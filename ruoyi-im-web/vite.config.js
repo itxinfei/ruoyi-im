@@ -61,9 +61,14 @@ export default defineConfig(({ mode }) => {
       open: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:9090',
+          target: 'http://localhost:80',
           changeOrigin: true,
           rewrite: path => path.replace(/^\/api/, ''),
+        },
+        '/ws': {
+          target: 'ws://localhost:80',
+          ws: true,
+          changeOrigin: true,
         },
       },
     },

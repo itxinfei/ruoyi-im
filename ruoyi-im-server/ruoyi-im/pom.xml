@@ -90,6 +90,8 @@
             <artifactId>sensitive-word</artifactId>
             <version>0.25.0</version>
         </dependency>
+
+        <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

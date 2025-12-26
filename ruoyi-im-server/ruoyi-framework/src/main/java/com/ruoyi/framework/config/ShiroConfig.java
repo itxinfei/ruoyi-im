@@ -290,6 +290,9 @@ public class ShiroConfig
         filterChainDefinitionMap.put("/js/**", "anon");
         filterChainDefinitionMap.put("/ruoyi/**", "anon");
         filterChainDefinitionMap.put("/captcha/captchaImage**", "anon");
+        // Vue前端API认证接口
+        filterChainDefinitionMap.put("/auth/login", "anon");
+        filterChainDefinitionMap.put("/auth/captcha", "anon");
         // 匿名访问不鉴权注解列表
         List<String> permitAllUrl = SpringUtils.getBean(PermitAllUrlProperties.class).getUrls();
         if (StringUtils.isNotEmpty(permitAllUrl))

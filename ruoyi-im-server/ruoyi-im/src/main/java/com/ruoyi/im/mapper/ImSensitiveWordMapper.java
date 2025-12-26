@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 敏感词Mapper接口
@@ -45,7 +46,7 @@ public interface ImSensitiveWordMapper extends BaseMapper<ImSensitiveWord> {
      * @param keyword 搜索关键词
      * @return 敏感词列表
      */
-    List<ImSensitiveWord> searchWords(@Param("keyword") String keyword);
+    List<ImSensitiveWord> searchSensitiveWords(@Param("keyword") String keyword);
 
     /**
      * 检查敏感词是否存在
@@ -53,7 +54,7 @@ public interface ImSensitiveWordMapper extends BaseMapper<ImSensitiveWord> {
      * @param word 敏感词
      * @return 是否存在
      */
-    boolean existsWord(@Param("word") String word);
+    boolean existsSensitiveWord(@Param("word") String word);
 
     /**
      * 批量插入敏感词
@@ -70,7 +71,7 @@ public interface ImSensitiveWordMapper extends BaseMapper<ImSensitiveWord> {
      * @param enabled 是否启用
      * @return 更新数量
      */
-    int updateEnabledBatch(@Param("wordIds") List<Long> wordIds, @Param("enabled") Boolean enabled);
+    int updateEnabledStatusBatch(@Param("wordIds") List<Long> wordIds, @Param("enabled") String enabled);
 
     /**
      * 批量删除敏感词
@@ -83,16 +84,16 @@ public interface ImSensitiveWordMapper extends BaseMapper<ImSensitiveWord> {
     /**
      * 统计各分类敏感词数量
      * 
-     * @return 统计信息列表
+     * @return 统计信息
      */
-    List<Object> countWordsByCategory();
+    Map<String, Integer> countWordsByCategory();
 
     /**
      * 统计各级别敏感词数量
      * 
-     * @return 统计信息列表
+     * @return 统计信息
      */
-    List<Object> countWordsByLevel();
+    Map<String, Integer> countWordsByLevel();
 
     /**
      * 查询所有分类列表
@@ -106,7 +107,8 @@ public interface ImSensitiveWordMapper extends BaseMapper<ImSensitiveWord> {
      * 
      * @param category 分类（可选）
      * @param level 级别（可选）
+     * @param enabled 是否启用（可选）
      * @return 敏感词列表
      */
-    List<ImSensitiveWord> exportWords(@Param("category") String category, @Param("level") String level);
+    List<ImSensitiveWord> exportSensitiveWords(@Param("category") String category, @Param("level") String level, @Param("enabled") Boolean enabled);
 }

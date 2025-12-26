@@ -3,10 +3,10 @@ export const envConfig = {
   // 应用配置
   title: 'RuoYi-IM',
   baseAPI: '/api',
-  wsAPI: 'ws://localhost:9090/ws',
+  wsAPI: 'ws://localhost:80/ws',
 
   // 功能开关
-  useMock: true,
+  useMock: false, // 关闭Mock，使用真实API
   showSettings: true,
   showTagsView: true,
   fixedHeader: true,

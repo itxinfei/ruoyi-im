@@ -20,27 +20,47 @@ export function getSession(sessionId) {
 // 新增会话
 export function addSession(data) {
   return request({
-    url: '/im/session',
+    url: '/im/session/create',
     method: 'post',
     data: data,
   })
 }
 
-// 修改会话
-export function updateSession(data) {
+// 修改会话 - 根据具体操作调用不同接口
+export function updateSession(sessionId, data) {
+  // 如果是置顶操作
+  if (data.pinned !== undefined) {
+    return request({
+      url: `/im/session/${sessionId}/${data.pinned ? 'pin' : 'unpin'}`,
+      method: 'put',
+    })
+  }
+  // 如果是静音操作
+  if (data.muted !== undefined) {
+    return request({
+      url: `/im/session/${sessionId}/${data.muted ? 'mute' : 'unmute'}`,
+      method: 'put',
+    })
+  }
+  // 其他更新操作
   return request({
-    url: '/im/session',
+    url: `/im/session/${sessionId}/settings`,
     method: 'put',
     data: data,
   })
 }
 
 // 删除会话
-export function delSession(sessionId) {
+export function deleteSession(sessionId) {
   return request({
     url: '/im/session/' + sessionId,
     method: 'delete',
   })
+}
+
+// 删除会话（别名）
+export function delSession(sessionId) {
+  return deleteSession(sessionId)
 }
 
 // 批量删除会话

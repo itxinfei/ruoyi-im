@@ -2,19 +2,44 @@ import request from '@/utils/request'
 
 // 发送消息
 export function sendMessage(data) {
+  // 转换字段名以匹配后端API
+  const params = {
+    conversationId: data.sessionId || data.conversationId,
+    type: data.type,
+    content: data.content,
+    replyToMessageId: data.replyTo || data.replyToMessageId,
+    clientMsgId: data.clientMsgId,
+  }
   return request({
     url: '/im/message/send',
     method: 'post',
-    data: data,
+    data: params,
+  })
+}
+
+// 获取会话消息列表（用于store调用）
+export function listMessage(params) {
+  return request({
+    url: '/im/message/history',
+    method: 'get',
+    params: {
+      sessionId: params.sessionId,
+      size: params.pageSize || 20,
+      lastMessageId: params.lastMessageId,
+    },
   })
 }
 
 // 获取会话消息列表
 export function getConversationMessages(params) {
   return request({
-    url: '/im/message/list',
+    url: '/im/message/history',
     method: 'get',
-    params: params,
+    params: {
+      sessionId: params.sessionId || params.conversationId,
+      size: params.pageSize || 20,
+      lastMessageId: params.lastMessageId,
+    },
   })
 }
 

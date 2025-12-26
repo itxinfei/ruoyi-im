@@ -205,7 +205,7 @@ public class ImMessageServiceImpl extends ServiceImpl<ImMessageMapper, ImMessage
      */
     @Override
     public List<ImMessage> searchMessages(Long conversationId, Long userId, String keyword, String messageType, Date startTime, Date endTime) {
-        return imMessageMapper.searchMessages(conversationId, keyword, 100); // 限制返回100条结果
+        return imMessageMapper.searchMessages(conversationId, userId, keyword, messageType, startTime, endTime);
     }
 
     /**
@@ -219,7 +219,7 @@ public class ImMessageServiceImpl extends ServiceImpl<ImMessageMapper, ImMessage
      */
     @Override
     public List<ImMessage> selectUserSentMessages(Long senderId, String messageType, Date startTime, Date endTime) {
-        return imMessageMapper.selectUserMessages(senderId, startTime, endTime, 100); // 限制返回100条结果
+        return imMessageMapper.selectUserSentMessages(senderId, messageType, startTime, endTime);
     }
 
     /**
@@ -232,7 +232,7 @@ public class ImMessageServiceImpl extends ServiceImpl<ImMessageMapper, ImMessage
     @Override
     @Transactional
     public int updateMessageStatusBatch(List<Long> messageIds, String status) {
-        return imMessageMapper.updateStatusBatch(messageIds, status);
+        return imMessageMapper.updateMessageStatusBatch(messageIds, status);
     }
 
     /**
