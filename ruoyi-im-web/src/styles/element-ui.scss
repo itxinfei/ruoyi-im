@@ -1,0 +1,94 @@
+
+// 覆盖element-ui的样式
+
+// 修复表格头部错位
+.el-table th.gutter {
+  display: table-cell !important;
+}
+
+// 弹窗
+.el-dialog {
+  margin-top: 6vh !important;
+  .el-dialog__header {
+    padding: 20px 20px 10px;
+  }
+  .el-dialog__body {
+    padding: 15px 20px;
+  }
+  .el-dialog__footer {
+    padding: 10px 20px 20px;
+  }
+}
+
+// 表单
+.el-form {
+  .el-form-item {
+    margin-bottom: 22px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// 按钮
+.el-button {
+  [class*="el-icon-"] + span {
+    margin-left: 5px;
+  }
+}
+
+// 下拉菜单
+.el-dropdown-menu {
+  padding: 0;
+  .el-dropdown-menu__item {
+    line-height: 36px;
+    padding: 0 20px;
+    &:hover {
+      background-color: #ecf5ff;
+      color: $--color-primary;
+    }
+  }
+}
+
+// 消息提示
+.el-message {
+  min-width: 380px;
+  box-sizing: border-box;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 4px;
+  position: fixed;
+  left: 50%;
+  top: 20px;
+  transform: translateX(-50%);
+  background-color: #edf2fc;
+  transition: opacity 0.3s, transform .4s, top 0.4s;
+  overflow: hidden;
+  padding: 15px 15px 15px 20px;
+  display: flex;
+  align-items: center;
+
+  &--success {
+    background-color: #f0f9eb;
+    border-color: #e1f3d8;
+    .el-message__content {
+      color: #67c23a;
+    }
+  }
+
+  &--warning {
+    background-color: #fdf6ec;
+    border-color: #faecd8;
+    .el-message__content {
+      color: #e6a23c;
+    }
+  }
+
+  &--error {
+    background-color: #fef0f0;
+    border-color: #fde2e2;
+    .el-message__content {
+      color: #f56c6c;
+    }
+  }
+}

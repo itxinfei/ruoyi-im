@@ -1,0 +1,10 @@
+<template>
+  <el-dialog
+    v-model="visible"
+    title="插入代码片段"
+    width="800px"
+    :append-to-body="true"
+    custom-class="code-editor-dialog"
+    @open="handleOpen"
+  ></el-dialog>
+</template>

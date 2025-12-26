@@ -1,0 +1,99 @@
+/* 主题样式变量 */
+:root {
+  --background-color: #f0f2f5;
+  --card-background: #ffffff;
+  --text-color: #303133;
+  --text-color-secondary: #909399;
+  --border-color: #e4e7ed;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --hover-color: #f5f7fa;
+}
+
+[data-theme='dark'] {
+  --background-color: #1e1e1e;
+  --card-background: #2d2d2d;
+  --text-color: #e0e0e0;
+  --text-color-secondary: #a0a0a0;
+  --border-color: #3e3e3e;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --hover-color: #383838;
+  
+  // 覆盖Element UI的暗色主题
+  .el-card {
+    background-color: var(--card-background);
+    color: var(--text-color);
+    border-color: var(--border-color);
+  }
+  
+  .el-table {
+    background-color: var(--card-background);
+    color: var(--text-color);
+    
+    th, td {
+      background-color: var(--card-background);
+      border-bottom-color: var(--border-color);
+    }
+    
+    tr:hover > td {
+      background-color: var(--hover-color);
+    }
+    
+    .el-table__header th {
+      background-color: var(--hover-color);
+    }
+  }
+  
+  .el-input__inner,
+  .el-textarea__inner {
+    background-color: #3a3a3a;
+    border-color: var(--border-color);
+    color: var(--text-color);
+    
+    &::placeholder {
+      color: var(--text-color-secondary);
+    }
+  }
+  
+  .el-button:not(.el-button--primary):not(.el-button--success):not(.el-button--warning):not(.el-button--danger):not(.el-button--info) {
+    background-color: #3a3a3a;
+    border-color: var(--border-color);
+    color: var(--text-color);
+  }
+  
+  .el-dialog,
+  .el-message-box {
+    background-color: var(--card-background);
+    
+    .el-dialog__title,
+    .el-message-box__title {
+      color: var(--text-color);
+    }
+  }
+  
+  .el-dropdown-menu {
+    background-color: var(--card-background);
+    border-color: var(--border-color);
+    
+    .el-dropdown-menu__item {
+      color: var(--text-color);
+      
+      &:hover {
+        background-color: var(--hover-color);
+      }
+    }
+  }
+}
+
+// 应用主题变量到全局样式
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.app-main {
+  background-color: var(--background-color) !important;
+}
+
+.el-card {
+  transition: all 0.3s;
+}

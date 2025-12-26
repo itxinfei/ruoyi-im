@@ -1,0 +1,95 @@
+
+// base color
+$blue:#324157;
+$light-blue:#3A71A8;
+$red:#C03639;
+$pink: #E65D6E;
+$green: #30B08F;
+$tiffany: #4AB7BD;
+$yellow:#FEC171;
+$panGreen: #30B08F;
+
+// theme colors
+$primary-color: #409eff;
+$success-color: #67c23a;
+$warning-color: #e6a23c;
+$danger-color: #f56c6c;
+$info-color: #909399;
+
+// sidebar
+$menuText:#bfcbd9;
+$menuActiveText:#409EFF;
+$subMenuActiveText:#f4f4f5;
+
+$menuBg:#304156;
+$menuHover:#263445;
+
+$subMenuBg:#1f2d3d;
+$subMenuHover:#001528;
+
+$sideBarWidth: 200px;
+
+// nav rail (左侧导航栏)
+$nav-rail-width: 64px;
+$nav-rail-bg: #ffffff;
+$nav-rail-border: #e4e7ed;
+$nav-rail-text: #606266;
+$nav-rail-hover: #f5f7fa;
+$nav-rail-active-bg: #ecf5ff;
+$nav-rail-text-active: #409eff;
+
+// list panel (列表面板)
+$list-panel-width: 320px;
+$list-panel-bg: #ffffff;
+$list-panel-border: #e4e7ed;
+
+// chat panel (聊天面板)
+$chat-panel-bg: #ffffff;
+$chat-panel-border: #e4e7ed;
+
+// detail panel (详情面板)
+$detail-panel-width: 280px;
+$detail-panel-bg: #ffffff;
+$detail-panel-border: #e4e7ed;
+
+// border colors
+$border-color-base: #dcdfe6;
+$border-color-light: #e4e7ed;
+$border-color-lighter: #ebeef5;
+$border-color-extra-light: #f2f6fc;
+
+// text colors
+$text-primary: #303133;
+$text-regular: #606266;
+$text-secondary: #909399;
+$text-placeholder: #c0c4cc;
+
+// background colors
+$background-color-base: #f5f7fa;
+$background-color-light: #fafafa;
+
+// the :export directive is the magic sauce for webpack
+// https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
+:export {
+  menuText: $menuText;
+  menuActiveText: $menuActiveText;
+  subMenuActiveText: $subMenuActiveText;
+  menuBg: $menuBg;
+  menuHover: $menuHover;
+  subMenuBg: $subMenuBg;
+  subMenuHover: $subMenuHover;
+  sideBarWidth: $sideBarWidth;
+  navRailWidth: $nav-rail-width;
+  navRailBg: $nav-rail-bg;
+  navRailBorder: $nav-rail-border;
+  navRailText: $nav-rail-text;
+  navRailHover: $nav-rail-hover;
+  navRailActiveBg: $nav-rail-active-bg;
+  navRailTextActive: $nav-rail-text-active;
+  textPrimary: $text-primary;
+  textRegular: $text-regular;
+  textSecondary: $text-secondary;
+  textPlaceholder: $text-placeholder;
+  backgroundColorBase: $background-color-base;
+  backgroundColorLight: $background-color-light;
+}

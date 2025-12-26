@@ -1,0 +1,102 @@
+import request from '@/utils/request'
+
+// 查询文件列表
+export function listFile(query) {
+  return request({
+    url: '/im/file/list',
+    method: 'get',
+    params: query,
+  })
+}
+
+// 查询文件详细
+export function getFile(fileId) {
+  return request({
+    url: '/im/file/' + fileId,
+    method: 'get',
+  })
+}
+
+// 删除文件
+export function delFile(fileId) {
+  return request({
+    url: '/im/file/' + fileId,
+    method: 'delete',
+  })
+}
+
+// 下载文件
+export function downloadFile(fileId) {
+  return request({
+    url: '/im/file/download/' + fileId,
+    method: 'get',
+    responseType: 'blob',
+  })
+}
+
+// 获取文件预览URL
+export function getFilePreviewUrl(fileId) {
+  return request({
+    url: '/im/file/preview/' + fileId,
+    method: 'get',
+  })
+}
+
+// 获取文件统计信息
+export function getFileStats() {
+  return request({
+    url: '/im/file/stats',
+    method: 'get',
+  })
+}
+
+// 获取存储空间使用情况
+export function getStorageUsage() {
+  return request({
+    url: '/im/file/storage',
+    method: 'get',
+  })
+}
+
+// 获取文件上传配置
+export function getUploadConfig() {
+  return request({
+    url: '/im/file/config',
+    method: 'get',
+  })
+}
+
+// 更新文件上传配置
+export function updateUploadConfig(data) {
+  return request({
+    url: '/im/file/config',
+    method: 'put',
+    data: data,
+  })
+}
+
+// 清理无效文件
+export function cleanInvalidFiles() {
+  return request({
+    url: '/im/file/clean',
+    method: 'delete',
+  })
+}
+
+// 批量移动文件
+export function moveFiles(data) {
+  return request({
+    url: '/im/file/move',
+    method: 'put',
+    data: data,
+  })
+}
+
+// 批量复制文件
+export function copyFiles(data) {
+  return request({
+    url: '/im/file/copy',
+    method: 'post',
+    data: data,
+  })
+}

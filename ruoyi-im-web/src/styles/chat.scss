@@ -1,0 +1,302 @@
+
+// 主题颜色
+$primary-color: #409eff;
+$success-color: #67c23a;
+$warning-color: #e6a23c;
+$danger-color: #f56c6c;
+$info-color: #909399;
+
+// 文字颜色
+$text-primary: #303133;
+$text-regular: #606266;
+$text-secondary: #909399;
+$text-placeholder: #c0c4cc;
+
+// 边框颜色
+$border-base: #dcdfe6;
+$border-light: #e4e7ed;
+$border-lighter: #ebeef5;
+$border-extra-light: #f2f6fc;
+
+// 背景颜色
+$background-base: #f5f7fa;
+$background-light: #ffffff;
+
+// 消息气泡颜色
+$message-self-bg: #95ec69;
+$message-other-bg: #ffffff;
+
+// 布局尺寸
+$header-height: 60px;
+$sidebar-width: 280px;
+$footer-height: 150px;
+
+// 动画时长
+$animation-duration: 0.3s;
+
+// 基础样式
+.im-container {
+  height: 100%;
+  background-color: $background-base;
+  display: flex;
+}
+
+// 布局样式
+.im-sidebar {
+  width: $sidebar-width;
+  border-right: 1px solid $border-base;
+  background-color: $background-light;
+  display: flex;
+  flex-direction: column;
+}
+
+.im-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: $background-light;
+}
+
+.im-header {
+  height: $header-height;
+  padding: 0 20px;
+  border-bottom: 1px solid $border-base;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: $background-light;
+}
+
+.im-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.im-footer {
+  height: $footer-height;
+  border-top: 1px solid $border-base;
+  background-color: $background-light;
+}
+
+// 滚动条样式
+.im-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $background-base;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $border-base;
+    border-radius: 3px;
+    
+    &:hover {
+      background: $border-light;
+    }
+  }
+}
+
+// 动画效果
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity $animation-duration;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: transform $animation-duration;
+}
+
+.slide-right-enter,
+.slide-right-leave-to {
+  transform: translateX(-100%);
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform $animation-duration;
+}
+
+.slide-left-enter,
+.slide-left-leave-to {
+  transform: translateX(100%);
+}
+
+// 通用样式类
+.im-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.im-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background-color: $danger-color;
+  color: white;
+  font-size: 12px;
+  text-align: center;
+}
+
+.im-divider {
+  height: 1px;
+  background-color: $border-lighter;
+  margin: 10px 0;
+}
+
+.im-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: $text-secondary;
+  
+  i {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    margin: 0;
+  }
+}
+
+// 消息相关样式
+.im-message {
+  margin: 16px 0;
+  display: flex;
+  align-items: flex-start;
+
+  &.is-self {
+    flex-direction: row-reverse;
+
+    .im-message-content {
+      margin: 0 12px 0 0;
+
+      .im-message-bubble {
+        background-color: $message-self-bg;
+      }
+    }
+  }
+
+  .im-message-avatar {
+    flex-shrink: 0;
+  }
+
+  .im-message-content {
+    margin: 0 0 0 12px;
+    max-width: 60%;
+
+    .im-message-name {
+      font-size: 12px;
+      color: $text-secondary;
+      margin-bottom: 4px;
+    }
+
+    .im-message-bubble {
+      background-color: $message-other-bg;
+      padding: 10px;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+
+    .im-message-time {
+      font-size: 12px;
+      color: $text-secondary;
+      margin-top: 4px;
+      text-align: right;
+    }
+  }
+}
+
+// 输入框样式
+.im-input {
+  padding: 10px;
+
+  .im-input-toolbar {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+
+  .im-input-content {
+    background-color: $background-base;
+    border-radius: 4px;
+    padding: 10px;
+
+    textarea {
+      width: 100%;
+      height: 60px;
+      border: none;
+      outline: none;
+      resize: none;
+      background: none;
+      font-size: 14px;
+      line-height: 1.5;
+      color: $text-primary;
+
+      &::placeholder {
+        color: $text-placeholder;
+      }
+    }
+  }
+
+  .im-input-actions {
+    margin-top: 10px;
+    text-align: right;
+  }
+}
+
+// 工具类
+.im-clickable {
+  cursor: pointer;
+  transition: opacity $animation-duration;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.im-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.im-text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.im-position-relative {
+  position: relative;
+}
+
+.im-full-height {
+  height: 100%;
+}

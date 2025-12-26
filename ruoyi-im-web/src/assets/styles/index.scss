@@ -1,0 +1,674 @@
+@use './variables.scss' as *;
+@use './mixin.scss' as *;
+@use './transition.scss' as *;
+@use './element-ui.scss' as *;
+@use './sidebar.scss' as *;
+@use './btn.scss' as *;
+
+html {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f0f2f5;
+}
+
+#app {
+  height: 100%;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+a:focus,
+a:active {
+  outline: none;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+
+div:focus {
+  outline: none;
+}
+
+.clearfix {
+  &:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+  }
+}
+
+.app-container {
+  padding: 20px;
+}
+
+.components-container {
+  margin: 30px 50px;
+  position: relative;
+}
+
+.app-wrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.app-main {
+  min-height: 100%;
+}
+
+.app-container {
+  padding: 20px;
+}
+
+.dingtalk-layout {
+  display: flex;
+  height: 100vh;
+  position: relative;
+  
+  .sidebar-nav {
+    width: 240px;
+    background: linear-gradient(180deg, #001529 0%, #002140 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 12px 0 rgba(29, 35, 41, 0.1);
+    z-index: 100;
+    
+    &.collapsed {
+      width: 64px;
+      
+      .nav-header {
+        .logo-text {
+          display: none;
+        }
+      }
+      
+      .nav-menu {
+        .nav-item {
+          padding: 16px 0;
+        }
+      }
+      
+      .nav-footer {
+        .collapse-btn {
+          display: none;
+        }
+      }
+    }
+    
+    .nav-header {
+      padding: 20px 0;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      
+      .logo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        
+        .logo-img {
+          width: 40px;
+          height: 40px;
+          border-radius: 8px;
+          transition: all 0.3s;
+        }
+        
+        .logo-text {
+          margin-top: 12px;
+          font-size: 14px;
+          font-weight: 500;
+          letter-spacing: 0.5px;
+          transition: all 0.3s;
+        }
+      }
+    }
+    
+    .nav-menu {
+      flex: 1;
+      padding: 8px 0;
+      overflow-y: auto;
+      
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px 0;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin: 4px 8px;
+        border-radius: 8px;
+        
+        &:hover {
+          background: rgba(24, 144, 255, 0.15);
+          
+          .nav-icon {
+            transform: scale(1.1);
+            color: #1890ff;
+          }
+        }
+        
+        &.active {
+          background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+          box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+          
+          .nav-icon {
+            color: #fff;
+            transform: scale(1.1);
+          }
+          
+          .nav-label {
+            color: #fff;
+            font-weight: 500;
+          }
+        }
+        
+        .nav-icon {
+          font-size: 24px;
+          margin-bottom: 6px;
+          transition: all 0.3s;
+          color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .nav-label {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.65);
+          transition: all 0.3s;
+        }
+        
+        .nav-badge {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+          color: #fff;
+          border-radius: 10px;
+          padding: 0 6px;
+          font-size: 11px;
+          min-width: 20px;
+          height: 20px;
+          line-height: 20px;
+          text-align: center;
+          font-weight: 500;
+          box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
+        }
+      }
+    }
+    
+    .nav-footer {
+      padding: 16px 0;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      
+      .user-info {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        transition: all 0.3s;
+        
+        &:hover {
+          transform: scale(1.05);
+        }
+        
+        .user-status-indicator {
+          position: absolute;
+          bottom: 2px;
+          right: 2px;
+          width: 10px;
+          height: 10px;
+          background: #52c41a;
+          border: 2px solid #001529;
+          border-radius: 50%;
+          box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+        }
+      }
+      
+      .collapse-btn {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.3s;
+        color: rgba(255, 255, 255, 0.65);
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.1);
+          color: #fff;
+        }
+        
+        i {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+  
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #f0f2f5;
+    overflow: hidden;
+    
+    .top-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      height: 56px;
+      background: #fff;
+      box-shadow: 0 1px 8px rgba(0, 21, 41, 0.08);
+      z-index: 10;
+      transition: all 0.3s;
+      
+      .toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        
+        .mobile-menu-btn {
+          border: none;
+          background: transparent;
+          
+          &:hover {
+            background: #f5f5f5;
+          }
+        }
+        
+        .page-title {
+          font-size: 18px;
+          font-weight: 600;
+          color: #1f1f1f;
+          letter-spacing: 0.3px;
+        }
+      }
+      
+      .toolbar-right {
+        display: flex;
+        align-items: center;
+        
+        .toolbar-icon {
+          font-size: 20px;
+          margin-left: 20px;
+          color: #595959;
+          cursor: pointer;
+          transition: all 0.3s;
+          padding: 8px;
+          border-radius: 6px;
+          
+          &:hover {
+            color: #1890ff;
+            background: rgba(24, 144, 255, 0.1);
+          }
+        }
+        
+        .toolbar-badge {
+          margin-left: 20px;
+          
+          ::v-deep .el-badge__content {
+            background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+            border: none;
+            box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
+          }
+        }
+      }
+    }
+    
+    .page-content {
+      flex: 1;
+      padding: 20px;
+      overflow: auto;
+      scroll-behavior: smooth;
+    }
+  }
+  
+  .mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+    backdrop-filter: blur(2px);
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+@media (max-width: 1200px) {
+  .dingtalk-layout {
+    .sidebar-nav {
+      width: 200px;
+    }
+  }
+}
+
+@media (max-width: 992px) {
+  .dingtalk-layout {
+    .sidebar-nav {
+      width: 180px;
+    }
+    
+    .main-content {
+      .top-toolbar {
+        padding: 0 20px;
+        
+        .toolbar-left {
+          gap: 12px;
+          
+          .page-title {
+            font-size: 17px;
+          }
+        }
+        
+        .toolbar-right {
+          .toolbar-icon {
+            margin-left: 16px;
+          }
+        }
+      }
+      
+      .page-content {
+        padding: 16px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .dingtalk-layout {
+    .sidebar-nav {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 100;
+      transform: translateX(-100%);
+      width: 240px;
+      
+      &.mobile-open {
+        transform: translateX(0);
+      }
+    }
+    
+    .main-content {
+      .top-toolbar {
+        padding: 0 16px;
+        height: 50px;
+        
+        .toolbar-left {
+          .page-title {
+            font-size: 16px;
+          }
+        }
+        
+        .toolbar-right {
+          .toolbar-icon {
+            margin-left: 12px;
+            padding: 6px;
+          }
+        }
+      }
+      
+      .page-content {
+        padding: 12px;
+      }
+    }
+  }
+  
+  .app-container {
+    padding: 12px;
+  }
+  
+  .components-container {
+    margin: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .dingtalk-layout {
+    .sidebar-nav {
+      width: 260px;
+      
+      .nav-header {
+        padding: 16px 0;
+        
+        .logo {
+          .logo-img {
+            width: 36px;
+            height: 36px;
+          }
+          
+          .logo-text {
+            margin-top: 8px;
+            font-size: 13px;
+          }
+        }
+      }
+      
+      .nav-menu {
+        .nav-item {
+          padding: 14px 0;
+          
+          .nav-icon {
+            font-size: 22px;
+          }
+          
+          .nav-label {
+            font-size: 11px;
+          }
+        }
+      }
+    }
+    
+    .main-content {
+      .top-toolbar {
+        padding: 0 12px;
+        height: 48px;
+        
+        .toolbar-left {
+          gap: 8px;
+          
+          .page-title {
+            font-size: 15px;
+          }
+        }
+        
+        .toolbar-right {
+          .toolbar-icon {
+            font-size: 18px;
+            margin-left: 8px;
+            padding: 5px;
+          }
+        }
+      }
+      
+      .page-content {
+        padding: 10px;
+      }
+    }
+  }
+  
+  .app-container {
+    padding: 10px;
+  }
+  
+  .components-container {
+    margin: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dingtalk-layout {
+    .main-content {
+      .top-toolbar {
+        padding: 0 10px;
+        height: 44px;
+        
+        .toolbar-left {
+          .page-title {
+            font-size: 14px;
+          }
+        }
+        
+        .toolbar-right {
+          .toolbar-icon {
+            font-size: 16px;
+            margin-left: 6px;
+            padding: 4px;
+          }
+        }
+      }
+      
+      .page-content {
+        padding: 8px;
+      }
+    }
+  }
+  
+  .app-container {
+    padding: 8px;
+  }
+  
+  .components-container {
+    margin: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .dingtalk-layout {
+    .main-content {
+      .top-toolbar {
+        height: 40px;
+        
+        .toolbar-left {
+          .page-title {
+            font-size: 13px;
+          }
+        }
+        
+        .toolbar-right {
+          .toolbar-icon {
+            font-size: 14px;
+            margin-left: 4px;
+            padding: 3px;
+          }
+        }
+      }
+      
+      .page-content {
+        padding: 6px;
+      }
+    }
+  }
+  
+  .app-container {
+    padding: 6px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .dingtalk-layout {
+    .sidebar-nav {
+      .nav-header {
+        padding: 12px 0;
+        
+        .logo {
+          .logo-img {
+            width: 32px;
+            height: 32px;
+          }
+          
+          .logo-text {
+            margin-top: 6px;
+            font-size: 12px;
+          }
+        }
+      }
+      
+      .nav-menu {
+        .nav-item {
+          padding: 10px 0;
+          
+          .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+          }
+          
+          .nav-label {
+            font-size: 10px;
+          }
+        }
+      }
+    }
+    
+    .main-content {
+      .top-toolbar {
+        height: 40px;
+      }
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (print) {
+  .dingtalk-layout {
+    .sidebar-nav,
+    .top-toolbar {
+      display: none;
+    }
+    
+    .main-content {
+      .page-content {
+        padding: 0;
+        overflow: visible;
+      }
+    }
+  }
+}

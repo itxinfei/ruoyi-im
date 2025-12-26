@@ -1,0 +1,404 @@
+/**
+ * IM 聊天模块主题样式
+ * 包含全局变量、动画、滚动条样式等
+ */
+
+/* CSS 变量定义 */
+:root {
+  /* 主题色 */
+  --im-primary-color: #1890ff;
+  --im-primary-hover: #40a9ff;
+  --im-primary-active: #096dd9;
+  --im-primary-light: #e6f7ff;
+
+  /* 成功/警告/错误色 */
+  --im-success-color: #52c41a;
+  --im-warning-color: #faad14;
+  --im-error-color: #ff4d4f;
+
+  /* 文字颜色 */
+  --im-text-primary: #1a1a1a;
+  --im-text-secondary: #666666;
+  --im-text-placeholder: #999999;
+  --im-text-disabled: #c0c0c0;
+
+  /* 背景色 */
+  --im-bg-base: #f5f5f5;
+  --im-bg-white: #ffffff;
+  --im-bg-hover: #f0f0f0;
+  --im-bg-active: #e6f7ff;
+
+  /* 边框 */
+  --im-border-color: #e8e8e8;
+  --im-border-light: #f0f0f0;
+
+  /* 阴影 */
+  --im-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --im-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --im-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --im-shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+  /* 圆角 */
+  --im-radius-sm: 4px;
+  --im-radius-md: 8px;
+  --im-radius-lg: 12px;
+  --im-radius-xl: 16px;
+  --im-radius-full: 9999px;
+
+  /* 动画时长 */
+  --im-transition-fast: 0.15s;
+  --im-transition-base: 0.3s;
+  --im-transition-slow: 0.5s;
+
+  /* 消息气泡颜色 */
+  --im-bubble-self: #1890ff;
+  --im-bubble-other: #ffffff;
+  --im-bubble-text-self: #ffffff;
+  --im-bubble-text-other: #333333;
+
+  /* 在线状态 */
+  --im-online-color: #52c41a;
+  --im-offline-color: #bfbfbf;
+  --im-busy-color: #ff4d4f;
+  --im-away-color: #faad14;
+}
+
+/* 暗色主题 */
+[data-theme='dark'] {
+  --im-primary-color: #177ddc;
+  --im-primary-hover: #3c9ae8;
+  --im-primary-light: #111b26;
+
+  --im-text-primary: #e6e6e6;
+  --im-text-secondary: #a6a6a6;
+  --im-text-placeholder: #666666;
+
+  --im-bg-base: #141414;
+  --im-bg-white: #1f1f1f;
+  --im-bg-hover: #2a2a2a;
+  --im-bg-active: #111b26;
+
+  --im-border-color: #303030;
+  --im-border-light: #262626;
+
+  --im-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --im-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --im-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
+
+  --im-bubble-other: #2a2a2a;
+  --im-bubble-text-other: #e6e6e6;
+}
+
+/* 全局滚动条样式 */
+.im-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d9d9d9 transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d9d9d9;
+    border-radius: 3px;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: #bfbfbf;
+    }
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+/* 消息动画 */
+@keyframes im-message-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes im-message-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes im-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+@keyframes im-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes im-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes im-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes im-typing-dot {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes im-online-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(82, 196, 26, 0);
+  }
+}
+
+@keyframes im-unread-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+/* 通用动画类 */
+.im-animate-slide-in {
+  animation: im-message-slide-in 0.3s ease-out forwards;
+}
+
+.im-animate-fade-in {
+  animation: im-message-fade-in 0.3s ease forwards;
+}
+
+.im-animate-pulse {
+  animation: im-pulse 2s ease-in-out infinite;
+}
+
+.im-animate-bounce {
+  animation: im-bounce 0.5s ease infinite;
+}
+
+.im-animate-shake {
+  animation: im-shake 0.5s ease;
+}
+
+.im-animate-spin {
+  animation: im-spin 1s linear infinite;
+}
+
+/* 输入中指示器 */
+.im-typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: var(--im-bg-white);
+  border-radius: var(--im-radius-lg);
+  box-shadow: var(--im-shadow-sm);
+
+  .typing-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--im-primary-color);
+    border-radius: 50%;
+    animation: im-typing-dot 1.4s infinite;
+
+    &:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  }
+}
+
+/* 在线状态指示器 */
+.im-online-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--im-bg-white);
+
+  &.online {
+    background: var(--im-online-color);
+    animation: im-online-pulse 2s infinite;
+  }
+
+  &.offline {
+    background: var(--im-offline-color);
+  }
+
+  &.busy {
+    background: var(--im-busy-color);
+  }
+
+  &.away {
+    background: var(--im-away-color);
+  }
+}
+
+/* 未读消息徽标 */
+.im-unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--im-radius-full);
+  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+
+  &.new {
+    animation: im-unread-bounce 0.5s ease;
+  }
+}
+
+/* 空状态 */
+.im-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--im-text-placeholder);
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .empty-text {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .empty-hint {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+}
+
+/* 加载状态 */
+.im-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: var(--im-text-secondary);
+
+  .loading-icon {
+    font-size: 24px;
+    margin-right: 8px;
+    animation: im-spin 1s linear infinite;
+  }
+
+  .loading-text {
+    font-size: 14px;
+  }
+}
+
+/* 骨架屏 */
+.im-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: im-skeleton-loading 1.5s infinite;
+  border-radius: var(--im-radius-sm);
+
+  &.circle {
+    border-radius: 50%;
+  }
+}
+
+@keyframes im-skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* 响应式断点 */
+@media (max-width: 768px) {
+  .im-scrollbar {
+    &::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .im-animate-slide-in,
+  .im-animate-fade-in,
+  .im-animate-pulse,
+  .im-animate-bounce,
+  .im-animate-shake,
+  .im-animate-spin {
+    animation: none;
+  }
+}
