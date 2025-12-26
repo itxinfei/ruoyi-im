@@ -53,6 +53,7 @@ public class ApiAuthController {
             // 构建用户信息
             Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("userId", user.getUserId());
+            userInfo.put("loginName", user.getLoginName());
             userInfo.put("userName", user.getUserName());
             userInfo.put("nickName", user.getUserName());
             userInfo.put("avatar", user.getAvatar());
@@ -95,6 +96,7 @@ public class ApiAuthController {
             // 构建用户信息
             Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("userId", user.getUserId());
+            userInfo.put("loginName", user.getLoginName());
             userInfo.put("userName", user.getUserName());
             userInfo.put("nickName", user.getUserName());
             userInfo.put("avatar", user.getAvatar());

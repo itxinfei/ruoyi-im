@@ -37,6 +37,7 @@
       <java.version>1.8</java.version>
       <kaptcha.version>2.3.3</kaptcha.version>
       <logback.version>1.2.13</logback.version>
+      <lombok.version>1.18.24</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
       <maven.compiler.source>1.8</maven.compiler.source>
@@ -157,6 +158,11 @@
           <groupId>com.alibaba</groupId>
           <artifactId>fastjson</artifactId>
           <version>1.2.83</version>
+        </dependency>
+        <dependency>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok</artifactId>
+          <version>1.18.24</version>
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
@@ -1540,11 +1546,6 @@
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-access</artifactId>
           <version>1.2.12</version>
-        </dependency>
-        <dependency>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok</artifactId>
-          <version>1.18.26</version>
         </dependency>
         <dependency>
           <groupId>org.mariadb.jdbc</groupId>
@@ -6023,7 +6024,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.11.0</version>
           <configuration>
             <source>1.8</source>
             <target>1.8</target>
@@ -6147,6 +6148,7 @@
       <java.version>1.8</java.version>
       <kaptcha.version>2.3.3</kaptcha.version>
       <logback.version>1.2.13</logback.version>
+      <lombok.version>1.18.24</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
       <maven.compiler.source>1.8</maven.compiler.source>
@@ -6267,6 +6269,11 @@
           <groupId>com.alibaba</groupId>
           <artifactId>fastjson</artifactId>
           <version>1.2.83</version>
+        </dependency>
+        <dependency>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok</artifactId>
+          <version>1.18.24</version>
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
@@ -7650,11 +7657,6 @@
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-access</artifactId>
           <version>1.2.12</version>
-        </dependency>
-        <dependency>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok</artifactId>
-          <version>1.18.26</version>
         </dependency>
         <dependency>
           <groupId>org.mariadb.jdbc</groupId>
@@ -12078,6 +12080,12 @@
         <version>4.0.1</version>
         <scope>compile</scope>
       </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-redis</artifactId>
+        <version>2.5.15</version>
+        <scope>compile</scope>
+      </dependency>
     </dependencies>
     <repositories>
       <repository>
@@ -12213,7 +12221,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.11.0</version>
           <executions>
             <execution>
               <id>default-compile</id>
@@ -12409,6 +12417,7 @@
       <java.version>1.8</java.version>
       <kaptcha.version>2.3.3</kaptcha.version>
       <logback.version>1.2.13</logback.version>
+      <lombok.version>1.18.24</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
       <maven.compiler.source>1.8</maven.compiler.source>
@@ -12529,6 +12538,11 @@
           <groupId>com.alibaba</groupId>
           <artifactId>fastjson</artifactId>
           <version>1.2.83</version>
+        </dependency>
+        <dependency>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok</artifactId>
+          <version>1.18.24</version>
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
@@ -13912,11 +13926,6 @@
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-access</artifactId>
           <version>1.2.12</version>
-        </dependency>
-        <dependency>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok</artifactId>
-          <version>1.18.26</version>
         </dependency>
         <dependency>
           <groupId>org.mariadb.jdbc</groupId>
@@ -18403,7 +18412,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.11.0</version>
           <executions>
             <execution>
               <id>default-compile</id>
@@ -18599,6 +18608,7 @@
       <java.version>1.8</java.version>
       <kaptcha.version>2.3.3</kaptcha.version>
       <logback.version>1.2.13</logback.version>
+      <lombok.version>1.18.24</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
       <maven.compiler.source>1.8</maven.compiler.source>
@@ -18719,6 +18729,11 @@
           <groupId>com.alibaba</groupId>
           <artifactId>fastjson</artifactId>
           <version>1.2.83</version>
+        </dependency>
+        <dependency>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok</artifactId>
+          <version>1.18.24</version>
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
@@ -20102,11 +20117,6 @@
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-access</artifactId>
           <version>1.2.12</version>
-        </dependency>
-        <dependency>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok</artifactId>
-          <version>1.18.26</version>
         </dependency>
         <dependency>
           <groupId>org.mariadb.jdbc</groupId>
@@ -24653,7 +24663,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.11.0</version>
           <executions>
             <execution>
               <id>default-compile</id>
@@ -24849,6 +24859,7 @@
       <java.version>1.8</java.version>
       <kaptcha.version>2.3.3</kaptcha.version>
       <logback.version>1.2.13</logback.version>
+      <lombok.version>1.18.24</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
       <maven.compiler.source>1.8</maven.compiler.source>
@@ -24969,6 +24980,11 @@
           <groupId>com.alibaba</groupId>
           <artifactId>fastjson</artifactId>
           <version>1.2.83</version>
+        </dependency>
+        <dependency>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok</artifactId>
+          <version>1.18.24</version>
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
@@ -26352,11 +26368,6 @@
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-access</artifactId>
           <version>1.2.12</version>
-        </dependency>
-        <dependency>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok</artifactId>
-          <version>1.18.26</version>
         </dependency>
         <dependency>
           <groupId>org.mariadb.jdbc</groupId>
@@ -30855,7 +30866,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.11.0</version>
           <executions>
             <execution>
               <id>default-compile</id>
@@ -31051,6 +31062,7 @@
       <java.version>1.8</java.version>
       <kaptcha.version>2.3.3</kaptcha.version>
       <logback.version>1.2.13</logback.version>
+      <lombok.version>1.18.24</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
       <maven.compiler.source>1.8</maven.compiler.source>
@@ -31171,6 +31183,11 @@
           <groupId>com.alibaba</groupId>
           <artifactId>fastjson</artifactId>
           <version>1.2.83</version>
+        </dependency>
+        <dependency>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok</artifactId>
+          <version>1.18.24</version>
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
@@ -32554,11 +32571,6 @@
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-access</artifactId>
           <version>1.2.12</version>
-        </dependency>
-        <dependency>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok</artifactId>
-          <version>1.18.26</version>
         </dependency>
         <dependency>
           <groupId>org.mariadb.jdbc</groupId>
@@ -37057,7 +37069,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.11.0</version>
           <executions>
             <execution>
               <id>default-compile</id>
@@ -37253,6 +37265,7 @@
       <java.version>1.8</java.version>
       <kaptcha.version>2.3.3</kaptcha.version>
       <logback.version>1.2.13</logback.version>
+      <lombok.version>1.18.24</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
       <maven.compiler.source>1.8</maven.compiler.source>
@@ -37373,6 +37386,11 @@
           <groupId>com.alibaba</groupId>
           <artifactId>fastjson</artifactId>
           <version>1.2.83</version>
+        </dependency>
+        <dependency>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok</artifactId>
+          <version>1.18.24</version>
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
@@ -38756,11 +38774,6 @@
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-access</artifactId>
           <version>1.2.12</version>
-        </dependency>
-        <dependency>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok</artifactId>
-          <version>1.18.26</version>
         </dependency>
         <dependency>
           <groupId>org.mariadb.jdbc</groupId>
@@ -43181,7 +43194,7 @@
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.18.26</version>
+        <version>1.18.24</version>
         <scope>provided</scope>
       </dependency>
     </dependencies>
@@ -43319,7 +43332,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.11.0</version>
           <executions>
             <execution>
               <id>default-compile</id>
@@ -43515,6 +43528,7 @@
       <java.version>1.8</java.version>
       <kaptcha.version>2.3.3</kaptcha.version>
       <logback.version>1.2.13</logback.version>
+      <lombok.version>1.18.24</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
       <maven.compiler.source>1.8</maven.compiler.source>
@@ -43635,6 +43649,11 @@
           <groupId>com.alibaba</groupId>
           <artifactId>fastjson</artifactId>
           <version>1.2.83</version>
+        </dependency>
+        <dependency>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok</artifactId>
+          <version>1.18.24</version>
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
@@ -45018,11 +45037,6 @@
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-access</artifactId>
           <version>1.2.12</version>
-        </dependency>
-        <dependency>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok</artifactId>
-          <version>1.18.26</version>
         </dependency>
         <dependency>
           <groupId>org.mariadb.jdbc</groupId>
@@ -49576,7 +49590,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.11.0</version>
           <executions>
             <execution>
               <id>default-compile</id>
