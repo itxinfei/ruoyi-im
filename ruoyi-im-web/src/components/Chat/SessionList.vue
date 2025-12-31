@@ -184,7 +184,7 @@ const deleteSession = sessionId => {
 </script>
 
 <style scoped lang="scss">
-@import '@/styles/dingtalk-theme.scss';
+@use '@/styles/dingtalk-theme.scss' as *;
 
 .session-list {
   flex: 1;

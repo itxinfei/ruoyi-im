@@ -725,7 +725,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/dingtalk-theme.scss';
+@use '@/styles/dingtalk-theme.scss' as *;
 
 .chat-input-container {
   border-top: 1px solid $border-base;

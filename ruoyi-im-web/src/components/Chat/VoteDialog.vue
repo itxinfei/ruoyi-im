@@ -490,7 +490,7 @@ watch(visible, (newVal) => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/dingtalk-theme.scss';
+@use '@/styles/dingtalk-theme.scss' as *;
 
 .vote-dialog {
   :deep(.el-dialog__body) {

@@ -12,8 +12,10 @@ public class ImUser {
     private String username;
     private String password;
     private String nickname;
+    private String email;
+    private String phone;
     private String avatar;
-    private Integer status;
+    private String status;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
@@ -50,6 +52,22 @@ public class ImUser {
         this.nickname = nickname;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     public String getAvatar() {
         return avatar;
     }
@@ -58,11 +76,11 @@ public class ImUser {
         this.avatar = avatar;
     }
 
-    public Integer getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

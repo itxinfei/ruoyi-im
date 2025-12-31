@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImMessageMapper">
+    
+    <resultMap type="com.ruoyi.im.domain.ImMessage" id="ImMessageResult">
+        <id property="id" column="id"/>
+        <result property="conversationId" column="conversation_id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="type" column="type"/>
+        <result property="content" column="content"/>
+        <result property="replyToMessageId" column="reply_to_message_id"/>
+        <result property="forwardFromMessageId" column="forward_from_message_id"/>
+        <result property="status" column="status"/>
+        <result property="sensitiveLevel" column="sensitive_level"/>
+        <result property="revokedTime" column="revoked_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImMessageVo">
+        select id, conversation_id, sender_id, type, content, reply_to_message_id, 
+               forward_from_message_id, status, sensitive_level, revoked_time, create_time, update_time 
+        from im_message
+    </sql>
+
+    <select id="selectImMessageById" parameterType="Long" resultMap="ImMessageResult">
+        <include refid="selectImMessageVo"/>
+        where id = #{id}
+    </select>
+    
+    <select id="selectImMessageList" parameterType="com.ruoyi.im.domain.ImMessage" resultMap="ImMessageResult">
+        <include refid="selectImMessageVo"/>
+        <where>
+            <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
+            <if test="senderId != null"> and sender_id = #{senderId} </if>
+            <if test="type != null and type != ''"> and type = #{type} </if>
+            <if test="status != null and status != ''"> and status = #{status} </if>
+        </where>
+    </select>
+
+    <insert id="insertImMessage" parameterType="com.ruoyi.im.domain.ImMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into im_message
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="conversationId != null">conversation_id,</if>
+            <if test="senderId != null">sender_id,</if>
+            <if test="type != null">type,</if>
+            <if test="content != null">content,</if>
+            <if test="replyToMessageId != null">reply_to_message_id,</if>
+            <if test="forwardFromMessageId != null">forward_from_message_id,</if>
+            <if test="status != null">status,</if>
+            <if test="sensitiveLevel != null">sensitive_level,</if>
+            <if test="revokedTime != null">revoked_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="conversationId != null">#{conversationId},</if>
+            <if test="senderId != null">#{senderId},</if>
+            <if test="type != null">#{type},</if>
+            <if test="content != null">#{content},</if>
+            <if test="replyToMessageId != null">#{replyToMessageId},</if>
+            <if test="forwardFromMessageId != null">#{forwardFromMessageId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="sensitiveLevel != null">#{sensitiveLevel},</if>
+            <if test="revokedTime != null">#{revokedTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImMessage" parameterType="com.ruoyi.im.domain.ImMessage">
+        update im_message
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="conversationId != null">conversation_id = #{conversationId},</if>
+            <if test="senderId != null">sender_id = #{senderId},</if>
+            <if test="type != null and type != ''">type = #{type},</if>
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="replyToMessageId != null">reply_to_message_id = #{replyToMessageId},</if>
+            <if test="forwardFromMessageId != null">forward_from_message_id = #{forwardFromMessageId},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="sensitiveLevel != null and sensitiveLevel != ''">sensitive_level = #{sensitiveLevel},</if>
+            <if test="revokedTime != null">revoked_time = #{revokedTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImMessageById" parameterType="Long">
+        delete from im_message where id = #{id}
+    </delete>
+
+    <delete id="deleteImMessageByIds" parameterType="Long[]">
+        delete from im_message where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <select id="selectImMessageByConversationId" parameterType="map" resultMap="ImMessageResult">
+        select id, conversation_id, sender_id, type, content, reply_to_message_id, 
+               forward_from_message_id, status, sensitive_level, revoked_time, create_time, update_time
+        from im_message
+        where conversation_id = #{conversationId}
+        order by create_time desc
+        limit #{limit}
+    </select>
+</mapper>

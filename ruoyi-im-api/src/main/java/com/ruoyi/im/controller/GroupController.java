@@ -2,8 +2,10 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.domain.ImGroup;
 import com.ruoyi.im.domain.ImGroupMember;
+import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.service.ImGroupService;
 import com.ruoyi.im.service.ImGroupMemberService;
+import com.ruoyi.im.service.ImUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +29,9 @@ public class GroupController {
     
     @Autowired
     private ImGroupMemberService imGroupMemberService;
+    
+    @Autowired
+    private ImUserService imUserService;
 
     /**
      * 获取群组列表
@@ -54,7 +59,11 @@ public class GroupController {
             // 过滤条件
             List<ImGroup> filteredGroups = allGroups.stream()
                 .filter(g -> groupName == null || g.getName().contains(groupName))
-                .filter(g -> ownerName == null || g.getOwnerName().contains(ownerName))
+                .filter(g -> ownerName == null || {
+                    // 获取群主用户信息
+                    ImUser owner = imUserService.selectImUserById(g.getOwnerId());
+                    return owner != null && owner.getNickname() != null && owner.getNickname().contains(ownerName);
+                })
                 .filter(g -> status == null || g.getStatus().equals(status))
                 .collect(Collectors.toList());
             
@@ -64,8 +73,32 @@ public class GroupController {
             List<ImGroup> pagedGroups = start < filteredGroups.size() ? 
                 filteredGroups.subList(start, end) : java.util.Collections.emptyList();
             
+            // 为每个群组设置群主名称
+            List<Map<String, Object>> groupList = pagedGroups.stream().map(g -> {
+                Map<String, Object> groupMap = new HashMap<>();
+                groupMap.put("id", g.getId());
+                groupMap.put("name", g.getName());
+                groupMap.put("ownerId", g.getOwnerId());
+                groupMap.put("notice", g.getNotice());
+                groupMap.put("avatar", g.getAvatar());
+                groupMap.put("status", g.getStatus());
+                groupMap.put("memberCount", g.getMemberCount());
+                groupMap.put("createTime", g.getCreateTime());
+                groupMap.put("updateTime", g.getUpdateTime());
+                
+                // 获取群主名称
+                ImUser owner = imUserService.selectImUserById(g.getOwnerId());
+                if (owner != null) {
+                    groupMap.put("ownerName", owner.getNickname() != null ? owner.getNickname() : owner.getUsername());
+                } else {
+                    groupMap.put("ownerName", "未知");
+                }
+                
+                return groupMap;
+            }).collect(Collectors.toList());
+            
             Map<String, Object> pageResult = new HashMap<>();
-            pageResult.put("rows", pagedGroups);
+            pageResult.put("rows", groupList);
             pageResult.put("total", filteredGroups.size());
             pageResult.put("pageNum", pageNum);
             pageResult.put("pageSize", pageSize);
@@ -138,9 +171,29 @@ public class GroupController {
         try {
             ImGroup group = imGroupService.selectImGroupById(groupId);
             if (group != null) {
+                // 构建包含群主名称的群组信息
+                Map<String, Object> groupInfo = new HashMap<>();
+                groupInfo.put("id", group.getId());
+                groupInfo.put("name", group.getName());
+                groupInfo.put("ownerId", group.getOwnerId());
+                groupInfo.put("notice", group.getNotice());
+                groupInfo.put("avatar", group.getAvatar());
+                groupInfo.put("status", group.getStatus());
+                groupInfo.put("memberCount", group.getMemberCount());
+                groupInfo.put("createTime", group.getCreateTime());
+                groupInfo.put("updateTime", group.getUpdateTime());
+                
+                // 获取群主名称
+                ImUser owner = imUserService.selectImUserById(group.getOwnerId());
+                if (owner != null) {
+                    groupInfo.put("ownerName", owner.getNickname() != null ? owner.getNickname() : owner.getUsername());
+                } else {
+                    groupInfo.put("ownerName", "未知");
+                }
+                
                 result.put("code", 200);
                 result.put("msg", "查询成功");
-                result.put("data", group);
+                result.put("data", groupInfo);
             } else {
                 result.put("code", 404);
                 result.put("msg", "群组不存在");
@@ -232,8 +285,29 @@ public class GroupController {
             List<ImGroupMember> pagedMembers = start < allMembers.size() ? 
                 allMembers.subList(start, end) : java.util.Collections.emptyList();
             
+            // 为每个成员获取用户详细信息
+            List<Map<String, Object>> memberList = pagedMembers.stream().map(m -> {
+                Map<String, Object> memberMap = new HashMap<>();
+                memberMap.put("id", m.getId());
+                memberMap.put("groupId", m.getGroupId());
+                memberMap.put("userId", m.getUserId());
+                memberMap.put("role", m.getRole());
+                memberMap.put("nickname", m.getGroupNickname());
+                memberMap.put("joinedTime", m.getJoinedTime());
+                
+                // 获取用户信息
+                ImUser user = imUserService.selectImUserById(m.getUserId());
+                if (user != null) {
+                    memberMap.put("username", user.getUsername());
+                    memberMap.put("userNickname", user.getNickname());
+                    memberMap.put("avatar", user.getAvatar());
+                }
+                
+                return memberMap;
+            }).collect(Collectors.toList());
+            
             Map<String, Object> pageResult = new HashMap<>();
-            pageResult.put("rows", pagedMembers);
+            pageResult.put("rows", memberList);
             pageResult.put("total", allMembers.size());
             pageResult.put("pageNum", pageNum);
             pageResult.put("pageSize", pageSize);

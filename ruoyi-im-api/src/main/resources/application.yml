@@ -32,7 +32,7 @@ spring:
 
 # MyBatis-Plus配置
 mybatis-plus:
-  # mapper-locations: classpath*:/mapper/**/*Mapper.xml  # 映射文件已移除，使用注解方式
+  mapper-locations: classpath*:/mapper/**/*Mapper.xml  # 映射文件位置
   type-aliases-package: com.ruoyi.im.domain
   global-config:
     db-config:

@@ -26,7 +26,7 @@ public class ImGroup {
     /**
      * 群公告
      */
-    private String announcement;
+    private String notice;
     
     /**
      * 群头像
@@ -52,6 +52,11 @@ public class ImGroup {
      * 更新时间
      */
     private LocalDateTime updateTime;
+    
+    /**
+     * 群主名称（非数据库字段，用于显示）
+     */
+    private String ownerName;
 
     // Getters and Setters
     public Long getId() {
@@ -78,12 +83,12 @@ public class ImGroup {
         this.ownerId = ownerId;
     }
 
-    public String getAnnouncement() {
-        return announcement;
+    public String getNotice() {
+        return notice;
     }
 
-    public void setAnnouncement(String announcement) {
-        this.announcement = announcement;
+    public void setNotice(String notice) {
+        this.notice = notice;
     }
 
     public String getAvatar() {
@@ -124,5 +129,13 @@ public class ImGroup {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
     }
 }

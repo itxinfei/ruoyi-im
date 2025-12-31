@@ -415,7 +415,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/dingtalk-theme.scss';
+@use '@/styles/dingtalk-theme.scss' as *;
 
 .location-picker-dialog {
   :deep(.el-dialog__body) {

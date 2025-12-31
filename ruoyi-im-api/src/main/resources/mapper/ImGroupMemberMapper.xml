@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImGroupMemberMapper">
+    
+    <resultMap type="com.ruoyi.im.domain.ImGroupMember" id="ImGroupMemberResult">
+        <id property="id" column="id"/>
+        <result property="groupId" column="group_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="role" column="role"/>
+        <result property="nickname" column="nickname"/>
+        <result property="muteUntil" column="mute_until"/>
+        <result property="joinedTime" column="joined_time"/>
+    </resultMap>
+
+    <sql id="selectImGroupMemberVo">
+        select id, group_id, user_id, role, nickname, mute_until, joined_time 
+        from im_group_member
+    </sql>
+
+    <select id="selectImGroupMemberById" parameterType="Long" resultMap="ImGroupMemberResult">
+        <include refid="selectImGroupMemberVo"/>
+        where id = #{id}
+    </select>
+    
+    <select id="selectImGroupMemberList" parameterType="com.ruoyi.im.domain.ImGroupMember" resultMap="ImGroupMemberResult">
+        <include refid="selectImGroupMemberVo"/>
+        <where>
+            <if test="groupId != null"> and group_id = #{groupId} </if>
+            <if test="userId != null"> and user_id = #{userId} </if>
+            <if test="role != null and role != ''"> and role = #{role} </if>
+        </where>
+    </select>
+
+    <insert id="insertImGroupMember" parameterType="com.ruoyi.im.domain.ImGroupMember" useGeneratedKeys="true" keyProperty="id">
+        insert into im_group_member
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="groupId != null">group_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="role != null">role,</if>
+            <if test="nickname != null">nickname,</if>
+            <if test="muteUntil != null">mute_until,</if>
+            <if test="joinedTime != null">joined_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="groupId != null">#{groupId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="role != null">#{role},</if>
+            <if test="nickname != null">#{nickname},</if>
+            <if test="muteUntil != null">#{muteUntil},</if>
+            <if test="joinedTime != null">#{joinedTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImGroupMember" parameterType="com.ruoyi.im.domain.ImGroupMember">
+        update im_group_member
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="groupId != null">group_id = #{groupId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="role != null and role != ''">role = #{role},</if>
+            <if test="nickname != null and nickname != ''">nickname = #{nickname},</if>
+            <if test="muteUntil != null">mute_until = #{muteUntil},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImGroupMemberById" parameterType="Long">
+        delete from im_group_member where id = #{id}
+    </delete>
+
+    <delete id="deleteImGroupMemberByIds" parameterType="Long[]">
+        delete from im_group_member where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <select id="selectImGroupMemberByGroupIdAndUserId" parameterType="map" resultMap="ImGroupMemberResult">
+        select id, group_id, user_id, role, nickname, mute_until, joined_time
+        from im_group_member
+        where group_id = #{groupId} and user_id = #{userId}
+    </select>
+    
+    <select id="selectImGroupMembersByGroupId" parameterType="Long" resultMap="ImGroupMemberResult">
+        select id, group_id, user_id, role, nickname, mute_until, joined_time
+        from im_group_member
+        where group_id = #{groupId}
+    </select>
+</mapper>

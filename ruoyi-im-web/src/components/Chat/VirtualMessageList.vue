@@ -438,7 +438,7 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/dingtalk-theme.scss';
+@use '@/styles/dingtalk-theme.scss' as *;
 
 .virtual-message-list {
   height: 100%;
