@@ -2,8 +2,10 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.domain.ImFriend;
 import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImFriendService;
 import com.ruoyi.im.service.ImUserService;
+import com.ruoyi.im.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,21 +29,45 @@ public class ContactController {
     
     @Autowired
     private ImUserService imUserService;
+    
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    /**
+     * 从请求头中获取当前用户ID
+     */
+    private Long getCurrentUserId(@RequestHeader(value = "Authorization", required = false) String token) {
+        if (token == null || !token.startsWith("Bearer ")) {
+            throw new BusinessException(401, "未提供有效的认证token");
+        }
+        
+        try {
+            String jwtToken = token.replace("Bearer ", "");
+            String username = jwtUtils.getUsernameFromToken(jwtToken);
+            ImUser user = imUserService.findByUsername(username);
+            
+            if (user == null) {
+                throw new BusinessException(404, "用户不存在");
+            }
+            
+            return user.getId();
+        } catch (Exception e) {
+            throw new BusinessException(401, "Token验证失败");
+        }
+    }
 
     /**
      * 获取联系人列表
      */
     @GetMapping("/list")
-    public Map<String, Object> listContacts(@RequestParam(required = false) String keyword,
+    public Map<String, Object> listContacts(@RequestHeader(value = "Authorization", required = false) String token,
+                                           @RequestParam(required = false) String keyword,
                                            @RequestParam(defaultValue = "1") Integer pageNum,
                                            @RequestParam(defaultValue = "10") Integer pageSize) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取当前用户的好友列表
-            // 这里简化处理，实际项目中需要从请求中获取当前用户ID
-            // 为了演示，我们使用userId=1作为当前用户
-            Long currentUserId = 1L; // 从安全上下文获取当前用户ID
+            Long currentUserId = getCurrentUserId(token);
             
             List<ImFriend> allFriends = imFriendService.selectImFriendListByUserId(currentUserId);
             
@@ -99,15 +125,15 @@ public class ContactController {
      * 获取联系人详情
      */
     @GetMapping("/{contactId}")
-    public Map<String, Object> getContact(@PathVariable Long contactId) {
+    public Map<String, Object> getContact(@RequestHeader(value = "Authorization", required = false) String token,
+                                        @PathVariable Long contactId) {
         Map<String, Object> result = new HashMap<>();
         
         try {
+            Long currentUserId = getCurrentUserId(token);
+            
             ImUser user = imUserService.selectImUserById(contactId);
             if (user != null) {
-                // 获取好友关系信息
-                // 实际项目中需要从安全上下文获取当前用户ID
-                Long currentUserId = 1L;
                 ImFriend friend = imFriendService.selectImFriendByUserIdAndFriendUserId(currentUserId, contactId);
                 
                 Map<String, Object> contact = new HashMap<>();
@@ -148,15 +174,15 @@ public class ContactController {
      * 添加联系人（发送好友申请）
      */
     @PostMapping
-    public Map<String, Object> addContact(@RequestBody Map<String, Object> contactData) {
+    public Map<String, Object> addContact(@RequestHeader(value = "Authorization", required = false) String token,
+                                        @RequestBody Map<String, Object> contactData) {
         Map<String, Object> result = new HashMap<>();
         
         try {
+            Long currentUserId = getCurrentUserId(token);
+            
             Long friendUserId = Long.valueOf(contactData.get("userId").toString());
             String message = contactData.get("message").toString();
-            
-            // 实际项目中需要从安全上下文获取当前用户ID
-            Long currentUserId = 1L;
             
             // 检查是否已经是好友
             ImFriend existingFriend = imFriendService.selectImFriendByUserIdAndFriendUserId(currentUserId, friendUserId);
@@ -236,12 +262,12 @@ public class ContactController {
      * 删除联系人（删除好友关系）
      */
     @DeleteMapping("/{contactId}")
-    public Map<String, Object> deleteContact(@PathVariable Long contactId) {
+    public Map<String, Object> deleteContact(@RequestHeader(value = "Authorization", required = false) String token,
+                                           @PathVariable Long contactId) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 实际项目中需要从安全上下文获取当前用户ID
-            Long currentUserId = 1L;
+            Long currentUserId = getCurrentUserId(token);
             
             int deleteResult = imFriendService.deleteFriend(currentUserId, contactId);
             if (deleteResult > 0) {
@@ -263,22 +289,20 @@ public class ContactController {
      * 搜索联系人
      */
     @GetMapping("/search")
-    public Map<String, Object> searchContacts(@RequestParam String keyword,
+    public Map<String, Object> searchContacts(@RequestHeader(value = "Authorization", required = false) String token,
+                                             @RequestParam String keyword,
                                              @RequestParam(defaultValue = "1") Integer pageNum,
                                              @RequestParam(defaultValue = "20") Integer pageSize) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 搜索用户（非好友）
+            Long currentUserId = getCurrentUserId(token);
+            
             ImUser user = new ImUser();
             List<ImUser> users = imUserService.selectImUserList(user);
             
-            // 过滤出包含关键词的用户，排除自己
-            // 实际项目中需要从安全上下文获取当前用户ID
-            Long currentUserId = 1L;
-            
             List<Map<String, Object>> contacts = users.stream()
-                .filter(u -> u.getId() != currentUserId) // 排除自己
+                .filter(u -> u.getId() != currentUserId)
                 .filter(u -> keyword == null || 
                     u.getUsername().contains(keyword) ||
                     u.getNickname().contains(keyword))
@@ -341,12 +365,13 @@ public class ContactController {
      * 设置备注
      */
     @PutMapping("/{contactId}/remark")
-    public Map<String, Object> setRemark(@PathVariable Long contactId, @RequestParam String remark) {
+    public Map<String, Object> setRemark(@RequestHeader(value = "Authorization", required = false) String token,
+                                       @PathVariable Long contactId, 
+                                       @RequestParam String remark) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 实际项目中需要从安全上下文获取当前用户ID
-            Long currentUserId = 1L;
+            Long currentUserId = getCurrentUserId(token);
             
             ImFriend friend = imFriendService.selectImFriendByUserIdAndFriendUserId(currentUserId, contactId);
             if (friend != null) {
