@@ -19,9 +19,6 @@ public class UserServiceImpl implements IUserService {
     
     @Autowired
     private ImUserMapper imUserMapper;
-    
-    @Autowired
-    private ImUserService imUserService;
 
     @Override
     public ImUser findByUsername(String username) {

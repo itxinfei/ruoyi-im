@@ -11,7 +11,7 @@ import java.util.Map;
  * @author ruoyi
  */
 @RestController
-@RequestMapping({"/im/config", "/api/im/config"})
+@RequestMapping("/api/im/config")
 public class ConfigController {
 
     /**

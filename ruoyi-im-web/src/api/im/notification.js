@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 获取通知列表
 export function listNotifications(query) {
   return request({
-    url: '/im/notification/list',
+    url: '/api/im/notification/list',
     method: 'get',
     params: query,
   })
@@ -12,7 +12,7 @@ export function listNotifications(query) {
 // 获取通知详情
 export function getNotification(notificationId) {
   return request({
-    url: '/im/notification/' + notificationId,
+    url: '/api/im/notification/' + notificationId,
     method: 'get',
   })
 }
@@ -20,7 +20,7 @@ export function getNotification(notificationId) {
 // 标记通知已读
 export function markAsRead(notificationIds) {
   return request({
-    url: '/im/notification/read',
+    url: '/api/im/notification/read',
     method: 'put',
     data: notificationIds,
   })
@@ -29,7 +29,7 @@ export function markAsRead(notificationIds) {
 // 标记所有通知已读
 export function markAllAsRead() {
   return request({
-    url: '/im/notification/read/all',
+    url: '/api/im/notification/read/all',
     method: 'put',
   })
 }
@@ -37,7 +37,7 @@ export function markAllAsRead() {
 // 删除通知
 export function deleteNotification(notificationId) {
   return request({
-    url: '/im/notification/' + notificationId,
+    url: '/api/im/notification/' + notificationId,
     method: 'delete',
   })
 }
@@ -45,7 +45,7 @@ export function deleteNotification(notificationId) {
 // 批量删除通知
 export function batchDeleteNotifications(notificationIds) {
   return request({
-    url: '/im/notification/batch',
+    url: '/api/im/notification/batch',
     method: 'delete',
     data: notificationIds,
   })
@@ -54,7 +54,7 @@ export function batchDeleteNotifications(notificationIds) {
 // 获取未读通知数量
 export function getUnreadCount() {
   return request({
-    url: '/im/notification/unread/count',
+    url: '/api/im/notification/unread/count',
     method: 'get',
   })
 }
@@ -62,7 +62,7 @@ export function getUnreadCount() {
 // 获取通知设置
 export function getNotificationSettings() {
   return request({
-    url: '/im/notification/settings',
+    url: '/api/im/notification/settings',
     method: 'get',
   })
 }
@@ -70,7 +70,7 @@ export function getNotificationSettings() {
 // 更新通知设置
 export function updateNotificationSettings(data) {
   return request({
-    url: '/im/notification/settings',
+    url: '/api/im/notification/settings',
     method: 'put',
     data: data,
   })
@@ -79,7 +79,7 @@ export function updateNotificationSettings(data) {
 // 清空所有通知
 export function clearAllNotifications() {
   return request({
-    url: '/im/notification/clear',
+    url: '/api/im/notification/clear',
     method: 'delete',
   })
 }

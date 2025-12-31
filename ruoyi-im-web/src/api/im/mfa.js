@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 获取MFA状态
 export function getMfaStatus() {
   return request({
-    url: '/im/mfa/status',
+    url: '/api/im/mfa/status',
     method: 'get',
   })
 }
@@ -11,7 +11,7 @@ export function getMfaStatus() {
 // 启用MFA
 export function enableMfa(data) {
   return request({
-    url: '/im/mfa/enable',
+    url: '/api/im/mfa/enable',
     method: 'post',
     data: data,
   })
@@ -20,7 +20,7 @@ export function enableMfa(data) {
 // 禁用MFA
 export function disableMfa(data) {
   return request({
-    url: '/im/mfa/disable',
+    url: '/api/im/mfa/disable',
     method: 'post',
     data: data,
   })
@@ -29,7 +29,7 @@ export function disableMfa(data) {
 // 验证MFA
 export function verifyMfa(data) {
   return request({
-    url: '/im/mfa/verify',
+    url: '/api/im/mfa/verify',
     method: 'post',
     data: data,
   })
@@ -38,7 +38,7 @@ export function verifyMfa(data) {
 // 生成MFA密钥
 export function generateMfaSecret() {
   return request({
-    url: '/im/mfa/secret',
+    url: '/api/im/mfa/secret',
     method: 'get',
   })
 }
@@ -46,7 +46,7 @@ export function generateMfaSecret() {
 // 获取备用码
 export function getBackupCodes() {
   return request({
-    url: '/im/mfa/backup-codes',
+    url: '/api/im/mfa/backup-codes',
     method: 'get',
   })
 }
@@ -54,7 +54,7 @@ export function getBackupCodes() {
 // 重新生成备用码
 export function regenerateBackupCodes() {
   return request({
-    url: '/im/mfa/backup-codes/regenerate',
+    url: '/api/im/mfa/backup-codes/regenerate',
     method: 'post',
   })
 }
@@ -62,7 +62,7 @@ export function regenerateBackupCodes() {
 // 发送验证码（短信/邮件）
 export function sendVerificationCode(data) {
   return request({
-    url: '/im/mfa/send-code',
+    url: '/api/im/mfa/send-code',
     method: 'post',
     data: data,
   })
@@ -71,7 +71,7 @@ export function sendVerificationCode(data) {
 // 获取MFA设置
 export function getMfaSettings() {
   return request({
-    url: '/im/mfa/settings',
+    url: '/api/im/mfa/settings',
     method: 'get',
   })
 }
@@ -79,7 +79,7 @@ export function getMfaSettings() {
 // 更新MFA设置
 export function updateMfaSettings(data) {
   return request({
-    url: '/im/mfa/settings',
+    url: '/api/im/mfa/settings',
     method: 'put',
     data: data,
   })

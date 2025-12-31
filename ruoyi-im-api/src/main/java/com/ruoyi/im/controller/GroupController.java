@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @RestController
-@RequestMapping({"/im/group", "/api/im/group"})
+@RequestMapping("/api/im/group")
 public class GroupController {
 
     @Autowired
@@ -59,10 +59,15 @@ public class GroupController {
             // 过滤条件
             List<ImGroup> filteredGroups = allGroups.stream()
                 .filter(g -> groupName == null || g.getName().contains(groupName))
-                .filter(g -> ownerName == null || {
-                    // 获取群主用户信息
-                    ImUser owner = imUserService.selectImUserById(g.getOwnerId());
-                    return owner != null && owner.getNickname() != null && owner.getNickname().contains(ownerName);
+                .filter(g -> {
+                    if (ownerName == null) {
+                        return true;
+                    } else {
+                        // 获取群主用户信息
+                        ImUser owner = imUserService.selectImUserById(g.getOwnerId());
+                        return owner != null && 
+                               (owner.getNickname() != null ? owner.getNickname().contains(ownerName) : owner.getUsername().contains(ownerName));
+                    }
                 })
                 .filter(g -> status == null || g.getStatus().equals(status))
                 .collect(Collectors.toList());
@@ -275,8 +280,6 @@ public class GroupController {
         
         try {
             // 获取群组成员列表
-            ImGroupMember member = new ImGroupMember();
-            member.setGroupId(groupId);
             List<ImGroupMember> allMembers = imGroupMemberService.selectImGroupMemberListByGroupId(groupId);
             
             int start = (pageNum - 1) * pageSize;

@@ -1,15 +1,18 @@
-import Cookies from 'js-cookie'
-
-const TokenKey = 'Admin-Token'
+// 使用localStorage替代cookies存储token
+const TokenKey = 'token'
 
 export function getToken() {
-  return Cookies.get(TokenKey)
+  return localStorage.getItem(TokenKey)
 }
 
 export function setToken(token) {
-  return Cookies.set(TokenKey, token)
+  if (token) {
+    localStorage.setItem(TokenKey, token)
+  } else {
+    localStorage.removeItem(TokenKey)
+  }
 }
 
 export function removeToken() {
-  return Cookies.remove(TokenKey)
+  localStorage.removeItem(TokenKey)
 }

@@ -31,12 +31,17 @@ public class ImGroupMember {
     /**
      * 群内昵称
      */
-    private String nickname;
+    private String groupNickname;
     
     /**
      * 禁言截止时间
      */
-    private LocalDateTime muteUntil;
+    private LocalDateTime muteEndTime;
+    
+    /**
+     * 邀请人用户ID
+     */
+    private Long inviterId;
     
     /**
      * 加入时间
@@ -76,20 +81,28 @@ public class ImGroupMember {
         this.role = role;
     }
 
-    public String getNickname() {
-        return nickname;
+    public String getGroupNickname() {
+        return groupNickname;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public void setGroupNickname(String groupNickname) {
+        this.groupNickname = groupNickname;
     }
 
-    public LocalDateTime getMuteUntil() {
-        return muteUntil;
+    public LocalDateTime getMuteEndTime() {
+        return muteEndTime;
     }
 
-    public void setMuteUntil(LocalDateTime muteUntil) {
-        this.muteUntil = muteUntil;
+    public void setMuteEndTime(LocalDateTime muteEndTime) {
+        this.muteEndTime = muteEndTime;
+    }
+
+    public Long getInviterId() {
+        return inviterId;
+    }
+
+    public void setInviterId(Long inviterId) {
+        this.inviterId = inviterId;
     }
 
     public LocalDateTime getJoinedTime() {

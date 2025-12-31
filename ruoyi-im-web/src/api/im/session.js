@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 查询会话列表
 export function listSession(query) {
   return request({
-    url: '/im/session/list',
+    url: '/api/im/session/list',
     method: 'get',
     params: query,
   })
@@ -12,7 +12,7 @@ export function listSession(query) {
 // 查询会话详细信息
 export function getSession(sessionId) {
   return request({
-    url: '/im/session/' + sessionId,
+    url: '/api/im/session/' + sessionId,
     method: 'get',
   })
 }
@@ -20,7 +20,7 @@ export function getSession(sessionId) {
 // 新增会话
 export function addSession(data) {
   return request({
-    url: '/im/session/create',
+    url: '/api/im/session/create',
     method: 'post',
     data: data,
   })
@@ -31,20 +31,20 @@ export function updateSession(sessionId, data) {
   // 如果是置顶操作
   if (data.pinned !== undefined) {
     return request({
-      url: `/im/session/${sessionId}/${data.pinned ? 'pin' : 'unpin'}`,
+      url: `/api/im/session/${sessionId}/${data.pinned ? 'pin' : 'unpin'}`,
       method: 'put',
     })
   }
   // 如果是静音操作
   if (data.muted !== undefined) {
     return request({
-      url: `/im/session/${sessionId}/${data.muted ? 'mute' : 'unmute'}`,
+      url: `/api/im/session/${sessionId}/${data.muted ? 'mute' : 'unmute'}`,
       method: 'put',
     })
   }
   // 其他更新操作
   return request({
-    url: `/im/session/${sessionId}/settings`,
+    url: `/api/im/session/${sessionId}/settings`,
     method: 'put',
     data: data,
   })
@@ -53,7 +53,7 @@ export function updateSession(sessionId, data) {
 // 删除会话
 export function deleteSession(sessionId) {
   return request({
-    url: '/im/session/' + sessionId,
+    url: '/api/im/session/' + sessionId,
     method: 'delete',
   })
 }
@@ -66,7 +66,7 @@ export function delSession(sessionId) {
 // 批量删除会话
 export function delSessions(sessionIds) {
   return request({
-    url: '/im/session/batch/' + sessionIds,
+    url: '/api/im/session/batch/' + sessionIds,
     method: 'delete',
   })
 }
@@ -74,7 +74,7 @@ export function delSessions(sessionIds) {
 // 获取会话成员列表
 export function listSessionMembers(sessionId) {
   return request({
-    url: '/im/session/' + sessionId + '/members',
+    url: '/api/im/session/' + sessionId + '/members',
     method: 'get',
   })
 }
@@ -82,7 +82,7 @@ export function listSessionMembers(sessionId) {
 // 添加会话成员
 export function addSessionMember(data) {
   return request({
-    url: '/im/session/member',
+    url: '/api/im/session/member',
     method: 'post',
     data: data,
   })
@@ -91,7 +91,7 @@ export function addSessionMember(data) {
 // 移除会话成员
 export function removeSessionMember(sessionId, memberIds) {
   return request({
-    url: '/im/session/member/' + sessionId + '/' + memberIds,
+    url: '/api/im/session/member/' + sessionId + '/' + memberIds,
     method: 'delete',
   })
 }
@@ -99,7 +99,7 @@ export function removeSessionMember(sessionId, memberIds) {
 // 获取会话未读消息数
 export function getUnreadCount(sessionId) {
   return request({
-    url: '/im/session/unread/' + sessionId,
+    url: '/api/im/session/unread/' + sessionId,
     method: 'get',
   })
 }
@@ -107,7 +107,7 @@ export function getUnreadCount(sessionId) {
 // 获取用户活跃会话数量
 export function getActiveCount() {
   return request({
-    url: '/im/session/active/count',
+    url: '/api/im/session/active/count',
     method: 'get',
   })
 }
@@ -115,7 +115,7 @@ export function getActiveCount() {
 // 清理过期会话
 export function cleanExpiredSessions(days) {
   return request({
-    url: '/im/session/clean/' + days,
+    url: '/api/im/session/clean/' + days,
     method: 'delete',
   })
 }
@@ -123,7 +123,7 @@ export function cleanExpiredSessions(days) {
 // 更新会话活动时间
 export function updateActiveTime(sessionId) {
   return request({
-    url: '/im/session/active/' + sessionId,
+    url: '/api/im/session/active/' + sessionId,
     method: 'put',
   })
 }
@@ -131,7 +131,7 @@ export function updateActiveTime(sessionId) {
 // 获取会话消息列表
 export function listSessionMessages(query) {
   return request({
-    url: '/im/message/list',
+    url: '/api/im/message/list',
     method: 'get',
     params: query,
   })
@@ -140,7 +140,7 @@ export function listSessionMessages(query) {
 // 导出会话消息
 export function exportSessionMessages(sessionId) {
   return request({
-    url: '/im/message/export',
+    url: '/api/im/message/export',
     method: 'get',
     params: {
       sessionId: sessionId,
@@ -151,7 +151,7 @@ export function exportSessionMessages(sessionId) {
 // 获取会话统计信息
 export function getSessionStats(sessionId) {
   return request({
-    url: '/im/session/stats/' + sessionId,
+    url: '/api/im/session/stats/' + sessionId,
     method: 'get',
   })
 }

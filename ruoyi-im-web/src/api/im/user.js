@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 查询IM用户列表
 export function listUser(query) {
   return request({
-    url: '/im/user/list',
+    url: '/api/im/user/list',
     method: 'get',
     params: query,
   })
@@ -12,7 +12,7 @@ export function listUser(query) {
 // 查询IM用户详细
 export function getUser(userId) {
   return request({
-    url: '/im/user/' + userId,
+    url: '/api/im/user/' + userId,
     method: 'get',
   })
 }
@@ -20,7 +20,7 @@ export function getUser(userId) {
 // 新增IM用户
 export function addUser(data) {
   return request({
-    url: '/im/user',
+    url: '/api/im/user',
     method: 'post',
     data: data,
   })
@@ -29,7 +29,7 @@ export function addUser(data) {
 // 修改IM用户
 export function updateUser(data) {
   return request({
-    url: '/im/user',
+    url: '/api/im/user',
     method: 'put',
     data: data,
   })
@@ -38,7 +38,7 @@ export function updateUser(data) {
 // 删除IM用户
 export function delUser(userId) {
   return request({
-    url: '/im/user/' + userId,
+    url: '/api/im/user/' + userId,
     method: 'delete',
   })
 }
@@ -50,7 +50,7 @@ export function changeUserStatus(userId, status) {
     status,
   }
   return request({
-    url: '/im/user/changeStatus',
+    url: '/api/im/user/changeStatus',
     method: 'put',
     data: data,
   })
@@ -59,7 +59,7 @@ export function changeUserStatus(userId, status) {
 // 查询用户好友列表
 export function listUserFriends(userId) {
   return request({
-    url: '/im/user/friends/' + userId,
+    url: '/api/im/user/friends/' + userId,
     method: 'get',
   })
 }

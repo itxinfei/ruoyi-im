@@ -269,7 +269,7 @@ const handleLogin = async () => {
     await loginFormRef.value.validate()
     loading.value = true
 
-    const response = await login(loginForm)
+    const response = await login(loginForm.username, loginForm.password)
 
     // 保存token和用户信息
     store.commit('user/SET_TOKEN', response.data.token)
@@ -333,10 +333,28 @@ const handleRegister = async () => {
     return
   }
 
+  if (registerForm.password !== registerForm.confirmPassword) {
+    ElMessage.error('两次输入的密码不一致')
+    return
+  }
+
   try {
-    await register(registerForm)
+    const registerData = {
+      username: registerForm.username,
+      password: registerForm.password,
+      nickname: registerForm.username, // 使用用户名作为昵称
+      email: registerForm.email,
+      phone: registerForm.phone
+    }
+    await register(registerData)
     ElMessage.success('注册成功，请登录')
     showRegisterDialog.value = false
+    // 清空表单
+    registerForm.username = ''
+    registerForm.email = ''
+    registerForm.phone = ''
+    registerForm.password = ''
+    registerForm.confirmPassword = ''
   } catch (error) {
     ElMessage.error(error.message || '注册失败')
   }

@@ -89,10 +89,24 @@
         where conversation_id = #{conversationId} and user_id = #{userId}
     </select>
     
-    <select id="selectImConversationMembersByConversationId" parameterType="Long" resultMap="ImConversationMemberResult">
+    <select id="selectImConversationMemberListByConversationId" parameterType="Long" resultMap="ImConversationMemberResult">
         select id, conversation_id, user_id, unread_count, last_read_message_id, 
                is_pinned, is_muted, create_time, update_time
         from im_conversation_member
         where conversation_id = #{conversationId}
     </select>
+    
+    <select id="selectImConversationMemberListByUserId" parameterType="Long" resultMap="ImConversationMemberResult">
+        select id, conversation_id, user_id, unread_count, last_read_message_id, 
+               is_pinned, is_muted, create_time, update_time
+        from im_conversation_member
+        where user_id = #{userId}
+    </select>
+    
+    <delete id="deleteImConversationMemberByConversationIds" parameterType="Long[]">
+        delete from im_conversation_member where conversation_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>

@@ -61,12 +61,12 @@ export default defineConfig(({ mode }) => {
       open: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:80',
+          target: 'http://localhost:8080',
           changeOrigin: true,
           rewrite: path => path.replace(/^\/api/, ''),
         },
         '/ws': {
-          target: 'ws://localhost:80',
+          target: 'ws://localhost:8080',
           ws: true,
           changeOrigin: true,
         },
@@ -129,7 +129,6 @@ export default defineConfig(({ mode }) => {
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: `@use "@/assets/styles/variables.scss" as *;`,
           silenceDeprecations: ['legacy-js-api'],
         },
       },

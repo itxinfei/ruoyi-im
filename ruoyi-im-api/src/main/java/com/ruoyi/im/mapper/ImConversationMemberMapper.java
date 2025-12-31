@@ -75,6 +75,14 @@ public interface ImConversationMemberMapper {
     public ImConversationMember selectImConversationMemberByConversationIdAndUserId(Long conversationId, Long userId);
     
     /**
+     * 根据用户ID查询会话成员列表
+     * 
+     * @param userId 用户ID
+     * @return 会话成员集合
+     */
+    public List<ImConversationMember> selectImConversationMemberListByUserId(Long userId);
+    
+    /**
      * 批量删除会话成员（根据会话ID）
      * 
      * @param conversationIds 会话ID数组

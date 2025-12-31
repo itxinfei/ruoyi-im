@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @RestController
-@RequestMapping({"/im/contact", "/api/im/contact"})
+@RequestMapping("/api/im/contact")
 public class ContactController {
 
     @Autowired

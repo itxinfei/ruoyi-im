@@ -7,13 +7,14 @@
         <result property="groupId" column="group_id"/>
         <result property="userId" column="user_id"/>
         <result property="role" column="role"/>
-        <result property="nickname" column="nickname"/>
-        <result property="muteUntil" column="mute_until"/>
+        <result property="groupNickname" column="group_nickname"/>
+        <result property="muteEndTime" column="mute_end_time"/>
+        <result property="inviterId" column="inviter_id"/>
         <result property="joinedTime" column="joined_time"/>
     </resultMap>
 
     <sql id="selectImGroupMemberVo">
-        select id, group_id, user_id, role, nickname, mute_until, joined_time 
+        select id, group_id, user_id, role, group_nickname, mute_end_time, inviter_id, joined_time 
         from im_group_member
     </sql>
 
@@ -37,16 +38,18 @@
             <if test="groupId != null">group_id,</if>
             <if test="userId != null">user_id,</if>
             <if test="role != null">role,</if>
-            <if test="nickname != null">nickname,</if>
-            <if test="muteUntil != null">mute_until,</if>
+            <if test="groupNickname != null">group_nickname,</if>
+            <if test="muteEndTime != null">mute_end_time,</if>
+            <if test="inviterId != null">inviter_id,</if>
             <if test="joinedTime != null">joined_time,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="groupId != null">#{groupId},</if>
             <if test="userId != null">#{userId},</if>
             <if test="role != null">#{role},</if>
-            <if test="nickname != null">#{nickname},</if>
-            <if test="muteUntil != null">#{muteUntil},</if>
+            <if test="groupNickname != null">#{groupNickname},</if>
+            <if test="muteEndTime != null">#{muteEndTime},</if>
+            <if test="inviterId != null">#{inviterId},</if>
             <if test="joinedTime != null">#{joinedTime},</if>
         </trim>
     </insert>
@@ -57,8 +60,8 @@
             <if test="groupId != null">group_id = #{groupId},</if>
             <if test="userId != null">user_id = #{userId},</if>
             <if test="role != null and role != ''">role = #{role},</if>
-            <if test="nickname != null and nickname != ''">nickname = #{nickname},</if>
-            <if test="muteUntil != null">mute_until = #{muteUntil},</if>
+            <if test="groupNickname != null and groupNickname != ''">group_nickname = #{groupNickname},</if>
+            <if test="muteEndTime != null">mute_end_time = #{muteEndTime},</if>
         </trim>
         where id = #{id}
     </update>
@@ -75,14 +78,21 @@
     </delete>
     
     <select id="selectImGroupMemberByGroupIdAndUserId" parameterType="map" resultMap="ImGroupMemberResult">
-        select id, group_id, user_id, role, nickname, mute_until, joined_time
+        select id, group_id, user_id, role, group_nickname, mute_end_time, inviter_id, joined_time
         from im_group_member
         where group_id = #{groupId} and user_id = #{userId}
     </select>
     
-    <select id="selectImGroupMembersByGroupId" parameterType="Long" resultMap="ImGroupMemberResult">
-        select id, group_id, user_id, role, nickname, mute_until, joined_time
+    <select id="selectImGroupMemberListByGroupId" parameterType="Long" resultMap="ImGroupMemberResult">
+        select id, group_id, user_id, role, group_nickname, mute_end_time, inviter_id, joined_time
         from im_group_member
         where group_id = #{groupId}
     </select>
+    
+    <delete id="deleteImGroupMemberByGroupIds" parameterType="Long[]">
+        delete from im_group_member where group_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>

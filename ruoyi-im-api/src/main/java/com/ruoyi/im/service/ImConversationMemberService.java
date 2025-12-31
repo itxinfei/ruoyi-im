@@ -75,6 +75,14 @@ public interface ImConversationMemberService {
     public ImConversationMember selectImConversationMemberByConversationIdAndUserId(Long conversationId, Long userId);
     
     /**
+     * 根据用户ID查询会话成员列表
+     * 
+     * @param userId 用户ID
+     * @return 会话成员集合
+     */
+    public List<ImConversationMember> selectImConversationMemberListByUserId(Long userId);
+    
+    /**
      * 添加会话成员
      * 
      * @param conversationId 会话ID

@@ -326,6 +326,12 @@ CREATE TABLE `im_user`  (
 -- ----------------------------
 -- Records of im_user
 -- ----------------------------
+INSERT INTO `im_user` VALUES (1, 'admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '管理员', 'admin@example.com', '13800000001', '/avatar/1.jpg', 'ACTIVE', '2025-12-31 10:00:00', '2025-12-31 15:08:19');
+INSERT INTO `im_user` VALUES (2, 'zhangsan', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '张三', 'zhangsan@example.com', '13800000002', '/avatar/2.jpg', 'ACTIVE', '2025-12-31 10:00:00', '2025-12-31 15:08:19');
+INSERT INTO `im_user` VALUES (3, 'lisi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '李四', 'lisi@example.com', '13800000003', '/avatar/3.jpg', 'ACTIVE', '2025-12-31 10:00:00', '2025-12-31 15:08:19');
+INSERT INTO `im_user` VALUES (4, 'wangwu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '王五', 'wangwu@example.com', '13800000004', '/avatar/4.jpg', 'ACTIVE', '2025-12-31 10:00:00', '2025-12-31 15:08:19');
+INSERT INTO `im_user` VALUES (5, 'zhaoliu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '赵六', 'zhaoliu@example.com', '13800000005', '/avatar/5.jpg', 'ACTIVE', '2025-12-31 10:00:00', '2025-12-31 15:08:19');
+INSERT INTO `im_user` VALUES (6, 'qianqi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '钱七', 'qianqi@example.com', '13800000006', '/avatar/6.jpg', 'ACTIVE', '2025-12-31 10:00:00', '2025-12-31 15:08:19');
 
 -- ----------------------------
 -- Table structure for im_audit_export_request
@@ -512,7 +518,7 @@ CREATE TABLE `im_group`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '群组ID',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '群组名称',
   `owner_id` bigint(20) NOT NULL COMMENT '群主用户ID',
-  `announcement` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群公告',
+  `notice` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群公告',
   `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群头像',
   `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'NORMAL' COMMENT '状态（NORMAL正常 DISMISSED已解散）',
   `member_count` int(11) NOT NULL DEFAULT 0 COMMENT '成员数量',

@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ruoyi</groupId>
-    <artifactId>ruoyi-im-system</artifactId>
+    <artifactId>im</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
-    <name>ruoyi-im-system</name>
+    <name>im</name>
     <description>IM即时通讯系统 - 父项目</description>
 
     <modules>

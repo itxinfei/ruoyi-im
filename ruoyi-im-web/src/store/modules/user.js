@@ -1,8 +1,7 @@
 import { login, logout, getInfo } from '@/api/login'
-import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const state = {
-  token: getToken(),
+  token: localStorage.getItem('token') || '',
   name: '',
   avatar: '',
   roles: [],
@@ -12,7 +11,11 @@ const state = {
 const mutations = {
   SET_TOKEN: (state, token) => {
     state.token = token
-    setToken(token)
+    if (token) {
+      localStorage.setItem('token', token)
+    } else {
+      localStorage.removeItem('token')
+    }
   },
   SET_NAME: (state, name) => {
     state.name = name
@@ -32,6 +35,12 @@ const mutations = {
     state.avatar = avatar
     state.roles = roles
     state.permissions = permissions || []
+    // 同时保存用户信息到localStorage
+    if (userInfo) {
+      localStorage.setItem('userInfo', JSON.stringify(userInfo))
+    } else {
+      localStorage.removeItem('userInfo')
+    }
   },
 }
 
@@ -40,11 +49,10 @@ const actions = {
   login({ commit }, userInfo) {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password: password })
+      login(username, password)
         .then(response => {
           const { data } = response
           commit('SET_TOKEN', data.token)
-          setToken(data.token)
           resolve()
         })
         .catch(error => {
@@ -87,8 +95,13 @@ const actions = {
       logout(state.token)
         .then(() => {
           commit('SET_TOKEN', '')
+          commit('SET_NAME', '')
+          commit('SET_AVATAR', '')
           commit('SET_ROLES', [])
-          removeToken()
+          commit('SET_PERMISSIONS', [])
+          // 清除localStorage中的数据
+          localStorage.removeItem('token')
+          localStorage.removeItem('userInfo')
           resolve()
         })
         .catch(error => {
@@ -101,8 +114,13 @@ const actions = {
   resetToken({ commit }) {
     return new Promise(resolve => {
       commit('SET_TOKEN', '')
+      commit('SET_NAME', '')
+      commit('SET_AVATAR', '')
       commit('SET_ROLES', [])
-      removeToken()
+      commit('SET_PERMISSIONS', [])
+      // 清除localStorage中的数据
+      localStorage.removeItem('token')
+      localStorage.removeItem('userInfo')
       resolve()
     })
   },

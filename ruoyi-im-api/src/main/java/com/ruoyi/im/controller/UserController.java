@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @RestController
-@RequestMapping({"/im/user", "/api/im/user"})
+@RequestMapping("/api/im/user")
 public class UserController {
 
     @Autowired
@@ -174,7 +174,7 @@ public class UserController {
         Map<String, Object> result = new HashMap<>();
         
         Long userId = Long.valueOf(params.get("userId").toString());
-        Integer status = Integer.valueOf(params.get("status").toString());
+        String status = params.get("status").toString();
         
         ImUser user = userService.findById(userId);
         

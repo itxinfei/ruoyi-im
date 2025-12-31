@@ -1,6 +1,7 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.domain.ImMessage;
+import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImConversationMemberService;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @RestController
-@RequestMapping({"/im/message", "/api/im/message"})
+@RequestMapping("/api/im/message")
 public class MessageController {
 
     @Autowired
@@ -83,7 +84,7 @@ public class MessageController {
             Long currentUserId = 1L;
             
             // 检查用户是否在会话中
-            var member = imConversationMemberService
+            ImConversationMember member = imConversationMemberService
                 .selectImConversationMemberByConversationIdAndUserId(sessionId, currentUserId);
             if (member == null) {
                 result.put("code", 403);
@@ -220,7 +221,7 @@ public class MessageController {
             
             // 如果指定了会话ID，需要检查用户是否在该会话中
             if (conversationId != null) {
-                var member = imConversationMemberService
+                ImConversationMember member = imConversationMemberService
                     .selectImConversationMemberByConversationIdAndUserId(conversationId, currentUserId);
                 if (member == null) {
                     result.put("code", 403);

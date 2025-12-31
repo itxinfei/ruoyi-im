@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @RestController
-@RequestMapping({"/im/session", "/api/im/session"})
+@RequestMapping("/api/im/session")
 public class SessionController {
 
     @Autowired

@@ -376,6 +376,8 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/assets/styles/variables.scss' as *;
+
 .contacts-container {
   height: 100%;
   display: flex;

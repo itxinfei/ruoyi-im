@@ -568,6 +568,8 @@ const formatTime = time => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/assets/styles/variables.scss' as *;
+
 .chat-container {
   height: 100%;
   display: flex;
