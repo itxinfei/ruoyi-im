@@ -25,11 +25,21 @@ export function delFile(fileId) {
   })
 }
 
+// 批量删除文件
+export function batchDeleteFiles(fileIds) {
+  return request({
+    url: '/im/file/batch',
+    method: 'delete',
+    data: fileIds
+  })
+}
+
 // 下载文件
 export function downloadFile(fileId) {
   return request({
-    url: '/im/file/download/' + fileId,
+    url: '/im/file/download',
     method: 'get',
+    params: { fileId },
     responseType: 'blob',
   })
 }
@@ -45,7 +55,7 @@ export function getFilePreviewUrl(fileId) {
 // 获取文件统计信息
 export function getFileStats() {
   return request({
-    url: '/im/file/stats',
+    url: '/im/file/statistics',
     method: 'get',
   })
 }

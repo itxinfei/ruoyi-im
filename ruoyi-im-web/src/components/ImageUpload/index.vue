@@ -31,7 +31,7 @@ defineProps({
   },
   uploadImgUrl: {
     type: String,
-    default: process.env.VUE_APP_BASE_API + '/common/upload',
+    default: import.meta.env.VITE_BASE_API + '/common/upload',
   },
 })
 

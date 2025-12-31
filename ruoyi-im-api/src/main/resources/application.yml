@@ -1,0 +1,79 @@
+# 服务器端口
+server:
+  port: 80
+
+# Spring配置
+spring:
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/ruoyi_im?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: root
+    password: password  # 请根据实际情况修改
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password:  # 如果Redis设置了密码，请填写
+    database: 0
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 20
+        max-idle: 10
+        min-idle: 0
+
+  # Jackson配置
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+
+# MyBatis-Plus配置
+mybatis-plus:
+  # mapper-locations: classpath*:/mapper/**/*Mapper.xml  # 映射文件已移除，使用注解方式
+  type-aliases-package: com.ruoyi.im.domain
+  global-config:
+    db-config:
+      id-type: assign_id  # 使用雪花算法生成ID
+      logic-delete-field: delFlag  # 逻辑删除字段名
+      logic-delete-value: 1  # 逻辑删除值
+      logic-not-delete-value: 0  # 逻辑未删除值
+  configuration:
+    map-underscore-to-camel-case: true  # 开启驼峰命名转换
+
+# IM模块配置
+im:
+  jwt:
+    secret: im_secret_key_2024_for_api_system  # JWT密钥
+  message:
+    maxLength: 2000  # 消息最大长度
+    expireDays: 30   # 消息过期天数
+    recallWindowSeconds: 120  # 消息撤回时间窗口(秒)
+  file:
+    maxSizeMb: 20  # 文件最大大小(MB)
+    allowExt: 
+      - pdf
+      - docx
+      - xlsx
+      - png
+      - jpg
+      - txt
+    downloadExpireMinutes: 60  # 下载链接过期时间(分钟)
+  sensitive:
+    enabled: true  # 是否启用敏感词检测
+    onBlock: REJECT  # 敏感词拦截策略: REJECT | MASK | WARN
+  security:
+    corsAllowOrigins: []
+    heartbeatInterval: 30  # WebSocket心跳间隔(秒)
+    maxConnections: 10000  # 最大连接数
+
+# 日志配置
+logging:
+  level:
+    com.ruoyi.im: debug
+    org.springframework.security: debug
+    org.springframework.web: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

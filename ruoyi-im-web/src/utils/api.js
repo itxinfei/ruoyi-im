@@ -6,7 +6,11 @@ const defaultRetryConfig = {
   retries: 3,
   retryDelay: 1000,
   retryCondition: error => {
-    return error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.message.includes('timeout')
+    return (
+      error.code === 'ECONNABORTED' ||
+      error.code === 'ETIMEDOUT' ||
+      error.message.includes('timeout')
+    )
   },
 }
 
@@ -102,7 +106,7 @@ export function debounceRequest(fn, delay = 300) {
   let timer = null
   let lastPromise = null
 
-  return function(...args) {
+  return function (...args) {
     return new Promise((resolve, reject) => {
       if (timer) {
         clearTimeout(timer)
@@ -123,21 +127,28 @@ export function throttleRequest(fn, interval = 500) {
   let lastTime = 0
   let timer = null
 
-  return function(...args) {
+  return function (...args) {
     const now = Date.now()
 
     return new Promise((resolve, reject) => {
       if (now - lastTime >= interval) {
         lastTime = now
-        fn(...args).then(resolve).catch(reject)
+        fn(...args)
+          .then(resolve)
+          .catch(reject)
       } else {
         if (timer) {
           clearTimeout(timer)
         }
-        timer = setTimeout(() => {
-          lastTime = Date.now()
-          fn(...args).then(resolve).catch(reject)
-        }, interval - (now - lastTime))
+        timer = setTimeout(
+          () => {
+            lastTime = Date.now()
+            fn(...args)
+              .then(resolve)
+              .catch(reject)
+          },
+          interval - (now - lastTime)
+        )
       }
     })
   }

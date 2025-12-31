@@ -61,7 +61,7 @@ export function deepClone(obj) {
   if (obj instanceof Object) {
     const clonedObj = {}
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         clonedObj[key] = deepClone(obj[key])
       }
     }
@@ -76,7 +76,7 @@ export function deepMerge(target, source) {
   const result = { ...target }
 
   for (const key in source) {
-    if (source.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
       if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
         result[key] = deepMerge(target[key] || {}, source[key])
       } else {
@@ -123,7 +123,7 @@ export function isEqual(a, b) {
 export function pick(obj, keys) {
   const result = {}
   for (const key of keys) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
       result[key] = obj[key]
     }
   }
@@ -176,7 +176,7 @@ export function sortBy(array, key, order = 'asc') {
   return [...array].sort((a, b) => {
     const valueA = typeof key === 'function' ? key(a) : a[key]
     const valueB = typeof key === 'function' ? key(b) : b[key]
-    
+
     if (valueA < valueB) return order === 'asc' ? -1 : 1
     if (valueA > valueB) return order === 'asc' ? 1 : -1
     return 0

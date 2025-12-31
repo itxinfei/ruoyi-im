@@ -27,11 +27,18 @@ export function formatMessageDate(timestamp) {
 
   if (isThisWeek(timestamp)) {
     const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-    return weekdays[date.getDay()] + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    return (
+      weekdays[date.getDay()] +
+      ' ' +
+      date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    )
   }
 
-  return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) + ' ' +
-         date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  return (
+    date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) +
+    ' ' +
+    date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  )
 }
 
 export function isYesterday(timestamp) {
@@ -190,7 +197,8 @@ export function extractUrls(content) {
 
 export function extractEmojis(content) {
   if (!content) return []
-  const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu
+  const emojiRegex =
+    /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu
   const matches = content.match(emojiRegex)
   return matches || []
 }

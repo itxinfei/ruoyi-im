@@ -176,6 +176,22 @@ export function isArchiveFile(filename) {
 
 export function isCodeFile(filename) {
   const ext = getFileExtension(filename).toLowerCase()
-  const codeExts = ['js', 'jsx', 'ts', 'tsx', 'vue', 'json', 'html', 'css', 'scss', 'less', 'py', 'java', 'php', 'go', 'rs']
+  const codeExts = [
+    'js',
+    'jsx',
+    'ts',
+    'tsx',
+    'vue',
+    'json',
+    'html',
+    'css',
+    'scss',
+    'less',
+    'py',
+    'java',
+    'php',
+    'go',
+    'rs',
+  ]
   return codeExts.includes(ext)
 }

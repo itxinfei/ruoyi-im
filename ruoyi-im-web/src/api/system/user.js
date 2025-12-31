@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import { parseStrEmpty } from '@/utils/ruoyi'
+import { parseStrEmpty } from '@/utils/index'
 
 // 查询用户列表
 export function listUser(query) {
@@ -172,11 +172,3 @@ export function exportUser(query) {
   })
 }
 
-// 搜索用户列表
-export function searchUserList(query) {
-  return request({
-    url: '/system/user/search',
-    method: 'get',
-    params: query,
-  })
-}

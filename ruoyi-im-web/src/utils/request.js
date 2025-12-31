@@ -11,11 +11,13 @@ function generateRequestKey(config) {
 
 function addPendingRequest(config) {
   const requestKey = generateRequestKey(config)
-  config.cancelToken = config.cancelToken || new axios.CancelToken(cancel => {
-    if (!pendingRequests.has(requestKey)) {
-      pendingRequests.set(requestKey, cancel)
-    }
-  })
+  config.cancelToken =
+    config.cancelToken ||
+    new axios.CancelToken(cancel => {
+      if (!pendingRequests.has(requestKey)) {
+        pendingRequests.set(requestKey, cancel)
+      }
+    })
 }
 
 function removePendingRequest(config) {
@@ -82,7 +84,6 @@ service.interceptors.response.use(
     removePendingRequest(error.config || {})
 
     if (axios.isCancel(error)) {
-      console.log('Request canceled:', error.message)
       return Promise.reject(error)
     }
 

@@ -26,7 +26,10 @@ export function formatText(text) {
   if (!text) return ''
   let result = escapeHtml(text)
   result = result.replace(/\n/g, '<br>')
-  result = result.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-link">$1</a>')
+  result = result.replace(
+    /(https?:\/\/[^\s]+)/g,
+    '<a href="$1" target="_blank" class="text-link">$1</a>'
+  )
   return result
 }
 
@@ -50,9 +53,9 @@ export function stripHtml(html) {
 export function stripTags(html, allowedTags = []) {
   if (!html) return ''
   if (allowedTags.length === 0) return stripHtml(html)
-  
+
   const tags = allowedTags.join('|')
-  const regex = new RegExp(`<(?!\/?(?:${tags})\s*\/?>)[^>]+>`, 'gi')
+  const regex = new RegExp(`<(?!/?(?:${tags})\\s*/?>)[^>]+>`, 'gi')
   return html.replace(regex, '')
 }
 
@@ -88,20 +91,20 @@ export function generateAvatarUrl(name, size = 100) {
   const firstChar = name ? name.charAt(0).toUpperCase() : '?'
   const colorIndex = name ? name.charCodeAt(0) % colors.length : 0
   const backgroundColor = colors[colorIndex]
-  
+
   const canvas = document.createElement('canvas')
   canvas.width = size
   canvas.height = size
   const ctx = canvas.getContext('2d')
-  
+
   ctx.fillStyle = backgroundColor
   ctx.fillRect(0, 0, size, size)
-  
+
   ctx.fillStyle = '#fff'
   ctx.font = `bold ${size * 0.5}px Arial`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   ctx.fillText(firstChar, size / 2, size / 2)
-  
+
   return canvas.toDataURL('image/png')
 }

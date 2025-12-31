@@ -82,7 +82,9 @@
     <transition name="slide-right">
       <div v-if="showDetail && currentSession" class="detail-panel">
         <div class="panel-header">
-          <span class="panel-title">{{ currentSession.type === 'group' ? '群聊信息' : '联系人信息' }}</span>
+          <span class="panel-title">{{
+            currentSession.type === 'group' ? '群聊信息' : '联系人信息'
+          }}</span>
           <el-button :icon="Close" circle size="small" @click="toggleDetailPanel" />
         </div>
 
@@ -111,13 +113,21 @@
                 </el-button>
               </div>
               <div class="member-grid">
-                <div v-for="member in groupMembers.slice(0, 8)" :key="member.userId" class="member-item">
+                <div
+                  v-for="member in groupMembers.slice(0, 8)"
+                  :key="member.userId"
+                  class="member-item"
+                >
                   <el-avatar :size="36" :src="member.avatar">
                     {{ member.nickname?.charAt(0) }}
                   </el-avatar>
                   <span class="member-name">{{ member.nickname }}</span>
                 </div>
-                <div v-if="groupMembers.length > 8" class="member-item more" @click="showGroupMembers">
+                <div
+                  v-if="groupMembers.length > 8"
+                  class="member-item more"
+                  @click="showGroupMembers"
+                >
                   <div class="more-icon">+{{ groupMembers.length - 8 }}</div>
                 </div>
               </div>
@@ -203,10 +213,22 @@
           <el-table-column prop="role" label="角色" width="100">
             <template #default="scope">
               <el-tag
-                :type="scope.row.role === 'owner' ? 'danger' : scope.row.role === 'admin' ? 'warning' : ''"
+                :type="
+                  scope.row.role === 'owner'
+                    ? 'danger'
+                    : scope.row.role === 'admin'
+                      ? 'warning'
+                      : ''
+                "
                 size="small"
               >
-                {{ scope.row.role === 'owner' ? '群主' : scope.row.role === 'admin' ? '管理员' : '成员' }}
+                {{
+                  scope.row.role === 'owner'
+                    ? '群主'
+                    : scope.row.role === 'admin'
+                      ? '管理员'
+                      : '成员'
+                }}
               </el-tag>
             </template>
           </el-table-column>
@@ -241,7 +263,6 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { VideoCamera, Phone, Search, More, Close } from '@element-plus/icons-vue'
 import SessionList from '@/components/Chat/SessionList.vue'
@@ -249,7 +270,6 @@ import MessageList from '@/components/Chat/MessageList.vue'
 import ChatInput from '@/components/Chat/ChatInput.vue'
 
 const store = useStore()
-const router = useRouter()
 
 // 状态
 const searchKeyword = ref('')
@@ -277,7 +297,7 @@ const sessionMembers = computed(() => {
 })
 
 // 会话选择
-const handleSessionSelect = (session) => {
+const handleSessionSelect = session => {
   store.dispatch('im/switchSession', session)
 }
 
@@ -287,7 +307,7 @@ const toggleDetailPanel = () => {
 }
 
 // 发送消息
-const handleSendMessage = async (payload) => {
+const handleSendMessage = async payload => {
   if (!currentSession.value) return
   try {
     await store.dispatch('im/sendMessage', {
@@ -303,7 +323,7 @@ const handleSendMessage = async (payload) => {
 }
 
 // 发送文件
-const handleSendFile = async (file) => {
+const handleSendFile = async file => {
   if (!currentSession.value) return
   try {
     await store.dispatch('im/sendMessage', {
@@ -318,7 +338,7 @@ const handleSendFile = async (file) => {
 }
 
 // 发送图片
-const handleSendImage = async (image) => {
+const handleSendImage = async image => {
   if (!currentSession.value) return
   try {
     await store.dispatch('im/sendMessage', {
@@ -333,7 +353,7 @@ const handleSendImage = async (image) => {
 }
 
 // 发送语音
-const handleSendVoice = async (voice) => {
+const handleSendVoice = async voice => {
   if (!currentSession.value) return
   try {
     await store.dispatch('im/sendMessage', {
@@ -348,7 +368,7 @@ const handleSendVoice = async (voice) => {
 }
 
 // 发送位置
-const handleSendLocation = async (location) => {
+const handleSendLocation = async location => {
   if (!currentSession.value) return
   try {
     await store.dispatch('im/sendMessage', {
@@ -363,7 +383,7 @@ const handleSendLocation = async (location) => {
 }
 
 // 发送投票
-const handleSendVote = async (vote) => {
+const handleSendVote = async vote => {
   if (!currentSession.value) return
   try {
     await store.dispatch('im/sendMessage', {
@@ -378,7 +398,7 @@ const handleSendVote = async (vote) => {
 }
 
 // 发送代码
-const handleSendCode = async (code) => {
+const handleSendCode = async code => {
   if (!currentSession.value) return
   try {
     await store.dispatch('im/sendMessage', {
@@ -444,25 +464,25 @@ const handleMessageSearch = async () => {
 }
 
 // 跳转到消息
-const jumpToMessage = (message) => {
+const jumpToMessage = message => {
   searchDialogVisible.value = false
   messageListRef.value?.scrollToMessage(message.id)
 }
 
 // HTML 实体转义，防止 XSS
-const escapeHtml = (text) => {
+const escapeHtml = text => {
   const map = {
     '&': '&amp;',
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    "'": '&#039;'
+    "'": '&#039;',
   }
   return String(text).replace(/[&<>"']/g, m => map[m])
 }
 
 // 高亮关键词（先转义 HTML，再添加高亮）
-const highlightKeyword = (content) => {
+const highlightKeyword = content => {
   if (!content) return ''
   const escaped = escapeHtml(content)
   if (!messageSearchKeyword.value) return escaped
@@ -497,14 +517,14 @@ const showAddMember = () => {
 }
 
 // 是否可以管理成员
-const canManageMember = (member) => {
+const canManageMember = member => {
   if (isGroupOwner.value) return member.role !== 'owner'
   if (isGroupAdmin.value) return member.role === 'member'
   return false
 }
 
 // 设置管理员
-const setAdmin = async (member) => {
+const setAdmin = async member => {
   try {
     await store.dispatch('im/setGroupAdmin', {
       groupId: currentSession.value.id,
@@ -517,7 +537,7 @@ const setAdmin = async (member) => {
 }
 
 // 移除成员
-const removeMember = async (member) => {
+const removeMember = async member => {
   try {
     await ElMessageBox.confirm(`确定要将 ${member.nickname} 移出群组吗？`, '提示', {
       confirmButtonText: '确定',
@@ -542,7 +562,7 @@ const startEditRemark = () => {
 }
 
 // 格式化时间
-const formatTime = (time) => {
+const formatTime = time => {
   return new Date(time).toLocaleString()
 }
 </script>

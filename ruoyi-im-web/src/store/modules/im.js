@@ -2,21 +2,91 @@ import { sendMessage as apiSendMessage, listMessage } from '@/api/im/message'
 import { listSession, updateSession, deleteSession as apiDeleteSession } from '@/api/im/session'
 import { ElMessage } from 'element-plus'
 
+// 消息列表最大条数限制
+const MAX_MESSAGES_PER_SESSION = 500
+// 离线消息存储Key
+const OFFLINE_MESSAGES_KEY = 'im_offline_messages'
+const MESSAGE_CACHE_KEY = 'im_message_cache'
+
+/**
+ * 从本地存储加载离线消息
+ */
+function loadOfflineMessages() {
+  try {
+    const data = localStorage.getItem(OFFLINE_MESSAGES_KEY)
+    return data ? JSON.parse(data) : {}
+  } catch (e) {
+    console.error('加载离线消息失败:', e)
+    return {}
+  }
+}
+
+/**
+ * 保存离线消息到本地存储
+ */
+function saveOfflineMessages(messages) {
+  try {
+    localStorage.setItem(OFFLINE_MESSAGES_KEY, JSON.stringify(messages))
+  } catch (e) {
+    console.error('保存离线消息失败:', e)
+  }
+}
+
+/**
+ * 从本地存储加载消息缓存
+ */
+function loadMessageCache() {
+  try {
+    const data = localStorage.getItem(MESSAGE_CACHE_KEY)
+    return data ? JSON.parse(data) : {}
+  } catch (e) {
+    console.error('加载消息缓存失败:', e)
+    return {}
+  }
+}
+
+/**
+ * 保存消息缓存到本地存储
+ */
+function saveMessageCache(messageList) {
+  try {
+    // 只缓存每个会话最近的100条消息
+    const cacheData = {}
+    for (const sessionId in messageList) {
+      const messages = messageList[sessionId]
+      cacheData[sessionId] = messages.slice(-100)
+    }
+    localStorage.setItem(MESSAGE_CACHE_KEY, JSON.stringify(cacheData))
+  } catch (e) {
+    console.error('保存消息缓存失败:', e)
+  }
+}
+
+/**
+ * 生成消息唯一ID（用于去重）
+ */
+function generateMessageKey(message) {
+  // 优先使用clientMsgId，其次使用id
+  return message.clientMsgId || message.id || `${message.senderId}_${message.timestamp}_${message.content?.substring?.(0, 20) || ''}`
+}
+
 const state = {
   currentSession: null,
   sessions: [],
-  messageList: {},
+  messageList: loadMessageCache(), // 从缓存加载
   unreadCount: 0,
   onlineStatus: {},
   // 发送中的消息
-  pendingMessages: {},
+  pendingMessages: loadOfflineMessages(), // 从离线存储加载
   // WebSocket连接状态
   wsConnected: false,
+  // 消息ID集合（用于快速去重）
+  messageIdSet: {},
 }
 
 const getters = {
   // 根据会话ID获取消息列表
-  messagesBySession: (state) => (sessionId) => {
+  messagesBySession: state => sessionId => {
     return state.messageList[sessionId] || []
   },
   // 当前用户ID
@@ -25,11 +95,11 @@ const getters = {
     return userInfo.userId || null
   },
   // 获取会话列表
-  sessionList: (state) => state.sessions,
+  sessionList: state => state.sessions,
   // 当前会话
-  currentSession: (state) => state.currentSession,
+  currentSession: state => state.currentSession,
   // 未读消息总数
-  totalUnreadCount: (state) => {
+  totalUnreadCount: state => {
     return state.sessions.reduce((total, session) => total + (session.unreadCount || 0), 0)
   },
 }
@@ -55,27 +125,81 @@ const mutations = {
   },
   REMOVE_SESSION: (state, sessionId) => {
     state.sessions = state.sessions.filter(s => s.id !== sessionId)
+    // 清理相关消息
+    delete state.messageList[sessionId]
+    delete state.messageIdSet[sessionId]
+    delete state.pendingMessages[sessionId]
+    // 更新缓存
+    saveMessageCache(state.messageList)
   },
   SET_MESSAGE_LIST: (state, { sessionId, messages }) => {
-    state.messageList[sessionId] = messages
+    // 初始化消息ID集合
+    if (!state.messageIdSet[sessionId]) {
+      state.messageIdSet[sessionId] = new Set()
+    }
+    // 清空旧数据
+    state.messageIdSet[sessionId].clear()
+    // 添加新消息并记录ID
+    const uniqueMessages = []
+    for (const msg of messages) {
+      const key = generateMessageKey(msg)
+      if (!state.messageIdSet[sessionId].has(key)) {
+        state.messageIdSet[sessionId].add(key)
+        uniqueMessages.push(msg)
+      }
+    }
+    state.messageList[sessionId] = uniqueMessages
+    // 更新缓存
+    saveMessageCache(state.messageList)
   },
   ADD_MESSAGE: (state, { sessionId, message }) => {
     if (!state.messageList[sessionId]) {
       state.messageList[sessionId] = []
     }
-    const exists = state.messageList[sessionId].find(m => m.id === message.id)
-    if (!exists) {
-      state.messageList[sessionId].push(message)
+    if (!state.messageIdSet[sessionId]) {
+      state.messageIdSet[sessionId] = new Set()
     }
+
+    // 生成消息唯一标识用于去重
+    const key = generateMessageKey(message)
+
+    // 检查是否已存在（去重）
+    if (state.messageIdSet[sessionId].has(key)) {
+      return // 消息已存在，跳过
+    }
+
+    // 添加消息
+    state.messageIdSet[sessionId].add(key)
+    state.messageList[sessionId].push(message)
+
+    // 超过上限时移除最旧的消息
+    if (state.messageList[sessionId].length > MAX_MESSAGES_PER_SESSION) {
+      const removed = state.messageList[sessionId].shift()
+      const removedKey = generateMessageKey(removed)
+      state.messageIdSet[sessionId].delete(removedKey)
+    }
+
+    // 更新缓存
+    saveMessageCache(state.messageList)
   },
   UPDATE_MESSAGE: (state, { sessionId, messageId, updates }) => {
     if (state.messageList[sessionId]) {
-      const index = state.messageList[sessionId].findIndex(m => m.id === messageId)
+      const index = state.messageList[sessionId].findIndex(m => m.id === messageId || m.clientMsgId === messageId)
       if (index !== -1) {
-        state.messageList[sessionId][index] = {
-          ...state.messageList[sessionId][index],
-          ...updates
+        const oldMessage = state.messageList[sessionId][index]
+        const newMessage = { ...oldMessage, ...updates }
+
+        // 如果ID变化，更新ID集合
+        if (updates.id && updates.id !== oldMessage.id) {
+          const oldKey = generateMessageKey(oldMessage)
+          const newKey = generateMessageKey(newMessage)
+          state.messageIdSet[sessionId].delete(oldKey)
+          state.messageIdSet[sessionId].add(newKey)
         }
+
+        state.messageList[sessionId][index] = newMessage
+        // 更新缓存
+        saveMessageCache(state.messageList)
       }
     }
   },
@@ -83,7 +207,31 @@ const mutations = {
     if (!state.messageList[sessionId]) {
       state.messageList[sessionId] = []
     }
-    state.messageList[sessionId] = [...messages, ...state.messageList[sessionId]]
+    if (!state.messageIdSet[sessionId]) {
+      state.messageIdSet[sessionId] = new Set()
+    }
+
+    // 去重后的消息
+    const uniqueMessages = []
+    for (const msg of messages) {
+      const key = generateMessageKey(msg)
+      if (!state.messageIdSet[sessionId].has(key)) {
+        state.messageIdSet[sessionId].add(key)
+        uniqueMessages.push(msg)
+      }
+    }
+
+    state.messageList[sessionId] = [...uniqueMessages, ...state.messageList[sessionId]]
+
+    // 超过上限时移除最旧的消息（从末尾移除，保留最新的）
+    while (state.messageList[sessionId].length > MAX_MESSAGES_PER_SESSION) {
+      const removed = state.messageList[sessionId].pop()
+      const removedKey = generateMessageKey(removed)
+      state.messageIdSet[sessionId].delete(removedKey)
+    }
+
+    // 更新缓存
+    saveMessageCache(state.messageList)
   },
   SET_UNREAD_COUNT: (state, count) => {
     state.unreadCount = count
@@ -99,10 +247,14 @@ const mutations = {
       state.pendingMessages[sessionId] = {}
     }
     state.pendingMessages[sessionId][tempId] = message
+    // 保存到离线存储
+    saveOfflineMessages(state.pendingMessages)
   },
   REMOVE_PENDING_MESSAGE: (state, { sessionId, tempId }) => {
     if (state.pendingMessages[sessionId]) {
       delete state.pendingMessages[sessionId][tempId]
+      // 更新离线存储
+      saveOfflineMessages(state.pendingMessages)
     }
   },
   CLEAR_SESSION_UNREAD: (state, sessionId) => {
@@ -111,20 +263,27 @@ const mutations = {
       session.unreadCount = 0
     }
   },
+  // 清理过期的消息缓存
+  CLEAR_OLD_MESSAGES: (state, { sessionId, keepCount = 200 }) => {
+    if (state.messageList[sessionId] && state.messageList[sessionId].length > keepCount) {
+      const removed = state.messageList[sessionId].splice(0, state.messageList[sessionId].length - keepCount)
+      // 清理ID集合
+      for (const msg of removed) {
+        const key = generateMessageKey(msg)
+        state.messageIdSet[sessionId]?.delete(key)
+      }
+      saveMessageCache(state.messageList)
+    }
+  },
 }
 
 const actions = {
   // 加载会话列表
   async loadSessions({ commit }) {
-    try {
-      const response = await listSession()
-      const sessions = response.rows || response.data || []
-      commit('SET_SESSIONS', sessions)
-      return sessions
-    } catch (error) {
-      console.error('加载会话列表失败:', error)
-      throw error
-    }
+    const response = await listSession()
+    const sessions = response.rows || response.data || []
+    commit('SET_SESSIONS', sessions)
+    return sessions
   },
 
   // 切换会话
@@ -136,35 +295,33 @@ const actions = {
   },
 
   // 加载消息
-  async loadMessages({ commit, state }, { sessionId, page = 1, pageSize = 20 }) {
-    try {
-      const response = await listMessage({ sessionId, page, pageSize })
-      const messages = response.rows || response.data || []
+  async loadMessages({ commit }, { sessionId, page = 1, pageSize = 20 }) {
+    const response = await listMessage({ sessionId, page, pageSize })
+    const messages = response.rows || response.data || []
 
-      if (page === 1) {
-        commit('SET_MESSAGE_LIST', { sessionId, messages })
-      } else {
-        commit('PREPEND_MESSAGES', { sessionId, messages })
-      }
+    if (page === 1) {
+      commit('SET_MESSAGE_LIST', { sessionId, messages })
+    } else {
+      commit('PREPEND_MESSAGES', { sessionId, messages })
+    }
 
-      return {
-        messages,
-        hasMore: messages.length === pageSize
-      }
-    } catch (error) {
-      console.error('加载消息失败:', error)
-      throw error
+    return {
+      messages,
+      hasMore: messages.length === pageSize,
     }
   },
 
   // 发送消息
-  async sendMessage({ commit, state }, { sessionId, type, content, replyTo }) {
-    const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  async sendMessage({ commit }, { sessionId, type, content, replyTo }) {
+    // 生成唯一的clientMsgId用于去重
+    const clientMsgId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const tempId = `temp_${clientMsgId}`
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
 
     // 创建临时消息
     const tempMessage = {
       id: tempId,
+      clientMsgId,
       sessionId,
       type,
       content,
@@ -188,6 +345,7 @@ const actions = {
         type,
         content: typeof content === 'object' ? JSON.stringify(content) : content,
         replyTo,
+        clientMsgId, // 传递clientMsgId用于服务端去重
       })
 
       // 更新消息状态
@@ -197,7 +355,7 @@ const actions = {
         updates: {
           id: response.data?.id || tempId,
           status: 'sent',
-        }
+        },
       })
 
       // 更新会话的最后消息
@@ -207,8 +365,8 @@ const actions = {
           lastMessage: {
             content: typeof content === 'string' ? content : '[消息]',
             timestamp: Date.now(),
-          }
-        }
+          },
+        },
       })
 
       commit('REMOVE_PENDING_MESSAGE', { sessionId, tempId })
@@ -218,7 +376,7 @@ const actions = {
       commit('UPDATE_MESSAGE', {
         sessionId,
         messageId: tempId,
-        updates: { status: 'failed' }
+        updates: { status: 'failed' },
       })
       commit('REMOVE_PENDING_MESSAGE', { sessionId, tempId })
       throw error
@@ -226,12 +384,12 @@ const actions = {
   },
 
   // 重发消息
-  async resendMessage({ commit, dispatch, state }, message) {
+  async resendMessage({ commit, dispatch }, message) {
     // 更新消息状态为发送中
     commit('UPDATE_MESSAGE', {
       sessionId: message.sessionId,
       messageId: message.id,
-      updates: { status: 'sending' }
+      updates: { status: 'sending' },
     })
 
     try {
@@ -243,6 +401,23 @@ const actions = {
       })
     } catch (error) {
       ElMessage.error('重发失败，请重试')
+    }
+  },
+
+  // 重发所有离线消息
+  async resendOfflineMessages({ state, dispatch }) {
+    const pendingMessages = state.pendingMessages
+    for (const sessionId in pendingMessages) {
+      for (const tempId in pendingMessages[sessionId]) {
+        const message = pendingMessages[sessionId][tempId]
+        if (message.status === 'failed' || message.status === 'sending') {
+          try {
+            await dispatch('resendMessage', message)
+          } catch (e) {
+            console.error('重发离线消息失败:', e)
+          }
+        }
+      }
     }
   },
 
@@ -261,8 +436,8 @@ const actions = {
             lastMessage: {
               content: message.content,
               timestamp: message.timestamp,
-            }
-          }
+            },
+          },
         })
       }
     }
@@ -310,7 +485,7 @@ const actions = {
   },
 
   // 下载文件
-  downloadFile({ commit }, message) {
+  downloadFile(_, message) {
     if (message.type === 'file' && message.content?.url) {
       const link = document.createElement('a')
       link.href = message.content.url

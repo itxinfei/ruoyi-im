@@ -4,7 +4,7 @@
       <div v-if="visible" class="image-preview-overlay" @click.self="close">
         <div class="preview-container">
           <!-- 关闭按钮 -->
-          <button class="preview-close" @click="close" aria-label="关闭预览">
+          <button class="preview-close" aria-label="关闭预览" @click="close">
             <i class="el-icon-close"></i>
           </button>
 
@@ -15,30 +15,30 @@
 
           <!-- 工具栏 -->
           <div class="preview-toolbar">
-            <button class="toolbar-btn" @click="zoomIn" title="放大">
+            <button class="toolbar-btn" title="放大" @click="zoomIn">
               <i class="el-icon-zoom-in"></i>
             </button>
-            <button class="toolbar-btn" @click="zoomOut" title="缩小">
+            <button class="toolbar-btn" title="缩小" @click="zoomOut">
               <i class="el-icon-zoom-out"></i>
             </button>
-            <button class="toolbar-btn" @click="resetZoom" title="重置">
+            <button class="toolbar-btn" title="重置" @click="resetZoom">
               <i class="el-icon-refresh"></i>
             </button>
-            <button class="toolbar-btn" @click="rotateLeft" title="左旋转">
+            <button class="toolbar-btn" title="左旋转" @click="rotateLeft">
               <i class="el-icon-refresh-left"></i>
             </button>
-            <button class="toolbar-btn" @click="rotateRight" title="右旋转">
+            <button class="toolbar-btn" title="右旋转" @click="rotateRight">
               <i class="el-icon-refresh-right"></i>
             </button>
-            <button class="toolbar-btn" @click="downloadImage" title="下载">
+            <button class="toolbar-btn" title="下载" @click="downloadImage">
               <i class="el-icon-download"></i>
             </button>
           </div>
 
           <!-- 主图片区域 -->
           <div
-            class="preview-main"
             ref="previewMain"
+            class="preview-main"
             @wheel.prevent="handleWheel"
             @mousedown="startDrag"
             @touchstart="handleTouchStart"
@@ -51,9 +51,9 @@
                 :src="currentImage"
                 :style="imageStyle"
                 class="preview-image"
-                @load="handleImageLoad"
                 alt="预览图片"
                 draggable="false"
+                @load="handleImageLoad"
               />
             </transition>
           </div>
@@ -63,18 +63,18 @@
             <button
               class="preview-nav prev"
               :class="{ disabled: currentIndex === 0 }"
-              @click="prevImage"
               :disabled="currentIndex === 0"
               aria-label="上一张"
+              @click="prevImage"
             >
               <i class="el-icon-arrow-left"></i>
             </button>
             <button
               class="preview-nav next"
               :class="{ disabled: currentIndex === images.length - 1 }"
-              @click="nextImage"
               :disabled="currentIndex === images.length - 1"
               aria-label="下一张"
+              @click="nextImage"
             >
               <i class="el-icon-arrow-right"></i>
             </button>

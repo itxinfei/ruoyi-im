@@ -8,8 +8,8 @@
           <button
             class="toolbar-button"
             :class="{ active: showEmojiPicker }"
-            @click="toggleEmojiPicker"
             aria-label="表情"
+            @click="toggleEmojiPicker"
           >
             <i class="el-icon-collection-tag"></i>
             <span class="button-ripple"></span>
@@ -62,13 +62,13 @@
           <button
             class="toolbar-button"
             :class="{ recording: isRecording }"
+            aria-label="语音消息"
             @mousedown="startRecording"
             @mouseup="stopRecording"
             @mouseleave="stopRecording"
             @touchstart.prevent="startRecording"
             @touchend.prevent="stopRecording"
             @touchcancel.prevent="stopRecording"
-            aria-label="语音消息"
           >
             <i class="el-icon-microphone"></i>
             <span class="button-ripple"></span>
@@ -78,7 +78,7 @@
 
         <!-- 视频通话 -->
         <el-tooltip content="视频通话" placement="top">
-          <button class="toolbar-button" @click="startVideoCall" aria-label="视频通话">
+          <button class="toolbar-button" aria-label="视频通话" @click="startVideoCall">
             <i class="el-icon-video-camera"></i>
             <span class="button-ripple"></span>
           </button>
@@ -86,7 +86,7 @@
 
         <!-- 语音通话 -->
         <el-tooltip content="语音通话" placement="top">
-          <button class="toolbar-button" @click="startVoiceCall" aria-label="语音通话">
+          <button class="toolbar-button" aria-label="语音通话" @click="startVoiceCall">
             <i class="el-icon-phone"></i>
             <span class="button-ripple"></span>
           </button>
@@ -96,7 +96,7 @@
       <div class="toolbar-right">
         <!-- @提醒 -->
         <el-tooltip content="@提醒" placement="top">
-          <button class="toolbar-button" @click="handleAtClick" aria-label="@提醒">
+          <button class="toolbar-button" aria-label="@提醒" @click="handleAtClick">
             <i class="el-icon-user"></i>
             <span class="button-ripple"></span>
           </button>
@@ -137,7 +137,7 @@
             <div class="reply-sender">{{ replyMessage.senderName }}</div>
             <div class="reply-text">{{ replyMessage.content }}</div>
           </div>
-          <button class="reply-close" @click="cancelReply" aria-label="取消回复">
+          <button class="reply-close" aria-label="取消回复" @click="cancelReply">
             <i class="el-icon-close"></i>
           </button>
         </div>
@@ -162,7 +162,11 @@
 
         <!-- 字数统计 -->
         <transition name="count-fade">
-          <div v-show="messageText.length > 0" class="char-count" :class="{ 'near-limit': isNearLimit }">
+          <div
+            v-show="messageText.length > 0"
+            class="char-count"
+            :class="{ 'near-limit': isNearLimit }"
+          >
             <i class="el-icon-edit"></i>
             <span>{{ messageText.length }}/{{ maxLength }}</span>
           </div>
@@ -184,12 +188,12 @@
             type="primary"
             :class="{
               'send-ready': canSend && !sending,
-              'send-sending': sending
+              'send-sending': sending,
             }"
             :disabled="!canSend"
             :loading="sending"
-            @click="sendMessage"
             aria-label="发送消息"
+            @click="sendMessage"
           >
             <template v-if="!sending">
               <i class="el-icon-s-promotion"></i>
@@ -241,7 +245,7 @@
             <i class="el-icon-info"></i>
             <span>松开结束录音</span>
           </div>
-          <button class="recording-cancel" @click="cancelRecording" aria-label="取消录音">
+          <button class="recording-cancel" aria-label="取消录音" @click="cancelRecording">
             <i class="el-icon-close"></i>
             <span>取消</span>
           </button>
@@ -269,6 +273,26 @@
     </transition>
 
     <!-- 功能弹窗 -->
+
+    <!-- 位置选择器 -->
+    <location-picker
+      v-model="showLocationPicker"
+      @confirm="handleLocationConfirm"
+    />
+
+    <!-- 投票对话框 -->
+    <vote-dialog
+      v-model="showVoteDialog"
+      :session-id="sessionId"
+      @confirm="handleVoteConfirm"
+    />
+
+    <!-- 代码片段对话框 -->
+    <code-snippet-dialog
+      v-model="showCodeSnippetDialog"
+      :session-id="sessionId"
+      @send="handleCodeSend"
+    />
   </div>
 </template>
 
@@ -277,6 +301,9 @@ import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import EmojiPicker from './EmojiPicker.vue'
 import MentionSelector from './MentionSelector.vue'
+import LocationPicker from './LocationPicker.vue'
+import VoteDialog from './VoteDialog.vue'
+import CodeSnippetDialog from './CodeSnippetDialog.vue'
 import { getToken } from '@/utils/auth.js'
 
 // 组件属性定义
@@ -332,7 +359,7 @@ const uploadProgress = ref({
   percent: 0,
   status: '',
   filename: '',
-  icon: 'el-icon-upload'
+  icon: 'el-icon-upload',
 })
 
 const isFocused = ref(false)
@@ -341,6 +368,11 @@ const isFocused = ref(false)
 const showMentionSelector = ref(false)
 const mentionPosition = ref({ x: 0, y: 0 })
 const mentionedMembers = ref([])
+
+// 功能弹窗状态
+const showLocationPicker = ref(false)
+const showVoteDialog = ref(false)
+const showCodeSnippetDialog = ref(false)
 
 // 计算属性：是否是群聊
 const isGroupChat = computed(() => props.sessionMembers.length > 0)
@@ -387,11 +419,11 @@ const handleFocus = () => {
   isFocused.value = true
   showInputHint.value = true
   inputHintText.value = '按 Enter 发送，Shift + Enter 换行'
-  
+
   if (inputHintTimer.value) {
     clearTimeout(inputHintTimer.value)
   }
-  
+
   inputHintTimer.value = setTimeout(() => {
     showInputHint.value = false
   }, 3000)
@@ -411,11 +443,11 @@ const handleBlur = () => {
 const showHint = (text, duration = 3000) => {
   inputHintText.value = text
   showInputHint.value = true
-  
+
   if (inputHintTimer.value) {
     clearTimeout(inputHintTimer.value)
   }
-  
+
   inputHintTimer.value = setTimeout(() => {
     showInputHint.value = false
   }, duration)
@@ -467,7 +499,7 @@ const handleEmojiSelect = emoji => {
 }
 
 // 处理@提醒按钮点击事件
-const handleAtClick = (event) => {
+const handleAtClick = event => {
   if (!isGroupChat.value) {
     ElMessage.info('@提醒功能仅在群聊中可用')
     return
@@ -477,13 +509,13 @@ const handleAtClick = (event) => {
   const rect = event.target.getBoundingClientRect()
   mentionPosition.value = {
     x: rect.left,
-    y: rect.top - 10
+    y: rect.top - 10,
   }
   showMentionSelector.value = true
 }
 
 // 处理@选择器选中成员
-const handleMentionSelect = (member) => {
+const handleMentionSelect = member => {
   // 在输入框中插入@提醒
   const mentionText = `@${member.name} `
   messageText.value += mentionText
@@ -589,7 +621,7 @@ const stopRecording = () => {
     duration: recordingTime.value,
     url: 'voice_url_here',
   })
-  
+
   showHint(`录音完成，时长 ${recordingTime.value} 秒`)
 }
 
@@ -603,7 +635,7 @@ const cancelRecording = () => {
 }
 
 // 格式化录音时间
-const formatRecordingTime = (seconds) => {
+const formatRecordingTime = seconds => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
@@ -641,15 +673,39 @@ const startVoiceCall = () => {
 const handleMoreCommand = command => {
   switch (command) {
     case 'location':
-      ElMessage.info('位置功能开发中...')
+      showLocationPicker.value = true
       break
     case 'vote':
-      ElMessage.info('投票功能开发中...')
+      showVoteDialog.value = true
       break
     case 'code':
-      ElMessage.info('代码片段功能开发中...')
+      showCodeSnippetDialog.value = true
       break
   }
+}
+
+/**
+ * 处理位置选择确认
+ * @param {Object} locationData - 位置数据
+ */
+const handleLocationConfirm = (locationData) => {
+  emit('send-location', locationData)
+}
+
+/**
+ * 处理投票创建确认
+ * @param {Object} voteData - 投票数据
+ */
+const handleVoteConfirm = (voteData) => {
+  emit('send-vote', voteData)
+}
+
+/**
+ * 处理代码片段发送
+ * @param {Object} codeData - 代码数据
+ */
+const handleCodeSend = (codeData) => {
+  emit('send-code', codeData)
 }
 
 // 取消回复消息
@@ -669,27 +725,29 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/styles/dingtalk-theme.scss';
+
 .chat-input-container {
-  border-top: 1px solid #e5e5e5;
-  background: #ffffff;
+  border-top: 1px solid $border-base;
+  background: $bg-white;
   position: relative;
-  transition: all 0.3s ease;
+  transition: all $transition-base $ease-base;
 }
 
 .input-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  background: linear-gradient(to bottom, #ffffff, #fafafa);
+  padding: $spacing-sm $spacing-lg;
+  border-bottom: 1px solid $border-light;
+  background: linear-gradient(to bottom, $bg-white, $bg-light);
 }
 
 .toolbar-left,
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: $spacing-sm;
 }
 
 .toolbar-button {
@@ -701,34 +759,34 @@ onUnmounted(() => {
   height: 36px;
   border: none;
   background: transparent;
-  border-radius: 8px;
+  border-radius: $border-radius-base;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all $transition-base $ease-out;
   overflow: hidden;
 
   i {
     font-size: 18px;
-    color: #666;
-    transition: color 0.3s ease;
+    color: $text-secondary;
+    transition: color $transition-base $ease-base;
   }
 
   .button-ripple {
     position: absolute;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, rgba(24, 144, 255, 0.2) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba($primary-color, 0.2) 0%, transparent 70%);
     transform: scale(0);
     opacity: 0;
     transition: all 0.4s ease;
   }
 
   &:hover {
-    background: #f0f7ff;
+    background: $primary-color-light;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+    box-shadow: 0 4px 12px rgba($primary-color, 0.15);
 
     i {
-      color: #1890ff;
+      color: $primary-color;
     }
 
     .button-ripple {
@@ -739,20 +797,20 @@ onUnmounted(() => {
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+    box-shadow: 0 2px 8px rgba($primary-color, 0.1);
   }
 
   &.active {
-    background: #e6f7ff;
+    background: $primary-color-light;
     i {
-      color: #1890ff;
+      color: $primary-color;
     }
   }
 
   &.recording {
-    background: #fff1f0;
+    background: rgba($error-color, 0.08);
     i {
-      color: #ff4d4f;
+      color: $error-color;
       animation: pulse 1s infinite;
     }
   }
@@ -763,8 +821,8 @@ onUnmounted(() => {
     right: 4px;
     width: 8px;
     height: 8px;
-    background: #ff4d4f;
-    border-radius: 50%;
+    background: $error-color;
+    border-radius: $border-radius-round;
     animation: blink 1s infinite;
   }
 }
@@ -774,7 +832,7 @@ onUnmounted(() => {
 }
 
 .input-area {
-  padding: 12px 16px;
+  padding: $spacing-md $spacing-lg;
   position: relative;
 }
 
@@ -782,13 +840,13 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-left: 3px solid #1890ff;
-  padding: 10px 12px;
-  margin-bottom: 10px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
+  background: linear-gradient(135deg, $bg-light 0%, $bg-white 100%);
+  border-left: 3px solid $primary-color;
+  padding: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-sm;
+  border-radius: $border-radius-sm;
+  box-shadow: $shadow-sm;
+  transition: all $transition-base $ease-base;
 
   .reply-content {
     flex: 1;
@@ -797,17 +855,15 @@ onUnmounted(() => {
 
   .reply-sender {
     font-size: 12px;
-    color: #1890ff;
+    color: $primary-color;
     font-weight: 500;
-    margin-bottom: 4px;
+    margin-bottom: $spacing-xs;
   }
 
   .reply-text {
     font-size: 12px;
-    color: #666;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    color: $text-secondary;
+    @include text-ellipsis;
   }
 
   .reply-close {
@@ -819,13 +875,13 @@ onUnmounted(() => {
     border: none;
     background: transparent;
     cursor: pointer;
-    color: #999;
-    border-radius: 4px;
+    color: $text-tertiary;
+    border-radius: $border-radius-sm;
     transition: all 0.2s ease;
 
     &:hover {
-      background: #e5e5e5;
-      color: #666;
+      background: $bg-active;
+      color: $text-secondary;
       transform: rotate(90deg);
     }
   }
@@ -833,51 +889,51 @@ onUnmounted(() => {
 
 .text-input-wrapper {
   position: relative;
-  margin-bottom: 12px;
+  margin-bottom: $spacing-md;
 }
 
 .custom-textarea {
   :deep(.el-textarea__inner) {
-    border-radius: 8px;
-    border: 2px solid #e8e8e8;
-    transition: all 0.3s ease;
+    border-radius: $border-radius-base;
+    border: 2px solid $border-base;
+    transition: all $transition-base $ease-base;
     font-size: 14px;
     line-height: 1.6;
-    padding: 10px 12px;
+    padding: $spacing-sm $spacing-md;
 
     &:focus {
-      border-color: #1890ff;
-      box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
     }
 
     &:hover {
-      border-color: #d9d9d9;
+      border-color: $border-dark;
     }
   }
 }
 
 .char-count {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
+  bottom: $spacing-sm;
+  right: $spacing-sm;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: $spacing-xs;
   font-size: 12px;
-  color: #999;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 4px 8px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  color: $text-tertiary;
+  background: rgba($bg-white, 0.95);
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius-base;
+  box-shadow: $shadow-sm;
+  transition: all $transition-base $ease-base;
 
   i {
     font-size: 12px;
   }
 
   &.near-limit {
-    color: #ff4d4f;
-    background: #fff1f0;
+    color: $error-color;
+    background: rgba($error-color, 0.08);
     font-weight: 500;
   }
 }
@@ -888,13 +944,13 @@ onUnmounted(() => {
   left: 0;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-md;
+  background: linear-gradient(135deg, $primary-color 0%, $primary-color-active 100%);
   color: white;
   font-size: 12px;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  border-radius: $border-radius-sm;
+  box-shadow: 0 4px 12px rgba($primary-color, 0.3);
 
   i {
     font-size: 14px;
@@ -907,23 +963,23 @@ onUnmounted(() => {
 }
 
 :deep(.el-button) {
-  padding: 10px 24px;
-  border-radius: 8px;
+  padding: $spacing-sm $spacing-xl;
+  border-radius: $border-radius-base;
   font-weight: 500;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all $transition-base $ease-out;
 
   i {
-    margin-right: 6px;
+    margin-right: $spacing-xs;
   }
 
   &.send-ready {
-    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+    background: linear-gradient(135deg, $primary-color 0%, $primary-color-active 100%);
     border: none;
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+    box-shadow: 0 4px 12px rgba($primary-color, 0.3);
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(24, 144, 255, 0.4);
+      box-shadow: 0 6px 16px rgba($primary-color, 0.4);
     }
 
     &:active {
@@ -932,14 +988,14 @@ onUnmounted(() => {
   }
 
   &.send-sending {
-    background: #b8e986;
+    background: $success-color;
     border: none;
   }
 
   &:disabled {
-    background: #f5f5f5;
-    border-color: #d9d9d9;
-    color: #bfbfbf;
+    background: $bg-hover;
+    border-color: $border-dark;
+    color: $text-placeholder;
     cursor: not-allowed;
     transform: none !important;
     box-shadow: none !important;
@@ -952,7 +1008,7 @@ onUnmounted(() => {
   bottom: 100%;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: $z-index-dropdown;
 }
 
 .recording-overlay {
@@ -961,22 +1017,22 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: $bg-mask;
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
-  animation: fadeIn 0.3s ease;
+  z-index: $z-index-modal;
+  animation: fadeIn $transition-base $ease-base;
 }
 
 .recording-modal {
-  background: white;
-  border-radius: 16px;
-  padding: 40px 32px;
+  background: $bg-white;
+  border-radius: $border-radius-xl;
+  padding: 40px $spacing-xxl;
   text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.3s ease;
+  box-shadow: $shadow-lg;
+  animation: slideUp $transition-base $ease-base;
   max-width: 90%;
   width: 320px;
 }
@@ -985,7 +1041,7 @@ onUnmounted(() => {
   position: relative;
   width: 100px;
   height: 100px;
-  margin: 0 auto 24px;
+  margin: 0 auto $spacing-xl;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1003,8 +1059,8 @@ onUnmounted(() => {
     transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
-    border: 2px solid #ff4d4f;
-    border-radius: 50%;
+    border: 2px solid $error-color;
+    border-radius: $border-radius-round;
     opacity: 0;
     animation: wave 1.5s ease-out infinite;
 
@@ -1020,24 +1076,24 @@ onUnmounted(() => {
 
 .recording-icon {
   font-size: 48px;
-  color: #ff4d4f;
+  color: $error-color;
   animation: pulse 1s infinite;
   position: relative;
   z-index: 1;
 }
 
 .recording-text {
-  margin-bottom: 20px;
+  margin-bottom: $spacing-xl;
 }
 
 .recording-status {
   font-size: 16px;
-  color: #333;
-  margin-bottom: 8px;
+  color: $text-primary;
+  margin-bottom: $spacing-sm;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: $spacing-sm;
 
   i {
     animation: spin 1s linear infinite;
@@ -1047,36 +1103,36 @@ onUnmounted(() => {
 .recording-time {
   font-size: 32px;
   font-weight: bold;
-  color: #ff4d4f;
+  color: $error-color;
   font-family: 'Monaco', 'Consolas', monospace;
 }
 
 .recording-tip {
   font-size: 14px;
-  color: #666;
-  margin-bottom: 20px;
+  color: $text-secondary;
+  margin-bottom: $spacing-xl;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: $spacing-xs;
 }
 
 .recording-cancel {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  background: #f5f5f5;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-xl;
+  background: $bg-hover;
   border: none;
-  border-radius: 8px;
-  color: #666;
+  border-radius: $border-radius-base;
+  color: $text-secondary;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all $transition-base $ease-base;
 
   &:hover {
-    background: #e8e8e8;
-    color: #333;
+    background: $bg-active;
+    color: $text-primary;
   }
 }
 
@@ -1086,30 +1142,30 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: $bg-mask;
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
-  animation: fadeIn 0.3s ease;
+  z-index: $z-index-modal;
+  animation: fadeIn $transition-base $ease-base;
 }
 
 .upload-progress-modal {
-  background: white;
-  border-radius: 12px;
-  padding: 32px;
+  background: $bg-white;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xxl;
   text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.3s ease;
+  box-shadow: $shadow-lg;
+  animation: slideUp $transition-base $ease-base;
   width: 320px;
   max-width: 90%;
 }
 
 .upload-progress-icon {
   font-size: 48px;
-  color: #1890ff;
-  margin-bottom: 16px;
+  color: $primary-color;
+  margin-bottom: $spacing-lg;
 
   i {
     animation: spin 1s linear infinite;
@@ -1117,48 +1173,47 @@ onUnmounted(() => {
 }
 
 .upload-progress-text {
-  margin-bottom: 20px;
+  margin-bottom: $spacing-xl;
 }
 
 .upload-status {
   font-size: 16px;
-  color: #333;
-  margin-bottom: 8px;
+  color: $text-primary;
+  margin-bottom: $spacing-sm;
 }
 
 .upload-filename {
   font-size: 14px;
-  color: #666;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: $text-secondary;
+  @include text-ellipsis;
 }
 
 .upload-progress-bar {
   width: 100%;
   height: 8px;
-  background: #f0f0f0;
-  border-radius: 4px;
+  background: $bg-hover;
+  border-radius: $border-radius-sm;
   overflow: hidden;
-  margin-bottom: 12px;
+  margin-bottom: $spacing-md;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #1890ff 0%, #096dd9 100%);
-  border-radius: 4px;
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, $primary-color 0%, $primary-color-active 100%);
+  border-radius: $border-radius-sm;
+  transition: width $transition-base $ease-base;
 }
 
 .upload-progress-percent {
   font-size: 18px;
   font-weight: bold;
-  color: #1890ff;
+  color: $primary-color;
 }
 
 // 动画定义
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -1167,7 +1222,8 @@ onUnmounted(() => {
 }
 
 @keyframes blink {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -1289,9 +1345,9 @@ onUnmounted(() => {
 }
 
 // 响应式设计
-@media (max-width: 768px) {
+@media (max-width: $breakpoint-md) {
   .input-toolbar {
-    padding: 6px 12px;
+    padding: $spacing-xs $spacing-md;
   }
 
   .toolbar-button {
@@ -1304,12 +1360,12 @@ onUnmounted(() => {
   }
 
   .input-area {
-    padding: 8px 12px;
+    padding: $spacing-sm $spacing-md;
   }
 
   .recording-modal {
-    padding: 24px;
-    margin: 16px;
+    padding: $spacing-xl;
+    margin: $spacing-lg;
     width: auto;
   }
 
@@ -1322,21 +1378,21 @@ onUnmounted(() => {
   }
 
   .upload-progress-modal {
-    padding: 24px;
-    margin: 16px;
+    padding: $spacing-xl;
+    margin: $spacing-lg;
     width: auto;
   }
 
   :deep(.el-button) {
-    padding: 8px 20px;
+    padding: $spacing-sm $spacing-xl;
     font-size: 14px;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: $breakpoint-xs) {
   .toolbar-left,
   .toolbar-right {
-    gap: 4px;
+    gap: $spacing-xs;
   }
 
   .toolbar-button {
@@ -1349,38 +1405,38 @@ onUnmounted(() => {
   }
 
   .input-area {
-    padding: 6px 10px;
+    padding: $spacing-xs $spacing-sm;
   }
 
   .custom-textarea {
     :deep(.el-textarea__inner) {
       font-size: 13px;
-      padding: 8px 10px;
+      padding: $spacing-sm $spacing-sm;
     }
   }
 
   .char-count {
     font-size: 11px;
-    padding: 3px 6px;
+    padding: 3px $spacing-xs;
   }
 
   .input-hint {
     font-size: 11px;
-    padding: 4px 8px;
+    padding: $spacing-xs $spacing-sm;
   }
 }
 
 @media (hover: none) and (pointer: coarse) {
   .toolbar-button {
     &:active {
-      background: #e6f7ff;
+      background: $primary-color-light;
       transform: scale(0.95);
     }
   }
 
   .recording-cancel {
     &:active {
-      background: #d9d9d9;
+      background: $border-dark;
     }
   }
 }

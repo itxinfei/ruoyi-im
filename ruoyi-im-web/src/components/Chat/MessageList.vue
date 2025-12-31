@@ -3,9 +3,9 @@
     ref="messageList"
     class="message-list im-scrollbar"
     :class="{
-      'scrolling': isScrolling,
+      scrolling: isScrolling,
       'at-bottom': isAtBottom(),
-      'has-new-messages': showNewMessageTip
+      'has-new-messages': showNewMessageTip,
     }"
     @scroll="handleScroll"
     @touchstart="handleTouchStart"
@@ -19,8 +19,8 @@
           type="text"
           :loading="loading"
           :class="{ 'loading-active': loading }"
-          @click="loadMoreMessages"
           :disabled="loading"
+          @click="loadMoreMessages"
         >
           <template v-if="!loading">
             <i class="el-icon-arrow-up"></i>
@@ -35,16 +35,10 @@
 
     <!-- 消息列表 -->
     <transition-group name="message-group" tag="div" class="message-groups">
-      <div
-        v-for="(group, date) in groupedMessages"
-        :key="date"
-        class="message-group"
-      >
-        <transition name="date-divider">
-          <div class="message-date">
-            <span class="date-badge">{{ formatDate(date) }}</span>
-          </div>
-        </transition>
+      <div v-for="(group, date) in groupedMessages" :key="date" class="message-group">
+        <div class="message-date">
+          <span class="date-badge">{{ formatDate(date) }}</span>
+        </div>
 
         <!-- 消息气泡 -->
         <message-bubble
@@ -68,12 +62,14 @@
       <button
         v-show="showScrollToBottom"
         class="scroll-to-bottom"
-        @click="scrollToBottom"
         aria-label="滚动到底部"
+        @click="scrollToBottom"
       >
         <i class="el-icon-bottom"></i>
         <transition name="badge-pop">
-          <span v-if="newMessageCount > 0" class="message-count">{{ formatMessageCount(newMessageCount) }}</span>
+          <span v-if="newMessageCount > 0" class="message-count">{{
+            formatMessageCount(newMessageCount)
+          }}</span>
         </transition>
       </button>
     </transition>
@@ -83,9 +79,9 @@
       <div
         v-show="showNewMessageTip && !showScrollToBottom"
         class="new-message-tip"
-        @click="scrollToBottom"
         role="button"
         aria-label="查看新消息"
+        @click="scrollToBottom"
       >
         <div class="tip-content">
           <i class="el-icon-bell"></i>
@@ -176,7 +172,6 @@ export default {
       showScrollToBottom: false,
       scrollThreshold: 100,
       reducedMotion: false,
-      isEmpty: false,
       // 图片预览状态
       imagePreviewVisible: false,
       previewImages: [],
@@ -187,8 +182,7 @@ export default {
     ...mapGetters(['messagesBySession', 'currentUserId']),
     groupedMessages() {
       const messages = this.messagesBySession(this.sessionId)
-      this.isEmpty = !messages || messages.length === 0
-      if (this.isEmpty) return {}
+      if (!messages || messages.length === 0) return {}
 
       return messages.reduce((groups, message) => {
         const date = new Date(message.time).toLocaleDateString()
@@ -198,6 +192,10 @@ export default {
         groups[date].push(message)
         return groups
       }, {})
+    },
+    isEmpty() {
+      const messages = this.messagesBySession(this.sessionId)
+      return !messages || messages.length === 0
     },
   },
   watch: {
@@ -458,16 +456,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@/styles/dingtalk-theme.scss';
+
 .message-list {
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 20px;
+  padding: $spacing-xl;
   position: relative;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  background-color: #f5f7fa;
-  transition: background-color 0.3s ease;
+  background-color: $bg-base;
+  transition: background-color $transition-base $ease-base;
 
   &.scrolling {
     cursor: grabbing;
@@ -479,19 +479,19 @@ export default {
 
   .load-more {
     text-align: center;
-    margin-bottom: 20px;
-    padding: 10px 0;
+    margin-bottom: $spacing-xl;
+    padding: $spacing-sm 0;
 
     .el-button {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 20px;
-      transition: all 0.3s ease;
+      gap: $spacing-sm;
+      padding: $spacing-sm $spacing-lg;
+      border-radius: $border-radius-xl;
+      transition: all $transition-base $ease-base;
 
       &:hover:not(:disabled) {
-        background-color: rgba(64, 158, 255, 0.1);
+        background-color: rgba($primary-color, 0.1);
         transform: translateY(-2px);
       }
 
@@ -506,7 +506,7 @@ export default {
 
       i {
         font-size: 16px;
-        transition: transform 0.3s ease;
+        transition: transform $transition-base $ease-base;
       }
 
       &:hover i {
@@ -518,26 +518,26 @@ export default {
   .message-groups {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: $spacing-xl;
   }
 
   .message-group {
-    animation: fadeInUp 0.3s ease-out;
+    animation: fadeInUp $transition-base $ease-out;
   }
 
   .message-date {
     text-align: center;
-    margin: 20px 0 10px;
+    margin: $spacing-xl 0 $spacing-sm;
 
     .date-badge {
       display: inline-block;
       background-color: rgba(0, 0, 0, 0.08);
-      padding: 4px 12px;
-      border-radius: 12px;
+      padding: $spacing-xs $spacing-md;
+      border-radius: $border-radius-base;
       font-size: 12px;
-      color: #909399;
+      color: $text-tertiary;
       font-weight: 500;
-      transition: all 0.3s ease;
+      transition: all $transition-base $ease-base;
 
       &:hover {
         background-color: rgba(0, 0, 0, 0.12);
@@ -551,21 +551,21 @@ export default {
     bottom: 100px;
     width: 48px;
     height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+    border-radius: $border-radius-round;
+    background: linear-gradient(135deg, $primary-color 0%, $primary-color-hover 100%);
     border: none;
     color: white;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba($primary-color, 0.4);
+    transition: all $transition-base $ease-out;
     z-index: 100;
 
     &:hover {
       transform: translateY(-4px) scale(1.05);
-      box-shadow: 0 6px 20px rgba(64, 158, 255, 0.5);
+      box-shadow: 0 6px 20px rgba($primary-color, 0.5);
     }
 
     &:active {
@@ -574,7 +574,7 @@ export default {
 
     i {
       font-size: 20px;
-      transition: transform 0.3s ease;
+      transition: transform $transition-base $ease-base;
     }
 
     &:hover i {
@@ -588,7 +588,7 @@ export default {
       min-width: 20px;
       height: 20px;
       padding: 0 6px;
-      background-color: #f56c6c;
+      background-color: $error-color;
       color: white;
       font-size: 11px;
       font-weight: 600;
@@ -596,8 +596,8 @@ export default {
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 8px rgba(245, 108, 108, 0.4);
-      animation: badgePop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: 0 2px 8px rgba($error-color, 0.4);
+      animation: badgePop $transition-base $ease-bounce;
     }
   }
 
@@ -608,21 +608,21 @@ export default {
     transform: translateX(-50%);
     cursor: pointer;
     z-index: 99;
-    animation: slideUp 0.3s ease-out;
+    animation: slideUp $transition-base $ease-out;
 
     .tip-content {
       display: flex;
       align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
-      padding: 12px 20px;
-      border-radius: 24px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      gap: $spacing-sm;
+      background: linear-gradient(135deg, $bg-white 0%, $bg-light 100%);
+      padding: $spacing-md $spacing-xl;
+      border-radius: $border-radius-xl;
+      box-shadow: $shadow-base;
+      transition: all $transition-base $ease-out;
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        box-shadow: $shadow-lg;
       }
 
       &:active {
@@ -631,21 +631,21 @@ export default {
 
       i {
         font-size: 18px;
-        color: #409eff;
+        color: $primary-color;
         animation: bellShake 0.5s ease-in-out infinite;
       }
 
       .tip-text {
         font-size: 14px;
-        color: #303133;
+        color: $text-primary;
         font-weight: 500;
       }
 
       .tip-badge {
         :deep(.el-badge__content) {
-          background-color: #f56c6c;
+          background-color: $error-color;
           border: none;
-          animation: badgePop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          animation: badgePop $transition-base $ease-bounce;
         }
       }
     }
@@ -658,50 +658,54 @@ export default {
     justify-content: center;
     height: 100%;
     min-height: 300px;
-    padding: 40px 20px;
-    animation: fadeIn 0.5s ease-out;
+    padding: 40px $spacing-xl;
+    animation: fadeIn $transition-slow $ease-out;
 
     .empty-icon {
       width: 120px;
       height: 120px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, rgba(64, 158, 255, 0.1) 0%, rgba(102, 177, 255, 0.1) 100%);
+      border-radius: $border-radius-round;
+      background: linear-gradient(
+        135deg,
+        rgba($primary-color, 0.1) 0%,
+        rgba($primary-color-hover, 0.1) 100%
+      );
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 24px;
+      margin-bottom: $spacing-xl;
       animation: float 3s ease-in-out infinite;
 
       i {
         font-size: 64px;
-        color: #409eff;
+        color: $primary-color;
         opacity: 0.6;
       }
     }
 
     .empty-text {
       font-size: 18px;
-      color: #303133;
+      color: $text-primary;
       font-weight: 500;
-      margin-bottom: 8px;
+      margin-bottom: $spacing-sm;
     }
 
     .empty-hint {
       font-size: 14px;
-      color: #909399;
+      color: $text-tertiary;
     }
   }
 }
 
 .location-dialog {
   :deep(.el-dialog) {
-    border-radius: 12px;
+    border-radius: $border-radius-lg;
     overflow: hidden;
   }
 
   :deep(.el-dialog__header) {
-    padding: 20px 24px;
-    border-bottom: 1px solid #ebeef5;
+    padding: $spacing-xl $spacing-xl;
+    border-bottom: 1px solid $border-light;
   }
 
   :deep(.el-dialog__body) {
@@ -712,11 +716,11 @@ export default {
 .location-map {
   height: 400px;
   width: 100%;
-  background-color: #f5f7fa;
+  background-color: $bg-base;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #909399;
+  color: $text-tertiary;
   font-size: 14px;
 }
 
@@ -855,19 +859,28 @@ export default {
 }
 
 @keyframes bellShake {
-  0%, 100% {
+  0%,
+  100% {
     transform: rotate(0deg);
   }
-  10%, 30%, 50%, 70%, 90% {
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: rotate(-10deg);
   }
-  20%, 40%, 60%, 80% {
+  20%,
+  40%,
+  60%,
+  80% {
     transform: rotate(10deg);
   }
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -875,20 +888,20 @@ export default {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $breakpoint-md) {
   .message-list {
-    padding: 12px;
+    padding: $spacing-md;
 
     .load-more {
-      margin-bottom: 12px;
+      margin-bottom: $spacing-md;
     }
 
     .message-group {
-      margin-bottom: 12px;
+      margin-bottom: $spacing-md;
     }
 
     .scroll-to-bottom {
-      right: 20px;
+      right: $spacing-xl;
       bottom: 80px;
       width: 44px;
       height: 44px;
@@ -902,8 +915,8 @@ export default {
       bottom: 80px;
 
       .tip-content {
-        padding: 10px 16px;
-        gap: 6px;
+        padding: $spacing-sm $spacing-lg;
+        gap: $spacing-xs;
 
         i {
           font-size: 16px;
@@ -916,7 +929,7 @@ export default {
     }
 
     .empty-state {
-      padding: 20px;
+      padding: $spacing-xl;
 
       .empty-icon {
         width: 80px;

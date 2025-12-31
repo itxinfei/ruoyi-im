@@ -13,28 +13,27 @@ export function createPersistedState(options = {}) {
     const savedState = loadState(key, storage, reducer)
 
     if (savedState) {
-      store.replaceState(
-        Object.assign({}, store.state, savedState)
-      )
+      store.replaceState(Object.assign({}, store.state, savedState))
     }
 
     store.subscribe((mutation, state) => {
-      const stateToSave = paths.length === 0
-        ? state
-        : paths.reduce((acc, path) => {
-            const value = path.split('.').reduce((obj, key) => obj && obj[key], state)
-            if (value !== undefined) {
-              path.split('.').reduce((obj, key, index, arr) => {
-                if (index === arr.length - 1) {
-                  obj[key] = value
-                } else {
-                  obj[key] = obj[key] || {}
-                }
-                return obj[key]
-              }, acc)
-            }
-            return acc
-          }, {})
+      const stateToSave =
+        paths.length === 0
+          ? state
+          : paths.reduce((acc, path) => {
+              const value = path.split('.').reduce((obj, key) => obj && obj[key], state)
+              if (value !== undefined) {
+                path.split('.').reduce((obj, key, index, arr) => {
+                  if (index === arr.length - 1) {
+                    obj[key] = value
+                  } else {
+                    obj[key] = obj[key] || {}
+                  }
+                  return obj[key]
+                }, acc)
+              }
+              return acc
+            }, {})
 
       if (filter(mutation, stateToSave)) {
         saveState(key, stateToSave, storage)

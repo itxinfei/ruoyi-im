@@ -1,5 +1,14 @@
 import request from '@/utils/request'
 
+// 更新通知设置
+export function updateNotificationSettings(data) {
+  return request({
+    url: '/im/config/notification',
+    method: 'put',
+    data: data,
+  })
+}
+
 // 更新隐私设置
 export function updatePrivacySettings(data) {
   return request({

@@ -19,19 +19,17 @@ export default class CommentSocket {
    */
   connect() {
     const token = getToken()
-    const url = `${process.env.VUE_APP_WS_API}/document/${this.documentId}/comments?token=${token}`
+    const url = `${import.meta.env.VITE_WS_API}/document/${this.documentId}/comments?token=${token}`
 
     this.ws = new WebSocket(url)
 
     this.ws.onopen = () => {
-      console.log('Comment WebSocket connected')
       this.connected = true
       this.reconnectAttempts = 0
       this.emit('connect')
     }
 
     this.ws.onclose = () => {
-      console.log('Comment WebSocket closed')
       this.connected = false
       this.emit('disconnect')
       this.reconnect()
@@ -57,12 +55,10 @@ export default class CommentSocket {
    */
   reconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.log('Max reconnection attempts reached')
       return
     }
 
     this.reconnectAttempts++
-    console.log(`Reconnecting... Attempt ${this.reconnectAttempts}`)
 
     setTimeout(() => {
       this.connect()

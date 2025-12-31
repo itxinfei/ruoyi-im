@@ -84,7 +84,9 @@
                     <i class="el-icon-video-camera"></i> 视频通话
                   </el-dropdown-item>
                   <el-dropdown-item divided command="star">
-                    <i :class="selectedContact.starred ? 'el-icon-star-off' : 'el-icon-star-on'"></i>
+                    <i
+                      :class="selectedContact.starred ? 'el-icon-star-off' : 'el-icon-star-on'"
+                    ></i>
                     {{ selectedContact.starred ? '取消星标' : '添加星标' }}
                   </el-dropdown-item>
                   <el-dropdown-item command="edit">
@@ -139,70 +141,105 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ChatDotRound, More } from '@element-plus/icons-vue'
+import {
+  listContact,
+  deleteContact,
+  searchContacts,
+  getContactStatus,
+  getFriendGroups,
+  updateContactRemark
+} from '@/api/im/contact'
 
 const router = useRouter()
-const store = useStore()
 
 // 状态
 const searchText = ref('')
 const activeGroup = ref('all')
 const selectedContact = ref(null)
+const loading = ref(false)
+const contacts = ref([])
+const friendGroups = ref([])
 
-// 模拟联系人数据
-const contacts = ref([
-  {
-    id: '1',
-    name: '张三',
-    nickname: '小张',
-    username: 'zhangsan',
-    avatar: '',
-    email: 'zhangsan@example.com',
-    phone: '13800138001',
-    signature: '今天天气真不错！',
-    online: true,
-    starred: true,
-    lastSeen: '刚刚',
-  },
-  {
-    id: '2',
-    name: '李四',
-    nickname: '小李',
-    username: 'lisi',
-    avatar: '',
-    email: 'lisi@example.com',
-    phone: '13800138002',
-    signature: '努力工作，快乐生活',
-    online: false,
-    starred: false,
-    lastSeen: '2小时前',
-  },
-  {
-    id: '3',
-    name: '王五',
-    nickname: '老王',
-    username: 'wangwu',
-    avatar: '',
-    email: 'wangwu@example.com',
-    phone: '13800138003',
-    signature: '技术改变世界',
-    online: true,
-    starred: true,
-    lastSeen: '刚刚',
-  },
-])
+// 加载联系人列表
+const loadContacts = async () => {
+  loading.value = true
+  try {
+    const res = await listContact()
+    if (res.code === 200) {
+      contacts.value = res.rows || res.data || []
+      // 加载在线状态
+      if (contacts.value.length > 0) {
+        await loadOnlineStatus()
+      }
+    }
+  } catch (error) {
+    console.error('加载联系人失败:', error)
+    ElMessage.error('加载联系人失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 加载在线状态
+const loadOnlineStatus = async () => {
+  try {
+    const userIds = contacts.value.map(c => c.friendId || c.id)
+    const res = await getContactStatus(userIds)
+    if (res.code === 200 && res.data) {
+      contacts.value.forEach(contact => {
+        const id = contact.friendId || contact.id
+        contact.online = res.data[id] === 'online'
+      })
+    }
+  } catch (error) {
+    console.error('加载在线状态失败:', error)
+  }
+}
+
+// 加载好友分组
+const loadFriendGroups = async () => {
+  try {
+    const res = await getFriendGroups()
+    if (res.code === 200) {
+      friendGroups.value = res.data || []
+    }
+  } catch (error) {
+    console.error('加载好友分组失败:', error)
+  }
+}
+
+// 搜索联系人
+const handleSearch = async () => {
+  if (!searchText.value) {
+    await loadContacts()
+    return
+  }
+  loading.value = true
+  try {
+    const res = await searchContacts(searchText.value)
+    if (res.code === 200) {
+      contacts.value = res.rows || res.data || []
+    }
+  } catch (error) {
+    console.error('搜索联系人失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
 
 // 计算属性
 const filteredContacts = computed(() => {
   if (!searchText.value) return contacts.value
   const keyword = searchText.value.toLowerCase()
-  return contacts.value.filter(
-    c => c.name.toLowerCase().includes(keyword) || c.username.toLowerCase().includes(keyword)
-  )
+  return contacts.value.filter(c => {
+    const name = c.friendNickname || c.name || ''
+    const username = c.friendUsername || c.username || ''
+    return name.toLowerCase().includes(keyword) || username.toLowerCase().includes(keyword)
+  })
 })
 
 const onlineContacts = computed(() => filteredContacts.value.filter(c => c.online))
@@ -226,19 +263,27 @@ const tabs = computed(() => [
 ])
 
 // 方法
-const handleSearch = () => {}
-
-const selectContact = (contact) => {
-  selectedContact.value = contact
+const selectContact = contact => {
+  selectedContact.value = {
+    ...contact,
+    id: contact.friendId || contact.id,
+    name: contact.friendNickname || contact.name,
+    nickname: contact.remark || contact.friendNickname,
+    username: contact.friendUsername || contact.username,
+    avatar: contact.friendAvatar || contact.avatar,
+    email: contact.friendEmail || contact.email,
+    phone: contact.friendPhone || contact.phone,
+    signature: contact.friendSignature || contact.signature,
+  }
 }
 
 const startChat = () => {
   if (selectedContact.value) {
-    router.push(`/chat?userId=${selectedContact.value.id}`)
+    router.push(`/im/chat?userId=${selectedContact.value.id}`)
   }
 }
 
-const handleAction = (command) => {
+const handleAction = async command => {
   if (!selectedContact.value) return
 
   switch (command) {
@@ -249,11 +294,10 @@ const handleAction = (command) => {
       ElMessage.info(`正在视频呼叫 ${selectedContact.value.name}...`)
       break
     case 'star':
-      selectedContact.value.starred = !selectedContact.value.starred
-      ElMessage.success(selectedContact.value.starred ? '已添加星标' : '已取消星标')
+      await toggleStar()
       break
     case 'edit':
-      ElMessage.info('编辑功能开发中...')
+      editContact()
       break
     case 'delete':
       confirmDelete()
@@ -261,23 +305,74 @@ const handleAction = (command) => {
   }
 }
 
+const toggleStar = async () => {
+  try {
+    const newStarred = !selectedContact.value.starred
+    await updateContactRemark({
+      friendId: selectedContact.value.id,
+      starred: newStarred
+    })
+    selectedContact.value.starred = newStarred
+    // 更新列表中的对应项
+    const contact = contacts.value.find(c => (c.friendId || c.id) === selectedContact.value.id)
+    if (contact) {
+      contact.starred = newStarred
+    }
+    ElMessage.success(newStarred ? '已添加星标' : '已取消星标')
+  } catch (error) {
+    console.error('操作失败:', error)
+    ElMessage.error('操作失败')
+  }
+}
+
+const editContact = () => {
+  ElMessageBox.prompt('请输入备注名称', '编辑备注', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputValue: selectedContact.value.remark || selectedContact.value.nickname || '',
+  }).then(async ({ value }) => {
+    try {
+      await updateContactRemark({
+        friendId: selectedContact.value.id,
+        remark: value
+      })
+      selectedContact.value.nickname = value
+      const contact = contacts.value.find(c => (c.friendId || c.id) === selectedContact.value.id)
+      if (contact) {
+        contact.remark = value
+      }
+      ElMessage.success('备注已更新')
+    } catch (error) {
+      console.error('更新备注失败:', error)
+      ElMessage.error('更新备注失败')
+    }
+  }).catch(() => {})
+}
+
 const confirmDelete = async () => {
   try {
-    await ElMessageBox.confirm(
-      `确定要删除联系人 ${selectedContact.value.name} 吗？`,
-      '确认删除',
-      { type: 'warning' }
-    )
-    const index = contacts.value.findIndex(c => c.id === selectedContact.value.id)
+    await ElMessageBox.confirm(`确定要删除联系人 ${selectedContact.value.name} 吗？`, '确认删除', {
+      type: 'warning',
+    })
+    await deleteContact(selectedContact.value.id)
+    const index = contacts.value.findIndex(c => (c.friendId || c.id) === selectedContact.value.id)
     if (index > -1) {
       contacts.value.splice(index, 1)
       selectedContact.value = null
       ElMessage.success('联系人已删除')
     }
-  } catch {
-    // 取消
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除失败:', error)
+      ElMessage.error('删除失败')
+    }
   }
 }
+
+// 初始化
+onMounted(async () => {
+  await Promise.all([loadContacts(), loadFriendGroups()])
+})
 </script>
 
 <style lang="scss" scoped>

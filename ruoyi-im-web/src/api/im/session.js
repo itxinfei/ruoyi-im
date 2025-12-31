@@ -74,7 +74,7 @@ export function delSessions(sessionIds) {
 // 获取会话成员列表
 export function listSessionMembers(sessionId) {
   return request({
-    url: '/im/session/members/' + sessionId,
+    url: '/im/session/' + sessionId + '/members',
     method: 'get',
   })
 }

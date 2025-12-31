@@ -1,6 +1,6 @@
 <template>
   <transition name="message-slide" appear>
-    <div class="message-bubble" :class="messageClasses">
+    <div class="message-bubble" :class="messageClasses" @contextmenu.prevent="showContextMenu">
       <!-- 消息头部信息 -->
       <div v-if="showSenderInfo" class="message-header">
         <span class="sender-name">{{ message.senderName }}</span>
@@ -8,16 +8,26 @@
       </div>
 
       <!-- 消息内容 -->
-      <div class="message-content">
+      <div class="message-content" @dblclick="handleDoubleClick">
+        <!-- 撤回的消息 -->
+        <div v-if="message.status === 'recalled' || message.revoked" class="recalled-message">
+          <span>{{ isSelf ? '你撤回了一条消息' : `${message.senderName || '对方'}撤回了一条消息` }}</span>
+        </div>
+
         <!-- 文本消息 -->
-        <div v-if="message.type === 'text'" class="text-message">
+        <div v-else-if="message.type === 'text'" class="text-message">
           <div class="text-content" v-html="formatText(message.content)"></div>
         </div>
 
         <!-- 图片消息 -->
         <div v-else-if="message.type === 'image'" class="image-message">
           <div class="image-container" @click="previewImage(message.content)">
-            <img :src="message.content" :alt="message.content" class="message-image" @load="onImageLoad" />
+            <img
+              :src="message.content"
+              :alt="message.content"
+              class="message-image"
+              @load="onImageLoad"
+            />
             <div class="image-overlay">
               <i class="el-icon-zoom-in"></i>
             </div>
@@ -94,6 +104,11 @@
           </div>
         </div>
 
+        <!-- 转发消息标记 -->
+        <div v-if="message.forwarded" class="forward-tag">
+          <i class="el-icon-share"></i> 转发
+        </div>
+
         <!-- 投票消息 -->
         <div v-else-if="message.type === 'vote'" class="vote-message">
           <div class="vote-container">
@@ -123,19 +138,81 @@
       <!-- 消息状态 -->
       <div v-if="isSelf" class="message-status">
         <transition name="status-fade" mode="out-in">
-          <i v-if="message.status === 'sending'" key="sending" class="el-icon-loading status-icon sending"></i>
-          <i v-else-if="message.status === 'sent'" key="sent" class="el-icon-circle-check status-icon sent"></i>
-          <i v-else-if="message.status === 'delivered'" key="delivered" class="el-icon-success status-icon delivered"></i>
-          <i v-else-if="message.status === 'read'" key="read" class="el-icon-view status-icon read"></i>
+          <i
+            v-if="message.status === 'sending'"
+            key="sending"
+            class="el-icon-loading status-icon sending"
+          ></i>
+          <i
+            v-else-if="message.status === 'sent'"
+            key="sent"
+            class="el-icon-circle-check status-icon sent"
+          ></i>
+          <i
+            v-else-if="message.status === 'delivered'"
+            key="delivered"
+            class="el-icon-success status-icon delivered"
+          ></i>
+          <i
+            v-else-if="message.status === 'read'"
+            key="read"
+            class="el-icon-view status-icon read"
+          ></i>
           <i
             v-else-if="message.status === 'failed'"
             key="failed"
             class="el-icon-warning status-icon failed"
-            @click.stop="$emit('resend', message.id)"
             title="点击重发"
+            @click.stop="$emit('resend', message.id)"
           ></i>
         </transition>
       </div>
+
+      <!-- 消息操作按钮 -->
+      <div v-if="!message.revoked && message.status !== 'recalled'" class="message-actions" :class="{ visible: showActions }">
+        <el-tooltip content="回复" placement="top">
+          <i class="el-icon-chat-line-round action-icon" @click.stop="handleReply"></i>
+        </el-tooltip>
+        <el-tooltip content="转发" placement="top">
+          <i class="el-icon-share action-icon" @click.stop="handleForward"></i>
+        </el-tooltip>
+        <el-tooltip v-if="isSelf && canRecall" content="撤回" placement="top">
+          <i class="el-icon-refresh-left action-icon" @click.stop="handleRecall"></i>
+        </el-tooltip>
+        <el-tooltip content="复制" placement="top">
+          <i class="el-icon-copy-document action-icon" @click.stop="handleCopy"></i>
+        </el-tooltip>
+        <el-tooltip content="删除" placement="top">
+          <i class="el-icon-delete action-icon danger" @click.stop="handleDelete"></i>
+        </el-tooltip>
+      </div>
+
+      <!-- 右键菜单 -->
+      <teleport to="body">
+        <div
+          v-if="contextMenuVisible"
+          class="context-menu"
+          :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }"
+          @click.stop
+        >
+          <div class="menu-item" @click="handleReply">
+            <i class="el-icon-chat-line-round"></i> 回复
+          </div>
+          <div class="menu-item" @click="handleForward">
+            <i class="el-icon-share"></i> 转发
+          </div>
+          <div class="menu-item" @click="handleCopy">
+            <i class="el-icon-copy-document"></i> 复制
+          </div>
+          <div v-if="isSelf && canRecall" class="menu-item" @click="handleRecall">
+            <i class="el-icon-refresh-left"></i> 撤回
+          </div>
+          <div class="menu-divider"></div>
+          <div class="menu-item danger" @click="handleDelete">
+            <i class="el-icon-delete"></i> 删除
+          </div>
+        </div>
+      </teleport>
     </div>
   </transition>
 </template>
@@ -144,6 +221,9 @@
 import { formatTime, formatDuration } from '@/utils/format/time'
 import { formatFileSize, getFileTypeIcon } from '@/utils/format/file'
 import { formatText } from '@/utils/format/text'
+
+// 撤回时间限制（2分钟）
+const RECALL_TIME_LIMIT = 2 * 60 * 1000
 
 export default {
   name: 'MessageBubble',
@@ -161,11 +241,15 @@ export default {
       default: false,
     },
   },
-  emits: ['resend', 'image-load'],
+  emits: ['resend', 'image-load', 'reply', 'forward', 'recall', 'delete', 'copy'],
   data() {
     return {
       isPlaying: false,
       imageLoaded: false,
+      showActions: false,
+      contextMenuVisible: false,
+      contextMenuX: 0,
+      contextMenuY: 0,
     }
   },
   computed: {
@@ -177,6 +261,19 @@ export default {
         'image-loaded': this.imageLoaded,
       }
     },
+    canRecall() {
+      // 检查是否可以撤回（2分钟内）
+      if (!this.message.timestamp && !this.message.createTime) return false
+      const msgTime = new Date(this.message.timestamp || this.message.createTime).getTime()
+      return Date.now() - msgTime < RECALL_TIME_LIMIT
+    },
+  },
+  mounted() {
+    // 点击其他地方关闭右键菜单
+    document.addEventListener('click', this.hideContextMenu)
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.hideContextMenu)
   },
   methods: {
     formatText,
@@ -208,6 +305,68 @@ export default {
     onImageLoad() {
       this.imageLoaded = true
       this.$emit('image-load', this.message.id)
+    },
+
+    // 右键菜单
+    showContextMenu(event) {
+      this.contextMenuX = event.clientX
+      this.contextMenuY = event.clientY
+      this.contextMenuVisible = true
+    },
+    hideContextMenu() {
+      this.contextMenuVisible = false
+    },
+
+    // 双击回复
+    handleDoubleClick() {
+      this.handleReply()
+    },
+
+    // 回复消息
+    handleReply() {
+      this.hideContextMenu()
+      this.$emit('reply', this.message)
+    },
+
+    // 转发消息
+    handleForward() {
+      this.hideContextMenu()
+      this.$emit('forward', this.message)
+    },
+
+    // 撤回消息
+    handleRecall() {
+      this.hideContextMenu()
+      if (this.canRecall) {
+        this.$emit('recall', this.message.id)
+      }
+    },
+
+    // 复制消息内容
+    handleCopy() {
+      this.hideContextMenu()
+      let content = ''
+      if (this.message.type === 'text') {
+        content = this.message.content
+      } else if (this.message.type === 'file') {
+        content = this.message.content.name
+      } else if (this.message.type === 'location') {
+        content = `${this.message.content.name} - ${this.message.content.address}`
+      }
+
+      if (content) {
+        navigator.clipboard.writeText(content).then(() => {
+          this.$emit('copy', this.message)
+        }).catch(err => {
+          console.error('复制失败:', err)
+        })
+      }
+    },
+
+    // 删除消息
+    handleDelete() {
+      this.hideContextMenu()
+      this.$emit('delete', this.message.id)
     },
   },
 }
@@ -273,7 +432,9 @@ export default {
         &.failed {
           color: #ff4d4f;
           cursor: pointer;
-          transition: transform 0.2s ease, color 0.2s ease;
+          transition:
+            transform 0.2s ease,
+            color 0.2s ease;
 
           &:hover {
             transform: scale(1.2);
@@ -314,7 +475,9 @@ export default {
       padding: 12px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 
       &:hover {
         transform: translateY(-1px);
@@ -335,7 +498,9 @@ export default {
         border-radius: 8px;
         overflow: hidden;
         cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
 
         &:hover {
           transform: translateY(-2px);
@@ -443,7 +608,9 @@ export default {
           margin-left: 12px;
           font-size: 20px;
           color: #1890ff;
-          transition: transform 0.2s ease, color 0.2s ease;
+          transition:
+            transform 0.2s ease,
+            color 0.2s ease;
         }
 
         &:hover {
@@ -540,7 +707,9 @@ export default {
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
 
         &:hover {
           transform: translateY(-2px);
@@ -861,6 +1030,140 @@ export default {
         }
       }
     }
+  }
+}
+
+// 撤回消息样式
+.recalled-message {
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  color: #999;
+  font-size: 13px;
+  font-style: italic;
+}
+
+// 转发标记样式
+.forward-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+  padding: 2px 6px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+
+  i {
+    font-size: 10px;
+  }
+}
+
+// 消息操作按钮样式
+.message-actions {
+  position: absolute;
+  top: -30px;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .action-icon {
+    padding: 4px;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: #1890ff;
+      background-color: #e6f7ff;
+    }
+
+    &.danger:hover {
+      color: #ff4d4f;
+      background-color: #fff1f0;
+    }
+  }
+}
+
+.message-bubble {
+  position: relative;
+
+  &:hover {
+    .message-actions {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}
+
+// 右键菜单样式（全局）
+.context-menu {
+  position: fixed;
+  z-index: 9999;
+  min-width: 120px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 4px 0;
+  animation: fadeIn 0.15s ease;
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+
+    &.danger {
+      color: #ff4d4f;
+
+      &:hover {
+        background-color: #fff1f0;
+      }
+    }
+
+    i {
+      font-size: 14px;
+    }
+  }
+
+  .menu-divider {
+    height: 1px;
+    background-color: #f0f0f0;
+    margin: 4px 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 </style>

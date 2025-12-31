@@ -1,0 +1,272 @@
+/**
+ * 钉钉风格主题变量
+ * 统一管理所有颜色、尺寸、动画等样式变量
+ */
+
+// ==================== 颜色系统 ====================
+
+// 品牌色
+$primary-color: #1890ff;
+$primary-color-hover: #40a9ff;
+$primary-color-active: #096dd9;
+$primary-color-light: #e6f7ff;
+$primary-color-bg: rgba(24, 144, 255, 0.08);
+
+// 功能色
+$success-color: #52c41a;
+$warning-color: #faad14;
+$error-color: #ff4d4f;
+$info-color: #1890ff;
+
+// 中性色 - 文字
+$text-primary: #1a1a1a;
+$text-secondary: #595959;
+$text-tertiary: #8c8c8c;
+$text-placeholder: #bfbfbf;
+$text-disabled: #c0c0c0;
+
+// 中性色 - 背景
+$bg-base: #f5f6f7;
+$bg-light: #fafafa;
+$bg-white: #ffffff;
+$bg-hover: #f0f0f0;
+$bg-active: #e8e8e8;
+$bg-mask: rgba(0, 0, 0, 0.45);
+
+// 中性色 - 边框
+$border-light: #f0f0f0;
+$border-base: #e8e8e8;
+$border-dark: #d9d9d9;
+
+// ==================== 导航栏颜色 ====================
+
+// 左侧图标导航栏（深色）
+$nav-rail-bg: #2c3e50;
+$nav-rail-bg-dark: #1a252f;
+$nav-rail-text: rgba(255, 255, 255, 0.65);
+$nav-rail-text-hover: rgba(255, 255, 255, 0.85);
+$nav-rail-text-active: #ffffff;
+$nav-rail-icon-active-bg: rgba(24, 144, 255, 0.9);
+$nav-rail-border: rgba(255, 255, 255, 0.08);
+$nav-rail-hover-bg: rgba(255, 255, 255, 0.08);
+
+// ==================== 尺寸系统 ====================
+
+// 导航栏尺寸
+$nav-rail-width: 64px;
+$nav-rail-width-collapsed: 64px;
+
+// 侧边面板尺寸
+$sidebar-width: 280px;
+$sidebar-width-min: 240px;
+$sidebar-width-max: 360px;
+$sidebar-collapsed-width: 0px;
+
+// 头部高度
+$header-height: 56px;
+$header-height-mobile: 50px;
+
+// 圆角
+$border-radius-sm: 4px;
+$border-radius-base: 8px;
+$border-radius-lg: 12px;
+$border-radius-xl: 16px;
+$border-radius-round: 50%;
+
+// 间距
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 24px;
+$spacing-xxl: 32px;
+
+// ==================== 响应式断点 ====================
+
+$breakpoint-xs: 480px;
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+$breakpoint-xxl: 1600px;
+
+// ==================== 阴影系统 ====================
+
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+$shadow-base: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+$shadow-lg: 0 6px 16px -8px rgba(0, 0, 0, 0.08), 0 9px 28px 0 rgba(0, 0, 0, 0.05), 0 12px 48px 16px rgba(0, 0, 0, 0.03);
+$shadow-inset: inset 0 2px 8px rgba(0, 0, 0, 0.06);
+
+// ==================== 动画系统 ====================
+
+$transition-fast: 0.15s;
+$transition-base: 0.25s;
+$transition-slow: 0.35s;
+
+$ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+$ease-in: cubic-bezier(0.4, 0, 1, 1);
+$ease-out: cubic-bezier(0, 0, 0.2, 1);
+$ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+// ==================== 层级系统 ====================
+
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+$z-index-toast: 1080;
+
+// ==================== 混入工具 ====================
+
+// 文字溢出省略
+@mixin text-ellipsis($lines: 1) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  @if $lines == 1 {
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+  }
+}
+
+// Flex 居中
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Flex 两端对齐
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// 自定义滚动条
+@mixin custom-scrollbar($width: 6px, $thumb-color: $border-dark, $track-color: transparent) {
+  &::-webkit-scrollbar {
+    width: $width;
+    height: $width;
+  }
+  &::-webkit-scrollbar-track {
+    background: $track-color;
+    border-radius: $width / 2;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $thumb-color;
+    border-radius: $width / 2;
+    transition: background $transition-fast $ease-base;
+
+    &:hover {
+      background: darken($thumb-color, 10%);
+    }
+  }
+}
+
+// 悬浮效果
+@mixin hover-lift($y: -2px) {
+  transition: transform $transition-base $ease-out, box-shadow $transition-base $ease-out;
+
+  &:hover {
+    transform: translateY($y);
+    box-shadow: $shadow-base;
+  }
+}
+
+// 点击效果
+@mixin click-scale($scale: 0.97) {
+  transition: transform $transition-fast $ease-base;
+
+  &:active {
+    transform: scale($scale);
+  }
+}
+
+// 响应式媒体查询
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == xs {
+    @media (max-width: $breakpoint-xs) { @content; }
+  }
+  @else if $breakpoint == sm {
+    @media (max-width: $breakpoint-sm) { @content; }
+  }
+  @else if $breakpoint == md {
+    @media (max-width: $breakpoint-md) { @content; }
+  }
+  @else if $breakpoint == lg {
+    @media (max-width: $breakpoint-lg) { @content; }
+  }
+  @else if $breakpoint == xl {
+    @media (max-width: $breakpoint-xl) { @content; }
+  }
+  @else if $breakpoint == xxl {
+    @media (max-width: $breakpoint-xxl) { @content; }
+  }
+}
+
+// ==================== 动画关键帧 ====================
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+// 在线状态呼吸灯效果
+@keyframes online-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(82, 196, 26, 0);
+  }
+}
+
+// 未读消息徽标弹出效果
+@keyframes badge-pop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}

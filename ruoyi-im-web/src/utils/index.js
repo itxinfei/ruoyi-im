@@ -241,34 +241,21 @@ export function copyToClipboard(text) {
   return new Promise((resolve, reject) => {
     try {
       if (navigator.clipboard && window.isSecureContext) {
-        // 如果浏览器支持 Clipboard API 且在安全上下文中
         navigator.clipboard
           .writeText(text)
-          .then(() => {
-            resolve(true)
-          })
-          .catch(err => {
-            reject(err)
-          })
+          .then(() => resolve(true))
+          .catch(err => reject(err))
       } else {
-        // 回退到传统方法
         const textArea = document.createElement('textarea')
         textArea.value = text
-        // 防止在iOS上滚动到底部
-        textArea.style.top = '0'
-        textArea.style.left = '0'
-        textArea.style.position = 'fixed'
+        textArea.style.cssText = 'top:0;left:0;position:fixed'
         document.body.appendChild(textArea)
         textArea.focus()
         textArea.select()
         try {
           const successful = document.execCommand('copy')
           document.body.removeChild(textArea)
-          if (successful) {
-            resolve(true)
-          } else {
-            reject(new Error('复制失败'))
-          }
+          successful ? resolve(true) : reject(new Error('复制失败'))
         } catch (err) {
           document.body.removeChild(textArea)
           reject(err)
@@ -280,62 +267,4 @@ export function copyToClipboard(text) {
   })
 }
 
-// 格式化文件大小
-export function formatFileSize(bytes) {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-// 获取文件扩展名
-export function getFileExtension(filename) {
-  return filename.slice(((filename.lastIndexOf('.') - 1) >>> 0) + 2)
-}
-
-// 获取文件类型图标
-export function getFileTypeIcon(filename) {
-  const extension = getFileExtension(filename).toLowerCase()
-  const iconMap = {
-    // 图片
-    jpg: 'image',
-    jpeg: 'image',
-    png: 'image',
-    gif: 'image',
-    bmp: 'image',
-    // 文档
-    doc: 'word',
-    docx: 'word',
-    xls: 'excel',
-    xlsx: 'excel',
-    ppt: 'ppt',
-    pptx: 'ppt',
-    pdf: 'pdf',
-    txt: 'text',
-    // 压缩包
-    zip: 'zip',
-    rar: 'zip',
-    '7z': 'zip',
-    // 音视频
-    mp3: 'audio',
-    wav: 'audio',
-    mp4: 'video',
-    avi: 'video',
-    mov: 'video',
-    // 代码
-    js: 'code',
-    jsx: 'code',
-    ts: 'code',
-    tsx: 'code',
-    vue: 'code',
-    json: 'code',
-    html: 'code',
-    css: 'code',
-    scss: 'code',
-    less: 'code',
-    // 其他
-    default: 'file',
-  }
-  return iconMap[extension] || iconMap.default
-}
+// 文件相关函数请使用 @/utils/format/file.js

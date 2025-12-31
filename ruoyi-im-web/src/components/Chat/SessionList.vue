@@ -1,6 +1,6 @@
 <template>
   <div class="session-list">
-    <div class="session-items" ref="sessionItemsContainer">
+    <div ref="sessionItemsContainer" class="session-items">
       <transition-group name="session-list" tag="div" class="session-list-inner">
         <div
           v-for="session in filteredSessions"
@@ -10,7 +10,7 @@
             active: activeSessionId === session.id,
             collapsed: isCollapsed,
             pinned: session.pinned,
-            muted: session.muted
+            muted: session.muted,
           }"
           @click="onSelect(session)"
           @mouseenter="handleSessionHover(session.id)"
@@ -47,32 +47,30 @@
               ></el-badge>
             </transition>
           </div>
-          <transition name="actions-slide">
-            <div class="session-actions" :class="{ hidden: isCollapsed }" @click.stop>
-              <el-dropdown trigger="click" @command="cmd => handleSessionAction(cmd, session.id)">
-                <span class="el-dropdown-link">
-                  <i class="el-icon-more"></i>
-                </span>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="pin">
-                    <i :class="session.pinned ? 'el-icon-bottom' : 'el-icon-top'"></i>
-                    {{ session.pinned ? '取消置顶' : '置顶' }}
-                  </el-dropdown-item>
-                  <el-dropdown-item command="mute">
-                    <i :class="session.muted ? 'el-icon-bell' : 'el-icon-close-notification'"></i>
-                    {{ session.muted ? '取消静音' : '静音' }}
-                  </el-dropdown-item>
-                  <el-dropdown-item command="delete" divided>
-                    <i class="el-icon-delete"></i>
-                    删除会话
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </el-dropdown>
-            </div>
-          </transition>
+          <div class="session-actions" :class="{ hidden: isCollapsed }" @click.stop>
+            <el-dropdown trigger="click" @command="cmd => handleSessionAction(cmd, session.id)">
+              <span class="el-dropdown-link">
+                <i class="el-icon-more"></i>
+              </span>
+              <el-dropdown-menu>
+                <el-dropdown-item command="pin">
+                  <i :class="session.pinned ? 'el-icon-bottom' : 'el-icon-top'"></i>
+                  {{ session.pinned ? '取消置顶' : '置顶' }}
+                </el-dropdown-item>
+                <el-dropdown-item command="mute">
+                  <i :class="session.muted ? 'el-icon-bell' : 'el-icon-close-notification'"></i>
+                  {{ session.muted ? '取消静音' : '静音' }}
+                </el-dropdown-item>
+                <el-dropdown-item command="delete" divided>
+                  <i class="el-icon-delete"></i>
+                  删除会话
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </div>
         </div>
       </transition-group>
-      
+
       <transition name="empty-state">
         <div v-if="filteredSessions.length === 0" class="empty-state">
           <div class="empty-icon">
@@ -133,26 +131,26 @@ const filteredSessions = computed(() => {
 })
 
 // 方法
-const onSelect = (session) => {
+const onSelect = session => {
   emit('select', session)
   if (!props.sessionsProp && store?.dispatch) {
     store.dispatch('im/switchSession', session)
   }
 }
 
-const getPeerOnline = (session) => {
+const getPeerOnline = session => {
   return session.type !== 'group' && session.online === true
 }
 
-const formatUnreadCount = (count) => {
+const formatUnreadCount = count => {
   return count > 99 ? '99+' : count
 }
 
-const handleSessionHover = (sessionId) => {
+const handleSessionHover = sessionId => {
   hoveredSessionId.value = sessionId
 }
 
-const handleSessionLeave = (sessionId) => {
+const handleSessionLeave = sessionId => {
   if (hoveredSessionId.value === sessionId) {
     hoveredSessionId.value = null
   }
@@ -172,49 +170,34 @@ const handleSessionAction = (command, sessionId) => {
   }
 }
 
-const togglePin = (sessionId) => {
+const togglePin = sessionId => {
   store?.dispatch('im/toggleSessionPin', sessionId)
 }
 
-const toggleMute = (sessionId) => {
+const toggleMute = sessionId => {
   store?.dispatch('im/toggleSessionMute', sessionId)
 }
 
-const deleteSession = (sessionId) => {
+const deleteSession = sessionId => {
   store?.dispatch('im/deleteSession', sessionId)
 }
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/dingtalk-theme.scss';
+
 .session-list {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #fff;
+  background: $bg-white;
 
   .session-items {
     flex: 1;
     overflow-y: auto;
     position: relative;
-
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: #d9d9d9;
-      border-radius: 3px;
-      transition: background 0.3s ease;
-
-      &:hover {
-        background: #bfbfbf;
-      }
-    }
+    @include custom-scrollbar(6px, $border-dark);
 
     .session-list-inner {
       min-height: 100%;
@@ -223,10 +206,10 @@ const deleteSession = (sessionId) => {
     .session-item {
       display: flex;
       align-items: center;
-      padding: 14px 12px;
+      padding: $spacing-md $spacing-md;
       cursor: pointer;
       position: relative;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all $transition-base $ease-out;
       border-left: 3px solid transparent;
       overflow: hidden;
 
@@ -237,14 +220,14 @@ const deleteSession = (sessionId) => {
         top: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.02) 100%);
+        background: linear-gradient(90deg, transparent 0%, rgba($primary-color, 0.02) 100%);
         opacity: 0;
-        transition: opacity 0.3s ease;
+        transition: opacity $transition-base $ease-base;
         pointer-events: none;
       }
 
       &:hover {
-        background-color: #f5f5f5;
+        background-color: $bg-hover;
         transform: translateX(2px);
 
         &::before {
@@ -253,32 +236,32 @@ const deleteSession = (sessionId) => {
       }
 
       &.active {
-        background-color: #e6f7ff;
-        border-left-color: #1890ff;
+        background-color: $primary-color-light;
+        border-left-color: $primary-color;
 
         &::before {
-          background: linear-gradient(90deg, rgba(24, 144, 255, 0.08) 0%, transparent 100%);
+          background: linear-gradient(90deg, rgba($primary-color, 0.08) 0%, transparent 100%);
           opacity: 1;
         }
 
         &:hover {
-          background-color: #e6f7ff;
+          background-color: $primary-color-light;
           transform: translateX(0);
         }
 
         .session-name {
-          color: #1890ff;
+          color: $primary-color;
         }
 
         .last-message {
-          color: #666;
+          color: $text-secondary;
         }
       }
 
       &.pinned {
         .session-name-row {
           .pin-icon {
-            color: #faad14;
+            color: $warning-color;
           }
         }
       }
@@ -286,7 +269,7 @@ const deleteSession = (sessionId) => {
       &.muted {
         .session-name-row {
           .mute-icon {
-            color: #999;
+            color: $text-tertiary;
           }
         }
 
@@ -297,7 +280,7 @@ const deleteSession = (sessionId) => {
 
       &.collapsed {
         justify-content: center;
-        padding: 12px;
+        padding: $spacing-md;
 
         .session-avatar {
           margin-right: 0;
@@ -306,15 +289,15 @@ const deleteSession = (sessionId) => {
 
       .session-avatar {
         position: relative;
-        margin-right: 14px;
-        transition: margin-right 0.3s ease;
+        margin-right: $spacing-md;
+        transition: margin-right $transition-base $ease-base;
         flex-shrink: 0;
 
         .status-badge {
           :deep(.el-badge__content) {
-            border: 2px solid #fff;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            border: 2px solid $bg-white;
+            box-shadow: $shadow-sm;
+            transition: all $transition-base $ease-base;
           }
         }
 
@@ -324,19 +307,19 @@ const deleteSession = (sessionId) => {
           right: 2px;
           width: 12px;
           height: 12px;
-          background: #52c41a;
-          border: 2px solid #fff;
-          border-radius: 50%;
-          box-shadow: 0 2px 4px rgba(82, 196, 26, 0.3);
+          background: $success-color;
+          border: 2px solid $bg-white;
+          border-radius: $border-radius-round;
+          box-shadow: 0 2px 4px rgba($success-color, 0.3);
           animation: online-pulse 2s infinite;
         }
 
         :deep(.el-avatar) {
-          transition: all 0.3s ease;
+          transition: all $transition-base $ease-base;
           border: 2px solid transparent;
 
           &:hover {
-            border-color: #1890ff;
+            border-color: $primary-color;
             transform: scale(1.05);
           }
         }
@@ -345,7 +328,7 @@ const deleteSession = (sessionId) => {
       .session-info {
         flex: 1;
         min-width: 0;
-        transition: all 0.3s ease;
+        transition: all $transition-base $ease-base;
 
         &.hidden {
           display: none;
@@ -354,25 +337,23 @@ const deleteSession = (sessionId) => {
         .session-name-row {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: $spacing-xs;
           margin-bottom: 5px;
 
           .session-name {
             font-size: 14px;
             font-weight: 600;
-            color: #1a1a1a;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            color: $text-primary;
+            @include text-ellipsis;
             line-height: 1.4;
-            transition: color 0.3s ease;
+            transition: color $transition-base $ease-base;
           }
 
           .pin-icon,
           .mute-icon {
             font-size: 12px;
             flex-shrink: 0;
-            transition: all 0.3s ease;
+            transition: all $transition-base $ease-base;
           }
 
           .pin-icon {
@@ -382,12 +363,10 @@ const deleteSession = (sessionId) => {
 
         .last-message {
           font-size: 12px;
-          color: #999;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          color: $text-tertiary;
+          @include text-ellipsis;
           line-height: 1.4;
-          transition: color 0.3s ease;
+          transition: color $transition-base $ease-base;
         }
       }
 
@@ -395,8 +374,8 @@ const deleteSession = (sessionId) => {
         display: flex;
         flex-direction: column;
         align-items: flex-end;
-        margin-left: 10px;
-        transition: all 0.3s ease;
+        margin-left: $spacing-sm;
+        transition: all $transition-base $ease-base;
 
         &.hidden {
           display: none;
@@ -404,33 +383,33 @@ const deleteSession = (sessionId) => {
 
         .timestamp {
           font-size: 11px;
-          color: #bbb;
+          color: $text-placeholder;
           margin-bottom: 5px;
           font-weight: 500;
-          transition: color 0.3s ease;
+          transition: color $transition-base $ease-base;
         }
 
         .unread-badge {
           :deep(.el-badge__content) {
-            background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+            background: linear-gradient(135deg, $error-color 0%, #ff7875 100%);
             border: none;
             font-weight: 600;
             min-width: 18px;
             height: 18px;
             line-height: 18px;
             padding: 0 5px;
-            box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
-            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba($error-color, 0.3);
+            transition: all $transition-base $ease-base;
             animation: badge-pop 0.3s ease;
           }
         }
       }
 
       .session-actions {
-        margin-left: 10px;
+        margin-left: $spacing-sm;
         opacity: 0;
         transform: translateX(10px);
-        transition: all 0.3s ease;
+        transition: all $transition-base $ease-base;
 
         &.hidden {
           display: none;
@@ -442,14 +421,14 @@ const deleteSession = (sessionId) => {
           justify-content: center;
           width: 28px;
           height: 28px;
-          border-radius: 6px;
-          color: #999;
-          transition: all 0.3s ease;
+          border-radius: $border-radius-sm;
+          color: $text-tertiary;
+          transition: all $transition-base $ease-base;
           background: transparent;
 
           &:hover {
-            background-color: #f0f0f0;
-            color: #666;
+            background-color: $bg-hover;
+            color: $text-secondary;
             transform: scale(1.1);
           }
 
@@ -466,7 +445,7 @@ const deleteSession = (sessionId) => {
         }
 
         .timestamp {
-          color: #999;
+          color: $text-tertiary;
         }
       }
     }
@@ -476,30 +455,31 @@ const deleteSession = (sessionId) => {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 20px;
-      color: #999;
+      padding: 60px $spacing-xl;
+      color: $text-tertiary;
 
       .empty-icon {
         font-size: 64px;
-        color: #d9d9d9;
-        margin-bottom: 16px;
+        color: $border-dark;
+        margin-bottom: $spacing-lg;
         animation: empty-float 3s ease-in-out infinite;
       }
 
       .empty-text {
         font-size: 14px;
-        color: #666;
+        color: $text-secondary;
       }
     }
   }
 }
 
 @keyframes online-pulse {
-  0%, 100% {
-    box-shadow: 0 2px 4px rgba(82, 196, 26, 0.3);
+  0%,
+  100% {
+    box-shadow: 0 2px 4px rgba($success-color, 0.3);
   }
   50% {
-    box-shadow: 0 2px 8px rgba(82, 196, 26, 0.6);
+    box-shadow: 0 2px 8px rgba($success-color, 0.6);
   }
 }
 
@@ -528,7 +508,8 @@ const deleteSession = (sessionId) => {
 }
 
 @keyframes empty-float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -606,14 +587,14 @@ const deleteSession = (sessionId) => {
   transform: translateY(20px);
 }
 
-@media (max-width: 768px) {
+@media (max-width: $breakpoint-md) {
   .session-list {
     .session-items {
       .session-item {
-        padding: 12px 10px;
+        padding: $spacing-md $spacing-sm;
 
         .session-avatar {
-          margin-right: 12px;
+          margin-right: $spacing-md;
 
           :deep(.el-avatar) {
             width: 36px !important;
@@ -634,7 +615,7 @@ const deleteSession = (sessionId) => {
         }
 
         .session-meta {
-          margin-left: 8px;
+          margin-left: $spacing-sm;
 
           .timestamp {
             font-size: 10px;

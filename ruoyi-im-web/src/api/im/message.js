@@ -17,21 +17,8 @@ export function sendMessage(data) {
   })
 }
 
-// 获取会话消息列表（用于store调用）
-export function listMessage(params) {
-  return request({
-    url: '/im/message/history',
-    method: 'get',
-    params: {
-      sessionId: params.sessionId,
-      size: params.pageSize || 20,
-      lastMessageId: params.lastMessageId,
-    },
-  })
-}
-
 // 获取会话消息列表
-export function getConversationMessages(params) {
+export function listMessage(params) {
   return request({
     url: '/im/message/history',
     method: 'get',
@@ -42,6 +29,9 @@ export function getConversationMessages(params) {
     },
   })
 }
+
+// 别名，兼容旧代码
+export const getConversationMessages = listMessage
 
 // 标记消息已读
 export function markMessageRead(conversationId, data) {

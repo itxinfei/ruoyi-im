@@ -1,20 +1,15 @@
 <template>
   <transition name="mention-pop">
-    <div
-      v-if="visible"
-      class="mention-selector"
-      :style="positionStyle"
-      ref="selectorRef"
-    >
+    <div v-if="visible" ref="selectorRef" class="mention-selector" :style="positionStyle">
       <div class="mention-header">
         <span class="mention-title">选择要@的成员</span>
         <el-input
+          ref="searchInputRef"
           v-model="searchKeyword"
           placeholder="搜索成员..."
           :prefix-icon="Search"
           size="small"
           clearable
-          ref="searchInputRef"
           @keydown.down.prevent="navigateDown"
           @keydown.up.prevent="navigateUp"
           @keydown.enter.prevent="selectCurrent"
@@ -76,7 +71,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
 import { Search, UserFilled } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -111,12 +106,14 @@ const filteredMembers = computed(() => {
   if (!searchKeyword.value) return props.members.slice(0, 50)
 
   const keyword = searchKeyword.value.toLowerCase()
-  return props.members.filter(
-    member =>
-      member.name?.toLowerCase().includes(keyword) ||
-      member.nickname?.toLowerCase().includes(keyword) ||
-      member.userName?.toLowerCase().includes(keyword)
-  ).slice(0, 50)
+  return props.members
+    .filter(
+      member =>
+        member.name?.toLowerCase().includes(keyword) ||
+        member.nickname?.toLowerCase().includes(keyword) ||
+        member.userName?.toLowerCase().includes(keyword)
+    )
+    .slice(0, 50)
 })
 
 const positionStyle = computed(() => {
@@ -187,7 +184,7 @@ const selectCurrent = () => {
   }
 }
 
-const selectMember = (member) => {
+const selectMember = member => {
   emit('select', member)
   close()
 }
@@ -199,25 +196,28 @@ const close = () => {
 }
 
 // 点击外部关闭
-const handleClickOutside = (event) => {
+const handleClickOutside = event => {
   if (selectorRef.value && !selectorRef.value.contains(event.target)) {
     close()
   }
 }
 
 // 监听器
-watch(() => props.visible, (newVal) => {
-  if (newVal) {
-    searchKeyword.value = ''
-    activeIndex.value = props.showAll ? -1 : 0
-    nextTick(() => {
-      searchInputRef.value?.focus()
-    })
-    document.addEventListener('click', handleClickOutside)
-  } else {
-    document.removeEventListener('click', handleClickOutside)
+watch(
+  () => props.visible,
+  newVal => {
+    if (newVal) {
+      searchKeyword.value = ''
+      activeIndex.value = props.showAll ? -1 : 0
+      nextTick(() => {
+        searchInputRef.value?.focus()
+      })
+      document.addEventListener('click', handleClickOutside)
+    } else {
+      document.removeEventListener('click', handleClickOutside)
+    }
   }
-})
+)
 
 watch(searchKeyword, () => {
   activeIndex.value = props.showAll && !searchKeyword.value ? -1 : 0
@@ -408,7 +408,8 @@ onUnmounted(() => {
 }
 
 @keyframes pulse-online {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.4);
   }
   50% {

@@ -12,7 +12,7 @@ const routes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/chat',
+    redirect: '/im/chat',
     children: imRoutes,
   },
   {
@@ -53,7 +53,7 @@ router.beforeEach((to, from, next) => {
   }
 })
 
-router.afterEach((to) => {
+router.afterEach(to => {
   document.title = to.meta.title || 'RuoYi IM'
 })
 

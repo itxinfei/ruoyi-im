@@ -1,161 +1,260 @@
 <template>
-  <div class="im-layout">
-    <!-- 左侧图标导航栏 -->
-    <div class="nav-rail">
+  <div class="dingtalk-layout" :class="{ 'mobile': isMobile, 'sidebar-collapsed': isSidebarCollapsed }">
+    <!-- 最左侧图标导航栏 -->
+    <aside class="nav-rail">
       <!-- Logo -->
-      <div class="nav-logo">
-        <div class="logo-avatar">
-          {{ currentUser.name ? currentUser.name.charAt(0) : 'U' }}
+      <div class="nav-rail-logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
         </div>
       </div>
 
-      <!-- 导航菜单 -->
-      <div class="nav-menu">
-        <el-tooltip
-          v-for="item in menuItems"
+      <!-- 主导航菜单 -->
+      <nav class="nav-rail-menu">
+        <div
+          v-for="item in mainMenuItems"
           :key="item.path"
-          :content="item.label"
-          placement="right"
-          :show-after="300"
+          class="nav-rail-item"
+          :class="{ active: isActiveMenu(item.path) }"
+          @click="handleMenuClick(item)"
         >
-          <div
-            class="nav-item"
-            :class="{ active: isActiveMenu(item.path) }"
-            @click="handleMenuClick(item.path)"
-          >
-            <el-badge
-              v-if="item.badge"
-              :value="item.badge"
-              :max="99"
-              class="nav-badge"
-            >
-              <i :class="item.icon"></i>
-            </el-badge>
-            <i v-else :class="item.icon"></i>
-          </div>
-        </el-tooltip>
-      </div>
+          <el-tooltip :content="item.label" placement="right" :show-after="500">
+            <div class="nav-item-inner">
+              <el-badge v-if="item.badge" :value="item.badge" :max="99" class="nav-badge">
+                <component :is="item.icon" class="nav-icon" />
+              </el-badge>
+              <component v-else :is="item.icon" class="nav-icon" />
+            </div>
+          </el-tooltip>
+        </div>
+      </nav>
 
-      <!-- 底部用户区域 -->
-      <div class="nav-footer">
+      <!-- 底部工具栏 -->
+      <div class="nav-rail-footer">
+        <!-- 设置按钮 -->
+        <div
+          class="nav-rail-item"
+          :class="{ active: isActiveMenu('/im/settings') }"
+          @click="handleMenuClick({ path: '/im/settings' })"
+        >
+          <el-tooltip content="设置" placement="right" :show-after="500">
+            <div class="nav-item-inner">
+              <Setting class="nav-icon" />
+            </div>
+          </el-tooltip>
+        </div>
+
+        <!-- 用户头像 -->
         <el-dropdown trigger="click" placement="right-end" @command="handleUserCommand">
-          <div class="user-avatar">
+          <div class="nav-rail-avatar">
             <el-avatar :size="36" :src="currentUser.avatar">
-              {{ currentUser.name ? currentUser.name.charAt(0) : 'U' }}
+              {{ currentUser.name?.charAt(0) || 'U' }}
             </el-avatar>
-            <span class="online-dot"></span>
+            <span class="status-dot" :class="{ online: wsConnected }"></span>
           </div>
           <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item disabled>
-                <span class="user-name">{{ currentUser.name }}</span>
+            <el-dropdown-menu class="user-dropdown">
+              <div class="user-dropdown-header">
+                <el-avatar :size="48" :src="currentUser.avatar">
+                  {{ currentUser.name?.charAt(0) || 'U' }}
+                </el-avatar>
+                <div class="user-info">
+                  <div class="user-name">{{ currentUser.name }}</div>
+                  <div class="user-status" :class="{ online: wsConnected }">
+                    {{ wsConnected ? '在线' : '离线' }}
+                  </div>
+                </div>
+              </div>
+              <el-dropdown-item command="profile" divided>
+                <User class="dropdown-icon" />
+                <span>个人资料</span>
               </el-dropdown-item>
-              <el-dropdown-item divided command="settings">
-                <i class="el-icon-setting"></i> 设置
+              <el-dropdown-item command="settings">
+                <Setting class="dropdown-icon" />
+                <span>设置</span>
               </el-dropdown-item>
-              <el-dropdown-item command="logout">
-                <i class="el-icon-switch-button"></i> 退出登录
+              <el-dropdown-item command="logout" divided>
+                <SwitchButton class="dropdown-icon" />
+                <span>退出登录</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
       </div>
-    </div>
+    </aside>
 
     <!-- 主内容区 -->
-    <div class="main-container">
-      <app-main />
-    </div>
+    <main class="main-content">
+      <router-view v-slot="{ Component }">
+        <transition name="page-fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
+    </main>
+
+    <!-- 移动端底部导航 -->
+    <nav v-if="isMobile" class="mobile-nav">
+      <div
+        v-for="item in mobileMenuItems"
+        :key="item.path"
+        class="mobile-nav-item"
+        :class="{ active: isActiveMenu(item.path) }"
+        @click="handleMenuClick(item)"
+      >
+        <el-badge v-if="item.badge" :value="item.badge" :max="99" :offset="[-2, 2]">
+          <component :is="item.icon" class="mobile-nav-icon" />
+        </el-badge>
+        <component v-else :is="item.icon" class="mobile-nav-icon" />
+        <span class="mobile-nav-label">{{ item.label }}</span>
+      </div>
+    </nav>
 
     <!-- 移动端遮罩 -->
-    <div v-if="isMobileMenuOpen" class="mobile-overlay" @click="closeMobileMenu"></div>
+    <transition name="fade">
+      <div v-if="isMobile && isMobileSidebarOpen" class="mobile-overlay" @click="closeMobileSidebar"></div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, provide } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import AppMain from './components/AppMain.vue'
+import {
+  ChatDotRound,
+  User,
+  OfficeBuilding,
+  Folder,
+  Setting,
+  SwitchButton,
+  Calendar,
+  Bell,
+} from '@element-plus/icons-vue'
 
 const router = useRouter()
+const route = useRoute()
 const store = useStore()
 
-// 当前用户信息
-const currentUser = computed(() => ({
-  name: store.state.user?.name || store.state.user?.info?.userName || '用户',
-  avatar: store.state.user?.avatar || store.state.user?.info?.avatar || '',
-}))
-
-// 移动端状态
+// 响应式状态
 const isMobile = ref(false)
-const isMobileMenuOpen = ref(false)
+const isSidebarCollapsed = ref(false)
+const isMobileSidebarOpen = ref(false)
+
+// 提供给子组件
+provide('isMobile', isMobile)
+provide('isSidebarCollapsed', isSidebarCollapsed)
+provide('toggleSidebar', () => {
+  if (isMobile.value) {
+    isMobileSidebarOpen.value = !isMobileSidebarOpen.value
+  } else {
+    isSidebarCollapsed.value = !isSidebarCollapsed.value
+  }
+})
+
+// 当前用户信息
+const currentUser = computed(() => {
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+  return {
+    name: userInfo.nickName || userInfo.userName || store.state.user?.name || '用户',
+    avatar: userInfo.avatar || store.state.user?.avatar || '',
+  }
+})
+
+// WebSocket连接状态
+const wsConnected = computed(() => store.state.im?.wsConnected ?? false)
 
 // 未读消息数
-const unreadCount = computed(() => store.getters.unreadTotal || 0)
+const unreadCount = computed(() => {
+  const sessions = store.state.im?.sessions || []
+  return sessions.reduce((total, session) => total + (session.unreadCount || 0), 0)
+})
 
-// 导航菜单配置
-const menuItems = computed(() => [
+// 主菜单配置
+const mainMenuItems = computed(() => [
   {
-    path: '/chat',
-    icon: 'el-icon-chat-dot-round',
+    path: '/im/chat',
+    icon: ChatDotRound,
     label: '消息',
     badge: unreadCount.value > 0 ? unreadCount.value : null,
   },
   {
-    path: '/contacts',
-    icon: 'el-icon-user',
+    path: '/im/contacts',
+    icon: User,
     label: '通讯录',
     badge: null,
   },
   {
-    path: '/group',
-    icon: 'el-icon-office-building',
+    path: '/im/group',
+    icon: OfficeBuilding,
     label: '群组',
     badge: null,
   },
   {
-    path: '/files',
-    icon: 'el-icon-folder',
+    path: '/im/file/list',
+    icon: Folder,
     label: '文件',
     badge: null,
   },
+])
+
+// 移动端菜单（底部导航）
+const mobileMenuItems = computed(() => [
   {
-    path: '/settings',
-    icon: 'el-icon-setting',
-    label: '设置',
+    path: '/im/chat',
+    icon: ChatDotRound,
+    label: '消息',
+    badge: unreadCount.value > 0 ? unreadCount.value : null,
+  },
+  {
+    path: '/im/contacts',
+    icon: User,
+    label: '联系人',
+    badge: null,
+  },
+  {
+    path: '/im/group',
+    icon: OfficeBuilding,
+    label: '群组',
+    badge: null,
+  },
+  {
+    path: '/im/settings',
+    icon: Setting,
+    label: '我的',
     badge: null,
   },
 ])
 
 // 判断当前激活菜单
 const isActiveMenu = (path) => {
-  const currentPath = router.currentRoute.value.path
-  // 处理路径匹配，支持子路径
+  const currentPath = route.path
   if (currentPath === path) return true
   if (currentPath.startsWith(path + '/')) return true
-  // 处理 meta.activeMenu
-  const meta = router.currentRoute.value.meta
-  if (meta?.activeMenu === path) return true
+  if (route.meta?.activeMenu === path) return true
   return false
 }
 
 // 菜单点击
-const handleMenuClick = (path) => {
-  if (router.currentRoute.value.path !== path) {
-    router.push(path)
+const handleMenuClick = (item) => {
+  if (route.path !== item.path) {
+    router.push(item.path)
   }
   if (isMobile.value) {
-    isMobileMenuOpen.value = false
+    isMobileSidebarOpen.value = false
   }
 }
 
 // 用户菜单命令
 const handleUserCommand = (command) => {
   switch (command) {
+    case 'profile':
+      router.push('/im/settings')
+      break
     case 'settings':
-      router.push('/settings')
+      router.push('/im/settings')
       break
     case 'logout':
       confirmLogout()
@@ -179,190 +278,420 @@ const confirmLogout = () => {
     .catch(() => {})
 }
 
-// 关闭移动端菜单
-const closeMobileMenu = () => {
-  isMobileMenuOpen.value = false
+// 关闭移动端侧边栏
+const closeMobileSidebar = () => {
+  isMobileSidebarOpen.value = false
 }
 
 // 响应式处理
 const handleResize = () => {
-  isMobile.value = window.innerWidth < 768
+  const width = window.innerWidth
+  isMobile.value = width < 768
+
+  if (width < 768) {
+    isSidebarCollapsed.value = true
+  } else if (width < 1200) {
+    isSidebarCollapsed.value = false
+  } else {
+    isSidebarCollapsed.value = false
+  }
+}
+
+// 键盘快捷键
+const handleKeydown = (e) => {
+  // Ctrl/Cmd + B 切换侧边栏
+  if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+    e.preventDefault()
+    isSidebarCollapsed.value = !isSidebarCollapsed.value
+  }
 }
 
 onMounted(() => {
   handleResize()
   window.addEventListener('resize', handleResize)
+  window.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
+  window.removeEventListener('keydown', handleKeydown)
 })
 </script>
 
 <style lang="scss" scoped>
-.im-layout {
+@import '@/styles/dingtalk-theme.scss';
+
+.dingtalk-layout {
   display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  background-color: $bg-base;
 }
 
-// 左侧图标导航栏
+// ==================== 左侧图标导航栏 ====================
 .nav-rail {
   width: $nav-rail-width;
   min-width: $nav-rail-width;
   height: 100%;
-  background-color: $nav-rail-bg;
+  background: linear-gradient(180deg, $nav-rail-bg 0%, $nav-rail-bg-dark 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-right: 1px solid $nav-rail-border;
-  z-index: 100;
+  z-index: $z-index-fixed;
+  position: relative;
 
   // Logo区域
-  .nav-logo {
+  .nav-rail-logo {
     width: 100%;
     height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    @include flex-center;
     border-bottom: 1px solid $nav-rail-border;
 
-    .logo-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      @include flex-center;
+      background: linear-gradient(135deg, $primary-color 0%, #40a9ff 100%);
+      border-radius: $border-radius-lg;
       color: #fff;
-      font-size: 18px;
-      font-weight: 600;
+      transition: transform $transition-base $ease-out;
+
+      &:hover {
+        transform: scale(1.05);
+      }
     }
   }
 
   // 导航菜单
-  .nav-menu {
+  .nav-rail-menu {
     flex: 1;
     width: 100%;
-    padding: 12px 0;
+    padding: $spacing-md 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: $spacing-xs;
     overflow-y: auto;
+    @include custom-scrollbar(4px, rgba(255, 255, 255, 0.2));
+  }
 
-    &::-webkit-scrollbar {
-      display: none;
+  .nav-rail-item {
+    width: 48px;
+    height: 48px;
+    @include flex-center;
+    border-radius: $border-radius-lg;
+    cursor: pointer;
+    transition: all $transition-base $ease-out;
+    position: relative;
+
+    .nav-item-inner {
+      @include flex-center;
+      width: 100%;
+      height: 100%;
     }
 
-    .nav-item {
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
+    .nav-icon {
+      width: 24px;
+      height: 24px;
       color: $nav-rail-text;
-      position: relative;
+      transition: color $transition-base $ease-base;
+    }
 
-      i {
-        font-size: 22px;
+    .nav-badge {
+      :deep(.el-badge__content) {
+        top: -4px;
+        right: -4px;
+        border: none;
+        background: linear-gradient(135deg, $error-color 0%, #ff7875 100%);
+        box-shadow: 0 2px 8px rgba($error-color, 0.4);
       }
+    }
+
+    &:hover {
+      background-color: $nav-rail-hover-bg;
+
+      .nav-icon {
+        color: $nav-rail-text-hover;
+      }
+    }
+
+    &.active {
+      background-color: $nav-rail-icon-active-bg;
+      box-shadow: 0 4px 12px rgba($primary-color, 0.4);
+
+      .nav-icon {
+        color: $nav-rail-text-active;
+      }
+
+      // 左侧指示条
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 24px;
+        background: #fff;
+        border-radius: 0 2px 2px 0;
+      }
+    }
+
+    @include click-scale(0.95);
+  }
+
+  // 底部区域
+  .nav-rail-footer {
+    width: 100%;
+    padding: $spacing-lg 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-sm;
+    border-top: 1px solid $nav-rail-border;
+
+    .nav-rail-avatar {
+      position: relative;
+      cursor: pointer;
+      padding: $spacing-sm;
+      border-radius: $border-radius-lg;
+      transition: background-color $transition-base $ease-base;
 
       &:hover {
-        background-color: $nav-rail-hover;
-        color: $nav-rail-text-active;
+        background-color: $nav-rail-hover-bg;
       }
 
-      &.active {
-        background-color: $nav-rail-active-bg;
-        color: $nav-rail-text-active;
+      .status-dot {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        width: 10px;
+        height: 10px;
+        background-color: $text-disabled;
+        border: 2px solid $nav-rail-bg;
+        border-radius: $border-radius-round;
+        transition: background-color $transition-base $ease-base;
+
+        &.online {
+          background-color: $success-color;
+          animation: online-pulse 2s infinite;
+        }
       }
 
-      .nav-badge {
-        :deep(.el-badge__content) {
-          top: -2px;
-          right: 2px;
+      :deep(.el-avatar) {
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        transition: border-color $transition-base $ease-base;
+      }
+
+      &:hover :deep(.el-avatar) {
+        border-color: rgba(255, 255, 255, 0.4);
+      }
+    }
+  }
+}
+
+// ==================== 主内容区 ====================
+.main-content {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  background-color: $bg-white;
+  position: relative;
+}
+
+// ==================== 用户下拉菜单 ====================
+.user-dropdown {
+  .user-dropdown-header {
+    display: flex;
+    align-items: center;
+    padding: $spacing-lg;
+    border-bottom: 1px solid $border-light;
+    gap: $spacing-md;
+
+    .user-info {
+      .user-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: $text-primary;
+        margin-bottom: $spacing-xs;
+      }
+
+      .user-status {
+        font-size: 12px;
+        color: $text-tertiary;
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+
+        &::before {
+          content: '';
+          width: 6px;
+          height: 6px;
+          background-color: $text-disabled;
+          border-radius: $border-radius-round;
+        }
+
+        &.online {
+          color: $success-color;
+
+          &::before {
+            background-color: $success-color;
+          }
         }
       }
     }
   }
 
-  // 底部用户区域
-  .nav-footer {
-    width: 100%;
-    padding: 16px 0;
-    display: flex;
-    justify-content: center;
-    border-top: 1px solid $nav-rail-border;
+  .dropdown-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: $spacing-sm;
+  }
+}
 
-    .user-avatar {
-      position: relative;
-      cursor: pointer;
-      transition: transform 0.2s;
+// ==================== 移动端底部导航 ====================
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: $header-height-mobile;
+  background-color: $bg-white;
+  border-top: 1px solid $border-light;
+  z-index: $z-index-fixed;
+  padding-bottom: env(safe-area-inset-bottom);
 
-      &:hover {
-        transform: scale(1.05);
-      }
+  .mobile-nav-item {
+    flex: 1;
+    @include flex-center;
+    flex-direction: column;
+    gap: 2px;
+    cursor: pointer;
+    transition: all $transition-fast $ease-base;
 
-      .online-dot {
-        position: absolute;
-        bottom: 2px;
-        right: 2px;
-        width: 10px;
-        height: 10px;
-        background-color: #52c41a;
-        border: 2px solid $nav-rail-bg;
-        border-radius: 50%;
-      }
+    .mobile-nav-icon {
+      width: 22px;
+      height: 22px;
+      color: $text-tertiary;
+      transition: color $transition-fast $ease-base;
     }
 
-    .user-name {
-      font-weight: 500;
-      color: $text-primary;
+    .mobile-nav-label {
+      font-size: 10px;
+      color: $text-tertiary;
+      transition: color $transition-fast $ease-base;
+    }
+
+    &.active {
+      .mobile-nav-icon {
+        color: $primary-color;
+      }
+
+      .mobile-nav-label {
+        color: $primary-color;
+        font-weight: 500;
+      }
     }
   }
 }
 
-// 主内容区
-.main-container {
-  flex: 1;
-  height: 100%;
-  overflow: hidden;
-  background-color: $background-color-base;
-}
-
-// 移动端遮罩
+// ==================== 移动端遮罩 ====================
 .mobile-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 99;
+  background-color: $bg-mask;
+  z-index: $z-index-modal-backdrop;
 }
 
-// 移动端适配
-@media screen and (max-width: 768px) {
-  .nav-rail {
-    position: fixed;
-    left: 0;
-    top: 0;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
+// ==================== 页面切换动画 ====================
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity $transition-base $ease-base;
+}
 
-    &.open {
-      transform: translateX(0);
+.page-fade-enter-from,
+.page-fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity $transition-base $ease-base;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+// ==================== 响应式适配 ====================
+@include respond-to(md) {
+  .dingtalk-layout {
+    &.mobile {
+      .nav-rail {
+        display: none;
+      }
+
+      .main-content {
+        padding-bottom: $header-height-mobile;
+      }
+
+      .mobile-nav {
+        display: flex;
+      }
+    }
+  }
+}
+
+// 平板适配
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .dingtalk-layout {
+    .nav-rail {
+      width: 56px;
+      min-width: 56px;
+
+      .nav-rail-item {
+        width: 42px;
+        height: 42px;
+
+        .nav-icon {
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      .nav-rail-avatar {
+        :deep(.el-avatar) {
+          width: 32px !important;
+          height: 32px !important;
+        }
+      }
+    }
+  }
+}
+
+// 减少动画偏好
+@media (prefers-reduced-motion: reduce) {
+  .dingtalk-layout {
+    .nav-rail-item {
+      transition: none;
+    }
+
+    .status-dot.online {
+      animation: none;
     }
   }
 
-  .main-container {
-    width: 100%;
+  .page-fade-enter-active,
+  .page-fade-leave-active,
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: none;
   }
 }
 </style>

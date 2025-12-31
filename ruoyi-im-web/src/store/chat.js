@@ -87,7 +87,7 @@ const getters = {
   },
   onlineUsers: state => {
     return Object.entries(state.userStatus)
-      .filter(([_, status]) => status === 'online')
+      .filter(([, status]) => status === 'online')
       .map(([userId]) => parseInt(userId))
   },
 }
@@ -178,7 +178,7 @@ const mutations = {
 }
 
 const actions = {
-  selectSession({ commit, state }, sessionId) {
+  selectSession({ commit }, sessionId) {
     commit('SET_CURRENT_SESSION_ID', sessionId)
     commit('MARK_SESSION_READ', sessionId)
   },

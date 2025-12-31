@@ -1,12 +1,32 @@
+/**
+ * @file Chat组件模块导出
+ * @description 聊天相关组件统一导出
+ */
 import MessageBubble from './MessageBubble.vue'
 import EmojiPicker from './EmojiPicker.vue'
-import FileUploader from './FileUploader.vue'
 import ImagePreview from './ImagePreview.vue'
 import SessionList from './SessionList.vue'
 import MessageList from './MessageList.vue'
 import ChatInput from './ChatInput.vue'
+import MentionSelector from './MentionSelector.vue'
+import LocationPicker from './LocationPicker.vue'
+import VoteDialog from './VoteDialog.vue'
+import CodeSnippetDialog from './CodeSnippetDialog.vue'
+import VirtualMessageList from './VirtualMessageList.vue'
 
-const components = [MessageBubble, EmojiPicker, FileUploader, ImagePreview, SessionList, MessageList, ChatInput]
+const components = [
+  MessageBubble,
+  EmojiPicker,
+  ImagePreview,
+  SessionList,
+  MessageList,
+  ChatInput,
+  MentionSelector,
+  LocationPicker,
+  VoteDialog,
+  CodeSnippetDialog,
+  VirtualMessageList,
+]
 
 const install = function (Vue) {
   components.forEach(component => {
@@ -14,11 +34,20 @@ const install = function (Vue) {
   })
 }
 
-if (typeof window !== 'undefined' && window.Vue) {
-  install(window.Vue)
+export {
+  install,
+  MessageBubble,
+  EmojiPicker,
+  ImagePreview,
+  SessionList,
+  MessageList,
+  ChatInput,
+  MentionSelector,
+  LocationPicker,
+  VoteDialog,
+  CodeSnippetDialog,
+  VirtualMessageList,
 }
-
-export { install, MessageBubble, EmojiPicker, FileUploader, ImagePreview, SessionList, MessageList, ChatInput }
 
 export default {
   install,

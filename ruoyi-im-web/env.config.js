@@ -3,7 +3,7 @@ export const envConfig = {
   // 应用配置
   title: 'RuoYi-IM',
   baseAPI: '/api',
-  wsAPI: 'ws://localhost:80/ws',
+  wsAPI: import.meta.env.VITE_WS_API || 'ws://localhost:8080/ws',
 
   // 功能开关
   useMock: false, // 关闭Mock，使用真实API

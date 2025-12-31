@@ -10,7 +10,7 @@ import { visualizer } from 'rollup-plugin-visualizer'
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  
+
   return {
     base: '/',
     plugins: [
@@ -61,12 +61,12 @@ export default defineConfig(({ mode }) => {
       open: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:80',
+          target: 'http://localhost:8080',
           changeOrigin: true,
           rewrite: path => path.replace(/^\/api/, ''),
         },
         '/ws': {
-          target: 'ws://localhost:80',
+          target: 'ws://localhost:8080',
           ws: true,
           changeOrigin: true,
         },
@@ -90,7 +90,7 @@ export default defineConfig(({ mode }) => {
       },
       rollupOptions: {
         output: {
-          manualChunks: (id) => {
+          manualChunks: id => {
             if (id.includes('node_modules')) {
               if (id.includes('element-plus')) {
                 return 'element-plus'
@@ -109,7 +109,7 @@ export default defineConfig(({ mode }) => {
           },
           chunkFileNames: 'static/js/[name]-[hash].js',
           entryFileNames: 'static/js/[name]-[hash].js',
-          assetFileNames: (assetInfo) => {
+          assetFileNames: assetInfo => {
             const info = assetInfo.name.split('.')
             const ext = info[info.length - 1]
             if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(assetInfo.name)) {
