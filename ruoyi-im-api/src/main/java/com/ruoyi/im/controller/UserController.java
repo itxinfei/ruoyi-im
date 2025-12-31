@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @RestController
-@RequestMapping("/im/user")
+@RequestMapping({"/im/user", "/api/im/user"})
 public class UserController {
 
     @Autowired

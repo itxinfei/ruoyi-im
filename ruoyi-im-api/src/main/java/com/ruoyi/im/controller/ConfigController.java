@@ -11,7 +11,7 @@ import java.util.Map;
  * @author ruoyi
  */
 @RestController
-@RequestMapping("/im/config")
+@RequestMapping({"/im/config", "/api/im/config"})
 public class ConfigController {
 
     /**
@@ -22,8 +22,16 @@ public class ConfigController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取系统配置（简化实现）
-            Map<String, Object> config = getSystemConfigFromMemory();
+            // 获取系统配置
+            Map<String, Object> config = new HashMap<>();
+            config.put("serverVersion", "1.0.0");
+            config.put("maxOnlineUsers", 10000);
+            config.put("messageRetentionDays", 90);
+            config.put("fileUploadSizeLimit", 104857600); // 100MB
+            config.put("enableHistorySearch", true);
+            config.put("maxGroupMembers", 200);
+            config.put("enableMessageRecall", true);
+            config.put("messageEditTimeout", 300); // 5分钟
             
             result.put("code", 200);
             result.put("msg", "查询成功");
@@ -44,8 +52,20 @@ public class ConfigController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取用户配置（简化实现）
-            Map<String, Object> config = getUserConfigFromMemory();
+            // 实际项目中需要从安全上下文获取当前用户ID
+            // Long currentUserId = getCurrentUserIdFromSecurityContext();
+            Long currentUserId = 1L; // 简化实现
+            
+            // 获取用户配置
+            Map<String, Object> config = new HashMap<>();
+            config.put("theme", "auto");
+            config.put("language", "zh-CN");
+            config.put("notification", true);
+            config.put("sound", true);
+            config.put("autoDownloadImages", true);
+            config.put("showTypingIndicator", true);
+            config.put("messageLogging", true);
+            config.put("privacyMode", false);
             
             result.put("code", 200);
             result.put("msg", "查询成功");
@@ -66,8 +86,12 @@ public class ConfigController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 更新用户配置（简化实现）
-            updateUserConfigInMemory(configData);
+            // 实际项目中需要从安全上下文获取当前用户ID
+            // Long currentUserId = getCurrentUserIdFromSecurityContext();
+            Long currentUserId = 1L; // 简化实现
+            
+            // 在实际项目中，这里应该将用户配置保存到数据库
+            // UserService.updateUserConfig(currentUserId, configData);
             
             result.put("code", 200);
             result.put("msg", "配置更新成功");
@@ -108,43 +132,5 @@ public class ConfigController {
         }
         
         return result;
-    }
-
-    // 以下方法是简化实现，实际项目中应使用数据库
-    private Map<String, Object> getSystemConfigFromMemory() {
-        // 获取系统配置
-        // 实际项目中应从数据库或配置文件中获取
-        Map<String, Object> config = new HashMap<>();
-        config.put("serverVersion", "1.0.0");
-        config.put("maxOnlineUsers", 10000);
-        config.put("messageRetentionDays", 90);
-        config.put("fileUploadSizeLimit", 104857600); // 100MB
-        config.put("enableHistorySearch", true);
-        config.put("maxGroupMembers", 200);
-        config.put("enableMessageRecall", true);
-        config.put("messageEditTimeout", 300); // 5分钟
-        
-        return config;
-    }
-    
-    private Map<String, Object> getUserConfigFromMemory() {
-        // 获取用户配置
-        // 实际项目中应从数据库中获取
-        Map<String, Object> config = new HashMap<>();
-        config.put("theme", "auto");
-        config.put("language", "zh-CN");
-        config.put("notification", true);
-        config.put("sound", true);
-        config.put("autoDownloadImages", true);
-        config.put("showTypingIndicator", true);
-        config.put("messageLogging", true);
-        config.put("privacyMode", false);
-        
-        return config;
-    }
-    
-    private void updateUserConfigInMemory(Map<String, Object> configData) {
-        // 更新用户配置到内存
-        // 实际项目中应持久化到数据库
     }
 }

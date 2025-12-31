@@ -64,6 +64,7 @@ public class SecurityConfig {
             .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
             // IM相关接口
             .antMatchers("/im/**").permitAll() // 在实际部署时，可能需要认证
+            .antMatchers("/api/im/**").permitAll() // 前端API路径
             // 所有请求都需要认证
             .anyRequest().authenticated();
 

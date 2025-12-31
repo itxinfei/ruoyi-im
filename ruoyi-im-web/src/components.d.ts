@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AvatarUpload: typeof import('./components/AvatarUpload/index.vue')['default']
     ChatInput: typeof import('./components/Chat/ChatInput.vue')['default']
     CodeSnippetDialog: typeof import('./components/Chat/CodeSnippetDialog.vue')['default']
     Editor: typeof import('./components/Editor/index.vue')['default']
@@ -17,6 +18,8 @@ declare module 'vue' {
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCol: typeof import('element-plus/es')['ElCol']
     ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
+    ElDescriptions: typeof import('element-plus/es')['ElDescriptions']
+    ElDescriptionsItem: typeof import('element-plus/es')['ElDescriptionsItem']
     ElDialog: typeof import('element-plus/es')['ElDialog']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']

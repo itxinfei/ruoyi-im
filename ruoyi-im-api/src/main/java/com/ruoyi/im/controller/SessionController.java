@@ -1,13 +1,16 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.domain.ImConversation;
+import com.ruoyi.im.domain.ImConversationMember;
+import com.ruoyi.im.service.ImConversationService;
+import com.ruoyi.im.service.ImConversationMemberService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * IM会话控制器
@@ -15,31 +18,69 @@ import java.util.stream.Stream;
  * @author ruoyi
  */
 @RestController
-@RequestMapping("/im/session")
+@RequestMapping({"/im/session", "/api/im/session"})
 public class SessionController {
+
+    @Autowired
+    private ImConversationService imConversationService;
+    
+    @Autowired
+    private ImConversationMemberService imConversationMemberService;
 
     /**
      * 获取会话列表
      */
     @GetMapping("/list")
     public Map<String, Object> listSessions(@RequestParam(defaultValue = "1") Integer pageNum,
-                                           @RequestParam(defaultValue = "20") Integer pageSize,
+                                           @RequestParam(defaultValue = "10") Integer pageSize,
                                            @RequestParam(required = false) String type) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取会话列表（简化实现）
-            List<Map<String, Object>> sessions = getSessionsByType(type);
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L; // 从安全上下文获取当前用户ID
+            
+            // 获取当前用户的会话列表
+            List<ImConversation> conversations = imConversationService.selectImConversationListByUserId(currentUserId);
+            
+            // 根据类型过滤
+            List<ImConversation> filteredConversations = conversations.stream()
+                .filter(conv -> type == null || conv.getType().equals(type))
+                .collect(Collectors.toList());
             
             int start = (pageNum - 1) * pageSize;
-            int end = Math.min(start + pageSize, sessions.size());
+            int end = Math.min(start + pageSize, filteredConversations.size());
             
-            List<Map<String, Object>> pagedSessions = start < sessions.size() ? 
-                sessions.subList(start, end) : java.util.Collections.emptyList();
+            List<ImConversation> pagedConversations = start < filteredConversations.size() ? 
+                filteredConversations.subList(start, end) : java.util.Collections.emptyList();
+            
+            // 为每个会话添加成员信息和未读数
+            List<Map<String, Object>> sessionList = pagedConversations.stream()
+                .map(conv -> {
+                    Map<String, Object> session = new HashMap<>();
+                    session.put("id", conv.getId());
+                    session.put("type", conv.getType());
+                    session.put("targetId", conv.getTargetId());
+                    session.put("lastMessageId", conv.getLastMessageId());
+                    session.put("createTime", conv.getCreateTime());
+                    session.put("updateTime", conv.getUpdateTime());
+                    
+                    // 获取当前用户在此会话中的信息
+                    ImConversationMember member = imConversationMemberService
+                        .selectImConversationMemberByConversationIdAndUserId(conv.getId(), currentUserId);
+                    if (member != null) {
+                        session.put("isPinned", member.getIsPinned());
+                        session.put("isMuted", member.getIsMuted());
+                        session.put("unreadCount", member.getUnreadCount());
+                    }
+                    
+                    return session;
+                })
+                .collect(Collectors.toList());
             
             Map<String, Object> pageResult = new HashMap<>();
-            pageResult.put("rows", pagedSessions);
-            pageResult.put("total", sessions.size());
+            pageResult.put("rows", sessionList);
+            pageResult.put("total", filteredConversations.size());
             pageResult.put("pageNum", pageNum);
             pageResult.put("pageSize", pageSize);
             
@@ -55,35 +96,40 @@ public class SessionController {
     }
 
     /**
-     * 创建会话
+     * 创建私聊会话
      */
     @PostMapping
     public Map<String, Object> createSession(@RequestBody Map<String, Object> sessionData) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取会话参数
             String type = sessionData.get("type").toString();
-            String name = sessionData.get("name").toString();
-            List<Long> participantIds = (List<Long>) sessionData.get("participantIds");
+            Long targetId = Long.valueOf(sessionData.get("targetId").toString());
             
-            // 创建会话对象（简化实现）
-            Map<String, Object> session = new HashMap<>();
-            session.put("id", System.currentTimeMillis());
-            session.put("type", type);
-            session.put("name", name);
-            session.put("participantIds", participantIds);
-            session.put("createTime", LocalDateTime.now());
-            session.put("updateTime", LocalDateTime.now());
-            session.put("lastMessage", null);
-            session.put("unreadCount", 0);
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
             
-            // 保存会话（简化实现）
-            saveSessionToMemory(session);
+            ImConversation conversation;
+            if ("PRIVATE".equals(type)) {
+                // 创建私聊会话
+                conversation = imConversationService.createPrivateConversation(currentUserId, targetId);
+            } else if ("GROUP".equals(type)) {
+                // 创建群聊会话
+                conversation = imConversationService.createGroupConversation(targetId);
+            } else {
+                result.put("code", 400);
+                result.put("msg", "不支持的会话类型");
+                return result;
+            }
             
-            result.put("code", 200);
-            result.put("msg", "会话创建成功");
-            result.put("data", session);
+            if (conversation != null) {
+                result.put("code", 200);
+                result.put("msg", "会话创建成功");
+                result.put("data", conversation);
+            } else {
+                result.put("code", 500);
+                result.put("msg", "会话创建失败");
+            }
         } catch (Exception e) {
             result.put("code", 500);
             result.put("msg", "会话创建失败: " + e.getMessage());
@@ -96,12 +142,32 @@ public class SessionController {
      * 获取会话详情
      */
     @GetMapping("/{sessionId}")
-    public Map<String, Object> getSession(@PathVariable String sessionId) {
+    public Map<String, Object> getSession(@PathVariable Long sessionId) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            Map<String, Object> session = getSessionById(sessionId);
-            if (session != null) {
+            ImConversation conversation = imConversationService.selectImConversationById(sessionId);
+            if (conversation != null) {
+                // 实际项目中需要从安全上下文获取当前用户ID
+                Long currentUserId = 1L;
+                
+                Map<String, Object> session = new HashMap<>();
+                session.put("id", conversation.getId());
+                session.put("type", conversation.getType());
+                session.put("targetId", conversation.getTargetId());
+                session.put("lastMessageId", conversation.getLastMessageId());
+                session.put("createTime", conversation.getCreateTime());
+                session.put("updateTime", conversation.getUpdateTime());
+                
+                // 获取当前用户在此会话中的信息
+                ImConversationMember member = imConversationMemberService
+                    .selectImConversationMemberByConversationIdAndUserId(sessionId, currentUserId);
+                if (member != null) {
+                    session.put("isPinned", member.getIsPinned());
+                    session.put("isMuted", member.getIsMuted());
+                    session.put("unreadCount", member.getUnreadCount());
+                }
+                
                 result.put("code", 200);
                 result.put("msg", "查询成功");
                 result.put("data", session);
@@ -125,26 +191,36 @@ public class SessionController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            String sessionId = sessionData.get("id").toString();
-            Map<String, Object> session = getSessionById(sessionId);
+            Long sessionId = Long.valueOf(sessionData.get("id").toString());
+            Boolean isPinned = (Boolean) sessionData.get("isPinned");
+            Boolean isMuted = (Boolean) sessionData.get("isMuted");
             
-            if (session != null) {
-                // 更新会话信息
-                if (sessionData.containsKey("name")) {
-                    session.put("name", sessionData.get("name"));
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
+            
+            ImConversation conversation = imConversationService.selectImConversationById(sessionId);
+            if (conversation != null) {
+                // 获取当前用户在此会话中的成员信息
+                ImConversationMember member = imConversationMemberService
+                    .selectImConversationMemberByConversationIdAndUserId(sessionId, currentUserId);
+                
+                if (member != null) {
+                    if (isPinned != null) {
+                        imConversationMemberService.setConversationPinned(sessionId, currentUserId, isPinned);
+                        member.setIsPinned(isPinned);
+                    }
+                    if (isMuted != null) {
+                        imConversationMemberService.setConversationMuted(sessionId, currentUserId, isMuted);
+                        member.setIsMuted(isMuted);
+                    }
+                    
+                    result.put("code", 200);
+                    result.put("msg", "会话更新成功");
+                    result.put("data", member);
+                } else {
+                    result.put("code", 404);
+                    result.put("msg", "用户不在会话中");
                 }
-                if (sessionData.containsKey("mute")) {
-                    session.put("mute", sessionData.get("mute"));
-                }
-                
-                session.put("updateTime", LocalDateTime.now());
-                
-                // 更新会话（简化实现）
-                updateSessionInMemory(session);
-                
-                result.put("code", 200);
-                result.put("msg", "会话更新成功");
-                result.put("data", session);
             } else {
                 result.put("code", 404);
                 result.put("msg", "会话不存在");
@@ -161,14 +237,24 @@ public class SessionController {
      * 删除会话
      */
     @DeleteMapping("/{sessionId}")
-    public Map<String, Object> deleteSession(@PathVariable String sessionId) {
+    public Map<String, Object> deleteSession(@PathVariable Long sessionId) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            boolean deleted = deleteSessionFromMemory(sessionId);
-            if (deleted) {
-                result.put("code", 200);
-                result.put("msg", "会话删除成功");
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
+            
+            ImConversation conversation = imConversationService.selectImConversationById(sessionId);
+            if (conversation != null) {
+                // 从会话成员中移除当前用户，但不删除整个会话（因为其他用户可能还在会话中）
+                int removed = imConversationMemberService.removeConversationMember(sessionId, currentUserId);
+                if (removed > 0) {
+                    result.put("code", 200);
+                    result.put("msg", "会话删除成功");
+                } else {
+                    result.put("code", 404);
+                    result.put("msg", "用户不在会话中");
+                }
             } else {
                 result.put("code", 404);
                 result.put("msg", "会话不存在");
@@ -185,16 +271,33 @@ public class SessionController {
      * 获取会话成员
      */
     @GetMapping("/{sessionId}/members")
-    public Map<String, Object> getSessionMembers(@PathVariable String sessionId) {
+    public Map<String, Object> getSessionMembers(@PathVariable Long sessionId) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取会话成员列表（简化实现）
-            List<Map<String, Object>> members = getSessionMembersById(sessionId);
+            // 获取会话成员列表
+            List<ImConversationMember> members = imConversationMemberService
+                .selectImConversationMemberListByConversationId(sessionId);
+            
+            List<Map<String, Object>> memberList = members.stream()
+                .map(member -> {
+                    Map<String, Object> memberMap = new HashMap<>();
+                    memberMap.put("id", member.getId());
+                    memberMap.put("conversationId", member.getConversationId());
+                    memberMap.put("userId", member.getUserId());
+                    memberMap.put("unreadCount", member.getUnreadCount());
+                    memberMap.put("lastReadMessageId", member.getLastReadMessageId());
+                    memberMap.put("isPinned", member.getIsPinned());
+                    memberMap.put("isMuted", member.getIsMuted());
+                    memberMap.put("createTime", member.getCreateTime());
+                    memberMap.put("updateTime", member.getUpdateTime());
+                    return memberMap;
+                })
+                .collect(Collectors.toList());
             
             result.put("code", 200);
             result.put("msg", "查询成功");
-            result.put("data", members);
+            result.put("data", memberList);
         } catch (Exception e) {
             result.put("code", 500);
             result.put("msg", "查询失败: " + e.getMessage());
@@ -204,119 +307,23 @@ public class SessionController {
     }
 
     /**
-     * 添加会话成员
-     */
-    @PostMapping("/{sessionId}/members")
-    public Map<String, Object> addSessionMembers(@PathVariable String sessionId, @RequestBody List<Long> userIds) {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            // 添加成员到会话（简化实现）
-            Map<String, Object> session = getSessionById(sessionId);
-            if (session != null) {
-                @SuppressWarnings("unchecked")
-                List<Long> existingMembers = (List<Long>) session.get("participantIds");
-                if (existingMembers == null) {
-                    existingMembers = java.util.Collections.emptyList();
-                }
-                
-                // 使用传统方式实现过滤，避免lambda表达式的类型推断问题
-                List<Long> newMembers = new java.util.ArrayList<>();
-                for (Long id : userIds) {
-                    if (!existingMembers.contains(id)) {
-                        newMembers.add(id);
-                    }
-                }
-                
-                List<Long> allMembers = new java.util.ArrayList<>(existingMembers);
-                allMembers.addAll(newMembers);
-                
-                session.put("participantIds", allMembers);
-                session.put("updateTime", LocalDateTime.now());
-                
-                updateSessionInMemory(session);
-                
-                result.put("code", 200);
-                result.put("msg", "成员添加成功");
-                result.put("data", newMembers);
-            } else {
-                result.put("code", 404);
-                result.put("msg", "会话不存在");
-            }
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("msg", "添加成员失败: " + e.getMessage());
-        }
-        
-        return result;
-    }
-
-    /**
-     * 移除会话成员
-     */
-    @DeleteMapping("/{sessionId}/members/{userId}")
-    public Map<String, Object> removeSessionMember(@PathVariable String sessionId, @PathVariable Long userId) {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            // 从会话中移除成员（简化实现）
-            Map<String, Object> session = getSessionById(sessionId);
-            if (session != null) {
-                @SuppressWarnings("unchecked")
-                List<Long> existingMembers = (List<Long>) session.get("participantIds");
-                
-                if (existingMembers != null && existingMembers.contains(userId)) {
-                                                                    // 使用传统方式实现过滤，避免lambda表达式的类型推断问题
-                                                                    List<Long> updatedMembers = new java.util.ArrayList<>();
-                                                                    for (Long id : existingMembers) {
-                                                                        if (!id.equals(userId)) {
-                                                                            updatedMembers.add(id);
-                                                                        }
-                                                                    }
-                                                                    
-                                                                    session.put("participantIds", updatedMembers);
-                                                                    session.put("updateTime", LocalDateTime.now());
-                                                                    
-                                                                    updateSessionInMemory(session);
-                                                                    
-                                                                    result.put("code", 200);
-                                                                    result.put("msg", "成员移除成功");
-                                                                } else {
-                    result.put("code", 404);
-                    result.put("msg", "成员不存在于会话中");
-                }
-            } else {
-                result.put("code", 404);
-                result.put("msg", "会话不存在");
-            }
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("msg", "移除成员失败: " + e.getMessage());
-        }
-        
-        return result;
-    }
-
-    /**
      * 设置会话置顶
      */
     @PutMapping("/{sessionId}/top")
-    public Map<String, Object> setSessionTop(@PathVariable String sessionId, @RequestParam Boolean top) {
+    public Map<String, Object> setSessionTop(@PathVariable Long sessionId, @RequestParam Boolean top) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            Map<String, Object> session = getSessionById(sessionId);
-            if (session != null) {
-                session.put("isTop", top);
-                session.put("updateTime", LocalDateTime.now());
-                
-                updateSessionInMemory(session);
-                
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
+            
+            int updateResult = imConversationMemberService.setConversationPinned(sessionId, currentUserId, top);
+            if (updateResult > 0) {
                 result.put("code", 200);
                 result.put("msg", "置顶状态更新成功");
             } else {
                 result.put("code", 404);
-                result.put("msg", "会话不存在");
+                result.put("msg", "会话不存在或用户不在会话中");
             }
         } catch (Exception e) {
             result.put("code", 500);
@@ -330,22 +337,20 @@ public class SessionController {
      * 设置会话免打扰
      */
     @PutMapping("/{sessionId}/mute")
-    public Map<String, Object> setSessionMute(@PathVariable String sessionId, @RequestParam Boolean mute) {
+    public Map<String, Object> setSessionMute(@PathVariable Long sessionId, @RequestParam Boolean mute) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            Map<String, Object> session = getSessionById(sessionId);
-            if (session != null) {
-                session.put("mute", mute);
-                session.put("updateTime", LocalDateTime.now());
-                
-                updateSessionInMemory(session);
-                
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
+            
+            int updateResult = imConversationMemberService.setConversationMuted(sessionId, currentUserId, mute);
+            if (updateResult > 0) {
                 result.put("code", 200);
                 result.put("msg", "免打扰状态更新成功");
             } else {
                 result.put("code", 404);
-                result.put("msg", "会话不存在");
+                result.put("msg", "会话不存在或用户不在会话中");
             }
         } catch (Exception e) {
             result.put("code", 500);
@@ -353,40 +358,5 @@ public class SessionController {
         }
         
         return result;
-    }
-
-    // 以下方法是简化实现，实际项目中应使用数据库
-    private List<Map<String, Object>> getSessionsByType(String type) {
-        // 根据类型获取会话列表
-        // 实际项目中应从数据库查询
-        return java.util.Collections.emptyList();
-    }
-    
-    private Map<String, Object> getSessionById(String sessionId) {
-        // 根据ID获取会话
-        // 实际项目中应从数据库查询
-        return null;
-    }
-    
-    private void saveSessionToMemory(Map<String, Object> session) {
-        // 保存会话到内存
-        // 实际项目中应持久化到数据库
-    }
-    
-    private void updateSessionInMemory(Map<String, Object> session) {
-        // 更新内存中的会话
-        // 实际项目中应更新数据库
-    }
-    
-    private boolean deleteSessionFromMemory(String sessionId) {
-        // 从内存删除会话
-        // 实际项目中应从数据库删除
-        return true;
-    }
-    
-    private List<Map<String, Object>> getSessionMembersById(String sessionId) {
-        // 获取会话成员列表
-        // 实际项目中应从数据库查询
-        return java.util.Collections.emptyList();
     }
 }

@@ -9,7 +9,7 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface IUserService {
+public interface IUserService extends ImUserService {
     ImUser findByUsername(String username);
     
     List<ImUser> findAll();

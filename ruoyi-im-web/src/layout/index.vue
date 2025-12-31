@@ -33,19 +33,6 @@
 
       <!-- 底部工具栏 -->
       <div class="nav-rail-footer">
-        <!-- 设置按钮 -->
-        <div
-          class="nav-rail-item"
-          :class="{ active: isActiveMenu('/im/settings') }"
-          @click="handleMenuClick({ path: '/im/settings' })"
-        >
-          <el-tooltip content="设置" placement="right" :show-after="500">
-            <div class="nav-item-inner">
-              <Setting class="nav-icon" />
-            </div>
-          </el-tooltip>
-        </div>
-
         <!-- 用户头像 -->
         <el-dropdown trigger="click" placement="right-end" @command="handleUserCommand">
           <div class="nav-rail-avatar">

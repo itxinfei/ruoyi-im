@@ -1,7 +1,9 @@
 package com.ruoyi.im.controller;
 
-import com.ruoyi.im.domain.ImUser;
-import com.ruoyi.im.service.IUserService;
+import com.ruoyi.im.domain.ImMessage;
+import com.ruoyi.im.service.ImMessageService;
+import com.ruoyi.im.service.ImConversationService;
+import com.ruoyi.im.service.ImConversationMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +19,17 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @RestController
-@RequestMapping("/im/message")
+@RequestMapping({"/im/message", "/api/im/message"})
 public class MessageController {
 
     @Autowired
-    private IUserService userService;
+    private ImMessageService imMessageService;
+    
+    @Autowired
+    private ImConversationService imConversationService;
+    
+    @Autowired
+    private ImConversationMemberService imConversationMemberService;
 
     /**
      * 发送消息
@@ -32,31 +40,27 @@ public class MessageController {
         
         try {
             // 获取消息参数
-            String conversationId = messageData.get("conversationId").toString();
+            Long conversationId = Long.valueOf(messageData.get("conversationId").toString());
             String type = messageData.get("type").toString();
             String content = messageData.get("content").toString();
-            String replyToMessageId = messageData.get("replyToMessageId") != null ? 
-                messageData.get("replyToMessageId").toString() : null;
-            String clientMsgId = messageData.get("clientMsgId").toString();
             
-            // 创建消息对象（简化实现）
-            Map<String, Object> message = new HashMap<>();
-            message.put("id", System.currentTimeMillis());
-            message.put("conversationId", conversationId);
-            message.put("type", type);
-            message.put("content", content);
-            message.put("senderId", getCurrentUserId()); // 获取当前用户ID
-            message.put("sendTime", LocalDateTime.now());
-            message.put("replyToMessageId", replyToMessageId);
-            message.put("clientMsgId", clientMsgId);
-            message.put("status", "sent");
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
             
-            // 保存消息（简化实现）
-            saveMessageToMemory(message);
+            // 发送消息
+            Long messageId = imMessageService.sendMessage(conversationId, currentUserId, type, content);
             
-            result.put("code", 200);
-            result.put("msg", "消息发送成功");
-            result.put("data", message);
+            if (messageId != null) {
+                // 获取完整的消息对象
+                ImMessage message = imMessageService.selectImMessageById(messageId);
+                
+                result.put("code", 200);
+                result.put("msg", "消息发送成功");
+                result.put("data", message);
+            } else {
+                result.put("code", 500);
+                result.put("msg", "消息发送失败");
+            }
         } catch (Exception e) {
             result.put("code", 500);
             result.put("msg", "消息发送失败: " + e.getMessage());
@@ -69,18 +73,36 @@ public class MessageController {
      * 获取会话消息列表
      */
     @GetMapping("/history")
-    public Map<String, Object> listMessage(@RequestParam String sessionId,
+    public Map<String, Object> listMessage(@RequestParam Long sessionId,
                                           @RequestParam(defaultValue = "20") Integer size,
-                                          @RequestParam(required = false) String lastMessageId) {
+                                          @RequestParam(required = false) Long lastMessageId) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取会话消息（简化实现）
-            List<Map<String, Object>> messages = getMessagesForSession(sessionId, size, lastMessageId);
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
+            
+            // 检查用户是否在会话中
+            var member = imConversationMemberService
+                .selectImConversationMemberByConversationIdAndUserId(sessionId, currentUserId);
+            if (member == null) {
+                result.put("code", 403);
+                result.put("msg", "用户不在会话中");
+                return result;
+            }
+            
+            // 获取会话消息
+            List<ImMessage> messages = imMessageService.selectImMessageListByConversationId(sessionId);
+            
+            // 按时间倒序排列并分页
+            List<ImMessage> sortedMessages = messages.stream()
+                .sorted((m1, m2) -> m2.getCreateTime().compareTo(m1.getCreateTime()))
+                .limit(size)
+                .collect(Collectors.toList());
             
             result.put("code", 200);
             result.put("msg", "查询成功");
-            result.put("data", messages);
+            result.put("data", sortedMessages);
         } catch (Exception e) {
             result.put("code", 500);
             result.put("msg", "查询失败: " + e.getMessage());
@@ -93,15 +115,30 @@ public class MessageController {
      * 标记消息已读
      */
     @PutMapping("/read/{conversationId}")
-    public Map<String, Object> markMessageRead(@PathVariable String conversationId, @RequestBody Map<String, Object> data) {
+    public Map<String, Object> markMessageRead(@PathVariable Long conversationId, @RequestBody Map<String, Object> data) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取已读消息ID列表（如果有的话）
-            List<String> messageIds = (List<String>) data.get("messageIds");
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
             
-            // 更新消息已读状态（简化实现）
-            updateMessagesReadStatus(conversationId, messageIds);
+            // 获取已读消息ID列表（如果有的话）
+            List<Long> messageIds = (List<Long>) data.get("messageIds");
+            
+            if (messageIds != null && !messageIds.isEmpty()) {
+                // 批量更新消息已读状态
+                for (Long messageId : messageIds) {
+                    imConversationMemberService.markMessageAsRead(conversationId, currentUserId, messageId);
+                }
+            } else {
+                // 如果没有提供具体消息ID，则标记所有消息为已读
+                // 获取该会话中用户发送的最后一条消息ID，或会话中最后一条消息ID
+                List<ImMessage> messages = imMessageService.selectImMessageListByConversationId(conversationId);
+                if (!messages.isEmpty()) {
+                    ImMessage lastMessage = messages.get(messages.size() - 1);
+                    imConversationMemberService.markMessageAsRead(conversationId, currentUserId, lastMessage.getId());
+                }
+            }
             
             result.put("code", 200);
             result.put("msg", "消息已读状态更新成功");
@@ -117,26 +154,38 @@ public class MessageController {
      * 撤回消息
      */
     @PutMapping("/recall/{messageId}")
-    public Map<String, Object> recallMessage(@PathVariable String messageId) {
+    public Map<String, Object> recallMessage(@PathVariable Long messageId) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 检查消息是否存在和是否可以撤回（简化实现）
-            Map<String, Object> message = getMessageById(messageId);
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
+            
+            // 获取消息信息
+            ImMessage message = imMessageService.selectImMessageById(messageId);
             if (message == null) {
                 result.put("code", 404);
                 result.put("msg", "消息不存在");
                 return result;
             }
             
-            // 更新消息状态为已撤回
-            message.put("status", "recalled");
-            message.put("recallTime", LocalDateTime.now());
-            updateMessageInMemory(message);
+            // 检查是否是消息发送者
+            if (!message.getSenderId().equals(currentUserId)) {
+                result.put("code", 403);
+                result.put("msg", "只能撤回自己发送的消息");
+                return result;
+            }
             
-            result.put("code", 200);
-            result.put("msg", "消息撤回成功");
-            result.put("data", message);
+            // 撤回消息
+            int recallResult = imMessageService.revokeMessage(messageId, currentUserId);
+            if (recallResult > 0) {
+                result.put("code", 200);
+                result.put("msg", "消息撤回成功");
+                result.put("data", message);
+            } else {
+                result.put("code", 500);
+                result.put("msg", "消息撤回失败");
+            }
         } catch (Exception e) {
             result.put("code", 500);
             result.put("msg", "撤回失败: " + e.getMessage());
@@ -150,31 +199,64 @@ public class MessageController {
      */
     @GetMapping("/search")
     public Map<String, Object> searchMessages(@RequestParam(required = false) String keywords,
-                                             @RequestParam(required = false) String conversationId,
+                                             @RequestParam(required = false) Long conversationId,
                                              @RequestParam(required = false) String type,
                                              @RequestParam(defaultValue = "1") Integer pageNum,
                                              @RequestParam(defaultValue = "10") Integer pageSize) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 搜索消息（简化实现）
-            List<Map<String, Object>> messages = searchMessagesByCriteria(keywords, conversationId, type);
+            ImMessage message = new ImMessage();
+            if (type != null) {
+                message.setType(type);
+            }
+            if (keywords != null) {
+                // 这里需要根据实际需求实现关键词搜索
+                // 可以搜索消息内容中的关键词
+            }
             
-            int start = (pageNum - 1) * pageSize;
-            int end = Math.min(start + pageSize, messages.size());
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
             
-            List<Map<String, Object>> pagedMessages = start < messages.size() ? 
-                messages.subList(start, end) : java.util.Collections.emptyList();
-            
-            Map<String, Object> pageResult = new HashMap<>();
-            pageResult.put("rows", pagedMessages);
-            pageResult.put("total", messages.size());
-            pageResult.put("pageNum", pageNum);
-            pageResult.put("pageSize", pageSize);
-            
-            result.put("code", 200);
-            result.put("msg", "搜索成功");
-            result.put("data", pageResult);
+            // 如果指定了会话ID，需要检查用户是否在该会话中
+            if (conversationId != null) {
+                var member = imConversationMemberService
+                    .selectImConversationMemberByConversationIdAndUserId(conversationId, currentUserId);
+                if (member == null) {
+                    result.put("code", 403);
+                    result.put("msg", "用户不在会话中");
+                    return result;
+                }
+                
+                // 获取指定会话的消息
+                List<ImMessage> messages = imMessageService.selectImMessageListByConversationId(conversationId);
+                
+                List<ImMessage> filteredMessages = messages.stream()
+                    .filter(msg -> type == null || msg.getType().equals(type))
+                    .filter(msg -> keywords == null || 
+                        (msg.getContent() != null && msg.getContent().contains(keywords)))
+                    .collect(Collectors.toList());
+                
+                int start = (pageNum - 1) * pageSize;
+                int end = Math.min(start + pageSize, filteredMessages.size());
+                
+                List<ImMessage> pagedMessages = start < filteredMessages.size() ? 
+                    filteredMessages.subList(start, end) : java.util.Collections.emptyList();
+                
+                Map<String, Object> pageResult = new HashMap<>();
+                pageResult.put("rows", pagedMessages);
+                pageResult.put("total", filteredMessages.size());
+                pageResult.put("pageNum", pageNum);
+                pageResult.put("pageSize", pageSize);
+                
+                result.put("code", 200);
+                result.put("msg", "搜索成功");
+                result.put("data", pageResult);
+            } else {
+                result.put("code", 200);
+                result.put("msg", "查询成功");
+                result.put("data", java.util.Collections.emptyMap());
+            }
         } catch (Exception e) {
             result.put("code", 500);
             result.put("msg", "搜索失败: " + e.getMessage());
@@ -187,11 +269,11 @@ public class MessageController {
      * 获取消息详情
      */
     @GetMapping("/{messageId}")
-    public Map<String, Object> getMessageDetail(@PathVariable String messageId) {
+    public Map<String, Object> getMessageDetail(@PathVariable Long messageId) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            Map<String, Object> message = getMessageById(messageId);
+            ImMessage message = imMessageService.selectImMessageById(messageId);
             if (message != null) {
                 result.put("code", 200);
                 result.put("msg", "查询成功");
@@ -209,55 +291,6 @@ public class MessageController {
     }
 
     /**
-     * 删除消息
-     */
-    @DeleteMapping("/delete/{messageId}")
-    public Map<String, Object> deleteMessage(@PathVariable String messageId) {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            boolean deleted = deleteMessageFromMemory(messageId);
-            if (deleted) {
-                result.put("code", 200);
-                result.put("msg", "消息删除成功");
-            } else {
-                result.put("code", 404);
-                result.put("msg", "消息不存在");
-            }
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("msg", "删除失败: " + e.getMessage());
-        }
-        
-        return result;
-    }
-
-    /**
-     * 批量删除消息
-     */
-    @DeleteMapping("/batch")
-    public Map<String, Object> batchDeleteMessages(@RequestBody List<String> messageIds) {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            int deletedCount = 0;
-            for (String messageId : messageIds) {
-                if (deleteMessageFromMemory(messageId)) {
-                    deletedCount++;
-                }
-            }
-            
-            result.put("code", 200);
-            result.put("msg", "成功删除 " + deletedCount + " 条消息");
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("msg", "批量删除失败: " + e.getMessage());
-        }
-        
-        return result;
-    }
-
-    /**
      * 获取未读消息数量
      */
     @GetMapping("/unread/count")
@@ -265,8 +298,15 @@ public class MessageController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取当前用户的未读消息数量（简化实现）
-            int unreadCount = getCurrentUserUnreadMessageCount();
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
+            
+            // 获取当前用户所有会话的未读消息总数
+            // 这里简化处理，获取所有会话成员记录中的未读数总和
+            List<ImConversationMember> members = imConversationMemberService.selectImConversationMemberListByUserId(currentUserId);
+            int unreadCount = members.stream()
+                .mapToInt(member -> member.getUnreadCount() != null ? member.getUnreadCount() : 0)
+                .sum();
             
             result.put("code", 200);
             result.put("msg", "查询成功");
@@ -283,45 +323,29 @@ public class MessageController {
      * 获取会话未读消息数量
      */
     @GetMapping("/unread/conversation/{conversationId}")
-    public Map<String, Object> getConversationUnreadCount(@PathVariable String conversationId) {
+    public Map<String, Object> getConversationUnreadCount(@PathVariable Long conversationId) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取指定会话的未读消息数量（简化实现）
-            int unreadCount = getConversationUnreadMessageCount(conversationId);
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
             
-            result.put("code", 200);
-            result.put("msg", "查询成功");
-            result.put("data", unreadCount);
+            ImConversationMember member = imConversationMemberService
+                .selectImConversationMemberByConversationIdAndUserId(conversationId, currentUserId);
+            
+            if (member != null) {
+                int unreadCount = member.getUnreadCount() != null ? member.getUnreadCount() : 0;
+                
+                result.put("code", 200);
+                result.put("msg", "查询成功");
+                result.put("data", unreadCount);
+            } else {
+                result.put("code", 404);
+                result.put("msg", "用户不在会话中");
+            }
         } catch (Exception e) {
             result.put("code", 500);
             result.put("msg", "查询失败: " + e.getMessage());
-        }
-        
-        return result;
-    }
-
-    /**
-     * 转发消息
-     */
-    @PostMapping("/forward")
-    public Map<String, Object> forwardMessage(@RequestBody Map<String, Object> data) {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            // 转发消息逻辑（简化实现）
-            String originalMessageId = data.get("originalMessageId").toString();
-            List<String> targetConversationIds = (List<String>) data.get("targetConversationIds");
-            
-            // 实现转发逻辑
-            List<Map<String, Object>> forwardedMessages = forwardMessages(originalMessageId, targetConversationIds);
-            
-            result.put("code", 200);
-            result.put("msg", "消息转发成功");
-            result.put("data", forwardedMessages);
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("msg", "转发失败: " + e.getMessage());
         }
         
         return result;
@@ -336,158 +360,31 @@ public class MessageController {
         
         try {
             // 获取回复参数
-            String originalMessageId = data.get("originalMessageId").toString();
+            Long originalMessageId = Long.valueOf(data.get("originalMessageId").toString());
             String content = data.get("content").toString();
-            String conversationId = data.get("conversationId").toString();
+            Long conversationId = Long.valueOf(data.get("conversationId").toString());
             
-            // 创建回复消息对象
-            Map<String, Object> replyMessage = new HashMap<>();
-            replyMessage.put("id", System.currentTimeMillis());
-            replyMessage.put("conversationId", conversationId);
-            replyMessage.put("type", "text"); // 默认类型
-            replyMessage.put("content", content);
-            replyMessage.put("senderId", getCurrentUserId()); // 获取当前用户ID
-            replyMessage.put("sendTime", LocalDateTime.now());
-            replyMessage.put("replyToMessageId", originalMessageId);
-            replyMessage.put("status", "sent");
+            // 实际项目中需要从安全上下文获取当前用户ID
+            Long currentUserId = 1L;
             
-            // 保存回复消息（简化实现）
-            saveMessageToMemory(replyMessage);
+            // 发送回复消息
+            Long messageId = imMessageService.sendReplyMessage(conversationId, currentUserId, originalMessageId, "TEXT", content);
             
-            result.put("code", 200);
-            result.put("msg", "回复发送成功");
-            result.put("data", replyMessage);
+            if (messageId != null) {
+                ImMessage message = imMessageService.selectImMessageById(messageId);
+                
+                result.put("code", 200);
+                result.put("msg", "回复发送成功");
+                result.put("data", message);
+            } else {
+                result.put("code", 500);
+                result.put("msg", "回复发送失败");
+            }
         } catch (Exception e) {
             result.put("code", 500);
             result.put("msg", "回复失败: " + e.getMessage());
         }
         
         return result;
-    }
-
-    /**
-     * 获取消息统计
-     */
-    @GetMapping("/statistics")
-    public Map<String, Object> getMessageStatistics(@RequestParam(required = false) String conversationId,
-                                                   @RequestParam(required = false) String startDate,
-                                                   @RequestParam(required = false) String endDate) {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            // 获取消息统计信息（简化实现）
-            Map<String, Object> statistics = getMessageStatisticsByConversation(conversationId, startDate, endDate);
-            
-            result.put("code", 200);
-            result.put("msg", "查询成功");
-            result.put("data", statistics);
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("msg", "查询失败: " + e.getMessage());
-        }
-        
-        return result;
-    }
-
-    /**
-     * 获取最新消息
-     */
-    @GetMapping("/latest")
-    public Map<String, Object> getLatestMessages(@RequestParam(defaultValue = "10") Integer limit) {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            // 获取最新消息（简化实现）
-            List<Map<String, Object>> latestMessages = getLatestMessagesFromMemory(limit);
-            
-            result.put("code", 200);
-            result.put("msg", "查询成功");
-            result.put("data", latestMessages);
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("msg", "查询失败: " + e.getMessage());
-        }
-        
-        return result;
-    }
-
-    // 以下方法是简化实现，实际项目中应使用数据库
-    private Long getCurrentUserId() {
-        // 在实际项目中应从JWT token或Session中获取当前用户ID
-        return 1L; // 简化返回固定用户ID
-    }
-    
-    private void saveMessageToMemory(Map<String, Object> message) {
-        // 保存消息到内存
-        // 实际项目中应持久化到数据库
-    }
-    
-    private List<Map<String, Object>> getMessagesForSession(String sessionId, Integer size, String lastMessageId) {
-        // 根据会话ID获取消息列表
-        // 实际项目中应从数据库查询
-        return java.util.Collections.emptyList();
-    }
-    
-    private Map<String, Object> getMessageById(String messageId) {
-        // 根据ID获取消息
-        // 实际项目中应从数据库查询
-        return null;
-    }
-    
-    private void updateMessageInMemory(Map<String, Object> message) {
-        // 更新内存中的消息
-        // 实际项目中应更新数据库
-    }
-    
-    private void updateMessagesReadStatus(String conversationId, List<String> messageIds) {
-        // 更新消息已读状态
-        // 实际项目中应更新数据库
-    }
-    
-    private boolean deleteMessageFromMemory(String messageId) {
-        // 从内存删除消息
-        // 实际项目中应从数据库删除
-        return true;
-    }
-    
-    private int getCurrentUserUnreadMessageCount() {
-        // 获取当前用户未读消息数量
-        // 实际项目中应从数据库查询
-        return 0;
-    }
-    
-    private int getConversationUnreadMessageCount(String conversationId) {
-        // 获取会话未读消息数量
-        // 实际项目中应从数据库查询
-        return 0;
-    }
-    
-    private List<Map<String, Object>> searchMessagesByCriteria(String keywords, String conversationId, String type) {
-        // 按条件搜索消息
-        // 实际项目中应从数据库查询
-        return java.util.Collections.emptyList();
-    }
-    
-    private List<Map<String, Object>> forwardMessages(String originalMessageId, List<String> targetConversationIds) {
-        // 转发消息实现
-        // 实际项目中应创建新消息记录
-        return java.util.Collections.emptyList();
-    }
-    
-    private Map<String, Object> getMessageStatisticsByConversation(String conversationId, String startDate, String endDate) {
-        // 获取消息统计信息
-        // 实际项目中应从数据库查询
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("total", 0);
-        stats.put("text", 0);
-        stats.put("image", 0);
-        stats.put("file", 0);
-        return stats;
-    }
-    
-    private List<Map<String, Object>> getLatestMessagesFromMemory(Integer limit) {
-        // 获取最新消息
-        // 实际项目中应从数据库查询
-        return java.util.Collections.emptyList();
     }
 }

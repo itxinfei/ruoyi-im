@@ -9,19 +9,13 @@
             </template>
             <div class="profile-header">
               <div class="avatar-container">
-                <el-avatar :size="80" :src="userInfo.avatar">
-                  {{ userInfo.nickName?.charAt(0) || 'U' }}
-                </el-avatar>
-                <el-upload
-                  class="avatar-upload"
-                  :action="uploadUrl"
-                  :headers="uploadHeaders"
-                  :show-file-list="false"
-                  :before-upload="beforeAvatarUpload"
-                  :on-success="handleAvatarSuccess"
-                >
-                  <el-button size="small" type="primary">更换头像</el-button>
-                </el-upload>
+                <AvatarUpload
+                  :avatar="userInfo.avatar"
+                  :default-text="userInfo.nickName?.charAt(0) || 'U'"
+                  :size="80"
+                  @success="handleAvatarSuccess"
+                  @error="handleAvatarError"
+                />
               </div>
               <div class="user-basic">
                 <h3>{{ userInfo.nickName || '用户' }}</h3>
@@ -295,6 +289,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Check } from '@element-plus/icons-vue'
 import { getToken } from '@/utils/auth'
+import AvatarUpload from '@/components/AvatarUpload/index.vue'
 
 const router = useRouter()
 
@@ -412,19 +407,6 @@ const privacyForm = reactive({
 /** 黑名单用户列表 */
 const blockedUsers = ref([])
 
-// ==================== 计算属性 ====================
-
-/** 上传地址 */
-const uploadUrl = computed(() => {
-  const baseUrl = import.meta.env.VITE_BASE_API || ''
-  return `${baseUrl}/api/im/file/upload`
-})
-
-/** 上传请求头 */
-const uploadHeaders = computed(() => ({
-  Authorization: 'Bearer ' + getToken(),
-}))
-
 // ==================== 方法定义 ====================
 
 /**
@@ -441,33 +423,18 @@ const initFormData = () => {
 }
 
 /**
- * 头像上传前校验
+ * 头像上传成功
  */
-const beforeAvatarUpload = (file) => {
-  const isImage = file.type.startsWith('image/')
-  const isLt2M = file.size / 1024 / 1024 < 2
-
-  if (!isImage) {
-    ElMessage.error('只能上传图片文件')
-    return false
-  }
-  if (!isLt2M) {
-    ElMessage.error('头像大小不能超过 2MB')
-    return false
-  }
-  return true
+const handleAvatarSuccess = (avatarUrl) => {
+  userInfo.value.avatar = avatarUrl
+  ElMessage.success('头像更新成功')
 }
 
 /**
- * 头像上传成功
+ * 头像上传失败
  */
-const handleAvatarSuccess = (response) => {
-  if (response.code === 200) {
-    userInfo.value.avatar = response.data?.url || response.url
-    ElMessage.success('头像更新成功')
-  } else {
-    ElMessage.error('头像上传失败')
-  }
+const handleAvatarError = (error) => {
+  ElMessage.error(error || '头像上传失败')
 }
 
 /**

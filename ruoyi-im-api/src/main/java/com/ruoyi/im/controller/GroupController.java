@@ -1,5 +1,10 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.domain.ImGroup;
+import com.ruoyi.im.domain.ImGroupMember;
+import com.ruoyi.im.service.ImGroupService;
+import com.ruoyi.im.service.ImGroupMemberService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -14,32 +19,49 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @RestController
-@RequestMapping("/im/group")
+@RequestMapping({"/im/group", "/api/im/group"})
 public class GroupController {
+
+    @Autowired
+    private ImGroupService imGroupService;
+    
+    @Autowired
+    private ImGroupMemberService imGroupMemberService;
 
     /**
      * 获取群组列表
      */
     @GetMapping("/list")
-    public Map<String, Object> listGroups(@RequestParam(required = false) String name,
+    public Map<String, Object> listGroups(@RequestParam(required = false) String groupName,
+                                         @RequestParam(required = false) String ownerName,
+                                         @RequestParam(required = false) String status,
                                          @RequestParam(defaultValue = "1") Integer pageNum,
-                                         @RequestParam(defaultValue = "20") Integer pageSize) {
+                                         @RequestParam(defaultValue = "10") Integer pageSize) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取群组列表（简化实现）
-            List<Map<String, Object>> allGroups = getAllGroups();
+            ImGroup group = new ImGroup();
+            if (groupName != null) {
+                group.setName(groupName);
+            }
+            if (status != null) {
+                group.setStatus(status);
+            }
+            
+            // 获取群组列表
+            List<ImGroup> allGroups = imGroupService.selectImGroupList(group);
             
             // 过滤条件
-            List<Map<String, Object>> filteredGroups = allGroups.stream()
-                .filter(group -> name == null || 
-                    group.get("name").toString().contains(name))
+            List<ImGroup> filteredGroups = allGroups.stream()
+                .filter(g -> groupName == null || g.getName().contains(groupName))
+                .filter(g -> ownerName == null || g.getOwnerName().contains(ownerName))
+                .filter(g -> status == null || g.getStatus().equals(status))
                 .collect(Collectors.toList());
             
             int start = (pageNum - 1) * pageSize;
             int end = Math.min(start + pageSize, filteredGroups.size());
             
-            List<Map<String, Object>> pagedGroups = start < filteredGroups.size() ? 
+            List<ImGroup> pagedGroups = start < filteredGroups.size() ? 
                 filteredGroups.subList(start, end) : java.util.Collections.emptyList();
             
             Map<String, Object> pageResult = new HashMap<>();
@@ -68,29 +90,36 @@ public class GroupController {
         
         try {
             String name = groupData.get("name").toString();
-            String description = groupData.get("description").toString();
-            List<Long> memberIds = (List<Long>) groupData.get("memberIds");
-            Long creatorId = Long.valueOf(groupData.get("creatorId").toString());
+            String notice = groupData.get("notice") != null ? groupData.get("notice").toString() : "";
+            Long ownerId = Long.valueOf(groupData.get("ownerId").toString());
+            String avatar = groupData.getOrDefault("avatar", "/profile/group.png").toString();
             
-            // 创建群组对象（简化实现）
-            Map<String, Object> group = new HashMap<>();
-            group.put("id", System.currentTimeMillis());
-            group.put("name", name);
-            group.put("description", description);
-            group.put("creatorId", creatorId);
-            group.put("memberIds", memberIds);
-            group.put("maxMembers", groupData.getOrDefault("maxMembers", 200)); // 默认最大成员数
-            group.put("avatar", groupData.getOrDefault("avatar", "/static/default-group-avatar.png"));
-            group.put("createTime", LocalDateTime.now());
-            group.put("updateTime", LocalDateTime.now());
-            group.put("status", 1); // 1表示正常
+            ImGroup group = new ImGroup();
+            group.setName(name);
+            group.setOwnerId(ownerId);
+            group.setNotice(notice);
+            group.setAvatar(avatar);
+            group.setStatus("ACTIVE");
+            group.setMemberCount(1); // 创建者本身就是成员
             
-            // 保存群组（简化实现）
-            saveGroupToMemory(group);
+            int insertResult = imGroupService.insertImGroup(group);
             
-            result.put("code", 200);
-            result.put("msg", "群组创建成功");
-            result.put("data", group);
+            if (insertResult > 0) {
+                // 添加群主为群成员
+                ImGroupMember member = new ImGroupMember();
+                member.setGroupId(group.getId());
+                member.setUserId(ownerId);
+                member.setRole("OWNER");
+                member.setInviterId(ownerId); // 群主邀请自己
+                imGroupMemberService.insertImGroupMember(member);
+                
+                result.put("code", 200);
+                result.put("msg", "群组创建成功");
+                result.put("data", group);
+            } else {
+                result.put("code", 500);
+                result.put("msg", "群组创建失败");
+            }
         } catch (Exception e) {
             result.put("code", 500);
             result.put("msg", "群组创建失败: " + e.getMessage());
@@ -107,7 +136,7 @@ public class GroupController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            Map<String, Object> group = getGroupById(groupId);
+            ImGroup group = imGroupService.selectImGroupById(groupId);
             if (group != null) {
                 result.put("code", 200);
                 result.put("msg", "查询成功");
@@ -128,33 +157,24 @@ public class GroupController {
      * 更新群组
      */
     @PutMapping
-    public Map<String, Object> updateGroup(@RequestBody Map<String, Object> groupData) {
+    public Map<String, Object> updateGroup(@RequestBody ImGroup group) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            Long groupId = Long.valueOf(groupData.get("id").toString());
-            Map<String, Object> group = getGroupById(groupId);
+            ImGroup existingGroup = imGroupService.selectImGroupById(group.getId());
             
-            if (group != null) {
+            if (existingGroup != null) {
                 // 更新群组信息
-                if (groupData.containsKey("name")) {
-                    group.put("name", groupData.get("name"));
-                }
-                if (groupData.containsKey("description")) {
-                    group.put("description", groupData.get("description"));
-                }
-                if (groupData.containsKey("avatar")) {
-                    group.put("avatar", groupData.get("avatar"));
-                }
+                int updateResult = imGroupService.updateImGroup(group);
                 
-                group.put("updateTime", LocalDateTime.now());
-                
-                // 更新群组（简化实现）
-                updateGroupInMemory(group);
-                
-                result.put("code", 200);
-                result.put("msg", "群组更新成功");
-                result.put("data", group);
+                if (updateResult > 0) {
+                    result.put("code", 200);
+                    result.put("msg", "群组更新成功");
+                    result.put("data", group);
+                } else {
+                    result.put("code", 500);
+                    result.put("msg", "群组更新失败");
+                }
             } else {
                 result.put("code", 404);
                 result.put("msg", "群组不存在");
@@ -175,8 +195,8 @@ public class GroupController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            boolean deleted = deleteGroupFromMemory(groupId);
-            if (deleted) {
+            int deleted = imGroupService.deleteImGroupById(groupId);
+            if (deleted > 0) {
                 result.put("code", 200);
                 result.put("msg", "群组已解散");
             } else {
@@ -201,13 +221,15 @@ public class GroupController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 获取群组成员列表（简化实现）
-            List<Map<String, Object>> allMembers = getGroupMembersById(groupId);
+            // 获取群组成员列表
+            ImGroupMember member = new ImGroupMember();
+            member.setGroupId(groupId);
+            List<ImGroupMember> allMembers = imGroupMemberService.selectImGroupMemberListByGroupId(groupId);
             
             int start = (pageNum - 1) * pageSize;
             int end = Math.min(start + pageSize, allMembers.size());
             
-            List<Map<String, Object>> pagedMembers = start < allMembers.size() ? 
+            List<ImGroupMember> pagedMembers = start < allMembers.size() ? 
                 allMembers.subList(start, end) : java.util.Collections.emptyList();
             
             Map<String, Object> pageResult = new HashMap<>();
@@ -235,33 +257,19 @@ public class GroupController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            Map<String, Object> group = getGroupById(groupId);
+            ImGroup group = imGroupService.selectImGroupById(groupId);
             if (group != null) {
-                @SuppressWarnings("unchecked")
-                List<Long> existingMembers = (List<Long>) group.get("memberIds");
-                if (existingMembers == null) {
-                    existingMembers = java.util.Collections.emptyList();
+                // 添加群组成员
+                int addResult = imGroupMemberService.addGroupMembers(groupId, userIds, "MEMBER", null);
+                
+                if (addResult > 0) {
+                    result.put("code", 200);
+                    result.put("msg", "成员添加成功");
+                    result.put("data", userIds);
+                } else {
+                    result.put("code", 500);
+                    result.put("msg", "成员添加失败");
                 }
-                
-                // 使用传统方式实现过滤，避免lambda表达式的类型推断问题
-                List<Long> newMembers = new java.util.ArrayList<>();
-                for (Long id : userIds) {
-                    if (!existingMembers.contains(id)) {
-                        newMembers.add(id);
-                    }
-                }
-                
-                List<Long> allMembers = new java.util.ArrayList<>(existingMembers);
-                allMembers.addAll(newMembers);
-                
-                group.put("memberIds", allMembers);
-                group.put("updateTime", LocalDateTime.now());
-                
-                updateGroupInMemory(group);
-                
-                result.put("code", 200);
-                result.put("msg", "成员添加成功");
-                result.put("data", newMembers);
             } else {
                 result.put("code", 404);
                 result.put("msg", "群组不存在");
@@ -282,27 +290,20 @@ public class GroupController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            Map<String, Object> group = getGroupById(groupId);
+            ImGroup group = imGroupService.selectImGroupById(groupId);
             if (group != null) {
-                @SuppressWarnings("unchecked")
-                List<Long> existingMembers = (List<Long>) group.get("memberIds");
+                ImGroupMember member = imGroupMemberService.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
                 
-                if (existingMembers != null && existingMembers.contains(userId)) {
-                    // 使用传统方式实现过滤，避免lambda表达式的类型推断问题
-                    List<Long> updatedMembers = new java.util.ArrayList<>();
-                    for (Long id : existingMembers) {
-                        if (!id.equals(userId)) {
-                            updatedMembers.add(id);
-                        }
+                if (member != null) {
+                    int deleteResult = imGroupMemberService.removeGroupMember(groupId, userId, null);
+                    
+                    if (deleteResult > 0) {
+                        result.put("code", 200);
+                        result.put("msg", "成员移除成功");
+                    } else {
+                        result.put("code", 500);
+                        result.put("msg", "成员移除失败");
                     }
-                    
-                    group.put("memberIds", updatedMembers);
-                    group.put("updateTime", LocalDateTime.now());
-                    
-                    updateGroupInMemory(group);
-                    
-                    result.put("code", 200);
-                    result.put("msg", "成员移除成功");
                 } else {
                     result.put("code", 404);
                     result.put("msg", "成员不存在于群组中");
@@ -327,11 +328,18 @@ public class GroupController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 设置群组管理员（简化实现）
-            Map<String, Object> group = getGroupById(groupId);
+            ImGroup group = imGroupService.selectImGroupById(groupId);
             if (group != null) {
-                result.put("code", 200);
-                result.put("msg", "管理员权限设置成功");
+                String newRole = isAdmin ? "ADMIN" : "MEMBER";
+                int updateResult = imGroupMemberService.updateGroupMemberRole(groupId, userId, newRole, null);
+                
+                if (updateResult > 0) {
+                    result.put("code", 200);
+                    result.put("msg", "管理员权限设置成功");
+                } else {
+                    result.put("code", 500);
+                    result.put("msg", "管理员权限设置失败");
+                }
             } else {
                 result.put("code", 404);
                 result.put("msg", "群组不存在");
@@ -352,23 +360,27 @@ public class GroupController {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            Map<String, Object> group = getGroupById(groupId);
+            ImGroup group = imGroupService.selectImGroupById(groupId);
             if (group != null) {
-                @SuppressWarnings("unchecked")
-                List<Long> existingMembers = (List<Long>) group.get("memberIds");
+                ImGroupMember member = imGroupMemberService.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
                 
-                if (existingMembers != null && existingMembers.contains(userId)) {
-                    List<Long> updatedMembers = existingMembers.stream()
-                        .filter(id -> !id.equals(userId))
-                        .collect(Collectors.toList());
+                if (member != null) {
+                    // 群主不能退出群组，只能解散
+                    if ("OWNER".equals(member.getRole())) {
+                        result.put("code", 400);
+                        result.put("msg", "群主不能退出群组，请解散群组");
+                        return result;
+                    }
                     
-                    group.put("memberIds", updatedMembers);
-                    group.put("updateTime", LocalDateTime.now());
+                    int deleteResult = imGroupMemberService.removeGroupMember(groupId, userId, null);
                     
-                    updateGroupInMemory(group);
-                    
-                    result.put("code", 200);
-                    result.put("msg", "已退出群组");
+                    if (deleteResult > 0) {
+                        result.put("code", 200);
+                        result.put("msg", "已退出群组");
+                    } else {
+                        result.put("code", 500);
+                        result.put("msg", "退出群组失败");
+                    }
                 } else {
                     result.put("code", 404);
                     result.put("msg", "用户不在群组中");
@@ -391,53 +403,31 @@ public class GroupController {
     @PutMapping("/{groupId}/nickname")
     public Map<String, Object> modifyGroupNickname(@PathVariable Long groupId, 
                                                   @RequestParam Long userId, 
-                                                  @RequestParam String nickname) {
+                                                  @RequestParam String groupNickname) {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // 修改群昵称（简化实现）
-            result.put("code", 200);
-            result.put("msg", "群昵称修改成功");
+            ImGroupMember member = imGroupMemberService.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
+            if (member != null) {
+                member.setGroupNickname(groupNickname);
+                int updateResult = imGroupMemberService.updateImGroupMember(member);
+                
+                if (updateResult > 0) {
+                    result.put("code", 200);
+                    result.put("msg", "群昵称修改成功");
+                } else {
+                    result.put("code", 500);
+                    result.put("msg", "群昵称修改失败");
+                }
+            } else {
+                result.put("code", 404);
+                result.put("msg", "用户不在群组中");
+            }
         } catch (Exception e) {
             result.put("code", 500);
             result.put("msg", "修改群昵称失败: " + e.getMessage());
         }
         
         return result;
-    }
-
-    // 以下方法是简化实现，实际项目中应使用数据库
-    private List<Map<String, Object>> getAllGroups() {
-        // 获取所有群组
-        // 实际项目中应从数据库查询
-        return java.util.Collections.emptyList();
-    }
-    
-    private Map<String, Object> getGroupById(Long groupId) {
-        // 根据ID获取群组
-        // 实际项目中应从数据库查询
-        return null;
-    }
-    
-    private void saveGroupToMemory(Map<String, Object> group) {
-        // 保存群组到内存
-        // 实际项目中应持久化到数据库
-    }
-    
-    private void updateGroupInMemory(Map<String, Object> group) {
-        // 更新内存中的群组
-        // 实际项目中应更新数据库
-    }
-    
-    private boolean deleteGroupFromMemory(Long groupId) {
-        // 从内存删除群组
-        // 实际项目中应从数据库删除
-        return true;
-    }
-    
-    private List<Map<String, Object>> getGroupMembersById(Long groupId) {
-        // 获取群组成员列表
-        // 实际项目中应从数据库查询
-        return java.util.Collections.emptyList();
     }
 }
