@@ -1,24 +1,32 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.im.dto.LoginRequest;
+import com.ruoyi.im.dto.RegisterRequest;
+import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.IUserService;
 import com.ruoyi.im.utils.JwtUtils;
-import io.jsonwebtoken.Claims;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 认证控制器
- * 
- * @author ruoyi
- */
+@Api(tags = "认证管理")
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
+@Validated
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     private IUserService userService;
@@ -29,24 +37,54 @@ public class AuthController {
     @Autowired
     private JwtUtils jwtUtils;
 
-    /**
-     * 用户登录
-     */
+    @ApiOperation("用户登录")
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, String> loginData) {
-        String username = loginData.get("username");
-        String password = loginData.get("password");
+    public Result<Map<String, Object>> login(@Valid @RequestBody LoginRequest loginRequest) {
+        log.info("用户登录请求: username={}", loginRequest.getUsername());
+        
+        ImUser user = userService.findByUsername(loginRequest.getUsername());
+        if (user == null || !passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            log.warn("用户登录失败: username={}, 原因=用户名或密码错误", loginRequest.getUsername());
+            throw new BusinessException(401, "用户名或密码错误");
+        }
+        
+        if (!"ACTIVE".equals(user.getStatus())) {
+            log.warn("用户登录失败: username={}, 原因=用户已被禁用", loginRequest.getUsername());
+            throw new BusinessException(403, "用户已被禁用");
+        }
+        
+        String token = jwtUtils.generateToken(user.getUsername());
+        
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("id", user.getId());
+        userInfo.put("username", user.getUsername());
+        userInfo.put("nickname", user.getNickname());
+        userInfo.put("avatar", user.getAvatar());
+        userInfo.put("email", user.getEmail());
+        userInfo.put("phone", user.getPhone());
         
         Map<String, Object> result = new HashMap<>();
+        result.put("token", token);
+        result.put("userInfo", userInfo);
         
-        ImUser user = userService.findByUsername(username);
-        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
-            // 生成JWT token
-            String token = jwtUtils.generateToken(username);
+        log.info("用户登录成功: username={}, userId={}", user.getUsername(), user.getId());
+        return Result.success(result);
+    }
+    
+    @ApiOperation("获取用户信息")
+    @GetMapping("/getInfo")
+    public Result<Map<String, Object>> getInfo(@RequestHeader("Authorization") String token) {
+        log.info("获取用户信息请求: token={}", token.substring(0, Math.min(20, token.length())) + "...");
+        
+        try {
+            String jwtToken = token.replace("Bearer ", "");
+            String username = jwtUtils.getUsernameFromToken(jwtToken);
             
-            result.put("code", 200);
-            result.put("msg", "登录成功");
-            result.put("token", token);
+            ImUser user = userService.findByUsername(username);
+            if (user == null) {
+                log.warn("获取用户信息失败: username={}, 原因=用户不存在", username);
+                throw new BusinessException(404, "用户不存在");
+            }
             
             Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("id", user.getId());
@@ -55,105 +93,49 @@ public class AuthController {
             userInfo.put("avatar", user.getAvatar());
             userInfo.put("email", user.getEmail());
             userInfo.put("phone", user.getPhone());
-            result.put("userInfo", userInfo);
-        } else {
-            result.put("code", 401);
-            result.put("msg", "用户名或密码错误");
-        }
-        
-        return result;
-    }
-    
-    /**
-     * 获取用户信息
-     */
-    @GetMapping("/getInfo")
-    public Map<String, Object> getInfo(@RequestHeader("Authorization") String token) {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            // 移除Bearer前缀
-            String jwtToken = token.replace("Bearer ", "");
             
-            // 验证token并获取用户名
-            String username = jwtUtils.getUsernameFromToken(jwtToken);
-            ImUser user = userService.findByUsername(username);
-            
-            if (user != null) {
-                result.put("code", 200);
-                
-                Map<String, Object> userInfo = new HashMap<>();
-                userInfo.put("id", user.getId());
-                userInfo.put("username", user.getUsername());
-                userInfo.put("nickname", user.getNickname());
-                userInfo.put("avatar", user.getAvatar());
-                userInfo.put("email", user.getEmail());
-                userInfo.put("phone", user.getPhone());
-                // 不返回密码
-                result.put("data", userInfo);
-            } else {
-                result.put("code", 404);
-                result.put("msg", "用户不存在");
-            }
+            log.info("获取用户信息成功: username={}, userId={}", user.getUsername(), user.getId());
+            return Result.success(userInfo);
         } catch (Exception e) {
-            result.put("code", 401);
-            result.put("msg", "Token验证失败");
+            log.error("获取用户信息失败: token验证失败", e);
+            throw new BusinessException(401, "Token验证失败");
         }
-        
-        return result;
     }
     
-    /**
-     * 用户登出
-     */
+    @ApiOperation("用户登出")
     @PostMapping("/logout")
-    public Map<String, Object> logout() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("msg", "登出成功");
-        return result;
+    public Result<Void> logout() {
+        log.info("用户登出请求");
+        return Result.success("登出成功", null);
     }
     
-    /**
-     * 用户注册
-     */
+    @ApiOperation("用户注册")
     @PostMapping("/register")
-    public Map<String, Object> register(@RequestBody Map<String, String> registerData) {
-        String username = registerData.get("username");
-        String password = registerData.get("password");
-        String nickname = registerData.getOrDefault("nickname", username);
-        String email = registerData.get("email");
-        String phone = registerData.get("phone");
+    public Result<Void> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        log.info("用户注册请求: username={}", registerRequest.getUsername());
         
-        Map<String, Object> result = new HashMap<>();
-        
-        // 检查用户是否存在
-        if (userService.findByUsername(username) != null) {
-            result.put("code", 400);
-            result.put("msg", "用户名已存在");
-            return result;
+        if (userService.findByUsername(registerRequest.getUsername()) != null) {
+            log.warn("用户注册失败: username={}, 原因=用户名已存在", registerRequest.getUsername());
+            throw new BusinessException(400, "用户名已存在");
         }
         
-        // 创建新用户
         ImUser newUser = new ImUser();
-        newUser.setUsername(username);
-        newUser.setNickname(nickname);
-        newUser.setPassword(passwordEncoder.encode(password)); // 加密密码
-        newUser.setEmail(email);
-        newUser.setPhone(phone);
-        newUser.setAvatar("/profile/avatar.png"); // 默认头像
-        newUser.setStatus("ACTIVE"); // 默认状态
+        newUser.setUsername(registerRequest.getUsername());
+        newUser.setNickname(registerRequest.getNickname());
+        newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        newUser.setEmail(registerRequest.getEmail());
+        newUser.setPhone(registerRequest.getPhone());
+        newUser.setAvatar("/profile/avatar.png");
+        newUser.setStatus("ACTIVE");
         
         int insertResult = userService.insert(newUser);
         
         if (insertResult > 0) {
-            result.put("code", 200);
-            result.put("msg", "注册成功");
+            log.info("用户注册成功: username={}, userId={}", newUser.getUsername(), newUser.getId());
+            return Result.success("注册成功", null);
         } else {
-            result.put("code", 500);
-            result.put("msg", "注册失败");
+            log.error("用户注册失败: username={}", registerRequest.getUsername());
+            throw new BusinessException(500, "注册失败");
         }
-        
-        return result;
     }
 }

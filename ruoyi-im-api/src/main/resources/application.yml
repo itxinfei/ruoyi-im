@@ -1,6 +1,6 @@
 # 服务器端口
 server:
-  port: 80
+  port: 8080
 
 # Spring配置
 spring:
@@ -30,6 +30,15 @@ spring:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
 
+  # MVC配置
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+# Swagger配置
+swagger:
+  enabled: false
+
 # MyBatis-Plus配置
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*Mapper.xml  # 映射文件位置
@@ -46,7 +55,7 @@ mybatis-plus:
 # IM模块配置
 im:
   jwt:
-    secret: im_secret_key_2024_for_api_system  # JWT密钥
+    secret: im_secret_key_2024_for_api_system_that_is_long_enough_for_HS512_algorithm  # JWT密钥
   message:
     maxLength: 2000  # 消息最大长度
     expireDays: 30   # 消息过期天数

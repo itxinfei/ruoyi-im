@@ -7,7 +7,7 @@ export function login(username, password) {
     password
   }
   return request({
-    url: '/auth/login',
+    url: '/api/auth/login',
     headers: {
       isToken: false,
     },
@@ -19,7 +19,7 @@ export function login(username, password) {
 // 注册方法
 export function register(data) {
   return request({
-    url: '/register',
+    url: '/api/auth/register',
     headers: {
       isToken: false,
     },
@@ -31,7 +31,7 @@ export function register(data) {
 // 获取用户详细信息
 export function getInfo() {
   return request({
-    url: '/auth/getInfo',
+    url: '/api/auth/getInfo',
     method: 'get',
   })
 }
@@ -39,31 +39,7 @@ export function getInfo() {
 // 退出方法
 export function logout() {
   return request({
-    url: '/auth/logout',
+    url: '/api/auth/logout',
     method: 'post',
-  })
-}
-
-// 获取验证码
-export function getCodeImg() {
-  return request({
-    url: '/auth/captcha',
-    headers: {
-      isToken: false,
-    },
-    method: 'get',
-    timeout: 20000,
-  })
-}
-
-// 忘记密码
-export function forgotPassword(data) {
-  return request({
-    url: '/auth/forgot-password',
-    headers: {
-      isToken: false,
-    },
-    method: 'post',
-    data: data,
   })
 }

@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 查询群组列表
 export function listGroup(query) {
   return request({
-    url: '/im/group/list',
+    url: '/api/im/group/list',
     method: 'get',
     params: query,
   })
@@ -12,7 +12,7 @@ export function listGroup(query) {
 // 查询群组详细
 export function getGroup(groupId) {
   return request({
-    url: '/im/group/' + groupId,
+    url: '/api/im/group/' + groupId,
     method: 'get',
   })
 }
@@ -20,7 +20,7 @@ export function getGroup(groupId) {
 // 新增群组
 export function addGroup(data) {
   return request({
-    url: '/im/group',
+    url: '/api/im/group',
     method: 'post',
     data: data,
   })
@@ -29,7 +29,7 @@ export function addGroup(data) {
 // 修改群组
 export function updateGroup(data) {
   return request({
-    url: '/im/group',
+    url: '/api/im/group',
     method: 'put',
     data: data,
   })
@@ -38,7 +38,7 @@ export function updateGroup(data) {
 // 删除群组
 export function delGroup(groupId) {
   return request({
-    url: '/im/group/' + groupId,
+    url: '/api/im/group/' + groupId,
     method: 'delete',
   })
 }
@@ -46,7 +46,7 @@ export function delGroup(groupId) {
 // 修改群组设置
 export function updateGroupSettings(data) {
   return request({
-    url: '/im/group/settings',
+    url: '/api/im/group/settings',
     method: 'put',
     data: data,
   })
@@ -55,7 +55,7 @@ export function updateGroupSettings(data) {
 // 获取群组设置
 export function getGroupSettings(groupId) {
   return request({
-    url: '/im/group/settings/' + groupId,
+    url: '/api/im/group/settings/' + groupId,
     method: 'get',
   })
 }
@@ -63,7 +63,7 @@ export function getGroupSettings(groupId) {
 // 更新群组公告
 export function updateGroupAnnouncement(data) {
   return request({
-    url: '/im/group/announcement',
+    url: '/api/im/group/announcement',
     method: 'put',
     data: data,
   })
@@ -72,7 +72,7 @@ export function updateGroupAnnouncement(data) {
 // 获取群组公告
 export function getGroupAnnouncement(groupId) {
   return request({
-    url: '/im/group/announcement/' + groupId,
+    url: '/api/im/group/announcement/' + groupId,
     method: 'get',
   })
 }

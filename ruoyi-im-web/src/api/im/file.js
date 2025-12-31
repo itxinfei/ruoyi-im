@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 查询文件列表
 export function listFile(query) {
   return request({
-    url: '/im/file/list',
+    url: '/api/im/file/list',
     method: 'get',
     params: query,
   })
@@ -12,7 +12,7 @@ export function listFile(query) {
 // 查询文件详细
 export function getFile(fileId) {
   return request({
-    url: '/im/file/' + fileId,
+    url: '/api/im/file/' + fileId,
     method: 'get',
   })
 }
@@ -20,7 +20,7 @@ export function getFile(fileId) {
 // 删除文件
 export function delFile(fileId) {
   return request({
-    url: '/im/file/' + fileId,
+    url: '/api/im/file/' + fileId,
     method: 'delete',
   })
 }
@@ -28,7 +28,7 @@ export function delFile(fileId) {
 // 批量删除文件
 export function batchDeleteFiles(fileIds) {
   return request({
-    url: '/im/file/batch',
+    url: '/api/im/file/batch',
     method: 'delete',
     data: fileIds
   })
@@ -37,7 +37,7 @@ export function batchDeleteFiles(fileIds) {
 // 下载文件
 export function downloadFile(fileId) {
   return request({
-    url: '/im/file/download',
+    url: '/api/im/file/download',
     method: 'get',
     params: { fileId },
     responseType: 'blob',
@@ -47,7 +47,7 @@ export function downloadFile(fileId) {
 // 获取文件预览URL
 export function getFilePreviewUrl(fileId) {
   return request({
-    url: '/im/file/preview/' + fileId,
+    url: '/api/im/file/preview/' + fileId,
     method: 'get',
   })
 }
@@ -55,7 +55,7 @@ export function getFilePreviewUrl(fileId) {
 // 获取文件统计信息
 export function getFileStats() {
   return request({
-    url: '/im/file/statistics',
+    url: '/api/im/file/statistics',
     method: 'get',
   })
 }
@@ -63,7 +63,7 @@ export function getFileStats() {
 // 获取存储空间使用情况
 export function getStorageUsage() {
   return request({
-    url: '/im/file/storage',
+    url: '/api/im/file/storage',
     method: 'get',
   })
 }
@@ -71,7 +71,7 @@ export function getStorageUsage() {
 // 获取文件上传配置
 export function getUploadConfig() {
   return request({
-    url: '/im/file/config',
+    url: '/api/im/file/config',
     method: 'get',
   })
 }
@@ -79,7 +79,7 @@ export function getUploadConfig() {
 // 更新文件上传配置
 export function updateUploadConfig(data) {
   return request({
-    url: '/im/file/config',
+    url: '/api/im/file/config',
     method: 'put',
     data: data,
   })
@@ -88,7 +88,7 @@ export function updateUploadConfig(data) {
 // 清理无效文件
 export function cleanInvalidFiles() {
   return request({
-    url: '/im/file/clean',
+    url: '/api/im/file/clean',
     method: 'delete',
   })
 }
@@ -96,7 +96,7 @@ export function cleanInvalidFiles() {
 // 批量移动文件
 export function moveFiles(data) {
   return request({
-    url: '/im/file/move',
+    url: '/api/im/file/move',
     method: 'put',
     data: data,
   })
@@ -105,7 +105,7 @@ export function moveFiles(data) {
 // 批量复制文件
 export function copyFiles(data) {
   return request({
-    url: '/im/file/copy',
+    url: '/api/im/file/copy',
     method: 'post',
     data: data,
   })

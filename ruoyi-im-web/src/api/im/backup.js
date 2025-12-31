@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 获取备份列表
 export function listBackups(query) {
   return request({
-    url: '/im/backup/list',
+    url: '/api/im/backup/list',
     method: 'get',
     params: query,
   })
@@ -12,7 +12,7 @@ export function listBackups(query) {
 // 创建备份
 export function createBackup(data) {
   return request({
-    url: '/im/backup/create',
+    url: '/api/im/backup/create',
     method: 'post',
     data: data,
   })
@@ -21,7 +21,7 @@ export function createBackup(data) {
 // 下载备份
 export function downloadBackup(backupId) {
   return request({
-    url: '/im/backup/download/' + backupId,
+    url: '/api/im/backup/download/' + backupId,
     method: 'get',
     responseType: 'blob',
   })
@@ -30,7 +30,7 @@ export function downloadBackup(backupId) {
 // 删除备份
 export function deleteBackup(backupId) {
   return request({
-    url: '/im/backup/' + backupId,
+    url: '/api/im/backup/' + backupId,
     method: 'delete',
   })
 }
@@ -38,7 +38,7 @@ export function deleteBackup(backupId) {
 // 恢复备份
 export function restoreBackup(backupId) {
   return request({
-    url: '/im/backup/restore/' + backupId,
+    url: '/api/im/backup/restore/' + backupId,
     method: 'post',
   })
 }
@@ -46,7 +46,7 @@ export function restoreBackup(backupId) {
 // 获取备份设置
 export function getBackupSettings() {
   return request({
-    url: '/im/backup/settings',
+    url: '/api/im/backup/settings',
     method: 'get',
   })
 }
@@ -54,7 +54,7 @@ export function getBackupSettings() {
 // 更新备份设置
 export function updateBackupSettings(data) {
   return request({
-    url: '/im/backup/settings',
+    url: '/api/im/backup/settings',
     method: 'put',
     data: data,
   })
@@ -63,7 +63,7 @@ export function updateBackupSettings(data) {
 // 获取备份状态
 export function getBackupStatus() {
   return request({
-    url: '/im/backup/status',
+    url: '/api/im/backup/status',
     method: 'get',
   })
 }
@@ -71,7 +71,7 @@ export function getBackupStatus() {
 // 取消备份任务
 export function cancelBackup(backupId) {
   return request({
-    url: '/im/backup/cancel/' + backupId,
+    url: '/api/im/backup/cancel/' + backupId,
     method: 'post',
   })
 }

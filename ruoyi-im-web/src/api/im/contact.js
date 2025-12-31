@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 获取联系人列表
 export function listContact(query) {
   return request({
-    url: '/im/contact/list',
+    url: '/api/im/contact/list',
     method: 'get',
     params: query,
   })
@@ -12,7 +12,7 @@ export function listContact(query) {
 // 添加联系人（发送好友申请）
 export function addContact(data) {
   return request({
-    url: '/im/contact/add',
+    url: '/api/im/contact/add',
     method: 'post',
     data: data,
   })
@@ -21,7 +21,7 @@ export function addContact(data) {
 // 删除联系人
 export function deleteContact(userId) {
   return request({
-    url: '/im/contact/' + userId,
+    url: '/api/im/contact/' + userId,
     method: 'delete',
   })
 }
@@ -29,7 +29,7 @@ export function deleteContact(userId) {
 // 获取联系人详情
 export function getContactInfo(userId) {
   return request({
-    url: '/im/contact/' + userId,
+    url: '/api/im/contact/' + userId,
     method: 'get',
   })
 }
@@ -37,7 +37,7 @@ export function getContactInfo(userId) {
 // 更新联系人备注
 export function updateContactRemark(data) {
   return request({
-    url: '/im/contact/remark',
+    url: '/api/im/contact/remark',
     method: 'put',
     data: data,
   })
@@ -46,7 +46,7 @@ export function updateContactRemark(data) {
 // 获取联系人在线状态
 export function getContactStatus(userIds) {
   return request({
-    url: '/im/contact/status',
+    url: '/api/im/contact/status',
     method: 'post',
     data: userIds,
   })
@@ -55,7 +55,7 @@ export function getContactStatus(userIds) {
 // 搜索联系人
 export function searchContacts(keyword) {
   return request({
-    url: '/im/contact/search',
+    url: '/api/im/contact/search',
     method: 'get',
     params: { keyword },
   })
@@ -64,7 +64,7 @@ export function searchContacts(keyword) {
 // 获取好友申请列表
 export function getFriendRequests() {
   return request({
-    url: '/im/contact/requests',
+    url: '/api/im/contact/requests',
     method: 'get',
   })
 }
@@ -72,7 +72,7 @@ export function getFriendRequests() {
 // 处理好友申请
 export function handleFriendRequest(data) {
   return request({
-    url: '/im/contact/request/handle',
+    url: '/api/im/contact/request/handle',
     method: 'post',
     data: data,
   })
@@ -81,7 +81,7 @@ export function handleFriendRequest(data) {
 // 获取好友分组列表
 export function getFriendGroups() {
   return request({
-    url: '/im/contact/groups',
+    url: '/api/im/contact/groups',
     method: 'get',
   })
 }
@@ -89,7 +89,7 @@ export function getFriendGroups() {
 // 创建好友分组
 export function createFriendGroup(data) {
   return request({
-    url: '/im/contact/group',
+    url: '/api/im/contact/group',
     method: 'post',
     data: data,
   })
@@ -98,7 +98,7 @@ export function createFriendGroup(data) {
 // 更新好友分组
 export function updateFriendGroup(groupId, data) {
   return request({
-    url: '/im/contact/group/' + groupId,
+    url: '/api/im/contact/group/' + groupId,
     method: 'put',
     data: data,
   })
@@ -107,7 +107,7 @@ export function updateFriendGroup(groupId, data) {
 // 删除好友分组
 export function deleteFriendGroup(groupId) {
   return request({
-    url: '/im/contact/group/' + groupId,
+    url: '/api/im/contact/group/' + groupId,
     method: 'delete',
   })
 }
@@ -115,7 +115,7 @@ export function deleteFriendGroup(groupId) {
 // 移动好友到分组
 export function moveFriendToGroup(data) {
   return request({
-    url: '/im/contact/group/move',
+    url: '/api/im/contact/group/move',
     method: 'put',
     data: data,
   })
@@ -124,7 +124,7 @@ export function moveFriendToGroup(data) {
 // 获取系统通知
 export function getSystemNotifications(query) {
   return request({
-    url: '/im/contact/notifications',
+    url: '/api/im/contact/notifications',
     method: 'get',
     params: query,
   })
@@ -133,7 +133,7 @@ export function getSystemNotifications(query) {
 // 标记通知已读
 export function markNotificationRead(notificationIds) {
   return request({
-    url: '/im/contact/notifications/read',
+    url: '/api/im/contact/notifications/read',
     method: 'post',
     data: notificationIds,
   })
@@ -142,7 +142,7 @@ export function markNotificationRead(notificationIds) {
 // 删除通知
 export function deleteNotification(notificationId) {
   return request({
-    url: '/im/contact/notifications/' + notificationId,
+    url: '/api/im/contact/notifications/' + notificationId,
     method: 'delete',
   })
 }
@@ -150,7 +150,7 @@ export function deleteNotification(notificationId) {
 // 获取未读通知数量
 export function getUnreadNotificationCount() {
   return request({
-    url: '/im/contact/notifications/unread/count',
+    url: '/api/im/contact/notifications/unread/count',
     method: 'get',
   })
 }

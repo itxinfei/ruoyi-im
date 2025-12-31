@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 获取审计日志列表
 export function listAuditLogs(query) {
   return request({
-    url: '/im/audit/list',
+    url: '/api/im/audit/list',
     method: 'get',
     params: query,
   })
@@ -12,7 +12,7 @@ export function listAuditLogs(query) {
 // 获取审计日志详情
 export function getAuditLog(logId) {
   return request({
-    url: '/im/audit/' + logId,
+    url: '/api/im/audit/' + logId,
     method: 'get',
   })
 }
@@ -20,7 +20,7 @@ export function getAuditLog(logId) {
 // 导出审计日志
 export function exportAuditLogs(query) {
   return request({
-    url: '/im/audit/export',
+    url: '/api/im/audit/export',
     method: 'get',
     params: query,
     responseType: 'blob',
@@ -30,7 +30,7 @@ export function exportAuditLogs(query) {
 // 获取审计统计信息
 export function getAuditStatistics(query) {
   return request({
-    url: '/im/audit/statistics',
+    url: '/api/im/audit/statistics',
     method: 'get',
     params: query,
   })
@@ -39,7 +39,7 @@ export function getAuditStatistics(query) {
 // 获取敏感词列表
 export function listSensitiveWords(query) {
   return request({
-    url: '/im/audit/sensitive/list',
+    url: '/api/im/audit/sensitive/list',
     method: 'get',
     params: query,
   })
@@ -48,7 +48,7 @@ export function listSensitiveWords(query) {
 // 添加敏感词
 export function addSensitiveWord(data) {
   return request({
-    url: '/im/audit/sensitive',
+    url: '/api/im/audit/sensitive',
     method: 'post',
     data: data,
   })
@@ -57,7 +57,7 @@ export function addSensitiveWord(data) {
 // 删除敏感词
 export function deleteSensitiveWord(wordId) {
   return request({
-    url: '/im/audit/sensitive/' + wordId,
+    url: '/api/im/audit/sensitive/' + wordId,
     method: 'delete',
   })
 }
@@ -65,7 +65,7 @@ export function deleteSensitiveWord(wordId) {
 // 批量导入敏感词
 export function importSensitiveWords(data) {
   return request({
-    url: '/im/audit/sensitive/import',
+    url: '/api/im/audit/sensitive/import',
     method: 'post',
     data: data,
   })
@@ -74,7 +74,7 @@ export function importSensitiveWords(data) {
 // 获取敏感事件列表
 export function listSensitiveEvents(query) {
   return request({
-    url: '/im/audit/events',
+    url: '/api/im/audit/events',
     method: 'get',
     params: query,
   })
@@ -83,7 +83,7 @@ export function listSensitiveEvents(query) {
 // 处理敏感事件
 export function handleSensitiveEvent(eventId, data) {
   return request({
-    url: '/im/audit/events/' + eventId + '/handle',
+    url: '/api/im/audit/events/' + eventId + '/handle',
     method: 'put',
     data: data,
   })

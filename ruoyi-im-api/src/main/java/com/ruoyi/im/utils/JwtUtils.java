@@ -3,9 +3,11 @@ package com.ruoyi.im.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
 import java.util.Date;
 
 /**
@@ -16,11 +18,19 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
-    @Value("${im.jwt.secret:default_secret_key_for_im_system}")
+    @Value("${im.jwt.secret:im_secret_key_2024_for_api_system_that_is_long_enough_for_HS512_algorithm}")
     private String secret;
 
     @Value("${im.jwt.expiration:86400}") // 默认24小时
     private Long expiration;
+
+    /**
+     * 获取签名密钥
+     */
+    private Key getSigningKey() {
+        // 确保密钥长度满足HS512要求（至少512位）
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     /**
      * 生成JWT token
@@ -33,7 +43,7 @@ public class JwtUtils {
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, secret)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
@@ -41,8 +51,9 @@ public class JwtUtils {
      * 从token中获取用户名
      */
     public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(secret)
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
 
@@ -61,8 +72,9 @@ public class JwtUtils {
      * 从token中获取过期日期
      */
     public Date getExpirationDateFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(secret)
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
         return claims.getExpiration();

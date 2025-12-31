@@ -66,22 +66,23 @@ const actions = {
     return new Promise((resolve, reject) => {
       getInfo(state.token)
         .then(response => {
-          const { data } = response
+          if (response.code === 200) {
+            const data = response.data
 
-          if (!data) {
-            reject('Verification failed, please Login again.')
+            if (!data) {
+              reject('Verification failed, please Login again.')
+            }
+
+            // 提取用户信息
+            const { username, nickname, avatar, email, phone } = data
+
+            commit('SET_NAME', nickname || username)
+            commit('SET_AVATAR', avatar)
+            // 可以根据需要设置其他字段
+            resolve(data)
+          } else {
+            reject(new Error(response.msg || '获取用户信息失败'))
           }
-
-          const { roles, name, avatar } = data
-
-          if (!roles || roles.length <= 0) {
-            reject('getInfo: roles must be a non-null array!')
-          }
-
-          commit('SET_ROLES', roles)
-          commit('SET_NAME', name)
-          commit('SET_AVATAR', avatar)
-          resolve(data)
         })
         .catch(error => {
           reject(error)
@@ -93,16 +94,20 @@ const actions = {
   logout({ commit, state }) {
     return new Promise((resolve, reject) => {
       logout(state.token)
-        .then(() => {
-          commit('SET_TOKEN', '')
-          commit('SET_NAME', '')
-          commit('SET_AVATAR', '')
-          commit('SET_ROLES', [])
-          commit('SET_PERMISSIONS', [])
-          // 清除localStorage中的数据
-          localStorage.removeItem('token')
-          localStorage.removeItem('userInfo')
-          resolve()
+        .then(response => {
+          if (response.code === 200 || response.code === undefined) {
+            commit('SET_TOKEN', '')
+            commit('SET_NAME', '')
+            commit('SET_AVATAR', '')
+            commit('SET_ROLES', [])
+            commit('SET_PERMISSIONS', [])
+            // 清除localStorage中的数据
+            localStorage.removeItem('token')
+            localStorage.removeItem('userInfo')
+            resolve()
+          } else {
+            reject(new Error(response.msg || '登出失败'))
+          }
         })
         .catch(error => {
           reject(error)

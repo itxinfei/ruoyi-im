@@ -170,15 +170,14 @@ const loadContacts = async () => {
   try {
     const res = await listContact()
     if (res.code === 200) {
-      contacts.value = res.rows || res.data || []
-      // 加载在线状态
-      if (contacts.value.length > 0) {
-        await loadOnlineStatus()
-      }
+      // 确保contacts是数组
+      contacts.value = Array.isArray(res.rows) ? res.rows : 
+                      Array.isArray(res.data) ? res.data : []
     }
   } catch (error) {
     console.error('加载联系人失败:', error)
     ElMessage.error('加载联系人失败')
+    contacts.value = [] // 确保contacts是数组
   } finally {
     loading.value = false
   }
@@ -222,7 +221,9 @@ const handleSearch = async () => {
   try {
     const res = await searchContacts(searchText.value)
     if (res.code === 200) {
-      contacts.value = res.rows || res.data || []
+      // 确保搜索结果是数组
+      contacts.value = Array.isArray(res.rows) ? res.rows : 
+                      Array.isArray(res.data) ? res.data : []
     }
   } catch (error) {
     console.error('搜索联系人失败:', error)
@@ -233,17 +234,28 @@ const handleSearch = async () => {
 
 // 计算属性
 const filteredContacts = computed(() => {
-  if (!searchText.value) return contacts.value
+  // 确保contacts是数组
+  const contactList = Array.isArray(contacts.value) ? contacts.value : []
+  
+  if (!searchText.value) return contactList
   const keyword = searchText.value.toLowerCase()
-  return contacts.value.filter(c => {
+  return contactList.filter(c => {
     const name = c.friendNickname || c.name || ''
     const username = c.friendUsername || c.username || ''
     return name.toLowerCase().includes(keyword) || username.toLowerCase().includes(keyword)
   })
 })
 
-const onlineContacts = computed(() => filteredContacts.value.filter(c => c.online))
-const starredContacts = computed(() => filteredContacts.value.filter(c => c.starred))
+const onlineContacts = computed(() => {
+  // 确保filteredContacts是数组
+  const contactList = Array.isArray(filteredContacts.value) ? filteredContacts.value : []
+  return contactList.filter(c => c.online)
+})
+const starredContacts = computed(() => {
+  // 确保filteredContacts是数组
+  const contactList = Array.isArray(filteredContacts.value) ? filteredContacts.value : []
+  return contactList.filter(c => c.starred)
+})
 
 const currentContacts = computed(() => {
   switch (activeGroup.value) {

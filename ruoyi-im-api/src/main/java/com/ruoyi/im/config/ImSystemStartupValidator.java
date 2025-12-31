@@ -18,12 +18,9 @@ public class ImSystemStartupValidator implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         logger.info("=== IM系统启动验证开始 ===");
-        
         logger.info("✓ IM系统API接口已成功启动");
-        logger.info("✓ 支持路径: /im/* 和 /api/im/*");
         logger.info("✓ 已启用测试数据生成功能 (开发环境)");
         logger.info("✓ 所有IM服务组件已就绪");
-        
         logger.info("=== IM系统启动验证完成 ===");
     }
 }
