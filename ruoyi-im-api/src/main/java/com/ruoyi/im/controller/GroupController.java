@@ -243,9 +243,13 @@ public class GroupController {
                     existingMembers = java.util.Collections.emptyList();
                 }
                 
-                List<Long> newMembers = userIds.stream()
-                    .filter(id -> !existingMembers.contains(id))
-                    .collect(Collectors.toList());
+                // 使用传统方式实现过滤，避免lambda表达式的类型推断问题
+                List<Long> newMembers = new java.util.ArrayList<>();
+                for (Long id : userIds) {
+                    if (!existingMembers.contains(id)) {
+                        newMembers.add(id);
+                    }
+                }
                 
                 List<Long> allMembers = new java.util.ArrayList<>(existingMembers);
                 allMembers.addAll(newMembers);
@@ -284,9 +288,13 @@ public class GroupController {
                 List<Long> existingMembers = (List<Long>) group.get("memberIds");
                 
                 if (existingMembers != null && existingMembers.contains(userId)) {
-                    List<Long> updatedMembers = existingMembers.stream()
-                        .filter(id -> !id.equals(userId))
-                        .collect(Collectors.toList());
+                    // 使用传统方式实现过滤，避免lambda表达式的类型推断问题
+                    List<Long> updatedMembers = new java.util.ArrayList<>();
+                    for (Long id : existingMembers) {
+                        if (!id.equals(userId)) {
+                            updatedMembers.add(id);
+                        }
+                    }
                     
                     group.put("memberIds", updatedMembers);
                     group.put("updateTime", LocalDateTime.now());

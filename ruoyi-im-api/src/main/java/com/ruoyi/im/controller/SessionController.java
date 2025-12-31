@@ -35,7 +35,7 @@ public class SessionController {
             int end = Math.min(start + pageSize, sessions.size());
             
             List<Map<String, Object>> pagedSessions = start < sessions.size() ? 
-                sessions.subList(start, end) : List.of();
+                sessions.subList(start, end) : java.util.Collections.emptyList();
             
             Map<String, Object> pageResult = new HashMap<>();
             pageResult.put("rows", pagedSessions);
@@ -217,12 +217,16 @@ public class SessionController {
                 @SuppressWarnings("unchecked")
                 List<Long> existingMembers = (List<Long>) session.get("participantIds");
                 if (existingMembers == null) {
-                    existingMembers = List.of();
+                    existingMembers = java.util.Collections.emptyList();
                 }
                 
-                List<Long> newMembers = userIds.stream()
-                    .filter(id -> !existingMembers.contains(id))
-                    .collect(Collectors.toList());
+                // 使用传统方式实现过滤，避免lambda表达式的类型推断问题
+                List<Long> newMembers = new java.util.ArrayList<>();
+                for (Long id : userIds) {
+                    if (!existingMembers.contains(id)) {
+                        newMembers.add(id);
+                    }
+                }
                 
                 List<Long> allMembers = new java.util.ArrayList<>(existingMembers);
                 allMembers.addAll(newMembers);
@@ -262,18 +266,22 @@ public class SessionController {
                 List<Long> existingMembers = (List<Long>) session.get("participantIds");
                 
                 if (existingMembers != null && existingMembers.contains(userId)) {
-                    List<Long> updatedMembers = existingMembers.stream()
-                        .filter(id -> !id.equals(userId))
-                        .collect(Collectors.toList());
-                    
-                    session.put("participantIds", updatedMembers);
-                    session.put("updateTime", LocalDateTime.now());
-                    
-                    updateSessionInMemory(session);
-                    
-                    result.put("code", 200);
-                    result.put("msg", "成员移除成功");
-                } else {
+                                                                    // 使用传统方式实现过滤，避免lambda表达式的类型推断问题
+                                                                    List<Long> updatedMembers = new java.util.ArrayList<>();
+                                                                    for (Long id : existingMembers) {
+                                                                        if (!id.equals(userId)) {
+                                                                            updatedMembers.add(id);
+                                                                        }
+                                                                    }
+                                                                    
+                                                                    session.put("participantIds", updatedMembers);
+                                                                    session.put("updateTime", LocalDateTime.now());
+                                                                    
+                                                                    updateSessionInMemory(session);
+                                                                    
+                                                                    result.put("code", 200);
+                                                                    result.put("msg", "成员移除成功");
+                                                                } else {
                     result.put("code", 404);
                     result.put("msg", "成员不存在于会话中");
                 }
@@ -351,7 +359,7 @@ public class SessionController {
     private List<Map<String, Object>> getSessionsByType(String type) {
         // 根据类型获取会话列表
         // 实际项目中应从数据库查询
-        return List.of();
+        return java.util.Collections.emptyList();
     }
     
     private Map<String, Object> getSessionById(String sessionId) {
@@ -379,6 +387,6 @@ public class SessionController {
     private List<Map<String, Object>> getSessionMembersById(String sessionId) {
         // 获取会话成员列表
         // 实际项目中应从数据库查询
-        return List.of();
+        return java.util.Collections.emptyList();
     }
 }

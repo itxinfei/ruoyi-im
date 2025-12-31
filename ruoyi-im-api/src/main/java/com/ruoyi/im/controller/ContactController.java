@@ -32,7 +32,7 @@ public class ContactController {
             
             // 过滤条件
             List<Map<String, Object>> filteredContacts = allContacts.stream()
-                .filter(contact -> keyword == null || 
+                .filter((Map<String, Object> contact) -> keyword == null || 
                     contact.get("username").toString().contains(keyword) ||
                     contact.get("nickname").toString().contains(keyword))
                 .collect(Collectors.toList());

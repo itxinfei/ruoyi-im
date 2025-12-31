@@ -46,7 +46,7 @@ public class UserController {
         int end = Math.min(start + pageSize, filteredUsers.size());
         
         List<ImUser> pagedUsers = start < filteredUsers.size() ? 
-            filteredUsers.subList(start, end) : List.of();
+            filteredUsers.subList(start, end) : java.util.Collections.emptyList();
         
         Map<String, Object> pageResult = new HashMap<>();
         pageResult.put("rows", pagedUsers);

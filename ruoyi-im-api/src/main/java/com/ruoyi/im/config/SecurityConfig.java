@@ -48,6 +48,8 @@ public class SecurityConfig {
         http
             // 禁用 CSRF
             .csrf().disable()
+            // 启用跨域
+            .cors().and()
             // 禁用默认的Session管理
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             // 设置未认证访问的处理类
@@ -60,6 +62,8 @@ public class SecurityConfig {
             .antMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.gif").permitAll()
             // Swagger相关接口
             .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+            // IM相关接口
+            .antMatchers("/im/**").permitAll() // 在实际部署时，可能需要认证
             // 所有请求都需要认证
             .anyRequest().authenticated();
 
