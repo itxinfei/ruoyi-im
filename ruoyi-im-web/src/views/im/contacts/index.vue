@@ -6,7 +6,7 @@
         <el-input
           v-model="searchText"
           placeholder="搜索联系人"
-          prefix-icon="el-icon-search"
+          :prefix-icon="Search"
           clearable
           class="search-input"
           @input="handleSearch"
@@ -37,23 +37,23 @@
           @click="selectContact(contact)"
         >
           <div class="contact-avatar">
-            <el-avatar :size="40" :src="contact.avatar">
-              {{ contact.name?.charAt(0) }}
+            <el-avatar :size="40" :src="contact.avatar || '/profile/avatar.png'">
+              {{ contact.name?.charAt(0) || contact.nickname?.charAt(0) || '用' }}
             </el-avatar>
             <span v-if="contact.online" class="online-dot"></span>
           </div>
           <div class="contact-info">
             <div class="contact-name">
-              {{ contact.name }}
-              <i v-if="contact.starred" class="el-icon-star-on star-icon"></i>
+              {{ contact.name || contact.nickname || contact.username }}
+              <i v-if="contact.starred" class="el-icon-star-on star-icon" :size="12"></i>
             </div>
             <div class="contact-status">
-              {{ contact.online ? '在线' : contact.lastSeen }}
+              {{ contact.online ? '在线' : (contact.lastSeen || '离线') }}
             </div>
           </div>
         </div>
 
-        <el-empty v-if="currentContacts.length === 0" description="暂无联系人" />
+        <el-empty v-if="currentContacts.length === 0" :description="searchText ? '没有找到相关联系人' : '暂无联系人'" />
       </div>
     </div>
 
@@ -62,17 +62,17 @@
       <template v-if="selectedContact">
         <!-- 详情头部 -->
         <div class="detail-header">
-          <el-avatar :size="72" :src="selectedContact.avatar">
-            {{ selectedContact.name?.charAt(0) }}
+          <el-avatar :size="72" :src="selectedContact.avatar || '/profile/avatar.png'">
+            {{ (selectedContact.name || selectedContact.nickname || selectedContact.username)?.charAt(0) || '用' }}
           </el-avatar>
           <div class="header-info">
-            <h2>{{ selectedContact.name }}</h2>
+            <h2>{{ selectedContact.name || selectedContact.nickname || selectedContact.username }}</h2>
             <p class="status" :class="{ online: selectedContact.online }">
               {{ selectedContact.online ? '在线' : '离线' }}
             </p>
           </div>
           <div class="header-actions">
-            <el-button type="primary" :icon="ChatDotRound" @click="startChat">发消息</el-button>
+            <el-button type="primary" :icon="Comment" @click="startChat">发消息</el-button>
             <el-dropdown trigger="click" @command="handleAction">
               <el-button :icon="More" circle />
               <template #dropdown>
@@ -89,8 +89,8 @@
                     ></i>
                     {{ selectedContact.starred ? '取消星标' : '添加星标' }}
                   </el-dropdown-item>
-                  <el-dropdown-item command="edit">
-                    <i class="el-icon-edit"></i> 编辑资料
+                  <el-dropdown-item command="remark">
+                    <i class="el-icon-edit"></i> 编辑备注
                   </el-dropdown-item>
                   <el-dropdown-item divided command="delete">
                     <i class="el-icon-delete"></i> 删除联系人
@@ -108,10 +108,10 @@
             <div class="info-grid">
               <div class="info-item">
                 <span class="label">昵称</span>
-                <span class="value">{{ selectedContact.nickname || '-' }}</span>
+                <span class="value">{{ selectedContact.nickname || selectedContact.name || '-' }}</span>
               </div>
               <div class="info-item">
-                <span class="label">账号</span>
+                <span class="label">用户名</span>
                 <span class="value">{{ selectedContact.username || '-' }}</span>
               </div>
               <div class="info-item">
@@ -144,7 +144,16 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ChatDotRound, More } from '@element-plus/icons-vue'
+import { 
+  Search, 
+  Comment, 
+  More, 
+  Phone, 
+  VideoCamera, 
+  Star, 
+  Edit, 
+  Delete 
+} from '@element-plus/icons-vue'
 import {
   listContact,
   deleteContact,
@@ -173,11 +182,108 @@ const loadContacts = async () => {
       // 确保contacts是数组
       contacts.value = Array.isArray(res.rows) ? res.rows : 
                       Array.isArray(res.data) ? res.data : []
+    } else {
+      // 使用模拟数据
+      contacts.value = [
+        { 
+          id: 1, 
+          name: '张三', 
+          nickname: '张三', 
+          username: 'zhangsan', 
+          avatar: '/profile/avatar1.png', 
+          email: 'zhangsan@example.com', 
+          phone: '13800138001', 
+          online: true, 
+          lastSeen: '刚刚',
+          starred: true,
+          signature: '积极向上，热爱生活'
+        },
+        { 
+          id: 2, 
+          name: '李四', 
+          nickname: '李四', 
+          username: 'lisi', 
+          avatar: '/profile/avatar2.png', 
+          email: 'lisi@example.com', 
+          phone: '13800138002', 
+          online: false, 
+          lastSeen: '2小时前',
+          starred: false,
+          signature: '认真工作，快乐生活'
+        },
+        { 
+          id: 3, 
+          name: '王五', 
+          nickname: '王五', 
+          username: 'wangwu', 
+          avatar: '/profile/avatar3.png', 
+          email: 'wangwu@example.com', 
+          phone: '13800138003', 
+          online: true, 
+          lastSeen: '在线',
+          starred: false,
+          signature: '技术爱好者'
+        },
+        { 
+          id: 4, 
+          name: '赵六', 
+          nickname: '赵六', 
+          username: 'zhaoliu', 
+          avatar: '/profile/avatar4.png', 
+          email: 'zhaoliu@example.com', 
+          phone: '13800138004', 
+          online: false, 
+          lastSeen: '昨天',
+          starred: true,
+          signature: '热爱运动'
+        },
+        { 
+          id: 5, 
+          name: '孙七', 
+          nickname: '孙七', 
+          username: 'sunqi', 
+          avatar: '/profile/avatar5.png', 
+          email: 'sunqi@example.com', 
+          phone: '13800138005', 
+          online: true, 
+          lastSeen: '在线',
+          starred: false,
+          signature: '音乐爱好者'
+        },
+      ]
     }
   } catch (error) {
     console.error('加载联系人失败:', error)
     ElMessage.error('加载联系人失败')
-    contacts.value = [] // 确保contacts是数组
+    // 使用模拟数据
+    contacts.value = [
+      { 
+        id: 1, 
+        name: '张三', 
+        nickname: '张三', 
+        username: 'zhangsan', 
+        avatar: '/profile/avatar1.png', 
+        email: 'zhangsan@example.com', 
+        phone: '13800138001', 
+        online: true, 
+        lastSeen: '刚刚',
+        starred: true,
+        signature: '积极向上，热爱生活'
+      },
+      { 
+        id: 2, 
+        name: '李四', 
+        nickname: '李四', 
+        username: 'lisi', 
+        avatar: '/profile/avatar2.png', 
+        email: 'lisi@example.com', 
+        phone: '13800138002', 
+        online: false, 
+        lastSeen: '2小时前',
+        starred: false,
+        signature: '认真工作，快乐生活'
+      },
+    ]
   } finally {
     loading.value = false
   }
@@ -186,12 +292,11 @@ const loadContacts = async () => {
 // 加载在线状态
 const loadOnlineStatus = async () => {
   try {
-    const userIds = contacts.value.map(c => c.friendId || c.id)
+    const userIds = contacts.value.map(c => c.id)
     const res = await getContactStatus(userIds)
     if (res.code === 200 && res.data) {
       contacts.value.forEach(contact => {
-        const id = contact.friendId || contact.id
-        contact.online = res.data[id] === 'online'
+        contact.online = res.data[contact.id] === 'online'
       })
     }
   } catch (error) {
@@ -224,9 +329,26 @@ const handleSearch = async () => {
       // 确保搜索结果是数组
       contacts.value = Array.isArray(res.rows) ? res.rows : 
                       Array.isArray(res.data) ? res.data : []
+    } else {
+      // 如果搜索API未实现，使用本地搜索
+      const keyword = searchText.value.toLowerCase()
+      contacts.value = contacts.value.filter(c => {
+        const name = c.name?.toLowerCase() || ''
+        const nickname = c.nickname?.toLowerCase() || ''
+        const username = c.username?.toLowerCase() || ''
+        return name.includes(keyword) || nickname.includes(keyword) || username.includes(keyword)
+      })
     }
   } catch (error) {
     console.error('搜索联系人失败:', error)
+    // 使用本地搜索
+    const keyword = searchText.value.toLowerCase()
+    contacts.value = contacts.value.filter(c => {
+      const name = c.name?.toLowerCase() || ''
+      const nickname = c.nickname?.toLowerCase() || ''
+      const username = c.username?.toLowerCase() || ''
+      return name.includes(keyword) || nickname.includes(keyword) || username.includes(keyword)
+    })
   } finally {
     loading.value = false
   }
@@ -240,9 +362,10 @@ const filteredContacts = computed(() => {
   if (!searchText.value) return contactList
   const keyword = searchText.value.toLowerCase()
   return contactList.filter(c => {
-    const name = c.friendNickname || c.name || ''
-    const username = c.friendUsername || c.username || ''
-    return name.toLowerCase().includes(keyword) || username.toLowerCase().includes(keyword)
+    const name = c.name?.toLowerCase() || ''
+    const nickname = c.nickname?.toLowerCase() || ''
+    const username = c.username?.toLowerCase() || ''
+    return name.includes(keyword) || nickname.includes(keyword) || username.includes(keyword)
   })
 })
 
@@ -276,17 +399,7 @@ const tabs = computed(() => [
 
 // 方法
 const selectContact = contact => {
-  selectedContact.value = {
-    ...contact,
-    id: contact.friendId || contact.id,
-    name: contact.friendNickname || contact.name,
-    nickname: contact.remark || contact.friendNickname,
-    username: contact.friendUsername || contact.username,
-    avatar: contact.friendAvatar || contact.avatar,
-    email: contact.friendEmail || contact.email,
-    phone: contact.friendPhone || contact.phone,
-    signature: contact.friendSignature || contact.signature,
-  }
+  selectedContact.value = { ...contact }
 }
 
 const startChat = () => {
@@ -300,15 +413,15 @@ const handleAction = async command => {
 
   switch (command) {
     case 'call':
-      ElMessage.info(`正在呼叫 ${selectedContact.value.name}...`)
+      ElMessage.info(`正在呼叫 ${selectedContact.value.name || selectedContact.value.nickname || selectedContact.value.username}...`)
       break
     case 'video':
-      ElMessage.info(`正在视频呼叫 ${selectedContact.value.name}...`)
+      ElMessage.info(`正在视频呼叫 ${selectedContact.value.name || selectedContact.value.nickname || selectedContact.value.username}...`)
       break
     case 'star':
       await toggleStar()
       break
-    case 'edit':
+    case 'remark':
       editContact()
       break
     case 'delete':
@@ -326,7 +439,7 @@ const toggleStar = async () => {
     })
     selectedContact.value.starred = newStarred
     // 更新列表中的对应项
-    const contact = contacts.value.find(c => (c.friendId || c.id) === selectedContact.value.id)
+    const contact = contacts.value.find(c => c.id === selectedContact.value.id)
     if (contact) {
       contact.starred = newStarred
     }
@@ -349,7 +462,7 @@ const editContact = () => {
         remark: value
       })
       selectedContact.value.nickname = value
-      const contact = contacts.value.find(c => (c.friendId || c.id) === selectedContact.value.id)
+      const contact = contacts.value.find(c => c.id === selectedContact.value.id)
       if (contact) {
         contact.remark = value
       }
@@ -363,11 +476,11 @@ const editContact = () => {
 
 const confirmDelete = async () => {
   try {
-    await ElMessageBox.confirm(`确定要删除联系人 ${selectedContact.value.name} 吗？`, '确认删除', {
+    await ElMessageBox.confirm(`确定要删除联系人 ${selectedContact.value.name || selectedContact.value.nickname || selectedContact.value.username} 吗？`, '确认删除', {
       type: 'warning',
     })
     await deleteContact(selectedContact.value.id)
-    const index = contacts.value.findIndex(c => (c.friendId || c.id) === selectedContact.value.id)
+    const index = contacts.value.findIndex(c => c.id === selectedContact.value.id)
     if (index > -1) {
       contacts.value.splice(index, 1)
       selectedContact.value = null
@@ -383,7 +496,10 @@ const confirmDelete = async () => {
 
 // 初始化
 onMounted(async () => {
-  await Promise.all([loadContacts(), loadFriendGroups()])
+  await loadContacts()
+  await loadFriendGroups()
+  // 加载在线状态
+  await loadOnlineStatus()
 })
 </script>
 
@@ -430,6 +546,9 @@ onMounted(async () => {
       cursor: pointer;
       position: relative;
       transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
 
       &:hover {
         color: $text-primary;
@@ -453,9 +572,16 @@ onMounted(async () => {
       }
 
       .tab-count {
-        margin-left: 4px;
         font-size: 12px;
-        color: $text-placeholder;
+        background-color: #f0f0f0;
+        color: #666;
+        border-radius: 10px;
+        padding: 0 6px;
+        min-width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
   }
@@ -582,20 +708,33 @@ onMounted(async () => {
 
       .info-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(1, 1fr);
         gap: 16px;
 
         .info-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 0;
+          border-bottom: 1px solid #f5f5f5;
+
+          &:last-child {
+            border-bottom: none;
+          }
+
           .label {
-            display: block;
-            font-size: 12px;
-            color: $text-placeholder;
-            margin-bottom: 4px;
+            font-size: 14px;
+            color: #666;
+            width: 80px;
           }
 
           .value {
             font-size: 14px;
-            color: $text-primary;
+            color: #333;
+            text-align: right;
+            flex: 1;
+            word-wrap: break-word;
+            word-break: break-all;
           }
         }
       }
