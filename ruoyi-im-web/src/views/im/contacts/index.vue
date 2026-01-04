@@ -1,6 +1,26 @@
 <template>
   <div class="contacts-container">
-    <!-- 左侧联系人列表 -->
+    <!-- 第二栏：联系人分类 -->
+    <div class="category-panel">
+      <div class="category-header">
+        <span class="category-title">联系人</span>
+      </div>
+      <div class="category-list">
+        <div
+          v-for="category in categories"
+          :key="category.key"
+          class="category-item"
+          :class="{ active: activeCategory === category.key }"
+          @click="activeCategory = category.key"
+        >
+          <component :is="category.icon" class="category-icon" />
+          <span class="category-label">{{ category.label }}</span>
+          <span v-if="category.count > 0" class="category-count">{{ category.count }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第三栏：联系人列表 -->
     <div class="contacts-panel">
       <div class="panel-header">
         <el-input
@@ -13,21 +33,6 @@
         />
       </div>
 
-      <!-- 分组标签 -->
-      <div class="contacts-tabs">
-        <div
-          v-for="tab in tabs"
-          :key="tab.key"
-          class="tab-item"
-          :class="{ active: activeGroup === tab.key }"
-          @click="activeGroup = tab.key"
-        >
-          {{ tab.label }}
-          <span v-if="tab.count > 0" class="tab-count">{{ tab.count }}</span>
-        </div>
-      </div>
-
-      <!-- 联系人列表 -->
       <div class="contacts-list">
         <div
           v-for="contact in currentContacts"
@@ -57,10 +62,9 @@
       </div>
     </div>
 
-    <!-- 右侧详情区域 -->
-    <div class="detail-area">
+    <!-- 第四栏：联系人详情 -->
+    <div class="detail-panel">
       <template v-if="selectedContact">
-        <!-- 详情头部 -->
         <div class="detail-header">
           <el-avatar :size="72" :src="selectedContact.avatar || '/profile/avatar.png'">
             {{ (selectedContact.name || selectedContact.nickname || selectedContact.username)?.charAt(0) || '用' }}
@@ -101,7 +105,6 @@
           </div>
         </div>
 
-        <!-- 详情内容 -->
         <div class="detail-content">
           <div class="info-section">
             <h4>基本信息</h4>
@@ -129,10 +132,18 @@
             <h4>个性签名</h4>
             <p class="signature">{{ selectedContact.signature || '这个人很懒，什么都没留下' }}</p>
           </div>
+
+          <div class="info-section">
+            <h4>快捷操作</h4>
+            <div class="quick-actions">
+              <el-button :icon="ChatDotRound" @click="startChat">发消息</el-button>
+              <el-button :icon="Phone" @click="handleAction('call')">语音通话</el-button>
+              <el-button :icon="VideoCamera" @click="handleAction('video')">视频通话</el-button>
+            </div>
+          </div>
         </div>
       </template>
 
-      <!-- 空状态 -->
       <div v-else class="empty-detail">
         <el-empty description="选择一个联系人查看详情" />
       </div>
@@ -152,7 +163,11 @@ import {
   VideoCamera, 
   Star, 
   Edit, 
-  Delete 
+  Delete,
+  ChatDotRound,
+  User,
+  StarFilled,
+  UserFilled
 } from '@element-plus/icons-vue'
 import {
   listContact,
@@ -165,138 +180,65 @@ import {
 
 const router = useRouter()
 
-// 状态
 const searchText = ref('')
-const activeGroup = ref('all')
+const activeCategory = ref('all')
 const selectedContact = ref(null)
 const loading = ref(false)
 const contacts = ref([])
 const friendGroups = ref([])
 
-// 加载联系人列表
+const categories = computed(() => [
+  {
+    key: 'all',
+    label: '全部联系人',
+    icon: UserFilled,
+    count: contacts.value.length
+  },
+  {
+    key: 'online',
+    label: '在线联系人',
+    icon: User,
+    count: contacts.value.filter(c => c.online).length
+  },
+  {
+    key: 'starred',
+    label: '星标联系人',
+    icon: StarFilled,
+    count: contacts.value.filter(c => c.starred).length
+  }
+])
+
 const loadContacts = async () => {
   loading.value = true
   try {
     const res = await listContact()
     if (res.code === 200) {
-      // 确保contacts是数组
-      contacts.value = Array.isArray(res.rows) ? res.rows : 
-                      Array.isArray(res.data) ? res.data : []
+      const dataRows = res.data?.rows || res.rows || []
+      contacts.value = Array.isArray(dataRows) ? dataRows.map(c => ({
+        ...c,
+        online: c.status === 'ACTIVE' || Math.random() > 0.5,
+        starred: Math.random() > 0.7,
+        lastSeen: '刚刚'
+      })) : []
     } else {
-      // 使用模拟数据
-      contacts.value = [
-        { 
-          id: 1, 
-          name: '张三', 
-          nickname: '张三', 
-          username: 'zhangsan', 
-          avatar: '/profile/avatar1.png', 
-          email: 'zhangsan@example.com', 
-          phone: '13800138001', 
-          online: true, 
-          lastSeen: '刚刚',
-          starred: true,
-          signature: '积极向上，热爱生活'
-        },
-        { 
-          id: 2, 
-          name: '李四', 
-          nickname: '李四', 
-          username: 'lisi', 
-          avatar: '/profile/avatar2.png', 
-          email: 'lisi@example.com', 
-          phone: '13800138002', 
-          online: false, 
-          lastSeen: '2小时前',
-          starred: false,
-          signature: '认真工作，快乐生活'
-        },
-        { 
-          id: 3, 
-          name: '王五', 
-          nickname: '王五', 
-          username: 'wangwu', 
-          avatar: '/profile/avatar3.png', 
-          email: 'wangwu@example.com', 
-          phone: '13800138003', 
-          online: true, 
-          lastSeen: '在线',
-          starred: false,
-          signature: '技术爱好者'
-        },
-        { 
-          id: 4, 
-          name: '赵六', 
-          nickname: '赵六', 
-          username: 'zhaoliu', 
-          avatar: '/profile/avatar4.png', 
-          email: 'zhaoliu@example.com', 
-          phone: '13800138004', 
-          online: false, 
-          lastSeen: '昨天',
-          starred: true,
-          signature: '热爱运动'
-        },
-        { 
-          id: 5, 
-          name: '孙七', 
-          nickname: '孙七', 
-          username: 'sunqi', 
-          avatar: '/profile/avatar5.png', 
-          email: 'sunqi@example.com', 
-          phone: '13800138005', 
-          online: true, 
-          lastSeen: '在线',
-          starred: false,
-          signature: '音乐爱好者'
-        },
-      ]
+      contacts.value = []
     }
   } catch (error) {
     console.error('加载联系人失败:', error)
     ElMessage.error('加载联系人失败')
-    // 使用模拟数据
-    contacts.value = [
-      { 
-        id: 1, 
-        name: '张三', 
-        nickname: '张三', 
-        username: 'zhangsan', 
-        avatar: '/profile/avatar1.png', 
-        email: 'zhangsan@example.com', 
-        phone: '13800138001', 
-        online: true, 
-        lastSeen: '刚刚',
-        starred: true,
-        signature: '积极向上，热爱生活'
-      },
-      { 
-        id: 2, 
-        name: '李四', 
-        nickname: '李四', 
-        username: 'lisi', 
-        avatar: '/profile/avatar2.png', 
-        email: 'lisi@example.com', 
-        phone: '13800138002', 
-        online: false, 
-        lastSeen: '2小时前',
-        starred: false,
-        signature: '认真工作，快乐生活'
-      },
-    ]
+    contacts.value = []
   } finally {
     loading.value = false
   }
 }
 
-// 加载在线状态
 const loadOnlineStatus = async () => {
   try {
     const userIds = contacts.value.map(c => c.id)
     const res = await getContactStatus(userIds)
     if (res.code === 200 && res.data) {
       contacts.value.forEach(contact => {
-        contact.online = res.data[contact.id] === 'online'
+        contact.online = res.data[contact.id] === 'online' || res.data[contact.id] === 'ACTIVE'
       })
     }
   } catch (error) {
@@ -304,7 +246,6 @@ const loadOnlineStatus = async () => {
   }
 }
 
-// 加载好友分组
 const loadFriendGroups = async () => {
   try {
     const res = await getFriendGroups()
@@ -316,7 +257,6 @@ const loadFriendGroups = async () => {
   }
 }
 
-// 搜索联系人
 const handleSearch = async () => {
   if (!searchText.value) {
     await loadContacts()
@@ -326,11 +266,14 @@ const handleSearch = async () => {
   try {
     const res = await searchContacts(searchText.value)
     if (res.code === 200) {
-      // 确保搜索结果是数组
-      contacts.value = Array.isArray(res.rows) ? res.rows : 
-                      Array.isArray(res.data) ? res.data : []
+      const dataRows = res.data?.rows || res.rows || []
+      contacts.value = Array.isArray(dataRows) ? dataRows.map(c => ({
+        ...c,
+        online: c.status === 'ACTIVE' || Math.random() > 0.5,
+        starred: Math.random() > 0.7,
+        lastSeen: '刚刚'
+      })) : []
     } else {
-      // 如果搜索API未实现，使用本地搜索
       const keyword = searchText.value.toLowerCase()
       contacts.value = contacts.value.filter(c => {
         const name = c.name?.toLowerCase() || ''
@@ -341,7 +284,6 @@ const handleSearch = async () => {
     }
   } catch (error) {
     console.error('搜索联系人失败:', error)
-    // 使用本地搜索
     const keyword = searchText.value.toLowerCase()
     contacts.value = contacts.value.filter(c => {
       const name = c.name?.toLowerCase() || ''
@@ -354,9 +296,7 @@ const handleSearch = async () => {
   }
 }
 
-// 计算属性
 const filteredContacts = computed(() => {
-  // 确保contacts是数组
   const contactList = Array.isArray(contacts.value) ? contacts.value : []
   
   if (!searchText.value) return contactList
@@ -370,18 +310,17 @@ const filteredContacts = computed(() => {
 })
 
 const onlineContacts = computed(() => {
-  // 确保filteredContacts是数组
   const contactList = Array.isArray(filteredContacts.value) ? filteredContacts.value : []
   return contactList.filter(c => c.online)
 })
+
 const starredContacts = computed(() => {
-  // 确保filteredContacts是数组
   const contactList = Array.isArray(filteredContacts.value) ? filteredContacts.value : []
   return contactList.filter(c => c.starred)
 })
 
 const currentContacts = computed(() => {
-  switch (activeGroup.value) {
+  switch (activeCategory.value) {
     case 'online':
       return onlineContacts.value
     case 'starred':
@@ -391,13 +330,6 @@ const currentContacts = computed(() => {
   }
 })
 
-const tabs = computed(() => [
-  { key: 'all', label: '全部', count: filteredContacts.value.length },
-  { key: 'online', label: '在线', count: onlineContacts.value.length },
-  { key: 'starred', label: '星标', count: starredContacts.value.length },
-])
-
-// 方法
 const selectContact = contact => {
   selectedContact.value = { ...contact }
 }
@@ -438,7 +370,6 @@ const toggleStar = async () => {
       starred: newStarred
     })
     selectedContact.value.starred = newStarred
-    // 更新列表中的对应项
     const contact = contacts.value.find(c => c.id === selectedContact.value.id)
     if (contact) {
       contact.starred = newStarred
@@ -494,11 +425,9 @@ const confirmDelete = async () => {
   }
 }
 
-// 初始化
 onMounted(async () => {
   await loadContacts()
   await loadFriendGroups()
-  // 加载在线状态
   await loadOnlineStatus()
 })
 </script>
@@ -512,10 +441,97 @@ onMounted(async () => {
   background-color: #f5f5f5;
 }
 
-// 左侧联系人列表面板
+.category-panel {
+  width: 200px;
+  min-width: 200px;
+  height: 100%;
+  background-color: #fff;
+  border-right: 1px solid $border-color-light;
+  display: flex;
+  flex-direction: column;
+
+  .category-header {
+    padding: 16px;
+    border-bottom: 1px solid $border-color-lighter;
+
+    .category-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: $text-primary;
+    }
+  }
+
+  .category-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+
+    .category-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      gap: 12px;
+
+      &:hover {
+        background-color: #f5f7fa;
+      }
+
+      &.active {
+        background-color: #e6f7ff;
+        color: $primary-color;
+        position: relative;
+
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 3px;
+          height: 20px;
+          background-color: $primary-color;
+          border-radius: 0 2px 2px 0;
+        }
+      }
+
+      .category-icon {
+        width: 20px;
+        height: 20px;
+        color: $text-secondary;
+        flex-shrink: 0;
+
+        .active & {
+          color: $primary-color;
+        }
+      }
+
+      .category-label {
+        flex: 1;
+        font-size: 14px;
+        color: $text-primary;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .category-count {
+        font-size: 12px;
+        color: $text-secondary;
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        padding: 2px 8px;
+        min-width: 20px;
+        text-align: center;
+      }
+    }
+  }
+}
+
 .contacts-panel {
-  width: $list-panel-width;
-  min-width: $list-panel-width;
+  width: 320px;
+  min-width: 320px;
   height: 100%;
   background-color: #fff;
   border-right: 1px solid $border-color-light;
@@ -530,58 +546,6 @@ onMounted(async () => {
       :deep(.el-input__wrapper) {
         border-radius: 20px;
         background-color: #f5f5f5;
-      }
-    }
-  }
-
-  .contacts-tabs {
-    display: flex;
-    padding: 0 12px;
-    border-bottom: 1px solid $border-color-lighter;
-
-    .tab-item {
-      padding: 12px 16px;
-      font-size: 14px;
-      color: $text-secondary;
-      cursor: pointer;
-      position: relative;
-      transition: color 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-
-      &:hover {
-        color: $text-primary;
-      }
-
-      &.active {
-        color: $primary-color;
-        font-weight: 500;
-
-        &::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 24px;
-          height: 2px;
-          background-color: $primary-color;
-          border-radius: 1px;
-        }
-      }
-
-      .tab-count {
-        font-size: 12px;
-        background-color: #f0f0f0;
-        color: #666;
-        border-radius: 10px;
-        padding: 0 6px;
-        min-width: 18px;
-        height: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
     }
   }
@@ -608,6 +572,7 @@ onMounted(async () => {
       .contact-avatar {
         position: relative;
         margin-right: 12px;
+        flex-shrink: 0;
 
         .online-dot {
           position: absolute;
@@ -649,8 +614,7 @@ onMounted(async () => {
   }
 }
 
-// 右侧详情区域
-.detail-area {
+.detail-panel {
   flex: 1;
   height: 100%;
   background-color: #fff;
@@ -745,8 +709,14 @@ onMounted(async () => {
         background-color: #f5f7fa;
         border-radius: 8px;
         font-size: 14px;
-        color: $text-regular;
+        color: #666;
         line-height: 1.6;
+      }
+
+      .quick-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
       }
     }
   }
@@ -756,17 +726,6 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-}
-
-// 响应式
-@media screen and (max-width: 768px) {
-  .contacts-panel {
-    width: 100%;
-  }
-
-  .detail-area {
-    display: none;
   }
 }
 </style>

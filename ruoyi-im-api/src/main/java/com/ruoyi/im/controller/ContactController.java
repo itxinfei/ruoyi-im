@@ -362,6 +362,40 @@ public class ContactController {
     }
 
     /**
+     * 获取联系人在线状态
+     */
+    @PostMapping("/status")
+    public Map<String, Object> getContactStatus(@RequestHeader(value = "Authorization", required = false) String token,
+                                                @RequestBody List<Long> userIds) {
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            getCurrentUserId(token); // 验证token
+
+            Map<Long, String> statusMap = new HashMap<>();
+            if (userIds != null && !userIds.isEmpty()) {
+                for (Long userId : userIds) {
+                    ImUser user = imUserService.selectImUserById(userId);
+                    if (user != null) {
+                        statusMap.put(userId, user.getStatus() != null ? user.getStatus() : "offline");
+                    } else {
+                        statusMap.put(userId, "offline");
+                    }
+                }
+            }
+
+            result.put("code", 200);
+            result.put("msg", "查询成功");
+            result.put("data", statusMap);
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("msg", "查询失败: " + e.getMessage());
+        }
+
+        return result;
+    }
+
+    /**
      * 设置备注
      */
     @PutMapping("/{contactId}/remark")
