@@ -70,7 +70,7 @@ export function getMessageDetail(messageId) {
 // 删除消息
 export function deleteMessage(messageId) {
   return request({
-    url: `/api/im/message/delete/${messageId}`,
+    url: `/api/admin/im/message/${messageId}`,
     method: 'delete',
   })
 }
@@ -87,7 +87,7 @@ export function batchDeleteMessages(messageIds) {
 // 获取未读消息数量
 export function getUnreadCount() {
   return request({
-    url: '/api/im/message/unread/count',
+    url: '/api/admin/im/message/unread/count',
     method: 'get',
   })
 }
@@ -95,7 +95,7 @@ export function getUnreadCount() {
 // 获取会话未读消息数量
 export function getConversationUnreadCount(conversationId) {
   return request({
-    url: `/api/im/message/unread/conversation/${conversationId}`,
+    url: `/api/admin/im/message/unread/conversation/${conversationId}`,
     method: 'get',
   })
 }

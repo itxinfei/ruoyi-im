@@ -189,12 +189,45 @@ npm run preview
 
 ## 环境配置
 
+### 端口分配
+
+| 服务 | 端口 | 说明 |
+|------|------|------|
+| 前端开发服务器 | 3000 | Vue前端页面访问地址 |
+| IM接口服务 | 8080 | 即时通讯业务接口（聊天、联系人、群组、文件等） |
+| 后台管理服务 | 8081 | 系统管理接口（用户、角色、权限等） |
+| MySQL数据库 | 3306 | 数据存储 |
+| Redis缓存 | 6379 | 缓存和会话存储 |
+
 编辑 `env.config.js`:
 
 ```javascript
 module.exports = {
   VITE_BASE_API: '/api',           // API基础路径
-  VITE_WS_URL: 'ws://localhost:8080/ws'  // WebSocket地址
+  VITE_WS_URL: 'ws://localhost:8080/ws'  // WebSocket地址（IM服务）
+}
+```
+
+### Vite代理配置
+
+前端通过Vite代理将请求转发到不同的后端服务：
+
+```javascript
+// vite.config.js
+proxy: {
+  '/api/im': {
+    target: 'http://localhost:8080',  // IM接口服务
+    changeOrigin: true,
+  },
+  '/system': {
+    target: 'http://localhost:8081',  // 后台管理服务
+    changeOrigin: true,
+  },
+  '/ws': {
+    target: 'ws://localhost:8080',  // WebSocket（IM服务）
+    ws: true,
+    changeOrigin: true,
+  },
 }
 ```
 

@@ -1,5 +1,6 @@
 package com.ruoyi.im.domain;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -12,14 +13,19 @@ public class ImUser {
     private String username;
     private String password;
     private String nickname;
+    private String signature;
+    private String gender;
+    private LocalDate birthday;
+    private String region;
     private String email;
     private String phone;
     private String avatar;
     private String status;
+    private Boolean isDeleted;
+    private LocalDateTime deletedTime;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -52,6 +58,38 @@ public class ImUser {
         this.nickname = nickname;
     }
 
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public LocalDate getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -82,6 +120,22 @@ public class ImUser {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public LocalDateTime getDeletedTime() {
+        return deletedTime;
+    }
+
+    public void setDeletedTime(LocalDateTime deletedTime) {
+        this.deletedTime = deletedTime;
     }
 
     public LocalDateTime getCreateTime() {

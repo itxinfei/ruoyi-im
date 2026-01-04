@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ImSessionMapper">
+    
+    <resultMap type="ImSession" id="ImSessionResult">
+        <result property="id"    column="id"    />
+        <result property="type"    column="type"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userName"    column="user_name"    />
+        <result property="targetId"    column="target_id"    />
+        <result property="targetName"    column="target_name"    />
+        <result property="lastMessageId"    column="last_message_id"    />
+        <result property="lastMessage"    column="last_message"    />
+        <result property="unreadCount"    column="unread_count"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectImSessionVo">
+        select id, type, user_id, user_name, target_id, target_name, last_message_id, last_message, unread_count, create_time, update_time from im_session
+    </sql>
+
+    <select id="selectImSessionList" parameterType="ImSession" resultMap="ImSessionResult">
+        <include refid="selectImSessionVo"/>
+        <where>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="targetId != null "> and target_id = #{targetId}</if>
+        </where>
+        order by update_time desc
+    </select>
+    
+    <select id="selectImSessionById" parameterType="Long" resultMap="ImSessionResult">
+        <include refid="selectImSessionVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertImSession" parameterType="ImSession" useGeneratedKeys="true" keyProperty="id">
+        insert into im_session
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="type != null">type,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="targetId != null">target_id,</if>
+            <if test="targetName != null">target_name,</if>
+            <if test="lastMessageId != null">last_message_id,</if>
+            <if test="lastMessage != null">last_message,</if>
+            <if test="unreadCount != null">unread_count,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="type != null">#{type},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="userName != null">#{userName},</if>
+            <if test="targetId != null">#{targetId},</if>
+            <if test="targetName != null">#{targetName},</if>
+            <if test="lastMessageId != null">#{lastMessageId},</if>
+            <if test="lastMessage != null">#{lastMessage},</if>
+            <if test="unreadCount != null">#{unreadCount},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImSession" parameterType="ImSession">
+        update im_session
+        <trim prefix="set" suffixOverrides=",">
+            <if test="type != null">type = #{type},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="targetId != null">target_id = #{targetId},</if>
+            <if test="targetName != null">target_name = #{targetName},</if>
+            <if test="lastMessageId != null">last_message_id = #{lastMessageId},</if>
+            <if test="lastMessage != null">last_message = #{lastMessage},</if>
+            <if test="unreadCount != null">unread_count = #{unreadCount},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImSessionById" parameterType="Long">
+        delete from im_session where id = #{id}
+    </delete>
+
+    <delete id="deleteImSessionByIds" parameterType="String">
+        delete from im_session where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

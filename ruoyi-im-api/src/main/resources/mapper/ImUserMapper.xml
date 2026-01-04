@@ -7,16 +7,22 @@
         <result property="username" column="username"/>
         <result property="password" column="password"/>
         <result property="nickname" column="nickname"/>
+        <result property="signature" column="signature"/>
+        <result property="gender" column="gender"/>
+        <result property="birthday" column="birthday"/>
+        <result property="region" column="region"/>
         <result property="email" column="email"/>
         <result property="phone" column="phone"/>
         <result property="avatar" column="avatar"/>
         <result property="status" column="status"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <sql id="selectImUserVo">
-        select id, username, password, nickname, email, phone, avatar, status, create_time, update_time 
+        select id, username, password, nickname, signature, gender, birthday, region, email, phone, avatar, status, is_deleted, deleted_time, create_time, update_time 
         from im_user
     </sql>
 
@@ -42,10 +48,16 @@
             <if test="username != null">username,</if>
             <if test="password != null">password,</if>
             <if test="nickname != null">nickname,</if>
+            <if test="signature != null">signature,</if>
+            <if test="gender != null">gender,</if>
+            <if test="birthday != null">birthday,</if>
+            <if test="region != null">region,</if>
             <if test="email != null">email,</if>
             <if test="phone != null">phone,</if>
             <if test="avatar != null">avatar,</if>
             <if test="status != null">status,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="deletedTime != null">deleted_time,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
         </trim>
@@ -53,10 +65,16 @@
             <if test="username != null">#{username},</if>
             <if test="password != null">#{password},</if>
             <if test="nickname != null">#{nickname},</if>
+            <if test="signature != null">#{signature},</if>
+            <if test="gender != null">#{gender},</if>
+            <if test="birthday != null">#{birthday},</if>
+            <if test="region != null">#{region},</if>
             <if test="email != null">#{email},</if>
             <if test="phone != null">#{phone},</if>
             <if test="avatar != null">#{avatar},</if>
             <if test="status != null">#{status},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="deletedTime != null">#{deletedTime},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
@@ -68,10 +86,16 @@
             <if test="username != null and username != ''">username = #{username},</if>
             <if test="password != null and password != ''">password = #{password},</if>
             <if test="nickname != null and nickname != ''">nickname = #{nickname},</if>
+            <if test="signature != null">signature = #{signature},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="birthday != null">birthday = #{birthday},</if>
+            <if test="region != null">region = #{region},</if>
             <if test="email != null and email != ''">email = #{email},</if>
             <if test="phone != null and phone != ''">phone = #{phone},</if>
             <if test="avatar != null and avatar != ''">avatar = #{avatar},</if>
             <if test="status != null and status != ''">status = #{status},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="deletedTime != null">deleted_time = #{deletedTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>
         where id = #{id}

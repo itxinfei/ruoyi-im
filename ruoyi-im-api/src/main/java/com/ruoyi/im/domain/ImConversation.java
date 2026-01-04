@@ -8,37 +8,17 @@ import java.time.LocalDateTime;
  * @author ruoyi
  */
 public class ImConversation {
-    /**
-     * 会话ID
-     */
     private Long id;
-    
-    /**
-     * 会话类型（PRIVATE私聊 GROUP群聊）
-     */
     private String type;
-    
-    /**
-     * 目标ID（私聊为好友ID，群聊为群组ID）
-     */
     private Long targetId;
-    
-    /**
-     * 最后一条消息ID
-     */
+    private String name;
+    private String avatar;
     private Long lastMessageId;
-    
-    /**
-     * 创建时间
-     */
+    private Boolean isDeleted;
+    private LocalDateTime deletedTime;
     private LocalDateTime createTime;
-    
-    /**
-     * 更新时间
-     */
     private LocalDateTime updateTime;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -63,12 +43,44 @@ public class ImConversation {
         this.targetId = targetId;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
     public Long getLastMessageId() {
         return lastMessageId;
     }
 
     public void setLastMessageId(Long lastMessageId) {
         this.lastMessageId = lastMessageId;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public LocalDateTime getDeletedTime() {
+        return deletedTime;
+    }
+
+    public void setDeletedTime(LocalDateTime deletedTime) {
+        this.deletedTime = deletedTime;
     }
 
     public LocalDateTime getCreateTime() {

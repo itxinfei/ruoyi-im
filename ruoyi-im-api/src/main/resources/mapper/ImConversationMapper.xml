@@ -6,13 +6,17 @@
         <id property="id" column="id"/>
         <result property="type" column="type"/>
         <result property="targetId" column="target_id"/>
+        <result property="name" column="name"/>
+        <result property="avatar" column="avatar"/>
         <result property="lastMessageId" column="last_message_id"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <sql id="selectImConversationVo">
-        select id, type, target_id, last_message_id, create_time, update_time 
+        select id, type, target_id, name, avatar, last_message_id, is_deleted, deleted_time, create_time, update_time 
         from im_conversation
     </sql>
 
@@ -34,14 +38,22 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="type != null">type,</if>
             <if test="targetId != null">target_id,</if>
+            <if test="name != null">name,</if>
+            <if test="avatar != null">avatar,</if>
             <if test="lastMessageId != null">last_message_id,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="deletedTime != null">deleted_time,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="type != null">#{type},</if>
             <if test="targetId != null">#{targetId},</if>
+            <if test="name != null">#{name},</if>
+            <if test="avatar != null">#{avatar},</if>
             <if test="lastMessageId != null">#{lastMessageId},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="deletedTime != null">#{deletedTime},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
@@ -50,9 +62,13 @@
     <update id="updateImConversation" parameterType="com.ruoyi.im.domain.ImConversation">
         update im_conversation
         <trim prefix="SET" suffixOverrides=",">
-            <if test="type != null and type != ''">type = #{type},</if>
+            <if test="type != null">type = #{type},</if>
             <if test="targetId != null">target_id = #{targetId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
             <if test="lastMessageId != null">last_message_id = #{lastMessageId},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="deletedTime != null">deleted_time = #{deletedTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>
         where id = #{id}

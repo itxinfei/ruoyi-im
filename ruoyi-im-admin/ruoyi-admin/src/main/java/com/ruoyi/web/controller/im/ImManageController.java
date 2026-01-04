@@ -1,0 +1,62 @@
+package com.ruoyi.web.controller.im;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+/**
+ * IM管理页面控制器
+ * 
+ * @author ruoyi
+ */
+@Controller
+@RequestMapping("/im")
+public class ImManageController
+{
+    private String prefix = "im";
+
+    /**
+     * 用户管理页面
+     */
+    @GetMapping("/user")
+    public String user()
+    {
+        return prefix + "/user/user";
+    }
+
+    /**
+     * 消息管理页面
+     */
+    @GetMapping("/message")
+    public String message()
+    {
+        return prefix + "/message/message";
+    }
+
+    /**
+     * 群组管理页面
+     */
+    @GetMapping("/group")
+    public String group()
+    {
+        return prefix + "/group/group";
+    }
+
+    /**
+     * 会话管理页面
+     */
+    @GetMapping("/session")
+    public String session()
+    {
+        return prefix + "/session/session";
+    }
+
+    /**
+     * 文件管理页面
+     */
+    @GetMapping("/file")
+    public String file()
+    {
+        return prefix + "/file/file";
+    }
+}

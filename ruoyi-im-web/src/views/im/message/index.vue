@@ -216,7 +216,7 @@ const getList = async () => {
     }
 
     const response = await request({
-      url: '/api/im/message/list',
+      url: '/api/im/message/history',
       method: 'get',
       params,
     })
@@ -309,7 +309,7 @@ const handleDelete = async (row) => {
   try {
     await ElMessageBox.confirm('是否确认删除该消息？', '警告', { type: 'warning' })
     await request({
-      url: `/api/im/message/${row.msgId}`,
+      url: `/api/im/message/recall/${row.msgId}`,
       method: 'delete',
     })
     ElMessage.success('删除成功')

@@ -60,8 +60,12 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       open: true,
       proxy: {
-        '/api': {
+        '/api/im': {
           target: 'http://localhost:8080',
+          changeOrigin: true,
+        },
+        '/system': {
+          target: 'http://localhost:8081',
           changeOrigin: true,
         },
         '/ws': {

@@ -8,8 +8,7 @@
     <version>4.8.0</version>
 
     <name>ruoyi-im-admin</name>
-    <url>http://www.ruoyi.vip</url>
-    <description>若依管理系统</description>
+    <description>IM系统</description>
 
     <properties>
         <ruoyi.version>4.8.0</ruoyi.version>
@@ -19,7 +18,6 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
-        <maven.compiler.compilerVersion>${java.version}</maven.compiler.compilerVersion>
         <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
         <spring-boot.version>2.5.15</spring-boot.version>
         <shiro.version>1.13.0</shiro.version>
@@ -243,7 +241,7 @@
             <!-- IM模块-->
             <dependency>
                 <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-im</artifactId>
+                <artifactId>ruoyi-im-api</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 

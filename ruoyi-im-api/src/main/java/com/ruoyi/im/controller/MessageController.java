@@ -3,10 +3,14 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImMessage;
+import com.ruoyi.im.domain.ImMessageReaction;
+import com.ruoyi.im.domain.ImMessageReadReceipt;
 import com.ruoyi.im.dto.MessageSendRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.service.ImConversationService;
+import com.ruoyi.im.service.ImMessageReactionService;
+import com.ruoyi.im.service.ImMessageReadReceiptService;
 import com.ruoyi.im.service.ImMessageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -41,6 +45,12 @@ public class MessageController {
     
     @Autowired
     private ImConversationMemberService imConversationMemberService;
+
+    @Autowired
+    private ImMessageReactionService imMessageReactionService;
+
+    @Autowired
+    private ImMessageReadReceiptService imMessageReadReceiptService;
 
     @ApiOperation("发送消息")
     @PostMapping("/send")
@@ -265,5 +275,106 @@ public class MessageController {
         ImMessage message = imMessageService.selectImMessageById(messageId);
         log.info("回复发送成功: messageId={}", messageId);
         return Result.success("回复发送成功", message);
+    }
+
+    @ApiOperation("添加消息互动")
+    @PostMapping("/reaction/add")
+    public Result<ImMessageReaction> addReaction(@RequestBody Map<String, Object> data) {
+        log.info("添加消息互动请求");
+        
+        Long messageId = Long.valueOf(data.get("messageId").toString());
+        String reactionType = data.get("reactionType").toString();
+        
+        Long currentUserId = 1L;
+        
+        ImMessageReaction reaction = new ImMessageReaction();
+        reaction.setMessageId(messageId);
+        reaction.setUserId(currentUserId);
+        reaction.setReactionType(reactionType);
+        
+        int result = imMessageReactionService.insertImMessageReaction(reaction);
+        if (result <= 0) {
+            log.error("添加消息互动失败: messageId={}, reactionType={}", messageId, reactionType);
+            throw new BusinessException(500, "添加消息互动失败");
+        }
+        
+        log.info("添加消息互动成功: messageId={}, reactionType={}", messageId, reactionType);
+        return Result.success("添加消息互动成功", reaction);
+    }
+
+    @ApiOperation("移除消息互动")
+    @DeleteMapping("/reaction/remove")
+    public Result<Void> removeReaction(@RequestBody Map<String, Object> data) {
+        log.info("移除消息互动请求");
+        
+        Long messageId = Long.valueOf(data.get("messageId").toString());
+        String reactionType = data.get("reactionType").toString();
+        
+        Long currentUserId = 1L;
+        
+        int result = imMessageReactionService.deleteImMessageReaction(messageId, currentUserId, reactionType);
+        if (result <= 0) {
+            log.error("移除消息互动失败: messageId={}, reactionType={}", messageId, reactionType);
+            throw new BusinessException(500, "移除消息互动失败");
+        }
+        
+        log.info("移除消息互动成功: messageId={}, reactionType={}", messageId, reactionType);
+        return Result.success("移除消息互动成功", null);
+    }
+
+    @ApiOperation("获取消息互动列表")
+    @GetMapping("/reaction/list/{messageId}")
+    public Result<List<ImMessageReaction>> getReactionList(@PathVariable @Positive Long messageId) {
+        log.info("获取消息互动列表请求: messageId={}", messageId);
+        
+        List<ImMessageReaction> reactions = imMessageReactionService.selectImMessageReactionListByMessageId(messageId);
+        log.info("获取消息互动列表成功: messageId={}, count={}", messageId, reactions.size());
+        return Result.success(reactions);
+    }
+
+    @ApiOperation("发送消息已读回执")
+    @PostMapping("/readReceipt/send")
+    public Result<ImMessageReadReceipt> sendReadReceipt(@RequestBody Map<String, Object> data) {
+        log.info("发送消息已读回执请求");
+        
+        Long messageId = Long.valueOf(data.get("messageId").toString());
+        Long conversationId = Long.valueOf(data.get("conversationId").toString());
+        
+        Long currentUserId = 1L;
+        
+        ImMessageReadReceipt readReceipt = new ImMessageReadReceipt();
+        readReceipt.setMessageId(messageId);
+        readReceipt.setConversationId(conversationId);
+        readReceipt.setUserId(currentUserId);
+        readReceipt.setReadTime(java.time.LocalDateTime.now());
+        
+        int result = imMessageReadReceiptService.insertImMessageReadReceipt(readReceipt);
+        if (result <= 0) {
+            log.error("发送消息已读回执失败: messageId={}, conversationId={}", messageId, conversationId);
+            throw new BusinessException(500, "发送消息已读回执失败");
+        }
+        
+        log.info("发送消息已读回执成功: messageId={}, conversationId={}", messageId, conversationId);
+        return Result.success("发送消息已读回执成功", readReceipt);
+    }
+
+    @ApiOperation("获取消息已读回执列表")
+    @GetMapping("/readReceipt/list/{messageId}")
+    public Result<List<ImMessageReadReceipt>> getReadReceiptList(@PathVariable @Positive Long messageId) {
+        log.info("获取消息已读回执列表请求: messageId={}", messageId);
+        
+        List<ImMessageReadReceipt> readReceipts = imMessageReadReceiptService.selectImMessageReadReceiptListByMessageId(messageId);
+        log.info("获取消息已读回执列表成功: messageId={}, count={}", messageId, readReceipts.size());
+        return Result.success(readReceipts);
+    }
+
+    @ApiOperation("获取会话已读回执列表")
+    @GetMapping("/readReceipt/conversation/{conversationId}")
+    public Result<List<ImMessageReadReceipt>> getConversationReadReceiptList(@PathVariable @Positive Long conversationId) {
+        log.info("获取会话已读回执列表请求: conversationId={}", conversationId);
+        
+        List<ImMessageReadReceipt> readReceipts = imMessageReadReceiptService.selectImMessageReadReceiptListByConversationId(conversationId);
+        log.info("获取会话已读回执列表成功: conversationId={}, count={}", conversationId, readReceipts.size());
+        return Result.success(readReceipts);
     }
 }
