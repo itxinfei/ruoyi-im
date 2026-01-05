@@ -6,14 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 要求权限注解
+ * Swagger标签注解，用于标识API接口
  * 
  * @author ruoyi
  */
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RequirePermission {
+public @interface SwaggerTag {
     String value() default "";
-    String[] permissions() default {};
-    String desc() default "";
+    String description() default "";
 }

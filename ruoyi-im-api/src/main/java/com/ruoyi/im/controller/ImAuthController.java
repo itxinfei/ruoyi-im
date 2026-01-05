@@ -86,12 +86,12 @@ public class ImAuthController extends BaseController {
             ImUser user = userService.findByUsername(loginRequest.getUsername());
             if (user == null || !passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
                 logger.warn("用户登录失败: username={}, 原因=用户名或密码错误", loginRequest.getUsername());
-                return unauthorized("用户名或密码错误");
+                return Result.error(401, "用户名或密码错误");
             }
             
             if (!"ACTIVE".equals(user.getStatus())) {
                 logger.warn("用户登录失败: username={}, 原因=用户已被禁用", loginRequest.getUsername());
-                return forbidden("用户已被禁用");
+                return Result.error(403, "用户已被禁用");
             }
             
             String token = jwtUtils.generateToken(user.getUsername());
@@ -114,10 +114,10 @@ public class ImAuthController extends BaseController {
             loginVO.setDeviceInfo(deviceInfo);
             
             logger.info("用户登录成功: username={}, userId={}", user.getUsername(), user.getId());
-            return success(loginVO);
+            return Result.success(loginVO);
         } catch (Exception e) {
             logger.error("用户登录异常: username={}, error={}", loginRequest.getUsername(), e.getMessage(), e);
-            return error("登录失败: " + e.getMessage());
+            return Result.error(500, "登录失败: " + e.getMessage());
         }
     }
     
@@ -226,13 +226,13 @@ public class ImAuthController extends BaseController {
             // 验证用户名是否已存在
             if (userService.findByUsername(registerRequest.getUsername()) != null) {
                 logger.warn("用户注册失败: username={}, 原因=用户名已存在", registerRequest.getUsername());
-                return businessError("用户名已存在");
+                return Result.error(400, "用户名已存在");
             }
             
             // 验证密码和确认密码是否一致
             if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
                 logger.warn("用户注册失败: username={}, 原因=两次输入的密码不一致", registerRequest.getUsername());
-                return businessError("两次输入的密码不一致");
+                return Result.error(400, "两次输入的密码不一致");
             }
             
             // 创建新用户
@@ -249,14 +249,14 @@ public class ImAuthController extends BaseController {
             
             if (insertResult > 0) {
                 logger.info("用户注册成功: username={}, userId={}", newUser.getUsername(), newUser.getId());
-                return success("注册成功");
+                return Result.success("注册成功");
             } else {
                 logger.error("用户注册失败: username={}", registerRequest.getUsername());
-                return error("注册失败");
+                return Result.error(500, "注册失败");
             }
         } catch (Exception e) {
             logger.error("用户注册异常: username={}, error={}", registerRequest.getUsername(), e.getMessage(), e);
-            return error("注册失败: " + e.getMessage());
+            return Result.error(500, "注册失败: " + e.getMessage());
         }
     }
 

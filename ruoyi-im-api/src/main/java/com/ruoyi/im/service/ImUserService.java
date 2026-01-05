@@ -9,24 +9,54 @@ import java.util.Set;
  * 
  * @author ruoyi
  */
-public interface ImUserService extends BaseService<ImUser> {
+public interface ImUserService {
     
-    @Override
+    /**
+     * 根据ID查询用户
+     * 
+     * @param id 用户ID
+     * @return IM用户
+     */
     ImUser selectById(Long id);
     
-    @Override
+    /**
+     * 查询用户列表
+     * 
+     * @param imUser 查询条件
+     * @return IM用户集合
+     */
     List<ImUser> selectList(ImUser imUser);
     
-    @Override
+    /**
+     * 新增用户
+     * 
+     * @param imUser IM用户
+     * @return 结果
+     */
     int insert(ImUser imUser);
     
-    @Override
+    /**
+     * 修改用户
+     * 
+     * @param imUser IM用户
+     * @return 结果
+     */
     int update(ImUser imUser);
     
-    @Override
+    /**
+     * 批量删除用户
+     * 
+     * @param ids 需要删除的用户ID
+     * @return 结果
+     */
     int deleteByIds(Long[] ids);
     
-    @Override
+    /**
+     * 删除用户信息
+     * 
+     * @param id 用户ID
+     * @return 结果
+     */
     int deleteById(Long id);
     
     /**
@@ -101,31 +131,4 @@ public interface ImUserService extends BaseService<ImUser> {
      * @return 角色集合
      */
     public Set<String> getUserRoles(Long userId);
-    
-    /**
-     * 为兼容旧接口添加的方法
-     */
-    default ImUser findByUsername(String username) {
-        return selectImUserByUsername(username);
-    }
-    
-    default List<ImUser> findAll() {
-        return selectList(new ImUser());
-    }
-    
-    default ImUser findById(Long id) {
-        return selectById(id);
-    }
-    
-    default int insert(ImUser user) {
-        return insertImUser(user);
-    }
-    
-    default int updateById(ImUser user) {
-        return updateImUser(user);
-    }
-    
-    default int deleteById(Long id) {
-        return deleteImUserById(id);
-    }
 }

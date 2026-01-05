@@ -3,9 +3,8 @@ package com.ruoyi.im.controller;
 import com.github.pagehelper.PageInfo;
 import com.ruoyi.im.annotation.ImApiVersion;
 import com.ruoyi.im.annotation.RequirePermission;
-import com.ruoyi.common.core.controller.BaseController;
-import com.ruoyi.common.core.domain.PageResult;
-import com.ruoyi.common.core.domain.Result;
+import com.ruoyi.im.common.PageResult;
+import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImFriend;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.contact.ImFriendAddRequest;
@@ -21,11 +20,14 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * IM联系人控制器
@@ -38,6 +40,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/{version}/im/contacts")
 @ImApiVersion(value = {"v1", "v2"}, description = "联系人管理API，支持v1和v2版本")
 public class ImContactController extends BaseController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ImContactController.class);
 
     @Autowired
     private ImFriendService imFriendService;
@@ -295,14 +299,14 @@ public class ImContactController extends BaseController {
             // 检查用户是否存在
             ImUser user = imUserService.selectImUserById(request.getFriendUserId());
             if (user == null) {
-                log.warn("用户不存在: friendUserId={}", request.getFriendUserId());
+                logger.warn("用户不存在: friendUserId={}", request.getFriendUserId());
                 return Result.error(404, "用户不存在");
             }
             
             // 检查是否已经是好友
             ImFriend existingFriend = imFriendService.selectImFriendByUserIdAndFriendUserId(currentUserId, request.getFriendUserId());
             if (existingFriend != null) {
-                log.warn("已经是好友: currentUserId={}, friendUserId={}", currentUserId, request.getFriendUserId());
+                logger.warn("已经是好友: currentUserId={}, friendUserId={}", currentUserId, request.getFriendUserId());
                 return Result.error(400, "已经是好友，无需重复添加");
             }
             
@@ -314,14 +318,14 @@ public class ImContactController extends BaseController {
                 ImFriend friend = imFriendService.selectImFriendByUserIdAndFriendUserId(currentUserId, request.getFriendUserId());
                 ImFriendVO friendVO = convertToVO(friend, user);
                 
-                log.info("好友申请发送成功: currentUserId={}, friendUserId={}", currentUserId, request.getFriendUserId());
+                logger.info("好友申请发送成功: currentUserId={}, friendUserId={}", currentUserId, request.getFriendUserId());
                 return Result.success(friendVO, "好友申请已发送");
             } else {
-                log.error("好友申请发送失败: currentUserId={}, friendUserId={}", currentUserId, request.getFriendUserId());
+                logger.error("好友申请发送失败: currentUserId={}, friendUserId={}", currentUserId, request.getFriendUserId());
                 return Result.error(500, "好友申请发送失败");
             }
         } catch (Exception e) {
-            log.error("添加联系人异常: currentUserId={}, friendUserId={}, error={}", 
+            logger.error("添加联系人异常: currentUserId={}, friendUserId={}, error={}", 
                     currentUserId, request.getFriendUserId(), e.getMessage(), e);
             return Result.error(500, "添加联系人失败: " + e.getMessage());
         }
@@ -351,7 +355,7 @@ public class ImContactController extends BaseController {
             return Result.error(validationResult.getCode(), validationResult.getMessage());
         }
         
-        log.info("更新联系人信息请求: id={}, alias={}, remark={}, friendUserId={}", 
+        logger.info("更新联系人信息请求: id={}, alias={}, remark={}, friendUserId={}", 
                 request.getId(), request.getAlias(), request.getRemark(), request.getFriendUserId());
         
         Long currentUserId = getCurrentUserId();
@@ -360,13 +364,13 @@ public class ImContactController extends BaseController {
             ImFriend friend = imFriendService.selectImFriendById(request.getId());
             
             if (friend == null) {
-                log.warn("联系人不存在: id={}", request.getId());
+                logger.warn("联系人不存在: id={}", request.getId());
                 return Result.error(404, "联系人不存在");
             }
             
             // 验证好友关系是否属于当前用户
             if (!currentUserId.equals(friend.getUserId())) {
-                log.warn("无权更新好友信息: friendId={}, currentUserId={}, friendOwnerId={}", 
+                logger.warn("无权更新好友信息: friendId={}, currentUserId={}, friendOwnerId={}", 
                         request.getId(), currentUserId, friend.getUserId());
                 return Result.error(403, "无权更新该联系人信息");
             }
@@ -386,14 +390,14 @@ public class ImContactController extends BaseController {
                 ImUser user = imUserService.selectImUserById(friend.getFriendUserId());
                 ImFriendVO friendVO = convertToVO(friend, user);
                 
-                log.info("联系人信息更新成功: id={}", request.getId());
+                logger.info("联系人信息更新成功: id={}", request.getId());
                 return Result.success(friendVO, "联系人更新成功");
             } else {
-                log.error("联系人信息更新失败: id={}", request.getId());
+                logger.error("联系人信息更新失败: id={}", request.getId());
                 return Result.error(500, "联系人更新失败");
             }
         } catch (Exception e) {
-            log.error("更新联系人信息异常: id={}, error={}", request.getId(), e.getMessage(), e);
+            logger.error("更新联系人信息异常: id={}, error={}", request.getId(), e.getMessage(), e);
             return Result.error(500, "更新联系人失败: " + e.getMessage());
         }
     }
@@ -415,21 +419,21 @@ public class ImContactController extends BaseController {
     public Result<Void> deleteContact(
             @PathVariable @NotNull(message = "用户ID不能为空") @Positive(message = "用户ID必须为正数") Long userId) {
         
-        log.info("删除联系人请求: userId={}", userId);
+        logger.info("删除联系人请求: userId={}", userId);
         
         Long currentUserId = getCurrentUserId();
         
         try {
             int deleteResult = imFriendService.deleteFriend(currentUserId, userId);
             if (deleteResult > 0) {
-                log.info("联系人删除成功: currentUserId={}, userId={}", currentUserId, userId);
-                return Result.success("联系人删除成功");
+                logger.info("联系人删除成功: currentUserId={}, userId={}", currentUserId, userId);
+                return Result.success();
             } else {
-                log.warn("联系人不存在: currentUserId={}, userId={}", currentUserId, userId);
+                logger.warn("联系人不存在: currentUserId={}, userId={}", currentUserId, userId);
                 return Result.error(404, "联系人不存在");
             }
         } catch (Exception e) {
-            log.error("删除联系人异常: currentUserId={}, userId={}, error={}", 
+            logger.error("删除联系人异常: currentUserId={}, userId={}, error={}", 
                     currentUserId, userId, e.getMessage(), e);
             return Result.error(500, "删除联系人失败: " + e.getMessage());
         }
@@ -450,11 +454,11 @@ public class ImContactController extends BaseController {
     @GetMapping("/search")
     @RequirePermission(value = "im:contact:search", desc = "搜索用户")
     public Result<PageResult<ImFriendVO>> searchUsers(
-            @RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword,
+            @RequestParam String keyword,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "20") Integer pageSize) {
         
-        log.info("搜索用户请求: keyword={}, pageNum={}, pageSize={}", keyword, pageNum, pageSize);
+        logger.info("搜索用户请求: keyword={}, pageNum={}, pageSize={}", keyword, pageNum, pageSize);
         
         Long currentUserId = getCurrentUserId();
         
@@ -483,10 +487,10 @@ public class ImContactController extends BaseController {
                     pageInfo.getPageSize()
             );
             
-            log.info("用户搜索成功: keyword={}, 总数={}", keyword, pageInfo.getTotal());
+            logger.info("用户搜索成功: keyword={}, 总数={}", keyword, pageInfo.getTotal());
             return Result.success(pageResult);
         } catch (Exception e) {
-            log.error("搜索用户异常: keyword={}, error={}", keyword, e.getMessage(), e);
+            logger.error("搜索用户异常: keyword={}, error={}", keyword, e.getMessage(), e);
             return Result.error(500, "搜索失败: " + e.getMessage());
         }
     }
@@ -500,10 +504,10 @@ public class ImContactController extends BaseController {
             // 这里可以实现联系人分组功能
             // 暂时返回默认分组
             List<Map<String, Object>> groups = java.util.Arrays.asList(
-                createGroup("我的好友", 10),
-                createGroup("同事", 5),
-                createGroup("家人", 3),
-                createGroup("同学", 8)
+                java.util.Map.of("name", "我的好友", "count", 10),
+                java.util.Map.of("name", "同事", "count", 5),
+                java.util.Map.of("name", "家人", "count", 3),
+                java.util.Map.of("name", "同学", "count", 8)
             );
             
             return Result.success(groups, "获取联系人分组成功");
@@ -516,10 +520,9 @@ public class ImContactController extends BaseController {
      * 获取联系人在线状态
      */
     @PostMapping("/status")
-    public Result<Map<String, Object>> getContactStatus(@RequestHeader(value = "Authorization", required = false) String token,
-                                                @RequestBody List<Long> userIds) {
+    public Result<Map<String, Object>> getContactStatus(@RequestBody List<Long> userIds) {
         try {
-            getCurrentUserId(token); // 验证token
+            Long currentUserId = getCurrentUserId(); // 获取当前用户ID
 
             Map<Long, String> statusMap = new HashMap<>();
             if (userIds != null && !userIds.isEmpty()) {
@@ -543,11 +546,10 @@ public class ImContactController extends BaseController {
      * 设置备注
      */
     @PutMapping("/{contactId}/remark")
-    public Result<ImFriend> setRemark(@RequestHeader(value = "Authorization", required = false) String token,
-                                       @PathVariable Long contactId, 
+    public Result<ImFriendVO> setRemark(@PathVariable Long contactId, 
                                        @RequestParam String remark) {
         try {
-            Long currentUserId = getCurrentUserId(token);
+            Long currentUserId = getCurrentUserId();
             
             ImFriend friend = imFriendService.selectImFriendByUserIdAndFriendUserId(currentUserId, contactId);
             if (friend == null) {
@@ -558,7 +560,10 @@ public class ImContactController extends BaseController {
             int updateResult = imFriendService.updateImFriend(friend);
             
             if (updateResult > 0) {
-                return Result.success(friend, "备注设置成功");
+                // 获取更新后的用户信息并转换为VO
+                ImUser user = imUserService.selectImUserById(friend.getFriendUserId());
+                ImFriendVO friendVO = convertToVO(friend, user);
+                return Result.success(friendVO, "备注设置成功");
             } else {
                 return Result.error(500, "备注设置失败");
             }

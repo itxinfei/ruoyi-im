@@ -18,27 +18,37 @@ public class PageResult<T> implements Serializable {
     /**
      * 总记录数
      */
-    private final long total;
+    private long total;
     
     /**
      * 分页数据列表
      */
-    private final List<T> rows;
+    private List<T> rows;
     
     /**
      * 当前页码（从1开始）
      */
-    private final int pageNum;
+    private int pageNum;
     
     /**
      * 每页显示记录数
      */
-    private final int pageSize;
+    private int pageSize;
     
     /**
      * 总页数
      */
-    private final int pages;
+    private int pages;
+    
+    /**
+     * 是否有下一页
+     */
+    private boolean hasNextPage;
+    
+    /**
+     * 是否有上一页
+     */
+    private boolean hasPreviousPage;
     
     /**
      * 默认构造函数
@@ -76,6 +86,10 @@ public class PageResult<T> implements Serializable {
         if (this.pageNum > this.pages && this.pages > 0) {
             this.pageNum = this.pages;
         }
+        
+        // 计算是否有上一页和下一页
+        this.hasNextPage = this.pages > 0 && this.pageNum < this.pages;
+        this.hasPreviousPage = this.pageNum > 1;
     }
     
     /**
@@ -114,12 +128,30 @@ public class PageResult<T> implements Serializable {
     }
     
     /**
+     * 设置总记录数
+     * 
+     * @param total 总记录数
+     */
+    public void setTotal(long total) {
+        this.total = total;
+    }
+    
+    /**
      * 获取分页数据列表
      * 
      * @return 分页数据列表
      */
     public List<T> getRows() {
         return rows;
+    }
+    
+    /**
+     * 设置分页数据列表
+     * 
+     * @param rows 分页数据列表
+     */
+    public void setRows(List<T> rows) {
+        this.rows = rows;
     }
     
     /**
@@ -132,12 +164,30 @@ public class PageResult<T> implements Serializable {
     }
     
     /**
+     * 设置当前页码
+     * 
+     * @param pageNum 当前页码
+     */
+    public void setPageNum(int pageNum) {
+        this.pageNum = pageNum;
+    }
+    
+    /**
      * 获取每页显示记录数
      * 
      * @return 每页显示记录数
      */
     public int getPageSize() {
         return pageSize;
+    }
+    
+    /**
+     * 设置每页显示记录数
+     * 
+     * @param pageSize 每页显示记录数
+     */
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
     }
     
     /**
@@ -150,21 +200,48 @@ public class PageResult<T> implements Serializable {
     }
     
     /**
+     * 设置总页数
+     * 
+     * @param pages 总页数
+     */
+    public void setPages(int pages) {
+        this.pages = pages;
+    }
+    
+    /**
      * 判断是否还有下一页
      * 
      * @return 是否有下一页
      */
-    public boolean hasNextPage() {
-        return pages > 0 && pageNum < pages;
+    public boolean isHasNextPage() {
+        return hasNextPage;
     }
     
     /**
-     * 判断是否有上一页
+     * 设置是否有下一页
+     * 
+     * @param hasNextPage 是否有下一页
+     */
+    public void setHasNextPage(boolean hasNextPage) {
+        this.hasNextPage = hasNextPage;
+    }
+    
+    /**
+     * 判断是否还有上一页
      * 
      * @return 是否有上一页
      */
-    public boolean hasPreviousPage() {
-        return pageNum > 1;
+    public boolean isHasPreviousPage() {
+        return hasPreviousPage;
+    }
+    
+    /**
+     * 设置是否有上一页
+     * 
+     * @param hasPreviousPage 是否有上一页
+     */
+    public void setHasPreviousPage(boolean hasPreviousPage) {
+        this.hasPreviousPage = hasPreviousPage;
     }
     
     /**
@@ -301,6 +378,8 @@ public class PageResult<T> implements Serializable {
                 ", pageNum=" + pageNum +
                 ", pageSize=" + pageSize +
                 ", pages=" + pages +
+                ", hasNextPage=" + hasNextPage +
+                ", hasPreviousPage=" + hasPreviousPage +
                 '}';
     }
 }

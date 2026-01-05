@@ -1,6 +1,8 @@
 package com.ruoyi.im.utils;
 
 import com.ruoyi.im.domain.ImUser;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -127,5 +129,30 @@ public class SecurityUtils {
         }
         
         return false;
+    }
+    
+    /**
+     * 从token中获取用户名
+     * 
+     * @param token token
+     * @return 用户名
+     */
+    public static String getUsernameFromToken(String token) {
+        try {
+            // 如果token包含"Bearer "前缀，需要先移除
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+            
+            Claims claims = Jwts.parser()
+                    .setSigningKey("RuoYiSecretKey") // 注意：在实际项目中应从配置中获取密钥
+                    .parseClaimsJws(token)
+                    .getBody();
+                    
+            return claims.getSubject();
+        } catch (Exception e) {
+            log.error("解析token失败: {}", e.getMessage());
+            return null;
+        }
     }
 }
