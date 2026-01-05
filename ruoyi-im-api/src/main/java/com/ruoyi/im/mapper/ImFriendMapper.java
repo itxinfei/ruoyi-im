@@ -1,14 +1,15 @@
 package com.ruoyi.im.mapper;
 
-import com.ruoyi.im.domain.ImFriend;
 import java.util.List;
+import com.ruoyi.im.domain.ImFriend;
 
 /**
  * 好友Mapper接口
  * 
  * @author ruoyi
  */
-public interface ImFriendMapper {
+public interface ImFriendMapper 
+{
     /**
      * 查询好友
      * 
@@ -58,19 +59,10 @@ public interface ImFriendMapper {
     public int deleteImFriendByIds(Long[] ids);
     
     /**
-     * 根据用户ID查询好友列表
+     * 根据条件删除好友
      * 
-     * @param userId 用户ID
-     * @return 好友集合
+     * @param imFriend 条件
+     * @return 结果
      */
-    public List<ImFriend> selectImFriendListByUserId(Long userId);
-    
-    /**
-     * 根据用户ID和好友用户ID查询好友关系
-     * 
-     * @param userId 用户ID
-     * @param friendUserId 好友用户ID
-     * @return 好友关系
-     */
-    public ImFriend selectImFriendByUserIdAndFriendUserId(Long userId, Long friendUserId);
+    public int deleteImFriendByCondition(ImFriend imFriend);
 }

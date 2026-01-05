@@ -3,88 +3,164 @@ package com.ruoyi.im.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.security.Key;
 import java.util.Date;
 
 /**
  * JWT工具类
  * 
+ * 用于生成和解析JWT令牌，实现用户身份验证和授权功能。
+ * 
  * @author ruoyi
  */
-@Component
 public class JwtUtils {
 
-    @Value("${im.jwt.secret:im_secret_key_2024_for_api_system_that_is_long_enough_for_HS512_algorithm}")
-    private String secret;
-
-    @Value("${im.jwt.expiration:86400}") // 默认24小时
-    private Long expiration;
-
-    /**
-     * 获取签名密钥
-     */
-    private Key getSigningKey() {
-        // 确保密钥长度满足HS512要求（至少512位）
-        return Keys.hmacShaKeyFor(secret.getBytes());
-    }
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+    
+    // JWT密钥 - 在实际项目中应从配置文件中获取
+    private static final String JWT_SECRET = "RuoYiSecretKey";
+    
+    // JWT过期时间 - 1小时
+    private static final long JWT_EXPIRATION = 3600000L;
 
     /**
-     * 生成JWT token
+     * 生成JWT令牌
+     * 
+     * @param username 用户名
+     * @return JWT令牌
      */
     public String generateToken(String username) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiration * 1000);
-
+        Date expiryDate = new Date(System.currentTimeMillis() + JWT_EXPIRATION);
+        
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
+                .compact();
+    }
+    
+    /**
+     * 生成JWT令牌（带用户ID）
+     * 
+     * @param username 用户名
+     * @param userId 用户ID
+     * @return JWT令牌
+     */
+    public String generateToken(String username, Long userId) {
+        Date expiryDate = new Date(System.currentTimeMillis() + JWT_EXPIRATION);
+        
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("userId", userId)
+                .setIssuedAt(new Date())
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
                 .compact();
     }
 
     /**
-     * 从token中获取用户名
+     * 从JWT令牌中获取用户名
+     * 
+     * @param token JWT令牌
+     * @return 用户名
      */
     public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getSubject();
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(JWT_SECRET)
+                    .parseClaimsJws(token)
+                    .getBody();
+                    
+            return claims.getSubject();
+        } catch (Exception e) {
+            logger.error("解析JWT令牌失败: {}", e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * 从JWT令牌中获取用户ID
+     * 
+     * @param token JWT令牌
+     * @return 用户ID
+     */
+    public Long getUserIdFromToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(JWT_SECRET)
+                    .parseClaimsJws(token)
+                    .getBody();
+                    
+            Object userId = claims.get("userId");
+            if (userId instanceof Integer) {
+                return ((Integer) userId).longValue();
+            } else if (userId instanceof Long) {
+                return (Long) userId;
+            }
+            return null;
+        } catch (Exception e) {
+            logger.error("解析JWT令牌中的用户ID失败: {}", e.getMessage());
+            return null;
+        }
     }
 
     /**
-     * 验证token是否过期
+     * 验证JWT令牌是否有效
+     * 
+     * @param token JWT令牌
+     * @return 是否有效
      */
-    public Boolean isTokenExpired(String token) {
-        Date expiration = getExpirationDateFromToken(token);
-        return expiration.before(new Date());
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            logger.error("验证JWT令牌失败: {}", e.getMessage());
+            return false;
+        }
     }
-
+    
     /**
-     * 从token中获取过期日期
+     * 验证JWT令牌是否有效（带用户名验证）
+     * 
+     * @param token JWT令牌
+     * @param username 用户名
+     * @return 是否有效
      */
-    public Date getExpirationDateFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getExpiration();
+    public boolean validateToken(String token, String username) {
+        try {
+            String tokenUsername = getUsernameFromToken(token);
+            boolean isValid = validateToken(token) && username.equals(tokenUsername);
+            if (!isValid) {
+                logger.warn("JWT令牌验证失败: token={}, username={}", token, username);
+            }
+            return isValid;
+        } catch (Exception e) {
+            logger.error("验证JWT令牌失败: {}", e.getMessage());
+            return false;
+        }
     }
-
+    
     /**
-     * 验证token
+     * 从JWT令牌中获取过期时间
+     * 
+     * @param token JWT令牌
+     * @return 过期时间
      */
-    public Boolean validateToken(String token, String username) {
-        final String tokenUsername = getUsernameFromToken(token);
-        return (username.equals(tokenUsername) && !isTokenExpired(token));
+    public Date getExpiryDateFromToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(JWT_SECRET)
+                    .parseClaimsJws(token)
+                    .getBody();
+                    
+            return claims.getExpiration();
+        } catch (Exception e) {
+            logger.error("获取JWT令牌过期时间失败: {}", e.getMessage());
+            return null;
+        }
     }
 }

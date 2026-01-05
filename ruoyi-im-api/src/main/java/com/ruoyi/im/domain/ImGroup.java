@@ -44,6 +44,21 @@ public class ImGroup {
     private Integer memberCount;
     
     /**
+     * 成员数量限制
+     */
+    private Integer memberLimit;
+    
+    /**
+     * 群组描述
+     */
+    private String description;
+    
+    /**
+     * 群组类型
+     */
+    private String type;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;
@@ -113,6 +128,30 @@ public class ImGroup {
 
     public void setMemberCount(Integer memberCount) {
         this.memberCount = memberCount;
+    }
+
+    public Integer getMemberLimit() {
+        return memberLimit;
+    }
+
+    public void setMemberLimit(Integer memberLimit) {
+        this.memberLimit = memberLimit;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public LocalDateTime getCreateTime() {

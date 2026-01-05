@@ -10,9 +10,68 @@ import java.util.List;
  */
 public interface ImMessageReadReceiptService extends BaseService<ImMessageReadReceipt> {
     
-    @Override
-    ImMessageReadReceipt selectById(Long id);
-    
+        @Override
+        ImMessageReadReceipt selectById(Long id);
+        
+        /**
+         * 根据ID查询消息已读回执
+         * 
+         * @param id 消息已读回执ID
+         * @return 消息已读回执信息
+         */
+        default ImMessageReadReceipt selectImMessageReadReceiptById(Long id) {
+            return selectById(id);
+        }
+        
+        /**
+         * 查询消息已读回执列表
+         * 
+         * @param imMessageReadReceipt 消息已读回执对象
+         * @return 消息已读回执集合
+         */
+        default List<ImMessageReadReceipt> selectImMessageReadReceiptList(ImMessageReadReceipt imMessageReadReceipt) {
+            return selectList(imMessageReadReceipt);
+        }
+        
+        /**
+         * 新增消息已读回执
+         * 
+         * @param imMessageReadReceipt 消息已读回执对象
+         * @return 结果
+         */
+        default int insertImMessageReadReceipt(ImMessageReadReceipt imMessageReadReceipt) {
+            return insert(imMessageReadReceipt);
+        }
+        
+        /**
+         * 修改消息已读回执
+         * 
+         * @param imMessageReadReceipt 消息已读回执对象
+         * @return 结果
+         */
+        default int updateImMessageReadReceipt(ImMessageReadReceipt imMessageReadReceipt) {
+            return update(imMessageReadReceipt);
+        }
+        
+        /**
+         * 删除消息已读回执
+         * 
+         * @param id 消息已读回执ID
+         * @return 结果
+         */
+        default int deleteImMessageReadReceiptById(Long id) {
+            return deleteById(id);
+        }
+        
+        /**
+         * 批量删除消息已读回执
+         * 
+         * @param ids 需要删除的数据ID
+         * @return 结果
+         */
+        default int deleteImMessageReadReceiptByIds(Long[] ids) {
+            return deleteByIds(ids);
+        }    
     @Override
     List<ImMessageReadReceipt> selectList(ImMessageReadReceipt imMessageReadReceipt);
     

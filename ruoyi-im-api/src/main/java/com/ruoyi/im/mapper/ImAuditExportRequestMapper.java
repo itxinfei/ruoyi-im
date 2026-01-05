@@ -1,6 +1,7 @@
 package com.ruoyi.im.mapper;
 
 import com.ruoyi.im.domain.ImAuditExportRequest;
+import com.ruoyi.im.mapper.base.BaseMapper;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImAuditExportRequestMapper {
+public interface ImAuditExportRequestMapper extends BaseMapper<ImAuditExportRequest> {
     /**
      * 查询审计导出请求
      * 

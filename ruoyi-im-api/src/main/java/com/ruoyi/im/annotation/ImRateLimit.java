@@ -8,81 +8,85 @@ import java.lang.annotation.Target;
 /**
  * 限流注解
  * 
- * 用于限制API接口的访问频率，防止接口被恶意调用或过载。
- * 支持多种限流算法：令牌桶算法、固定窗口、滑动窗口等。
+ * 用于标记需要进行限流控制的方法
  * 
  * @author ruoyi
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ImRateLimit {
     
     /**
-     * 限流key标识
-     * 
-     * @return 限流标识，用于区分不同的限流规则
+     * 限流的key，用于标识不同的限流策略
      */
     String key() default "";
     
     /**
-     * 限流数量（每秒钟允许的请求数）
-     * 
-     * @return 每秒最大请求数
+     * 单位时间内的请求次数限制
      */
-    int rate() default 10;
+    int count() default 10;
     
     /**
-     * 限流窗口时间（秒）
-     * 
-     * @return 限流窗口时间，默认1秒
+     * 限流时间窗口，单位秒
      */
-    int window() default 1;
+    int time() default 60;
     
     /**
      * 限流算法类型
-     * 
-     * @return 限流算法：TOKEN_BUCKET（令牌桶）、FIXED_WINDOW（固定窗口）、SLIDING_WINDOW（滑动窗口）
      */
-    LimitAlgorithm algorithm() default LimitAlgorithm.TOKEN_BUCKET;
-    
-    /**
-     * 超限后的提示消息
-     * 
-     * @return 超限提示消息
-     */
-    String message() default "请求过于频繁，请稍后再试";
-    
-    /**
-     * 是否启用限流
-     * 
-     * @限流，falsereturn true启用禁用限流
-     */
-    boolean enabled() default true;
-    
-    /**
-     * 限流分组
-     * 
-     * @return 限流分组，用于区分不同模块的限流策略
-     */
-    String group() default "default";
+    LimitAlgorithm algorithm() default LimitAlgorithm.FIXED_WINDOW;
     
     /**
      * 限流算法枚举
      */
     enum LimitAlgorithm {
-        /**
-         * 令牌桶算法
-         */
-        TOKEN_BUCKET,
-        
-        /**
-         * 固定窗口算法
-         */
-        FIXED_WINDOW,
-        
-        /**
-         * 滑动窗口算法
-         */
-        SLIDING_WINDOW
+        FIXED_WINDOW,     // 固定窗口
+        SLIDING_WINDOW,   // 滑动窗口
+        TOKEN_BUCKET,     // 令牌桶
+        LEAKY_BUCKET      // 漏桶
     }
+    
+    /**
+     * 限流失败时的处理策略
+     */
+    LimitStrategy strategy() default LimitStrategy.REJECT;
+    
+    /**
+     * 限流失败处理策略枚举
+     */
+    enum LimitStrategy {
+        REJECT,     // 拒绝请求
+        QUEUE,      // 排队等待
+        DEGRADE     // 降级处理
+    }
+    
+    /**
+     * 限流速率（每秒请求数）
+     */
+    double rate() default 1.0;
+    
+    /**
+     * 限流窗口大小（秒）
+     */
+    int window() default 60;
+    
+    /**
+     * 限流失败时的消息
+     */
+    String message() default "请求过于频繁，请稍后重试";
+    
+    /**
+     * 限流组
+     */
+    String group() default "";
+    
+    /**
+     * 延迟时间（毫秒）
+     */
+    int delay() default 0;
+    
+    /**
+     * 是否启用限流
+     */
+    boolean enabled() default true;
 }

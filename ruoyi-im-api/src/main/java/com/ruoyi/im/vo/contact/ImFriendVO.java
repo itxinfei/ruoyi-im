@@ -1,191 +1,108 @@
 package com.ruoyi.im.vo.contact;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
- * 好友信息视图对象
+ * 好友视图对象 im_friend
  * 
  * @author ruoyi
  */
-@ApiModel(description = "好友信息")
-public class ImFriendVO {
-
-    @ApiModelProperty(value = "好友关系ID", example = "1")
+public class ImFriendVO
+{
+    /** 好友关系ID */
     private Long id;
 
-    @ApiModelProperty(value = "好友用户ID", example = "1")
-    private Long friendUserId;
+    /** 用户ID */
+    private Long userId;
 
-    @ApiModelProperty(value = "好友用户名", example = "zhangsan")
-    private String friendUsername;
+    /** 好友ID */
+    private Long friendId;
 
-    @ApiModelProperty(value = "好友昵称", example = "张三")
-    private String friendNickname;
+    /** 昵称 */
+    private String nickname;
 
-    @ApiModelProperty(value = "好友头像", example = "/profile/avatar.png")
-    private String friendAvatar;
+    /** 头像 */
+    private String avatar;
 
-    @ApiModelProperty(value = "好友状态", example = "ACTIVE")
-    private String friendStatus;
-
-    @ApiModelProperty(value = "好友状态描述", example = "在线")
-    private String friendStatusDesc;
-
-    @ApiModelProperty(value = "好友邮箱", example = "zhangsan@example.com")
-    private String friendEmail;
-
-    @ApiModelProperty(value = "好友电话", example = "13800138000")
-    private String friendPhone;
-
-    @ApiModelProperty(value = "好友别名", example = "张三")
-    private String alias;
-
-    @ApiModelProperty(value = "好友备注", example = "技术专家")
+    /** 备注 */
     private String remark;
 
-    @ApiModelProperty(value = "好友关系状态", example = "ACTIVE")
-    private String friendRelationStatus;
+    /** 好友状态 */
+    private String status;
 
-    @ApiModelProperty(value = "好友关系状态描述", example = "正常")
-    private String friendRelationStatusDesc;
+    /** 创建时间 */
+    private Date createTime;
 
-    @ApiModelProperty(value = "是否为本人的好友", example = "true")
-    private Boolean isFriend;
-
-    @ApiModelProperty(value = "好友关系创建时间", example = "2023-12-01T10:30:00")
-    private LocalDateTime createTime;
-
-    @ApiModelProperty(value = "好友关系更新时间", example = "2023-12-01T10:30:00")
-    private LocalDateTime updateTime;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
+    public void setId(Long id) 
+    {
         this.id = id;
     }
 
-    public Long getFriendUserId() {
-        return friendUserId;
+    public Long getId() 
+    {
+        return id;
+    }
+    public void setUserId(Long userId) 
+    {
+        this.userId = userId;
     }
 
-    public void setFriendUserId(Long friendUserId) {
-        this.friendUserId = friendUserId;
+    public Long getUserId() 
+    {
+        return userId;
+    }
+    public void setFriendId(Long friendId) 
+    {
+        this.friendId = friendId;
     }
 
-    public String getFriendUsername() {
-        return friendUsername;
+    public Long getFriendId() 
+    {
+        return friendId;
+    }
+    public void setNickname(String nickname) 
+    {
+        this.nickname = nickname;
     }
 
-    public void setFriendUsername(String friendUsername) {
-        this.friendUsername = friendUsername;
+    public String getNickname() 
+    {
+        return nickname;
+    }
+    public void setAvatar(String avatar) 
+    {
+        this.avatar = avatar;
     }
 
-    public String getFriendNickname() {
-        return friendNickname;
+    public String getAvatar() 
+    {
+        return avatar;
     }
-
-    public void setFriendNickname(String friendNickname) {
-        this.friendNickname = friendNickname;
-    }
-
-    public String getFriendAvatar() {
-        return friendAvatar;
-    }
-
-    public void setFriendAvatar(String friendAvatar) {
-        this.friendAvatar = friendAvatar;
-    }
-
-    public String getFriendStatus() {
-        return friendStatus;
-    }
-
-    public void setFriendStatus(String friendStatus) {
-        this.friendStatus = friendStatus;
-    }
-
-    public String getFriendStatusDesc() {
-        return friendStatusDesc;
-    }
-
-    public void setFriendStatusDesc(String friendStatusDesc) {
-        this.friendStatusDesc = friendStatusDesc;
-    }
-
-    public String getFriendEmail() {
-        return friendEmail;
-    }
-
-    public void setFriendEmail(String friendEmail) {
-        this.friendEmail = friendEmail;
-    }
-
-    public String getFriendPhone() {
-        return friendPhone;
-    }
-
-    public void setFriendPhone(String friendPhone) {
-        this.friendPhone = friendPhone;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
+    public void setRemark(String remark) 
+    {
         this.remark = remark;
     }
 
-    public String getFriendRelationStatus() {
-        return friendRelationStatus;
+    public String getRemark() 
+    {
+        return remark;
+    }
+    public void setStatus(String status) 
+    {
+        this.status = status;
     }
 
-    public void setFriendRelationStatus(String friendRelationStatus) {
-        this.friendRelationStatus = friendRelationStatus;
+    public String getStatus() 
+    {
+        return status;
     }
-
-    public String getFriendRelationStatusDesc() {
-        return friendRelationStatusDesc;
-    }
-
-    public void setFriendRelationStatusDesc(String friendRelationStatusDesc) {
-        this.friendRelationStatusDesc = friendRelationStatusDesc;
-    }
-
-    public Boolean getIsFriend() {
-        return isFriend;
-    }
-
-    public void setIsFriend(Boolean isFriend) {
-        this.isFriend = isFriend;
-    }
-
-    public LocalDateTime getCreateTime() {
+    public Date getCreateTime() 
+    {
         return createTime;
     }
 
-    public void setCreateTime(LocalDateTime createTime) {
+    public void setCreateTime(Date createTime) 
+    {
         this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
     }
 }

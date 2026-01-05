@@ -87,4 +87,46 @@ public interface ImGroupMemberService extends BaseService<ImGroupMember> {
      * @return 结果
      */
     public int setGroupMemberMuteTime(Long groupId, Long userId, java.time.LocalDateTime muteEndTime, Long operatorId);
+    
+    /**
+     * 根据群组ID删除群组成员
+     * 
+     * @param groupId 群组ID
+     * @return 结果
+     */
+    public int deleteByGroupId(Long groupId);
+    
+    /**
+     * 根据群组ID查询所有群组成员
+     * 
+     * @param groupId 群组ID
+     * @return 群组成员列表
+     */
+    public java.util.List<ImGroupMember> selectByGroupId(Long groupId);
+    
+    /**
+     * 根据群组ID和用户ID查询群组成员
+     * 
+     * @param groupId 群组ID
+     * @param userId 用户ID
+     * @return 群组成员
+     */
+    public ImGroupMember selectByGroupIdAndUserId(Long groupId, Long userId);
+    
+    /**
+     * 根据群组ID和用户ID删除群组成员
+     * 
+     * @param groupId 群组ID
+     * @param userId 用户ID
+     * @return 结果
+     */
+    public int deleteByGroupIdAndUserId(Long groupId, Long userId);
+    
+    /**
+     * 根据群组ID统计成员数量
+     * 
+     * @param groupId 群组ID
+     * @return 成员数量
+     */
+    public int countByGroupId(Long groupId);
 }

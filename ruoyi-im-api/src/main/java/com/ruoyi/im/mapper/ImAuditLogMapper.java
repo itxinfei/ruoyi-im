@@ -1,6 +1,7 @@
 package com.ruoyi.im.mapper;
 
 import com.ruoyi.im.domain.ImAuditLog;
+import com.ruoyi.im.mapper.base.BaseMapper;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImAuditLogMapper {
+public interface ImAuditLogMapper extends BaseMapper<ImAuditLog> {
     /**
      * 查询审计日志
      * 

@@ -64,6 +64,41 @@ public class ImFileAsset {
     private String status;
     
     /**
+     * 文件分类
+     */
+    private String category;
+
+    /**
+     * 文件描述
+     */
+    private String description;
+
+    /**
+     * 文件标签
+     */
+    private String tags;
+
+    /**
+     * 原始文件名
+     */
+    private String originalName;
+
+    /**
+     * 文件URL
+     */
+    private String fileUrl;
+
+    /**
+     * 上传时间
+     */
+    private LocalDateTime uploadTime;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;
@@ -155,6 +190,62 @@ public class ImFileAsset {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
+
+    public String getOriginalName() {
+        return originalName;
+    }
+
+    public void setOriginalName(String originalName) {
+        this.originalName = originalName;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
+    }
+
+    public LocalDateTime getUploadTime() {
+        return uploadTime;
+    }
+
+    public void setUploadTime(LocalDateTime uploadTime) {
+        this.uploadTime = uploadTime;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
     }
 
     public LocalDateTime getCreateTime() {

@@ -79,4 +79,61 @@ public class ServletUtils {
             return null;
         }
     }
+    
+    /**
+     * 获取客户端IP地址
+     * 
+     * @param request HttpServletRequest
+     * @return 客户端IP地址
+     */
+    public static String getClientIpAddress(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_CLIENT_IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        
+        // 如果是多IP情况，取第一个IP
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim();
+        }
+        
+        return ip;
+    }
+    
+    /**
+     * 获取指定请求的参数为整数
+     * 
+     * @param request HttpServletRequest
+     * @param name 参数名
+     * @return 参数值
+     */
+    public static Integer getParameterToInt(HttpServletRequest request, String name) {
+        String value = request.getParameter(name);
+        return Convert.toInt(value);
+    }
+    
+    /**
+     * 获取指定请求的参数为整数
+     * 
+     * @param request HttpServletRequest
+     * @param name 参数名
+     * @param defaultValue 默认值
+     * @return 参数值
+     */
+    public static Integer getParameterToInt(HttpServletRequest request, String name, Integer defaultValue) {
+        String value = request.getParameter(name);
+        return Convert.toInt(value, defaultValue);
+    }
 }

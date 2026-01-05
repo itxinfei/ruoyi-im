@@ -1,6 +1,6 @@
 package com.ruoyi.im.controller;
 
-import com.ruoyi.common.core.controller.BaseController;
+import com.ruoyi.im.controller.BaseController;
 import com.ruoyi.im.annotation.RequirePermission;
 import com.ruoyi.im.annotation.ImApiVersion;
 import com.ruoyi.im.annotation.ImRateLimit;
@@ -122,9 +122,9 @@ public class ImSessionController extends BaseController {
         int result = imSessionService.update(imSession);
         
         if (result > 0) {
-            return Result.success("会话更新成功");
+            return Result.success();
         } else {
-            return Result.error("会话更新失败");
+            return Result.error(500, "会话更新失败");
         }
     }
 
@@ -139,7 +139,7 @@ public class ImSessionController extends BaseController {
         int result = imSessionService.deleteById(id);
         
         if (result > 0) {
-            return Result.success("会话删除成功");
+            return Result.success();
         } else {
             return Result.error("会话删除失败");
         }

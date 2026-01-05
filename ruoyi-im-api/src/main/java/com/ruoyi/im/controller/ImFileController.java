@@ -128,10 +128,10 @@ public class ImFileController extends BaseController {
             logger.info("文件列表: 总查询成功数={}, 当前页={}, 每页数量={}", 
                        filteredFiles.size(), queryRequest.getPageNum(), queryRequest.getPageSize());
             
-            return success(result, "查询成功");
+            return Result.success("查询成功", result);
         } catch (Exception e) {
             logger.error("文件列表查询异常: {}", e.getMessage(), e);
-            return error("查询失败: " + e.getMessage());
+            return Result.error("查询失败: " + e.getMessage());
         }
     }
 
@@ -167,14 +167,14 @@ public class ImFileController extends BaseController {
             // 验证文件
             if (file.isEmpty()) {
                 logger.warn("文件上传失败: 文件为空");
-                return badRequest("文件不能为空");
+                return Result.error(400, "文件不能为空");
             }
             
             // 检查文件大小（最大100MB）
             long maxSize = 100 * 1024 * 1024;
             if (file.getSize() > maxSize) {
                 logger.warn("文件上传失败: 文件大小超过限制, size={}, maxSize={}", file.getSize(), maxSize);
-                return badRequest("文件大小不能超过100MB");
+                return Result.error(400, "文件大小不能超过100MB");
             }
             
             // 生成文件路径
@@ -215,14 +215,14 @@ public class ImFileController extends BaseController {
                 logger.info("文件上传成功: fileId={}, fileName={}, fileSize={}", 
                            fileAsset.getId(), originalFileName, file.getSize());
                 
-                return success(fileVO, "文件上传成功");
+                return Result.success("文件上传成功", fileVO);
             } else {
                 logger.error("文件上传失败: 数据库插入失败");
-                return error("文件上传失败");
+                return Result.error("文件上传失败");
             }
         } catch (Exception e) {
             logger.error("文件上传异常: {}", e.getMessage(), e);
-            return error("文件上传失败: " + e.getMessage());
+            return Result.error("文件上传失败: " + e.getMessage());
         }
     }
 
@@ -247,7 +247,7 @@ public class ImFileController extends BaseController {
             ImFileAsset fileAsset = imFileAssetService.selectById(fileId);
             if (fileAsset == null) {
                 logger.warn("获取文件信息失败: 文件不存在, fileId={}", fileId);
-                return notFound("文件不存在");
+                return Result.error(404, "文件不存在");
             }
             
             // 转换为VO
@@ -255,10 +255,10 @@ public class ImFileController extends BaseController {
             
             logger.info("获取文件信息成功: fileId={}, fileName={}", fileId, fileAsset.getFileName());
             
-            return success(fileVO, "获取文件信息成功");
+            return Result.success("获取文件信息成功", fileVO);
         } catch (Exception e) {
             logger.error("获取文件信息异常: fileId={}, error={}", fileId, e.getMessage(), e);
-            return error("获取文件信息失败: " + e.getMessage());
+            return Result.error("获取文件信息失败: " + e.getMessage());
         }
     }
 
@@ -375,14 +375,14 @@ public class ImFileController extends BaseController {
                 
                 logger.info("文件删除成功: fileId={}, fileName={}", fileId, fileAsset.getFileName());
                 
-                return success("文件删除成功");
+                return Result.success();
             } else {
                 logger.error("文件删除失败: 数据库更新失败, fileId={}", fileId);
-                return error("文件删除失败");
+                return Result.error(500, "文件删除失败");
             }
         } catch (Exception e) {
             logger.error("文件删除异常: fileId={}, error={}", fileId, e.getMessage(), e);
-            return error("文件删除失败: " + e.getMessage());
+            return Result.error(500, "文件删除失败: " + e.getMessage());
         }
     }
 

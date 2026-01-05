@@ -274,7 +274,9 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
         
         try {
             // 参数验证
-            validateId(md5, methodName);
+            if (md5 == null || md5.trim().isEmpty()) {
+                throw new BusinessException(methodName + "参数无效: MD5不能为空");
+            }
             
             log.debug("根据MD5查询文件资源: md5={}, method={}", md5, methodName);
             
@@ -289,8 +291,13 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
                 return cachedFile;
             }
             
+            // 构建查询条件
+            ImFileAsset query = new ImFileAsset();
+            query.setMd5(md5);
+            
             // 查询数据库
-            ImFileAsset fileAsset = imFileAssetMapper.selectImFileAssetByMd5(md5);
+            List<ImFileAsset> fileAssets = selectList(query);
+            ImFileAsset fileAsset = fileAssets != null && !fileAssets.isEmpty() ? fileAssets.get(0) : null;
             
             // 缓存结果
             if (fileAsset != null) {
@@ -336,8 +343,12 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
                 return cachedFiles;
             }
             
+            // 构建查询条件
+            ImFileAsset query = new ImFileAsset();
+            query.setUploaderId(userId);
+            
             // 查询数据库
-            List<ImFileAsset> fileAssets = imFileAssetMapper.selectImFileAssetListByUploaderId(userId);
+            List<ImFileAsset> fileAssets = selectList(query);
             
             // 缓存结果
             if (fileAssets != null && !fileAssets.isEmpty()) {

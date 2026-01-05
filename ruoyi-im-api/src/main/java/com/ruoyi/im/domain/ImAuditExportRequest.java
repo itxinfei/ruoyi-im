@@ -3,22 +3,17 @@ package com.ruoyi.im.domain;
 import java.time.LocalDateTime;
 
 /**
- * 审计导出请求实体
+ * 审计导出请求对象
  * 
  * @author ruoyi
  */
 public class ImAuditExportRequest {
     private Long id;
     private Long userId;
-    private String operationType;
-    private String targetType;
-    private Long targetId;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private String status;
-    private String filePath;
-    private String errorMessage;
-    private String format;
+    private String exportType;
+    private String exportStatus;
+    private String exportParams;
+    private String exportUrl;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
@@ -38,76 +33,36 @@ public class ImAuditExportRequest {
         this.userId = userId;
     }
 
-    public String getOperationType() {
-        return operationType;
+    public String getExportType() {
+        return exportType;
     }
 
-    public void setOperationType(String operationType) {
-        this.operationType = operationType;
+    public void setExportType(String exportType) {
+        this.exportType = exportType;
     }
 
-    public String getTargetType() {
-        return targetType;
+    public String getExportStatus() {
+        return exportStatus;
     }
 
-    public void setTargetType(String targetType) {
-        this.targetType = targetType;
+    public void setExportStatus(String exportStatus) {
+        this.exportStatus = exportStatus;
     }
 
-    public Long getTargetId() {
-        return targetId;
+    public String getExportParams() {
+        return exportParams;
     }
 
-    public void setTargetId(Long targetId) {
-        this.targetId = targetId;
+    public void setExportParams(String exportParams) {
+        this.exportParams = exportParams;
     }
 
-    public LocalDateTime getStartTime() {
-        return startTime;
+    public String getExportUrl() {
+        return exportUrl;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
-
-    public String getFormat() {
-        return format;
-    }
-
-    public void setFormat(String format) {
-        this.format = format;
+    public void setExportUrl(String exportUrl) {
+        this.exportUrl = exportUrl;
     }
 
     public LocalDateTime getCreateTime() {
@@ -124,5 +79,14 @@ public class ImAuditExportRequest {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+    
+    // 添加一些常用的getter/setter方法以确保兼容性
+    public void setStatus(String status) {
+        this.exportStatus = status;
+    }
+    
+    public String getStatus() {
+        return this.exportStatus;
     }
 }

@@ -13,7 +13,7 @@ import com.ruoyi.im.service.ImFriendRequestService;
  * @author ruoyi
  */
 @Service
-public class ImFriendRequestServiceImpl implements ImFriendRequestService {
+public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest, ImFriendRequestMapper> implements ImFriendRequestService {
     @Autowired
     private ImFriendRequestMapper imFriendRequestMapper;
 

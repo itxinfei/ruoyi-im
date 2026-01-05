@@ -59,6 +59,16 @@ public class ImMessage {
     private LocalDateTime revokedTime;
     
     /**
+     * 扩展数据（JSON格式）
+     */
+    private String extData;
+    
+    /**
+     * 回复消息ID（别名）
+     */
+    private Long replyMessageId;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;
@@ -147,6 +157,22 @@ public class ImMessage {
 
     public void setRevokedTime(LocalDateTime revokedTime) {
         this.revokedTime = revokedTime;
+    }
+
+    public String getExtData() {
+        return extData;
+    }
+
+    public void setExtData(String extData) {
+        this.extData = extData;
+    }
+
+    public Long getReplyMessageId() {
+        return replyMessageId;
+    }
+
+    public void setReplyMessageId(Long replyMessageId) {
+        this.replyMessageId = replyMessageId;
     }
 
     public LocalDateTime getCreateTime() {

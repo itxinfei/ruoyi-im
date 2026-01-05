@@ -13,6 +13,16 @@ public interface ImMessageService extends BaseService<ImMessage> {
     @Override
     ImMessage selectById(Long id);
     
+    /**
+     * 根据ID查询消息
+     * 
+     * @param id 消息ID
+     * @return 消息信息
+     */
+    default ImMessage selectImMessageById(Long id) {
+        return selectById(id);
+    }
+    
     @Override
     List<ImMessage> selectList(ImMessage imMessage);
     

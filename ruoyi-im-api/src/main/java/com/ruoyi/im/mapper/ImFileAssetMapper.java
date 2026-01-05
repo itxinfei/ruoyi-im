@@ -1,6 +1,7 @@
 package com.ruoyi.im.mapper;
 
 import com.ruoyi.im.domain.ImFileAsset;
+import com.ruoyi.im.mapper.base.BaseMapper;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImFileAssetMapper {
+public interface ImFileAssetMapper extends BaseMapper<ImFileAsset> {
     /**
      * 查询文件资源
      * 

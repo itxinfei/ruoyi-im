@@ -59,4 +59,14 @@ public interface ImGroupService extends BaseService<ImGroup> {
      * @return 结果
      */
     public int deleteImGroupById(Long id);
+    
+    /**
+     * 查询群组列表
+     * 
+     * @param request 查询请求
+     * @return 群组集合
+     */
+    default List<ImGroup> selectImGroupList(com.ruoyi.im.dto.group.ImGroupQueryRequest request) {
+        return selectList(new com.ruoyi.im.domain.ImGroup());
+    }
 }

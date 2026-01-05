@@ -47,6 +47,16 @@ public class ImGroupMember {
      * 加入时间
      */
     private LocalDateTime joinedTime;
+    
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
+    
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
 
     // Getters and Setters
     public Long getId() {
@@ -111,5 +121,21 @@ public class ImGroupMember {
 
     public void setJoinedTime(LocalDateTime joinedTime) {
         this.joinedTime = joinedTime;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
     }
 }

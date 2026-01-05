@@ -1,6 +1,7 @@
 package com.ruoyi.im.mapper;
 
 import com.ruoyi.im.domain.ImConversation;
+import com.ruoyi.im.mapper.base.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImConversationMapper {
+public interface ImConversationMapper extends BaseMapper<ImConversation> {
     /**
      * 查询会话
      * 

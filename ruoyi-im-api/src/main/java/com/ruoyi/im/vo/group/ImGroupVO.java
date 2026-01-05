@@ -51,6 +51,24 @@ public class ImGroupVO {
     @ApiModelProperty(value = "更新时间", example = "2024-01-01 10:00:00")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
+    
+    @ApiModelProperty(value = "群组名称（别名）", example = "技术交流群")
+    private String groupName;
+    
+    @ApiModelProperty(value = "群组描述", example = "这是一个技术交流群")
+    private String groupDesc;
+    
+    @ApiModelProperty(value = "群组类型", example = "COMMON")
+    private String groupType;
+    
+    @ApiModelProperty(value = "成员数量限制", example = "200")
+    private Integer memberLimit;
+    
+    @ApiModelProperty(value = "群主名称", example = "张三")
+    private String ownerName;
+    
+    @ApiModelProperty(value = "群主头像", example = "/profile/avatar.png")
+    private String ownerAvatar;
 
     public Long getId() {
         return id;
@@ -146,5 +164,53 @@ public class ImGroupVO {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public String getGroupDesc() {
+        return groupDesc;
+    }
+
+    public void setGroupDesc(String groupDesc) {
+        this.groupDesc = groupDesc;
+    }
+
+    public String getGroupType() {
+        return groupType;
+    }
+
+    public void setGroupType(String groupType) {
+        this.groupType = groupType;
+    }
+
+    public Integer getMemberLimit() {
+        return memberLimit;
+    }
+
+    public void setMemberLimit(Integer memberLimit) {
+        this.memberLimit = memberLimit;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
+    public String getOwnerAvatar() {
+        return ownerAvatar;
+    }
+
+    public void setOwnerAvatar(String ownerAvatar) {
+        this.ownerAvatar = ownerAvatar;
     }
 }

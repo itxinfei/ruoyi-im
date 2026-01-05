@@ -146,7 +146,7 @@ public class ImMessageController extends BaseController {
             .selectImConversationMemberByConversationIdAndUserId(request.getConversationId(), currentUserId);
         if (member == null) {
             log.warn("用户不在会话中: conversationId={}, userId={}", request.getConversationId(), currentUserId);
-            return forbidden("用户不在该会话中");
+            return Result.error(403, "用户不在该会话中");
         }
         
         List<ImMessage> messages = imMessageService.selectImMessageListByConversationId(request.getConversationId());
@@ -170,7 +170,7 @@ public class ImMessageController extends BaseController {
         
         log.info("分页查询会话消息列表成功: conversationId={}, total={}, count={}", 
                 request.getConversationId(), filteredMessages.size(), messageVOList.size());
-        return getDataTable(messageVOList, filteredMessages.size());
+        return getDataTable(messageVOList);
     }
 
     @ApiOperation(value = "标记消息已读", notes = "将指定消息或会话所有消息标记为已读状态")
@@ -219,7 +219,7 @@ public class ImMessageController extends BaseController {
         }
         
         log.info("标记消息已读成功: conversationId={}", conversationId);
-        return Result.success("消息已读状态更新成功", null);
+        return Result.success();
     }
 
     @ApiOperation(value = "撤回消息", notes = "撤回指定消息，只能撤回自己发送的消息")
@@ -243,12 +243,12 @@ public class ImMessageController extends BaseController {
         ImMessage message = imMessageService.selectImMessageById(messageId);
         if (message == null) {
             log.warn("消息不存在: messageId={}", messageId);
-            return notFound("消息不存在");
+            return Result.error(404, "消息不存在");
         }
         
         if (!message.getSenderId().equals(currentUserId)) {
             log.warn("用户无权撤回消息: messageId={}, userId={}", messageId, currentUserId);
-            return forbidden("只能撤回自己发送的消息");
+            return Result.error(403, "只能撤回自己发送的消息");
         }
         
         int recallResult = imMessageService.revokeMessage(messageId, currentUserId);
@@ -258,7 +258,7 @@ public class ImMessageController extends BaseController {
         }
         
         log.info("消息撤回成功: messageId={}", messageId);
-        return Result.success("消息撤回成功", convertToVO(message));
+        return Result.success(convertToVO(message));
     }
 
     @ApiOperation(value = "搜索消息", notes = "在指定会话中搜索消息，支持关键词和消息类型过滤")
@@ -290,7 +290,7 @@ public class ImMessageController extends BaseController {
                 .selectImConversationMemberByConversationIdAndUserId(request.getConversationId(), currentUserId);
             if (member == null) {
                 log.warn("用户不在会话中: conversationId={}, userId={}", request.getConversationId(), currentUserId);
-                return forbidden("用户不在该会话中");
+                return Result.error(403, "用户不在该会话中");
             }
             
             List<ImMessage> messages = imMessageService.selectImMessageListByConversationId(request.getConversationId());
@@ -314,11 +314,11 @@ public class ImMessageController extends BaseController {
             
             log.info("搜索消息成功: conversationId={}, total={}, count={}", 
                     request.getConversationId(), filteredMessages.size(), messageVOList.size());
-            return getDataTable(messageVOList, filteredMessages.size());
+            return getDataTable(messageVOList);
         }
         
         log.info("搜索消息成功: 未指定会话ID");
-        return getDataTable(java.util.Collections.emptyList(), 0);
+        return getDataTable(java.util.Collections.emptyList());
     }
 
     @ApiOperation(value = "获取消息详情", notes = "获取指定消息的详细信息，包括互动和已读回执")
@@ -338,7 +338,7 @@ public class ImMessageController extends BaseController {
         ImMessage message = imMessageService.selectImMessageById(messageId);
         if (message == null) {
             log.warn("消息不存在: messageId={}", messageId);
-            return notFound("消息不存在");
+            return Result.error(404, "消息不存在");
         }
         
         log.info("获取消息详情成功: messageId={}", messageId);
@@ -390,7 +390,7 @@ public class ImMessageController extends BaseController {
         
         if (member == null) {
             log.warn("用户不在会话中: conversationId={}, userId={}", conversationId, currentUserId);
-            return forbidden("用户不在该会话中");
+            return Result.error(403, "用户不在该会话中");
         }
         
         int unreadCount = member.getUnreadCount() != null ? member.getUnreadCount() : 0;
@@ -558,8 +558,9 @@ public class ImMessageController extends BaseController {
      * 
      * @return 当前用户ID
      */
-    private Long getCurrentUserId() {
-        return 1L;
+    @Override
+    protected Long getCurrentUserId() {
+        return super.getCurrentUserId();
     }
 
     @ApiOperation("回复消息")

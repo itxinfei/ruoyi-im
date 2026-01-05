@@ -131,4 +131,54 @@ public interface ImUserService {
      * @return 角色集合
      */
     public Set<String> getUserRoles(Long userId);
+    
+    /**
+     * 查询IM用户列表
+     * 
+     * @param imUser 查询条件
+     * @return IM用户集合
+     */
+    default List<ImUser> selectImUserList(ImUser imUser) {
+        return selectList(imUser);
+    }
+    
+    /**
+     * 根据ID查找用户
+     * 
+     * @param id 用户ID
+     * @return IM用户
+     */
+    default ImUser findById(Long id) {
+        return selectById(id);
+    }
+    
+    /**
+     * 根据用户名查找用户
+     * 
+     * @param username 用户名
+     * @return IM用户
+     */
+    default ImUser findByUsername(String username) {
+        return selectImUserByUsername(username);
+    }
+    
+    /**
+     * 更新用户信息
+     * 
+     * @param imUser 用户信息
+     * @return 结果
+     */
+    default int updateById(ImUser imUser) {
+        return update(imUser);
+    }
+    
+    /**
+     * 查询IM用户信息
+     * 
+     * @param imUser 查询条件
+     * @return IM用户信息
+     */
+    default ImUser selectImUserById(Long id) {
+        return selectById(id);
+    }
 }

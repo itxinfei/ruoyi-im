@@ -1,115 +1,93 @@
 package com.ruoyi.im.domain;
 
-import java.time.LocalDateTime;
+import com.ruoyi.common.base.BaseEntity;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
- * 好友关系实体
+ * 好友对象 im_friend
  * 
  * @author ruoyi
  */
-public class ImFriend {
-    /**
-     * 主键ID
-     */
+@TableName("im_friend")
+public class ImFriend extends BaseEntity
+{
+    private static final long serialVersionUID = 1L;
+
+    /** 好友关系ID */
+    @TableId
     private Long id;
-    
-    /**
-     * 用户ID
-     */
+
+    /** 用户ID */
     private Long userId;
-    
-    /**
-     * 好友用户ID
-     */
-    private Long friendUserId;
-    
-    /**
-     * 好友别名
-     */
-    private String alias;
-    
-    /**
-     * 备注信息
-     */
+
+    /** 好友ID */
+    private Long friendId;
+
+    /** 备注 */
     private String remark;
-    
-    /**
-     * 状态（NORMAL正常 BLOCKED拉黑）
-     */
+
+    /** 好友状态 */
     private String status;
-    
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createTime;
-    
-    /**
-     * 更新时间
-     */
-    private LocalDateTime updateTime;
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
+    public void setId(Long id) 
+    {
         this.id = id;
     }
 
-    public Long getUserId() {
-        return userId;
+    public Long getId() 
+    {
+        return id;
     }
-
-    public void setUserId(Long userId) {
+    public void setUserId(Long userId) 
+    {
         this.userId = userId;
     }
 
-    public Long getFriendUserId() {
-        return friendUserId;
+    public Long getUserId() 
+    {
+        return userId;
+    }
+    public void setFriendId(Long friendId) 
+    {
+        this.friendId = friendId;
     }
 
-    public void setFriendUserId(Long friendUserId) {
-        this.friendUserId = friendUserId;
+    public Long getFriendId() 
+    {
+        return friendId;
     }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
+    public void setRemark(String remark) 
+    {
         this.remark = remark;
     }
 
-    public String getStatus() {
-        return status;
+    public String getRemark() 
+    {
+        return remark;
     }
-
-    public void setStatus(String status) {
+    public void setStatus(String status) 
+    {
         this.status = status;
     }
 
-    public LocalDateTime getCreateTime() {
-        return createTime;
+    public String getStatus() 
+    {
+        return status;
     }
 
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
+            .append("id", getId())
+            .append("userId", getUserId())
+            .append("friendId", getFriendId())
+            .append("remark", getRemark())
+            .append("status", getStatus())
+            .append("createTime", getCreateTime())
+            .append("updateTime", getUpdateTime())
+            .toString();
     }
 }

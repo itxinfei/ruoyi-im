@@ -13,7 +13,7 @@ import com.ruoyi.im.service.ImConversationMemberService;
  * @author ruoyi
  */
 @Service
-public class ImConversationMemberServiceImpl implements ImConversationMemberService {
+public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversationMember, ImConversationMemberMapper> implements ImConversationMemberService {
     @Autowired
     private ImConversationMemberMapper imConversationMemberMapper;
 

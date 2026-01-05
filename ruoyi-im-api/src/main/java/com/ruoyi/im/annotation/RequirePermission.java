@@ -16,4 +16,5 @@ public @interface RequirePermission {
     String value() default "";
     String[] permissions() default {};
     String desc() default "";
+    boolean allRequired() default false;
 }

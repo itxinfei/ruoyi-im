@@ -2,7 +2,7 @@ package com.ruoyi.im.controller;
 
 import com.github.pagehelper.PageInfo;
 import com.ruoyi.common.annotation.Log;
-import com.ruoyi.common.core.controller.BaseController;
+import com.ruoyi.im.controller.BaseController;
 import com.ruoyi.im.annotation.SwaggerTag;
 import com.ruoyi.im.common.PageResult;
 import com.ruoyi.im.common.Result;
@@ -102,11 +102,9 @@ public class ImGroupController extends BaseController {
         
         // 创建群组
         ImGroup group = new ImGroup();
-        group.setGroupName(request.getGroupName());
-        group.setGroupDesc(request.getGroupDesc());
+        group.setName(request.getName());
+        group.setNotice(request.getNotice());
         group.setOwnerId(currentUserId); // 设置创建者为群主
-        group.setGroupType(request.getGroupType());
-        group.setMemberLimit(request.getMemberLimit());
         group.setAvatar(request.getAvatar());
         group.setCreateTime(LocalDateTime.now());
         group.setUpdateTime(LocalDateTime.now());
@@ -119,9 +117,7 @@ public class ImGroupController extends BaseController {
             member.setGroupId(group.getId());
             member.setUserId(currentUserId);
             member.setRole("owner"); // 群主角色
-            member.setJoinTime(LocalDateTime.now());
-            member.setCreateTime(LocalDateTime.now());
-            member.setUpdateTime(LocalDateTime.now());
+            member.setJoinedTime(LocalDateTime.now());
             
             imGroupMemberService.insert(member);
             
@@ -156,19 +152,17 @@ public class ImGroupController extends BaseController {
         }
         
         // 更新群组信息
-        existingGroup.setGroupName(request.getGroupName());
-        existingGroup.setGroupDesc(request.getGroupDesc());
-        existingGroup.setGroupType(request.getGroupType());
-        existingGroup.setMemberLimit(request.getMemberLimit());
+        existingGroup.setName(request.getName());
+        existingGroup.setNotice(request.getNotice());
         existingGroup.setAvatar(request.getAvatar());
         existingGroup.setUpdateTime(LocalDateTime.now());
         
         int result = imGroupService.update(existingGroup);
         
         if (result > 0) {
-            return Result.success("群组信息更新成功");
+            return Result.success();
         } else {
-            return Result.error("群组信息更新失败");
+            return Result.error(500, "群组信息更新失败");
         }
     }
 
@@ -192,9 +186,9 @@ public class ImGroupController extends BaseController {
         int result = imGroupService.deleteById(groupId);
         
         if (result > 0) {
-            return Result.success("群组删除成功");
+            return Result.success();
         } else {
-            return Result.error("群组删除失败");
+            return Result.error(500, "群组删除失败");
         }
     }
 
@@ -220,9 +214,9 @@ public class ImGroupController extends BaseController {
         int memberResult = imGroupMemberService.deleteByGroupId(groupId);
         
         if (groupResult > 0) {
-            return Result.success("群组已解散");
+            return Result.success();
         } else {
-            return Result.error("解散群组失败");
+            return Result.error(500, "解散群组失败");
         }
     }
 
@@ -248,7 +242,7 @@ public class ImGroupController extends BaseController {
                 vo.setUserId(member.getUserId());
                 vo.setGroupId(member.getGroupId());
                 vo.setRole(member.getRole());
-                vo.setJoinTime(member.getJoinTime());
+                vo.setJoinedTime(member.getJoinedTime());
                 
                 // 查询用户信息
                 ImUser user = imUserService.selectById(member.getUserId());
@@ -315,15 +309,13 @@ public class ImGroupController extends BaseController {
             member.setGroupId(groupId);
             member.setUserId(userId);
             member.setRole("member"); // 默认为普通成员
-            member.setJoinTime(LocalDateTime.now());
-            member.setCreateTime(LocalDateTime.now());
-            member.setUpdateTime(LocalDateTime.now());
+            member.setJoinedTime(LocalDateTime.now());
             
             imGroupMemberService.insert(member);
             addedCount++;
         }
         
-        return Result.success("成功添加" + addedCount + "个群成员");
+        return Result.success();
     }
 
     /**
@@ -367,9 +359,9 @@ public class ImGroupController extends BaseController {
         int result = imGroupMemberService.deleteByGroupIdAndUserId(groupId, userId);
         
         if (result > 0) {
-            return Result.success("群成员移除成功");
+            return Result.success();
         } else {
-            return Result.error("群成员移除失败");
+            return Result.error(500, "群成员移除失败");
         }
     }
 
@@ -399,9 +391,9 @@ public class ImGroupController extends BaseController {
         int result = imGroupMemberService.update(member);
         
         if (result > 0) {
-            return Result.success("已设置为群管理员");
+            return Result.success();
         } else {
-            return Result.error("设置群管理员失败");
+            return Result.error(500, "设置群管理员失败");
         }
     }
 
@@ -431,9 +423,9 @@ public class ImGroupController extends BaseController {
         int result = imGroupMemberService.update(member);
         
         if (result > 0) {
-            return Result.success("已取消群管理员");
+            return Result.success();
         } else {
-            return Result.error("取消群管理员失败");
+            return Result.error(500, "取消群管理员失败");
         }
     }
 
@@ -456,7 +448,9 @@ public class ImGroupController extends BaseController {
         stats.put("memberCount", memberCount);
         stats.put("memberLimit", group.getMemberLimit());
         stats.put("ownerId", group.getOwnerId());
-        stats.put("groupName", group.getGroupName());
+        stats.put("groupName", group.getName());
+        stats.put("description", group.getDescription());
+        stats.put("type", group.getType());
         stats.put("createTime", group.getCreateTime());
         
         return Result.success(stats);
@@ -466,10 +460,10 @@ public class ImGroupController extends BaseController {
     private ImGroupVO convertToVO(ImGroup group) {
         ImGroupVO vo = new ImGroupVO();
         vo.setId(group.getId());
-        vo.setGroupName(group.getGroupName());
-        vo.setGroupDesc(group.getGroupDesc());
+        vo.setGroupName(group.getName());
+        vo.setGroupDesc(group.getDescription());
         vo.setOwnerId(group.getOwnerId());
-        vo.setGroupType(group.getGroupType());
+        vo.setGroupType(group.getType());
         vo.setMemberLimit(group.getMemberLimit());
         vo.setAvatar(group.getAvatar());
         vo.setCreateTime(group.getCreateTime());

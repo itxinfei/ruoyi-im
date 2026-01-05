@@ -35,7 +35,7 @@ public class ImMessageReadReceiptController {
         
         List<ImMessageReadReceipt> list = imMessageReadReceiptService.selectImMessageReadReceiptList(query);
         
-        return Result.success(list, "查询成功");
+        return Result.success("查询成功", list);
     }
 
     /**
@@ -46,7 +46,7 @@ public class ImMessageReadReceiptController {
         ImMessageReadReceipt receipt = imMessageReadReceiptService.selectImMessageReadReceiptById(id);
         
         if (receipt != null) {
-            return Result.success(receipt, "查询成功");
+            return Result.success("查询成功", receipt);
         } else {
             return Result.error(404, "消息已读回执不存在");
         }
@@ -59,7 +59,7 @@ public class ImMessageReadReceiptController {
     public Result<List<ImMessageReadReceipt>> listByMessageId(@PathVariable Long messageId) {
         List<ImMessageReadReceipt> list = imMessageReadReceiptService.selectImMessageReadReceiptByMessageId(messageId);
         
-        return Result.success(list, "查询成功");
+        return Result.success("查询成功", list);
     }
 
     /**
@@ -69,7 +69,7 @@ public class ImMessageReadReceiptController {
     public Result<List<ImMessageReadReceipt>> listByUserId(@PathVariable Long userId) {
         List<ImMessageReadReceipt> list = imMessageReadReceiptService.selectImMessageReadReceiptByUserId(userId);
         
-        return Result.success(list, "查询成功");
+        return Result.success("查询成功", list);
     }
 
     /**
@@ -79,7 +79,7 @@ public class ImMessageReadReceiptController {
     public Result<List<ImMessageReadReceipt>> listByConversationId(@PathVariable Long conversationId) {
         List<ImMessageReadReceipt> list = imMessageReadReceiptService.selectImMessageReadReceiptByConversationId(conversationId);
         
-        return Result.success(list, "查询成功");
+        return Result.success("查询成功", list);
     }
 
     /**
@@ -90,7 +90,7 @@ public class ImMessageReadReceiptController {
         int rows = imMessageReadReceiptService.insertImMessageReadReceipt(receipt);
         
         if (rows > 0) {
-            return Result.success(receipt, "消息已读回执添加成功");
+            return Result.success("消息已读回执添加成功", receipt);
         } else {
             return Result.error(500, "消息已读回执添加失败");
         }
@@ -109,7 +109,7 @@ public class ImMessageReadReceiptController {
         int rows = imMessageReadReceiptService.markMessageAsRead(messageId, userId, conversationId, deviceType);
         
         if (rows > 0) {
-            return Result.success("消息已读标记成功");
+            return Result.success(200, "消息已读标记成功", null);
         } else {
             return Result.error(500, "消息已读标记失败");
         }
@@ -129,7 +129,7 @@ public class ImMessageReadReceiptController {
         int rows = imMessageReadReceiptService.batchMarkMessagesAsRead(messageIds, userId, conversationId, deviceType);
         
         if (rows > 0) {
-            return Result.success(rows, "批量标记消息已读成功");
+            return Result.success("批量标记消息已读成功", rows);
         } else {
             return Result.error(500, "批量标记消息已读失败");
         }
@@ -143,7 +143,7 @@ public class ImMessageReadReceiptController {
         int rows = imMessageReadReceiptService.updateImMessageReadReceipt(receipt);
         
         if (rows > 0) {
-            return Result.success(receipt, "消息已读回执修改成功");
+            return Result.success("消息已读回执修改成功", receipt);
         } else {
             return Result.error(500, "消息已读回执修改失败");
         }
@@ -157,7 +157,7 @@ public class ImMessageReadReceiptController {
         int rows = imMessageReadReceiptService.deleteImMessageReadReceiptById(id);
         
         if (rows > 0) {
-            return Result.success("消息已读回执删除成功");
+            return Result.success(200, "消息已读回执删除成功", null);
         } else {
             return Result.error(404, "消息已读回执不存在");
         }
@@ -171,7 +171,7 @@ public class ImMessageReadReceiptController {
         int rows = imMessageReadReceiptService.deleteImMessageReadReceiptByIds(ids);
         
         if (rows > 0) {
-            return Result.success("消息已读回执删除成功");
+            return Result.success(200, "消息已读回执删除成功", null);
         } else {
             return Result.error(500, "消息已读回执删除失败");
         }

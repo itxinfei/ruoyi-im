@@ -42,7 +42,7 @@
         </div>
 
         <!-- 用户信息 -->
-        <el-dropdown @command="handleUserCommand" trigger="click">
+        <el-dropdown @command="handleUserCommand" trigger="click" placement="bottom-end">
           <div class="user-dropdown">
             <el-avatar :size="32" :src="currentUser?.avatar">
               {{ currentUser?.name?.charAt(0) || 'U' }}
@@ -108,9 +108,20 @@
         <div v-if="activeModule === 'chat'" class="chat-workspace">
           <!-- 会话列表 -->
           <div class="session-panel">
+            <div class="session-header">
+              <el-input
+                v-model="sessionSearch"
+                placeholder="搜索会话..."
+                :prefix-icon="Search"
+                size="small"
+                clearable
+                class="session-search"
+              />
+              <el-button :icon="Plus" size="small" circle @click="showCreateGroupDialog" />
+            </div>
             <div class="session-list">
               <div
-                v-for="session in sessions"
+                v-for="session in filteredSessions"
                 :key="session.id"
                 class="session-item"
                 :class="{ active: currentSessionId === session.id }"
@@ -154,30 +165,120 @@
               </div>
 
               <!-- 消息区 -->
-              <div class="message-area">
-                <div v-for="msg in messages" :key="msg.id" class="message-item" :class="{ isOwn: msg.isOwn }">
-                  <el-avatar v-if="!msg.isOwn" :size="36" :src="msg.senderAvatar">
-                    {{ msg.senderName?.charAt(0) || 'U' }}
+              <div ref="messageAreaRef" class="message-area">
+                <!-- 连接状态提示 -->
+                <div v-if="!isConnected" class="connection-status">
+                  <el-icon><Warning /></el-icon>
+                  <span>连接中...</span>
+                </div>
+                <div v-for="msg in messages" :key="msg.id || msg.clientMsgId" class="message-item" :class="{ isOwn: msg.isOwn || msg.senderId === currentUser?.userId }">
+                  <el-avatar v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)" :size="36" :src="msg.senderAvatar || msg.avatar">
+                    {{ (msg.senderName || msg.sender?.name)?.charAt(0) || 'U' }}
                   </el-avatar>
                   <div class="message-content">
-                    <div v-if="!msg.isOwn" class="sender-name">{{ msg.senderName }}</div>
-                    <div class="message-bubble">{{ msg.content }}</div>
-                    <div class="message-time">{{ formatTime(msg.time) }}</div>
+                    <div v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)" class="sender-name">{{ msg.senderName || msg.sender?.name }}</div>
+
+                    <!-- 文本消息 -->
+                    <div v-if="msg.type === 'text' || !msg.type" class="message-bubble" :class="{ 'sending': msg.status === 'sending', 'failed': msg.status === 'failed' }">
+                      {{ msg.content }}
+                    </div>
+
+                    <!-- 图片消息 -->
+                    <div v-else-if="msg.type === 'image'" class="message-image">
+                      <el-image
+                        :src="msg.content"
+                        :preview-src-list="[msg.content]"
+                        fit="cover"
+                        class="image-content"
+                        :class="{ 'sending': msg.status === 'sending' }"
+                      />
+                    </div>
+
+                    <!-- 文件消息 -->
+                    <div v-else-if="msg.type === 'file'" class="message-file" :class="{ 'sending': msg.status === 'sending' }">
+                      <div class="file-icon">
+                        <el-icon><Document /></el-icon>
+                      </div>
+                      <div class="file-info">
+                        <div class="file-name">{{ msg.fileName || '文件' }}</div>
+                        <div class="file-size">{{ msg.fileSize ? formatFileSize(msg.fileSize) : '' }}</div>
+                      </div>
+                      <el-button type="primary" size="small" @click.stop="downloadFile(msg)">下载</el-button>
+                    </div>
+
+                    <!-- 语音消息 -->
+                    <div v-else-if="msg.type === 'voice'" class="message-voice" :class="{ 'sending': msg.status === 'sending' }">
+                      <el-icon class="voice-icon"><Microphone /></el-icon>
+                      <span class="voice-duration">{{ msg.duration || 0 }}''</span>
+                    </div>
+
+                    <!-- 其他类型 -->
+                    <div v-else class="message-bubble" :class="{ 'sending': msg.status === 'sending' }">
+                      [{{ msg.type }}消息]
+                    </div>
+
+                    <div class="message-time">
+                      {{ formatTime(msg.timestamp || msg.time) }}
+                      <el-icon v-if="msg.status === 'sending'" class="status-icon sending"><Loading /></el-icon>
+                      <el-icon v-else-if="msg.status === 'failed'" class="status-icon failed" @click="resendMessage(msg)"><WarningFilled /></el-icon>
+                      <el-icon v-else-if="msg.isOwn || msg.senderId === currentUser?.userId" class="status-icon sent"><SuccessFilled /></el-icon>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <!-- 输入区 -->
               <div class="input-area">
+                <!-- 隐藏的文件输入 -->
+                <input
+                  ref="fileInputRef"
+                  type="file"
+                  style="display: none"
+                  @change="handleFileSelect"
+                />
+                <input
+                  ref="imageInputRef"
+                  type="file"
+                  accept="image/*"
+                  style="display: none"
+                  @change="handleImageSelect"
+                />
+
+                <!-- 语音录制界面 -->
+                <div v-if="isRecording" class="voice-recording-panel">
+                  <div class="voice-info">
+                    <span class="recording-duration">{{ formattedDuration }}</span>
+                    <div class="volume-bars">
+                      <div
+                        v-for="(height, index) in getVolumeBars(5)"
+                        :key="index"
+                        class="volume-bar"
+                        :style="{ height: height + '%' }"
+                      ></div>
+                    </div>
+                    <span class="recording-tip">正在录音...</span>
+                  </div>
+                  <div class="voice-actions">
+                    <el-button size="small" @click="cancelRecording">取消</el-button>
+                    <el-button type="danger" size="small" @click="stopVoiceRecord">完成</el-button>
+                  </div>
+                </div>
+
                 <div class="input-toolbar">
                   <el-tooltip content="文件" placement="top">
-                    <el-button :icon="Folder" text />
+                    <el-button :icon="Folder" text :disabled="uploading" @click="triggerFileSelect" />
                   </el-tooltip>
                   <el-tooltip content="图片" placement="top">
-                    <el-button :icon="PictureFilled" text />
+                    <el-button :icon="PictureFilled" text :disabled="uploading" @click="selectImage" />
                   </el-tooltip>
-                  <el-tooltip content="语音" placement="top">
-                    <el-button :icon="Microphone" text />
+                  <el-tooltip :content="isRecording ? '停止录音' : '按住说话'" placement="top">
+                    <el-button
+                      :icon="Microphone"
+                      text
+                      :disabled="uploading"
+                      :class="{ 'recording': isRecording }"
+                      @click="isRecording ? stopVoiceRecord() : startVoiceRecord()"
+                    />
                   </el-tooltip>
                   <el-tooltip content="表情" placement="top">
                     <el-button :icon="ChatDotRound" text />
@@ -206,58 +307,689 @@
 
         <!-- 通讯录模块 -->
         <div v-else-if="activeModule === 'contacts'" class="contacts-workspace">
+          <!-- 通讯录分类 -->
           <div class="contacts-sidebar">
-            <div class="section-title">企业组织架构</div>
+            <div class="section-title">通讯录</div>
             <div class="tree-list">
-              <div v-for="dept in departments" :key="dept.id" class="tree-item">
-                <el-icon><Folder /></el-icon>
-                {{ dept.name }}
+              <div
+                v-for="item in contactCategories"
+                :key="item.key"
+                class="tree-item"
+                :class="{ active: contactCategory === item.key }"
+                @click="contactCategory = item.key"
+              >
+                <el-icon>
+                  <component :is="item.icon" />
+                </el-icon>
+                <span class="tree-label">{{ item.label }}</span>
+                <span v-if="item.count > 0" class="tree-count">{{ item.count }}</span>
               </div>
             </div>
           </div>
-          <div class="contacts-content">
-            <p>联系人列表内容...</p>
+
+          <!-- 联系人列表 -->
+          <div class="contacts-list-panel">
+            <div class="list-header">
+              <el-input
+                v-model="contactSearch"
+                placeholder="搜索..."
+                :prefix-icon="Search"
+                clearable
+                class="search-input"
+              />
+            </div>
+
+            <!-- 好友列表 / 群组列表（带A-Z索引） -->
+            <div v-if="contactCategory === 'friends' || contactCategory === 'groups'" class="indexed-contacts">
+              <div
+                v-for="group in searchedGroups"
+                :key="group.letter"
+                :id="`contact-section-${group.letter}`"
+                class="contact-section"
+              >
+                <div class="section-header">{{ group.letter }}</div>
+                <div
+                  v-for="contact in group.contacts"
+                  :key="contact.id"
+                  class="contact-item-row"
+                  @click="contactCategory === 'friends' ? selectContact(contact) : selectGroupContact(contact)"
+                >
+                  <el-avatar :size="44" :src="contact.avatar">
+                    {{ (contact.name || contact.groupName || contact.nickname)?.charAt(0) || 'U' }}
+                  </el-avatar>
+                  <div class="contact-row-info">
+                    <div class="contact-row-name">{{ contact.name || contact.groupName || contact.nickname }}</div>
+                    <div v-if="contactCategory === 'friends'" class="contact-row-desc">{{ contact.signature || contact.remark || '' }}</div>
+                    <div v-else class="contact-row-desc">{{ contact.memberCount || 0 }}人</div>
+                  </div>
+                </div>
+              </div>
+              <el-empty v-if="searchedGroups.length === 0" description="暂无数据" />
+            </div>
+
+            <!-- 组织架构 -->
+            <div v-else-if="contactCategory === 'org'" class="org-tree">
+              <el-tree
+                :data="orgTree"
+                :props="{ label: 'name', children: 'children' }"
+                node-key="id"
+                @node-click="handleOrgNodeClick"
+              >
+                <template #default="{ node, data }">
+                  <div class="org-node">
+                    <el-icon><Folder /></el-icon>
+                    <span>{{ data.name }}</span>
+                    <span v-if="data.userCount" class="user-count">({{ data.userCount }})</span>
+                  </div>
+                </template>
+              </el-tree>
+
+              <!-- 部门成员列表 -->
+              <div v-if="orgMembers.length > 0" class="org-members">
+                <div class="members-title">{{ currentDept?.name }} - 成员列表</div>
+                <div
+                  v-for="member in orgMembers"
+                  :key="member.id"
+                  class="contact-item"
+                  @click="selectContact(member)"
+                >
+                  <el-avatar :size="36" :src="member.avatar">
+                    {{ (member.name || member.nickname)?.charAt(0) || 'U' }}
+                  </el-avatar>
+                  <div class="contact-info">
+                    <div class="contact-name">{{ member.name || member.nickname }}</div>
+                    <div class="contact-signature">{{ member.position || member.signature || '-' }}</div>
+                  </div>
+                  <el-button v-if="!member.isFriend" size="small" @click.stop="sendFriendRequest(member)">添加</el-button>
+                  <div v-else-if="member.online" class="online-dot"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 新朋友 -->
+            <div v-else-if="contactCategory === 'new'" class="new-friends">
+              <div
+                v-for="request in friendRequests"
+                :key="request.id"
+                class="friend-request-item"
+              >
+                <el-avatar :size="48" :src="request.avatar">
+                  {{ (request.name || request.nickname)?.charAt(0) || 'U' }}
+                </el-avatar>
+                <div class="request-info">
+                  <div class="request-name">{{ request.name || request.nickname }}</div>
+                  <div class="request-message">{{ request.message || '请求添加你为好友' }}</div>
+                  <div class="request-time">{{ formatTime(request.timestamp) }}</div>
+                </div>
+                <div class="request-actions">
+                  <el-button
+                    v-if="request.status === 'pending'"
+                    type="primary"
+                    size="small"
+                    @click="handleFriendRequest(request, 'accept')"
+                  >
+                    同意
+                  </el-button>
+                  <el-button
+                    v-if="request.status === 'pending'"
+                    size="small"
+                    @click="handleFriendRequest(request, 'reject')"
+                  >
+                    拒绝
+                  </el-button>
+                  <span v-else class="request-status">
+                    {{ request.status === 'accepted' ? '已添加' : '已拒绝' }}
+                  </span>
+                </div>
+              </div>
+              <el-empty v-if="friendRequests.length === 0" description="暂无新朋友请求" />
+            </div>
+
+            <!-- A-Z 索引侧边栏 -->
+            <div v-if="contactCategory === 'friends' || contactCategory === 'groups'" class="index-sidebar">
+              <div
+                v-for="letter in indexLetters"
+                :key="letter"
+                class="index-item"
+                :class="{ active: activeLetter === letter, disabled: !searchedGroups.find(g => g.letter === letter) }"
+                @click="scrollToLetter(letter)"
+              >
+                {{ letter }}
+              </div>
+            </div>
+          </div>
+
+          <!-- 联系人详情 -->
+          <div class="contacts-detail-panel">
+            <template v-if="selectedContact">
+              <div class="detail-header">
+                <el-avatar :size="80" :src="selectedContact.avatar">
+                  {{ (selectedContact.name || selectedContact.nickname)?.charAt(0) || 'U' }}
+                </el-avatar>
+                <div class="header-info">
+                  <h2>{{ selectedContact.name || selectedContact.nickname }}</h2>
+                  <p class="status" :class="{ online: selectedContact.online }">
+                    {{ selectedContact.online ? '在线' : '离线' }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="detail-actions">
+                <el-button type="primary" :icon="ChatDotRound" @click="startChat(selectedContact)">发消息</el-button>
+                <el-button :icon="VideoCamera" @click="startVideoCall(selectedContact)">视频通话</el-button>
+              </div>
+
+              <div class="detail-info">
+                <div class="info-section">
+                  <h4>个人信息</h4>
+                  <div class="info-item">
+                    <span class="label">昵称</span>
+                    <span class="value">{{ selectedContact.nickname || '-' }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="label">部门</span>
+                    <span class="value">{{ selectedContact.deptName || '-' }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="label">职位</span>
+                    <span class="value">{{ selectedContact.position || '-' }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="label">邮箱</span>
+                    <span class="value">{{ selectedContact.email || '-' }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="label">手机</span>
+                    <span class="value">{{ selectedContact.phone || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+            <div v-else class="empty-detail">
+              <el-icon :size="64" color="#ddd"><User /></el-icon>
+              <p>选择一个联系人查看详情</p>
+            </div>
           </div>
         </div>
 
         <!-- 工作台模块 -->
         <div v-else-if="activeModule === 'workbench'" class="workbench-workspace">
-          <div class="app-grid">
-            <div
-              v-for="app in workbenchApps"
-              :key="app.key"
-              class="app-card"
-              @click="openApp(app.key)"
-            >
-              <div class="app-icon" :style="{ background: app.color }">
-                <el-icon :size="28" color="white">
-                  <component :is="app.icon" />
+          <!-- 工作台侧边栏 -->
+          <div class="workbench-sidebar">
+            <div class="section-title">应用中心</div>
+            <div class="app-category-list">
+              <div
+                v-for="category in workbenchCategories"
+                :key="category.key"
+                class="category-item"
+                :class="{ active: workbenchCategory === category.key }"
+                @click="workbenchCategory = category.key"
+              >
+                <el-icon>
+                  <component :is="category.icon" />
                 </el-icon>
+                <span class="category-label">{{ category.label }}</span>
+                <span v-if="category.count > 0" class="category-count">{{ category.count }}</span>
               </div>
-              <span class="app-name">{{ app.name }}</span>
+            </div>
+          </div>
+
+          <!-- 工作台内容 -->
+          <div class="workbench-content">
+            <!-- 应用网格 -->
+            <div v-if="workbenchCategory === 'all'" class="app-grid">
+              <div
+                v-for="app in workbenchApps"
+                :key="app.key"
+                class="app-card"
+                @click="openApp(app.key)"
+              >
+                <div class="app-icon" :style="{ background: app.color }">
+                  <el-icon :size="28" color="white">
+                    <component :is="app.icon" />
+                  </el-icon>
+                </div>
+                <span class="app-name">{{ app.name }}</span>
+              </div>
+            </div>
+
+            <!-- 待办审批 -->
+            <div v-else-if="workbenchCategory === 'approval'" class="approval-list">
+              <div class="list-header">
+                <h3>待办审批</h3>
+                <el-tabs v-model="approvalTab" class="approval-tabs">
+                  <el-tab-pane label="待我审批" name="pending"></el-tab-pane>
+                  <el-tab-pane label="我发起的" name="my"></el-tab-pane>
+                  <el-tab-pane label="已处理" name="done"></el-tab-pane>
+                </el-tabs>
+              </div>
+
+              <div class="approval-items">
+                <div
+                  v-for="item in mockApprovals"
+                  :key="item.id"
+                  class="approval-item"
+                >
+                  <div class="approval-icon" :style="{ background: item.color }">
+                    <el-icon :size="20" color="white">
+                      <component :is="item.icon" />
+                    </el-icon>
+                  </div>
+                  <div class="approval-info">
+                    <div class="approval-title">{{ item.title }}</div>
+                    <div class="approval-detail">
+                      <span class="approval-type">{{ item.type }}</span>
+                      <span class="approval-time">{{ formatTime(item.time) }}</span>
+                    </div>
+                    <div class="approval-applicant">申请人: {{ item.applicant }}</div>
+                  </div>
+                  <div class="approval-actions">
+                    <el-button type="primary" size="small" @click="handleApproval(item, 'approve')">同意</el-button>
+                    <el-button size="small" @click="handleApproval(item, 'reject')">拒绝</el-button>
+                  </div>
+                </div>
+                <el-empty v-if="mockApprovals.length === 0" description="暂无待办审批" />
+              </div>
+            </div>
+
+            <!-- 考勤打卡 -->
+            <div v-else-if="workbenchCategory === 'attendance'" class="attendance-panel">
+              <div class="attendance-card">
+                <div class="attendance-time">{{ currentTime }}</div>
+                <div class="attendance-date">{{ currentDate }}</div>
+                <div class="attendance-status" :class="{ checked: hasCheckedIn }">
+                  {{ hasCheckedIn ? '今日已打卡' : '未打卡' }}
+                </div>
+                <el-button
+                  v-if="!hasCheckedIn"
+                  type="primary"
+                  size="large"
+                  :icon="Edit"
+                  @click="handleCheckIn"
+                >
+                  立即打卡
+                </el-button>
+                <div v-else class="check-time">
+                  打卡时间: {{ checkInTime }}
+                </div>
+              </div>
+
+              <div class="attendance-records">
+                <h4>本周打卡记录</h4>
+                <div class="record-list">
+                  <div
+                    v-for="record in weeklyRecords"
+                    :key="record.date"
+                    class="record-item"
+                  >
+                    <div class="record-day">{{ record.day }}</div>
+                    <div class="record-time">{{ record.checkInTime || '-' }}</div>
+                    <div class="record-status" :class="record.status">
+                      {{ record.statusText }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 日程管理 -->
+            <div v-else-if="workbenchCategory === 'schedule'" class="schedule-panel">
+              <div class="schedule-header">
+                <h3>我的日程</h3>
+                <el-button :icon="Plus" type="primary" size="small" @click="showAddSchedule">新建日程</el-button>
+              </div>
+
+              <div class="schedule-calendar">
+                <div class="calendar-header">
+                  <el-button :icon="ArrowLeft" circle size="small" @click="prevWeek" />
+                  <span class="calendar-title">{{ currentWeekRange }}</span>
+                  <el-button :icon="ArrowRight" circle size="small" @click="nextWeek" />
+                </div>
+                <div class="week-days">
+                  <div
+                    v-for="day in weekDays"
+                    :key="day.date"
+                    class="day-item"
+                    :class="{ today: day.isToday, selected: selectedDate === day.date }"
+                    @click="selectDate(day.date)"
+                  >
+                    <div class="day-name">{{ day.name }}</div>
+                    <div class="day-date">{{ day.dayNum }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="schedule-list">
+                <div
+                  v-for="schedule in selectedDateSchedules"
+                  :key="schedule.id"
+                  class="schedule-item"
+                  :style="{ borderLeftColor: schedule.color }"
+                >
+                  <div class="schedule-time">{{ schedule.time }}</div>
+                  <div class="schedule-content">
+                    <div class="schedule-title">{{ schedule.title }}</div>
+                    <div class="schedule-location" v-if="schedule.location">
+                      <el-icon><Location /></el-icon>
+                      {{ schedule.location }}
+                    </div>
+                  </div>
+                </div>
+                <el-empty v-if="selectedDateSchedules.length === 0" description="暂无日程" />
+              </div>
             </div>
           </div>
         </div>
 
         <!-- 钉盘模块 -->
         <div v-else-if="activeModule === 'drive'" class="drive-workspace">
+          <!-- 钉盘侧边栏 -->
           <div class="drive-sidebar">
-            <div class="drive-nav-item active">个人文件</div>
-            <div class="drive-nav-item">企业共享</div>
-            <div class="drive-nav-item">部门文件</div>
+            <div class="section-title">文件分类</div>
+            <div class="drive-nav-list">
+              <div
+                v-for="item in driveCategories"
+                :key="item.key"
+                class="drive-nav-item"
+                :class="{ active: driveCategory === item.key }"
+                @click="driveCategory = item.key"
+              >
+                <el-icon>
+                  <component :is="item.icon" />
+                </el-icon>
+                <span class="nav-label">{{ item.label }}</span>
+                <span v-if="item.count > 0" class="nav-count">{{ item.count }}</span>
+              </div>
+            </div>
+
+            <div class="section-title" style="margin-top: 20px;">存储空间</div>
+            <div class="storage-info">
+              <el-progress :percentage="storagePercent" :stroke-width="6" />
+              <div class="storage-text">已使用 {{ storageUsed }} / {{ storageTotal }}</div>
+            </div>
           </div>
+
+          <!-- 钉盘内容 -->
           <div class="drive-content">
-            <p>文件列表内容...</p>
+            <div class="drive-toolbar">
+              <div class="breadcrumb">
+                <span class="breadcrumb-item" @click="navigateToRoot">根目录</span>
+                <span v-for="(crumb, index) in breadcrumbs" :key="index" class="breadcrumb-item">
+                  / {{ crumb.name }}
+                </span>
+              </div>
+              <div class="toolbar-actions">
+                <el-upload
+                  :show-file-list="false"
+                  :before-upload="handleFileUpload"
+                  :multiple="true"
+                >
+                  <el-button :icon="Upload">上传文件</el-button>
+                </el-upload>
+                <el-button :icon="Folder" @click="createFolder">新建文件夹</el-button>
+                <el-button :icon="Download" :disabled="!selectedFile">下载</el-button>
+                <el-button :icon="Delete" :disabled="!selectedFile" @click="deleteFile">删除</el-button>
+              </div>
+            </div>
+
+            <!-- 文件列表 -->
+            <div class="file-list">
+              <!-- 文件夹 -->
+              <div
+                v-for="folder in currentFolders"
+                :key="'folder-' + folder.id"
+                class="file-item folder-item"
+                :class="{ selected: selectedFile?.id === folder.id }"
+                @click="selectFile(folder)"
+                @dblclick="openFolder(folder)"
+              >
+                <div class="file-icon folder-icon">
+                  <el-icon :size="32"><Folder /></el-icon>
+                </div>
+                <div class="file-info">
+                  <div class="file-name">{{ folder.name }}</div>
+                  <div class="file-meta">{{ folder.itemCount || 0 }} 项</div>
+                </div>
+              </div>
+
+              <!-- 文件 -->
+              <div
+                v-for="file in currentFiles"
+                :key="'file-' + file.id"
+                class="file-item"
+                :class="{ selected: selectedFile?.id === file.id }"
+                @click="selectFile(file)"
+                @dblclick="openFile(file)"
+              >
+                <div class="file-icon" :class="`file-type-${file.type}`">
+                  <el-icon :size="32">
+                    <component :is="getFileIcon(file.type)" />
+                  </el-icon>
+                </div>
+                <div class="file-info">
+                  <div class="file-name">{{ file.name }}</div>
+                  <div class="file-meta">{{ formatFileSize(file.size) }} · {{ formatTime(file.updateTime) }}</div>
+                </div>
+                <div class="file-actions">
+                  <el-button :icon="Download" size="small" circle @click.stop="downloadSingleFile(file)" />
+                </div>
+              </div>
+
+              <el-empty v-if="currentFolders.length === 0 && currentFiles.length === 0" description="暂无文件" />
+            </div>
           </div>
         </div>
       </main>
     </div>
+
+    <!-- 创建群组对话框 -->
+    <el-dialog
+      v-model="createGroupDialogVisible"
+      title="创建群组"
+      width="500px"
+      @close="resetCreateGroupForm"
+    >
+      <el-form ref="createGroupFormRef" :model="createGroupForm" :rules="createGroupRules" label-width="80px">
+        <el-form-item label="群组名称" prop="name">
+          <el-input v-model="createGroupForm.name" placeholder="请输入群组名称" maxlength="20" show-word-limit />
+        </el-form-item>
+        <el-form-item label="群组头像" prop="avatar">
+          <div class="avatar-upload">
+            <el-upload
+              :show-file-list="false"
+              :on-success="handleGroupAvatarSuccess"
+              :before-upload="beforeGroupAvatarUpload"
+              :http-request="customGroupAvatarUpload"
+              accept="image/*"
+            >
+              <el-avatar v-if="createGroupForm.avatar" :size="80" :src="createGroupForm.avatar" />
+              <div v-else class="avatar-placeholder">
+                <el-icon :size="32"><Plus /></el-icon>
+                <span>上传头像</span>
+              </div>
+            </el-upload>
+          </div>
+        </el-form-item>
+        <el-form-item label="群组简介" prop="description">
+          <el-input
+            v-model="createGroupForm.description"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入群组简介"
+            maxlength="200"
+            show-word-limit
+          />
+        </el-form-item>
+        <el-form-item label="选择成员" prop="memberIds">
+          <div class="member-selector">
+            <div class="selected-members">
+              <el-tag
+                v-for="member in selectedGroupMembers"
+                :key="member.id"
+                closable
+                @close="removeGroupMember(member)"
+              >
+                {{ member.name || member.nickname }}
+              </el-tag>
+              <el-button v-if="selectedGroupMembers.length < 1" text size="small" @click="showMemberSelector">
+                选择成员
+              </el-button>
+            </div>
+            <el-button v-if="selectedGroupMembers.length > 0" text size="small" @click="showMemberSelector">
+              <el-icon><Plus /></el-icon> 添加成员
+            </el-button>
+          </div>
+        </el-form-item>
+        <el-form-item label="加群方式" prop="joinType">
+          <el-radio-group v-model="createGroupForm.joinType">
+            <el-radio label="open">自由加入</el-radio>
+            <el-radio label="needApproval">需要验证</el-radio>
+            <el-radio label="forbidden">禁止加群</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="createGroupDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="creatingGroup" @click="submitCreateGroup">创建</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 选择成员对话框 -->
+    <el-dialog
+      v-model="memberSelectorVisible"
+      title="选择成员"
+      width="500px"
+    >
+      <div class="member-selector-content">
+        <el-input
+          v-model="memberSearchKeyword"
+          placeholder="搜索成员..."
+          :prefix-icon="Search"
+          clearable
+          size="small"
+          class="member-search"
+        />
+        <div class="member-list">
+          <div
+            v-for="user in filteredUsers"
+            :key="user.id"
+            class="member-list-item"
+            @click="toggleGroupMember(user)"
+          >
+            <el-avatar :size="36" :src="user.avatar">
+              {{ (user.name || user.nickname)?.charAt(0) || 'U' }}
+            </el-avatar>
+            <div class="member-info">
+              <span class="member-name">{{ user.name || user.nickname }}</span>
+              <span class="member-dept">{{ user.deptName || user.position || '' }}</span>
+            </div>
+            <el-checkbox :model-value="isGroupMemberSelected(user)" @change="toggleGroupMember(user)" />
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="memberSelectorVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmMemberSelection">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 群组管理对话框 -->
+    <el-dialog
+      v-model="groupManageDialogVisible"
+      title="群组管理"
+      width="600px"
+    >
+      <div v-if="managingGroup" class="group-manage">
+        <div class="group-info-header">
+          <el-avatar :size="64" :src="managingGroup.avatar">
+            {{ managingGroup.name?.charAt(0) || 'G' }}
+          </el-avatar>
+          <div class="group-info">
+            <h3>{{ managingGroup.name }}</h3>
+            <p>{{ managingGroup.memberCount || 0 }} 位成员</p>
+          </div>
+        </div>
+
+        <el-tabs v-model="groupManageTab">
+          <el-tab-pane label="成员" name="members">
+            <div class="group-members">
+              <div class="members-toolbar">
+                <el-input
+                  v-model="groupMemberSearch"
+                  placeholder="搜索成员..."
+                  size="small"
+                  :prefix-icon="Search"
+                  clearable
+                  class="member-search-input"
+                />
+                <el-button v-if="canAddMembers" :icon="Plus" size="small" @click="showAddGroupMember">
+                  添加成员
+                </el-button>
+              </div>
+              <div class="members-list">
+                <div
+                  v-for="member in filteredGroupMembers"
+                  :key="member.id"
+                  class="group-member-item"
+                >
+                  <el-avatar :size="40" :src="member.avatar">
+                    {{ (member.name || member.nickname)?.charAt(0) || 'U' }}
+                  </el-avatar>
+                  <div class="member-info">
+                    <div class="member-name">
+                      {{ member.name || member.nickname }}
+                      <el-tag v-if="member.role === 'owner'" size="small" type="danger">群主</el-tag>
+                      <el-tag v-else-if="member.role === 'admin'" size="small">管理员</el-tag>
+                    </div>
+                    <div class="member-role">{{ member.roleText || '成员' }}</div>
+                  </div>
+                  <el-dropdown v-if="canManageMember(member)" @command="(cmd) => handleMemberCommand(cmd, member)">
+                    <el-button :icon="More" circle size="small" text />
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item v-if="member.role !== 'admin'" command="setAdmin">设为管理员</el-dropdown-item>
+                        <el-dropdown-item v-if="member.role === 'admin'" command="removeAdmin">取消管理员</el-dropdown-item>
+                        <el-dropdown-item command="remove" style="color: #f5222d">移出群组</el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
+                </div>
+              </div>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane label="设置" name="settings">
+            <el-form label-width="80px">
+              <el-form-item label="群组名称">
+                <el-input v-model="managingGroup.name" />
+              </el-form-item>
+              <el-form-item label="群组简介">
+                <el-input v-model="managingGroup.description" type="textarea" :rows="3" />
+              </el-form-item>
+              <el-form-item label="群公告">
+                <el-input v-model="managingGroup.announcement" type="textarea" :rows="4" placeholder="暂无公告" />
+              </el-form-item>
+              <el-form-item label="加群方式">
+                <el-select v-model="managingGroup.joinType">
+                  <el-option label="自由加入" value="open" />
+                  <el-option label="需要验证" value="needApproval" />
+                  <el-option label="禁止加群" value="forbidden" />
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="saveGroupSettings">保存设置</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, nextTick, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
@@ -282,23 +1014,822 @@ import {
   Files,
   Bell,
   More,
-  SwitchButton
+  SwitchButton,
+  Warning,
+  Loading,
+  WarningFilled,
+  SuccessFilled,
+  Plus,
+  Location,
+  Upload,
+  Download,
+  Delete,
+  Star
 } from '@element-plus/icons-vue'
 import { formatTime as formatTimeUtil } from '@/utils/format/time'
+import { useImWebSocket } from '@/composables/useImWebSocket'
+import { useVoiceRecorder } from '@/utils/audio/useVoiceRecorder'
+import { listSession } from '@/api/im/session'
+import { uploadFile, uploadImage } from '@/api/im/file'
+import { sendMessage as apiSendMessage } from '@/api/im/message'
+import {
+  listContact,
+  addContact,
+  searchContacts,
+  getFriendRequests,
+  handleFriendRequest as apiHandleFriendRequest
+} from '@/api/im/contact'
 
 const router = useRouter()
 const route = useRoute()
+const store = useStore()
+
+// WebSocket
+const { isConnected, connect, disconnect, sendMessage: wsSendMessage } = useImWebSocket()
 
 // 状态
 const isNavCollapsed = ref(false)
 const activeModule = ref('chat')
 const sessionSearch = ref('')
-const currentSessionId = ref(null)
 const inputMessage = ref('')
-const unreadCount = ref(3)
+
+// 消息区域引用
+const messageAreaRef = ref(null)
+
+// 文件上传
+const fileInputRef = ref(null)
+const imageInputRef = ref(null)
+const uploading = ref(false)
+
+// 语音录制
+const {
+  isRecording,
+  duration,
+  volume,
+  recordResult,
+  error: recordError,
+  isSupported: voiceSupported,
+  formattedDuration,
+  progress,
+  canSend,
+  startRecording,
+  stopRecording,
+  cancelRecording,
+  clearResult,
+  getVolumeBars
+} = useVoiceRecorder({
+  maxDuration: 60,
+  minDuration: 1,
+  onRecordComplete: async (result) => {
+    await sendVoiceMessage(result)
+  }
+})
+
+// ==================== 联系人模块 ====================
+const contactCategory = ref('friends')
+const contactSearch = ref('')
+const selectedContact = ref(null)
+const friends = ref([])
+const orgTree = ref([])
+const orgMembers = ref([])
+const currentDept = ref(null)
+const friendRequests = ref([])
+const activeLetter = ref('') // 当前激活的字母索引
+
+// A-Z 索引字母
+const indexLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#']
+
+// 获取拼音首字母（简化版，实际项目建议使用pinyin库）
+const getFirstLetter = (str) => {
+  if (!str) return '#'
+  const char = str.charAt(0).toUpperCase()
+
+  // 检查是否是英文字母
+  if (/[A-Z]/.test(char)) return char
+
+  // 中文转拼音首字母（常用字映射）
+  const pinyinMap = {
+    '阿': 'A', '艾': 'A', '安': 'A',
+    '八': 'B', '白': 'B', '包': 'B', '贝': 'B', '毕': 'B', '博': 'B', '布': 'B', '蔡': 'C', '曹': 'C', '柴': 'C', '陈': 'C', '成': 'C', '程': 'C', '崔': 'C',
+    '达': 'D', '戴': 'D', '邓': 'D', '狄': 'D', '丁': 'D', '董': 'D', '杜': 'D', '段': 'D',
+    '恩': 'E',
+    '发': 'F', '范': 'F', '方': 'F', '费': 'F', '冯': 'F', '傅': 'F', '付': 'F',
+    '高': 'G', '葛': 'G', '耿': 'G', '龚': 'G', '古': 'G', '谷': 'G', '关': 'G', '郭': 'G',
+    '哈': 'H', '海': 'H', '韩': 'H', '郝': 'H', '何': 'H', '贺': 'H', '洪': 'H', '侯': 'H', '胡': 'H', '华': 'H', '黄': 'H',
+    '姬': 'J', '季': 'J', '简': 'J', '江': 'J', '姜': 'J', '蒋': 'J', '焦': 'J', '金': 'J', '晋': 'J', '荆': 'J',
+    '康': 'K', '柯': 'K', '孔': 'K', '库': 'K', '匡': 'K', '赖': 'L', '兰': 'L', '郎': 'L', '乐': 'L', '雷': 'L', '黎': 'L', '李': 'L', '梁': 'L', '廖': 'L', '林': 'L', '刘': 'L', '柳': 'L', '龙': 'L', '卢': 'L', '鲁': 'L', '陆': 'L', '吕': 'L', '罗': 'L',
+    '马': 'M', '麦': 'M', '毛': 'M', '梅': 'M', '孟': 'M', '莫': 'M', '穆': 'M',
+    '那': 'N', '南': 'N', '倪': 'N', '牛': 'N', '钮': 'N',
+    '欧': 'O',
+    '潘': 'P', '庞': 'P', '裴': 'P', '彭': 'P', '皮': 'P', '蒲': 'P', '浦': 'P',
+    '戚': 'Q', '祁': 'Q', '齐': 'Q', '钱': 'Q', '乔': 'Q', '秦': 'Q', '邱': 'Q', '屈': 'Q', '瞿': 'Q',
+    '冉': 'R', '饶': 'R', '任': 'R', '荣': 'R', '容': 'R', '茹': 'R', '阮': 'R',
+    '桑': 'S', '沙': 'S', '商': 'S', '尚': 'S', '邵': 'S', '施': 'S', '石': 'S', '时': 'S', '史': 'S', '舒': 'S', '宋': 'S', '苏': 'S', '孙': 'S',
+    '谭': 'T', '汤': 'T', '唐': 'T', '陶': 'T', '滕': 'T', '田': 'T', '童': 'T',
+    '万': 'W', '王': 'W', '汪': 'W', '魏': 'W', '文': 'W', '翁': 'W', '沃': 'W', '吴': 'W', '武': 'W',
+    '西': 'X', '夏': 'X', '向': 'X', '项': 'X', '萧': 'X', '谢': 'X', '辛': 'X', '邢': 'X', '徐': 'X', '许': 'X', '薛': 'X',
+    '严': 'Y', '颜': 'Y', '晏': 'Y', '燕': 'Y', '杨': 'Y', '姚': 'Y', '叶': 'Y', '易': 'Y', '殷': 'Y', '尹': 'Y', '于': 'Y', '余': 'Y', '袁': 'Y', '岳': 'Y', '云': 'Y',
+    '詹': 'Z', '张': 'Z', '章': 'Z', '赵': 'Z', '甄': 'Z', '郑': 'Z', '钟': 'Z', '周': 'Z', '朱': 'Z', '诸': 'Z', '庄': 'Z', '邹': 'Z', '祖': 'Z'
+  }
+
+  return pinyinMap[char] || '#'
+}
+
+// 按字母分组的好友列表
+const groupedFriends = computed(() => {
+  const groups = {}
+
+  // 先获取所有可用字母
+  indexLetters.forEach(letter => {
+    groups[letter] = []
+  })
+
+  // 对好友进行分组
+  friends.value.forEach(friend => {
+    const letter = getFirstLetter(friend.name || friend.nickname)
+    if (!groups[letter]) groups[letter] = []
+    groups[letter].push(friend)
+  })
+
+  // 过滤掉空分组并排序
+  const result = []
+  indexLetters.forEach(letter => {
+    if (groups[letter].length > 0) {
+      result.push({
+        letter,
+        contacts: groups[letter].sort((a, b) => {
+          const nameA = a.name || a.nickname || ''
+          const nameB = b.name || b.nickname || ''
+          return nameA.localeCompare(nameB, 'zh-CN')
+        })
+      })
+    }
+  })
+
+  return result
+})
+
+// 可用的字母索引（有联系人的）
+const availableLetters = computed(() => {
+  return groupedFriends.value.map(g => g.letter)
+})
+
+// 按字母分组的群组列表
+const groupedGroups = computed(() => {
+  const groups = {}
+  indexLetters.forEach(letter => {
+    groups[letter] = []
+  })
+
+  groupSessions.value.forEach(group => {
+    const letter = getFirstLetter(group.name || group.groupName)
+    if (!groups[letter]) groups[letter] = []
+    groups[letter].push(group)
+  })
+
+  const result = []
+  indexLetters.forEach(letter => {
+    if (groups[letter].length > 0) {
+      result.push({
+        letter,
+        contacts: groups[letter].sort((a, b) => {
+          const nameA = a.name || a.groupName || ''
+          const nameB = b.name || b.groupName || ''
+          return nameA.localeCompare(nameB, 'zh-CN')
+        })
+      })
+    }
+  })
+
+  return result
+})
+
+// 联系人分类
+const contactCategories = computed(() => [
+  { key: 'friends', label: '我的好友', icon: User, count: friends.value.length },
+  { key: 'groups', label: '我的群组', icon: ChatDotRound, count: groupSessions.value.length },
+  { key: 'org', label: '组织架构', icon: Folder, count: 0 },
+  { key: 'new', label: '新朋友', icon: Bell, count: friendRequests.value.filter(r => r.status === 'pending').length }
+])
+
+// 搜索过滤后的分组好友
+const searchedGroups = computed(() => {
+  if (!contactSearch.value) {
+    return contactCategory.value === 'friends' ? groupedFriends.value : groupedGroups.value
+  }
+
+  const keyword = contactSearch.value.toLowerCase()
+  const sourceList = contactCategory.value === 'friends' ? friends.value : groupSessions.value
+
+  const filtered = sourceList.filter(item => {
+    const name = (item.name || item.groupName || item.nickname)?.toLowerCase() || ''
+    return name.includes(keyword)
+  })
+
+  // 将搜索结果重新分组
+  const groups = {}
+  indexLetters.forEach(letter => {
+    groups[letter] = []
+  })
+
+  filtered.forEach(item => {
+    const letter = getFirstLetter(item.name || item.groupName || item.nickname)
+    if (!groups[letter]) groups[letter] = []
+    groups[letter].push(item)
+  })
+
+  const result = []
+  indexLetters.forEach(letter => {
+    if (groups[letter].length > 0) {
+      result.push({
+        letter,
+        contacts: groups[letter]
+      })
+    }
+  })
+
+  return result
+})
+
+// 过滤好友列表（保留用于兼容）
+const filteredFriends = computed(() => {
+  return friends.value
+})
+
+// 加载好友列表
+const loadFriends = async () => {
+  try {
+    const res = await listContact()
+    const dataRows = res.rows || res.data?.rows || res.data || []
+    friends.value = Array.isArray(dataRows) ? dataRows.map(f => ({
+      ...f,
+      online: f.status === 'ACTIVE',
+      name: f.remark || f.friendName || f.name
+    })) : []
+  } catch (error) {
+    console.error('加载好友列表失败:', error)
+    friends.value = []
+  }
+}
+
+// 加载好友请求
+const loadFriendRequests = async () => {
+  try {
+    const res = await getFriendRequests()
+    const dataRows = res.rows || res.data?.rows || res.data || []
+    friendRequests.value = Array.isArray(dataRows) ? dataRows : []
+  } catch (error) {
+    console.error('加载好友请求失败:', error)
+    friendRequests.value = []
+  }
+}
+
+// 初始化组织架构树
+const initOrgTree = () => {
+  orgTree.value = [
+    {
+      id: 1,
+      name: '总公司',
+      userCount: 100,
+      children: [
+        {
+          id: 11,
+          name: '技术部',
+          userCount: 35,
+          children: [
+            { id: 111, name: '前端组', userCount: 12 },
+            { id: 112, name: '后端组', userCount: 15 },
+            { id: 113, name: '测试组', userCount: 8 }
+          ]
+        },
+        {
+          id: 12,
+          name: '产品部',
+          userCount: 20,
+          children: [
+            { id: 121, name: '产品设计', userCount: 8 },
+            { id: 122, name: '用户研究', userCount: 12 }
+          ]
+        },
+        {
+          id: 13,
+          name: '市场部',
+          userCount: 25,
+          children: [
+            { id: 131, name: '销售组', userCount: 15 },
+            { id: 132, name: '推广组', userCount: 10 }
+          ]
+        },
+        {
+          id: 14,
+          name: '人事部',
+          userCount: 10
+        },
+        {
+          id: 15,
+          name: '财务部',
+          userCount: 10
+        }
+      ]
+    }
+  ]
+}
+
+// 组织架构节点点击
+const handleOrgNodeClick = async (data) => {
+  currentDept.value = data
+  // 模拟获取部门成员
+  if (data.userCount) {
+    orgMembers.value = [
+      {
+        id: `u_${Date.now()}_1`,
+        name: '张三',
+        nickname: '张三',
+        avatar: null,
+        position: '工程师',
+        deptName: data.name,
+        online: true,
+        isFriend: false
+      },
+      {
+        id: `u_${Date.now()}_2`,
+        name: '李四',
+        nickname: '李四',
+        avatar: null,
+        position: '设计师',
+        deptName: data.name,
+        online: false,
+        isFriend: false
+      },
+      {
+        id: `u_${Date.now()}_3`,
+        name: '王五',
+        nickname: '王五',
+        avatar: null,
+        position: '产品经理',
+        deptName: data.name,
+        online: true,
+        isFriend: true
+      }
+    ]
+  } else {
+    orgMembers.value = []
+  }
+}
+
+// 选择联系人
+const selectContact = (contact) => {
+  selectedContact.value = { ...contact }
+}
+
+// 滚动到指定字母
+const scrollToLetter = (letter) => {
+  activeLetter.value = letter
+  const element = document.getElementById(`contact-section-${letter}`)
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+  // 300ms后清除激活状态
+  setTimeout(() => {
+    activeLetter.value = ''
+  }, 300)
+}
+
+// 选择群组（从联系人列表）
+const selectGroupContact = (group) => {
+  // 切换到聊天模块并打开该群组
+  store.dispatch('im/switchSession', group.id)
+  activeModule.value = 'chat'
+  currentSessionId.value = group.id
+  router.push(`/im/chat/${group.id}`)
+}
+
+// 开始聊天
+const startChat = async (contact) => {
+  await store.dispatch('im/switchToContact', contact)
+  activeModule.value = 'chat'
+  currentSessionId.value = store.state.im.currentSession?.id
+  router.push('/im/chat')
+}
+
+// 视频通话
+const startVideoCall = (contact) => {
+  ElMessage.info(`正在发起视频通话: ${contact.name || contact.nickname}`)
+}
+
+// 发送好友请求
+const sendFriendRequest = async (user) => {
+  try {
+    await ElMessageBox.prompt('请输入验证消息', '添加好友', {
+      confirmButtonText: '发送',
+      cancelButtonText: '取消',
+      inputValue: '我是' + currentUser.value?.name
+    })
+    const { value } = await ElMessageBox.prompt('请输入验证消息', '添加好友', {
+      confirmButtonText: '发送',
+      cancelButtonText: '取消',
+      inputValue: '我是' + (currentUser.value?.name || '我')
+    })
+
+    await addContact({
+      friendId: user.id,
+      message: value
+    })
+
+    ElMessage.success('好友请求已发送')
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
+  }
+}
+
+// 处理好友请求
+const handleFriendRequest = async (request, action) => {
+  try {
+    await apiHandleFriendRequest({
+      requestId: request.id,
+      action: action // accept or reject
+    })
+
+    request.status = action === 'accept' ? 'accepted' : 'rejected'
+
+    if (action === 'accept') {
+      // 重新加载好友列表
+      await loadFriends()
+    }
+
+    ElMessage.success(action === 'accept' ? '已添加好友' : '已拒绝请求')
+  } catch (error) {
+    ElMessage.error('操作失败')
+  }
+}
+
+// 显示添加好友对话框
+const showAddFriendDialog = () => {
+  ElMessageBox.prompt('请输入用户名或手机号', '添加好友', {
+    confirmButtonText: '搜索',
+    cancelButtonText: '取消'
+  }).then(async ({ value }) => {
+    if (!value) return
+    // TODO: 调用搜索用户API
+    ElMessage.info('搜索用户功能开发中...')
+  }).catch(() => {})
+}
+
+// ==================== 工作台模块 ====================
+const workbenchCategory = ref('all')
+const approvalTab = ref('pending')
+
+// 工作台分类
+const workbenchCategories = computed(() => [
+  { key: 'all', label: '全部应用', icon: Grid, count: 0 },
+  { key: 'approval', label: '待办审批', icon: Document, count: 5 },
+  { key: 'attendance', label: '考勤打卡', icon: Odometer, count: 0 },
+  { key: 'schedule', label: '日程管理', icon: Calendar, count: 3 }
+])
+
+// 模拟审批数据
+const mockApprovals = ref([
+  { id: 1, title: '采购申请 - 办公用品', type: '采购审批', applicant: '张三', time: Date.now() - 3600000, icon: Document, color: '#1677ff' },
+  { id: 2, title: '请假申请 - 年假', type: '请假审批', applicant: '李四', time: Date.now() - 7200000, icon: Edit, color: '#52c41a' },
+  { id: 3, title: '报销申请 - 差旅费', type: '报销审批', applicant: '王五', time: Date.now() - 86400000, icon: Files, color: '#faad14' },
+  { id: 4, title: '用印申请 - 合同盖章', type: '用印审批', applicant: '赵六', time: Date.now() - 172800000, icon: Notification, color: '#eb2f96' },
+  { id: 5, title: '物品领用 - 笔记本电脑', type: '领用审批', applicant: '钱七', time: Date.now() - 259200000, icon: Odometer, color: '#13c2c2' }
+])
+
+// 考勤相关
+const currentTime = ref('')
+const currentDate = ref('')
+const hasCheckedIn = ref(false)
+const checkInTime = ref('')
+
+// 本周打卡记录
+const weeklyRecords = ref([
+  { day: '周一', date: '2024-01-08', checkInTime: '08:55', status: 'normal', statusText: '正常' },
+  { day: '周二', date: '2024-01-09', checkInTime: '09:02', status: 'late', statusText: '迟到' },
+  { day: '周三', date: '2024-01-10', checkInTime: '08:58', status: 'normal', statusText: '正常' },
+  { day: '周四', date: '2024-01-11', checkInTime: '08:45', status: 'normal', statusText: '正常' },
+  { day: '周五', date: '2024-01-12', checkInTime: '-', status: 'pending', statusText: '未打卡' }
+])
+
+// 日程相关
+const selectedDate = ref(new Date().toISOString().split('T')[0])
+const currentWeekStart = ref(getWeekStart(new Date()))
+
+const weekDays = ref(getWeekDays(new Date()))
+const schedules = ref([
+  { id: 1, title: '周会', date: getWeekDays(new Date())[0].date, time: '09:00', location: '会议室A', color: '#1677ff' },
+  { id: 2, title: '产品评审', date: getWeekDays(new Date())[1].date, time: '14:00', location: '会议室B', color: '#52c41a' },
+  { id: 3, title: '技术分享', date: getWeekDays(new Date())[2].date, time: '16:00', location: '线上', color: '#faad14' },
+  { id: 4, title: '项目讨论', date: getWeekDays(new Date())[3].date, time: '10:00', location: '会议室C', color: '#722ed1' },
+  { id: 5, title: '需求评审', date: getWeekDays(new Date())[4].date, time: '15:00', location: '会议室A', color: '#eb2f96' }
+])
+
+// 获取本周日期范围
+function getWeekStart(date) {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+  return new Date(d.setDate(diff))
+}
+
+// 获取本周7天
+function getWeekDays(date) {
+  const weekStart = getWeekStart(date)
+  const days = []
+  const today = new Date().toISOString().split('T')[0]
+  const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart)
+    d.setDate(d.getDate() + i)
+    const dateStr = d.toISOString().split('T')[0]
+    days.push({
+      name: dayNames[i],
+      date: dateStr,
+      dayNum: d.getDate(),
+      isToday: dateStr === today
+    })
+  }
+  return days
+}
+
+// 计算属性
+const currentWeekRange = computed(() => {
+  const days = weekDays.value
+  if (days.length === 0) return ''
+  const start = days[0].date
+  const end = days[6].date
+  return `${start.substring(5)} ~ ${end.substring(5)}`
+})
+
+const selectedDateSchedules = computed(() => {
+  return schedules.value.filter(s => s.date === selectedDate.value)
+})
+
+// 更新时间
+const updateTime = () => {
+  const now = new Date()
+  currentTime.value = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  currentDate.value = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
+}
+
+// 审批操作
+const handleApproval = async (item, action) => {
+  try {
+    const actionText = action === 'approve' ? '同意' : '拒绝'
+    await ElMessageBox.confirm(`确定要${actionText}该申请吗？`, '确认', {
+      type: 'warning'
+    })
+
+    // 从列表中移除
+    const index = mockApprovals.value.findIndex(a => a.id === item.id)
+    if (index > -1) {
+      mockApprovals.value.splice(index, 1)
+    }
+
+    ElMessage.success(`已${actionText}该申请`)
+  } catch {
+    // 用户取消
+  }
+}
+
+// 打卡操作
+const handleCheckIn = () => {
+  const now = new Date()
+  hasCheckedIn.value = true
+  checkInTime.value = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  ElMessage.success('打卡成功！')
+}
+
+// 日程操作
+const prevWeek = () => {
+  const newStart = new Date(currentWeekStart.value)
+  newStart.setDate(newStart.getDate() - 7)
+  currentWeekStart.value = newStart
+  weekDays.value = getWeekDays(newStart)
+}
+
+const nextWeek = () => {
+  const newStart = new Date(currentWeekStart.value)
+  newStart.setDate(newStart.getDate() + 7)
+  currentWeekStart.value = newStart
+  weekDays.value = getWeekDays(newStart)
+}
+
+const selectDate = (date) => {
+  selectedDate.value = date
+}
+
+const showAddSchedule = () => {
+  ElMessage.info('新建日程功能开发中...')
+}
+
+// 启动时钟
+let clockInterval = null
+
+onMounted(() => {
+  updateTime()
+  clockInterval = setInterval(updateTime, 1000)
+})
+
+onUnmounted(() => {
+  if (clockInterval) {
+    clearInterval(clockInterval)
+  }
+})
+
+// ==================== 钉盘模块 ====================
+const driveCategory = ref('personal')
+const selectedFile = ref(null)
+const breadcrumbs = ref([])
+const currentFolderId = ref(null)
+
+// 钉盘分类
+const driveCategories = computed(() => [
+  { key: 'personal', label: '个人文件', icon: User, count: allFiles.value.length },
+  { key: 'shared', label: '企业共享', icon: Grid, count: 0 },
+  { key: 'department', label: '部门文件', icon: Grid, count: 0 },
+  { key: 'favorite', label: '我的收藏', icon: Star, count: 0 }
+])
+
+// 存储空间
+const storageUsed = ref('1.2 GB')
+const storageTotal = ref('10 GB')
+const storagePercent = computed(() => {
+  const used = parseFloat(storageUsed.value)
+  const total = parseFloat(storageTotal.value)
+  return Math.round((used / total) * 100)
+})
+
+// 模拟文件和文件夹数据
+const allFiles = ref([
+  { id: 'f1', name: '项目文档.docx', type: 'word', size: 245760, updateTime: Date.now() - 86400000, folderId: null },
+  { id: 'f2', name: '产品需求.pdf', type: 'pdf', size: 524288, updateTime: Date.now() - 172800000, folderId: null },
+  { id: 'f3', name: '设计稿.png', type: 'image', size: 2097152, updateTime: Date.now() - 259200000, folderId: null },
+  { id: 'f4', name: '会议记录.xlsx', type: 'excel', size: 102400, updateTime: Date.now() - 345600000, folderId: null },
+  { id: 'f5', name: '演示文稿.pptx', type: 'ppt', size: 5242880, updateTime: Date.now() - 432000000, folderId: null },
+])
+
+const allFolders = ref([
+  { id: 'fol1', name: '工作文档', itemCount: 5, parentId: null },
+  { id: 'fol2', name: '图片资料', itemCount: 12, parentId: null },
+  { id: 'fol3', name: '项目文件', itemCount: 8, parentId: null },
+])
+
+// 当前文件夹和文件
+const currentFolders = computed(() => {
+  return allFolders.value.filter(f => f.parentId === currentFolderId.value)
+})
+
+const currentFiles = computed(() => {
+  return allFiles.value.filter(f => f.folderId === currentFolderId.value)
+})
+
+// 获取文件图标
+const getFileIcon = (type) => {
+  const iconMap = {
+    word: Document,
+    excel: Document,
+    ppt: Document,
+    pdf: Document,
+    image: PictureFilled,
+    video: VideoCamera,
+    audio: Microphone,
+    archive: Folder,
+    default: Document
+  }
+  return iconMap[type] || iconMap.default
+}
+
+// 导航到根目录
+const navigateToRoot = () => {
+  currentFolderId.value = null
+  breadcrumbs.value = []
+  selectedFile.value = null
+}
+
+// 选择文件/文件夹
+const selectFile = (file) => {
+  selectedFile.value = file
+}
+
+// 打开文件夹
+const openFolder = (folder) => {
+  currentFolderId.value = folder.id
+  breadcrumbs.value.push({ id: folder.id, name: folder.name })
+  selectedFile.value = null
+}
+
+// 打开文件
+const openFile = (file) => {
+  ElMessage.info(`打开文件: ${file.name}`)
+  // TODO: 实现文件预览
+}
+
+// 上传文件
+const handleFileUpload = async (file) => {
+  const newFile = {
+    id: `f_${Date.now()}`,
+    name: file.name,
+    type: getFileType(file.name),
+    size: file.size,
+    updateTime: Date.now(),
+    folderId: currentFolderId.value
+  }
+  allFiles.value.push(newFile)
+  ElMessage.success('文件上传成功')
+  return false // 阻止自动上传
+}
+
+// 获取文件类型
+const getFileType = (fileName) => {
+  const ext = fileName.split('.').pop()?.toLowerCase()
+  const typeMap = {
+    doc: 'word', docx: 'word',
+    xls: 'excel', xlsx: 'excel',
+    ppt: 'ppt', pptx: 'ppt',
+    pdf: 'pdf',
+    jpg: 'image', jpeg: 'image', png: 'image', gif: 'image',
+    mp4: 'video', avi: 'video',
+    mp3: 'audio', wav: 'audio',
+    zip: 'archive', rar: 'archive', '7z': 'archive'
+  }
+  return typeMap[ext] || 'default'
+}
+
+// 新建文件夹
+const createFolder = () => {
+  ElMessageBox.prompt('请输入文件夹名称', '新建文件夹', {
+    confirmButtonText: '创建',
+    cancelButtonText: '取消',
+    inputValue: '新建文件夹'
+  }).then(({ value }) => {
+    if (!value) return
+    const newFolder = {
+      id: `fol_${Date.now()}`,
+      name: value,
+      itemCount: 0,
+      parentId: currentFolderId.value
+    }
+    allFolders.value.push(newFolder)
+    ElMessage.success('文件夹创建成功')
+  }).catch(() => {})
+}
+
+// 删除文件
+const deleteFile = () => {
+  if (!selectedFile.value) return
+
+  ElMessageBox.confirm('确定要删除所选文件吗？', '确认删除', {
+    type: 'warning'
+  }).then(() => {
+    if (selectedFile.value.id.startsWith('fol')) {
+      // 删除文件夹
+      const index = allFolders.value.findIndex(f => f.id === selectedFile.value.id)
+      if (index > -1) allFolders.value.splice(index, 1)
+    } else {
+      // 删除文件
+      const index = allFiles.value.findIndex(f => f.id === selectedFile.value.id)
+      if (index > -1) allFiles.value.splice(index, 1)
+    }
+    selectedFile.value = null
+    ElMessage.success('删除成功')
+  }).catch(() => {})
+}
+
+// 下载单个文件
+const downloadSingleFile = (file) => {
+  ElMessage.info(`下载文件: ${file.name}`)
+  // TODO: 实现文件下载
+}
 
 // 当前用户
-const currentUser = ref({ name: '测试用户', avatar: null })
+const currentUser = computed(() => {
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+  return {
+    name: userInfo.nickName || userInfo.userName || '用户',
+    avatar: userInfo.avatar || null,
+    userId: userInfo.userId
+  }
+})
+
+// 从 store 获取会话列表
+const sessions = computed(() => store.state.im.sessions || [])
+
+// 当前会话
+const currentSessionId = computed(() => store.state.im.currentSession?.id)
+const currentSession = computed(() => store.state.im.currentSession)
+
+// 未读消息数
+const unreadCount = computed(() => store.getters['im/totalUnreadCount'] || 0)
+
+// 当前会话的消息列表
+const messages = computed(() => {
+  if (!currentSessionId.value) return []
+  return store.getters['im/messagesBySession'](currentSessionId.value) || []
+})
 
 // 导航模块
 const navModules = ref([
@@ -306,26 +1837,6 @@ const navModules = ref([
   { key: 'contacts', label: '联系人', icon: User },
   { key: 'workbench', label: '工作台', icon: Grid },
   { key: 'drive', label: '钉盘', icon: Folder }
-])
-
-// 会话数据
-const sessions = ref([
-  { id: 1, name: '项目讨论组', avatar: null, lastMessage: '明天的会议时间确定了吗？', lastMessageTime: Date.now() - 3600000, unreadCount: 2 },
-  { id: 2, name: '张三', avatar: null, lastMessage: '好的，收到了', lastMessageTime: Date.now() - 7200000, unreadCount: 1 },
-  { id: 3, name: '李四', avatar: null, lastMessage: '文件已发送', lastMessageTime: Date.now() - 86400000, unreadCount: 0 },
-  { id: 4, name: '产品群', avatar: null, lastMessage: '新版本已发布', lastMessageTime: Date.now() - 172800000, unreadCount: 0 },
-])
-
-// 当前会话
-const currentSession = computed(() => {
-  return sessions.value.find(s => s.id === currentSessionId.value)
-})
-
-// 消息数据
-const messages = ref([
-  { id: 1, senderId: 2, senderName: '张三', content: '你好，在吗？', time: Date.now() - 3600000, isOwn: false },
-  { id: 2, senderId: 1, senderName: '我', content: '在的，有什么事？', time: Date.now() - 3000000, isOwn: true },
-  { id: 3, senderId: 2, senderName: '张三', content: '明天下午开会，讨论新项目需求', time: Date.now() - 1800000, isOwn: false },
 ])
 
 // 部门数据
@@ -368,20 +1879,40 @@ const toggleNavCollapse = () => {
 
 const switchModule = (moduleKey) => {
   activeModule.value = moduleKey
-  // 更新URL
-  router.push(`/im/${moduleKey}`)
+  // 只更新URL用于状态保持，不触发路由导航
+  // 使用replace避免产生历史记录
+  const validRoutes = ['chat', 'contacts']
+  if (validRoutes.includes(moduleKey)) {
+    router.push(`/im/${moduleKey}`)
+  } else {
+    // 工作台和钉盘是内嵌模块，不更新路由
+    // 只更新浏览器URL状态（可选）
+    window.history.replaceState(null, '', `/im/${moduleKey}`)
+  }
 }
 
-const selectSession = (session) => {
-  currentSessionId.value = session.id
-  // 清除未读
-  session.unreadCount = 0
-  updateUnreadCount()
+const selectSession = async (session) => {
+  // 切换会话
+  await store.dispatch('im/switchSession', session)
+  // 滚动到底部
+  nextTick(() => {
+    scrollToBottom()
+  })
 }
 
-const updateUnreadCount = () => {
-  unreadCount.value = sessions.value.reduce((sum, s) => sum + (s.unreadCount || 0), 0)
+// 滚动到消息底部
+const scrollToBottom = () => {
+  if (messageAreaRef.value) {
+    messageAreaRef.value.scrollTop = messageAreaRef.value.scrollHeight
+  }
 }
+
+// 监听消息变化，自动滚动到底部
+watch(messages, () => {
+  nextTick(() => {
+    scrollToBottom()
+  })
+}, { deep: true })
 
 const handleEnter = (e) => {
   if (!e.shiftKey) {
@@ -389,18 +1920,215 @@ const handleEnter = (e) => {
   }
 }
 
-const sendMessage = () => {
+const sendMessage = async () => {
   if (!inputMessage.value.trim() || !currentSessionId.value) return
 
-  messages.value.push({
-    id: Date.now(),
-    senderId: 1,
-    senderName: '我',
-    content: inputMessage.value,
-    time: Date.now(),
-    isOwn: true,
-  })
+  const content = inputMessage.value.trim()
   inputMessage.value = ''
+
+  try {
+    // 通过 store 发送消息
+    await store.dispatch('im/sendMessage', {
+      sessionId: currentSessionId.value,
+      type: 'text',
+      content: content
+    })
+
+    // 如果 WebSocket 连接，也通过 WebSocket 发送
+    if (isConnected.value) {
+      wsSendMessage({
+        sessionId: currentSessionId.value,
+        type: 'text',
+        content: content
+      })
+    }
+  } catch (error) {
+    ElMessage.error('发送失败：' + (error.message || '未知错误'))
+  }
+}
+
+// 触发文件选择
+const triggerFileSelect = () => {
+  fileInputRef.value?.click()
+}
+
+// 选择图片
+const selectImage = () => {
+  imageInputRef.value?.click()
+}
+
+// 处理文件选择
+const handleFileSelect = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file || !currentSessionId.value) return
+
+  await uploadAndSendFile(file, 'file')
+  event.target.value = ''
+}
+
+// 处理图片选择
+const handleImageSelect = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file || !currentSessionId.value) return
+
+  if (!file.type.startsWith('image/')) {
+    ElMessage.warning('请选择图片文件')
+    return
+  }
+
+  await uploadAndSendFile(file, 'image')
+  event.target.value = ''
+}
+
+// 上传并发送文件
+const uploadAndSendFile = async (file, type) => {
+  if (uploading.value) {
+    ElMessage.warning('正在上传中，请稍候...')
+    return
+  }
+
+  uploading.value = true
+
+  try {
+    // 调用上传接口
+    const uploadApi = type === 'image' ? uploadImage : uploadFile
+    const response = await uploadApi(file, (progressEvent) => {
+      const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+      console.log('上传进度:', percentCompleted)
+    })
+
+    const fileUrl = response.data?.url || response.data?.fileUrl || response.url
+
+    if (!fileUrl) {
+      throw new Error('上传失败：未获取到文件地址')
+    }
+
+    // 发送文件消息
+    const messageData = {
+      sessionId: currentSessionId.value,
+      type: type,
+      content: fileUrl,
+      fileName: file.name,
+      fileSize: file.size
+    }
+
+    await store.dispatch('im/sendMessage', messageData)
+
+    // 通过 WebSocket 发送
+    if (isConnected.value) {
+      wsSendMessage(messageData)
+    }
+
+    ElMessage.success(type === 'image' ? '图片发送成功' : '文件发送成功')
+  } catch (error) {
+    ElMessage.error('发送失败：' + (error.message || '未知错误'))
+  } finally {
+    uploading.value = false
+  }
+}
+
+// 发送语音消息
+const sendVoiceMessage = async (result) => {
+  if (!currentSessionId.value || !result.blob) {
+    ElMessage.error('发送语音失败')
+    clearResult()
+    return
+  }
+
+  uploading.value = true
+
+  try {
+    // 上传语音文件
+    const formData = new FormData()
+    formData.append('file', result.blob, `voice_${Date.now()}.wav`)
+
+    const response = await uploadFile(result.blob)
+
+    const voiceUrl = response.data?.url || response.data?.fileUrl || response.url
+
+    if (!voiceUrl) {
+      throw new Error('上传失败：未获取到语音文件地址')
+    }
+
+    // 发送语音消息
+    const messageData = {
+      sessionId: currentSessionId.value,
+      type: 'voice',
+      content: voiceUrl,
+      duration: result.duration
+    }
+
+    await store.dispatch('im/sendMessage', messageData)
+
+    // 通过 WebSocket 发送
+    if (isConnected.value) {
+      wsSendMessage(messageData)
+    }
+
+    ElMessage.success('语音发送成功')
+  } catch (error) {
+    ElMessage.error('发送失败：' + (error.message || '未知错误'))
+  } finally {
+    uploading.value = false
+    clearResult()
+  }
+}
+
+// 开始录制语音
+const startVoiceRecord = async () => {
+  if (!voiceSupported.value) {
+    ElMessage.warning('当前浏览器不支持语音录制')
+    return
+  }
+
+  if (!currentSessionId.value) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
+
+  await startRecording()
+}
+
+// 停止录制语音
+const stopVoiceRecord = () => {
+  stopRecording()
+}
+
+// 下载文件
+const downloadFile = async (msg) => {
+  if (!msg.content) return
+
+  try {
+    const link = document.createElement('a')
+    link.href = msg.content
+    link.download = msg.fileName || 'download'
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  } catch (error) {
+    ElMessage.error('下载失败')
+  }
+}
+
+// 重发消息
+const resendMessage = async (msg) => {
+  if (msg.status !== 'failed') return
+
+  try {
+    await store.dispatch('im/resendMessage', msg)
+  } catch (error) {
+    ElMessage.error('重发失败')
+  }
+}
+
+// 格式化文件大小
+const formatFileSize = (bytes) => {
+  if (!bytes || bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i]
 }
 
 const formatTime = formatTimeUtil
@@ -434,16 +2162,351 @@ const handleUserCommand = async (command) => {
 }
 
 // 初始化
-const init = () => {
+const init = async () => {
   // 读取折叠状态
   const savedCollapsed = localStorage.getItem('navCollapsed')
   if (savedCollapsed !== null) {
     isNavCollapsed.value = savedCollapsed === 'true'
   }
-  updateUnreadCount()
+
+  // 根据路由或URL设置当前模块
+  const pathSegments = route.path.split('/')
+  const moduleFromPath = pathSegments[2]
+
+  // 支持所有模块类型（包括内嵌的工作台和钉盘）
+  const validModules = ['chat', 'contacts', 'workbench', 'drive']
+  if (moduleFromPath && validModules.includes(moduleFromPath)) {
+    activeModule.value = moduleFromPath
+  }
+
+  // 连接 WebSocket
+  connect()
+
+  // 加载会话列表
+  try {
+    await loadSessions()
+  } catch (error) {
+    console.error('加载会话列表失败:', error)
+  }
+
+  // 加载联系人数据
+  try {
+    await loadFriends()
+    await loadFriendRequests()
+    initOrgTree()
+  } catch (error) {
+    console.error('加载联系人数据失败:', error)
+  }
+
+  // 尝试重发离线消息
+  try {
+    await store.dispatch('im/resendOfflineMessages')
+  } catch (error) {
+    console.error('重发离线消息失败:', error)
+  }
 }
 
-init()
+// 加载会话列表
+const loadSessions = async () => {
+  try {
+    const response = await listSession()
+    const sessionList = response.rows || response.data || []
+
+    // 转换会话数据格式
+    const formattedSessions = sessionList.map(s => ({
+      id: s.id || s.conversationId,
+      name: s.name || s.title,
+      avatar: s.avatar,
+      type: s.type || 'private', // private, group
+      peerId: s.peerId,
+      groupId: s.groupId,
+      unreadCount: s.unreadCount || 0,
+      lastMessage: s.lastMessage?.content || s.lastMessage,
+      lastMessageTime: s.lastMessage?.timestamp || s.updatedAt,
+      pinned: s.pinned || false,
+      muted: s.muted || false
+    }))
+
+    store.commit('im/SET_SESSIONS', formattedSessions)
+  } catch (error) {
+    console.error('加载会话列表失败:', error)
+  }
+}
+
+// ==================== 群组功能 ====================
+// 创建群组相关
+const createGroupDialogVisible = ref(false)
+const createGroupFormRef = ref(null)
+const creatingGroup = ref(false)
+
+const createGroupForm = ref({
+  name: '',
+  avatar: '',
+  description: '',
+  memberIds: [],
+  joinType: 'needApproval'
+})
+
+const createGroupRules = {
+  name: [
+    { required: true, message: '请输入群组名称', trigger: 'blur' },
+    { min: 2, max: 20, message: '群组名称长度在2-20个字符', trigger: 'blur' }
+  ],
+  memberIds: [
+    { required: true, message: '请至少选择一个成员', trigger: 'change' }
+  ]
+}
+
+// 成员选择器相关
+const memberSelectorVisible = ref(false)
+const memberSearchKeyword = ref('')
+const selectedGroupMembers = ref([])
+
+// 可选用户列表（模拟数据，实际应从好友列表获取）
+const availableUsers = computed(() => {
+  return friends.value.map(f => ({
+    id: f.id || f.friendId || f.userId,
+    name: f.name,
+    nickname: f.nickname,
+    avatar: f.avatar,
+    deptName: f.deptName,
+    position: f.position
+  }))
+})
+
+const filteredUsers = computed(() => {
+  if (!memberSearchKeyword.value) return availableUsers.value
+  const keyword = memberSearchKeyword.value.toLowerCase()
+  return availableUsers.value.filter(u => {
+    const name = (u.name || u.nickname || '').toLowerCase()
+    return name.includes(keyword)
+  })
+})
+
+// 群组管理相关
+const groupManageDialogVisible = ref(false)
+const groupManageTab = ref('members')
+const managingGroup = ref(null)
+const groupMemberSearch = ref('')
+const groupMembers = ref([])
+
+// 过滤后的会话列表
+const filteredSessions = computed(() => {
+  if (!sessionSearch.value) return sessions.value
+  const keyword = sessionSearch.value.toLowerCase()
+  return sessions.value.filter(s => {
+    const name = (s.name || '').toLowerCase()
+    return name.includes(keyword)
+  })
+})
+
+// 过滤后的群组成员
+const filteredGroupMembers = computed(() => {
+  if (!groupMemberSearch.value) return groupMembers.value
+  const keyword = groupMemberSearch.value.toLowerCase()
+  return groupMembers.value.filter(m => {
+    const name = (m.name || m.nickname || '').toLowerCase()
+    return name.includes(keyword)
+  })
+})
+
+// 是否可以添加成员
+const canAddMembers = computed(() => {
+  return managingGroup.value && (
+    managingGroup.value.role === 'owner' ||
+    managingGroup.value.role === 'admin'
+  )
+})
+
+// 显示创建群组对话框
+const showCreateGroupDialog = () => {
+  createGroupDialogVisible.value = true
+}
+
+// 重置创建群组表单
+const resetCreateGroupForm = () => {
+  createGroupForm.value = {
+    name: '',
+    avatar: '',
+    description: '',
+    memberIds: [],
+    joinType: 'needApproval'
+  }
+  selectedGroupMembers.value = []
+  createGroupFormRef.value?.resetFields()
+}
+
+// 群组头像上传成功
+const handleGroupAvatarSuccess = (response) => {
+  createGroupForm.value.avatar = response.url || response.data?.url
+}
+
+// 群组头像上传前检查
+const beforeGroupAvatarUpload = (file) => {
+  const isImage = file.type.startsWith('image/')
+  const isLt2M = file.size / 1024 / 1024 < 2
+
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
+    return false
+  }
+  if (!isLt2M) {
+    ElMessage.error('图片大小不能超过2MB!')
+    return false
+  }
+  return true
+}
+
+// 自定义群组头像上传
+const customGroupAvatarUpload = async (options) => {
+  try {
+    const response = await uploadImage(options.file)
+    options.onSuccess(response)
+  } catch (error) {
+    options.onError(error)
+    ElMessage.error('头像上传失败')
+  }
+}
+
+// 显示成员选择器
+const showMemberSelector = () => {
+  memberSelectorVisible.value = true
+}
+
+// 判断成员是否已选中
+const isGroupMemberSelected = (user) => {
+  return selectedGroupMembers.value.some(m => m.id === user.id)
+}
+
+// 切换成员选中状态
+const toggleGroupMember = (user) => {
+  const index = selectedGroupMembers.value.findIndex(m => m.id === user.id)
+  if (index > -1) {
+    selectedGroupMembers.value.splice(index, 1)
+  } else {
+    selectedGroupMembers.value.push(user)
+  }
+}
+
+// 移除成员
+const removeGroupMember = (member) => {
+  const index = selectedGroupMembers.value.findIndex(m => m.id === member.id)
+  if (index > -1) {
+    selectedGroupMembers.value.splice(index, 1)
+  }
+}
+
+// 确认成员选择
+const confirmMemberSelection = () => {
+  memberSelectorVisible.value = false
+}
+
+// 提交创建群组
+const submitCreateGroup = async () => {
+  try {
+    await createGroupFormRef.value.validate()
+
+    if (selectedGroupMembers.value.length === 0) {
+      ElMessage.warning('请至少选择一个成员')
+      return
+    }
+
+    creatingGroup.value = true
+
+    // 调用创建群组API
+    const groupData = {
+      name: createGroupForm.value.name,
+      avatar: createGroupForm.value.avatar,
+      description: createGroupForm.value.description,
+      memberIds: selectedGroupMembers.value.map(m => m.id),
+      joinType: createGroupForm.value.joinType
+    }
+
+    // TODO: 调用实际的创建群组API
+    // const response = await addGroup(groupData)
+
+    // 模拟创建成功
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    ElMessage.success('群组创建成功')
+    createGroupDialogVisible.value = false
+    resetCreateGroupForm()
+
+    // 刷新会话列表
+    await loadSessions()
+  } catch (error) {
+    if (error !== false) {
+      ElMessage.error('创建失败：' + (error.message || '未知错误'))
+    }
+  } finally {
+    creatingGroup.value = false
+  }
+}
+
+// 打开群组管理
+const openGroupManage = (group) => {
+  managingGroup.value = { ...group }
+  groupMembers.value = [
+    { id: currentUser.value?.userId, name: currentUser.value?.name || '我', role: 'owner', roleText: '群主' },
+    ...selectedGroupMembers.value.map(m => ({ ...m, role: 'member', roleText: '成员' }))
+  ]
+  groupManageDialogVisible.value = true
+}
+
+// 是否可以管理成员
+const canManageMember = (member) => {
+  if (!managingGroup.value) return false
+  const currentRole = 'owner' // 当前用户角色
+  if (currentRole === 'owner') return member.role !== 'owner'
+  if (currentRole === 'admin') return member.role === 'member'
+  return false
+}
+
+// 处理成员命令
+const handleMemberCommand = async (command, member) => {
+  try {
+    switch (command) {
+      case 'setAdmin':
+        member.role = 'admin'
+        member.roleText = '管理员'
+        ElMessage.success('已设为管理员')
+        break
+      case 'removeAdmin':
+        member.role = 'member'
+        member.roleText = '成员'
+        ElMessage.success('已取消管理员')
+        break
+      case 'remove':
+        await ElMessageBox.confirm(`确定要将${member.name || member.nickname}移出群组吗？`, '确认')
+        const index = groupMembers.value.findIndex(m => m.id === member.id)
+        if (index > -1) groupMembers.value.splice(index, 1)
+        ElMessage.success('已移出群组')
+        break
+    }
+  } catch {
+    // 用户取消
+  }
+}
+
+// 显示添加群成员
+const showAddGroupMember = () => {
+  ElMessage.info('添加群成员功能开发中...')
+}
+
+// 保存群组设置
+const saveGroupSettings = () => {
+  ElMessage.success('群组设置已保存')
+}
+
+// 组件挂载
+onMounted(() => {
+  init()
+})
+
+// 组件卸载
+onUnmounted(() => {
+  // 这里不主动断开 WebSocket，因为其他组件可能也在使用
+})
 </script>
 
 <style lang="scss" scoped>
@@ -457,8 +2520,10 @@ $success-color: #52c41a;
 $warning-color: #faad14;
 $danger-color: #ff4d4f;
 $bg-gray: #f5f5f5;
+$bg-base: #f0f2f5;
 $bg-hover: #e6f7ff;
 $border-color: #e8e8e8;
+$border-base: #d9d9d9;
 $text-primary: #262626;
 $text-secondary: #595959;
 $text-tertiary: #8c8c8c;
@@ -727,9 +2792,24 @@ $text-light: #bfbfbf;
           width: $session-panel-width;
           background: #fff;
           border-right: 1px solid $border-color;
+          display: flex;
+          flex-direction: column;
+
+          .session-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid $border-color;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+
+            .session-search {
+              flex: 1;
+            }
+          }
 
           .session-list {
-            height: 100%;
+            flex: 1;
+            height: 0;
             overflow-y: auto;
             @include web-scrollbar;
 
@@ -849,6 +2929,24 @@ $text-light: #bfbfbf;
               overflow-y: auto;
               @include web-scrollbar;
 
+              .connection-status {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 12px;
+                margin-bottom: 16px;
+                background: #fff7e6;
+                border: 1px solid #ffd591;
+                border-radius: 8px;
+                color: #fa8c16;
+                font-size: 13px;
+
+                .el-icon {
+                  animation: pulse 1.5s infinite;
+                }
+              }
+
               .message-item {
                 display: flex;
                 margin-bottom: 20px;
@@ -887,12 +2985,135 @@ $text-light: #bfbfbf;
                     font-size: 14px;
                     line-height: 1.5;
                     word-break: break-word;
+
+                    &.sending {
+                      opacity: 0.7;
+                    }
+
+                    &.failed {
+                      background: #fff1f0;
+                      color: $danger-color;
+                    }
+                  }
+
+                  // 图片消息
+                  .message-image {
+                    max-width: 200px;
+
+                    .image-content {
+                      width: 200px;
+                      height: 200px;
+                      border-radius: 8px;
+                      overflow: hidden;
+                      background: #f0f0f0;
+
+                      &.sending {
+                        opacity: 0.7;
+                      }
+                    }
+                  }
+
+                  // 文件消息
+                  .message-file {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px 16px;
+                    background: $bg-gray;
+                    border-radius: 8px;
+                    min-width: 200px;
+
+                    &.sending {
+                      opacity: 0.7;
+                    }
+
+                    .file-icon {
+                      width: 40px;
+                      height: 40px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      background: #e6f7ff;
+                      border-radius: 8px;
+                      color: $primary-color;
+                      font-size: 20px;
+                    }
+
+                    .file-info {
+                      flex: 1;
+                      min-width: 0;
+
+                      .file-name {
+                        font-size: 14px;
+                        font-weight: 500;
+                        color: $text-primary;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                      }
+
+                      .file-size {
+                        font-size: 12px;
+                        color: $text-tertiary;
+                        margin-top: 2px;
+                      }
+                    }
+                  }
+
+                  // 语音消息
+                  .message-voice {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 10px 16px;
+                    background: $bg-gray;
+                    border-radius: 20px;
+                    min-width: 80px;
+
+                    &.sending {
+                      opacity: 0.7;
+                    }
+
+                    .voice-icon {
+                      font-size: 18px;
+                      color: $text-secondary;
+                    }
+
+                    .voice-duration {
+                      font-size: 13px;
+                      color: $text-secondary;
+                    }
                   }
 
                   .message-time {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
                     font-size: 12px;
                     color: $text-tertiary;
                     margin-top: 6px;
+
+                    .status-icon {
+                      font-size: 13px;
+
+                      &.sending {
+                        color: $warning-color;
+                        animation: spin 1s linear infinite;
+                      }
+
+                      &.failed {
+                        color: $danger-color;
+                        cursor: pointer;
+
+                        &:hover {
+                          color: #d9363e;
+                        }
+                      }
+
+                      &.sent {
+                        color: $success-color;
+                      }
+                    }
                   }
                 }
               }
@@ -901,6 +3122,54 @@ $text-light: #bfbfbf;
             .input-area {
               padding: 16px 20px;
               border-top: 1px solid $border-color;
+
+              .voice-recording-panel {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 16px;
+                margin-bottom: 12px;
+                background: #fff7e6;
+                border: 1px solid #ffd591;
+                border-radius: 8px;
+
+                .voice-info {
+                  display: flex;
+                  align-items: center;
+                  gap: 12px;
+
+                  .recording-duration {
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: $primary-color;
+                    min-width: 50px;
+                  }
+
+                  .volume-bars {
+                    display: flex;
+                    gap: 3px;
+                    height: 20px;
+
+                    .volume-bar {
+                      width: 4px;
+                      min-height: 4px;
+                      background: linear-gradient(to top, $primary-color, #69b1ff);
+                      border-radius: 2px;
+                      transition: height 0.1s ease;
+                    }
+                  }
+
+                  .recording-tip {
+                    font-size: 13px;
+                    color: $warning-color;
+                  }
+                }
+
+                .voice-actions {
+                  display: flex;
+                  gap: 8px;
+                }
+              }
 
               .input-toolbar {
                 display: flex;
@@ -916,6 +3185,11 @@ $text-light: #bfbfbf;
                   &:hover {
                     --el-button-text-color: $primary-color;
                     --el-button-hover-bg-color: $bg-hover;
+                  }
+
+                  &.recording {
+                    --el-button-text-color: $danger-color;
+                    animation: pulse 1.5s infinite;
                   }
                 }
               }
@@ -956,87 +3230,840 @@ $text-light: #bfbfbf;
         width: 100%;
 
         .contacts-sidebar {
-          width: 220px;
+          width: 200px;
           background: #fff;
           border-right: 1px solid $border-color;
-          padding: 16px 0;
+          display: flex;
+          flex-direction: column;
 
           .section-title {
-            padding: 0 16px 8px;
-            font-size: 12px;
-            color: $text-tertiary;
+            padding: 16px 16px 8px;
+            font-size: 13px;
             font-weight: 500;
+            color: $text-secondary;
           }
 
           .tree-list {
+            flex: 1;
+            overflow-y: auto;
+            @include web-scrollbar;
+
             .tree-item {
               display: flex;
               align-items: center;
-              gap: 8px;
-              padding: 8px 16px;
+              gap: 10px;
+              padding: 10px 16px;
               cursor: pointer;
               font-size: 14px;
               color: $text-primary;
+              transition: background 0.2s;
+
+              .tree-label {
+                flex: 1;
+              }
+
+              .tree-count {
+                font-size: 12px;
+                color: $text-tertiary;
+                background: $bg-gray;
+                padding: 2px 8px;
+                border-radius: 10px;
+              }
 
               &:hover {
-                background: $bg-gray;
+                background: $bg-hover;
+              }
+
+              &.active {
+                background: $bg-hover;
+                color: $primary-color;
+                font-weight: 500;
               }
 
               .el-icon {
-                color: $warning-color;
+                font-size: 16px;
               }
             }
           }
         }
 
-        .contacts-content {
+        .contacts-list-panel {
+          width: 320px;
+          background: #fff;
+          border-right: 1px solid $border-color;
+          display: flex;
+          flex-direction: column;
+
+          .list-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid $border-color;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+
+            .search-input {
+              flex: 1;
+            }
+          }
+
+          .contact-items,
+          .org-members {
+            flex: 1;
+            overflow-y: auto;
+            @include web-scrollbar;
+
+            .contact-item {
+              display: flex;
+              align-items: center;
+              padding: 12px 16px;
+              cursor: pointer;
+              border-bottom: 1px solid #f0f0f0;
+              transition: background 0.2s;
+              position: relative;
+
+              &:hover {
+                background: $bg-hover;
+              }
+
+              .contact-info {
+                flex: 1;
+                margin-left: 12px;
+                min-width: 0;
+
+                .contact-name {
+                  font-size: 14px;
+                  font-weight: 500;
+                  color: $text-primary;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                }
+
+                .contact-signature {
+                  font-size: 12px;
+                  color: $text-tertiary;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                  margin-top: 2px;
+                }
+              }
+
+              .online-dot {
+                width: 8px;
+                height: 8px;
+                background: $success-color;
+                border-radius: 50%;
+                flex-shrink: 0;
+              }
+            }
+          }
+
+          .org-tree {
+            flex: 1;
+            overflow-y: auto;
+            @include web-scrollbar;
+            padding: 8px 0;
+
+            :deep(.el-tree) {
+              .el-tree-node__content {
+                height: 36px;
+
+                &:hover {
+                  background: $bg-hover;
+                }
+              }
+
+              .org-node {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 14px;
+
+                .user-count {
+                  font-size: 12px;
+                  color: $text-tertiary;
+                  margin-left: 4px;
+                }
+              }
+            }
+          }
+
+          .org-members {
+            border-top: 1px solid $border-color;
+            max-height: 300px;
+
+            .members-title {
+              padding: 12px 16px 8px;
+              font-size: 13px;
+              font-weight: 500;
+              color: $text-secondary;
+            }
+          }
+
+          .new-friends {
+            flex: 1;
+            overflow-y: auto;
+            @include web-scrollbar;
+
+            .friend-request-item {
+              display: flex;
+              padding: 16px;
+              border-bottom: 1px solid #f0f0f0;
+
+              .request-info {
+                flex: 1;
+                margin: 0 12px;
+
+                .request-name {
+                  font-size: 14px;
+                  font-weight: 500;
+                  color: $text-primary;
+                }
+
+                .request-message {
+                  font-size: 13px;
+                  color: $text-secondary;
+                  margin-top: 4px;
+                }
+
+                .request-time {
+                  font-size: 12px;
+                  color: $text-tertiary;
+                  margin-top: 4px;
+                }
+              }
+
+              .request-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+
+                .request-status {
+                  font-size: 13px;
+                  color: $text-tertiary;
+                }
+              }
+            }
+          }
+
+          // 索引联系人列表
+          .indexed-contacts {
+            flex: 1;
+            overflow-y: auto;
+            @include web-scrollbar;
+            position: relative;
+
+            .contact-section {
+              .section-header {
+                padding: 8px 16px;
+                background: #f5f5f5;
+                font-size: 12px;
+                font-weight: 500;
+                color: $text-secondary;
+                position: sticky;
+                top: 0;
+                z-index: 1;
+              }
+
+              .contact-item-row {
+                display: flex;
+                align-items: center;
+                padding: 10px 16px;
+                cursor: pointer;
+                border-bottom: 1px solid #f0f0f0;
+                transition: background 0.15s;
+
+                &:hover {
+                  background: $bg-hover;
+                }
+
+                .contact-row-info {
+                  flex: 1;
+                  margin-left: 12px;
+                  min-width: 0;
+
+                  .contact-row-name {
+                    font-size: 15px;
+                    font-weight: 400;
+                    color: $text-primary;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                  }
+
+                  .contact-row-desc {
+                    font-size: 12px;
+                    color: $text-tertiary;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    margin-top: 2px;
+                  }
+                }
+              }
+            }
+          }
+
+          // A-Z 索引侧边栏
+          .index-sidebar {
+            width: 36px;
+            background: #fff;
+            border-left: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 0;
+            overflow-y: auto;
+            @include web-scrollbar;
+
+            .index-item {
+              width: 28px;
+              height: 18px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 11px;
+              color: $text-secondary;
+              cursor: pointer;
+              border-radius: 4px;
+              margin: 1px 0;
+              transition: all 0.15s;
+
+              &:hover:not(.disabled) {
+                background: $bg-hover;
+                color: $primary-color;
+              }
+
+              &.active {
+                background: $primary-color;
+                color: #fff;
+              }
+
+              &.disabled {
+                color: #e0e0e0;
+                cursor: default;
+              }
+            }
+          }
+        }
+
+        .contacts-detail-panel {
           flex: 1;
-          padding: 20px;
+          background: #fff;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+
+          .detail-header {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid $border-color;
+
+            .header-info {
+              flex: 1;
+
+              h2 {
+                margin: 0 0 4px;
+                font-size: 20px;
+                font-weight: 500;
+                color: $text-primary;
+              }
+
+              .status {
+                margin: 0;
+                font-size: 14px;
+                color: $text-secondary;
+
+                &.online {
+                  color: $success-color;
+                }
+              }
+            }
+          }
+
+          .detail-actions {
+            padding: 16px 24px;
+            border-bottom: 1px solid $border-color;
+            display: flex;
+            gap: 12px;
+          }
+
+          .detail-info {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            @include web-scrollbar;
+
+            .info-section {
+              h4 {
+                margin: 0 0 16px;
+                font-size: 14px;
+                font-weight: 500;
+                color: $text-secondary;
+              }
+
+              .info-item {
+                display: flex;
+                justify-content: space-between;
+                padding: 10px 0;
+                border-bottom: 1px solid #f5f5f5;
+
+                &:last-child {
+                  border-bottom: none;
+                }
+
+                .label {
+                  font-size: 14px;
+                  color: $text-secondary;
+                }
+
+                .value {
+                  font-size: 14px;
+                  color: $text-primary;
+                }
+              }
+            }
+          }
+
+          .empty-detail {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: $text-light;
+
+            p {
+              margin-top: 16px;
+              font-size: 14px;
+            }
+          }
         }
       }
 
       // 工作台工作区
       .workbench-workspace {
-        flex: 1;
-        padding: 24px;
-        overflow-y: auto;
-        @include web-scrollbar;
+        display: flex;
+        width: 100%;
 
-        .app-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-          gap: 20px;
+        .workbench-sidebar {
+          width: 180px;
+          background: #fff;
+          border-right: 1px solid $border-color;
+          display: flex;
+          flex-direction: column;
 
-          .app-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+          .section-title {
+            padding: 16px 16px 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: $text-secondary;
+          }
 
-            &:hover {
-              transform: translateY(-2px);
-              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            }
+          .app-category-list {
+            flex: 1;
+            overflow-y: auto;
+            @include web-scrollbar;
 
-            .app-icon {
-              width: 56px;
-              height: 56px;
-              border-radius: 12px;
+            .category-item {
               display: flex;
               align-items: center;
-              justify-content: center;
-              margin-bottom: 12px;
-            }
-
-            .app-name {
+              gap: 10px;
+              padding: 10px 16px;
+              cursor: pointer;
               font-size: 14px;
               color: $text-primary;
+              transition: background 0.2s;
+
+              .category-label {
+                flex: 1;
+              }
+
+              .category-count {
+                font-size: 12px;
+                color: $text-tertiary;
+                background: $bg-gray;
+                padding: 2px 8px;
+                border-radius: 10px;
+              }
+
+              &:hover {
+                background: $bg-hover;
+              }
+
+              &.active {
+                background: $bg-hover;
+                color: $primary-color;
+                font-weight: 500;
+              }
+
+              .el-icon {
+                font-size: 16px;
+              }
+            }
+          }
+        }
+
+        .workbench-content {
+          flex: 1;
+          background: $bg-base;
+          overflow-y: auto;
+          @include web-scrollbar;
+
+          .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 20px;
+            padding: 24px;
+
+            .app-card {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              padding: 20px;
+              background: #fff;
+              border-radius: 8px;
+              cursor: pointer;
+              transition: all 0.2s;
+              box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+
+              &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              }
+
+              .app-icon {
+                width: 56px;
+                height: 56px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 12px;
+              }
+
+              .app-name {
+                font-size: 14px;
+                color: $text-primary;
+                text-align: center;
+              }
+            }
+          }
+
+          // 审批列表
+          .approval-list {
+            padding: 24px;
+
+            .list-header {
+              background: #fff;
+              padding: 16px 20px;
+              border-radius: 8px 8px 0 0;
+              border-bottom: 1px solid $border-color;
+
+              h3 {
+                margin: 0 0 12px;
+                font-size: 16px;
+                font-weight: 500;
+              }
+
+              .approval-tabs {
+                :deep(.el-tabs__header) {
+                  margin: 0;
+                }
+
+                :deep(.el-tabs__nav-wrap::after) {
+                  display: none;
+                }
+              }
+            }
+
+            .approval-items {
+              background: #fff;
+              border-radius: 0 0 8px 8px;
+
+              .approval-item {
+                display: flex;
+                align-items: center;
+                padding: 16px 20px;
+                border-bottom: 1px solid #f0f0f0;
+
+                &:last-child {
+                  border-bottom: none;
+                }
+
+                .approval-icon {
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 8px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin-right: 16px;
+                  flex-shrink: 0;
+                }
+
+                .approval-info {
+                  flex: 1;
+
+                  .approval-title {
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: $text-primary;
+                    margin-bottom: 4px;
+                  }
+
+                  .approval-detail {
+                    display: flex;
+                    gap: 12px;
+                    font-size: 13px;
+                    color: $text-secondary;
+                    margin-bottom: 4px;
+                  }
+
+                  .approval-applicant {
+                    font-size: 12px;
+                    color: $text-tertiary;
+                  }
+                }
+
+                .approval-actions {
+                  display: flex;
+                  gap: 8px;
+                }
+              }
+            }
+          }
+
+          // 考勤打卡
+          .attendance-panel {
+            padding: 24px;
+
+            .attendance-card {
+              background: linear-gradient(135deg, #1677ff 0%, #69b1ff 100%);
+              border-radius: 12px;
+              padding: 32px;
               text-align: center;
+              color: #fff;
+              margin-bottom: 24px;
+
+              .attendance-time {
+                font-size: 48px;
+                font-weight: 300;
+                margin-bottom: 8px;
+              }
+
+              .attendance-date {
+                font-size: 16px;
+                opacity: 0.9;
+                margin-bottom: 16px;
+              }
+
+              .attendance-status {
+                display: inline-block;
+                padding: 6px 16px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 20px;
+                font-size: 14px;
+                margin-bottom: 20px;
+
+                &.checked {
+                  background: rgba(82, 196, 26, 0.3);
+                }
+              }
+
+              .check-time {
+                font-size: 18px;
+                font-weight: 500;
+              }
+            }
+
+            .attendance-records {
+              background: #fff;
+              border-radius: 12px;
+              padding: 20px;
+
+              h4 {
+                margin: 0 0 16px;
+                font-size: 15px;
+                font-weight: 500;
+              }
+
+              .record-list {
+                .record-item {
+                  display: flex;
+                  align-items: center;
+                  padding: 12px 0;
+                  border-bottom: 1px solid #f5f5f5;
+
+                  &:last-child {
+                    border-bottom: none;
+                  }
+
+                  .record-day {
+                    width: 60px;
+                    font-size: 14px;
+                    color: $text-secondary;
+                  }
+
+                  .record-time {
+                    flex: 1;
+                    font-size: 14px;
+                    color: $text-primary;
+                  }
+
+                  .record-status {
+                    padding: 2px 10px;
+                    border-radius: 4px;
+                    font-size: 12px;
+
+                    &.normal {
+                      background: #f6ffed;
+                      color: #52c41a;
+                    }
+
+                    &.late {
+                      background: #fff7e6;
+                      color: #fa8c16;
+                    }
+
+                    &.pending {
+                      background: #f5f5f5;
+                      color: $text-tertiary;
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          // 日程管理
+          .schedule-panel {
+            padding: 24px;
+
+            .schedule-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 20px;
+
+              h3 {
+                margin: 0;
+                font-size: 18px;
+                font-weight: 500;
+              }
+            }
+
+            .schedule-calendar {
+              background: #fff;
+              border-radius: 12px;
+              padding: 20px;
+              margin-bottom: 20px;
+
+              .calendar-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 16px;
+
+                .calendar-title {
+                  font-size: 15px;
+                  font-weight: 500;
+                }
+              }
+
+              .week-days {
+                display: flex;
+                gap: 8px;
+
+                .day-item {
+                  flex: 1;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  padding: 12px 8px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  transition: all 0.2s;
+
+                  .day-name {
+                    font-size: 12px;
+                    color: $text-secondary;
+                    margin-bottom: 4px;
+                  }
+
+                  .day-date {
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: $text-primary;
+                  }
+
+                  &:hover {
+                    background: $bg-hover;
+                  }
+
+                  &.selected {
+                    background: $primary-color;
+                    color: #fff;
+
+                    .day-name,
+                    .day-date {
+                      color: #fff;
+                    }
+                  }
+
+                  &.today {
+                    border: 1px solid $primary-color;
+                  }
+                }
+              }
+            }
+
+            .schedule-list {
+              background: #fff;
+              border-radius: 12px;
+              padding: 16px 20px;
+              min-height: 200px;
+
+              .schedule-item {
+                display: flex;
+                gap: 16px;
+                padding: 14px 0;
+                border-left: 3px solid $primary-color;
+                padding-left: 16px;
+                margin-bottom: 12px;
+
+                &:last-child {
+                  margin-bottom: 0;
+                }
+
+                .schedule-time {
+                  font-size: 13px;
+                  color: $text-secondary;
+                  min-width: 50px;
+                }
+
+                .schedule-content {
+                  flex: 1;
+
+                  .schedule-title {
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: $text-primary;
+                    margin-bottom: 4px;
+                  }
+
+                  .schedule-location {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    font-size: 12px;
+                    color: $text-tertiary;
+                  }
+                }
+              }
             }
           }
         }
@@ -1048,32 +4075,214 @@ $text-light: #bfbfbf;
         width: 100%;
 
         .drive-sidebar {
-          width: 180px;
+          width: 200px;
           background: #fff;
           border-right: 1px solid $border-color;
-          padding: 16px 0;
+          display: flex;
+          flex-direction: column;
 
-          .drive-nav-item {
-            padding: 10px 16px;
-            cursor: pointer;
-            font-size: 14px;
-            color: $text-primary;
+          .section-title {
+            padding: 16px 16px 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: $text-secondary;
+          }
 
-            &:hover {
-              background: $bg-gray;
+          .drive-nav-list {
+            flex: 1;
+            overflow-y: auto;
+            @include web-scrollbar;
+
+            .drive-nav-item {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              padding: 10px 16px;
+              cursor: pointer;
+              font-size: 14px;
+              color: $text-primary;
+              transition: background 0.2s;
+
+              .nav-label {
+                flex: 1;
+              }
+
+              .nav-count {
+                font-size: 12px;
+                color: $text-tertiary;
+                background: $bg-gray;
+                padding: 2px 8px;
+                border-radius: 10px;
+              }
+
+              &:hover {
+                background: $bg-hover;
+              }
+
+              &.active {
+                background: $bg-hover;
+                color: $primary-color;
+                font-weight: 500;
+              }
+
+              .el-icon {
+                font-size: 16px;
+              }
             }
+          }
 
-            &.active {
-              background: $bg-hover;
-              color: $primary-color;
-              font-weight: 500;
+          .storage-info {
+            padding: 16px;
+            border-top: 1px solid $border-color;
+
+            .storage-text {
+              font-size: 12px;
+              color: $text-tertiary;
+              text-align: center;
+              margin-top: 8px;
             }
           }
         }
 
         .drive-content {
           flex: 1;
-          padding: 20px;
+          background: #fff;
+          display: flex;
+          flex-direction: column;
+
+          .drive-toolbar {
+            padding: 16px 20px;
+            border-bottom: 1px solid $border-color;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+
+            .breadcrumb {
+              display: flex;
+              align-items: center;
+              font-size: 14px;
+              color: $text-secondary;
+
+              .breadcrumb-item {
+                cursor: pointer;
+
+                &:hover {
+                  color: $primary-color;
+                }
+              }
+            }
+
+            .toolbar-actions {
+              display: flex;
+              gap: 8px;
+            }
+          }
+
+          .file-list {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            @include web-scrollbar;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+            align-content: start;
+
+            .file-item {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              padding: 16px 12px;
+              border-radius: 8px;
+              cursor: pointer;
+              transition: all 0.2s;
+              position: relative;
+
+              &:hover {
+                background: $bg-hover;
+              }
+
+              &.selected {
+                background: #e6f7ff;
+                border: 1px solid $primary-color;
+              }
+
+              .file-icon {
+                margin-bottom: 8px;
+                color: $text-secondary;
+
+                &.folder-icon {
+                  color: #faad14;
+                }
+
+                &.file-type-image {
+                  color: #722ed1;
+                }
+
+                &.file-type-video {
+                  color: #eb2f96;
+                }
+
+                &.file-type-audio {
+                  color: #13c2c2;
+                }
+
+                &.file-type-word {
+                  color: #1677ff;
+                }
+
+                &.file-type-excel {
+                  color: #52c41a;
+                }
+
+                &.file-type-ppt {
+                  color: #fa8c16;
+                }
+
+                &.file-type-pdf {
+                  color: #f5222d;
+                }
+              }
+
+              .file-info {
+                text-align: center;
+                width: 100%;
+
+                .file-name {
+                  font-size: 13px;
+                  color: $text-primary;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                  width: 100%;
+                }
+
+                .file-meta {
+                  font-size: 11px;
+                  color: $text-tertiary;
+                  margin-top: 4px;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                  width: 100%;
+                }
+              }
+
+              .file-actions {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                opacity: 0;
+                transition: opacity 0.2s;
+              }
+
+              &:hover .file-actions {
+                opacity: 1;
+              }
+            }
+          }
         }
       }
     }
@@ -1172,6 +4381,162 @@ $text-light: #bfbfbf;
                 font-size: 12px;
               }
             }
+          }
+        }
+      }
+    }
+  }
+}
+
+// ==================== 群组功能样式 ====================
+.avatar-upload {
+  .avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    border: 2px dashed $border-base;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: $text-tertiary;
+    transition: all 0.2s;
+
+    &:hover {
+      border-color: $primary-color;
+      color: $primary-color;
+    }
+
+    span {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+  }
+}
+
+.member-selector {
+  .selected-members {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 32px;
+  }
+}
+
+.member-selector-content {
+  .member-search {
+    margin-bottom: 16px;
+  }
+
+  .member-list {
+    max-height: 300px;
+    overflow-y: auto;
+    @include web-scrollbar;
+
+    .member-list-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: $bg-hover;
+      }
+
+      .member-info {
+        flex: 1;
+        margin-left: 12px;
+        display: flex;
+        flex-direction: column;
+
+        .member-name {
+          font-size: 14px;
+          font-weight: 500;
+          color: $text-primary;
+        }
+
+        .member-dept {
+          font-size: 12px;
+          color: $text-tertiary;
+        }
+      }
+    }
+  }
+}
+
+.group-manage {
+  .group-info-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid $border-color;
+    margin-bottom: 20px;
+
+    .group-info {
+      flex: 1;
+
+      h3 {
+        margin: 0 0 4px;
+        font-size: 18px;
+        font-weight: 500;
+      }
+
+      p {
+        margin: 0;
+        font-size: 14px;
+        color: $text-secondary;
+      }
+    }
+  }
+
+  .group-members {
+    .members-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+
+      .member-search-input {
+        width: 200px;
+      }
+    }
+
+    .members-list {
+      max-height: 350px;
+      overflow-y: auto;
+      @include web-scrollbar;
+
+      .group-member-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #f5f5f5;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .member-info {
+          flex: 1;
+          margin-left: 12px;
+
+          .member-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: $text-primary;
+          }
+
+          .member-role {
+            font-size: 12px;
+            color: $text-tertiary;
+            margin-top: 4px;
           }
         }
       }

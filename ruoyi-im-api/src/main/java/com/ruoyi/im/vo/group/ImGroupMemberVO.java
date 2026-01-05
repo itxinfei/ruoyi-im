@@ -93,6 +93,10 @@ public class ImGroupMemberVO {
     public void setUserNickname(String userNickname) {
         this.userNickname = userNickname;
     }
+    
+    public void setNickname(String userNickname) {
+        this.userNickname = userNickname;
+    }
 
     public String getAvatar() {
         return avatar;

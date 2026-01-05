@@ -164,13 +164,13 @@ public class ImUserController extends BaseController {
         // 处理参数验证错误
         Result<Void> validationResult = handleValidationError(bindingResult);
         if (validationResult != null) {
-            return validationResult;
+            return Result.error(validationResult.getCode(), validationResult.getMessage());
         }
         
         // 检查用户名是否已存在
         if (imUserService.findByUsername(request.getUsername()) != null) {
             log.warn("用户名已存在: username={}", request.getUsername());
-            return businessError("用户名已存在");
+            return Result.error(400, "用户名已存在");
         }
         
         // 转换为实体对象
@@ -180,12 +180,12 @@ public class ImUserController extends BaseController {
         int rows = imUserService.insert(user);
         if (rows <= 0) {
             log.error("用户创建失败: username={}", request.getUsername());
-            return error("用户创建失败");
+            return Result.error(500, "用户创建失败");
         }
         
         ImUserVO userVO = convertToVO(user);
         log.info("用户创建成功: userId={}", user.getId());
-        return success(userVO, "用户创建成功");
+        return success(userVO);
     }
 
     /**
@@ -218,14 +218,14 @@ public class ImUserController extends BaseController {
         // 处理参数验证错误
         Result<Void> validationResult = handleValidationError(bindingResult);
         if (validationResult != null) {
-            return validationResult;
+            return Result.error(validationResult.getCode(), validationResult.getMessage());
         }
         
         // 检查用户是否存在
         ImUser existingUser = imUserService.findById(request.getId());
         if (existingUser == null) {
             log.warn("用户不存在: userId={}", request.getId());
-            return notFound("用户不存在");
+            return Result.error(404, "用户不存在");
         }
         
         // 转换为实体对象并更新
@@ -233,12 +233,12 @@ public class ImUserController extends BaseController {
         int rows = imUserService.updateById(user);
         if (rows <= 0) {
             log.error("用户更新失败: userId={}", request.getId());
-            return error("用户更新失败");
+            return Result.error(500, "用户更新失败");
         }
         
         ImUserVO userVO = convertToVO(user);
         log.info("用户更新成功: userId={}", request.getId());
-        return success(userVO, "用户更新成功");
+        return Result.success(userVO);
     }
 
     /**
@@ -269,11 +269,11 @@ public class ImUserController extends BaseController {
         int rows = imUserService.deleteById(userId);
         if (rows <= 0) {
             log.warn("用户不存在或已删除: userId={}", userId);
-            return notFound("用户不存在或已删除");
+            return Result.error(404, "用户不存在或已删除");
         }
         
         log.info("用户删除成功: userId={}", userId);
-        return success("用户删除成功");
+        return Result.success();
     }
 
     /**
@@ -313,19 +313,19 @@ public class ImUserController extends BaseController {
         ImUser user = imUserService.findById(userId);
         if (user == null) {
             log.warn("用户不存在: userId={}", userId);
-            return notFound("用户不存在");
+            return Result.error(404, "用户不存在");
         }
         
         user.setStatus(status);
         int rows = imUserService.updateById(user);
         if (rows <= 0) {
             log.error("用户状态更新失败: userId={}", userId);
-            return error("用户状态更新失败");
+            return Result.error(500, "用户状态更新失败");
         }
         
         ImUserVO userVO = convertToVO(user);
         log.info("用户状态更新成功: userId={}, status={}", userId, status);
-        return success(userVO, "用户状态更新成功");
+        return Result.success(userVO);
     }
 
     /**
@@ -358,7 +358,7 @@ public class ImUserController extends BaseController {
         ImUser user = imUserService.findById(userId);
         if (user == null) {
             log.warn("用户不存在: userId={}", userId);
-            return notFound("用户不存在");
+            return Result.error(404, "用户不存在");
         }
         
         // 设置分页参数
@@ -393,14 +393,14 @@ public class ImUserController extends BaseController {
     public Result<ImUserVO> getCurrentUser() {
         Long currentUserId = getCurrentUserId();
         if (currentUserId == null) {
-            return unauthorized("请先登录");
+            return Result.error(401, "请先登录");
         }
         
         log.info("获取当前用户信息请求: userId={}", currentUserId);
         
         ImUser user = imUserService.findById(currentUserId);
         if (user == null) {
-            return notFound("用户不存在");
+            return Result.error(404, "用户不存在");
         }
         
         ImUserVO userVO = convertToVO(user);

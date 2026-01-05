@@ -291,7 +291,7 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int createExportRequest(Long userId, LocalDateTime startTime, LocalDateTime endTime, String operationType, String targetType, Long targetId, String format) {
-        long startTime = System.currentTimeMillis();
+        long startTimeMs = System.currentTimeMillis();
         String methodName = "createExportRequest";
         
         try {
@@ -312,13 +312,19 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
             
             ImAuditExportRequest request = new ImAuditExportRequest();
             request.setUserId(userId);
-            request.setOperationType(operationType);
-            request.setTargetType(targetType);
-            request.setTargetId(targetId);
-            request.setStartTime(startTime);
-            request.setEndTime(endTime);
-            request.setFormat(format != null ? format : "CSV");
-            request.setStatus("PENDING");
+            request.setExportType(operationType);
+            request.setExportStatus("PENDING");
+            request.setCreateTime(LocalDateTime.now());
+            request.setUpdateTime(LocalDateTime.now());
+            
+            // 将参数存储在导出参数字段中
+            StringBuilder params = new StringBuilder();
+            params.append("startTime:").append(startTime)
+                  .append(",endTime:").append(endTime)
+                  .append(",targetType:").append(targetType)
+                  .append(",targetId:").append(targetId)
+                  .append(",format:").append(format != null ? format : "CSV");
+            request.setExportParams(params.toString());
             
             // 使用父类方法插入
             int result = insert(request);
@@ -335,7 +341,7 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
                       userId, startTime, endTime, e.getMessage(), methodName, e);
             throw new BusinessException("创建导出请求失败", e);
         } finally {
-            long duration = System.currentTimeMillis() - startTime;
+            long duration = System.currentTimeMillis() - startTimeMs;
             log.info("创建导出请求耗时: {}ms, userId={}, method={}", 
                      duration, userId, methodName);
         }
@@ -366,7 +372,28 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
             log.debug("更新导出请求状态: id={}, status={}, filePath={}, errorMessage={}, method={}", 
                       id, status, filePath, errorMessage, methodName);
             
-            int result = imAuditExportRequestMapper.updateImAuditExportRequestStatus(id, status, filePath, errorMessage);
+            ImAuditExportRequest request = selectById(id);
+            if (request == null) {
+                log.warn("导出请求不存在: id={}", id);
+                return 0;
+            }
+            
+            request.setExportStatus(status);
+            request.setExportUrl(filePath);
+            request.setUpdateTime(LocalDateTime.now());
+            
+            // 添加错误信息到导出参数中
+            if (errorMessage != null) {
+                String params = request.getExportParams();
+                if (params != null) {
+                    params += ",errorMessage:" + errorMessage;
+                } else {
+                    params = "errorMessage:" + errorMessage;
+                }
+                request.setExportParams(params);
+            }
+            
+            int result = update(request);
             
             // 清除相关缓存
             clearEntityCache(id);
@@ -414,15 +441,15 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
                 throw new BusinessException("导出请求不存在: id=" + id);
             }
             
-            if (!"PENDING".equals(request.getStatus())) {
+            if (!"PENDING".equals(request.getExportStatus())) {
                 log.warn("导出请求状态不是PENDING，无法处理: id={}, status={}, method={}", 
-                         id, request.getStatus(), methodName);
+                         id, request.getExportStatus(), methodName);
                 return 0;
             }
             
             try {
                 // 更新状态为处理中
-                request.setStatus("PROCESSING");
+                request.setExportStatus("PROCESSING");
                 int updateResult = update(request);
                 
                 if (updateResult <= 0) {
@@ -436,9 +463,9 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
                         String filePath = generateExportFile(request);
                         
                         // 更新状态为完成
-                        request.setStatus("COMPLETED");
-                        request.setFilePath(filePath);
-                        imAuditExportRequestMapper.updateImAuditExportRequest(request);
+                        request.setExportStatus("COMPLETED");
+                        request.setExportUrl(filePath);
+                        update(request);
                         
                         log.info("导出请求处理完成: id={}, filePath={}, method={}", 
                                  id, filePath, methodName);
@@ -449,9 +476,15 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
                                   id, e.getMessage(), methodName, e);
                         
                         // 更新状态为失败
-                        request.setStatus("FAILED");
-                        request.setErrorMessage(e.getMessage());
-                        imAuditExportRequestMapper.updateImAuditExportRequest(request);
+                        request.setExportStatus("FAILED");
+                        String errorMsg = request.getExportParams();
+                        if (errorMsg != null) {
+                            errorMsg += ",errorMessage:" + e.getMessage();
+                        } else {
+                            errorMsg = "errorMessage:" + e.getMessage();
+                        }
+                        request.setExportParams(errorMsg);
+                        update(request);
                         
                         return null;
                     }
@@ -463,8 +496,14 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
                 
             } catch (Exception e) {
                 // 更新状态为失败
-                request.setStatus("FAILED");
-                request.setErrorMessage(e.getMessage());
+                request.setExportStatus("FAILED");
+                String errorMsg = request.getExportParams();
+                if (errorMsg != null) {
+                    errorMsg += ",errorMessage:" + e.getMessage();
+                } else {
+                    errorMsg = "errorMessage:" + e.getMessage();
+                }
+                request.setExportParams(errorMsg);
                 update(request);
                 
                 log.error("导出请求处理异常: id={}, error={}, method={}", 
@@ -493,7 +532,7 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
     private String generateExportFile(ImAuditExportRequest request) {
         // 这里实现导出逻辑
         String filePath = "/exports/audit_" + request.getId() + "_" + System.currentTimeMillis() + "." + 
-                          (request.getFormat() != null ? request.getFormat() : "csv");
+                          (request.getExportParams() != null ? request.getExportParams() : "csv"); // 使用现有的字段替代
         
         // 模拟文件生成过程
         try {
@@ -507,4 +546,29 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
         
         return filePath;
     }
-}
+
+            @Override
+            public int updateImAuditExportRequest(ImAuditExportRequest imAuditExportRequest) {
+                return update(imAuditExportRequest);
+            }
+        
+            @Override
+            public int deleteImAuditExportRequestByIds(Long[] ids) {
+                return deleteByIds(ids);
+            }
+        
+            @Override
+            public int deleteImAuditExportRequestById(Long id) {
+                return deleteById(id);
+            }
+        
+            @Override
+            public int insertImAuditExportRequest(ImAuditExportRequest imAuditExportRequest) {
+                return insert(imAuditExportRequest);
+            }
+        
+            @Override
+            public List<ImAuditExportRequest> selectImAuditExportRequestList(ImAuditExportRequest imAuditExportRequest) {
+                return selectList(imAuditExportRequest);
+            }
+        }

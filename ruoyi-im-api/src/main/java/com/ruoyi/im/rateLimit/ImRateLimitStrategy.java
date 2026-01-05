@@ -19,7 +19,7 @@ public interface ImRateLimitStrategy {
      * @param window 窗口时间（秒）
      * @return true表示允许通过，false表示被限流
      */
-    boolean isAllowed(String key, int rate, int window);
+    boolean isAllowed(String key, double rate, int window);
     
     /**
      * 重置限流状态
@@ -47,14 +47,14 @@ public interface ImRateLimitStrategy {
         private final AtomicLong lastRefillTime = new AtomicLong(0);
         
         @Override
-        public boolean isAllowed(String key, int rate, int window) {
+        public boolean isAllowed(String key, double rate, int window) {
             long currentTime = System.currentTimeMillis();
             long lastTime = lastRefillTime.get();
             
             // 如果是第一次请求或者时间窗口重置
             if (lastTime == 0 || currentTime - lastTime >= window * 1000) {
                 // 重置令牌桶
-                tokenCount.set(rate);
+                tokenCount.set((long) rate);
                 lastRefillTime.set(currentTime);
                 return true;
             }
@@ -92,7 +92,7 @@ public interface ImRateLimitStrategy {
         private final AtomicLong windowStartTime = new AtomicLong(0);
         
         @Override
-        public boolean isAllowed(String key, int rate, int window) {
+        public boolean isAllowed(String key, double rate, int window) {
             long currentTime = System.currentTimeMillis();
             long startTime = windowStartTime.get();
             
@@ -105,7 +105,7 @@ public interface ImRateLimitStrategy {
             
             // 检查当前窗口内的请求数
             long count = requestCount.get();
-            if (count < rate) {
+            if (count < (long) rate) {
                 requestCount.incrementAndGet();
                 return true;
             }
@@ -138,38 +138,31 @@ public interface ImRateLimitStrategy {
         private final int slotCount;
         
         public SlidingWindowStrategy() {
-            this.slotCount = 10; // 分为10个时间槽
+            this.slotCount = 10; // 使用10个时间槽
             this.timeSlots = new AtomicLong[slotCount];
             for (int i = 0; i < slotCount; i++) {
-                timeSlots[i] = new AtomicLong(0);
+                this.timeSlots[i] = new AtomicLong(0);
             }
         }
         
         @Override
-        public boolean isAllowed(String key, int rate, int window) {
+        public boolean isAllowed(String key, double rate, int window) {
             long currentTime = System.currentTimeMillis();
-            long windowSize = window * 1000 / slotCount;
-            long currentSlotIndex = (currentTime / windowSize) % slotCount;
+            int currentSlotIndex = (int) ((currentTime / (window * 1000 / slotCount)) % slotCount);
+            long slotStartTime = (currentTime / (window * 1000 / slotCount)) * (window * 1000 / slotCount);
             
-            // 如果时间槽发生变化，重置旧槽
-            long lastSlot = currentSlot.get();
-            if (lastSlot != currentSlotIndex) {
-                // 清理过期的槽
-                long diff = (currentSlotIndex - lastSlot + slotCount) % slotCount;
-                for (int i = 0; i < diff; i++) {
-                    timeSlots[(lastSlot + i) % slotCount].set(0);
-                }
-                currentSlot.set(currentSlotIndex);
+            // 检查当前槽位是否需要重置
+            if (currentTime - slotStartTime >= (window * 1000 / slotCount)) {
+                timeSlots[currentSlotIndex].set(0);
             }
             
-            // 计算窗口内的总请求数
+            // 计算总请求数
             long totalRequests = 0;
             for (AtomicLong slot : timeSlots) {
                 totalRequests += slot.get();
             }
             
-            // 检查是否超过限制
-            if (totalRequests < rate) {
+            if (totalRequests < (long) rate) {
                 timeSlots[currentSlotIndex].incrementAndGet();
                 return true;
             }
@@ -182,7 +175,6 @@ public interface ImRateLimitStrategy {
             for (AtomicLong slot : timeSlots) {
                 slot.set(0);
             }
-            currentSlot.set(0);
         }
         
         @Override

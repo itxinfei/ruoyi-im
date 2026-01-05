@@ -35,7 +35,7 @@ public class ImMessageReactionController {
         
         List<ImMessageReaction> list = imMessageReactionService.selectImMessageReactionList(query);
         
-        return Result.success(list, "查询成功");
+        return Result.success("查询成功", list);
     }
 
     /**
@@ -46,7 +46,7 @@ public class ImMessageReactionController {
         ImMessageReaction reaction = imMessageReactionService.selectImMessageReactionById(id);
         
         if (reaction != null) {
-            return Result.success(reaction, "查询成功");
+            return Result.success("查询成功", reaction);
         } else {
             return Result.error(404, "消息互动不存在");
         }
@@ -59,7 +59,7 @@ public class ImMessageReactionController {
     public Result<List<ImMessageReaction>> listByMessageId(@PathVariable Long messageId) {
         List<ImMessageReaction> list = imMessageReactionService.selectImMessageReactionByMessageId(messageId);
         
-        return Result.success(list, "查询成功");
+        return Result.success("查询成功", list);
     }
 
     /**
@@ -69,7 +69,7 @@ public class ImMessageReactionController {
     public Result<List<ImMessageReaction>> listByUserId(@PathVariable Long userId) {
         List<ImMessageReaction> list = imMessageReactionService.selectImMessageReactionByUserId(userId);
         
-        return Result.success(list, "查询成功");
+        return Result.success("查询成功", list);
     }
 
     /**
@@ -80,7 +80,7 @@ public class ImMessageReactionController {
         int rows = imMessageReactionService.insertImMessageReaction(reaction);
         
         if (rows > 0) {
-            return Result.success(reaction, "消息互动添加成功");
+            return Result.success("消息互动添加成功", reaction);
         } else {
             return Result.error(500, "消息互动添加失败");
         }
@@ -99,7 +99,7 @@ public class ImMessageReactionController {
         int rows = imMessageReactionService.addReaction(messageId, userId, reactionType, emoji);
         
         if (rows > 0) {
-            return Result.success("消息互动添加成功");
+            return Result.success(200, "消息互动添加成功", null);
         } else {
             return Result.error(500, "消息互动添加失败");
         }
@@ -117,7 +117,7 @@ public class ImMessageReactionController {
         int rows = imMessageReactionService.removeReaction(messageId, userId, reactionType);
         
         if (rows > 0) {
-            return Result.success("消息互动取消成功");
+            return Result.success(200, "消息互动取消成功", null);
         } else {
             return Result.error(500, "消息互动取消失败");
         }
@@ -131,7 +131,7 @@ public class ImMessageReactionController {
         int rows = imMessageReactionService.updateImMessageReaction(reaction);
         
         if (rows > 0) {
-            return Result.success(reaction, "消息互动修改成功");
+            return Result.success("消息互动修改成功", reaction);
         } else {
             return Result.error(500, "消息互动修改失败");
         }
@@ -145,7 +145,7 @@ public class ImMessageReactionController {
         int rows = imMessageReactionService.deleteImMessageReactionById(id);
         
         if (rows > 0) {
-            return Result.success("消息互动删除成功");
+            return Result.success(200, "消息互动删除成功", null);
         } else {
             return Result.error(404, "消息互动不存在");
         }
@@ -159,7 +159,7 @@ public class ImMessageReactionController {
         int rows = imMessageReactionService.deleteImMessageReactionByIds(ids);
         
         if (rows > 0) {
-            return Result.success("消息互动删除成功");
+            return Result.success(200, "消息互动删除成功", null);
         } else {
             return Result.error(500, "消息互动删除失败");
         }

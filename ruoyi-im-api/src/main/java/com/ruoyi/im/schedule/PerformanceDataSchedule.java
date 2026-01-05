@@ -31,7 +31,7 @@ public class PerformanceDataSchedule {
             // 生成统计报告
             StringBuilder report = new StringBuilder();
             report.append("性能数据统计报告 (").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append(")\n");
-            report.append("=".repeat(80)).append("\n");
+            report.append(repeatChar('=', 80)).append("\n");
             
             for (Map.Entry<String, Map<String, Object>> entry : allData.entrySet()) {
                 Map<String, Object> data = entry.getValue();
@@ -44,7 +44,7 @@ public class PerformanceDataSchedule {
                 report.append("平均响应时间: ").append(data.get("avgResponseTime")).append("\n");
                 report.append("最小响应时间: ").append(data.get("minResponseTime")).append("\n");
                 report.append("最大响应时间: ").append(data.get("maxResponseTime")).append("\n");
-                report.append("-".repeat(80)).append("\n");
+                report.append(repeatChar('-', 80)).append("\n");
             }
             
             // 记录性能统计报告
@@ -56,5 +56,20 @@ public class PerformanceDataSchedule {
         } else {
             BusinessLogger.logSystemStatus("性能统计", "无性能数据需要统计");
         }
+    }
+    
+    /**
+     * 重复字符指定次数
+     * 
+     * @param ch 要重复的字符
+     * @param count 重复次数
+     * @return 重复后的字符串
+     */
+    private String repeatChar(char ch, int count) {
+        StringBuilder sb = new StringBuilder(count);
+        for (int i = 0; i < count; i++) {
+            sb.append(ch);
+        }
+        return sb.toString();
     }
 }

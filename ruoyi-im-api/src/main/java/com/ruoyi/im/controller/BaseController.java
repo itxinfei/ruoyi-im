@@ -60,6 +60,13 @@ public class BaseController {
     }
     
     /**
+     * 设置请求分页数据（使用默认值）
+     */
+    protected void startPage() {
+        PageHelper.startPage(1, 20);
+    }
+    
+    /**
      * 清理分页的线程变量
      */
     protected void clearPage() {
@@ -203,5 +210,15 @@ public class BaseController {
      */
     public Result<Void> notFound(String message) {
         return Result.error(404, message != null ? message : "资源不存在");
+    }
+
+    /**
+     * 统一请求错误响应
+     * 
+     * @param message 错误消息
+     * @return 请求错误响应
+     */
+    public Result<Void> badRequest(String message) {
+        return Result.error(400, message != null ? message : "请求错误");
     }
 }

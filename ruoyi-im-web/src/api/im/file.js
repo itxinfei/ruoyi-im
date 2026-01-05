@@ -1,5 +1,37 @@
 import request from '@/utils/request'
 
+// 上传文件
+export function uploadFile(file, onUploadProgress) {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  return request({
+    url: '/api/im/file/upload',
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    onUploadProgress,
+  })
+}
+
+// 上传图片
+export function uploadImage(file, onUploadProgress) {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  return request({
+    url: '/api/im/file/upload/image',
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    onUploadProgress,
+  })
+}
+
 // 查询文件列表
 export function listFile(query) {
   return request({
