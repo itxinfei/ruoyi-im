@@ -1,5 +1,7 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.common.PageResult;
+import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImAuditLog;
 import com.ruoyi.im.service.ImAuditLogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/im/audit")
-public class ImAuditLogController {
+public class ImAuditLogController extends BaseController {
 
     @Autowired
     private ImAuditLogService imAuditLogService;
@@ -27,156 +29,95 @@ public class ImAuditLogController {
      * 查询审计日志列表
      */
     @GetMapping("/list")
-    public Map<String, Object> list(@RequestParam(required = false) Long userId,
+    public Result<PageResult<ImAuditLog>> list(@RequestParam(required = false) Long userId,
                                    @RequestParam(required = false) String operationType,
                                    @RequestParam(required = false) String targetType,
                                    @RequestParam(required = false) Long targetId,
-                                   @RequestParam(required = false) String ipAddress,
-                                   @RequestParam(defaultValue = "1") Integer pageNum,
-                                   @RequestParam(defaultValue = "10") Integer pageSize) {
-        Map<String, Object> result = new HashMap<>();
-        
+                                   @RequestParam(required = false) String ipAddress) {
+        startPage();
         ImAuditLog query = new ImAuditLog();
         query.setUserId(userId);
         query.setOperationType(operationType);
         query.setTargetType(targetType);
         query.setTargetId(targetId);
         query.setIpAddress(ipAddress);
-        
-        List<ImAuditLog> allLogs = imAuditLogService.selectImAuditLogList(query);
-        
-        int start = (pageNum - 1) * pageSize;
-        int end = Math.min(start + pageSize, allLogs.size());
-        
-        List<ImAuditLog> pagedLogs = start < allLogs.size() ? 
-            allLogs.subList(start, end) : java.util.Collections.emptyList();
-        
-        Map<String, Object> pageResult = new HashMap<>();
-        pageResult.put("rows", pagedLogs);
-        pageResult.put("total", allLogs.size());
-        pageResult.put("pageNum", pageNum);
-        pageResult.put("pageSize", pageSize);
-        
-        result.put("code", 200);
-        result.put("msg", "查询成功");
-        result.put("data", pageResult);
-        
-        return result;
+        List<ImAuditLog> list = imAuditLogService.selectList(query);
+        return getDataTable(list);
     }
 
     /**
      * 查询审计日志详细
      */
     @GetMapping("/{id}")
-    public Map<String, Object> getInfo(@PathVariable Long id) {
-        Map<String, Object> result = new HashMap<>();
-        
-        ImAuditLog auditLog = imAuditLogService.selectImAuditLogById(id);
+    public Result<ImAuditLog> getInfo(@PathVariable Long id) {
+        ImAuditLog auditLog = imAuditLogService.selectById(id);
         
         if (auditLog != null) {
-            result.put("code", 200);
-            result.put("msg", "查询成功");
-            result.put("data", auditLog);
+            return Result.success(auditLog);
         } else {
-            result.put("code", 404);
-            result.put("msg", "审计日志不存在");
+            return Result.error("审计日志不存在");
         }
-        
-        return result;
     }
 
     /**
      * 根据用户ID查询审计日志列表
      */
     @GetMapping("/user/{userId}")
-    public Map<String, Object> listByUserId(@PathVariable Long userId) {
-        Map<String, Object> result = new HashMap<>();
-        
+    public Result<List<ImAuditLog>> listByUserId(@PathVariable Long userId) {
         List<ImAuditLog> list = imAuditLogService.selectImAuditLogByUserId(userId);
         
-        result.put("code", 200);
-        result.put("msg", "查询成功");
-        result.put("data", list);
-        
-        return result;
+        return Result.success(list);
     }
 
     /**
      * 根据操作类型查询审计日志列表
      */
     @GetMapping("/operation/{operationType}")
-    public Map<String, Object> listByOperationType(@PathVariable String operationType) {
-        Map<String, Object> result = new HashMap<>();
-        
+    public Result<List<ImAuditLog>> listByOperationType(@PathVariable String operationType) {
         List<ImAuditLog> list = imAuditLogService.selectImAuditLogByOperationType(operationType);
         
-        result.put("code", 200);
-        result.put("msg", "查询成功");
-        result.put("data", list);
-        
-        return result;
+        return Result.success(list);
     }
 
     /**
      * 根据目标类型和目标ID查询审计日志列表
      */
     @GetMapping("/target")
-    public Map<String, Object> listByTarget(@RequestParam String targetType, @RequestParam Long targetId) {
-        Map<String, Object> result = new HashMap<>();
-        
+    public Result<List<ImAuditLog>> listByTarget(@RequestParam String targetType, @RequestParam Long targetId) {
         List<ImAuditLog> list = imAuditLogService.selectImAuditLogByTarget(targetType, targetId);
         
-        result.put("code", 200);
-        result.put("msg", "查询成功");
-        result.put("data", list);
-        
-        return result;
+        return Result.success(list);
     }
 
     /**
      * 根据IP地址查询审计日志列表
      */
     @GetMapping("/ip/{ipAddress}")
-    public Map<String, Object> listByIpAddress(@PathVariable String ipAddress) {
-        Map<String, Object> result = new HashMap<>();
-        
+    public Result<List<ImAuditLog>> listByIpAddress(@PathVariable String ipAddress) {
         List<ImAuditLog> list = imAuditLogService.selectImAuditLogByIpAddress(ipAddress);
         
-        result.put("code", 200);
-        result.put("msg", "查询成功");
-        result.put("data", list);
-        
-        return result;
+        return Result.success(list);
     }
 
     /**
      * 新增审计日志
      */
     @PostMapping
-    public Map<String, Object> add(@RequestBody ImAuditLog auditLog) {
-        Map<String, Object> result = new HashMap<>();
-        
-        int rows = imAuditLogService.insertImAuditLog(auditLog);
+    public Result<ImAuditLog> add(@RequestBody ImAuditLog auditLog) {
+        int rows = imAuditLogService.insert(auditLog);
         
         if (rows > 0) {
-            result.put("code", 200);
-            result.put("msg", "审计日志添加成功");
-            result.put("data", auditLog);
+            return Result.success(auditLog);
         } else {
-            result.put("code", 500);
-            result.put("msg", "审计日志添加失败");
+            return Result.error("审计日志添加失败");
         }
-        
-        return result;
     }
 
     /**
      * 记录审计日志
      */
     @PostMapping("/log")
-    public Map<String, Object> logAudit(@RequestBody Map<String, Object> params) {
-        Map<String, Object> result = new HashMap<>();
-        
+    public Result<String> logAudit(@RequestBody Map<String, Object> params) {
         Long userId = params.get("userId") != null ? Long.valueOf(params.get("userId").toString()) : null;
         String operationType = params.get("operationType") != null ? params.get("operationType").toString() : null;
         String targetType = params.get("targetType") != null ? params.get("targetType").toString() : null;
@@ -189,98 +130,64 @@ public class ImAuditLogController {
         int rows = imAuditLogService.logAudit(userId, operationType, targetType, targetId, operationResult, errorMessage, ipAddress, userAgent);
         
         if (rows > 0) {
-            result.put("code", 200);
-            result.put("msg", "审计日志记录成功");
+            return Result.success("审计日志记录成功");
         } else {
-            result.put("code", 500);
-            result.put("msg", "审计日志记录失败");
+            return Result.error("审计日志记录失败");
         }
-        
-        return result;
     }
 
     /**
      * 修改审计日志
      */
     @PutMapping
-    public Map<String, Object> edit(@RequestBody ImAuditLog auditLog) {
-        Map<String, Object> result = new HashMap<>();
-        
-        int rows = imAuditLogService.updateImAuditLog(auditLog);
+    public Result<ImAuditLog> edit(@RequestBody ImAuditLog auditLog) {
+        int rows = imAuditLogService.update(auditLog);
         
         if (rows > 0) {
-            result.put("code", 200);
-            result.put("msg", "审计日志修改成功");
-            result.put("data", auditLog);
+            return Result.success(auditLog);
         } else {
-            result.put("code", 500);
-            result.put("msg", "审计日志修改失败");
+            return Result.error("审计日志修改失败");
         }
-        
-        return result;
     }
 
     /**
      * 删除审计日志
      */
     @DeleteMapping("/{id}")
-    public Map<String, Object> remove(@PathVariable Long id) {
-        Map<String, Object> result = new HashMap<>();
-        
-        int rows = imAuditLogService.deleteImAuditLogById(id);
+    public Result<String> remove(@PathVariable Long id) {
+        int rows = imAuditLogService.deleteById(id);
         
         if (rows > 0) {
-            result.put("code", 200);
-            result.put("msg", "审计日志删除成功");
+            return Result.success("审计日志删除成功");
         } else {
-            result.put("code", 404);
-            result.put("msg", "审计日志不存在");
+            return Result.error("审计日志不存在");
         }
-        
-        return result;
     }
 
     /**
      * 批量删除审计日志
      */
     @DeleteMapping
-    public Map<String, Object> remove(@RequestBody Long[] ids) {
-        Map<String, Object> result = new HashMap<>();
-        
-        int rows = imAuditLogService.deleteImAuditLogByIds(ids);
+    public Result<String> remove(@RequestBody Long[] ids) {
+        int rows = imAuditLogService.deleteByIds(ids);
         
         if (rows > 0) {
-            result.put("code", 200);
-            result.put("msg", "审计日志删除成功");
+            return Result.success("审计日志删除成功");
         } else {
-            result.put("code", 500);
-            result.put("msg", "审计日志删除失败");
+            return Result.error("审计日志删除失败");
         }
-        
-        return result;
     }
 
     /**
      * 批量删除指定时间之前的审计日志
      */
     @DeleteMapping("/before/{beforeTime}")
-    public Map<String, Object> removeByBeforeTime(@PathVariable String beforeTime) {
-        Map<String, Object> result = new HashMap<>();
-        
+    public Result<Integer> removeByBeforeTime(@PathVariable String beforeTime) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime time = LocalDateTime.parse(beforeTime, formatter);
         
         int rows = imAuditLogService.deleteImAuditLogByBeforeTime(time);
         
-        if (rows > 0) {
-            result.put("code", 200);
-            result.put("msg", "审计日志删除成功");
-            result.put("data", rows);
-        } else {
-            result.put("code", 500);
-            result.put("msg", "审计日志删除失败");
-        }
-        
-        return result;
+        return Result.success(rows);
     }
 }

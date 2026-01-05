@@ -44,6 +44,8 @@
 
 - 日志框架：SLF4J + Logback（日志记录与审计）
 
+- 工具：hutool（日期时间处理、加密解密、文件操作等）
+
 ## 3.2 前端技术栈
 
 - 核心框架：Vue 3
@@ -114,11 +116,11 @@ mysql -u root -p im < im.sql`或通过 Navicat 等工具，右键数据库选择
 
 2. 配置数据源：修改 `ruoyi-im-api/src/main/resources/application.yml` 中以下配置：
         `spring:
-  datasource:
+    datasource:
     url: jdbc:mysql://localhost:3306/im?useUnicode=true&characterEncoding=utf8mb4&useSSL=false&serverTimezone=Asia/Shanghai
     username: root  # 你的 MySQL 用户名
     password: 123456  # 你的 MySQL 密码
-  redis:
+    redis:
     host: localhost  # 你的 Redis 地址
     port: 6379
     password: 123456  # 你的 Redis 密码
@@ -126,9 +128,9 @@ mysql -u root -p im < im.sql`或通过 Navicat 等工具，右键数据库选择
 
 3. 配置 WebSocket/Netty：检查 application.yml 中通信相关配置（默认无需修改，按需调整端口）：
         `im:
-  websocket:
+    websocket:
     port: 8080  # WebSocket 绑定端口（与 API 服务端口一致）
-  netty:
+    netty:
     port: 8888  # Netty 服务端口（高性能通信备用）`
 
 4. 启动服务：运行 `com.ruoyi.im.ImApplication` 类的 main 方法，控制台输出“Started ImApplication in XXX seconds”即为启动成功
@@ -340,4 +342,3 @@ grep "ERROR" /usr/local/ruoyi-im/logs/im-api.log`
 # 七、许可证
 
 MIT License
-> （注：文档部分内容可能由 AI 生成）

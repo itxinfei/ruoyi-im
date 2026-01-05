@@ -2,60 +2,32 @@ package com.ruoyi.im.service;
 
 import com.ruoyi.im.domain.ImUser;
 import java.util.List;
+import java.util.Set;
 
 /**
  * IM用户Service接口
  * 
  * @author ruoyi
  */
-public interface ImUserService {
-    /**
-     * 查询IM用户
-     * 
-     * @param id 用户ID
-     * @return IM用户
-     */
-    public ImUser selectImUserById(Long id);
-
-    /**
-     * 查询IM用户列表
-     * 
-     * @param imUser IM用户
-     * @return IM用户集合
-     */
-    public List<ImUser> selectImUserList(ImUser imUser);
-
-    /**
-     * 新增IM用户
-     * 
-     * @param imUser IM用户
-     * @return 结果
-     */
-    public int insertImUser(ImUser imUser);
-
-    /**
-     * 修改IM用户
-     * 
-     * @param imUser IM用户
-     * @return 结果
-     */
-    public int updateImUser(ImUser imUser);
-
-    /**
-     * 批量删除IM用户
-     * 
-     * @param ids 需要删除的用户ID
-     * @return 结果
-     */
-    public int deleteImUserByIds(Long[] ids);
-
-    /**
-     * 删除IM用户信息
-     * 
-     * @param id 用户ID
-     * @return 结果
-     */
-    public int deleteImUserById(Long id);
+public interface ImUserService extends BaseService<ImUser> {
+    
+    @Override
+    ImUser selectById(Long id);
+    
+    @Override
+    List<ImUser> selectList(ImUser imUser);
+    
+    @Override
+    int insert(ImUser imUser);
+    
+    @Override
+    int update(ImUser imUser);
+    
+    @Override
+    int deleteByIds(Long[] ids);
+    
+    @Override
+    int deleteById(Long id);
     
     /**
      * 根据用户名查询用户
@@ -115,6 +87,22 @@ public interface ImUserService {
     public int updateUserInfo(Long userId, String nickname, String email, String phone);
     
     /**
+     * 获取用户权限列表
+     * 
+     * @param userId 用户ID
+     * @return 权限集合
+     */
+    public Set<String> getUserPermissions(Long userId);
+    
+    /**
+     * 获取用户角色列表
+     * 
+     * @param userId 用户ID
+     * @return 角色集合
+     */
+    public Set<String> getUserRoles(Long userId);
+    
+    /**
      * 为兼容旧接口添加的方法
      */
     default ImUser findByUsername(String username) {
@@ -122,11 +110,11 @@ public interface ImUserService {
     }
     
     default List<ImUser> findAll() {
-        return selectImUserList(new ImUser());
+        return selectList(new ImUser());
     }
     
     default ImUser findById(Long id) {
-        return selectImUserById(id);
+        return selectById(id);
     }
     
     default int insert(ImUser user) {

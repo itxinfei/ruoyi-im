@@ -11,7 +11,7 @@ import com.ruoyi.system.domain.ImGroup;
  * 
  * @author ruoyi
  */
-@Service
+@Service("adminImGroupServiceImpl")
 public class ImGroupServiceImpl implements IImGroupService
 {
     @Autowired

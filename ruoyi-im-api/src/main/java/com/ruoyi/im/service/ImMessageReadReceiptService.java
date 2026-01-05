@@ -8,54 +8,25 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImMessageReadReceiptService {
-    /**
-     * 查询消息已读回执
-     * 
-     * @param id 消息已读回执ID
-     * @return 消息已读回执
-     */
-    public ImMessageReadReceipt selectImMessageReadReceiptById(Long id);
-
-    /**
-     * 查询消息已读回执列表
-     * 
-     * @param imMessageReadReceipt 消息已读回执
-     * @return 消息已读回执集合
-     */
-    public List<ImMessageReadReceipt> selectImMessageReadReceiptList(ImMessageReadReceipt imMessageReadReceipt);
-
-    /**
-     * 新增消息已读回执
-     * 
-     * @param imMessageReadReceipt 消息已读回执
-     * @return 结果
-     */
-    public int insertImMessageReadReceipt(ImMessageReadReceipt imMessageReadReceipt);
-
-    /**
-     * 修改消息已读回执
-     * 
-     * @param imMessageReadReceipt 消息已读回执
-     * @return 结果
-     */
-    public int updateImMessageReadReceipt(ImMessageReadReceipt imMessageReadReceipt);
-
-    /**
-     * 批量删除消息已读回执
-     * 
-     * @param ids 需要删除的消息已读回执ID
-     * @return 结果
-     */
-    public int deleteImMessageReadReceiptByIds(Long[] ids);
-
-    /**
-     * 删除消息已读回执信息
-     * 
-     * @param id 消息已读回执ID
-     * @return 结果
-     */
-    public int deleteImMessageReadReceiptById(Long id);
+public interface ImMessageReadReceiptService extends BaseService<ImMessageReadReceipt> {
+    
+    @Override
+    ImMessageReadReceipt selectById(Long id);
+    
+    @Override
+    List<ImMessageReadReceipt> selectList(ImMessageReadReceipt imMessageReadReceipt);
+    
+    @Override
+    int insert(ImMessageReadReceipt imMessageReadReceipt);
+    
+    @Override
+    int update(ImMessageReadReceipt imMessageReadReceipt);
+    
+    @Override
+    int deleteByIds(Long[] ids);
+    
+    @Override
+    int deleteById(Long id);
     
     /**
      * 根据消息ID查询已读回执列表

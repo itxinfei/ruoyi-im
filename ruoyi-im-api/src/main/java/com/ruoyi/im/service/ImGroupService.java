@@ -8,54 +8,25 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImGroupService {
-    /**
-     * 查询群组
-     * 
-     * @param id 群组ID
-     * @return 群组
-     */
-    public ImGroup selectImGroupById(Long id);
-
-    /**
-     * 查询群组列表
-     * 
-     * @param imGroup 群组
-     * @return 群组集合
-     */
-    public List<ImGroup> selectImGroupList(ImGroup imGroup);
-
-    /**
-     * 新增群组
-     * 
-     * @param imGroup 群组
-     * @return 结果
-     */
-    public int insertImGroup(ImGroup imGroup);
-
-    /**
-     * 修改群组
-     * 
-     * @param imGroup 群组
-     * @return 结果
-     */
-    public int updateImGroup(ImGroup imGroup);
-
-    /**
-     * 批量删除群组
-     * 
-     * @param ids 需要删除的群组ID
-     * @return 结果
-     */
-    public int deleteImGroupByIds(Long[] ids);
-
-    /**
-     * 删除群组信息
-     * 
-     * @param id 群组ID
-     * @return 结果
-     */
-    public int deleteImGroupById(Long id);
+public interface ImGroupService extends BaseService<ImGroup> {
+    
+    @Override
+    ImGroup selectById(Long id);
+    
+    @Override
+    List<ImGroup> selectList(ImGroup imGroup);
+    
+    @Override
+    int insert(ImGroup imGroup);
+    
+    @Override
+    int update(ImGroup imGroup);
+    
+    @Override
+    int deleteByIds(Long[] ids);
+    
+    @Override
+    int deleteById(Long id);
     
     /**
      * 根据用户ID查询群组列表
@@ -64,4 +35,28 @@ public interface ImGroupService {
      * @return 群组集合
      */
     public List<ImGroup> selectImGroupListByUserId(Long userId);
+    
+    /**
+     * 根据群组ID查询群组信息
+     * 
+     * @param id 群组ID
+     * @return 群组信息
+     */
+    public ImGroup selectImGroupById(Long id);
+    
+    /**
+     * 更新群组信息
+     * 
+     * @param imGroup 群组信息
+     * @return 结果
+     */
+    public int updateImGroup(ImGroup imGroup);
+    
+    /**
+     * 根据ID删除群组信息
+     * 
+     * @param id 群组ID
+     * @return 结果
+     */
+    public int deleteImGroupById(Long id);
 }

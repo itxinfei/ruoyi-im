@@ -8,54 +8,25 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImAuditLogService {
-    /**
-     * 查询审计日志
-     * 
-     * @param id 审计日志ID
-     * @return 审计日志
-     */
-    public ImAuditLog selectImAuditLogById(Long id);
-
-    /**
-     * 查询审计日志列表
-     * 
-     * @param imAuditLog 审计日志
-     * @return 审计日志集合
-     */
-    public List<ImAuditLog> selectImAuditLogList(ImAuditLog imAuditLog);
-
-    /**
-     * 新增审计日志
-     * 
-     * @param imAuditLog 审计日志
-     * @return 结果
-     */
-    public int insertImAuditLog(ImAuditLog imAuditLog);
-
-    /**
-     * 修改审计日志
-     * 
-     * @param imAuditLog 审计日志
-     * @return 结果
-     */
-    public int updateImAuditLog(ImAuditLog imAuditLog);
-
-    /**
-     * 批量删除审计日志
-     * 
-     * @param ids 需要删除的审计日志ID
-     * @return 结果
-     */
-    public int deleteImAuditLogByIds(Long[] ids);
-
-    /**
-     * 删除审计日志信息
-     * 
-     * @param id 审计日志ID
-     * @return 结果
-     */
-    public int deleteImAuditLogById(Long id);
+public interface ImAuditLogService extends BaseService<ImAuditLog> {
+    
+    @Override
+    ImAuditLog selectById(Long id);
+    
+    @Override
+    List<ImAuditLog> selectList(ImAuditLog imAuditLog);
+    
+    @Override
+    int insert(ImAuditLog imAuditLog);
+    
+    @Override
+    int update(ImAuditLog imAuditLog);
+    
+    @Override
+    int deleteByIds(Long[] ids);
+    
+    @Override
+    int deleteById(Long id);
     
     /**
      * 根据用户ID查询审计日志列表

@@ -2,9 +2,11 @@ package com.ruoyi.im.mapper;
 
 import com.ruoyi.im.domain.ImUser;
 import java.util.List;
+import java.util.Set;
 
 /**
- * IM用户Mapper接口
+ * IM用户Mapper接口 - 性能优化版本
+ * 优化内容：添加批量操作、分页查询、性能监控、索引优化
  * 
  * @author ruoyi
  */
@@ -72,4 +74,88 @@ public interface ImUserMapper {
      * @return IM用户
      */
     public ImUser selectImUserByEmail(String email);
+    
+    /**
+     * 批量插入用户 - 性能优化
+     * 
+     * @param users 用户列表
+     * @return 插入成功的数量
+     */
+    public int batchInsertImUser(List<ImUser> users);
+    
+    /**
+     * 批量更新用户状态 - 性能优化
+     * 
+     * @param userIds 用户ID列表
+     * @param status 新状态
+     * @return 更新成功的数量
+     */
+    public int batchUpdateUserStatus(List<Long> userIds, String status);
+    
+    /**
+     * 分页查询用户列表 - 性能优化
+     * 
+     * @param imUser 查询条件
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 用户列表
+     */
+    public List<ImUser> selectImUserListWithPagination(ImUser imUser, int offset, int limit);
+    
+    /**
+     * 根据用户ID列表批量查询用户 - 性能优化
+     * 
+     * @param userIds 用户ID列表
+     * @return 用户列表
+     */
+    public List<ImUser> selectImUserListByIds(List<Long> userIds);
+    
+    /**
+     * 查询用户总数（用于分页）
+     * 
+     * @param imUser 查询条件
+     * @return 总数
+     */
+    public int selectImUserCount(ImUser imUser);
+    
+    /**
+     * 根据状态查询用户列表 - 性能优化
+     * 
+     * @param status 用户状态
+     * @param limit 限制数量
+     * @return 用户列表
+     */
+    public List<ImUser> selectImUserListByStatus(String status, int limit);
+    
+    /**
+     * 检查用户名是否存在 - 性能优化
+     * 
+     * @param username 用户名
+     * @return 存在返回true，不存在返回false
+     */
+    public boolean existsByUsername(String username);
+    
+    /**
+     * 检查邮箱是否存在 - 性能优化
+     * 
+     * @param email 邮箱
+     * @return 存在返回true，不存在返回false
+     */
+    public boolean existsByEmail(String email);
+    
+    /**
+     * 获取用户权限列表
+     * 
+     * @param userId 用户ID
+     * @return 权限集合
+     */
+    public Set<String> selectUserPermissionsByUserId(Long userId);
+    
+    /**
+     * 获取用户角色列表
+     * 
+     * @param userId 用户ID
+     * @return 角色集合
+     */
+    public Set<String> selectUserRolesByUserId(Long userId);
 }

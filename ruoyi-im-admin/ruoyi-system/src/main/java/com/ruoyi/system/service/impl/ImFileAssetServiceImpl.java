@@ -13,7 +13,7 @@ import com.ruoyi.system.service.IImFileAssetService;
  * @author ruoyi
  * @date 2024-01-01
  */
-@Service
+@Service("systemImFileAssetServiceImpl")
 public class ImFileAssetServiceImpl implements IImFileAssetService
 {
     @Autowired

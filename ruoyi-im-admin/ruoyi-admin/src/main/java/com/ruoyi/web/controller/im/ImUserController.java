@@ -27,7 +27,7 @@ import com.ruoyi.web.service.IImUserService;
  * @author ruoyi
  * @date 2024-01-01
  */
-@RestController
+@RestController("adminImUserController")
 @RequestMapping("/api/admin/im/user")
 public class ImUserController extends BaseController
 {

@@ -7,7 +7,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="com.ruoyi.im.domain.ImAuditLog" id="ImAuditLogResult">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
-        <result property="operationType" column="operation_type"/>
         <result property="targetType" column="target_type"/>
         <result property="targetId" column="target_id"/>
         <result property="operationResult" column="operation_result"/>
@@ -18,7 +17,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectImAuditLogVo">
-        select id, user_id, operation_type, target_type, target_id, operation_result, error_message, ip_address, user_agent, create_time 
+        select id, user_id, target_type, target_id, operation_result, error_message, ip_address, user_agent, create_time 
         from im_audit_log
     </sql>
 
@@ -26,7 +25,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectImAuditLogVo"/>
         <where>  
             <if test="userId != null"> AND user_id = #{userId}</if>
-            <if test="operationType != null and operationType != ''"> AND operation_type = #{operationType}</if>
             <if test="targetType != null and targetType != ''"> AND target_type = #{targetType}</if>
             <if test="targetId != null"> AND target_id = #{targetId}</if>
             <if test="operationResult != null and operationResult != ''"> AND operation_result = #{operationResult}</if>
@@ -43,7 +41,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         insert into im_audit_log
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="userId != null">user_id,</if>
-            <if test="operationType != null">operation_type,</if>
             <if test="targetType != null">target_type,</if>
             <if test="targetId != null">target_id,</if>
             <if test="operationResult != null">operation_result,</if>
@@ -54,7 +51,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="userId != null">#{userId},</if>
-            <if test="operationType != null">#{operationType},</if>
             <if test="targetType != null">#{targetType},</if>
             <if test="targetId != null">#{targetId},</if>
             <if test="operationResult != null">#{operationResult},</if>

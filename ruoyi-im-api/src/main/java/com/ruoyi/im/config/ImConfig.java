@@ -232,7 +232,7 @@ public class ImConfig {
         private Integer heartbeatInterval = 30;
 
         /** JWT密钥 */
-        private String jwtSecret = "ruoyi_secret_key_2024_for_im_system";
+        private String jwtSecret = "${im.security.jwt-secret:default_secret_key_2024_for_im_system}";
 
         public Boolean getEnableAuth() {
             return enableAuth;

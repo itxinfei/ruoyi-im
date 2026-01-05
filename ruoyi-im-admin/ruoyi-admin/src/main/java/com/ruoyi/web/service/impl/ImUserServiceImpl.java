@@ -12,7 +12,7 @@ import com.ruoyi.system.mapper.ImUserMapper;
  * 
  * @author ruoyi
  */
-@Service
+@Service("adminImUserServiceImpl")
 public class ImUserServiceImpl implements IImUserService
 {
     @Autowired

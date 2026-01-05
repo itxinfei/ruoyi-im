@@ -18,7 +18,8 @@
     <version>4.8.0</version>
     <packaging>pom</packaging>
     <name>ruoyi-im-admin</name>
-    <description>IM系统</description>
+    <description>若依管理系统</description>
+    <url>http://www.ruoyi.vip</url>
     <modules>
       <module>ruoyi-admin</module>
       <module>ruoyi-framework</module>
@@ -38,7 +39,6 @@
       <lombok.version>1.18.30</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
-      <maven.compiler.release>1.8</maven.compiler.release>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
       <oshi.version>6.6.5</oshi.version>
@@ -190,7 +190,7 @@
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
-          <artifactId>ruoyi-im-api</artifactId>
+          <artifactId>ruoyi-im</artifactId>
           <version>4.8.0</version>
         </dependency>
         <dependency>
@@ -6025,7 +6025,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.13.0</version>
           <configuration>
-            <release>1.8</release>
+            <source>1.8</source>
+            <target>1.8</target>
             <encoding>UTF-8</encoding>
             <annotationProcessorPaths>
               <path>
@@ -6147,6 +6148,7 @@
     <artifactId>ruoyi-common</artifactId>
     <version>4.8.0</version>
     <description>common通用工具</description>
+    <url>http://www.ruoyi.vip/ruoyi-common</url>
     <properties>
       <bitwalker.version>1.21</bitwalker.version>
       <commons.io.version>2.16.1</commons.io.version>
@@ -6158,7 +6160,6 @@
       <lombok.version>1.18.30</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
-      <maven.compiler.release>1.8</maven.compiler.release>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
       <oshi.version>6.6.5</oshi.version>
@@ -6310,7 +6311,7 @@
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
-          <artifactId>ruoyi-im-api</artifactId>
+          <artifactId>ruoyi-im</artifactId>
           <version>4.8.0</version>
         </dependency>
         <dependency>
@@ -12238,7 +12239,8 @@
                 <goal>compile</goal>
               </goals>
               <configuration>
-                <release>1.8</release>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <annotationProcessorPaths>
                   <path>
@@ -12259,7 +12261,8 @@
                 <goal>testCompile</goal>
               </goals>
               <configuration>
-                <release>1.8</release>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <annotationProcessorPaths>
                   <path>
@@ -12275,7 +12278,8 @@
             </execution>
           </executions>
           <configuration>
-            <release>1.8</release>
+            <source>1.8</source>
+            <target>1.8</target>
             <encoding>UTF-8</encoding>
             <annotationProcessorPaths>
               <path>
@@ -12443,6 +12447,7 @@
     <artifactId>ruoyi-system</artifactId>
     <version>4.8.0</version>
     <description>system系统模块</description>
+    <url>http://www.ruoyi.vip/ruoyi-system</url>
     <properties>
       <bitwalker.version>1.21</bitwalker.version>
       <commons.io.version>2.16.1</commons.io.version>
@@ -12454,7 +12459,6 @@
       <lombok.version>1.18.30</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
-      <maven.compiler.release>1.8</maven.compiler.release>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
       <oshi.version>6.6.5</oshi.version>
@@ -12606,7 +12610,7 @@
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
-          <artifactId>ruoyi-im-api</artifactId>
+          <artifactId>ruoyi-im</artifactId>
           <version>4.8.0</version>
         </dependency>
         <dependency>
@@ -18456,7 +18460,8 @@
                 <goal>compile</goal>
               </goals>
               <configuration>
-                <release>1.8</release>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <annotationProcessorPaths>
                   <path>
@@ -18477,7 +18482,8 @@
                 <goal>testCompile</goal>
               </goals>
               <configuration>
-                <release>1.8</release>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <annotationProcessorPaths>
                   <path>
@@ -18493,7 +18499,8 @@
             </execution>
           </executions>
           <configuration>
-            <release>1.8</release>
+            <source>1.8</source>
+            <target>1.8</target>
             <encoding>UTF-8</encoding>
             <annotationProcessorPaths>
               <path>
@@ -18661,6 +18668,7 @@
     <artifactId>ruoyi-framework</artifactId>
     <version>4.8.0</version>
     <description>framework框架核心</description>
+    <url>http://www.ruoyi.vip/ruoyi-framework</url>
     <properties>
       <bitwalker.version>1.21</bitwalker.version>
       <commons.io.version>2.16.1</commons.io.version>
@@ -18672,7 +18680,6 @@
       <lombok.version>1.18.30</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
-      <maven.compiler.release>1.8</maven.compiler.release>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
       <oshi.version>6.6.5</oshi.version>
@@ -18824,7 +18831,7 @@
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
-          <artifactId>ruoyi-im-api</artifactId>
+          <artifactId>ruoyi-im</artifactId>
           <version>4.8.0</version>
         </dependency>
         <dependency>
@@ -24728,7 +24735,8 @@
                 <goal>compile</goal>
               </goals>
               <configuration>
-                <release>1.8</release>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <annotationProcessorPaths>
                   <path>
@@ -24749,7 +24757,8 @@
                 <goal>testCompile</goal>
               </goals>
               <configuration>
-                <release>1.8</release>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <annotationProcessorPaths>
                   <path>
@@ -24765,7 +24774,8 @@
             </execution>
           </executions>
           <configuration>
-            <release>1.8</release>
+            <source>1.8</source>
+            <target>1.8</target>
             <encoding>UTF-8</encoding>
             <annotationProcessorPaths>
               <path>
@@ -24933,6 +24943,7 @@
     <artifactId>ruoyi-quartz</artifactId>
     <version>4.8.0</version>
     <description>quartz定时任务</description>
+    <url>http://www.ruoyi.vip/ruoyi-quartz</url>
     <properties>
       <bitwalker.version>1.21</bitwalker.version>
       <commons.io.version>2.16.1</commons.io.version>
@@ -24944,7 +24955,6 @@
       <lombok.version>1.18.30</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
-      <maven.compiler.release>1.8</maven.compiler.release>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
       <oshi.version>6.6.5</oshi.version>
@@ -25096,7 +25106,7 @@
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
-          <artifactId>ruoyi-im-api</artifactId>
+          <artifactId>ruoyi-im</artifactId>
           <version>4.8.0</version>
         </dependency>
         <dependency>
@@ -30958,7 +30968,8 @@
                 <goal>compile</goal>
               </goals>
               <configuration>
-                <release>1.8</release>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <annotationProcessorPaths>
                   <path>
@@ -30979,7 +30990,8 @@
                 <goal>testCompile</goal>
               </goals>
               <configuration>
-                <release>1.8</release>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <annotationProcessorPaths>
                   <path>
@@ -30995,7 +31007,8 @@
             </execution>
           </executions>
           <configuration>
-            <release>1.8</release>
+            <source>1.8</source>
+            <target>1.8</target>
             <encoding>UTF-8</encoding>
             <annotationProcessorPaths>
               <path>
@@ -31163,6 +31176,7 @@
     <artifactId>ruoyi-generator</artifactId>
     <version>4.8.0</version>
     <description>generator代码生成</description>
+    <url>http://www.ruoyi.vip/ruoyi-generator</url>
     <properties>
       <bitwalker.version>1.21</bitwalker.version>
       <commons.io.version>2.16.1</commons.io.version>
@@ -31174,7 +31188,6 @@
       <lombok.version>1.18.30</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
-      <maven.compiler.release>1.8</maven.compiler.release>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
       <oshi.version>6.6.5</oshi.version>
@@ -31326,7 +31339,7 @@
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
-          <artifactId>ruoyi-im-api</artifactId>
+          <artifactId>ruoyi-im</artifactId>
           <version>4.8.0</version>
         </dependency>
         <dependency>
@@ -37188,7 +37201,8 @@
                 <goal>compile</goal>
               </goals>
               <configuration>
-                <release>1.8</release>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <annotationProcessorPaths>
                   <path>
@@ -37209,7 +37223,8 @@
                 <goal>testCompile</goal>
               </goals>
               <configuration>
-                <release>1.8</release>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <annotationProcessorPaths>
                   <path>
@@ -37225,7 +37240,8 @@
             </execution>
           </executions>
           <configuration>
-            <release>1.8</release>
+            <source>1.8</source>
+            <target>1.8</target>
             <encoding>UTF-8</encoding>
             <annotationProcessorPaths>
               <path>
@@ -37393,6 +37409,7 @@
     <artifactId>ruoyi-admin</artifactId>
     <version>4.8.0</version>
     <description>web服务入口</description>
+    <url>http://www.ruoyi.vip/ruoyi-admin</url>
     <properties>
       <bitwalker.version>1.21</bitwalker.version>
       <commons.io.version>2.16.1</commons.io.version>
@@ -37404,7 +37421,6 @@
       <lombok.version>1.18.30</lombok.version>
       <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
       <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
-      <maven.compiler.release>1.8</maven.compiler.release>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
       <oshi.version>6.6.5</oshi.version>
@@ -37556,7 +37572,7 @@
         </dependency>
         <dependency>
           <groupId>com.ruoyi</groupId>
-          <artifactId>ruoyi-im-api</artifactId>
+          <artifactId>ruoyi-im</artifactId>
           <version>4.8.0</version>
         </dependency>
         <dependency>
@@ -43312,6 +43328,12 @@
         <scope>compile</scope>
       </dependency>
       <dependency>
+        <groupId>com.ruoyi</groupId>
+        <artifactId>ruoyi-im</artifactId>
+        <version>4.8.0</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-actuator</artifactId>
         <version>2.5.15</version>
@@ -43461,7 +43483,8 @@
                 <goal>compile</goal>
               </goals>
               <configuration>
-                <release>1.8</release>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <annotationProcessorPaths>
                   <path>
@@ -43482,7 +43505,8 @@
                 <goal>testCompile</goal>
               </goals>
               <configuration>
-                <release>1.8</release>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <annotationProcessorPaths>
                   <path>
@@ -43498,7 +43522,8 @@
             </execution>
           </executions>
           <configuration>
-            <release>1.8</release>
+            <source>1.8</source>
+            <target>1.8</target>
             <encoding>UTF-8</encoding>
             <annotationProcessorPaths>
               <path>

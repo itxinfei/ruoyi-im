@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 日志存放路径 -->
+    <property name="log.path" value="/home/ruoyi/im/logs" />
+    <!-- 日志输出格式 -->
+    <property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - [%method,%line] - %msg%n" />
+
+    <!-- 控制台输出 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- API访问日志 -->
+    <appender name="file_api" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/im-api.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/im-api.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- 性能日志 -->
+    <appender name="file_performance" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/im-performance.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/im-performance.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    
+    <!-- 错误日志 -->
+    <appender name="file_error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/im-error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/im-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 安全日志 -->
+    <appender name="file_security" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/im-security.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/im-security.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- 控制日志级别的logger -->
+    <!-- 用户操作日志 -->
+    <logger name="com.ruoyi.im.controller" level="info" additivity="false">
+        <appender-ref ref="file_api" />
+        <appender-ref ref="console" />
+    </logger>
+    
+    <!-- 安全相关日志 -->
+    <logger name="com.ruoyi.im.security" level="info" additivity="false">
+        <appender-ref ref="file_security" />
+    </logger>
+    
+    <!-- 性能监控日志 -->
+    <logger name="com.ruoyi.im.performance" level="info" additivity="false">
+        <appender-ref ref="file_performance" />
+    </logger>
+    
+    <!-- Spring相关日志 -->
+    <logger name="org.springframework" level="warn" />
+    
+    <!-- 默认日志级别 -->
+    <root level="info">
+        <appender-ref ref="console" />
+        <appender-ref ref="file_error" />
+    </root>
+</configuration>

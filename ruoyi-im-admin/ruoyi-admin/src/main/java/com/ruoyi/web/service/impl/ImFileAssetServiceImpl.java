@@ -11,7 +11,7 @@ import com.ruoyi.system.domain.ImFileAsset;
  * 
  * @author ruoyi
  */
-@Service
+@Service("adminImFileAssetServiceImpl")
 public class ImFileAssetServiceImpl implements IImFileAssetService
 {
     @Autowired

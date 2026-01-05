@@ -8,54 +8,25 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImFriendRequestService {
-    /**
-     * 查询好友申请
-     * 
-     * @param id 好友申请ID
-     * @return 好友申请
-     */
-    public ImFriendRequest selectImFriendRequestById(Long id);
-
-    /**
-     * 查询好友申请列表
-     * 
-     * @param imFriendRequest 好友申请
-     * @return 好友申请集合
-     */
-    public List<ImFriendRequest> selectImFriendRequestList(ImFriendRequest imFriendRequest);
-
-    /**
-     * 新增好友申请
-     * 
-     * @param imFriendRequest 好友申请
-     * @return 结果
-     */
-    public int insertImFriendRequest(ImFriendRequest imFriendRequest);
-
-    /**
-     * 修改好友申请
-     * 
-     * @param imFriendRequest 好友申请
-     * @return 结果
-     */
-    public int updateImFriendRequest(ImFriendRequest imFriendRequest);
-
-    /**
-     * 批量删除好友申请
-     * 
-     * @param ids 需要删除的好友申请ID
-     * @return 结果
-     */
-    public int deleteImFriendRequestByIds(Long[] ids);
-
-    /**
-     * 删除好友申请信息
-     * 
-     * @param id 好友申请ID
-     * @return 结果
-     */
-    public int deleteImFriendRequestById(Long id);
+public interface ImFriendRequestService extends BaseService<ImFriendRequest> {
+    
+    @Override
+    ImFriendRequest selectById(Long id);
+    
+    @Override
+    List<ImFriendRequest> selectList(ImFriendRequest imFriendRequest);
+    
+    @Override
+    int insert(ImFriendRequest imFriendRequest);
+    
+    @Override
+    int update(ImFriendRequest imFriendRequest);
+    
+    @Override
+    int deleteByIds(Long[] ids);
+    
+    @Override
+    int deleteById(Long id);
     
     /**
      * 根据申请人ID和被申请人ID查询好友申请

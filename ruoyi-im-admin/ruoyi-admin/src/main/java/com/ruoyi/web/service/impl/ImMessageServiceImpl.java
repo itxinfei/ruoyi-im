@@ -11,7 +11,7 @@ import com.ruoyi.system.domain.ImMessage;
  * 
  * @author ruoyi
  */
-@Service
+@Service("adminImMessageServiceImpl")
 public class ImMessageServiceImpl implements IImMessageService
 {
     @Autowired

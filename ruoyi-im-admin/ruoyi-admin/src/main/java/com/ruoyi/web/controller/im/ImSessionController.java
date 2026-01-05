@@ -26,7 +26,7 @@ import com.ruoyi.system.service.IImSessionService;
  * @author ruoyi
  * @date 2024-01-01
  */
-@RestController
+@RestController("adminImSessionController")
 @RequestMapping("/api/admin/im/session")
 public class ImSessionController extends BaseController
 {

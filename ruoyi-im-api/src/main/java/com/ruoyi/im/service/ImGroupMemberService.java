@@ -8,54 +8,25 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImGroupMemberService {
-    /**
-     * 查询群组成员
-     * 
-     * @param id 群组成员ID
-     * @return 群组成员
-     */
-    public ImGroupMember selectImGroupMemberById(Long id);
-
-    /**
-     * 查询群组成员列表
-     * 
-     * @param imGroupMember 群组成员
-     * @return 群组成员集合
-     */
-    public List<ImGroupMember> selectImGroupMemberList(ImGroupMember imGroupMember);
-
-    /**
-     * 新增群组成员
-     * 
-     * @param imGroupMember 群组成员
-     * @return 结果
-     */
-    public int insertImGroupMember(ImGroupMember imGroupMember);
-
-    /**
-     * 修改群组成员
-     * 
-     * @param imGroupMember 群组成员
-     * @return 结果
-     */
-    public int updateImGroupMember(ImGroupMember imGroupMember);
-
-    /**
-     * 批量删除群组成员
-     * 
-     * @param ids 需要删除的群组成员ID
-     * @return 结果
-     */
-    public int deleteImGroupMemberByIds(Long[] ids);
-
-    /**
-     * 删除群组成员信息
-     * 
-     * @param id 群组成员ID
-     * @return 结果
-     */
-    public int deleteImGroupMemberById(Long id);
+public interface ImGroupMemberService extends BaseService<ImGroupMember> {
+    
+    @Override
+    ImGroupMember selectById(Long id);
+    
+    @Override
+    List<ImGroupMember> selectList(ImGroupMember imGroupMember);
+    
+    @Override
+    int insert(ImGroupMember imGroupMember);
+    
+    @Override
+    int update(ImGroupMember imGroupMember);
+    
+    @Override
+    int deleteByIds(Long[] ids);
+    
+    @Override
+    int deleteById(Long id);
     
     /**
      * 根据群组ID查询群组成员列表

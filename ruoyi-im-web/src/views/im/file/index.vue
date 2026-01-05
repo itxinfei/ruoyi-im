@@ -252,6 +252,7 @@ import {
 } from '@element-plus/icons-vue'
 import { listFile, downloadFile, delFile } from '@/api/im/file'
 import { getToken } from '@/utils/auth'
+import { formatFileSize } from '@/utils/format/file'
 
 // ==================== 响应式状态 ====================
 
@@ -542,21 +543,7 @@ const handleRename = (file) => {
   })
 }
 
-/**
- * 格式化文件大小
- */
-const formatFileSize = (size) => {
-  if (!size) return '0B'
-  if (size < 1024) {
-    return size + 'B'
-  } else if (size < 1024 * 1024) {
-    return (size / 1024).toFixed(2) + 'KB'
-  } else if (size < 1024 * 1024 * 1024) {
-    return (size / (1024 * 1024)).toFixed(2) + 'MB'
-  } else {
-    return (size / (1024 * 1024 * 1024)).toFixed(2) + 'GB'
-  }
-}
+// formatFileSize 函数已从 @/utils/format/file 导入
 
 /**
  * 格式化时间

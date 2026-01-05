@@ -1,877 +1,858 @@
 <template>
-  <div class="chat-container">
-    <!-- 左侧会话列表 -->
-    <div class="session-panel">
-      <div class="panel-header">
-        <el-input
-          v-model="searchKeyword"
-          placeholder="搜索"
-          prefix-icon="el-icon-search"
-          clearable
-          class="search-input"
-        />
-      </div>
-      <session-list
-        :sessions-prop="sessions"
-        :current-session-id-prop="currentSession?.id"
-        @select="handleSessionSelect"
-      />
-    </div>
-
-    <!-- 中间聊天区域 -->
-    <div class="chat-main">
-      <template v-if="currentSession">
-        <!-- 聊天头部 -->
-        <div class="chat-header">
+  <div class="chat-content">
+    <template v-if="currentSession">
+      <!-- 聊天头部 -->
+      <div class="chat-header">
+        <div class="header-left">
+          <el-avatar 
+            :size="36" 
+            :src="currentSession.avatar || defaultAvatar"
+            class="header-avatar"
+          >
+            {{ currentSession.name?.charAt(0) || 'U' }}
+          </el-avatar>
           <div class="header-info">
             <span class="chat-title">{{ currentSession.name }}</span>
-            <span v-if="currentSession.type === 'group'" class="chat-subtitle">
-              ({{ currentSession.memberCount }}人)
+            <span class="chat-status" v-if="currentSession.type === 'private'">
+              {{ currentSession.status === 'online' ? '在线' : '离线' }}
             </span>
           </div>
-          <div class="header-actions">
-            <el-button
-              v-if="currentSession.type === 'private'"
-              :icon="VideoCamera"
-              circle
-              size="small"
-              @click="startVideoCall"
-            />
-            <el-button
-              v-if="currentSession.type === 'private'"
-              :icon="Phone"
-              circle
-              size="small"
-              @click="startVoiceCall"
-            />
-            <el-button :icon="Search" circle size="small" @click="showSearchMessage" />
-            <el-button :icon="More" circle size="small" @click="toggleDetailPanel" />
-          </div>
         </div>
 
-        <!-- 消息列表 -->
-        <message-list
-          ref="messageListRef"
-          :session-id="currentSession.id"
-          :is-group="currentSession.type === 'group'"
-          @load-more="loadMoreMessages"
-        />
-
-        <!-- 聊天输入 -->
-        <chat-input
-          :session-id="currentSession.id"
-          :session-members="sessionMembers"
-          @send-message="handleSendMessage"
-          @send-file="handleSendFile"
-          @send-image="handleSendImage"
-          @send-voice="handleSendVoice"
-          @send-location="handleSendLocation"
-          @send-vote="handleSendVote"
-          @send-code="handleSendCode"
-          @start-call="handleStartCall"
-        />
-      </template>
-
-      <!-- 空状态 -->
-      <div v-else class="chat-empty">
-        <el-empty description="选择一个会话开始聊天" />
+        <div class="header-right">
+          <el-button :icon="Phone" circle size="small" @click="startCall('voice')" />
+          <el-button :icon="VideoCamera" circle size="small" @click="startCall('video')" />
+          <el-button :icon="Search" circle size="small" @click="showSearchDialog" />
+          <el-button :icon="More" circle size="small" @click="showChatActions" />
+        </div>
       </div>
-    </div>
 
-    <!-- 右侧详情面板 -->
-    <transition name="slide-right">
-      <div v-if="showDetail && currentSession" class="detail-panel">
-        <div class="panel-header">
-          <span class="panel-title">{{
-            currentSession.type === 'group' ? '群聊信息' : '联系人信息'
-          }}</span>
-          <el-button :icon="Close" circle size="small" @click="toggleDetailPanel" />
-        </div>
-
-        <div class="panel-content">
-          <!-- 头像和名称 -->
-          <div class="info-header">
-            <el-avatar :size="64" :src="currentSession.avatar">
-              {{ currentSession.name?.charAt(0) }}
-            </el-avatar>
-            <h3>{{ currentSession.name }}</h3>
-            <p class="info-type">{{ currentSession.type === 'group' ? '群聊' : '联系人' }}</p>
+      <!-- 消息列表 -->
+      <div ref="messageListRef" class="message-list" @scroll="handleScroll">
+        <div v-for="message in displayedMessages" :key="message.id" class="message-wrapper">
+          <!-- 消息时间分组 -->
+          <div v-if="shouldShowTime(message)" class="message-time">
+            {{ formatTime(message.time) }}
           </div>
 
-          <!-- 群组成员 -->
-          <template v-if="currentSession.type === 'group'">
-            <div class="info-section">
-              <div class="section-header">
-                <span>群组成员 ({{ currentSession.memberCount }})</span>
-                <el-button
-                  v-if="isGroupOwner || isGroupAdmin"
-                  type="primary"
-                  link
-                  @click="showGroupMembers"
+          <!-- 消息气泡 -->
+          <div 
+            class="message-bubble"
+            :class="{
+              'message-own': message.isOwn,
+              'message-group': currentSession.type === 'group',
+              'message-read': message.read,
+            }"
+          >
+            <!-- 群聊消息：显示发送者头像和姓名 -->
+            <template v-if="currentSession.type === 'group' && !message.isOwn">
+              <el-avatar 
+                :size="32" 
+                :src="message.sender?.avatar || defaultAvatar"
+                class="sender-avatar"
+                @click="showSenderInfo(message.sender)"
+              />
+              <span 
+                class="sender-name"
+                @click="showSenderInfo(message.sender)"
+              >
+                {{ message.sender?.name || message.senderName }}
+              </span>
+            </template>
+
+            <!-- 消息内容 -->
+            <div class="message-content">
+              <!-- 文本消息 -->
+              <div 
+                v-if="message.type === 'text'" 
+                class="text-content"
+                @click="handleTextClick(message)"
+              >
+                <span v-html="formatMessageContent(message.content)"></span>
+              </div>
+
+              <!-- 图片消息 -->
+              <div v-else-if="message.type === 'image'" class="image-content">
+                <el-image
+                  :src="message.content"
+                  :preview-src-list="[message.content]"
+                  preview-teleported
+                  class="message-image"
+                  fit="cover"
+                />
+              </div>
+
+              <!-- 文件消息 -->
+              <div v-else-if="message.type === 'file'" class="file-content">
+                <div class="file-icon">
+                  <el-icon><Document /></el-icon>
+                </div>
+                <div class="file-info">
+                  <div class="file-name">{{ message.fileName }}</div>
+                  <div class="file-size">{{ formatFileSize(message.fileSize) }}</div>
+                </div>
+                <el-button 
+                  class="file-download-btn" 
+                  type="primary" 
+                  size="small" 
+                  @click="downloadFile(message)"
                 >
-                  管理
+                  下载
                 </el-button>
               </div>
-              <div class="member-grid">
-                <div
-                  v-for="member in groupMembers.slice(0, 8)"
-                  :key="member.userId"
-                  class="member-item"
-                >
-                  <el-avatar :size="36" :src="member.avatar">
-                    {{ member.nickname?.charAt(0) }}
-                  </el-avatar>
-                  <span class="member-name">{{ member.nickname }}</span>
-                </div>
-                <div
-                  v-if="groupMembers.length > 8"
-                  class="member-item more"
-                  @click="showGroupMembers"
-                >
-                  <div class="more-icon">+{{ groupMembers.length - 8 }}</div>
-                </div>
-              </div>
-            </div>
-          </template>
 
-          <!-- 联系人信息 -->
-          <template v-else>
-            <div class="info-section">
-              <div class="info-row">
-                <span class="label">账号</span>
-                <span class="value">{{ currentSession.account }}</span>
-              </div>
-              <div class="info-row">
-                <span class="label">备注</span>
-                <span class="value editable" @click="startEditRemark">
-                  {{ currentSession.remark || '设置备注' }}
-                </span>
+              <!-- 其他类型消息 -->
+              <div v-else class="other-content">
+                [{{ message.type }}消息]
               </div>
             </div>
-          </template>
 
-          <!-- 操作按钮 -->
-          <div class="info-section">
-            <div class="action-row" @click="searchMessage">
-              <i class="el-icon-search"></i>
-              <span>搜索聊天记录</span>
+            <!-- 消息状态 -->
+            <div class="message-status">
+              <el-icon 
+                v-if="message.status === 'sending'" 
+                class="status-icon sending"
+              >
+                <Loading />
+              </el-icon>
+              <el-icon 
+                v-else-if="message.status === 'sent'" 
+                class="status-icon sent"
+              >
+                <SuccessFilled />
+              </el-icon>
+              <el-icon 
+                v-else-if="message.status === 'read'" 
+                class="status-icon read"
+              >
+                <SuccessFilled />
+              </el-icon>
             </div>
-            <div class="action-row" @click="exportHistory">
-              <i class="el-icon-download"></i>
-              <span>导出聊天记录</span>
+          </div>
+        </div>
+
+        <div v-if="loadingMore" class="loading-more">
+          <el-icon><Loading /></el-icon>
+          <span>加载中...</span>
+        </div>
+      </div>
+
+      <!-- 聊天输入区域 -->
+      <div class="chat-input-area">
+        <div class="chat-input-toolbar">
+          <el-button :icon="Plus" circle size="small" @click="showQuickActions" />
+          <el-button :icon="EditPen" circle size="small" @click="sendImage" />
+          <el-button :icon="VideoPlay" circle size="small" @click="sendFile" />
+          <el-button :icon="Location" circle size="small" @click="sendLocation" />
+          <el-button :icon="Microphone" circle size="small" @click="startVoiceMessage" />
+        </div>
+        <div class="chat-input-container">
+          <el-input
+            v-model="inputMessage"
+            type="textarea"
+            class="message-input"
+            :rows="2"
+            :autosize="{ minRows: 2, maxRows: 6 }"
+            placeholder="输入消息..."
+            maxlength="2000"
+            show-word-limit
+            @keydown.enter="handleEnterPress"
+          />
+          <div class="chat-input-actions">
+            <div class="input-hints">
+              <div class="hint-item" @click="toggleEmojiPanel">
+                <el-icon><ChatDotRound /></el-icon>
+                <span>表情</span>
+              </div>
+              <div class="hint-item" @click="toggleRichText">
+                <el-icon><Ticket /></el-icon>
+                <span>富文本</span>
+              </div>
+            </div>
+            <div class="send-actions">
+              <el-button @click="clearInput">清空</el-button>
+              <el-button type="primary" class="send-btn" @click="sendMessage">发送</el-button>
             </div>
           </div>
         </div>
       </div>
-    </transition>
-
-    <!-- 搜索消息对话框 -->
-    <el-dialog v-model="searchDialogVisible" title="搜索聊天记录" width="600px">
-      <div class="search-dialog">
-        <el-input
-          v-model="messageSearchKeyword"
-          placeholder="搜索消息内容"
-          prefix-icon="el-icon-search"
-          clearable
-          @input="handleMessageSearch"
-        />
-        <div v-loading="searching" class="search-results">
-          <div
-            v-for="message in searchResults"
-            :key="message.id"
-            class="search-item"
-            @click="jumpToMessage(message)"
-          >
-            <div class="message-info">
-              <span class="sender">{{ message.senderName }}</span>
-              <span class="time">{{ formatTime(message.time) }}</span>
-            </div>
-            <div class="message-content" v-html="highlightKeyword(message.content)"></div>
+    </template>
+    <template v-else>
+      <!-- 未选择会话时的空状态 -->
+      <div class="empty-chat-state">
+        <div class="empty-content">
+          <div class="empty-icon">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <path fill="#e0e0e0" d="M60 10C32.4 10 10 32.4 10 60s22.4 50 50 50 50-22.4 50-50S87.6 10 60 10zm0 85c-13.8 0-25-11.2-25-25s11.2-25 25-25 25 11.2 25 25-11.2 25-25 25z"/>
+              <circle cx="45" cy="55" r="8" fill="#e0e0e0"/>
+              <circle cx="75" cy="55" r="8" fill="#e0e0e0"/>
+              <path fill="#e0e0e0" d="M60 85c-10.5 0-19-7.2-19-16h38c0 8.8-8.5 16-19 16z"/>
+            </svg>
           </div>
-          <el-empty v-if="!searching && !searchResults.length" description="没有找到相关消息" />
+          <p>选择一个会话开始聊天</p>
         </div>
       </div>
-    </el-dialog>
-
-    <!-- 群成员管理对话框 -->
-    <el-dialog v-model="memberDialogVisible" title="群成员管理" width="600px">
-      <div class="member-dialog">
-        <div class="dialog-actions">
-          <el-button type="primary" size="small" @click="showAddMember">添加成员</el-button>
-        </div>
-        <el-table :data="groupMembers" style="width: 100%">
-          <el-table-column label="成员" width="200">
-            <template #default="scope">
-              <div class="member-cell">
-                <el-avatar :size="32" :src="scope.row.avatar">
-                  {{ scope.row.nickname?.charAt(0) }}
-                </el-avatar>
-                <span>{{ scope.row.nickname }}</span>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column prop="role" label="角色" width="100">
-            <template #default="scope">
-              <el-tag
-                :type="
-                  scope.row.role === 'owner'
-                    ? 'danger'
-                    : scope.row.role === 'admin'
-                      ? 'warning'
-                      : ''
-                "
-                size="small"
-              >
-                {{
-                  scope.row.role === 'owner'
-                    ? '群主'
-                    : scope.row.role === 'admin'
-                      ? '管理员'
-                      : '成员'
-                }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作">
-            <template #default="scope">
-              <el-button
-                v-if="isGroupOwner && scope.row.role === 'member'"
-                type="primary"
-                link
-                size="small"
-                @click="setAdmin(scope.row)"
-              >
-                设为管理员
-              </el-button>
-              <el-button
-                v-if="canManageMember(scope.row)"
-                type="danger"
-                link
-                size="small"
-                @click="removeMember(scope.row)"
-              >
-                移出群组
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </div>
-    </el-dialog>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { VideoCamera, Phone, Search, More, Close } from '@element-plus/icons-vue'
-import SessionList from '@/components/Chat/SessionList.vue'
-import MessageList from '@/components/Chat/MessageList.vue'
-import ChatInput from '@/components/Chat/ChatInput.vue'
+import {
+  Search,
+  Plus,
+  More,
+  Phone,
+  VideoCamera,
+  Loading,
+  SuccessFilled,
+  ChatLineSquare,
+  User,
+  Menu,
+  Folder,
+  Setting,
+  ArrowLeft,
+  EditPen,
+  Document,
+  VideoPlay,
+  Location,
+  Bell,
+  ChatDotRound,
+  Ticket,
+  Microphone
+} from '@element-plus/icons-vue'
+import { formatTime as formatTimeUtil } from '@/utils/format/time'
+import { formatFileSize as formatFileSizeUtil } from '@/utils/format/file'
 
 const store = useStore()
 
 // 状态
-const searchKeyword = ref('')
-const showDetail = ref(false)
-const searchDialogVisible = ref(false)
-const memberDialogVisible = ref(false)
-const messageSearchKeyword = ref('')
-const searching = ref(false)
-const searchResults = ref([])
+const inputMessage = ref('')
+const currentSession = ref(null)
+const loadingMore = ref(false)
+const hasMoreMessages = ref(true)
+
+// 状态
+const sessions = ref([])
+const displayedMessages = ref([])
 const messageListRef = ref(null)
 
-// 计算属性
-const currentSession = computed(() => store.state.im.currentSession)
-const sessions = computed(() => store.state.im.sessions)
-const groupMembers = computed(() => store.getters.groupMembers || [])
-const isGroupOwner = computed(() => store.getters.isGroupOwner)
-const isGroupAdmin = computed(() => store.getters.isGroupAdmin)
+// 默认头像
+const defaultAvatar = ref('/static/avatar-default.png')
 
-const sessionMembers = computed(() => {
-  if (!currentSession.value) return []
-  if (currentSession.value.type === 'group') {
-    return groupMembers.value
-  }
-  return []
+// 计算属性来获取当前会话
+const currentSessionComputed = computed(() => {
+  // 尝试从store获取，如果失败则返回本地状态
+  const storeSession = store.state.im?.currentSession
+  return storeSession || currentSession.value
 })
 
-// 会话选择
-const handleSessionSelect = session => {
-  store.dispatch('im/switchSession', session)
+// 监听当前会话变化，自动滚动到底部
+watch(currentSessionComputed, async () => {
+  await nextTick()
+  scrollToBottom()
+}, { immediate: false })
+
+// 初始化会话数据
+const initializeSession = () => {
+  // 模拟会话数据
+  displayedMessages.value = [
+    { 
+      id: 1, 
+      content: '你好！有什么可以帮助你的吗？', 
+      type: 'text', 
+      time: Date.now() - 3600000, 
+      isOwn: false,
+      sender: { name: '测试联系人' }
+    },
+    { 
+      id: 2, 
+      content: '你好，我想了解一下项目进度', 
+      type: 'text', 
+      time: Date.now() - 1800000, 
+      isOwn: true
+    },
+    { 
+      id: 3, 
+      content: '项目进展顺利，预计下周可以完成第一阶段', 
+      type: 'text', 
+      time: Date.now() - 600000, 
+      isOwn: false,
+      sender: { name: '测试联系人' }
+    }
+  ]
 }
 
-// 切换详情面板
-const toggleDetailPanel = () => {
-  showDetail.value = !showDetail.value
+// 滚动到底部
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (messageListRef.value) {
+      messageListRef.value.scrollTop = messageListRef.value.scrollHeight
+    }
+  })
+}
+
+// 格式化时间 - 使用工具函数
+const formatTime = formatTimeUtil
+
+// 是否显示时间（每5分钟显示一次）
+const shouldShowTime = (message, index) => {
+  if (index === 0) return true
+  
+  const prevMessage = displayedMessages.value[index - 1]
+  if (!prevMessage) return true
+  
+  const timeDiff = Math.abs(new Date(message.time) - new Date(prevMessage.time))
+  return timeDiff > 5 * 60 * 1000 // 5分钟
 }
 
 // 发送消息
-const handleSendMessage = async payload => {
-  if (!currentSession.value) return
-  try {
-    await store.dispatch('im/sendMessage', {
-      sessionId: currentSession.value.id,
-      sessionType: currentSession.value.type,
-      type: payload.type || 'text',
-      content: payload.content,
-      replyTo: payload.replyTo,
-    })
-  } catch (error) {
-    ElMessage.error('发送消息失败')
+const sendMessage = () => {
+  if (!inputMessage.value.trim() || !currentSessionComputed.value) return
+  
+  const newMessage = {
+    id: Date.now(),
+    content: inputMessage.value,
+    type: 'text',
+    time: Date.now(),
+    isOwn: true
   }
+  
+  displayedMessages.value.push(newMessage)
+  inputMessage.value = ''
+  
+  scrollToBottom()
 }
 
-// 发送文件
-const handleSendFile = async file => {
-  if (!currentSession.value) return
-  try {
-    await store.dispatch('im/sendMessage', {
-      sessionId: currentSession.value.id,
-      sessionType: currentSession.value.type,
-      type: 'file',
-      content: file,
-    })
-  } catch (e) {
-    ElMessage.error('文件发送失败')
-  }
+// 处理回车键
+const handleEnterPress = (event) => {
+  if (event.shiftKey) return
+  event.preventDefault()
+  sendMessage()
 }
 
-// 发送图片
-const handleSendImage = async image => {
-  if (!currentSession.value) return
-  try {
-    await store.dispatch('im/sendMessage', {
-      sessionId: currentSession.value.id,
-      sessionType: currentSession.value.type,
-      type: 'image',
-      content: image,
-    })
-  } catch (e) {
-    ElMessage.error('图片发送失败')
-  }
+// 清空输入
+const clearInput = () => {
+  inputMessage.value = ''
 }
 
-// 发送语音
-const handleSendVoice = async voice => {
-  if (!currentSession.value) return
-  try {
-    await store.dispatch('im/sendMessage', {
-      sessionId: currentSession.value.id,
-      sessionType: currentSession.value.type,
-      type: 'voice',
-      content: voice,
-    })
-  } catch (e) {
-    ElMessage.error('语音发送失败')
-  }
+// 其他方法
+const startCall = (type) => {
+  ElMessage.info(`${type === 'voice' ? '语音' : '视频'}通话功能开发中...`)
 }
 
-// 发送位置
-const handleSendLocation = async location => {
-  if (!currentSession.value) return
-  try {
-    await store.dispatch('im/sendMessage', {
-      sessionId: currentSession.value.id,
-      sessionType: currentSession.value.type,
-      type: 'location',
-      content: location,
-    })
-  } catch (e) {
-    ElMessage.error('位置发送失败')
-  }
+const showSearchDialog = () => {
+  ElMessage.info('消息搜索功能开发中...')
 }
 
-// 发送投票
-const handleSendVote = async vote => {
-  if (!currentSession.value) return
-  try {
-    await store.dispatch('im/sendMessage', {
-      sessionId: currentSession.value.id,
-      sessionType: currentSession.value.type,
-      type: 'vote',
-      content: vote,
-    })
-  } catch (e) {
-    ElMessage.error('投票发送失败')
-  }
+const showChatActions = () => {
+  ElMessage.info('聊天操作功能开发中...')
 }
 
-// 发送代码
-const handleSendCode = async code => {
-  if (!currentSession.value) return
-  try {
-    await store.dispatch('im/sendMessage', {
-      sessionId: currentSession.value.id,
-      sessionType: currentSession.value.type,
-      type: 'code',
-      content: code,
-    })
-  } catch (e) {
-    ElMessage.error('代码片段发送失败')
-  }
+const sendImage = () => {
+  ElMessage.info('发送图片功能开发中...')
 }
 
-// 开始通话
-const handleStartCall = ({ type }) => {
-  if (type === 'video') startVideoCall()
-  if (type === 'voice') startVoiceCall()
+const sendFile = () => {
+  ElMessage.info('发送文件功能开发中...')
+}
+
+const sendLocation = () => {
+  ElMessage.info('发送位置功能开发中...')
+}
+
+const showQuickActions = () => {
+  ElMessage.info('快捷操作功能开发中...')
+}
+
+const downloadFile = (file) => {
+  ElMessage.info('下载功能开发中...')
+}
+
+// 格式化文件大小 - 使用工具函数
+const formatFileSize = formatFileSizeUtil
+
+// 格式化消息内容（支持链接、@等）
+const formatMessageContent = (content) => {
+  if (!content) return ''
+  
+  // 转义HTML
+  let escaped = content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+  
+  // 匹配URL链接
+  escaped = escaped.replace(
+    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g,
+    '<a href="$&" target="_blank" class="message-link">$&</a>'
+  )
+  
+  return escaped
+}
+
+// 处理文本点击
+const handleTextClick = (message) => {
+  // 可以在这里处理点击消息的逻辑，如回复、转发等
+}
+
+// 显示发送者信息
+const showSenderInfo = (sender) => {
+  if (!sender) return
+  ElMessage.info(`用户信息: ${sender.name}`)
+}
+
+// 处理滚动事件（用于加载更多消息）
+const handleScroll = () => {
+  if (!messageListRef.value || !hasMoreMessages.value) return
+  
+  const { scrollTop } = messageListRef.value
+  if (scrollTop <= 20 && !loadingMore.value) {
+    loadMoreMessages()
+  }
 }
 
 // 加载更多消息
-const loadMoreMessages = () => {
-  if (!currentSession.value) return
-  store.dispatch('im/loadMoreMessages', currentSession.value.id)
-}
-
-// 视频通话
-const startVideoCall = () => {
-  if (!currentSession.value || currentSession.value.type !== 'private') return
-  store.dispatch('im/startVideoCall', currentSession.value.id)
-}
-
-// 语音通话
-const startVoiceCall = () => {
-  if (!currentSession.value || currentSession.value.type !== 'private') return
-  store.dispatch('im/startVoiceCall', currentSession.value.id)
-}
-
-// 显示消息搜索
-const showSearchMessage = () => {
-  searchDialogVisible.value = true
-  messageSearchKeyword.value = ''
-  searchResults.value = []
-}
-
-// 搜索消息
-const handleMessageSearch = async () => {
-  if (!messageSearchKeyword.value.trim()) {
-    searchResults.value = []
-    return
-  }
-  searching.value = true
+const loadMoreMessages = async () => {
+  if (!currentSessionComputed.value || !hasMoreMessages.value || loadingMore.value) return
+  
+  loadingMore.value = true
   try {
-    const results = await store.dispatch('im/searchMessages', {
-      sessionId: currentSession.value.id,
-      keyword: messageSearchKeyword.value,
-    })
-    searchResults.value = results
+    // 模拟加载更多消息
+    const moreMessages = [
+      { 
+        id: Date.now() + 1, 
+        content: '这是更早之前的消息', 
+        type: 'text', 
+        time: Date.now() - 86400000, // 1天前
+        isOwn: false,
+        sender: { name: '测试联系人' }
+      }
+    ]
+    displayedMessages.value.unshift(...moreMessages)
   } catch (error) {
-    ElMessage.error('搜索失败')
+    console.error('加载更多消息失败:', error)
   } finally {
-    searching.value = false
+    loadingMore.value = false
   }
 }
 
-// 跳转到消息
-const jumpToMessage = message => {
-  searchDialogVisible.value = false
-  messageListRef.value?.scrollToMessage(message.id)
+// 切换表情面板
+const toggleEmojiPanel = () => {
+  ElMessage.info('表情功能开发中...')
 }
 
-// HTML 实体转义，防止 XSS
-const escapeHtml = text => {
-  const map = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  }
-  return String(text).replace(/[&<>"']/g, m => map[m])
+// 切换富文本
+const toggleRichText = () => {
+  ElMessage.info('富文本功能开发中...')
 }
 
-// 高亮关键词（先转义 HTML，再添加高亮）
-const highlightKeyword = content => {
-  if (!content) return ''
-  const escaped = escapeHtml(content)
-  if (!messageSearchKeyword.value) return escaped
-  const keyword = escapeHtml(messageSearchKeyword.value)
-  const reg = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')
-  return escaped.replace(reg, match => `<span class="highlight">${match}</span>`)
+// 开始录制语音消息
+const startVoiceMessage = () => {
+  ElMessage.info('语音消息功能开发中...')
 }
 
-// 搜索聊天记录
-const searchMessage = () => {
-  showSearchMessage()
-}
-
-// 导出聊天记录
-const exportHistory = async () => {
-  try {
-    await store.dispatch('im/exportChatHistory', currentSession.value.id)
-    ElMessage.success('导出成功')
-  } catch (error) {
-    ElMessage.error('导出失败')
-  }
-}
-
-// 显示群成员管理
-const showGroupMembers = () => {
-  memberDialogVisible.value = true
-}
-
-// 显示添加成员
-const showAddMember = () => {
-  ElMessage.info('添加成员功能开发中...')
-}
-
-// 是否可以管理成员
-const canManageMember = member => {
-  if (isGroupOwner.value) return member.role !== 'owner'
-  if (isGroupAdmin.value) return member.role === 'member'
-  return false
-}
-
-// 设置管理员
-const setAdmin = async member => {
-  try {
-    await store.dispatch('im/setGroupAdmin', {
-      groupId: currentSession.value.id,
-      userId: member.userId,
-    })
-    ElMessage.success('设置成功')
-  } catch (error) {
-    ElMessage.error('设置失败')
-  }
-}
-
-// 移除成员
-const removeMember = async member => {
-  try {
-    await ElMessageBox.confirm(`确定要将 ${member.nickname} 移出群组吗？`, '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
-    await store.dispatch('im/removeGroupMember', {
-      groupId: currentSession.value.id,
-      userId: member.userId,
-    })
-    ElMessage.success('移除成功')
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('移除失败')
-    }
-  }
-}
-
-// 编辑备注
-const startEditRemark = () => {
-  ElMessage.info('编辑备注功能开发中...')
-}
-
-// 格式化时间
-const formatTime = time => {
-  return new Date(time).toLocaleString()
-}
+onMounted(() => {
+  initializeSession()
+  scrollToBottom()
+})
 </script>
 
 <style lang="scss" scoped>
-@use '@/assets/styles/variables.scss' as *;
+@use '@/styles/dingtalk-theme.scss' as *;
 
-.chat-container {
-  height: 100%;
-  display: flex;
-  background-color: #f5f5f5;
-}
-
-// 左侧会话列表面板
-.session-panel {
-  width: $list-panel-width;
-  min-width: $list-panel-width;
-  height: 100%;
-  background-color: #fff;
-  border-right: 1px solid $border-color-light;
-  display: flex;
-  flex-direction: column;
-
-  .panel-header {
-    padding: 12px;
-    border-bottom: 1px solid $border-color-lighter;
-
-    .search-input {
-      :deep(.el-input__wrapper) {
-        border-radius: 20px;
-        background-color: #f5f5f5;
-      }
-    }
-  }
-}
-
-// 中间聊天主区域
-.chat-main {
+.chat-content {
   flex: 1;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #fff;
+  height: 100%;
   overflow: hidden;
+  background: $chat-bg;
 
   .chat-header {
-    height: 60px;
-    min-height: 60px;
-    padding: 0 16px;
+    height: 56px;
+    min-height: 56px;
+    padding: 0 $spacing-lg;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid $border-color-lighter;
-    background-color: #fff;
+    border-bottom: 1px solid $border-light;
+    background: $bg-white;
+    flex-shrink: 0;
 
-    .header-info {
+    .header-left {
       display: flex;
-      align-items: baseline;
-      gap: 8px;
+      align-items: center;
+      gap: $spacing-md;
 
-      .chat-title {
-        font-size: 16px;
-        font-weight: 500;
-        color: $text-primary;
+      .header-avatar {
+        flex-shrink: 0;
       }
 
-      .chat-subtitle {
-        font-size: 12px;
-        color: $text-secondary;
+      .header-info {
+        .chat-title {
+          font-size: $font-size-lg;
+          font-weight: $font-weight-semibold;
+          color: $text-primary;
+          display: block;
+        }
+
+        .chat-status {
+          font-size: $font-size-sm;
+          color: $success-color;
+          display: block;
+        }
       }
     }
 
-    .header-actions {
+    .header-right {
       display: flex;
-      gap: 8px;
+      gap: $spacing-xs;
+
+      .el-button {
+        border: none;
+        background: transparent;
+        padding: 6px;
+
+        &:hover {
+          background: $bg-hover;
+        }
+      }
     }
   }
 
-  .chat-empty {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-// 右侧详情面板
-.detail-panel {
-  width: $detail-panel-width;
-  min-width: $detail-panel-width;
-  height: 100%;
-  background-color: #fff;
-  border-left: 1px solid $border-color-light;
-  display: flex;
-  flex-direction: column;
-
-  .panel-header {
-    height: 60px;
-    min-height: 60px;
-    padding: 0 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid $border-color-lighter;
-
-    .panel-title {
-      font-size: 16px;
-      font-weight: 500;
-    }
-  }
-
-  .panel-content {
+  .message-list {
     flex: 1;
     overflow-y: auto;
-    padding: 16px;
+    padding: $spacing-lg $spacing-xl;
+    background: $chat-bg;
 
-    .info-header {
-      text-align: center;
-      padding-bottom: 16px;
-      border-bottom: 1px solid $border-color-lighter;
-      margin-bottom: 16px;
+    @include custom-scrollbar(6px, $border-base);
 
-      h3 {
-        margin: 12px 0 4px;
-        font-size: 16px;
+    .message-wrapper {
+      margin-bottom: $spacing-lg;
+
+      .message-time {
+        text-align: center;
+        font-size: $font-size-sm;
+        color: $text-tertiary;
+        margin: $spacing-md 0;
       }
 
-      .info-type {
-        color: $text-secondary;
-        font-size: 12px;
-        margin: 0;
-      }
-    }
-
-    .info-section {
-      margin-bottom: 20px;
-
-      .section-header {
+      .message-bubble {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-        font-weight: 500;
-      }
+        gap: $spacing-sm;
+        max-width: 65%;
+        align-items: flex-end;
 
-      .member-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
+        &.message-own {
+          margin-left: auto;
+          flex-direction: row-reverse;
 
-        .member-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
+          .message-content {
+            background: #d0e7ff;
+            color: #000;
+            border-radius: $border-radius-lg $border-radius-xs $border-radius-lg $border-radius-lg;
 
-          .member-name {
-            font-size: 12px;
-            color: $text-secondary;
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          }
-
-          &.more {
-            cursor: pointer;
-
-            .more-icon {
-              width: 36px;
-              height: 36px;
-              border-radius: 50%;
-              background-color: #f5f5f5;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 12px;
-              color: $text-secondary;
+            .message-link {
+              color: #006EFF;
+              text-decoration: underline;
             }
           }
-        }
-      }
-
-      .info-row {
-        display: flex;
-        align-items: center;
-        padding: 8px 0;
-
-        .label {
-          width: 60px;
-          color: $text-secondary;
-          font-size: 14px;
+          
+          .message-status {
+            order: -1;
+            margin-right: $spacing-sm;
+            margin-left: 0;
+          }
         }
 
-        .value {
-          flex: 1;
-          font-size: 14px;
-
-          &.editable {
-            color: $primary-color;
+        &.message-group {
+          .sender-avatar {
             cursor: pointer;
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+          }
+
+          .sender-name {
+            font-size: $font-size-sm;
+            color: #4a7fee;
+            cursor: pointer;
+            margin-bottom: $spacing-xs;
+            padding: 0 $spacing-sm;
+            font-weight: $font-weight-medium;
 
             &:hover {
               text-decoration: underline;
             }
           }
         }
-      }
 
-      .action-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 12px 0;
-        cursor: pointer;
-        color: $text-regular;
+        .sender-avatar {
+          cursor: pointer;
+          flex-shrink: 0;
+          width: 36px;
+          height: 36px;
+        }
+
+        .sender-name {
+          font-size: $font-size-sm;
+          color: $text-secondary;
+          cursor: pointer;
+          margin-bottom: $spacing-xs;
+          padding: 0 $spacing-sm;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+
+        .message-content {
+          padding: $spacing-sm $spacing-md;
+          background: $bg-white;
+          border: 1px solid $border-light;
+          border-radius: $border-radius-xs $border-radius-lg $border-radius-lg $border-radius-lg;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+          word-wrap: break-word;
+          max-width: 400px;
+
+          .text-content {
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: $font-size-base;
+
+            .message-link {
+              color: #006EFF;
+              text-decoration: underline;
+              cursor: pointer;
+
+              &:hover {
+                opacity: 0.8;
+              }
+            }
+          }
+
+          .image-content {
+            .message-image {
+              max-width: 180px;
+              max-height: 180px;
+              border-radius: $border-radius-sm;
+              cursor: pointer;
+              object-fit: cover;
+            }
+          }
+
+          .file-content {
+            display: flex;
+            align-items: center;
+            gap: $spacing-md;
+            padding: $spacing-md;
+            background: $bg-light;
+            border-radius: $border-radius-sm;
+
+            .file-icon {
+              width: 44px;
+              height: 44px;
+              background: #f0f5ff;
+              border-radius: $border-radius-sm;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #409eff;
+              flex-shrink: 0;
+
+              .el-icon {
+                font-size: 20px;
+              }
+            }
+
+            .file-info {
+              flex: 1;
+              min-width: 0;
+
+              .file-name {
+                font-weight: $font-weight-medium;
+                color: $text-primary;
+                margin-bottom: $spacing-xs;
+                @include text-ellipsis;
+                font-size: $font-size-sm;
+              }
+
+              .file-size {
+                font-size: $font-size-xs;
+                color: $text-tertiary;
+              }
+            }
+            
+            .file-download-btn {
+              margin-left: $spacing-md;
+              flex-shrink: 0;
+            }
+          }
+        }
+
+        .message-status {
+          margin: 0 $spacing-sm;
+          display: flex;
+          align-items: center;
+
+          .status-icon {
+            font-size: 13px;
+            width: 16px;
+            height: 16px;
+
+            &.sent {
+              color: $text-tertiary;
+            }
+
+            &.read {
+              color: #006EFF;
+            }
+
+            &.sending {
+              color: $text-tertiary;
+              animation: spin 1s linear infinite;
+            }
+          }
+        }
+      }
+    }
+
+    .loading-more {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-sm;
+      color: $text-tertiary;
+      padding: $spacing-md;
+    }
+  }
+
+  .chat-input-area {
+    padding: $spacing-lg;
+    background: $bg-white;
+    border-top: 1px solid $border-light;
+
+    .chat-input-toolbar {
+      display: flex;
+      gap: $spacing-sm;
+      margin-bottom: $spacing-md;
+      padding: 0 $spacing-sm;
+
+      .el-button {
+        border: none;
+        background: transparent;
+        padding: 8px;
+        border-radius: $border-radius-sm;
+        color: $text-secondary;
 
         &:hover {
+          background: $bg-hover;
           color: $primary-color;
         }
+        
+        &.primary-action {
+          &:hover {
+            background: $primary-color-light;
+            color: $primary-color;
+          }
+        }
+      }
+    }
 
-        i {
-          font-size: 16px;
+    .chat-input-container {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-sm;
+
+      .message-input {
+        :deep(.el-textarea__inner) {
+          border: 1px solid $border-base;
+          border-radius: $border-radius-lg;
+          padding: $spacing-md;
+          min-height: 80px;
+          max-height: 160px;
+          font-size: $font-size-base;
+          line-height: 1.6;
+
+          &:focus {
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+          }
+        }
+      }
+
+      .chat-input-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .input-hints {
+          display: flex;
+          gap: $spacing-md;
+          color: $text-tertiary;
+          font-size: $font-size-sm;
+
+          .hint-item {
+            display: flex;
+            align-items: center;
+            gap: $spacing-xs;
+
+            &:hover {
+              color: $primary-color;
+              cursor: pointer;
+            }
+          }
+        }
+
+        .send-actions {
+          display: flex;
+          gap: $spacing-sm;
+
+          .el-button {
+            border-radius: $border-radius-sm;
+            padding: 8px 16px;
+            font-size: $font-size-sm;
+
+            &.send-btn {
+              background: $primary-color;
+              color: white;
+              border: none;
+
+              &:hover {
+                background: $primary-color-dark;
+              }
+            }
+          }
         }
       }
     }
   }
-}
-
-// 搜索对话框
-.search-dialog {
-  .search-results {
-    max-height: 400px;
-    overflow-y: auto;
-    margin-top: 16px;
-
-    .search-item {
-      padding: 12px;
-      cursor: pointer;
-      border-radius: 4px;
-
-      &:hover {
-        background-color: #f5f5f5;
-      }
-
-      .message-info {
-        margin-bottom: 4px;
-
-        .sender {
-          font-weight: 500;
-        }
-
-        .time {
-          margin-left: 8px;
-          font-size: 12px;
-          color: $text-secondary;
-        }
-      }
-
-      .message-content {
-        color: $text-regular;
-
-        :deep(.highlight) {
-          background-color: #ffd04b;
-          padding: 0 2px;
-        }
-      }
-    }
-  }
-}
-
-// 成员对话框
-.member-dialog {
-  .dialog-actions {
-    margin-bottom: 16px;
-  }
-
-  .member-cell {
+  
+  .empty-chat-state {
+    flex: 1;
     display: flex;
     align-items: center;
-    gap: 8px;
-  }
-}
+    justify-content: center;
 
-// 过渡动画
-.slide-right-enter-active,
-.slide-right-leave-active {
-  transition: all 0.3s ease;
-}
+    .empty-content {
+      text-align: center;
 
-.slide-right-enter-from,
-.slide-right-leave-to {
-  transform: translateX(100%);
-  opacity: 0;
-}
+      .empty-icon {
+        margin-bottom: $spacing-lg;
+      }
 
-// 响应式
-@media screen and (max-width: 768px) {
-  .session-panel {
-    width: 100%;
-    position: absolute;
-    z-index: 10;
-  }
-
-  .detail-panel {
-    width: 100%;
-    position: absolute;
-    z-index: 10;
-    right: 0;
+      p {
+        color: $text-tertiary;
+        font-size: $font-size-base;
+      }
+    }
   }
 }
 </style>

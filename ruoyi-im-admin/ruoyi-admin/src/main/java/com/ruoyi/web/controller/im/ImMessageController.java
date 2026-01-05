@@ -26,7 +26,7 @@ import com.ruoyi.system.service.IImMessageService;
  * @author ruoyi
  * @date 2024-01-01
  */
-@RestController
+@RestController("adminImMessageController")
 @RequestMapping("/api/admin/im/message")
 public class ImMessageController extends BaseController
 {

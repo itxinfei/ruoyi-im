@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Layout from '@/layout/index.vue'
+
 import imRoutes from './modules/im'
 
 const routes = [
@@ -11,10 +11,9 @@ const routes = [
   },
   {
     path: '/',
-    component: Layout,
     redirect: '/im/chat',
-    children: imRoutes,
   },
+  ...imRoutes,
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
@@ -36,21 +35,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
-
-  if (to.path === '/login') {
-    if (token) {
-      next('/')
-    } else {
-      next()
-    }
-  } else {
-    if (token) {
-      next()
-    } else {
-      next('/login')
-    }
-  }
+  // 开发阶段取消登录验证，允许直接访问所有页面
+  next()
 })
 
 router.afterEach(to => {

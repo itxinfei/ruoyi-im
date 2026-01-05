@@ -26,7 +26,7 @@ import com.ruoyi.system.service.IImGroupService;
  * @author ruoyi
  * @date 2024-01-01
  */
-@RestController
+@RestController("adminImGroupController")
 @RequestMapping("/api/admin/im/group")
 public class ImGroupController extends BaseController
 {

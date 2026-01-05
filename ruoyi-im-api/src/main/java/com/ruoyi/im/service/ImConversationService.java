@@ -8,62 +8,34 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImConversationService {
-    /**
-     * 查询会话
-     * 
-     * @param id 会话ID
-     * @return 会话
-     */
-    public ImConversation selectImConversationById(Long id);
-
-    /**
-     * 查询会话列表
-     * 
-     * @param imConversation 会话
-     * @return 会话集合
-     */
-    public List<ImConversation> selectImConversationList(ImConversation imConversation);
-
-    /**
-     * 新增会话
-     * 
-     * @param imConversation 会话
-     * @return 结果
-     */
-    public int insertImConversation(ImConversation imConversation);
-
-    /**
-     * 修改会话
-     * 
-     * @param imConversation 会话
-     * @return 结果
-     */
-    public int updateImConversation(ImConversation imConversation);
-
-    /**
-     * 批量删除会话
-     * 
-     * @param ids 需要删除的会话ID
-     * @return 结果
-     */
-    public int deleteImConversationByIds(Long[] ids);
-
-    /**
-     * 删除会话信息
-     * 
-     * @param id 会话ID
-     * @return 结果
-     */
-    public int deleteImConversationById(Long id);
+public interface ImConversationService extends BaseService<ImConversation> {
+    
+    @Override
+    ImConversation selectById(Long id);
+    
+    @Override
+    List<ImConversation> selectList(ImConversation imConversation);
+    
+    @Override
+    int insert(ImConversation imConversation);
+    
+    @Override
+    int update(ImConversation imConversation);
+    
+    @Override
+    int deleteByIds(Long[] ids);
+    
+    @Override
+    int deleteById(Long id);
     
     /**
      * 根据用户ID查询会话列表
      * 
      * @param userId 用户ID
+     * @param type 会话类型
      * @return 会话集合
      */
-    public List<ImConversation> selectImConversationListByUserId(Long userId);
+    public List<ImConversation> selectImConversationListByUserId(Long userId, String type);
     
     /**
      * 根据会话类型和目标ID查询会话

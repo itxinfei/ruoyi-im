@@ -12,6 +12,7 @@
         <result property="memberCount" column="member_count"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
+        <result property="ownerName" column="owner_name"/>
     </resultMap>
 
     <sql id="selectImGroupVo">
@@ -25,11 +26,15 @@
     </select>
     
     <select id="selectImGroupList" parameterType="com.ruoyi.im.domain.ImGroup" resultMap="ImGroupResult">
-        <include refid="selectImGroupVo"/>
+        select g.id, g.name, g.owner_id, g.notice, g.avatar, g.status, g.member_count, g.create_time, g.update_time,
+               u.nickname as owner_name
+        from im_group g
+        left join im_user u on g.owner_id = u.id
         <where>
-            <if test="name != null and name != ''"> and name like concat('%', #{name}, '%') </if>
-            <if test="ownerId != null"> and owner_id = #{ownerId} </if>
-            <if test="status != null and status != ''"> and status = #{status} </if>
+            <if test="name != null and name != ''"> and g.name like concat('%', #{name}, '%') </if>
+            <if test="ownerId != null"> and g.owner_id = #{ownerId} </if>
+            <if test="status != null and status != ''"> and g.status = #{status} </if>
+            <if test="ownerName != null and ownerName != ''"> and (u.nickname like concat('%', #{ownerName}, '%') or u.username like concat('%', #{ownerName}, '%')) </if>
         </where>
     </select>
 

@@ -1,5 +1,4 @@
 import { createStore } from 'vuex'
-import chat from './chat'
 import getters from './getters'
 import app from './modules/app'
 import user from './modules/user'
@@ -10,14 +9,13 @@ export default createStore({
   modules: {
     app,
     user,
-    chat,
     im,
   },
   getters,
   plugins: [
     createPersistedState({
       key: 'vuex',
-      paths: ['app.sidebarOpened', 'app.device', 'user.token', 'user.name', 'user.avatar'],
+      paths: ['app.sidebar.opened', 'app.device', 'user.token', 'user.name', 'user.avatar'],
     }),
   ],
 })

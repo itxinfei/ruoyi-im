@@ -8,54 +8,25 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImConversationMemberService {
-    /**
-     * 查询会话成员
-     * 
-     * @param id 会话成员ID
-     * @return 会话成员
-     */
-    public ImConversationMember selectImConversationMemberById(Long id);
-
-    /**
-     * 查询会话成员列表
-     * 
-     * @param imConversationMember 会话成员
-     * @return 会话成员集合
-     */
-    public List<ImConversationMember> selectImConversationMemberList(ImConversationMember imConversationMember);
-
-    /**
-     * 新增会话成员
-     * 
-     * @param imConversationMember 会话成员
-     * @return 结果
-     */
-    public int insertImConversationMember(ImConversationMember imConversationMember);
-
-    /**
-     * 修改会话成员
-     * 
-     * @param imConversationMember 会话成员
-     * @return 结果
-     */
-    public int updateImConversationMember(ImConversationMember imConversationMember);
-
-    /**
-     * 批量删除会话成员
-     * 
-     * @param ids 需要删除的会话成员ID
-     * @return 结果
-     */
-    public int deleteImConversationMemberByIds(Long[] ids);
-
-    /**
-     * 删除会话成员信息
-     * 
-     * @param id 会话成员ID
-     * @return 结果
-     */
-    public int deleteImConversationMemberById(Long id);
+public interface ImConversationMemberService extends BaseService<ImConversationMember> {
+    
+    @Override
+    ImConversationMember selectById(Long id);
+    
+    @Override
+    List<ImConversationMember> selectList(ImConversationMember imConversationMember);
+    
+    @Override
+    int insert(ImConversationMember imConversationMember);
+    
+    @Override
+    int update(ImConversationMember imConversationMember);
+    
+    @Override
+    int deleteByIds(Long[] ids);
+    
+    @Override
+    int deleteById(Long id);
     
     /**
      * 根据会话ID查询会话成员列表

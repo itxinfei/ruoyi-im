@@ -77,6 +77,7 @@ im:
     corsAllowOrigins: []
     heartbeatInterval: 30  # WebSocket心跳间隔(秒)
     maxConnections: 10000  # 最大连接数
+    jwt-secret: im_secret_key_2024_for_im_system_that_is_long_enough_for_HS512_algorithm
 
 # 日志配置
 logging:

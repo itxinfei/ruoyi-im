@@ -8,54 +8,25 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImAuditExportRequestService {
-    /**
-     * 查询审计导出请求
-     * 
-     * @param id 审计导出请求ID
-     * @return 审计导出请求
-     */
-    public ImAuditExportRequest selectImAuditExportRequestById(Long id);
-
-    /**
-     * 查询审计导出请求列表
-     * 
-     * @param imAuditExportRequest 审计导出请求
-     * @return 审计导出请求集合
-     */
-    public List<ImAuditExportRequest> selectImAuditExportRequestList(ImAuditExportRequest imAuditExportRequest);
-
-    /**
-     * 新增审计导出请求
-     * 
-     * @param imAuditExportRequest 审计导出请求
-     * @return 结果
-     */
-    public int insertImAuditExportRequest(ImAuditExportRequest imAuditExportRequest);
-
-    /**
-     * 修改审计导出请求
-     * 
-     * @param imAuditExportRequest 审计导出请求
-     * @return 结果
-     */
-    public int updateImAuditExportRequest(ImAuditExportRequest imAuditExportRequest);
-
-    /**
-     * 批量删除审计导出请求
-     * 
-     * @param ids 需要删除的审计导出请求ID
-     * @return 结果
-     */
-    public int deleteImAuditExportRequestByIds(Long[] ids);
-
-    /**
-     * 删除审计导出请求信息
-     * 
-     * @param id 审计导出请求ID
-     * @return 结果
-     */
-    public int deleteImAuditExportRequestById(Long id);
+public interface ImAuditExportRequestService extends BaseService<ImAuditExportRequest> {
+    
+    @Override
+    ImAuditExportRequest selectById(Long id);
+    
+    @Override
+    List<ImAuditExportRequest> selectList(ImAuditExportRequest imAuditExportRequest);
+    
+    @Override
+    int insert(ImAuditExportRequest imAuditExportRequest);
+    
+    @Override
+    int update(ImAuditExportRequest imAuditExportRequest);
+    
+    @Override
+    int deleteByIds(Long[] ids);
+    
+    @Override
+    int deleteById(Long id);
     
     /**
      * 根据用户ID查询审计导出请求列表

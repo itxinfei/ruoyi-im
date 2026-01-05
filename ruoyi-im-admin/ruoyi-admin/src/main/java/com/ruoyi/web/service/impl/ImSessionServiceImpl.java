@@ -11,7 +11,7 @@ import com.ruoyi.system.domain.ImSession;
  * 
  * @author ruoyi
  */
-@Service
+@Service("adminImSessionServiceImpl")
 public class ImSessionServiceImpl implements IImSessionService
 {
     @Autowired

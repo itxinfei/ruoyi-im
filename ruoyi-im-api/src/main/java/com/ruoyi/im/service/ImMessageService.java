@@ -8,54 +8,25 @@ import java.util.List;
  * 
  * @author ruoyi
  */
-public interface ImMessageService {
-    /**
-     * 查询消息
-     * 
-     * @param id 消息ID
-     * @return 消息
-     */
-    public ImMessage selectImMessageById(Long id);
-
-    /**
-     * 查询消息列表
-     * 
-     * @param imMessage 消息
-     * @return 消息集合
-     */
-    public List<ImMessage> selectImMessageList(ImMessage imMessage);
-
-    /**
-     * 新增消息
-     * 
-     * @param imMessage 消息
-     * @return 结果
-     */
-    public int insertImMessage(ImMessage imMessage);
-
-    /**
-     * 修改消息
-     * 
-     * @param imMessage 消息
-     * @return 结果
-     */
-    public int updateImMessage(ImMessage imMessage);
-
-    /**
-     * 批量删除消息
-     * 
-     * @param ids 需要删除的消息ID
-     * @return 结果
-     */
-    public int deleteImMessageByIds(Long[] ids);
-
-    /**
-     * 删除消息信息
-     * 
-     * @param id 消息ID
-     * @return 结果
-     */
-    public int deleteImMessageById(Long id);
+public interface ImMessageService extends BaseService<ImMessage> {
+    
+    @Override
+    ImMessage selectById(Long id);
+    
+    @Override
+    List<ImMessage> selectList(ImMessage imMessage);
+    
+    @Override
+    int insert(ImMessage imMessage);
+    
+    @Override
+    int update(ImMessage imMessage);
+    
+    @Override
+    int deleteByIds(Long[] ids);
+    
+    @Override
+    int deleteById(Long id);
     
     /**
      * 根据会话ID查询消息列表

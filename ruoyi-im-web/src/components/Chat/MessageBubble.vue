@@ -373,9 +373,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/dingtalk-theme.scss' as *;
+
 .message-bubble {
   display: flex;
-  margin-bottom: 16px;
+  margin-bottom: $spacing-md;
   max-width: 80%;
   opacity: 0;
   transform: translateY(20px);
@@ -386,7 +388,7 @@ export default {
 
     .message-content {
       .text-message {
-        background-color: #1890ff;
+        background-color: $primary-color;
         color: #fff;
 
         .text-content {
@@ -404,7 +406,7 @@ export default {
     }
 
     .message-status {
-      margin-right: 8px;
+      margin-right: $spacing-sm;
       display: flex;
       align-items: flex-end;
 
@@ -413,7 +415,7 @@ export default {
         transition: all 0.3s ease;
 
         &.sending {
-          color: #1890ff;
+          color: $primary-color;
           animation: pulse 1.5s ease-in-out infinite;
         }
 
@@ -422,15 +424,15 @@ export default {
         }
 
         &.delivered {
-          color: #52c41a;
+          color: $success-color;
         }
 
         &.read {
-          color: #1890ff;
+          color: $primary-color;
         }
 
         &.failed {
-          color: #ff4d4f;
+          color: $error-color;
           cursor: pointer;
           transition:
             transform 0.2s ease,
@@ -453,27 +455,27 @@ export default {
     align-self: flex-start;
 
     .message-header {
-      margin-bottom: 4px;
+      margin-bottom: $spacing-xs;
 
       .sender-name {
-        font-size: 12px;
-        color: #1890ff;
-        margin-right: 8px;
-        font-weight: 500;
+        font-size: $font-size-sm;
+        color: $primary-color;
+        margin-right: $spacing-sm;
+        font-weight: $font-weight-medium;
       }
 
       .message-time {
-        font-size: 12px;
-        color: #999;
+        font-size: $font-size-sm;
+        color: $text-tertiary;
       }
     }
   }
 
   .message-content {
     .text-message {
-      background-color: #fff;
-      padding: 12px;
-      border-radius: 8px;
+      background-color: $bg-white;
+      padding: $spacing-sm;
+      border-radius: $border-radius-lg;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       transition:
         transform 0.2s ease,
@@ -485,8 +487,8 @@ export default {
       }
 
       .text-content {
-        color: #333;
-        line-height: 1.5;
+        color: $text-primary;
+        line-height: $line-height-base;
         white-space: pre-wrap;
         word-wrap: break-word;
       }
@@ -833,9 +835,9 @@ export default {
 
     .vote-message {
       .vote-container {
-        background: #fff;
-        border-radius: 8px;
-        padding: 12px;
+        background: $bg-white;
+        border-radius: $border-radius-lg;
+        padding: $spacing-sm;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         transition: all 0.2s ease;
 
@@ -845,43 +847,43 @@ export default {
         }
 
         .vote-title {
-          font-size: 14px;
-          font-weight: 500;
-          color: #333;
-          margin-bottom: 12px;
+          font-size: $font-size-base;
+          font-weight: $font-weight-medium;
+          color: $text-primary;
+          margin-bottom: $spacing-sm;
         }
 
         .vote-options {
-          margin-bottom: 12px;
+          margin-bottom: $spacing-sm;
 
           .vote-option {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 12px;
-            border-radius: 4px;
-            margin-bottom: 8px;
+            padding: $spacing-xs $spacing-sm;
+            border-radius: $border-radius-sm;
+            margin-bottom: $spacing-sm;
             cursor: pointer;
             transition: all 0.3s ease;
             border: 1px solid transparent;
 
             &:hover {
-              background: #f5f5f5;
+              background: $bg-hover;
             }
 
             &.selected {
-              background: #e6f7ff;
-              border-color: #1890ff;
+              background: $primary-color-lighter;
+              border-color: $primary-color;
             }
 
             .option-text {
-              font-size: 14px;
-              color: #333;
+              font-size: $font-size-base;
+              color: $text-primary;
             }
 
             .option-votes {
-              font-size: 12px;
-              color: #999;
+              font-size: $font-size-sm;
+              color: $text-tertiary;
             }
           }
         }
@@ -889,8 +891,8 @@ export default {
         .vote-info {
           display: flex;
           justify-content: space-between;
-          font-size: 12px;
-          color: #999;
+          font-size: $font-size-sm;
+          color: $text-tertiary;
         }
       }
     }
@@ -1035,11 +1037,11 @@ export default {
 
 // 撤回消息样式
 .recalled-message {
-  padding: 8px 12px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  color: #999;
-  font-size: 13px;
+  padding: $spacing-xs $spacing-sm;
+  background-color: $bg-light;
+  border-radius: $border-radius-lg;
+  color: $text-tertiary;
+  font-size: $font-size-sm;
   font-style: italic;
 }
 
@@ -1047,13 +1049,13 @@ export default {
 .forward-tag {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: $spacing-xs;
   font-size: 11px;
-  color: #999;
-  margin-top: 4px;
-  padding: 2px 6px;
+  color: $text-tertiary;
+  margin-top: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
   background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
+  border-radius: $border-radius-sm;
 
   i {
     font-size: 10px;
@@ -1066,10 +1068,10 @@ export default {
   top: -30px;
   right: 0;
   display: flex;
-  gap: 4px;
-  padding: 4px 8px;
-  background: #fff;
-  border-radius: 16px;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  background: $bg-white;
+  border-radius: $border-radius-xl;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   opacity: 0;
   visibility: hidden;
@@ -1081,20 +1083,20 @@ export default {
   }
 
   .action-icon {
-    padding: 4px;
+    padding: $spacing-xs;
     font-size: 14px;
-    color: #666;
+    color: $text-secondary;
     cursor: pointer;
     border-radius: 50%;
     transition: all 0.2s ease;
 
     &:hover {
-      color: #1890ff;
-      background-color: #e6f7ff;
+      color: $primary-color;
+      background-color: $primary-color-lighter;
     }
 
     &.danger:hover {
-      color: #ff4d4f;
+      color: $error-color;
       background-color: #fff1f0;
     }
   }
@@ -1116,28 +1118,28 @@ export default {
   position: fixed;
   z-index: 9999;
   min-width: 120px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  padding: 4px 0;
+  background: $bg-white;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-lg;
+  padding: $spacing-xs 0;
   animation: fadeIn 0.15s ease;
 
   .menu-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    font-size: 13px;
-    color: #333;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-lg;
+    font-size: $font-size-sm;
+    color: $text-primary;
     cursor: pointer;
     transition: background-color 0.2s;
 
     &:hover {
-      background-color: #f5f5f5;
+      background-color: $bg-hover;
     }
 
     &.danger {
-      color: #ff4d4f;
+      color: $error-color;
 
       &:hover {
         background-color: #fff1f0;
@@ -1151,8 +1153,8 @@ export default {
 
   .menu-divider {
     height: 1px;
-    background-color: #f0f0f0;
-    margin: 4px 0;
+    background-color: $border-light;
+    margin: $spacing-xs 0;
   }
 }
 

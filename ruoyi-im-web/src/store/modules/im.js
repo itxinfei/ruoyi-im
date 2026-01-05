@@ -82,6 +82,12 @@ const state = {
   wsConnected: false,
   // 消息ID集合（用于快速去重）
   messageIdSet: {},
+  // 联系人列表
+  contacts: [],
+  // 群组列表
+  groups: [],
+  // 文件列表
+  files: [],
 }
 
 const getters = {
@@ -274,6 +280,15 @@ const mutations = {
       }
       saveMessageCache(state.messageList)
     }
+  },
+  SET_CONTACTS: (state, contacts) => {
+    state.contacts = contacts
+  },
+  SET_GROUPS: (state, groups) => {
+    state.groups = groups
+  },
+  SET_FILES: (state, files) => {
+    state.files = files
   },
 }
 
@@ -504,6 +519,104 @@ const actions = {
   // 更新在线状态
   updateOnlineStatus({ commit }, { userId, status }) {
     commit('SET_ONLINE_STATUS', { userId, status })
+  },
+
+  // 切换到联系人私聊
+  async switchToContact({ commit, state }, contact) {
+    // 创建或获取与该联系人的私聊会话
+    let session = state.sessions.find(s => s.type === 'private' && s.peerId === contact.id)
+
+    if (!session) {
+      session = {
+        id: contact.id,
+        name: contact.nickname || contact.username,
+        avatar: contact.avatar,
+        type: 'private',
+        peerId: contact.id,
+        unreadCount: 0,
+        lastMessage: null,
+        pinned: false,
+        muted: false,
+        online: contact.online,
+      }
+      commit('ADD_SESSION', session)
+    }
+
+    commit('SET_CURRENT_SESSION', session)
+    return session
+  },
+
+  // 切换到群组
+  async switchToGroup({ commit, state }, group) {
+    let session = state.sessions.find(s => s.type === 'group' && s.id === group.id)
+
+    if (!session) {
+      session = {
+        id: group.id,
+        name: group.name,
+        avatar: group.avatar,
+        type: 'group',
+        groupId: group.id,
+        unreadCount: 0,
+        lastMessage: null,
+        pinned: false,
+        muted: false,
+        memberCount: group.memberCount,
+      }
+      commit('ADD_SESSION', session)
+    }
+
+    commit('SET_CURRENT_SESSION', session)
+    return session
+  },
+
+  // 打开文件
+  openFile({ commit }, file) {
+    // 可以在这里处理文件打开逻辑
+    console.log('打开文件:', file)
+  },
+
+  // 加载联系人列表
+  async loadContacts({ commit }) {
+    // TODO: 调用API获取联系人列表
+    // const response = await listContacts()
+    // commit('SET_CONTACTS', response.data)
+    commit('SET_CONTACTS', [])
+  },
+
+  // 加载群组列表
+  async loadGroups({ commit }) {
+    // TODO: 调用API获取群组列表
+    // const response = await listGroups()
+    // commit('SET_GROUPS', response.data)
+    commit('SET_GROUPS', [])
+  },
+
+  // 加载文件列表
+  async loadFiles({ commit }) {
+    // TODO: 调用API获取文件列表
+    // const response = await listFiles()
+    // commit('SET_FILES', response.data)
+    commit('SET_FILES', [])
+  },
+
+  // 删除联系人
+  async deleteContact({ commit }, contactId) {
+    // TODO: 调用API删除联系人
+    ElMessage.success('联系人已删除')
+  },
+
+  // 退出群组
+  async leaveGroup({ commit }, groupId) {
+    // TODO: 调用API退出群组
+    commit('REMOVE_SESSION', groupId)
+    ElMessage.success('已退出群组')
+  },
+
+  // 删除文件
+  async deleteFile({ commit }, fileId) {
+    // TODO: 调用API删除文件
+    ElMessage.success('文件已删除')
   },
 }
 

@@ -8,7 +8,6 @@ import * as backupApi from './backup.js'
 import * as mfaApi from './mfa.js'
 import * as userApi from './user.js'
 import * as notificationApi from './notification.js'
-import imSocket from '@/utils/socket/imSocket.js'
 
 // 统一导出
 export {
@@ -21,7 +20,6 @@ export {
   mfaApi,
   userApi,
   notificationApi,
-  imSocket,
 }
 
 export default {
@@ -34,7 +32,6 @@ export default {
   mfa: mfaApi,
   user: userApi,
   notification: notificationApi,
-  socket: imSocket,
 }
 
 // 常量定义
