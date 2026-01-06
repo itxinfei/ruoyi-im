@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * IM用户实体
+ * IM鐢ㄦ埛瀹炰綋
  * 
  * @author ruoyi
  */

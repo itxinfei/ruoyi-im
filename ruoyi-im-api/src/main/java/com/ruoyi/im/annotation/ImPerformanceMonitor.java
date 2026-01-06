@@ -34,7 +34,7 @@ public @interface ImPerformanceMonitor {
     /**
      * 性能阈值（毫秒）
      * 
-     * @return 性能阈值，当响应时间超过此值时记录告警日志
+     * @return 性能阈值，当响应时间超过此值时记录警告日志
      */
     long threshold() default 1000;
     

@@ -4,7 +4,7 @@ import com.ruoyi.im.domain.ImConversation;
 import java.util.List;
 
 /**
- * 会话Service接口
+ * 浼氳瘽Service鎺ュ彛
  * 
  * @author ruoyi
  */
@@ -29,46 +29,46 @@ public interface ImConversationService extends BaseService<ImConversation> {
     int deleteById(Long id);
     
     /**
-     * 根据用户ID查询会话列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ浼氳瘽鍒楄〃
      * 
-     * @param userId 用户ID
-     * @param type 会话类型
-     * @return 会话集合
+     * @param userId 鐢ㄦ埛ID
+     * @param type 浼氳瘽绫诲瀷
+     * @return 浼氳瘽闆嗗悎
      */
     public List<ImConversation> selectImConversationListByUserId(Long userId, String type);
     
     /**
-     * 根据会话类型和目标ID查询会话
+     * 鏍规嵁浼氳瘽绫诲瀷鍜岀洰鏍嘔D鏌ヨ浼氳瘽
      * 
-     * @param type 会话类型
-     * @param targetId 目标ID
-     * @return 会话
+     * @param type 浼氳瘽绫诲瀷
+     * @param targetId 鐩爣ID
+     * @return 浼氳瘽
      */
     public ImConversation selectImConversationByTypeAndTargetId(String type, Long targetId);
     
     /**
-     * 创建私聊会话
+     * 鍒涘缓绉佽亰浼氳瘽
      * 
-     * @param userId 用户ID
-     * @param friendUserId 好友用户ID
-     * @return 会话
+     * @param userId 鐢ㄦ埛ID
+     * @param friendUserId 濂藉弸鐢ㄦ埛ID
+     * @return 浼氳瘽
      */
     public ImConversation createPrivateConversation(Long userId, Long friendUserId);
     
     /**
-     * 创建群聊会话
+     * 鍒涘缓缇よ亰浼氳瘽
      * 
-     * @param groupId 群组ID
-     * @return 会话
+     * @param groupId 缇ょ粍ID
+     * @return 浼氳瘽
      */
     public ImConversation createGroupConversation(Long groupId);
     
     /**
-     * 更新会话最后消息ID
+     * 鏇存柊浼氳瘽鏈€鍚庢秷鎭疘D
      * 
-     * @param conversationId 会话ID
-     * @param lastMessageId 最后消息ID
-     * @return 结果
+     * @param conversationId 浼氳瘽ID
+     * @param lastMessageId 鏈€鍚庢秷鎭疘D
+     * @return 缁撴灉
      */
     public int updateConversationLastMessage(Long conversationId, Long lastMessageId);
 }

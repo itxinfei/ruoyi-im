@@ -30,7 +30,7 @@ public class ImConfigController extends BaseController {
      * 获取IM系统配置
      * 
      * 获取IM系统的全局配置信息，包括服务器版本、用户数限制、
-     * 消息保留天数、文件上传限制等系统级参数。
+     * 消息保存天数、文件上传限制等系统级参数。
      * 该接口通常仅限管理员访问。
      * 
      * @return 系统配置信息，包含服务器版本、限制参数、功能开关等

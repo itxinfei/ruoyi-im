@@ -5,178 +5,171 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * IM用户Service接口
+ * IM鐢ㄦ埛Service鎺ュ彛
  * 
  * @author ruoyi
  */
 public interface ImUserService {
     
     /**
-     * 根据ID查询用户
+     * 鏍规嵁ID鏌ヨ鐢ㄦ埛
      * 
-     * @param id 用户ID
-     * @return IM用户
+     * @param id 鐢ㄦ埛ID
+     * @return IM鐢ㄦ埛
      */
     ImUser selectById(Long id);
     
     /**
-     * 查询用户列表
+     * 鏌ヨ鐢ㄦ埛鍒楄〃
      * 
-     * @param imUser 查询条件
-     * @return IM用户集合
+     * @param imUser 鏌ヨ鏉′欢
+     * @return IM鐢ㄦ埛闆嗗悎
      */
     List<ImUser> selectList(ImUser imUser);
     
     /**
-     * 新增用户
+     * 鏂板鐢ㄦ埛
      * 
-     * @param imUser IM用户
-     * @return 结果
+     * @param imUser IM鐢ㄦ埛
+     * @return 缁撴灉
      */
     int insert(ImUser imUser);
     
     /**
-     * 修改用户
+     * 淇敼鐢ㄦ埛
      * 
-     * @param imUser IM用户
-     * @return 结果
+     * @param imUser IM鐢ㄦ埛
+     * @return 缁撴灉
      */
     int update(ImUser imUser);
     
     /**
-     * 批量删除用户
+     * 鎵归噺鍒犻櫎鐢ㄦ埛
      * 
-     * @param ids 需要删除的用户ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑鐢ㄦ埛ID
+     * @return 缁撴灉
      */
     int deleteByIds(Long[] ids);
     
     /**
-     * 删除用户信息
+     * 鍒犻櫎鐢ㄦ埛淇℃伅
      * 
-     * @param id 用户ID
-     * @return 结果
+     * @param id 鐢ㄦ埛ID
+     * @return 缁撴灉
      */
     int deleteById(Long id);
     
     /**
-     * 根据用户名查询用户
-     * 
-     * @param username 用户名
-     * @return IM用户
+     * 鏍规嵁鐢ㄦ埛鍚嶆煡璇㈢敤鎴?     * 
+     * @param username 鐢ㄦ埛鍚?     * @return IM鐢ㄦ埛
      */
     public ImUser selectImUserByUsername(String username);
     
     /**
-     * 根据邮箱查询用户
+     * 鏍规嵁閭鏌ヨ鐢ㄦ埛
      * 
-     * @param email 邮箱
-     * @return IM用户
+     * @param email 閭
+     * @return IM鐢ㄦ埛
      */
     public ImUser selectImUserByEmail(String email);
     
     /**
-     * 用户注册
+     * 鐢ㄦ埛娉ㄥ唽
      * 
-     * @param username 用户名
-     * @param password 密码
-     * @param nickname 昵称
-     * @param email 邮箱
-     * @param phone 电话
-     * @return 用户ID
+     * @param username 鐢ㄦ埛鍚?     * @param password 瀵嗙爜
+     * @param nickname 鏄电О
+     * @param email 閭
+     * @param phone 鐢佃瘽
+     * @return 鐢ㄦ埛ID
      */
     public Long registerUser(String username, String password, String nickname, String email, String phone);
     
     /**
-     * 更新用户状态
-     * 
-     * @param userId 用户ID
-     * @param status 状态
-     * @return 结果
+     * 鏇存柊鐢ㄦ埛鐘舵€?     * 
+     * @param userId 鐢ㄦ埛ID
+     * @param status 鐘舵€?     * @return 缁撴灉
      */
     public int updateUserStatus(Long userId, String status);
     
     /**
-     * 更新用户头像
+     * 鏇存柊鐢ㄦ埛澶村儚
      * 
-     * @param userId 用户ID
-     * @param avatar 头像URL
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @param avatar 澶村儚URL
+     * @return 缁撴灉
      */
     public int updateUserAvatar(Long userId, String avatar);
     
     /**
-     * 更新用户信息
+     * 鏇存柊鐢ㄦ埛淇℃伅
      * 
-     * @param userId 用户ID
-     * @param nickname 昵称
-     * @param email 邮箱
-     * @param phone 电话
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @param nickname 鏄电О
+     * @param email 閭
+     * @param phone 鐢佃瘽
+     * @return 缁撴灉
      */
     public int updateUserInfo(Long userId, String nickname, String email, String phone);
     
     /**
-     * 获取用户权限列表
+     * 鑾峰彇鐢ㄦ埛鏉冮檺鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 权限集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 鏉冮檺闆嗗悎
      */
     public Set<String> getUserPermissions(Long userId);
     
     /**
-     * 获取用户角色列表
+     * 鑾峰彇鐢ㄦ埛瑙掕壊鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 角色集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 瑙掕壊闆嗗悎
      */
     public Set<String> getUserRoles(Long userId);
     
     /**
-     * 查询IM用户列表
+     * 鏌ヨIM鐢ㄦ埛鍒楄〃
      * 
-     * @param imUser 查询条件
-     * @return IM用户集合
+     * @param imUser 鏌ヨ鏉′欢
+     * @return IM鐢ㄦ埛闆嗗悎
      */
     default List<ImUser> selectImUserList(ImUser imUser) {
         return selectList(imUser);
     }
     
     /**
-     * 根据ID查找用户
+     * 鏍规嵁ID鏌ユ壘鐢ㄦ埛
      * 
-     * @param id 用户ID
-     * @return IM用户
+     * @param id 鐢ㄦ埛ID
+     * @return IM鐢ㄦ埛
      */
     default ImUser findById(Long id) {
         return selectById(id);
     }
     
     /**
-     * 根据用户名查找用户
-     * 
-     * @param username 用户名
-     * @return IM用户
+     * 鏍规嵁鐢ㄦ埛鍚嶆煡鎵剧敤鎴?     * 
+     * @param username 鐢ㄦ埛鍚?     * @return IM鐢ㄦ埛
      */
     default ImUser findByUsername(String username) {
         return selectImUserByUsername(username);
     }
     
     /**
-     * 更新用户信息
+     * 鏇存柊鐢ㄦ埛淇℃伅
      * 
-     * @param imUser 用户信息
-     * @return 结果
+     * @param imUser 鐢ㄦ埛淇℃伅
+     * @return 缁撴灉
      */
     default int updateById(ImUser imUser) {
         return update(imUser);
     }
     
     /**
-     * 查询IM用户信息
+     * 鏌ヨIM鐢ㄦ埛淇℃伅
      * 
-     * @param imUser 查询条件
-     * @return IM用户信息
+     * @param imUser 鏌ヨ鏉′欢
+     * @return IM鐢ㄦ埛淇℃伅
      */
     default ImUser selectImUserById(Long id) {
         return selectById(id);

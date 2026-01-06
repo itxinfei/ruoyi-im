@@ -3,53 +3,51 @@ package com.ruoyi.im.domain;
 import java.time.LocalDateTime;
 
 /**
- * 会话成员实体
+ * 浼氳瘽鎴愬憳瀹炰綋
  * 
  * @author ruoyi
  */
 public class ImConversationMember {
     /**
-     * 主键ID
+     * 涓婚敭ID
      */
     private Long id;
     
     /**
-     * 会话ID
+     * 浼氳瘽ID
      */
     private Long conversationId;
     
     /**
-     * 用户ID
+     * 鐢ㄦ埛ID
      */
     private Long userId;
     
     /**
-     * 未读消息数
-     */
+     * 鏈娑堟伅鏁?     */
     private Integer unreadCount;
     
     /**
-     * 最后阅读消息ID
+     * 鏈€鍚庨槄璇绘秷鎭疘D
      */
     private Long lastReadMessageId;
     
     /**
-     * 是否置顶
+     * 鏄惁缃《
      */
     private Boolean isPinned;
     
     /**
-     * 是否免打扰
-     */
+     * 鏄惁鍏嶆墦鎵?     */
     private Boolean isMuted;
     
     /**
-     * 创建时间
+     * 鍒涘缓鏃堕棿
      */
     private LocalDateTime createTime;
     
     /**
-     * 更新时间
+     * 鏇存柊鏃堕棿
      */
     private LocalDateTime updateTime;
 

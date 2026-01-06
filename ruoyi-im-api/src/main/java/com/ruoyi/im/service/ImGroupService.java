@@ -4,7 +4,7 @@ import com.ruoyi.im.domain.ImGroup;
 import java.util.List;
 
 /**
- * 群组Service接口
+ * 缇ょ粍Service鎺ュ彛
  * 
  * @author ruoyi
  */
@@ -29,42 +29,42 @@ public interface ImGroupService extends BaseService<ImGroup> {
     int deleteById(Long id);
     
     /**
-     * 根据用户ID查询群组列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ缇ょ粍鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 群组集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 缇ょ粍闆嗗悎
      */
     public List<ImGroup> selectImGroupListByUserId(Long userId);
     
     /**
-     * 根据群组ID查询群组信息
+     * 鏍规嵁缇ょ粍ID鏌ヨ缇ょ粍淇℃伅
      * 
-     * @param id 群组ID
-     * @return 群组信息
+     * @param id 缇ょ粍ID
+     * @return 缇ょ粍淇℃伅
      */
     public ImGroup selectImGroupById(Long id);
     
     /**
-     * 更新群组信息
+     * 鏇存柊缇ょ粍淇℃伅
      * 
-     * @param imGroup 群组信息
-     * @return 结果
+     * @param imGroup 缇ょ粍淇℃伅
+     * @return 缁撴灉
      */
     public int updateImGroup(ImGroup imGroup);
     
     /**
-     * 根据ID删除群组信息
+     * 鏍规嵁ID鍒犻櫎缇ょ粍淇℃伅
      * 
-     * @param id 群组ID
-     * @return 结果
+     * @param id 缇ょ粍ID
+     * @return 缁撴灉
      */
     public int deleteImGroupById(Long id);
     
     /**
-     * 查询群组列表
+     * 鏌ヨ缇ょ粍鍒楄〃
      * 
-     * @param request 查询请求
-     * @return 群组集合
+     * @param request 鏌ヨ璇锋眰
+     * @return 缇ょ粍闆嗗悎
      */
     default List<ImGroup> selectImGroupList(com.ruoyi.im.dto.group.ImGroupQueryRequest request) {
         return selectList(new com.ruoyi.im.domain.ImGroup());

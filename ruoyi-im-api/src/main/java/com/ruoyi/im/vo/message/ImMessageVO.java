@@ -8,61 +8,61 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 消息信息VO
+ * 娑堟伅淇℃伅VO
  * 
  * @author zhangxy
  */
-@ApiModel(description = "消息信息")
+@ApiModel(description = "娑堟伅淇℃伅")
 public class ImMessageVO {
 
-    @ApiModelProperty(value = "消息ID", example = "1")
+    @ApiModelProperty(value = "娑堟伅ID", example = "1")
     private Long id;
 
-    @ApiModelProperty(value = "会话ID", example = "1")
+    @ApiModelProperty(value = "浼氳瘽ID", example = "1")
     private Long conversationId;
 
-    @ApiModelProperty(value = "发送者用户ID", example = "1")
+    @ApiModelProperty(value = "鍙戦€佽€呯敤鎴稩D", example = "1")
     private Long senderId;
 
-    @ApiModelProperty(value = "发送者用户名", example = "zhangsan")
+    @ApiModelProperty(value = "鍙戦€佽€呯敤鎴峰悕", example = "zhangsan")
     private String senderUsername;
 
-    @ApiModelProperty(value = "发送者昵称", example = "张三")
+    @ApiModelProperty(value = "鍙戦€佽€呮樀绉?, example = "寮犱笁")
     private String senderNickname;
 
-    @ApiModelProperty(value = "消息类型", example = "TEXT")
+    @ApiModelProperty(value = "娑堟伅绫诲瀷", example = "TEXT")
     private String type;
 
-    @ApiModelProperty(value = "消息内容", example = "你好，世界！")
+    @ApiModelProperty(value = "娑堟伅鍐呭", example = "浣犲ソ锛屼笘鐣岋紒")
     private String content;
 
-    @ApiModelProperty(value = "消息状态", example = "NORMAL")
+    @ApiModelProperty(value = "娑堟伅鐘舵€?, example = "NORMAL")
     private String status;
 
-    @ApiModelProperty(value = "消息状态描述", example = "正常")
+    @ApiModelProperty(value = "娑堟伅鐘舵€佹弿杩?, example = "姝ｅ父")
     private String statusDesc;
 
-    @ApiModelProperty(value = "消息扩展字段", example = "{\"fileName\":\"document.pdf\"}")
+    @ApiModelProperty(value = "娑堟伅鎵╁睍瀛楁", example = "{\"fileName\":\"document.pdf\"}")
     private String extData;
 
-    @ApiModelProperty(value = "被回复的消息ID", example = "100")
+    @ApiModelProperty(value = "琚洖澶嶇殑娑堟伅ID", example = "100")
     private Long replyMessageId;
 
-    @ApiModelProperty(value = "被回复的消息内容", example = "原始消息内容")
+    @ApiModelProperty(value = "琚洖澶嶇殑娑堟伅鍐呭", example = "鍘熷娑堟伅鍐呭")
     private String replyMessageContent;
 
-    @ApiModelProperty(value = "创建时间", example = "2024-01-01 10:00:00")
+    @ApiModelProperty(value = "鍒涘缓鏃堕棿", example = "2024-01-01 10:00:00")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
-    @ApiModelProperty(value = "更新时间", example = "2024-01-01 10:00:00")
+    @ApiModelProperty(value = "鏇存柊鏃堕棿", example = "2024-01-01 10:00:00")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
-    @ApiModelProperty(value = "消息互动列表")
+    @ApiModelProperty(value = "娑堟伅浜掑姩鍒楄〃")
     private List<ImMessageReactionVO> reactions;
 
-    @ApiModelProperty(value = "已读回执列表")
+    @ApiModelProperty(value = "宸茶鍥炴墽鍒楄〃")
     private List<ImMessageReadReceiptVO> readReceipts;
 
     public Long getId() {

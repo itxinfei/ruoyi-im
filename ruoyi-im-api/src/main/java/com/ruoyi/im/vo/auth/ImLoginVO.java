@@ -4,30 +4,30 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * 登录响应VO
+ * 鐧诲綍鍝嶅簲VO
  * 
  * @author ruoyi
  * @since 2024-01-05
  */
-@ApiModel(description = "登录响应信息")
+@ApiModel(description = "鐧诲綍鍝嶅簲淇℃伅")
 public class ImLoginVO {
 
-    @ApiModelProperty(value = "访问令牌", example = "eyJhbGciOiJIUzI1NiJ9...")
+    @ApiModelProperty(value = "璁块棶浠ょ墝", example = "eyJhbGciOiJIUzI1NiJ9...")
     private String token;
 
-    @ApiModelProperty(value = "令牌类型", example = "Bearer")
+    @ApiModelProperty(value = "浠ょ墝绫诲瀷", example = "Bearer")
     private String tokenType;
 
-    @ApiModelProperty(value = "过期时间（秒）", example = "3600")
+    @ApiModelProperty(value = "杩囨湡鏃堕棿锛堢锛?, example = "3600")
     private Long expiresIn;
 
-    @ApiModelProperty(value = "用户信息")
+    @ApiModelProperty(value = "鐢ㄦ埛淇℃伅")
     private ImUserVO userInfo;
 
-    @ApiModelProperty(value = "登录时间", example = "2024-01-05 10:30:00")
+    @ApiModelProperty(value = "鐧诲綍鏃堕棿", example = "2024-01-05 10:30:00")
     private String loginTime;
 
-    @ApiModelProperty(value = "设备信息")
+    @ApiModelProperty(value = "璁惧淇℃伅")
     private ImDeviceInfoVO deviceInfo;
 
     public String getToken() {

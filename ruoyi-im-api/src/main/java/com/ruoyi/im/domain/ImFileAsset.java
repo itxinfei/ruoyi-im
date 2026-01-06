@@ -3,103 +3,99 @@ package com.ruoyi.im.domain;
 import java.time.LocalDateTime;
 
 /**
- * 文件资源实体
+ * 鏂囦欢璧勬簮瀹炰綋
  * 
  * @author ruoyi
  */
 public class ImFileAsset {
     /**
-     * 文件ID
+     * 鏂囦欢ID
      */
     private Long id;
     
     /**
-     * 文件名
-     */
+     * 鏂囦欢鍚?     */
     private String fileName;
     
     /**
-     * 文件路径
+     * 鏂囦欢璺緞
      */
     private String filePath;
     
     /**
-     * 文件大小（字节）
+     * 鏂囦欢澶у皬锛堝瓧鑺傦級
      */
     private Long fileSize;
     
     /**
-     * 文件类型
+     * 鏂囦欢绫诲瀷
      */
     private String fileType;
     
     /**
-     * 文件扩展名
-     */
+     * 鏂囦欢鎵╁睍鍚?     */
     private String fileExt;
     
     /**
-     * 文件MD5值
-     */
+     * 鏂囦欢MD5鍊?     */
     private String md5;
     
     /**
-     * 上传者用户ID
+     * 涓婁紶鑰呯敤鎴稩D
      */
     private Long uploaderId;
     
     /**
-     * 下载次数
+     * 涓嬭浇娆℃暟
      */
     private Integer downloadCount;
     
     /**
-     * 下载链接过期时间
+     * 涓嬭浇閾炬帴杩囨湡鏃堕棿
      */
     private LocalDateTime downloadExpireTime;
     
     /**
-     * 状态（ACTIVE正常 DELETED已删除）
+     * 鐘舵€侊紙ACTIVE姝ｅ父 DELETED宸插垹闄わ級
      */
     private String status;
     
     /**
-     * 文件分类
+     * 鏂囦欢鍒嗙被
      */
     private String category;
 
     /**
-     * 文件描述
+     * 鏂囦欢鎻忚堪
      */
     private String description;
 
     /**
-     * 文件标签
+     * 鏂囦欢鏍囩
      */
     private String tags;
 
     /**
-     * 原始文件名
-     */
+     * 鍘熷鏂囦欢鍚?     */
     private String originalName;
 
     /**
-     * 文件URL
+     * 鏂囦欢URL
      */
     private String fileUrl;
 
     /**
-     * 上传时间
+     * 涓婁紶鏃堕棿
      */
     private LocalDateTime uploadTime;
 
     /**
-     * 更新时间
+     * 鏇存柊鏃堕棿
      */
     private LocalDateTime updateTime;
 
     /**
-     * 创建时间
+     * 鍒涘缓鏃堕棿
      */
     private LocalDateTime createTime;
 

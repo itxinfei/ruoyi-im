@@ -7,67 +7,67 @@ import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
 
 /**
- * 群组信息VO
+ * 缇ょ粍淇℃伅VO
  * 
  * @author ruoyi
  */
-@ApiModel(description = "群组信息")
+@ApiModel(description = "缇ょ粍淇℃伅")
 public class ImGroupVO {
 
-    @ApiModelProperty(value = "群组ID", example = "1")
+    @ApiModelProperty(value = "缇ょ粍ID", example = "1")
     private Long id;
 
-    @ApiModelProperty(value = "群组名称", example = "技术交流群")
+    @ApiModelProperty(value = "缇ょ粍鍚嶇О", example = "鎶€鏈氦娴佺兢")
     private String name;
 
-    @ApiModelProperty(value = "群主ID", example = "1")
+    @ApiModelProperty(value = "缇や富ID", example = "1")
     private Long ownerId;
 
-    @ApiModelProperty(value = "群主用户名", example = "zhangsan")
+    @ApiModelProperty(value = "缇や富鐢ㄦ埛鍚?, example = "zhangsan")
     private String ownerUsername;
 
-    @ApiModelProperty(value = "群主昵称", example = "张三")
+    @ApiModelProperty(value = "缇や富鏄电О", example = "寮犱笁")
     private String ownerNickname;
 
-    @ApiModelProperty(value = "群组公告", example = "欢迎大家加入技术交流群")
+    @ApiModelProperty(value = "缇ょ粍鍏憡", example = "娆㈣繋澶у鍔犲叆鎶€鏈氦娴佺兢")
     private String notice;
 
-    @ApiModelProperty(value = "群组头像", example = "/profile/group.png")
+    @ApiModelProperty(value = "缇ょ粍澶村儚", example = "/profile/group.png")
     private String avatar;
 
-    @ApiModelProperty(value = "群组状态", example = "ACTIVE")
+    @ApiModelProperty(value = "缇ょ粍鐘舵€?, example = "ACTIVE")
     private String status;
 
-    @ApiModelProperty(value = "群组状态描述", example = "活跃")
+    @ApiModelProperty(value = "缇ょ粍鐘舵€佹弿杩?, example = "娲昏穬")
     private String statusDesc;
 
-    @ApiModelProperty(value = "成员数量", example = "10")
+    @ApiModelProperty(value = "鎴愬憳鏁伴噺", example = "10")
     private Integer memberCount;
 
-    @ApiModelProperty(value = "创建时间", example = "2024-01-01 10:00:00")
+    @ApiModelProperty(value = "鍒涘缓鏃堕棿", example = "2024-01-01 10:00:00")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
-    @ApiModelProperty(value = "更新时间", example = "2024-01-01 10:00:00")
+    @ApiModelProperty(value = "鏇存柊鏃堕棿", example = "2024-01-01 10:00:00")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
     
-    @ApiModelProperty(value = "群组名称（别名）", example = "技术交流群")
+    @ApiModelProperty(value = "缇ょ粍鍚嶇О锛堝埆鍚嶏級", example = "鎶€鏈氦娴佺兢")
     private String groupName;
     
-    @ApiModelProperty(value = "群组描述", example = "这是一个技术交流群")
+    @ApiModelProperty(value = "缇ょ粍鎻忚堪", example = "杩欐槸涓€涓妧鏈氦娴佺兢")
     private String groupDesc;
     
-    @ApiModelProperty(value = "群组类型", example = "COMMON")
+    @ApiModelProperty(value = "缇ょ粍绫诲瀷", example = "COMMON")
     private String groupType;
     
-    @ApiModelProperty(value = "成员数量限制", example = "200")
+    @ApiModelProperty(value = "鎴愬憳鏁伴噺闄愬埗", example = "200")
     private Integer memberLimit;
     
-    @ApiModelProperty(value = "群主名称", example = "张三")
+    @ApiModelProperty(value = "缇や富鍚嶇О", example = "寮犱笁")
     private String ownerName;
     
-    @ApiModelProperty(value = "群主头像", example = "/profile/avatar.png")
+    @ApiModelProperty(value = "缇や富澶村儚", example = "/profile/avatar.png")
     private String ownerAvatar;
 
     public Long getId() {

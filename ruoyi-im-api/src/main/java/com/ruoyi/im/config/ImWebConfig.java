@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * IM模块Web配置
  * 
- * 配置IM模块相关的拦截器和路径映射
+ * 配置IM模块相关的拦截器和路由映射
  * 
  * @author ruoyi
  * @date 2024-08-09
@@ -23,7 +23,7 @@ public class ImWebConfig implements WebMvcConfigurer
     @Override
     public void addInterceptors(InterceptorRegistry registry)
     {
-        // 添加IM模块的认证拦截器，处理 /im/** 路径的请求
+        // 添加IM模块的认证拦截器，处理/im/** 路径的请求
         registry.addInterceptor(imAuthInterceptor)
                 .addPathPatterns("/im/**")
                 .excludePathPatterns(

@@ -6,84 +6,84 @@ import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
 
 /**
- * 文件信息VO
+ * 鏂囦欢淇℃伅VO
  * 
  * @author ruoyi
  * @since 2024-01-05
  */
-@ApiModel(description = "文件信息")
+@ApiModel(description = "鏂囦欢淇℃伅")
 public class ImFileVO {
 
-    @ApiModelProperty(value = "文件ID", example = "1")
+    @ApiModelProperty(value = "鏂囦欢ID", example = "1")
     private Long id;
 
-    @ApiModelProperty(value = "文件名称", example = "avatar.jpg")
+    @ApiModelProperty(value = "鏂囦欢鍚嶇О", example = "avatar.jpg")
     private String fileName;
 
-    @ApiModelProperty(value = "原始文件名", example = "我的头像.jpg")
+    @ApiModelProperty(value = "鍘熷鏂囦欢鍚?, example = "鎴戠殑澶村儚.jpg")
     private String originalName;
 
-    @ApiModelProperty(value = "文件路径", example = "/files/1704451200000_1.jpg")
+    @ApiModelProperty(value = "鏂囦欢璺緞", example = "/files/1704451200000_1.jpg")
     private String filePath;
 
-    @ApiModelProperty(value = "文件URL", example = "http://localhost:8080/files/1704451200000_1.jpg")
+    @ApiModelProperty(value = "鏂囦欢URL", example = "http://localhost:8080/files/1704451200000_1.jpg")
     private String fileUrl;
 
-    @ApiModelProperty(value = "文件大小（字节）", example = "102400")
+    @ApiModelProperty(value = "鏂囦欢澶у皬锛堝瓧鑺傦級", example = "102400")
     private Long fileSize;
 
-    @ApiModelProperty(value = "文件大小描述", example = "100KB")
+    @ApiModelProperty(value = "鏂囦欢澶у皬鎻忚堪", example = "100KB")
     private String fileSizeDesc;
 
-    @ApiModelProperty(value = "文件类型", example = "image")
+    @ApiModelProperty(value = "鏂囦欢绫诲瀷", example = "image")
     private String fileType;
 
-    @ApiModelProperty(value = "文件类型描述", example = "图片")
+    @ApiModelProperty(value = "鏂囦欢绫诲瀷鎻忚堪", example = "鍥剧墖")
     private String fileTypeDesc;
 
-    @ApiModelProperty(value = "文件扩展名", example = ".jpg")
+    @ApiModelProperty(value = "鏂囦欢鎵╁睍鍚?, example = ".jpg")
     private String fileExt;
 
-    @ApiModelProperty(value = "文件分类", example = "avatar")
+    @ApiModelProperty(value = "鏂囦欢鍒嗙被", example = "avatar")
     private String category;
 
-    @ApiModelProperty(value = "文件标签", example = "头像,个人资料")
+    @ApiModelProperty(value = "鏂囦欢鏍囩", example = "澶村儚,涓汉璧勬枡")
     private String tags;
 
-    @ApiModelProperty(value = "文件描述", example = "用户头像图片")
+    @ApiModelProperty(value = "鏂囦欢鎻忚堪", example = "鐢ㄦ埛澶村儚鍥剧墖")
     private String description;
 
-    @ApiModelProperty(value = "上传者用户ID", example = "1")
+    @ApiModelProperty(value = "涓婁紶鑰呯敤鎴稩D", example = "1")
     private Long uploaderId;
 
-    @ApiModelProperty(value = "上传者用户名", example = "admin")
+    @ApiModelProperty(value = "涓婁紶鑰呯敤鎴峰悕", example = "admin")
     private String uploaderUsername;
 
-    @ApiModelProperty(value = "上传者昵称", example = "管理员")
+    @ApiModelProperty(value = "涓婁紶鑰呮樀绉?, example = "绠＄悊鍛?)
     private String uploaderNickname;
 
-    @ApiModelProperty(value = "文件状态", example = "ACTIVE")
+    @ApiModelProperty(value = "鏂囦欢鐘舵€?, example = "ACTIVE")
     private String status;
 
-    @ApiModelProperty(value = "文件状态描述", example = "正常")
+    @ApiModelProperty(value = "鏂囦欢鐘舵€佹弿杩?, example = "姝ｅ父")
     private String statusDesc;
 
-    @ApiModelProperty(value = "下载次数", example = "5")
+    @ApiModelProperty(value = "涓嬭浇娆℃暟", example = "5")
     private Integer downloadCount;
 
-    @ApiModelProperty(value = "是否可下载", example = "true")
+    @ApiModelProperty(value = "鏄惁鍙笅杞?, example = "true")
     private Boolean canDownload;
 
-    @ApiModelProperty(value = "是否图片", example = "true")
+    @ApiModelProperty(value = "鏄惁鍥剧墖", example = "true")
     private Boolean isImage;
 
-    @ApiModelProperty(value = "上传时间", example = "2024-01-05 10:30:00")
+    @ApiModelProperty(value = "涓婁紶鏃堕棿", example = "2024-01-05 10:30:00")
     private LocalDateTime uploadTime;
 
-    @ApiModelProperty(value = "创建时间", example = "2024-01-05 10:30:00")
+    @ApiModelProperty(value = "鍒涘缓鏃堕棿", example = "2024-01-05 10:30:00")
     private LocalDateTime createTime;
 
-    @ApiModelProperty(value = "更新时间", example = "2024-01-05 10:30:00")
+    @ApiModelProperty(value = "鏇存柊鏃堕棿", example = "2024-01-05 10:30:00")
     private LocalDateTime updateTime;
 
     // Getters and setters

@@ -19,13 +19,12 @@ import com.ruoyi.im.utils.CacheUtils;
 import com.ruoyi.im.utils.ValidationUtils;
 
 /**
- * 增强版基础Service实现类
- * 
- * 提供通用的缓存管理、参数验证、性能监控、异常处理等功能
+ * 澧炲己鐗堝熀纭€Service瀹炵幇绫? * 
+ * 鎻愪緵閫氱敤鐨勭紦瀛樼鐞嗐€佸弬鏁伴獙璇併€佹€ц兘鐩戞帶銆佸紓甯稿鐞嗙瓑鍔熻兘
  * 
  * @author ruoyi
- * @param <T> 实体类型
- * @param <M> Mapper类型
+ * @param <T> 瀹炰綋绫诲瀷
+ * @param <M> Mapper绫诲瀷
  */
 @Service
 public abstract class EnhancedBaseServiceImpl<T, M extends BaseMapper<T>> implements BaseService<T> {
@@ -41,16 +40,16 @@ public abstract class EnhancedBaseServiceImpl<T, M extends BaseMapper<T>> implem
     @Autowired
     protected CacheUtils cacheUtils;
     
-    // 缓存相关常量
+    // 缂撳瓨鐩稿叧甯搁噺
     protected static final String ENTITY_CACHE_PREFIX = "im:entity:";
     protected static final String LIST_CACHE_PREFIX = "im:list:";
-    protected static final int DEFAULT_CACHE_TIMEOUT = 10; // 分钟
+    protected static final int DEFAULT_CACHE_TIMEOUT = 10; // 鍒嗛挓
     
     /**
-     * 查询实体 - 增强版（带缓存）
+     * 鏌ヨ瀹炰綋 - 澧炲己鐗堬紙甯︾紦瀛橈級
      * 
-     * @param id 实体ID
-     * @return 实体
+     * @param id 瀹炰綋ID
+     * @return 瀹炰綋
      */
     @Override
     public T selectById(Long id) {
@@ -58,45 +57,41 @@ public abstract class EnhancedBaseServiceImpl<T, M extends BaseMapper<T>> implem
         String methodName = "selectById";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateId(id, methodName);
             
-            // 生成缓存键
-            String cacheKey = generateEntityCacheKey(id);
+            // 鐢熸垚缂撳瓨閿?            String cacheKey = generateEntityCacheKey(id);
             
-            // 检查缓存
-            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
             T cachedEntity = (T) redisTemplate.opsForValue().get(cacheKey);
             if (cachedEntity != null) {
-                logger.debug("从缓存获取实体: id={}, method={}", id, methodName);
+                logger.debug("浠庣紦瀛樿幏鍙栧疄浣? id={}, method={}", id, methodName);
                 return cachedEntity;
             }
             
-            // 查询数据库
-            T entity = baseMapper.selectById(id);
+            // 鏌ヨ鏁版嵁搴?            T entity = baseMapper.selectById(id);
             
-            // 缓存结果
+            // 缂撳瓨缁撴灉
             if (entity != null) {
                 cacheEntity(entity, cacheKey);
-                logger.debug("实体已缓存: id={}, method={}", id, methodName);
+                logger.debug("瀹炰綋宸茬紦瀛? id={}, method={}", id, methodName);
             }
             
             return entity;
             
         } catch (Exception e) {
-            logger.error("查询实体异常: id={}, method={}, error={}", id, methodName, e.getMessage(), e);
-            throw new BusinessException("实体查询失败", e);
+            logger.error("鏌ヨ瀹炰綋寮傚父: id={}, method={}, error={}", id, methodName, e.getMessage(), e);
+            throw new BusinessException("瀹炰綋鏌ヨ澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            logger.info("查询实体耗时: {}ms, id={}, method={}", duration, id, methodName);
+            logger.info("鏌ヨ瀹炰綋鑰楁椂: {}ms, id={}, method={}", duration, id, methodName);
         }
     }
     
     /**
-     * 查询实体列表 - 增强版（带分页和缓存）
-     * 
-     * @param entity 实体条件
-     * @return 实体列表
+     * 鏌ヨ瀹炰綋鍒楄〃 - 澧炲己鐗堬紙甯﹀垎椤靛拰缂撳瓨锛?     * 
+     * @param entity 瀹炰綋鏉′欢
+     * @return 瀹炰綋鍒楄〃
      */
     @Override
     public List<T> selectList(T entity) {
@@ -104,29 +99,28 @@ public abstract class EnhancedBaseServiceImpl<T, M extends BaseMapper<T>> implem
         String methodName = "selectList";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateEntity(entity, methodName);
             
-            // 查询数据库
-            List<T> list = baseMapper.selectList(entity);
+            // 鏌ヨ鏁版嵁搴?            List<T> list = baseMapper.selectList(entity);
             
-            logger.debug("查询实体列表完成: method={}, count={}", methodName, list != null ? list.size() : 0);
+            logger.debug("鏌ヨ瀹炰綋鍒楄〃瀹屾垚: method={}, count={}", methodName, list != null ? list.size() : 0);
             return list;
             
         } catch (Exception e) {
-            logger.error("查询实体列表异常: method={}, error={}", methodName, e.getMessage(), e);
-            throw new BusinessException("实体列表查询失败", e);
+            logger.error("鏌ヨ瀹炰綋鍒楄〃寮傚父: method={}, error={}", methodName, e.getMessage(), e);
+            throw new BusinessException("瀹炰綋鍒楄〃鏌ヨ澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            logger.info("查询实体列表耗时: {}ms, method={}", duration, methodName);
+            logger.info("鏌ヨ瀹炰綋鍒楄〃鑰楁椂: {}ms, method={}", duration, methodName);
         }
     }
     
     /**
-     * 新增实体 - 增强版（带缓存清理）
+     * 鏂板瀹炰綋 - 澧炲己鐗堬紙甯︾紦瀛樻竻鐞嗭級
      * 
-     * @param entity 实体
-     * @return 结果
+     * @param entity 瀹炰綋
+     * @return 缁撴灉
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -135,38 +129,38 @@ public abstract class EnhancedBaseServiceImpl<T, M extends BaseMapper<T>> implem
         String methodName = "insert";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateEntity(entity, methodName);
             
-            // 设置创建时间
+            // 璁剧疆鍒涘缓鏃堕棿
             setCreateTime(entity);
             
-            // 执行插入
+            // 鎵ц鎻掑叆
             int result = baseMapper.insert(entity);
             
             if (result > 0) {
-                // 清理相关缓存
+                // 娓呯悊鐩稿叧缂撳瓨
                 clearRelatedCache(entity);
-                logger.debug("实体插入成功: method={}, result={}", methodName, result);
+                logger.debug("瀹炰綋鎻掑叆鎴愬姛: method={}, result={}", methodName, result);
             }
             
             return result;
             
         } catch (Exception e) {
-            logger.error("新增实体异常: method={}, error={}", methodName, e.getMessage(), e);
-            // 事务回滚由Spring管理
-            throw new BusinessException("实体新增失败", e);
+            logger.error("鏂板瀹炰綋寮傚父: method={}, error={}", methodName, e.getMessage(), e);
+            // 浜嬪姟鍥炴粴鐢盨pring绠＄悊
+            throw new BusinessException("瀹炰綋鏂板澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            logger.info("新增实体耗时: {}ms, method={}", duration, methodName);
+            logger.info("鏂板瀹炰綋鑰楁椂: {}ms, method={}", duration, methodName);
         }
     }
     
     /**
-     * 修改实体 - 增强版（带缓存更新）
+     * 淇敼瀹炰綋 - 澧炲己鐗堬紙甯︾紦瀛樻洿鏂帮級
      * 
-     * @param entity 实体
-     * @return 结果
+     * @param entity 瀹炰綋
+     * @return 缁撴灉
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -175,38 +169,38 @@ public abstract class EnhancedBaseServiceImpl<T, M extends BaseMapper<T>> implem
         String methodName = "update";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateEntity(entity, methodName);
             
-            // 设置更新时间
+            // 璁剧疆鏇存柊鏃堕棿
             setUpdateTime(entity);
             
-            // 执行更新
+            // 鎵ц鏇存柊
             int result = baseMapper.update(entity);
             
             if (result > 0) {
-                // 更新缓存
+                // 鏇存柊缂撳瓨
                 updateCache(entity);
-                logger.debug("实体更新成功: method={}, result={}", methodName, result);
+                logger.debug("瀹炰綋鏇存柊鎴愬姛: method={}, result={}", methodName, result);
             }
             
             return result;
             
         } catch (Exception e) {
-            logger.error("修改实体异常: method={}, error={}", methodName, e.getMessage(), e);
-            // 事务回滚由Spring管理
-            throw new BusinessException("实体修改失败", e);
+            logger.error("淇敼瀹炰綋寮傚父: method={}, error={}", methodName, e.getMessage(), e);
+            // 浜嬪姟鍥炴粴鐢盨pring绠＄悊
+            throw new BusinessException("瀹炰綋淇敼澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            logger.info("修改实体耗时: {}ms, method={}", duration, methodName);
+            logger.info("淇敼瀹炰綋鑰楁椂: {}ms, method={}", duration, methodName);
         }
     }
     
     /**
-     * 删除实体信息 - 增强版（带缓存清理）
+     * 鍒犻櫎瀹炰綋淇℃伅 - 澧炲己鐗堬紙甯︾紦瀛樻竻鐞嗭級
      * 
-     * @param id 实体ID
-     * @return 结果
+     * @param id 瀹炰綋ID
+     * @return 缁撴灉
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -215,39 +209,38 @@ public abstract class EnhancedBaseServiceImpl<T, M extends BaseMapper<T>> implem
         String methodName = "deleteById";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateId(id, methodName);
             
-            // 先查询实体（用于缓存清理）
-            T entity = selectById(id);
+            // 鍏堟煡璇㈠疄浣擄紙鐢ㄤ簬缂撳瓨娓呯悊锛?            T entity = selectById(id);
             
-            // 执行删除
+            // 鎵ц鍒犻櫎
             int result = baseMapper.deleteById(id);
             
             if (result > 0 && entity != null) {
-                // 清理缓存
+                // 娓呯悊缂撳瓨
                 clearEntityCache(id);
                 clearRelatedCache(entity);
-                logger.debug("实体删除成功: method={}, id={}, result={}", methodName, id, result);
+                logger.debug("瀹炰綋鍒犻櫎鎴愬姛: method={}, id={}, result={}", methodName, id, result);
             }
             
             return result;
             
         } catch (Exception e) {
-            logger.error("删除实体异常: method={}, id={}, error={}", methodName, id, e.getMessage(), e);
-            // 事务回滚由Spring管理
-            throw new BusinessException("实体删除失败", e);
+            logger.error("鍒犻櫎瀹炰綋寮傚父: method={}, id={}, error={}", methodName, id, e.getMessage(), e);
+            // 浜嬪姟鍥炴粴鐢盨pring绠＄悊
+            throw new BusinessException("瀹炰綋鍒犻櫎澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            logger.info("删除实体耗时: {}ms, method={}, id={}", duration, methodName, id);
+            logger.info("鍒犻櫎瀹炰綋鑰楁椂: {}ms, method={}, id={}", duration, methodName, id);
         }
     }
     
     /**
-     * 批量删除实体 - 增强版（带缓存清理）
+     * 鎵归噺鍒犻櫎瀹炰綋 - 澧炲己鐗堬紙甯︾紦瀛樻竻鐞嗭級
      * 
-     * @param ids 需要删除的实体ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑瀹炰綋ID
+     * @return 缁撴灉
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -256,109 +249,98 @@ public abstract class EnhancedBaseServiceImpl<T, M extends BaseMapper<T>> implem
         String methodName = "deleteByIds";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateIds(ids, methodName);
             
-            // 执行批量删除
+            // 鎵ц鎵归噺鍒犻櫎
             int result = baseMapper.deleteByIds(ids);
             
             if (result > 0) {
-                // 清理所有相关缓存
-                for (Long id : ids) {
+                // 娓呯悊鎵€鏈夌浉鍏崇紦瀛?                for (Long id : ids) {
                     clearEntityCache(id);
                 }
-                logger.debug("批量删除实体成功: method={}, count={}, result={}", methodName, ids.length, result);
+                logger.debug("鎵归噺鍒犻櫎瀹炰綋鎴愬姛: method={}, count={}, result={}", methodName, ids.length, result);
             }
             
             return result;
             
         } catch (Exception e) {
-            logger.error("批量删除实体异常: method={}, count={}, error={}", methodName, ids.length, e.getMessage(), e);
-            // 事务回滚由Spring管理
-            throw new BusinessException("批量删除实体失败", e);
+            logger.error("鎵归噺鍒犻櫎瀹炰綋寮傚父: method={}, count={}, error={}", methodName, ids.length, e.getMessage(), e);
+            // 浜嬪姟鍥炴粴鐢盨pring绠＄悊
+            throw new BusinessException("鎵归噺鍒犻櫎瀹炰綋澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            logger.info("批量删除实体耗时: {}ms, method={}, count={}", duration, methodName, ids.length);
+            logger.info("鎵归噺鍒犻櫎瀹炰綋鑰楁椂: {}ms, method={}, count={}", duration, methodName, ids.length);
         }
     }
     
-    // ==================== 通用方法 ====================
+    // ==================== 閫氱敤鏂规硶 ====================
     
     /**
-     * 异步执行独立任务
+     * 寮傛鎵ц鐙珛浠诲姟
      * 
-     * @param task 任务
+     * @param task 浠诲姟
      * @return CompletableFuture
      */
     protected CompletableFuture<Void> executeAsync(Runnable task) {
         return CompletableFuture.runAsync(task).exceptionally(throwable -> {
-            logger.error("异步任务执行失败: {}", throwable.getMessage(), throwable);
+            logger.error("寮傛浠诲姟鎵ц澶辫触: {}", throwable.getMessage(), throwable);
             return null;
         });
     }
     
     /**
-     * 验证ID参数（Long类型）
-     * 
+     * 楠岃瘉ID鍙傛暟锛圠ong绫诲瀷锛?     * 
      * @param id ID
-     * @param methodName 方法名
-     */
+     * @param methodName 鏂规硶鍚?     */
     protected void validateId(Long id, String methodName) {
         ValidationUtils.validateId(id, methodName);
     }
     
     /**
-     * 验证ID参数（String类型）
-     * 
+     * 楠岃瘉ID鍙傛暟锛圫tring绫诲瀷锛?     * 
      * @param id ID
-     * @param methodName 方法名
-     */
+     * @param methodName 鏂规硶鍚?     */
     protected void validateId(String id, String methodName) {
         if (id == null || id.trim().isEmpty()) {
-            throw new BusinessException(methodName + "参数无效: ID不能为空");
+            throw new BusinessException(methodName + "鍙傛暟鏃犳晥: ID涓嶈兘涓虹┖");
         }
     }
     
     /**
-     * 验证ID数组参数
+     * 楠岃瘉ID鏁扮粍鍙傛暟
      * 
-     * @param ids ID数组
-     * @param methodName 方法名
-     */
+     * @param ids ID鏁扮粍
+     * @param methodName 鏂规硶鍚?     */
     protected void validateIds(Long[] ids, String methodName) {
         ValidationUtils.validateIdArray(ids, methodName);
     }
     
     /**
-     * 验证实体参数
+     * 楠岃瘉瀹炰綋鍙傛暟
      * 
-     * @param entity 实体
-     * @param methodName 方法名
-     */
+     * @param entity 瀹炰綋
+     * @param methodName 鏂规硶鍚?     */
     protected void validateEntity(T entity, String methodName) {
         if (entity == null) {
-            throw new BusinessException(methodName + "参数无效: 实体不能为空");
+            throw new BusinessException(methodName + "鍙傛暟鏃犳晥: 瀹炰綋涓嶈兘涓虹┖");
         }
     }
     
-    // ==================== 缓存相关方法 ====================
+    // ==================== 缂撳瓨鐩稿叧鏂规硶 ====================
     
     /**
-     * 生成实体缓存键
-     * 
-     * @param id 实体ID
-     * @return 缓存键
-     */
+     * 鐢熸垚瀹炰綋缂撳瓨閿?     * 
+     * @param id 瀹炰綋ID
+     * @return 缂撳瓨閿?     */
     protected String generateEntityCacheKey(Long id) {
         return ENTITY_CACHE_PREFIX + getEntityType() + ":" + id;
     }
     
     /**
-     * 生成列表缓存键
-     * 
-     * @param params 参数
-     * @return 缓存键
-     */
+     * 鐢熸垚鍒楄〃缂撳瓨閿?     * 
+     * @param params 鍙傛暟
+     * @return 缂撳瓨閿?     */
     protected String generateListCacheKey(Object... params) {
         StringBuilder key = new StringBuilder(LIST_CACHE_PREFIX + getEntityType() + ":");
         for (Object param : params) {
@@ -368,11 +350,10 @@ public abstract class EnhancedBaseServiceImpl<T, M extends BaseMapper<T>> implem
     }
     
     /**
-     * 缓存实体
+     * 缂撳瓨瀹炰綋
      * 
-     * @param entity 实体
-     * @param cacheKey 缓存键
-     */
+     * @param entity 瀹炰綋
+     * @param cacheKey 缂撳瓨閿?     */
     protected void cacheEntity(T entity, String cacheKey) {
         if (entity != null && cacheKey != null) {
             redisTemplate.opsForValue().set(cacheKey, entity, DEFAULT_CACHE_TIMEOUT, TimeUnit.MINUTES);
@@ -380,82 +361,81 @@ public abstract class EnhancedBaseServiceImpl<T, M extends BaseMapper<T>> implem
     }
     
     /**
-     * 更新缓存
+     * 鏇存柊缂撳瓨
      * 
-     * @param entity 实体
+     * @param entity 瀹炰綋
      */
     protected void updateCache(T entity) {
         try {
-            // 获取实体ID（需要子类实现）
+            // 鑾峰彇瀹炰綋ID锛堥渶瑕佸瓙绫诲疄鐜帮級
             Long id = getEntityId(entity);
             if (id != null) {
                 String cacheKey = generateEntityCacheKey(id);
                 cacheEntity(entity, cacheKey);
             }
         } catch (Exception e) {
-            logger.warn("更新缓存失败: {}", e.getMessage());
+            logger.warn("鏇存柊缂撳瓨澶辫触: {}", e.getMessage());
         }
     }
     
     /**
-     * 清理实体缓存
+     * 娓呯悊瀹炰綋缂撳瓨
      * 
-     * @param id 实体ID
+     * @param id 瀹炰綋ID
      */
     protected void clearEntityCache(Long id) {
         try {
             String cacheKey = generateEntityCacheKey(id);
             cacheUtils.clearCache(cacheKey);
         } catch (Exception e) {
-            logger.warn("清理实体缓存失败: id={}, error={}", id, e.getMessage());
+            logger.warn("娓呯悊瀹炰綋缂撳瓨澶辫触: id={}, error={}", id, e.getMessage());
         }
     }
     
     /**
-     * 清理相关缓存
+     * 娓呯悊鐩稿叧缂撳瓨
      * 
-     * @param entity 实体
+     * @param entity 瀹炰綋
      */
     protected void clearRelatedCache(T entity) {
         try {
-            // 默认实现：清理实体缓存
-            Long id = getEntityId(entity);
+            // 榛樿瀹炵幇锛氭竻鐞嗗疄浣撶紦瀛?            Long id = getEntityId(entity);
             if (id != null) {
                 clearEntityCache(id);
             }
         } catch (Exception e) {
-            logger.warn("清理相关缓存失败: {}", e.getMessage());
+            logger.warn("娓呯悊鐩稿叧缂撳瓨澶辫触: {}", e.getMessage());
         }
     }
     
-    // ==================== 抽象方法（需要子类实现） ====================
+    // ==================== 鎶借薄鏂规硶锛堥渶瑕佸瓙绫诲疄鐜帮級 ====================
     
     /**
-     * 获取实体类型名称
+     * 鑾峰彇瀹炰綋绫诲瀷鍚嶇О
      * 
-     * @return 实体类型名称
+     * @return 瀹炰綋绫诲瀷鍚嶇О
      */
     protected abstract String getEntityType();
     
     /**
-     * 获取实体ID
+     * 鑾峰彇瀹炰綋ID
      * 
-     * @param entity 实体
-     * @return 实体ID
+     * @param entity 瀹炰綋
+     * @return 瀹炰綋ID
      */
     protected abstract Long getEntityId(T entity);
     
     /**
-     * 设置创建时间
+     * 璁剧疆鍒涘缓鏃堕棿
      * 
-     * @param entity 实体
+     * @param entity 瀹炰綋
      */
     protected abstract void setCreateTime(T entity);
     
     /**
-     * 设置更新时间
+     * 璁剧疆鏇存柊鏃堕棿
      * 
-     * @param entity 实体
+     * @param entity 瀹炰綋
      */
     protected abstract void setUpdateTime(T entity);
 }

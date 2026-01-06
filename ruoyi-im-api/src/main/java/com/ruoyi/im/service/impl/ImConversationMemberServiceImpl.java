@@ -8,8 +8,7 @@ import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.service.ImConversationMemberService;
 
 /**
- * 会话成员Service业务层处理
- * 
+ * 浼氳瘽鎴愬憳Service涓氬姟灞傚鐞? * 
  * @author ruoyi
  */
 @Service
@@ -17,77 +16,37 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     @Autowired
     private ImConversationMemberMapper imConversationMemberMapper;
 
-    /**
-     * 查询会话成员
-     * 
-     * @param id 会话成员ID
-     * @return 会话成员
-     */
-    @Override
     public ImConversationMember selectImConversationMemberById(Long id) {
-        return imConversationMemberMapper.selectImConversationMemberById(id);
+        return selectById(id);
     }
 
-    /**
-     * 查询会话成员列表
-     * 
-     * @param imConversationMember 会话成员
-     * @return 会话成员
-     */
-    @Override
     public List<ImConversationMember> selectImConversationMemberList(ImConversationMember imConversationMember) {
-        return imConversationMemberMapper.selectImConversationMemberList(imConversationMember);
+        return selectList(imConversationMember);
     }
 
-    /**
-     * 新增会话成员
-     * 
-     * @param imConversationMember 会话成员
-     * @return 结果
-     */
-    @Override
     public int insertImConversationMember(ImConversationMember imConversationMember) {
-        return imConversationMemberMapper.insertImConversationMember(imConversationMember);
+        return insert(imConversationMember);
     }
 
-    /**
-     * 修改会话成员
-     * 
-     * @param imConversationMember 会话成员
-     * @return 结果
-     */
-    @Override
     public int updateImConversationMember(ImConversationMember imConversationMember) {
-        return imConversationMemberMapper.updateImConversationMember(imConversationMember);
+        return update(imConversationMember);
     }
 
-    /**
-     * 批量删除会话成员
-     * 
-     * @param ids 需要删除的会话成员ID
-     * @return 结果
-     */
-    @Override
     public int deleteImConversationMemberByIds(Long[] ids) {
-        return imConversationMemberMapper.deleteImConversationMemberByIds(ids);
+        return deleteByIds(ids);
     }
 
-    /**
-     * 删除会话成员信息
-     * 
-     * @param id 会话成员ID
-     * @return 结果
-     */
-    @Override
     public int deleteImConversationMemberById(Long id) {
-        return imConversationMemberMapper.deleteImConversationMemberById(id);
+        return deleteById(id);
     }
+
+
     
     /**
-     * 根据会话ID查询会话成员列表
+     * 鏍规嵁浼氳瘽ID鏌ヨ浼氳瘽鎴愬憳鍒楄〃
      * 
-     * @param conversationId 会话ID
-     * @return 会话成员集合
+     * @param conversationId 浼氳瘽ID
+     * @return 浼氳瘽鎴愬憳闆嗗悎
      */
     @Override
     public List<ImConversationMember> selectImConversationMemberListByConversationId(Long conversationId) {
@@ -95,11 +54,11 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 根据会话ID和用户ID查询会话成员
+     * 鏍规嵁浼氳瘽ID鍜岀敤鎴稩D鏌ヨ浼氳瘽鎴愬憳
      * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @return 会话成员
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @return 浼氳瘽鎴愬憳
      */
     @Override
     public ImConversationMember selectImConversationMemberByConversationIdAndUserId(Long conversationId, Long userId) {
@@ -107,10 +66,10 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 根据用户ID查询会话成员列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ浼氳瘽鎴愬憳鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 会话成员集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 浼氳瘽鎴愬憳闆嗗悎
      */
     @Override
     public List<ImConversationMember> selectImConversationMemberListByUserId(Long userId) {
@@ -118,17 +77,17 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 添加会话成员
+     * 娣诲姞浼氳瘽鎴愬憳
      * 
-     * @param conversationId 会话ID
-     * @param userIds 用户ID列表
-     * @return 结果
+     * @param conversationId 浼氳瘽ID
+     * @param userIds 鐢ㄦ埛ID鍒楄〃
+     * @return 缁撴灉
      */
     @Override
     public int addConversationMembers(Long conversationId, List<Long> userIds) {
         int result = 0;
         for (Long userId : userIds) {
-            // 检查用户是否已经是会话成员
+            // 妫€鏌ョ敤鎴锋槸鍚﹀凡缁忔槸浼氳瘽鎴愬憳
             ImConversationMember existingMember = selectImConversationMemberByConversationIdAndUserId(conversationId, userId);
             if (existingMember == null) {
                 ImConversationMember member = new ImConversationMember();
@@ -143,11 +102,11 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 移除会话成员
+     * 绉婚櫎浼氳瘽鎴愬憳
      * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @return 结果
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @return 缁撴灉
      */
     @Override
     public int removeConversationMember(Long conversationId, Long userId) {
@@ -159,12 +118,10 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 更新会话成员未读数
-     * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @param unreadCount 未读数
-     * @return 结果
+     * 鏇存柊浼氳瘽鎴愬憳鏈鏁?     * 
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @param unreadCount 鏈鏁?     * @return 缁撴灉
      */
     @Override
     public int updateUnreadCount(Long conversationId, Long userId, Integer unreadCount) {
@@ -177,19 +134,19 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 标记会话成员消息已读
+     * 鏍囪浼氳瘽鎴愬憳娑堟伅宸茶
      * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @param messageId 消息ID
-     * @return 结果
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @param messageId 娑堟伅ID
+     * @return 缁撴灉
      */
     @Override
     public int markMessageAsRead(Long conversationId, Long userId, Long messageId) {
         ImConversationMember member = selectImConversationMemberByConversationIdAndUserId(conversationId, userId);
         if (member != null) {
             member.setLastReadMessageId(messageId);
-            // 将未读数设置为0
+            // 灏嗘湭璇绘暟璁剧疆涓?
             member.setUnreadCount(0);
             return updateImConversationMember(member);
         }
@@ -197,12 +154,11 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 设置会话成员置顶状态
-     * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @param isPinned 是否置顶
-     * @return 结果
+     * 璁剧疆浼氳瘽鎴愬憳缃《鐘舵€?     * 
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @param isPinned 鏄惁缃《
+     * @return 缁撴灉
      */
     @Override
     public int setConversationPinned(Long conversationId, Long userId, Boolean isPinned) {
@@ -215,12 +171,10 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 设置会话成员免打扰状态
-     * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @param isMuted 是否免打扰
-     * @return 结果
+     * 璁剧疆浼氳瘽鎴愬憳鍏嶆墦鎵扮姸鎬?     * 
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @param isMuted 鏄惁鍏嶆墦鎵?     * @return 缁撴灉
      */
     @Override
     public int setConversationMuted(Long conversationId, Long userId, Boolean isMuted) {

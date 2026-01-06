@@ -4,89 +4,89 @@ import com.ruoyi.im.domain.ImUserDevice;
 import java.util.List;
 
 /**
- * 用户设备Mapper接口
+ * 鐢ㄦ埛璁惧Mapper鎺ュ彛
  * 
  * @author ruoyi
  */
 public interface ImUserDeviceMapper {
     /**
-     * 查询用户设备
+     * 鏌ヨ鐢ㄦ埛璁惧
      * 
-     * @param id 用户设备ID
-     * @return 用户设备
+     * @param id 鐢ㄦ埛璁惧ID
+     * @return 鐢ㄦ埛璁惧
      */
     public ImUserDevice selectImUserDeviceById(Long id);
 
     /**
-     * 查询用户设备列表
+     * 鏌ヨ鐢ㄦ埛璁惧鍒楄〃
      * 
-     * @param imUserDevice 用户设备
-     * @return 用户设备集合
+     * @param imUserDevice 鐢ㄦ埛璁惧
+     * @return 鐢ㄦ埛璁惧闆嗗悎
      */
     public List<ImUserDevice> selectImUserDeviceList(ImUserDevice imUserDevice);
 
     /**
-     * 新增用户设备
+     * 鏂板鐢ㄦ埛璁惧
      * 
-     * @param imUserDevice 用户设备
-     * @return 结果
+     * @param imUserDevice 鐢ㄦ埛璁惧
+     * @return 缁撴灉
      */
     public int insertImUserDevice(ImUserDevice imUserDevice);
 
     /**
-     * 修改用户设备
+     * 淇敼鐢ㄦ埛璁惧
      * 
-     * @param imUserDevice 用户设备
-     * @return 结果
+     * @param imUserDevice 鐢ㄦ埛璁惧
+     * @return 缁撴灉
      */
     public int updateImUserDevice(ImUserDevice imUserDevice);
 
     /**
-     * 删除用户设备
+     * 鍒犻櫎鐢ㄦ埛璁惧
      * 
-     * @param id 用户设备ID
-     * @return 结果
+     * @param id 鐢ㄦ埛璁惧ID
+     * @return 缁撴灉
      */
     public int deleteImUserDeviceById(Long id);
 
     /**
-     * 批量删除用户设备
+     * 鎵归噺鍒犻櫎鐢ㄦ埛璁惧
      * 
-     * @param ids 需要删除的数据ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑鏁版嵁ID
+     * @return 缁撴灉
      */
     public int deleteImUserDeviceByIds(Long[] ids);
     
     /**
-     * 根据用户ID查询设备列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ璁惧鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 用户设备集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 鐢ㄦ埛璁惧闆嗗悎
      */
     public List<ImUserDevice> selectImUserDeviceByUserId(Long userId);
     
     /**
-     * 根据设备ID查询设备
+     * 鏍规嵁璁惧ID鏌ヨ璁惧
      * 
-     * @param deviceId 设备ID
-     * @return 用户设备
+     * @param deviceId 璁惧ID
+     * @return 鐢ㄦ埛璁惧
      */
     public ImUserDevice selectImUserDeviceByDeviceId(String deviceId);
     
     /**
-     * 根据用户ID和设备ID查询设备
+     * 鏍规嵁鐢ㄦ埛ID鍜岃澶嘔D鏌ヨ璁惧
      * 
-     * @param userId 用户ID
-     * @param deviceId 设备ID
-     * @return 用户设备
+     * @param userId 鐢ㄦ埛ID
+     * @param deviceId 璁惧ID
+     * @return 鐢ㄦ埛璁惧
      */
     public ImUserDevice selectImUserDeviceByUserIdAndDeviceId(Long userId, String deviceId);
     
     /**
-     * 删除用户的所有设备
+     * 鍒犻櫎鐢ㄦ埛鐨勬墍鏈夎澶?
      * 
-     * @param userId 用户ID
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @return 缁撴灉
      */
     public int deleteImUserDeviceByUserId(Long userId);
 }

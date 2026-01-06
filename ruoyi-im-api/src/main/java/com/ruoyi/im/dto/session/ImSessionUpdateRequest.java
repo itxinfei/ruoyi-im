@@ -6,23 +6,23 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.NotNull;
 
 /**
- * 会话更新请求DTO
+ * 浼氳瘽鏇存柊璇锋眰DTO
  * 
  * @author ruoyi
  */
-@ApiModel(description = "会话更新请求")
+@ApiModel(description = "浼氳瘽鏇存柊璇锋眰")
 public class ImSessionUpdateRequest {
 
-    @ApiModelProperty(value = "用户ID", required = true, example = "1")
-    @NotNull(message = "用户ID不能为空")
+    @ApiModelProperty(value = "鐢ㄦ埛ID", required = true, example = "1")
+    @NotNull(message = "鐢ㄦ埛ID涓嶈兘涓虹┖")
     private Long userId;
 
-    @ApiModelProperty(value = "目标ID", required = true, example = "2")
-    @NotNull(message = "目标ID不能为空")
+    @ApiModelProperty(value = "鐩爣ID", required = true, example = "2")
+    @NotNull(message = "鐩爣ID涓嶈兘涓虹┖")
     private Long targetId;
 
-    @ApiModelProperty(value = "会话类型", required = true, example = "private")
-    @NotNull(message = "会话类型不能为空")
+    @ApiModelProperty(value = "浼氳瘽绫诲瀷", required = true, example = "private")
+    @NotNull(message = "浼氳瘽绫诲瀷涓嶈兘涓虹┖")
     private String sessionType;
 
     public Long getUserId() {

@@ -9,27 +9,23 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 
 /**
- * JWT工具类
- * 
- * 用于生成和解析JWT令牌，实现用户身份验证和授权功能。
- * 
+ * JWT宸ュ叿绫? * 
+ * 鐢ㄤ簬鐢熸垚鍜岃В鏋怞WT浠ょ墝锛屽疄鐜扮敤鎴疯韩浠介獙璇佸拰鎺堟潈鍔熻兘銆? * 
  * @author ruoyi
  */
 public class JwtUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
     
-    // JWT密钥 - 在实际项目中应从配置文件中获取
-    private static final String JWT_SECRET = "RuoYiSecretKey";
+    // JWT瀵嗛挜 - 鍦ㄥ疄闄呴」鐩腑搴斾粠閰嶇疆鏂囦欢涓幏鍙?    private static final String JWT_SECRET = "RuoYiSecretKey";
     
-    // JWT过期时间 - 1小时
+    // JWT杩囨湡鏃堕棿 - 1灏忔椂
     private static final long JWT_EXPIRATION = 3600000L;
 
     /**
-     * 生成JWT令牌
+     * 鐢熸垚JWT浠ょ墝
      * 
-     * @param username 用户名
-     * @return JWT令牌
+     * @param username 鐢ㄦ埛鍚?     * @return JWT浠ょ墝
      */
     public String generateToken(String username) {
         Date expiryDate = new Date(System.currentTimeMillis() + JWT_EXPIRATION);
@@ -43,11 +39,9 @@ public class JwtUtils {
     }
     
     /**
-     * 生成JWT令牌（带用户ID）
-     * 
-     * @param username 用户名
-     * @param userId 用户ID
-     * @return JWT令牌
+     * 鐢熸垚JWT浠ょ墝锛堝甫鐢ㄦ埛ID锛?     * 
+     * @param username 鐢ㄦ埛鍚?     * @param userId 鐢ㄦ埛ID
+     * @return JWT浠ょ墝
      */
     public String generateToken(String username, Long userId) {
         Date expiryDate = new Date(System.currentTimeMillis() + JWT_EXPIRATION);
@@ -62,11 +56,10 @@ public class JwtUtils {
     }
 
     /**
-     * 从JWT令牌中获取用户名
+     * 浠嶫WT浠ょ墝涓幏鍙栫敤鎴峰悕
      * 
-     * @param token JWT令牌
-     * @return 用户名
-     */
+     * @param token JWT浠ょ墝
+     * @return 鐢ㄦ埛鍚?     */
     public String getUsernameFromToken(String token) {
         try {
             Claims claims = Jwts.parser()
@@ -76,16 +69,16 @@ public class JwtUtils {
                     
             return claims.getSubject();
         } catch (Exception e) {
-            logger.error("解析JWT令牌失败: {}", e.getMessage());
+            logger.error("瑙ｆ瀽JWT浠ょ墝澶辫触: {}", e.getMessage());
             return null;
         }
     }
     
     /**
-     * 从JWT令牌中获取用户ID
+     * 浠嶫WT浠ょ墝涓幏鍙栫敤鎴稩D
      * 
-     * @param token JWT令牌
-     * @return 用户ID
+     * @param token JWT浠ょ墝
+     * @return 鐢ㄦ埛ID
      */
     public Long getUserIdFromToken(String token) {
         try {
@@ -102,53 +95,51 @@ public class JwtUtils {
             }
             return null;
         } catch (Exception e) {
-            logger.error("解析JWT令牌中的用户ID失败: {}", e.getMessage());
+            logger.error("瑙ｆ瀽JWT浠ょ墝涓殑鐢ㄦ埛ID澶辫触: {}", e.getMessage());
             return null;
         }
     }
 
     /**
-     * 验证JWT令牌是否有效
+     * 楠岃瘉JWT浠ょ墝鏄惁鏈夋晥
      * 
-     * @param token JWT令牌
-     * @return 是否有效
+     * @param token JWT浠ょ墝
+     * @return 鏄惁鏈夋晥
      */
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            logger.error("验证JWT令牌失败: {}", e.getMessage());
+            logger.error("楠岃瘉JWT浠ょ墝澶辫触: {}", e.getMessage());
             return false;
         }
     }
     
     /**
-     * 验证JWT令牌是否有效（带用户名验证）
+     * 楠岃瘉JWT浠ょ墝鏄惁鏈夋晥锛堝甫鐢ㄦ埛鍚嶉獙璇侊級
      * 
-     * @param token JWT令牌
-     * @param username 用户名
-     * @return 是否有效
+     * @param token JWT浠ょ墝
+     * @param username 鐢ㄦ埛鍚?     * @return 鏄惁鏈夋晥
      */
     public boolean validateToken(String token, String username) {
         try {
             String tokenUsername = getUsernameFromToken(token);
             boolean isValid = validateToken(token) && username.equals(tokenUsername);
             if (!isValid) {
-                logger.warn("JWT令牌验证失败: token={}, username={}", token, username);
+                logger.warn("JWT浠ょ墝楠岃瘉澶辫触: token={}, username={}", token, username);
             }
             return isValid;
         } catch (Exception e) {
-            logger.error("验证JWT令牌失败: {}", e.getMessage());
+            logger.error("楠岃瘉JWT浠ょ墝澶辫触: {}", e.getMessage());
             return false;
         }
     }
     
     /**
-     * 从JWT令牌中获取过期时间
-     * 
-     * @param token JWT令牌
-     * @return 过期时间
+     * 浠嶫WT浠ょ墝涓幏鍙栬繃鏈熸椂闂?     * 
+     * @param token JWT浠ょ墝
+     * @return 杩囨湡鏃堕棿
      */
     public Date getExpiryDateFromToken(String token) {
         try {
@@ -159,7 +150,7 @@ public class JwtUtils {
                     
             return claims.getExpiration();
         } catch (Exception e) {
-            logger.error("获取JWT令牌过期时间失败: {}", e.getMessage());
+            logger.error("鑾峰彇JWT浠ょ墝杩囨湡鏃堕棿澶辫触: {}", e.getMessage());
             return null;
         }
     }

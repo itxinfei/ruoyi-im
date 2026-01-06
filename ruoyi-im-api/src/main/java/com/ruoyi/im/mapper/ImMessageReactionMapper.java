@@ -4,88 +4,88 @@ import com.ruoyi.im.domain.ImMessageReaction;
 import java.util.List;
 
 /**
- * 消息互动Mapper接口
+ * 娑堟伅浜掑姩Mapper鎺ュ彛
  * 
  * @author ruoyi
  */
 public interface ImMessageReactionMapper {
     /**
-     * 查询消息互动
+     * 鏌ヨ娑堟伅浜掑姩
      * 
-     * @param id 消息互动ID
-     * @return 消息互动
+     * @param id 娑堟伅浜掑姩ID
+     * @return 娑堟伅浜掑姩
      */
     public ImMessageReaction selectImMessageReactionById(Long id);
 
     /**
-     * 查询消息互动列表
+     * 鏌ヨ娑堟伅浜掑姩鍒楄〃
      * 
-     * @param imMessageReaction 消息互动
-     * @return 消息互动集合
+     * @param imMessageReaction 娑堟伅浜掑姩
+     * @return 娑堟伅浜掑姩闆嗗悎
      */
     public List<ImMessageReaction> selectImMessageReactionList(ImMessageReaction imMessageReaction);
 
     /**
-     * 新增消息互动
+     * 鏂板娑堟伅浜掑姩
      * 
-     * @param imMessageReaction 消息互动
-     * @return 结果
+     * @param imMessageReaction 娑堟伅浜掑姩
+     * @return 缁撴灉
      */
     public int insertImMessageReaction(ImMessageReaction imMessageReaction);
 
     /**
-     * 修改消息互动
+     * 淇敼娑堟伅浜掑姩
      * 
-     * @param imMessageReaction 消息互动
-     * @return 结果
+     * @param imMessageReaction 娑堟伅浜掑姩
+     * @return 缁撴灉
      */
     public int updateImMessageReaction(ImMessageReaction imMessageReaction);
 
     /**
-     * 删除消息互动
+     * 鍒犻櫎娑堟伅浜掑姩
      * 
-     * @param id 消息互动ID
-     * @return 结果
+     * @param id 娑堟伅浜掑姩ID
+     * @return 缁撴灉
      */
     public int deleteImMessageReactionById(Long id);
 
     /**
-     * 批量删除消息互动
+     * 鎵归噺鍒犻櫎娑堟伅浜掑姩
      * 
-     * @param ids 需要删除的数据ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑鏁版嵁ID
+     * @return 缁撴灉
      */
     public int deleteImMessageReactionByIds(Long[] ids);
     
     /**
-     * 根据消息ID查询互动列表
+     * 鏍规嵁娑堟伅ID鏌ヨ浜掑姩鍒楄〃
      * 
-     * @param messageId 消息ID
-     * @return 消息互动集合
+     * @param messageId 娑堟伅ID
+     * @return 娑堟伅浜掑姩闆嗗悎
      */
     public List<ImMessageReaction> selectImMessageReactionByMessageId(Long messageId);
     
     /**
-     * 根据消息ID查询互动列表（带分页）
+     * 鏍规嵁娑堟伅ID鏌ヨ浜掑姩鍒楄〃锛堝甫鍒嗛〉锛?
      * 
-     * @param messageId 消息ID
-     * @return 消息互动集合
+     * @param messageId 娑堟伅ID
+     * @return 娑堟伅浜掑姩闆嗗悎
      */
     public List<ImMessageReaction> selectImMessageReactionListByMessageId(Long messageId);
     
     /**
-     * 根据用户ID查询互动列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ浜掑姩鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 消息互动集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 娑堟伅浜掑姩闆嗗悎
      */
     public List<ImMessageReaction> selectImMessageReactionByUserId(Long userId);
     
     /**
-     * 删除消息的所有互动
+     * 鍒犻櫎娑堟伅鐨勬墍鏈変簰鍔?
      * 
-     * @param messageId 消息ID
-     * @return 结果
+     * @param messageId 娑堟伅ID
+     * @return 缁撴灉
      */
     public int deleteImMessageReactionByMessageId(Long messageId);
 }

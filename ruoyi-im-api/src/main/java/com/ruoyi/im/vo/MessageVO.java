@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 /**
- * 消息视图对象
- * 包含消息详情和发送者信息，用于前端展示
+ * 娑堟伅瑙嗗浘瀵硅薄
+ * 鍖呭惈娑堟伅璇︽儏鍜屽彂閫佽€呬俊鎭紝鐢ㄤ簬鍓嶇灞曠ず
  *
  * @author ruoyi
  */
@@ -18,77 +18,77 @@ public class MessageVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 消息ID
+     * 娑堟伅ID
      */
     private Long id;
 
     /**
-     * 会话ID
+     * 浼氳瘽ID
      */
     private Long sessionId;
 
     /**
-     * 发送者ID
+     * 鍙戦€佽€匢D
      */
     private Long senderId;
 
     /**
-     * 发送者昵称
+     * 鍙戦€佽€呮樀绉?
      */
     private String senderName;
 
     /**
-     * 发送者头像
+     * 鍙戦€佽€呭ご鍍?
      */
     private String senderAvatar;
 
     /**
-     * 消息类型
+     * 娑堟伅绫诲瀷
      */
     private String type;
 
     /**
-     * 消息内容
+     * 娑堟伅鍐呭
      */
     private Object content;
 
     /**
-     * 消息状态
+     * 娑堟伅鐘舵€?
      */
     private String status;
 
     /**
-     * 回复的消息ID
+     * 鍥炲鐨勬秷鎭疘D
      */
     private Long replyTo;
 
     /**
-     * 被回复的消息内容（简要）
+     * 琚洖澶嶇殑娑堟伅鍐呭锛堢畝瑕侊級
      */
     private MessageVO replyToMessage;
 
     /**
-     * 时间戳（毫秒）
+     * 鏃堕棿鎴筹紙姣锛?
      */
     private Long timestamp;
 
     /**
-     * ISO格式时间字符串
+     * ISO鏍煎紡鏃堕棿瀛楃涓?
      */
     private String time;
 
     /**
-     * 客户端消息ID（用于去重）
+     * 瀹㈡埛绔秷鎭疘D锛堢敤浜庡幓閲嶏級
      */
     private String clientMsgId;
 
     /**
-     * 是否已撤回
+     * 鏄惁宸叉挙鍥?
      */
     private Boolean revoked;
 
     /**
-     * 撤回时间
+     * 鎾ゅ洖鏃堕棿
      */
     private Long revokedTime;
 
@@ -96,7 +96,7 @@ public class MessageVO implements Serializable {
     }
 
     /**
-     * 从ImMessage和ImUser构建MessageVO
+     * 浠嶪mMessage鍜孖mUser鏋勫缓MessageVO
      */
     public static MessageVO fromMessage(ImMessage message, ImUser sender) {
         if (message == null) {
@@ -111,10 +111,10 @@ public class MessageVO implements Serializable {
         vo.setStatus(message.getStatus() != null ? message.getStatus().toLowerCase() : "sent");
         vo.setReplyTo(message.getReplyToMessageId());
 
-        // 处理消息内容
+        // 澶勭悊娑堟伅鍐呭
         vo.setContent(parseContent(message.getType(), message.getContent()));
 
-        // 处理时间
+        // 澶勭悊鏃堕棿
         if (message.getCreateTime() != null) {
             vo.setTimestamp(message.getCreateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
             vo.setTime(message.getCreateTime().toString());
@@ -123,18 +123,18 @@ public class MessageVO implements Serializable {
             vo.setTime(LocalDateTime.now().toString());
         }
 
-        // 处理撤回状态
+        // 澶勭悊鎾ゅ洖鐘舵€?
         vo.setRevoked("REVOKED".equalsIgnoreCase(message.getStatus()));
         if (message.getRevokedTime() != null) {
             vo.setRevokedTime(message.getRevokedTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         }
 
-        // 设置发送者信息
+        // 璁剧疆鍙戦€佽€呬俊鎭?
         if (sender != null) {
             vo.setSenderName(sender.getNickname() != null ? sender.getNickname() : sender.getUsername());
             vo.setSenderAvatar(sender.getAvatar());
         } else {
-            vo.setSenderName("未知用户");
+            vo.setSenderName("鏈煡鐢ㄦ埛");
             vo.setSenderAvatar(null);
         }
 
@@ -142,20 +142,20 @@ public class MessageVO implements Serializable {
     }
 
     /**
-     * 解析消息内容
-     * 文本消息返回纯文本，其他类型返回解析后的对象
+     * 瑙ｆ瀽娑堟伅鍐呭
+     * 鏂囨湰娑堟伅杩斿洖绾枃鏈紝鍏朵粬绫诲瀷杩斿洖瑙ｆ瀽鍚庣殑瀵硅薄
      */
     private static Object parseContent(String type, String content) {
         if (content == null) {
             return "";
         }
 
-        // 尝试解析JSON格式的内容
+        // 灏濊瘯瑙ｆ瀽JSON鏍煎紡鐨勫唴瀹?
         if (content.startsWith("{") && content.endsWith("}")) {
             try {
-                // 如果是文本消息，提取text字段
+                // 濡傛灉鏄枃鏈秷鎭紝鎻愬彇text瀛楁
                 if ("TEXT".equalsIgnoreCase(type)) {
-                    // 简单解析 {"text":"xxx"} 格式
+                    // 绠€鍗曡В鏋?{"text":"xxx"} 鏍煎紡
                     if (content.contains("\"text\"")) {
                         int start = content.indexOf("\"text\"") + 8;
                         int end = content.lastIndexOf("\"");
@@ -164,7 +164,7 @@ public class MessageVO implements Serializable {
                         }
                     }
                 }
-                // 其他类型返回原始JSON字符串，让前端解析
+                // 鍏朵粬绫诲瀷杩斿洖鍘熷JSON瀛楃涓诧紝璁╁墠绔В鏋?
                 return content;
             } catch (Exception e) {
                 return content;

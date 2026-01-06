@@ -10,8 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 用户服务实现（基于数据库）
- * 
+ * 鐢ㄦ埛鏈嶅姟瀹炵幇锛堝熀浜庢暟鎹簱锛? * 
  * @author ruoyi
  */
 @Service

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 用户服务接口
+ * 鐢ㄦ埛鏈嶅姟鎺ュ彛
  * 
  * @author ruoyi
  */
@@ -24,18 +24,18 @@ public interface IUserService {
     int deleteById(Long id);
     
     /**
-     * 获取用户权限列表
+     * 鑾峰彇鐢ㄦ埛鏉冮檺鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 权限集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 鏉冮檺闆嗗悎
      */
     Set<String> getUserPermissions(Long userId);
     
     /**
-     * 获取用户角色列表
+     * 鑾峰彇鐢ㄦ埛瑙掕壊鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 角色集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 瑙掕壊闆嗗悎
      */
     Set<String> getUserRoles(Long userId);
 }

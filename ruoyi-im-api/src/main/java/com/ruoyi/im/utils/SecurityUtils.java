@@ -10,9 +10,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
- * 安全工具类
+ * 瀹夊叏宸ュ叿绫?
  * 
- * 用于获取当前认证用户信息
+ * 鐢ㄤ簬鑾峰彇褰撳墠璁よ瘉鐢ㄦ埛淇℃伅
  * 
  * @author ruoyi
  */
@@ -22,9 +22,9 @@ public class SecurityUtils {
     private static final Logger log = LoggerFactory.getLogger(SecurityUtils.class);
 
     /**
-     * 获取当前认证用户
+     * 鑾峰彇褰撳墠璁よ瘉鐢ㄦ埛
      * 
-     * @return 当前用户，如果未认证则返回 null
+     * @return 褰撳墠鐢ㄦ埛锛屽鏋滄湭璁よ瘉鍒欒繑鍥?null
      */
     public static ImUser getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -41,24 +41,24 @@ public class SecurityUtils {
     }
 
     /**
-     * 获取当前认证用户ID
+     * 鑾峰彇褰撳墠璁よ瘉鐢ㄦ埛ID
      * 
-     * @return 当前用户ID
-     * @throws com.ruoyi.im.exception.BusinessException 如果未认证
+     * @return 褰撳墠鐢ㄦ埛ID
+     * @throws com.ruoyi.im.exception.BusinessException 濡傛灉鏈璇?
      */
     public static Long getLoginUserId() {
         Long userId = getCurrentUserId();
         if (userId == null) {
-            throw new com.ruoyi.im.exception.BusinessException(401, "未登录或Token已过期");
+            throw new com.ruoyi.im.exception.BusinessException(401, "鏈櫥褰曟垨Token宸茶繃鏈?);
         }
         return userId;
     }
 
     /**
-     * 获取当前认证用户ID (允许为空)
+     * 鑾峰彇褰撳墠璁よ瘉鐢ㄦ埛ID (鍏佽涓虹┖)
      * 
-     * @return 当前用户ID，如果未认证则返回 null
-     * @throws RuntimeException 如果获取用户信息时发生系统错误
+     * @return 褰撳墠鐢ㄦ埛ID锛屽鏋滄湭璁よ瘉鍒欒繑鍥?null
+     * @throws RuntimeException 濡傛灉鑾峰彇鐢ㄦ埛淇℃伅鏃跺彂鐢熺郴缁熼敊璇?
      */
     public static Long getCurrentUserId() {
         try {
@@ -68,25 +68,25 @@ public class SecurityUtils {
                 if (principal instanceof ImUser) {
                     return ((ImUser) principal).getId();
                 } else if (principal instanceof String && "anonymousUser".equals(principal)) {
-                    // 匿名用户
+                    // 鍖垮悕鐢ㄦ埛
                     return null;
                 } else {
-                    // 其他类型的principal，记录日志
-                    log.warn("未知的principal类型: {}", principal != null ? principal.getClass().getName() : "null");
+                    // 鍏朵粬绫诲瀷鐨刾rincipal锛岃褰曟棩蹇?
+                    log.warn("鏈煡鐨刾rincipal绫诲瀷: {}", principal != null ? principal.getClass().getName() : "null");
                     return null;
                 }
             }
         } catch (Exception e) {
-            log.error("获取当前用户ID时发生异常", e);
-            throw new RuntimeException("获取用户信息失败", e);
+            log.error("鑾峰彇褰撳墠鐢ㄦ埛ID鏃跺彂鐢熷紓甯?, e);
+            throw new RuntimeException("鑾峰彇鐢ㄦ埛淇℃伅澶辫触", e);
         }
         return null;
     }
 
     /**
-     * 获取当前认证用户名
+     * 鑾峰彇褰撳墠璁よ瘉鐢ㄦ埛鍚?
      * 
-     * @return 当前用户名，如果未认证则返回 null
+     * @return 褰撳墠鐢ㄦ埛鍚嶏紝濡傛灉鏈璇佸垯杩斿洖 null
      */
     public static String getCurrentUsername() {
         ImUser user = getCurrentUser();
@@ -94,9 +94,9 @@ public class SecurityUtils {
     }
 
     /**
-     * 检查用户是否已认证
+     * 妫€鏌ョ敤鎴锋槸鍚﹀凡璁よ瘉
      * 
-     * @return true 如果用户已认证，否则 false
+     * @return true 濡傛灉鐢ㄦ埛宸茶璇侊紝鍚﹀垯 false
      */
     public static boolean isAuthenticated() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -104,10 +104,10 @@ public class SecurityUtils {
     }
 
     /**
-     * 检查当前用户是否是指定用户
+     * 妫€鏌ュ綋鍓嶇敤鎴锋槸鍚︽槸鎸囧畾鐢ㄦ埛
      * 
-     * @param userId 用户ID
-     * @return true 如果当前用户是指定用户，否则 false
+     * @param userId 鐢ㄦ埛ID
+     * @return true 濡傛灉褰撳墠鐢ㄦ埛鏄寚瀹氱敤鎴凤紝鍚﹀垯 false
      */
     public static boolean isCurrentUser(Long userId) {
         Long currentUserId = getCurrentUserId();
@@ -115,10 +115,10 @@ public class SecurityUtils {
     }
 
     /**
-     * 检查当前用户是否有指定权限
+     * 妫€鏌ュ綋鍓嶇敤鎴锋槸鍚︽湁鎸囧畾鏉冮檺
      * 
-     * @param permission 权限标识
-     * @return true 如果有权限，否则 false
+     * @param permission 鏉冮檺鏍囪瘑
+     * @return true 濡傛灉鏈夋潈闄愶紝鍚﹀垯 false
      */
     public static boolean hasPermission(String permission) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -132,26 +132,26 @@ public class SecurityUtils {
     }
     
     /**
-     * 从token中获取用户名
+     * 浠巘oken涓幏鍙栫敤鎴峰悕
      * 
      * @param token token
-     * @return 用户名
+     * @return 鐢ㄦ埛鍚?
      */
     public static String getUsernameFromToken(String token) {
         try {
-            // 如果token包含"Bearer "前缀，需要先移除
+            // 濡傛灉token鍖呭惈"Bearer "鍓嶇紑锛岄渶瑕佸厛绉婚櫎
             if (token != null && token.startsWith("Bearer ")) {
                 token = token.substring(7);
             }
             
             Claims claims = Jwts.parser()
-                    .setSigningKey("RuoYiSecretKey") // 注意：在实际项目中应从配置中获取密钥
+                    .setSigningKey("RuoYiSecretKey") // 娉ㄦ剰锛氬湪瀹為檯椤圭洰涓簲浠庨厤缃腑鑾峰彇瀵嗛挜
                     .parseClaimsJws(token)
                     .getBody();
                     
             return claims.getSubject();
         } catch (Exception e) {
-            log.error("解析token失败: {}", e.getMessage());
+            log.error("瑙ｆ瀽token澶辫触: {}", e.getMessage());
             return null;
         }
     }

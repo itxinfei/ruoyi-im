@@ -8,10 +8,8 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 /**
- * 缓存操作工具类
- * 
- * 提供统一的缓存操作方法，消除重复的缓存操作代码
- * 
+ * 缂撳瓨鎿嶄綔宸ュ叿绫? * 
+ * 鎻愪緵缁熶竴鐨勭紦瀛樻搷浣滄柟娉曪紝娑堥櫎閲嶅鐨勭紦瀛樻搷浣滀唬鐮? * 
  * @author ruoyi
  */
 @Component
@@ -22,73 +20,65 @@ public class CacheUtils {
     private RedisTemplate<String, Object> redisTemplate;
     
     /**
-     * 设置 RedisTemplate 实例
+     * 璁剧疆 RedisTemplate 瀹炰緥
      * 
-     * @param redisTemplate RedisTemplate 实例
+     * @param redisTemplate RedisTemplate 瀹炰緥
      */
     public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
     
     /**
-     * 清除单个缓存键
-     * 
-     * @param cacheKey 缓存键
-     */
+     * 娓呴櫎鍗曚釜缂撳瓨閿?     * 
+     * @param cacheKey 缂撳瓨閿?     */
     public void clearCache(String cacheKey) {
         try {
             if (redisTemplate == null) {
-                log.warn("RedisTemplate 未初始化，无法清除缓存: {}", cacheKey);
+                log.warn("RedisTemplate 鏈垵濮嬪寲锛屾棤娉曟竻闄ょ紦瀛? {}", cacheKey);
                 return;
             }
             
             redisTemplate.delete(cacheKey);
-            log.debug("已清除缓存: {}", cacheKey);
+            log.debug("宸叉竻闄ょ紦瀛? {}", cacheKey);
         } catch (Exception e) {
-            log.warn("清除缓存失败: {}, error={}", cacheKey, e.getMessage());
+            log.warn("娓呴櫎缂撳瓨澶辫触: {}, error={}", cacheKey, e.getMessage());
         }
     }
     
     /**
-     * 清除多个缓存键
-     * 
-     * @param cacheKeys 缓存键集合
-     */
+     * 娓呴櫎澶氫釜缂撳瓨閿?     * 
+     * @param cacheKeys 缂撳瓨閿泦鍚?     */
     public void clearCaches(Set<String> cacheKeys) {
         try {
             if (redisTemplate == null) {
-                log.warn("RedisTemplate 未初始化，无法清除缓存: {}", cacheKeys);
+                log.warn("RedisTemplate 鏈垵濮嬪寲锛屾棤娉曟竻闄ょ紦瀛? {}", cacheKeys);
                 return;
             }
             
             if (cacheKeys != null && !cacheKeys.isEmpty()) {
                 redisTemplate.delete(cacheKeys);
-                log.debug("已清除 {} 个缓存键", cacheKeys.size());
+                log.debug("宸叉竻闄?{} 涓紦瀛橀敭", cacheKeys.size());
             }
         } catch (Exception e) {
-            log.warn("清除多个缓存失败: {}, error={}", cacheKeys, e.getMessage());
+            log.warn("娓呴櫎澶氫釜缂撳瓨澶辫触: {}, error={}", cacheKeys, e.getMessage());
         }
     }
     
     /**
-     * 生成实体缓存键
-     * 
-     * @param entityType 实体类型
-     * @param id 实体ID
-     * @return 缓存键
-     */
+     * 鐢熸垚瀹炰綋缂撳瓨閿?     * 
+     * @param entityType 瀹炰綋绫诲瀷
+     * @param id 瀹炰綋ID
+     * @return 缂撳瓨閿?     */
     public String generateEntityCacheKey(String entityType, Long id) {
         return String.format("im:%s:entity:%d", entityType, id);
     }
     
     /**
-     * 生成列表缓存键
-     * 
-     * @param entityType 实体类型
-     * @param listType 列表类型
-     * @param params 附加参数
-     * @return 缓存键
-     */
+     * 鐢熸垚鍒楄〃缂撳瓨閿?     * 
+     * @param entityType 瀹炰綋绫诲瀷
+     * @param listType 鍒楄〃绫诲瀷
+     * @param params 闄勫姞鍙傛暟
+     * @return 缂撳瓨閿?     */
     public String generateListCacheKey(String entityType, String listType, Object... params) {
         StringBuilder sb = new StringBuilder();
         sb.append("im:").append(entityType).append(":").append(listType);
@@ -107,33 +97,29 @@ public class CacheUtils {
     }
     
     /**
-     * 记录缓存操作结果
+     * 璁板綍缂撳瓨鎿嶄綔缁撴灉
      * 
-     * @param methodName 方法名
-     * @param cacheKey 缓存键
-     * @param success 是否成功
+     * @param methodName 鏂规硶鍚?     * @param cacheKey 缂撳瓨閿?     * @param success 鏄惁鎴愬姛
      */
     public void logCacheOperation(String methodName, String cacheKey, boolean success) {
         if (success) {
-            log.debug("缓存操作成功: {}.{}={}", methodName, "clearCache", cacheKey);
+            log.debug("缂撳瓨鎿嶄綔鎴愬姛: {}.{}={}", methodName, "clearCache", cacheKey);
         } else {
-            log.warn("缓存操作失败: {}.{}={}", methodName, "clearCache", cacheKey);
+            log.warn("缂撳瓨鎿嶄綔澶辫触: {}.{}={}", methodName, "clearCache", cacheKey);
         }
     }
     
     /**
-     * 记录多个缓存操作结果
+     * 璁板綍澶氫釜缂撳瓨鎿嶄綔缁撴灉
      * 
-     * @param methodName 方法名
-     * @param cacheKeys 缓存键集合
-     * @param success 是否成功
+     * @param methodName 鏂规硶鍚?     * @param cacheKeys 缂撳瓨閿泦鍚?     * @param success 鏄惁鎴愬姛
      */
     public void logCacheOperation(String methodName, Set<String> cacheKeys, boolean success) {
         if (success) {
-            log.debug("缓存操作成功: {}.{} ({} 个缓存键)", methodName, "clearCaches", 
+            log.debug("缂撳瓨鎿嶄綔鎴愬姛: {}.{} ({} 涓紦瀛橀敭)", methodName, "clearCaches", 
                      cacheKeys != null ? cacheKeys.size() : 0);
         } else {
-            log.warn("缓存操作失败: {}.{} ({} 个缓存键)", methodName, "clearCaches", 
+            log.warn("缂撳瓨鎿嶄綔澶辫触: {}.{} ({} 涓紦瀛橀敭)", methodName, "clearCaches", 
                      cacheKeys != null ? cacheKeys.size() : 0);
         }
     }

@@ -12,9 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
 /**
- * 性能日志拦截器
- * 
- * 记录API访问日志和性能监控数据
+ * 鎬ц兘鏃ュ織鎷︽埅鍣? * 
+ * 璁板綍API璁块棶鏃ュ織鍜屾€ц兘鐩戞帶鏁版嵁
  * 
  * @author ruoyi
  */
@@ -25,23 +24,22 @@ public class PerformanceLoggingInterceptor implements HandlerInterceptor {
     
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // 生成请求追踪ID
+        // 鐢熸垚璇锋眰杩借釜ID
         String traceId = UUID.randomUUID().toString().replace("-", "");
         request.setAttribute("traceId", traceId);
         
-        // 记录请求开始时间
-        long startTime = System.currentTimeMillis();
+        // 璁板綍璇锋眰寮€濮嬫椂闂?        long startTime = System.currentTimeMillis();
         request.setAttribute("startTime", startTime);
         
-        // 记录请求日志
+        // 璁板綍璇锋眰鏃ュ織
         String method = request.getMethod();
         String uri = request.getRequestURI();
         String ip = getClientIp(request);
         String userAgent = request.getHeader("User-Agent");
         
-        logger.info("请求开始: {} {} - IP: {} - UA: {}", method, uri, ip, userAgent);
+        logger.info("璇锋眰寮€濮? {} {} - IP: {} - UA: {}", method, uri, ip, userAgent);
         
-        // 开始性能监控
+        // 寮€濮嬫€ц兘鐩戞帶
         PerformanceMonitor.MonitorContext monitorContext = PerformanceMonitor.startMonitor(uri, method);
         request.setAttribute("monitorContext", monitorContext);
         
@@ -50,12 +48,12 @@ public class PerformanceLoggingInterceptor implements HandlerInterceptor {
     
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        // 后处理逻辑
+        // 鍚庡鐞嗛€昏緫
     }
     
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        // 获取请求信息
+        // 鑾峰彇璇锋眰淇℃伅
         long startTime = (long) request.getAttribute("startTime");
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
@@ -65,8 +63,7 @@ public class PerformanceLoggingInterceptor implements HandlerInterceptor {
         int status = response.getStatus();
         String traceId = (String) request.getAttribute("traceId");
         
-        // 获取性能监控上下文
-        PerformanceMonitor.MonitorContext monitorContext = (PerformanceMonitor.MonitorContext) request.getAttribute("monitorContext");
+        // 鑾峰彇鎬ц兘鐩戞帶涓婁笅鏂?        PerformanceMonitor.MonitorContext monitorContext = (PerformanceMonitor.MonitorContext) request.getAttribute("monitorContext");
         if (monitorContext != null) {
             if (status >= 200 && status < 300) {
                 monitorContext.success();
@@ -75,18 +72,18 @@ public class PerformanceLoggingInterceptor implements HandlerInterceptor {
             }
         }
         
-        // 记录请求完成日志
+        // 璁板綍璇锋眰瀹屾垚鏃ュ織
         if (ex != null) {
-            logger.error("请求异常: {} {} - 耗时: {}ms - 状态码: {} - 追踪ID: {} - 错误: {}", 
+            logger.error("璇锋眰寮傚父: {} {} - 鑰楁椂: {}ms - 鐘舵€佺爜: {} - 杩借釜ID: {} - 閿欒: {}", 
                     method, uri, duration, status, traceId, ex.getMessage(), ex);
         } else {
-            logger.info("请求完成: {} {} - 耗时: {}ms - 状态码: {} - 追踪ID: {}", 
+            logger.info("璇锋眰瀹屾垚: {} {} - 鑰楁椂: {}ms - 鐘舵€佺爜: {} - 杩借釜ID: {}", 
                     method, uri, duration, status, traceId);
         }
     }
     
     /**
-     * 获取客户端IP地址
+     * 鑾峰彇瀹㈡埛绔疘P鍦板潃
      */
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");

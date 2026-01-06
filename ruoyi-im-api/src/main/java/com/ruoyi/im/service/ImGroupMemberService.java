@@ -4,7 +4,7 @@ import com.ruoyi.im.domain.ImGroupMember;
 import java.util.List;
 
 /**
- * 群组成员Service接口
+ * 缇ょ粍鎴愬憳Service鎺ュ彛
  * 
  * @author ruoyi
  */
@@ -29,104 +29,102 @@ public interface ImGroupMemberService extends BaseService<ImGroupMember> {
     int deleteById(Long id);
     
     /**
-     * 根据群组ID查询群组成员列表
+     * 鏍规嵁缇ょ粍ID鏌ヨ缇ょ粍鎴愬憳鍒楄〃
      * 
-     * @param groupId 群组ID
-     * @return 群组成员集合
+     * @param groupId 缇ょ粍ID
+     * @return 缇ょ粍鎴愬憳闆嗗悎
      */
     public List<ImGroupMember> selectImGroupMemberListByGroupId(Long groupId);
     
     /**
-     * 根据群组ID和用户ID查询群组成员
+     * 鏍规嵁缇ょ粍ID鍜岀敤鎴稩D鏌ヨ缇ょ粍鎴愬憳
      * 
-     * @param groupId 群组ID
-     * @param userId 用户ID
-     * @return 群组成员
+     * @param groupId 缇ょ粍ID
+     * @param userId 鐢ㄦ埛ID
+     * @return 缇ょ粍鎴愬憳
      */
     public ImGroupMember selectImGroupMemberByGroupIdAndUserId(Long groupId, Long userId);
     
     /**
-     * 添加群组成员
+     * 娣诲姞缇ょ粍鎴愬憳
      * 
-     * @param groupId 群组ID
-     * @param userIds 用户ID列表
-     * @param role 角色
-     * @param inviterId 邀请人ID
-     * @return 结果
+     * @param groupId 缇ょ粍ID
+     * @param userIds 鐢ㄦ埛ID鍒楄〃
+     * @param role 瑙掕壊
+     * @param inviterId 閭€璇蜂汉ID
+     * @return 缁撴灉
      */
     public int addGroupMembers(Long groupId, List<Long> userIds, String role, Long inviterId);
     
     /**
-     * 移除群组成员
+     * 绉婚櫎缇ょ粍鎴愬憳
      * 
-     * @param groupId 群组ID
-     * @param userId 用户ID
-     * @param operatorId 操作人ID
-     * @return 结果
+     * @param groupId 缇ょ粍ID
+     * @param userId 鐢ㄦ埛ID
+     * @param operatorId 鎿嶄綔浜篒D
+     * @return 缁撴灉
      */
     public int removeGroupMember(Long groupId, Long userId, Long operatorId);
     
     /**
-     * 更新群组成员角色
+     * 鏇存柊缇ょ粍鎴愬憳瑙掕壊
      * 
-     * @param groupId 群组ID
-     * @param userId 用户ID
-     * @param newRole 新角色
-     * @param operatorId 操作人ID
-     * @return 结果
+     * @param groupId 缇ょ粍ID
+     * @param userId 鐢ㄦ埛ID
+     * @param newRole 鏂拌鑹?     * @param operatorId 鎿嶄綔浜篒D
+     * @return 缁撴灉
      */
     public int updateGroupMemberRole(Long groupId, Long userId, String newRole, Long operatorId);
     
     /**
-     * 设置群组成员禁言时间
+     * 璁剧疆缇ょ粍鎴愬憳绂佽█鏃堕棿
      * 
-     * @param groupId 群组ID
-     * @param userId 用户ID
-     * @param muteEndTime 禁言结束时间
-     * @param operatorId 操作人ID
-     * @return 结果
+     * @param groupId 缇ょ粍ID
+     * @param userId 鐢ㄦ埛ID
+     * @param muteEndTime 绂佽█缁撴潫鏃堕棿
+     * @param operatorId 鎿嶄綔浜篒D
+     * @return 缁撴灉
      */
     public int setGroupMemberMuteTime(Long groupId, Long userId, java.time.LocalDateTime muteEndTime, Long operatorId);
     
     /**
-     * 根据群组ID删除群组成员
+     * 鏍规嵁缇ょ粍ID鍒犻櫎缇ょ粍鎴愬憳
      * 
-     * @param groupId 群组ID
-     * @return 结果
+     * @param groupId 缇ょ粍ID
+     * @return 缁撴灉
      */
     public int deleteByGroupId(Long groupId);
     
     /**
-     * 根据群组ID查询所有群组成员
-     * 
-     * @param groupId 群组ID
-     * @return 群组成员列表
+     * 鏍规嵁缇ょ粍ID鏌ヨ鎵€鏈夌兢缁勬垚鍛?     * 
+     * @param groupId 缇ょ粍ID
+     * @return 缇ょ粍鎴愬憳鍒楄〃
      */
     public java.util.List<ImGroupMember> selectByGroupId(Long groupId);
     
     /**
-     * 根据群组ID和用户ID查询群组成员
+     * 鏍规嵁缇ょ粍ID鍜岀敤鎴稩D鏌ヨ缇ょ粍鎴愬憳
      * 
-     * @param groupId 群组ID
-     * @param userId 用户ID
-     * @return 群组成员
+     * @param groupId 缇ょ粍ID
+     * @param userId 鐢ㄦ埛ID
+     * @return 缇ょ粍鎴愬憳
      */
     public ImGroupMember selectByGroupIdAndUserId(Long groupId, Long userId);
     
     /**
-     * 根据群组ID和用户ID删除群组成员
+     * 鏍规嵁缇ょ粍ID鍜岀敤鎴稩D鍒犻櫎缇ょ粍鎴愬憳
      * 
-     * @param groupId 群组ID
-     * @param userId 用户ID
-     * @return 结果
+     * @param groupId 缇ょ粍ID
+     * @param userId 鐢ㄦ埛ID
+     * @return 缁撴灉
      */
     public int deleteByGroupIdAndUserId(Long groupId, Long userId);
     
     /**
-     * 根据群组ID统计成员数量
+     * 鏍规嵁缇ょ粍ID缁熻鎴愬憳鏁伴噺
      * 
-     * @param groupId 群组ID
-     * @return 成员数量
+     * @param groupId 缇ょ粍ID
+     * @return 鎴愬憳鏁伴噺
      */
     public int countByGroupId(Long groupId);
 }

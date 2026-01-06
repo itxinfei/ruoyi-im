@@ -23,8 +23,7 @@ import com.ruoyi.im.service.ImUserDeviceService;
 import com.ruoyi.im.utils.ValidationUtils;
 
 /**
- * 用户设备Service业务层处理
- * 
+ * 鐢ㄦ埛璁惧Service涓氬姟灞傚鐞? * 
  * @author ruoyi
  */
 @Service
@@ -37,34 +36,33 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
-    // 缓存键前缀
+    // 缂撳瓨閿墠缂€
     private static final String USER_DEVICE_CACHE_PREFIX = "im:user:devices:";
     private static final String DEVICE_ID_CACHE_PREFIX = "im:device:id:";
     private static final String USER_CURRENT_DEVICE_CACHE_PREFIX = "im:user:current_device:";
 
     /**
-     * 查询用户设备
+     * 鏌ヨ鐢ㄦ埛璁惧
      * 
-     * @param id 用户设备ID
-     * @return 用户设备
+     * @param id 鐢ㄦ埛璁惧ID
+     * @return 鐢ㄦ埛璁惧
      */
     @Override
     @Cacheable(value = "im-user-device", key = "#id")
     public ImUserDevice selectById(Long id) {
         ImUserDevice device = super.selectById(id);
         if (device != null) {
-            // 缓存用户和设备ID的映射
-            String deviceCacheKey = DEVICE_ID_CACHE_PREFIX + device.getDeviceId();
+            // 缂撳瓨鐢ㄦ埛鍜岃澶嘔D鐨勬槧灏?            String deviceCacheKey = DEVICE_ID_CACHE_PREFIX + device.getDeviceId();
             redisTemplate.opsForValue().set(deviceCacheKey, device.getUserId(), 30, TimeUnit.MINUTES);
         }
         return device;
     }
 
     /**
-     * 查询用户设备列表
+     * 鏌ヨ鐢ㄦ埛璁惧鍒楄〃
      * 
-     * @param imUserDevice 用户设备
-     * @return 用户设备集合
+     * @param imUserDevice 鐢ㄦ埛璁惧
+     * @return 鐢ㄦ埛璁惧闆嗗悎
      */
     @Override
     public List<ImUserDevice> selectList(ImUserDevice imUserDevice) {
@@ -72,29 +70,28 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
     }
 
     /**
-     * 新增用户设备
+     * 鏂板鐢ㄦ埛璁惧
      * 
-     * @param imUserDevice 用户设备
-     * @return 结果
+     * @param imUserDevice 鐢ㄦ埛璁惧
+     * @return 缁撴灉
      */
     @Override
     @CacheEvict(value = {"im-user-device", "im-user-devices"}, key = "#imUserDevice.userId")
     public int insert(ImUserDevice imUserDevice) {
-        // 设置创建时间
+        // 璁剧疆鍒涘缓鏃堕棿
         imUserDevice.setCreateTime(LocalDateTime.now());
         imUserDevice.setUpdateTime(LocalDateTime.now());
         
-        // 设置初始状态
-        if (imUserDevice.getStatus() == null) {
+        // 璁剧疆鍒濆鐘舵€?        if (imUserDevice.getStatus() == null) {
             imUserDevice.setStatus("active");
         }
         
         int result = imUserDeviceMapper.insertImUserDevice(imUserDevice);
         
         if (result > 0) {
-            // 清理用户设备列表缓存
+            // 娓呯悊鐢ㄦ埛璁惧鍒楄〃缂撳瓨
             clearUserDevicesCache(imUserDevice.getUserId());
-            // 缓存设备信息
+            // 缂撳瓨璁惧淇℃伅
             String deviceCacheKey = DEVICE_ID_CACHE_PREFIX + imUserDevice.getDeviceId();
             redisTemplate.opsForValue().set(deviceCacheKey, imUserDevice.getUserId(), 30, TimeUnit.MINUTES);
         }
@@ -103,22 +100,20 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
     }
 
     /**
-     * 修改用户设备
+     * 淇敼鐢ㄦ埛璁惧
      * 
-     * @param imUserDevice 用户设备
-     * @return 结果
+     * @param imUserDevice 鐢ㄦ埛璁惧
+     * @return 缁撴灉
      */
     @Override
     @CacheEvict(value = {"im-user-device", "im-user-devices"}, key = "#imUserDevice.id")
     public int update(ImUserDevice imUserDevice) {
-        // 设置更新时间
+        // 璁剧疆鏇存柊鏃堕棿
         imUserDevice.setUpdateTime(LocalDateTime.now());
         
-        // 检查是否有设备状态变更
-        ImUserDevice existingDevice = selectById(imUserDevice.getId());
+        // 妫€鏌ユ槸鍚︽湁璁惧鐘舵€佸彉鏇?        ImUserDevice existingDevice = selectById(imUserDevice.getId());
         if (existingDevice != null && !existingDevice.getStatus().equals(imUserDevice.getStatus())) {
-            // 如果状态变为非活跃，清理当前设备缓存
-            if ("inactive".equals(imUserDevice.getStatus()) || "deleted".equals(imUserDevice.getStatus())) {
+            // 濡傛灉鐘舵€佸彉涓洪潪娲昏穬锛屾竻鐞嗗綋鍓嶈澶囩紦瀛?            if ("inactive".equals(imUserDevice.getStatus()) || "deleted".equals(imUserDevice.getStatus())) {
                 String currentDeviceCacheKey = USER_CURRENT_DEVICE_CACHE_PREFIX + imUserDevice.getUserId();
                 redisTemplate.delete(currentDeviceCacheKey);
             }
@@ -127,7 +122,7 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
         int result = imUserDeviceMapper.updateImUserDevice(imUserDevice);
         
         if (result > 0) {
-            // 清理用户设备列表缓存
+            // 娓呯悊鐢ㄦ埛璁惧鍒楄〃缂撳瓨
             clearUserDevicesCache(imUserDevice.getUserId());
         }
         
@@ -135,10 +130,10 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
     }
 
     /**
-     * 批量删除用户设备
+     * 鎵归噺鍒犻櫎鐢ㄦ埛璁惧
      * 
-     * @param ids 需要删除的用户设备ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑鐢ㄦ埛璁惧ID
+     * @return 缁撴灉
      */
     @Override
     @CacheEvict(value = {"im-user-device", "im-user-devices"}, allEntries = true)
@@ -146,8 +141,7 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
         int result = imUserDeviceMapper.deleteImUserDeviceByIds(ids);
         
         if (result > 0) {
-            // 获取所有受影响的用户ID并清理缓存
-            for (Long id : ids) {
+            // 鑾峰彇鎵€鏈夊彈褰卞搷鐨勭敤鎴稩D骞舵竻鐞嗙紦瀛?            for (Long id : ids) {
                 ImUserDevice device = selectById(id);
                 if (device != null) {
                     clearUserDevicesCache(device.getUserId());
@@ -159,10 +153,10 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
     }
 
     /**
-     * 删除用户设备信息
+     * 鍒犻櫎鐢ㄦ埛璁惧淇℃伅
      * 
-     * @param id 用户设备ID
-     * @return 结果
+     * @param id 鐢ㄦ埛璁惧ID
+     * @return 缁撴灉
      */
     @Override
     @CacheEvict(value = {"im-user-device", "im-user-devices"}, key = "#id")
@@ -175,9 +169,9 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
         int result = imUserDeviceMapper.deleteImUserDeviceById(id);
         
         if (result > 0) {
-            // 清理用户设备列表缓存
+            // 娓呯悊鐢ㄦ埛璁惧鍒楄〃缂撳瓨
             clearUserDevicesCache(device.getUserId());
-            // 清理设备ID映射缓存
+            // 娓呯悊璁惧ID鏄犲皠缂撳瓨
             String deviceCacheKey = DEVICE_ID_CACHE_PREFIX + device.getDeviceId();
             redisTemplate.delete(deviceCacheKey);
         }
@@ -186,17 +180,17 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
     }
 
     /**
-     * 注册设备
+     * 娉ㄥ唽璁惧
      * 
-     * @param userId 用户ID
-     * @param deviceType 设备类型
-     * @param deviceId 设备ID
-     * @param deviceName 设备名称
-     * @param osVersion 操作系统版本
-     * @param appVersion 应用版本
-     * @param ipAddress IP地址
-     * @param location 位置
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @param deviceType 璁惧绫诲瀷
+     * @param deviceId 璁惧ID
+     * @param deviceName 璁惧鍚嶇О
+     * @param osVersion 鎿嶄綔绯荤粺鐗堟湰
+     * @param appVersion 搴旂敤鐗堟湰
+     * @param ipAddress IP鍦板潃
+     * @param location 浣嶇疆
+     * @return 缁撴灉
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -205,17 +199,17 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
         long startTime = System.currentTimeMillis();
 
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             ValidationUtils.validateId(userId, methodName);
-            ValidationUtils.validateString(deviceType, "设备类型", methodName);
-            ValidationUtils.validateString(deviceId, "设备ID", methodName);
+            ValidationUtils.validateString(deviceType, "璁惧绫诲瀷", methodName);
+            ValidationUtils.validateString(deviceId, "璁惧ID", methodName);
 
-            // 检查设备是否已存在
+            // 妫€鏌ヨ澶囨槸鍚﹀凡瀛樺湪
             ImUserDevice existingDevice = imUserDeviceMapper.selectImUserDeviceByUserIdAndDeviceId(userId, deviceId);
             ImUserDevice device;
 
             if (existingDevice != null) {
-                // 更新现有设备信息
+                // 鏇存柊鐜版湁璁惧淇℃伅
                 device = existingDevice;
                 device.setDeviceType(deviceType);
                 device.setDeviceName(deviceName);
@@ -229,12 +223,11 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
                 int result = imUserDeviceMapper.updateImUserDevice(device);
                 if (result > 0) {
                     clearUserDevicesCache(userId);
-                    log.debug("更新设备信息成功: userId={}, deviceId={}", userId, deviceId);
+                    log.debug("鏇存柊璁惧淇℃伅鎴愬姛: userId={}, deviceId={}", userId, deviceId);
                 }
                 return result;
             } else {
-                // 创建新设备记录
-                device = new ImUserDevice();
+                // 鍒涘缓鏂拌澶囪褰?                device = new ImUserDevice();
                 device.setUserId(userId);
                 device.setDeviceType(deviceType);
                 device.setDeviceId(deviceId);
@@ -250,28 +243,28 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
                 int result = imUserDeviceMapper.insertImUserDevice(device);
                 if (result > 0) {
                     clearUserDevicesCache(userId);
-                    // 缓存设备信息
+                    // 缂撳瓨璁惧淇℃伅
                     String deviceCacheKey = DEVICE_ID_CACHE_PREFIX + deviceId;
                     redisTemplate.opsForValue().set(deviceCacheKey, userId, 30, TimeUnit.MINUTES);
-                    log.debug("注册设备成功: userId={}, deviceId={}", userId, deviceId);
+                    log.debug("娉ㄥ唽璁惧鎴愬姛: userId={}, deviceId={}", userId, deviceId);
                 }
                 return result;
             }
         } catch (Exception e) {
-            log.error("注册设备异常: userId={}, deviceId={}, error={}", userId, deviceId, e.getMessage(), e);
+            log.error("娉ㄥ唽璁惧寮傚父: userId={}, deviceId={}, error={}", userId, deviceId, e.getMessage(), e);
             throw e;
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("注册设备耗时: {}ms, userId={}, deviceId={}", duration, userId, deviceId);
+            log.info("娉ㄥ唽璁惧鑰楁椂: {}ms, userId={}, deviceId={}", duration, userId, deviceId);
         }
     }
 
     /**
-     * 更新设备活跃时间
+     * 鏇存柊璁惧娲昏穬鏃堕棿
      * 
-     * @param userId 用户ID
-     * @param deviceId 设备ID
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @param deviceId 璁惧ID
+     * @return 缁撴灉
      */
     @Override
     public int updateDeviceActiveTime(Long userId, String deviceId) {
@@ -279,11 +272,11 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
         long startTime = System.currentTimeMillis();
 
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             ValidationUtils.validateId(userId, methodName);
-            ValidationUtils.validateString(deviceId, "设备ID", methodName);
+            ValidationUtils.validateString(deviceId, "璁惧ID", methodName);
 
-            // 更新设备活跃时间
+            // 鏇存柊璁惧娲昏穬鏃堕棿
             Map<String, Object> params = new HashMap<>();
             params.put("userId", userId);
             params.put("deviceId", deviceId);
@@ -292,7 +285,7 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
             int result = imUserDeviceMapper.updateDeviceActiveTime(params);
 
             if (result > 0) {
-                // 异步清理缓存
+                // 寮傛娓呯悊缂撳瓨
                 CompletableFuture.runAsync(() -> {
                     clearUserDevicesCache(userId);
                 });
@@ -300,21 +293,19 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
 
             return result;
         } catch (Exception e) {
-            log.error("更新设备活跃时间异常: userId={}, deviceId={}, error={}", userId, deviceId, e.getMessage(), e);
+            log.error("鏇存柊璁惧娲昏穬鏃堕棿寮傚父: userId={}, deviceId={}, error={}", userId, deviceId, e.getMessage(), e);
             throw e;
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("更新设备活跃时间耗时: {}ms, userId={}, deviceId={}", duration, userId, deviceId);
+            log.info("鏇存柊璁惧娲昏穬鏃堕棿鑰楁椂: {}ms, userId={}, deviceId={}", duration, userId, deviceId);
         }
     }
 
     /**
-     * 更新设备状态
-     * 
-     * @param userId 用户ID
-     * @param deviceId 设备ID
-     * @param status 状态
-     * @return 结果
+     * 鏇存柊璁惧鐘舵€?     * 
+     * @param userId 鐢ㄦ埛ID
+     * @param deviceId 璁惧ID
+     * @param status 鐘舵€?     * @return 缁撴灉
      */
     @Override
     public int updateDeviceStatus(Long userId, String deviceId, String status) {
@@ -322,13 +313,12 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
         long startTime = System.currentTimeMillis();
 
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             ValidationUtils.validateId(userId, methodName);
-            ValidationUtils.validateString(deviceId, "设备ID", methodName);
-            ValidationUtils.validateString(status, "状态", methodName);
+            ValidationUtils.validateString(deviceId, "璁惧ID", methodName);
+            ValidationUtils.validateString(status, "鐘舵€?, methodName);
 
-            // 更新设备状态
-            Map<String, Object> params = new HashMap<>();
+            // 鏇存柊璁惧鐘舵€?            Map<String, Object> params = new HashMap<>();
             params.put("userId", userId);
             params.put("deviceId", deviceId);
             params.put("status", status);
@@ -337,10 +327,9 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
             int result = imUserDeviceMapper.updateDeviceStatus(params);
 
             if (result > 0) {
-                // 清理用户设备列表缓存
+                // 娓呯悊鐢ㄦ埛璁惧鍒楄〃缂撳瓨
                 clearUserDevicesCache(userId);
-                // 如果状态变为非活跃，清理当前设备缓存
-                if ("inactive".equals(status) || "deleted".equals(status)) {
+                // 濡傛灉鐘舵€佸彉涓洪潪娲昏穬锛屾竻鐞嗗綋鍓嶈澶囩紦瀛?                if ("inactive".equals(status) || "deleted".equals(status)) {
                     String currentDeviceCacheKey = USER_CURRENT_DEVICE_CACHE_PREFIX + userId;
                     redisTemplate.delete(currentDeviceCacheKey);
                 }
@@ -348,19 +337,19 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
 
             return result;
         } catch (Exception e) {
-            log.error("更新设备状态异常: userId={}, deviceId={}, status={}, error={}", userId, deviceId, status, e.getMessage(), e);
+            log.error("鏇存柊璁惧鐘舵€佸紓甯? userId={}, deviceId={}, status={}, error={}", userId, deviceId, status, e.getMessage(), e);
             throw e;
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("更新设备状态耗时: {}ms, userId={}, deviceId={}, status={}", duration, userId, deviceId, status);
+            log.info("鏇存柊璁惧鐘舵€佽€楁椂: {}ms, userId={}, deviceId={}, status={}", duration, userId, deviceId, status);
         }
     }
 
     /**
-     * 根据用户ID删除用户设备
+     * 鏍规嵁鐢ㄦ埛ID鍒犻櫎鐢ㄦ埛璁惧
      * 
-     * @param userId 用户ID
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @return 缁撴灉
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -369,7 +358,7 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
         long startTime = System.currentTimeMillis();
 
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             ValidationUtils.validateId(userId, methodName);
 
             int result = imUserDeviceMapper.deleteImUserDeviceByUserId(userId);
@@ -380,19 +369,19 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
 
             return result;
         } catch (Exception e) {
-            log.error("删除用户设备异常: userId={}, error={}", userId, e.getMessage(), e);
+            log.error("鍒犻櫎鐢ㄦ埛璁惧寮傚父: userId={}, error={}", userId, e.getMessage(), e);
             throw e;
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("删除用户设备耗时: {}ms, userId={}", duration, userId);
+            log.info("鍒犻櫎鐢ㄦ埛璁惧鑰楁椂: {}ms, userId={}", duration, userId);
         }
     }
 
     /**
-     * 根据用户ID查询设备列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ璁惧鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 设备列表
+     * @param userId 鐢ㄦ埛ID
+     * @return 璁惧鍒楄〃
      */
     @Cacheable(value = "im-user-devices", key = "#userId")
     public List<ImUserDevice> selectImUserDeviceByUserId(Long userId) {
@@ -400,21 +389,20 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
     }
 
     /**
-     * 根据用户ID和设备ID查询设备
+     * 鏍规嵁鐢ㄦ埛ID鍜岃澶嘔D鏌ヨ璁惧
      * 
-     * @param userId 用户ID
-     * @param deviceId 设备ID
-     * @return 设备信息
+     * @param userId 鐢ㄦ埛ID
+     * @param deviceId 璁惧ID
+     * @return 璁惧淇℃伅
      */
     public ImUserDevice selectImUserDeviceByUserIdAndDeviceId(Long userId, String deviceId) {
         return imUserDeviceMapper.selectImUserDeviceByUserIdAndDeviceId(userId, deviceId);
     }
 
     /**
-     * 查询用户的当前活跃设备
-     * 
-     * @param userId 用户ID
-     * @return 当前活跃设备
+     * 鏌ヨ鐢ㄦ埛鐨勫綋鍓嶆椿璺冭澶?     * 
+     * @param userId 鐢ㄦ埛ID
+     * @return 褰撳墠娲昏穬璁惧
      */
     public ImUserDevice getCurrentActiveDevice(Long userId) {
         String cacheKey = USER_CURRENT_DEVICE_CACHE_PREFIX + userId;
@@ -424,11 +412,10 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
             return cachedDevice;
         }
         
-        // 查询数据库获取最新活跃设备
-        ImUserDevice device = imUserDeviceMapper.selectCurrentActiveDevice(userId);
+        // 鏌ヨ鏁版嵁搴撹幏鍙栨渶鏂版椿璺冭澶?        ImUserDevice device = imUserDeviceMapper.selectCurrentActiveDevice(userId);
         
         if (device != null) {
-            // 缓存结果
+            // 缂撳瓨缁撴灉
             redisTemplate.opsForValue().set(cacheKey, device, 5, TimeUnit.MINUTES);
         }
         
@@ -436,22 +423,22 @@ public class ImUserDeviceServiceImpl extends EnhancedBaseServiceImpl<ImUserDevic
     }
 
     /**
-     * 清理用户设备缓存
+     * 娓呯悊鐢ㄦ埛璁惧缂撳瓨
      * 
-     * @param userId 用户ID
+     * @param userId 鐢ㄦ埛ID
      */
     private void clearUserDevicesCache(Long userId) {
         if (userId != null) {
             String cacheKey = "im:user:devices:" + userId;
             redisTemplate.delete(cacheKey);
             
-            // 清理相关缓存
+            // 娓呯悊鐩稿叧缂撳瓨
             String currentDeviceCacheKey = USER_CURRENT_DEVICE_CACHE_PREFIX + userId;
             redisTemplate.delete(currentDeviceCacheKey);
         }
     }
 
-    // 实现抽象方法
+    // 瀹炵幇鎶借薄鏂规硶
     @Override
     protected String getEntityType() {
         return "user_device";

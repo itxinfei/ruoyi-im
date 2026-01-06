@@ -165,7 +165,7 @@
               </div>
 
               <!-- 消息区 -->
-              <div ref="messageAreaRef" class="message-area">
+              <div ref="messageAreaRef" class="message-area" @contextmenu.prevent>
                 <!-- 连接状态提示 -->
                 <div v-if="!isConnected" class="connection-status">
                   <el-icon><Warning /></el-icon>
@@ -175,12 +175,18 @@
                   <el-avatar v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)" :size="36" :src="msg.senderAvatar || msg.avatar">
                     {{ (msg.senderName || msg.sender?.name)?.charAt(0) || 'U' }}
                   </el-avatar>
-                  <div class="message-content">
+                  <div class="message-content" @click.right.prevent="showMessageMenu($event, msg)">
                     <div v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)" class="sender-name">{{ msg.senderName || msg.sender?.name }}</div>
+
+                    <!-- 引用回复内容 -->
+                    <div v-if="msg.replyTo" class="message-quote">
+                      <div class="quote-title">{{ msg.replyTo.senderName }}:</div>
+                      <div class="quote-content">{{ msg.replyTo.content }}</div>
+                    </div>
 
                     <!-- 文本消息 -->
                     <div v-if="msg.type === 'text' || !msg.type" class="message-bubble" :class="{ 'sending': msg.status === 'sending', 'failed': msg.status === 'failed' }">
-                      {{ msg.content }}
+                      <span v-html="formatMessageContent(msg.content)"></span>
                     </div>
 
                     <!-- 图片消息 -->
@@ -244,6 +250,15 @@
                   @change="handleImageSelect"
                 />
 
+                <!-- 引用回复预览 -->
+                <div v-if="replyingMessage" class="reply-preview">
+                  <div class="reply-info">
+                    <span class="reply-label">回复 {{ replyingMessage.senderName }}</span>
+                    <span class="reply-content">{{ replyingMessage.content }}</span>
+                  </div>
+                  <el-button :icon="Close" text circle size="small" @click="cancelReply" />
+                </div>
+
                 <!-- 语音录制界面 -->
                 <div v-if="isRecording" class="voice-recording-panel">
                   <div class="voice-info">
@@ -264,14 +279,67 @@
                   </div>
                 </div>
 
+                <!-- 表情选择器 -->
+                <div v-if="showEmojiPicker" class="emoji-picker">
+                  <div class="emoji-tabs">
+                    <div
+                      v-for="tab in emojiTabs"
+                      :key="tab.key"
+                      class="emoji-tab"
+                      :class="{ active: activeEmojiTab === tab.key }"
+                      @click="activeEmojiTab = tab.key"
+                    >
+                      {{ tab.icon }}
+                    </div>
+                  </div>
+                  <div class="emoji-list">
+                    <div
+                      v-for="emoji in currentEmojis"
+                      :key="emoji"
+                      class="emoji-item"
+                      @click="insertEmoji(emoji)"
+                    >
+                      {{ emoji }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- @提及建议 -->
+                <div v-if="showMentionSuggestions && mentionSuggestions.length > 0" class="mention-suggestions">
+                  <div
+                    v-for="user in mentionSuggestions"
+                    :key="user.id"
+                    class="mention-item"
+                    :class="{ 'mention-all': user.isAll }"
+                    @click="selectMention(user)"
+                  >
+                    <el-avatar v-if="!user.isAll" :size="28" :src="user.avatar">
+                      {{ (user.name || user.nickname)?.charAt(0) || 'U' }}
+                    </el-avatar>
+                    <div v-else class="mention-all-avatar">
+                      <el-icon><Promotion /></el-icon>
+                    </div>
+                    <span class="mention-name">{{ user.name || user.nickname }}</span>
+                    <span v-if="user.isAll" class="mention-all-badge">全员</span>
+                  </div>
+                </div>
+
                 <div class="input-toolbar">
+                  <el-tooltip content="表情" placement="top">
+                    <el-button
+                      :icon="ChatDotRound"
+                      text
+                      :class="{ active: showEmojiPicker }"
+                      @click="showEmojiPicker = !showEmojiPicker"
+                    />
+                  </el-tooltip>
                   <el-tooltip content="文件" placement="top">
                     <el-button :icon="Folder" text :disabled="uploading" @click="triggerFileSelect" />
                   </el-tooltip>
                   <el-tooltip content="图片" placement="top">
                     <el-button :icon="PictureFilled" text :disabled="uploading" @click="selectImage" />
                   </el-tooltip>
-                  <el-tooltip :content="isRecording ? '停止录音' : '按住说话'" placement="top">
+                  <el-tooltip content="语音" placement="top">
                     <el-button
                       :icon="Microphone"
                       text
@@ -280,20 +348,22 @@
                       @click="isRecording ? stopVoiceRecord() : startVoiceRecord()"
                     />
                   </el-tooltip>
-                  <el-tooltip content="表情" placement="top">
-                    <el-button :icon="ChatDotRound" text />
+                  <el-tooltip content="历史记录 (Ctrl+H)" placement="top">
+                    <el-button :icon="Search" text @click="showMessageSearch" />
                   </el-tooltip>
                 </div>
                 <el-input
+                  ref="inputRef"
                   v-model="inputMessage"
                   type="textarea"
                   :rows="2"
                   :autosize="{ minRows: 2, maxRows: 6 }"
-                  placeholder="输入消息... (Enter发送，Shift+Enter换行)"
-                  @keydown.enter.prevent="handleEnter"
+                  placeholder="输入消息... @提及、Enter发送、Ctrl+Enter换行"
+                  @keydown="handleInputKeydown"
+                  @input="handleInputChange"
                 />
                 <div class="input-footer">
-                  <span class="input-tip">按 Enter 发送</span>
+                  <span class="input-tip">Enter 发送 · @提及 · Ctrl+H 搜索</span>
                   <el-button type="primary" size="small" @click="sendMessage">发送</el-button>
                 </div>
               </div>
@@ -771,6 +841,7 @@
                   <div class="file-meta">{{ formatFileSize(file.size) }} · {{ formatTime(file.updateTime) }}</div>
                 </div>
                 <div class="file-actions">
+                  <el-button :icon="Share" size="small" circle @click.stop="shareFile(file)" />
                   <el-button :icon="Download" size="small" circle @click.stop="downloadSingleFile(file)" />
                 </div>
               </div>
@@ -949,6 +1020,14 @@
                       <el-dropdown-menu>
                         <el-dropdown-item v-if="member.role !== 'admin'" command="setAdmin">设为管理员</el-dropdown-item>
                         <el-dropdown-item v-if="member.role === 'admin'" command="removeAdmin">取消管理员</el-dropdown-item>
+                        <el-dropdown-item v-if="!member.isMuted" command="mute">
+                          <el-icon><Mute /></el-icon>
+                          禁言成员
+                        </el-dropdown-item>
+                        <el-dropdown-item v-if="member.isMuted" command="unmute">
+                          <el-icon><Muted /></el-icon>
+                          取消禁言
+                        </el-dropdown-item>
                         <el-dropdown-item command="remove" style="color: #f5222d">移出群组</el-dropdown-item>
                       </el-dropdown-menu>
                     </template>
@@ -980,8 +1059,305 @@
               </el-form-item>
             </el-form>
           </el-tab-pane>
+          <el-tab-pane label="群文件" name="files">
+            <div class="group-files-panel">
+              <div class="files-toolbar">
+                <el-button :icon="Upload" size="small" @click="uploadGroupFile">上传文件</el-button>
+                <el-button :icon="Folder" size="small">新建文件夹</el-button>
+              </div>
+              <div class="files-list">
+                <div
+                  v-for="file in groupFiles"
+                  :key="file.id"
+                  class="file-item"
+                  @click="previewGroupFile(file)"
+                >
+                  <div class="file-icon">
+                    <el-icon v-if="file.type === 'image'" :size="32"><Picture /></el-icon>
+                    <el-icon v-else-if="file.type === 'video'" :size="32"><VideoCamera /></el-icon>
+                    <el-icon v-else-if="file.type === 'folder'" :size="32"><Folder /></el-icon>
+                    <el-icon v-else :size="32"><Document /></el-icon>
+                  </div>
+                  <div class="file-info">
+                    <div class="file-name">{{ file.name }}</div>
+                    <div class="file-meta">
+                      <span>{{ file.size }}</span>
+                      <span>{{ file.uploadTime }}</span>
+                      <span>{{ file.uploader }}</span>
+                    </div>
+                  </div>
+                  <el-dropdown @command="(cmd) => handleFileCommand(cmd, file)">
+                    <el-button :icon="More" circle size="small" text />
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item command="download">下载</el-dropdown-item>
+                        <el-dropdown-item command="rename">重命名</el-dropdown-item>
+                        <el-dropdown-item command="delete" style="color: #f5222d">删除</el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
+                </div>
+                <el-empty v-if="groupFiles.length === 0" description="暂无群文件" />
+              </div>
+            </div>
+          </el-tab-pane>
         </el-tabs>
       </div>
+    </el-dialog>
+
+    <!-- 消息右键菜单 -->
+    <div
+      v-if="messageMenuVisible"
+      class="message-context-menu"
+      :style="{ left: messageMenuPosition.x + 'px', top: messageMenuPosition.y + 'px' }"
+    >
+      <div class="menu-item" @click="replyMessage">
+        <el-icon><Edit /></el-icon>
+        <span>回复</span>
+      </div>
+      <div class="menu-item" @click="forwardMessage">
+        <el-icon><Share /></el-icon>
+        <span>转发</span>
+      </div>
+      <div class="menu-item" @click="copyMessage">
+        <el-icon><DocumentCopy /></el-icon>
+        <span>复制</span>
+      </div>
+      <div class="menu-item" @click="deleteMessage" v-if="selectedMessage?.isOwn || selectedMessage?.senderId === currentUser?.userId">
+        <el-icon><Delete /></el-icon>
+        <span>删除</span>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-item" @click="selectMessage">
+        <el-icon><Check /></el-icon>
+        <span>多选</span>
+      </div>
+    </div>
+
+    <!-- 消息搜索对话框 -->
+    <el-dialog
+      v-model="messageSearchDialogVisible"
+      title="搜索聊天记录"
+      width="600px"
+      :append-to-body="true"
+    >
+      <el-input
+        v-model="messageSearchKeyword"
+        placeholder="搜索消息内容..."
+        :prefix-icon="Search"
+        clearable
+        @input="searchMessages"
+        class="search-input"
+      />
+      <div class="search-results">
+        <div
+          v-for="result in searchResults"
+          :key="result.id"
+          class="search-result-item"
+          @click="jumpToMessage(result)"
+        >
+          <div class="result-time">{{ formatTime(result.timestamp) }}</div>
+          <div class="result-sender">{{ result.senderName }}</div>
+          <div class="result-content">{{ highlightKeyword(result.content) }}</div>
+        </div>
+        <el-empty v-if="searchResults.length === 0 && messageSearchKeyword" description="没有找到相关消息" />
+      </div>
+    </el-dialog>
+
+    <!-- 转发消息对话框 -->
+    <el-dialog
+      v-model="forwardDialogVisible"
+      title="转发消息"
+      width="500px"
+      :append-to-body="true"
+    >
+      <div class="forward-content">
+        <div class="forward-message">{{ selectedMessage?.content }}</div>
+        <el-input
+          v-model="forwardSearchKeyword"
+          placeholder="搜索联系人或群组..."
+          :prefix-icon="Search"
+          clearable
+          class="search-input"
+        />
+        <div class="forward-targets">
+          <div
+            v-for="target in filteredForwardTargets"
+            :key="target.id"
+            class="target-item"
+            @click="selectForwardTarget(target)"
+          >
+            <el-avatar :size="40" :src="target.avatar">
+              {{ (target.name || target.groupName)?.charAt(0) || 'U' }}
+            </el-avatar>
+            <div class="target-info">
+              <div class="target-name">{{ target.name || target.groupName }}</div>
+              <div class="target-desc">{{ target.type === 'group' ? '群组' : '好友' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="forwardDialogVisible = false">取消</el-button>
+        <el-button type="primary" :disabled="!selectedForwardTarget" @click="confirmForward">发送</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 文件预览对话框 -->
+    <el-dialog
+      v-model="filePreviewDialogVisible"
+      :title="previewingFile?.name"
+      width="800px"
+      :append-to-body="true"
+      class="file-preview-dialog"
+    >
+      <div class="file-preview-content">
+        <!-- 图片预览 -->
+        <div v-if="isImageFile(previewingFile)" class="preview-image">
+          <el-image :src="previewingFile?.url" fit="contain" />
+        </div>
+        <!-- PDF预览 -->
+        <div v-else-if="isPdfFile(previewingFile)" class="preview-pdf">
+          <iframe :src="previewingFile?.url" frameborder="0"></iframe>
+        </div>
+        <!-- 其他文件 -->
+        <div v-else class="preview-file">
+          <el-icon :size="80" color="#ddd"><Document /></el-icon>
+          <p>{{ previewingFile?.name }}</p>
+          <el-button type="primary" @click="downloadFile(previewingFile)">下载文件</el-button>
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- 主题设置对话框 -->
+    <el-dialog
+      v-model="themeSettingsVisible"
+      title="主题设置"
+      width="400px"
+      :append-to-body="true"
+    >
+      <div class="theme-settings">
+        <div class="setting-item">
+          <span class="setting-label">深色模式</span>
+          <el-switch v-model="isDarkMode" @change="toggleDarkMode" />
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">消息提示音</span>
+          <el-switch v-model="messageSoundEnabled" />
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">桌面通知</span>
+          <el-switch v-model="desktopNotificationEnabled" @change="toggleDesktopNotification" />
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- 文件分享对话框 -->
+    <el-dialog
+      v-model="shareFileDialogVisible"
+      title="分享文件"
+      width="500px"
+    >
+      <div v-if="sharingFile" class="share-file-dialog">
+        <div class="share-file-info">
+          <div class="file-icon-large">
+            <el-icon :size="48">
+              <component :is="getFileIcon(sharingFile.type)" />
+            </el-icon>
+          </div>
+          <div class="file-details">
+            <div class="file-name">{{ sharingFile.name }}</div>
+            <div class="file-meta">{{ formatFileSize(sharingFile.size) }}</div>
+          </div>
+        </div>
+
+        <el-tabs v-model="shareTab">
+          <el-tab-pane label="复制链接" name="link">
+            <div class="share-link-section">
+              <el-input
+                v-model="shareLink"
+                readonly
+                :suffix-icon="DocumentCopy"
+                @click="copyShareLink"
+              >
+                <template #append>
+                  <el-button @click="copyShareLink">复制</el-button>
+                </template>
+              </el-input>
+              <div class="share-options">
+                <el-checkbox v-model="shareOptions.password">设置密码</el-checkbox>
+                <el-checkbox v-model="shareOptions.expire">设置过期时间</el-checkbox>
+              </div>
+              <div v-if="shareOptions.password" class="share-password-input">
+                <el-input v-model="shareOptions.passwordValue" placeholder="请输入分享密码" maxlength="6" />
+              </div>
+              <div v-if="shareOptions.expire" class="share-expire-input">
+                <el-select v-model="shareOptions.expireDays" placeholder="选择有效期">
+                  <el-option label="1天" :value="1" />
+                  <el-option label="7天" :value="7" />
+                  <el-option label="30天" :value="30" />
+                </el-select>
+              </div>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane label="发送给好友" name="friend">
+            <div class="share-friend-section">
+              <el-input
+                v-model="friendSearchKeyword"
+                placeholder="搜索好友..."
+                :prefix-icon="Search"
+                clearable
+              />
+              <div class="friend-list">
+                <div
+                  v-for="friend in filteredFriendsForShare"
+                  :key="friend.id"
+                  class="friend-item"
+                  @click="sendToFile(friend)"
+                >
+                  <el-avatar :size="36" :src="friend.avatar">
+                    {{ (friend.name || friend.nickname)?.charAt(0) || 'U' }}
+                  </el-avatar>
+                  <span class="friend-name">{{ friend.name || friend.nickname }}</span>
+                </div>
+              </div>
+            </div>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
+    </el-dialog>
+
+    <!-- 大文件上传进度对话框 -->
+    <el-dialog
+      v-model="uploadProgressDialogVisible"
+      title="上传文件"
+      width="450px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+    >
+      <div class="upload-progress-dialog">
+        <div v-for="upload in uploadProgressList" :key="upload.id" class="upload-item">
+          <div class="upload-file-info">
+            <el-icon class="file-icon"><Document /></el-icon>
+            <div class="upload-file-details">
+              <div class="upload-file-name">{{ upload.file.name }}</div>
+              <div class="upload-file-size">{{ formatFileSize(upload.file.size) }}</div>
+            </div>
+          </div>
+          <el-progress :percentage="upload.percent" :status="upload.status" />
+          <div v-if="upload.status === 'success'" class="upload-success">
+            上传成功
+          </div>
+          <div v-else-if="upload.status === 'exception'" class="upload-error">
+            上传失败，请重试
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="cancelAllUploads" :disabled="allUploadsComplete">取消全部</el-button>
+        <el-button type="primary" @click="closeUploadDialog" :disabled="!allUploadsComplete">关闭</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -1024,7 +1400,16 @@ import {
   Upload,
   Download,
   Delete,
-  Star
+  Star,
+  Share,
+  DocumentCopy,
+  Check,
+  Close,
+  Moon,
+  Sunny,
+  Promotion,
+  Mute,
+  Muted
 } from '@element-plus/icons-vue'
 import { formatTime as formatTimeUtil } from '@/utils/format/time'
 import { useImWebSocket } from '@/composables/useImWebSocket'
@@ -1663,6 +2048,35 @@ const storagePercent = computed(() => {
   return Math.round((used / total) * 100)
 })
 
+// 文件分享相关
+const shareFileDialogVisible = ref(false)
+const sharingFile = ref(null)
+const shareTab = ref('link')
+const shareLink = ref('https://im.example.com/share/')
+const friendSearchKeyword = ref('')
+const shareOptions = ref({
+  password: false,
+  passwordValue: '',
+  expire: false,
+  expireDays: 7
+})
+
+// 过滤好友列表用于分享
+const filteredFriendsForShare = computed(() => {
+  if (!friendSearchKeyword.value) return friends.value
+  return friends.value.filter(f =>
+    (f.name || f.nickname)?.toLowerCase().includes(friendSearchKeyword.value.toLowerCase())
+  )
+})
+
+// 大文件上传进度
+const uploadProgressDialogVisible = ref(false)
+const uploadProgressList = ref([])
+const allUploadsComplete = computed(() => {
+  return uploadProgressList.value.length > 0 &&
+    uploadProgressList.value.every(u => u.status === 'success' || u.status === 'exception')
+})
+
 // 模拟文件和文件夹数据
 const allFiles = ref([
   { id: 'f1', name: '项目文档.docx', type: 'word', size: 245760, updateTime: Date.now() - 86400000, folderId: null },
@@ -1730,6 +2144,11 @@ const openFile = (file) => {
 
 // 上传文件
 const handleFileUpload = async (file) => {
+  // 大文件显示上传进度
+  if (file.size > 10 * 1024 * 1024) { // 大于10MB
+    return handleLargeFileUpload(file)
+  }
+
   const newFile = {
     id: `f_${Date.now()}`,
     name: file.name,
@@ -1741,6 +2160,82 @@ const handleFileUpload = async (file) => {
   allFiles.value.push(newFile)
   ElMessage.success('文件上传成功')
   return false // 阻止自动上传
+}
+
+// 处理大文件上传
+const handleLargeFileUpload = (file) => {
+  const uploadId = `upload_${Date.now()}`
+  const uploadItem = {
+    id: uploadId,
+    file: file,
+    percent: 0,
+    status: ''
+  }
+
+  uploadProgressList.value.push(uploadItem)
+  uploadProgressDialogVisible.value = true
+
+  // 模拟上传进度
+  let progress = 0
+  const interval = setInterval(() => {
+    progress += Math.random() * 15
+    if (progress >= 100) {
+      progress = 100
+      clearInterval(interval)
+      uploadItem.percent = 100
+      uploadItem.status = 'success'
+
+      // 添加到文件列表
+      const newFile = {
+        id: `f_${Date.now()}`,
+        name: file.name,
+        type: getFileType(file.name),
+        size: file.size,
+        updateTime: Date.now(),
+        folderId: currentFolderId.value
+      }
+      allFiles.value.push(newFile)
+      ElMessage.success('文件上传成功')
+    } else {
+      uploadItem.percent = Math.round(progress)
+    }
+  }, 300)
+
+  return false
+}
+
+// 分享文件
+const shareFile = (file) => {
+  sharingFile.value = file
+  shareLink.value = `https://im.example.com/share/${file.id}`
+  shareFileDialogVisible.value = true
+}
+
+// 复制分享链接
+const copyShareLink = () => {
+  navigator.clipboard.writeText(shareLink.value).then(() => {
+    ElMessage.success('链接已复制到剪贴板')
+  }).catch(() => {
+    ElMessage.error('复制失败，请手动复制')
+  })
+}
+
+// 发送文件给好友
+const sendToFile = (friend) => {
+  ElMessage.success(`已将"${sharingFile.value?.name}"发送给${friend.name || friend.nickname}`)
+  shareFileDialogVisible.value = false
+}
+
+// 取消所有上传
+const cancelAllUploads = () => {
+  uploadProgressList.value = []
+  uploadProgressDialogVisible.value = false
+}
+
+// 关闭上传对话框
+const closeUploadDialog = () => {
+  uploadProgressList.value = []
+  uploadProgressDialogVisible.value = false
 }
 
 // 获取文件类型
@@ -1917,33 +2412,6 @@ watch(messages, () => {
 const handleEnter = (e) => {
   if (!e.shiftKey) {
     sendMessage()
-  }
-}
-
-const sendMessage = async () => {
-  if (!inputMessage.value.trim() || !currentSessionId.value) return
-
-  const content = inputMessage.value.trim()
-  inputMessage.value = ''
-
-  try {
-    // 通过 store 发送消息
-    await store.dispatch('im/sendMessage', {
-      sessionId: currentSessionId.value,
-      type: 'text',
-      content: content
-    })
-
-    // 如果 WebSocket 连接，也通过 WebSocket 发送
-    if (isConnected.value) {
-      wsSendMessage({
-        sessionId: currentSessionId.value,
-        type: 'text',
-        content: content
-      })
-    }
-  } catch (error) {
-    ElMessage.error('发送失败：' + (error.message || '未知错误'))
   }
 }
 
@@ -2138,8 +2606,473 @@ const openApp = (appKey) => {
 }
 
 const showSettings = () => {
-  ElMessage.info('打开设置')
+  themeSettingsVisible.value = true
 }
+
+// ==================== 新增功能变量 ====================
+// 表情选择器
+const showEmojiPicker = ref(false)
+const activeEmojiTab = ref('smile')
+const emojiTabs = [
+  { key: 'smile', icon: '😊' },
+  { key: 'people', icon: '👋' },
+  { key: 'animals', icon: '🐱' },
+  { key: 'food', icon: '🍔' },
+  { key: 'activities', icon: '⚽' },
+  { key: 'travel', icon: '🚗' },
+  { key: 'objects', icon: '💡' },
+  { key: 'symbols', icon: '❤️' }
+]
+const emojis = {
+  smile: ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😜', '🤪', '😝', '🤗', '🤭', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥵', '🥶', '😶‍🌫️', '🥴', '😵', '🤯', '🤠', '🥳', '🥸', '😎', '🤓', '🧐'],
+  people: ['👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💪', '🦾', '🦿', '🦵', '🦶', '👂', '🦻', '👃', '🧠', '🫀', '🫁', '🦷', '🦴', '👀', '👁️', '👅', '👄'],
+  animals: ['🐱', '🐶', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜', '🦟', '🦗', '🕷️', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦞', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋'],
+  food: ['🍔', '🍟', '🍕', '🌭', '🥪', '🌮', '🌯', '🥙', '🧆', '🥚', '🍳', '🥘', '🍲', '🥣', '🥗', '🍿', '🧈', '🧂', '🥫', '🍱', '🍘', '🍙', '🍚', '🍛', '🍜', '🍝', '🍠', '🍢', '🍣', '🍤', '🍥', '🥮', '🍡', '🥟', '🥠', '🥡', '🦀', '🦞', '🦐', '🦑', '🦪', '🍦', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🧁', '🥧', '🍫', '🍬', '🍭', '🍮', '🍯', '🍼', '🥛', '☕', '🍵', '🍶'],
+  activities: ['⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🪀', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🥅', '⛳', '🪁', '🏹', '🎣', '🤿', '🥊', '🥋', '🎽', '🛹', '🛼', '🛷', '⛸️', '🥌', '🎿', '⛷️', '🏂', '🪂', '🏋️', '🤼', '🤸', '🤾', '🏌️', '🏇', '🧘', '🏊', '🤽', '🚣', '🧗', '🚴', '🚵'],
+  travel: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐', '🛻', '🚚', '🚛', '🚜', '🦯', '🦽', '🦼', '🛴', '🚲', '🛵', '🏍️', '🛺', '🚨', '🚔', '🚍', '🚘', '🚖', '🚡', '🚠', '🚟', '🚃', '🚋', '🚞', '🚝', '🚄', '🚅', '🚈', '🚂', '🚆', '🚇', '🚊', '🚉', '✈️', '🛫', '🛬', '🛩️', '💺', '🛰️', '🚀', '🛸', '🚁', '🛶', '⛵', '🚤', '🛥️', '🛳️', '⛴️', '⚓', '⛽', '🚧', '🚦', '🚥', '🚏'],
+  objects: ['💡', '🔦', '🏮', '📱', '💻', '🖥️', '🖨️', '⌨️', '🖱️', '🖲️', '💽', '💾', '💿', '📀', '🧮', '🎥', '📷', '📸', '📹', '📼', '🔍', '🔎', '🕯️', '💰', '💳', '💎', '⚖️', '🔧', '🔨', '⚒️', '🛠️', '⛏️', '🔩', '⚙️', '🧲', '🔫', '💣', '🔪', '🗡️', '⚔️', '🛡️', '🚬', '⚰️', '🏺', '🔮', '📿', '🧿', '💈', '⚗️', '🔭', '🔬', '🕳️', '🩹', '🩺', '💊', '💉', '🩸', '🧬', '🦠', '🧫', '🧪'],
+  symbols: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉️', '☸️', '✡️', '🔯', '🕎', '☯️', '☦️', '🛐', '⛎', '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️', '☣️', '📴', '📳', '🈶', '🈚', '🈸', '🈺', '🈷️', '✴️', '🆚', '💮', '🉐', '㊙️', '㊗️', '🈴', '🈵', '🈲', '🅰️', '🅱️']
+}
+const currentEmojis = computed(() => emojis[activeEmojiTab.value] || emojis.smile)
+
+// @提及
+const showMentionSuggestions = ref(false)
+const mentionSuggestions = ref([])
+const mentionStartIndex = ref(-1)
+
+// 引用回复
+const replyingMessage = ref(null)
+
+// 消息右键菜单
+const messageMenuVisible = ref(false)
+const messageMenuPosition = ref({ x: 0, y: 0 })
+const selectedMessage = ref(null)
+
+// 消息搜索
+const messageSearchDialogVisible = ref(false)
+const messageSearchKeyword = ref('')
+const searchResults = ref([])
+
+// 转发消息
+const forwardDialogVisible = ref(false)
+const forwardSearchKeyword = ref('')
+const selectedForwardTarget = ref(null)
+const forwardTargets = ref([])
+
+// 文件预览
+const filePreviewDialogVisible = ref(false)
+const previewingFile = ref(null)
+
+// 主题设置
+const themeSettingsVisible = ref(false)
+const isDarkMode = ref(localStorage.getItem('darkMode') === 'true')
+const messageSoundEnabled = ref(localStorage.getItem('messageSoundEnabled') !== 'false')
+const desktopNotificationEnabled = ref(localStorage.getItem('desktopNotificationEnabled') !== 'false')
+
+// 输入框引用
+const inputRef = ref(null)
+
+// ==================== 新增功能函数 ====================
+
+// 表情相关
+const insertEmoji = (emoji) => {
+  const input = inputRef.value?.$el?.querySelector('textarea')
+  if (!input) return
+
+  const start = input.selectionStart || input.value.length
+  const end = input.selectionEnd || input.value.length
+  const text = input.value
+
+  input.value = text.substring(0, start) + emoji + text.substring(end)
+  inputMessage.value = input.value
+
+  // 设置光标位置
+  nextTick(() => {
+    input.selectionStart = input.selectionEnd = start + emoji.length
+    input.focus()
+  })
+}
+
+// 格式化消息内容（处理@提及和换行）
+const formatMessageContent = (content) => {
+  if (!content) return ''
+  // 转义HTML
+  let formatted = content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+  // 处理@提及
+  formatted = formatted.replace(/@([^\s]+)/g, '<span class="mention">@$1</span>')
+  // 处理换行
+  formatted = formatted.replace(/\n/g, '<br>')
+  return formatted
+}
+
+// 处理输入变化（检测@符号）
+const handleInputChange = (value) => {
+  const textarea = inputRef.value?.$el?.querySelector('textarea')
+  if (!textarea) return
+
+  const cursorPosition = textarea.selectionStart
+  const textBeforeCursor = inputMessage.value.substring(0, cursorPosition)
+
+  // 检查是否输入了@
+  const lastAtIndex = textBeforeCursor.lastIndexOf('@')
+  if (lastAtIndex !== -1) {
+    const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1)
+    // 如果@后面没有空格且在文本末尾附近
+    if (!textAfterAt.includes(' ') && textAfterAt.length < 20) {
+      mentionStartIndex.value = lastAtIndex
+      // 获取可@的成员列表
+      const currentSession = store.state.im.currentSession
+      if (currentSession?.type === 'group') {
+        // 先添加@所有人选项（如果是群组且用户有权限）
+        const suggestions = []
+        // 只有群主和管理员可以@所有人
+        const isOwnerOrAdmin = currentSession.creatorId === currentUser.value?.userId ||
+                               currentSession.isAdmin === true
+        if (isOwnerOrAdmin) {
+          suggestions.push({ id: 'all', name: '所有人', nickname: '所有人', isAll: true })
+        }
+        // 添加匹配的成员
+        const matchedMembers = groupMembers.value.filter(m =>
+          m.name?.toLowerCase().includes(textAfterAt.toLowerCase())
+        ).slice(0, 5)
+        suggestions.push(...matchedMembers)
+        mentionSuggestions.value = suggestions.slice(0, 6)
+      } else {
+        mentionSuggestions.value = friends.value.filter(f =>
+          f.name?.toLowerCase().includes(textAfterAt.toLowerCase())
+        ).slice(0, 5)
+      }
+      showMentionSuggestions.value = mentionSuggestions.value.length > 0
+      return
+    }
+  }
+
+  showMentionSuggestions.value = false
+  mentionSuggestions.value = []
+}
+
+// 选择@提及
+const selectMention = (user) => {
+  const textarea = inputRef.value?.$el?.querySelector('textarea')
+  if (!textarea) return
+
+  const textBeforeMention = inputMessage.value.substring(0, mentionStartIndex.value)
+  const textAfterMention = inputMessage.value.substring(textarea.selectionStart)
+
+  // 如果是@所有人，使用特殊格式
+  if (user.isAll) {
+    inputMessage.value = textBeforeMention + '@所有人 ' + textAfterMention
+  } else {
+    inputMessage.value = textBeforeMention + '@' + (user.name || user.nickname) + ' ' + textAfterMention
+  }
+
+  showMentionSuggestions.value = false
+  mentionSuggestions.value = []
+
+  nextTick(() => {
+    textarea.focus()
+  })
+}
+
+// 处理键盘事件
+const handleInputKeydown = (e) => {
+  // Ctrl+Enter 发送
+  if (e.ctrlKey && e.key === 'Enter') {
+    e.preventDefault()
+    sendMessage()
+    return
+  }
+
+  // Enter 发送（Shift+Enter 换行）
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault()
+    sendMessage()
+    return
+  }
+
+  // ESC 关闭表情选择器
+  if (e.key === 'Escape') {
+    showEmojiPicker.value = false
+    return
+  }
+
+  // Ctrl+H 搜索消息
+  if (e.ctrlKey && e.key === 'h') {
+    e.preventDefault()
+    showMessageSearch()
+    return
+  }
+
+  // 处理@提及上下选择
+  if (showMentionSuggestions.value) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+      e.preventDefault()
+      // 这里可以实现键盘导航，暂时简化
+    }
+  }
+}
+
+// 显示消息右键菜单
+const showMessageMenu = (event, message) => {
+  selectedMessage.value = message
+  messageMenuPosition.value = { x: event.clientX, y: event.clientY }
+  messageMenuVisible.value = true
+
+  // 点击其他地方关闭菜单
+  const closeMenu = () => {
+    messageMenuVisible.value = false
+    document.removeEventListener('click', closeMenu)
+  }
+  setTimeout(() => {
+    document.addEventListener('click', closeMenu)
+  }, 0)
+}
+
+// 回复消息
+const replyMessage = () => {
+  replyingMessage.value = selectedMessage.value
+  messageMenuVisible.value = false
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
+}
+
+// 取消回复
+const cancelReply = () => {
+  replyingMessage.value = null
+}
+
+// 转发消息
+const forwardMessage = () => {
+  // 收集可转发的目标（好友和群组）
+  forwardTargets.value = [
+    ...friends.value.map(f => ({ ...f, type: 'friend' })),
+    ...groupSessions.value.map(g => ({ ...g, type: 'group' }))
+  ]
+  forwardDialogVisible.value = true
+  messageMenuVisible.value = false
+}
+
+// 选择转发目标
+const selectForwardTarget = (target) => {
+  selectedForwardTarget.value = target
+}
+
+// 过滤转发目标
+const filteredForwardTargets = computed(() => {
+  if (!forwardSearchKeyword.value) return forwardTargets.value
+  const keyword = forwardSearchKeyword.value.toLowerCase()
+  return forwardTargets.value.filter(t => {
+    const name = (t.name || t.groupName || '').toLowerCase()
+    return name.includes(keyword)
+  })
+})
+
+// 确认转发
+const confirmForward = async () => {
+  if (!selectedForwardTarget.value || !selectedMessage.value) return
+
+  try {
+    const target = selectedForwardTarget.value
+    const sessionId = target.type === 'group' ? target.id : target.sessionId
+
+    await store.dispatch('im/sendMessage', {
+      sessionId: sessionId,
+      type: 'text',
+      content: `[转发消息] ${selectedMessage.value.content}`
+    })
+
+    ElMessage.success('转发成功')
+    forwardDialogVisible.value = false
+    selectedForwardTarget.value = null
+  } catch (error) {
+    ElMessage.error('转发失败')
+  }
+}
+
+// 复制消息
+const copyMessage = () => {
+  if (selectedMessage.value?.content) {
+    navigator.clipboard.writeText(selectedMessage.value.content)
+    ElMessage.success('已复制')
+  }
+  messageMenuVisible.value = false
+}
+
+// 删除消息
+const deleteMessage = async () => {
+  try {
+    await ElMessageBox.confirm('确定要删除这条消息吗？', '提示', {
+      type: 'warning'
+    })
+    await store.dispatch('im/deleteMessage', selectedMessage.value.id)
+    ElMessage.success('已删除')
+  } catch {
+    // 取消
+  }
+  messageMenuVisible.value = false
+}
+
+// 显示消息搜索
+const showMessageSearch = () => {
+  messageSearchDialogVisible.value = true
+  messageSearchKeyword.value = ''
+  searchResults.value = []
+}
+
+// 搜索消息
+const searchMessages = () => {
+  if (!messageSearchKeyword.value.trim()) {
+    searchResults.value = []
+    return
+  }
+
+  const keyword = messageSearchKeyword.value.toLowerCase()
+  const allMessages = store.state.im.messages || []
+
+  searchResults.value = allMessages
+    .filter(msg => msg.content?.toLowerCase().includes(keyword))
+    .map(msg => ({
+      ...msg,
+      sessionId: currentSessionId.value
+    }))
+    .slice(0, 50) // 限制结果数量
+}
+
+// 高亮关键词
+const highlightKeyword = (content) => {
+  if (!messageSearchKeyword.value) return content
+  const keyword = messageSearchKeyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp(`(${keyword})`, 'gi')
+  return content.replace(regex, '<span style="background: #ffeb3b;">$1</span>')
+}
+
+// 跳转到消息
+const jumpToMessage = (message) => {
+  messageSearchDialogVisible.value = false
+  // 滚动到指定消息
+  nextTick(() => {
+    const element = document.querySelector(`[data-message-id="${message.id}"]`)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      element.classList.add('highlight')
+      setTimeout(() => element.classList.remove('highlight'), 2000)
+    }
+  })
+}
+
+// 文件预览相关
+const isImageFile = (file) => {
+  if (!file) return false
+  const ext = (file.name || '').split('.').pop()?.toLowerCase()
+  return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(ext)
+}
+
+const isPdfFile = (file) => {
+  if (!file) return false
+  const ext = (file.name || '').split('.').pop()?.toLowerCase()
+  return ext === 'pdf'
+}
+
+// 切换深色模式
+const toggleDarkMode = () => {
+  localStorage.setItem('darkMode', String(isDarkMode.value))
+  document.documentElement.classList.toggle('dark', isDarkMode.value)
+}
+
+// 切换桌面通知
+const toggleDesktopNotification = async () => {
+  if (desktopNotificationEnabled.value) {
+    if ('Notification' in window) {
+      const permission = await Notification.requestPermission()
+      if (permission !== 'granted') {
+        ElMessage.warning('浏览器通知权限被拒绝')
+        desktopNotificationEnabled.value = false
+      }
+    }
+  }
+  localStorage.setItem('desktopNotificationEnabled', String(desktopNotificationEnabled.value))
+}
+
+// 显示桌面通知
+const showDesktopNotification = (title, body) => {
+  if (desktopNotificationEnabled.value && 'Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, {
+      body: body,
+      icon: '/logo.png',
+      badge: '/logo.png'
+    })
+  }
+}
+
+// 播放消息提示音
+const playMessageSound = () => {
+  if (messageSoundEnabled.value) {
+    const audio = new Audio('/sounds/message.mp3')
+    audio.volume = 0.3
+    audio.play().catch(() => {})
+  }
+}
+
+// 修改发送消息函数以支持引用回复
+const sendMessage = async () => {
+  if (!inputMessage.value.trim() || !currentSessionId.value) return
+
+  const messageData = {
+    sessionId: currentSessionId.value,
+    type: 'text',
+    content: inputMessage.value.trim()
+  }
+
+  // 添加引用回复
+  if (replyingMessage.value) {
+    messageData.replyTo = {
+      messageId: replyingMessage.value.id,
+      senderName: replyingMessage.value.senderName,
+      content: replyingMessage.value.content
+    }
+    replyingMessage.value = null
+  }
+
+  // 发送消息
+  await store.dispatch('im/sendMessage', messageData)
+
+  // 通过 WebSocket 发送
+  if (isConnected.value) {
+    wsSendMessage(messageData)
+  }
+
+  inputMessage.value = ''
+  showEmojiPicker.value = false
+}
+
+// 获取群组成员（用于@提及）
+const groupMembers = computed(() => {
+  const currentSession = store.state.im.currentSession
+  if (currentSession?.type === 'group' && currentSession.members) {
+    return currentSession.members
+  }
+  return []
+})
+
+// 初始化深色模式
+if (isDarkMode.value) {
+  document.documentElement.classList.add('dark')
+}
+
+// 监听消息播放提示音
+watch(() => store.state.im.messages, (newMessages, oldMessages) => {
+  if (newMessages.length > (oldMessages?.length || 0)) {
+    const latestMessage = newMessages[newMessages.length - 1]
+    if (!latestMessage.isOwn) {
+      playMessageSound()
+      showDesktopNotification('新消息', `${latestMessage.senderName}: ${latestMessage.content}`)
+    }
+  }
+}, { deep: true })
 
 const handleUserCommand = async (command) => {
   if (command === 'logout') {
@@ -2288,7 +3221,12 @@ const groupManageDialogVisible = ref(false)
 const groupManageTab = ref('members')
 const managingGroup = ref(null)
 const groupMemberSearch = ref('')
-const groupMembers = ref([])
+const managedGroupMembers = ref([])
+const groupFiles = ref([
+  { id: '1', name: '项目计划.docx', type: 'document', size: '2.3 MB', uploadTime: '2024-01-10', uploader: '张三' },
+  { id: '2', name: '会议记录.pdf', type: 'pdf', size: '1.1 MB', uploadTime: '2024-01-09', uploader: '李四' },
+  { id: '3', name: '产品截图', type: 'image', size: '5.6 MB', uploadTime: '2024-01-08', uploader: '王五' }
+])
 
 // 过滤后的会话列表
 const filteredSessions = computed(() => {
@@ -2302,9 +3240,9 @@ const filteredSessions = computed(() => {
 
 // 过滤后的群组成员
 const filteredGroupMembers = computed(() => {
-  if (!groupMemberSearch.value) return groupMembers.value
+  if (!groupMemberSearch.value) return managedGroupMembers.value
   const keyword = groupMemberSearch.value.toLowerCase()
-  return groupMembers.value.filter(m => {
+  return managedGroupMembers.value.filter(m => {
     const name = (m.name || m.nickname || '').toLowerCase()
     return name.includes(keyword)
   })
@@ -2446,7 +3384,7 @@ const submitCreateGroup = async () => {
 // 打开群组管理
 const openGroupManage = (group) => {
   managingGroup.value = { ...group }
-  groupMembers.value = [
+  managedGroupMembers.value = [
     { id: currentUser.value?.userId, name: currentUser.value?.name || '我', role: 'owner', roleText: '群主' },
     ...selectedGroupMembers.value.map(m => ({ ...m, role: 'member', roleText: '成员' }))
   ]
@@ -2476,10 +3414,19 @@ const handleMemberCommand = async (command, member) => {
         member.roleText = '成员'
         ElMessage.success('已取消管理员')
         break
+      case 'mute':
+        await ElMessageBox.confirm(`确定要禁言${member.name || member.nickname}吗？`, '确认禁言')
+        member.isMuted = true
+        ElMessage.success('已禁言该成员')
+        break
+      case 'unmute':
+        member.isMuted = false
+        ElMessage.success('已取消禁言')
+        break
       case 'remove':
         await ElMessageBox.confirm(`确定要将${member.name || member.nickname}移出群组吗？`, '确认')
-        const index = groupMembers.value.findIndex(m => m.id === member.id)
-        if (index > -1) groupMembers.value.splice(index, 1)
+        const index = managedGroupMembers.value.findIndex(m => m.id === member.id)
+        if (index > -1) managedGroupMembers.value.splice(index, 1)
         ElMessage.success('已移出群组')
         break
     }
@@ -2496,6 +3443,39 @@ const showAddGroupMember = () => {
 // 保存群组设置
 const saveGroupSettings = () => {
   ElMessage.success('群组设置已保存')
+}
+
+// 上传群文件
+const uploadGroupFile = () => {
+  ElMessage.info('群文件上传功能开发中...')
+}
+
+// 预览群文件
+const previewGroupFile = (file) => {
+  previewingFile.value = file
+  filePreviewDialogVisible.value = true
+}
+
+// 处理文件命令
+const handleFileCommand = async (command, file) => {
+  switch (command) {
+    case 'download':
+      ElMessage.success(`正在下载: ${file.name}`)
+      break
+    case 'rename':
+      ElMessage.info('重命名功能开发中...')
+      break
+    case 'delete':
+      try {
+        await ElMessageBox.confirm(`确定要删除文件"${file.name}"吗？`, '确认删除')
+        const index = groupFiles.value.findIndex(f => f.id === file.id)
+        if (index > -1) groupFiles.value.splice(index, 1)
+        ElMessage.success('文件已删除')
+      } catch {
+        // 用户取消
+      }
+      break
+  }
 }
 
 // 组件挂载
@@ -2516,11 +3496,14 @@ $nav-width-collapsed: 56px;
 $header-height: 56px;
 $session-panel-width: 280px;
 $primary-color: #1677ff;
+$primary-color-light: #e8f3ff;
 $success-color: #52c41a;
 $warning-color: #faad14;
 $danger-color: #ff4d4f;
 $bg-gray: #f5f5f5;
 $bg-base: #f0f2f5;
+$bg-light: #fafafa;
+$bg-white: #ffffff;
 $bg-hover: #e6f7ff;
 $border-color: #e8e8e8;
 $border-base: #d9d9d9;
@@ -2528,6 +3511,9 @@ $text-primary: #262626;
 $text-secondary: #595959;
 $text-tertiary: #8c8c8c;
 $text-light: #bfbfbf;
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
 // 滚动条样式
 @mixin web-scrollbar {
@@ -4541,6 +5527,475 @@ $text-light: #bfbfbf;
         }
       }
     }
+  }
+}
+
+// ==================== 新增功能样式 ====================
+
+// 消息引用样式
+.message-quote {
+  background: rgba(0, 0, 0, 0.05);
+  border-left: 3px solid $primary-color;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+
+  .quote-title {
+    font-size: 12px;
+    color: $text-secondary;
+    margin-bottom: 4px;
+  }
+
+  .quote-content {
+    font-size: 13px;
+    color: $text-tertiary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+  }
+}
+
+// 消息内容中的@提及样式
+:deep(.message-bubble) {
+  .mention {
+    color: $primary-color;
+    font-weight: 500;
+  }
+}
+
+// 回复预览
+.reply-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #f0f7ff;
+  border-top: 1px solid $border-base;
+
+  .reply-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .reply-label {
+      font-size: 12px;
+      color: $text-secondary;
+    }
+
+    .reply-content {
+      font-size: 13px;
+      color: $text-primary;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 300px;
+    }
+  }
+}
+
+// 表情选择器
+.emoji-picker {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: #fff;
+  border: 1px solid $border-base;
+  border-radius: 8px;
+  box-shadow: $shadow-lg;
+  width: 320px;
+  max-height: 280px;
+  z-index: 100;
+
+  .emoji-tabs {
+    display: flex;
+    border-bottom: 1px solid $border-base;
+    overflow-x: auto;
+
+    .emoji-tab {
+      flex-shrink: 0;
+      padding: 8px 12px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: $bg-hover;
+      }
+
+      &.active {
+        background: $primary-color-light;
+        color: $primary-color;
+      }
+    }
+  }
+
+  .emoji-list {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    padding: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    @include web-scrollbar;
+
+    .emoji-item {
+      font-size: 20px;
+      text-align: center;
+      padding: 4px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.15s;
+
+      &:hover {
+        background: $bg-hover;
+      }
+    }
+  }
+}
+
+// @提及建议
+.mention-suggestions {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: #fff;
+  border: 1px solid $border-base;
+  border-radius: 8px;
+  box-shadow: $shadow-lg;
+  width: 240px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+
+  .mention-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover {
+      background: $bg-hover;
+    }
+
+    &.mention-all {
+      background: $primary-color-light;
+
+      &:hover {
+        background: darken($primary-color-light, 5%);
+      }
+
+      .mention-all-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: $primary-color;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .mention-all-badge {
+        margin-left: auto;
+        padding: 2px 6px;
+        background: $primary-color;
+        color: #fff;
+        font-size: 11px;
+        border-radius: 4px;
+      }
+    }
+
+    .mention-name {
+      flex: 1;
+      font-size: 14px;
+    }
+  }
+}
+
+// 群文件面板
+.group-files-panel {
+  .files-toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid $border-base;
+  }
+
+  .files-list {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover {
+      background: $bg-hover;
+    }
+
+    .file-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $text-secondary;
+    }
+
+    .file-info {
+      flex: 1;
+      min-width: 0;
+
+      .file-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: $text-primary;
+        @include text-ellipsis;
+      }
+
+      .file-meta {
+        display: flex;
+        gap: 12px;
+        margin-top: 4px;
+        font-size: 12px;
+        color: $text-tertiary;
+      }
+    }
+  }
+}
+
+// 消息右键菜单
+.message-context-menu {
+  position: fixed;
+  background: #fff;
+  border: 1px solid $border-base;
+  border-radius: 8px;
+  box-shadow: $shadow-lg;
+  padding: 4px 0;
+  z-index: 1000;
+  min-width: 140px;
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    color: $text-primary;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover {
+      background: $bg-hover;
+    }
+
+    .el-icon {
+      font-size: 16px;
+    }
+  }
+
+  .menu-divider {
+    height: 1px;
+    background: $border-base;
+    margin: 4px 0;
+  }
+}
+
+// 消息搜索结果
+.search-results {
+  max-height: 400px;
+  overflow-y: auto;
+  @include web-scrollbar;
+  margin-top: 16px;
+
+  .search-result-item {
+    padding: 12px;
+    border-bottom: 1px solid $border-base;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover {
+      background: $bg-hover;
+    }
+
+    .result-time {
+      font-size: 11px;
+      color: $text-tertiary;
+      margin-bottom: 4px;
+    }
+
+    .result-sender {
+      font-size: 13px;
+      color: $text-secondary;
+      margin-bottom: 4px;
+    }
+
+    .result-content {
+      font-size: 14px;
+      color: $text-primary;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+// 转发对话框
+.forward-content {
+  .forward-message {
+    padding: 12px;
+    background: $bg-light;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: $text-primary;
+  }
+
+  .search-input {
+    margin-bottom: 16px;
+  }
+
+  .forward-targets {
+    max-height: 300px;
+    overflow-y: auto;
+    @include web-scrollbar;
+
+    .target-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+
+      &:hover {
+        background: $bg-hover;
+      }
+
+      &.selected {
+        background: $primary-color-light;
+      }
+
+      .target-info {
+        margin-left: 12px;
+
+        .target-name {
+          font-size: 14px;
+          font-weight: 500;
+          color: $text-primary;
+        }
+
+        .target-desc {
+          font-size: 12px;
+          color: $text-tertiary;
+        }
+      }
+    }
+  }
+}
+
+// 文件预览
+.file-preview-content {
+  min-height: 300px;
+
+  .preview-image {
+    text-align: center;
+
+    :deep(.el-image) {
+      max-height: 500px;
+    }
+  }
+
+  .preview-pdf {
+    iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+    }
+  }
+
+  .preview-file {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+
+    p {
+      margin: 16px 0;
+      font-size: 16px;
+      color: $text-secondary;
+    }
+  }
+}
+
+// 主题设置
+.theme-settings {
+  .setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid $border-base;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .setting-label {
+      font-size: 14px;
+      color: $text-primary;
+    }
+  }
+}
+
+// 深色模式
+:deep(.dark) {
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+// 消息高亮动画
+:deep(.message-item) {
+  &.highlight {
+    animation: highlightPulse 1s ease-in-out;
+  }
+}
+
+@keyframes highlightPulse {
+  0%, 100% {
+    background: transparent;
+  }
+  50% {
+    background: rgba(22, 119, 255, 0.2);
+  }
+}
+
+// 按钮激活状态
+:deep(.el-button.active) {
+  color: $primary-color !important;
+  background: rgba(22, 119, 255, 0.1) !important;
+}
+
+// 消息已读回执样式
+.message-read-receipt {
+  font-size: 11px;
+  color: $text-tertiary;
+  margin-top: 4px;
+
+  &.read {
+    color: $success-color;
   }
 }
 </style>

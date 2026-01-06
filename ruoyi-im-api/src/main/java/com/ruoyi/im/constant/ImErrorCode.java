@@ -34,8 +34,8 @@ public enum ImErrorCode {
     /** 用户不在线 */
     USER_OFFLINE("IM-400-03", "用户不在线", 400),
     
-    /** 导出申请待审批 */
-    EXPORT_PENDING("IM-400-04", "导出申请待审批", 400),
+    /** 导出申请待审核 */
+    EXPORT_PENDING("IM-400-04", "导出申请待审核", 400),
     
     /** 导出链接已过期 */
     EXPORT_EXPIRED("IM-400-05", "导出链接已过期", 400),
@@ -159,4 +159,4 @@ public enum ImErrorCode {
         }
         return codes;
     }
-} 
+}

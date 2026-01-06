@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 限流管理器
  * 
- * 负责管理不同类型的限流策略，根据配置选择合适的限流算法
+ * 负责管理不同类型限流策略，根据配置选择合适的限流算法
  * 执行限流检查，并提供限流状态的查询和管理功能。
  * 
  * @author ruoyi
@@ -23,7 +23,7 @@ public class ImRateLimitManager {
     private final ConcurrentHashMap<String, ImRateLimitStrategy> strategyCache = new ConcurrentHashMap<>();
     
     /**
-     * 策略工厂，用于创建不同类型的限流策略
+     * 策略工厂，用于创建不同类型限流策略
      */
     private final StrategyFactory strategyFactory = new StrategyFactory();
 
@@ -106,7 +106,7 @@ public class ImRateLimitManager {
     
     /**
      * 策略工厂类
-     * 用于创建不同类型的限流策略实例
+     * 用于创建不同类型限流策略实例
      */
     private static class StrategyFactory {
         

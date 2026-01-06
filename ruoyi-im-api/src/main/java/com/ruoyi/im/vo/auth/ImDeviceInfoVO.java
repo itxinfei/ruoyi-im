@@ -4,33 +4,33 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * 设备信息VO
+ * 璁惧淇℃伅VO
  * 
  * @author ruoyi
  * @since 2024-01-05
  */
-@ApiModel(description = "设备信息")
+@ApiModel(description = "璁惧淇℃伅")
 public class ImDeviceInfoVO {
 
-    @ApiModelProperty(value = "设备ID", example = "device-001")
+    @ApiModelProperty(value = "璁惧ID", example = "device-001")
     private String deviceId;
 
-    @ApiModelProperty(value = "设备类型", example = "web")
+    @ApiModelProperty(value = "璁惧绫诲瀷", example = "web")
     private String deviceType;
 
-    @ApiModelProperty(value = "设备名称", example = "Chrome 120.0")
+    @ApiModelProperty(value = "璁惧鍚嶇О", example = "Chrome 120.0")
     private String deviceName;
 
-    @ApiModelProperty(value = "操作系统", example = "Windows 10")
+    @ApiModelProperty(value = "鎿嶄綔绯荤粺", example = "Windows 10")
     private String os;
 
-    @ApiModelProperty(value = "浏览器", example = "Chrome")
+    @ApiModelProperty(value = "娴忚鍣?, example = "Chrome")
     private String browser;
 
-    @ApiModelProperty(value = "IP地址", example = "192.168.1.100")
+    @ApiModelProperty(value = "IP鍦板潃", example = "192.168.1.100")
     private String ipAddress;
 
-    @ApiModelProperty(value = "登录地点", example = "北京市")
+    @ApiModelProperty(value = "鐧诲綍鍦扮偣", example = "鍖椾含甯?)
     private String location;
 
     public String getDeviceId() {

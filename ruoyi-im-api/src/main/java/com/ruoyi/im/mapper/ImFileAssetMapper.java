@@ -5,56 +5,56 @@ import com.ruoyi.im.mapper.base.BaseMapper;
 import java.util.List;
 
 /**
- * 文件资源Mapper接口
+ * 鏂囦欢璧勬簮Mapper鎺ュ彛
  * 
  * @author ruoyi
  */
 public interface ImFileAssetMapper extends BaseMapper<ImFileAsset> {
     /**
-     * 查询文件资源
+     * 鏌ヨ鏂囦欢璧勬簮
      * 
-     * @param id 文件资源ID
-     * @return 文件资源
+     * @param id 鏂囦欢璧勬簮ID
+     * @return 鏂囦欢璧勬簮
      */
     public ImFileAsset selectImFileAssetById(Long id);
 
     /**
-     * 查询文件资源列表
+     * 鏌ヨ鏂囦欢璧勬簮鍒楄〃
      * 
-     * @param imFileAsset 文件资源
-     * @return 文件资源集合
+     * @param imFileAsset 鏂囦欢璧勬簮
+     * @return 鏂囦欢璧勬簮闆嗗悎
      */
     public List<ImFileAsset> selectImFileAssetList(ImFileAsset imFileAsset);
 
     /**
-     * 新增文件资源
+     * 鏂板鏂囦欢璧勬簮
      * 
-     * @param imFileAsset 文件资源
-     * @return 结果
+     * @param imFileAsset 鏂囦欢璧勬簮
+     * @return 缁撴灉
      */
     public int insertImFileAsset(ImFileAsset imFileAsset);
 
     /**
-     * 修改文件资源
+     * 淇敼鏂囦欢璧勬簮
      * 
-     * @param imFileAsset 文件资源
-     * @return 结果
+     * @param imFileAsset 鏂囦欢璧勬簮
+     * @return 缁撴灉
      */
     public int updateImFileAsset(ImFileAsset imFileAsset);
 
     /**
-     * 删除文件资源
+     * 鍒犻櫎鏂囦欢璧勬簮
      * 
-     * @param id 文件资源ID
-     * @return 结果
+     * @param id 鏂囦欢璧勬簮ID
+     * @return 缁撴灉
      */
     public int deleteImFileAssetById(Long id);
 
     /**
-     * 批量删除文件资源
+     * 鎵归噺鍒犻櫎鏂囦欢璧勬簮
      * 
-     * @param ids 需要删除的数据ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑鏁版嵁ID
+     * @return 缁撴灉
      */
     public int deleteImFileAssetByIds(Long[] ids);
 }

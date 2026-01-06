@@ -6,42 +6,42 @@ import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
 
 /**
- * 用户信息VO
+ * 鐢ㄦ埛淇℃伅VO
  * 
  * @author ruoyi
  * @since 2024-01-05
  */
-@ApiModel(description = "用户信息")
+@ApiModel(description = "鐢ㄦ埛淇℃伅")
 public class ImUserVO {
 
-    @ApiModelProperty(value = "用户ID", example = "1")
+    @ApiModelProperty(value = "鐢ㄦ埛ID", example = "1")
     private Long id;
 
-    @ApiModelProperty(value = "用户名", example = "admin")
+    @ApiModelProperty(value = "鐢ㄦ埛鍚?, example = "admin")
     private String username;
 
-    @ApiModelProperty(value = "昵称", example = "管理员")
+    @ApiModelProperty(value = "鏄电О", example = "绠＄悊鍛?)
     private String nickname;
 
-    @ApiModelProperty(value = "头像", example = "/profile/avatar.png")
+    @ApiModelProperty(value = "澶村儚", example = "/profile/avatar.png")
     private String avatar;
 
-    @ApiModelProperty(value = "邮箱", example = "admin@example.com")
+    @ApiModelProperty(value = "閭", example = "admin@example.com")
     private String email;
 
-    @ApiModelProperty(value = "手机号", example = "13800138000")
+    @ApiModelProperty(value = "鎵嬫満鍙?, example = "13800138000")
     private String phone;
 
-    @ApiModelProperty(value = "用户状态", example = "ACTIVE")
+    @ApiModelProperty(value = "鐢ㄦ埛鐘舵€?, example = "ACTIVE")
     private String status;
 
-    @ApiModelProperty(value = "用户状态描述", example = "正常")
+    @ApiModelProperty(value = "鐢ㄦ埛鐘舵€佹弿杩?, example = "姝ｅ父")
     private String statusDesc;
 
-    @ApiModelProperty(value = "最后登录时间", example = "2024-01-05 10:30:00")
+    @ApiModelProperty(value = "鏈€鍚庣櫥褰曟椂闂?, example = "2024-01-05 10:30:00")
     private LocalDateTime lastLoginTime;
 
-    @ApiModelProperty(value = "注册时间", example = "2024-01-01 09:00:00")
+    @ApiModelProperty(value = "娉ㄥ唽鏃堕棿", example = "2024-01-01 09:00:00")
     private LocalDateTime createTime;
 
     public Long getId() {

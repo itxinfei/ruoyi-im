@@ -9,41 +9,41 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- * 客户端工具类
+ * 瀹㈡埛绔伐鍏风被
  * 
  * @author ruoyi
  */
 public class ServletUtils {
     /**
-     * 获取String参数
+     * 鑾峰彇String鍙傛暟
      */
     public static String getParameter(String name) {
         return getRequest().getParameter(name);
     }
 
     /**
-     * 获取String参数
+     * 鑾峰彇String鍙傛暟
      */
     public static String getParameter(String name, String defaultValue) {
         return Convert.toStr(getRequest().getParameter(name), defaultValue);
     }
 
     /**
-     * 获取Integer参数
+     * 鑾峰彇Integer鍙傛暟
      */
     public static Integer getParameterToInt(String name) {
         return Convert.toInt(getRequest().getParameter(name));
     }
 
     /**
-     * 获取Integer参数
+     * 鑾峰彇Integer鍙傛暟
      */
     public static Integer getParameterToInt(String name, Integer defaultValue) {
         return Convert.toInt(getRequest().getParameter(name), defaultValue);
     }
 
     /**
-     * 获取request
+     * 鑾峰彇request
      */
     public static HttpServletRequest getRequest() {
         try {
@@ -54,7 +54,7 @@ public class ServletUtils {
     }
 
     /**
-     * 获取response
+     * 鑾峰彇response
      */
     public static HttpServletResponse getResponse() {
         try {
@@ -65,7 +65,7 @@ public class ServletUtils {
     }
 
     /**
-     * 获取session
+     * 鑾峰彇session
      */
     public static HttpSession getSession() {
         return getRequest().getSession();
@@ -81,10 +81,10 @@ public class ServletUtils {
     }
     
     /**
-     * 获取客户端IP地址
+     * 鑾峰彇瀹㈡埛绔疘P鍦板潃
      * 
      * @param request HttpServletRequest
-     * @return 客户端IP地址
+     * @return 瀹㈡埛绔疘P鍦板潃
      */
     public static String getClientIpAddress(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
@@ -104,7 +104,7 @@ public class ServletUtils {
             ip = request.getRemoteAddr();
         }
         
-        // 如果是多IP情况，取第一个IP
+        // 濡傛灉鏄IP鎯呭喌锛屽彇绗竴涓狪P
         if (ip != null && ip.contains(",")) {
             ip = ip.split(",")[0].trim();
         }
@@ -113,25 +113,20 @@ public class ServletUtils {
     }
     
     /**
-     * 获取指定请求的参数为整数
+     * 鑾峰彇鎸囧畾璇锋眰鐨勫弬鏁颁负鏁存暟
      * 
      * @param request HttpServletRequest
-     * @param name 参数名
-     * @return 参数值
-     */
+     * @param name 鍙傛暟鍚?     * @return 鍙傛暟鍊?     */
     public static Integer getParameterToInt(HttpServletRequest request, String name) {
         String value = request.getParameter(name);
         return Convert.toInt(value);
     }
     
     /**
-     * 获取指定请求的参数为整数
+     * 鑾峰彇鎸囧畾璇锋眰鐨勫弬鏁颁负鏁存暟
      * 
      * @param request HttpServletRequest
-     * @param name 参数名
-     * @param defaultValue 默认值
-     * @return 参数值
-     */
+     * @param name 鍙傛暟鍚?     * @param defaultValue 榛樿鍊?     * @return 鍙傛暟鍊?     */
     public static Integer getParameterToInt(HttpServletRequest request, String name, Integer defaultValue) {
         String value = request.getParameter(name);
         return Convert.toInt(value, defaultValue);

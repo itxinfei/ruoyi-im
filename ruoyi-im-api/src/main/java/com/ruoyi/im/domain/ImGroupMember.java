@@ -3,58 +3,58 @@ package com.ruoyi.im.domain;
 import java.time.LocalDateTime;
 
 /**
- * 群组成员实体
+ * 缇ょ粍鎴愬憳瀹炰綋
  * 
  * @author ruoyi
  */
 public class ImGroupMember {
     /**
-     * 主键ID
+     * 涓婚敭ID
      */
     private Long id;
     
     /**
-     * 群组ID
+     * 缇ょ粍ID
      */
     private Long groupId;
     
     /**
-     * 用户ID
+     * 鐢ㄦ埛ID
      */
     private Long userId;
     
     /**
-     * 角色（OWNER群主 ADMIN管理员 MEMBER普通成员）
+     * 瑙掕壊锛圤WNER缇や富 ADMIN绠＄悊鍛?MEMBER鏅€氭垚鍛橈級
      */
     private String role;
     
     /**
-     * 群内昵称
+     * 缇ゅ唴鏄电О
      */
     private String groupNickname;
     
     /**
-     * 禁言截止时间
+     * 绂佽█鎴鏃堕棿
      */
     private LocalDateTime muteEndTime;
     
     /**
-     * 邀请人用户ID
+     * 閭€璇蜂汉鐢ㄦ埛ID
      */
     private Long inviterId;
     
     /**
-     * 加入时间
+     * 鍔犲叆鏃堕棿
      */
     private LocalDateTime joinedTime;
     
     /**
-     * 创建时间
+     * 鍒涘缓鏃堕棿
      */
     private LocalDateTime createTime;
     
     /**
-     * 更新时间
+     * 鏇存柊鏃堕棿
      */
     private LocalDateTime updateTime;
 

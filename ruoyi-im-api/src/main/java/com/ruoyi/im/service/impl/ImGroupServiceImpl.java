@@ -12,9 +12,8 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImGroupService;
 
 /**
- * 群组Service业务层处理 - 优化版本
- * 优化内容：添加缓存机制、事务控制、性能监控、错误处理
- * 
+ * 缇ょ粍Service涓氬姟灞傚鐞?- 浼樺寲鐗堟湰
+ * 浼樺寲鍐呭锛氭坊鍔犵紦瀛樻満鍒躲€佷簨鍔℃帶鍒躲€佹€ц兘鐩戞帶銆侀敊璇鐞? * 
  * @author ruoyi
  */
 @Service
@@ -23,23 +22,23 @@ public class ImGroupServiceImpl extends EnhancedBaseServiceImpl<ImGroup, ImGroup
     private ImGroupMapper imGroupMapper;
 
     /**
-     * 根据用户ID查询群组列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ缇ょ粍鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 群组集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 缇ょ粍闆嗗悎
      */
     @Override
     public List<ImGroup> selectImGroupListByUserId(Long userId) {
-        // TODO: 实现根据用户ID查询群组列表的逻辑
-        // 这里需要关联查询群组成员表来获取用户所在的群组
+        // TODO: 瀹炵幇鏍规嵁鐢ㄦ埛ID鏌ヨ缇ょ粍鍒楄〃鐨勯€昏緫
+        // 杩欓噷闇€瑕佸叧鑱旀煡璇㈢兢缁勬垚鍛樿〃鏉ヨ幏鍙栫敤鎴锋墍鍦ㄧ殑缇ょ粍
         return imGroupMapper.selectImGroupList(new ImGroup());
     }
     
     /**
-     * 根据群组ID查询群组信息
+     * 鏍规嵁缇ょ粍ID鏌ヨ缇ょ粍淇℃伅
      * 
-     * @param id 群组ID
-     * @return 群组信息
+     * @param id 缇ょ粍ID
+     * @return 缇ょ粍淇℃伅
      */
     @Override
     public ImGroup selectImGroupById(Long id) {
@@ -47,10 +46,10 @@ public class ImGroupServiceImpl extends EnhancedBaseServiceImpl<ImGroup, ImGroup
     }
     
     /**
-     * 更新群组信息
+     * 鏇存柊缇ょ粍淇℃伅
      * 
-     * @param imGroup 群组信息
-     * @return 结果
+     * @param imGroup 缇ょ粍淇℃伅
+     * @return 缁撴灉
      */
     @Override
     public int updateImGroup(ImGroup imGroup) {
@@ -58,10 +57,10 @@ public class ImGroupServiceImpl extends EnhancedBaseServiceImpl<ImGroup, ImGroup
     }
     
     /**
-     * 根据ID删除群组信息
+     * 鏍规嵁ID鍒犻櫎缇ょ粍淇℃伅
      * 
-     * @param id 群组ID
-     * @return 结果
+     * @param id 缇ょ粍ID
+     * @return 缁撴灉
      */
     @Override
     public int deleteImGroupById(Long id) {

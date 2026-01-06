@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 import java.util.List;
+
 /**
  * IM系统配置
  * 

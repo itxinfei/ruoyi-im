@@ -6,101 +6,98 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * 会话Mapper接口
+ * 浼氳瘽Mapper鎺ュ彛
  * 
  * @author ruoyi
  */
 public interface ImConversationMapper extends BaseMapper<ImConversation> {
     /**
-     * 查询会话
+     * 鏌ヨ浼氳瘽
      * 
-     * @param id 会话ID
-     * @return 会话
+     * @param id 浼氳瘽ID
+     * @return 浼氳瘽
      */
     public ImConversation selectImConversationById(Long id);
 
     /**
-     * 查询会话列表
+     * 鏌ヨ浼氳瘽鍒楄〃
      * 
-     * @param imConversation 会话
-     * @return 会话集合
+     * @param imConversation 浼氳瘽
+     * @return 浼氳瘽闆嗗悎
      */
     public List<ImConversation> selectImConversationList(ImConversation imConversation);
 
     /**
-     * 新增会话
+     * 鏂板浼氳瘽
      * 
-     * @param imConversation 会话
-     * @return 结果
+     * @param imConversation 浼氳瘽
+     * @return 缁撴灉
      */
     public int insertImConversation(ImConversation imConversation);
 
     /**
-     * 修改会话
+     * 淇敼浼氳瘽
      * 
-     * @param imConversation 会话
-     * @return 结果
+     * @param imConversation 浼氳瘽
+     * @return 缁撴灉
      */
     public int updateImConversation(ImConversation imConversation);
 
     /**
-     * 删除会话
+     * 鍒犻櫎浼氳瘽
      * 
-     * @param id 会话ID
-     * @return 结果
+     * @param id 浼氳瘽ID
+     * @return 缁撴灉
      */
     public int deleteImConversationById(Long id);
 
     /**
-     * 批量删除会话
+     * 鎵归噺鍒犻櫎浼氳瘽
      * 
-     * @param ids 需要删除的数据ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑鏁版嵁ID
+     * @return 缁撴灉
      */
     public int deleteImConversationByIds(Long[] ids);
     
     /**
-     * 根据用户ID查询会话列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ浼氳瘽鍒楄〃
      * 
-     * @param userId 用户ID
-     * @param type 会话类型
-     * @return 会话集合
+     * @param userId 鐢ㄦ埛ID
+     * @param type 浼氳瘽绫诲瀷
+     * @return 浼氳瘽闆嗗悎
      */
     public List<ImConversation> selectImConversationListByUserId(@Param("userId") Long userId, @Param("type") String type);
     
     /**
-     * 根据会话类型和目标ID查询会话
+     * 鏍规嵁浼氳瘽绫诲瀷鍜岀洰鏍嘔D鏌ヨ浼氳瘽
      * 
-     * @param type 会话类型
-     * @param targetId 目标ID
-     * @return 会话
+     * @param type 浼氳瘽绫诲瀷
+     * @param targetId 鐩爣ID
+     * @return 浼氳瘽
      */
     public ImConversation selectImConversationByTypeAndTargetId(String type, Long targetId);
     
     /**
-     * 批量插入会话 - 性能优化
+     * 鎵归噺鎻掑叆浼氳瘽 - 鎬ц兘浼樺寲
      * 
-     * @param conversations 会话列表
-     * @return 插入成功的数量
-     */
+     * @param conversations 浼氳瘽鍒楄〃
+     * @return 鎻掑叆鎴愬姛鐨勬暟閲?     */
     public int batchInsertImConversation(List<ImConversation> conversations);
     
     /**
-     * 批量更新会话 - 性能优化
+     * 鎵归噺鏇存柊浼氳瘽 - 鎬ц兘浼樺寲
      * 
-     * @param conversations 会话列表
-     * @return 更新成功的数量
-     */
+     * @param conversations 浼氳瘽鍒楄〃
+     * @return 鏇存柊鎴愬姛鐨勬暟閲?     */
     public int batchUpdateImConversation(List<ImConversation> conversations);
     
     /**
-     * 分页查询用户会话列表 - 性能优化
+     * 鍒嗛〉鏌ヨ鐢ㄦ埛浼氳瘽鍒楄〃 - 鎬ц兘浼樺寲
      * 
-     * @param userId 用户ID
-     * @param type 会话类型
-     * @param offset 偏移量
-     * @param limit 限制数量
-     * @return 会话集合
+     * @param userId 鐢ㄦ埛ID
+     * @param type 浼氳瘽绫诲瀷
+     * @param offset 鍋忕Щ閲?     * @param limit 闄愬埗鏁伴噺
+     * @return 浼氳瘽闆嗗悎
      */
     public List<ImConversation> selectUserConversationListWithPagination(
             @Param("userId") Long userId, 
@@ -109,28 +106,27 @@ public interface ImConversationMapper extends BaseMapper<ImConversation> {
             @Param("limit") int limit);
     
     /**
-     * 批量删除会话 - 性能优化
+     * 鎵归噺鍒犻櫎浼氳瘽 - 鎬ц兘浼樺寲
      * 
-     * @param conversationIds 会话ID列表
-     * @return 删除成功的数量
-     */
+     * @param conversationIds 浼氳瘽ID鍒楄〃
+     * @return 鍒犻櫎鎴愬姛鐨勬暟閲?     */
     public int batchDeleteConversations(List<Long> conversationIds);
     
     /**
-     * 检查会话是否存在 - 性能优化
+     * 妫€鏌ヤ細璇濇槸鍚﹀瓨鍦?- 鎬ц兘浼樺寲
      * 
-     * @param type 会话类型
-     * @param targetId 目标ID
-     * @return 存在返回true，不存在返回false
+     * @param type 浼氳瘽绫诲瀷
+     * @param targetId 鐩爣ID
+     * @return 瀛樺湪杩斿洖true锛屼笉瀛樺湪杩斿洖false
      */
     public boolean existsByTypeAndTargetId(@Param("type") String type, @Param("targetId") Long targetId);
     
     /**
-     * 统计用户会话数量 - 性能优化
+     * 缁熻鐢ㄦ埛浼氳瘽鏁伴噺 - 鎬ц兘浼樺寲
      * 
-     * @param userId 用户ID
-     * @param type 会话类型
-     * @return 会话数量
+     * @param userId 鐢ㄦ埛ID
+     * @param type 浼氳瘽绫诲瀷
+     * @return 浼氳瘽鏁伴噺
      */
     public int countUserConversations(@Param("userId") Long userId, @Param("type") String type);
 }

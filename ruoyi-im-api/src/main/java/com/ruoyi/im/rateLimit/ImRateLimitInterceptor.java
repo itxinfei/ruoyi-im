@@ -2,7 +2,7 @@ package com.ruoyi.im.rateLimit;
 
 import com.ruoyi.im.utils.ServletUtils;
 import com.ruoyi.im.annotation.ImRateLimit;
-import com.ruoyi.im.util.PerformanceMonitor;
+import com.ruoyi.im.utils.PerformanceMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +17,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 限流拦截器
- * 
+ * 闄愭祦鎷︽埅鍣? * 
  * @author ruoyi
  */
 @Component
@@ -35,25 +34,23 @@ public class ImRateLimitInterceptor implements HandlerInterceptor {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();
             
-            // 检查方法上是否有@ImRateLimit注解
+            // 妫€鏌ユ柟娉曚笂鏄惁鏈堾ImRateLimit娉ㄨВ
             if (method.isAnnotationPresent(ImRateLimit.class)) {
                 ImRateLimit rateLimit = method.getAnnotation(ImRateLimit.class);
                 
-                // 构建限流键
-                String key = buildRateLimitKey(request, rateLimit);
+                // 鏋勫缓闄愭祦閿?                String key = buildRateLimitKey(request, rateLimit);
                 
-                // 获取当前请求次数
+                // 鑾峰彇褰撳墠璇锋眰娆℃暟
                 Long currentCount = (Long) redisTemplate.opsForValue().get(key);
                 if (currentCount == null) {
-                    // 首次请求，设置计数和过期时间
+                    // 棣栨璇锋眰锛岃缃鏁板拰杩囨湡鏃堕棿
                     redisTemplate.opsForValue().set(key, 1L, rateLimit.time(), TimeUnit.SECONDS);
                 } else if (currentCount < rateLimit.count()) {
-                    // 增加计数
+                    // 澧炲姞璁℃暟
                     redisTemplate.opsForValue().increment(key);
                 } else {
-                    // 超过限流次数，返回429状态码
-                    response.setStatus(429); // 使用硬编码状态码，因为ServletResponse.SC_TOO_MANY_REQUESTS可能不存在
-                    response.getWriter().write("请求过于频繁，请稍后重试");
+                    // 瓒呰繃闄愭祦娆℃暟锛岃繑鍥?29鐘舵€佺爜
+                    response.setStatus(429); // 浣跨敤纭紪鐮佺姸鎬佺爜锛屽洜涓篠ervletResponse.SC_TOO_MANY_REQUESTS鍙兘涓嶅瓨鍦?                    response.getWriter().write("璇锋眰杩囦簬棰戠箒锛岃绋嶅悗閲嶈瘯");
                     return false;
                 }
             }
@@ -63,18 +60,16 @@ public class ImRateLimitInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * 构建限流键
-     * 
-     * @param request HTTP请求
-     * @param rateLimit 限流注解
-     * @return 限流键
-     */
+     * 鏋勫缓闄愭祦閿?     * 
+     * @param request HTTP璇锋眰
+     * @param rateLimit 闄愭祦娉ㄨВ
+     * @return 闄愭祦閿?     */
     private String buildRateLimitKey(HttpServletRequest request, ImRateLimit rateLimit) {
         String ip = ServletUtils.getClientIpAddress(request);
         String uri = request.getRequestURI();
         String method = request.getMethod();
         
-        // 使用IP+URI+方法名作为限流键
+        // 浣跨敤IP+URI+鏂规硶鍚嶄綔涓洪檺娴侀敭
         StringBuilder keyBuilder = new StringBuilder();
         keyBuilder.append("rate_limit:")
                   .append(rateLimit.key().isEmpty() ? (method + ":" + uri) : rateLimit.key())
@@ -85,11 +80,10 @@ public class ImRateLimitInterceptor implements HandlerInterceptor {
     }
     
     /**
-     * 清除统计信息
+     * 娓呴櫎缁熻淇℃伅
      */
     public void clearStats() {
-        // 实现清除统计信息的逻辑
-        // 可以清除相关的Redis统计键
-        log.info("清除限流统计信息");
+        // 瀹炵幇娓呴櫎缁熻淇℃伅鐨勯€昏緫
+        // 鍙互娓呴櫎鐩稿叧鐨凴edis缁熻閿?        log.info("娓呴櫎闄愭祦缁熻淇℃伅");
     }
 }

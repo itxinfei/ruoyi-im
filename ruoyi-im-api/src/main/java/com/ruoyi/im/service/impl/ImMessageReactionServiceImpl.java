@@ -8,7 +8,7 @@ import com.ruoyi.im.domain.ImMessageReaction;
 import com.ruoyi.im.service.ImMessageReactionService;
 
 /**
- * 消息互动Service业务层处理
+ * 娑堟伅浜掑姩Service涓氬姟灞傚鐞?
  * 
  * @author ruoyi
  */
@@ -18,10 +18,10 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     private ImMessageReactionMapper imMessageReactionMapper;
 
     /**
-     * 查询消息互动
+     * 鏌ヨ娑堟伅浜掑姩
      * 
-     * @param id 消息互动ID
-     * @return 消息互动
+     * @param id 娑堟伅浜掑姩ID
+     * @return 娑堟伅浜掑姩
      */
     @Override
     public ImMessageReaction selectImMessageReactionById(Long id) {
@@ -29,10 +29,10 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     }
 
     /**
-     * 查询消息互动列表
+     * 鏌ヨ娑堟伅浜掑姩鍒楄〃
      * 
-     * @param imMessageReaction 消息互动
-     * @return 消息互动
+     * @param imMessageReaction 娑堟伅浜掑姩
+     * @return 娑堟伅浜掑姩
      */
     @Override
     public List<ImMessageReaction> selectImMessageReactionList(ImMessageReaction imMessageReaction) {
@@ -40,10 +40,10 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     }
 
     /**
-     * 新增消息互动
+     * 鏂板娑堟伅浜掑姩
      * 
-     * @param imMessageReaction 消息互动
-     * @return 结果
+     * @param imMessageReaction 娑堟伅浜掑姩
+     * @return 缁撴灉
      */
     @Override
     public int insertImMessageReaction(ImMessageReaction imMessageReaction) {
@@ -51,10 +51,10 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     }
 
     /**
-     * 修改消息互动
+     * 淇敼娑堟伅浜掑姩
      * 
-     * @param imMessageReaction 消息互动
-     * @return 结果
+     * @param imMessageReaction 娑堟伅浜掑姩
+     * @return 缁撴灉
      */
     @Override
     public int updateImMessageReaction(ImMessageReaction imMessageReaction) {
@@ -62,10 +62,10 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     }
 
     /**
-     * 批量删除消息互动
+     * 鎵归噺鍒犻櫎娑堟伅浜掑姩
      * 
-     * @param ids 需要删除的消息互动ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑娑堟伅浜掑姩ID
+     * @return 缁撴灉
      */
     @Override
     public int deleteImMessageReactionByIds(Long[] ids) {
@@ -73,10 +73,10 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     }
 
     /**
-     * 删除消息互动信息
+     * 鍒犻櫎娑堟伅浜掑姩淇℃伅
      * 
-     * @param id 消息互动ID
-     * @return 结果
+     * @param id 娑堟伅浜掑姩ID
+     * @return 缁撴灉
      */
     @Override
     public int deleteImMessageReactionById(Long id) {
@@ -84,10 +84,10 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     }
     
     /**
-     * 根据消息ID查询互动列表
+     * 鏍规嵁娑堟伅ID鏌ヨ浜掑姩鍒楄〃
      * 
-     * @param messageId 消息ID
-     * @return 消息互动集合
+     * @param messageId 娑堟伅ID
+     * @return 娑堟伅浜掑姩闆嗗悎
      */
     @Override
     public List<ImMessageReaction> selectImMessageReactionByMessageId(Long messageId) {
@@ -95,10 +95,10 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     }
     
     /**
-     * 根据消息ID查询互动列表（带分页）
+     * 鏍规嵁娑堟伅ID鏌ヨ浜掑姩鍒楄〃锛堝甫鍒嗛〉锛?
      * 
-     * @param messageId 消息ID
-     * @return 消息互动集合
+     * @param messageId 娑堟伅ID
+     * @return 娑堟伅浜掑姩闆嗗悎
      */
     @Override
     public List<ImMessageReaction> selectImMessageReactionListByMessageId(Long messageId) {
@@ -106,10 +106,10 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     }
     
     /**
-     * 根据用户ID查询互动列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ浜掑姩鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 消息互动集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 娑堟伅浜掑姩闆嗗悎
      */
     @Override
     public List<ImMessageReaction> selectImMessageReactionByUserId(Long userId) {
@@ -117,13 +117,13 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     }
     
     /**
-     * 添加消息互动
+     * 娣诲姞娑堟伅浜掑姩
      * 
-     * @param messageId 消息ID
-     * @param userId 用户ID
-     * @param reactionType 互动类型
-     * @param emoji 表情
-     * @return 结果
+     * @param messageId 娑堟伅ID
+     * @param userId 鐢ㄦ埛ID
+     * @param reactionType 浜掑姩绫诲瀷
+     * @param emoji 琛ㄦ儏
+     * @return 缁撴灉
      */
     @Override
     public int addReaction(Long messageId, Long userId, String reactionType, String emoji) {
@@ -136,12 +136,12 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     }
     
     /**
-     * 取消消息互动
+     * 鍙栨秷娑堟伅浜掑姩
      * 
-     * @param messageId 消息ID
-     * @param userId 用户ID
-     * @param reactionType 互动类型
-     * @return 结果
+     * @param messageId 娑堟伅ID
+     * @param userId 鐢ㄦ埛ID
+     * @param reactionType 浜掑姩绫诲瀷
+     * @return 缁撴灉
      */
     @Override
     public int removeReaction(Long messageId, Long userId, String reactionType) {
@@ -157,12 +157,12 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     }
     
     /**
-     * 删除消息互动
+     * 鍒犻櫎娑堟伅浜掑姩
      * 
-     * @param messageId 消息ID
-     * @param userId 用户ID
-     * @param reactionType 互动类型
-     * @return 结果
+     * @param messageId 娑堟伅ID
+     * @param userId 鐢ㄦ埛ID
+     * @param reactionType 浜掑姩绫诲瀷
+     * @return 缁撴灉
      */
     @Override
     public int deleteImMessageReaction(Long messageId, Long userId, String reactionType) {
@@ -178,10 +178,10 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     }
     
     /**
-     * 删除消息的所有互动
+     * 鍒犻櫎娑堟伅鐨勬墍鏈変簰鍔?
      * 
-     * @param messageId 消息ID
-     * @return 结果
+     * @param messageId 娑堟伅ID
+     * @return 缁撴灉
      */
     @Override
     public int deleteImMessageReactionByMessageId(Long messageId) {

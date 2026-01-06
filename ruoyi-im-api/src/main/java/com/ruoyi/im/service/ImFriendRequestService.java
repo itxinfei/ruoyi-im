@@ -4,7 +4,7 @@ import com.ruoyi.im.domain.ImFriendRequest;
 import java.util.List;
 
 /**
- * 好友申请Service接口
+ * 濂藉弸鐢宠Service鎺ュ彛
  * 
  * @author ruoyi
  */
@@ -29,65 +29,64 @@ public interface ImFriendRequestService extends BaseService<ImFriendRequest> {
     int deleteById(Long id);
     
     /**
-     * 根据申请人ID和被申请人ID查询好友申请
+     * 鏍规嵁鐢宠浜篒D鍜岃鐢宠浜篒D鏌ヨ濂藉弸鐢宠
      * 
-     * @param fromUserId 申请人ID
-     * @param toUserId 被申请人ID
-     * @return 好友申请
+     * @param fromUserId 鐢宠浜篒D
+     * @param toUserId 琚敵璇蜂汉ID
+     * @return 濂藉弸鐢宠
      */
     public ImFriendRequest selectImFriendRequestByFromAndToUserId(Long fromUserId, Long toUserId);
     
     /**
-     * 根据申请人ID查询好友申请列表
+     * 鏍规嵁鐢宠浜篒D鏌ヨ濂藉弸鐢宠鍒楄〃
      * 
-     * @param fromUserId 申请人ID
-     * @return 好友申请集合
+     * @param fromUserId 鐢宠浜篒D
+     * @return 濂藉弸鐢宠闆嗗悎
      */
     public List<ImFriendRequest> selectImFriendRequestListByFromUserId(Long fromUserId);
     
     /**
-     * 根据被申请人ID查询好友申请列表
+     * 鏍规嵁琚敵璇蜂汉ID鏌ヨ濂藉弸鐢宠鍒楄〃
      * 
-     * @param toUserId 被申请人ID
-     * @return 好友申请集合
+     * @param toUserId 琚敵璇蜂汉ID
+     * @return 濂藉弸鐢宠闆嗗悎
      */
     public List<ImFriendRequest> selectImFriendRequestListByToUserId(Long toUserId);
     
     /**
-     * 发送好友申请
-     * 
-     * @param fromUserId 申请人ID
-     * @param toUserId 被申请人ID
-     * @param message 申请消息
-     * @return 结果
+     * 鍙戦€佸ソ鍙嬬敵璇?     * 
+     * @param fromUserId 鐢宠浜篒D
+     * @param toUserId 琚敵璇蜂汉ID
+     * @param message 鐢宠娑堟伅
+     * @return 缁撴灉
      */
     public int sendFriendRequest(Long fromUserId, Long toUserId, String message);
     
     /**
-     * 处理好友申请
+     * 澶勭悊濂藉弸鐢宠
      * 
-     * @param id 申请ID
-     * @param operatorId 操作人ID
-     * @param status 状态（APPROVED已同意 REJECTED已拒绝）
-     * @return 结果
+     * @param id 鐢宠ID
+     * @param operatorId 鎿嶄綔浜篒D
+     * @param status 鐘舵€侊紙APPROVED宸插悓鎰?REJECTED宸叉嫆缁濓級
+     * @return 缁撴灉
      */
     public int handleFriendRequest(Long id, Long operatorId, String status);
     
     /**
-     * 同意好友申请
+     * 鍚屾剰濂藉弸鐢宠
      * 
-     * @param id 申请ID
-     * @param operatorId 操作人ID
-     * @return 结果
+     * @param id 鐢宠ID
+     * @param operatorId 鎿嶄綔浜篒D
+     * @return 缁撴灉
      */
     public int approveFriendRequest(Long id, Long operatorId);
     
     /**
-     * 拒绝好友申请
+     * 鎷掔粷濂藉弸鐢宠
      * 
-     * @param id 申请ID
-     * @param operatorId 操作人ID
-     * @return 结果
+     * @param id 鐢宠ID
+     * @param operatorId 鎿嶄綔浜篒D
+     * @return 缁撴灉
      */
     public int rejectFriendRequest(Long id, Long operatorId);
 }

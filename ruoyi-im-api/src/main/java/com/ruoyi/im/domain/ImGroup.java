@@ -3,74 +3,71 @@ package com.ruoyi.im.domain;
 import java.time.LocalDateTime;
 
 /**
- * 群组实体
+ * 缇ょ粍瀹炰綋
  * 
  * @author ruoyi
  */
 public class ImGroup {
     /**
-     * 群组ID
+     * 缇ょ粍ID
      */
     private Long id;
     
     /**
-     * 群组名称
+     * 缇ょ粍鍚嶇О
      */
     private String name;
     
     /**
-     * 群主用户ID
+     * 缇や富鐢ㄦ埛ID
      */
     private Long ownerId;
     
     /**
-     * 群公告
-     */
+     * 缇ゅ叕鍛?     */
     private String notice;
     
     /**
-     * 群头像
-     */
+     * 缇ゅご鍍?     */
     private String avatar;
     
     /**
-     * 状态（NORMAL正常 DISMISSED已解散）
+     * 鐘舵€侊紙NORMAL姝ｅ父 DISMISSED宸茶В鏁ｏ級
      */
     private String status;
     
     /**
-     * 成员数量
+     * 鎴愬憳鏁伴噺
      */
     private Integer memberCount;
     
     /**
-     * 成员数量限制
+     * 鎴愬憳鏁伴噺闄愬埗
      */
     private Integer memberLimit;
     
     /**
-     * 群组描述
+     * 缇ょ粍鎻忚堪
      */
     private String description;
     
     /**
-     * 群组类型
+     * 缇ょ粍绫诲瀷
      */
     private String type;
 
     /**
-     * 创建时间
+     * 鍒涘缓鏃堕棿
      */
     private LocalDateTime createTime;
     
     /**
-     * 更新时间
+     * 鏇存柊鏃堕棿
      */
     private LocalDateTime updateTime;
     
     /**
-     * 群主名称（非数据库字段，用于显示）
-     */
+     * 缇や富鍚嶇О锛堥潪鏁版嵁搴撳瓧娈碉紝鐢ㄤ簬鏄剧ず锛?     */
     private String ownerName;
 
     // Getters and Setters

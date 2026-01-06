@@ -73,7 +73,7 @@ public class ImContactController extends BaseController {
     @RequirePermission(value = "im:contact:list", desc = "查看联系人列表")
     public Result<PageResult<ImFriendVO>> list(ImFriendQueryRequest request) {
         
-        log.info("获取联系人列表请求: keyword={}, pageNum={}, pageSize={}", 
+        log.info("获取联系人列表请求， keyword={}, pageNum={}, pageSize={}", 
                 request.getKeyword(), request.getPageNum(), request.getPageSize());
         
         Long currentUserId = getCurrentUserId();
@@ -107,7 +107,7 @@ public class ImContactController extends BaseController {
             pageResult.setPageSize(request.getPageSize());
             pageResult.setPages((int) Math.ceil((double) friendList.size() / request.getPageSize()));
 
-            log.info("获取联系人列表成功: count={}", friendVOList.size());
+            log.info("获取联系人列表成功， count={}", friendVOList.size());
             return Result.success("获取联系人列表成功", pageResult);
         } catch (Exception e) {
             log.error("获取联系人列表异常: {}", e.getMessage(), e);
@@ -137,7 +137,7 @@ public class ImContactController extends BaseController {
     @GetMapping("/{userId}")
     @RequirePermission(value = "im:contact:query", desc = "查看联系人信息")
     public Result<ImFriendVO> getInfo(@PathVariable @NotNull(message = "用户ID不能为空") @Positive(message = "用户ID必须为正数") Long userId) {
-        log.info("获取联系人信息请求: userId={}", userId);
+        log.info("获取联系人信息请求， userId={}", userId);
         
         try {
             Long currentUserId = getCurrentUserId();
@@ -155,7 +155,7 @@ public class ImContactController extends BaseController {
             // 查询用户信息
             ImUser friendUser = imUserService.selectById(userId);
             if (friendUser == null) {
-                log.warn("好友用户不存在: userId={}", userId);
+                log.warn("好友用户不存在， userId={}", userId);
                 return Result.error(404, "好友用户不存在");
             }
             
@@ -169,10 +169,10 @@ public class ImContactController extends BaseController {
             friendVO.setStatus(friend.getStatus());
             friendVO.setCreateTime(friend.getCreateTime());
             
-            log.info("获取联系人信息成功: userId={}", userId);
+            log.info("获取联系人信息成功， userId={}", userId);
             return Result.success("获取联系人信息成功", friendVO);
         } catch (Exception e) {
-            log.error("获取联系人信息异常: userId={}, error={}", userId, e.getMessage(), e);
+            log.error("获取联系人信息异常， userId={}, error={}", userId, e.getMessage(), e);
             return Result.error(500, "获取联系人信息失败: " + e.getMessage());
         }
     }
@@ -200,7 +200,7 @@ public class ImContactController extends BaseController {
     @PostMapping
     @RequirePermission(value = "im:contact:add", desc = "添加联系人")
     public Result<Void> add(@Valid @RequestBody ImFriendAddRequest request, BindingResult bindingResult) {
-        log.info("添加联系人请求: request={}", request);
+        log.info("添加联系人请求， request={}", request);
         
         Result<Void> validationResult = handleValidationError(bindingResult);
         if (validationResult != null) {
@@ -213,7 +213,7 @@ public class ImContactController extends BaseController {
                 return Result.error(401, "用户未登录");
             }
             
-            // 检查是否已经是好友
+            // 检查是否已经好友
             ImFriend existingFriend = imFriendService.selectImFriendByUserIdAndFriendId(currentUserId, request.getFriendId());
             if (existingFriend != null) {
                 log.warn("用户已是好友: userId={}, friendId={}", currentUserId, request.getFriendId());
@@ -223,7 +223,7 @@ public class ImContactController extends BaseController {
             // 检查好友用户是否存在
             ImUser friendUser = imUserService.selectById(request.getFriendId());
             if (friendUser == null) {
-                log.warn("好友用户不存在: friendId={}", request.getFriendId());
+                log.warn("好友用户不存在， friendId={}", request.getFriendId());
                 return Result.error(404, "好友用户不存在");
             }
             
@@ -237,14 +237,14 @@ public class ImContactController extends BaseController {
             int result = imFriendService.insertImFriend(friend);
             
             if (result > 0) {
-                log.info("添加联系人成功: userId={}, friendId={}", currentUserId, request.getFriendId());
+                log.info("添加联系人成功， userId={}, friendId={}", currentUserId, request.getFriendId());
                 return Result.success();
             } else {
-                log.error("添加联系人失败: userId={}, friendId={}", currentUserId, request.getFriendId());
+                log.error("添加联系人失败， userId={}, friendId={}", currentUserId, request.getFriendId());
                 return Result.error(500, "添加好友失败");
             }
         } catch (Exception e) {
-            log.error("添加联系人异常: error={}", e.getMessage(), e);
+            log.error("添加联系人异常， error={}", e.getMessage(), e);
             return Result.error(500, "添加好友失败: " + e.getMessage());
         }
     }
@@ -271,7 +271,7 @@ public class ImContactController extends BaseController {
     @DeleteMapping("/{userId}")
     @RequirePermission(value = "im:contact:remove", desc = "删除联系人")
     public Result<Void> remove(@PathVariable @NotNull(message = "用户ID不能为空") @Positive(message = "用户ID必须为正数") Long userId) {
-        log.info("删除联系人请求: userId={}", userId);
+        log.info("删除联系人请求， userId={}", userId);
         
         try {
             Long currentUserId = getCurrentUserId();
@@ -282,7 +282,7 @@ public class ImContactController extends BaseController {
             // 检查好友关系是否存在
             ImFriend friend = imFriendService.selectImFriendByUserIdAndFriendId(currentUserId, userId);
             if (friend == null) {
-                log.warn("好友关系不存在: userId={}, friendId={}", currentUserId, userId);
+                log.warn("好友关系不存在， userId={}, friendId={}", currentUserId, userId);
                 return Result.error(404, "好友关系不存在");
             }
             
@@ -290,14 +290,14 @@ public class ImContactController extends BaseController {
             int result = imFriendService.deleteImFriendByUserIdAndFriendId(currentUserId, userId);
             
             if (result > 0) {
-                log.info("删除联系人成功: userId={}, friendId={}", currentUserId, userId);
+                log.info("删除联系人成功， userId={}, friendId={}", currentUserId, userId);
                 return Result.success();
             } else {
-                log.error("删除联系人失败: userId={}, friendId={}", currentUserId, userId);
+                log.error("删除联系人失败， userId={}, friendId={}", currentUserId, userId);
                 return Result.error(500, "删除好友失败");
             }
         } catch (Exception e) {
-            log.error("删除联系人异常: userId={}, error={}", userId, e.getMessage(), e);
+            log.error("删除联系人异常， userId={}, error={}", userId, e.getMessage(), e);
             return Result.error(500, "删除好友失败: " + e.getMessage());
         }
     }
@@ -344,7 +344,7 @@ public class ImContactController extends BaseController {
             // 检查好友关系是否存在
             ImFriend friend = imFriendService.selectImFriendByUserIdAndFriendId(currentUserId, userId);
             if (friend == null) {
-                log.warn("好友关系不存在: userId={}, friendId={}", currentUserId, userId);
+                log.warn("好友关系不存在， userId={}, friendId={}", currentUserId, userId);
                 return Result.error(404, "好友关系不存在");
             }
             
@@ -428,7 +428,7 @@ public class ImContactController extends BaseController {
                 .sorted((a, b) -> a.getGroupName().compareTo(b.getGroupName()))
                 .collect(Collectors.toList());
             
-            log.info("获取联系人群组成功: count={}", groupList.size());
+            log.info("获取联系人群组成功， count={}", groupList.size());
             return Result.success("获取联系人群组成功", groupList);
         } catch (Exception e) {
             log.error("获取联系人群组异常: {}", e.getMessage(), e);

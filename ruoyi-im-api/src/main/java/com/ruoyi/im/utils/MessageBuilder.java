@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 消息构建器
+ * 娑堟伅鏋勫缓鍣?
  * 
  * @author ruoyi
  */
@@ -15,15 +15,15 @@ import java.util.Map;
 public class MessageBuilder {
     
     /**
-     * 构建WebSocket消息
+     * 鏋勫缓WebSocket娑堟伅
      */
     public Object buildWebSocketMessage(Object message) {
-        // 简单实现，返回消息对象本身
+        // 绠€鍗曞疄鐜帮紝杩斿洖娑堟伅瀵硅薄鏈韩
         return message;
     }
     
     /**
-     * 构建在线状态消息
+     * 鏋勫缓鍦ㄧ嚎鐘舵€佹秷鎭?
      */
     public Object buildOnlineStatusMessage(Long userId, boolean online) {
         Map<String, Object> message = new HashMap<>();
@@ -35,7 +35,7 @@ public class MessageBuilder {
     }
     
     /**
-     * 构建消息撤回通知
+     * 鏋勫缓娑堟伅鎾ゅ洖閫氱煡
      */
     public Object buildRecallMessage(Long messageId, Long userId) {
         Map<String, Object> message = new HashMap<>();
@@ -47,7 +47,7 @@ public class MessageBuilder {
     }
     
     /**
-     * 构建已读回执消息
+     * 鏋勫缓宸茶鍥炴墽娑堟伅
      */
     public Object buildReadReceiptMessage(Long messageId, Long userId) {
         Map<String, Object> message = new HashMap<>();
@@ -59,7 +59,7 @@ public class MessageBuilder {
     }
     
     /**
-     * 构建消息反应通知
+     * 鏋勫缓娑堟伅鍙嶅簲閫氱煡
      */
     public Object buildReactionMessage(Long messageId, String reaction, Long userId, boolean added) {
         Map<String, Object> message = new HashMap<>();
@@ -73,7 +73,7 @@ public class MessageBuilder {
     }
     
     /**
-     * 构建消息回执
+     * 鏋勫缓娑堟伅鍥炴墽
      */
     public Object buildReceiptMessage(Long messageId, Integer status, Long userId) {
         Map<String, Object> message = new HashMap<>();

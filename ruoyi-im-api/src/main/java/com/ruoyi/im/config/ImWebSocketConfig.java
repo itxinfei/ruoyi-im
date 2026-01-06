@@ -9,7 +9,7 @@ import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 /**
  * WebSocket配置类
  * 
- * 用于启用WebSocket支持，注册@ServerEndpoint注解的WebSocket端点
+ * 用于启用WebSocket支持，注册使用@ServerEndpoint注解的WebSocket端点
  * 
  * @author ruoyi
  * @date 2024-01-01

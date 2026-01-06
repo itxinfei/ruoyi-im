@@ -80,7 +80,7 @@ public class ImAuditLogController extends BaseController {
     }
 
     /**
-     * 根据目标类型和目标ID查询审计日志列表
+     * 根据目标查询审计日志列表
      */
     @GetMapping("/target")
     public Result<List<ImAuditLog>> listByTarget(@RequestParam String targetType, @RequestParam Long targetId) {
@@ -90,7 +90,7 @@ public class ImAuditLogController extends BaseController {
     }
 
     /**
-     * 根据IP地址查询审计日志列表
+     * 根据IP查询审计日志列表
      */
     @GetMapping("/ip/{ipAddress}")
     public Result<List<ImAuditLog>> listByIpAddress(@PathVariable String ipAddress) {
@@ -172,14 +172,14 @@ public class ImAuditLogController extends BaseController {
         int rows = imAuditLogService.deleteByIds(ids);
         
         if (rows > 0) {
-            return Result.success("审计日志删除成功");
+            return Result.success("审计日志批量删除成功");
         } else {
-            return Result.error("审计日志删除失败");
+            return Result.error("审计日志批量删除失败");
         }
     }
 
     /**
-     * 批量删除指定时间之前的审计日志
+     * 删除指定时间之前的审计日志
      */
     @DeleteMapping("/before/{beforeTime}")
     public Result<Integer> removeByBeforeTime(@PathVariable String beforeTime) {

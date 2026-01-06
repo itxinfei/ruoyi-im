@@ -1,84 +1,85 @@
 package com.ruoyi.im.mapper;
 
 import com.ruoyi.im.domain.ImFriendRequest;
+import com.ruoyi.im.mapper.base.BaseMapper;
 import java.util.List;
 
 /**
- * 好友申请Mapper接口
+ * 濂藉弸鐢宠Mapper鎺ュ彛
  * 
  * @author ruoyi
  */
-public interface ImFriendRequestMapper {
+public interface ImFriendRequestMapper extends BaseMapper<ImFriendRequest> {
     /**
-     * 查询好友申请
+     * 鏌ヨ濂藉弸鐢宠
      * 
-     * @param id 好友申请ID
-     * @return 好友申请
+     * @param id 濂藉弸鐢宠ID
+     * @return 濂藉弸鐢宠
      */
     public ImFriendRequest selectImFriendRequestById(Long id);
 
     /**
-     * 查询好友申请列表
+     * 鏌ヨ濂藉弸鐢宠鍒楄〃
      * 
-     * @param imFriendRequest 好友申请
-     * @return 好友申请集合
+     * @param imFriendRequest 濂藉弸鐢宠
+     * @return 濂藉弸鐢宠闆嗗悎
      */
     public List<ImFriendRequest> selectImFriendRequestList(ImFriendRequest imFriendRequest);
 
     /**
-     * 新增好友申请
+     * 鏂板濂藉弸鐢宠
      * 
-     * @param imFriendRequest 好友申请
-     * @return 结果
+     * @param imFriendRequest 濂藉弸鐢宠
+     * @return 缁撴灉
      */
     public int insertImFriendRequest(ImFriendRequest imFriendRequest);
 
     /**
-     * 修改好友申请
+     * 淇敼濂藉弸鐢宠
      * 
-     * @param imFriendRequest 好友申请
-     * @return 结果
+     * @param imFriendRequest 濂藉弸鐢宠
+     * @return 缁撴灉
      */
     public int updateImFriendRequest(ImFriendRequest imFriendRequest);
 
     /**
-     * 删除好友申请
+     * 鍒犻櫎濂藉弸鐢宠
      * 
-     * @param id 好友申请ID
-     * @return 结果
+     * @param id 濂藉弸鐢宠ID
+     * @return 缁撴灉
      */
     public int deleteImFriendRequestById(Long id);
 
     /**
-     * 批量删除好友申请
+     * 鎵归噺鍒犻櫎濂藉弸鐢宠
      * 
-     * @param ids 需要删除的数据ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑鏁版嵁ID
+     * @return 缁撴灉
      */
     public int deleteImFriendRequestByIds(Long[] ids);
     
     /**
-     * 根据申请人ID和被申请人ID查询好友申请
+     * 鏍规嵁鐢宠浜篒D鍜岃鐢宠浜篒D鏌ヨ濂藉弸鐢宠
      * 
-     * @param fromUserId 申请人ID
-     * @param toUserId 被申请人ID
-     * @return 好友申请
+     * @param fromUserId 鐢宠浜篒D
+     * @param toUserId 琚敵璇蜂汉ID
+     * @return 濂藉弸鐢宠
      */
     public ImFriendRequest selectImFriendRequestByFromAndToUserId(Long fromUserId, Long toUserId);
     
     /**
-     * 根据申请人ID查询好友申请列表
+     * 鏍规嵁鐢宠浜篒D鏌ヨ濂藉弸鐢宠鍒楄〃
      * 
-     * @param fromUserId 申请人ID
-     * @return 好友申请集合
+     * @param fromUserId 鐢宠浜篒D
+     * @return 濂藉弸鐢宠闆嗗悎
      */
     public List<ImFriendRequest> selectImFriendRequestListByFromUserId(Long fromUserId);
     
     /**
-     * 根据被申请人ID查询好友申请列表
+     * 鏍规嵁琚敵璇蜂汉ID鏌ヨ濂藉弸鐢宠鍒楄〃
      * 
-     * @param toUserId 被申请人ID
-     * @return 好友申请集合
+     * @param toUserId 琚敵璇蜂汉ID
+     * @return 濂藉弸鐢宠闆嗗悎
      */
     public List<ImFriendRequest> selectImFriendRequestListByToUserId(Long toUserId);
 }

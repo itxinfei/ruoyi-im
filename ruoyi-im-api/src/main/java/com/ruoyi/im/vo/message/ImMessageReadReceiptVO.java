@@ -7,32 +7,32 @@ import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
 
 /**
- * 消息已读回执VO
+ * 娑堟伅宸茶鍥炴墽VO
  * 
  * @author zhangxy
  */
-@ApiModel(description = "消息已读回执")
+@ApiModel(description = "娑堟伅宸茶鍥炴墽")
 public class ImMessageReadReceiptVO {
 
-    @ApiModelProperty(value = "回执ID", example = "1")
+    @ApiModelProperty(value = "鍥炴墽ID", example = "1")
     private Long id;
 
-    @ApiModelProperty(value = "消息ID", example = "1")
+    @ApiModelProperty(value = "娑堟伅ID", example = "1")
     private Long messageId;
 
-    @ApiModelProperty(value = "会话ID", example = "1")
+    @ApiModelProperty(value = "浼氳瘽ID", example = "1")
     private Long conversationId;
 
-    @ApiModelProperty(value = "用户ID", example = "1")
+    @ApiModelProperty(value = "鐢ㄦ埛ID", example = "1")
     private Long userId;
 
-    @ApiModelProperty(value = "用户名", example = "zhangsan")
+    @ApiModelProperty(value = "鐢ㄦ埛鍚?, example = "zhangsan")
     private String username;
 
-    @ApiModelProperty(value = "用户昵称", example = "张三")
+    @ApiModelProperty(value = "鐢ㄦ埛鏄电О", example = "寮犱笁")
     private String nickname;
 
-    @ApiModelProperty(value = "已读时间", example = "2024-01-01 10:00:00")
+    @ApiModelProperty(value = "宸茶鏃堕棿", example = "2024-01-01 10:00:00")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime readTime;
 

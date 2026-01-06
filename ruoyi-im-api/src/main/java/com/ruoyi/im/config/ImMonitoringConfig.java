@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.annotation.PostConstruct;
 
-/**
+/** 
  * 监控配置类
  * 
  * 配置并注册性能监控拦截器和限流拦截器，统一管理API监控功能。
@@ -82,7 +82,7 @@ public class ImMonitoringConfig implements WebMvcConfigurer {
         // 设置不同类型接口的性能阈值
         // - 登录接口：1000ms
         // - 消息发送：500ms
-        // - 查询接口：800ms
+        // - 查询接口：200ms
         
         // 这些配置可以通过配置文件或数据库进行动态管理
     }

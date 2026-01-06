@@ -14,9 +14,8 @@ import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.utils.ValidationUtils;
 
 /**
- * 会话Service业务层处理 - 优化版本
- * 优化内容：添加缓存机制、事务控制、异步处理、性能监控、错误处理
- * 
+ * 浼氳瘽Service涓氬姟灞傚鐞?- 浼樺寲鐗堟湰
+ * 浼樺寲鍐呭锛氭坊鍔犵紦瀛樻満鍒躲€佷簨鍔℃帶鍒躲€佸紓姝ュ鐞嗐€佹€ц兘鐩戞帶銆侀敊璇鐞? * 
  * @author ruoyi
  */
 @Service
@@ -29,15 +28,14 @@ public class ImConversationServiceImpl extends EnhancedBaseServiceImpl<ImConvers
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     
-    // 缓存键前缀
+    // 缂撳瓨閿墠缂€
     private static final String CONVERSATION_BY_TYPE_TARGET_CACHE_PREFIX = "im:conversation:typeTarget:";
     private static final String USER_CONVERSATIONS_CACHE_PREFIX = "im:user:conversations:";
     
-    // 缓存超时时间（分钟）
+    // 缂撳瓨瓒呮椂鏃堕棿锛堝垎閽燂級
     private static final int CACHE_TIMEOUT_MINUTES = 30;
     
-    // 实现EnhancedBaseServiceImpl的抽象方法
-    @Override
+    // 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?    @Override
     protected String getEntityType() {
         return "conversation";
     }
@@ -62,48 +60,46 @@ public class ImConversationServiceImpl extends EnhancedBaseServiceImpl<ImConvers
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl中的clearRelatedCache方法，提供会话特定缓存清理逻辑
+     * 瀹炵幇EnhancedBaseServiceImpl涓殑clearRelatedCache鏂规硶锛屾彁渚涗細璇濈壒瀹氱紦瀛樻竻鐞嗛€昏緫
      * 
-     * @param entity 会话实体
+     * @param entity 浼氳瘽瀹炰綋
      */
     @Override
     protected void clearRelatedCache(ImConversation entity) {
         if (entity != null) {
-            // 清除实体缓存
+            // 娓呴櫎瀹炰綋缂撳瓨
             clearEntityCache(entity.getId());
             
-            // 清除按类型和目标ID查找的缓存
-            if (entity.getType() != null && entity.getTargetId() != null) {
+            // 娓呴櫎鎸夌被鍨嬪拰鐩爣ID鏌ユ壘鐨勭紦瀛?            if (entity.getType() != null && entity.getTargetId() != null) {
                 clearConversationByTypeTargetCache(entity.getType(), entity.getTargetId());
             }
             
-            // 清除用户会话列表缓存
-            // 注意：这里可能需要根据实际业务逻辑清除更多相关缓存
+            // 娓呴櫎鐢ㄦ埛浼氳瘽鍒楄〃缂撳瓨
+            // 娉ㄦ剰锛氳繖閲屽彲鑳介渶瑕佹牴鎹疄闄呬笟鍔￠€昏緫娓呴櫎鏇村鐩稿叧缂撳瓨
         }
     }
     
     /**
-     * 清除按类型和目标ID查找的会话缓存
-     * 
-     * @param type 会话类型
-     * @param targetId 目标ID
+     * 娓呴櫎鎸夌被鍨嬪拰鐩爣ID鏌ユ壘鐨勪細璇濈紦瀛?     * 
+     * @param type 浼氳瘽绫诲瀷
+     * @param targetId 鐩爣ID
      */
     private void clearConversationByTypeTargetCache(String type, Long targetId) {
         try {
             String cacheKey = CONVERSATION_BY_TYPE_TARGET_CACHE_PREFIX + type + ":" + targetId;
             redisTemplate.delete(cacheKey);
-            log.debug("已清除按类型和目标ID查找的会话缓存: type={}, targetId={}", type, targetId);
+            log.debug("宸叉竻闄ゆ寜绫诲瀷鍜岀洰鏍嘔D鏌ユ壘鐨勪細璇濈紦瀛? type={}, targetId={}", type, targetId);
         } catch (Exception e) {
-            log.warn("清除按类型和目标ID查找的会话缓存失败: type={}, targetId={}, error={}", type, targetId, e.getMessage());
+            log.warn("娓呴櫎鎸夌被鍨嬪拰鐩爣ID鏌ユ壘鐨勪細璇濈紦瀛樺け璐? type={}, targetId={}, error={}", type, targetId, e.getMessage());
         }
     }
     
     /**
-     * 根据用户ID查询会话列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ浼氳瘽鍒楄〃
      * 
-     * @param userId 用户ID
-     * @param type 会话类型
-     * @return 会话集合
+     * @param userId 鐢ㄦ埛ID
+     * @param type 浼氳瘽绫诲瀷
+     * @return 浼氳瘽闆嗗悎
      */
     @Override
     public List<ImConversation> selectImConversationListByUserId(Long userId, String type) {
@@ -111,57 +107,52 @@ public class ImConversationServiceImpl extends EnhancedBaseServiceImpl<ImConvers
         String methodName = "selectImConversationListByUserId";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             ValidationUtils.validateId(userId, methodName);
             
-            // 生成缓存键
-            String cacheKey = generateUserConversationsCacheKey(userId, type);
+            // 鐢熸垚缂撳瓨閿?            String cacheKey = generateUserConversationsCacheKey(userId, type);
             
-            // 检查缓存
-            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
             List<ImConversation> cachedConversations = (List<ImConversation>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedConversations != null) {
-                log.debug("从缓存获取用户会话列表: userId={}, type={}, method={}", userId, type, methodName);
+                log.debug("浠庣紦瀛樿幏鍙栫敤鎴蜂細璇濆垪琛? userId={}, type={}, method={}", userId, type, methodName);
                 return cachedConversations;
             }
             
-            // 查询数据库
-            List<ImConversation> conversations = imConversationMapper.selectImConversationListByUserId(userId, type);
+            // 鏌ヨ鏁版嵁搴?            List<ImConversation> conversations = imConversationMapper.selectImConversationListByUserId(userId, type);
             
-            // 缓存结果
+            // 缂撳瓨缁撴灉
             if (conversations != null && !conversations.isEmpty()) {
                 redisTemplate.opsForValue().set(cacheKey, conversations, CACHE_TIMEOUT_MINUTES, java.util.concurrent.TimeUnit.MINUTES);
-                log.debug("用户会话列表已缓存: userId={}, type={}, count={}, method={}", userId, type, conversations.size(), methodName);
+                log.debug("鐢ㄦ埛浼氳瘽鍒楄〃宸茬紦瀛? userId={}, type={}, count={}, method={}", userId, type, conversations.size(), methodName);
             }
             
             return conversations;
             
         } catch (Exception e) {
-            log.error("查询用户会话列表异常: userId={}, type={}, error={}", userId, type, e.getMessage(), e);
-            throw new RuntimeException("查询用户会话列表失败", e);
+            log.error("鏌ヨ鐢ㄦ埛浼氳瘽鍒楄〃寮傚父: userId={}, type={}, error={}", userId, type, e.getMessage(), e);
+            throw new RuntimeException("鏌ヨ鐢ㄦ埛浼氳瘽鍒楄〃澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("查询用户会话列表耗时: {}ms, userId={}, type={}, method={}", duration, userId, type, methodName);
+            log.info("鏌ヨ鐢ㄦ埛浼氳瘽鍒楄〃鑰楁椂: {}ms, userId={}, type={}, method={}", duration, userId, type, methodName);
         }
     }
     
     /**
-     * 生成用户会话列表缓存键
-     * 
-     * @param userId 用户ID
-     * @param type 会话类型
-     * @return 缓存键
-     */
+     * 鐢熸垚鐢ㄦ埛浼氳瘽鍒楄〃缂撳瓨閿?     * 
+     * @param userId 鐢ㄦ埛ID
+     * @param type 浼氳瘽绫诲瀷
+     * @return 缂撳瓨閿?     */
     private String generateUserConversationsCacheKey(Long userId, String type) {
         return USER_CONVERSATIONS_CACHE_PREFIX + userId + ":" + (type != null ? type : "all");
     }
     
     /**
-     * 根据会话类型和目标ID查询会话
+     * 鏍规嵁浼氳瘽绫诲瀷鍜岀洰鏍嘔D鏌ヨ浼氳瘽
      * 
-     * @param type 会话类型
-     * @param targetId 目标ID
-     * @return 会话
+     * @param type 浼氳瘽绫诲瀷
+     * @param targetId 鐩爣ID
+     * @return 浼氳瘽
      */
     @Override
     public ImConversation selectImConversationByTypeAndTargetId(String type, Long targetId) {
@@ -169,47 +160,44 @@ public class ImConversationServiceImpl extends EnhancedBaseServiceImpl<ImConvers
         String methodName = "selectImConversationByTypeAndTargetId";
         
         try {
-            // 参数验证
-            ValidationUtils.validateString(type, "会话类型", methodName);
+            // 鍙傛暟楠岃瘉
+            ValidationUtils.validateString(type, "浼氳瘽绫诲瀷", methodName);
             ValidationUtils.validateId(targetId, methodName);
             
-            // 生成缓存键
-            String cacheKey = CONVERSATION_BY_TYPE_TARGET_CACHE_PREFIX + type + ":" + targetId;
+            // 鐢熸垚缂撳瓨閿?            String cacheKey = CONVERSATION_BY_TYPE_TARGET_CACHE_PREFIX + type + ":" + targetId;
             
-            // 检查缓存
-            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
             ImConversation cachedConversation = (ImConversation) redisTemplate.opsForValue().get(cacheKey);
             if (cachedConversation != null) {
-                log.debug("从缓存获取按类型和目标ID查找的会话: type={}, targetId={}, method={}", type, targetId, methodName);
+                log.debug("浠庣紦瀛樿幏鍙栨寜绫诲瀷鍜岀洰鏍嘔D鏌ユ壘鐨勪細璇? type={}, targetId={}, method={}", type, targetId, methodName);
                 return cachedConversation;
             }
             
-            // 查询数据库
-            ImConversation conversation = imConversationMapper.selectImConversationByTypeAndTargetId(type, targetId);
+            // 鏌ヨ鏁版嵁搴?            ImConversation conversation = imConversationMapper.selectImConversationByTypeAndTargetId(type, targetId);
             
-            // 缓存结果
+            // 缂撳瓨缁撴灉
             if (conversation != null) {
                 redisTemplate.opsForValue().set(cacheKey, conversation, CACHE_TIMEOUT_MINUTES, java.util.concurrent.TimeUnit.MINUTES);
-                log.debug("按类型和目标ID查找的会话已缓存: type={}, targetId={}, method={}", type, targetId, methodName);
+                log.debug("鎸夌被鍨嬪拰鐩爣ID鏌ユ壘鐨勪細璇濆凡缂撳瓨: type={}, targetId={}, method={}", type, targetId, methodName);
             }
             
             return conversation;
             
         } catch (Exception e) {
-            log.error("按类型和目标ID查询会话异常: type={}, targetId={}, error={}", type, targetId, e.getMessage(), e);
-            throw new RuntimeException("按类型和目标ID查询会话失败", e);
+            log.error("鎸夌被鍨嬪拰鐩爣ID鏌ヨ浼氳瘽寮傚父: type={}, targetId={}, error={}", type, targetId, e.getMessage(), e);
+            throw new RuntimeException("鎸夌被鍨嬪拰鐩爣ID鏌ヨ浼氳瘽澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("按类型和目标ID查询会话耗时: {}ms, type={}, targetId={}, method={}", duration, type, targetId, methodName);
+            log.info("鎸夌被鍨嬪拰鐩爣ID鏌ヨ浼氳瘽鑰楁椂: {}ms, type={}, targetId={}, method={}", duration, type, targetId, methodName);
         }
     }
     
     /**
-     * 创建私聊会话
+     * 鍒涘缓绉佽亰浼氳瘽
      * 
-     * @param userId 用户ID
-     * @param friendUserId 好友用户ID
-     * @return 会话
+     * @param userId 鐢ㄦ埛ID
+     * @param friendUserId 濂藉弸鐢ㄦ埛ID
+     * @return 浼氳瘽
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -218,66 +206,65 @@ public class ImConversationServiceImpl extends EnhancedBaseServiceImpl<ImConvers
         String methodName = "createPrivateConversation";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateId(userId, methodName);
             validateId(friendUserId, methodName);
             
-            // 确保用户ID和好友ID不同
+            // 纭繚鐢ㄦ埛ID鍜屽ソ鍙婭D涓嶅悓
             if (userId.equals(friendUserId)) {
-                throw new RuntimeException(methodName + "参数无效: 用户不能与自己创建私聊会话");
+                throw new RuntimeException(methodName + "鍙傛暟鏃犳晥: 鐢ㄦ埛涓嶈兘涓庤嚜宸卞垱寤虹鑱婁細璇?);
             }
             
-            // 检查是否已存在私聊会话（使用较小的ID作为目标ID以保证一致性）
+            // 妫€鏌ユ槸鍚﹀凡瀛樺湪绉佽亰浼氳瘽锛堜娇鐢ㄨ緝灏忕殑ID浣滀负鐩爣ID浠ヤ繚璇佷竴鑷存€э級
             Long targetId = Math.min(userId, friendUserId);
             ImConversation existingConversation = selectImConversationByTypeAndTargetId("PRIVATE", targetId);
             if (existingConversation != null) {
-                log.debug("私聊会话已存在: userId={}, friendUserId={}, targetId={}, method={}", userId, friendUserId, targetId, methodName);
+                log.debug("绉佽亰浼氳瘽宸插瓨鍦? userId={}, friendUserId={}, targetId={}, method={}", userId, friendUserId, targetId, methodName);
                 return existingConversation;
             }
             
-            // 创建新的私聊会话
+            // 鍒涘缓鏂扮殑绉佽亰浼氳瘽
             ImConversation conversation = new ImConversation();
             conversation.setType("PRIVATE");
             conversation.setTargetId(targetId);
-            // 设置会话名称和头像（如果有）
+            // 璁剧疆浼氳瘽鍚嶇О鍜屽ご鍍忥紙濡傛灉鏈夛級
             
-            // 异步处理会话名称和头像（不阻塞主流程）
-            executeAsync(() -> {
+            // 寮傛澶勭悊浼氳瘽鍚嶇О鍜屽ご鍍忥紙涓嶉樆濉炰富娴佺▼锛?            executeAsync(() -> {
                 try {
-                    // 这里可以添加获取会话名称和头像的逻辑
-                    // 例如：从用户信息中获取昵称组合等
-                    log.debug("异步处理会话信息: conversationId={}", conversation.getId());
+                    // 杩欓噷鍙互娣诲姞鑾峰彇浼氳瘽鍚嶇О鍜屽ご鍍忕殑閫昏緫
+                    // 渚嬪锛氫粠鐢ㄦ埛淇℃伅涓幏鍙栨樀绉扮粍鍚堢瓑
+                    log.debug("寮傛澶勭悊浼氳瘽淇℃伅: conversationId={}", conversation.getId());
                 } catch (Exception e) {
-                    log.warn("异步处理会话信息失败: {}", e.getMessage());
+                    log.warn("寮傛澶勭悊浼氳瘽淇℃伅澶辫触: {}", e.getMessage());
                 }
             });
             
-            // 插入会话
+            // 鎻掑叆浼氳瘽
             int result = insert(conversation);
             
             if (result > 0) {
-                log.info("创建私聊会话成功: userId={}, friendUserId={}, targetId={}, conversationId={}, result={}", 
+                log.info("鍒涘缓绉佽亰浼氳瘽鎴愬姛: userId={}, friendUserId={}, targetId={}, conversationId={}, result={}", 
                          userId, friendUserId, targetId, conversation.getId(), result);
             } else {
-                throw new RuntimeException("创建私聊会话失败");
+                throw new RuntimeException("鍒涘缓绉佽亰浼氳瘽澶辫触");
             }
             
             return conversation;
             
         } catch (Exception e) {
-            log.error("创建私聊会话异常: userId={}, friendUserId={}, error={}", userId, friendUserId, e.getMessage(), e);
-            throw new RuntimeException("创建私聊会话失败", e);
+            log.error("鍒涘缓绉佽亰浼氳瘽寮傚父: userId={}, friendUserId={}, error={}", userId, friendUserId, e.getMessage(), e);
+            throw new RuntimeException("鍒涘缓绉佽亰浼氳瘽澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("创建私聊会话耗时: {}ms, userId={}, friendUserId={}, method={}", duration, userId, friendUserId, methodName);
+            log.info("鍒涘缓绉佽亰浼氳瘽鑰楁椂: {}ms, userId={}, friendUserId={}, method={}", duration, userId, friendUserId, methodName);
         }
     }
     
     /**
-     * 创建群聊会话
+     * 鍒涘缓缇よ亰浼氳瘽
      * 
-     * @param groupId 群组ID
-     * @return 会话
+     * @param groupId 缇ょ粍ID
+     * @return 浼氳瘽
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -286,59 +273,58 @@ public class ImConversationServiceImpl extends EnhancedBaseServiceImpl<ImConvers
         String methodName = "createGroupConversation";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateId(groupId, methodName);
             
-            // 检查是否已存在群聊会话
+            // 妫€鏌ユ槸鍚﹀凡瀛樺湪缇よ亰浼氳瘽
             ImConversation existingConversation = selectImConversationByTypeAndTargetId("GROUP", groupId);
             if (existingConversation != null) {
-                log.debug("群聊会话已存在: groupId={}, method={}", groupId, methodName);
+                log.debug("缇よ亰浼氳瘽宸插瓨鍦? groupId={}, method={}", groupId, methodName);
                 return existingConversation;
             }
             
-            // 创建新的群聊会话
+            // 鍒涘缓鏂扮殑缇よ亰浼氳瘽
             ImConversation conversation = new ImConversation();
             conversation.setType("GROUP");
             conversation.setTargetId(groupId);
-            // 设置会话名称和头像（如果有）
+            // 璁剧疆浼氳瘽鍚嶇О鍜屽ご鍍忥紙濡傛灉鏈夛級
             
-            // 异步处理会话名称和头像（不阻塞主流程）
-            executeAsync(() -> {
+            // 寮傛澶勭悊浼氳瘽鍚嶇О鍜屽ご鍍忥紙涓嶉樆濉炰富娴佺▼锛?            executeAsync(() -> {
                 try {
-                    // 这里可以添加获取群组名称和头像的逻辑
-                    log.debug("异步处理群组会话信息: conversationId={}", conversation.getId());
+                    // 杩欓噷鍙互娣诲姞鑾峰彇缇ょ粍鍚嶇О鍜屽ご鍍忕殑閫昏緫
+                    log.debug("寮傛澶勭悊缇ょ粍浼氳瘽淇℃伅: conversationId={}", conversation.getId());
                 } catch (Exception e) {
-                    log.warn("异步处理群组会话信息失败: {}", e.getMessage());
+                    log.warn("寮傛澶勭悊缇ょ粍浼氳瘽淇℃伅澶辫触: {}", e.getMessage());
                 }
             });
             
-            // 插入会话
+            // 鎻掑叆浼氳瘽
             int result = insert(conversation);
             
             if (result > 0) {
-                log.info("创建群聊会话成功: groupId={}, conversationId={}, result={}", 
+                log.info("鍒涘缓缇よ亰浼氳瘽鎴愬姛: groupId={}, conversationId={}, result={}", 
                          groupId, conversation.getId(), result);
             } else {
-                throw new RuntimeException("创建群聊会话失败");
+                throw new RuntimeException("鍒涘缓缇よ亰浼氳瘽澶辫触");
             }
             
             return conversation;
             
         } catch (Exception e) {
-            log.error("创建群聊会话异常: groupId={}, error={}", groupId, e.getMessage(), e);
-            throw new RuntimeException("创建群聊会话失败", e);
+            log.error("鍒涘缓缇よ亰浼氳瘽寮傚父: groupId={}, error={}", groupId, e.getMessage(), e);
+            throw new RuntimeException("鍒涘缓缇よ亰浼氳瘽澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("创建群聊会话耗时: {}ms, groupId={}, method={}", duration, groupId, methodName);
+            log.info("鍒涘缓缇よ亰浼氳瘽鑰楁椂: {}ms, groupId={}, method={}", duration, groupId, methodName);
         }
     }
     
     /**
-     * 更新会话最后消息ID
+     * 鏇存柊浼氳瘽鏈€鍚庢秷鎭疘D
      * 
-     * @param conversationId 会话ID
-     * @param lastMessageId 最后消息ID
-     * @return 结果
+     * @param conversationId 浼氳瘽ID
+     * @param lastMessageId 鏈€鍚庢秷鎭疘D
+     * @return 缁撴灉
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -347,44 +333,39 @@ public class ImConversationServiceImpl extends EnhancedBaseServiceImpl<ImConvers
         String methodName = "updateConversationLastMessage";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateId(conversationId, methodName);
             validateId(lastMessageId, methodName);
             
-            // 查询会话
+            // 鏌ヨ浼氳瘽
             ImConversation conversation = selectById(conversationId);
             if (conversation == null) {
-                log.warn("会话不存在: conversationId={}, method={}", conversationId, methodName);
+                log.warn("浼氳瘽涓嶅瓨鍦? conversationId={}, method={}", conversationId, methodName);
                 return 0;
             }
             
-            // 检查是否需要更新
-            if (conversation.getLastMessageId() != null && conversation.getLastMessageId().equals(lastMessageId)) {
-                log.debug("会话最后消息ID已是最新，无需更新: conversationId={}, lastMessageId={}, method={}", 
+            // 妫€鏌ユ槸鍚﹂渶瑕佹洿鏂?            if (conversation.getLastMessageId() != null && conversation.getLastMessageId().equals(lastMessageId)) {
+                log.debug("浼氳瘽鏈€鍚庢秷鎭疘D宸叉槸鏈€鏂帮紝鏃犻渶鏇存柊: conversationId={}, lastMessageId={}, method={}", 
                          conversationId, lastMessageId, methodName);
                 return 0;
             }
             
-            // 更新会话最后消息ID
+            // 鏇存柊浼氳瘽鏈€鍚庢秷鎭疘D
             conversation.setLastMessageId(lastMessageId);
             
-            // 使用EnhancedBaseServiceImpl的update方法，该方法会自动更新缓存
-            int result = update(conversation);
+            // 浣跨敤EnhancedBaseServiceImpl鐨剈pdate鏂规硶锛岃鏂规硶浼氳嚜鍔ㄦ洿鏂扮紦瀛?            int result = update(conversation);
             
             if (result > 0) {
-                log.info("更新会话最后消息ID成功: conversationId={}, lastMessageId={}, result={}, method={}", 
+                log.info("鏇存柊浼氳瘽鏈€鍚庢秷鎭疘D鎴愬姛: conversationId={}, lastMessageId={}, result={}, method={}", 
                          conversationId, lastMessageId, result, methodName);
                 
-                // 异步处理额外任务（如果需要）
+                // 寮傛澶勭悊棰濆浠诲姟锛堝鏋滈渶瑕侊級
                 executeAsync(() -> {
                     try {
-                        // 这里可以添加其他相关处理，例如：
-                        // - 发送WebSocket消息通知客户端
-                        // - 更新会话的未读消息计数
-                        // - 记录操作日志等
-                        log.debug("异步处理会话最后消息ID更新完成: conversationId={}", conversationId);
+                        // 杩欓噷鍙互娣诲姞鍏朵粬鐩稿叧澶勭悊锛屼緥濡傦細
+                        // - 鍙戦€乄ebSocket娑堟伅閫氱煡瀹㈡埛绔?                        // - 鏇存柊浼氳瘽鐨勬湭璇绘秷鎭鏁?                        // - 璁板綍鎿嶄綔鏃ュ織绛?                        log.debug("寮傛澶勭悊浼氳瘽鏈€鍚庢秷鎭疘D鏇存柊瀹屾垚: conversationId={}", conversationId);
                     } catch (Exception e) {
-                        log.warn("异步处理会话最后消息ID更新失败: conversationId={}, error={}", conversationId, e.getMessage());
+                        log.warn("寮傛澶勭悊浼氳瘽鏈€鍚庢秷鎭疘D鏇存柊澶辫触: conversationId={}, error={}", conversationId, e.getMessage());
                     }
                 });
             }
@@ -392,12 +373,12 @@ public class ImConversationServiceImpl extends EnhancedBaseServiceImpl<ImConvers
             return result;
             
         } catch (Exception e) {
-            log.error("更新会话最后消息ID异常: conversationId={}, lastMessageId={}, error={}", 
+            log.error("鏇存柊浼氳瘽鏈€鍚庢秷鎭疘D寮傚父: conversationId={}, lastMessageId={}, error={}", 
                      conversationId, lastMessageId, e.getMessage(), e);
-            throw new RuntimeException("更新会话最后消息ID失败", e);
+            throw new RuntimeException("鏇存柊浼氳瘽鏈€鍚庢秷鎭疘D澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("更新会话最后消息ID耗时: {}ms, conversationId={}, method={}", duration, conversationId, methodName);
+            log.info("鏇存柊浼氳瘽鏈€鍚庢秷鎭疘D鑰楁椂: {}ms, conversationId={}, method={}", duration, conversationId, methodName);
         }
     }
 }

@@ -6,45 +6,45 @@ import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
 
 /**
- * IM用户信息响应对象
+ * IM鐢ㄦ埛淇℃伅鍝嶅簲瀵硅薄
  * 
  * @author ruoyi
  * @since 2024-01-05
  */
-@ApiModel(description = "IM用户信息")
+@ApiModel(description = "IM鐢ㄦ埛淇℃伅")
 public class ImUserVO {
     
-    @ApiModelProperty(value = "用户ID", example = "1")
+    @ApiModelProperty(value = "鐢ㄦ埛ID", example = "1")
     private Long id;
     
-    @ApiModelProperty(value = "用户名", example = "zhangsan")
+    @ApiModelProperty(value = "鐢ㄦ埛鍚?, example = "zhangsan")
     private String username;
     
-    @ApiModelProperty(value = "昵称", example = "张三")
+    @ApiModelProperty(value = "鏄电О", example = "寮犱笁")
     private String nickname;
     
-    @ApiModelProperty(value = "邮箱", example = "zhangsan@example.com")
+    @ApiModelProperty(value = "閭", example = "zhangsan@example.com")
     private String email;
     
-    @ApiModelProperty(value = "手机号", example = "13800138000")
+    @ApiModelProperty(value = "鎵嬫満鍙?, example = "13800138000")
     private String phone;
     
-    @ApiModelProperty(value = "头像URL", example = "https://example.com/avatar.jpg")
+    @ApiModelProperty(value = "澶村儚URL", example = "https://example.com/avatar.jpg")
     private String avatar;
     
-    @ApiModelProperty(value = "用户状态", example = "online")
+    @ApiModelProperty(value = "鐢ㄦ埛鐘舵€?, example = "online")
     private String status;
     
-    @ApiModelProperty(value = "用户状态描述", example = "在线")
+    @ApiModelProperty(value = "鐢ㄦ埛鐘舵€佹弿杩?, example = "鍦ㄧ嚎")
     private String statusDesc;
     
-    @ApiModelProperty(value = "个性签名", example = "这个人很懒，什么都没有留下")
+    @ApiModelProperty(value = "涓€х鍚?, example = "杩欎釜浜哄緢鎳掞紝浠€涔堥兘娌℃湁鐣欎笅")
     private String signature;
     
-    @ApiModelProperty(value = "创建时间", example = "2024-01-01 12:00:00")
+    @ApiModelProperty(value = "鍒涘缓鏃堕棿", example = "2024-01-01 12:00:00")
     private LocalDateTime createTime;
     
-    @ApiModelProperty(value = "更新时间", example = "2024-01-01 12:00:00")
+    @ApiModelProperty(value = "鏇存柊鏃堕棿", example = "2024-01-01 12:00:00")
     private LocalDateTime updateTime;
 
     public Long getId() {

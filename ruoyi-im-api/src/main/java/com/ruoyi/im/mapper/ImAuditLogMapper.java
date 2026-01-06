@@ -5,97 +5,96 @@ import com.ruoyi.im.mapper.base.BaseMapper;
 import java.util.List;
 
 /**
- * 审计日志Mapper接口
+ * 瀹¤鏃ュ織Mapper鎺ュ彛
  * 
  * @author ruoyi
  */
 public interface ImAuditLogMapper extends BaseMapper<ImAuditLog> {
     /**
-     * 查询审计日志
+     * 鏌ヨ瀹¤鏃ュ織
      * 
-     * @param id 审计日志ID
-     * @return 审计日志
+     * @param id 瀹¤鏃ュ織ID
+     * @return 瀹¤鏃ュ織
      */
     public ImAuditLog selectImAuditLogById(Long id);
 
     /**
-     * 查询审计日志列表
+     * 鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param imAuditLog 审计日志
-     * @return 审计日志集合
+     * @param imAuditLog 瀹¤鏃ュ織
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     public List<ImAuditLog> selectImAuditLogList(ImAuditLog imAuditLog);
 
     /**
-     * 新增审计日志
+     * 鏂板瀹¤鏃ュ織
      * 
-     * @param imAuditLog 审计日志
-     * @return 结果
+     * @param imAuditLog 瀹¤鏃ュ織
+     * @return 缁撴灉
      */
     public int insertImAuditLog(ImAuditLog imAuditLog);
 
     /**
-     * 修改审计日志
+     * 淇敼瀹¤鏃ュ織
      * 
-     * @param imAuditLog 审计日志
-     * @return 结果
+     * @param imAuditLog 瀹¤鏃ュ織
+     * @return 缁撴灉
      */
     public int updateImAuditLog(ImAuditLog imAuditLog);
 
     /**
-     * 删除审计日志
+     * 鍒犻櫎瀹¤鏃ュ織
      * 
-     * @param id 审计日志ID
-     * @return 结果
+     * @param id 瀹¤鏃ュ織ID
+     * @return 缁撴灉
      */
     public int deleteImAuditLogById(Long id);
 
     /**
-     * 批量删除审计日志
+     * 鎵归噺鍒犻櫎瀹¤鏃ュ織
      * 
-     * @param ids 需要删除的数据ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑鏁版嵁ID
+     * @return 缁撴灉
      */
     public int deleteImAuditLogByIds(Long[] ids);
     
     /**
-     * 根据用户ID查询审计日志列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 审计日志集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     public List<ImAuditLog> selectImAuditLogByUserId(Long userId);
     
     /**
-     * 根据操作类型查询审计日志列表
+     * 鏍规嵁鎿嶄綔绫诲瀷鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param operationType 操作类型
-     * @return 审计日志集合
+     * @param operationType 鎿嶄綔绫诲瀷
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     public List<ImAuditLog> selectImAuditLogByOperationType(String operationType);
     
     /**
-     * 根据目标类型和目标ID查询审计日志列表
+     * 鏍规嵁鐩爣绫诲瀷鍜岀洰鏍嘔D鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param targetType 目标类型
-     * @param targetId 目标ID
-     * @return 审计日志集合
+     * @param targetType 鐩爣绫诲瀷
+     * @param targetId 鐩爣ID
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     public List<ImAuditLog> selectImAuditLogByTarget(String targetType, Long targetId);
     
     /**
-     * 根据IP地址查询审计日志列表
+     * 鏍规嵁IP鍦板潃鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param ipAddress IP地址
-     * @return 审计日志集合
+     * @param ipAddress IP鍦板潃
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     public List<ImAuditLog> selectImAuditLogByIpAddress(String ipAddress);
     
     /**
-     * 批量删除指定时间之前的审计日志
-     * 
-     * @param beforeTime 时间
-     * @return 结果
+     * 鎵归噺鍒犻櫎鎸囧畾鏃堕棿涔嬪墠鐨勫璁℃棩蹇?     * 
+     * @param beforeTime 鏃堕棿
+     * @return 缁撴灉
      */
     public int deleteImAuditLogByBeforeTime(java.time.LocalDateTime beforeTime);
 }

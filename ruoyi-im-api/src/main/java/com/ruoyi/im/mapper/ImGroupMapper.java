@@ -4,56 +4,56 @@ import com.ruoyi.im.domain.ImGroup;
 import java.util.List;
 
 /**
- * 群组Mapper接口
+ * 缇ょ粍Mapper鎺ュ彛
  * 
  * @author ruoyi
  */
 public interface ImGroupMapper {
     /**
-     * 查询群组
+     * 鏌ヨ缇ょ粍
      * 
-     * @param id 群组ID
-     * @return 群组
+     * @param id 缇ょ粍ID
+     * @return 缇ょ粍
      */
     public ImGroup selectImGroupById(Long id);
 
     /**
-     * 查询群组列表
+     * 鏌ヨ缇ょ粍鍒楄〃
      * 
-     * @param imGroup 群组
-     * @return 群组集合
+     * @param imGroup 缇ょ粍
+     * @return 缇ょ粍闆嗗悎
      */
     public List<ImGroup> selectImGroupList(ImGroup imGroup);
 
     /**
-     * 新增群组
+     * 鏂板缇ょ粍
      * 
-     * @param imGroup 群组
-     * @return 结果
+     * @param imGroup 缇ょ粍
+     * @return 缁撴灉
      */
     public int insertImGroup(ImGroup imGroup);
 
     /**
-     * 修改群组
+     * 淇敼缇ょ粍
      * 
-     * @param imGroup 群组
-     * @return 结果
+     * @param imGroup 缇ょ粍
+     * @return 缁撴灉
      */
     public int updateImGroup(ImGroup imGroup);
 
     /**
-     * 删除群组
+     * 鍒犻櫎缇ょ粍
      * 
-     * @param id 群组ID
-     * @return 结果
+     * @param id 缇ょ粍ID
+     * @return 缁撴灉
      */
     public int deleteImGroupById(Long id);
 
     /**
-     * 批量删除群组
+     * 鎵归噺鍒犻櫎缇ょ粍
      * 
-     * @param ids 需要删除的数据ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑鏁版嵁ID
+     * @return 缁撴灉
      */
     public int deleteImGroupByIds(Long[] ids);
 }

@@ -7,35 +7,35 @@ import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
 
 /**
- * 消息互动VO
+ * 娑堟伅浜掑姩VO
  * 
  * @author zhangxy
  */
-@ApiModel(description = "消息互动")
+@ApiModel(description = "娑堟伅浜掑姩")
 public class ImMessageReactionVO {
 
-    @ApiModelProperty(value = "互动ID", example = "1")
+    @ApiModelProperty(value = "浜掑姩ID", example = "1")
     private Long id;
 
-    @ApiModelProperty(value = "消息ID", example = "1")
+    @ApiModelProperty(value = "娑堟伅ID", example = "1")
     private Long messageId;
 
-    @ApiModelProperty(value = "用户ID", example = "1")
+    @ApiModelProperty(value = "鐢ㄦ埛ID", example = "1")
     private Long userId;
 
-    @ApiModelProperty(value = "用户名", example = "zhangsan")
+    @ApiModelProperty(value = "鐢ㄦ埛鍚?, example = "zhangsan")
     private String username;
 
-    @ApiModelProperty(value = "用户昵称", example = "张三")
+    @ApiModelProperty(value = "鐢ㄦ埛鏄电О", example = "寮犱笁")
     private String nickname;
 
-    @ApiModelProperty(value = "互动类型", example = "LIKE")
+    @ApiModelProperty(value = "浜掑姩绫诲瀷", example = "LIKE")
     private String reactionType;
 
-    @ApiModelProperty(value = "互动类型描述", example = "点赞")
+    @ApiModelProperty(value = "浜掑姩绫诲瀷鎻忚堪", example = "鐐硅禐")
     private String reactionTypeDesc;
 
-    @ApiModelProperty(value = "创建时间", example = "2024-01-01 10:00:00")
+    @ApiModelProperty(value = "鍒涘缓鏃堕棿", example = "2024-01-01 10:00:00")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 

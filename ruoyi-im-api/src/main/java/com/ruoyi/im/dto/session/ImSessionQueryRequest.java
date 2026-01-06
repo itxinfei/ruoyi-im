@@ -5,20 +5,20 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * 会话查询请求DTO
+ * 浼氳瘽鏌ヨ璇锋眰DTO
  * 
  * @author ruoyi
  */
-@ApiModel(description = "会话查询请求")
+@ApiModel(description = "浼氳瘽鏌ヨ璇锋眰")
 public class ImSessionQueryRequest extends BasePageRequest {
 
-    @ApiModelProperty(value = "用户ID", example = "1")
+    @ApiModelProperty(value = "鐢ㄦ埛ID", example = "1")
     private Long userId;
 
-    @ApiModelProperty(value = "目标ID", example = "2")
+    @ApiModelProperty(value = "鐩爣ID", example = "2")
     private Long targetId;
 
-    @ApiModelProperty(value = "会话类型", example = "private")
+    @ApiModelProperty(value = "浼氳瘽绫诲瀷", example = "private")
     private String sessionType;
 
     public Long getUserId() {

@@ -3,16 +3,15 @@ package com.ruoyi.im.vo.contact;
 import java.util.List;
 
 /**
- * 联系人群组视图对象
- * 
+ * 鑱旂郴浜虹兢缁勮鍥惧璞? * 
  * @author ruoyi
  */
 public class ImContactGroupVO
 {
-    /** 群组名称（通常是首字母） */
+    /** 缇ょ粍鍚嶇О锛堥€氬父鏄瀛楁瘝锛?*/
     private String groupName;
 
-    /** 群组中的好友列表 */
+    /** 缇ょ粍涓殑濂藉弸鍒楄〃 */
     private List<ImFriendVO> friends;
 
     public void setGroupName(String groupName) 

@@ -3,34 +3,34 @@ package com.ruoyi.im.vo.contact;
 import java.util.Date;
 
 /**
- * 好友视图对象 im_friend
+ * 濂藉弸瑙嗗浘瀵硅薄 im_friend
  * 
  * @author ruoyi
  */
 public class ImFriendVO
 {
-    /** 好友关系ID */
+    /** 濂藉弸鍏崇郴ID */
     private Long id;
 
-    /** 用户ID */
+    /** 鐢ㄦ埛ID */
     private Long userId;
 
-    /** 好友ID */
+    /** 濂藉弸ID */
     private Long friendId;
 
-    /** 昵称 */
+    /** 鏄电О */
     private String nickname;
 
-    /** 头像 */
+    /** 澶村儚 */
     private String avatar;
 
-    /** 备注 */
+    /** 澶囨敞 */
     private String remark;
 
-    /** 好友状态 */
+    /** 濂藉弸鐘舵€?*/
     private String status;
 
-    /** 创建时间 */
+    /** 鍒涘缓鏃堕棿 */
     private Date createTime;
 
     public void setId(Long id) 

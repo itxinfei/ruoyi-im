@@ -7,7 +7,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
- * 好友对象 im_friend
+ * 濂藉弸瀵硅薄 im_friend
  * 
  * @author ruoyi
  */
@@ -16,20 +16,20 @@ public class ImFriend extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
-    /** 好友关系ID */
+    /** 濂藉弸鍏崇郴ID */
     @TableId
     private Long id;
 
-    /** 用户ID */
+    /** 鐢ㄦ埛ID */
     private Long userId;
 
-    /** 好友ID */
+    /** 濂藉弸ID */
     private Long friendId;
 
-    /** 备注 */
+    /** 澶囨敞 */
     private String remark;
 
-    /** 好友状态 */
+    /** 濂藉弸鐘舵€?*/
     private String status;
 
     public void setId(Long id) 

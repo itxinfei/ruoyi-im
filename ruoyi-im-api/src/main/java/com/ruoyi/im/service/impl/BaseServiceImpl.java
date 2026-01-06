@@ -6,11 +6,11 @@ import com.ruoyi.im.mapper.base.BaseMapper;
 import com.ruoyi.im.service.BaseService;
 
 /**
- * 基础Service实现类
+ * 鍩虹Service瀹炵幇绫?
  * 
  * @author ruoyi
- * @param <T> 实体类型
- * @param <M> Mapper类型
+ * @param <T> 瀹炰綋绫诲瀷
+ * @param <M> Mapper绫诲瀷
  */
 public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements BaseService<T> {
     
@@ -18,10 +18,10 @@ public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements Bas
     protected M baseMapper;
     
     /**
-     * 查询实体
+     * 鏌ヨ瀹炰綋
      * 
-     * @param id 实体ID
-     * @return 实体
+     * @param id 瀹炰綋ID
+     * @return 瀹炰綋
      */
     @Override
     public T selectById(Long id) {
@@ -29,10 +29,10 @@ public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements Bas
     }
     
     /**
-     * 查询实体列表
+     * 鏌ヨ瀹炰綋鍒楄〃
      * 
-     * @param entity 实体条件
-     * @return 实体列表
+     * @param entity 瀹炰綋鏉′欢
+     * @return 瀹炰綋鍒楄〃
      */
     @Override
     public List<T> selectList(T entity) {
@@ -40,10 +40,10 @@ public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements Bas
     }
     
     /**
-     * 新增实体
+     * 鏂板瀹炰綋
      * 
-     * @param entity 实体
-     * @return 结果
+     * @param entity 瀹炰綋
+     * @return 缁撴灉
      */
     @Override
     public int insert(T entity) {
@@ -51,10 +51,10 @@ public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements Bas
     }
     
     /**
-     * 修改实体
+     * 淇敼瀹炰綋
      * 
-     * @param entity 实体
-     * @return 结果
+     * @param entity 瀹炰綋
+     * @return 缁撴灉
      */
     @Override
     public int update(T entity) {
@@ -62,10 +62,10 @@ public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements Bas
     }
     
     /**
-     * 批量删除实体
+     * 鎵归噺鍒犻櫎瀹炰綋
      * 
-     * @param ids 需要删除的实体ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑瀹炰綋ID
+     * @return 缁撴灉
      */
     @Override
     public int deleteByIds(Long[] ids) {
@@ -73,10 +73,10 @@ public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements Bas
     }
     
     /**
-     * 删除实体信息
+     * 鍒犻櫎瀹炰綋淇℃伅
      * 
-     * @param id 实体ID
-     * @return 结果
+     * @param id 瀹炰綋ID
+     * @return 缁撴灉
      */
     @Override
     public int deleteById(Long id) {

@@ -7,50 +7,50 @@ import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
 
 /**
- * 群组成员信息VO
+ * 缇ょ粍鎴愬憳淇℃伅VO
  * 
  * @author ruoyi
  */
-@ApiModel(description = "群组成员信息")
+@ApiModel(description = "缇ょ粍鎴愬憳淇℃伅")
 public class ImGroupMemberVO {
 
-    @ApiModelProperty(value = "成员ID", example = "1")
+    @ApiModelProperty(value = "鎴愬憳ID", example = "1")
     private Long id;
 
-    @ApiModelProperty(value = "群组ID", example = "1")
+    @ApiModelProperty(value = "缇ょ粍ID", example = "1")
     private Long groupId;
 
-    @ApiModelProperty(value = "用户ID", example = "1")
+    @ApiModelProperty(value = "鐢ㄦ埛ID", example = "1")
     private Long userId;
 
-    @ApiModelProperty(value = "用户用户名", example = "zhangsan")
+    @ApiModelProperty(value = "鐢ㄦ埛鐢ㄦ埛鍚?, example = "zhangsan")
     private String username;
 
-    @ApiModelProperty(value = "用户昵称", example = "张三")
+    @ApiModelProperty(value = "鐢ㄦ埛鏄电О", example = "寮犱笁")
     private String userNickname;
 
-    @ApiModelProperty(value = "用户头像", example = "/profile/avatar.png")
+    @ApiModelProperty(value = "鐢ㄦ埛澶村儚", example = "/profile/avatar.png")
     private String avatar;
 
-    @ApiModelProperty(value = "群组角色", example = "MEMBER")
+    @ApiModelProperty(value = "缇ょ粍瑙掕壊", example = "MEMBER")
     private String role;
 
-    @ApiModelProperty(value = "群组角色描述", example = "普通成员")
+    @ApiModelProperty(value = "缇ょ粍瑙掕壊鎻忚堪", example = "鏅€氭垚鍛?)
     private String roleDesc;
 
-    @ApiModelProperty(value = "群昵称", example = "技术大牛")
+    @ApiModelProperty(value = "缇ゆ樀绉?, example = "鎶€鏈ぇ鐗?)
     private String groupNickname;
 
-    @ApiModelProperty(value = "邀请人ID", example = "1")
+    @ApiModelProperty(value = "閭€璇蜂汉ID", example = "1")
     private Long inviterId;
 
-    @ApiModelProperty(value = "邀请人用户名", example = "lisi")
+    @ApiModelProperty(value = "閭€璇蜂汉鐢ㄦ埛鍚?, example = "lisi")
     private String inviterUsername;
 
-    @ApiModelProperty(value = "邀请人昵称", example = "李四")
+    @ApiModelProperty(value = "閭€璇蜂汉鏄电О", example = "鏉庡洓")
     private String inviterNickname;
 
-    @ApiModelProperty(value = "加入时间", example = "2024-01-01 10:00:00")
+    @ApiModelProperty(value = "鍔犲叆鏃堕棿", example = "2024-01-01 10:00:00")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime joinedTime;
 

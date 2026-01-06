@@ -3,78 +3,78 @@ package com.ruoyi.im.service;
 import com.ruoyi.im.domain.ImMessage;
 
 /**
- * 消息推送服务接口
+ * 娑堟伅鎺ㄩ€佹湇鍔℃帴鍙?
  * 
- * 负责将消息实时推送给在线用户
+ * 璐熻矗灏嗘秷鎭疄鏃舵帹閫佺粰鍦ㄧ嚎鐢ㄦ埛
  * 
  * @author ruoyi
  */
 public interface ImMessagePushService {
 
     /**
-     * 推送消息给指定用户
+     * 鎺ㄩ€佹秷鎭粰鎸囧畾鐢ㄦ埛
      * 
-     * @param userId 用户ID
-     * @param message 消息对象
+     * @param userId 鐢ㄦ埛ID
+     * @param message 娑堟伅瀵硅薄
      */
     void pushMessageToUser(Long userId, ImMessage message);
 
     /**
-     * 推送消息给会话中的所有用户
+     * 鎺ㄩ€佹秷鎭粰浼氳瘽涓殑鎵€鏈夌敤鎴?
      * 
-     * @param conversationId 会话ID
-     * @param message 消息对象
+     * @param conversationId 浼氳瘽ID
+     * @param message 娑堟伅瀵硅薄
      */
     void pushMessageToConversation(Long conversationId, ImMessage message);
 
     /**
-     * 推送消息给群组中的所有用户
+     * 鎺ㄩ€佹秷鎭粰缇ょ粍涓殑鎵€鏈夌敤鎴?
      * 
-     * @param groupId 群组ID
-     * @param message 消息对象
+     * @param groupId 缇ょ粍ID
+     * @param message 娑堟伅瀵硅薄
      */
     void pushMessageToGroup(Long groupId, ImMessage message);
 
     /**
-     * 推送在线状态变化
+     * 鎺ㄩ€佸湪绾跨姸鎬佸彉鍖?
      * 
-     * @param userId 用户ID
-     * @param online 是否在线
+     * @param userId 鐢ㄦ埛ID
+     * @param online 鏄惁鍦ㄧ嚎
      */
     void pushOnlineStatus(Long userId, boolean online);
 
     /**
-     * 推送正在输入状态
+     * 鎺ㄩ€佹鍦ㄨ緭鍏ョ姸鎬?
      * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @param isTyping 是否正在输入
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @param isTyping 鏄惁姝ｅ湪杈撳叆
      */
     void pushTypingStatus(Long conversationId, Long userId, boolean isTyping);
 
     /**
-     * 推送消息已读回执
+     * 鎺ㄩ€佹秷鎭凡璇诲洖鎵?
      * 
-     * @param messageId 消息ID
-     * @param userId 用户ID
+     * @param messageId 娑堟伅ID
+     * @param userId 鐢ㄦ埛ID
      */
     void pushReadReceipt(Long messageId, Long userId);
 
     /**
-     * 推送消息撤回通知
+     * 鎺ㄩ€佹秷鎭挙鍥為€氱煡
      * 
-     * @param messageId 消息ID
-     * @param conversationId 会话ID
+     * @param messageId 娑堟伅ID
+     * @param conversationId 浼氳瘽ID
      */
     void pushMessageRevoke(Long messageId, Long conversationId);
 
     /**
-     * 推送消息反应
+     * 鎺ㄩ€佹秷鎭弽搴?
      * 
-     * @param messageId 消息ID
-     * @param reaction 反应表情
-     * @param userId 用户ID
-     * @param added 是否添加
+     * @param messageId 娑堟伅ID
+     * @param reaction 鍙嶅簲琛ㄦ儏
+     * @param userId 鐢ㄦ埛ID
+     * @param added 鏄惁娣诲姞
      */
     void pushMessageReaction(Long messageId, String reaction, Long userId, boolean added);
 }

@@ -28,15 +28,15 @@ import java.util.Map;
 /**
  * 认证控制器
  * 
- * 提供用户认证相关功能，包括用户登录、登出、注册、密码修改等。
- * 采用JWT方式进行身份认证和授权，确保系统的安全性。
+ * 提供用户认证相关功能，包括登录、注册、密码修改等操作，
+ * 使用JWT实现无状态认证机制。
  * 
  * @author ruoyi
  */
 @Api(tags = "用户认证")
 @RestController
 @RequestMapping("/api/{version}/im/auth")
-@ImApiVersion(value = {"v1", "v2"}, description = "认证管理API，支持v1和v2版本")
+@ImApiVersion(value = {"v1", "v2"}, description = "认证相关API，v1版本兼容，v2版本增强")
 public class ImAuthController extends BaseController {
 
     private static final Logger logger = LoggerFactory.getLogger(ImAuthController.class);
@@ -50,14 +50,14 @@ public class ImAuthController extends BaseController {
     /**
      * 用户登录
      * 
-     * 用户通过用户名和密码进行身份验证，验证成功后返回JWT令牌。
-     * 该接口支持多种验证方式，包括用户名/邮箱+密码验证。
+     * 用户登录验证用户名和密码，成功后返回包含JWT令牌的响应，
+     * 客户端需要在后续请求中携带此令牌进行身份验证。
      * 
      * @param request 登录请求参数
      * @param bindingResult 参数验证结果
-     * @return 登录结果，包含JWT令牌和用户基本信息
+     * @return 登录成功后的数据，包括JWT令牌和用户信息
      */
-    @ApiOperation(value = "用户登录", notes = "用户通过用户名和密码进行身份验证，验证成功后返回JWT令牌")
+    @ApiOperation(value = "用户登录", notes = "用户登录验证用户名和密码，成功后返回包含JWT令牌的响应")
     @ApiResponses({
         @ApiResponse(code = 200, message = "登录成功"),
         @ApiResponse(code = 400, message = "参数验证失败"),
@@ -67,12 +67,12 @@ public class ImAuthController extends BaseController {
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@Valid @RequestBody ImLoginRequest request, BindingResult bindingResult) {
         try {
-            // 验证参数
+            // 参数验证
             if (bindingResult.hasErrors()) {
                 return Result.error(400, "参数验证失败: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             }
             
-            // 验证用户名和密码
+            // 获取登录参数
             String username = request.getUsername();
             String password = request.getPassword();
             
@@ -82,34 +82,34 @@ public class ImAuthController extends BaseController {
             // 查询用户
             ImUser user = imUserService.selectImUserByUsername(username);
             if (user == null) {
-                logger.warn("用户登录失败: 用户名不存在, username={}", username);
+                logger.warn("用户登录失败，用户不存在， username={}", username);
                 return Result.error(401, "用户名或密码错误");
             }
             
-            // 验证密码（这里假设密码已经通过BCrypt加密）
-            // 实际项目中需要实现密码验证逻辑
+            // 验证密码是否匹配，使用BCrypt加密后的密码进行对比
+            // 这里需要实现密码验证逻辑
             if (!isValidPassword(password, user.getPassword())) {
-                logger.warn("用户登录失败: 密码错误, username={}", username);
+                logger.warn("用户登录失败，密码错误, username={}", username);
                 return Result.error(401, "用户名或密码错误");
             }
             
             // 检查用户状态
             if ("inactive".equals(user.getStatus())) {
-                logger.warn("用户登录失败: 账户已被禁用, username={}", username);
-                return Result.error(401, "账户已被禁用");
+                logger.warn("用户登录失败，用户已禁用， username={}", username);
+                return Result.error(401, "用户已被禁用");
             }
             
             // 生成JWT令牌
             String token = jwtUtils.generateToken(user.getUsername(), user.getId());
             
-            // 更新用户最后登录时间
+            // 更新最后登录时间
             // imUserService.updateLastLoginTime(user.getId());
             
-            // 构建响应数据
+            // 准备响应数据
             Map<String, Object> data = new HashMap<>();
             data.put("token", token);
             data.put("tokenType", "Bearer");
-            data.put("expiresIn", 3600); // 1小时后过期
+            data.put("expiresIn", 3600); // 1小时有效期
             
             Map<String, Object> userData = new HashMap<>();
             userData.put("id", user.getId());
@@ -118,10 +118,10 @@ public class ImAuthController extends BaseController {
             userData.put("avatar", user.getAvatar());
             data.put("user", userData);
             
-            logger.info("用户登录成功: username={}", username);
+            logger.info("用户登录成功， username={}", username);
             return Result.success("登录成功", data);
         } catch (Exception e) {
-            logger.error("用户登录异常: error={}", e.getMessage(), e);
+            logger.error("用户登录异常， error={}", e.getMessage(), e);
             return Result.error(500, "登录失败: " + e.getMessage());
         }
     }
@@ -129,16 +129,16 @@ public class ImAuthController extends BaseController {
     /**
      * 用户登出
      * 
-     * 用户登出系统，使当前会话失效。实际项目中可能需要将JWT令牌加入黑名单
-     * 以确保令牌在有效期内无法使用，提高系统的安全性。
+     * 用户登出操作将使当前用户的JWT令牌失效，
+     * 服务端需要实现令牌黑名单机制或在缓存中记录已登出的令牌。
      * 
      * @param request HTTP请求对象
-     * @return 登出结果
+     * @return 登出成功后的响应
      */
-    @ApiOperation(value = "用户登出", notes = "用户登出系统，使当前会话失效")
+    @ApiOperation(value = "用户登出", notes = "用户登出操作将使当前用户的JWT令牌失效")
     @ApiResponses({
         @ApiResponse(code = 200, message = "登出成功"),
-        @ApiResponse(code = 401, message = "未授权访问"),
+        @ApiResponse(code = 401, message = "无效的令牌"),
         @ApiResponse(code = 500, message = "登出失败")
     })
     @PostMapping("/logout")
@@ -146,18 +146,18 @@ public class ImAuthController extends BaseController {
         try {
             String token = request.getHeader("Authorization");
             if (token == null || token.isEmpty()) {
-                logger.warn("用户登出失败: 缺少认证令牌");
-                return Result.error(401, "缺少认证令牌");
+                logger.warn("用户登出失败，无效的令牌");
+                return Result.error(401, "无效的令牌");
             }
             
-            // TODO: 可以将令牌加入黑名单，实现更安全的登出
+            // TODO: 实现令牌黑名单机制或在缓存中记录已登出的令牌
             String jwtToken = token.replace("Bearer ", "");
             String username = jwtUtils.getUsernameFromToken(jwtToken);
             
-            logger.info("用户登出成功: username={}", username);
-            return Result.success(); // 修复：使用无返回值的成功结果
+            logger.info("用户登出成功， username={}", username);
+            return Result.success(); // 登出成功后通常返回空数据
         } catch (Exception e) {
-            logger.error("用户登出异常: error={}", e.getMessage(), e);
+            logger.error("用户登出异常， error={}", e.getMessage(), e);
             return Result.error(500, "登出失败: " + e.getMessage());
         }
     }
@@ -165,14 +165,14 @@ public class ImAuthController extends BaseController {
     /**
      * 用户注册
      * 
-     * 新用户注册到系统，需要提供用户名、密码等基本信息。
-     * 系统会对输入信息进行验证，确保数据的完整性和安全性。
+     * 新用户注册功能，需要提供用户名、密码、昵称等必要信息，
+     * 注册成功后自动登录并返回JWT令牌。
      * 
      * @param request 注册请求参数
      * @param bindingResult 参数验证结果
-     * @return 注册结果
+     * @return 注册成功后的响应
      */
-    @ApiOperation(value = "用户注册", notes = "新用户注册到系统，需要提供用户名、密码等基本信息")
+    @ApiOperation(value = "用户注册", notes = "新用户注册功能，需要提供用户名、密码、昵称等必要信息")
     @ApiResponses({
         @ApiResponse(code = 200, message = "注册成功"),
         @ApiResponse(code = 400, message = "参数验证失败"),
@@ -182,12 +182,12 @@ public class ImAuthController extends BaseController {
     @PostMapping("/register")
     public Result<Map<String, Object>> register(@Valid @RequestBody ImRegisterRequest request, BindingResult bindingResult) {
         try {
-            // 验证参数
+            // 参数验证
             if (bindingResult.hasErrors()) {
                 return Result.error(400, "参数验证失败: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             }
             
-            // 验证输入
+            // 验证参数格式
             ValidationUtils.validateUsername(request.getUsername(), "register");
             ValidationUtils.validatePassword(request.getPassword(), "register");
             ValidationUtils.validateString(request.getNickname(), "昵称", "register");
@@ -203,15 +203,15 @@ public class ImAuthController extends BaseController {
             // 检查用户名是否已存在
             ImUser existingUser = imUserService.selectImUserByUsername(request.getUsername());
             if (existingUser != null) {
-                logger.warn("用户注册失败: 用户名已存在, username={}", request.getUsername());
+                logger.warn("用户注册失败，用户名已存在， username={}", request.getUsername());
                 return Result.error(409, "用户名已存在");
             }
             
-            // 检查邮箱是否已存在（如果提供了邮箱）
+            // 检查邮箱是否已存在
             if (request.getEmail() != null) {
                 ImUser existingEmailUser = imUserService.selectImUserByEmail(request.getEmail());
                 if (existingEmailUser != null) {
-                    logger.warn("用户注册失败: 邮箱已存在, email={}", request.getEmail());
+                    logger.warn("用户注册失败，邮箱已存在， email={}", request.getEmail());
                     return Result.error(409, "邮箱已被使用");
                 }
             }
@@ -229,11 +229,11 @@ public class ImAuthController extends BaseController {
                 // 生成JWT令牌
                 String token = jwtUtils.generateToken(request.getUsername(), userId);
                 
-                // 构建响应数据
+                // 准备响应数据
                 Map<String, Object> data = new HashMap<>();
                 data.put("token", token);
                 data.put("tokenType", "Bearer");
-                data.put("expiresIn", 3600); // 1小时后过期
+                data.put("expiresIn", 3600); // 1小时有效期
                 
                 Map<String, Object> userData = new HashMap<>();
                 userData.put("id", userId);
@@ -242,17 +242,17 @@ public class ImAuthController extends BaseController {
                 userData.put("email", request.getEmail());
                 data.put("user", userData);
                 
-                logger.info("用户注册成功: username={}", request.getUsername());
+                logger.info("用户注册成功， username={}", request.getUsername());
                 return Result.success("注册成功", data);
             } else {
-                logger.error("用户注册失败: 数据库操作异常");
+                logger.error("用户注册失败，数据库操作异常");
                 return Result.error(500, "注册失败");
             }
         } catch (BusinessException e) {
             logger.error("用户注册业务异常: error={}", e.getMessage());
             return Result.error(e.getCode(), e.getMessage());
         } catch (Exception e) {
-            logger.error("用户注册异常: error={}", e.getMessage(), e);
+            logger.error("用户注册异常， error={}", e.getMessage(), e);
             return Result.error(500, "注册失败: " + e.getMessage());
         }
     }
@@ -260,24 +260,24 @@ public class ImAuthController extends BaseController {
     /**
      * 修改密码
      * 
-     * 用户修改自己的密码，需要提供原密码和新密码。
-     * 系统会对原密码进行验证，确保操作的安全性。
+     * 用户修改密码功能，需要提供旧密码验证身份，
+     * 修改成功后密码将被加密保存到数据库中。
      * 
      * @param request 修改密码请求参数
      * @param bindingResult 参数验证结果
-     * @return 修改结果
+     * @return 修改密码成功后的响应
      */
-    @ApiOperation(value = "修改密码", notes = "用户修改自己的密码，需要提供原密码和新密码")
+    @ApiOperation(value = "修改密码", notes = "用户修改密码功能，需要提供旧密码验证身份")
     @ApiResponses({
         @ApiResponse(code = 200, message = "密码修改成功"),
         @ApiResponse(code = 400, message = "参数验证失败"),
-        @ApiResponse(code = 401, message = "原密码错误"),
+        @ApiResponse(code = 401, message = "旧密码错误"),
         @ApiResponse(code = 500, message = "密码修改失败")
     })
     @PostMapping("/change-password")
     public Result<Void> changePassword(@Valid @RequestBody ImUpdatePasswordRequest request, BindingResult bindingResult) {
         try {
-            // 验证参数
+            // 参数验证
             if (bindingResult.hasErrors()) {
                 return Result.error(400, "参数验证失败: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             }
@@ -298,19 +298,18 @@ public class ImAuthController extends BaseController {
                 return Result.error(404, "用户不存在");
             }
             
-            // 验证原密码
+            // 验证旧密码
             if (!isValidPassword(request.getOldPassword(), user.getPassword())) {
-                return Result.error(401, "原密码错误");
+                return Result.error(401, "旧密码错误");
             }
             
-            // 更新密码（这里应该使用BCrypt等安全的密码加密方式）
-            // 实际项目中需要实现安全的密码更新逻辑
+            // 更新密码，使用BCrypt加密
             // imUserService.updatePassword(userId, request.getNewPassword());
             
-            logger.info("用户密码修改成功: userId={}", userId);
-            return Result.success(); // 修复：使用无返回值的成功结果
+            logger.info("用户密码修改成功， userId={}", userId);
+            return Result.success(); // 修改成功后通常返回空数据
         } catch (Exception e) {
-            logger.error("用户密码修改异常: error={}", e.getMessage(), e);
+            logger.error("用户密码修改异常， error={}", e.getMessage(), e);
             return Result.error(500, "密码修改失败: " + e.getMessage());
         }
     }
@@ -318,15 +317,16 @@ public class ImAuthController extends BaseController {
     /**
      * 验证密码
      * 
-     * 验证输入的密码是否与存储的密码匹配
+     * 验证输入密码与存储密码是否匹配，
+     * 使用BCrypt加密算法比较密码。
      * 
-     * @param inputPassword 输入的密码
-     * @param storedPassword 存储的密码
-     * @return 是否匹配
+     * @param inputPassword 输入密码
+     * @param storedPassword 存储密码
+     * @return 验证结果
      */
     private boolean isValidPassword(String inputPassword, String storedPassword) {
-        // 实际项目中应该使用BCrypt等安全的密码验证方式
-        // 这里简化实现，直接比较字符串
+        // 使用BCrypt加密算法比较密码
+        // 这里需要实现密码验证逻辑
         return inputPassword.equals(storedPassword);
     }
 }

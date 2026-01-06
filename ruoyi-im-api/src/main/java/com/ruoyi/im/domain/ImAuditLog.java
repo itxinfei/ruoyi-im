@@ -3,7 +3,7 @@ package com.ruoyi.im.domain;
 import java.time.LocalDateTime;
 
 /**
- * 审计日志实体
+ * 瀹¤鏃ュ織瀹炰綋
  * 
  * @author ruoyi
  */

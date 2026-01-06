@@ -16,9 +16,8 @@ import com.ruoyi.im.domain.ImAuditLog;
 import com.ruoyi.im.service.ImAuditLogService;
 
 /**
- * 审计日志Service业务层处理 - 优化版本
- * 优化内容：添加缓存机制、事务控制、性能监控、错误处理
- * 
+ * 瀹¤鏃ュ織Service涓氬姟灞傚鐞?- 浼樺寲鐗堟湰
+ * 浼樺寲鍐呭锛氭坊鍔犵紦瀛樻満鍒躲€佷簨鍔℃帶鍒躲€佹€ц兘鐩戞帶銆侀敊璇鐞? * 
  * @author ruoyi
  */
 @Service
@@ -28,19 +27,18 @@ public class ImAuditLogServiceImpl extends EnhancedBaseServiceImpl<ImAuditLog, I
     @Autowired
     private ImAuditLogMapper imAuditLogMapper;
     
-    // 缓存键前缀
+    // 缂撳瓨閿墠缂€
     private static final String USER_AUDIT_LOG_CACHE_PREFIX = "im:audit:log:user:";
     private static final String OPERATION_AUDIT_LOG_CACHE_PREFIX = "im:audit:log:operation:";
     private static final String TARGET_AUDIT_LOG_CACHE_PREFIX = "im:audit:log:target:";
     private static final String IP_AUDIT_LOG_CACHE_PREFIX = "im:audit:log:ip:";
     
-    // 缓存超时时间（分钟）
+    // 缂撳瓨瓒呮椂鏃堕棿锛堝垎閽燂級
     private static final int CACHE_TIMEOUT_MINUTES = 60;
 
     /**
-     * 实现EnhancedBaseServiceImpl的抽象方法
-     * 
-     * @return 实体类型名称
+     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?     * 
+     * @return 瀹炰綋绫诲瀷鍚嶇О
      */
     @Override
     protected String getEntityType() {
@@ -48,10 +46,9 @@ public class ImAuditLogServiceImpl extends EnhancedBaseServiceImpl<ImAuditLog, I
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl的抽象方法
-     * 
-     * @param entity 审计日志实体
-     * @return 审计日志ID
+     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?     * 
+     * @param entity 瀹¤鏃ュ織瀹炰綋
+     * @return 瀹¤鏃ュ織ID
      */
     @Override
     protected Long getEntityId(ImAuditLog entity) {
@@ -59,9 +56,8 @@ public class ImAuditLogServiceImpl extends EnhancedBaseServiceImpl<ImAuditLog, I
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl的抽象方法
-     * 
-     * @param entity 审计日志实体
+     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?     * 
+     * @param entity 瀹¤鏃ュ織瀹炰綋
      */
     @Override
     protected void setCreateTime(ImAuditLog entity) {
@@ -71,9 +67,8 @@ public class ImAuditLogServiceImpl extends EnhancedBaseServiceImpl<ImAuditLog, I
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl的抽象方法
-     * 
-     * @param entity 审计日志实体
+     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?     * 
+     * @param entity 瀹¤鏃ュ織瀹炰綋
      */
     @Override
     protected void setUpdateTime(ImAuditLog entity) {
@@ -83,32 +78,32 @@ public class ImAuditLogServiceImpl extends EnhancedBaseServiceImpl<ImAuditLog, I
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl中的clearRelatedCache方法，提供审计日志特定缓存清理逻辑
+     * 瀹炵幇EnhancedBaseServiceImpl涓殑clearRelatedCache鏂规硶锛屾彁渚涘璁℃棩蹇楃壒瀹氱紦瀛樻竻鐞嗛€昏緫
      * 
-     * @param entity 审计日志实体
+     * @param entity 瀹¤鏃ュ織瀹炰綋
      */
     @Override
     protected void clearRelatedCache(ImAuditLog entity) {
         if (entity != null) {
-            // 清除实体缓存
+            // 娓呴櫎瀹炰綋缂撳瓨
             clearEntityCache(entity.getId());
             
-            // 清除用户审计日志缓存
+            // 娓呴櫎鐢ㄦ埛瀹¤鏃ュ織缂撳瓨
             if (entity.getUserId() != null) {
                 redisTemplate.delete(USER_AUDIT_LOG_CACHE_PREFIX + entity.getUserId());
             }
             
-            // 清除操作类型审计日志缓存
+            // 娓呴櫎鎿嶄綔绫诲瀷瀹¤鏃ュ織缂撳瓨
             if (entity.getOperationType() != null) {
                 redisTemplate.delete(OPERATION_AUDIT_LOG_CACHE_PREFIX + entity.getOperationType());
             }
             
-            // 清除目标审计日志缓存
+            // 娓呴櫎鐩爣瀹¤鏃ュ織缂撳瓨
             if (entity.getTargetType() != null && entity.getTargetId() != null) {
                 redisTemplate.delete(TARGET_AUDIT_LOG_CACHE_PREFIX + entity.getTargetType() + ":" + entity.getTargetId());
             }
             
-            // 清除IP地址审计日志缓存
+            // 娓呴櫎IP鍦板潃瀹¤鏃ュ織缂撳瓨
             if (entity.getIpAddress() != null) {
                 redisTemplate.delete(IP_AUDIT_LOG_CACHE_PREFIX + entity.getIpAddress());
             }
@@ -116,82 +111,81 @@ public class ImAuditLogServiceImpl extends EnhancedBaseServiceImpl<ImAuditLog, I
     }
     
     /**
-     * 查询审计日志
+     * 鏌ヨ瀹¤鏃ュ織
      * 
-     * @param id 审计日志ID
-     * @return 审计日志
+     * @param id 瀹¤鏃ュ織ID
+     * @return 瀹¤鏃ュ織
      */
     @Override
     public ImAuditLog selectImAuditLogById(Long id) {
-        // 使用父类selectById方法，该方法已经包含缓存、验证和错误处理
+        // 浣跨敤鐖剁被selectById鏂规硶锛岃鏂规硶宸茬粡鍖呭惈缂撳瓨銆侀獙璇佸拰閿欒澶勭悊
         return selectById(id);
     }
 
     /**
-     * 查询审计日志列表
+     * 鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param imAuditLog 审计日志
-     * @return 审计日志
+     * @param imAuditLog 瀹¤鏃ュ織
+     * @return 瀹¤鏃ュ織
      */
     @Override
     public List<ImAuditLog> selectImAuditLogList(ImAuditLog imAuditLog) {
-        // 使用父类selectList方法，该方法已经包含验证和错误处理
-        return selectList(imAuditLog);
+        // 浣跨敤鐖剁被selectList鏂规硶锛岃鏂规硶宸茬粡鍖呭惈楠岃瘉鍜岄敊璇鐞?        return selectList(imAuditLog);
     }
 
     /**
-     * 新增审计日志
+     * 鏂板瀹¤鏃ュ織
      * 
-     * @param imAuditLog 审计日志
-     * @return 结果
+     * @param imAuditLog 瀹¤鏃ュ織
+     * @return 缁撴灉
      */
     @Override
     public int insertImAuditLog(ImAuditLog imAuditLog) {
-        // 使用父类insert方法，该方法已经包含缓存、事务控制和错误处理
+        // 浣跨敤鐖剁被insert鏂规硶锛岃鏂规硶宸茬粡鍖呭惈缂撳瓨銆佷簨鍔℃帶鍒跺拰閿欒澶勭悊
         return insert(imAuditLog);
     }
 
     /**
-     * 修改审计日志
+     * 淇敼瀹¤鏃ュ織
      * 
-     * @param imAuditLog 审计日志
-     * @return 结果
+     * @param imAuditLog 瀹¤鏃ュ織
+     * @return 缁撴灉
      */
     @Override
     public int updateImAuditLog(ImAuditLog imAuditLog) {
-        // 使用父类update方法，该方法已经包含缓存、事务控制和错误处理
+        // 浣跨敤鐖剁被update鏂规硶锛岃鏂规硶宸茬粡鍖呭惈缂撳瓨銆佷簨鍔℃帶鍒跺拰閿欒澶勭悊
         return update(imAuditLog);
     }
 
     /**
-     * 批量删除审计日志
+     * 鎵归噺鍒犻櫎瀹¤鏃ュ織
      * 
-     * @param ids 需要删除的审计日志ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑瀹¤鏃ュ織ID
+     * @return 缁撴灉
      */
     @Override
     public int deleteImAuditLogByIds(Long[] ids) {
-        // 使用父类deleteByIds方法，该方法已经包含缓存、事务控制和错误处理
+        // 浣跨敤鐖剁被deleteByIds鏂规硶锛岃鏂规硶宸茬粡鍖呭惈缂撳瓨銆佷簨鍔℃帶鍒跺拰閿欒澶勭悊
         return deleteByIds(ids);
     }
 
     /**
-     * 删除审计日志信息
+     * 鍒犻櫎瀹¤鏃ュ織淇℃伅
      * 
-     * @param id 审计日志ID
-     * @return 结果
+     * @param id 瀹¤鏃ュ織ID
+     * @return 缁撴灉
      */
     @Override
     public int deleteImAuditLogById(Long id) {
-        // 使用父类deleteById方法，该方法已经包含缓存、事务控制和错误处理
+        // 浣跨敤鐖剁被deleteById鏂规硶锛岃鏂规硶宸茬粡鍖呭惈缂撳瓨銆佷簨鍔℃帶鍒跺拰閿欒澶勭悊
         return deleteById(id);
     }
     
     /**
-     * 根据用户ID查询审计日志列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 审计日志集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     @Override
     public List<ImAuditLog> selectImAuditLogByUserId(Long userId) {
@@ -199,50 +193,47 @@ public class ImAuditLogServiceImpl extends EnhancedBaseServiceImpl<ImAuditLog, I
         String methodName = "selectImAuditLogByUserId";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateId(userId, methodName);
             
-            log.debug("根据用户ID查询审计日志: userId={}, method={}", userId, methodName);
+            log.debug("鏍规嵁鐢ㄦ埛ID鏌ヨ瀹¤鏃ュ織: userId={}, method={}", userId, methodName);
             
-            // 生成缓存键
-            String cacheKey = USER_AUDIT_LOG_CACHE_PREFIX + userId;
+            // 鐢熸垚缂撳瓨閿?            String cacheKey = USER_AUDIT_LOG_CACHE_PREFIX + userId;
             
-            // 检查缓存
-            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
             List<ImAuditLog> cachedLogs = (List<ImAuditLog>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedLogs != null) {
-                log.debug("从缓存获取用户审计日志: userId={}, method={}", userId, methodName);
+                log.debug("浠庣紦瀛樿幏鍙栫敤鎴峰璁℃棩蹇? userId={}, method={}", userId, methodName);
                 return cachedLogs;
             }
             
-            // 查询数据库
-            List<ImAuditLog> logs = imAuditLogMapper.selectImAuditLogByUserId(userId);
+            // 鏌ヨ鏁版嵁搴?            List<ImAuditLog> logs = imAuditLogMapper.selectImAuditLogByUserId(userId);
             
-            // 缓存结果
+            // 缂撳瓨缁撴灉
             if (logs != null && !logs.isEmpty()) {
                 redisTemplate.opsForValue().set(cacheKey, logs, CACHE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
-                log.debug("用户审计日志已缓存: userId={}, count={}, method={}", 
+                log.debug("鐢ㄦ埛瀹¤鏃ュ織宸茬紦瀛? userId={}, count={}, method={}", 
                           userId, logs.size(), methodName);
             }
             
             return logs;
             
         } catch (Exception e) {
-            log.error("根据用户ID查询审计日志异常: userId={}, error={}, method={}", 
+            log.error("鏍规嵁鐢ㄦ埛ID鏌ヨ瀹¤鏃ュ織寮傚父: userId={}, error={}, method={}", 
                       userId, e.getMessage(), methodName, e);
-            throw new BusinessException("根据用户ID查询审计日志失败", e);
+            throw new BusinessException("鏍规嵁鐢ㄦ埛ID鏌ヨ瀹¤鏃ュ織澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("根据用户ID查询审计日志耗时: {}ms, userId={}, method={}", 
+            log.info("鏍规嵁鐢ㄦ埛ID鏌ヨ瀹¤鏃ュ織鑰楁椂: {}ms, userId={}, method={}", 
                      duration, userId, methodName);
         }
     }
     
     /**
-     * 根据操作类型查询审计日志列表
+     * 鏍规嵁鎿嶄綔绫诲瀷鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param operationType 操作类型
-     * @return 审计日志集合
+     * @param operationType 鎿嶄綔绫诲瀷
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     @Override
     public List<ImAuditLog> selectImAuditLogByOperationType(String operationType) {
@@ -250,53 +241,50 @@ public class ImAuditLogServiceImpl extends EnhancedBaseServiceImpl<ImAuditLog, I
         String methodName = "selectImAuditLogByOperationType";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             if (operationType == null || operationType.trim().isEmpty()) {
-                throw new BusinessException(methodName + "参数无效: 操作类型不能为空");
+                throw new BusinessException(methodName + "鍙傛暟鏃犳晥: 鎿嶄綔绫诲瀷涓嶈兘涓虹┖");
             }
             
-            log.debug("根据操作类型查询审计日志: operationType={}, method={}", operationType, methodName);
+            log.debug("鏍规嵁鎿嶄綔绫诲瀷鏌ヨ瀹¤鏃ュ織: operationType={}, method={}", operationType, methodName);
             
-            // 生成缓存键
-            String cacheKey = OPERATION_AUDIT_LOG_CACHE_PREFIX + operationType;
+            // 鐢熸垚缂撳瓨閿?            String cacheKey = OPERATION_AUDIT_LOG_CACHE_PREFIX + operationType;
             
-            // 检查缓存
-            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
             List<ImAuditLog> cachedLogs = (List<ImAuditLog>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedLogs != null) {
-                log.debug("从缓存获取操作类型审计日志: operationType={}, method={}", operationType, methodName);
+                log.debug("浠庣紦瀛樿幏鍙栨搷浣滅被鍨嬪璁℃棩蹇? operationType={}, method={}", operationType, methodName);
                 return cachedLogs;
             }
             
-            // 查询数据库
-            List<ImAuditLog> logs = imAuditLogMapper.selectImAuditLogByOperationType(operationType);
+            // 鏌ヨ鏁版嵁搴?            List<ImAuditLog> logs = imAuditLogMapper.selectImAuditLogByOperationType(operationType);
             
-            // 缓存结果
+            // 缂撳瓨缁撴灉
             if (logs != null && !logs.isEmpty()) {
                 redisTemplate.opsForValue().set(cacheKey, logs, CACHE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
-                log.debug("操作类型审计日志已缓存: operationType={}, count={}, method={}", 
+                log.debug("鎿嶄綔绫诲瀷瀹¤鏃ュ織宸茬紦瀛? operationType={}, count={}, method={}", 
                           operationType, logs.size(), methodName);
             }
             
             return logs;
             
         } catch (Exception e) {
-            log.error("根据操作类型查询审计日志异常: operationType={}, error={}, method={}", 
+            log.error("鏍规嵁鎿嶄綔绫诲瀷鏌ヨ瀹¤鏃ュ織寮傚父: operationType={}, error={}, method={}", 
                       operationType, e.getMessage(), methodName, e);
-            throw new BusinessException("根据操作类型查询审计日志失败", e);
+            throw new BusinessException("鏍规嵁鎿嶄綔绫诲瀷鏌ヨ瀹¤鏃ュ織澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("根据操作类型查询审计日志耗时: {}ms, operationType={}, method={}", 
+            log.info("鏍规嵁鎿嶄綔绫诲瀷鏌ヨ瀹¤鏃ュ織鑰楁椂: {}ms, operationType={}, method={}", 
                      duration, operationType, methodName);
         }
     }
     
     /**
-     * 根据目标类型和目标ID查询审计日志列表
+     * 鏍规嵁鐩爣绫诲瀷鍜岀洰鏍嘔D鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param targetType 目标类型
-     * @param targetId 目标ID
-     * @return 审计日志集合
+     * @param targetType 鐩爣绫诲瀷
+     * @param targetId 鐩爣ID
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     @Override
     public List<ImAuditLog> selectImAuditLogByTarget(String targetType, Long targetId) {
@@ -304,55 +292,52 @@ public class ImAuditLogServiceImpl extends EnhancedBaseServiceImpl<ImAuditLog, I
         String methodName = "selectImAuditLogByTarget";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             if (targetType == null || targetType.trim().isEmpty()) {
-                throw new BusinessException(methodName + "参数无效: 目标类型不能为空");
+                throw new BusinessException(methodName + "鍙傛暟鏃犳晥: 鐩爣绫诲瀷涓嶈兘涓虹┖");
             }
             validateId(targetId, methodName);
             
-            log.debug("根据目标查询审计日志: targetType={}, targetId={}, method={}", 
+            log.debug("鏍规嵁鐩爣鏌ヨ瀹¤鏃ュ織: targetType={}, targetId={}, method={}", 
                       targetType, targetId, methodName);
             
-            // 生成缓存键
-            String cacheKey = TARGET_AUDIT_LOG_CACHE_PREFIX + targetType + ":" + targetId;
+            // 鐢熸垚缂撳瓨閿?            String cacheKey = TARGET_AUDIT_LOG_CACHE_PREFIX + targetType + ":" + targetId;
             
-            // 检查缓存
-            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
             List<ImAuditLog> cachedLogs = (List<ImAuditLog>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedLogs != null) {
-                log.debug("从缓存获取目标审计日志: targetType={}, targetId={}, method={}", 
+                log.debug("浠庣紦瀛樿幏鍙栫洰鏍囧璁℃棩蹇? targetType={}, targetId={}, method={}", 
                           targetType, targetId, methodName);
                 return cachedLogs;
             }
             
-            // 查询数据库
-            List<ImAuditLog> logs = imAuditLogMapper.selectImAuditLogByTarget(targetType, targetId);
+            // 鏌ヨ鏁版嵁搴?            List<ImAuditLog> logs = imAuditLogMapper.selectImAuditLogByTarget(targetType, targetId);
             
-            // 缓存结果
+            // 缂撳瓨缁撴灉
             if (logs != null && !logs.isEmpty()) {
                 redisTemplate.opsForValue().set(cacheKey, logs, CACHE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
-                log.debug("目标审计日志已缓存: targetType={}, targetId={}, count={}, method={}", 
+                log.debug("鐩爣瀹¤鏃ュ織宸茬紦瀛? targetType={}, targetId={}, count={}, method={}", 
                           targetType, targetId, logs.size(), methodName);
             }
             
             return logs;
             
         } catch (Exception e) {
-            log.error("根据目标查询审计日志异常: targetType={}, targetId={}, error={}, method={}", 
+            log.error("鏍规嵁鐩爣鏌ヨ瀹¤鏃ュ織寮傚父: targetType={}, targetId={}, error={}, method={}", 
                       targetType, targetId, e.getMessage(), methodName, e);
-            throw new BusinessException("根据目标查询审计日志失败", e);
+            throw new BusinessException("鏍规嵁鐩爣鏌ヨ瀹¤鏃ュ織澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("根据目标查询审计日志耗时: {}ms, targetType={}, targetId={}, method={}", 
+            log.info("鏍规嵁鐩爣鏌ヨ瀹¤鏃ュ織鑰楁椂: {}ms, targetType={}, targetId={}, method={}", 
                      duration, targetType, targetId, methodName);
         }
     }
     
     /**
-     * 根据IP地址查询审计日志列表
+     * 鏍规嵁IP鍦板潃鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param ipAddress IP地址
-     * @return 审计日志集合
+     * @param ipAddress IP鍦板潃
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     @Override
     public List<ImAuditLog> selectImAuditLogByIpAddress(String ipAddress) {
@@ -360,59 +345,56 @@ public class ImAuditLogServiceImpl extends EnhancedBaseServiceImpl<ImAuditLog, I
         String methodName = "selectImAuditLogByIpAddress";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             if (ipAddress == null || ipAddress.trim().isEmpty()) {
-                throw new BusinessException(methodName + "参数无效: IP地址不能为空");
+                throw new BusinessException(methodName + "鍙傛暟鏃犳晥: IP鍦板潃涓嶈兘涓虹┖");
             }
             
-            log.debug("根据IP地址查询审计日志: ipAddress={}, method={}", ipAddress, methodName);
+            log.debug("鏍规嵁IP鍦板潃鏌ヨ瀹¤鏃ュ織: ipAddress={}, method={}", ipAddress, methodName);
             
-            // 生成缓存键
-            String cacheKey = IP_AUDIT_LOG_CACHE_PREFIX + ipAddress;
+            // 鐢熸垚缂撳瓨閿?            String cacheKey = IP_AUDIT_LOG_CACHE_PREFIX + ipAddress;
             
-            // 检查缓存
-            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
             List<ImAuditLog> cachedLogs = (List<ImAuditLog>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedLogs != null) {
-                log.debug("从缓存获取IP地址审计日志: ipAddress={}, method={}", ipAddress, methodName);
+                log.debug("浠庣紦瀛樿幏鍙朓P鍦板潃瀹¤鏃ュ織: ipAddress={}, method={}", ipAddress, methodName);
                 return cachedLogs;
             }
             
-            // 查询数据库
-            List<ImAuditLog> logs = imAuditLogMapper.selectImAuditLogByIpAddress(ipAddress);
+            // 鏌ヨ鏁版嵁搴?            List<ImAuditLog> logs = imAuditLogMapper.selectImAuditLogByIpAddress(ipAddress);
             
-            // 缓存结果
+            // 缂撳瓨缁撴灉
             if (logs != null && !logs.isEmpty()) {
                 redisTemplate.opsForValue().set(cacheKey, logs, CACHE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
-                log.debug("IP地址审计日志已缓存: ipAddress={}, count={}, method={}", 
+                log.debug("IP鍦板潃瀹¤鏃ュ織宸茬紦瀛? ipAddress={}, count={}, method={}", 
                           ipAddress, logs.size(), methodName);
             }
             
             return logs;
             
         } catch (Exception e) {
-            log.error("根据IP地址查询审计日志异常: ipAddress={}, error={}, method={}", 
+            log.error("鏍规嵁IP鍦板潃鏌ヨ瀹¤鏃ュ織寮傚父: ipAddress={}, error={}, method={}", 
                       ipAddress, e.getMessage(), methodName, e);
-            throw new BusinessException("根据IP地址查询审计日志失败", e);
+            throw new BusinessException("鏍规嵁IP鍦板潃鏌ヨ瀹¤鏃ュ織澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("根据IP地址查询审计日志耗时: {}ms, ipAddress={}, method={}", 
+            log.info("鏍规嵁IP鍦板潃鏌ヨ瀹¤鏃ュ織鑰楁椂: {}ms, ipAddress={}, method={}", 
                      duration, ipAddress, methodName);
         }
     }
     
     /**
-     * 记录审计日志
+     * 璁板綍瀹¤鏃ュ織
      * 
-     * @param userId 用户ID
-     * @param operationType 操作类型
-     * @param targetType 目标类型
-     * @param targetId 目标ID
-     * @param operationResult 操作结果
-     * @param errorMessage 错误信息
-     * @param ipAddress IP地址
-     * @param userAgent 用户代理
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @param operationType 鎿嶄綔绫诲瀷
+     * @param targetType 鐩爣绫诲瀷
+     * @param targetId 鐩爣ID
+     * @param operationResult 鎿嶄綔缁撴灉
+     * @param errorMessage 閿欒淇℃伅
+     * @param ipAddress IP鍦板潃
+     * @param userAgent 鐢ㄦ埛浠ｇ悊
+     * @return 缁撴灉
      */
     @Override
     public int logAudit(Long userId, String operationType, String targetType, Long targetId, String operationResult, String errorMessage, String ipAddress, String userAgent) {
@@ -429,10 +411,9 @@ public class ImAuditLogServiceImpl extends EnhancedBaseServiceImpl<ImAuditLog, I
     }
     
     /**
-     * 批量删除指定时间之前的审计日志
-     * 
-     * @param beforeTime 时间
-     * @return 结果
+     * 鎵归噺鍒犻櫎鎸囧畾鏃堕棿涔嬪墠鐨勫璁℃棩蹇?     * 
+     * @param beforeTime 鏃堕棿
+     * @return 缁撴灉
      */
     @Override
     public int deleteImAuditLogByBeforeTime(LocalDateTime beforeTime) {

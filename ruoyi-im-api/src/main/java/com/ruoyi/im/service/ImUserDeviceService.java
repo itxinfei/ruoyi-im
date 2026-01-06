@@ -4,7 +4,7 @@ import com.ruoyi.im.domain.ImUserDevice;
 import java.util.List;
 
 /**
- * 用户设备Service接口
+ * 鐢ㄦ埛璁惧Service鎺ュ彛
  * 
  * @author ruoyi
  */
@@ -29,69 +29,69 @@ public interface ImUserDeviceService extends BaseService<ImUserDevice> {
     int deleteById(Long id);
     
     /**
-     * 根据用户ID查询设备列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ璁惧鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 用户设备集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 鐢ㄦ埛璁惧闆嗗悎
      */
     public List<ImUserDevice> selectImUserDeviceByUserId(Long userId);
     
     /**
-     * 根据设备ID查询设备
+     * 鏍规嵁璁惧ID鏌ヨ璁惧
      * 
-     * @param deviceId 设备ID
-     * @return 用户设备
+     * @param deviceId 璁惧ID
+     * @return 鐢ㄦ埛璁惧
      */
     public ImUserDevice selectImUserDeviceByDeviceId(String deviceId);
     
     /**
-     * 根据用户ID和设备ID查询设备
+     * 鏍规嵁鐢ㄦ埛ID鍜岃澶嘔D鏌ヨ璁惧
      * 
-     * @param userId 用户ID
-     * @param deviceId 设备ID
-     * @return 用户设备
+     * @param userId 鐢ㄦ埛ID
+     * @param deviceId 璁惧ID
+     * @return 鐢ㄦ埛璁惧
      */
     public ImUserDevice selectImUserDeviceByUserIdAndDeviceId(Long userId, String deviceId);
     
     /**
-     * 注册设备
+     * 娉ㄥ唽璁惧
      * 
-     * @param userId 用户ID
-     * @param deviceType 设备类型
-     * @param deviceId 设备ID
-     * @param deviceName 设备名称
-     * @param osVersion 操作系统版本
-     * @param appVersion 应用版本
-     * @param ipAddress IP地址
-     * @param location 位置
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @param deviceType 璁惧绫诲瀷
+     * @param deviceId 璁惧ID
+     * @param deviceName 璁惧鍚嶇О
+     * @param osVersion 鎿嶄綔绯荤粺鐗堟湰
+     * @param appVersion 搴旂敤鐗堟湰
+     * @param ipAddress IP鍦板潃
+     * @param location 浣嶇疆
+     * @return 缁撴灉
      */
     public int registerDevice(Long userId, String deviceType, String deviceId, String deviceName, String osVersion, String appVersion, String ipAddress, String location);
     
     /**
-     * 更新设备活跃时间
+     * 鏇存柊璁惧娲昏穬鏃堕棿
      * 
-     * @param userId 用户ID
-     * @param deviceId 设备ID
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @param deviceId 璁惧ID
+     * @return 缁撴灉
      */
     public int updateDeviceActiveTime(Long userId, String deviceId);
     
     /**
-     * 更新设备状态
+     * 鏇存柊璁惧鐘舵€?
      * 
-     * @param userId 用户ID
-     * @param deviceId 设备ID
-     * @param status 状态
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @param deviceId 璁惧ID
+     * @param status 鐘舵€?
+     * @return 缁撴灉
      */
     public int updateDeviceStatus(Long userId, String deviceId, String status);
     
     /**
-     * 删除用户的所有设备
+     * 鍒犻櫎鐢ㄦ埛鐨勬墍鏈夎澶?
      * 
-     * @param userId 用户ID
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @return 缁撴灉
      */
     public int deleteImUserDeviceByUserId(Long userId);
 }

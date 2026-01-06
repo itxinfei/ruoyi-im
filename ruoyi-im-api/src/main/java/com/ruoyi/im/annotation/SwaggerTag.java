@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Swagger标签注解，用于标识API接口
+ * Swagger标签注解，用于标记API接口
  * 
  * @author ruoyi
  */

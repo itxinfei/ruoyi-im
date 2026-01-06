@@ -4,7 +4,7 @@ import com.ruoyi.im.domain.ImConversationMember;
 import java.util.List;
 
 /**
- * 会话成员Service接口
+ * 浼氳瘽鎴愬憳Service鎺ュ彛
  * 
  * @author ruoyi
  */
@@ -29,85 +29,80 @@ public interface ImConversationMemberService extends BaseService<ImConversationM
     int deleteById(Long id);
     
     /**
-     * 根据会话ID查询会话成员列表
+     * 鏍规嵁浼氳瘽ID鏌ヨ浼氳瘽鎴愬憳鍒楄〃
      * 
-     * @param conversationId 会话ID
-     * @return 会话成员集合
+     * @param conversationId 浼氳瘽ID
+     * @return 浼氳瘽鎴愬憳闆嗗悎
      */
     public List<ImConversationMember> selectImConversationMemberListByConversationId(Long conversationId);
     
     /**
-     * 根据会话ID和用户ID查询会话成员
+     * 鏍规嵁浼氳瘽ID鍜岀敤鎴稩D鏌ヨ浼氳瘽鎴愬憳
      * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @return 会话成员
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @return 浼氳瘽鎴愬憳
      */
     public ImConversationMember selectImConversationMemberByConversationIdAndUserId(Long conversationId, Long userId);
     
     /**
-     * 根据用户ID查询会话成员列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ浼氳瘽鎴愬憳鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 会话成员集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 浼氳瘽鎴愬憳闆嗗悎
      */
     public List<ImConversationMember> selectImConversationMemberListByUserId(Long userId);
     
     /**
-     * 添加会话成员
+     * 娣诲姞浼氳瘽鎴愬憳
      * 
-     * @param conversationId 会话ID
-     * @param userIds 用户ID列表
-     * @return 结果
+     * @param conversationId 浼氳瘽ID
+     * @param userIds 鐢ㄦ埛ID鍒楄〃
+     * @return 缁撴灉
      */
     public int addConversationMembers(Long conversationId, List<Long> userIds);
     
     /**
-     * 移除会话成员
+     * 绉婚櫎浼氳瘽鎴愬憳
      * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @return 结果
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @return 缁撴灉
      */
     public int removeConversationMember(Long conversationId, Long userId);
     
     /**
-     * 更新会话成员未读数
-     * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @param unreadCount 未读数
-     * @return 结果
+     * 鏇存柊浼氳瘽鎴愬憳鏈鏁?     * 
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @param unreadCount 鏈鏁?     * @return 缁撴灉
      */
     public int updateUnreadCount(Long conversationId, Long userId, Integer unreadCount);
     
     /**
-     * 标记会话成员消息已读
+     * 鏍囪浼氳瘽鎴愬憳娑堟伅宸茶
      * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @param messageId 消息ID
-     * @return 结果
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @param messageId 娑堟伅ID
+     * @return 缁撴灉
      */
     public int markMessageAsRead(Long conversationId, Long userId, Long messageId);
     
     /**
-     * 设置会话成员置顶状态
-     * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @param isPinned 是否置顶
-     * @return 结果
+     * 璁剧疆浼氳瘽鎴愬憳缃《鐘舵€?     * 
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @param isPinned 鏄惁缃《
+     * @return 缁撴灉
      */
     public int setConversationPinned(Long conversationId, Long userId, Boolean isPinned);
     
     /**
-     * 设置会话成员免打扰状态
-     * 
-     * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @param isMuted 是否免打扰
-     * @return 结果
+     * 璁剧疆浼氳瘽鎴愬憳鍏嶆墦鎵扮姸鎬?     * 
+     * @param conversationId 浼氳瘽ID
+     * @param userId 鐢ㄦ埛ID
+     * @param isMuted 鏄惁鍏嶆墦鎵?     * @return 缁撴灉
      */
     public int setConversationMuted(Long conversationId, Long userId, Boolean isMuted);
 }

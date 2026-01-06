@@ -4,7 +4,7 @@ import com.ruoyi.im.domain.ImFileAsset;
 import java.util.List;
 
 /**
- * 文件资源Service接口
+ * 鏂囦欢璧勬簮Service鎺ュ彛
  * 
  * @author ruoyi
  */
@@ -23,10 +23,10 @@ public interface ImFileAssetService extends BaseService<ImFileAsset> {
     int update(ImFileAsset imFileAsset);
     
     /**
-     * 修改文件资源（与update方法相同，用于兼容性）
+     * 淇敼鏂囦欢璧勬簮锛堜笌update鏂规硶鐩稿悓锛岀敤浜庡吋瀹规€э級
      * 
-     * @param imFileAsset 文件资源
-     * @return 结果
+     * @param imFileAsset 鏂囦欢璧勬簮
+     * @return 缁撴灉
      */
     default int updateImFileAsset(ImFileAsset imFileAsset) {
         return update(imFileAsset);

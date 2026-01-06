@@ -39,19 +39,19 @@ public class PermissionAspect {
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
         
-        log.debug("开始权限检查: method={}, permission={}", method.getName(), requirePermission.value());
+        log.debug("开始权限检查 method={}, permission={}", method.getName(), requirePermission.value());
         
         // 获取当前用户
         ImUser currentUser = getCurrentUser();
         if (currentUser == null) {
-            log.warn("权限检查失败: 当前用户未登录");
+            log.warn("权限检查失败，当前用户未登录");
             throw new BusinessException(401, "用户未登录");
         }
         
         // 检查权限
         boolean hasPermission = checkPermission(currentUser, requirePermission);
         if (!hasPermission) {
-            log.warn("权限检查失败: userId={}, method={}, permission={}", 
+            log.warn("权限检查失败， userId={}, method={}, permission={}", 
                     currentUser.getId(), method.getName(), requirePermission.value());
             throw new BusinessException(403, "权限不足: " + requirePermission.desc());
         }
@@ -88,7 +88,8 @@ public class PermissionAspect {
      */
     private boolean checkPermission(ImUser user, RequirePermission requirePermission) {
         String permission = requirePermission.value();
-        if (permission.isEmpty()) {
+        String[] permissions = requirePermission.permissions();
+        if (permission.isEmpty() && (permissions == null || permissions.length == 0)) {
             return true;
         }
         
@@ -96,17 +97,48 @@ public class PermissionAspect {
         Set<String> userPermissions = userService.getUserPermissions(user.getId());
         
         // 检查单个权限
-        if (!requirePermission.allRequired()) {
+        if (!requirePermission.allRequired() && !permission.isEmpty()) {
             return userPermissions.contains(permission);
         }
         
         // 检查多个权限（AND逻辑）
-        String[] permissions = permission.split(",");
-        for (String perm : permissions) {
-            if (!userPermissions.contains(perm.trim())) {
+        if (requirePermission.allRequired()) {
+            if (permissions.length > 0) {
+                for (String perm : permissions) {
+                    if (!userPermissions.contains(perm.trim())) {
+                        return false;
+                    }
+                }
+                return true;
+            } else if (!permission.isEmpty()) {
+                String[] permArray = permission.split(",");
+                for (String perm : permArray) {
+                    if (!userPermissions.contains(perm.trim())) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        } else {
+            // 检查多个权限（OR逻辑）
+            if (permissions.length > 0) {
+                for (String perm : permissions) {
+                    if (userPermissions.contains(perm.trim())) {
+                        return true;
+                    }
+                }
+                return false;
+            } else if (!permission.isEmpty()) {
+                String[] permArray = permission.split(",");
+                for (String perm : permArray) {
+                    if (userPermissions.contains(perm.trim())) {
+                        return true;
+                    }
+                }
                 return false;
             }
         }
+        
         return true;
     }
 }

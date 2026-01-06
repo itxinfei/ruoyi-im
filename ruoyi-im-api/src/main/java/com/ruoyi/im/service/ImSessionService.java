@@ -5,57 +5,57 @@ import com.ruoyi.im.dto.session.ImSessionQueryRequest;
 import java.util.List;
 
 /**
- * 会话Service接口
+ * 浼氳瘽Service鎺ュ彛
  * 
  * @author ruoyi
  */
 public interface ImSessionService {
     
     /**
-     * 根据ID查询会话
+     * 鏍规嵁ID鏌ヨ浼氳瘽
      * 
-     * @param id 会话ID
-     * @return 会话
+     * @param id 浼氳瘽ID
+     * @return 浼氳瘽
      */
     ImSession selectById(Long id);
     
     /**
-     * 查询会话列表
+     * 鏌ヨ浼氳瘽鍒楄〃
      * 
-     * @param request 查询条件
-     * @return 会话集合
+     * @param request 鏌ヨ鏉′欢
+     * @return 浼氳瘽闆嗗悎
      */
     List<ImSession> selectImSessionList(ImSessionQueryRequest request);
     
     /**
-     * 新增会话
+     * 鏂板浼氳瘽
      * 
-     * @param imSession 会话
-     * @return 结果
+     * @param imSession 浼氳瘽
+     * @return 缁撴灉
      */
     int insert(ImSession imSession);
     
     /**
-     * 修改会话
+     * 淇敼浼氳瘽
      * 
-     * @param imSession 会话
-     * @return 结果
+     * @param imSession 浼氳瘽
+     * @return 缁撴灉
      */
     int update(ImSession imSession);
     
     /**
-     * 批量删除会话
+     * 鎵归噺鍒犻櫎浼氳瘽
      * 
-     * @param ids 需要删除的会话ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑浼氳瘽ID
+     * @return 缁撴灉
      */
     int deleteByIds(Long[] ids);
     
     /**
-     * 删除会话信息
+     * 鍒犻櫎浼氳瘽淇℃伅
      * 
-     * @param id 会话ID
-     * @return 结果
+     * @param id 浼氳瘽ID
+     * @return 缁撴灉
      */
     int deleteById(Long id);
 }

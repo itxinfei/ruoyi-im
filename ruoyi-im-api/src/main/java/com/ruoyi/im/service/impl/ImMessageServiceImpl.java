@@ -19,8 +19,8 @@ import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.utils.ValidationUtils;
 
 /**
- * 消息Service业务层处理 - 优化版本
- * 优化内容：添加缓存机制、分页查询优化、批量操作、事务控制、性能监控
+ * 娑堟伅Service涓氬姟灞傚鐞?- 浼樺寲鐗堟湰
+ * 浼樺寲鍐呭锛氭坊鍔犵紦瀛樻満鍒躲€佸垎椤垫煡璇紭鍖栥€佹壒閲忔搷浣溿€佷簨鍔℃帶鍒躲€佹€ц兘鐩戞帶
  * 
  * @author ruoyi
  */
@@ -34,66 +34,66 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     
-    // 缓存键前缀
+    // 缂撳瓨閿墠缂€
     private static final String MESSAGE_CACHE_PREFIX = "im:message:";
     private static final String CONVERSATION_MESSAGES_PREFIX = "im:conversation:";
     
-    // 缓存超时时间（分钟）
+    // 缂撳瓨瓒呮椂鏃堕棿锛堝垎閽燂級
     private static final int CACHE_TIMEOUT_MINUTES = 10;
     
     @PostConstruct
     public void init() {
-        log.info("ImMessageService初始化完成，开始启用缓存和性能监控");
+        log.info("ImMessageService鍒濆鍖栧畬鎴愶紝寮€濮嬪惎鐢ㄧ紦瀛樺拰鎬ц兘鐩戞帶");
     }
     
     /**
-     * 根据会话ID查询消息列表 - 优化版本
-     * 优化内容：分页支持、缓存机制、参数验证、性能监控
+     * 鏍规嵁浼氳瘽ID鏌ヨ娑堟伅鍒楄〃 - 浼樺寲鐗堟湰
+     * 浼樺寲鍐呭锛氬垎椤垫敮鎸併€佺紦瀛樻満鍒躲€佸弬鏁伴獙璇併€佹€ц兘鐩戞帶
      * 
-     * @param conversationId 会话ID
-     * @param pageNum 页码
-     * @param pageSize 每页大小
-     * @return 消息集合
+     * @param conversationId 浼氳瘽ID
+     * @param pageNum 椤电爜
+     * @param pageSize 姣忛〉澶у皬
+     * @return 娑堟伅闆嗗悎
      */
     @Override
     public List<ImMessage> selectImMessageListByConversationId(Long conversationId, Integer pageNum, Integer pageSize) {
         long startTime = System.currentTimeMillis();
-        log.debug("开始查询会话消息: conversationId={}, pageNum={}, pageSize={}", conversationId, pageNum, pageSize);
+        log.debug("寮€濮嬫煡璇細璇濇秷鎭? conversationId={}, pageNum={}, pageSize={}", conversationId, pageNum, pageSize);
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             ValidationUtils.validateConversationId(conversationId, "selectImMessageListByConversationId");
             ValidationUtils.validatePaginationParams(pageNum, pageSize, "selectImMessageListByConversationId");
             
-            // 计算偏移量
+            // 璁＄畻鍋忕Щ閲?
             int offset = (pageNum - 1) * pageSize;
             
-            // 检查缓存
+            // 妫€鏌ョ紦瀛?
             String cacheKey = CONVERSATION_MESSAGES_PREFIX + conversationId + ":" + pageNum + ":" + pageSize;
             @SuppressWarnings("unchecked")
             List<ImMessage> cachedMessages = (List<ImMessage>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedMessages != null) {
-                log.debug("从缓存获取会话消息: conversationId={}, count={}", conversationId, cachedMessages.size());
+                log.debug("浠庣紦瀛樿幏鍙栦細璇濇秷鎭? conversationId={}, count={}", conversationId, cachedMessages.size());
                 return cachedMessages;
             }
             
-            // 查询数据库
+            // 鏌ヨ鏁版嵁搴?
             List<ImMessage> messages = imMessageMapper.selectImMessageListByConversationIdAndPagination(conversationId, offset, pageSize);
             
-            // 缓存结果
+            // 缂撳瓨缁撴灉
             if (messages != null && !messages.isEmpty()) {
                 redisTemplate.opsForValue().set(cacheKey, messages, CACHE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
-                log.debug("会话消息已缓存: conversationId={}, count={}", conversationId, messages.size());
+                log.debug("浼氳瘽娑堟伅宸茬紦瀛? conversationId={}, count={}", conversationId, messages.size());
             }
             
             return messages;
             
         } catch (Exception e) {
-            log.error("查询会话消息异常: conversationId={}, error={}", conversationId, e.getMessage(), e);
-            throw new BusinessException("消息查询失败", e);
+            log.error("鏌ヨ浼氳瘽娑堟伅寮傚父: conversationId={}, error={}", conversationId, e.getMessage(), e);
+            throw new BusinessException("娑堟伅鏌ヨ澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("查询会话消息耗时: {}ms, conversationId={}, pageNum={}, pageSize={}", 
+            log.info("鏌ヨ浼氳瘽娑堟伅鑰楁椂: {}ms, conversationId={}, pageNum={}, pageSize={}", 
                      duration, conversationId, pageNum, pageSize);
         }
     }
@@ -101,25 +101,25 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
 
     
     /**
-     * 清除会话消息缓存
+     * 娓呴櫎浼氳瘽娑堟伅缂撳瓨
      * 
-     * @param conversationId 会话ID
+     * @param conversationId 浼氳瘽ID
      */
     private void clearConversationMessagesCache(Long conversationId) {
         try {
             String pattern = CONVERSATION_MESSAGES_PREFIX + conversationId + ":*";
             redisTemplate.delete(pattern);
-            log.debug("已清除会话消息缓存: conversationId={}", conversationId);
+            log.debug("宸叉竻闄や細璇濇秷鎭紦瀛? conversationId={}", conversationId);
         } catch (Exception e) {
-            log.warn("清除会话消息缓存失败: conversationId={}, error={}", conversationId, e.getMessage());
+            log.warn("娓呴櫎浼氳瘽娑堟伅缂撳瓨澶辫触: conversationId={}, error={}", conversationId, e.getMessage());
         }
     }
     
     /**
-     * 根据会话ID查询消息列表（兼容旧版本）
+     * 鏍规嵁浼氳瘽ID鏌ヨ娑堟伅鍒楄〃锛堝吋瀹规棫鐗堟湰锛?
      * 
-     * @param conversationId 会话ID
-     * @return 消息集合
+     * @param conversationId 浼氳瘽ID
+     * @return 娑堟伅闆嗗悎
      */
     @Override
     public List<ImMessage> selectImMessageListByConversationId(Long conversationId) {
@@ -127,12 +127,12 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 根据会话ID和时间范围查询消息列表
+     * 鏍规嵁浼氳瘽ID鍜屾椂闂磋寖鍥存煡璇㈡秷鎭垪琛?
      * 
-     * @param conversationId 会话ID
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @return 消息集合
+     * @param conversationId 浼氳瘽ID
+     * @param startTime 寮€濮嬫椂闂?
+     * @param endTime 缁撴潫鏃堕棿
+     * @return 娑堟伅闆嗗悎
      */
     @Override
     public List<ImMessage> selectImMessageListByConversationIdAndTimeRange(Long conversationId, java.time.LocalDateTime startTime, java.time.LocalDateTime endTime) {
@@ -140,36 +140,36 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 发送消息 - 优化版本
-     * 优化内容：事务控制、参数验证、异步处理、性能监控、缓存更新
+     * 鍙戦€佹秷鎭?- 浼樺寲鐗堟湰
+     * 浼樺寲鍐呭锛氫簨鍔℃帶鍒躲€佸弬鏁伴獙璇併€佸紓姝ュ鐞嗐€佹€ц兘鐩戞帶銆佺紦瀛樻洿鏂?
      * 
-     * @param conversationId 会话ID
-     * @param senderId 发送者ID
-     * @param type 消息类型
-     * @param content 消息内容
-     * @return 消息ID
+     * @param conversationId 浼氳瘽ID
+     * @param senderId 鍙戦€佽€匢D
+     * @param type 娑堟伅绫诲瀷
+     * @param content 娑堟伅鍐呭
+     * @return 娑堟伅ID
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long sendMessage(Long conversationId, Long senderId, String type, String content) {
         long startTime = System.currentTimeMillis();
-        log.info("开始发送消息: conversationId={}, senderId={}, type={}", conversationId, senderId, type);
+        log.info("寮€濮嬪彂閫佹秷鎭? conversationId={}, senderId={}, type={}", conversationId, senderId, type);
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             ValidationUtils.validateConversationId(conversationId, "sendMessage");
             ValidationUtils.validateUserId(senderId, "sendMessage");
-            ValidationUtils.validateString(type, "消息类型", "sendMessage");
-            ValidationUtils.validateString(content, "消息内容", "sendMessage");
+            ValidationUtils.validateString(type, "娑堟伅绫诲瀷", "sendMessage");
+            ValidationUtils.validateString(content, "娑堟伅鍐呭", "sendMessage");
             
-            // 验证消息类型
+            // 楠岃瘉娑堟伅绫诲瀷
             if (!isValidMessageType(type)) {
-                throw new BusinessException("无效的消息类型: " + type);
+                throw new BusinessException("鏃犳晥鐨勬秷鎭被鍨? " + type);
             }
             
-            // 验证内容长度
+            // 楠岃瘉鍐呭闀垮害
             if (content.length() > 5000) {
-                throw new BusinessException("消息内容长度不能超过5000个字符");
+                throw new BusinessException("娑堟伅鍐呭闀垮害涓嶈兘瓒呰繃5000涓瓧绗?);
             }
             
             ImMessage message = new ImMessage();
@@ -182,25 +182,25 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
             
             int result = insert(message);
             if (result <= 0) {
-                log.error("消息发送失败: conversationId={}, senderId={}", conversationId, senderId);
-                throw new BusinessException("消息发送失败");
+                log.error("娑堟伅鍙戦€佸け璐? conversationId={}, senderId={}", conversationId, senderId);
+                throw new BusinessException("娑堟伅鍙戦€佸け璐?);
             }
             
-            // 清除会话消息缓存
+            // 娓呴櫎浼氳瘽娑堟伅缂撳瓨
             clearConversationMessagesCache(conversationId);
             
-            // 异步处理消息推送和持久化
+            // 寮傛澶勭悊娑堟伅鎺ㄩ€佸拰鎸佷箙鍖?
             CompletableFuture.runAsync(() -> {
                 try {
-                    // 消息推送
+                    // 娑堟伅鎺ㄩ€?
                     processMessagePush(message);
-                    log.debug("消息推送完成: messageId={}", message.getId());
+                    log.debug("娑堟伅鎺ㄩ€佸畬鎴? messageId={}", message.getId());
                 } catch (Exception e) {
-                    log.error("消息推送异常: messageId={}, error={}", message.getId(), e.getMessage(), e);
+                    log.error("娑堟伅鎺ㄩ€佸紓甯? messageId={}, error={}", message.getId(), e.getMessage(), e);
                 }
             });
             
-            log.info("消息发送成功: messageId={}, conversationId={}, 耗时={}ms", 
+            log.info("娑堟伅鍙戦€佹垚鍔? messageId={}, conversationId={}, 鑰楁椂={}ms", 
                      message.getId(), conversationId, System.currentTimeMillis() - startTime);
             
             return message.getId();
@@ -208,22 +208,22 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("发送消息异常: conversationId={}, senderId={}, error={}", conversationId, senderId, e.getMessage(), e);
+            log.error("鍙戦€佹秷鎭紓甯? conversationId={}, senderId={}, error={}", conversationId, senderId, e.getMessage(), e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            throw new BusinessException("消息发送失败", e);
+            throw new BusinessException("娑堟伅鍙戦€佸け璐?, e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("发送消息总耗时: {}ms, conversationId={}, senderId={}", duration, conversationId, senderId);
+            log.info("鍙戦€佹秷鎭€昏€楁椂: {}ms, conversationId={}, senderId={}", duration, conversationId, senderId);
         }
     }
     
 
     
     /**
-     * 验证消息类型
+     * 楠岃瘉娑堟伅绫诲瀷
      * 
-     * @param type 消息类型
-     * @return 是否有效
+     * @param type 娑堟伅绫诲瀷
+     * @return 鏄惁鏈夋晥
      */
     private boolean isValidMessageType(String type) {
         return "TEXT".equals(type) || 
@@ -236,78 +236,78 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 处理消息推送
+     * 澶勭悊娑堟伅鎺ㄩ€?
      * 
-     * @param message 消息对象
+     * @param message 娑堟伅瀵硅薄
      */
     private void processMessagePush(ImMessage message) {
         try {
-            // 这里可以实现WebSocket推送、消息队列等
-            // 示例：发送到消息队列进行异步处理
+            // 杩欓噷鍙互瀹炵幇WebSocket鎺ㄩ€併€佹秷鎭槦鍒楃瓑
+            // 绀轰緥锛氬彂閫佸埌娑堟伅闃熷垪杩涜寮傛澶勭悊
             
-            // 记录消息推送日志
-            log.debug("处理消息推送: messageId={}, conversationId={}, type={}", 
+            // 璁板綍娑堟伅鎺ㄩ€佹棩蹇?
+            log.debug("澶勭悊娑堟伅鎺ㄩ€? messageId={}, conversationId={}, type={}", 
                      message.getId(), message.getConversationId(), message.getType());
             
-            // 可以在这里集成消息推送服务
+            // 鍙互鍦ㄨ繖閲岄泦鎴愭秷鎭帹閫佹湇鍔?
             // messagePushService.pushMessage(message);
             
         } catch (Exception e) {
-            log.error("处理消息推送异常: messageId={}, error={}", message.getId(), e.getMessage(), e);
+            log.error("澶勭悊娑堟伅鎺ㄩ€佸紓甯? messageId={}, error={}", message.getId(), e.getMessage(), e);
         }
     }
     
     /**
-     * 发送私聊消息
+     * 鍙戦€佺鑱婃秷鎭?
      * 
-     * @param senderId 发送者ID
-     * @param receiverId 接收者ID
-     * @param type 消息类型
-     * @param content 消息内容
-     * @return 消息ID
+     * @param senderId 鍙戦€佽€匢D
+     * @param receiverId 鎺ユ敹鑰匢D
+     * @param type 娑堟伅绫诲瀷
+     * @param content 娑堟伅鍐呭
+     * @return 娑堟伅ID
      */
     @Override
     public Long sendPrivateMessage(Long senderId, Long receiverId, String type, String content) {
-        // 创建或获取私聊会话
-        // 这里使用较小的ID作为目标ID来标识私聊会话
+        // 鍒涘缓鎴栬幏鍙栫鑱婁細璇?
+        // 杩欓噷浣跨敤杈冨皬鐨処D浣滀负鐩爣ID鏉ユ爣璇嗙鑱婁細璇?
         Long targetId = Math.min(senderId, receiverId);
-        // 注意：实际实现中，需要先检查或创建相应的私聊会话
-        // 暂时返回null，实际使用时需要先创建会话
+        // 娉ㄦ剰锛氬疄闄呭疄鐜颁腑锛岄渶瑕佸厛妫€鏌ユ垨鍒涘缓鐩稿簲鐨勭鑱婁細璇?
+        // 鏆傛椂杩斿洖null锛屽疄闄呬娇鐢ㄦ椂闇€瑕佸厛鍒涘缓浼氳瘽
         return null;
     }
     
     /**
-     * 发送群聊消息
+     * 鍙戦€佺兢鑱婃秷鎭?
      * 
-     * @param senderId 发送者ID
-     * @param groupId 群组ID
-     * @param type 消息类型
-     * @param content 消息内容
-     * @return 消息ID
+     * @param senderId 鍙戦€佽€匢D
+     * @param groupId 缇ょ粍ID
+     * @param type 娑堟伅绫诲瀷
+     * @param content 娑堟伅鍐呭
+     * @return 娑堟伅ID
      */
     @Override
     public Long sendGroupMessage(Long senderId, Long groupId, String type, String content) {
-        // 创建或获取群聊会话
-        // 这里使用群组ID作为目标ID
-        // 注意：实际实现中，需要先检查或创建相应的群聊会话
-        // 暂时返回null，实际使用时需要先创建会话
+        // 鍒涘缓鎴栬幏鍙栫兢鑱婁細璇?
+        // 杩欓噷浣跨敤缇ょ粍ID浣滀负鐩爣ID
+        // 娉ㄦ剰锛氬疄闄呭疄鐜颁腑锛岄渶瑕佸厛妫€鏌ユ垨鍒涘缓鐩稿簲鐨勭兢鑱婁細璇?
+        // 鏆傛椂杩斿洖null锛屽疄闄呬娇鐢ㄦ椂闇€瑕佸厛鍒涘缓浼氳瘽
         return null;
     }
     
     /**
-     * 撤回消息
+     * 鎾ゅ洖娑堟伅
      * 
-     * @param messageId 消息ID
-     * @param operatorId 操作人ID
-     * @return 结果
+     * @param messageId 娑堟伅ID
+     * @param operatorId 鎿嶄綔浜篒D
+     * @return 缁撴灉
      */
     @Override
     public int revokeMessage(Long messageId, Long operatorId) {
         ImMessage message = selectById(messageId);
         if (message != null) {
-            // 检查操作权限（发送者或管理员才能撤回）
+            // 妫€鏌ユ搷浣滄潈闄愶紙鍙戦€佽€呮垨绠＄悊鍛樻墠鑳芥挙鍥烇級
             if (!message.getSenderId().equals(operatorId)) {
-                // 非发送者无法撤回
+                // 闈炲彂閫佽€呮棤娉曟挙鍥?
                 return 0;
             }
             
@@ -319,11 +319,11 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 更新消息状态
+     * 鏇存柊娑堟伅鐘舵€?
      * 
-     * @param messageId 消息ID
-     * @param status 新状态
-     * @return 结果
+     * @param messageId 娑堟伅ID
+     * @param status 鏂扮姸鎬?
+     * @return 缁撴灉
      */
     @Override
     public int updateMessageStatus(Long messageId, String status) {
@@ -336,14 +336,14 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 发送回复消息
+     * 鍙戦€佸洖澶嶆秷鎭?
      * 
-     * @param conversationId 会话ID
-     * @param senderId 发送者ID
-     * @param replyToMessageId 回复的消息ID
-     * @param type 消息类型
-     * @param content 消息内容
-     * @return 消息ID
+     * @param conversationId 浼氳瘽ID
+     * @param senderId 鍙戦€佽€匢D
+     * @param replyToMessageId 鍥炲鐨勬秷鎭疘D
+     * @param type 娑堟伅绫诲瀷
+     * @param content 娑堟伅鍐呭
+     * @return 娑堟伅ID
      */
     @Override
     public Long sendReplyMessage(Long conversationId, Long senderId, Long replyToMessageId, String type, String content) {
@@ -363,14 +363,14 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 发送转发消息
+     * 鍙戦€佽浆鍙戞秷鎭?
      * 
-     * @param conversationId 会话ID
-     * @param senderId 发送者ID
-     * @param forwardFromMessageId 转发的消息ID
-     * @param type 消息类型
-     * @param content 消息内容
-     * @return 消息ID
+     * @param conversationId 浼氳瘽ID
+     * @param senderId 鍙戦€佽€匢D
+     * @param forwardFromMessageId 杞彂鐨勬秷鎭疘D
+     * @param type 娑堟伅绫诲瀷
+     * @param content 娑堟伅鍐呭
+     * @return 娑堟伅ID
      */
     @Override
     public Long sendForwardMessage(Long conversationId, Long senderId, Long forwardFromMessageId, String type, String content) {
@@ -390,9 +390,9 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl的抽象方法
+     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?
      * 
-     * @return 实体类型名称
+     * @return 瀹炰綋绫诲瀷鍚嶇О
      */
     @Override
     protected String getEntityType() {
@@ -400,10 +400,10 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl的抽象方法
+     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?
      * 
-     * @param entity 消息实体
-     * @return 消息ID
+     * @param entity 娑堟伅瀹炰綋
+     * @return 娑堟伅ID
      */
     @Override
     protected Long getEntityId(ImMessage entity) {
@@ -411,9 +411,9 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl的抽象方法
+     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?
      * 
-     * @param entity 消息实体
+     * @param entity 娑堟伅瀹炰綋
      */
     @Override
     protected void setCreateTime(ImMessage entity) {
@@ -423,9 +423,9 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl的抽象方法
+     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?
      * 
-     * @param entity 消息实体
+     * @param entity 娑堟伅瀹炰綋
      */
     @Override
     protected void setUpdateTime(ImMessage entity) {
@@ -435,17 +435,17 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl中的clearRelatedCache方法，提供消息特定缓存清理逻辑
+     * 瀹炵幇EnhancedBaseServiceImpl涓殑clearRelatedCache鏂规硶锛屾彁渚涙秷鎭壒瀹氱紦瀛樻竻鐞嗛€昏緫
      * 
-     * @param entity 消息实体
+     * @param entity 娑堟伅瀹炰綋
      */
     @Override
     protected void clearRelatedCache(ImMessage entity) {
         if (entity != null) {
-            // 清除实体缓存
+            // 娓呴櫎瀹炰綋缂撳瓨
             clearEntityCache(entity.getId());
             
-            // 清除会话消息缓存
+            // 娓呴櫎浼氳瘽娑堟伅缂撳瓨
             if (entity.getConversationId() != null) {
                 clearConversationMessagesCache(entity.getConversationId());
             }

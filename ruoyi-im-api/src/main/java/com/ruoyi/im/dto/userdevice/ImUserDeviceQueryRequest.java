@@ -1,6 +1,6 @@
 package com.ruoyi.im.dto.userdevice;
 
-import com.ruoyi.im.common.BasePageRequest;
+import com.ruoyi.im.dto.BasePageRequest;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 

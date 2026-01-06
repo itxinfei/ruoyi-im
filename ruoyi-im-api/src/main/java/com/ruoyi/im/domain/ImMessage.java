@@ -3,78 +3,74 @@ package com.ruoyi.im.domain;
 import java.time.LocalDateTime;
 
 /**
- * 消息实体
+ * 娑堟伅瀹炰綋
  * 
  * @author ruoyi
  */
 public class ImMessage {
     /**
-     * 消息ID
+     * 娑堟伅ID
      */
     private Long id;
     
     /**
-     * 会话ID
+     * 浼氳瘽ID
      */
     private Long conversationId;
     
     /**
-     * 发送者用户ID
+     * 鍙戦€佽€呯敤鎴稩D
      */
     private Long senderId;
     
     /**
-     * 消息类型（TEXT文本 FILE文件 NOTICE通知 RECALL撤回 REPLY回复 FORWARD转发 IMAGE图片 VOICE语音）
-     */
+     * 娑堟伅绫诲瀷锛圱EXT鏂囨湰 FILE鏂囦欢 NOTICE閫氱煡 RECALL鎾ゅ洖 REPLY鍥炲 FORWARD杞彂 IMAGE鍥剧墖 VOICE璇煶锛?     */
     private String type;
     
     /**
-     * 消息内容（JSON格式）
-     */
+     * 娑堟伅鍐呭锛圝SON鏍煎紡锛?     */
     private String content;
     
     /**
-     * 回复的消息ID
+     * 鍥炲鐨勬秷鎭疘D
      */
     private Long replyToMessageId;
     
     /**
-     * 转发的消息ID
+     * 杞彂鐨勬秷鎭疘D
      */
     private Long forwardFromMessageId;
     
     /**
-     * 消息状态（SENT已发送 DELIVERED已送达 READ已读 REVOKED已撤回）
+     * 娑堟伅鐘舵€侊紙SENT宸插彂閫?DELIVERED宸查€佽揪 READ宸茶 REVOKED宸叉挙鍥烇級
      */
     private String status;
     
     /**
-     * 敏感级别（NONE无 WARN警告 BLOCK拦截）
-     */
+     * 鏁忔劅绾у埆锛圢ONE鏃?WARN璀﹀憡 BLOCK鎷︽埅锛?     */
     private String sensitiveLevel;
     
     /**
-     * 撤回时间
+     * 鎾ゅ洖鏃堕棿
      */
     private LocalDateTime revokedTime;
     
     /**
-     * 扩展数据（JSON格式）
-     */
+     * 鎵╁睍鏁版嵁锛圝SON鏍煎紡锛?     */
     private String extData;
     
     /**
-     * 回复消息ID（别名）
+     * 鍥炲娑堟伅ID锛堝埆鍚嶏級
      */
     private Long replyMessageId;
 
     /**
-     * 创建时间
+     * 鍒涘缓鏃堕棿
      */
     private LocalDateTime createTime;
     
     /**
-     * 更新时间
+     * 鏇存柊鏃堕棿
      */
     private LocalDateTime updateTime;
 

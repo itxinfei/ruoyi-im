@@ -15,12 +15,11 @@ import com.ruoyi.im.domain.ImAuditExportRequest;
 import com.ruoyi.im.service.ImAuditExportRequestService;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.exception.BusinessException;
-import com.ruoyi.im.util.PerformanceMonitor;
+import com.ruoyi.im.utils.PerformanceMonitor;
 
 /**
- * 审计导出请求Service业务层处理 - 优化版本
- * 优化内容：添加缓存机制、事务控制、性能监控、错误处理
- * 
+ * 瀹¤瀵煎嚭璇锋眰Service涓氬姟灞傚鐞?- 浼樺寲鐗堟湰
+ * 浼樺寲鍐呭锛氭坊鍔犵紦瀛樻満鍒躲€佷簨鍔℃帶鍒躲€佹€ц兘鐩戞帶銆侀敊璇鐞? * 
  * @author ruoyi
  */
 @Service
@@ -33,19 +32,18 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     
-    // 缓存键前缀
+    // 缂撳瓨閿墠缂€
     private static final String USER_EXPORT_REQUEST_CACHE_PREFIX = "im:export:request:user:";
     private static final String STATUS_EXPORT_REQUEST_CACHE_PREFIX = "im:export:request:status:";
     private static final String USER_STATUS_EXPORT_REQUEST_CACHE_PREFIX = "im:export:request:user:status:";
     private static final String ENTITY_CACHE_PREFIX = "im:export:request:entity:";
     
-    // 缓存超时时间（分钟）
+    // 缂撳瓨瓒呮椂鏃堕棿锛堝垎閽燂級
     private static final int CACHE_TIMEOUT_MINUTES = 60;
 
     /**
-     * 实现EnhancedBaseServiceImpl的抽象方法
-     * 
-     * @return 实体类型名称
+     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?     * 
+     * @return 瀹炰綋绫诲瀷鍚嶇О
      */
     @Override
     protected String getEntityType() {
@@ -53,10 +51,9 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl的抽象方法
-     * 
-     * @param entity 导出请求实体
-     * @return 导出请求ID
+     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?     * 
+     * @param entity 瀵煎嚭璇锋眰瀹炰綋
+     * @return 瀵煎嚭璇锋眰ID
      */
     @Override
     protected Long getEntityId(ImAuditExportRequest entity) {
@@ -64,9 +61,8 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl的抽象方法
-     * 
-     * @param entity 导出请求实体
+     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?     * 
+     * @param entity 瀵煎嚭璇锋眰瀹炰綋
      */
     @Override
     protected void setCreateTime(ImAuditExportRequest entity) {
@@ -76,9 +72,8 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl的抽象方法
-     * 
-     * @param entity 导出请求实体
+     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?     * 
+     * @param entity 瀵煎嚭璇锋眰瀹炰綋
      */
     @Override
     protected void setUpdateTime(ImAuditExportRequest entity) {
@@ -88,38 +83,36 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
     }
     
     /**
-     * 实现EnhancedBaseServiceImpl中的clearRelatedCache方法，提供导出请求特定缓存清理逻辑
+     * 瀹炵幇EnhancedBaseServiceImpl涓殑clearRelatedCache鏂规硶锛屾彁渚涘鍑鸿姹傜壒瀹氱紦瀛樻竻鐞嗛€昏緫
      * 
-     * @param entity 导出请求实体
+     * @param entity 瀵煎嚭璇锋眰瀹炰綋
      */
     @Override
     protected void clearRelatedCache(ImAuditExportRequest entity) {
         if (entity != null) {
-            // 清除实体缓存
+            // 娓呴櫎瀹炰綋缂撳瓨
             clearEntityCache(entity.getId());
             
-            // 清除用户导出请求缓存
+            // 娓呴櫎鐢ㄦ埛瀵煎嚭璇锋眰缂撳瓨
             if (entity.getUserId() != null) {
                 redisTemplate.delete(USER_EXPORT_REQUEST_CACHE_PREFIX + entity.getUserId());
             }
             
-            // 清除状态导出请求缓存
-            if (entity.getStatus() != null) {
+            // 娓呴櫎鐘舵€佸鍑鸿姹傜紦瀛?            if (entity.getStatus() != null) {
                 redisTemplate.delete(STATUS_EXPORT_REQUEST_CACHE_PREFIX + entity.getStatus());
             }
             
-            // 清除用户和状态组合导出请求缓存
-            if (entity.getUserId() != null && entity.getStatus() != null) {
+            // 娓呴櫎鐢ㄦ埛鍜岀姸鎬佺粍鍚堝鍑鸿姹傜紦瀛?            if (entity.getUserId() != null && entity.getStatus() != null) {
                 redisTemplate.delete(USER_STATUS_EXPORT_REQUEST_CACHE_PREFIX + entity.getUserId() + ":" + entity.getStatus());
             }
         }
     }
     
     /**
-     * 根据用户ID查询导出请求列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ瀵煎嚭璇锋眰鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 导出请求集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 瀵煎嚭璇锋眰闆嗗悎
      */
     @Override
     public List<ImAuditExportRequest> selectImAuditExportRequestByUserId(Long userId) {
@@ -127,50 +120,45 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
         String methodName = "selectImAuditExportRequestByUserId";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateId(userId, methodName);
             
-            log.debug("根据用户ID查询导出请求: userId={}, method={}", userId, methodName);
+            log.debug("鏍规嵁鐢ㄦ埛ID鏌ヨ瀵煎嚭璇锋眰: userId={}, method={}", userId, methodName);
             
-            // 生成缓存键
-            String cacheKey = USER_EXPORT_REQUEST_CACHE_PREFIX + userId;
+            // 鐢熸垚缂撳瓨閿?            String cacheKey = USER_EXPORT_REQUEST_CACHE_PREFIX + userId;
             
-            // 检查缓存
-            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
             List<ImAuditExportRequest> cachedRequests = (List<ImAuditExportRequest>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedRequests != null) {
-                log.debug("从缓存获取用户导出请求: userId={}, method={}", userId, methodName);
+                log.debug("浠庣紦瀛樿幏鍙栫敤鎴峰鍑鸿姹? userId={}, method={}", userId, methodName);
                 return cachedRequests;
             }
             
-            // 查询数据库
-            List<ImAuditExportRequest> requests = imAuditExportRequestMapper.selectImAuditExportRequestByUserId(userId);
+            // 鏌ヨ鏁版嵁搴?            List<ImAuditExportRequest> requests = imAuditExportRequestMapper.selectImAuditExportRequestByUserId(userId);
             
-            // 缓存结果
+            // 缂撳瓨缁撴灉
             if (requests != null && !requests.isEmpty()) {
                 redisTemplate.opsForValue().set(cacheKey, requests, CACHE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
-                log.debug("用户导出请求已缓存: userId={}, count={}, method={}", 
+                log.debug("鐢ㄦ埛瀵煎嚭璇锋眰宸茬紦瀛? userId={}, count={}, method={}", 
                           userId, requests.size(), methodName);
             }
             
             return requests;
             
         } catch (Exception e) {
-            log.error("根据用户ID查询导出请求异常: userId={}, error={}, method={}", 
+            log.error("鏍规嵁鐢ㄦ埛ID鏌ヨ瀵煎嚭璇锋眰寮傚父: userId={}, error={}, method={}", 
                       userId, e.getMessage(), methodName, e);
-            throw new BusinessException("根据用户ID查询导出请求失败", e);
+            throw new BusinessException("鏍规嵁鐢ㄦ埛ID鏌ヨ瀵煎嚭璇锋眰澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("根据用户ID查询导出请求耗时: {}ms, userId={}, method={}", 
+            log.info("鏍规嵁鐢ㄦ埛ID鏌ヨ瀵煎嚭璇锋眰鑰楁椂: {}ms, userId={}, method={}", 
                      duration, userId, methodName);
         }
     }
     
     /**
-     * 根据状态查询导出请求列表
-     * 
-     * @param status 状态
-     * @return 导出请求集合
+     * 鏍规嵁鐘舵€佹煡璇㈠鍑鸿姹傚垪琛?     * 
+     * @param status 鐘舵€?     * @return 瀵煎嚭璇锋眰闆嗗悎
      */
     @Override
     public List<ImAuditExportRequest> selectImAuditExportRequestByStatus(String status) {
@@ -178,53 +166,48 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
         String methodName = "selectImAuditExportRequestByStatus";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             if (status == null || status.trim().isEmpty()) {
-                throw new BusinessException(methodName + "参数无效: 状态不能为空");
+                throw new BusinessException(methodName + "鍙傛暟鏃犳晥: 鐘舵€佷笉鑳戒负绌?);
             }
             
-            log.debug("根据状态查询导出请求: status={}, method={}", status, methodName);
+            log.debug("鏍规嵁鐘舵€佹煡璇㈠鍑鸿姹? status={}, method={}", status, methodName);
             
-            // 生成缓存键
-            String cacheKey = STATUS_EXPORT_REQUEST_CACHE_PREFIX + status;
+            // 鐢熸垚缂撳瓨閿?            String cacheKey = STATUS_EXPORT_REQUEST_CACHE_PREFIX + status;
             
-            // 检查缓存
-            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
             List<ImAuditExportRequest> cachedRequests = (List<ImAuditExportRequest>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedRequests != null) {
-                log.debug("从缓存获取状态导出请求: status={}, method={}", status, methodName);
+                log.debug("浠庣紦瀛樿幏鍙栫姸鎬佸鍑鸿姹? status={}, method={}", status, methodName);
                 return cachedRequests;
             }
             
-            // 查询数据库
-            List<ImAuditExportRequest> requests = imAuditExportRequestMapper.selectImAuditExportRequestByStatus(status);
+            // 鏌ヨ鏁版嵁搴?            List<ImAuditExportRequest> requests = imAuditExportRequestMapper.selectImAuditExportRequestByStatus(status);
             
-            // 缓存结果
+            // 缂撳瓨缁撴灉
             if (requests != null && !requests.isEmpty()) {
                 redisTemplate.opsForValue().set(cacheKey, requests, CACHE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
-                log.debug("状态导出请求已缓存: status={}, count={}, method={}", 
+                log.debug("鐘舵€佸鍑鸿姹傚凡缂撳瓨: status={}, count={}, method={}", 
                           status, requests.size(), methodName);
             }
             
             return requests;
             
         } catch (Exception e) {
-            log.error("根据状态查询导出请求异常: status={}, error={}, method={}", 
+            log.error("鏍规嵁鐘舵€佹煡璇㈠鍑鸿姹傚紓甯? status={}, error={}, method={}", 
                       status, e.getMessage(), methodName, e);
-            throw new BusinessException("根据状态查询导出请求失败", e);
+            throw new BusinessException("鏍规嵁鐘舵€佹煡璇㈠鍑鸿姹傚け璐?, e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("根据状态查询导出请求耗时: {}ms, status={}, method={}", 
+            log.info("鏍规嵁鐘舵€佹煡璇㈠鍑鸿姹傝€楁椂: {}ms, status={}, method={}", 
                      duration, status, methodName);
         }
     }
     
     /**
-     * 根据用户ID和状态查询导出请求列表
-     * 
-     * @param userId 用户ID
-     * @param status 状态
-     * @return 导出请求集合
+     * 鏍规嵁鐢ㄦ埛ID鍜岀姸鎬佹煡璇㈠鍑鸿姹傚垪琛?     * 
+     * @param userId 鐢ㄦ埛ID
+     * @param status 鐘舵€?     * @return 瀵煎嚭璇锋眰闆嗗悎
      */
     @Override
     public List<ImAuditExportRequest> selectImAuditExportRequestByUserIdAndStatus(Long userId, String status) {
@@ -232,61 +215,57 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
         String methodName = "selectImAuditExportRequestByUserIdAndStatus";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateId(userId, methodName);
             if (status == null || status.trim().isEmpty()) {
-                throw new BusinessException(methodName + "参数无效: 状态不能为空");
+                throw new BusinessException(methodName + "鍙傛暟鏃犳晥: 鐘舵€佷笉鑳戒负绌?);
             }
             
-            log.debug("根据用户ID和状态查询导出请求: userId={}, status={}, method={}", 
+            log.debug("鏍规嵁鐢ㄦ埛ID鍜岀姸鎬佹煡璇㈠鍑鸿姹? userId={}, status={}, method={}", 
                       userId, status, methodName);
             
-            // 生成缓存键
-            String cacheKey = USER_STATUS_EXPORT_REQUEST_CACHE_PREFIX + userId + ":" + status;
+            // 鐢熸垚缂撳瓨閿?            String cacheKey = USER_STATUS_EXPORT_REQUEST_CACHE_PREFIX + userId + ":" + status;
             
-            // 检查缓存
-            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
             List<ImAuditExportRequest> cachedRequests = (List<ImAuditExportRequest>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedRequests != null) {
-                log.debug("从缓存获取用户状态导出请求: userId={}, status={}, method={}", 
+                log.debug("浠庣紦瀛樿幏鍙栫敤鎴风姸鎬佸鍑鸿姹? userId={}, status={}, method={}", 
                           userId, status, methodName);
                 return cachedRequests;
             }
             
-            // 查询数据库
-            List<ImAuditExportRequest> requests = imAuditExportRequestMapper.selectImAuditExportRequestByUserIdAndStatus(userId, status);
+            // 鏌ヨ鏁版嵁搴?            List<ImAuditExportRequest> requests = imAuditExportRequestMapper.selectImAuditExportRequestByUserIdAndStatus(userId, status);
             
-            // 缓存结果
+            // 缂撳瓨缁撴灉
             if (requests != null && !requests.isEmpty()) {
                 redisTemplate.opsForValue().set(cacheKey, requests, CACHE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
-                log.debug("用户状态导出请求已缓存: userId={}, status={}, count={}, method={}", 
+                log.debug("鐢ㄦ埛鐘舵€佸鍑鸿姹傚凡缂撳瓨: userId={}, status={}, count={}, method={}", 
                           userId, status, requests.size(), methodName);
             }
             
             return requests;
             
         } catch (Exception e) {
-            log.error("根据用户ID和状态查询导出请求异常: userId={}, status={}, error={}, method={}", 
+            log.error("鏍规嵁鐢ㄦ埛ID鍜岀姸鎬佹煡璇㈠鍑鸿姹傚紓甯? userId={}, status={}, error={}, method={}", 
                       userId, status, e.getMessage(), methodName, e);
-            throw new BusinessException("根据用户ID和状态查询导出请求失败", e);
+            throw new BusinessException("鏍规嵁鐢ㄦ埛ID鍜岀姸鎬佹煡璇㈠鍑鸿姹傚け璐?, e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("根据用户ID和状态查询导出请求耗时: {}ms, userId={}, status={}, method={}", 
+            log.info("鏍规嵁鐢ㄦ埛ID鍜岀姸鎬佹煡璇㈠鍑鸿姹傝€楁椂: {}ms, userId={}, status={}, method={}", 
                      duration, userId, status, methodName);
         }
     }
     
     /**
-     * 创建导出请求
+     * 鍒涘缓瀵煎嚭璇锋眰
      * 
-     * @param userId 用户ID
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @param operationType 操作类型
-     * @param targetType 目标类型
-     * @param targetId 目标ID
-     * @param format 格式
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @param startTime 寮€濮嬫椂闂?     * @param endTime 缁撴潫鏃堕棿
+     * @param operationType 鎿嶄綔绫诲瀷
+     * @param targetType 鐩爣绫诲瀷
+     * @param targetId 鐩爣ID
+     * @param format 鏍煎紡
+     * @return 缁撴灉
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -295,19 +274,19 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
         String methodName = "createExportRequest";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateId(userId, methodName);
             if (startTime == null) {
-                throw new BusinessException(methodName + "参数无效: 开始时间不能为空");
+                throw new BusinessException(methodName + "鍙傛暟鏃犳晥: 寮€濮嬫椂闂翠笉鑳戒负绌?);
             }
             if (endTime == null) {
-                throw new BusinessException(methodName + "参数无效: 结束时间不能为空");
+                throw new BusinessException(methodName + "鍙傛暟鏃犳晥: 缁撴潫鏃堕棿涓嶈兘涓虹┖");
             }
             if (startTime.isAfter(endTime)) {
-                throw new BusinessException(methodName + "参数无效: 开始时间不能晚于结束时间");
+                throw new BusinessException(methodName + "鍙傛暟鏃犳晥: 寮€濮嬫椂闂翠笉鑳芥櫄浜庣粨鏉熸椂闂?);
             }
             
-            log.debug("创建导出请求: userId={}, startTime={}, endTime={}, operationType={}, targetType={}, targetId={}, format={}, method={}", 
+            log.debug("鍒涘缓瀵煎嚭璇锋眰: userId={}, startTime={}, endTime={}, operationType={}, targetType={}, targetId={}, format={}, method={}", 
                       userId, startTime, endTime, operationType, targetType, targetId, format, methodName);
             
             ImAuditExportRequest request = new ImAuditExportRequest();
@@ -317,8 +296,7 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
             request.setCreateTime(LocalDateTime.now());
             request.setUpdateTime(LocalDateTime.now());
             
-            // 将参数存储在导出参数字段中
-            StringBuilder params = new StringBuilder();
+            // 灏嗗弬鏁板瓨鍌ㄥ湪瀵煎嚭鍙傛暟瀛楁涓?            StringBuilder params = new StringBuilder();
             params.append("startTime:").append(startTime)
                   .append(",endTime:").append(endTime)
                   .append(",targetType:").append(targetType)
@@ -326,35 +304,33 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
                   .append(",format:").append(format != null ? format : "CSV");
             request.setExportParams(params.toString());
             
-            // 使用父类方法插入
+            // 浣跨敤鐖剁被鏂规硶鎻掑叆
             int result = insert(request);
             
             if (result > 0) {
-                log.info("导出请求创建成功: userId={}, requestId={}, method={}", 
+                log.info("瀵煎嚭璇锋眰鍒涘缓鎴愬姛: userId={}, requestId={}, method={}", 
                          userId, request.getId(), methodName);
             }
             
             return result;
             
         } catch (Exception e) {
-            log.error("创建导出请求异常: userId={}, startTime={}, endTime={}, error={}, method={}", 
+            log.error("鍒涘缓瀵煎嚭璇锋眰寮傚父: userId={}, startTime={}, endTime={}, error={}, method={}", 
                       userId, startTime, endTime, e.getMessage(), methodName, e);
-            throw new BusinessException("创建导出请求失败", e);
+            throw new BusinessException("鍒涘缓瀵煎嚭璇锋眰澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTimeMs;
-            log.info("创建导出请求耗时: {}ms, userId={}, method={}", 
+            log.info("鍒涘缓瀵煎嚭璇锋眰鑰楁椂: {}ms, userId={}, method={}", 
                      duration, userId, methodName);
         }
     }
     
     /**
-     * 更新导出请求状态
-     * 
-     * @param id 导出请求ID
-     * @param status 状态
-     * @param filePath 文件路径
-     * @param errorMessage 错误信息
-     * @return 结果
+     * 鏇存柊瀵煎嚭璇锋眰鐘舵€?     * 
+     * @param id 瀵煎嚭璇锋眰ID
+     * @param status 鐘舵€?     * @param filePath 鏂囦欢璺緞
+     * @param errorMessage 閿欒淇℃伅
+     * @return 缁撴灉
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -363,18 +339,18 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
         String methodName = "updateExportStatus";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateId(id, methodName);
             if (status == null || status.trim().isEmpty()) {
-                throw new BusinessException(methodName + "参数无效: 状态不能为空");
+                throw new BusinessException(methodName + "鍙傛暟鏃犳晥: 鐘舵€佷笉鑳戒负绌?);
             }
             
-            log.debug("更新导出请求状态: id={}, status={}, filePath={}, errorMessage={}, method={}", 
+            log.debug("鏇存柊瀵煎嚭璇锋眰鐘舵€? id={}, status={}, filePath={}, errorMessage={}, method={}", 
                       id, status, filePath, errorMessage, methodName);
             
             ImAuditExportRequest request = selectById(id);
             if (request == null) {
-                log.warn("导出请求不存在: id={}", id);
+                log.warn("瀵煎嚭璇锋眰涓嶅瓨鍦? id={}", id);
                 return 0;
             }
             
@@ -382,7 +358,7 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
             request.setExportUrl(filePath);
             request.setUpdateTime(LocalDateTime.now());
             
-            // 添加错误信息到导出参数中
+            // 娣诲姞閿欒淇℃伅鍒板鍑哄弬鏁颁腑
             if (errorMessage != null) {
                 String params = request.getExportParams();
                 if (params != null) {
@@ -395,33 +371,33 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
             
             int result = update(request);
             
-            // 清除相关缓存
+            // 娓呴櫎鐩稿叧缂撳瓨
             clearEntityCache(id);
             redisTemplate.delete(STATUS_EXPORT_REQUEST_CACHE_PREFIX + status);
             
             if (result > 0) {
-                log.info("导出请求状态更新成功: id={}, status={}, method={}", 
+                log.info("瀵煎嚭璇锋眰鐘舵€佹洿鏂版垚鍔? id={}, status={}, method={}", 
                          id, status, methodName);
             }
             
             return result;
             
         } catch (Exception e) {
-            log.error("更新导出请求状态异常: id={}, status={}, error={}, method={}", 
+            log.error("鏇存柊瀵煎嚭璇锋眰鐘舵€佸紓甯? id={}, status={}, error={}, method={}", 
                       id, status, e.getMessage(), methodName, e);
-            throw new BusinessException("更新导出请求状态失败", e);
+            throw new BusinessException("鏇存柊瀵煎嚭璇锋眰鐘舵€佸け璐?, e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("更新导出请求状态耗时: {}ms, id={}, method={}", 
+            log.info("鏇存柊瀵煎嚭璇锋眰鐘舵€佽€楁椂: {}ms, id={}, method={}", 
                      duration, id, methodName);
         }
     }
     
     /**
-     * 处理导出请求
+     * 澶勭悊瀵煎嚭璇锋眰
      * 
-     * @param id 导出请求ID
-     * @return 结果
+     * @param id 瀵煎嚭璇锋眰ID
+     * @return 缁撴灉
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -430,52 +406,51 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
         String methodName = "processExportRequest";
         
         try {
-            // 参数验证
+            // 鍙傛暟楠岃瘉
             validateId(id, methodName);
             
-            log.debug("处理导出请求: id={}, method={}", id, methodName);
+            log.debug("澶勭悊瀵煎嚭璇锋眰: id={}, method={}", id, methodName);
             
-            // 使用父类方法查询
+            // 浣跨敤鐖剁被鏂规硶鏌ヨ
             ImAuditExportRequest request = selectById(id);
             if (request == null) {
-                throw new BusinessException("导出请求不存在: id=" + id);
+                throw new BusinessException("瀵煎嚭璇锋眰涓嶅瓨鍦? id=" + id);
             }
             
             if (!"PENDING".equals(request.getExportStatus())) {
-                log.warn("导出请求状态不是PENDING，无法处理: id={}, status={}, method={}", 
+                log.warn("瀵煎嚭璇锋眰鐘舵€佷笉鏄疨ENDING锛屾棤娉曞鐞? id={}, status={}, method={}", 
                          id, request.getExportStatus(), methodName);
                 return 0;
             }
             
             try {
-                // 更新状态为处理中
-                request.setExportStatus("PROCESSING");
+                // 鏇存柊鐘舵€佷负澶勭悊涓?                request.setExportStatus("PROCESSING");
                 int updateResult = update(request);
                 
                 if (updateResult <= 0) {
-                    throw new BusinessException("更新导出请求状态失败");
+                    throw new BusinessException("鏇存柊瀵煎嚭璇锋眰鐘舵€佸け璐?);
                 }
                 
-                // 异步处理导出任务
+                // 寮傛澶勭悊瀵煎嚭浠诲姟
                 CompletableFuture.supplyAsync(() -> {
                     try {
-                        // 生成导出文件
+                        // 鐢熸垚瀵煎嚭鏂囦欢
                         String filePath = generateExportFile(request);
                         
-                        // 更新状态为完成
+                        // 鏇存柊鐘舵€佷负瀹屾垚
                         request.setExportStatus("COMPLETED");
                         request.setExportUrl(filePath);
                         update(request);
                         
-                        log.info("导出请求处理完成: id={}, filePath={}, method={}", 
+                        log.info("瀵煎嚭璇锋眰澶勭悊瀹屾垚: id={}, filePath={}, method={}", 
                                  id, filePath, methodName);
                         
                         return filePath;
                     } catch (Exception e) {
-                        log.error("导出请求处理异常: id={}, error={}, method={}", 
+                        log.error("瀵煎嚭璇锋眰澶勭悊寮傚父: id={}, error={}, method={}", 
                                   id, e.getMessage(), methodName, e);
                         
-                        // 更新状态为失败
+                        // 鏇存柊鐘舵€佷负澶辫触
                         request.setExportStatus("FAILED");
                         String errorMsg = request.getExportParams();
                         if (errorMsg != null) {
@@ -490,12 +465,12 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
                     }
                 });
                 
-                log.info("导出请求已提交处理: id={}, method={}", id, methodName);
+                log.info("瀵煎嚭璇锋眰宸叉彁浜ゅ鐞? id={}, method={}", id, methodName);
                 
                 return 1;
                 
             } catch (Exception e) {
-                // 更新状态为失败
+                // 鏇存柊鐘舵€佷负澶辫触
                 request.setExportStatus("FAILED");
                 String errorMsg = request.getExportParams();
                 if (errorMsg != null) {
@@ -506,43 +481,42 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
                 request.setExportParams(errorMsg);
                 update(request);
                 
-                log.error("导出请求处理异常: id={}, error={}, method={}", 
+                log.error("瀵煎嚭璇锋眰澶勭悊寮傚父: id={}, error={}, method={}", 
                           id, e.getMessage(), methodName, e);
                 
-                throw new BusinessException("导出请求处理失败", e);
+                throw new BusinessException("瀵煎嚭璇锋眰澶勭悊澶辫触", e);
             }
             
         } catch (Exception e) {
-            log.error("处理导出请求异常: id={}, error={}, method={}", 
+            log.error("澶勭悊瀵煎嚭璇锋眰寮傚父: id={}, error={}, method={}", 
                       id, e.getMessage(), methodName, e);
-            throw new BusinessException("处理导出请求失败", e);
+            throw new BusinessException("澶勭悊瀵煎嚭璇锋眰澶辫触", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("处理导出请求耗时: {}ms, id={}, method={}", 
+            log.info("澶勭悊瀵煎嚭璇锋眰鑰楁椂: {}ms, id={}, method={}", 
                      duration, id, methodName);
         }
     }
     
     /**
-     * 生成导出文件
+     * 鐢熸垚瀵煎嚭鏂囦欢
      * 
-     * @param request 导出请求
-     * @return 文件路径
+     * @param request 瀵煎嚭璇锋眰
+     * @return 鏂囦欢璺緞
      */
     private String generateExportFile(ImAuditExportRequest request) {
-        // 这里实现导出逻辑
+        // 杩欓噷瀹炵幇瀵煎嚭閫昏緫
         String filePath = "/exports/audit_" + request.getId() + "_" + System.currentTimeMillis() + "." + 
-                          (request.getExportParams() != null ? request.getExportParams() : "csv"); // 使用现有的字段替代
-        
-        // 模拟文件生成过程
+                          (request.getExportParams() != null ? request.getExportParams() : "csv"); // 浣跨敤鐜版湁鐨勫瓧娈垫浛浠?        
+        // 妯℃嫙鏂囦欢鐢熸垚杩囩▼
         try {
-            Thread.sleep(1000); // 模拟耗时操作
+            Thread.sleep(1000); // 妯℃嫙鑰楁椂鎿嶄綔
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.error("生成导出文件时线程被中断", e);
+            log.error("鐢熸垚瀵煎嚭鏂囦欢鏃剁嚎绋嬭涓柇", e);
         }
         
-        log.debug("生成导出文件: requestId={}, filePath={}", request.getId(), filePath);
+        log.debug("鐢熸垚瀵煎嚭鏂囦欢: requestId={}, filePath={}", request.getId(), filePath);
         
         return filePath;
     }

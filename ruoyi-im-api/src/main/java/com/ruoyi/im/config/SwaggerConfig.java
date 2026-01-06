@@ -39,7 +39,7 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("IM即时通讯系统API文档")
+                .title("IM即时通讯系统API文档.")
                 .description("提供用户管理、消息发送、会话管理、联系人管理、群组管理等功能的API接口")
                 .contact(new Contact("RuoYi", "", ""))
                 .version("1.0.0")

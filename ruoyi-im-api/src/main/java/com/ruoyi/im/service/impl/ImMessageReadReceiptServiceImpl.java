@@ -8,7 +8,7 @@ import com.ruoyi.im.domain.ImMessageReadReceipt;
 import com.ruoyi.im.service.ImMessageReadReceiptService;
 
 /**
- * 消息已读回执Service业务层处理
+ * 娑堟伅宸茶鍥炴墽Service涓氬姟灞傚鐞?
  * 
  * @author ruoyi
  */
@@ -18,10 +18,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     private ImMessageReadReceiptMapper imMessageReadReceiptMapper;
 
     /**
-     * 查询消息已读回执
+     * 鏌ヨ娑堟伅宸茶鍥炴墽
      * 
-     * @param id 消息已读回执ID
-     * @return 消息已读回执
+     * @param id 娑堟伅宸茶鍥炴墽ID
+     * @return 娑堟伅宸茶鍥炴墽
      */
     @Override
     public ImMessageReadReceipt selectImMessageReadReceiptById(Long id) {
@@ -29,10 +29,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
 
     /**
-     * 查询消息已读回执列表
+     * 鏌ヨ娑堟伅宸茶鍥炴墽鍒楄〃
      * 
-     * @param imMessageReadReceipt 消息已读回执
-     * @return 消息已读回执
+     * @param imMessageReadReceipt 娑堟伅宸茶鍥炴墽
+     * @return 娑堟伅宸茶鍥炴墽
      */
     @Override
     public List<ImMessageReadReceipt> selectImMessageReadReceiptList(ImMessageReadReceipt imMessageReadReceipt) {
@@ -40,10 +40,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
 
     /**
-     * 新增消息已读回执
+     * 鏂板娑堟伅宸茶鍥炴墽
      * 
-     * @param imMessageReadReceipt 消息已读回执
-     * @return 结果
+     * @param imMessageReadReceipt 娑堟伅宸茶鍥炴墽
+     * @return 缁撴灉
      */
     @Override
     public int insertImMessageReadReceipt(ImMessageReadReceipt imMessageReadReceipt) {
@@ -51,10 +51,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
 
     /**
-     * 修改消息已读回执
+     * 淇敼娑堟伅宸茶鍥炴墽
      * 
-     * @param imMessageReadReceipt 消息已读回执
-     * @return 结果
+     * @param imMessageReadReceipt 娑堟伅宸茶鍥炴墽
+     * @return 缁撴灉
      */
     @Override
     public int updateImMessageReadReceipt(ImMessageReadReceipt imMessageReadReceipt) {
@@ -62,10 +62,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
 
     /**
-     * 批量删除消息已读回执
+     * 鎵归噺鍒犻櫎娑堟伅宸茶鍥炴墽
      * 
-     * @param ids 需要删除的消息已读回执ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑娑堟伅宸茶鍥炴墽ID
+     * @return 缁撴灉
      */
     @Override
     public int deleteImMessageReadReceiptByIds(Long[] ids) {
@@ -73,10 +73,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
 
     /**
-     * 删除消息已读回执信息
+     * 鍒犻櫎娑堟伅宸茶鍥炴墽淇℃伅
      * 
-     * @param id 消息已读回执ID
-     * @return 结果
+     * @param id 娑堟伅宸茶鍥炴墽ID
+     * @return 缁撴灉
      */
     @Override
     public int deleteImMessageReadReceiptById(Long id) {
@@ -84,10 +84,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 根据消息ID查询已读回执列表
+     * 鏍规嵁娑堟伅ID鏌ヨ宸茶鍥炴墽鍒楄〃
      * 
-     * @param messageId 消息ID
-     * @return 消息已读回执集合
+     * @param messageId 娑堟伅ID
+     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
      */
     @Override
     public List<ImMessageReadReceipt> selectImMessageReadReceiptByMessageId(Long messageId) {
@@ -95,10 +95,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 根据消息ID查询已读回执列表（带分页）
+     * 鏍规嵁娑堟伅ID鏌ヨ宸茶鍥炴墽鍒楄〃锛堝甫鍒嗛〉锛?
      * 
-     * @param messageId 消息ID
-     * @return 消息已读回执集合
+     * @param messageId 娑堟伅ID
+     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
      */
     @Override
     public List<ImMessageReadReceipt> selectImMessageReadReceiptListByMessageId(Long messageId) {
@@ -106,10 +106,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 根据用户ID查询已读回执列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ宸茶鍥炴墽鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 消息已读回执集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
      */
     @Override
     public List<ImMessageReadReceipt> selectImMessageReadReceiptByUserId(Long userId) {
@@ -117,10 +117,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 根据会话ID查询已读回执列表
+     * 鏍规嵁浼氳瘽ID鏌ヨ宸茶鍥炴墽鍒楄〃
      * 
-     * @param conversationId 会话ID
-     * @return 消息已读回执集合
+     * @param conversationId 浼氳瘽ID
+     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
      */
     @Override
     public List<ImMessageReadReceipt> selectImMessageReadReceiptByConversationId(Long conversationId) {
@@ -128,10 +128,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 根据会话ID查询已读回执列表（带分页）
+     * 鏍规嵁浼氳瘽ID鏌ヨ宸茶鍥炴墽鍒楄〃锛堝甫鍒嗛〉锛?
      * 
-     * @param conversationId 会话ID
-     * @return 消息已读回执集合
+     * @param conversationId 浼氳瘽ID
+     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
      */
     @Override
     public List<ImMessageReadReceipt> selectImMessageReadReceiptListByConversationId(Long conversationId) {
@@ -139,13 +139,13 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 标记消息已读
+     * 鏍囪娑堟伅宸茶
      * 
-     * @param messageId 消息ID
-     * @param userId 用户ID
-     * @param conversationId 会话ID
-     * @param deviceType 设备类型
-     * @return 结果
+     * @param messageId 娑堟伅ID
+     * @param userId 鐢ㄦ埛ID
+     * @param conversationId 浼氳瘽ID
+     * @param deviceType 璁惧绫诲瀷
+     * @return 缁撴灉
      */
     @Override
     public int markMessageAsRead(Long messageId, Long userId, Long conversationId, String deviceType) {
@@ -158,13 +158,13 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 批量标记消息已读
+     * 鎵归噺鏍囪娑堟伅宸茶
      * 
-     * @param messageIds 消息ID列表
-     * @param userId 用户ID
-     * @param conversationId 会话ID
-     * @param deviceType 设备类型
-     * @return 结果
+     * @param messageIds 娑堟伅ID鍒楄〃
+     * @param userId 鐢ㄦ埛ID
+     * @param conversationId 浼氳瘽ID
+     * @param deviceType 璁惧绫诲瀷
+     * @return 缁撴灉
      */
     @Override
     public int batchMarkMessagesAsRead(List<Long> messageIds, Long userId, Long conversationId, String deviceType) {
@@ -176,10 +176,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 删除消息的所有已读回执
+     * 鍒犻櫎娑堟伅鐨勬墍鏈夊凡璇诲洖鎵?
      * 
-     * @param messageId 消息ID
-     * @return 结果
+     * @param messageId 娑堟伅ID
+     * @return 缁撴灉
      */
     @Override
     public int deleteImMessageReadReceiptByMessageId(Long messageId) {

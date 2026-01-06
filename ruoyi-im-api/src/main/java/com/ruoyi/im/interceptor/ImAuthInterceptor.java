@@ -11,9 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * IM模块认证拦截器
- * 
- * 使用JWT Token进行认证的拦截器
+ * IM妯″潡璁よ瘉鎷︽埅鍣? * 
+ * 浣跨敤JWT Token杩涜璁よ瘉鐨勬嫤鎴櫒
  * 
  * @author ruoyi
  * @date 2024-08-09
@@ -29,8 +28,7 @@ public class ImAuthInterceptor implements HandlerInterceptor
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
     {
-        // 在Spring Security配置中已经处理了认证，这里可以做额外的检查
-        // 由于Spring Security的JWT过滤器已经验证了token，所以直接通过
+        // 鍦⊿pring Security閰嶇疆涓凡缁忓鐞嗕簡璁よ瘉锛岃繖閲屽彲浠ュ仛棰濆鐨勬鏌?        // 鐢变簬Spring Security鐨凧WT杩囨护鍣ㄥ凡缁忛獙璇佷簡token锛屾墍浠ョ洿鎺ラ€氳繃
         return true;
     }
 }

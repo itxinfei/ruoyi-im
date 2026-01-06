@@ -4,7 +4,7 @@ import com.ruoyi.im.domain.ImAuditLog;
 import java.util.List;
 
 /**
- * 审计日志Service接口
+ * 瀹¤鏃ュ織Service鎺ュ彛
  * 
  * @author ruoyi
  */
@@ -29,58 +29,58 @@ public interface ImAuditLogService extends BaseService<ImAuditLog> {
     int deleteById(Long id);
     
     /**
-     * 根据用户ID查询审计日志列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 审计日志集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     public List<ImAuditLog> selectImAuditLogByUserId(Long userId);
     
     /**
-     * 根据操作类型查询审计日志列表
+     * 鏍规嵁鎿嶄綔绫诲瀷鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param operationType 操作类型
-     * @return 审计日志集合
+     * @param operationType 鎿嶄綔绫诲瀷
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     public List<ImAuditLog> selectImAuditLogByOperationType(String operationType);
     
     /**
-     * 根据目标类型和目标ID查询审计日志列表
+     * 鏍规嵁鐩爣绫诲瀷鍜岀洰鏍嘔D鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param targetType 目标类型
-     * @param targetId 目标ID
-     * @return 审计日志集合
+     * @param targetType 鐩爣绫诲瀷
+     * @param targetId 鐩爣ID
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     public List<ImAuditLog> selectImAuditLogByTarget(String targetType, Long targetId);
     
     /**
-     * 根据IP地址查询审计日志列表
+     * 鏍规嵁IP鍦板潃鏌ヨ瀹¤鏃ュ織鍒楄〃
      * 
-     * @param ipAddress IP地址
-     * @return 审计日志集合
+     * @param ipAddress IP鍦板潃
+     * @return 瀹¤鏃ュ織闆嗗悎
      */
     public List<ImAuditLog> selectImAuditLogByIpAddress(String ipAddress);
     
     /**
-     * 记录审计日志
+     * 璁板綍瀹¤鏃ュ織
      * 
-     * @param userId 用户ID
-     * @param operationType 操作类型
-     * @param targetType 目标类型
-     * @param targetId 目标ID
-     * @param operationResult 操作结果
-     * @param errorMessage 错误信息
-     * @param ipAddress IP地址
-     * @param userAgent 用户代理
-     * @return 结果
+     * @param userId 鐢ㄦ埛ID
+     * @param operationType 鎿嶄綔绫诲瀷
+     * @param targetType 鐩爣绫诲瀷
+     * @param targetId 鐩爣ID
+     * @param operationResult 鎿嶄綔缁撴灉
+     * @param errorMessage 閿欒淇℃伅
+     * @param ipAddress IP鍦板潃
+     * @param userAgent 鐢ㄦ埛浠ｇ悊
+     * @return 缁撴灉
      */
     public int logAudit(Long userId, String operationType, String targetType, Long targetId, String operationResult, String errorMessage, String ipAddress, String userAgent);
     
     /**
-     * 批量删除指定时间之前的审计日志
+     * 鎵归噺鍒犻櫎鎸囧畾鏃堕棿涔嬪墠鐨勫璁℃棩蹇?
      * 
-     * @param beforeTime 时间
-     * @return 结果
+     * @param beforeTime 鏃堕棿
+     * @return 缁撴灉
      */
     public int deleteImAuditLogByBeforeTime(java.time.LocalDateTime beforeTime);
 }

@@ -47,7 +47,7 @@ public class DruidConfig {
         dataSource.setMinIdle(5); // 最小连接数
         dataSource.setMaxActive(20); // 最大连接数
         dataSource.setMaxWait(60000); // 获取连接等待超时时间（毫秒）
-        dataSource.setTimeBetweenEvictionRunsMillis(60000); // 间隔多久才进行一次检测，检测需要关闭的空闲连接（毫秒）
+        dataSource.setTimeBetweenEvictionRunsMillis(60000); // 间隔多久进行一次检测，检测需要关闭的空闲连接（毫秒）
         dataSource.setMinEvictableIdleTimeMillis(300000); // 连接保持空闲而不被驱逐的最小时间（毫秒）
         dataSource.setValidationQuery("SELECT 1 FROM DUAL"); // 验证连接是否有效的SQL
         dataSource.setTestWhileIdle(true); // 空闲时检测连接是否有效

@@ -3,43 +3,43 @@ package com.ruoyi.im.domain;
 import java.time.LocalDateTime;
 
 /**
- * 好友申请实体
+ * 濂藉弸鐢宠瀹炰綋
  * 
  * @author ruoyi
  */
 public class ImFriendRequest {
     /**
-     * 主键ID
+     * 涓婚敭ID
      */
     private Long id;
     
     /**
-     * 申请人用户ID
+     * 鐢宠浜虹敤鎴稩D
      */
     private Long fromUserId;
     
     /**
-     * 被申请人用户ID
+     * 琚敵璇蜂汉鐢ㄦ埛ID
      */
     private Long toUserId;
     
     /**
-     * 申请消息
+     * 鐢宠娑堟伅
      */
     private String message;
     
     /**
-     * 状态（PENDING待处理 APPROVED已同意 REJECTED已拒绝）
+     * 鐘舵€侊紙PENDING寰呭鐞?APPROVED宸插悓鎰?REJECTED宸叉嫆缁濓級
      */
     private String status;
     
     /**
-     * 创建时间
+     * 鍒涘缓鏃堕棿
      */
     private LocalDateTime createTime;
     
     /**
-     * 处理时间
+     * 澶勭悊鏃堕棿
      */
     private LocalDateTime handledTime;
 

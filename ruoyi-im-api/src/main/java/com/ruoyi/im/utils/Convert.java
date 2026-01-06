@@ -1,18 +1,15 @@
 package com.ruoyi.im.utils;
 
 /**
- * 类型转换工具类
- * 
+ * 绫诲瀷杞崲宸ュ叿绫? * 
  * @author ruoyi
  */
 public class Convert {
     
     /**
-     * 转换为字符串
+     * 杞崲涓哄瓧绗︿覆
      * 
-     * @param value 被转换的值
-     * @param defaultValue 默认值
-     * @return 结果
+     * @param value 琚浆鎹㈢殑鍊?     * @param defaultValue 榛樿鍊?     * @return 缁撴灉
      */
     public static String toStr(Object value, String defaultValue) {
         if (value == null) {
@@ -23,21 +20,18 @@ public class Convert {
     }
     
     /**
-     * 转换为字符串
+     * 杞崲涓哄瓧绗︿覆
      * 
-     * @param value 被转换的值
-     * @return 结果
+     * @param value 琚浆鎹㈢殑鍊?     * @return 缁撴灉
      */
     public static String toStr(Object value) {
         return toStr(value, null);
     }
     
     /**
-     * 转换为Integer
+     * 杞崲涓篒nteger
      * 
-     * @param value 被转换的值
-     * @param defaultValue 默认值
-     * @return 结果
+     * @param value 琚浆鎹㈢殑鍊?     * @param defaultValue 榛樿鍊?     * @return 缁撴灉
      */
     public static Integer toInt(Object value, Integer defaultValue) {
         if (value == null) {
@@ -60,21 +54,18 @@ public class Convert {
     }
     
     /**
-     * 转换为Integer
+     * 杞崲涓篒nteger
      * 
-     * @param value 被转换的值
-     * @return 结果
+     * @param value 琚浆鎹㈢殑鍊?     * @return 缁撴灉
      */
     public static Integer toInt(Object value) {
         return toInt(value, null);
     }
     
     /**
-     * 转换为Long
+     * 杞崲涓篖ong
      * 
-     * @param value 被转换的值
-     * @param defaultValue 默认值
-     * @return 结果
+     * @param value 琚浆鎹㈢殑鍊?     * @param defaultValue 榛樿鍊?     * @return 缁撴灉
      */
     public static Long toLong(Object value, Long defaultValue) {
         if (value == null) {
@@ -97,21 +88,18 @@ public class Convert {
     }
     
     /**
-     * 转换为Long
+     * 杞崲涓篖ong
      * 
-     * @param value 被转换的值
-     * @return 结果
+     * @param value 琚浆鎹㈢殑鍊?     * @return 缁撴灉
      */
     public static Long toLong(Object value) {
         return toLong(value, null);
     }
     
     /**
-     * 转换为Double
+     * 杞崲涓篋ouble
      * 
-     * @param value 被转换的值
-     * @param defaultValue 默认值
-     * @return 结果
+     * @param value 琚浆鎹㈢殑鍊?     * @param defaultValue 榛樿鍊?     * @return 缁撴灉
      */
     public static Double toDouble(Object value, Double defaultValue) {
         if (value == null) {
@@ -134,21 +122,18 @@ public class Convert {
     }
     
     /**
-     * 转换为Double
+     * 杞崲涓篋ouble
      * 
-     * @param value 被转换的值
-     * @return 结果
+     * @param value 琚浆鎹㈢殑鍊?     * @return 缁撴灉
      */
     public static Double toDouble(Object value) {
         return toDouble(value, null);
     }
     
     /**
-     * 转换为Boolean
+     * 杞崲涓築oolean
      * 
-     * @param value 被转换的值
-     * @param defaultValue 默认值
-     * @return 结果
+     * @param value 琚浆鎹㈢殑鍊?     * @param defaultValue 榛樿鍊?     * @return 缁撴灉
      */
     public static Boolean toBool(Object value, Boolean defaultValue) {
         if (value == null) {
@@ -171,10 +156,9 @@ public class Convert {
     }
     
     /**
-     * 转换为Boolean
+     * 杞崲涓築oolean
      * 
-     * @param value 被转换的值
-     * @return 结果
+     * @param value 琚浆鎹㈢殑鍊?     * @return 缁撴灉
      */
     public static Boolean toBool(Object value) {
         return toBool(value, null);

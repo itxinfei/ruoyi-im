@@ -4,104 +4,104 @@ import com.ruoyi.im.domain.ImMessageReadReceipt;
 import java.util.List;
 
 /**
- * 消息已读回执Mapper接口
+ * 娑堟伅宸茶鍥炴墽Mapper鎺ュ彛
  * 
  * @author ruoyi
  */
 public interface ImMessageReadReceiptMapper {
     /**
-     * 查询消息已读回执
+     * 鏌ヨ娑堟伅宸茶鍥炴墽
      * 
-     * @param id 消息已读回执ID
-     * @return 消息已读回执
+     * @param id 娑堟伅宸茶鍥炴墽ID
+     * @return 娑堟伅宸茶鍥炴墽
      */
     public ImMessageReadReceipt selectImMessageReadReceiptById(Long id);
 
     /**
-     * 查询消息已读回执列表
+     * 鏌ヨ娑堟伅宸茶鍥炴墽鍒楄〃
      * 
-     * @param imMessageReadReceipt 消息已读回执
-     * @return 消息已读回执集合
+     * @param imMessageReadReceipt 娑堟伅宸茶鍥炴墽
+     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
      */
     public List<ImMessageReadReceipt> selectImMessageReadReceiptList(ImMessageReadReceipt imMessageReadReceipt);
 
     /**
-     * 新增消息已读回执
+     * 鏂板娑堟伅宸茶鍥炴墽
      * 
-     * @param imMessageReadReceipt 消息已读回执
-     * @return 结果
+     * @param imMessageReadReceipt 娑堟伅宸茶鍥炴墽
+     * @return 缁撴灉
      */
     public int insertImMessageReadReceipt(ImMessageReadReceipt imMessageReadReceipt);
 
     /**
-     * 修改消息已读回执
+     * 淇敼娑堟伅宸茶鍥炴墽
      * 
-     * @param imMessageReadReceipt 消息已读回执
-     * @return 结果
+     * @param imMessageReadReceipt 娑堟伅宸茶鍥炴墽
+     * @return 缁撴灉
      */
     public int updateImMessageReadReceipt(ImMessageReadReceipt imMessageReadReceipt);
 
     /**
-     * 删除消息已读回执
+     * 鍒犻櫎娑堟伅宸茶鍥炴墽
      * 
-     * @param id 消息已读回执ID
-     * @return 结果
+     * @param id 娑堟伅宸茶鍥炴墽ID
+     * @return 缁撴灉
      */
     public int deleteImMessageReadReceiptById(Long id);
 
     /**
-     * 批量删除消息已读回执
+     * 鎵归噺鍒犻櫎娑堟伅宸茶鍥炴墽
      * 
-     * @param ids 需要删除的数据ID
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑鏁版嵁ID
+     * @return 缁撴灉
      */
     public int deleteImMessageReadReceiptByIds(Long[] ids);
     
     /**
-     * 根据消息ID查询已读回执列表
+     * 鏍规嵁娑堟伅ID鏌ヨ宸茶鍥炴墽鍒楄〃
      * 
-     * @param messageId 消息ID
-     * @return 消息已读回执集合
+     * @param messageId 娑堟伅ID
+     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
      */
     public List<ImMessageReadReceipt> selectImMessageReadReceiptByMessageId(Long messageId);
     
     /**
-     * 根据消息ID查询已读回执列表（带分页）
+     * 鏍规嵁娑堟伅ID鏌ヨ宸茶鍥炴墽鍒楄〃锛堝甫鍒嗛〉锛?
      * 
-     * @param messageId 消息ID
-     * @return 消息已读回执集合
+     * @param messageId 娑堟伅ID
+     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
      */
     public List<ImMessageReadReceipt> selectImMessageReadReceiptListByMessageId(Long messageId);
     
     /**
-     * 根据用户ID查询已读回执列表
+     * 鏍规嵁鐢ㄦ埛ID鏌ヨ宸茶鍥炴墽鍒楄〃
      * 
-     * @param userId 用户ID
-     * @return 消息已读回执集合
+     * @param userId 鐢ㄦ埛ID
+     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
      */
     public List<ImMessageReadReceipt> selectImMessageReadReceiptByUserId(Long userId);
     
     /**
-     * 根据会话ID查询已读回执列表
+     * 鏍规嵁浼氳瘽ID鏌ヨ宸茶鍥炴墽鍒楄〃
      * 
-     * @param conversationId 会话ID
-     * @return 消息已读回执集合
+     * @param conversationId 浼氳瘽ID
+     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
      */
     public List<ImMessageReadReceipt> selectImMessageReadReceiptByConversationId(Long conversationId);
     
     /**
-     * 根据会话ID查询已读回执列表（带分页）
+     * 鏍规嵁浼氳瘽ID鏌ヨ宸茶鍥炴墽鍒楄〃锛堝甫鍒嗛〉锛?
      * 
-     * @param conversationId 会话ID
-     * @return 消息已读回执集合
+     * @param conversationId 浼氳瘽ID
+     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
      */
     public List<ImMessageReadReceipt> selectImMessageReadReceiptListByConversationId(Long conversationId);
     
     /**
-     * 删除消息的所有已读回执
+     * 鍒犻櫎娑堟伅鐨勬墍鏈夊凡璇诲洖鎵?
      * 
-     * @param messageId 消息ID
-     * @return 结果
+     * @param messageId 娑堟伅ID
+     * @return 缁撴灉
      */
     public int deleteImMessageReadReceiptByMessageId(Long messageId);
 }

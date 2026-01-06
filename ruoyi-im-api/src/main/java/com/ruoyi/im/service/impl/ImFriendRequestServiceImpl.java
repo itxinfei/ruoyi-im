@@ -8,8 +8,7 @@ import com.ruoyi.im.domain.ImFriendRequest;
 import com.ruoyi.im.service.ImFriendRequestService;
 
 /**
- * 好友申请Service业务层处理
- * 
+ * 濂藉弸鐢宠Service涓氬姟灞傚鐞? * 
  * @author ruoyi
  */
 @Service
@@ -17,78 +16,42 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     @Autowired
     private ImFriendRequestMapper imFriendRequestMapper;
 
-    /**
-     * 查询好友申请
-     * 
-     * @param id 好友申请ID
-     * @return 好友申请
-     */
     @Override
     public ImFriendRequest selectImFriendRequestById(Long id) {
-        return imFriendRequestMapper.selectImFriendRequestById(id);
+        return selectById(id);
     }
 
-    /**
-     * 查询好友申请列表
-     * 
-     * @param imFriendRequest 好友申请
-     * @return 好友申请
-     */
     @Override
     public List<ImFriendRequest> selectImFriendRequestList(ImFriendRequest imFriendRequest) {
-        return imFriendRequestMapper.selectImFriendRequestList(imFriendRequest);
+        return selectList(imFriendRequest);
     }
 
-    /**
-     * 新增好友申请
-     * 
-     * @param imFriendRequest 好友申请
-     * @return 结果
-     */
     @Override
     public int insertImFriendRequest(ImFriendRequest imFriendRequest) {
-        return imFriendRequestMapper.insertImFriendRequest(imFriendRequest);
+        return insert(imFriendRequest);
     }
 
-    /**
-     * 修改好友申请
-     * 
-     * @param imFriendRequest 好友申请
-     * @return 结果
-     */
     @Override
     public int updateImFriendRequest(ImFriendRequest imFriendRequest) {
-        return imFriendRequestMapper.updateImFriendRequest(imFriendRequest);
+        return update(imFriendRequest);
     }
 
-    /**
-     * 批量删除好友申请
-     * 
-     * @param ids 需要删除的好友申请ID
-     * @return 结果
-     */
     @Override
     public int deleteImFriendRequestByIds(Long[] ids) {
-        return imFriendRequestMapper.deleteImFriendRequestByIds(ids);
+        return deleteByIds(ids);
     }
 
-    /**
-     * 删除好友申请信息
-     * 
-     * @param id 好友申请ID
-     * @return 结果
-     */
     @Override
     public int deleteImFriendRequestById(Long id) {
-        return imFriendRequestMapper.deleteImFriendRequestById(id);
+        return deleteById(id);
     }
     
     /**
-     * 根据申请人ID和被申请人ID查询好友申请
+     * 鏍规嵁鐢宠浜篒D鍜岃鐢宠浜篒D鏌ヨ濂藉弸鐢宠
      * 
-     * @param fromUserId 申请人ID
-     * @param toUserId 被申请人ID
-     * @return 好友申请
+     * @param fromUserId 鐢宠浜篒D
+     * @param toUserId 琚敵璇蜂汉ID
+     * @return 濂藉弸鐢宠
      */
     @Override
     public ImFriendRequest selectImFriendRequestByFromAndToUserId(Long fromUserId, Long toUserId) {
@@ -96,10 +59,10 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 根据申请人ID查询好友申请列表
+     * 鏍规嵁鐢宠浜篒D鏌ヨ濂藉弸鐢宠鍒楄〃
      * 
-     * @param fromUserId 申请人ID
-     * @return 好友申请集合
+     * @param fromUserId 鐢宠浜篒D
+     * @return 濂藉弸鐢宠闆嗗悎
      */
     @Override
     public List<ImFriendRequest> selectImFriendRequestListByFromUserId(Long fromUserId) {
@@ -107,10 +70,10 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 根据被申请人ID查询好友申请列表
+     * 鏍规嵁琚敵璇蜂汉ID鏌ヨ濂藉弸鐢宠鍒楄〃
      * 
-     * @param toUserId 被申请人ID
-     * @return 好友申请集合
+     * @param toUserId 琚敵璇蜂汉ID
+     * @return 濂藉弸鐢宠闆嗗悎
      */
     @Override
     public List<ImFriendRequest> selectImFriendRequestListByToUserId(Long toUserId) {
@@ -118,25 +81,22 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 发送好友申请
-     * 
-     * @param fromUserId 申请人ID
-     * @param toUserId 被申请人ID
-     * @param message 申请消息
-     * @return 结果
+     * 鍙戦€佸ソ鍙嬬敵璇?     * 
+     * @param fromUserId 鐢宠浜篒D
+     * @param toUserId 琚敵璇蜂汉ID
+     * @param message 鐢宠娑堟伅
+     * @return 缁撴灉
      */
     @Override
     public int sendFriendRequest(Long fromUserId, Long toUserId, String message) {
-        // 检查是否已经存在申请
-        ImFriendRequest existingRequest = selectImFriendRequestByFromAndToUserId(fromUserId, toUserId);
+        // 妫€鏌ユ槸鍚﹀凡缁忓瓨鍦ㄧ敵璇?        ImFriendRequest existingRequest = selectImFriendRequestByFromAndToUserId(fromUserId, toUserId);
         if (existingRequest != null) {
-            // 如果存在未处理的申请，不允许重复发送
-            if ("PENDING".equals(existingRequest.getStatus())) {
+            // 濡傛灉瀛樺湪鏈鐞嗙殑鐢宠锛屼笉鍏佽閲嶅鍙戦€?            if ("PENDING".equals(existingRequest.getStatus())) {
                 return 0;
             }
         }
         
-        // 创建新的好友申请
+        // 鍒涘缓鏂扮殑濂藉弸鐢宠
         ImFriendRequest request = new ImFriendRequest();
         request.setFromUserId(fromUserId);
         request.setToUserId(toUserId);
@@ -147,12 +107,12 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 处理好友申请
+     * 澶勭悊濂藉弸鐢宠
      * 
-     * @param id 申请ID
-     * @param operatorId 操作人ID
-     * @param status 状态（APPROVED已同意 REJECTED已拒绝）
-     * @return 结果
+     * @param id 鐢宠ID
+     * @param operatorId 鎿嶄綔浜篒D
+     * @param status 鐘舵€侊紙APPROVED宸插悓鎰?REJECTED宸叉嫆缁濓級
+     * @return 缁撴灉
      */
     @Override
     public int handleFriendRequest(Long id, Long operatorId, String status) {
@@ -161,12 +121,12 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
             return 0;
         }
         
-        // 检查操作权限，只有被申请人可以处理
+        // 妫€鏌ユ搷浣滄潈闄愶紝鍙湁琚敵璇蜂汉鍙互澶勭悊
         if (!request.getToUserId().equals(operatorId)) {
             return 0;
         }
         
-        // 检查申请状态，只能处理待处理的申请
+        // 妫€鏌ョ敵璇风姸鎬侊紝鍙兘澶勭悊寰呭鐞嗙殑鐢宠
         if (!"PENDING".equals(request.getStatus())) {
             return 0;
         }
@@ -176,10 +136,9 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
         
         int result = updateImFriendRequest(request);
         
-        // 如果同意好友申请，则建立好友关系
+        // 濡傛灉鍚屾剰濂藉弸鐢宠锛屽垯寤虹珛濂藉弸鍏崇郴
         if ("APPROVED".equals(status)) {
-            // 获取好友服务并添加好友
-            // 这里需要注入ImFriendService，但为避免循环依赖，暂时注释
+            // 鑾峰彇濂藉弸鏈嶅姟骞舵坊鍔犲ソ鍙?            // 杩欓噷闇€瑕佹敞鍏mFriendService锛屼絾涓洪伩鍏嶅惊鐜緷璧栵紝鏆傛椂娉ㄩ噴
             // imFriendService.addFriend(request.getToUserId(), request.getFromUserId(), null, null);
         }
         
@@ -187,11 +146,11 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 同意好友申请
+     * 鍚屾剰濂藉弸鐢宠
      * 
-     * @param id 申请ID
-     * @param operatorId 操作人ID
-     * @return 结果
+     * @param id 鐢宠ID
+     * @param operatorId 鎿嶄綔浜篒D
+     * @return 缁撴灉
      */
     @Override
     public int approveFriendRequest(Long id, Long operatorId) {
@@ -199,11 +158,11 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 拒绝好友申请
+     * 鎷掔粷濂藉弸鐢宠
      * 
-     * @param id 申请ID
-     * @param operatorId 操作人ID
-     * @return 结果
+     * @param id 鐢宠ID
+     * @param operatorId 鎿嶄綔浜篒D
+     * @return 缁撴灉
      */
     @Override
     public int rejectFriendRequest(Long id, Long operatorId) {
