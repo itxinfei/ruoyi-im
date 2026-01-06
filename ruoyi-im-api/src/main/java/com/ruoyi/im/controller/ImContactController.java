@@ -16,6 +16,7 @@ import java.util.List;
 
 /**
  * 联系人控制器
+ * 提供用户搜索、好友申请、好友管理、分组管理等功能
  *
  * @author ruoyi
  */
@@ -28,6 +29,13 @@ public class ImContactController {
 
     /**
      * 搜索用户
+     * 根据关键词搜索用户，支持按用户名、昵称、手机号搜索
+     *
+     * @param keyword 搜索关键词
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 用户列表，不包含当前用户和已是好友的用户
+     * @apiNote 搜索结果会排除当前用户和已经是好友的用户
+     * @throws BusinessException 当搜索参数无效时抛出业务异常
      */
     @GetMapping("/search")
     public Result<List<ImUserVO>> search(@RequestParam String keyword,
@@ -41,6 +49,13 @@ public class ImContactController {
 
     /**
      * 发送好友申请
+     * 向指定用户发送好友申请，对方同意后成为好友
+     *
+     * @param request 好友申请请求参数，包含目标用户ID、申请理由等
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 申请结果，包含申请记录ID
+     * @apiNote 使用 @Valid 注解进行参数校验；对方会收到好友申请通知
+     * @throws BusinessException 当用户不存在、已是好友或申请已存在时抛出业务异常
      */
     @PostMapping("/request/send")
     public Result<Long> sendRequest(@Valid @RequestBody ImFriendAddRequest request,
@@ -54,6 +69,11 @@ public class ImContactController {
 
     /**
      * 获取收到的好友申请列表
+     * 查询当前用户收到的好友申请，按申请时间倒序排列
+     *
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 好友申请列表
+     * @apiNote 只返回待处理状态的申请，已处理的申请不在此列表中
      */
     @GetMapping("/request/received")
     public Result<List<ImFriendRequest>> getReceivedRequests(@RequestHeader(value = "userId", required = false) Long userId) {
@@ -66,6 +86,11 @@ public class ImContactController {
 
     /**
      * 获取发送的好友申请列表
+     * 查询当前用户发送的好友申请，按申请时间倒序排列
+     *
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 好友申请列表
+     * @apiNote 包含所有状态的申请（待处理、已同意、已拒绝）
      */
     @GetMapping("/request/sent")
     public Result<List<ImFriendRequest>> getSentRequests(@RequestHeader(value = "userId", required = false) Long userId) {
@@ -78,6 +103,14 @@ public class ImContactController {
 
     /**
      * 处理好友申请
+     * 同意或拒绝好友申请
+     *
+     * @param id 好友申请ID
+     * @param approved 是否同意，true表示同意，false表示拒绝
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 处理结果
+     * @apiNote 同意后会建立好友关系，并创建私聊会话；拒绝后申请状态更新为已拒绝
+     * @throws BusinessException 当申请不存在或无权限处理时抛出业务异常
      */
     @PostMapping("/request/{id}/handle")
     public Result<Void> handleRequest(@PathVariable Long id,
@@ -92,6 +125,11 @@ public class ImContactController {
 
     /**
      * 获取好友列表
+     * 查询当前用户的所有好友，按昵称排序
+     *
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 好友列表
+     * @apiNote 返回的好友信息包含在线状态、最后活跃时间等
      */
     @GetMapping("/list")
     public Result<List<ImFriendVO>> getFriendList(@RequestHeader(value = "userId", required = false) Long userId) {
@@ -104,6 +142,11 @@ public class ImContactController {
 
     /**
      * 获取分组好友列表
+     * 查询当前用户的好友，按分组进行组织
+     *
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 分组好友列表，每个分组包含该分组下的好友
+     * @apiNote 未分组的好友会放在"默认分组"中
      */
     @GetMapping("/grouped")
     public Result<List<ImContactGroupVO>> getGroupedFriendList(@RequestHeader(value = "userId", required = false) Long userId) {
@@ -116,6 +159,13 @@ public class ImContactController {
 
     /**
      * 获取好友详情
+     * 查询指定好友的详细信息
+     *
+     * @param id 好友关系ID
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 好友详细信息
+     * @apiNote 只能查询自己的好友信息
+     * @throws BusinessException 当好友关系不存在时抛出业务异常
      */
     @GetMapping("/{id}")
     public Result<ImFriendVO> getFriendById(@PathVariable Long id,
@@ -129,6 +179,14 @@ public class ImContactController {
 
     /**
      * 更新好友信息
+     * 更新好友的备注名、分组等信息
+     *
+     * @param id 好友关系ID
+     * @param request 更新请求参数，包含备注名、分组ID等
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 更新结果
+     * @apiNote 使用 @Valid 注解进行参数校验；只能更新自己的好友信息
+     * @throws BusinessException 当好友关系不存在时抛出业务异常
      */
     @PutMapping("/{id}")
     public Result<Void> updateFriend(@PathVariable Long id,
@@ -143,6 +201,13 @@ public class ImContactController {
 
     /**
      * 删除好友
+     * 删除指定好友关系，删除后双方不再是好友
+     *
+     * @param id 好友关系ID
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 删除结果
+     * @apiNote 删除好友后，对应的私聊会话也会被删除
+     * @throws BusinessException 当好友关系不存在时抛出业务异常
      */
     @DeleteMapping("/{id}")
     public Result<Void> deleteFriend(@PathVariable Long id,
@@ -156,6 +221,14 @@ public class ImContactController {
 
     /**
      * 拉黑/解除拉黑好友
+     * 拉黑好友后，将无法接收该好友的消息
+     *
+     * @param id 好友关系ID
+     * @param blocked 是否拉黑，true表示拉黑，false表示解除拉黑
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 操作结果
+     * @apiNote 拉黑是单向的，拉黑好友后，对方仍可以发送消息，但自己无法接收
+     * @throws BusinessException 当好友关系不存在时抛出业务异常
      */
     @PutMapping("/{id}/block")
     public Result<Void> blockFriend(@PathVariable Long id,
