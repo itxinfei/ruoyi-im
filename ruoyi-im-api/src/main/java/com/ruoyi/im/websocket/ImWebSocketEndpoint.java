@@ -1,5 +1,6 @@
 package com.ruoyi.im.websocket;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.service.ImMessageService;
@@ -207,9 +208,8 @@ public class ImWebSocketEndpoint {
 
             log.debug("收到消息: userId={}, message={}", userId, message);
 
-            // 解析消息
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> messageMap = mapper.readValue(message, Map.class);
+            Map<String, Object> messageMap = mapper.readValue(message, new TypeReference<Map<String, Object>>() {});
 
             String type = (String) messageMap.get("type");
             Object payload = messageMap.get("payload");
@@ -303,7 +303,7 @@ public class ImWebSocketEndpoint {
     private void handleChatMessage(Long userId, Object payload) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> messageData = mapper.convertValue(payload, Map.class);
+            Map<String, Object> messageData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
 
             Long sessionId = Long.valueOf(messageData.get("sessionId").toString());
             String messageType = (String) messageData.get("type");
@@ -348,7 +348,7 @@ public class ImWebSocketEndpoint {
     private void handleTypingStatus(Long userId, Object payload) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> typingData = mapper.convertValue(payload, Map.class);
+            Map<String, Object> typingData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
 
             Long sessionId = Long.valueOf(typingData.get("sessionId").toString());
             boolean isTyping = (boolean) typingData.get("isTyping");
@@ -450,7 +450,7 @@ public class ImWebSocketEndpoint {
     private void handleReadReceipt(Long userId, Object payload) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> readData = mapper.convertValue(payload, Map.class);
+            Map<String, Object> readData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
 
             Long sessionId = Long.valueOf(readData.get("sessionId").toString());
             List<Long> messageIds = (List<Long>) readData.get("messageIds");

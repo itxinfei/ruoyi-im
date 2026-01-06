@@ -1,7 +1,7 @@
 // 环境变量配置
 export const envConfig = {
   title: 'RuoYi-IM',
-  baseAPI: '',
+  baseAPI: 'http://localhost:8080',
   wsAPI: import.meta.env.VITE_WS_API || 'ws://localhost:8080/ws',
 
   // 功能开关
