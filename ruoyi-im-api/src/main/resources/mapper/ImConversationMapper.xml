@@ -20,7 +20,7 @@
         <result column="target_id" property="targetId" />
         <result column="name" property="name" />
         <result column="avatar" property="avatar" />
-        <result column="last_message_id" property="lastMessage.id" />
+        <result column="last_message_id" property="lastMessageId" />
         <result column="last_message_content" property="lastMessage.content" />
         <result column="last_message_type" property="lastMessage.type" />
         <result column="last_message_sender_id" property="lastMessage.senderId" />
@@ -64,10 +64,10 @@
         WHERE cm.user_id = #{userId} AND c.target_id = #{targetId}
     </select>
 
-    <select id="selectByTypeAndTargetId" resultMap="BaseResultMap">
+    <select id="selectByTypeAndTarget" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List" />
         FROM im_conversation
-        WHERE type = #{type} AND target_id = #{targetId}
+        WHERE type = #{type} AND ((target_id = #{targetId1} AND target_id = #{targetId2}) OR (target_id = #{targetId1} OR target_id = #{targetId2}))
         LIMIT 1
     </select>
 

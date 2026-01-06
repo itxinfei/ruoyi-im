@@ -2,9 +2,10 @@ package com.ruoyi.im.dto.conversation;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
- * 会话创建请求参数
+ * 会话创建请求
  *
  * @author ruoyi
  */
@@ -19,25 +20,23 @@ public class ImConversationCreateRequest {
     /**
      * 目标ID：单聊为目标用户ID，群聊为群组ID
      */
-    @NotNull(message = "目标ID不能为空")
     private Long targetId;
 
     /**
-     * 会话名称（可选）
+     * 群组名称（群聊时使用）
      */
-    private String name;
+    private String groupName;
 
     /**
-     * 是否置顶
+     * 群组头像（群聊时使用）
      */
-    private Boolean isPinned;
+    private String groupAvatar;
 
     /**
-     * 是否免打扰
+     * 群组成员ID列表（群聊时使用）
      */
-    private Boolean isMuted;
+    private List<Long> memberIds;
 
-    // Getters and Setters
     public String getType() {
         return type;
     }
@@ -54,27 +53,27 @@ public class ImConversationCreateRequest {
         this.targetId = targetId;
     }
 
-    public String getName() {
-        return name;
+    public String getGroupName() {
+        return groupName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
-    public Boolean getIsPinned() {
-        return isPinned;
+    public String getGroupAvatar() {
+        return groupAvatar;
     }
 
-    public void setIsPinned(Boolean isPinned) {
-        this.isPinned = isPinned;
+    public void setGroupAvatar(String groupAvatar) {
+        this.groupAvatar = groupAvatar;
     }
 
-    public Boolean getIsMuted() {
-        return isMuted;
+    public List<Long> getMemberIds() {
+        return memberIds;
     }
 
-    public void setIsMuted(Boolean isMuted) {
-        this.isMuted = isMuted;
+    public void setMemberIds(List<Long> memberIds) {
+        this.memberIds = memberIds;
     }
 }

@@ -49,7 +49,7 @@ public interface ImConversationMapper extends BaseMapper<ImConversation> {
      * @param targetId 目标ID
      * @return 会话
      */
-    ImConversation selectByTypeAndTargetId(@Param("type") String type, @Param("targetId") Long targetId);
+    ImConversation selectByTypeAndTarget(@Param("type") String type, @Param("targetId1") Long targetId1, @Param("targetId2") Long targetId2);
 
     /**
      * 更新会话最后消息信息

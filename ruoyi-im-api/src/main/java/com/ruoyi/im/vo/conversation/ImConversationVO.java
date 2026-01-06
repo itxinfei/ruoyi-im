@@ -81,6 +81,12 @@ public class ImConversationVO {
      */
     private LocalDateTime updateTime;
 
+    // 以下为新增的缺失字段
+    private Long lastReadMessageId; // 最后已读消息ID
+    private String peerName;        // 对方姓名
+    private String peerAvatar;      // 对方头像
+    private Boolean peerOnline;     // 对方是否在线
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -192,5 +198,38 @@ public class ImConversationVO {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    // 新增字段的getter和setter方法
+    public Long getLastReadMessageId() {
+        return lastReadMessageId;
+    }
+
+    public void setLastReadMessageId(Long lastReadMessageId) {
+        this.lastReadMessageId = lastReadMessageId;
+    }
+
+    public String getPeerName() {
+        return peerName;
+    }
+
+    public void setPeerName(String peerName) {
+        this.peerName = peerName;
+    }
+
+    public String getPeerAvatar() {
+        return peerAvatar;
+    }
+
+    public void setPeerAvatar(String peerAvatar) {
+        this.peerAvatar = peerAvatar;
+    }
+
+    public Boolean getPeerOnline() {
+        return peerOnline;
+    }
+
+    public void setPeerOnline(Boolean peerOnline) {
+        this.peerOnline = peerOnline;
     }
 }

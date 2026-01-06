@@ -38,13 +38,13 @@ public class ImConversationMember extends BaseEntity implements Serializable {
     private Long lastReadMessageId;
 
     /** 是否置顶 */
-    private Boolean isPinned;
+    private Integer isPinned;
 
     /** 是否免打扰 */
-    private Boolean isMuted;
+    private Integer isMuted;
 
     /** 是否已删除（用户退出会话） */
-    private Boolean isDeleted;
+    private Integer isDeleted;
 
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -95,28 +95,28 @@ public class ImConversationMember extends BaseEntity implements Serializable {
         this.lastReadMessageId = lastReadMessageId;
     }
 
-    public Boolean getPinned() {
+    public Integer getIsPinned() {
         return isPinned;
     }
 
-    public void setPinned(Boolean pinned) {
-        isPinned = pinned;
+    public void setIsPinned(Integer isPinned) {
+        this.isPinned = isPinned;
     }
 
-    public Boolean getMuted() {
+    public Integer getIsMuted() {
         return isMuted;
     }
 
-    public void setMuted(Boolean muted) {
-        isMuted = muted;
+    public void setIsMuted(Integer isMuted) {
+        this.isMuted = isMuted;
     }
 
-    public Boolean getDeleted() {
+    public Integer getIsDeleted() {
         return isDeleted;
     }
 
-    public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
+    public void setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
     }
 
     public LocalDateTime getCreateTime() {
@@ -133,5 +133,18 @@ public class ImConversationMember extends BaseEntity implements Serializable {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    // 为MyBatis映射兼容性添加的方法
+    public boolean isPinned() {
+        return isPinned != null && isPinned == 1;
+    }
+
+    public boolean isMuted() {
+        return isMuted != null && isMuted == 1;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted != null && isDeleted == 1;
     }
 }

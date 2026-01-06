@@ -18,17 +18,16 @@ import java.util.List;
 public interface ImConversationMemberMapper extends BaseMapper<ImConversationMember> {
 
     /**
-     * 根据会话ID和用户ID获取会话成员关系
+     * 根据会话ID和用户ID查询会话成员
      *
      * @param conversationId 会话ID
      * @param userId 用户ID
-     * @return 会话成员关系
+     * @return 会话成员
      */
-    ImConversationMember selectByConversationIdAndUserId(@Param("conversationId") Long conversationId,
-                                                         @Param("userId") Long userId);
+    ImConversationMember selectByConversationIdAndUserId(@Param("conversationId") Long conversationId, @Param("userId") Long userId);
 
     /**
-     * 根据用户ID获取会话成员列表
+     * 根据用户ID查询会话成员列表
      *
      * @param userId 用户ID
      * @return 会话成员列表
@@ -36,7 +35,7 @@ public interface ImConversationMemberMapper extends BaseMapper<ImConversationMem
     List<ImConversationMember> selectByUserId(@Param("userId") Long userId);
 
     /**
-     * 根据会话ID获取所有成员
+     * 根据会话ID查询会话成员列表
      *
      * @param conversationId 会话ID
      * @return 会话成员列表
@@ -51,9 +50,7 @@ public interface ImConversationMemberMapper extends BaseMapper<ImConversationMem
      * @param unreadCount 未读消息数
      * @return 更新行数
      */
-    int updateUnreadCount(@Param("conversationId") Long conversationId,
-                          @Param("userId") Long userId,
-                          @Param("unreadCount") Integer unreadCount);
+    int updateUnreadCount(@Param("conversationId") Long conversationId, @Param("userId") Long userId, @Param("unreadCount") Integer unreadCount);
 
     /**
      * 更新最后已读消息ID
@@ -63,69 +60,51 @@ public interface ImConversationMemberMapper extends BaseMapper<ImConversationMem
      * @param lastReadMessageId 最后已读消息ID
      * @return 更新行数
      */
-    int updateLastReadMessageId(@Param("conversationId") Long conversationId,
-                                @Param("userId") Long userId,
-                                @Param("lastReadMessageId") Long lastReadMessageId);
+    int updateLastReadMessageId(@Param("conversationId") Long conversationId, @Param("userId") Long userId, @Param("lastReadMessageId") Long lastReadMessageId);
 
     /**
-     * 设置会话置顶状态
+     * 更新置顶状态
      *
      * @param conversationId 会话ID
      * @param userId 用户ID
-     * @param isPinned 是否置顶
+     * @param isPinned 是否置顶，1为置顶，0为不置顶
      * @return 更新行数
      */
-    int updatePinned(@Param("conversationId") Long conversationId,
-                     @Param("userId") Long userId,
-                     @Param("isPinned") Boolean isPinned);
+    int updatePinned(@Param("conversationId") Long conversationId, @Param("userId") Long userId, @Param("isPinned") Integer isPinned);
 
     /**
-     * 设置会话免打扰状态
+     * 更新免打扰状态
      *
      * @param conversationId 会话ID
      * @param userId 用户ID
-     * @param isMuted 是否免打扰
+     * @param isMuted 是否免打扰，1为免打扰，0为不免打扰
      * @return 更新行数
      */
-    int updateMuted(@Param("conversationId") Long conversationId,
-                    @Param("userId") Long userId,
-                    @Param("isMuted") Boolean isMuted);
+    int updateMuted(@Param("conversationId") Long conversationId, @Param("userId") Long userId, @Param("isMuted") Integer isMuted);
 
     /**
-     * 标记会话为已删除（用户退出会话）
+     * 标记为已删除（软删除）
      *
      * @param conversationId 会话ID
      * @param userId 用户ID
      * @return 更新行数
      */
-    int markAsDeleted(@Param("conversationId") Long conversationId,
-                      @Param("userId") Long userId);
+    int markAsDeleted(@Param("conversationId") Long conversationId, @Param("userId") Long userId);
 
     /**
-     * 删除会话成员关系
+     * 删除指定会话和用户之间的关系
      *
      * @param conversationId 会话ID
      * @param userId 用户ID
      * @return 删除行数
      */
-    int deleteByConversationIdAndUserId(@Param("conversationId") Long conversationId,
-                                        @Param("userId") Long userId);
+    int deleteByConversationIdAndUserId(@Param("conversationId") Long conversationId, @Param("userId") Long userId);
 
     /**
-     * 更新置顶状态
+     * 插入会话成员
      *
-     * @param id 会话成员ID
-     * @param isPinned 是否置顶
-     * @return 更新行数
+     * @param member 会话成员
+     * @return 插入行数
      */
-    int updateIsPinned(@Param("id") Long id, @Param("isPinned") Boolean isPinned);
-
-    /**
-     * 更新免打扰状态
-     *
-     * @param id 会话成员ID
-     * @param isMuted 是否免打扰
-     * @return 更新行数
-     */
-    int updateIsMuted(@Param("id") Long id, @Param("isMuted") Boolean isMuted);
+    int insertImConversationMember(ImConversationMember member);
 }

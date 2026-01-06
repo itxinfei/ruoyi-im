@@ -72,6 +72,12 @@ public class ImErrorCode {
     /** 会话成员不存在 */
     public static final int CONVERSATION_MEMBER_NOT_FOUND = 4015;
 
+    /** 创建会话失败 */
+    public static final int CREATE_CONVERSATION_FAILED = 4016;
+
+    /** 无效的会话类型 */
+    public static final int INVALID_CONVERSATION_TYPE = 4017;
+
     // ========== WebSocket 错误码 5000-5999 ==========
 
     /** WebSocket 连接失败 */

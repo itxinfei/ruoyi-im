@@ -51,7 +51,8 @@ public class ImConversationServiceImpl implements ImConversationService {
         List<ImConversationVO> voList = new ArrayList<>();
 
         for (ImConversationMember member : memberList) {
-            ImConversation conversation = imConversationMapper.selectImConversationById(member.getConversationId());
+            // 使用BaseMapper的selectById方法
+            ImConversation conversation = imConversationMapper.selectById(member.getConversationId());
             if (conversation != null) {
                 ImConversationVO vo = new ImConversationVO();
                 BeanUtils.copyProperties(conversation, vo);
@@ -94,7 +95,8 @@ public class ImConversationServiceImpl implements ImConversationService {
             throw new BusinessException(ImErrorCode.CONVERSATION_NOT_FOUND, "会话不存在或无权限访问");
         }
 
-        ImConversation conversation = imConversationMapper.selectImConversationById(conversationId);
+        // 使用BaseMapper的selectById方法
+        ImConversation conversation = imConversationMapper.selectById(conversationId);
         if (conversation == null) {
             throw new BusinessException(ImErrorCode.CONVERSATION_NOT_FOUND, "会话不存在");
         }
@@ -150,7 +152,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         conversation.setCreateTime(LocalDateTime.now());
         conversation.setUpdateTime(LocalDateTime.now());
 
-        int result = imConversationMapper.insertImConversation(conversation);
+        int result = imConversationMapper.insert(conversation); // 使用BaseMapper的insert方法
         if (result <= 0) {
             throw new BusinessException(ImErrorCode.CREATE_CONVERSATION_FAILED, "创建会话失败");
         }
@@ -175,7 +177,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         conversation.setCreateTime(LocalDateTime.now());
         conversation.setUpdateTime(LocalDateTime.now());
 
-        int result = imConversationMapper.insertImConversation(conversation);
+        int result = imConversationMapper.insert(conversation); // 使用BaseMapper的insert方法
         if (result <= 0) {
             throw new BusinessException(ImErrorCode.CREATE_CONVERSATION_FAILED, "创建群聊会话失败");
         }
@@ -211,7 +213,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         }
 
         // 从会话成员表中删除该用户，相当于删除会话（软删除）
-        imConversationMemberMapper.deleteByConversationIdAndUserId(conversationId, userId);
+        imConversationMemberMapper.markAsDeleted(conversationId, userId);
     }
 
     @Override
@@ -223,9 +225,7 @@ public class ImConversationServiceImpl implements ImConversationService {
             throw new BusinessException(ImErrorCode.CONVERSATION_NOT_FOUND, "会话不存在或无权限访问");
         }
 
-        member.setIsPinned(isPinned ? 1 : 0);
-        member.setUpdateTime(LocalDateTime.now());
-        imConversationMemberMapper.updateImConversationMember(member);
+        imConversationMemberMapper.updatePinned(conversationId, userId, isPinned ? 1 : 0);
     }
 
     @Override
@@ -237,9 +237,7 @@ public class ImConversationServiceImpl implements ImConversationService {
             throw new BusinessException(ImErrorCode.CONVERSATION_NOT_FOUND, "会话不存在或无权限访问");
         }
 
-        member.setIsMuted(isMuted ? 1 : 0);
-        member.setUpdateTime(LocalDateTime.now());
-        imConversationMemberMapper.updateImConversationMember(member);
+        imConversationMemberMapper.updateMuted(conversationId, userId, isMuted ? 1 : 0);
     }
 
     @Override
@@ -252,10 +250,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         }
 
         // 将未读消息数设为0
-        member.setUnreadCount(0);
-        member.setLastReadMessageId(member.getLastReadMessageId()); // 保持当前最后已读消息ID
-        member.setUpdateTime(LocalDateTime.now());
-        imConversationMemberMapper.updateImConversationMember(member);
+        imConversationMemberMapper.updateUnreadCount(conversationId, userId, 0);
     }
 
     @Override
@@ -268,9 +263,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         }
 
         // 将未读消息数设为0
-        member.setUnreadCount(0);
-        member.setUpdateTime(LocalDateTime.now());
-        imConversationMemberMapper.updateImConversationMember(member);
+        imConversationMemberMapper.updateUnreadCount(conversationId, userId, 0);
     }
 
     @Override
@@ -314,14 +307,11 @@ public class ImConversationServiceImpl implements ImConversationService {
 
         // 更新会话设置
         if (request.getIsPinned() != null) {
-            member.setIsPinned(request.getIsPinned() ? 1 : 0);
+            imConversationMemberMapper.updatePinned(id, userId, request.getIsPinned() ? 1 : 0);
         }
         if (request.getIsMuted() != null) {
-            member.setIsMuted(request.getIsMuted() ? 1 : 0);
+            imConversationMemberMapper.updateMuted(id, userId, request.getIsMuted() ? 1 : 0);
         }
-
-        member.setUpdateTime(LocalDateTime.now());
-        imConversationMemberMapper.updateImConversationMember(member);
     }
 
     @Override
@@ -343,7 +333,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         List<ImConversationVO> voList = new ArrayList<>();
 
         for (ImConversationMember member : memberList) {
-            ImConversation conversation = imConversationMapper.selectImConversationById(member.getConversationId());
+            ImConversation conversation = imConversationMapper.selectById(member.getConversationId());
             if (conversation != null) {
                 ImConversationVO vo = new ImConversationVO();
                 BeanUtils.copyProperties(conversation, vo);
@@ -393,6 +383,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         member.setUnreadCount(0);
         member.setIsPinned(0);
         member.setIsMuted(0);
+        member.setIsDeleted(0);
         member.setCreateTime(LocalDateTime.now());
         member.setUpdateTime(LocalDateTime.now());
 

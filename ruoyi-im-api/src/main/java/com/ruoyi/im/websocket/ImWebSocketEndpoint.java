@@ -44,6 +44,7 @@ public class ImWebSocketEndpoint {
      */
     private static final Map<Session, Long> sessionUserMap = new ConcurrentHashMap<>();
 
+    private static ImMessageService staticImMessageService;
     private static JwtUtils staticJwtUtils;
     private static ImUserService staticImUserService;
     private static ImRedisUtil staticImRedisUtil;
