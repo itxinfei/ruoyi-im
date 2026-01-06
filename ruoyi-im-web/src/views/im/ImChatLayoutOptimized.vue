@@ -1393,7 +1393,20 @@ import {
   Lock,
   Unlock,
   Bell,
-  Mute
+  Mute,
+  Grid,
+  Document,
+  Files,
+  Notification,
+  Odometer,
+  Calendar,
+  Edit,
+  ChatLineSquare,
+  ArrowDown,
+  ArrowRight,
+  ArrowLeft,
+  SwitchButton,
+  Folder
 } from '@element-plus/icons-vue'
 import { formatTime as formatTimeUtil } from '@/utils/format/time'
 import { useImWebSocket } from '@/composables/useImWebSocket'
@@ -3474,6 +3487,8 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@use "sass:color";
+
 // Web IM 布局变量
 $nav-width: 180px;
 $nav-width-collapsed: 56px;
@@ -5685,7 +5700,7 @@ $shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.
       background: $primary-color-light;
 
       &:hover {
-        background: darken($primary-color-light, 5%);
+        background: color.scale($primary-color-light, $lightness: -5%);
       }
 
       .mention-all-avatar {
