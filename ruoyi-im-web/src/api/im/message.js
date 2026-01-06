@@ -20,12 +20,11 @@ export function sendMessage(data) {
 // 获取会话消息列表
 export function listMessage(params) {
   return request({
-    url: '/api/im/message/history',
+    url: `/api/im/message/list/${params.sessionId || params.conversationId}`,
     method: 'get',
     params: {
-      sessionId: params.sessionId || params.conversationId,
-      size: params.pageSize || 20,
-      lastMessageId: params.lastMessageId,
+      limit: params.pageSize || 20,
+      lastId: params.lastMessageId,
     },
   })
 }

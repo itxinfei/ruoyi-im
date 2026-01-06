@@ -20,16 +20,16 @@ export function getGroup(groupId) {
 // 新增群组
 export function addGroup(data) {
   return request({
-    url: '/api/im/group',
+    url: '/api/im/group/create',
     method: 'post',
     data: data,
   })
 }
 
 // 修改群组
-export function updateGroup(data) {
+export function updateGroup(groupId, data) {
   return request({
-    url: '/api/im/group',
+    url: `/api/im/group/${groupId}`,
     method: 'put',
     data: data,
   })
@@ -43,36 +43,40 @@ export function delGroup(groupId) {
   })
 }
 
-// 修改群组设置
-export function updateGroupSettings(data) {
+// 修改群组设置 - 群组设置通过更新群组信息实现
+export function updateGroupSettings(groupId, data) {
   return request({
-    url: '/api/im/group/settings',
+    url: `/api/im/group/${groupId}`,
     method: 'put',
     data: data,
   })
 }
 
-// 获取群组设置
+// 获取群组设置 - 群组设置包含在群组详情中
 export function getGroupSettings(groupId) {
   return request({
-    url: '/api/im/group/settings/' + groupId,
+    url: `/api/im/group/${groupId}`,
     method: 'get',
   })
 }
 
-// 更新群组公告
-export function updateGroupAnnouncement(data) {
+// 更新群组公告 - 通过更新群组信息实现
+export function updateGroupAnnouncement(groupId, announcement) {
   return request({
-    url: '/api/im/group/announcement',
+    url: `/api/im/group/${groupId}`,
     method: 'put',
-    data: data,
+    data: {
+      announcement: announcement
+    },
   })
 }
 
-// 获取群组公告
+// 获取群组公告 - 包含在群组详情中
 export function getGroupAnnouncement(groupId) {
   return request({
-    url: '/api/im/group/announcement/' + groupId,
+    url: `/api/im/group/${groupId}`,
     method: 'get',
-  })
+  }).then(response => {
+    return { data: response.data?.announcement || '' };
+  });
 }

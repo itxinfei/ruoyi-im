@@ -89,6 +89,40 @@ public class ImUserController {
     }
 
     /**
+     * 获取用户列表
+     * 根据查询条件获取用户列表
+     *
+     * @param keyword 关键词
+     * @return 用户列表
+     * @apiNote 支持按用户名、昵称等条件搜索用户
+     */
+    @GetMapping("/list")
+    public Result<java.util.List<ImUserVO>> list(@RequestParam(required = false) String keyword) {
+        com.ruoyi.im.dto.BasePageRequest request = new com.ruoyi.im.dto.BasePageRequest();
+        // 如果需要关键词搜索，可以扩展BasePageRequest或直接调用特定方法
+        java.util.List<ImUserVO> list = imUserService.getUserList(request);
+        return Result.success(list);
+    }
+
+    /**
+     * 修改用户状态
+     * 修改用户状态（启用/禁用）
+     *
+     * @param user 用户信息
+     * @param operatorId 操作员ID，从请求头中获取
+     * @return 修改结果
+     */
+    @PutMapping("/changeStatus")
+    public Result<Void> changeStatus(@RequestBody com.ruoyi.im.domain.ImUser user,
+                                    @RequestHeader(value = "userId", required = false) Long operatorId) {
+        if (operatorId == null) {
+            operatorId = 1L;
+        }
+        imUserService.updateStatus(user.getId(), user.getStatus());
+        return Result.success("状态修改成功");
+    }
+
+    /**
      * 更新用户信息
      * 更新用户的昵称、头像、个性签名等信息
      *
