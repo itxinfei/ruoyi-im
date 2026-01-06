@@ -26,45 +26,8 @@ public class DruidConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DruidConfig.class);
 
-    /**
-     * 配置Druid数据源
-     * 
-     * @return Druid数据源
-     * @throws SQLException SQL异常
-     */
-    @Bean
-    @ConfigurationProperties(prefix = "spring.datasource.druid")
-    public DataSource druidDataSource() throws SQLException {
-        log.info("初始化Druid数据源");
-        
-        DruidDataSource dataSource = new DruidDataSource();
-        
-        // 基本配置
-        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        
-        // 连接池配置
-        dataSource.setInitialSize(5); // 初始连接数
-        dataSource.setMinIdle(5); // 最小连接数
-        dataSource.setMaxActive(20); // 最大连接数
-        dataSource.setMaxWait(60000); // 获取连接等待超时时间（毫秒）
-        dataSource.setTimeBetweenEvictionRunsMillis(60000); // 间隔多久进行一次检测，检测需要关闭的空闲连接（毫秒）
-        dataSource.setMinEvictableIdleTimeMillis(300000); // 连接保持空闲而不被驱逐的最小时间（毫秒）
-        dataSource.setValidationQuery("SELECT 1 FROM DUAL"); // 验证连接是否有效的SQL
-        dataSource.setTestWhileIdle(true); // 空闲时检测连接是否有效
-        dataSource.setTestOnBorrow(false); // 获取连接时不检测连接是否有效
-        dataSource.setTestOnReturn(false); // 归还连接时不检测连接是否有效
-        dataSource.setPoolPreparedStatements(true); // 是否缓存preparedStatement
-        dataSource.setMaxPoolPreparedStatementPerConnectionSize(20); // 每个连接最大缓存的preparedStatement数
-        
-        // 监控配置
-        dataSource.setFilters("stat,wall"); // 配置监控统计拦截的filters
-        dataSource.setConnectionProperties("druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000"); // 连接属性
-        
-        log.info("Druid数据源初始化完成：初始连接数={}, 最小连接数={}, 最大连接数={}", 
-                dataSource.getInitialSize(), dataSource.getMinIdle(), dataSource.getMaxActive());
-        
-        return dataSource;
-    }
+    // Druid数据源配置已通过application.yml中的spring.datasource.druid配置自动完成
+    // Spring Boot自动配置会处理Druid连接池的创建
 
     /**
      * 配置Druid监控Servlet

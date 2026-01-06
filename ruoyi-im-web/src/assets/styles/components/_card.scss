@@ -1,0 +1,36 @@
+@import '../variables.scss';
+
+.card {
+  background: $bg-white;
+  border-radius: $border-radius-base;
+  box-shadow: $shadow-light;
+  transition: all $transition-base ease-base;
+
+  &:hover {
+    box-shadow: $shadow-base;
+    transform: translateY(-2px);
+  }
+
+  &.is-clickable {
+    cursor: pointer;
+  }
+}
+
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid $border-color;
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-footer {
+  padding: 12px 20px;
+  border-top: 1px solid $border-color;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

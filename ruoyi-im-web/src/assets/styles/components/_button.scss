@@ -1,0 +1,34 @@
+@import '../variables.scss';
+
+.el-button {
+  transition: all $transition-base ease-base;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: $shadow-base;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &.el-button--primary {
+    background: linear-gradient(135deg, $primary-color 0%, #1557ff 100%);
+    
+    &:hover {
+      background: linear-gradient(135deg, lighten($primary-color, 5%) 0%, lighten(#1557ff, 5%) 100%);
+    }
+  }
+
+  &.el-button--success {
+    &:hover {
+      background: lighten($success-color, 5%);
+    }
+  }
+
+  &.el-button--danger {
+    &:hover {
+      background: lighten($danger-color, 5%);
+    }
+  }
+}

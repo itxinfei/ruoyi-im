@@ -6,12 +6,20 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import '@/assets/styles/index.scss'
-import '@/styles/im-theme.scss' // IM主题样式
-import './permission' // 路由守卫
+import '@/assets/styles/variables.scss'
+import '@/assets/styles/components/_button.scss'
+import '@/assets/styles/components/_card.scss'
+import '@/assets/styles/animations/_index.scss'
+import clickFeedback from '@/directives/clickFeedback'
+import hoverScale from '@/directives/hoverScale'
+import './permission'
 
 const app = createApp(App)
 app.use(ElementPlus)
 app.use(router)
 app.use(store)
+
+app.directive('click-feedback', clickFeedback)
+app.directive('hover-scale', hoverScale)
 
 app.mount('#app')

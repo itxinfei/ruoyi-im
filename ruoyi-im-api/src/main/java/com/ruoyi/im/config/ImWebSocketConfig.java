@@ -30,12 +30,6 @@ public class ImWebSocketConfig {
         return new ServerEndpointExporter();
     }
 
-    /**
-     * WebSocket握手拦截器
-     * 在WebSocket连接建立前进行Token认证、IP白名单校验
-     */
-    @Bean
-    public WebSocketHandshakeInterceptor webSocketHandshakeInterceptor() {
-        return new WebSocketHandshakeInterceptor();
-    }
+    // WebSocket握手拦截器已通过@Component注解在WebSocketHandshakeInterceptor类中定义
+    // 这里不再重复定义，避免bean名称冲突
 }

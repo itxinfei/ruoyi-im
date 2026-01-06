@@ -1,95 +1,60 @@
+// DingTalk 6.5.x color palette
+$primary-color: #1677ff;
+$success-color: #52c41a;
+$warning-color: #faad14;
+$danger-color: #ff4d4f;
 
-// base color
-$blue:#324157;
-$light-blue:#3A71A8;
-$red:#C03639;
-$pink: #E65D6E;
-$green: #30B08F;
-$tiffany: #4AB7BD;
-$yellow:#FEC171;
-$panGreen: #30B08F;
+// Button colors
+$blue: #1890ff;
+$light-blue: #69c0ff;
+$red: #f5222d;
+$pink: #eb2f96;
+$green: #52c41a;
+$tiffany: #13c2c2;
+$yellow: #faad14;
 
-// theme colors
-$primary-color: #409eff;
-$success-color: #67c23a;
-$warning-color: #e6a23c;
-$danger-color: #f56c6c;
-$info-color: #909399;
+// Background colors
+$bg-page: #f5f5f5;
+$bg-white: #ffffff;
+$bg-gray: #fafafa;
+$bg-hover: #f5f5f5;
+$bg-selected: #e8f3ff;
 
-// sidebar
-$menuText:#bfcbd9;
-$menuActiveText:#409EFF;
-$subMenuActiveText:#f4f4f5;
+// Text colors
+$text-primary: #333333;
+$text-secondary: #666666;
+$text-placeholder: #8c8c8c;
+$text-disabled: #bfbfbf;
 
-$menuBg:#304156;
-$menuHover:#263445;
+// Border colors
+$border-color: #e8e8e8;
+$border-light: #f0f0f0;
 
-$subMenuBg:#1f2d3d;
-$subMenuHover:#001528;
+// Dimensions
+$side-nav-width-expanded: 192px;
+$side-nav-width-collapsed: 64px;
+$sideBarWidth: 240px;
+$menuBg: #001529;
+$menuHover: rgba(0, 21, 41, 0.08);
+$subMenuActiveText: #ffffff;
+$subMenuBg: #001529;
+$session-list-width: 240px;
+$app-card-size: 120px;
+$list-item-height: 48px;
+$list-item-height-lg: 64px;
 
-$sideBarWidth: 200px;
+// Transitions
+$transition-fast: 150ms;
+$transition-base: 200ms;
+$transition-slow: 300ms;
+$ease-base: cubic-bezier(0.4, 0, 0.2, 1);
 
-// nav rail (左侧导航栏)
-$nav-rail-width: 64px;
-$nav-rail-bg: #ffffff;
-$nav-rail-border: #e4e7ed;
-$nav-rail-text: #606266;
-$nav-rail-hover: #f5f7fa;
-$nav-rail-active-bg: #ecf5ff;
-$nav-rail-text-active: #409eff;
+// Border radius
+$border-radius-small: 4px;
+$border-radius-base: 8px;
+$border-radius-large: 12px;
 
-// list panel (列表面板)
-$list-panel-width: 320px;
-$list-panel-bg: #ffffff;
-$list-panel-border: #e4e7ed;
-
-// chat panel (聊天面板)
-$chat-panel-bg: #ffffff;
-$chat-panel-border: #e4e7ed;
-
-// detail panel (详情面板)
-$detail-panel-width: 280px;
-$detail-panel-bg: #ffffff;
-$detail-panel-border: #e4e7ed;
-
-// border colors
-$border-color-base: #dcdfe6;
-$border-color-light: #e4e7ed;
-$border-color-lighter: #ebeef5;
-$border-color-extra-light: #f2f6fc;
-
-// text colors
-$text-primary: #303133;
-$text-regular: #606266;
-$text-secondary: #909399;
-$text-placeholder: #c0c4cc;
-
-// background colors
-$background-color-base: #f5f7fa;
-$background-color-light: #fafafa;
-
-// the :export directive is the magic sauce for webpack
-// https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
-:export {
-  menuText: $menuText;
-  menuActiveText: $menuActiveText;
-  subMenuActiveText: $subMenuActiveText;
-  menuBg: $menuBg;
-  menuHover: $menuHover;
-  subMenuBg: $subMenuBg;
-  subMenuHover: $subMenuHover;
-  sideBarWidth: $sideBarWidth;
-  navRailWidth: $nav-rail-width;
-  navRailBg: $nav-rail-bg;
-  navRailBorder: $nav-rail-border;
-  navRailText: $nav-rail-text;
-  navRailHover: $nav-rail-hover;
-  navRailActiveBg: $nav-rail-active-bg;
-  navRailTextActive: $nav-rail-text-active;
-  textPrimary: $text-primary;
-  textRegular: $text-regular;
-  textSecondary: $text-secondary;
-  textPlaceholder: $text-placeholder;
-  backgroundColorBase: $background-color-base;
-  backgroundColorLight: $background-color-light;
-}
+// Shadows
+$shadow-light: 0 2px 8px rgba(0, 0, 0, 0.06);
+$shadow-base: 0 2px 8px rgba(0, 0, 0, 0.1);
+$shadow-dark: 0 4px 16px rgba(0, 0, 0, 0.15);

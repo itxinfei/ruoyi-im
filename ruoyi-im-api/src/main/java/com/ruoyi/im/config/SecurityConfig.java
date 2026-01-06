@@ -3,6 +3,7 @@ package com.ruoyi.im.config;
 import com.ruoyi.im.security.JwtAuthenticationEntryPoint;
 import com.ruoyi.im.security.JwtAuthenticationTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -35,6 +36,9 @@ public class SecurityConfig {
     @Lazy
     private JwtAuthenticationTokenFilter authenticationTokenFilter;
 
+    @Value("${app.security.enabled:true}")
+    private boolean securityEnabled;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -63,9 +67,16 @@ public class SecurityConfig {
             // 静态资源访问
             .antMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.gif").permitAll()
             // Swagger相关接口
-            .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            // 所有请求都需要认证
-            .anyRequest().authenticated();
+            .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
+
+        // 根据配置决定是否启用认证
+        if (securityEnabled) {
+            // 生产环境：所有API请求都需要认证
+            http.authorizeRequests().anyRequest().authenticated();
+        } else {
+            // 开发环境：允许所有API接口访问
+            http.authorizeRequests().antMatchers("/api/**").permitAll();
+        }
 
         // 添加JWT过滤器
         http.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
