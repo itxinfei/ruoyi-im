@@ -178,11 +178,23 @@ $z-index-tooltip: 1070;
   }
 }
 
+// Web 滚动条样式（兼容别名）
+@mixin web-scrollbar {
+  @include custom-scrollbar(6px, #d9d9d9);
+}
+
 // Flex 居中
 @mixin flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+// Flex 两端对齐居中
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 // Flex 列

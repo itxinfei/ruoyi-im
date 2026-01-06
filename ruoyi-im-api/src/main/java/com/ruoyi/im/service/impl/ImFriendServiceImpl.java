@@ -8,7 +8,7 @@ import com.ruoyi.im.domain.ImFriend;
 import com.ruoyi.im.service.ImFriendService;
 
 /**
- * 濂藉弸Service涓氬姟灞傚鐞? * 
+ * 婵傝棄寮窼ervice娑撴艾濮熺仦鍌氼槱閻? * 
  * @author ruoyi
  */
 @Service
@@ -18,10 +18,10 @@ public class ImFriendServiceImpl implements ImFriendService
     private ImFriendMapper imFriendMapper;
 
     /**
-     * 鏌ヨ濂藉弸
+     * 閺屻儴顕楁總钘夊几
      * 
-     * @param id 濂藉弸ID
-     * @return 濂藉弸
+     * @param id 婵傝棄寮窱D
+     * @return 婵傝棄寮?
      */
     @Override
     public ImFriend selectImFriendById(Long id)
@@ -30,10 +30,10 @@ public class ImFriendServiceImpl implements ImFriendService
     }
 
     /**
-     * 鏌ヨ濂藉弸鍒楄〃
+     * 閺屻儴顕楁總钘夊几閸掓銆?
      * 
-     * @param imFriend 濂藉弸
-     * @return 濂藉弸
+     * @param imFriend 婵傝棄寮?
+     * @return 婵傝棄寮?
      */
     @Override
     public List<ImFriend> selectImFriendList(ImFriend imFriend)
@@ -42,10 +42,10 @@ public class ImFriendServiceImpl implements ImFriendService
     }
 
     /**
-     * 鏂板濂藉弸
+     * 閺傛澘顤冩總钘夊几
      * 
-     * @param imFriend 濂藉弸
-     * @return 缁撴灉
+     * @param imFriend 婵傝棄寮?
+     * @return 缂佹挻鐏?
      */
     @Override
     public int insertImFriend(ImFriend imFriend)
@@ -54,10 +54,10 @@ public class ImFriendServiceImpl implements ImFriendService
     }
 
     /**
-     * 淇敼濂藉弸
+     * 娣囶喗鏁兼總钘夊几
      * 
-     * @param imFriend 濂藉弸
-     * @return 缁撴灉
+     * @param imFriend 婵傝棄寮?
+     * @return 缂佹挻鐏?
      */
     @Override
     public int updateImFriend(ImFriend imFriend)
@@ -66,10 +66,10 @@ public class ImFriendServiceImpl implements ImFriendService
     }
 
     /**
-     * 鎵归噺鍒犻櫎濂藉弸
+     * 閹靛綊鍣洪崚鐘绘珟婵傝棄寮?
      * 
-     * @param ids 闇€瑕佸垹闄ょ殑鏁版嵁ID
-     * @return 缁撴灉
+     * @param ids 闂団偓鐟曚礁鍨归梽銈囨畱閺佺増宓両D
+     * @return 缂佹挻鐏?
      */
     @Override
     public int deleteImFriendByIds(Long[] ids)
@@ -78,10 +78,10 @@ public class ImFriendServiceImpl implements ImFriendService
     }
 
     /**
-     * 鍒犻櫎濂藉弸淇℃伅
+     * 閸掔娀娅庢總钘夊几娣団剝浼?
      * 
-     * @param id 濂藉弸ID
-     * @return 缁撴灉
+     * @param id 婵傝棄寮窱D
+     * @return 缂佹挻鐏?
      */
     @Override
     public int deleteImFriendById(Long id)
@@ -90,15 +90,15 @@ public class ImFriendServiceImpl implements ImFriendService
     }
     
     /**
-     * 鏍规嵁鐢ㄦ埛ID鍜屽ソ鍙婭D鏌ヨ濂藉弸鍏崇郴
+     * 閺嶈宓侀悽銊﹀煕ID閸滃苯銈介崣濠璂閺屻儴顕楁總钘夊几閸忓磭閮?
      * 
-     * @param userId 鐢ㄦ埛ID
-     * @param friendId 濂藉弸ID
-     * @return 濂藉弸鍏崇郴
+     * @param userId 閻劍鍩汭D
+     * @param friendId 婵傝棄寮窱D
+     * @return 婵傝棄寮搁崗宕囬兇
      */
     @Override
     public ImFriend selectImFriendByUserIdAndFriendId(Long userId, Long friendId) {
-        // 鍒涘缓鏌ヨ鏉′欢
+        // 閸掓稑缂撻弻銉嚄閺夆€叉
         ImFriend condition = new ImFriend();
         condition.setUserId(userId);
         condition.setFriendId(friendId);
@@ -107,25 +107,25 @@ public class ImFriendServiceImpl implements ImFriendService
     }
     
     /**
-     * 鏍规嵁鐢ㄦ埛ID鏌ヨ濂藉弸鍒楄〃
+     * 閺嶈宓侀悽銊﹀煕ID閺屻儴顕楁總钘夊几閸掓銆?
      * 
-     * @param userId 鐢ㄦ埛ID
-     * @return 濂藉弸鍒楄〃
+     * @param userId 閻劍鍩汭D
+     * @return 婵傝棄寮搁崚妤勩€?
      */
     @Override
     public List<ImFriend> selectImFriendListByUserId(Long userId) {
-        // 鍒涘缓鏌ヨ鏉′欢
+        // 閸掓稑缂撻弻銉嚄閺夆€叉
         ImFriend condition = new ImFriend();
         condition.setUserId(userId);
         return imFriendMapper.selectImFriendList(condition);
     }
     
     /**
-     * 鏍规嵁鐢ㄦ埛ID鍜屽ソ鍙婭D鍒犻櫎濂藉弸鍏崇郴
+     * 閺嶈宓侀悽銊﹀煕ID閸滃苯銈介崣濠璂閸掔娀娅庢總钘夊几閸忓磭閮?
      * 
-     * @param userId 鐢ㄦ埛ID
-     * @param friendId 濂藉弸ID
-     * @return 鍒犻櫎缁撴灉
+     * @param userId 閻劍鍩汭D
+     * @param friendId 婵傝棄寮窱D
+     * @return 閸掔娀娅庣紒鎾寸亯
      */
     @Override
     public int deleteImFriendByUserIdAndFriendId(Long userId, Long friendId) {

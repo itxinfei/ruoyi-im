@@ -51,6 +51,7 @@ declare module 'vue' {
     EmojiPicker: typeof import('./components/Chat/EmojiPicker.vue')['default']
     FilePreview: typeof import('./components/FilePreview/index.vue')['default']
     FilesList: typeof import('./components/Chat/FilesList.vue')['default']
+    FriendRequestDialog: typeof import('./components/Chat/FriendRequestDialog.vue')['default']
     GroupsList: typeof import('./components/Chat/GroupsList.vue')['default']
     ImagePreview: typeof import('./components/Chat/ImagePreview.vue')['default']
     ImageUpload: typeof import('./components/ImageUpload/index.vue')['default']
@@ -58,7 +59,9 @@ declare module 'vue' {
     LocationPicker: typeof import('./components/Chat/LocationPicker.vue')['default']
     MentionSelector: typeof import('./components/Chat/MentionSelector.vue')['default']
     MessageBubble: typeof import('./components/Chat/MessageBubble.vue')['default']
+    MessageForwardDialog: typeof import('./components/Chat/MessageForwardDialog.vue')['default']
     MessageList: typeof import('./components/Chat/MessageList.vue')['default']
+    MessageSearchDialog: typeof import('./components/Chat/MessageSearchDialog.vue')['default']
     NotificationToast: typeof import('./components/Common/NotificationToast.vue')['default']
     Pagination: typeof import('./components/Pagination/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
@@ -68,7 +71,9 @@ declare module 'vue' {
     SvgIcon: typeof import('./components/SvgIcon/index.vue')['default']
     ThemeSwitch: typeof import('./components/ThemeSwitch/index.vue')['default']
     Upload: typeof import('./components/Upload/index.vue')['default']
+    VideoCall: typeof import('./components/Chat/VideoCall.vue')['default']
     VirtualMessageList: typeof import('./components/Chat/VirtualMessageList.vue')['default']
+    VoiceRecorder: typeof import('./components/Chat/VoiceRecorder.vue')['default']
     VoteDialog: typeof import('./components/Chat/VoteDialog.vue')['default']
   }
   export interface ComponentCustomProperties {

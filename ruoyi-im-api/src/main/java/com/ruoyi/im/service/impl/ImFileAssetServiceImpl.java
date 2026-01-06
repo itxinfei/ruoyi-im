@@ -14,8 +14,8 @@ import com.ruoyi.im.service.ImFileAssetService;
 import com.ruoyi.im.exception.BusinessException;
 
 /**
- * 鏂囦欢璧勬簮Service涓氬姟灞傚鐞?- 浼樺寲鐗堟湰
- * 浼樺寲鍐呭锛氭坊鍔犵紦瀛樻満鍒躲€佷簨鍔℃帶鍒躲€佹€ц兘鐩戞帶銆侀敊璇鐞? * 
+ * 閺傚洣娆㈢挧鍕爱Service娑撴艾濮熺仦鍌氼槱閻?- 娴兼ê瀵查悧鍫熸拱
+ * 娴兼ê瀵查崘鍛啇閿涙碍鍧婇崝鐘电处鐎涙ɑ婧€閸掕翰鈧椒绨ㄩ崝鈩冨付閸掕翰鈧焦鈧嗗厴閻╂垶甯堕妴渚€鏁婄拠顖氼槱閻? * 
  * @author ruoyi
  */
 @Service("imFileAssetServiceImpl")
@@ -28,19 +28,19 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     
-    // 缂撳瓨閿墠缂€
+    // 缂傛挸鐡ㄩ柨顔煎缂傗偓
     private static final String FILE_ASSET_CACHE_PREFIX = "im:file:asset:";
     private static final String FILE_MD5_CACHE_PREFIX = "im:file:md5:";
     private static final String USER_FILES_CACHE_PREFIX = "im:user:files:";
     
-    // 缂撳瓨瓒呮椂鏃堕棿锛堝垎閽燂級
-    private static final int CACHE_TIMEOUT_MINUTES = 60; // 鏂囦欢璧勬簮缂撳瓨鏃堕棿鐩稿杈冮暱
+    // 缂傛挸鐡ㄧ搾鍛閺冨爼妫块敍鍫濆瀻闁界噦绱?
+    private static final int CACHE_TIMEOUT_MINUTES = 60; // 閺傚洣娆㈢挧鍕爱缂傛挸鐡ㄩ弮鍫曟？閻╃顕潏鍐毐
     
     /**
-     * 鏌ヨ鏂囦欢璧勬簮鍒楄〃锛堟敮鎸佸垎椤碉級
+     * 閺屻儴顕楅弬鍥︽鐠у嫭绨崚妤勩€冮敍鍫熸暜閹镐礁鍨庢い纰夌礆
      * 
-     * @param imFileAsset 鏂囦欢璧勬簮鏉′欢
-     * @return 鏂囦欢璧勬簮闆嗗悎
+     * @param imFileAsset 閺傚洣娆㈢挧鍕爱閺夆€叉
+     * @return 閺傚洣娆㈢挧鍕爱闂嗗棗鎮?
      */
     @Override
     public List<ImFileAsset> selectList(ImFileAsset imFileAsset) {
@@ -48,27 +48,27 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
         String methodName = "selectList";
         
         try {
-            log.debug("鏌ヨ鏂囦欢璧勬簮鍒楄〃: params={}, method={}", imFileAsset, methodName);
+            log.debug("閺屻儴顕楅弬鍥︽鐠у嫭绨崚妤勩€? params={}, method={}", imFileAsset, methodName);
             
-            // 鍩虹鍒楄〃鏌ヨ閫昏緫鐢辩埗绫诲疄鐜?            List<ImFileAsset> result = super.selectList(imFileAsset);
+            // 閸╄櫣顢呴崚妤勩€冮弻銉嚄闁槒绶悽杈╁煑缁鐤勯悳?            List<ImFileAsset> result = super.selectList(imFileAsset);
             
-            log.debug("鏌ヨ鏂囦欢璧勬簮鍒楄〃瀹屾垚: count={}, method={}", result != null ? result.size() : 0, methodName);
+            log.debug("閺屻儴顕楅弬鍥︽鐠у嫭绨崚妤勩€冪€瑰本鍨? count={}, method={}", result != null ? result.size() : 0, methodName);
             return result;
             
         } catch (Exception e) {
-            log.error("鏌ヨ鏂囦欢璧勬簮鍒楄〃寮傚父: params={}, error={}, method={}", imFileAsset, e.getMessage(), methodName, e);
-            throw new BusinessException("鏌ヨ鏂囦欢璧勬簮鍒楄〃澶辫触", e);
+            log.error("閺屻儴顕楅弬鍥︽鐠у嫭绨崚妤勩€冨鍌氱埗: params={}, error={}, method={}", imFileAsset, e.getMessage(), methodName, e);
+            throw new BusinessException("閺屻儴顕楅弬鍥︽鐠у嫭绨崚妤勩€冩径杈Е", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("鏌ヨ鏂囦欢璧勬簮鍒楄〃鑰楁椂: {}ms, method={}", duration, methodName);
+            log.info("閺屻儴顕楅弬鍥︽鐠у嫭绨崚妤勩€冮懓妤佹: {}ms, method={}", duration, methodName);
         }
     }
     
     /**
-     * 鏂板鏂囦欢璧勬簮
+     * 閺傛澘顤冮弬鍥︽鐠у嫭绨?
      * 
-     * @param imFileAsset 鏂囦欢璧勬簮淇℃伅
-     * @return 缁撴灉
+     * @param imFileAsset 閺傚洣娆㈢挧鍕爱娣団剝浼?
+     * @return 缂佹挻鐏?
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -77,46 +77,46 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
         String methodName = "insert";
         
         try {
-            log.debug("鏂板鏂囦欢璧勬簮: fileName={}, method={}", imFileAsset != null ? imFileAsset.getFileName() : null, methodName);
+            log.debug("閺傛澘顤冮弬鍥︽鐠у嫭绨? fileName={}, method={}", imFileAsset != null ? imFileAsset.getFileName() : null, methodName);
             
-            // 璁剧疆鍒涘缓鏃堕棿
+            // 鐠佸墽鐤嗛崚娑樼紦閺冨爼妫?
             setCreateTime(imFileAsset);
             
-            // 鍩虹鎻掑叆閫昏緫鐢辩埗绫诲疄鐜?            int result = super.insert(imFileAsset);
+            // 閸╄櫣顢呴幓鎺戝弳闁槒绶悽杈╁煑缁鐤勯悳?            int result = super.insert(imFileAsset);
             
             if (result > 0) {
-                log.info("鏂板鏂囦欢璧勬簮鎴愬姛: fileId={}, fileName={}, fileSize={}, result={}, method={}", 
+                log.info("閺傛澘顤冮弬鍥︽鐠у嫭绨幋鎰: fileId={}, fileName={}, fileSize={}, result={}, method={}", 
                          imFileAsset.getId(), imFileAsset.getFileName(), imFileAsset.getFileSize(), result, methodName);
                 
-                // 娓呴櫎鐢ㄦ埛鏂囦欢鍒楄〃缂撳瓨
+                // 濞撳懘娅庨悽銊﹀煕閺傚洣娆㈤崚妤勩€冪紓鎾崇摠
                 if (imFileAsset.getUploaderId() != null) {
                     clearUserFilesCache(imFileAsset.getUploaderId());
                 }
                 
-                // 缂撳瓨MD5淇℃伅
+                // 缂傛挸鐡∕D5娣団剝浼?
                 if (imFileAsset.getMd5() != null) {
                     cacheFileByMd5(imFileAsset);
                 }
             } else {
-                log.warn("鏂板鏂囦欢璧勬簮澶辫触: fileName={}, result={}, method={}", imFileAsset.getFileName(), result, methodName);
+                log.warn("閺傛澘顤冮弬鍥︽鐠у嫭绨径杈Е: fileName={}, result={}, method={}", imFileAsset.getFileName(), result, methodName);
             }
             
             return result;
             
         } catch (Exception e) {
-            log.error("鏂板鏂囦欢璧勬簮寮傚父: fileName={}, error={}, method={}", imFileAsset.getFileName(), e.getMessage(), methodName, e);
-            throw new BusinessException("鏂板鏂囦欢璧勬簮澶辫触", e);
+            log.error("閺傛澘顤冮弬鍥︽鐠у嫭绨鍌氱埗: fileName={}, error={}, method={}", imFileAsset.getFileName(), e.getMessage(), methodName, e);
+            throw new BusinessException("閺傛澘顤冮弬鍥︽鐠у嫭绨径杈Е", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("鏂板鏂囦欢璧勬簮鑰楁椂: {}ms, fileName={}, method={}", duration, imFileAsset.getFileName(), methodName);
+            log.info("閺傛澘顤冮弬鍥︽鐠у嫭绨懓妤佹: {}ms, fileName={}, method={}", duration, imFileAsset.getFileName(), methodName);
         }
     }
     
     /**
-     * 淇敼鏂囦欢璧勬簮
+     * 娣囶喗鏁奸弬鍥︽鐠у嫭绨?
      * 
-     * @param imFileAsset 鏂囦欢璧勬簮淇℃伅
-     * @return 缁撴灉
+     * @param imFileAsset 閺傚洣娆㈢挧鍕爱娣団剝浼?
+     * @return 缂佹挻鐏?
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -125,42 +125,42 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
         String methodName = "update";
         
         try {
-            log.debug("淇敼鏂囦欢璧勬簮: fileId={}, fileName={}, method={}", 
+            log.debug("娣囶喗鏁奸弬鍥︽鐠у嫭绨? fileId={}, fileName={}, method={}", 
                       imFileAsset.getId(), imFileAsset.getFileName(), methodName);
             
-            // 璁剧疆鏇存柊鏃堕棿
+            // 鐠佸墽鐤嗛弴瀛樻煀閺冨爼妫?
             setUpdateTime(imFileAsset);
             
-            // 鍩虹淇敼閫昏緫鐢辩埗绫诲疄鐜?            int result = super.update(imFileAsset);
+            // 閸╄櫣顢呮穱顔芥暭闁槒绶悽杈╁煑缁鐤勯悳?            int result = super.update(imFileAsset);
             
             if (result > 0) {
-                log.info("淇敼鏂囦欢璧勬簮鎴愬姛: fileId={}, fileName={}, result={}, method={}", 
+                log.info("娣囶喗鏁奸弬鍥︽鐠у嫭绨幋鎰: fileId={}, fileName={}, result={}, method={}", 
                          imFileAsset.getId(), imFileAsset.getFileName(), result, methodName);
                 
-                // 娓呴櫎鐩稿叧缂撳瓨
+                // 濞撳懘娅庨惄绋垮彠缂傛挸鐡?
                 clearRelatedCache(imFileAsset);
             } else {
-                log.warn("淇敼鏂囦欢璧勬簮澶辫触: fileId={}, fileName={}, result={}, method={}", 
+                log.warn("娣囶喗鏁奸弬鍥︽鐠у嫭绨径杈Е: fileId={}, fileName={}, result={}, method={}", 
                          imFileAsset.getId(), imFileAsset.getFileName(), result, methodName);
             }
             
             return result;
             
         } catch (Exception e) {
-            log.error("淇敼鏂囦欢璧勬簮寮傚父: fileId={}, fileName={}, error={}, method={}", 
+            log.error("娣囶喗鏁奸弬鍥︽鐠у嫭绨鍌氱埗: fileId={}, fileName={}, error={}, method={}", 
                       imFileAsset.getId(), imFileAsset.getFileName(), e.getMessage(), methodName, e);
-            throw new BusinessException("淇敼鏂囦欢璧勬簮澶辫触", e);
+            throw new BusinessException("娣囶喗鏁奸弬鍥︽鐠у嫭绨径杈Е", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("淇敼鏂囦欢璧勬簮鑰楁椂: {}ms, fileId={}, method={}", duration, imFileAsset.getId(), methodName);
+            log.info("娣囶喗鏁奸弬鍥︽鐠у嫭绨懓妤佹: {}ms, fileId={}, method={}", duration, imFileAsset.getId(), methodName);
         }
     }
     
     /**
-     * 鎵归噺鍒犻櫎鏂囦欢璧勬簮
+     * 閹靛綊鍣洪崚鐘绘珟閺傚洣娆㈢挧鍕爱
      * 
-     * @param ids 闇€瑕佸垹闄ょ殑鏂囦欢璧勬簮ID
-     * @return 缁撴灉
+     * @param ids 闂団偓鐟曚礁鍨归梽銈囨畱閺傚洣娆㈢挧鍕爱ID
+     * @return 缂佹挻鐏?
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -169,14 +169,14 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
         String methodName = "deleteByIds";
         
         try {
-            log.debug("鎵归噺鍒犻櫎鏂囦欢璧勬簮: ids={}, count={}, method={}", ids, ids != null ? ids.length : 0, methodName);
+            log.debug("閹靛綊鍣洪崚鐘绘珟閺傚洣娆㈢挧鍕爱: ids={}, count={}, method={}", ids, ids != null ? ids.length : 0, methodName);
             
             if (ids == null || ids.length == 0) {
-                log.warn("鎵归噺鍒犻櫎鏂囦欢璧勬簮鍙傛暟鏃犳晥: ids={}, method={}", ids, methodName);
-                throw new BusinessException("鎵归噺鍒犻櫎鏂囦欢璧勬簮鍙傛暟鏃犳晥");
+                log.warn("閹靛綊鍣洪崚鐘绘珟閺傚洣娆㈢挧鍕爱閸欏倹鏆熼弮鐘虫櫏: ids={}, method={}", ids, methodName);
+                throw new BusinessException("閹靛綊鍣洪崚鐘绘珟閺傚洣娆㈢挧鍕爱閸欏倹鏆熼弮鐘虫櫏");
             }
             
-            // 鎵归噺鍒犻櫎鍓嶅厛鏌ヨ鐩稿叧鏂囦欢淇℃伅锛岀敤浜庣紦瀛樻竻鐞?            List<ImFileAsset> fileAssets = null;
+            // 閹靛綊鍣洪崚鐘绘珟閸撳秴鍘涢弻銉嚄閻╃鍙ч弬鍥︽娣団剝浼呴敍宀€鏁ゆ禍搴ｇ处鐎涙ɑ绔婚悶?            List<ImFileAsset> fileAssets = null;
             for (Long id : ids) {
                 ImFileAsset fileAsset = selectById(id);
                 if (fileAsset != null) {
@@ -187,37 +187,37 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
                 }
             }
             
-            // 鍩虹鎵归噺鍒犻櫎閫昏緫鐢辩埗绫诲疄鐜?            int result = super.deleteByIds(ids);
+            // 閸╄櫣顢呴幍褰掑櫤閸掔娀娅庨柅鏄忕帆閻㈣京鍩楃猾璇茬杽閻?            int result = super.deleteByIds(ids);
             
             if (result > 0) {
-                log.info("鎵归噺鍒犻櫎鏂囦欢璧勬簮鎴愬姛: count={}, result={}, method={}", ids.length, result, methodName);
+                log.info("閹靛綊鍣洪崚鐘绘珟閺傚洣娆㈢挧鍕爱閹存劕濮? count={}, result={}, method={}", ids.length, result, methodName);
                 
-                // 娓呴櫎鐩稿叧缂撳瓨
+                // 濞撳懘娅庨惄绋垮彠缂傛挸鐡?
                 if (fileAssets != null) {
                     for (ImFileAsset fileAsset : fileAssets) {
                         clearRelatedCache(fileAsset);
                     }
                 }
             } else {
-                log.warn("鎵归噺鍒犻櫎鏂囦欢璧勬簮澶辫触: ids={}, count={}, result={}, method={}", ids, ids.length, result, methodName);
+                log.warn("閹靛綊鍣洪崚鐘绘珟閺傚洣娆㈢挧鍕爱婢惰精瑙? ids={}, count={}, result={}, method={}", ids, ids.length, result, methodName);
             }
             
             return result;
             
         } catch (Exception e) {
-            log.error("鎵归噺鍒犻櫎鏂囦欢璧勬簮寮傚父: ids={}, error={}, method={}", ids, e.getMessage(), methodName, e);
-            throw new BusinessException("鎵归噺鍒犻櫎鏂囦欢璧勬簮澶辫触", e);
+            log.error("閹靛綊鍣洪崚鐘绘珟閺傚洣娆㈢挧鍕爱瀵倸鐖? ids={}, error={}, method={}", ids, e.getMessage(), methodName, e);
+            throw new BusinessException("閹靛綊鍣洪崚鐘绘珟閺傚洣娆㈢挧鍕爱婢惰精瑙?", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("鎵归噺鍒犻櫎鏂囦欢璧勬簮鑰楁椂: {}ms, ids={}, count={}, method={}", duration, ids, ids != null ? ids.length : 0, methodName);
+            log.info("閹靛綊鍣洪崚鐘绘珟閺傚洣娆㈢挧鍕爱閼版妞? {}ms, ids={}, count={}, method={}", duration, ids, ids != null ? ids.length : 0, methodName);
         }
     }
     
     /**
-     * 鍒犻櫎鏂囦欢璧勬簮淇℃伅
+     * 閸掔娀娅庨弬鍥︽鐠у嫭绨穱鈩冧紖
      * 
-     * @param id 鏂囦欢璧勬簮ID
-     * @return 缁撴灉
+     * @param id 閺傚洣娆㈢挧鍕爱ID
+     * @return 缂佹挻鐏?
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -226,160 +226,160 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
         String methodName = "deleteById";
         
         try {
-            log.debug("鍒犻櫎鏂囦欢璧勬簮: fileId={}, method={}", id, methodName);
+            log.debug("閸掔娀娅庨弬鍥︽鐠у嫭绨? fileId={}, method={}", id, methodName);
             
-            // 鍏堟煡璇㈡枃浠朵俊鎭紝鐢ㄤ簬缂撳瓨娓呯悊
+            // 閸忓牊鐓＄拠銏℃瀮娴犳湹淇婇幁顖ょ礉閻劋绨紓鎾崇摠濞撳懐鎮?
             ImFileAsset fileAsset = selectById(id);
             
-            // 鍩虹鍒犻櫎閫昏緫鐢辩埗绫诲疄鐜?            int result = super.deleteById(id);
+            // 閸╄櫣顢呴崚鐘绘珟闁槒绶悽杈╁煑缁鐤勯悳?            int result = super.deleteById(id);
             
             if (result > 0) {
-                log.info("鍒犻櫎鏂囦欢璧勬簮鎴愬姛: fileId={}, result={}, method={}", id, result, methodName);
+                log.info("閸掔娀娅庨弬鍥︽鐠у嫭绨幋鎰: fileId={}, result={}, method={}", id, result, methodName);
                 
-                // 娓呴櫎鐩稿叧缂撳瓨
+                // 濞撳懘娅庨惄绋垮彠缂傛挸鐡?
                 if (fileAsset != null) {
                     clearRelatedCache(fileAsset);
                 }
             } else {
-                log.warn("鍒犻櫎鏂囦欢璧勬簮澶辫触: fileId={}, result={}, method={}", id, result, methodName);
+                log.warn("閸掔娀娅庨弬鍥︽鐠у嫭绨径杈Е: fileId={}, result={}, method={}", id, result, methodName);
             }
             
             return result;
             
         } catch (Exception e) {
-            log.error("鍒犻櫎鏂囦欢璧勬簮寮傚父: fileId={}, error={}, method={}", id, e.getMessage(), methodName, e);
-            throw new BusinessException("鍒犻櫎鏂囦欢璧勬簮澶辫触", e);
+            log.error("閸掔娀娅庨弬鍥︽鐠у嫭绨鍌氱埗: fileId={}, error={}, method={}", id, e.getMessage(), methodName, e);
+            throw new BusinessException("閸掔娀娅庨弬鍥︽鐠у嫭绨径杈Е", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("鍒犻櫎鏂囦欢璧勬簮鑰楁椂: {}ms, fileId={}, method={}", duration, id, methodName);
+            log.info("閸掔娀娅庨弬鍥︽鐠у嫭绨懓妤佹: {}ms, fileId={}, method={}", duration, id, methodName);
         }
     }
     
     /**
-     * 鏍规嵁MD5鍊兼煡璇㈡枃浠惰祫婧?     * 
-     * @param md5 鏂囦欢MD5鍊?     * @return 鏂囦欢璧勬簮
+     * 閺嶈宓丮D5閸婂吋鐓＄拠銏℃瀮娴犳儼绁┃?     * 
+     * @param md5 閺傚洣娆D5閸?     * @return 閺傚洣娆㈢挧鍕爱
      */
     public ImFileAsset selectImFileAssetByMd5(String md5) {
         long startTime = System.currentTimeMillis();
         String methodName = "selectImFileAssetByMd5";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             if (md5 == null || md5.trim().isEmpty()) {
-                throw new BusinessException(methodName + "鍙傛暟鏃犳晥: MD5涓嶈兘涓虹┖");
+                throw new BusinessException(methodName + "閸欏倹鏆熼弮鐘虫櫏: MD5娑撳秷鍏樻稉铏光敄");
             }
             
-            log.debug("鏍规嵁MD5鏌ヨ鏂囦欢璧勬簮: md5={}, method={}", md5, methodName);
+            log.debug("閺嶈宓丮D5閺屻儴顕楅弬鍥︽鐠у嫭绨? md5={}, method={}", md5, methodName);
             
-            // 鐢熸垚缂撳瓨閿?            String cacheKey = FILE_MD5_CACHE_PREFIX + md5;
+            // 閻㈢喐鍨氱紓鎾崇摠闁?            String cacheKey = FILE_MD5_CACHE_PREFIX + md5;
             
-            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
+            // 濡偓閺屻儳绱︾€?            @SuppressWarnings("unchecked")
             ImFileAsset cachedFile = (ImFileAsset) redisTemplate.opsForValue().get(cacheKey);
             if (cachedFile != null) {
-                log.debug("浠庣紦瀛樿幏鍙栨枃浠惰祫婧? md5={}, fileId={}, method={}", md5, cachedFile.getId(), methodName);
+                log.debug("娴犲海绱︾€涙骞忛崣鏍ㄦ瀮娴犳儼绁┃? md5={}, fileId={}, method={}", md5, cachedFile.getId(), methodName);
                 return cachedFile;
             }
             
-            // 鏋勫缓鏌ヨ鏉′欢
+            // 閺嬪嫬缂撻弻銉嚄閺夆€叉
             ImFileAsset query = new ImFileAsset();
             query.setMd5(md5);
             
-            // 鏌ヨ鏁版嵁搴?            List<ImFileAsset> fileAssets = selectList(query);
+            // 閺屻儴顕楅弫鐗堝祦鎼?            List<ImFileAsset> fileAssets = selectList(query);
             ImFileAsset fileAsset = fileAssets != null && !fileAssets.isEmpty() ? fileAssets.get(0) : null;
             
-            // 缂撳瓨缁撴灉
+            // 缂傛挸鐡ㄧ紒鎾寸亯
             if (fileAsset != null) {
                 redisTemplate.opsForValue().set(cacheKey, fileAsset, CACHE_TIMEOUT_MINUTES, java.util.concurrent.TimeUnit.MINUTES);
-                log.debug("鏂囦欢璧勬簮宸茬紦瀛? md5={}, fileId={}, method={}", md5, fileAsset.getId(), methodName);
+                log.debug("閺傚洣娆㈢挧鍕爱瀹歌尙绱︾€? md5={}, fileId={}, method={}", md5, fileAsset.getId(), methodName);
             }
             
             return fileAsset;
             
         } catch (Exception e) {
-            log.error("鏍规嵁MD5鏌ヨ鏂囦欢璧勬簮寮傚父: md5={}, error={}, method={}", md5, e.getMessage(), methodName, e);
-            throw new BusinessException("鏍规嵁MD5鏌ヨ鏂囦欢璧勬簮澶辫触", e);
+            log.error("閺嶈宓丮D5閺屻儴顕楅弬鍥︽鐠у嫭绨鍌氱埗: md5={}, error={}, method={}", md5, e.getMessage(), methodName, e);
+            throw new BusinessException("閺嶈宓丮D5閺屻儴顕楅弬鍥︽鐠у嫭绨径杈Е", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("鏍规嵁MD5鏌ヨ鏂囦欢璧勬簮鑰楁椂: {}ms, md5={}, method={}", duration, md5, methodName);
+            log.info("閺嶈宓丮D5閺屻儴顕楅弬鍥︽鐠у嫭绨懓妤佹: {}ms, md5={}, method={}", duration, md5, methodName);
         }
     }
     
     /**
-     * 鏍规嵁鐢ㄦ埛ID鏌ヨ鐢ㄦ埛涓婁紶鐨勬枃浠惰祫婧愬垪琛?     * 
-     * @param userId 鐢ㄦ埛ID
-     * @return 鏂囦欢璧勬簮闆嗗悎
+     * 閺嶈宓侀悽銊﹀煕ID閺屻儴顕楅悽銊﹀煕娑撳﹣绱堕惃鍕瀮娴犳儼绁┃鎰灙鐞?     * 
+     * @param userId 閻劍鍩汭D
+     * @return 閺傚洣娆㈢挧鍕爱闂嗗棗鎮?
      */
     public List<ImFileAsset> selectImFileAssetListByUploaderId(Long userId) {
         long startTime = System.currentTimeMillis();
         String methodName = "selectImFileAssetListByUploaderId";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             validateId(userId, methodName);
             
-            log.debug("鏍规嵁鐢ㄦ埛ID鏌ヨ鏂囦欢璧勬簮鍒楄〃: userId={}, method={}", userId, methodName);
+            log.debug("閺嶈宓侀悽銊﹀煕ID閺屻儴顕楅弬鍥︽鐠у嫭绨崚妤勩€? userId={}, method={}", userId, methodName);
             
-            // 鐢熸垚缂撳瓨閿?            String cacheKey = USER_FILES_CACHE_PREFIX + userId;
+            // 閻㈢喐鍨氱紓鎾崇摠闁?            String cacheKey = USER_FILES_CACHE_PREFIX + userId;
             
-            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
+            // 濡偓閺屻儳绱︾€?            @SuppressWarnings("unchecked")
             List<ImFileAsset> cachedFiles = (List<ImFileAsset>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedFiles != null && !cachedFiles.isEmpty()) {
-                log.debug("浠庣紦瀛樿幏鍙栫敤鎴锋枃浠惰祫婧愬垪琛? userId={}, count={}, method={}", userId, cachedFiles.size(), methodName);
+                log.debug("娴犲海绱︾€涙骞忛崣鏍暏閹撮攱鏋冩禒鎯扮カ濠ф劕鍨悰? userId={}, count={}, method={}", userId, cachedFiles.size(), methodName);
                 return cachedFiles;
             }
             
-            // 鏋勫缓鏌ヨ鏉′欢
+            // 閺嬪嫬缂撻弻銉嚄閺夆€叉
             ImFileAsset query = new ImFileAsset();
             query.setUploaderId(userId);
             
-            // 鏌ヨ鏁版嵁搴?            List<ImFileAsset> fileAssets = selectList(query);
+            // 閺屻儴顕楅弫鐗堝祦鎼?            List<ImFileAsset> fileAssets = selectList(query);
             
-            // 缂撳瓨缁撴灉
+            // 缂傛挸鐡ㄧ紒鎾寸亯
             if (fileAssets != null && !fileAssets.isEmpty()) {
                 redisTemplate.opsForValue().set(cacheKey, fileAssets, CACHE_TIMEOUT_MINUTES, java.util.concurrent.TimeUnit.MINUTES);
-                log.debug("鐢ㄦ埛鏂囦欢璧勬簮鍒楄〃宸茬紦瀛? userId={}, count={}, method={}", userId, fileAssets.size(), methodName);
+                log.debug("閻劍鍩涢弬鍥︽鐠у嫭绨崚妤勩€冨鑼处鐎? userId={}, count={}, method={}", userId, fileAssets.size(), methodName);
             }
             
             return fileAssets;
             
         } catch (Exception e) {
-            log.error("鏍规嵁鐢ㄦ埛ID鏌ヨ鏂囦欢璧勬簮鍒楄〃寮傚父: userId={}, error={}, method={}", userId, e.getMessage(), methodName, e);
-            throw new BusinessException("鏍规嵁鐢ㄦ埛ID鏌ヨ鏂囦欢璧勬簮鍒楄〃澶辫触", e);
+            log.error("閺嶈宓侀悽銊﹀煕ID閺屻儴顕楅弬鍥︽鐠у嫭绨崚妤勩€冨鍌氱埗: userId={}, error={}, method={}", userId, e.getMessage(), methodName, e);
+            throw new BusinessException("閺嶈宓侀悽銊﹀煕ID閺屻儴顕楅弬鍥︽鐠у嫭绨崚妤勩€冩径杈Е", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("鏍规嵁鐢ㄦ埛ID鏌ヨ鏂囦欢璧勬簮鍒楄〃鑰楁椂: {}ms, userId={}, method={}", duration, userId, methodName);
+            log.info("閺嶈宓侀悽銊﹀煕ID閺屻儴顕楅弬鍥︽鐠у嫭绨崚妤勩€冮懓妤佹: {}ms, userId={}, method={}", duration, userId, methodName);
         }
     }
     
     /**
-     * 鏍规嵁MD5缂撳瓨鏂囦欢璧勬簮
+     * 閺嶈宓丮D5缂傛挸鐡ㄩ弬鍥︽鐠у嫭绨?
      * 
-     * @param fileAsset 鏂囦欢璧勬簮
+     * @param fileAsset 閺傚洣娆㈢挧鍕爱
      */
     private void cacheFileByMd5(ImFileAsset fileAsset) {
         if (fileAsset != null && fileAsset.getMd5() != null) {
             String cacheKey = FILE_MD5_CACHE_PREFIX + fileAsset.getMd5();
             redisTemplate.opsForValue().set(cacheKey, fileAsset, CACHE_TIMEOUT_MINUTES, java.util.concurrent.TimeUnit.MINUTES);
-            log.debug("鏂囦欢璧勬簮MD5缂撳瓨宸叉洿鏂? fileId={}, md5={}", fileAsset.getId(), fileAsset.getMd5());
+            log.debug("閺傚洣娆㈢挧鍕爱MD5缂傛挸鐡ㄥ鍙夋纯閺? fileId={}, md5={}", fileAsset.getId(), fileAsset.getMd5());
         }
     }
     
     /**
-     * 娓呴櫎鐢ㄦ埛鏂囦欢鍒楄〃缂撳瓨
+     * 濞撳懘娅庨悽銊﹀煕閺傚洣娆㈤崚妤勩€冪紓鎾崇摠
      * 
-     * @param userId 鐢ㄦ埛ID
+     * @param userId 閻劍鍩汭D
      */
     private void clearUserFilesCache(Long userId) {
         if (userId != null) {
             String cacheKey = USER_FILES_CACHE_PREFIX + userId;
             redisTemplate.delete(cacheKey);
-            log.debug("鐢ㄦ埛鏂囦欢鍒楄〃缂撳瓨宸叉竻闄? userId={}", userId);
+            log.debug("閻劍鍩涢弬鍥︽閸掓銆冪紓鎾崇摠瀹稿弶绔婚梽? userId={}", userId);
         }
     }
     
     /**
-     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?     * 
-     * @return 瀹炰綋绫诲瀷鍚嶇О
+     * 鐎圭偟骞嘐nhancedBaseServiceImpl閻ㄥ嫭濞婄挒鈩冩煙濞?     * 
+     * @return 鐎圭偘缍嬬猾璇茬€烽崥宥囆?
      */
     @Override
     protected String getEntityType() {
@@ -387,9 +387,9 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
     }
     
     /**
-     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?     * 
-     * @param entity 鏂囦欢璧勬簮瀹炰綋
-     * @return 鏂囦欢璧勬簮ID
+     * 鐎圭偟骞嘐nhancedBaseServiceImpl閻ㄥ嫭濞婄挒鈩冩煙濞?     * 
+     * @param entity 閺傚洣娆㈢挧鍕爱鐎圭偘缍?
+     * @return 閺傚洣娆㈢挧鍕爱ID
      */
     @Override
     protected Long getEntityId(ImFileAsset entity) {
@@ -397,8 +397,8 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
     }
     
     /**
-     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?     * 
-     * @param entity 鏂囦欢璧勬簮瀹炰綋
+     * 鐎圭偟骞嘐nhancedBaseServiceImpl閻ㄥ嫭濞婄挒鈩冩煙濞?     * 
+     * @param entity 閺傚洣娆㈢挧鍕爱鐎圭偘缍?
      */
     @Override
     protected void setCreateTime(ImFileAsset entity) {
@@ -408,33 +408,33 @@ public class ImFileAssetServiceImpl extends EnhancedBaseServiceImpl<ImFileAsset,
     }
     
     /**
-     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?     * 
-     * @param entity 鏂囦欢璧勬簮瀹炰綋
+     * 鐎圭偟骞嘐nhancedBaseServiceImpl閻ㄥ嫭濞婄挒鈩冩煙濞?     * 
+     * @param entity 閺傚洣娆㈢挧鍕爱鐎圭偘缍?
      */
     @Override
     protected void setUpdateTime(ImFileAsset entity) {
         if (entity != null) {
-            // 鏂囦欢璧勬簮閫氬父涓嶉渶瑕佹洿鏂版椂闂达紝浣嗚繖閲屾彁渚涚粺涓€鐨勬帴鍙?            // 濡傛灉闇€瑕佹洿鏂帮紝鍙互鍙栨秷涓嬮潰鐨勬敞閲?            // entity.setUpdateTime(LocalDateTime.now());
+            // 閺傚洣娆㈢挧鍕爱闁艾鐖舵稉宥夋付鐟曚焦娲块弬鐗堟闂傝揪绱濇担鍡氱箹闁插本褰佹笟娑氱埠娑撯偓閻ㄥ嫭甯撮崣?            // 婵″倹鐏夐棁鈧憰浣规纯閺傚府绱濋崣顖欎簰閸欐牗绉锋稉瀣桨閻ㄥ嫭鏁為柌?            // entity.setUpdateTime(LocalDateTime.now());
         }
     }
     
     /**
-     * 瀹炵幇EnhancedBaseServiceImpl涓殑clearRelatedCache鏂规硶锛屾彁渚涙枃浠惰祫婧愮壒瀹氱紦瀛樻竻鐞嗛€昏緫
+     * 鐎圭偟骞嘐nhancedBaseServiceImpl娑擃厾娈慶learRelatedCache閺傝纭堕敍灞惧絹娓氭稒鏋冩禒鎯扮カ濠ф劗澹掔€规氨绱︾€涙ɑ绔婚悶鍡涒偓鏄忕帆
      * 
-     * @param entity 鏂囦欢璧勬簮瀹炰綋
+     * @param entity 閺傚洣娆㈢挧鍕爱鐎圭偘缍?
      */
     @Override
     protected void clearRelatedCache(ImFileAsset entity) {
         if (entity != null) {
-            // 娓呴櫎瀹炰綋缂撳瓨
+            // 濞撳懘娅庣€圭偘缍嬬紓鎾崇摠
             clearEntityCache(entity.getId());
             
-            // 娓呴櫎MD5缂撳瓨
+            // 濞撳懘娅嶮D5缂傛挸鐡?
             if (entity.getMd5() != null) {
                 redisTemplate.delete(FILE_MD5_CACHE_PREFIX + entity.getMd5());
             }
             
-            // 娓呴櫎鐢ㄦ埛鏂囦欢鍒楄〃缂撳瓨
+            // 濞撳懘娅庨悽銊﹀煕閺傚洣娆㈤崚妤勩€冪紓鎾崇摠
             if (entity.getUploaderId() != null) {
                 clearUserFilesCache(entity.getUploaderId());
             }

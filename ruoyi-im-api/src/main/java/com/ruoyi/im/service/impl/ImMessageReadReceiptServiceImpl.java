@@ -8,7 +8,7 @@ import com.ruoyi.im.domain.ImMessageReadReceipt;
 import com.ruoyi.im.service.ImMessageReadReceiptService;
 
 /**
- * 娑堟伅宸茶鍥炴墽Service涓氬姟灞傚鐞?
+ * 濞戝牊浼呭鑼额嚢閸ョ偞澧絊ervice娑撴艾濮熺仦鍌氼槱閻?
  * 
  * @author ruoyi
  */
@@ -18,10 +18,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     private ImMessageReadReceiptMapper imMessageReadReceiptMapper;
 
     /**
-     * 鏌ヨ娑堟伅宸茶鍥炴墽
+     * 閺屻儴顕楀☉鍫熶紖瀹歌尪顕伴崶鐐村⒔
      * 
-     * @param id 娑堟伅宸茶鍥炴墽ID
-     * @return 娑堟伅宸茶鍥炴墽
+     * @param id 濞戝牊浼呭鑼额嚢閸ョ偞澧絀D
+     * @return 濞戝牊浼呭鑼额嚢閸ョ偞澧?
      */
     @Override
     public ImMessageReadReceipt selectImMessageReadReceiptById(Long id) {
@@ -29,10 +29,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
 
     /**
-     * 鏌ヨ娑堟伅宸茶鍥炴墽鍒楄〃
+     * 閺屻儴顕楀☉鍫熶紖瀹歌尪顕伴崶鐐村⒔閸掓銆?
      * 
-     * @param imMessageReadReceipt 娑堟伅宸茶鍥炴墽
-     * @return 娑堟伅宸茶鍥炴墽
+     * @param imMessageReadReceipt 濞戝牊浼呭鑼额嚢閸ョ偞澧?
+     * @return 濞戝牊浼呭鑼额嚢閸ョ偞澧?
      */
     @Override
     public List<ImMessageReadReceipt> selectImMessageReadReceiptList(ImMessageReadReceipt imMessageReadReceipt) {
@@ -40,10 +40,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
 
     /**
-     * 鏂板娑堟伅宸茶鍥炴墽
+     * 閺傛澘顤冨☉鍫熶紖瀹歌尪顕伴崶鐐村⒔
      * 
-     * @param imMessageReadReceipt 娑堟伅宸茶鍥炴墽
-     * @return 缁撴灉
+     * @param imMessageReadReceipt 濞戝牊浼呭鑼额嚢閸ョ偞澧?
+     * @return 缂佹挻鐏?
      */
     @Override
     public int insertImMessageReadReceipt(ImMessageReadReceipt imMessageReadReceipt) {
@@ -51,10 +51,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
 
     /**
-     * 淇敼娑堟伅宸茶鍥炴墽
+     * 娣囶喗鏁煎☉鍫熶紖瀹歌尪顕伴崶鐐村⒔
      * 
-     * @param imMessageReadReceipt 娑堟伅宸茶鍥炴墽
-     * @return 缁撴灉
+     * @param imMessageReadReceipt 濞戝牊浼呭鑼额嚢閸ョ偞澧?
+     * @return 缂佹挻鐏?
      */
     @Override
     public int updateImMessageReadReceipt(ImMessageReadReceipt imMessageReadReceipt) {
@@ -62,10 +62,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
 
     /**
-     * 鎵归噺鍒犻櫎娑堟伅宸茶鍥炴墽
+     * 閹靛綊鍣洪崚鐘绘珟濞戝牊浼呭鑼额嚢閸ョ偞澧?
      * 
-     * @param ids 闇€瑕佸垹闄ょ殑娑堟伅宸茶鍥炴墽ID
-     * @return 缁撴灉
+     * @param ids 闂団偓鐟曚礁鍨归梽銈囨畱濞戝牊浼呭鑼额嚢閸ョ偞澧絀D
+     * @return 缂佹挻鐏?
      */
     @Override
     public int deleteImMessageReadReceiptByIds(Long[] ids) {
@@ -73,10 +73,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
 
     /**
-     * 鍒犻櫎娑堟伅宸茶鍥炴墽淇℃伅
+     * 閸掔娀娅庡☉鍫熶紖瀹歌尪顕伴崶鐐村⒔娣団剝浼?
      * 
-     * @param id 娑堟伅宸茶鍥炴墽ID
-     * @return 缁撴灉
+     * @param id 濞戝牊浼呭鑼额嚢閸ョ偞澧絀D
+     * @return 缂佹挻鐏?
      */
     @Override
     public int deleteImMessageReadReceiptById(Long id) {
@@ -84,10 +84,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 鏍规嵁娑堟伅ID鏌ヨ宸茶鍥炴墽鍒楄〃
+     * 閺嶈宓佸☉鍫熶紖ID閺屻儴顕楀鑼额嚢閸ョ偞澧介崚妤勩€?
      * 
-     * @param messageId 娑堟伅ID
-     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
+     * @param messageId 濞戝牊浼匢D
+     * @return 濞戝牊浼呭鑼额嚢閸ョ偞澧介梿鍡楁値
      */
     @Override
     public List<ImMessageReadReceipt> selectImMessageReadReceiptByMessageId(Long messageId) {
@@ -95,10 +95,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 鏍规嵁娑堟伅ID鏌ヨ宸茶鍥炴墽鍒楄〃锛堝甫鍒嗛〉锛?
+     * 閺嶈宓佸☉鍫熶紖ID閺屻儴顕楀鑼额嚢閸ョ偞澧介崚妤勩€冮敍鍫濈敨閸掑棝銆夐敍?
      * 
-     * @param messageId 娑堟伅ID
-     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
+     * @param messageId 濞戝牊浼匢D
+     * @return 濞戝牊浼呭鑼额嚢閸ョ偞澧介梿鍡楁値
      */
     @Override
     public List<ImMessageReadReceipt> selectImMessageReadReceiptListByMessageId(Long messageId) {
@@ -106,10 +106,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 鏍规嵁鐢ㄦ埛ID鏌ヨ宸茶鍥炴墽鍒楄〃
+     * 閺嶈宓侀悽銊﹀煕ID閺屻儴顕楀鑼额嚢閸ョ偞澧介崚妤勩€?
      * 
-     * @param userId 鐢ㄦ埛ID
-     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
+     * @param userId 閻劍鍩汭D
+     * @return 濞戝牊浼呭鑼额嚢閸ョ偞澧介梿鍡楁値
      */
     @Override
     public List<ImMessageReadReceipt> selectImMessageReadReceiptByUserId(Long userId) {
@@ -117,10 +117,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 鏍规嵁浼氳瘽ID鏌ヨ宸茶鍥炴墽鍒楄〃
+     * 閺嶈宓佹导姘崇樈ID閺屻儴顕楀鑼额嚢閸ョ偞澧介崚妤勩€?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
+     * @param conversationId 娴兼俺鐦絀D
+     * @return 濞戝牊浼呭鑼额嚢閸ョ偞澧介梿鍡楁値
      */
     @Override
     public List<ImMessageReadReceipt> selectImMessageReadReceiptByConversationId(Long conversationId) {
@@ -128,10 +128,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 鏍规嵁浼氳瘽ID鏌ヨ宸茶鍥炴墽鍒楄〃锛堝甫鍒嗛〉锛?
+     * 閺嶈宓佹导姘崇樈ID閺屻儴顕楀鑼额嚢閸ョ偞澧介崚妤勩€冮敍鍫濈敨閸掑棝銆夐敍?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @return 娑堟伅宸茶鍥炴墽闆嗗悎
+     * @param conversationId 娴兼俺鐦絀D
+     * @return 濞戝牊浼呭鑼额嚢閸ョ偞澧介梿鍡楁値
      */
     @Override
     public List<ImMessageReadReceipt> selectImMessageReadReceiptListByConversationId(Long conversationId) {
@@ -139,13 +139,13 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 鏍囪娑堟伅宸茶
+     * 閺嶅洩顔囧☉鍫熶紖瀹歌尪顕?
      * 
-     * @param messageId 娑堟伅ID
-     * @param userId 鐢ㄦ埛ID
-     * @param conversationId 浼氳瘽ID
-     * @param deviceType 璁惧绫诲瀷
-     * @return 缁撴灉
+     * @param messageId 濞戝牊浼匢D
+     * @param userId 閻劍鍩汭D
+     * @param conversationId 娴兼俺鐦絀D
+     * @param deviceType 鐠佹儳顦猾璇茬€?
+     * @return 缂佹挻鐏?
      */
     @Override
     public int markMessageAsRead(Long messageId, Long userId, Long conversationId, String deviceType) {
@@ -158,13 +158,13 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 鎵归噺鏍囪娑堟伅宸茶
+     * 閹靛綊鍣洪弽鍥唶濞戝牊浼呭鑼额嚢
      * 
-     * @param messageIds 娑堟伅ID鍒楄〃
-     * @param userId 鐢ㄦ埛ID
-     * @param conversationId 浼氳瘽ID
-     * @param deviceType 璁惧绫诲瀷
-     * @return 缁撴灉
+     * @param messageIds 濞戝牊浼匢D閸掓銆?
+     * @param userId 閻劍鍩汭D
+     * @param conversationId 娴兼俺鐦絀D
+     * @param deviceType 鐠佹儳顦猾璇茬€?
+     * @return 缂佹挻鐏?
      */
     @Override
     public int batchMarkMessagesAsRead(List<Long> messageIds, Long userId, Long conversationId, String deviceType) {
@@ -176,10 +176,10 @@ public class ImMessageReadReceiptServiceImpl implements ImMessageReadReceiptServ
     }
     
     /**
-     * 鍒犻櫎娑堟伅鐨勬墍鏈夊凡璇诲洖鎵?
+     * 閸掔娀娅庡☉鍫熶紖閻ㄥ嫭澧嶉張澶婂嚒鐠囪娲栭幍?
      * 
-     * @param messageId 娑堟伅ID
-     * @return 缁撴灉
+     * @param messageId 濞戝牊浼匢D
+     * @return 缂佹挻鐏?
      */
     @Override
     public int deleteImMessageReadReceiptByMessageId(Long messageId) {

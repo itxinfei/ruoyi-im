@@ -1024,10 +1024,10 @@
                           <el-icon><Mute /></el-icon>
                           禁言成员
                         </el-dropdown-item>
-                        <el-dropdown-item v-if="member.isMuted" command="unmute">
-                          <el-icon><Muted /></el-icon>
-                          取消禁言
-                        </el-dropdown-item>
+<el-dropdown-item v-if="member.isMuted" command="unmute">
+                           <el-icon><Unlock /></el-icon>
+                           取消禁言
+                         </el-dropdown-item>
                         <el-dropdown-item command="remove" style="color: #f5222d">移出群组</el-dropdown-item>
                       </el-dropdown-menu>
                     </template>
@@ -1368,48 +1368,32 @@ import { useRouter, useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Search,
-  ChatLineSquare,
-  User,
-  Grid,
-  Folder,
-  ArrowLeft,
-  ArrowRight,
-  ArrowDown,
-  Phone,
-  VideoCamera,
-  PictureFilled,
   Microphone,
+  VideoCamera,
   ChatDotRound,
-  Document,
-  Calendar,
-  Notification,
-  Odometer,
-  Edit,
   Setting,
-  Files,
-  Bell,
-  More,
-  SwitchButton,
-  Warning,
-  Loading,
-  WarningFilled,
-  SuccessFilled,
   Plus,
-  Location,
-  Upload,
-  Download,
-  Delete,
-  Star,
-  Share,
-  DocumentCopy,
-  Check,
   Close,
-  Moon,
-  Sunny,
-  Promotion,
-  Mute,
-  Muted
+  Search,
+  More,
+  Paperclip,
+  Picture,
+  Phone,
+  VideoPlay,
+  User,
+  CircleCheck,
+  Warning,
+  CircleClose,
+  Refresh,
+  Share,
+  Download,
+  Upload,
+  View,
+  Hide,
+  Lock,
+  Unlock,
+  Bell,
+  Mute
 } from '@element-plus/icons-vue'
 import { formatTime as formatTimeUtil } from '@/utils/format/time'
 import { useImWebSocket } from '@/composables/useImWebSocket'
@@ -2462,7 +2446,7 @@ const uploadAndSendFile = async (file, type) => {
     const uploadApi = type === 'image' ? uploadImage : uploadFile
     const response = await uploadApi(file, (progressEvent) => {
       const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-      console.log('上传进度:', percentCompleted)
+      // 可以在这里更新上传进度 UI
     })
 
     const fileUrl = response.data?.url || response.data?.fileUrl || response.url
@@ -3531,6 +3515,22 @@ $shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.
       background: #bfbfbf;
     }
   }
+}
+
+// 文本省略样式
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 多行文本省略
+@mixin text-ellipsis-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .web-im-layout {

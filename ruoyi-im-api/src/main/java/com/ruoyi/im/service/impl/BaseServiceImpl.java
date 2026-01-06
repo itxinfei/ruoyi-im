@@ -6,11 +6,11 @@ import com.ruoyi.im.mapper.base.BaseMapper;
 import com.ruoyi.im.service.BaseService;
 
 /**
- * 鍩虹Service瀹炵幇绫?
+ * 閸╄櫣顢匰ervice鐎圭偟骞囩猾?
  * 
  * @author ruoyi
- * @param <T> 瀹炰綋绫诲瀷
- * @param <M> Mapper绫诲瀷
+ * @param <T> 鐎圭偘缍嬬猾璇茬€?
+ * @param <M> Mapper缁鐎?
  */
 public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements BaseService<T> {
     
@@ -18,10 +18,10 @@ public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements Bas
     protected M baseMapper;
     
     /**
-     * 鏌ヨ瀹炰綋
+     * 閺屻儴顕楃€圭偘缍?
      * 
-     * @param id 瀹炰綋ID
-     * @return 瀹炰綋
+     * @param id 鐎圭偘缍婭D
+     * @return 鐎圭偘缍?
      */
     @Override
     public T selectById(Long id) {
@@ -29,10 +29,10 @@ public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements Bas
     }
     
     /**
-     * 鏌ヨ瀹炰綋鍒楄〃
+     * 閺屻儴顕楃€圭偘缍嬮崚妤勩€?
      * 
-     * @param entity 瀹炰綋鏉′欢
-     * @return 瀹炰綋鍒楄〃
+     * @param entity 鐎圭偘缍嬮弶鈥叉
+     * @return 鐎圭偘缍嬮崚妤勩€?
      */
     @Override
     public List<T> selectList(T entity) {
@@ -40,10 +40,10 @@ public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements Bas
     }
     
     /**
-     * 鏂板瀹炰綋
+     * 閺傛澘顤冪€圭偘缍?
      * 
-     * @param entity 瀹炰綋
-     * @return 缁撴灉
+     * @param entity 鐎圭偘缍?
+     * @return 缂佹挻鐏?
      */
     @Override
     public int insert(T entity) {
@@ -51,10 +51,10 @@ public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements Bas
     }
     
     /**
-     * 淇敼瀹炰綋
+     * 娣囶喗鏁肩€圭偘缍?
      * 
-     * @param entity 瀹炰綋
-     * @return 缁撴灉
+     * @param entity 鐎圭偘缍?
+     * @return 缂佹挻鐏?
      */
     @Override
     public int update(T entity) {
@@ -62,10 +62,10 @@ public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements Bas
     }
     
     /**
-     * 鎵归噺鍒犻櫎瀹炰綋
+     * 閹靛綊鍣洪崚鐘绘珟鐎圭偘缍?
      * 
-     * @param ids 闇€瑕佸垹闄ょ殑瀹炰綋ID
-     * @return 缁撴灉
+     * @param ids 闂団偓鐟曚礁鍨归梽銈囨畱鐎圭偘缍婭D
+     * @return 缂佹挻鐏?
      */
     @Override
     public int deleteByIds(Long[] ids) {
@@ -73,10 +73,10 @@ public abstract class BaseServiceImpl<T, M extends BaseMapper<T>> implements Bas
     }
     
     /**
-     * 鍒犻櫎瀹炰綋淇℃伅
+     * 閸掔娀娅庣€圭偘缍嬫穱鈩冧紖
      * 
-     * @param id 瀹炰綋ID
-     * @return 缁撴灉
+     * @param id 鐎圭偘缍婭D
+     * @return 缂佹挻鐏?
      */
     @Override
     public int deleteById(Long id) {

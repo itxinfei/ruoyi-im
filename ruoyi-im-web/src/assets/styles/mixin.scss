@@ -1,4 +1,9 @@
+/**
+ * @description 全局 SCSS Mixins
+ * @author RuoYi
+ */
 
+// 清除浮动
 @mixin clearfix {
   &:after {
     content: "";
@@ -7,6 +12,7 @@
   }
 }
 
+// 滚动条样式（旧版，保留兼容性）
 @mixin scrollBar {
   &::-webkit-scrollbar-track-piece {
     background: #d3dce6;
@@ -22,18 +28,63 @@
   }
 }
 
+// 自定义滚动条
+@mixin custom-scrollbar($width: 6px, $thumb-color: #d9d9d9, $track-color: transparent) {
+  &::-webkit-scrollbar {
+    width: $width;
+    height: $width;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $track-color;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $thumb-color;
+    border-radius: $width;
+
+    &:hover {
+      background: darken($thumb-color, 10%);
+    }
+  }
+}
+
+// Web 滚动条样式
+@mixin web-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d9d9d9;
+    border-radius: 3px;
+
+    &:hover {
+      background: #bfbfbf;
+    }
+  }
+}
+
+// 相对定位容器
 @mixin relative {
   position: relative;
   width: 100%;
   height: 100%;
 }
 
+// 百分比宽度居中
 @mixin pct($pct) {
   width: #{$pct};
   position: relative;
   margin: 0 auto;
 }
 
+// 三角形
 @mixin triangle($width, $height, $color, $direction) {
   $width: $width/2;
   $color-border-style: $height solid $color;
@@ -66,14 +117,140 @@
   }
 }
 
+// ==================== 布局相关 Mixins ====================
+
+// 水平垂直居中
 @mixin flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+// 水平两端对齐，垂直居中
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// 水平起始对齐，垂直居中
+@mixin flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+// Flex 列布局居中
+@mixin flex-column-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+// ==================== 文本相关 Mixins ====================
+
+// 文本省略（别名 text-overflow）
 @mixin text-overflow {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+// 单行文本省略
+@mixin text-ellipsis {
+  @include text-overflow;
+}
+
+// 多行文本省略
+@mixin text-ellipsis-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ==================== 动画相关 Mixins ====================
+
+// 点击缩放效果
+@mixin click-scale($scale: 0.95) {
+  &:active {
+    transform: scale($scale);
+  }
+}
+
+// 平滑过渡
+@mixin transition($property: all, $duration: 0.3s, $easing: ease) {
+  transition: $property $duration $easing;
+}
+
+// ==================== 响应式相关 Mixins ====================
+
+// 响应式断点
+$breakpoints: (
+  'xs': 480px,
+  'sm': 576px,
+  'md': 768px,
+  'lg': 992px,
+  'xl': 1200px,
+  'xxl': 1600px
+);
+
+// 响应式媒体查询
+@mixin respond-to($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (min-width: map-get($breakpoints, $breakpoint)) {
+      @content;
+    }
+  } @else {
+    @warn "Breakpoint #{$breakpoint} not found in $breakpoints";
+  }
+}
+
+// ==================== 其他实用 Mixins ====================
+
+// 隐藏滚动条
+@mixin hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// 全屏覆盖
+@mixin full-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+// 绝对定位居中
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// 遮罩层
+@mixin overlay($bg-color: rgba(0, 0, 0, 0.5), $z-index: 1000) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: $bg-color;
+  z-index: $z-index;
+}
+
+// 圆形
+@mixin circle($size) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
 }

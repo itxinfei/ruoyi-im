@@ -1,4 +1,4 @@
-import { sendMessage as apiSendMessage, listMessage } from '@/api/im/message'
+import { sendMessage as apiSendMessage, listMessage, recallMessage, forwardMessage, searchMessages as apiSearchMessages } from '@/api/im/message'
 import { listSession, updateSession, deleteSession as apiDeleteSession } from '@/api/im/session'
 import { ElMessage } from 'element-plus'
 
@@ -571,9 +571,9 @@ const actions = {
   },
 
   // 打开文件
-  openFile({ commit }, file) {
-    // 可以在这里处理文件打开逻辑
-    console.log('打开文件:', file)
+  openFile(_, file) {
+    // TODO: 实现文件打开逻辑，如预览、下载等
+    window.open(file.url, '_blank')
   },
 
   // 加载联系人列表
@@ -617,6 +617,80 @@ const actions = {
   async deleteFile({ commit }, fileId) {
     // TODO: 调用API删除文件
     ElMessage.success('文件已删除')
+  },
+
+  // 撤回消息
+  async recallMessage({ commit, state }, { sessionId, messageId }) {
+    try {
+      await recallMessage(messageId)
+      // 更新消息状态为已撤回
+      commit('UPDATE_MESSAGE', {
+        sessionId,
+        messageId,
+        updates: { status: 'recalled', revoked: true, content: '[消息已撤回]' },
+      })
+      ElMessage.success('消息已撤回')
+    } catch (error) {
+      console.error('撤回消息失败:', error)
+      ElMessage.error(error.message || '撤回失败，可能已超过撤回时间限制')
+    }
+  },
+
+  // 转发消息
+  async forwardMessage(_, { messageId, targetSessionIds }) {
+    try {
+      const response = await forwardMessage({
+        messageId,
+        targetSessionIds,
+      })
+      ElMessage.success(`消息已转发到 ${targetSessionIds.length} 个会话`)
+      return response.data
+    } catch (error) {
+      console.error('转发消息失败:', error)
+      ElMessage.error('转发失败')
+      throw error
+    }
+  },
+
+  // 搜索消息
+  async searchMessages({ commit }, { sessionId, keyword, messageType, page = 1, pageSize = 20 }) {
+    try {
+      const response = await apiSearchMessages({
+        sessionId,
+        keyword,
+        messageType,
+        page,
+        pageSize,
+      })
+      const messages = response.rows || response.data || []
+      return {
+        messages,
+        total: response.total || 0,
+        hasMore: messages.length === pageSize,
+      }
+    } catch (error) {
+      console.error('搜索消息失败:', error)
+      ElMessage.error('搜索失败')
+      return { messages: [], total: 0, hasMore: false }
+    }
+  },
+
+  // 批量删除消息
+  async batchDeleteMessages({ commit, state }, { sessionId, messageIds }) {
+    try {
+      await deleteMessage(messageIds)
+      // 从本地消息列表中移除
+      const messageList = state.messageList[sessionId]
+      if (messageList) {
+        state.messageList[sessionId] = messageList.filter(m => !messageIds.includes(m.id))
+        // 更新缓存
+        saveMessageCache(state.messageList)
+      }
+      ElMessage.success(`已删除 ${messageIds.length} 条消息`)
+    } catch (error) {
+      console.error('删除消息失败:', error)
+      ElMessage.error('删除失败')
+    }
   },
 }
 

@@ -8,7 +8,7 @@ import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.service.ImConversationMemberService;
 
 /**
- * 浼氳瘽鎴愬憳Service涓氬姟灞傚鐞? * 
+ * 娴兼俺鐦介幋鎰喅Service娑撴艾濮熺仦鍌氼槱閻? * 
  * @author ruoyi
  */
 @Service
@@ -43,10 +43,10 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
 
     
     /**
-     * 鏍规嵁浼氳瘽ID鏌ヨ浼氳瘽鎴愬憳鍒楄〃
+     * 閺嶈宓佹导姘崇樈ID閺屻儴顕楁导姘崇樈閹存劕鎲抽崚妤勩€?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @return 浼氳瘽鎴愬憳闆嗗悎
+     * @param conversationId 娴兼俺鐦絀D
+     * @return 娴兼俺鐦介幋鎰喅闂嗗棗鎮?
      */
     @Override
     public List<ImConversationMember> selectImConversationMemberListByConversationId(Long conversationId) {
@@ -54,11 +54,11 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 鏍规嵁浼氳瘽ID鍜岀敤鎴稩D鏌ヨ浼氳瘽鎴愬憳
+     * 閺嶈宓佹导姘崇樈ID閸滃瞼鏁ら幋绋〥閺屻儴顕楁导姘崇樈閹存劕鎲?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @param userId 鐢ㄦ埛ID
-     * @return 浼氳瘽鎴愬憳
+     * @param conversationId 娴兼俺鐦絀D
+     * @param userId 閻劍鍩汭D
+     * @return 娴兼俺鐦介幋鎰喅
      */
     @Override
     public ImConversationMember selectImConversationMemberByConversationIdAndUserId(Long conversationId, Long userId) {
@@ -66,10 +66,10 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 鏍规嵁鐢ㄦ埛ID鏌ヨ浼氳瘽鎴愬憳鍒楄〃
+     * 閺嶈宓侀悽銊﹀煕ID閺屻儴顕楁导姘崇樈閹存劕鎲抽崚妤勩€?
      * 
-     * @param userId 鐢ㄦ埛ID
-     * @return 浼氳瘽鎴愬憳闆嗗悎
+     * @param userId 閻劍鍩汭D
+     * @return 娴兼俺鐦介幋鎰喅闂嗗棗鎮?
      */
     @Override
     public List<ImConversationMember> selectImConversationMemberListByUserId(Long userId) {
@@ -77,17 +77,17 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 娣诲姞浼氳瘽鎴愬憳
+     * 濞ｈ濮炴导姘崇樈閹存劕鎲?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @param userIds 鐢ㄦ埛ID鍒楄〃
-     * @return 缁撴灉
+     * @param conversationId 娴兼俺鐦絀D
+     * @param userIds 閻劍鍩汭D閸掓銆?
+     * @return 缂佹挻鐏?
      */
     @Override
     public int addConversationMembers(Long conversationId, List<Long> userIds) {
         int result = 0;
         for (Long userId : userIds) {
-            // 妫€鏌ョ敤鎴锋槸鍚﹀凡缁忔槸浼氳瘽鎴愬憳
+            // 濡偓閺屻儳鏁ら幋閿嬫Ц閸氾箑鍑＄紒蹇旀Ц娴兼俺鐦介幋鎰喅
             ImConversationMember existingMember = selectImConversationMemberByConversationIdAndUserId(conversationId, userId);
             if (existingMember == null) {
                 ImConversationMember member = new ImConversationMember();
@@ -102,11 +102,11 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 绉婚櫎浼氳瘽鎴愬憳
+     * 缁夊娅庢导姘崇樈閹存劕鎲?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @param userId 鐢ㄦ埛ID
-     * @return 缁撴灉
+     * @param conversationId 娴兼俺鐦絀D
+     * @param userId 閻劍鍩汭D
+     * @return 缂佹挻鐏?
      */
     @Override
     public int removeConversationMember(Long conversationId, Long userId) {
@@ -118,10 +118,10 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 鏇存柊浼氳瘽鎴愬憳鏈鏁?     * 
-     * @param conversationId 浼氳瘽ID
-     * @param userId 鐢ㄦ埛ID
-     * @param unreadCount 鏈鏁?     * @return 缁撴灉
+     * 閺囧瓨鏌婃导姘崇樈閹存劕鎲抽張顏囶嚢閺?     * 
+     * @param conversationId 娴兼俺鐦絀D
+     * @param userId 閻劍鍩汭D
+     * @param unreadCount 閺堫亣顕伴弫?     * @return 缂佹挻鐏?
      */
     @Override
     public int updateUnreadCount(Long conversationId, Long userId, Integer unreadCount) {
@@ -134,19 +134,19 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 鏍囪浼氳瘽鎴愬憳娑堟伅宸茶
+     * 閺嶅洩顔囨导姘崇樈閹存劕鎲冲☉鍫熶紖瀹歌尪顕?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @param userId 鐢ㄦ埛ID
-     * @param messageId 娑堟伅ID
-     * @return 缁撴灉
+     * @param conversationId 娴兼俺鐦絀D
+     * @param userId 閻劍鍩汭D
+     * @param messageId 濞戝牊浼匢D
+     * @return 缂佹挻鐏?
      */
     @Override
     public int markMessageAsRead(Long conversationId, Long userId, Long messageId) {
         ImConversationMember member = selectImConversationMemberByConversationIdAndUserId(conversationId, userId);
         if (member != null) {
             member.setLastReadMessageId(messageId);
-            // 灏嗘湭璇绘暟璁剧疆涓?
+            // 鐏忓棙婀拠缁樻殶鐠佸墽鐤嗘稉?
             member.setUnreadCount(0);
             return updateImConversationMember(member);
         }
@@ -154,11 +154,11 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 璁剧疆浼氳瘽鎴愬憳缃《鐘舵€?     * 
-     * @param conversationId 浼氳瘽ID
-     * @param userId 鐢ㄦ埛ID
-     * @param isPinned 鏄惁缃《
-     * @return 缁撴灉
+     * 鐠佸墽鐤嗘导姘崇樈閹存劕鎲崇純顕€銆婇悩鑸碘偓?     * 
+     * @param conversationId 娴兼俺鐦絀D
+     * @param userId 閻劍鍩汭D
+     * @param isPinned 閺勵垰鎯佺純顕€銆?
+     * @return 缂佹挻鐏?
      */
     @Override
     public int setConversationPinned(Long conversationId, Long userId, Boolean isPinned) {
@@ -171,10 +171,10 @@ public class ImConversationMemberServiceImpl extends BaseServiceImpl<ImConversat
     }
     
     /**
-     * 璁剧疆浼氳瘽鎴愬憳鍏嶆墦鎵扮姸鎬?     * 
-     * @param conversationId 浼氳瘽ID
-     * @param userId 鐢ㄦ埛ID
-     * @param isMuted 鏄惁鍏嶆墦鎵?     * @return 缁撴灉
+     * 鐠佸墽鐤嗘导姘崇樈閹存劕鎲抽崗宥嗗ⅵ閹垫壆濮搁幀?     * 
+     * @param conversationId 娴兼俺鐦絀D
+     * @param userId 閻劍鍩汭D
+     * @param isMuted 閺勵垰鎯侀崗宥嗗ⅵ閹?     * @return 缂佹挻鐏?
      */
     @Override
     public int setConversationMuted(Long conversationId, Long userId, Boolean isMuted) {

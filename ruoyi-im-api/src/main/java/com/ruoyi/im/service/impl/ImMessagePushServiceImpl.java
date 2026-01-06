@@ -14,15 +14,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 娑堟伅鎺ㄩ€佹湇鍔″疄鐜?- 浼樺寲鐗堟湰
+ * 濞戝牊浼呴幒銊┾偓浣规箛閸斺€崇杽閻?- 娴兼ê瀵查悧鍫熸拱
  * 
- * 閫氳繃 WebSocket 瀹炴椂鎺ㄩ€佹秷鎭粰鍦ㄧ嚎鐢ㄦ埛
+ * 闁俺绻?WebSocket 鐎圭偞妞傞幒銊┾偓浣圭Х閹垳绮伴崷銊у殠閻劍鍩?
  * 
- * 浼樺寲鍐呭锛?
- * 1. 鎻愬彇鍏叡閫昏緫鍒?MessagePushUtils 宸ュ叿绫?
- * 2. 澧炲己鍙傛暟楠岃瘉鍜岄敊璇鐞?
- * 3. 娣诲姞鎬ц兘鐩戞帶鍜屾棩蹇楄褰?
- * 4. 浼樺寲娑堟伅鎺ㄩ€佹祦绋?
+ * 娴兼ê瀵查崘鍛啇閿?
+ * 1. 閹绘劕褰囬崗顒€鍙￠柅鏄忕帆閸?MessagePushUtils 瀹搞儱鍙跨猾?
+ * 2. 婢х偛宸遍崣鍌涙殶妤犲矁鐦夐崪宀勬晩鐠囶垰顦╅悶?
+ * 3. 濞ｈ濮為幀褑鍏橀惄鎴炲付閸滃本妫╄箛妤勵唶瑜?
+ * 4. 娴兼ê瀵插☉鍫熶紖閹恒劑鈧焦绁︾粙?
  * 
  * @author ruoyi
  */
@@ -32,7 +32,7 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
     private static final Logger log = LoggerFactory.getLogger(ImMessagePushServiceImpl.class);
     
     /**
-     * 鎺ㄩ€佹秷鎭粰鎸囧畾鐢ㄦ埛 - 浼樺寲鐗堟湰
+     * 閹恒劑鈧焦绉烽幁顖滅舶閹稿洤鐣鹃悽銊﹀煕 - 娴兼ê瀵查悧鍫熸拱
      */
     @Override
     public void pushMessageToUser(Long userId, ImMessage message) {
@@ -40,37 +40,37 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
         String methodName = "pushMessageToUser";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             MessagePushUtils.validatePushParams(userId, message, methodName);
             
-            log.debug("寮€濮嬫帹閫佹秷鎭粰鐢ㄦ埛: userId={}, messageId={}", userId, message.getId());
+            log.debug("瀵偓婵甯归柅浣圭Х閹垳绮伴悽銊﹀煕: userId={}, messageId={}", userId, message.getId());
             
-            // 妫€鏌ョ敤鎴锋槸鍚﹀湪绾?
+            // 濡偓閺屻儳鏁ら幋閿嬫Ц閸氾箑婀痪?
             if (!ImWebSocketEndpoint.isUserOnline(userId)) {
-                log.debug("鐢ㄦ埛涓嶅湪绾匡紝娑堟伅灏嗗湪鐢ㄦ埛涓婄嚎鏃舵帹閫? userId={}, messageId={}", userId, message.getId());
+                log.debug("閻劍鍩涙稉宥呮躬缁惧尅绱濆☉鍫熶紖鐏忓棗婀悽銊﹀煕娑撳﹦鍤庨弮鑸靛腹闁? userId={}, messageId={}", userId, message.getId());
                 MessagePushUtils.logPushResult(methodName, userId, message.getId(), true, System.currentTimeMillis() - startTime);
                 return;
             }
             
-            // 鏋勫缓鎺ㄩ€佹暟鎹?
+            // 閺嬪嫬缂撻幒銊┾偓浣规殶閹?
             Map<String, Object> pushData = MessagePushUtils.buildUserMessagePushData(userId, message);
             
-            // 鍙戦€佹帹閫佹暟鎹?
-            // 娉ㄦ剰锛氳繖閲岄渶瑕佹牴鎹疄闄匴ebSocket瀹炵幇淇敼
-            // 瀹為檯瀹炵幇闇€瑕佸湪 ImWebSocketEndpoint 涓坊鍔犲彂閫佹柟娉?
+            // 閸欐垿鈧焦甯归柅浣规殶閹?
+            // 濞夈劍鍓伴敍姘崇箹闁插矂娓剁憰浣圭壌閹诡喖鐤勯梽鍖磂bSocket鐎圭偟骞囨穱顔芥暭
+            // 鐎圭偤妾€圭偟骞囬棁鈧憰浣告躬 ImWebSocketEndpoint 娑擃厽鍧婇崝鐘插絺闁焦鏌熷▔?
             
-            log.info("鎺ㄩ€佹秷鎭粰鐢ㄦ埛鎴愬姛: userId={}, messageId={}", userId, message.getId());
+            log.info("閹恒劑鈧焦绉烽幁顖滅舶閻劍鍩涢幋鎰: userId={}, messageId={}", userId, message.getId());
             
         } catch (Exception e) {
-            log.error("鎺ㄩ€佹秷鎭粰鐢ㄦ埛寮傚父: userId={}, messageId={}, error={}", userId, message.getId(), e.getMessage(), e);
+            log.error("閹恒劑鈧焦绉烽幁顖滅舶閻劍鍩涘鍌氱埗: userId={}, messageId={}, error={}", userId, message.getId(), e.getMessage(), e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("鎺ㄩ€佹秷鎭粰鐢ㄦ埛鑰楁椂: {}ms, userId={}, messageId={}", duration, userId, message.getId());
+            log.info("閹恒劑鈧焦绉烽幁顖滅舶閻劍鍩涢懓妤佹: {}ms, userId={}, messageId={}", duration, userId, message.getId());
         }
     }
 
     /**
-     * 鎺ㄩ€佹秷鎭粰浼氳瘽涓殑鎵€鏈夌敤鎴?
+     * 閹恒劑鈧焦绉烽幁顖滅舶娴兼俺鐦芥稉顓犳畱閹碘偓閺堝鏁ら幋?
      */
     @Override
     public void pushMessageToConversation(Long conversationId, ImMessage message) {
@@ -78,51 +78,51 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
         String methodName = "pushMessageToConversation";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             if (conversationId == null || conversationId <= 0) {
-                throw new IllegalArgumentException(methodName + "鍙傛暟鏃犳晥: 浼氳瘽ID蹇呴』澶т簬0");
+                throw new IllegalArgumentException(methodName + "閸欏倹鏆熼弮鐘虫櫏: 娴兼俺鐦絀D韫囧懘銆忔径褌绨?");
             }
             if (message == null) {
-                throw new IllegalArgumentException(methodName + "鍙傛暟鏃犳晥: 娑堟伅瀵硅薄涓嶈兘涓虹┖");
+                throw new IllegalArgumentException(methodName + "閸欏倹鏆熼弮鐘虫櫏: 濞戝牊浼呯€电钖勬稉宥堝厴娑撹櫣鈹?);
             }
             
-            log.debug("寮€濮嬫帹閫佹秷鎭粰浼氳瘽: conversationId={}, messageId={}", conversationId, message.getId());
+            log.debug("瀵偓婵甯归柅浣圭Х閹垳绮版导姘崇樈: conversationId={}, messageId={}", conversationId, message.getId());
             
-            // 鑾峰彇浼氳瘽涓殑鎵€鏈夊湪绾跨敤鎴?
+            // 閼惧嘲褰囨导姘崇樈娑擃厾娈戦幍鈧張澶婃躬缁捐法鏁ら幋?
             Set<Long> onlineUsers = ImWebSocketEndpoint.getOnlineUserIds();
 
             if (onlineUsers.isEmpty()) {
-                log.debug("浼氳瘽涓病鏈夊湪绾跨敤鎴? conversationId={}", conversationId);
+                log.debug("娴兼俺鐦芥稉顓熺梾閺堝婀痪璺ㄦ暏閹? conversationId={}", conversationId);
                 MessagePushUtils.logPushResult(methodName, null, message.getId(), true, System.currentTimeMillis() - startTime);
                 return;
             }
 
-            // 鏋勫缓鎺ㄩ€佹暟鎹?
+            // 閺嬪嫬缂撻幒銊┾偓浣规殶閹?
             Map<String, Object> pushData = MessagePushUtils.buildConversationMessagePushData(conversationId, message);
             
-            // 灏嗘帹閫佹暟鎹浆鎹负JSON瀛楃涓诧紙瀹為檯瀹炵幇涓彲鑳介€氳繃WebSocket鍙戦€侊級
+            // 鐏忓棙甯归柅浣规殶閹诡喛娴嗛幑顫礋JSON鐎涙顑佹稉璇х礄鐎圭偤妾€圭偟骞囨稉顓炲讲閼充粙鈧俺绻僕ebSocket閸欐垿鈧緤绱?
             String messageJson = MessagePushUtils.toJsonString(pushData);
-            log.debug("鏋勫缓鐨勬帹閫佹暟鎹? {}", messageJson);
+            log.debug("閺嬪嫬缂撻惃鍕腹闁焦鏆熼幑? {}", messageJson);
 
-            // 鎺ㄩ€佺粰鎵€鏈夊湪绾跨敤鎴?
+            // 閹恒劑鈧胶绮伴幍鈧張澶婃躬缁捐法鏁ら幋?
             for (Long userId : onlineUsers) {
                 pushMessageToUser(userId, message);
             }
 
-            log.info("鎺ㄩ€佹秷鎭粰浼氳瘽鎴愬姛: conversationId={}, messageId={}, onlineUserCount={}", 
+            log.info("閹恒劑鈧焦绉烽幁顖滅舶娴兼俺鐦介幋鎰: conversationId={}, messageId={}, onlineUserCount={}", 
                 conversationId, message.getId(), onlineUsers.size());
             
             MessagePushUtils.logPushResult(methodName, null, message.getId(), true, System.currentTimeMillis() - startTime);
 
         } catch (Exception e) {
-            log.error("鎺ㄩ€佹秷鎭粰浼氳瘽寮傚父: conversationId={}, messageId={}, error={}", 
+            log.error("閹恒劑鈧焦绉烽幁顖滅舶娴兼俺鐦藉鍌氱埗: conversationId={}, messageId={}, error={}", 
                 conversationId, message.getId(), e.getMessage(), e);
             MessagePushUtils.logPushResult(methodName, null, message.getId(), false, System.currentTimeMillis() - startTime);
         }
     }
 
     /**
-     * 鎺ㄩ€佹秷鎭粰缇ょ粍涓殑鎵€鏈夌敤鎴?
+     * 閹恒劑鈧焦绉烽幁顖滅舶缂囥倗绮嶆稉顓犳畱閹碘偓閺堝鏁ら幋?
      */
     @Override
     public void pushMessageToGroup(Long groupId, ImMessage message) {
@@ -130,51 +130,51 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
         String methodName = "pushMessageToGroup";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             if (groupId == null || groupId <= 0) {
-                throw new IllegalArgumentException(methodName + "鍙傛暟鏃犳晥: 缇ょ粍ID蹇呴』澶т簬0");
+                throw new IllegalArgumentException(methodName + "閸欏倹鏆熼弮鐘虫櫏: 缂囥倗绮岻D韫囧懘銆忔径褌绨?");
             }
             if (message == null) {
-                throw new IllegalArgumentException(methodName + "鍙傛暟鏃犳晥: 娑堟伅瀵硅薄涓嶈兘涓虹┖");
+                throw new IllegalArgumentException(methodName + "閸欏倹鏆熼弮鐘虫櫏: 濞戝牊浼呯€电钖勬稉宥堝厴娑撹櫣鈹?);
             }
             
-            log.debug("寮€濮嬫帹閫佹秷鎭粰缇ょ粍: groupId={}, messageId={}", groupId, message.getId());
+            log.debug("瀵偓婵甯归柅浣圭Х閹垳绮扮紘銈囩矋: groupId={}, messageId={}", groupId, message.getId());
             
-            // 鑾峰彇缇ょ粍涓殑鎵€鏈夊湪绾跨敤鎴?
+            // 閼惧嘲褰囩紘銈囩矋娑擃厾娈戦幍鈧張澶婃躬缁捐法鏁ら幋?
             Set<Long> onlineUsers = ImWebSocketEndpoint.getOnlineUserIds();
 
             if (onlineUsers.isEmpty()) {
-                log.debug("缇ょ粍涓病鏈夊湪绾跨敤鎴? groupId={}", groupId);
+                log.debug("缂囥倗绮嶆稉顓熺梾閺堝婀痪璺ㄦ暏閹? groupId={}", groupId);
                 MessagePushUtils.logPushResult(methodName, null, message.getId(), true, System.currentTimeMillis() - startTime);
                 return;
             }
 
-            // 鏋勫缓鎺ㄩ€佹暟鎹?
+            // 閺嬪嫬缂撻幒銊┾偓浣规殶閹?
             Map<String, Object> pushData = MessagePushUtils.buildGroupMessagePushData(groupId, message);
             
-            // 灏嗘帹閫佹暟鎹浆鎹负JSON瀛楃涓诧紙瀹為檯瀹炵幇涓彲鑳介€氳繃WebSocket鍙戦€侊級
+            // 鐏忓棙甯归柅浣规殶閹诡喛娴嗛幑顫礋JSON鐎涙顑佹稉璇х礄鐎圭偤妾€圭偟骞囨稉顓炲讲閼充粙鈧俺绻僕ebSocket閸欐垿鈧緤绱?
             String messageJson = MessagePushUtils.toJsonString(pushData);
-            log.debug("鏋勫缓鐨勬帹閫佹暟鎹? {}", messageJson);
+            log.debug("閺嬪嫬缂撻惃鍕腹闁焦鏆熼幑? {}", messageJson);
 
-            // 鎺ㄩ€佺粰鎵€鏈夊湪绾跨敤鎴?
+            // 閹恒劑鈧胶绮伴幍鈧張澶婃躬缁捐法鏁ら幋?
             for (Long userId : onlineUsers) {
                 pushMessageToUser(userId, message);
             }
 
-            log.info("鎺ㄩ€佹秷鎭粰缇ょ粍鎴愬姛: groupId={}, messageId={}, onlineUserCount={}", 
+            log.info("閹恒劑鈧焦绉烽幁顖滅舶缂囥倗绮嶉幋鎰: groupId={}, messageId={}, onlineUserCount={}", 
                 groupId, message.getId(), onlineUsers.size());
                 
             MessagePushUtils.logPushResult(methodName, null, message.getId(), true, System.currentTimeMillis() - startTime);
 
         } catch (Exception e) {
-            log.error("鎺ㄩ€佹秷鎭粰缇ょ粍寮傚父: groupId={}, messageId={}, error={}", 
+            log.error("閹恒劑鈧焦绉烽幁顖滅舶缂囥倗绮嶅鍌氱埗: groupId={}, messageId={}, error={}", 
                 groupId, message.getId(), e.getMessage(), e);
             MessagePushUtils.logPushResult(methodName, null, message.getId(), false, System.currentTimeMillis() - startTime);
         }
     }
 
     /**
-     * 鎺ㄩ€佸湪绾跨姸鎬佸彉鍖?
+     * 閹恒劑鈧礁婀痪璺ㄥЦ閹礁褰夐崠?
      */
     @Override
     public void pushOnlineStatus(Long userId, boolean online) {
@@ -182,38 +182,38 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
         String methodName = "pushOnlineStatus";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             MessagePushUtils.validateStatusParams(userId, methodName);
             
-            log.debug("寮€濮嬫帹閫佸湪绾跨姸鎬? userId={}, online={}", userId, online);
+            log.debug("瀵偓婵甯归柅浣告躬缁捐法濮搁幀? userId={}, online={}", userId, online);
             
-            // 鏋勫缓鐘舵€佹帹閫佹暟鎹?
+            // 閺嬪嫬缂撻悩鑸碘偓浣瑰腹闁焦鏆熼幑?
             Map<String, Object> statusData = MessagePushUtils.buildOnlineStatusPushData(userId, online);
             
-            // 灏嗙姸鎬佹暟鎹浆鎹负JSON瀛楃涓诧紙瀹為檯瀹炵幇涓彲鑳介€氳繃WebSocket鍙戦€侊級
+            // 鐏忓棛濮搁幀浣规殶閹诡喛娴嗛幑顫礋JSON鐎涙顑佹稉璇х礄鐎圭偤妾€圭偟骞囨稉顓炲讲閼充粙鈧俺绻僕ebSocket閸欐垿鈧緤绱?
             String messageJson = MessagePushUtils.toJsonString(statusData);
-            log.debug("鏋勫缓鐨勫湪绾跨姸鎬佹暟鎹? {}", messageJson);
+            log.debug("閺嬪嫬缂撻惃鍕躬缁捐法濮搁幀浣规殶閹? {}", messageJson);
 
-            // 鎺ㄩ€佺粰鎵€鏈夊湪绾跨敤鎴?
+            // 閹恒劑鈧胶绮伴幍鈧張澶婃躬缁捐法鏁ら幋?
             Set<Long> onlineUsers = ImWebSocketEndpoint.getOnlineUserIds();
             for (Long onlineUserId : onlineUsers) {
-                // 杩欓噷搴旇閫氳繃 WebSocket 鍙戦€佺姸鎬?
-                // 瀹為檯瀹炵幇闇€瑕佸湪 ImWebSocketEndpoint 涓坊鍔犲彂閫佹柟娉?
+                // 鏉╂瑩鍣锋惔鏃囶嚉闁俺绻?WebSocket 閸欐垿鈧胶濮搁幀?
+                // 鐎圭偤妾€圭偟骞囬棁鈧憰浣告躬 ImWebSocketEndpoint 娑擃厽鍧婇崝鐘插絺闁焦鏌熷▔?
             }
 
-            log.info("鎺ㄩ€佸湪绾跨姸鎬佹垚鍔? userId={}, online={}, onlineUserCount={}", 
+            log.info("閹恒劑鈧礁婀痪璺ㄥЦ閹焦鍨氶崝? userId={}, online={}, onlineUserCount={}", 
                 userId, online, onlineUsers.size());
                 
             MessagePushUtils.logPushResult(methodName, userId, null, true, System.currentTimeMillis() - startTime);
 
         } catch (Exception e) {
-            log.error("鎺ㄩ€佸湪绾跨姸鎬佸紓甯? userId={}, online={}, error={}", userId, online, e.getMessage(), e);
+            log.error("閹恒劑鈧礁婀痪璺ㄥЦ閹礁绱撶敮? userId={}, online={}, error={}", userId, online, e.getMessage(), e);
             MessagePushUtils.logPushResult(methodName, userId, null, false, System.currentTimeMillis() - startTime);
         }
     }
 
     /**
-     * 鎺ㄩ€佹鍦ㄨ緭鍏ョ姸鎬?
+     * 閹恒劑鈧焦顒滈崷銊ㄧ翻閸忋儳濮搁幀?
      */
     @Override
     public void pushTypingStatus(Long conversationId, Long userId, boolean isTyping) {
@@ -221,45 +221,45 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
         String methodName = "pushTypingStatus";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             if (conversationId == null || conversationId <= 0) {
-                throw new IllegalArgumentException(methodName + "鍙傛暟鏃犳晥: 浼氳瘽ID蹇呴』澶т簬0");
+                throw new IllegalArgumentException(methodName + "閸欏倹鏆熼弮鐘虫櫏: 娴兼俺鐦絀D韫囧懘銆忔径褌绨?");
             }
             MessagePushUtils.validateStatusParams(userId, methodName);
             
-            log.debug("寮€濮嬫帹閫佹鍦ㄨ緭鍏ョ姸鎬? conversationId={}, userId={}, isTyping={}", 
+            log.debug("瀵偓婵甯归柅浣诡劀閸︺劏绶崗銉уЦ閹? conversationId={}, userId={}, isTyping={}", 
                 conversationId, userId, isTyping);
             
-            // 鏋勫缓鐘舵€佹帹閫佹暟鎹?
+            // 閺嬪嫬缂撻悩鑸碘偓浣瑰腹闁焦鏆熼幑?
             Map<String, Object> typingData = MessagePushUtils.buildTypingStatusPushData(conversationId, userId, isTyping);
             
-            // 灏嗙姸鎬佹暟鎹浆鎹负JSON瀛楃涓诧紙瀹為檯瀹炵幇涓彲鑳介€氳繃WebSocket鍙戦€侊級
+            // 鐏忓棛濮搁幀浣规殶閹诡喛娴嗛幑顫礋JSON鐎涙顑佹稉璇х礄鐎圭偤妾€圭偟骞囨稉顓炲讲閼充粙鈧俺绻僕ebSocket閸欐垿鈧緤绱?
             String messageJson = MessagePushUtils.toJsonString(typingData);
-            log.debug("鏋勫缓鐨勬鍦ㄨ緭鍏ョ姸鎬佹暟鎹? {}", messageJson);
+            log.debug("閺嬪嫬缂撻惃鍕劀閸︺劏绶崗銉уЦ閹焦鏆熼幑? {}", messageJson);
 
-            // 鎺ㄩ€佺粰浼氳瘽涓殑鎵€鏈夊湪绾跨敤鎴?
+            // 閹恒劑鈧胶绮版导姘崇樈娑擃厾娈戦幍鈧張澶婃躬缁捐法鏁ら幋?
             Set<Long> onlineUsers = ImWebSocketEndpoint.getOnlineUserIds();
             for (Long onlineUserId : onlineUsers) {
                 if (!onlineUserId.equals(userId)) {
-                    // 杩欓噷搴旇閫氳繃 WebSocket 鍙戦€佺姸鎬?
-                    // 瀹為檯瀹炵幇闇€瑕佸湪 ImWebSocketEndpoint 涓坊鍔犲彂閫佹柟娉?
+                    // 鏉╂瑩鍣锋惔鏃囶嚉闁俺绻?WebSocket 閸欐垿鈧胶濮搁幀?
+                    // 鐎圭偤妾€圭偟骞囬棁鈧憰浣告躬 ImWebSocketEndpoint 娑擃厽鍧婇崝鐘插絺闁焦鏌熷▔?
                 }
             }
 
-            log.debug("鎺ㄩ€佹鍦ㄨ緭鍏ョ姸鎬佹垚鍔? conversationId={}, userId={}, isTyping={}, onlineUserCount={}", 
+            log.debug("閹恒劑鈧焦顒滈崷銊ㄧ翻閸忋儳濮搁幀浣瑰灇閸? conversationId={}, userId={}, isTyping={}, onlineUserCount={}", 
                 conversationId, userId, isTyping, onlineUsers.size());
                 
             MessagePushUtils.logPushResult(methodName, userId, null, true, System.currentTimeMillis() - startTime);
 
         } catch (Exception e) {
-            log.error("鎺ㄩ€佹鍦ㄨ緭鍏ョ姸鎬佸紓甯? conversationId={}, userId={}, error={}", 
+            log.error("閹恒劑鈧焦顒滈崷銊ㄧ翻閸忋儳濮搁幀浣哥磽鐢? conversationId={}, userId={}, error={}", 
                 conversationId, userId, e.getMessage(), e);
             MessagePushUtils.logPushResult(methodName, userId, null, false, System.currentTimeMillis() - startTime);
         }
     }
 
     /**
-     * 鎺ㄩ€佹秷鎭凡璇诲洖鎵?
+     * 閹恒劑鈧焦绉烽幁顖氬嚒鐠囪娲栭幍?
      */
     @Override
     public void pushReadReceipt(Long messageId, Long userId) {
@@ -267,42 +267,42 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
         String methodName = "pushReadReceipt";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             if (messageId == null || messageId <= 0) {
-                throw new IllegalArgumentException(methodName + "鍙傛暟鏃犳晥: 娑堟伅ID蹇呴』澶т簬0");
+                throw new IllegalArgumentException(methodName + "閸欏倹鏆熼弮鐘虫櫏: 濞戝牊浼匢D韫囧懘銆忔径褌绨?");
             }
             MessagePushUtils.validateStatusParams(userId, methodName);
             
-            log.debug("寮€濮嬫帹閫佹秷鎭凡璇诲洖鎵? messageId={}, userId={}", messageId, userId);
+            log.debug("瀵偓婵甯归柅浣圭Х閹垰鍑＄拠璇叉礀閹? messageId={}, userId={}", messageId, userId);
             
-            // 鏋勫缓鐘舵€佹帹閫佹暟鎹?
+            // 閺嬪嫬缂撻悩鑸碘偓浣瑰腹闁焦鏆熼幑?
             Map<String, Object> receiptData = MessagePushUtils.buildReadReceiptPushData(messageId, userId);
             
-            // 灏嗙姸鎬佹暟鎹浆鎹负JSON瀛楃涓诧紙瀹為檯瀹炵幇涓彲鑳介€氳繃WebSocket鍙戦€侊級
+            // 鐏忓棛濮搁幀浣规殶閹诡喛娴嗛幑顫礋JSON鐎涙顑佹稉璇х礄鐎圭偤妾€圭偟骞囨稉顓炲讲閼充粙鈧俺绻僕ebSocket閸欐垿鈧緤绱?
             String messageJson = MessagePushUtils.toJsonString(receiptData);
-            log.debug("鏋勫缓鐨勬秷鎭凡璇诲洖鎵ф暟鎹? {}", messageJson);
+            log.debug("閺嬪嫬缂撻惃鍕Х閹垰鍑＄拠璇叉礀閹笛勬殶閹? {}", messageJson);
 
-            // 鎺ㄩ€佺粰鎵€鏈夊湪绾跨敤鎴?
+            // 閹恒劑鈧胶绮伴幍鈧張澶婃躬缁捐法鏁ら幋?
             Set<Long> onlineUsers = ImWebSocketEndpoint.getOnlineUserIds();
             for (Long onlineUserId : onlineUsers) {
-                // 杩欓噷搴旇閫氳繃 WebSocket 鍙戦€佸洖鎵?
-                // 瀹為檯瀹炵幇闇€瑕佸湪 ImWebSocketEndpoint 涓坊鍔犲彂閫佹柟娉?
+                // 鏉╂瑩鍣锋惔鏃囶嚉闁俺绻?WebSocket 閸欐垿鈧礁娲栭幍?
+                // 鐎圭偤妾€圭偟骞囬棁鈧憰浣告躬 ImWebSocketEndpoint 娑擃厽鍧婇崝鐘插絺闁焦鏌熷▔?
             }
 
-            log.debug("鎺ㄩ€佹秷鎭凡璇诲洖鎵ф垚鍔? messageId={}, userId={}, onlineUserCount={}", 
+            log.debug("閹恒劑鈧焦绉烽幁顖氬嚒鐠囪娲栭幍褎鍨氶崝? messageId={}, userId={}, onlineUserCount={}", 
                 messageId, userId, onlineUsers.size());
                 
             MessagePushUtils.logPushResult(methodName, userId, messageId, true, System.currentTimeMillis() - startTime);
 
         } catch (Exception e) {
-            log.error("鎺ㄩ€佹秷鎭凡璇诲洖鎵у紓甯? messageId={}, userId={}, error={}", 
+            log.error("閹恒劑鈧焦绉烽幁顖氬嚒鐠囪娲栭幍褍绱撶敮? messageId={}, userId={}, error={}", 
                 messageId, userId, e.getMessage(), e);
             MessagePushUtils.logPushResult(methodName, userId, messageId, false, System.currentTimeMillis() - startTime);
         }
     }
 
     /**
-     * 鎺ㄩ€佹秷鎭挙鍥為€氱煡
+     * 閹恒劑鈧焦绉烽幁顖涙寵閸ョ偤鈧氨鐓?
      */
     @Override
     public void pushMessageRevoke(Long messageId, Long conversationId) {
@@ -310,44 +310,44 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
         String methodName = "pushMessageRevoke";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             if (messageId == null || messageId <= 0) {
-                throw new IllegalArgumentException(methodName + "鍙傛暟鏃犳晥: 娑堟伅ID蹇呴』澶т簬0");
+                throw new IllegalArgumentException(methodName + "閸欏倹鏆熼弮鐘虫櫏: 濞戝牊浼匢D韫囧懘銆忔径褌绨?");
             }
             if (conversationId == null || conversationId <= 0) {
-                throw new IllegalArgumentException(methodName + "鍙傛暟鏃犳晥: 浼氳瘽ID蹇呴』澶т簬0");
+                throw new IllegalArgumentException(methodName + "閸欏倹鏆熼弮鐘虫櫏: 娴兼俺鐦絀D韫囧懘銆忔径褌绨?");
             }
             
-            log.debug("寮€濮嬫帹閫佹秷鎭挙鍥為€氱煡: messageId={}, conversationId={}", messageId, conversationId);
+            log.debug("瀵偓婵甯归柅浣圭Х閹垱鎸欓崶鐐衡偓姘辩叀: messageId={}, conversationId={}", messageId, conversationId);
             
-            // 鏋勫缓鐘舵€佹帹閫佹暟鎹?
+            // 閺嬪嫬缂撻悩鑸碘偓浣瑰腹闁焦鏆熼幑?
             Map<String, Object> revokeData = MessagePushUtils.buildMessageRevokePushData(messageId, conversationId);
             
-            // 灏嗙姸鎬佹暟鎹浆鎹负JSON瀛楃涓诧紙瀹為檯瀹炵幇涓彲鑳介€氳繃WebSocket鍙戦€侊級
+            // 鐏忓棛濮搁幀浣规殶閹诡喛娴嗛幑顫礋JSON鐎涙顑佹稉璇х礄鐎圭偤妾€圭偟骞囨稉顓炲讲閼充粙鈧俺绻僕ebSocket閸欐垿鈧緤绱?
             String messageJson = MessagePushUtils.toJsonString(revokeData);
-            log.debug("鏋勫缓鐨勬秷鎭挙鍥為€氱煡鏁版嵁: {}", messageJson);
+            log.debug("閺嬪嫬缂撻惃鍕Х閹垱鎸欓崶鐐衡偓姘辩叀閺佺増宓? {}", messageJson);
 
-            // 鎺ㄩ€佺粰浼氳瘽涓殑鎵€鏈夊湪绾跨敤鎴?
+            // 閹恒劑鈧胶绮版导姘崇樈娑擃厾娈戦幍鈧張澶婃躬缁捐法鏁ら幋?
             Set<Long> onlineUsers = ImWebSocketEndpoint.getOnlineUserIds();
             for (Long userId : onlineUsers) {
-                // 杩欓噷搴旇閫氳繃 WebSocket 鍙戦€佹挙鍥為€氱煡
-                // 瀹為檯瀹炵幇闇€瑕佸湪 ImWebSocketEndpoint 涓坊鍔犲彂閫佹柟娉?
+                // 鏉╂瑩鍣锋惔鏃囶嚉闁俺绻?WebSocket 閸欐垿鈧焦鎸欓崶鐐衡偓姘辩叀
+                // 鐎圭偤妾€圭偟骞囬棁鈧憰浣告躬 ImWebSocketEndpoint 娑擃厽鍧婇崝鐘插絺闁焦鏌熷▔?
             }
 
-            log.info("鎺ㄩ€佹秷鎭挙鍥為€氱煡鎴愬姛: messageId={}, conversationId={}, onlineUserCount={}", 
+            log.info("閹恒劑鈧焦绉烽幁顖涙寵閸ョ偤鈧氨鐓￠幋鎰: messageId={}, conversationId={}, onlineUserCount={}", 
                 messageId, conversationId, onlineUsers.size());
                 
             MessagePushUtils.logPushResult(methodName, null, messageId, true, System.currentTimeMillis() - startTime);
 
         } catch (Exception e) {
-            log.error("鎺ㄩ€佹秷鎭挙鍥為€氱煡寮傚父: messageId={}, conversationId={}, error={}", 
+            log.error("閹恒劑鈧焦绉烽幁顖涙寵閸ョ偤鈧氨鐓″鍌氱埗: messageId={}, conversationId={}, error={}", 
                 messageId, conversationId, e.getMessage(), e);
             MessagePushUtils.logPushResult(methodName, null, messageId, false, System.currentTimeMillis() - startTime);
         }
     }
 
     /**
-     * 鎺ㄩ€佹秷鎭弽搴?
+     * 閹恒劑鈧焦绉烽幁顖氬冀鎼?
      */
     @Override
     public void pushMessageReaction(Long messageId, String reaction, Long userId, boolean added) {
@@ -355,33 +355,33 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
         String methodName = "pushMessageReaction";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             MessagePushUtils.validateReactionParams(messageId, reaction, userId, methodName);
             
-            log.debug("寮€濮嬫帹閫佹秷鎭弽搴? messageId={}, reaction={}, userId={}, added={}", 
+            log.debug("瀵偓婵甯归柅浣圭Х閹垰寮芥惔? messageId={}, reaction={}, userId={}, added={}", 
                 messageId, reaction, userId, added);
             
-            // 鏋勫缓鐘舵€佹帹閫佹暟鎹?
+            // 閺嬪嫬缂撻悩鑸碘偓浣瑰腹闁焦鏆熼幑?
             Map<String, Object> reactionData = MessagePushUtils.buildMessageReactionPushData(messageId, reaction, userId, added);
             
-            // 灏嗙姸鎬佹暟鎹浆鎹负JSON瀛楃涓诧紙瀹為檯瀹炵幇涓彲鑳介€氳繃WebSocket鍙戦€侊級
+            // 鐏忓棛濮搁幀浣规殶閹诡喛娴嗛幑顫礋JSON鐎涙顑佹稉璇х礄鐎圭偤妾€圭偟骞囨稉顓炲讲閼充粙鈧俺绻僕ebSocket閸欐垿鈧緤绱?
             String messageJson = MessagePushUtils.toJsonString(reactionData);
-            log.debug("鏋勫缓鐨勬秷鎭弽搴旀暟鎹? {}", messageJson);
+            log.debug("閺嬪嫬缂撻惃鍕Х閹垰寮芥惔鏃€鏆熼幑? {}", messageJson);
 
-            // 鎺ㄩ€佺粰鎵€鏈夊湪绾跨敤鎴?
+            // 閹恒劑鈧胶绮伴幍鈧張澶婃躬缁捐法鏁ら幋?
             Set<Long> onlineUsers = ImWebSocketEndpoint.getOnlineUserIds();
             for (Long onlineUserId : onlineUsers) {
-                // 杩欓噷搴旇閫氳繃 WebSocket 鍙戦€佸弽搴?
-                // 瀹為檯瀹炵幇闇€瑕佸湪 ImWebSocketEndpoint 涓坊鍔犲彂閫佹柟娉?
+                // 鏉╂瑩鍣锋惔鏃囶嚉闁俺绻?WebSocket 閸欐垿鈧礁寮芥惔?
+                // 鐎圭偤妾€圭偟骞囬棁鈧憰浣告躬 ImWebSocketEndpoint 娑擃厽鍧婇崝鐘插絺闁焦鏌熷▔?
             }
 
-            log.debug("鎺ㄩ€佹秷鎭弽搴旀垚鍔? messageId={}, reaction={}, userId={}, added={}, onlineUserCount={}", 
+            log.debug("閹恒劑鈧焦绉烽幁顖氬冀鎼存梹鍨氶崝? messageId={}, reaction={}, userId={}, added={}, onlineUserCount={}", 
                 messageId, reaction, userId, added, onlineUsers.size());
                 
             MessagePushUtils.logPushResult(methodName, userId, messageId, true, System.currentTimeMillis() - startTime);
 
         } catch (Exception e) {
-            log.error("鎺ㄩ€佹秷鎭弽搴斿紓甯? messageId={}, reaction={}, userId={}, error={}", 
+            log.error("閹恒劑鈧焦绉烽幁顖氬冀鎼存柨绱撶敮? messageId={}, reaction={}, userId={}, error={}", 
                 messageId, reaction, userId, e.getMessage(), e);
             MessagePushUtils.logPushResult(methodName, userId, messageId, false, System.currentTimeMillis() - startTime);
         }

@@ -12,8 +12,8 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImGroupService;
 
 /**
- * 缇ょ粍Service涓氬姟灞傚鐞?- 浼樺寲鐗堟湰
- * 浼樺寲鍐呭锛氭坊鍔犵紦瀛樻満鍒躲€佷簨鍔℃帶鍒躲€佹€ц兘鐩戞帶銆侀敊璇鐞? * 
+ * 缂囥倗绮峉ervice娑撴艾濮熺仦鍌氼槱閻?- 娴兼ê瀵查悧鍫熸拱
+ * 娴兼ê瀵查崘鍛啇閿涙碍鍧婇崝鐘电处鐎涙ɑ婧€閸掕翰鈧椒绨ㄩ崝鈩冨付閸掕翰鈧焦鈧嗗厴閻╂垶甯堕妴渚€鏁婄拠顖氼槱閻? * 
  * @author ruoyi
  */
 @Service
@@ -22,23 +22,23 @@ public class ImGroupServiceImpl extends EnhancedBaseServiceImpl<ImGroup, ImGroup
     private ImGroupMapper imGroupMapper;
 
     /**
-     * 鏍规嵁鐢ㄦ埛ID鏌ヨ缇ょ粍鍒楄〃
+     * 閺嶈宓侀悽銊﹀煕ID閺屻儴顕楃紘銈囩矋閸掓銆?
      * 
-     * @param userId 鐢ㄦ埛ID
-     * @return 缇ょ粍闆嗗悎
+     * @param userId 閻劍鍩汭D
+     * @return 缂囥倗绮嶉梿鍡楁値
      */
     @Override
     public List<ImGroup> selectImGroupListByUserId(Long userId) {
-        // TODO: 瀹炵幇鏍规嵁鐢ㄦ埛ID鏌ヨ缇ょ粍鍒楄〃鐨勯€昏緫
-        // 杩欓噷闇€瑕佸叧鑱旀煡璇㈢兢缁勬垚鍛樿〃鏉ヨ幏鍙栫敤鎴锋墍鍦ㄧ殑缇ょ粍
+        // TODO: 鐎圭偟骞囬弽瑙勫祦閻劍鍩汭D閺屻儴顕楃紘銈囩矋閸掓銆冮惃鍕偓鏄忕帆
+        // 鏉╂瑩鍣烽棁鈧憰浣稿彠閼辨梹鐓＄拠銏㈠參缂佸嫭鍨氶崨妯裤€冮弶銉ㄥ箯閸欐牜鏁ら幋閿嬪閸︺劎娈戠紘銈囩矋
         return imGroupMapper.selectImGroupList(new ImGroup());
     }
     
     /**
-     * 鏍规嵁缇ょ粍ID鏌ヨ缇ょ粍淇℃伅
+     * 閺嶈宓佺紘銈囩矋ID閺屻儴顕楃紘銈囩矋娣団剝浼?
      * 
-     * @param id 缇ょ粍ID
-     * @return 缇ょ粍淇℃伅
+     * @param id 缂囥倗绮岻D
+     * @return 缂囥倗绮嶆穱鈩冧紖
      */
     @Override
     public ImGroup selectImGroupById(Long id) {
@@ -46,10 +46,10 @@ public class ImGroupServiceImpl extends EnhancedBaseServiceImpl<ImGroup, ImGroup
     }
     
     /**
-     * 鏇存柊缇ょ粍淇℃伅
+     * 閺囧瓨鏌婄紘銈囩矋娣団剝浼?
      * 
-     * @param imGroup 缇ょ粍淇℃伅
-     * @return 缁撴灉
+     * @param imGroup 缂囥倗绮嶆穱鈩冧紖
+     * @return 缂佹挻鐏?
      */
     @Override
     public int updateImGroup(ImGroup imGroup) {
@@ -57,10 +57,10 @@ public class ImGroupServiceImpl extends EnhancedBaseServiceImpl<ImGroup, ImGroup
     }
     
     /**
-     * 鏍规嵁ID鍒犻櫎缇ょ粍淇℃伅
+     * 閺嶈宓両D閸掔娀娅庣紘銈囩矋娣団剝浼?
      * 
-     * @param id 缇ょ粍ID
-     * @return 缁撴灉
+     * @param id 缂囥倗绮岻D
+     * @return 缂佹挻鐏?
      */
     @Override
     public int deleteImGroupById(Long id) {

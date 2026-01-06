@@ -8,7 +8,7 @@ import com.ruoyi.im.domain.ImFriendRequest;
 import com.ruoyi.im.service.ImFriendRequestService;
 
 /**
- * 濂藉弸鐢宠Service涓氬姟灞傚鐞? * 
+ * 婵傝棄寮搁悽瀹狀嚞Service娑撴艾濮熺仦鍌氼槱閻? * 
  * @author ruoyi
  */
 @Service
@@ -47,11 +47,11 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 鏍规嵁鐢宠浜篒D鍜岃鐢宠浜篒D鏌ヨ濂藉弸鐢宠
+     * 閺嶈宓侀悽瀹狀嚞娴滅瘨D閸滃矁顫﹂悽瀹狀嚞娴滅瘨D閺屻儴顕楁總钘夊几閻㈠疇顕?
      * 
-     * @param fromUserId 鐢宠浜篒D
-     * @param toUserId 琚敵璇蜂汉ID
-     * @return 濂藉弸鐢宠
+     * @param fromUserId 閻㈠疇顕禍绡扗
+     * @param toUserId 鐞氼偆鏁电拠铚傛眽ID
+     * @return 婵傝棄寮搁悽瀹狀嚞
      */
     @Override
     public ImFriendRequest selectImFriendRequestByFromAndToUserId(Long fromUserId, Long toUserId) {
@@ -59,10 +59,10 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 鏍规嵁鐢宠浜篒D鏌ヨ濂藉弸鐢宠鍒楄〃
+     * 閺嶈宓侀悽瀹狀嚞娴滅瘨D閺屻儴顕楁總钘夊几閻㈠疇顕崚妤勩€?
      * 
-     * @param fromUserId 鐢宠浜篒D
-     * @return 濂藉弸鐢宠闆嗗悎
+     * @param fromUserId 閻㈠疇顕禍绡扗
+     * @return 婵傝棄寮搁悽瀹狀嚞闂嗗棗鎮?
      */
     @Override
     public List<ImFriendRequest> selectImFriendRequestListByFromUserId(Long fromUserId) {
@@ -70,10 +70,10 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 鏍规嵁琚敵璇蜂汉ID鏌ヨ濂藉弸鐢宠鍒楄〃
+     * 閺嶈宓佺悮顐ゆ暤鐠囪渹姹塈D閺屻儴顕楁總钘夊几閻㈠疇顕崚妤勩€?
      * 
-     * @param toUserId 琚敵璇蜂汉ID
-     * @return 濂藉弸鐢宠闆嗗悎
+     * @param toUserId 鐞氼偆鏁电拠铚傛眽ID
+     * @return 婵傝棄寮搁悽瀹狀嚞闂嗗棗鎮?
      */
     @Override
     public List<ImFriendRequest> selectImFriendRequestListByToUserId(Long toUserId) {
@@ -81,22 +81,24 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 鍙戦€佸ソ鍙嬬敵璇?     * 
-     * @param fromUserId 鐢宠浜篒D
-     * @param toUserId 琚敵璇蜂汉ID
-     * @param message 鐢宠娑堟伅
-     * @return 缁撴灉
+     * 閸欐垿鈧礁銈介崣瀣暤鐠?     * 
+     * @param fromUserId 閻㈠疇顕禍绡扗
+     * @param toUserId 鐞氼偆鏁电拠铚傛眽ID
+     * @param message 閻㈠疇顕☉鍫熶紖
+     * @return 缂佹挻鐏?
      */
     @Override
     public int sendFriendRequest(Long fromUserId, Long toUserId, String message) {
-        // 妫€鏌ユ槸鍚﹀凡缁忓瓨鍦ㄧ敵璇?        ImFriendRequest existingRequest = selectImFriendRequestByFromAndToUserId(fromUserId, toUserId);
+        // 濡閺屻儲妲搁崥锕€鍑＄紒蹇撶摠閸︺劎鏁电拠?
+        ImFriendRequest existingRequest = selectImFriendRequestByFromAndToUserId(fromUserId, toUserId);
         if (existingRequest != null) {
-            // 濡傛灉瀛樺湪鏈鐞嗙殑鐢宠锛屼笉鍏佽閲嶅鍙戦€?            if ("PENDING".equals(existingRequest.getStatus())) {
+            // 婵″倹鐏夌€涙ê婀张顏勵槱閻炲棛娈戦悽瀹狀嚞閿涘奔绗夐崗浣筋啅闁插秴顦查崣鎴︹偓?
+            if ("PENDING".equals(existingRequest.getStatus())) {
                 return 0;
             }
         }
         
-        // 鍒涘缓鏂扮殑濂藉弸鐢宠
+        // 閸掓稑缂撻弬鎵畱婵傝棄寮搁悽瀹狀嚞
         ImFriendRequest request = new ImFriendRequest();
         request.setFromUserId(fromUserId);
         request.setToUserId(toUserId);
@@ -107,12 +109,12 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 澶勭悊濂藉弸鐢宠
+     * 婢跺嫮鎮婃總钘夊几閻㈠疇顕?
      * 
-     * @param id 鐢宠ID
-     * @param operatorId 鎿嶄綔浜篒D
-     * @param status 鐘舵€侊紙APPROVED宸插悓鎰?REJECTED宸叉嫆缁濓級
-     * @return 缁撴灉
+     * @param id 閻㈠疇顕琁D
+     * @param operatorId 閹垮秳缍旀禍绡扗
+     * @param status 閻樿埖鈧緤绱橝PPROVED瀹告彃鎮撻幇?REJECTED瀹稿弶瀚嗙紒婵撶礆
+     * @return 缂佹挻鐏?
      */
     @Override
     public int handleFriendRequest(Long id, Long operatorId, String status) {
@@ -121,12 +123,12 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
             return 0;
         }
         
-        // 妫€鏌ユ搷浣滄潈闄愶紝鍙湁琚敵璇蜂汉鍙互澶勭悊
+        // 濡偓閺屻儲鎼锋担婊勬綀闂勬劧绱濋崣顏呮箒鐞氼偆鏁电拠铚傛眽閸欘垯浜掓径鍕倞
         if (!request.getToUserId().equals(operatorId)) {
             return 0;
         }
         
-        // 妫€鏌ョ敵璇风姸鎬侊紝鍙兘澶勭悊寰呭鐞嗙殑鐢宠
+        // 濡偓閺屻儳鏁电拠椋庡Ц閹緤绱濋崣顏囧厴婢跺嫮鎮婂鍛槱閻炲棛娈戦悽瀹狀嚞
         if (!"PENDING".equals(request.getStatus())) {
             return 0;
         }
@@ -136,9 +138,9 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
         
         int result = updateImFriendRequest(request);
         
-        // 濡傛灉鍚屾剰濂藉弸鐢宠锛屽垯寤虹珛濂藉弸鍏崇郴
+        // 婵″倹鐏夐崥灞惧壈婵傝棄寮搁悽瀹狀嚞閿涘苯鍨铏圭彌婵傝棄寮搁崗宕囬兇
         if ("APPROVED".equals(status)) {
-            // 鑾峰彇濂藉弸鏈嶅姟骞舵坊鍔犲ソ鍙?            // 杩欓噷闇€瑕佹敞鍏mFriendService锛屼絾涓洪伩鍏嶅惊鐜緷璧栵紝鏆傛椂娉ㄩ噴
+            // 閼惧嘲褰囨總钘夊几閺堝秴濮熼獮鑸靛潑閸旂姴銈介崣?            // 鏉╂瑩鍣烽棁鈧憰浣规暈閸忣檹mFriendService閿涘奔绲炬稉娲缉閸忓秴鎯婇悳顖欑贩鐠ф牭绱濋弳鍌涙濞夈劑鍣?
             // imFriendService.addFriend(request.getToUserId(), request.getFromUserId(), null, null);
         }
         
@@ -146,11 +148,11 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 鍚屾剰濂藉弸鐢宠
+     * 閸氬本鍓版總钘夊几閻㈠疇顕?
      * 
-     * @param id 鐢宠ID
-     * @param operatorId 鎿嶄綔浜篒D
-     * @return 缁撴灉
+     * @param id 閻㈠疇顕琁D
+     * @param operatorId 閹垮秳缍旀禍绡扗
+     * @return 缂佹挻鐏?
      */
     @Override
     public int approveFriendRequest(Long id, Long operatorId) {
@@ -158,11 +160,11 @@ public class ImFriendRequestServiceImpl extends BaseServiceImpl<ImFriendRequest,
     }
     
     /**
-     * 鎷掔粷濂藉弸鐢宠
+     * 閹锋帞绮锋總钘夊几閻㈠疇顕?
      * 
-     * @param id 鐢宠ID
-     * @param operatorId 鎿嶄綔浜篒D
-     * @return 缁撴灉
+     * @param id 閻㈠疇顕琁D
+     * @param operatorId 閹垮秳缍旀禍绡扗
+     * @return 缂佹挻鐏?
      */
     @Override
     public int rejectFriendRequest(Long id, Long operatorId) {

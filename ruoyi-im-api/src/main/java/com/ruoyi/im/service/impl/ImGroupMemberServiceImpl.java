@@ -13,8 +13,8 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.utils.ValidationUtils;
 
 /**
- * 缇ょ粍鎴愬憳Service涓氬姟灞傚鐞?- 浼樺寲鐗堟湰
- * 浼樺寲鍐呭锛氭坊鍔犵紦瀛樻満鍒躲€佷簨鍔℃帶鍒躲€佹€ц兘鐩戞帶銆侀敊璇鐞? * 
+ * 缂囥倗绮嶉幋鎰喅Service娑撴艾濮熺仦鍌氼槱閻?- 娴兼ê瀵查悧鍫熸拱
+ * 娴兼ê瀵查崘鍛啇閿涙碍鍧婇崝鐘电处鐎涙ɑ婧€閸掕翰鈧椒绨ㄩ崝鈩冨付閸掕翰鈧焦鈧嗗厴閻╂垶甯堕妴渚€鏁婄拠顖氼槱閻? * 
  * @author ruoyi
  */
 @Service
@@ -27,15 +27,15 @@ public class ImGroupMemberServiceImpl extends EnhancedBaseServiceImpl<ImGroupMem
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     
-    // 缂撳瓨閿墠缂€
+    // 缂傛挸鐡ㄩ柨顔煎缂傗偓
     private static final String GROUP_MEMBERS_CACHE_PREFIX = "im:group:members:";
     private static final String USER_GROUPS_CACHE_PREFIX = "im:user:groups:";
     private static final String GROUP_MEMBER_CACHE_PREFIX = "im:group:member:";
     
-    // 缂撳瓨瓒呮椂鏃堕棿锛堝垎閽燂級
+    // 缂傛挸鐡ㄧ搾鍛閺冨爼妫块敍鍫濆瀻闁界噦绱?
     private static final int CACHE_TIMEOUT_MINUTES = 30;
     
-    // 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?    @Override
+    // 鐎圭偟骞嘐nhancedBaseServiceImpl閻ㄥ嫭濞婄挒鈩冩煙濞?    @Override
     protected String getEntityType() {
         return "groupMember";
     }
@@ -60,27 +60,27 @@ public class ImGroupMemberServiceImpl extends EnhancedBaseServiceImpl<ImGroupMem
     }
     
     /**
-     * 瀹炵幇EnhancedBaseServiceImpl涓殑clearRelatedCache鏂规硶锛屾彁渚涚兢缁勬垚鍛樼壒瀹氱紦瀛樻竻鐞嗛€昏緫
+     * 鐎圭偟骞嘐nhancedBaseServiceImpl娑擃厾娈慶learRelatedCache閺傝纭堕敍灞惧絹娓氭稓鍏㈢紒鍕灇閸涙澹掔€规氨绱︾€涙ɑ绔婚悶鍡涒偓鏄忕帆
      * 
-     * @param entity 缇ょ粍鎴愬憳瀹炰綋
+     * @param entity 缂囥倗绮嶉幋鎰喅鐎圭偘缍?
      */
     @Override
     protected void clearRelatedCache(ImGroupMember entity) {
         if (entity != null) {
-            // 娓呴櫎瀹炰綋缂撳瓨
+            // 濞撳懘娅庣€圭偘缍嬬紓鎾崇摠
             clearEntityCache(entity.getId());
             
-            // 娓呴櫎缇ょ粍鎴愬憳鍒楄〃缂撳瓨
+            // 濞撳懘娅庣紘銈囩矋閹存劕鎲抽崚妤勩€冪紓鎾崇摠
             if (entity.getGroupId() != null) {
                 clearGroupMembersCache(entity.getGroupId());
             }
             
-            // 娓呴櫎鐢ㄦ埛缇ょ粍鍒楄〃缂撳瓨
+            // 濞撳懘娅庨悽銊﹀煕缂囥倗绮嶉崚妤勩€冪紓鎾崇摠
             if (entity.getUserId() != null) {
                 clearUserGroupsCache(entity.getUserId());
             }
             
-            // 娓呴櫎鐗瑰畾缇ょ粍鎴愬憳缂撳瓨
+            // 濞撳懘娅庨悧鐟扮暰缂囥倗绮嶉幋鎰喅缂傛挸鐡?
             if (entity.getGroupId() != null && entity.getUserId() != null) {
                 clearGroupMemberCache(entity.getGroupId(), entity.getUserId());
             }
@@ -88,56 +88,56 @@ public class ImGroupMemberServiceImpl extends EnhancedBaseServiceImpl<ImGroupMem
     }
     
     /**
-     * 娓呴櫎缇ょ粍鎴愬憳鍒楄〃缂撳瓨
+     * 濞撳懘娅庣紘銈囩矋閹存劕鎲抽崚妤勩€冪紓鎾崇摠
      * 
-     * @param groupId 缇ょ粍ID
+     * @param groupId 缂囥倗绮岻D
      */
     private void clearGroupMembersCache(Long groupId) {
         try {
             String cacheKey = GROUP_MEMBERS_CACHE_PREFIX + groupId;
             redisTemplate.delete(cacheKey);
-            log.debug("宸叉竻闄ょ兢缁勬垚鍛樺垪琛ㄧ紦瀛? groupId={}", groupId);
+            log.debug("瀹稿弶绔婚梽銈囧參缂佸嫭鍨氶崨妯哄灙鐞涖劎绱︾€? groupId={}", groupId);
         } catch (Exception e) {
-            log.warn("娓呴櫎缇ょ粍鎴愬憳鍒楄〃缂撳瓨澶辫触: groupId={}, error={}", groupId, e.getMessage());
+            log.warn("濞撳懘娅庣紘銈囩矋閹存劕鎲抽崚妤勩€冪紓鎾崇摠婢惰精瑙? groupId={}, error={}", groupId, e.getMessage());
         }
     }
     
     /**
-     * 娓呴櫎鐢ㄦ埛缇ょ粍鍒楄〃缂撳瓨
+     * 濞撳懘娅庨悽銊﹀煕缂囥倗绮嶉崚妤勩€冪紓鎾崇摠
      * 
-     * @param userId 鐢ㄦ埛ID
+     * @param userId 閻劍鍩汭D
      */
     private void clearUserGroupsCache(Long userId) {
         try {
             String cacheKey = USER_GROUPS_CACHE_PREFIX + userId;
             redisTemplate.delete(cacheKey);
-            log.debug("宸叉竻闄ょ敤鎴风兢缁勫垪琛ㄧ紦瀛? userId={}", userId);
+            log.debug("瀹稿弶绔婚梽銈囨暏閹撮鍏㈢紒鍕灙鐞涖劎绱︾€? userId={}", userId);
         } catch (Exception e) {
-            log.warn("娓呴櫎鐢ㄦ埛缇ょ粍鍒楄〃缂撳瓨澶辫触: userId={}, error={}", userId, e.getMessage());
+            log.warn("濞撳懘娅庨悽銊﹀煕缂囥倗绮嶉崚妤勩€冪紓鎾崇摠婢惰精瑙? userId={}, error={}", userId, e.getMessage());
         }
     }
     
     /**
-     * 娓呴櫎鐗瑰畾缇ょ粍鎴愬憳缂撳瓨
+     * 濞撳懘娅庨悧鐟扮暰缂囥倗绮嶉幋鎰喅缂傛挸鐡?
      * 
-     * @param groupId 缇ょ粍ID
-     * @param userId 鐢ㄦ埛ID
+     * @param groupId 缂囥倗绮岻D
+     * @param userId 閻劍鍩汭D
      */
     private void clearGroupMemberCache(Long groupId, Long userId) {
         try {
             String cacheKey = GROUP_MEMBER_CACHE_PREFIX + groupId + ":" + userId;
             redisTemplate.delete(cacheKey);
-            log.debug("宸叉竻闄ょ壒瀹氱兢缁勬垚鍛樼紦瀛? groupId={}, userId={}", groupId, userId);
+            log.debug("瀹稿弶绔婚梽銈囧鐎规氨鍏㈢紒鍕灇閸涙绱︾€? groupId={}, userId={}", groupId, userId);
         } catch (Exception e) {
-            log.warn("娓呴櫎鐗瑰畾缇ょ粍鎴愬憳缂撳瓨澶辫触: groupId={}, userId={}, error={}", groupId, userId, e.getMessage());
+            log.warn("濞撳懘娅庨悧鐟扮暰缂囥倗绮嶉幋鎰喅缂傛挸鐡ㄦ径杈Е: groupId={}, userId={}, error={}", groupId, userId, e.getMessage());
         }
     }
 
     /**
-     * 鍒犻櫎缇ょ粍鎴愬憳淇℃伅
+     * 閸掔娀娅庣紘銈囩矋閹存劕鎲虫穱鈩冧紖
      * 
-     * @param id 缇ょ粍鎴愬憳ID
-     * @return 缁撴灉
+     * @param id 缂囥倗绮嶉幋鎰喅ID
+     * @return 缂佹挻鐏?
      */
     @Override
     public int deleteImGroupMemberById(Long id) {
@@ -145,10 +145,10 @@ public class ImGroupMemberServiceImpl extends EnhancedBaseServiceImpl<ImGroupMem
     }
     
     /**
-     * 鏍规嵁缇ょ粍ID鏌ヨ缇ょ粍鎴愬憳鍒楄〃
+     * 閺嶈宓佺紘銈囩矋ID閺屻儴顕楃紘銈囩矋閹存劕鎲抽崚妤勩€?
      * 
-     * @param groupId 缇ょ粍ID
-     * @return 缇ょ粍鎴愬憳闆嗗悎
+     * @param groupId 缂囥倗绮岻D
+     * @return 缂囥倗绮嶉幋鎰喅闂嗗棗鎮?
      */
     @Override
     public List<ImGroupMember> selectImGroupMemberListByGroupId(Long groupId) {
@@ -156,11 +156,11 @@ public class ImGroupMemberServiceImpl extends EnhancedBaseServiceImpl<ImGroupMem
     }
     
     /**
-     * 鏍规嵁缇ょ粍ID鍜岀敤鎴稩D鏌ヨ缇ょ粍鎴愬憳
+     * 閺嶈宓佺紘銈囩矋ID閸滃瞼鏁ら幋绋〥閺屻儴顕楃紘銈囩矋閹存劕鎲?
      * 
-     * @param groupId 缇ょ粍ID
-     * @param userId 鐢ㄦ埛ID
-     * @return 缇ょ粍鎴愬憳
+     * @param groupId 缂囥倗绮岻D
+     * @param userId 閻劍鍩汭D
+     * @return 缂囥倗绮嶉幋鎰喅
      */
     @Override
     public ImGroupMember selectImGroupMemberByGroupIdAndUserId(Long groupId, Long userId) {
@@ -168,13 +168,13 @@ public class ImGroupMemberServiceImpl extends EnhancedBaseServiceImpl<ImGroupMem
     }
     
     /**
-     * 娣诲姞缇ょ粍鎴愬憳
+     * 濞ｈ濮炵紘銈囩矋閹存劕鎲?
      * 
-     * @param groupId 缇ょ粍ID
-     * @param userIds 鐢ㄦ埛ID鍒楄〃
-     * @param role 瑙掕壊
-     * @param inviterId 閭€璇蜂汉ID
-     * @return 缁撴灉
+     * @param groupId 缂囥倗绮岻D
+     * @param userIds 閻劍鍩汭D閸掓銆?
+     * @param role 鐟欐帟澹?
+     * @param inviterId 闁偓鐠囪渹姹塈D
+     * @return 缂佹挻鐏?
      */
     @Override
     public int addGroupMembers(Long groupId, List<Long> userIds, String role, Long inviterId) {
@@ -182,13 +182,14 @@ public class ImGroupMemberServiceImpl extends EnhancedBaseServiceImpl<ImGroupMem
         String methodName = "addGroupMembers";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             ValidationUtils.validateId(groupId, methodName);
-            ValidationUtils.validateCollection(userIds, "鐢ㄦ埛ID鍒楄〃", methodName);
+            ValidationUtils.validateCollection(userIds, "閻劍鍩汭D閸掓銆?, methodName);
             
             int result = 0;
             for (Long userId : userIds) {
-                // 妫€鏌ョ敤鎴锋槸鍚﹀凡缁忔槸缇ゆ垚鍛?                ImGroupMember existingMember = selectImGroupMemberByGroupIdAndUserId(groupId, userId);
+                // 濡閺屻儳鏁ら幋閿嬫Ц閸氾箑鍑＄紒蹇旀Ц缂囥倖鍨氶崨?
+                ImGroupMember existingMember = selectImGroupMemberByGroupIdAndUserId(groupId, userId);
                 if (existingMember == null) {
                     ImGroupMember member = new ImGroupMember();
                     member.setGroupId(groupId);
@@ -200,25 +201,25 @@ public class ImGroupMemberServiceImpl extends EnhancedBaseServiceImpl<ImGroupMem
                 }
             }
             
-            log.info("娣诲姞缇ょ粍鎴愬憳鎴愬姛: groupId={}, userIds={}, result={}", groupId, userIds, result);
+            log.info("濞ｈ濮炵紘銈囩矋閹存劕鎲抽幋鎰: groupId={}, userIds={}, result={}", groupId, userIds, result);
             return result;
             
         } catch (Exception e) {
-            log.error("娣诲姞缇ょ粍鎴愬憳寮傚父: groupId={}, userIds={}, error={}", groupId, userIds, e.getMessage(), e);
-            throw new BusinessException("娣诲姞缇ょ粍鎴愬憳澶辫触", e);
+            log.error("濞ｈ濮炵紘銈囩矋閹存劕鎲冲鍌氱埗: groupId={}, userIds={}, error={}", groupId, userIds, e.getMessage(), e);
+            throw new BusinessException("濞ｈ濮炵紘銈囩矋閹存劕鎲虫径杈Е", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("娣诲姞缇ょ粍鎴愬憳鑰楁椂: {}ms, groupId={}, userIds={}", duration, groupId, userIds);
+            log.info("濞ｈ濮炵紘銈囩矋閹存劕鎲抽懓妤佹: {}ms, groupId={}, userIds={}", duration, groupId, userIds);
         }
     }
     
     /**
-     * 绉婚櫎缇ょ粍鎴愬憳
+     * 缁夊娅庣紘銈囩矋閹存劕鎲?
      * 
-     * @param groupId 缇ょ粍ID
-     * @param userId 鐢ㄦ埛ID
-     * @param operatorId 鎿嶄綔浜篒D
-     * @return 缁撴灉
+     * @param groupId 缂囥倗绮岻D
+     * @param userId 閻劍鍩汭D
+     * @param operatorId 閹垮秳缍旀禍绡扗
+     * @return 缂佹挻鐏?
      */
     @Override
     public int removeGroupMember(Long groupId, Long userId, Long operatorId) {
@@ -226,36 +227,36 @@ public class ImGroupMemberServiceImpl extends EnhancedBaseServiceImpl<ImGroupMem
         String methodName = "removeGroupMember";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             ValidationUtils.validateId(groupId, methodName);
             ValidationUtils.validateId(userId, methodName);
             
             ImGroupMember member = selectImGroupMemberByGroupIdAndUserId(groupId, userId);
             if (member != null) {
                 int result = deleteById(member.getId());
-                log.info("绉婚櫎缇ょ粍鎴愬憳鎴愬姛: groupId={}, userId={}, result={}", groupId, userId, result);
+                log.info("缁夊娅庣紘銈囩矋閹存劕鎲抽幋鎰: groupId={}, userId={}, result={}", groupId, userId, result);
                 return result;
             }
             
-            log.warn("鏈壘鍒拌绉婚櫎鐨勭兢缁勬垚鍛? groupId={}, userId={}", groupId, userId);
+            log.warn("閺堫亝澹橀崚鎷岊洣缁夊娅庨惃鍕參缂佸嫭鍨氶崨? groupId={}, userId={}", groupId, userId);
             return 0;
             
         } catch (Exception e) {
-            log.error("绉婚櫎缇ょ粍鎴愬憳寮傚父: groupId={}, userId={}, error={}", groupId, userId, e.getMessage(), e);
-            throw new BusinessException("绉婚櫎缇ょ粍鎴愬憳澶辫触", e);
+            log.error("缁夊娅庣紘銈囩矋閹存劕鎲冲鍌氱埗: groupId={}, userId={}, error={}", groupId, userId, e.getMessage(), e);
+            throw new BusinessException("缁夊娅庣紘銈囩矋閹存劕鎲虫径杈Е", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("绉婚櫎缇ょ粍鎴愬憳鑰楁椂: {}ms, groupId={}, userId={}", duration, groupId, userId);
+            log.info("缁夊娅庣紘銈囩矋閹存劕鎲抽懓妤佹: {}ms, groupId={}, userId={}", duration, groupId, userId);
         }
     }
     
     /**
-     * 鏇存柊缇ょ粍鎴愬憳瑙掕壊
+     * 閺囧瓨鏌婄紘銈囩矋閹存劕鎲崇憴鎺曞
      * 
-     * @param groupId 缇ょ粍ID
-     * @param userId 鐢ㄦ埛ID
-     * @param newRole 鏂拌鑹?     * @param operatorId 鎿嶄綔浜篒D
-     * @return 缁撴灉
+     * @param groupId 缂囥倗绮岻D
+     * @param userId 閻劍鍩汭D
+     * @param newRole 閺傛媽顫楅懝?     * @param operatorId 閹垮秳缍旀禍绡扗
+     * @return 缂佹挻鐏?
      */
     @Override
     public int updateGroupMemberRole(Long groupId, Long userId, String newRole, Long operatorId) {
@@ -263,39 +264,39 @@ public class ImGroupMemberServiceImpl extends EnhancedBaseServiceImpl<ImGroupMem
         String methodName = "updateGroupMemberRole";
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             ValidationUtils.validateId(groupId, methodName);
             ValidationUtils.validateId(userId, methodName);
-            ValidationUtils.validateString(newRole, "瑙掕壊", methodName);
+            ValidationUtils.validateString(newRole, "鐟欐帟澹?", methodName);
             
             ImGroupMember member = selectImGroupMemberByGroupIdAndUserId(groupId, userId);
             if (member != null) {
                 member.setRole(newRole);
                 int result = update(member);
-                log.info("鏇存柊缇ょ粍鎴愬憳瑙掕壊鎴愬姛: groupId={}, userId={}, newRole={}, result={}", groupId, userId, newRole, result);
+                log.info("閺囧瓨鏌婄紘銈囩矋閹存劕鎲崇憴鎺曞閹存劕濮? groupId={}, userId={}, newRole={}, result={}", groupId, userId, newRole, result);
                 return result;
             }
             
-            log.warn("鏈壘鍒拌鏇存柊瑙掕壊鐨勭兢缁勬垚鍛? groupId={}, userId={}", groupId, userId);
+            log.warn("閺堫亝澹橀崚鎷岊洣閺囧瓨鏌婄憴鎺曞閻ㄥ嫮鍏㈢紒鍕灇閸? groupId={}, userId={}", groupId, userId);
             return 0;
             
         } catch (Exception e) {
-            log.error("鏇存柊缇ょ粍鎴愬憳瑙掕壊寮傚父: groupId={}, userId={}, newRole={}, error={}", groupId, userId, newRole, e.getMessage(), e);
-            throw new BusinessException("鏇存柊缇ょ粍鎴愬憳瑙掕壊澶辫触", e);
+            log.error("閺囧瓨鏌婄紘銈囩矋閹存劕鎲崇憴鎺曞瀵倸鐖? groupId={}, userId={}, newRole={}, error={}", groupId, userId, newRole, e.getMessage(), e);
+            throw new BusinessException("閺囧瓨鏌婄紘銈囩矋閹存劕鎲崇憴鎺曞婢惰精瑙?", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("鏇存柊缇ょ粍鎴愬憳瑙掕壊鑰楁椂: {}ms, groupId={}, userId={}", duration, groupId, userId);
+            log.info("閺囧瓨鏌婄紘銈囩矋閹存劕鎲崇憴鎺曞閼版妞? {}ms, groupId={}, userId={}", duration, groupId, userId);
         }
     }
     
     /**
-     * 璁剧疆缇ょ粍鎴愬憳绂佽█鏃堕棿
+     * 鐠佸墽鐤嗙紘銈囩矋閹存劕鎲崇粋浣解枅閺冨爼妫?
      * 
-     * @param groupId 缇ょ粍ID
-     * @param userId 鐢ㄦ埛ID
-     * @param muteEndTime 绂佽█缁撴潫鏃堕棿
-     * @param operatorId 鎿嶄綔浜篒D
-     * @return 缁撴灉
+     * @param groupId 缂囥倗绮岻D
+     * @param userId 閻劍鍩汭D
+     * @param muteEndTime 缁備浇鈻堢紒鎾存将閺冨爼妫?
+     * @param operatorId 閹垮秳缍旀禍绡扗
+     * @return 缂佹挻鐏?
      */
     @Override
     public int setGroupMemberMuteTime(Long groupId, Long userId, java.time.LocalDateTime muteEndTime, Long operatorId) {

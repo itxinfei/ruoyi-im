@@ -98,11 +98,13 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
                 redisTemplate.delete(USER_EXPORT_REQUEST_CACHE_PREFIX + entity.getUserId());
             }
             
-            // 娓呴櫎鐘舵€佸鍑鸿姹傜紦瀛?            if (entity.getStatus() != null) {
+            // 娓呴櫎鐘舵€佸鍑鸿鍒嗗缓绗紦瀛?
+            if (entity.getStatus() != null) {
                 redisTemplate.delete(STATUS_EXPORT_REQUEST_CACHE_PREFIX + entity.getStatus());
             }
             
-            // 娓呴櫎鐢ㄦ埛鍜岀姸鎬佺粍鍚堝鍑鸿姹傜紦瀛?            if (entity.getUserId() != null && entity.getStatus() != null) {
+            // 娓呴櫎鐢ㄦ埛鍜岀姸鎬佺粍鍚堝鍑鸿鍒嗗缓绗紦瀛?
+            if (entity.getUserId() != null && entity.getStatus() != null) {
                 redisTemplate.delete(USER_STATUS_EXPORT_REQUEST_CACHE_PREFIX + entity.getUserId() + ":" + entity.getStatus());
             }
         }
@@ -125,16 +127,19 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
             
             log.debug("鏍规嵁鐢ㄦ埛ID鏌ヨ瀵煎嚭璇锋眰: userId={}, method={}", userId, methodName);
             
-            // 鐢熸垚缂撳瓨閿?            String cacheKey = USER_EXPORT_REQUEST_CACHE_PREFIX + userId;
+            // 鐢熸垚缂撳瓨閿?
+            String cacheKey = USER_EXPORT_REQUEST_CACHE_PREFIX + userId;
             
-            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?
+            @SuppressWarnings("unchecked")
             List<ImAuditExportRequest> cachedRequests = (List<ImAuditExportRequest>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedRequests != null) {
                 log.debug("浠庣紦瀛樿幏鍙栫敤鎴峰鍑鸿姹? userId={}, method={}", userId, methodName);
                 return cachedRequests;
             }
             
-            // 鏌ヨ鏁版嵁搴?            List<ImAuditExportRequest> requests = imAuditExportRequestMapper.selectImAuditExportRequestByUserId(userId);
+            // 鏌ヨ鏁版嵁搴?
+            List<ImAuditExportRequest> requests = imAuditExportRequestMapper.selectImAuditExportRequestByUserId(userId);
             
             // 缂撳瓨缁撴灉
             if (requests != null && !requests.isEmpty()) {
@@ -168,21 +173,24 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
         try {
             // 鍙傛暟楠岃瘉
             if (status == null || status.trim().isEmpty()) {
-                throw new BusinessException(methodName + "鍙傛暟鏃犳晥: 鐘舵€佷笉鑳戒负绌?);
+                throw new BusinessException(methodName + "鍙傛暟鏃犳晥: 鐘舵€佷笉鑳戒负绌");
             }
             
             log.debug("鏍规嵁鐘舵€佹煡璇㈠鍑鸿姹? status={}, method={}", status, methodName);
             
-            // 鐢熸垚缂撳瓨閿?            String cacheKey = STATUS_EXPORT_REQUEST_CACHE_PREFIX + status;
+            // 鐢熸垚缂撳瓨閿?
+            String cacheKey = STATUS_EXPORT_REQUEST_CACHE_PREFIX + status;
             
-            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?
+            @SuppressWarnings("unchecked")
             List<ImAuditExportRequest> cachedRequests = (List<ImAuditExportRequest>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedRequests != null) {
                 log.debug("浠庣紦瀛樿幏鍙栫姸鎬佸鍑鸿姹? status={}, method={}", status, methodName);
                 return cachedRequests;
             }
             
-            // 鏌ヨ鏁版嵁搴?            List<ImAuditExportRequest> requests = imAuditExportRequestMapper.selectImAuditExportRequestByStatus(status);
+            // 鏌ヨ鏁版嵁搴?
+            List<ImAuditExportRequest> requests = imAuditExportRequestMapper.selectImAuditExportRequestByStatus(status);
             
             // 缂撳瓨缁撴灉
             if (requests != null && !requests.isEmpty()) {
@@ -196,7 +204,7 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
         } catch (Exception e) {
             log.error("鏍规嵁鐘舵€佹煡璇㈠鍑鸿姹傚紓甯? status={}, error={}, method={}", 
                       status, e.getMessage(), methodName, e);
-            throw new BusinessException("鏍规嵁鐘舵€佹煡璇㈠鍑鸿姹傚け璐?, e);
+            throw new BusinessException("鏍规嵁鐘舵€佹煡璇㈠鍑鸿姹傚け璐", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
             log.info("鏍规嵁鐘舵€佹煡璇㈠鍑鸿姹傝€楁椂: {}ms, status={}, method={}", 
@@ -224,9 +232,11 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
             log.debug("鏍规嵁鐢ㄦ埛ID鍜岀姸鎬佹煡璇㈠鍑鸿姹? userId={}, status={}, method={}", 
                       userId, status, methodName);
             
-            // 鐢熸垚缂撳瓨閿?            String cacheKey = USER_STATUS_EXPORT_REQUEST_CACHE_PREFIX + userId + ":" + status;
+            // 鐢熸垚缂撳瓨閿?
+            String cacheKey = USER_STATUS_EXPORT_REQUEST_CACHE_PREFIX + userId + ":" + status;
             
-            // 妫€鏌ョ紦瀛?            @SuppressWarnings("unchecked")
+            // 妫€鏌ョ紦瀛?
+            @SuppressWarnings("unchecked")
             List<ImAuditExportRequest> cachedRequests = (List<ImAuditExportRequest>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedRequests != null) {
                 log.debug("浠庣紦瀛樿幏鍙栫敤鎴风姸鎬佸鍑鸿姹? userId={}, status={}, method={}", 
@@ -234,7 +244,8 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
                 return cachedRequests;
             }
             
-            // 鏌ヨ鏁版嵁搴?            List<ImAuditExportRequest> requests = imAuditExportRequestMapper.selectImAuditExportRequestByUserIdAndStatus(userId, status);
+            // 鏌ヨ鏁版嵁搴?
+            List<ImAuditExportRequest> requests = imAuditExportRequestMapper.selectImAuditExportRequestByUserIdAndStatus(userId, status);
             
             // 缂撳瓨缁撴灉
             if (requests != null && !requests.isEmpty()) {
@@ -296,7 +307,8 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
             request.setCreateTime(LocalDateTime.now());
             request.setUpdateTime(LocalDateTime.now());
             
-            // 灏嗗弬鏁板瓨鍌ㄥ湪瀵煎嚭鍙傛暟瀛楁涓?            StringBuilder params = new StringBuilder();
+            // 灏嗗弬鏁板瓨鍌ㄥ湪瀵煎嚭鍙傛暟瀛楁涓?
+            StringBuilder params = new StringBuilder();
             params.append("startTime:").append(startTime)
                   .append(",endTime:").append(endTime)
                   .append(",targetType:").append(targetType)
@@ -385,7 +397,7 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
         } catch (Exception e) {
             log.error("鏇存柊瀵煎嚭璇锋眰鐘舵€佸紓甯? id={}, status={}, error={}, method={}", 
                       id, status, e.getMessage(), methodName, e);
-            throw new BusinessException("鏇存柊瀵煎嚭璇锋眰鐘舵€佸け璐?, e);
+            throw new BusinessException("鏇存柊瀵煎嚭璇锋眰鐘舵€佸け璐", e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
             log.info("鏇存柊瀵煎嚭璇锋眰鐘舵€佽€楁椂: {}ms, id={}, method={}", 
@@ -424,11 +436,12 @@ public class ImAuditExportRequestServiceImpl extends EnhancedBaseServiceImpl<ImA
             }
             
             try {
-                // 鏇存柊鐘舵€佷负澶勭悊涓?                request.setExportStatus("PROCESSING");
+                // 鏇存柊鐘舵€佷负澶勭悊涓?
+                request.setExportStatus("PROCESSING");
                 int updateResult = update(request);
                 
                 if (updateResult <= 0) {
-                    throw new BusinessException("鏇存柊瀵煎嚭璇锋眰鐘舵€佸け璐?);
+                    throw new BusinessException("鏇存柊瀵煎嚭璇锋眰鐘舵€佸け璐");
                 }
                 
                 // 寮傛澶勭悊瀵煎嚭浠诲姟

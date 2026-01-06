@@ -19,8 +19,8 @@ import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.utils.ValidationUtils;
 
 /**
- * 娑堟伅Service涓氬姟灞傚鐞?- 浼樺寲鐗堟湰
- * 浼樺寲鍐呭锛氭坊鍔犵紦瀛樻満鍒躲€佸垎椤垫煡璇紭鍖栥€佹壒閲忔搷浣溿€佷簨鍔℃帶鍒躲€佹€ц兘鐩戞帶
+ * 濞戝牊浼匰ervice娑撴艾濮熺仦鍌氼槱閻?- 娴兼ê瀵查悧鍫熸拱
+ * 娴兼ê瀵查崘鍛啇閿涙碍鍧婇崝鐘电处鐎涙ɑ婧€閸掕翰鈧礁鍨庢い鍨叀鐠囶澀绱崠鏍モ偓浣瑰闁插繑鎼锋担婧库偓浣风皑閸斺剝甯堕崚韬测偓浣光偓褑鍏橀惄鎴炲付
  * 
  * @author ruoyi
  */
@@ -34,66 +34,66 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     
-    // 缂撳瓨閿墠缂€
+    // 缂傛挸鐡ㄩ柨顔煎缂傗偓
     private static final String MESSAGE_CACHE_PREFIX = "im:message:";
     private static final String CONVERSATION_MESSAGES_PREFIX = "im:conversation:";
     
-    // 缂撳瓨瓒呮椂鏃堕棿锛堝垎閽燂級
+    // 缂傛挸鐡ㄧ搾鍛閺冨爼妫块敍鍫濆瀻闁界噦绱?
     private static final int CACHE_TIMEOUT_MINUTES = 10;
     
     @PostConstruct
     public void init() {
-        log.info("ImMessageService鍒濆鍖栧畬鎴愶紝寮€濮嬪惎鐢ㄧ紦瀛樺拰鎬ц兘鐩戞帶");
+        log.info("ImMessageService閸掓繂顫愰崠鏍х暚閹存劧绱濆鈧慨瀣儙閻劎绱︾€涙ê鎷伴幀褑鍏橀惄鎴炲付");
     }
     
     /**
-     * 鏍规嵁浼氳瘽ID鏌ヨ娑堟伅鍒楄〃 - 浼樺寲鐗堟湰
-     * 浼樺寲鍐呭锛氬垎椤垫敮鎸併€佺紦瀛樻満鍒躲€佸弬鏁伴獙璇併€佹€ц兘鐩戞帶
+     * 閺嶈宓佹导姘崇樈ID閺屻儴顕楀☉鍫熶紖閸掓銆?- 娴兼ê瀵查悧鍫熸拱
+     * 娴兼ê瀵查崘鍛啇閿涙艾鍨庢い鍨暜閹镐降鈧胶绱︾€涙ɑ婧€閸掕翰鈧礁寮弫浼寸崣鐠囦降鈧焦鈧嗗厴閻╂垶甯?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @param pageNum 椤电爜
-     * @param pageSize 姣忛〉澶у皬
-     * @return 娑堟伅闆嗗悎
+     * @param conversationId 娴兼俺鐦絀D
+     * @param pageNum 妞ょ數鐖?
+     * @param pageSize 濮ｅ繘銆夋径褍鐨?
+     * @return 濞戝牊浼呴梿鍡楁値
      */
     @Override
     public List<ImMessage> selectImMessageListByConversationId(Long conversationId, Integer pageNum, Integer pageSize) {
         long startTime = System.currentTimeMillis();
-        log.debug("寮€濮嬫煡璇細璇濇秷鎭? conversationId={}, pageNum={}, pageSize={}", conversationId, pageNum, pageSize);
+        log.debug("瀵偓婵鐓＄拠顫窗鐠囨繃绉烽幁? conversationId={}, pageNum={}, pageSize={}", conversationId, pageNum, pageSize);
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             ValidationUtils.validateConversationId(conversationId, "selectImMessageListByConversationId");
             ValidationUtils.validatePaginationParams(pageNum, pageSize, "selectImMessageListByConversationId");
             
-            // 璁＄畻鍋忕Щ閲?
+            // 鐠侊紕鐣婚崑蹇曅╅柌?
             int offset = (pageNum - 1) * pageSize;
             
-            // 妫€鏌ョ紦瀛?
+            // 濡偓閺屻儳绱︾€?
             String cacheKey = CONVERSATION_MESSAGES_PREFIX + conversationId + ":" + pageNum + ":" + pageSize;
             @SuppressWarnings("unchecked")
             List<ImMessage> cachedMessages = (List<ImMessage>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedMessages != null) {
-                log.debug("浠庣紦瀛樿幏鍙栦細璇濇秷鎭? conversationId={}, count={}", conversationId, cachedMessages.size());
+                log.debug("娴犲海绱︾€涙骞忛崣鏍︾窗鐠囨繃绉烽幁? conversationId={}, count={}", conversationId, cachedMessages.size());
                 return cachedMessages;
             }
             
-            // 鏌ヨ鏁版嵁搴?
+            // 閺屻儴顕楅弫鐗堝祦鎼?
             List<ImMessage> messages = imMessageMapper.selectImMessageListByConversationIdAndPagination(conversationId, offset, pageSize);
             
-            // 缂撳瓨缁撴灉
+            // 缂傛挸鐡ㄧ紒鎾寸亯
             if (messages != null && !messages.isEmpty()) {
                 redisTemplate.opsForValue().set(cacheKey, messages, CACHE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
-                log.debug("浼氳瘽娑堟伅宸茬紦瀛? conversationId={}, count={}", conversationId, messages.size());
+                log.debug("娴兼俺鐦藉☉鍫熶紖瀹歌尙绱︾€? conversationId={}, count={}", conversationId, messages.size());
             }
             
             return messages;
             
         } catch (Exception e) {
-            log.error("鏌ヨ浼氳瘽娑堟伅寮傚父: conversationId={}, error={}", conversationId, e.getMessage(), e);
-            throw new BusinessException("娑堟伅鏌ヨ澶辫触", e);
+            log.error("閺屻儴顕楁导姘崇樈濞戝牊浼呭鍌氱埗: conversationId={}, error={}", conversationId, e.getMessage(), e);
+            throw new BusinessException("濞戝牊浼呴弻銉嚄婢惰精瑙?, e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("鏌ヨ浼氳瘽娑堟伅鑰楁椂: {}ms, conversationId={}, pageNum={}, pageSize={}", 
+            log.info("閺屻儴顕楁导姘崇樈濞戝牊浼呴懓妤佹: {}ms, conversationId={}, pageNum={}, pageSize={}", 
                      duration, conversationId, pageNum, pageSize);
         }
     }
@@ -101,25 +101,25 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
 
     
     /**
-     * 娓呴櫎浼氳瘽娑堟伅缂撳瓨
+     * 濞撳懘娅庢导姘崇樈濞戝牊浼呯紓鎾崇摠
      * 
-     * @param conversationId 浼氳瘽ID
+     * @param conversationId 娴兼俺鐦絀D
      */
     private void clearConversationMessagesCache(Long conversationId) {
         try {
             String pattern = CONVERSATION_MESSAGES_PREFIX + conversationId + ":*";
             redisTemplate.delete(pattern);
-            log.debug("宸叉竻闄や細璇濇秷鎭紦瀛? conversationId={}", conversationId);
+            log.debug("瀹稿弶绔婚梽銈勭窗鐠囨繃绉烽幁顖滅处鐎? conversationId={}", conversationId);
         } catch (Exception e) {
-            log.warn("娓呴櫎浼氳瘽娑堟伅缂撳瓨澶辫触: conversationId={}, error={}", conversationId, e.getMessage());
+            log.warn("濞撳懘娅庢导姘崇樈濞戝牊浼呯紓鎾崇摠婢惰精瑙? conversationId={}, error={}", conversationId, e.getMessage());
         }
     }
     
     /**
-     * 鏍规嵁浼氳瘽ID鏌ヨ娑堟伅鍒楄〃锛堝吋瀹规棫鐗堟湰锛?
+     * 閺嶈宓佹导姘崇樈ID閺屻儴顕楀☉鍫熶紖閸掓銆冮敍鍫濆悑鐎硅妫悧鍫熸拱閿?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @return 娑堟伅闆嗗悎
+     * @param conversationId 娴兼俺鐦絀D
+     * @return 濞戝牊浼呴梿鍡楁値
      */
     @Override
     public List<ImMessage> selectImMessageListByConversationId(Long conversationId) {
@@ -127,12 +127,12 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 鏍规嵁浼氳瘽ID鍜屾椂闂磋寖鍥存煡璇㈡秷鎭垪琛?
+     * 閺嶈宓佹导姘崇樈ID閸滃本妞傞梻纾嬪瘱閸ュ瓨鐓＄拠銏＄Х閹垰鍨悰?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @param startTime 寮€濮嬫椂闂?
-     * @param endTime 缁撴潫鏃堕棿
-     * @return 娑堟伅闆嗗悎
+     * @param conversationId 娴兼俺鐦絀D
+     * @param startTime 瀵偓婵妞傞梻?
+     * @param endTime 缂佹挻娼弮鍫曟？
+     * @return 濞戝牊浼呴梿鍡楁値
      */
     @Override
     public List<ImMessage> selectImMessageListByConversationIdAndTimeRange(Long conversationId, java.time.LocalDateTime startTime, java.time.LocalDateTime endTime) {
@@ -140,36 +140,36 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 鍙戦€佹秷鎭?- 浼樺寲鐗堟湰
-     * 浼樺寲鍐呭锛氫簨鍔℃帶鍒躲€佸弬鏁伴獙璇併€佸紓姝ュ鐞嗐€佹€ц兘鐩戞帶銆佺紦瀛樻洿鏂?
+     * 閸欐垿鈧焦绉烽幁?- 娴兼ê瀵查悧鍫熸拱
+     * 娴兼ê瀵查崘鍛啇閿涙矮绨ㄩ崝鈩冨付閸掕翰鈧礁寮弫浼寸崣鐠囦降鈧礁绱撳銉ヮ槱閻炲棎鈧焦鈧嗗厴閻╂垶甯堕妴浣虹处鐎涙ɑ娲块弬?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @param senderId 鍙戦€佽€匢D
-     * @param type 娑堟伅绫诲瀷
-     * @param content 娑堟伅鍐呭
-     * @return 娑堟伅ID
+     * @param conversationId 娴兼俺鐦絀D
+     * @param senderId 閸欐垿鈧浇鈧將D
+     * @param type 濞戝牊浼呯猾璇茬€?
+     * @param content 濞戝牊浼呴崘鍛啇
+     * @return 濞戝牊浼匢D
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long sendMessage(Long conversationId, Long senderId, String type, String content) {
         long startTime = System.currentTimeMillis();
-        log.info("寮€濮嬪彂閫佹秷鎭? conversationId={}, senderId={}, type={}", conversationId, senderId, type);
+        log.info("瀵偓婵褰傞柅浣圭Х閹? conversationId={}, senderId={}, type={}", conversationId, senderId, type);
         
         try {
-            // 鍙傛暟楠岃瘉
+            // 閸欏倹鏆熸宀冪槈
             ValidationUtils.validateConversationId(conversationId, "sendMessage");
             ValidationUtils.validateUserId(senderId, "sendMessage");
-            ValidationUtils.validateString(type, "娑堟伅绫诲瀷", "sendMessage");
-            ValidationUtils.validateString(content, "娑堟伅鍐呭", "sendMessage");
+            ValidationUtils.validateString(type, "濞戝牊浼呯猾璇茬€?, "sendMessage");
+            ValidationUtils.validateString(content, "濞戝牊浼呴崘鍛啇", "sendMessage");
             
-            // 楠岃瘉娑堟伅绫诲瀷
+            // 妤犲矁鐦夊☉鍫熶紖缁鐎?
             if (!isValidMessageType(type)) {
-                throw new BusinessException("鏃犳晥鐨勬秷鎭被鍨? " + type);
+                throw new BusinessException("閺冪姵鏅ラ惃鍕Х閹垳琚崹? " + type);
             }
             
-            // 楠岃瘉鍐呭闀垮害
+            // 妤犲矁鐦夐崘鍛啇闂€鍨
             if (content.length() > 5000) {
-                throw new BusinessException("娑堟伅鍐呭闀垮害涓嶈兘瓒呰繃5000涓瓧绗?);
+                throw new BusinessException("濞戝牊浼呴崘鍛啇闂€鍨娑撳秷鍏樼搾鍛扮箖5000娑擃亜鐡х粭?);
             }
             
             ImMessage message = new ImMessage();
@@ -182,25 +182,25 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
             
             int result = insert(message);
             if (result <= 0) {
-                log.error("娑堟伅鍙戦€佸け璐? conversationId={}, senderId={}", conversationId, senderId);
-                throw new BusinessException("娑堟伅鍙戦€佸け璐?);
+                log.error("濞戝牊浼呴崣鎴︹偓浣搞亼鐠? conversationId={}, senderId={}", conversationId, senderId);
+                throw new BusinessException("濞戝牊浼呴崣鎴︹偓浣搞亼鐠?);
             }
             
-            // 娓呴櫎浼氳瘽娑堟伅缂撳瓨
+            // 濞撳懘娅庢导姘崇樈濞戝牊浼呯紓鎾崇摠
             clearConversationMessagesCache(conversationId);
             
-            // 寮傛澶勭悊娑堟伅鎺ㄩ€佸拰鎸佷箙鍖?
+            // 瀵倹顒炴径鍕倞濞戝牊浼呴幒銊┾偓浣告嫲閹镐椒绠欓崠?
             CompletableFuture.runAsync(() -> {
                 try {
-                    // 娑堟伅鎺ㄩ€?
+                    // 濞戝牊浼呴幒銊┾偓?
                     processMessagePush(message);
-                    log.debug("娑堟伅鎺ㄩ€佸畬鎴? messageId={}", message.getId());
+                    log.debug("濞戝牊浼呴幒銊┾偓浣哥暚閹? messageId={}", message.getId());
                 } catch (Exception e) {
-                    log.error("娑堟伅鎺ㄩ€佸紓甯? messageId={}, error={}", message.getId(), e.getMessage(), e);
+                    log.error("濞戝牊浼呴幒銊┾偓浣哥磽鐢? messageId={}, error={}", message.getId(), e.getMessage(), e);
                 }
             });
             
-            log.info("娑堟伅鍙戦€佹垚鍔? messageId={}, conversationId={}, 鑰楁椂={}ms", 
+            log.info("濞戝牊浼呴崣鎴︹偓浣瑰灇閸? messageId={}, conversationId={}, 閼版妞?{}ms", 
                      message.getId(), conversationId, System.currentTimeMillis() - startTime);
             
             return message.getId();
@@ -208,22 +208,22 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("鍙戦€佹秷鎭紓甯? conversationId={}, senderId={}, error={}", conversationId, senderId, e.getMessage(), e);
+            log.error("閸欐垿鈧焦绉烽幁顖氱磽鐢? conversationId={}, senderId={}, error={}", conversationId, senderId, e.getMessage(), e);
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            throw new BusinessException("娑堟伅鍙戦€佸け璐?, e);
+            throw new BusinessException("濞戝牊浼呴崣鎴︹偓浣搞亼鐠?, e);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("鍙戦€佹秷鎭€昏€楁椂: {}ms, conversationId={}, senderId={}", duration, conversationId, senderId);
+            log.info("閸欐垿鈧焦绉烽幁顖涒偓鏄忊偓妤佹: {}ms, conversationId={}, senderId={}", duration, conversationId, senderId);
         }
     }
     
 
     
     /**
-     * 楠岃瘉娑堟伅绫诲瀷
+     * 妤犲矁鐦夊☉鍫熶紖缁鐎?
      * 
-     * @param type 娑堟伅绫诲瀷
-     * @return 鏄惁鏈夋晥
+     * @param type 濞戝牊浼呯猾璇茬€?
+     * @return 閺勵垰鎯侀張澶嬫櫏
      */
     private boolean isValidMessageType(String type) {
         return "TEXT".equals(type) || 
@@ -236,78 +236,78 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 澶勭悊娑堟伅鎺ㄩ€?
+     * 婢跺嫮鎮婂☉鍫熶紖閹恒劑鈧?
      * 
-     * @param message 娑堟伅瀵硅薄
+     * @param message 濞戝牊浼呯€电钖?
      */
     private void processMessagePush(ImMessage message) {
         try {
-            // 杩欓噷鍙互瀹炵幇WebSocket鎺ㄩ€併€佹秷鎭槦鍒楃瓑
-            // 绀轰緥锛氬彂閫佸埌娑堟伅闃熷垪杩涜寮傛澶勭悊
+            // 鏉╂瑩鍣烽崣顖欎簰鐎圭偟骞嘩ebSocket閹恒劑鈧降鈧焦绉烽幁顖炴Е閸掓鐡?
+            // 缁€杞扮伐閿涙艾褰傞柅浣稿煂濞戝牊浼呴梼鐔峰灙鏉╂稖顢戝鍌涱劄婢跺嫮鎮?
             
-            // 璁板綍娑堟伅鎺ㄩ€佹棩蹇?
-            log.debug("澶勭悊娑堟伅鎺ㄩ€? messageId={}, conversationId={}, type={}", 
+            // 鐠佹澘缍嶅☉鍫熶紖閹恒劑鈧焦妫╄箛?
+            log.debug("婢跺嫮鎮婂☉鍫熶紖閹恒劑鈧? messageId={}, conversationId={}, type={}", 
                      message.getId(), message.getConversationId(), message.getType());
             
-            // 鍙互鍦ㄨ繖閲岄泦鎴愭秷鎭帹閫佹湇鍔?
+            // 閸欘垯浜掗崷銊ㄧ箹闁插矂娉﹂幋鎰Х閹垱甯归柅浣规箛閸?
             // messagePushService.pushMessage(message);
             
         } catch (Exception e) {
-            log.error("澶勭悊娑堟伅鎺ㄩ€佸紓甯? messageId={}, error={}", message.getId(), e.getMessage(), e);
+            log.error("婢跺嫮鎮婂☉鍫熶紖閹恒劑鈧礁绱撶敮? messageId={}, error={}", message.getId(), e.getMessage(), e);
         }
     }
     
     /**
-     * 鍙戦€佺鑱婃秷鎭?
+     * 閸欐垿鈧胶顫嗛懕濠冪Х閹?
      * 
-     * @param senderId 鍙戦€佽€匢D
-     * @param receiverId 鎺ユ敹鑰匢D
-     * @param type 娑堟伅绫诲瀷
-     * @param content 娑堟伅鍐呭
-     * @return 娑堟伅ID
+     * @param senderId 閸欐垿鈧浇鈧將D
+     * @param receiverId 閹恒儲鏁归懓鍖
+     * @param type 濞戝牊浼呯猾璇茬€?
+     * @param content 濞戝牊浼呴崘鍛啇
+     * @return 濞戝牊浼匢D
      */
     @Override
     public Long sendPrivateMessage(Long senderId, Long receiverId, String type, String content) {
-        // 鍒涘缓鎴栬幏鍙栫鑱婁細璇?
-        // 杩欓噷浣跨敤杈冨皬鐨処D浣滀负鐩爣ID鏉ユ爣璇嗙鑱婁細璇?
+        // 閸掓稑缂撻幋鏍箯閸欐牜顫嗛懕濠佺窗鐠?
+        // 鏉╂瑩鍣锋担璺ㄦ暏鏉堝啫鐨惃鍑娴ｆ粈璐熼惄顔界垼ID閺夈儲鐖ｇ拠鍡欘潌閼卞﹣绱扮拠?
         Long targetId = Math.min(senderId, receiverId);
-        // 娉ㄦ剰锛氬疄闄呭疄鐜颁腑锛岄渶瑕佸厛妫€鏌ユ垨鍒涘缓鐩稿簲鐨勭鑱婁細璇?
-        // 鏆傛椂杩斿洖null锛屽疄闄呬娇鐢ㄦ椂闇€瑕佸厛鍒涘缓浼氳瘽
+        // 濞夈劍鍓伴敍姘杽闂勫懎鐤勯悳棰佽厬閿涘矂娓剁憰浣稿帥濡偓閺屻儲鍨ㄩ崚娑樼紦閻╃绨查惃鍕潌閼卞﹣绱扮拠?
+        // 閺嗗倹妞傛潻鏂挎礀null閿涘苯鐤勯梽鍛▏閻劍妞傞棁鈧憰浣稿帥閸掓稑缂撴导姘崇樈
         return null;
     }
     
     /**
-     * 鍙戦€佺兢鑱婃秷鎭?
+     * 閸欐垿鈧胶鍏㈤懕濠冪Х閹?
      * 
-     * @param senderId 鍙戦€佽€匢D
-     * @param groupId 缇ょ粍ID
-     * @param type 娑堟伅绫诲瀷
-     * @param content 娑堟伅鍐呭
-     * @return 娑堟伅ID
+     * @param senderId 閸欐垿鈧浇鈧將D
+     * @param groupId 缂囥倗绮岻D
+     * @param type 濞戝牊浼呯猾璇茬€?
+     * @param content 濞戝牊浼呴崘鍛啇
+     * @return 濞戝牊浼匢D
      */
     @Override
     public Long sendGroupMessage(Long senderId, Long groupId, String type, String content) {
-        // 鍒涘缓鎴栬幏鍙栫兢鑱婁細璇?
-        // 杩欓噷浣跨敤缇ょ粍ID浣滀负鐩爣ID
-        // 娉ㄦ剰锛氬疄闄呭疄鐜颁腑锛岄渶瑕佸厛妫€鏌ユ垨鍒涘缓鐩稿簲鐨勭兢鑱婁細璇?
-        // 鏆傛椂杩斿洖null锛屽疄闄呬娇鐢ㄦ椂闇€瑕佸厛鍒涘缓浼氳瘽
+        // 閸掓稑缂撻幋鏍箯閸欐牜鍏㈤懕濠佺窗鐠?
+        // 鏉╂瑩鍣锋担璺ㄦ暏缂囥倗绮岻D娴ｆ粈璐熼惄顔界垼ID
+        // 濞夈劍鍓伴敍姘杽闂勫懎鐤勯悳棰佽厬閿涘矂娓剁憰浣稿帥濡偓閺屻儲鍨ㄩ崚娑樼紦閻╃绨查惃鍕參閼卞﹣绱扮拠?
+        // 閺嗗倹妞傛潻鏂挎礀null閿涘苯鐤勯梽鍛▏閻劍妞傞棁鈧憰浣稿帥閸掓稑缂撴导姘崇樈
         return null;
     }
     
     /**
-     * 鎾ゅ洖娑堟伅
+     * 閹俱倕娲栧☉鍫熶紖
      * 
-     * @param messageId 娑堟伅ID
-     * @param operatorId 鎿嶄綔浜篒D
-     * @return 缁撴灉
+     * @param messageId 濞戝牊浼匢D
+     * @param operatorId 閹垮秳缍旀禍绡扗
+     * @return 缂佹挻鐏?
      */
     @Override
     public int revokeMessage(Long messageId, Long operatorId) {
         ImMessage message = selectById(messageId);
         if (message != null) {
-            // 妫€鏌ユ搷浣滄潈闄愶紙鍙戦€佽€呮垨绠＄悊鍛樻墠鑳芥挙鍥烇級
+            // 濡偓閺屻儲鎼锋担婊勬綀闂勬劧绱欓崣鎴︹偓浣解偓鍛灗缁狅紕鎮婇崨妯诲閼宠姤鎸欓崶鐑囩礆
             if (!message.getSenderId().equals(operatorId)) {
-                // 闈炲彂閫佽€呮棤娉曟挙鍥?
+                // 闂堢偛褰傞柅浣解偓鍛￥濞夋洘鎸欓崶?
                 return 0;
             }
             
@@ -319,11 +319,11 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 鏇存柊娑堟伅鐘舵€?
+     * 閺囧瓨鏌婂☉鍫熶紖閻樿埖鈧?
      * 
-     * @param messageId 娑堟伅ID
-     * @param status 鏂扮姸鎬?
-     * @return 缁撴灉
+     * @param messageId 濞戝牊浼匢D
+     * @param status 閺傛壆濮搁幀?
+     * @return 缂佹挻鐏?
      */
     @Override
     public int updateMessageStatus(Long messageId, String status) {
@@ -336,14 +336,14 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 鍙戦€佸洖澶嶆秷鎭?
+     * 閸欐垿鈧礁娲栨径宥嗙Х閹?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @param senderId 鍙戦€佽€匢D
-     * @param replyToMessageId 鍥炲鐨勬秷鎭疘D
-     * @param type 娑堟伅绫诲瀷
-     * @param content 娑堟伅鍐呭
-     * @return 娑堟伅ID
+     * @param conversationId 娴兼俺鐦絀D
+     * @param senderId 閸欐垿鈧浇鈧將D
+     * @param replyToMessageId 閸ョ偛顦查惃鍕Х閹枠D
+     * @param type 濞戝牊浼呯猾璇茬€?
+     * @param content 濞戝牊浼呴崘鍛啇
+     * @return 濞戝牊浼匢D
      */
     @Override
     public Long sendReplyMessage(Long conversationId, Long senderId, Long replyToMessageId, String type, String content) {
@@ -363,14 +363,14 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 鍙戦€佽浆鍙戞秷鎭?
+     * 閸欐垿鈧浇娴嗛崣鎴炵Х閹?
      * 
-     * @param conversationId 浼氳瘽ID
-     * @param senderId 鍙戦€佽€匢D
-     * @param forwardFromMessageId 杞彂鐨勬秷鎭疘D
-     * @param type 娑堟伅绫诲瀷
-     * @param content 娑堟伅鍐呭
-     * @return 娑堟伅ID
+     * @param conversationId 娴兼俺鐦絀D
+     * @param senderId 閸欐垿鈧浇鈧將D
+     * @param forwardFromMessageId 鏉烆剙褰傞惃鍕Х閹枠D
+     * @param type 濞戝牊浼呯猾璇茬€?
+     * @param content 濞戝牊浼呴崘鍛啇
+     * @return 濞戝牊浼匢D
      */
     @Override
     public Long sendForwardMessage(Long conversationId, Long senderId, Long forwardFromMessageId, String type, String content) {
@@ -390,9 +390,9 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?
+     * 鐎圭偟骞嘐nhancedBaseServiceImpl閻ㄥ嫭濞婄挒鈩冩煙濞?
      * 
-     * @return 瀹炰綋绫诲瀷鍚嶇О
+     * @return 鐎圭偘缍嬬猾璇茬€烽崥宥囆?
      */
     @Override
     protected String getEntityType() {
@@ -400,10 +400,10 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?
+     * 鐎圭偟骞嘐nhancedBaseServiceImpl閻ㄥ嫭濞婄挒鈩冩煙濞?
      * 
-     * @param entity 娑堟伅瀹炰綋
-     * @return 娑堟伅ID
+     * @param entity 濞戝牊浼呯€圭偘缍?
+     * @return 濞戝牊浼匢D
      */
     @Override
     protected Long getEntityId(ImMessage entity) {
@@ -411,9 +411,9 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?
+     * 鐎圭偟骞嘐nhancedBaseServiceImpl閻ㄥ嫭濞婄挒鈩冩煙濞?
      * 
-     * @param entity 娑堟伅瀹炰綋
+     * @param entity 濞戝牊浼呯€圭偘缍?
      */
     @Override
     protected void setCreateTime(ImMessage entity) {
@@ -423,9 +423,9 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 瀹炵幇EnhancedBaseServiceImpl鐨勬娊璞℃柟娉?
+     * 鐎圭偟骞嘐nhancedBaseServiceImpl閻ㄥ嫭濞婄挒鈩冩煙濞?
      * 
-     * @param entity 娑堟伅瀹炰綋
+     * @param entity 濞戝牊浼呯€圭偘缍?
      */
     @Override
     protected void setUpdateTime(ImMessage entity) {
@@ -435,17 +435,17 @@ public class ImMessageServiceImpl extends EnhancedBaseServiceImpl<ImMessage, ImM
     }
     
     /**
-     * 瀹炵幇EnhancedBaseServiceImpl涓殑clearRelatedCache鏂规硶锛屾彁渚涙秷鎭壒瀹氱紦瀛樻竻鐞嗛€昏緫
+     * 鐎圭偟骞嘐nhancedBaseServiceImpl娑擃厾娈慶learRelatedCache閺傝纭堕敍灞惧絹娓氭稒绉烽幁顖滃鐎规氨绱︾€涙ɑ绔婚悶鍡涒偓鏄忕帆
      * 
-     * @param entity 娑堟伅瀹炰綋
+     * @param entity 濞戝牊浼呯€圭偘缍?
      */
     @Override
     protected void clearRelatedCache(ImMessage entity) {
         if (entity != null) {
-            // 娓呴櫎瀹炰綋缂撳瓨
+            // 濞撳懘娅庣€圭偘缍嬬紓鎾崇摠
             clearEntityCache(entity.getId());
             
-            // 娓呴櫎浼氳瘽娑堟伅缂撳瓨
+            // 濞撳懘娅庢导姘崇樈濞戝牊浼呯紓鎾崇摠
             if (entity.getConversationId() != null) {
                 clearConversationMessagesCache(entity.getConversationId());
             }
