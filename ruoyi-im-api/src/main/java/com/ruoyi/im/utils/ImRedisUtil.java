@@ -11,38 +11,38 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * IM Redis宸ュ叿绫?
- * 
+ * IM Redis工具类
+ *
  * @author ruoyi
  */
 @Component
 public class ImRedisUtil {
-    
+
     @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
-    
+
     private static final AtomicLong MESSAGE_ID_COUNTER = new AtomicLong(System.currentTimeMillis());
-    
+
     /**
-     * 鐢熸垚娑堟伅ID
+     * 生成消息ID
      */
     public Long generateMessageId() {
         return MESSAGE_ID_COUNTER.incrementAndGet();
     }
-    
+
     /**
-     * 鐢熸垚浼氳瘽ID
+     * 生成会话ID
      */
     public Long generateSessionId() {
         return MESSAGE_ID_COUNTER.incrementAndGet();
     }
-    
+
     /**
-     * 缂撳瓨绂荤嚎娑堟伅
+     * 缓存离线消息
      */
     public void cacheOfflineMessage(Long userId, Object message) {
         if (redisTemplate == null) {
-            return; // Redis涓嶅彲鐢紝涓嶇紦瀛樼绾挎秷鎭?
+            return;
         }
         String key = "im:offline:messages:" + userId;
         redisTemplate.opsForZSet().add(key, message, System.currentTimeMillis());
@@ -50,12 +50,12 @@ public class ImRedisUtil {
     }
 
     /**
-     * 鑾峰彇绂荤嚎娑堟伅
+     * 获取离线消息
      */
     @SuppressWarnings("unchecked")
     public <T> List<T> getOfflineMessages(Long userId, Class<T> clazz) {
         if (redisTemplate == null) {
-            return new ArrayList<>(); // Redis涓嶅彲鐢紝杩斿洖绌哄垪琛?
+            return new ArrayList<>();
         }
         String key = "im:offline:messages:" + userId;
         Set<Object> messageObjects = redisTemplate.opsForZSet().range(key, 0, -1);
@@ -76,11 +76,11 @@ public class ImRedisUtil {
     }
 
     /**
-     * 娓呯┖鐢ㄦ埛绂荤嚎娑堟伅
+     * 清除用户离线消息
      */
     public void clearOfflineMessages(Long userId) {
         if (redisTemplate == null) {
-            return; // Redis涓嶅彲鐢紝涓嶅仛澶勭悊
+            return;
         }
         String key = "im:offline:messages:" + userId;
         redisTemplate.delete(key);

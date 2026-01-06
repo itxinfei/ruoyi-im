@@ -3,7 +3,7 @@
  * 提供在 Vue 组件中使用 WebSocket 的便捷方法
  */
 
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import imWebSocket, { WS_STATUS, MSG_TYPE } from '@/utils/websocket/imWebSocket'
 

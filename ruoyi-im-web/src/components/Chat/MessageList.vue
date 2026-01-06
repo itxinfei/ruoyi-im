@@ -41,19 +41,19 @@
         </div>
 
         <!-- 消息气泡 -->
-        <message-bubble
-          v-for="message in group"
-          :key="message.id"
-          :message="message"
-          :is-mine="message.senderId === currentUserId"
-          :show-sender="isGroup"
-          @resend="handleResend"
-          @download="handleDownload"
-          @show-location="handleShowLocation"
-          @image-load="handleImageLoad"
-          @preview-image="handlePreviewImage(message)"
-          @context-menu="handleContextMenu"
-        />
+    <message-bubble
+      v-for="message in group"
+      :key="message.id"
+      :message="message"
+      :is-mine="message.senderId === currentUserId"
+      :show-sender="isGroup"
+      @resend="handleResend"
+      @download-file="handleDownload"
+      @show-location="handleShowLocation"
+      @image-load="handleImageLoad"
+      @preview-image="handlePreviewImage"
+      @context-menu="handleContextMenu"
+    />
       </div>
     </transition-group>
 
@@ -135,7 +135,7 @@ import { debounce, throttle } from '@/utils/common'
 import MessageBubble from './MessageBubble.vue'
 import ImagePreview from './ImagePreview.vue'
 
-export default {
+export default {\n  emits: ['context-menu','preview-image','download-file','image-load','load-more','resend','reply','forward','recall','delete','copy','scroll-to-bottom'],\n  emits: ['context-menu','preview-image','download-file','image-load','resend','reply','forward','recall','delete','copy'],\n  emits: ['context-menu','preview-image','download-file','image-load','resend','reply','forward','recall','delete','copy'],
   name: 'MessageList',
   components: {
     MessageBubble,
@@ -448,8 +448,8 @@ export default {
     },
 
     // 处理右键菜单
-    handleContextMenu(event, message) {
-      this.$emit('context-menu', { event, message })
+    handleContextMenu(payload) {
+      this.$emit('context-menu', payload)
     },
   },
 }

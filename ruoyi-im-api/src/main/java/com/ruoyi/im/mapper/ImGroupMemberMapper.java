@@ -1,83 +1,86 @@
 package com.ruoyi.im.mapper;
 
 import com.ruoyi.im.domain.ImGroupMember;
+
 import java.util.List;
 
 /**
- * 缇ょ粍鎴愬憳Mapper鎺ュ彛
- * 
+ * 群组成员Mapper接口
+ *
  * @author ruoyi
  */
 public interface ImGroupMemberMapper {
-    /**
-     * 鏌ヨ缇ょ粍鎴愬憳
-     * 
-     * @param id 缇ょ粍鎴愬憳ID
-     * @return 缇ょ粍鎴愬憳
-     */
-    public ImGroupMember selectImGroupMemberById(Long id);
 
     /**
-     * 鏌ヨ缇ょ粍鎴愬憳鍒楄〃
-     * 
-     * @param imGroupMember 缇ょ粍鎴愬憳
-     * @return 缇ょ粍鎴愬憳闆嗗悎
+     * 查询群组成员
+     *
+     * @param id 群组成员ID
+     * @return 群组成员
      */
-    public List<ImGroupMember> selectImGroupMemberList(ImGroupMember imGroupMember);
+    ImGroupMember selectImGroupMemberById(Long id);
 
     /**
-     * 鏂板缇ょ粍鎴愬憳
-     * 
-     * @param imGroupMember 缇ょ粍鎴愬憳
-     * @return 缁撴灉
+     * 查询群组成员列表
+     *
+     * @param imGroupMember 群组成员
+     * @return 群组成员集合
      */
-    public int insertImGroupMember(ImGroupMember imGroupMember);
+    List<ImGroupMember> selectImGroupMemberList(ImGroupMember imGroupMember);
 
     /**
-     * 淇敼缇ょ粍鎴愬憳
-     * 
-     * @param imGroupMember 缇ょ粍鎴愬憳
-     * @return 缁撴灉
+     * 新增群组成员
+     *
+     * @param imGroupMember 群组成员
+     * @return 结果
      */
-    public int updateImGroupMember(ImGroupMember imGroupMember);
+    int insertImGroupMember(ImGroupMember imGroupMember);
 
     /**
-     * 鍒犻櫎缇ょ粍鎴愬憳
-     * 
-     * @param id 缇ょ粍鎴愬憳ID
-     * @return 缁撴灉
+     * 修改群组成员
+     *
+     * @param imGroupMember 群组成员
+     * @return 结果
      */
-    public int deleteImGroupMemberById(Long id);
+    int updateImGroupMember(ImGroupMember imGroupMember);
 
     /**
-     * 鎵归噺鍒犻櫎缇ょ粍鎴愬憳
-     * 
-     * @param ids 闇€瑕佸垹闄ょ殑鏁版嵁ID
-     * @return 缁撴灉
+     * 删除群组成员
+     *
+     * @param id 群组成员ID
+     * @return 结果
      */
-    public int deleteImGroupMemberByIds(Long[] ids);
-    
+    int deleteImGroupMemberById(Long id);
+
     /**
-     * 鏍规嵁缇ょ粍ID鏌ヨ缇ょ粍鎴愬憳鍒楄〃
-     * 
-     * @param groupId 缇ょ粍ID
-     * @return 缇ょ粍鎴愬憳闆嗗悎
+     * 批量删除群组成员
+     *
+     * @param ids 需要删除的数据ID
+     * @return 结果
      */
-    public List<ImGroupMember> selectImGroupMemberListByGroupId(Long groupId);
-    
+    int deleteImGroupMemberByIds(Long[] ids);
+
     /**
-     * 鏍规嵁缇ょ粍ID鍜岀敤鎴稩D鏌ヨ缇ょ粍鎴愬憳
-     * 
-     * @param groupId 缇ょ粍ID
-     * @param userId 鐢ㄦ埛ID
-     * @return 缇ょ粍鎴愬憳
+     * 根据群组ID查询群组成员列表
+     *
+     * @param groupId 群组ID
+     * @return 群组成员集合
      */
-    public ImGroupMember selectImGroupMemberByGroupIdAndUserId(Long groupId, Long userId);
-    
+    List<ImGroupMember> selectImGroupMemberListByGroupId(Long groupId);
+
     /**
-     * 鎵归噺鍒犻櫎缇ょ粍鎴愬憳锛堟牴鎹兢缁処D锛?     * 
-     * @param groupIds 缇ょ粍ID鏁扮粍
-     * @return 缁撴灉
+     * 根据群组ID和用户ID查询群组成员
+     *
+     * @param groupId 群组ID
+     * @param userId  用户ID
+     * @return 群组成员
      */
-    public int deleteImGroupMemberByGroupIds(Long[] groupIds);
+    ImGroupMember selectImGroupMemberByGroupIdAndUserId(Long groupId, Long userId);
+
+    /**
+     * 批量删除群组成员（根据群组ID）
+     *
+     * @param groupIds 群组ID数组
+     * @return 结果
+     */
+    int deleteImGroupMemberByGroupIds(Long[] groupIds);
 }

@@ -1,5 +1,10 @@
 package com.ruoyi.im.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +28,15 @@ import java.util.List;
 @Configuration
 @EnableSwagger2
 @ConditionalOnProperty(name = "swagger.enabled", havingValue = "true")
-public class SwaggerConfig {
+public class SwaggerConfig implements ApplicationRunner {
+
+    private static final Logger logger = LoggerFactory.getLogger(SwaggerConfig.class);
+
+    @Value("${server.port:8080}")
+    private String port;
+
+    @Value("${server.servlet.context-path:}")
+    private String contextPath;
 
     @Bean
     public Docket createRestApi() {
@@ -39,7 +52,7 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("IM即时通讯系统API文档.")
+                .title("IM即时通讯系统API文档")
                 .description("提供用户管理、消息发送、会话管理、联系人管理、群组管理等功能的API接口")
                 .contact(new Contact("RuoYi", "", ""))
                 .version("1.0.0")
@@ -64,5 +77,17 @@ public class SwaggerConfig {
         AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
         authorizationScopes[0] = authorizationScope;
         return Collections.singletonList(new SecurityReference("Authorization", authorizationScopes));
+    }
+
+    @Override
+    public void run(ApplicationArguments args) {
+        String swaggerUiUrl = "http://localhost:" + port + contextPath + "/swagger-ui.html";
+        String swaggerApiDocsUrl = "http://localhost:" + port + contextPath + "/v2/api-docs";
+        
+        logger.info("============================================================");
+        logger.info("Swagger API文档已启用");
+        logger.info("Swagger UI访问地址: {}", swaggerUiUrl);
+        logger.info("API文档JSON地址: {}", swaggerApiDocsUrl);
+        logger.info("============================================================");
     }
 }

@@ -41,8 +41,8 @@
           :message="item"
           :is-mine="item.senderId === currentUserId"
           :show-sender="isGroup"
-          @resend="$emit('resend', $event)"
-          @download="$emit('download', $event)"
+          $event)\"
+          @resend="$emit('resend', $event)" @download-file=\"$emit('download-file',
           @show-location="$emit('show-location', $event)"
           @image-load="handleImageLoad(index)"
           @preview-image="$emit('preview-image', item)"
@@ -164,6 +164,7 @@ const emit = defineEmits([
   'load-more',
   'resend',
   'download',
+  'download-file',
   'show-location',
   'preview-image',
   'context-menu',
@@ -201,41 +202,42 @@ const scrollThreshold = 100
  * @returns {number} 估算高度
  */
 const estimateMessageHeight = message => {
-  if (!message) return 60
-
-  // 根据消息类型估算高度
-  switch (message.type) {
-    case 'text':
-      // 根据文本长度估算
-      const textLength = message.content?.length || 0
-      const lines = Math.ceil(textLength / 30)
-      return Math.max(60, lines * 20 + 40)
-
-    case 'image':
-      return 200
-
-    case 'file':
-      return 80
-
-    case 'voice':
-      return 60
-
-    case 'video':
-      return 240
-
-    case 'location':
-      return 160
-
-    case 'vote':
-      return 200
-
-    case 'code':
-      return 150
-
-    default:
-      return 60
-  }
-}
+   if (!message) return 60
+   // 兼容 no-case-declarations：将变量在 switch 之外声明
+   let lines = 0
+   let textLength = 0
+   // 根据消息类型估算高度
+   switch (message.type) {
+     case 'text':
+       textLength = message.content?.length || 0
+       lines = Math.ceil(textLength / 30)
+       return Math.max(60, lines * 20 + 40)
+ 
+     case 'image':
+       return 200
+ 
+     case 'file':
+       return 80
+ 
+     case 'voice':
+       return 60
+ 
+     case 'video':
+       return 240
+ 
+     case 'location':
+       return 160
+ 
+     case 'vote':
+       return 200
+ 
+     case 'code':
+       return 150
+ 
+     default:
+       return 60
+   }
+ }
 
 // 使用虚拟列表
 const messagesRef = computed(() => props.messages)

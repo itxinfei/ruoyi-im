@@ -23,7 +23,7 @@
 
         <!-- 图片消息 -->
         <div v-else-if="message.type === 'image'" class="image-message">
-          <div class="image-container" @click="previewImage(message.content)">
+          <div class=\"image-container\" @click=\"previewImage(message)\">
             <img
               :src="message.content"
               :alt="message.content"
@@ -243,7 +243,7 @@ export default {
       default: false,
     },
   },
-  emits: ['resend', 'image-load', 'reply', 'forward', 'recall', 'delete', 'copy'],
+  emits: ['resend', 'image-load', 'reply', 'forward', 'recall', 'delete', 'copy', 'preview-image', 'download-file', 'play-voice', 'open-location', 'select-vote', 'context-menu'],
   data() {
     return {
       isPlaying: false,
@@ -288,60 +288,9 @@ export default {
     getLocationMapUrl() {
       return 'https://gw.alipayobjects.com/zos/rmsportal/WJyJcGifizzEbBbDBwQV.png'
     },
-    previewImage(url) {
-      this.$emit('preview-image', url)
-    },
-    downloadFile(file) {
-      this.$emit('download-file', file)
-    },
-    playVoice(voice) {
-      this.isPlaying = !this.isPlaying
-      this.$emit('play-voice', voice)
-    },
-    openLocation(location) {
-      this.$emit('open-location', location)
-    },
-    selectVoteOption(index) {
-      this.$emit('select-vote', index)
-    },
-    onImageLoad() {
-      this.imageLoaded = true
-      this.$emit('image-load', this.message.id)
-    },
-
-    // 右键菜单
-    showContextMenu(event) {
-      this.contextMenuX = event.clientX
-      this.contextMenuY = event.clientY
-      this.contextMenuVisible = true
-    },
-    hideContextMenu() {
-      this.contextMenuVisible = false
-    },
-
-    // 双击回复
-    handleDoubleClick() {
-      this.handleReply()
-    },
-
-    // 回复消息
-    handleReply() {
-      this.hideContextMenu()
-      this.$emit('reply', this.message)
-    },
-
-    // 转发消息
-    handleForward() {
-      this.hideContextMenu()
-      this.$emit('forward', this.message)
-    },
-
-    // 撤回消息
-    handleRecall() {
-      this.hideContextMenu()
-      if (this.canRecall) {
-        this.$emit('recall', this.message.id)
-      }
+previewImage(message) {
+      this.$emit('preview-image', message)
+    }
     },
 
     // 复制消息内容

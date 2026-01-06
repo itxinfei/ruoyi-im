@@ -3,58 +3,58 @@ package com.ruoyi.im.mapper.base;
 import java.util.List;
 
 /**
- * 鍩虹Mapper鎺ュ彛
- * 
+ * 基础Mapper接口
+ *
  * @author ruoyi
- * @param <T> 瀹炰綋绫诲瀷
+ * @param <T> 实体类型
  */
 public interface BaseMapper<T> {
-    
+
     /**
-     * 鏌ヨ瀹炰綋
-     * 
-     * @param id 瀹炰綋ID
-     * @return 瀹炰綋
+     * 查询实体
+     *
+     * @param id 实体ID
+     * @return 实体
      */
     T selectById(Long id);
-    
+
     /**
-     * 鏌ヨ瀹炰綋鍒楄〃
-     * 
-     * @param entity 瀹炰綋鏉′欢
-     * @return 瀹炰綋鍒楄〃
+     * 查询实体列表
+     *
+     * @param entity 实体条件
+     * @return 实体列表
      */
     List<T> selectList(T entity);
-    
+
     /**
-     * 鏂板瀹炰綋
-     * 
-     * @param entity 瀹炰綋
-     * @return 缁撴灉
+     * 新增实体
+     *
+     * @param entity 实体
+     * @return 结果
      */
     int insert(T entity);
-    
+
     /**
-     * 淇敼瀹炰綋
-     * 
-     * @param entity 瀹炰綋
-     * @return 缁撴灉
+     * 修改实体
+     *
+     * @param entity 实体
+     * @return 结果
      */
     int update(T entity);
-    
+
     /**
-     * 鎵归噺鍒犻櫎瀹炰綋
-     * 
-     * @param ids 闇€瑕佸垹闄ょ殑瀹炰綋ID
-     * @return 缁撴灉
+     * 批量删除实体
+     *
+     * @param ids 需要删除的实体ID
+     * @return 结果
      */
     int deleteByIds(Long[] ids);
-    
+
     /**
-     * 鍒犻櫎瀹炰綋淇℃伅
-     * 
-     * @param id 瀹炰綋ID
-     * @return 缁撴灉
+     * 删除实体信息
+     *
+     * @param id 实体ID
+     * @return 结果
      */
     int deleteById(Long id);
 }

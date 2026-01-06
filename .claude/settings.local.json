@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npx vue-tsc:*)",
       "Bash(npm run build:*)",
-      "Bash(mvn compile:*)"
+      "Bash(mvn compile:*)",
+      "Bash(done)",
+      "Bash(find:*)"
     ]
   }
 }

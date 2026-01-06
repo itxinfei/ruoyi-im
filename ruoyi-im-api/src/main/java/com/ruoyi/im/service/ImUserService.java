@@ -1,10 +1,12 @@
 package com.ruoyi.im.service;
 
+import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.user.ImLoginRequest;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
+import java.util.Set;
 
 /**
  * 用户服务接口
@@ -44,6 +46,22 @@ public interface ImUserService {
      * @param request 更新请求
      */
     void updateUser(Long userId, ImUserUpdateRequest request);
+
+    /**
+     * 根据用户名查询用户
+     *
+     * @param username 用户名
+     * @return 用户信息
+     */
+    ImUser findByUsername(String username);
+
+    /**
+     * 根据用户ID获取用户权限
+     *
+     * @param userId 用户ID
+     * @return 用户权限集合
+     */
+    Set<String> getUserPermissions(Long userId);
 
     /**
      * 更新用户状态

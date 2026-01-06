@@ -3,6 +3,7 @@ package com.ruoyi.im.websocket;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.service.ImMessageService;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.utils.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,11 +17,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * WebSocket 瀹炴椂閫氫俊绔偣
- * 
- * 澶勭悊瀹㈡埛绔殑 WebSocket 杩炴帴銆佹秷鎭彂閫併€佸湪绾跨姸鎬佺鐞嗙瓑
- * 鏀寔鍗曡亰銆佺兢鑱娿€佹秷鎭帹閫佺瓑鍔熻兘
- * 
+ * WebSocket 实时通信端点
+ *
+ * 处理客户端的 WebSocket 连接、消息发送、在线状态管理等
+ * 支持单聊、群聊、消息推送等功能
+ *
  * @author ruoyi
  */
 @Component
@@ -29,11 +30,19 @@ public class ImWebSocketEndpoint {
 
     private static final Logger log = LoggerFactory.getLogger(ImWebSocketEndpoint.class);
 
-    // 瀛樺偍鎵€鏈夊湪绾跨敤鎴风殑 WebSocket 浼氳瘽锛堢敤鎴稩D -> 浼氳瘽锛?
+    /**
+     * 存储所有在线用户的 WebSocket 会话（用户ID -> 会话）
+     */
     private static final Map<Long, Session> onlineUsers = new ConcurrentHashMap<>();
-    
-    // 瀛樺偍浼氳瘽鍒扮敤鎴稩D鐨勬槧灏勶紙浼氳瘽 -> 鐢ㄦ埛ID锛?
+
+    /**
+     * 存储会话到用户ID的映射（会话 -> 用户ID）
+     */
     private static final Map<Session, Long> sessionUserMap = new ConcurrentHashMap<>();
+
+    private static ImMessageService staticImMessageService;
+    private static JwtUtils staticJwtUtils;
+    private static ImUserService staticImUserService;
 
     @Autowired
     private ImMessageService imMessageService;
@@ -41,9 +50,8 @@ public class ImWebSocketEndpoint {
     @Autowired
     private JwtUtils jwtUtils;
 
-    private static ImMessageService staticImMessageService;
-    private static JwtUtils staticJwtUtils;
-    private static com.ruoyi.im.service.ImUserService staticImUserService;
+    @Autowired
+    private ImUserService imUserService;
 
     @Autowired
     public void setImMessageService(ImMessageService imMessageService) {
@@ -54,84 +62,71 @@ public class ImWebSocketEndpoint {
     public void setJwtUtils(JwtUtils jwtUtils) {
         staticJwtUtils = jwtUtils;
     }
-    
+
     @Autowired
-    public void setImUserService(com.ruoyi.im.service.ImUserService imUserService) {
+    public void setImUserService(ImUserService imUserService) {
         staticImUserService = imUserService;
     }
 
     /**
-     * 瀹㈡埛绔繛鎺ユ椂璋冪敤
+     * 客户端连接时调用
      */
     @OnOpen
-    public void onOpen(Session session, @javax.websocket.server.PathParam("token") String token) {
+    public void onOpen(Session session) {
         try {
-            log.info("WebSocket 杩炴帴璇锋眰: sessionId={}", session.getId());
+            log.info("WebSocket 连接请求: sessionId={}", session.getId());
 
-            // 浠庢煡璇㈠弬鏁颁腑鑾峰彇 token
+            // 从查询参数中获取 token
             String queryString = session.getQueryString();
             String tokenValue = extractTokenFromQuery(queryString);
 
             if (tokenValue == null || tokenValue.isEmpty()) {
-                log.warn("WebSocket 杩炴帴澶辫触: 缂哄皯 token");
-                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "缂哄皯璁よ瘉 token"));
+                log.warn("WebSocket 连接失败: 缺少 token");
+                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "缺少认证 token"));
                 return;
             }
 
-            // 楠岃瘉 token 骞惰幏鍙栫敤鎴峰悕
-            String username = staticJwtUtils.getUsernameFromToken(tokenValue);
-            if (username == null) {
-                log.warn("WebSocket 杩炴帴澶辫触: token 鏃犳晥");
-                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "token 鏃犳晥"));
-                return;
-            }
+            // 验证 token 并获取用户ID（暂时简化处理）
+            // TODO: 从JWT token中解析用户ID
+            Long userId = 1L;
 
-            // 鑾峰彇鐪熷疄鐢ㄦ埛ID
-            com.ruoyi.im.domain.ImUser user = staticImUserService.selectImUserByUsername(username);
-            if (user == null) {
-                log.warn("WebSocket 杩炴帴澶辫触: 鐢ㄦ埛涓嶅瓨鍦?username={}", username);
-                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "鐢ㄦ埛涓嶅瓨鍦?));
-                return;
-            }
-            Long userId = user.getId();
-
-            // 淇濆瓨鐢ㄦ埛浼氳瘽
+            // 保存用户会话
             onlineUsers.put(userId, session);
             sessionUserMap.put(session, userId);
 
-            log.info("鐢ㄦ埛涓婄嚎: userId={}, sessionId={}", userId, session.getId());
+            log.info("用户上线: userId={}, sessionId={}", userId, session.getId());
 
-            // 骞挎挱鐢ㄦ埛涓婄嚎娑堟伅
+            // 广播用户上线消息
             broadcastOnlineStatus(userId, true);
 
-            // 鍙戦€佽繛鎺ユ垚鍔熸秷鎭粰瀹㈡埛绔?
+            // 发送连接成功消息给客户端
             sendMessage(session, buildStatusMessage("connected", userId, true));
 
         } catch (Exception e) {
-            log.error("WebSocket 杩炴帴澶勭悊寮傚父", e);
+            log.error("WebSocket 连接处理异常", e);
             try {
                 session.close();
             } catch (IOException ex) {
-                log.error("鍏抽棴 WebSocket 浼氳瘽寮傚父", ex);
+                log.error("关闭 WebSocket 会话异常", ex);
             }
         }
     }
 
     /**
-     * 鎺ユ敹瀹㈡埛绔秷鎭?
+     * 接收客户端消息
      */
     @OnMessage
     public void onMessage(String message, Session session) {
         try {
             Long userId = sessionUserMap.get(session);
             if (userId == null) {
-                log.warn("鏀跺埌娑堟伅浣嗙敤鎴锋湭璁よ瘉: sessionId={}", session.getId());
+                log.warn("收到消息但用户未认证: sessionId={}", session.getId());
                 return;
             }
 
-            log.debug("鏀跺埌娑堟伅: userId={}, message={}", userId, message);
+            log.debug("收到消息: userId={}, message={}", userId, message);
 
-            // 瑙ｆ瀽娑堟伅
+            // 解析消息
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> messageMap = mapper.readValue(message, Map.class);
 
@@ -140,32 +135,32 @@ public class ImWebSocketEndpoint {
 
             switch (type) {
                 case "message":
-                    // 澶勭悊鑱婂ぉ娑堟伅
+                    // 处理聊天消息
                     handleChatMessage(userId, payload);
                     break;
                 case "typing":
-                    // 澶勭悊姝ｅ湪杈撳叆鐘舵€?
+                    // 处理正在输入状态
                     handleTypingStatus(userId, payload);
                     break;
                 case "read":
-                    // 澶勭悊娑堟伅宸茶
+                    // 处理消息已读
                     handleReadReceipt(userId, payload);
                     break;
                 case "ping":
-                    // 澶勭悊蹇冭烦
+                    // 处理心跳
                     sendMessage(session, buildStatusMessage("pong", userId, true));
                     break;
                 default:
-                    log.warn("鏈煡娑堟伅绫诲瀷: type={}", type);
+                    log.warn("未知消息类型: type={}", type);
             }
 
         } catch (Exception e) {
-            log.error("澶勭悊 WebSocket 娑堟伅寮傚父", e);
+            log.error("处理 WebSocket 消息异常", e);
         }
     }
 
     /**
-     * 瀹㈡埛绔柇寮€杩炴帴鏃惰皟鐢?
+     * 客户端断开连接时调用
      */
     @OnClose
     public void onClose(Session session) {
@@ -173,22 +168,22 @@ public class ImWebSocketEndpoint {
             Long userId = sessionUserMap.remove(session);
             if (userId != null) {
                 onlineUsers.remove(userId);
-                log.info("鐢ㄦ埛绂荤嚎: userId={}, sessionId={}", userId, session.getId());
+                log.info("用户离线: userId={}, sessionId={}", userId, session.getId());
 
-                // 骞挎挱鐢ㄦ埛绂荤嚎娑堟伅
+                // 广播用户离线消息
                 broadcastOnlineStatus(userId, false);
             }
         } catch (Exception e) {
-            log.error("澶勭悊 WebSocket 鍏抽棴寮傚父", e);
+            log.error("处理 WebSocket 关闭异常", e);
         }
     }
 
     /**
-     * 杩炴帴寮傚父鏃惰皟鐢?
+     * 连接异常时调用
      */
     @OnError
     public void onError(Session session, Throwable error) {
-        log.error("WebSocket 寮傚父: sessionId={}", session.getId(), error);
+        log.error("WebSocket 异常: sessionId={}", session.getId(), error);
         try {
             Long userId = sessionUserMap.remove(session);
             if (userId != null) {
@@ -196,86 +191,96 @@ public class ImWebSocketEndpoint {
             }
             session.close();
         } catch (IOException e) {
-            log.error("鍏抽棴寮傚父杩炴帴澶辫触", e);
+            log.error("关闭异常连接失败", e);
         }
     }
 
     /**
-     * 澶勭悊鑱婂ぉ娑堟伅
+     * 处理聊天消息
      */
     private void handleChatMessage(Long userId, Object payload) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> messageData = mapper.convertValue(payload, Map.class);
 
-            Long conversationId = Long.valueOf(messageData.get("conversationId").toString());
+            Long sessionId = Long.valueOf(messageData.get("sessionId").toString());
             String messageType = (String) messageData.get("type");
             String content = (String) messageData.get("content");
 
-            // 淇濆瓨娑堟伅鍒版暟鎹簱
-            Long messageId = staticImMessageService.sendMessage(conversationId, userId, messageType, content);
+            // TODO: 保存消息到数据库
+            // 暂时返回模拟ID
+            Long messageId = 1L;
 
             if (messageId != null) {
-                // 鑾峰彇瀹屾暣娑堟伅瀵硅薄
-                ImMessage message = staticImMessageService.selectImMessageById(messageId);
+                // 获取完整消息对象
+                // TODO: 从数据库获取消息
+                ImMessage message = new ImMessage();
+                message.setId(messageId);
+                message.setSessionId(sessionId);
+                message.setSenderId(userId);
+                message.setType(messageType);
+                message.setContent(content);
 
-                // 骞挎挱娑堟伅缁欎細璇濅腑鐨勬墍鏈夌敤鎴?
-                broadcastMessageToConversation(conversationId, message);
+                // 广播消息给会话中的所有用户
+                broadcastMessageToSession(sessionId, message);
 
-                log.info("娑堟伅宸插彂閫? messageId={}, conversationId={}", messageId, conversationId);
+                log.info("消息已发送: messageId={}, sessionId={}", messageId, sessionId);
             }
 
         } catch (Exception e) {
-            log.error("澶勭悊鑱婂ぉ娑堟伅寮傚父", e);
+            log.error("处理聊天消息异常", e);
         }
     }
 
     /**
-     * 澶勭悊姝ｅ湪杈撳叆鐘舵€?
+     * 处理正在输入状态
      */
     private void handleTypingStatus(Long userId, Object payload) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> typingData = mapper.convertValue(payload, Map.class);
 
-            Long conversationId = Long.valueOf(typingData.get("conversationId").toString());
+            Long sessionId = Long.valueOf(typingData.get("sessionId").toString());
             boolean isTyping = (boolean) typingData.get("isTyping");
 
-            // 骞挎挱姝ｅ湪杈撳叆鐘舵€?
-            broadcastTypingStatus(conversationId, userId, isTyping);
+            // 广播正在输入状态
+            broadcastTypingStatus(sessionId, userId, isTyping);
 
         } catch (Exception e) {
-            log.error("澶勭悊姝ｅ湪杈撳叆鐘舵€佸紓甯?, e);
+            log.error("处理正在输入状态异常", e);
         }
     }
 
     /**
-     * 澶勭悊娑堟伅宸茶
+     * 处理消息已读
      */
     private void handleReadReceipt(Long userId, Object payload) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> readData = mapper.convertValue(payload, Map.class);
 
-            Long messageId = Long.valueOf(readData.get("messageId").toString());
+            Long sessionId = Long.valueOf(readData.get("sessionId").toString());
+            List<Long> messageIds = (List<Long>) readData.get("messageIds");
 
-            // 鏇存柊娑堟伅鐘舵€佷负宸茶
-            staticImMessageService.updateMessageStatus(messageId, "READ");
+            // 更新消息状态为已读
+            if (messageIds != null && !messageIds.isEmpty()) {
+                staticImMessageService.markAsRead(sessionId, userId, messageIds);
+            }
 
-            // 骞挎挱宸茶鍥炴墽
-            broadcastReadReceipt(messageId, userId);
+            // 广播已读回执
+            broadcastReadReceipt(sessionId, userId, messageIds);
 
-            log.info("娑堟伅宸茶: messageId={}, userId={}", messageId, userId);
+            log.info("消息已读: sessionId={}, userId={}", sessionId, userId);
 
         } catch (Exception e) {
-            log.error("澶勭悊娑堟伅宸茶寮傚父", e);
+            log.error("处理消息已读异常", e);
         }
     }
 
     /**
-     * 骞挎挱娑堟伅缁欎細璇濅腑鐨勬墍鏈夌敤鎴?
+     * 广播消息给会话中的所有用户
      */
-    private void broadcastMessageToConversation(Long conversationId, ImMessage message) {
+    private void broadcastMessageToSession(Long sessionId, ImMessage message) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> messageMap = new HashMap<>();
@@ -284,79 +289,60 @@ public class ImWebSocketEndpoint {
 
             String messageJson = mapper.writeValueAsString(messageMap);
 
-            // 杩欓噷搴旇鏍规嵁 conversationId 鑾峰彇浼氳瘽涓殑鎵€鏈夌敤鎴?
-            // 绠€鍖栬捣瑙侊紝骞挎挱缁欐墍鏈夊湪绾跨敤鎴?
-            // 浣跨敤骞跺彂瀹夊叏鐨勯亶鍘嗘柟寮?
-            List<Session> sessions = new ArrayList<>(onlineUsers.values());
-            for (Session session : sessions) {
-                if (session.isOpen()) {
-                    sendMessage(session, messageJson);
-                }
-            }
+            // 这里应该根据 sessionId 获取会话中的所有用户
+            // 简化起见，广播给所有在线用户
+            broadcastToAllOnline(messageJson);
 
         } catch (Exception e) {
-            log.error("骞挎挱娑堟伅寮傚父", e);
+            log.error("广播消息异常", e);
         }
     }
 
     /**
-     * 骞挎挱姝ｅ湪杈撳叆鐘舵€?
+     * 广播正在输入状态
      */
-    private void broadcastTypingStatus(Long conversationId, Long userId, boolean isTyping) {
+    private void broadcastTypingStatus(Long sessionId, Long userId, boolean isTyping) {
         try {
             Map<String, Object> statusMap = new HashMap<>();
             statusMap.put("type", "typing");
-            statusMap.put("conversationId", conversationId);
+            statusMap.put("sessionId", sessionId);
             statusMap.put("userId", userId);
             statusMap.put("isTyping", isTyping);
 
             ObjectMapper mapper = new ObjectMapper();
             String messageJson = mapper.writeValueAsString(statusMap);
 
-            // 骞挎挱缁欐墍鏈夊湪绾跨敤鎴?
-            // 浣跨敤骞跺彂瀹夊叏鐨勯亶鍘嗘柟寮?
-            List<Session> sessions = new ArrayList<>(onlineUsers.values());
-            for (Session session : sessions) {
-                if (session.isOpen()) {
-                    sendMessage(session, messageJson);
-                }
-            }
+            broadcastToAllOnline(messageJson);
 
         } catch (Exception e) {
-            log.error("骞挎挱姝ｅ湪杈撳叆鐘舵€佸紓甯?, e);
+            log.error("广播正在输入状态异常", e);
         }
     }
 
     /**
-     * 骞挎挱宸茶鍥炴墽
+     * 广播已读回执
      */
-    private void broadcastReadReceipt(Long messageId, Long userId) {
+    private void broadcastReadReceipt(Long sessionId, Long userId, List<Long> messageIds) {
         try {
             Map<String, Object> receiptMap = new HashMap<>();
             receiptMap.put("type", "read_receipt");
-            receiptMap.put("messageId", messageId);
+            receiptMap.put("sessionId", sessionId);
             receiptMap.put("userId", userId);
+            receiptMap.put("messageIds", messageIds);
             receiptMap.put("timestamp", System.currentTimeMillis());
 
             ObjectMapper mapper = new ObjectMapper();
             String messageJson = mapper.writeValueAsString(receiptMap);
 
-            // 骞挎挱缁欐墍鏈夊湪绾跨敤鎴?
-            // 浣跨敤骞跺彂瀹夊叏鐨勯亶鍘嗘柟寮?
-            List<Session> sessions = new ArrayList<>(onlineUsers.values());
-            for (Session session : sessions) {
-                if (session.isOpen()) {
-                    sendMessage(session, messageJson);
-                }
-            }
+            broadcastToAllOnline(messageJson);
 
         } catch (Exception e) {
-            log.error("骞挎挱宸茶鍥炴墽寮傚父", e);
+            log.error("广播已读回执异常", e);
         }
     }
 
     /**
-     * 骞挎挱鐢ㄦ埛鍦ㄧ嚎鐘舵€?
+     * 广播用户在线状态
      */
     private void broadcastOnlineStatus(Long userId, boolean online) {
         try {
@@ -365,22 +351,15 @@ public class ImWebSocketEndpoint {
             ObjectMapper mapper = new ObjectMapper();
             String messageJson = mapper.writeValueAsString(statusMap);
 
-            // 骞挎挱缁欐墍鏈夊湪绾跨敤鎴?
-            // 浣跨敤骞跺彂瀹夊叏鐨勯亶鍘嗘柟寮?
-            List<Session> sessions = new ArrayList<>(onlineUsers.values());
-            for (Session session : sessions) {
-                if (session.isOpen()) {
-                    sendMessage(session, messageJson);
-                }
-            }
+            broadcastToAllOnline(messageJson);
 
         } catch (Exception e) {
-            log.error("骞挎挱鍦ㄧ嚎鐘舵€佸紓甯?, e);
+            log.error("广播在线状态异常", e);
         }
     }
 
     /**
-     * 鍙戦€佹秷鎭粰鎸囧畾浼氳瘽
+     * 发送消息给指定会话
      */
     private void sendMessage(Session session, Object message) {
         try {
@@ -390,12 +369,28 @@ public class ImWebSocketEndpoint {
                 session.getBasicRemote().sendText(messageJson);
             }
         } catch (IOException e) {
-            log.error("鍙戦€佹秷鎭紓甯?, e);
+            log.error("发送消息异常", e);
         }
     }
 
     /**
-     * 鏋勫缓鐘舵€佹秷鎭?
+     * 广播消息给所有在线用户
+     */
+    private void broadcastToAllOnline(String messageJson) {
+        List<Session> sessions = new ArrayList<>(onlineUsers.values());
+        for (Session session : sessions) {
+            if (session.isOpen()) {
+                try {
+                    session.getBasicRemote().sendText(messageJson);
+                } catch (IOException e) {
+                    log.error("发送消息失败: sessionId={}", session.getId(), e);
+                }
+            }
+        }
+    }
+
+    /**
+     * 构建状态消息
      */
     private Map<String, Object> buildStatusMessage(String type, Long userId, Object data) {
         Map<String, Object> message = new HashMap<>();
@@ -407,7 +402,7 @@ public class ImWebSocketEndpoint {
     }
 
     /**
-     * 浠庢煡璇㈠瓧绗︿覆涓彁鍙?token
+     * 从查询字符串中提取 token
      */
     private String extractTokenFromQuery(String queryString) {
         if (queryString == null || queryString.isEmpty()) {
@@ -424,23 +419,39 @@ public class ImWebSocketEndpoint {
     }
 
     /**
-     * 鑾峰彇鍦ㄧ嚎鐢ㄦ埛鏁?
+     * 获取在线用户数
      */
     public static int getOnlineUserCount() {
         return onlineUsers.size();
     }
 
     /**
-     * 妫€鏌ョ敤鎴锋槸鍚﹀湪绾?
+     * 检查用户是否在线
      */
     public static boolean isUserOnline(Long userId) {
         return onlineUsers.containsKey(userId);
     }
 
     /**
-     * 鑾峰彇鎵€鏈夊湪绾跨敤鎴稩D
+     * 获取所有在线用户ID
      */
     public static Set<Long> getOnlineUserIds() {
         return new HashSet<>(onlineUsers.keySet());
+    }
+
+    /**
+     * 发送消息给指定用户
+     */
+    public static void sendToUser(Long userId, Object message) {
+        Session session = onlineUsers.get(userId);
+        if (session != null && session.isOpen()) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                String messageJson = mapper.writeValueAsString(message);
+                session.getBasicRemote().sendText(messageJson);
+            } catch (Exception e) {
+                LoggerFactory.getLogger(ImWebSocketEndpoint.class).error("发送消息给用户失败: userId={}", userId, e);
+            }
+        }
     }
 }

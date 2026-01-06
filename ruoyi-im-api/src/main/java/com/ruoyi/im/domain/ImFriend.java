@@ -1,93 +1,157 @@
 package com.ruoyi.im.domain;
 
-import com.ruoyi.common.base.BaseEntity;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
- * 濂藉弸瀵硅薄 im_friend
- * 
+ * 好友关系实体
+ *
  * @author ruoyi
  */
-@TableName("im_friend")
-public class ImFriend extends BaseEntity
-{
+public class ImFriend implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
-    /** 濂藉弸鍏崇郴ID */
-    @TableId
+    /**
+     * 好友关系ID
+     */
     private Long id;
 
-    /** 鐢ㄦ埛ID */
+    /**
+     * 用户ID
+     */
     private Long userId;
 
-    /** 濂藉弸ID */
+    /**
+     * 好友ID
+     */
     private Long friendId;
 
-    /** 澶囨敞 */
+    /**
+     * 备注
+     */
     private String remark;
 
-    /** 濂藉弸鐘舵€?*/
+    /**
+     * 好友分组
+     */
+    private String groupName;
+
+    /**
+     * 好友状态（NORMAL正常 BLOCKED已拉黑 DELETED已删除）
+     */
     private String status;
 
-    public void setId(Long id) 
-    {
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
+
+    /**
+     * 好友名称（非数据库字段，用于显示）
+     */
+    private String friendName;
+
+    /**
+     * 好友头像（非数据库字段，用于显示）
+     */
+    private String friendAvatar;
+
+    /**
+     * 好友在线状态（非数据库字段，用于显示）
+     */
+    private Boolean online;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public Long getId() 
-    {
-        return id;
+    public Long getUserId() {
+        return userId;
     }
-    public void setUserId(Long userId) 
-    {
+
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
-    public Long getUserId() 
-    {
-        return userId;
+    public Long getFriendId() {
+        return friendId;
     }
-    public void setFriendId(Long friendId) 
-    {
+
+    public void setFriendId(Long friendId) {
         this.friendId = friendId;
     }
 
-    public Long getFriendId() 
-    {
-        return friendId;
+    public String getRemark() {
+        return remark;
     }
-    public void setRemark(String remark) 
-    {
+
+    public void setRemark(String remark) {
         this.remark = remark;
     }
 
-    public String getRemark() 
-    {
-        return remark;
-    }
-    public void setStatus(String status) 
-    {
-        this.status = status;
+    public String getGroupName() {
+        return groupName;
     }
 
-    public String getStatus() 
-    {
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public String getStatus() {
         return status;
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("id", getId())
-            .append("userId", getUserId())
-            .append("friendId", getFriendId())
-            .append("remark", getRemark())
-            .append("status", getStatus())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .toString();
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public String getFriendName() {
+        return friendName;
+    }
+
+    public void setFriendName(String friendName) {
+        this.friendName = friendName;
+    }
+
+    public String getFriendAvatar() {
+        return friendAvatar;
+    }
+
+    public void setFriendAvatar(String friendAvatar) {
+        this.friendAvatar = friendAvatar;
+    }
+
+    public Boolean getOnline() {
+        return online;
+    }
+
+    public void setOnline(Boolean online) {
+        this.online = online;
     }
 }

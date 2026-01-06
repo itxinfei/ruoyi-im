@@ -17,6 +17,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "im")
 @EnableScheduling
 public class ImConfig {
+
     /** 消息配置 */
     private Message message = new Message();
     

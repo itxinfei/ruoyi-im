@@ -1,152 +1,163 @@
 package com.ruoyi.im.mapper;
 
 import com.ruoyi.im.domain.ImUser;
+
 import java.util.List;
 import java.util.Set;
 
 /**
- * IM鐢ㄦ埛Mapper鎺ュ彛 - 鎬ц兘浼樺寲鐗堟湰
- * 浼樺寲鍐呭锛氭坊鍔犳壒閲忔搷浣溿€佸垎椤垫煡璇€佹€ц兘鐩戞帶銆佺储寮曚紭鍖? * 
+ * IM用户Mapper接口 - 性能优化版本
+ * 优化内容：添加缓存操作、分页查询、性能监控、索引优化
+ *
  * @author ruoyi
  */
 public interface ImUserMapper {
-    /**
-     * 鏌ヨIM鐢ㄦ埛
-     * 
-     * @param id 鐢ㄦ埛ID
-     * @return IM鐢ㄦ埛
-     */
-    public ImUser selectImUserById(Long id);
 
     /**
-     * 鏌ヨIM鐢ㄦ埛鍒楄〃
-     * 
-     * @param imUser IM鐢ㄦ埛
-     * @return IM鐢ㄦ埛闆嗗悎
+     * 查询IM用户
+     *
+     * @param id 用户ID
+     * @return IM用户
      */
-    public List<ImUser> selectImUserList(ImUser imUser);
+    ImUser selectImUserById(Long id);
 
     /**
-     * 鏂板IM鐢ㄦ埛
-     * 
-     * @param imUser IM鐢ㄦ埛
-     * @return 缁撴灉
+     * 查询IM用户列表
+     *
+     * @param imUser IM用户
+     * @return IM用户集合
      */
-    public int insertImUser(ImUser imUser);
+    List<ImUser> selectImUserList(ImUser imUser);
 
     /**
-     * 淇敼IM鐢ㄦ埛
-     * 
-     * @param imUser IM鐢ㄦ埛
-     * @return 缁撴灉
+     * 新增IM用户
+     *
+     * @param imUser IM用户
+     * @return 结果
      */
-    public int updateImUser(ImUser imUser);
+    int insertImUser(ImUser imUser);
 
     /**
-     * 鍒犻櫎IM鐢ㄦ埛
-     * 
-     * @param id 鐢ㄦ埛ID
-     * @return 缁撴灉
+     * 修改IM用户
+     *
+     * @param imUser IM用户
+     * @return 结果
      */
-    public int deleteImUserById(Long id);
+    int updateImUser(ImUser imUser);
 
     /**
-     * 鎵归噺鍒犻櫎IM鐢ㄦ埛
-     * 
-     * @param ids 闇€瑕佸垹闄ょ殑鏁版嵁ID
-     * @return 缁撴灉
+     * 删除IM用户
+     *
+     * @param id 用户ID
+     * @return 结果
      */
-    public int deleteImUserByIds(Long[] ids);
-    
+    int deleteImUserById(Long id);
+
     /**
-     * 鏍规嵁鐢ㄦ埛鍚嶆煡璇㈢敤鎴?     * 
-     * @param username 鐢ㄦ埛鍚?     * @return IM鐢ㄦ埛
+     * 批量删除IM用户
+     *
+     * @param ids 需要删除的数据ID
+     * @return 结果
      */
-    public ImUser selectImUserByUsername(String username);
-    
+    int deleteImUserByIds(Long[] ids);
+
     /**
-     * 鏍规嵁閭鏌ヨ鐢ㄦ埛
-     * 
-     * @param email 閭
-     * @return IM鐢ㄦ埛
+     * 根据用户名查询用户
+     *
+     * @param username 用户名
+     * @return IM用户
      */
-    public ImUser selectImUserByEmail(String email);
-    
+    ImUser selectImUserByUsername(String username);
+
     /**
-     * 鎵归噺鎻掑叆鐢ㄦ埛 - 鎬ц兘浼樺寲
-     * 
-     * @param users 鐢ㄦ埛鍒楄〃
-     * @return 鎻掑叆鎴愬姛鐨勬暟閲?     */
-    public int batchInsertImUser(List<ImUser> users);
-    
-    /**
-     * 鎵归噺鏇存柊鐢ㄦ埛鐘舵€?- 鎬ц兘浼樺寲
-     * 
-     * @param userIds 鐢ㄦ埛ID鍒楄〃
-     * @param status 鏂扮姸鎬?     * @return 鏇存柊鎴愬姛鐨勬暟閲?     */
-    public int batchUpdateUserStatus(List<Long> userIds, String status);
-    
-    /**
-     * 鍒嗛〉鏌ヨ鐢ㄦ埛鍒楄〃 - 鎬ц兘浼樺寲
-     * 
-     * @param imUser 鏌ヨ鏉′欢
-     * @param offset 鍋忕Щ閲?     * @param limit 闄愬埗鏁伴噺
-     * @return 鐢ㄦ埛鍒楄〃
+     * 根据邮箱查询用户
+     *
+     * @param email 邮箱
+     * @return IM用户
      */
-    public List<ImUser> selectImUserListWithPagination(ImUser imUser, int offset, int limit);
-    
+    ImUser selectImUserByEmail(String email);
+
     /**
-     * 鏍规嵁鐢ㄦ埛ID鍒楄〃鎵归噺鏌ヨ鐢ㄦ埛 - 鎬ц兘浼樺寲
-     * 
-     * @param userIds 鐢ㄦ埛ID鍒楄〃
-     * @return 鐢ㄦ埛鍒楄〃
+     * 批量插入用户 - 性能优化
+     *
+     * @param users 用户列表
+     * @return 插入成功的数量
      */
-    public List<ImUser> selectImUserListByIds(List<Long> userIds);
-    
+    int batchInsertImUser(List<ImUser> users);
+
     /**
-     * 鏌ヨ鐢ㄦ埛鎬绘暟锛堢敤浜庡垎椤碉級
-     * 
-     * @param imUser 鏌ヨ鏉′欢
-     * @return 鎬绘暟
+     * 批量更新用户状态 - 性能优化
+     *
+     * @param userIds 用户ID列表
+     * @param status 新状态
+     * @return 更新成功的数量
      */
-    public int selectImUserCount(ImUser imUser);
-    
+    int batchUpdateUserStatus(List<Long> userIds, String status);
+
     /**
-     * 鏍规嵁鐘舵€佹煡璇㈢敤鎴峰垪琛?- 鎬ц兘浼樺寲
-     * 
-     * @param status 鐢ㄦ埛鐘舵€?     * @param limit 闄愬埗鏁伴噺
-     * @return 鐢ㄦ埛鍒楄〃
+     * 分页查询用户列表 - 性能优化
+     *
+     * @param imUser 查询条件
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 用户列表
      */
-    public List<ImUser> selectImUserListByStatus(String status, int limit);
-    
+    List<ImUser> selectImUserListWithPagination(ImUser imUser, int offset, int limit);
+
     /**
-     * 妫€鏌ョ敤鎴峰悕鏄惁瀛樺湪 - 鎬ц兘浼樺寲
-     * 
-     * @param username 鐢ㄦ埛鍚?     * @return 瀛樺湪杩斿洖true锛屼笉瀛樺湪杩斿洖false
+     * 根据用户ID列表批量查询用户 - 性能优化
+     *
+     * @param userIds 用户ID列表
+     * @return 用户列表
      */
-    public boolean existsByUsername(String username);
-    
+    List<ImUser> selectImUserListByIds(List<Long> userIds);
+
     /**
-     * 妫€鏌ラ偖绠辨槸鍚﹀瓨鍦?- 鎬ц兘浼樺寲
-     * 
-     * @param email 閭
-     * @return 瀛樺湪杩斿洖true锛屼笉瀛樺湪杩斿洖false
+     * 查询用户总数（用于分页）
+     *
+     * @param imUser 查询条件
+     * @return 总数
      */
-    public boolean existsByEmail(String email);
-    
+    int selectImUserCount(ImUser imUser);
+
     /**
-     * 鑾峰彇鐢ㄦ埛鏉冮檺鍒楄〃
-     * 
-     * @param userId 鐢ㄦ埛ID
-     * @return 鏉冮檺闆嗗悎
+     * 根据状态查询用户列表 - 性能优化
+     *
+     * @param status 用户状态
+     * @param limit 限制数量
+     * @return 用户列表
      */
-    public Set<String> selectUserPermissionsByUserId(Long userId);
-    
+    List<ImUser> selectImUserListByStatus(String status, int limit);
+
     /**
-     * 鑾峰彇鐢ㄦ埛瑙掕壊鍒楄〃
-     * 
-     * @param userId 鐢ㄦ埛ID
-     * @return 瑙掕壊闆嗗悎
+     * 检查用户名是否存在 - 性能优化
+     *
+     * @param username 用户名
+     * @return 存在返回true，不存在返回false
      */
-    public Set<String> selectUserRolesByUserId(Long userId);
+    boolean existsByUsername(String username);
+
+    /**
+     * 检查邮箱是否存在 - 性能优化
+     *
+     * @param email 邮箱
+     * @return 存在返回true，不存在返回false
+     */
+    boolean existsByEmail(String email);
+
+    /**
+     * 获取用户权限列表
+     *
+     * @param userId 用户ID
+     * @return 权限集合
+     */
+    Set<String> selectUserPermissionsByUserId(Long userId);
+
+    /**
+     * 获取用户角色列表
+     *
+     * @param userId 用户ID
+     * @return 角色集合
+     */
+    Set<String> selectUserRolesByUserId(Long userId);
 }

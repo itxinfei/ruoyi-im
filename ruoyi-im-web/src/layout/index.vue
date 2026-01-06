@@ -126,8 +126,6 @@ import {
   Folder,
   Setting,
   SwitchButton,
-  Calendar,
-  Bell,
 } from '@element-plus/icons-vue'
 
 const router = useRouter()

@@ -1,68 +1,69 @@
 package com.ruoyi.im.mapper;
 
-import java.util.List;
 import com.ruoyi.im.domain.ImFriend;
 
+import java.util.List;
+
 /**
- * 濂藉弸Mapper鎺ュ彛
- * 
+ * 好友Mapper接口
+ *
  * @author ruoyi
  */
-public interface ImFriendMapper 
-{
-    /**
-     * 鏌ヨ濂藉弸
-     * 
-     * @param id 濂藉弸ID
-     * @return 濂藉弸
-     */
-    public ImFriend selectImFriendById(Long id);
+public interface ImFriendMapper {
 
     /**
-     * 鏌ヨ濂藉弸鍒楄〃
-     * 
-     * @param imFriend 濂藉弸
-     * @return 濂藉弸闆嗗悎
+     * 查询好友
+     *
+     * @param id 好友ID
+     * @return 好友
      */
-    public List<ImFriend> selectImFriendList(ImFriend imFriend);
+    ImFriend selectImFriendById(Long id);
 
     /**
-     * 鏂板濂藉弸
-     * 
-     * @param imFriend 濂藉弸
-     * @return 缁撴灉
+     * 查询好友列表
+     *
+     * @param imFriend 好友
+     * @return 好友集合
      */
-    public int insertImFriend(ImFriend imFriend);
+    List<ImFriend> selectImFriendList(ImFriend imFriend);
 
     /**
-     * 淇敼濂藉弸
-     * 
-     * @param imFriend 濂藉弸
-     * @return 缁撴灉
+     * 新增好友
+     *
+     * @param imFriend 好友
+     * @return 结果
      */
-    public int updateImFriend(ImFriend imFriend);
+    int insertImFriend(ImFriend imFriend);
 
     /**
-     * 鍒犻櫎濂藉弸
-     * 
-     * @param id 濂藉弸ID
-     * @return 缁撴灉
+     * 修改好友
+     *
+     * @param imFriend 好友
+     * @return 结果
      */
-    public int deleteImFriendById(Long id);
+    int updateImFriend(ImFriend imFriend);
 
     /**
-     * 鎵归噺鍒犻櫎濂藉弸
-     * 
-     * @param ids 闇€瑕佸垹闄ょ殑鏁版嵁ID
-     * @return 缁撴灉
+     * 删除好友
+     *
+     * @param id 好友ID
+     * @return 结果
      */
-    public int deleteImFriendByIds(Long[] ids);
-    
+    int deleteImFriendById(Long id);
+
     /**
-     * 鏍规嵁鏉′欢鍒犻櫎濂藉弸
-     * 
-     * @param imFriend 鏉′欢
-     * @return 缁撴灉
+     * 批量删除好友
+     *
+     * @param ids 需要删除的数据ID
+     * @return 结果
      */
-    public int deleteImFriendByCondition(ImFriend imFriend);
+    int deleteImFriendByIds(Long[] ids);
+
+    /**
+     * 根据条件删除好友
+     *
+     * @param imFriend 条件
+     * @return 结果
+     */
+    int deleteImFriendByCondition(ImFriend imFriend);
 }

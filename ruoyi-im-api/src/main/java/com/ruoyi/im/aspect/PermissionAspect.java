@@ -3,7 +3,7 @@ package com.ruoyi.im.aspect;
 import com.ruoyi.im.annotation.RequirePermission;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.exception.BusinessException;
-import com.ruoyi.im.service.IUserService;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.utils.SecurityUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -32,7 +32,7 @@ public class PermissionAspect {
     private static final Logger log = LoggerFactory.getLogger(PermissionAspect.class);
 
     @Autowired
-    private IUserService userService;
+    private ImUserService userService;
 
     @Around("@annotation(requirePermission)")
     public Object around(ProceedingJoinPoint point, RequirePermission requirePermission) throws Throwable {

@@ -9,41 +9,42 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- * 瀹㈡埛绔伐鍏风被
- * 
+ * 客户端工具类
+ *
  * @author ruoyi
  */
 public class ServletUtils {
+
     /**
-     * 鑾峰彇String鍙傛暟
+     * 获取String参数
      */
     public static String getParameter(String name) {
         return getRequest().getParameter(name);
     }
 
     /**
-     * 鑾峰彇String鍙傛暟
+     * 获取String参数
      */
     public static String getParameter(String name, String defaultValue) {
         return Convert.toStr(getRequest().getParameter(name), defaultValue);
     }
 
     /**
-     * 鑾峰彇Integer鍙傛暟
+     * 获取Integer参数
      */
     public static Integer getParameterToInt(String name) {
         return Convert.toInt(getRequest().getParameter(name));
     }
 
     /**
-     * 鑾峰彇Integer鍙傛暟
+     * 获取Integer参数
      */
     public static Integer getParameterToInt(String name, Integer defaultValue) {
         return Convert.toInt(getRequest().getParameter(name), defaultValue);
     }
 
     /**
-     * 鑾峰彇request
+     * 获取request
      */
     public static HttpServletRequest getRequest() {
         try {
@@ -54,7 +55,7 @@ public class ServletUtils {
     }
 
     /**
-     * 鑾峰彇response
+     * 获取response
      */
     public static HttpServletResponse getResponse() {
         try {
@@ -65,12 +66,15 @@ public class ServletUtils {
     }
 
     /**
-     * 鑾峰彇session
+     * 获取session
      */
     public static HttpSession getSession() {
         return getRequest().getSession();
     }
 
+    /**
+     * 获取RequestAttributes
+     */
     public static ServletRequestAttributes getRequestAttributes() {
         try {
             RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
@@ -79,12 +83,12 @@ public class ServletUtils {
             return null;
         }
     }
-    
+
     /**
-     * 鑾峰彇瀹㈡埛绔疘P鍦板潃
-     * 
+     * 获取客户端IP地址
+     *
      * @param request HttpServletRequest
-     * @return 瀹㈡埛绔疘P鍦板潃
+     * @return 客户端IP地址
      */
     public static String getClientIpAddress(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
@@ -103,30 +107,35 @@ public class ServletUtils {
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
-        
-        // 濡傛灉鏄IP鎯呭喌锛屽彇绗竴涓狪P
+
+        // 如果是多IP情况，取第一个IP
         if (ip != null && ip.contains(",")) {
             ip = ip.split(",")[0].trim();
         }
-        
+
         return ip;
     }
-    
+
     /**
-     * 鑾峰彇鎸囧畾璇锋眰鐨勫弬鏁颁负鏁存暟
-     * 
+     * 获取指定请求的参数为整数
+     *
      * @param request HttpServletRequest
-     * @param name 鍙傛暟鍚?     * @return 鍙傛暟鍊?     */
+     * @param name    参数名
+     * @return 参数值
+     */
     public static Integer getParameterToInt(HttpServletRequest request, String name) {
         String value = request.getParameter(name);
         return Convert.toInt(value);
     }
-    
+
     /**
-     * 鑾峰彇鎸囧畾璇锋眰鐨勫弬鏁颁负鏁存暟
-     * 
-     * @param request HttpServletRequest
-     * @param name 鍙傛暟鍚?     * @param defaultValue 榛樿鍊?     * @return 鍙傛暟鍊?     */
+     * 获取指定请求的参数为整数
+     *
+     * @param request      HttpServletRequest
+     * @param name         参数名
+     * @param defaultValue 默认值
+     * @return 参数值
+     */
     public static Integer getParameterToInt(HttpServletRequest request, String name, Integer defaultValue) {
         String value = request.getParameter(name);
         return Convert.toInt(value, defaultValue);

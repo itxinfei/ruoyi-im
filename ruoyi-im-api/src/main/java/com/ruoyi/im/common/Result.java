@@ -51,6 +51,15 @@ public class Result<T> implements Serializable {
     /**
      * 成功返回结果
      *
+     * @param msg 消息
+     */
+    public static <T> Result<T> success(String msg) {
+        return new Result<>(200, msg);
+    }
+
+    /**
+     * 成功返回结果
+     *
      * @param data 数据
      */
     public static <T> Result<T> success(T data) {
@@ -91,6 +100,38 @@ public class Result<T> implements Serializable {
      */
     public static <T> Result<T> fail(int code, String msg) {
         return new Result<>(code, msg);
+    }
+
+    /**
+     * 错误返回结果
+     *
+     * @param code 状态码
+     * @param msg 消息
+     */
+    public static <T> Result<T> error(int code, String msg) {
+        return new Result<>(code, msg);
+    }
+
+    /**
+     * 错误返回结果
+     *
+     * @param code 状态码
+     * @param msg 消息
+     * @param data 数据
+     */
+    public static <T> Result<T> error(int code, String msg, T data) {
+        return new Result<>(code, msg, data);
+    }
+
+    /**
+     * 错误返回结果
+     *
+     * @param code 状态码
+     * @param msg 消息
+     * @param data 数据
+     */
+    public static <T> Result<T> error(int code, String msg, java.util.Map<String, String> data) {
+        return new Result<>(code, msg, (T) data);
     }
 
     /**

@@ -7,23 +7,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 娑堟伅鏋勫缓鍣?
- * 
+ * 消息构建器
+ *
  * @author ruoyi
  */
 @Component
 public class MessageBuilder {
-    
+
     /**
-     * 鏋勫缓WebSocket娑堟伅
+     * 构建WebSocket消息
      */
     public Object buildWebSocketMessage(Object message) {
-        // 绠€鍗曞疄鐜帮紝杩斿洖娑堟伅瀵硅薄鏈韩
+        // 简单实现，直接返回消息对象
         return message;
     }
-    
+
     /**
-     * 鏋勫缓鍦ㄧ嚎鐘舵€佹秷鎭?
+     * 构建在线状态消息
      */
     public Object buildOnlineStatusMessage(Long userId, boolean online) {
         Map<String, Object> message = new HashMap<>();
@@ -33,9 +33,9 @@ public class MessageBuilder {
         message.put("timestamp", new Date());
         return message;
     }
-    
+
     /**
-     * 鏋勫缓娑堟伅鎾ゅ洖閫氱煡
+     * 构建消息撤回通知
      */
     public Object buildRecallMessage(Long messageId, Long userId) {
         Map<String, Object> message = new HashMap<>();
@@ -45,9 +45,9 @@ public class MessageBuilder {
         message.put("timestamp", new Date());
         return message;
     }
-    
+
     /**
-     * 鏋勫缓宸茶鍥炴墽娑堟伅
+     * 构建已读回执消息
      */
     public Object buildReadReceiptMessage(Long messageId, Long userId) {
         Map<String, Object> message = new HashMap<>();
@@ -57,9 +57,9 @@ public class MessageBuilder {
         message.put("timestamp", new Date());
         return message;
     }
-    
+
     /**
-     * 鏋勫缓娑堟伅鍙嶅簲閫氱煡
+     * 构建消息反应通知
      */
     public Object buildReactionMessage(Long messageId, String reaction, Long userId, boolean added) {
         Map<String, Object> message = new HashMap<>();
@@ -71,9 +71,9 @@ public class MessageBuilder {
         message.put("timestamp", new Date());
         return message;
     }
-    
+
     /**
-     * 鏋勫缓娑堟伅鍥炴墽
+     * 构建消息回执
      */
     public Object buildReceiptMessage(Long messageId, Integer status, Long userId) {
         Map<String, Object> message = new HashMap<>();

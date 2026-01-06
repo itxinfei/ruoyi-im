@@ -3,11 +3,22 @@ export default [
     path: '/im',
     component: () => import('@/views/im/ImChatLayoutOptimized.vue'),
     meta: {
-      title: '聊天',
+      title: '即时通讯',
       icon: 'chat',
       keepAlive: true,
     },
     children: [
+      {
+        path: 'workbench',
+        name: 'Workbench',
+        component: () => import('@/views/im/workbench/index.vue'),
+        meta: {
+          title: '工作台',
+          icon: 'dashboard',
+          keepAlive: true,
+          activeMenu: '/im/workbench',
+        },
+      },
       {
         path: 'chat/:id?',
         name: 'Chat',
@@ -86,6 +97,37 @@ export default [
           icon: 'file',
           keepAlive: false,
           activeMenu: '/im/file',
+        },
+      },
+      {
+        path: 'approval',
+        name: 'Approval',
+        component: () => import('@/views/im/approval/index.vue'),
+        meta: {
+          title: '审批中心',
+          icon: 'approval',
+          keepAlive: true,
+          activeMenu: '/im/approval',
+        },
+      },
+      {
+        path: 'approval/detail/:id',
+        name: 'ApprovalDetail',
+        component: () => import('@/views/im/approval/detail.vue'),
+        meta: {
+          title: '审批详情',
+          hidden: true,
+        },
+      },
+      {
+        path: 'app-center',
+        name: 'AppCenter',
+        component: () => import('@/views/im/app-center/index.vue'),
+        meta: {
+          title: '应用中心',
+          icon: 'app',
+          keepAlive: true,
+          activeMenu: '/im/app-center',
         },
       },
       {

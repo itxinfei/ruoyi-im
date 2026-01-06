@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onUnmounted, nextTick } from 'vue'
 import { Microphone, Delete, Promotion, VideoClock, VideoPause } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 

@@ -1,49 +1,62 @@
 package com.ruoyi.im.domain;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 濂藉弸鐢宠瀹炰綋
- * 
+ * 好友申请实体
+ *
  * @author ruoyi
  */
-public class ImFriendRequest {
+public class ImFriendRequest implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     /**
-     * 涓婚敭ID
+     * 主键ID
      */
     private Long id;
-    
+
     /**
-     * 鐢宠浜虹敤鎴稩D
+     * 申请人用户ID
      */
     private Long fromUserId;
-    
+
     /**
-     * 琚敵璇蜂汉鐢ㄦ埛ID
+     * 被申请人用户ID
      */
     private Long toUserId;
-    
+
     /**
-     * 鐢宠娑堟伅
+     * 申请消息
      */
     private String message;
-    
+
     /**
-     * 鐘舵€侊紙PENDING寰呭鐞?APPROVED宸插悓鎰?REJECTED宸叉嫆缁濓級
+     * 状态（PENDING待处理 APPROVED已同意 REJECTED已拒绝）
      */
     private String status;
-    
+
     /**
-     * 鍒涘缓鏃堕棿
+     * 创建时间
      */
     private LocalDateTime createTime;
-    
+
     /**
-     * 澶勭悊鏃堕棿
+     * 处理时间
      */
     private LocalDateTime handledTime;
 
-    // Getters and Setters
+    /**
+     * 申请人名称（非数据库字段，用于显示）
+     */
+    private String fromUserName;
+
+    /**
+     * 申请人头像（非数据库字段，用于显示）
+     */
+    private String fromUserAvatar;
+
     public Long getId() {
         return id;
     }
@@ -98,5 +111,21 @@ public class ImFriendRequest {
 
     public void setHandledTime(LocalDateTime handledTime) {
         this.handledTime = handledTime;
+    }
+
+    public String getFromUserName() {
+        return fromUserName;
+    }
+
+    public void setFromUserName(String fromUserName) {
+        this.fromUserName = fromUserName;
+    }
+
+    public String getFromUserAvatar() {
+        return fromUserAvatar;
+    }
+
+    public void setFromUserAvatar(String fromUserAvatar) {
+        this.fromUserAvatar = fromUserAvatar;
     }
 }
