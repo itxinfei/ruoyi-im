@@ -142,11 +142,11 @@ const currentAvatar = computed(() => props.modelValue)
 
 watch(
   () => cropperRef.value,
-  (cropper) => {
+  cropper => {
     if (cropper) {
-      cropper.getCroppedCanvas().toBlob((blob) => {
+      cropper.getCroppedCanvas().toBlob(blob => {
         const reader = new FileReader()
-        reader.onload = (e) => {
+        reader.onload = e => {
           previewImage.value = e.target.result
         }
         reader.readAsDataURL(blob)
@@ -160,7 +160,7 @@ const handleClick = () => {
   fileInput.value.click()
 }
 
-const handleFileChange = (event) => {
+const handleFileChange = event => {
   const file = event.target.files[0]
   if (!file) return
 
@@ -169,7 +169,7 @@ const handleFileChange = (event) => {
   }
 
   const reader = new FileReader()
-  reader.onload = (e) => {
+  reader.onload = e => {
     if (cropperRef.value) {
       cropperRef.value.replace(e.target.result)
     }
@@ -180,7 +180,7 @@ const handleFileChange = (event) => {
   event.target.value = ''
 }
 
-const validateFile = (file) => {
+const validateFile = file => {
   if (!props.acceptTypes.includes(file.type)) {
     ElMessage.error(`只支持 ${props.acceptTypes.join(', ')} 格式的图片`)
     return false
@@ -235,9 +235,9 @@ const handleReset = () => {
 
 const updatePreview = () => {
   if (cropperRef.value) {
-    cropperRef.value.getCroppedCanvas().toBlob((blob) => {
+    cropperRef.value.getCroppedCanvas().toBlob(blob => {
       const reader = new FileReader()
-      reader.onload = (e) => {
+      reader.onload = e => {
         previewImage.value = e.target.result
       }
       reader.readAsDataURL(blob)
@@ -256,7 +256,7 @@ const handleConfirmCrop = async () => {
       height: 200,
     })
 
-    canvas.toBlob(async (blob) => {
+    canvas.toBlob(async blob => {
       if (!blob) {
         ElMessage.error('图片处理失败')
         uploading.value = false
@@ -273,9 +273,9 @@ const handleConfirmCrop = async () => {
           const avatarUrl = response.data?.url || response.imgUrl || response.url
           emit('update:modelValue', avatarUrl)
           emit('upload-success', avatarUrl)
-          
+
           store.commit('user/SET_AVATAR', avatarUrl)
-          
+
           ElMessage.success('头像上传成功')
           cropperVisible.value = false
         } else {

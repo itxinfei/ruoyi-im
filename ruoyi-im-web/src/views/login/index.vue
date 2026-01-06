@@ -251,7 +251,7 @@ const handleRegister = async () => {
       password: registerForm.password,
       nickname: registerForm.username, // 使用用户名作为昵称
       email: registerForm.email,
-      phone: registerForm.phone
+      phone: registerForm.phone,
     }
     await register(registerData)
     ElMessage.success('注册成功，请登录')
@@ -421,9 +421,9 @@ onMounted(() => {
     height: 48px;
     font-size: 16px;
     border-radius: 8px;
-    background-color: #409EFF;
-    border-color: #409EFF;
-    
+    background-color: #409eff;
+    border-color: #409eff;
+
     &:hover {
       background-color: #66b1ff;
       border-color: #66b1ff;
@@ -438,7 +438,7 @@ onMounted(() => {
   margin-top: 20px;
 
   a {
-    color: #409EFF;
+    color: #409eff;
     text-decoration: none;
     margin-left: 4px;
 

@@ -8,17 +8,8 @@
     }"
   >
     <!-- 加载更多触发区域 -->
-    <div
-      v-if="hasMore"
-      ref="loadMoreTrigger"
-      class="load-more-trigger"
-    >
-      <el-button
-        type="text"
-        :loading="loading"
-        :disabled="loading"
-        @click="$emit('load-more')"
-      >
+    <div v-if="hasMore" ref="loadMoreTrigger" class="load-more-trigger">
+      <el-button type="text" :loading="loading" :disabled="loading" @click="$emit('load-more')">
         <template v-if="!loading">
           <i class="el-icon-arrow-up"></i>
           <span>加载更多</span>
@@ -41,10 +32,7 @@
         :data-index="index"
       >
         <!-- 日期分隔线 -->
-        <div
-          v-if="shouldShowDateDivider(item, index)"
-          class="message-date"
-        >
+        <div v-if="shouldShowDateDivider(item, index)" class="message-date">
           <span class="date-badge">{{ formatDate(item.time) }}</span>
         </div>
 
@@ -212,7 +200,7 @@ const scrollThreshold = 100
  * @param {Object} message - 消息对象
  * @returns {number} 估算高度
  */
-const estimateMessageHeight = (message) => {
+const estimateMessageHeight = message => {
   if (!message) return 60
 
   // 根据消息类型估算高度
@@ -321,7 +309,7 @@ const shouldShowDateDivider = (message, index) => {
  * @param {string|number} time - 时间
  * @returns {string}
  */
-const formatDate = (time) => {
+const formatDate = time => {
   return formatMessageDate(time)
 }
 
@@ -330,7 +318,7 @@ const formatDate = (time) => {
  * @param {number} count - 数量
  * @returns {string}
  */
-const formatMessageCount = (count) => {
+const formatMessageCount = count => {
   return count > 99 ? '99+' : count.toString()
 }
 
@@ -338,7 +326,7 @@ const formatMessageCount = (count) => {
  * 处理图片加载完成
  * @param {number} index - 消息索引
  */
-const handleImageLoad = (index) => {
+const handleImageLoad = index => {
   const el = itemRefs.get(index)
   if (el) {
     const height = el.offsetHeight
@@ -393,27 +381,33 @@ const showNewMessageNotification = () => {
 /**
  * 监听消息列表变化
  */
-watch(() => props.messages.length, (newLength, oldLength) => {
-  if (newLength > oldLength) {
-    // 有新消息
-    nextTick(() => {
-      if (atBottom.value) {
-        scrollToBottom({ behavior: 'smooth' })
-      } else {
-        showNewMessageNotification()
-      }
-    })
+watch(
+  () => props.messages.length,
+  (newLength, oldLength) => {
+    if (newLength > oldLength) {
+      // 有新消息
+      nextTick(() => {
+        if (atBottom.value) {
+          scrollToBottom({ behavior: 'smooth' })
+        } else {
+          showNewMessageNotification()
+        }
+      })
+    }
   }
-})
+)
 
 /**
  * 监听新消息数量
  */
-watch(() => props.newMessageCount, (count) => {
-  if (count > 0 && !atBottom.value) {
-    showNewMessageTip.value = true
+watch(
+  () => props.newMessageCount,
+  count => {
+    if (count > 0 && !atBottom.value) {
+      showNewMessageTip.value = true
+    }
   }
-})
+)
 
 // ==================== 生命周期 ====================
 
@@ -635,14 +629,33 @@ defineExpose({
 
 // 动画
 @keyframes bellShake {
-  0%, 100% { transform: rotate(0deg); }
-  10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
-  20%, 40%, 60%, 80% { transform: rotate(10deg); }
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: rotate(-10deg);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: rotate(10deg);
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 // 过渡动画

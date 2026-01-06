@@ -177,7 +177,10 @@
                 <h4>免打扰模式</h4>
                 <p>开启后将不会收到任何通知</p>
               </div>
-              <el-switch v-model="notificationForm.doNotDisturb" @change="handleNotificationChange" />
+              <el-switch
+                v-model="notificationForm.doNotDisturb"
+                @change="handleNotificationChange"
+              />
             </div>
             <div v-if="notificationForm.doNotDisturb" class="setting-item">
               <div class="setting-info">
@@ -185,9 +188,17 @@
                 <p>设置免打扰的时间段</p>
               </div>
               <div class="time-range">
-                <el-time-picker v-model="notificationForm.dndStart" placeholder="开始时间" format="HH:mm" />
+                <el-time-picker
+                  v-model="notificationForm.dndStart"
+                  placeholder="开始时间"
+                  format="HH:mm"
+                />
                 <span style="margin: 0 8px">至</span>
-                <el-time-picker v-model="notificationForm.dndEnd" placeholder="结束时间" format="HH:mm" />
+                <el-time-picker
+                  v-model="notificationForm.dndEnd"
+                  placeholder="结束时间"
+                  format="HH:mm"
+                />
               </div>
             </div>
           </el-card>
@@ -260,20 +271,42 @@
 
     <!-- 修改密码对话框 -->
     <el-dialog v-model="showPasswordDialog" title="修改密码" width="400px" destroy-on-close>
-      <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px">
+      <el-form
+        ref="passwordFormRef"
+        :model="passwordForm"
+        :rules="passwordRules"
+        label-width="100px"
+      >
         <el-form-item label="当前密码" prop="oldPassword">
-          <el-input v-model="passwordForm.oldPassword" type="password" show-password placeholder="请输入当前密码" />
+          <el-input
+            v-model="passwordForm.oldPassword"
+            type="password"
+            show-password
+            placeholder="请输入当前密码"
+          />
         </el-form-item>
         <el-form-item label="新密码" prop="newPassword">
-          <el-input v-model="passwordForm.newPassword" type="password" show-password placeholder="请输入新密码" />
+          <el-input
+            v-model="passwordForm.newPassword"
+            type="password"
+            show-password
+            placeholder="请输入新密码"
+          />
         </el-form-item>
         <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input v-model="passwordForm.confirmPassword" type="password" show-password placeholder="请确认新密码" />
+          <el-input
+            v-model="passwordForm.confirmPassword"
+            type="password"
+            show-password
+            placeholder="请确认新密码"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="showPasswordDialog = false">取消</el-button>
-        <el-button type="primary" :loading="passwordLoading" @click="handleChangePassword">确定</el-button>
+        <el-button type="primary" :loading="passwordLoading" @click="handleChangePassword"
+          >确定</el-button
+        >
       </template>
     </el-dialog>
   </div>
@@ -338,9 +371,7 @@ const passwordForm = reactive({
 
 /** 密码验证规则 */
 const passwordRules = {
-  oldPassword: [
-    { required: true, message: '请输入当前密码', trigger: 'blur' },
-  ],
+  oldPassword: [{ required: true, message: '请输入当前密码', trigger: 'blur' }],
   newPassword: [
     { required: true, message: '请输入新密码', trigger: 'blur' },
     { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' },
@@ -425,7 +456,7 @@ const initFormData = () => {
 /**
  * 头像上传成功
  */
-const handleAvatarSuccess = (avatarUrl) => {
+const handleAvatarSuccess = avatarUrl => {
   userInfo.value.avatar = avatarUrl
   ElMessage.success('头像更新成功')
 }
@@ -433,7 +464,7 @@ const handleAvatarSuccess = (avatarUrl) => {
 /**
  * 头像上传失败
  */
-const handleAvatarError = (error) => {
+const handleAvatarError = error => {
   ElMessage.error(error || '头像上传失败')
 }
 
@@ -484,7 +515,7 @@ const handleChangePassword = async () => {
 /**
  * 主题模式变化
  */
-const handleThemeChange = (mode) => {
+const handleThemeChange = mode => {
   // 应用主题
   if (mode === 'dark') {
     document.documentElement.classList.add('dark')
@@ -498,7 +529,7 @@ const handleThemeChange = (mode) => {
 /**
  * 主题颜色变化
  */
-const handleColorChange = (color) => {
+const handleColorChange = color => {
   themeForm.primaryColor = color
   document.documentElement.style.setProperty('--el-color-primary', color)
   localStorage.setItem('theme-color', color)
@@ -507,7 +538,7 @@ const handleColorChange = (color) => {
 /**
  * 字体大小变化
  */
-const handleFontSizeChange = (size) => {
+const handleFontSizeChange = size => {
   document.documentElement.style.setProperty('--base-font-size', `${size}px`)
   localStorage.setItem('font-size', size)
 }
@@ -537,7 +568,7 @@ const handlePrivacyChange = () => {
 /**
  * 解除黑名单
  */
-const handleUnblock = async (user) => {
+const handleUnblock = async user => {
   try {
     await ElMessageBox.confirm(`确定要将"${user.name}"移出黑名单吗？`, '确认', {
       type: 'warning',
@@ -723,7 +754,9 @@ onMounted(() => {
         }
 
         &.active {
-          box-shadow: 0 0 0 2px #fff, 0 0 0 4px currentColor;
+          box-shadow:
+            0 0 0 2px #fff,
+            0 0 0 4px currentColor;
         }
 
         .el-icon {

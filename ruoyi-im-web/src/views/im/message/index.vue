@@ -21,7 +21,12 @@
         />
       </el-form-item>
       <el-form-item label="消息类型" prop="msgType">
-        <el-select v-model="queryParams.msgType" placeholder="选择类型" clearable style="width: 120px">
+        <el-select
+          v-model="queryParams.msgType"
+          placeholder="选择类型"
+          clearable
+          style="width: 120px"
+        >
           <el-option label="文本" value="text" />
           <el-option label="图片" value="image" />
           <el-option label="文件" value="file" />
@@ -55,7 +60,8 @@
           :icon="Delete"
           :disabled="selectedIds.length === 0"
           @click="handleBatchDelete"
-        >批量删除</el-button>
+          >批量删除</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button type="warning" plain :icon="Download" @click="handleExport">导出</el-button>
@@ -63,11 +69,7 @@
     </el-row>
 
     <!-- 消息列表 -->
-    <el-table
-      v-loading="loading"
-      :data="messageList"
-      @selection-change="handleSelectionChange"
-    >
+    <el-table v-loading="loading" :data="messageList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="消息ID" align="center" prop="msgId" width="100" />
       <el-table-column label="发送者" align="center" width="120">
@@ -97,11 +99,19 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="消息内容" align="left" prop="content" min-width="200" show-overflow-tooltip>
+      <el-table-column
+        label="消息内容"
+        align="left"
+        prop="content"
+        min-width="200"
+        show-overflow-tooltip
+      >
         <template #default="scope">
           <span v-if="scope.row.msgType === 'text'">{{ scope.row.content }}</span>
           <span v-else-if="scope.row.msgType === 'image'" class="media-hint">[图片消息]</span>
-          <span v-else-if="scope.row.msgType === 'file'" class="media-hint">[文件: {{ scope.row.fileName }}]</span>
+          <span v-else-if="scope.row.msgType === 'file'" class="media-hint"
+            >[文件: {{ scope.row.fileName }}]</span
+          >
           <span v-else-if="scope.row.msgType === 'voice'" class="media-hint">[语音消息]</span>
           <span v-else-if="scope.row.msgType === 'video'" class="media-hint">[视频消息]</span>
           <span v-else>{{ scope.row.content }}</span>
@@ -117,8 +127,12 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="150">
         <template #default="scope">
-          <el-button link type="primary" :icon="View" @click="handleView(scope.row)">查看</el-button>
-          <el-button link type="danger" :icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button link type="primary" :icon="View" @click="handleView(scope.row)"
+            >查看</el-button
+          >
+          <el-button link type="danger" :icon="Delete" @click="handleDelete(scope.row)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -140,10 +154,16 @@
     <el-dialog v-model="detailDialogVisible" title="消息详情" width="600px">
       <el-descriptions :column="2" border>
         <el-descriptions-item label="消息ID">{{ currentMessage.msgId }}</el-descriptions-item>
-        <el-descriptions-item label="消息类型">{{ getMsgTypeLabel(currentMessage.msgType) }}</el-descriptions-item>
+        <el-descriptions-item label="消息类型">{{
+          getMsgTypeLabel(currentMessage.msgType)
+        }}</el-descriptions-item>
         <el-descriptions-item label="发送者">{{ currentMessage.senderName }}</el-descriptions-item>
-        <el-descriptions-item label="接收者">{{ currentMessage.receiverName }}</el-descriptions-item>
-        <el-descriptions-item label="发送时间" :span="2">{{ currentMessage.sendTime }}</el-descriptions-item>
+        <el-descriptions-item label="接收者">{{
+          currentMessage.receiverName
+        }}</el-descriptions-item>
+        <el-descriptions-item label="发送时间" :span="2">{{
+          currentMessage.sendTime
+        }}</el-descriptions-item>
         <el-descriptions-item label="消息内容" :span="2">
           <div v-if="currentMessage.msgType === 'text'">{{ currentMessage.content }}</div>
           <div v-else-if="currentMessage.msgType === 'image'">
@@ -182,7 +202,7 @@ const queryParams = reactive({
 })
 
 // 获取消息类型标签
-const getMsgTypeLabel = (type) => {
+const getMsgTypeLabel = type => {
   const labels = {
     text: '文本',
     image: '图片',
@@ -194,7 +214,7 @@ const getMsgTypeLabel = (type) => {
 }
 
 // 获取消息类型标签颜色
-const getMsgTypeTag = (type) => {
+const getMsgTypeTag = type => {
   const tags = {
     text: '',
     image: 'success',
@@ -282,30 +302,30 @@ const resetQuery = () => {
 }
 
 // 分页大小变化
-const handleSizeChange = (size) => {
+const handleSizeChange = size => {
   queryParams.pageSize = size
   getList()
 }
 
 // 页码变化
-const handleCurrentChange = (page) => {
+const handleCurrentChange = page => {
   queryParams.pageNum = page
   getList()
 }
 
 // 多选框选中
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = selection => {
   selectedIds.value = selection.map(item => item.msgId)
 }
 
 // 查看消息详情
-const handleView = (row) => {
+const handleView = row => {
   currentMessage.value = row
   detailDialogVisible.value = true
 }
 
 // 删除消息
-const handleDelete = async (row) => {
+const handleDelete = async row => {
   try {
     await ElMessageBox.confirm('是否确认删除该消息？', '警告', { type: 'warning' })
     await request({

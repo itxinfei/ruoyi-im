@@ -1,40 +1,46 @@
 package com.ruoyi.im.dto.group;
 
 import com.ruoyi.im.dto.BasePageRequest;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import java.io.Serializable;
 
 /**
- * 群组查询请求DTO
- * 
+ * 群组查询请求
+ *
  * @author ruoyi
  */
-@ApiModel(description = "群组查询请求")
-public class ImGroupQueryRequest extends BasePageRequest {
+public class ImGroupQueryRequest extends BasePageRequest implements Serializable {
 
-    @ApiModelProperty(value = "群组名称", example = "技术")
-    private String groupName;
+    private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "群主名称", example = "张三")
-    private String ownerName;
+    /**
+     * 群组名称（模糊查询）
+     */
+    private String name;
 
-    @ApiModelProperty(value = "群组状态", example = "ACTIVE")
+    /**
+     * 群组类型（PUBLIC公开群 PRIVATE私密群）
+     */
+    private String type;
+
+    /**
+     * 状态（NORMAL正常 DISMISSED已解散）
+     */
     private String status;
 
-    public String getGroupName() {
-        return groupName;
+    public String getName() {
+        return name;
     }
 
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getOwnerName() {
-        return ownerName;
+    public String getType() {
+        return type;
     }
 
-    public void setOwnerName(String ownerName) {
-        this.ownerName = ownerName;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getStatus() {

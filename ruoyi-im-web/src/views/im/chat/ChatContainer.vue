@@ -4,16 +4,12 @@
       <!-- 聊天头部 -->
       <div class="chat-header">
         <div class="header-left">
-          <el-avatar 
-            :size="36" 
-            :src="currentSession.avatar || defaultAvatar"
-            class="header-avatar"
-          >
+          <el-avatar :size="36" :src="currentSession.avatar || defaultAvatar" class="header-avatar">
             {{ currentSession.name?.charAt(0) || 'U' }}
           </el-avatar>
           <div class="header-info">
             <span class="chat-title">{{ currentSession.name }}</span>
-            <span class="chat-status" v-if="currentSession.type === 'private'">
+            <span v-if="currentSession.type === 'private'" class="chat-status">
               {{ currentSession.status === 'online' ? '在线' : '离线' }}
             </span>
           </div>
@@ -36,7 +32,7 @@
           </div>
 
           <!-- 消息气泡 -->
-          <div 
+          <div
             class="message-bubble"
             :class="{
               'message-own': message.isOwn,
@@ -46,16 +42,13 @@
           >
             <!-- 群聊消息：显示发送者头像和姓名 -->
             <template v-if="currentSession.type === 'group' && !message.isOwn">
-              <el-avatar 
-                :size="32" 
+              <el-avatar
+                :size="32"
                 :src="message.sender?.avatar || defaultAvatar"
                 class="sender-avatar"
                 @click="showSenderInfo(message.sender)"
               />
-              <span 
-                class="sender-name"
-                @click="showSenderInfo(message.sender)"
-              >
+              <span class="sender-name" @click="showSenderInfo(message.sender)">
                 {{ message.sender?.name || message.senderName }}
               </span>
             </template>
@@ -63,8 +56,8 @@
             <!-- 消息内容 -->
             <div class="message-content">
               <!-- 文本消息 -->
-              <div 
-                v-if="message.type === 'text'" 
+              <div
+                v-if="message.type === 'text'"
                 class="text-content"
                 @click="handleTextClick(message)"
               >
@@ -91,10 +84,10 @@
                   <div class="file-name">{{ message.fileName }}</div>
                   <div class="file-size">{{ formatFileSize(message.fileSize) }}</div>
                 </div>
-                <el-button 
-                  class="file-download-btn" 
-                  type="primary" 
-                  size="small" 
+                <el-button
+                  class="file-download-btn"
+                  type="primary"
+                  size="small"
                   @click="downloadFile(message)"
                 >
                   下载
@@ -102,29 +95,18 @@
               </div>
 
               <!-- 其他类型消息 -->
-              <div v-else class="other-content">
-                [{{ message.type }}消息]
-              </div>
+              <div v-else class="other-content">[{{ message.type }}消息]</div>
             </div>
 
             <!-- 消息状态 -->
             <div class="message-status">
-              <el-icon 
-                v-if="message.status === 'sending'" 
-                class="status-icon sending"
-              >
+              <el-icon v-if="message.status === 'sending'" class="status-icon sending">
                 <Loading />
               </el-icon>
-              <el-icon 
-                v-else-if="message.status === 'sent'" 
-                class="status-icon sent"
-              >
+              <el-icon v-else-if="message.status === 'sent'" class="status-icon sent">
                 <SuccessFilled />
               </el-icon>
-              <el-icon 
-                v-else-if="message.status === 'read'" 
-                class="status-icon read"
-              >
+              <el-icon v-else-if="message.status === 'read'" class="status-icon read">
                 <SuccessFilled />
               </el-icon>
             </div>
@@ -183,10 +165,13 @@
         <div class="empty-content">
           <div class="empty-icon">
             <svg width="120" height="120" viewBox="0 0 120 120">
-              <path fill="#e0e0e0" d="M60 10C32.4 10 10 32.4 10 60s22.4 50 50 50 50-22.4 50-50S87.6 10 60 10zm0 85c-13.8 0-25-11.2-25-25s11.2-25 25-25 25 11.2 25 25-11.2 25-25 25z"/>
-              <circle cx="45" cy="55" r="8" fill="#e0e0e0"/>
-              <circle cx="75" cy="55" r="8" fill="#e0e0e0"/>
-              <path fill="#e0e0e0" d="M60 85c-10.5 0-19-7.2-19-16h38c0 8.8-8.5 16-19 16z"/>
+              <path
+                fill="#e0e0e0"
+                d="M60 10C32.4 10 10 32.4 10 60s22.4 50 50 50 50-22.4 50-50S87.6 10 60 10zm0 85c-13.8 0-25-11.2-25-25s11.2-25 25-25 25 11.2 25 25-11.2 25-25 25z"
+              />
+              <circle cx="45" cy="55" r="8" fill="#e0e0e0" />
+              <circle cx="75" cy="55" r="8" fill="#e0e0e0" />
+              <path fill="#e0e0e0" d="M60 85c-10.5 0-19-7.2-19-16h38c0 8.8-8.5 16-19 16z" />
             </svg>
           </div>
           <p>选择一个会话开始聊天</p>
@@ -221,7 +206,7 @@ import {
   Bell,
   ChatDotRound,
   Ticket,
-  Microphone
+  Microphone,
 } from '@element-plus/icons-vue'
 import { formatTime as formatTimeUtil } from '@/utils/format/time'
 import { formatFileSize as formatFileSizeUtil } from '@/utils/format/file'
@@ -250,38 +235,42 @@ const currentSessionComputed = computed(() => {
 })
 
 // 监听当前会话变化，自动滚动到底部
-watch(currentSessionComputed, async () => {
-  await nextTick()
-  scrollToBottom()
-}, { immediate: false })
+watch(
+  currentSessionComputed,
+  async () => {
+    await nextTick()
+    scrollToBottom()
+  },
+  { immediate: false }
+)
 
 // 初始化会话数据
 const initializeSession = () => {
   // 模拟会话数据
   displayedMessages.value = [
-    { 
-      id: 1, 
-      content: '你好！有什么可以帮助你的吗？', 
-      type: 'text', 
-      time: Date.now() - 3600000, 
+    {
+      id: 1,
+      content: '你好！有什么可以帮助你的吗？',
+      type: 'text',
+      time: Date.now() - 3600000,
       isOwn: false,
-      sender: { name: '测试联系人' }
+      sender: { name: '测试联系人' },
     },
-    { 
-      id: 2, 
-      content: '你好，我想了解一下项目进度', 
-      type: 'text', 
-      time: Date.now() - 1800000, 
-      isOwn: true
+    {
+      id: 2,
+      content: '你好，我想了解一下项目进度',
+      type: 'text',
+      time: Date.now() - 1800000,
+      isOwn: true,
     },
-    { 
-      id: 3, 
-      content: '项目进展顺利，预计下周可以完成第一阶段', 
-      type: 'text', 
-      time: Date.now() - 600000, 
+    {
+      id: 3,
+      content: '项目进展顺利，预计下周可以完成第一阶段',
+      type: 'text',
+      time: Date.now() - 600000,
       isOwn: false,
-      sender: { name: '测试联系人' }
-    }
+      sender: { name: '测试联系人' },
+    },
   ]
 }
 
@@ -300,10 +289,10 @@ const formatTime = formatTimeUtil
 // 是否显示时间（每5分钟显示一次）
 const shouldShowTime = (message, index) => {
   if (index === 0) return true
-  
+
   const prevMessage = displayedMessages.value[index - 1]
   if (!prevMessage) return true
-  
+
   const timeDiff = Math.abs(new Date(message.time) - new Date(prevMessage.time))
   return timeDiff > 5 * 60 * 1000 // 5分钟
 }
@@ -311,23 +300,23 @@ const shouldShowTime = (message, index) => {
 // 发送消息
 const sendMessage = () => {
   if (!inputMessage.value.trim() || !currentSessionComputed.value) return
-  
+
   const newMessage = {
     id: Date.now(),
     content: inputMessage.value,
     type: 'text',
     time: Date.now(),
-    isOwn: true
+    isOwn: true,
   }
-  
+
   displayedMessages.value.push(newMessage)
   inputMessage.value = ''
-  
+
   scrollToBottom()
 }
 
 // 处理回车键
-const handleEnterPress = (event) => {
+const handleEnterPress = event => {
   if (event.shiftKey) return
   event.preventDefault()
   sendMessage()
@@ -339,7 +328,7 @@ const clearInput = () => {
 }
 
 // 其他方法
-const startCall = (type) => {
+const startCall = type => {
   ElMessage.info(`${type === 'voice' ? '语音' : '视频'}通话功能开发中...`)
 }
 
@@ -367,7 +356,7 @@ const showQuickActions = () => {
   ElMessage.info('快捷操作功能开发中...')
 }
 
-const downloadFile = (file) => {
+const downloadFile = file => {
   ElMessage.info('下载功能开发中...')
 }
 
@@ -375,9 +364,9 @@ const downloadFile = (file) => {
 const formatFileSize = formatFileSizeUtil
 
 // 格式化消息内容（支持链接、@等）
-const formatMessageContent = (content) => {
+const formatMessageContent = content => {
   if (!content) return ''
-  
+
   // 转义HTML
   let escaped = content
     .replace(/&/g, '&amp;')
@@ -385,23 +374,23 @@ const formatMessageContent = (content) => {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;')
-  
+
   // 匹配URL链接
   escaped = escaped.replace(
     /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g,
     '<a href="$&" target="_blank" class="message-link">$&</a>'
   )
-  
+
   return escaped
 }
 
 // 处理文本点击
-const handleTextClick = (message) => {
+const handleTextClick = message => {
   // 可以在这里处理点击消息的逻辑，如回复、转发等
 }
 
 // 显示发送者信息
-const showSenderInfo = (sender) => {
+const showSenderInfo = sender => {
   if (!sender) return
   ElMessage.info(`用户信息: ${sender.name}`)
 }
@@ -409,7 +398,7 @@ const showSenderInfo = (sender) => {
 // 处理滚动事件（用于加载更多消息）
 const handleScroll = () => {
   if (!messageListRef.value || !hasMoreMessages.value) return
-  
+
   const { scrollTop } = messageListRef.value
   if (scrollTop <= 20 && !loadingMore.value) {
     loadMoreMessages()
@@ -419,19 +408,19 @@ const handleScroll = () => {
 // 加载更多消息
 const loadMoreMessages = async () => {
   if (!currentSessionComputed.value || !hasMoreMessages.value || loadingMore.value) return
-  
+
   loadingMore.value = true
   try {
     // 模拟加载更多消息
     const moreMessages = [
-      { 
-        id: Date.now() + 1, 
-        content: '这是更早之前的消息', 
-        type: 'text', 
+      {
+        id: Date.now() + 1,
+        content: '这是更早之前的消息',
+        type: 'text',
         time: Date.now() - 86400000, // 1天前
         isOwn: false,
-        sender: { name: '测试联系人' }
-      }
+        sender: { name: '测试联系人' },
+      },
     ]
     displayedMessages.value.unshift(...moreMessages)
   } catch (error) {
@@ -559,11 +548,11 @@ onMounted(() => {
             border-radius: $border-radius-lg $border-radius-xs $border-radius-lg $border-radius-lg;
 
             .message-link {
-              color: #006EFF;
+              color: #006eff;
               text-decoration: underline;
             }
           }
-          
+
           .message-status {
             order: -1;
             margin-right: $spacing-sm;
@@ -628,7 +617,7 @@ onMounted(() => {
             font-size: $font-size-base;
 
             .message-link {
-              color: #006EFF;
+              color: #006eff;
               text-decoration: underline;
               cursor: pointer;
 
@@ -689,7 +678,7 @@ onMounted(() => {
                 color: $text-tertiary;
               }
             }
-            
+
             .file-download-btn {
               margin-left: $spacing-md;
               flex-shrink: 0;
@@ -712,7 +701,7 @@ onMounted(() => {
             }
 
             &.read {
-              color: #006EFF;
+              color: #006eff;
             }
 
             &.sending {
@@ -756,7 +745,7 @@ onMounted(() => {
           background: $bg-hover;
           color: $primary-color;
         }
-        
+
         &.primary-action {
           &:hover {
             background: $primary-color-light;
@@ -834,7 +823,7 @@ onMounted(() => {
       }
     }
   }
-  
+
   .empty-chat-state {
     flex: 1;
     display: flex;

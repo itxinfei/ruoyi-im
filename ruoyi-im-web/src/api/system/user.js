@@ -171,4 +171,3 @@ export function exportUser(query) {
     responseType: 'blob',
   })
 }
-

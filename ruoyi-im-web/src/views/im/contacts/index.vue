@@ -53,12 +53,15 @@
               <i v-if="contact.starred" class="el-icon-star-on star-icon" :size="12"></i>
             </div>
             <div class="contact-status">
-              {{ contact.online ? '在线' : (contact.lastSeen || '离线') }}
+              {{ contact.online ? '在线' : contact.lastSeen || '离线' }}
             </div>
           </div>
         </div>
 
-        <el-empty v-if="currentContacts.length === 0" :description="searchText ? '没有找到相关联系人' : '暂无联系人'" />
+        <el-empty
+          v-if="currentContacts.length === 0"
+          :description="searchText ? '没有找到相关联系人' : '暂无联系人'"
+        />
       </div>
     </div>
 
@@ -67,10 +70,18 @@
       <template v-if="selectedContact">
         <div class="detail-header">
           <el-avatar :size="72" :src="selectedContact.avatar || '/profile/avatar.png'">
-            {{ (selectedContact.name || selectedContact.nickname || selectedContact.username)?.charAt(0) || '用' }}
+            {{
+              (
+                selectedContact.name ||
+                selectedContact.nickname ||
+                selectedContact.username
+              )?.charAt(0) || '用'
+            }}
           </el-avatar>
           <div class="header-info">
-            <h2>{{ selectedContact.name || selectedContact.nickname || selectedContact.username }}</h2>
+            <h2>
+              {{ selectedContact.name || selectedContact.nickname || selectedContact.username }}
+            </h2>
             <p class="status" :class="{ online: selectedContact.online }">
               {{ selectedContact.online ? '在线' : '离线' }}
             </p>
@@ -111,7 +122,9 @@
             <div class="info-grid">
               <div class="info-item">
                 <span class="label">昵称</span>
-                <span class="value">{{ selectedContact.nickname || selectedContact.name || '-' }}</span>
+                <span class="value">{{
+                  selectedContact.nickname || selectedContact.name || '-'
+                }}</span>
               </div>
               <div class="info-item">
                 <span class="label">用户名</span>
@@ -155,19 +168,19 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  Search, 
-  Comment, 
-  More, 
-  Phone, 
-  VideoCamera, 
-  Star, 
-  Edit, 
+import {
+  Search,
+  Comment,
+  More,
+  Phone,
+  VideoCamera,
+  Star,
+  Edit,
   Delete,
   ChatDotRound,
   User,
   StarFilled,
-  UserFilled
+  UserFilled,
 } from '@element-plus/icons-vue'
 import {
   listContact,
@@ -175,7 +188,7 @@ import {
   searchContacts,
   getContactStatus,
   getFriendGroups,
-  updateContactRemark
+  updateContactRemark,
 } from '@/api/im/contact'
 
 const router = useRouter()
@@ -192,20 +205,20 @@ const categories = computed(() => [
     key: 'all',
     label: '全部联系人',
     icon: UserFilled,
-    count: contacts.value.length
+    count: contacts.value.length,
   },
   {
     key: 'online',
     label: '在线联系人',
     icon: User,
-    count: contacts.value.filter(c => c.online).length
+    count: contacts.value.filter(c => c.online).length,
   },
   {
     key: 'starred',
     label: '星标联系人',
     icon: StarFilled,
-    count: contacts.value.filter(c => c.starred).length
-  }
+    count: contacts.value.filter(c => c.starred).length,
+  },
 ])
 
 const loadContacts = async () => {
@@ -214,12 +227,14 @@ const loadContacts = async () => {
     const res = await listContact()
     if (res.code === 200) {
       const dataRows = res.data?.rows || res.rows || []
-      contacts.value = Array.isArray(dataRows) ? dataRows.map(c => ({
-        ...c,
-        online: c.status === 'ACTIVE' || Math.random() > 0.5,
-        starred: Math.random() > 0.7,
-        lastSeen: '刚刚'
-      })) : []
+      contacts.value = Array.isArray(dataRows)
+        ? dataRows.map(c => ({
+            ...c,
+            online: c.status === 'ACTIVE' || Math.random() > 0.5,
+            starred: Math.random() > 0.7,
+            lastSeen: '刚刚',
+          }))
+        : []
     } else {
       contacts.value = []
     }
@@ -267,12 +282,14 @@ const handleSearch = async () => {
     const res = await searchContacts(searchText.value)
     if (res.code === 200) {
       const dataRows = res.data?.rows || res.rows || []
-      contacts.value = Array.isArray(dataRows) ? dataRows.map(c => ({
-        ...c,
-        online: c.status === 'ACTIVE' || Math.random() > 0.5,
-        starred: Math.random() > 0.7,
-        lastSeen: '刚刚'
-      })) : []
+      contacts.value = Array.isArray(dataRows)
+        ? dataRows.map(c => ({
+            ...c,
+            online: c.status === 'ACTIVE' || Math.random() > 0.5,
+            starred: Math.random() > 0.7,
+            lastSeen: '刚刚',
+          }))
+        : []
     } else {
       const keyword = searchText.value.toLowerCase()
       contacts.value = contacts.value.filter(c => {
@@ -298,7 +315,7 @@ const handleSearch = async () => {
 
 const filteredContacts = computed(() => {
   const contactList = Array.isArray(contacts.value) ? contacts.value : []
-  
+
   if (!searchText.value) return contactList
   const keyword = searchText.value.toLowerCase()
   return contactList.filter(c => {
@@ -345,10 +362,14 @@ const handleAction = async command => {
 
   switch (command) {
     case 'call':
-      ElMessage.info(`正在呼叫 ${selectedContact.value.name || selectedContact.value.nickname || selectedContact.value.username}...`)
+      ElMessage.info(
+        `正在呼叫 ${selectedContact.value.name || selectedContact.value.nickname || selectedContact.value.username}...`
+      )
       break
     case 'video':
-      ElMessage.info(`正在视频呼叫 ${selectedContact.value.name || selectedContact.value.nickname || selectedContact.value.username}...`)
+      ElMessage.info(
+        `正在视频呼叫 ${selectedContact.value.name || selectedContact.value.nickname || selectedContact.value.username}...`
+      )
       break
     case 'star':
       await toggleStar()
@@ -367,7 +388,7 @@ const toggleStar = async () => {
     const newStarred = !selectedContact.value.starred
     await updateContactRemark({
       friendId: selectedContact.value.id,
-      starred: newStarred
+      starred: newStarred,
     })
     selectedContact.value.starred = newStarred
     const contact = contacts.value.find(c => c.id === selectedContact.value.id)
@@ -386,30 +407,36 @@ const editContact = () => {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     inputValue: selectedContact.value.remark || selectedContact.value.nickname || '',
-  }).then(async ({ value }) => {
-    try {
-      await updateContactRemark({
-        friendId: selectedContact.value.id,
-        remark: value
-      })
-      selectedContact.value.nickname = value
-      const contact = contacts.value.find(c => c.id === selectedContact.value.id)
-      if (contact) {
-        contact.remark = value
+  })
+    .then(async ({ value }) => {
+      try {
+        await updateContactRemark({
+          friendId: selectedContact.value.id,
+          remark: value,
+        })
+        selectedContact.value.nickname = value
+        const contact = contacts.value.find(c => c.id === selectedContact.value.id)
+        if (contact) {
+          contact.remark = value
+        }
+        ElMessage.success('备注已更新')
+      } catch (error) {
+        console.error('更新备注失败:', error)
+        ElMessage.error('更新备注失败')
       }
-      ElMessage.success('备注已更新')
-    } catch (error) {
-      console.error('更新备注失败:', error)
-      ElMessage.error('更新备注失败')
-    }
-  }).catch(() => {})
+    })
+    .catch(() => {})
 }
 
 const confirmDelete = async () => {
   try {
-    await ElMessageBox.confirm(`确定要删除联系人 ${selectedContact.value.name || selectedContact.value.nickname || selectedContact.value.username} 吗？`, '确认删除', {
-      type: 'warning',
-    })
+    await ElMessageBox.confirm(
+      `确定要删除联系人 ${selectedContact.value.name || selectedContact.value.nickname || selectedContact.value.username} 吗？`,
+      '确认删除',
+      {
+        type: 'warning',
+      }
+    )
     await deleteContact(selectedContact.value.id)
     const index = contacts.value.findIndex(c => c.id === selectedContact.value.id)
     if (index > -1) {

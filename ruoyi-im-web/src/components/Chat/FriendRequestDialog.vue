@@ -4,18 +4,14 @@
     :title="title"
     :width="400"
     :close-on-click-modal="false"
-    @close="handleClose"
     class="friend-request-dialog"
+    @close="handleClose"
   >
     <!-- 添加好友表单 -->
     <div v-if="mode === 'add'" class="add-friend-form">
-      <el-form :model="formData" :rules="rules" ref="formRef" label-width="80px">
+      <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px">
         <el-form-item label="用户ID" prop="userId">
-          <el-input
-            v-model="formData.userId"
-            placeholder="请输入对方用户ID"
-            clearable
-          />
+          <el-input v-model="formData.userId" placeholder="请输入对方用户ID" clearable />
         </el-form-item>
 
         <el-form-item label="验证信息" prop="remark">
@@ -56,11 +52,7 @@
       </div>
 
       <div v-else class="request-items">
-        <div
-          v-for="request in requests"
-          :key="request.id"
-          class="request-item"
-        >
+        <div v-for="request in requests" :key="request.id" class="request-item">
           <el-avatar :size="50" :src="request.fromAvatar">
             {{ (request.fromName || request.fromNickName)?.charAt(0) }}
           </el-avatar>
@@ -73,9 +65,7 @@
             <el-button type="primary" size="small" @click="handleRequest(request, 'accept')">
               同意
             </el-button>
-            <el-button size="small" @click="handleRequest(request, 'reject')">
-              拒绝
-            </el-button>
+            <el-button size="small" @click="handleRequest(request, 'reject')"> 拒绝 </el-button>
           </div>
           <div v-else class="request-status">
             <el-tag :type="request.status === 'ACCEPTED' ? 'success' : 'info'" size="small">
@@ -93,7 +83,7 @@
       <p class="result-hint">等待对方确认</p>
     </div>
 
-    <template #footer v-if="mode !== 'result'">
+    <template v-if="mode !== 'result'" #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">{{ mode === 'list' ? '关闭' : '取消' }}</el-button>
         <el-button v-if="mode === 'add'" type="primary" :loading="submitting" @click="handleSubmit">
@@ -107,7 +97,12 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { Loading, Box, SuccessFilled } from '@element-plus/icons-vue'
-import { addContact, getFriendRequests, handleFriendRequest, getFriendGroups } from '@/api/im/contact'
+import {
+  addContact,
+  getFriendRequests,
+  handleFriendRequest,
+  getFriendGroups,
+} from '@/api/im/contact'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps({
@@ -140,14 +135,12 @@ const formData = ref({
 })
 
 const rules = {
-  userId: [
-    { required: true, message: '请输入用户ID', trigger: 'blur' },
-  ],
+  userId: [{ required: true, message: '请输入用户ID', trigger: 'blur' }],
 }
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val),
+  set: val => emit('update:modelValue', val),
 })
 
 const title = computed(() => {
@@ -164,16 +157,19 @@ const title = computed(() => {
 })
 
 // 监听对话框打开
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    if (props.mode === 'add') {
-      formData.value.userId = props.userId || ''
-      loadFriendGroups()
-    } else if (props.mode === 'list') {
-      loadRequests()
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      if (props.mode === 'add') {
+        formData.value.userId = props.userId || ''
+        loadFriendGroups()
+      } else if (props.mode === 'list') {
+        loadRequests()
+      }
     }
   }
-})
+)
 
 // 加载好友分组
 const loadFriendGroups = async () => {
@@ -244,7 +240,7 @@ const handleRequest = async (request, action) => {
 }
 
 // 格式化时间
-const formatTime = (time) => {
+const formatTime = time => {
   if (!time) return ''
   const date = new Date(time)
   const now = new Date()

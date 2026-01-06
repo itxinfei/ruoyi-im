@@ -1,30 +1,61 @@
 package com.ruoyi.im.domain;
 
-import java.time.LocalDate;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.ruoyi.im.common.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * IM鐢ㄦ埛瀹炰綋
- * 
+ * IM用户实体
+ *
  * @author ruoyi
  */
-public class ImUser {
+@TableName("im_user")
+public class ImUser extends BaseEntity implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    /** 用户ID */
+    @TableId(type = IdType.AUTO)
     private Long id;
+
+    /** 用户名 */
     private String username;
-    private String password;
+
+    /** 昵称 */
     private String nickname;
-    private String signature;
-    private String gender;
-    private LocalDate birthday;
-    private String region;
-    private String email;
-    private String phone;
+
+    /** 密码 */
+    private String password;
+
+    /** 头像 */
     private String avatar;
-    private String status;
-    private Boolean isDeleted;
-    private LocalDateTime deletedTime;
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
+
+    /** 邮箱 */
+    private String email;
+
+    /** 手机号 */
+    private String mobile;
+
+    /** 性别: 0=未知, 1=男, 2=女 */
+    private Integer gender;
+
+    /** 状态: 0=正常, 1=禁用 */
+    private Integer status;
+
+    /** 签名 */
+    private String signature;
+
+    /** 最后登录时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime lastLoginTime;
+
+    /** 最后登录IP */
+    private String lastLoginIp;
 
     public Long getId() {
         return id;
@@ -42,14 +73,6 @@ public class ImUser {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getNickname() {
         return nickname;
     }
@@ -58,52 +81,12 @@ public class ImUser {
         this.nickname = nickname;
     }
 
-    public String getSignature() {
-        return signature;
+    public String getPassword() {
+        return password;
     }
 
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public LocalDate getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(LocalDate birthday) {
-        this.birthday = birthday;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getAvatar() {
@@ -114,43 +97,59 @@ public class ImUser {
         this.avatar = avatar;
     }
 
-    public String getStatus() {
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
+
+    public Integer getGender() {
+        return gender;
+    }
+
+    public void setGender(Integer gender) {
+        this.gender = gender;
+    }
+
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
-    public Boolean getIsDeleted() {
-        return isDeleted;
+    public String getSignature() {
+        return signature;
     }
 
-    public void setIsDeleted(Boolean isDeleted) {
-        this.isDeleted = isDeleted;
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
 
-    public LocalDateTime getDeletedTime() {
-        return deletedTime;
+    public LocalDateTime getLastLoginTime() {
+        return lastLoginTime;
     }
 
-    public void setDeletedTime(LocalDateTime deletedTime) {
-        this.deletedTime = deletedTime;
+    public void setLastLoginTime(LocalDateTime lastLoginTime) {
+        this.lastLoginTime = lastLoginTime;
     }
 
-    public LocalDateTime getCreateTime() {
-        return createTime;
+    public String getLastLoginIp() {
+        return lastLoginIp;
     }
 
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
+    public void setLastLoginIp(String lastLoginIp) {
+        this.lastLoginIp = lastLoginIp;
     }
 }

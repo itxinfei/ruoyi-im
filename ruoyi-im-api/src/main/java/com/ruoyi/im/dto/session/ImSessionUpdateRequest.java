@@ -1,51 +1,49 @@
 package com.ruoyi.im.dto.session;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
 
 /**
- * 浼氳瘽鏇存柊璇锋眰DTO
- * 
+ * 会话更新请求
+ *
  * @author ruoyi
  */
-@ApiModel(description = "浼氳瘽鏇存柊璇锋眰")
-public class ImSessionUpdateRequest {
+public class ImSessionUpdateRequest implements Serializable {
 
-    @ApiModelProperty(value = "鐢ㄦ埛ID", required = true, example = "1")
-    @NotNull(message = "鐢ㄦ埛ID涓嶈兘涓虹┖")
-    private Long userId;
+    private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "鐩爣ID", required = true, example = "2")
-    @NotNull(message = "鐩爣ID涓嶈兘涓虹┖")
-    private Long targetId;
+    /** 会话名称 */
+    @Size(max = 100, message = "会话名称长度不能超过100")
+    private String name;
 
-    @ApiModelProperty(value = "浼氳瘽绫诲瀷", required = true, example = "private")
-    @NotNull(message = "浼氳瘽绫诲瀷涓嶈兘涓虹┖")
-    private String sessionType;
+    /** 是否置顶: 0=否, 1=是 */
+    private Integer isPinned;
 
-    public Long getUserId() {
-        return userId;
+    /** 是否免打扰: 0=否, 1=是 */
+    private Integer isMuted;
+
+    public String getName() {
+        return name;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Long getTargetId() {
-        return targetId;
+    public Integer getIsPinned() {
+        return isPinned;
     }
 
-    public void setTargetId(Long targetId) {
-        this.targetId = targetId;
+    public void setIsPinned(Integer isPinned) {
+        this.isPinned = isPinned;
     }
 
-    public String getSessionType() {
-        return sessionType;
+    public Integer getIsMuted() {
+        return isMuted;
     }
 
-    public void setSessionType(String sessionType) {
-        this.sessionType = sessionType;
+    public void setIsMuted(Integer isMuted) {
+        this.isMuted = isMuted;
     }
 }

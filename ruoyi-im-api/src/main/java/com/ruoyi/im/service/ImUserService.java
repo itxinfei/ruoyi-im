@@ -1,177 +1,65 @@
 package com.ruoyi.im.service;
 
-import com.ruoyi.im.domain.ImUser;
-import java.util.List;
-import java.util.Set;
+import com.ruoyi.im.dto.user.ImLoginRequest;
+import com.ruoyi.im.dto.user.ImRegisterRequest;
+import com.ruoyi.im.dto.user.ImUserUpdateRequest;
+import com.ruoyi.im.vo.user.ImLoginVO;
+import com.ruoyi.im.vo.user.ImUserVO;
 
 /**
- * IM鐢ㄦ埛Service鎺ュ彛
- * 
+ * 用户服务接口
+ *
  * @author ruoyi
  */
 public interface ImUserService {
-    
+
     /**
-     * 鏍规嵁ID鏌ヨ鐢ㄦ埛
-     * 
-     * @param id 鐢ㄦ埛ID
-     * @return IM鐢ㄦ埛
+     * 用户登录
+     *
+     * @param request 登录请求
+     * @return 登录响应
      */
-    ImUser selectById(Long id);
-    
+    ImLoginVO login(ImLoginRequest request);
+
     /**
-     * 鏌ヨ鐢ㄦ埛鍒楄〃
-     * 
-     * @param imUser 鏌ヨ鏉′欢
-     * @return IM鐢ㄦ埛闆嗗悎
+     * 用户注册
+     *
+     * @param request 注册请求
+     * @return 用户ID
      */
-    List<ImUser> selectList(ImUser imUser);
-    
+    Long register(ImRegisterRequest request);
+
     /**
-     * 鏂板鐢ㄦ埛
-     * 
-     * @param imUser IM鐢ㄦ埛
-     * @return 缁撴灉
+     * 根据ID获取用户信息
+     *
+     * @param userId 用户ID
+     * @return 用户信息
      */
-    int insert(ImUser imUser);
-    
+    ImUserVO getUserById(Long userId);
+
     /**
-     * 淇敼鐢ㄦ埛
-     * 
-     * @param imUser IM鐢ㄦ埛
-     * @return 缁撴灉
+     * 更新用户信息
+     *
+     * @param userId 用户ID
+     * @param request 更新请求
      */
-    int update(ImUser imUser);
-    
+    void updateUser(Long userId, ImUserUpdateRequest request);
+
     /**
-     * 鎵归噺鍒犻櫎鐢ㄦ埛
-     * 
-     * @param ids 闇€瑕佸垹闄ょ殑鐢ㄦ埛ID
-     * @return 缁撴灉
+     * 更新用户状态
+     *
+     * @param userId 用户ID
+     * @param status 状态
      */
-    int deleteByIds(Long[] ids);
-    
+    void updateStatus(Long userId, Integer status);
+
     /**
-     * 鍒犻櫎鐢ㄦ埛淇℃伅
-     * 
-     * @param id 鐢ㄦ埛ID
-     * @return 缁撴灉
+     * 修改密码
+     *
+     * @param userId 用户ID
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     * @return 是否成功
      */
-    int deleteById(Long id);
-    
-    /**
-     * 鏍规嵁鐢ㄦ埛鍚嶆煡璇㈢敤鎴?     * 
-     * @param username 鐢ㄦ埛鍚?     * @return IM鐢ㄦ埛
-     */
-    public ImUser selectImUserByUsername(String username);
-    
-    /**
-     * 鏍规嵁閭鏌ヨ鐢ㄦ埛
-     * 
-     * @param email 閭
-     * @return IM鐢ㄦ埛
-     */
-    public ImUser selectImUserByEmail(String email);
-    
-    /**
-     * 鐢ㄦ埛娉ㄥ唽
-     * 
-     * @param username 鐢ㄦ埛鍚?     * @param password 瀵嗙爜
-     * @param nickname 鏄电О
-     * @param email 閭
-     * @param phone 鐢佃瘽
-     * @return 鐢ㄦ埛ID
-     */
-    public Long registerUser(String username, String password, String nickname, String email, String phone);
-    
-    /**
-     * 鏇存柊鐢ㄦ埛鐘舵€?     * 
-     * @param userId 鐢ㄦ埛ID
-     * @param status 鐘舵€?     * @return 缁撴灉
-     */
-    public int updateUserStatus(Long userId, String status);
-    
-    /**
-     * 鏇存柊鐢ㄦ埛澶村儚
-     * 
-     * @param userId 鐢ㄦ埛ID
-     * @param avatar 澶村儚URL
-     * @return 缁撴灉
-     */
-    public int updateUserAvatar(Long userId, String avatar);
-    
-    /**
-     * 鏇存柊鐢ㄦ埛淇℃伅
-     * 
-     * @param userId 鐢ㄦ埛ID
-     * @param nickname 鏄电О
-     * @param email 閭
-     * @param phone 鐢佃瘽
-     * @return 缁撴灉
-     */
-    public int updateUserInfo(Long userId, String nickname, String email, String phone);
-    
-    /**
-     * 鑾峰彇鐢ㄦ埛鏉冮檺鍒楄〃
-     * 
-     * @param userId 鐢ㄦ埛ID
-     * @return 鏉冮檺闆嗗悎
-     */
-    public Set<String> getUserPermissions(Long userId);
-    
-    /**
-     * 鑾峰彇鐢ㄦ埛瑙掕壊鍒楄〃
-     * 
-     * @param userId 鐢ㄦ埛ID
-     * @return 瑙掕壊闆嗗悎
-     */
-    public Set<String> getUserRoles(Long userId);
-    
-    /**
-     * 鏌ヨIM鐢ㄦ埛鍒楄〃
-     * 
-     * @param imUser 鏌ヨ鏉′欢
-     * @return IM鐢ㄦ埛闆嗗悎
-     */
-    default List<ImUser> selectImUserList(ImUser imUser) {
-        return selectList(imUser);
-    }
-    
-    /**
-     * 鏍规嵁ID鏌ユ壘鐢ㄦ埛
-     * 
-     * @param id 鐢ㄦ埛ID
-     * @return IM鐢ㄦ埛
-     */
-    default ImUser findById(Long id) {
-        return selectById(id);
-    }
-    
-    /**
-     * 鏍规嵁鐢ㄦ埛鍚嶆煡鎵剧敤鎴?     * 
-     * @param username 鐢ㄦ埛鍚?     * @return IM鐢ㄦ埛
-     */
-    default ImUser findByUsername(String username) {
-        return selectImUserByUsername(username);
-    }
-    
-    /**
-     * 鏇存柊鐢ㄦ埛淇℃伅
-     * 
-     * @param imUser 鐢ㄦ埛淇℃伅
-     * @return 缁撴灉
-     */
-    default int updateById(ImUser imUser) {
-        return update(imUser);
-    }
-    
-    /**
-     * 鏌ヨIM鐢ㄦ埛淇℃伅
-     * 
-     * @param imUser 鏌ヨ鏉′欢
-     * @return IM鐢ㄦ埛淇℃伅
-     */
-    default ImUser selectImUserById(Long id) {
-        return selectById(id);
-    }
+    boolean changePassword(Long userId, String oldPassword, String newPassword);
 }

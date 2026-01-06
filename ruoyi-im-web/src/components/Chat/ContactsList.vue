@@ -33,16 +33,16 @@
               circle
               size="small"
               text
-              @click="handleCall(contact)"
               title="语音通话"
+              @click="handleCall(contact)"
             />
             <el-button
               :icon="VideoCamera"
               circle
               size="small"
               text
-              @click="handleVideoCall(contact)"
               title="视频通话"
+              @click="handleVideoCall(contact)"
             />
             <el-dropdown trigger="click" @command="cmd => handleContactAction(cmd, contact)">
               <el-button :icon="MoreFilled" circle size="small" text />

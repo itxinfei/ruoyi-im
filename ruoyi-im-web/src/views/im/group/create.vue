@@ -4,7 +4,7 @@
       <h2>创建群组</h2>
     </div>
 
-    <el-form :model="form" :rules="rules" ref="formRef" label-width="100px" class="create-form">
+    <el-form ref="formRef" :model="form" :rules="rules" label-width="100px" class="create-form">
       <el-form-item label="群组名称" prop="name">
         <el-input
           v-model="form.name"
@@ -39,7 +39,11 @@
           <el-radio label="PRIVATE">私密群</el-radio>
         </el-radio-group>
         <div class="form-tip">
-          {{ form.type === 'PUBLIC' ? '公开群：任何人都可以通过群号搜索到' : '私密群：只有受邀成员可以加入' }}
+          {{
+            form.type === 'PUBLIC'
+              ? '公开群：任何人都可以通过群号搜索到'
+              : '私密群：只有受邀成员可以加入'
+          }}
         </div>
       </el-form-item>
 
@@ -61,21 +65,24 @@
               v-for="member in selectedMembers"
               :key="member.id"
               :closable="true"
-              @close="removeMember(member.id)"
               class="member-tag"
+              @close="removeMember(member.id)"
             >
               <el-avatar :size="20" :src="member.avatar" class="member-avatar">
                 {{ (member.name || member.username)?.charAt(0) }}
               </el-avatar>
               {{ member.name || member.username }}
             </el-tag>
-            <el-button v-if="selectedMembers.length > 0" text type="danger" @click="clearAllMembers">
+            <el-button
+              v-if="selectedMembers.length > 0"
+              text
+              type="danger"
+              @click="clearAllMembers"
+            >
               清空
             </el-button>
           </div>
-          <el-button @click="showMemberSelector = true" :icon="Plus">
-            添加成员
-          </el-button>
+          <el-button :icon="Plus" @click="showMemberSelector = true"> 添加成员 </el-button>
         </div>
         <div class="form-tip">已选择 {{ selectedMembers.length }} 位成员</div>
       </el-form-item>
@@ -96,9 +103,7 @@
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary" :loading="submitting" @click="submitForm">
-          创建群组
-        </el-button>
+        <el-button type="primary" :loading="submitting" @click="submitForm"> 创建群组 </el-button>
         <el-button @click="goBack">取消</el-button>
       </el-form-item>
     </el-form>
@@ -136,7 +141,9 @@
       </div>
       <template #footer>
         <el-button @click="showMemberSelector = false">取消</el-button>
-        <el-button type="primary" @click="confirmMembers">确定 ({{ selectedMembers.length }})</el-button>
+        <el-button type="primary" @click="confirmMembers"
+          >确定 ({{ selectedMembers.length }})</el-button
+        >
       </template>
     </el-dialog>
   </div>
@@ -185,13 +192,16 @@ const rules = {
   ],
   memberIds: [
     { required: true, message: '请选择群组成员', trigger: 'change' },
-    { validator: (rule, value, callback) => {
-      if (selectedMembers.value.length === 0) {
-        callback(new Error('至少需要选择一位成员'))
-      } else {
-        callback()
-      }
-    }, trigger: 'change' },
+    {
+      validator: (rule, value, callback) => {
+        if (selectedMembers.value.length === 0) {
+          callback(new Error('至少需要选择一位成员'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'change',
+    },
   ],
 }
 
@@ -206,12 +216,12 @@ const filteredContacts = computed(() => {
 })
 
 // 判断是否已选择成员
-const isMemberSelected = (id) => {
+const isMemberSelected = id => {
   return selectedMembers.value.some(m => m.id === id)
 }
 
 // 切换成员选择状态
-const toggleMember = (contact) => {
+const toggleMember = contact => {
   const index = selectedMembers.value.findIndex(m => m.id === contact.id)
   if (index > -1) {
     selectedMembers.value.splice(index, 1)
@@ -221,7 +231,7 @@ const toggleMember = (contact) => {
 }
 
 // 移除成员
-const removeMember = (id) => {
+const removeMember = id => {
   const index = selectedMembers.value.findIndex(m => m.id === id)
   if (index > -1) {
     selectedMembers.value.splice(index, 1)
@@ -244,7 +254,7 @@ const confirmMembers = () => {
 }
 
 // 头像上传成功
-const handleAvatarSuccess = (response) => {
+const handleAvatarSuccess = response => {
   if (response.code === 200) {
     form.avatar = response.data.url
     ElMessage.success('头像上传成功')
@@ -252,7 +262,7 @@ const handleAvatarSuccess = (response) => {
 }
 
 // 头像上传前验证
-const beforeAvatarUpload = (file) => {
+const beforeAvatarUpload = file => {
   const isImage = file.type.startsWith('image/')
   const isLt2M = file.size / 1024 / 1024 < 2
 

@@ -1,124 +1,51 @@
 package com.ruoyi.im.service;
 
-import com.ruoyi.im.domain.ImMessage;
+import com.ruoyi.im.dto.message.ImMessageSendRequest;
+import com.ruoyi.im.vo.message.ImMessageVO;
+
 import java.util.List;
 
 /**
- * 娑堟伅Service鎺ュ彛
- * 
+ * 消息服务接口
+ *
  * @author ruoyi
  */
-public interface ImMessageService extends BaseService<ImMessage> {
-    
-    @Override
-    ImMessage selectById(Long id);
-    
+public interface ImMessageService {
+
     /**
-     * 鏍规嵁ID鏌ヨ娑堟伅
-     * 
-     * @param id 娑堟伅ID
-     * @return 娑堟伅淇℃伅
+     * 发送消息
+     *
+     * @param request 发送请求
+     * @param userId 当前用户ID
+     * @return 消息ID
      */
-    default ImMessage selectImMessageById(Long id) {
-        return selectById(id);
-    }
-    
-    @Override
-    List<ImMessage> selectList(ImMessage imMessage);
-    
-    @Override
-    int insert(ImMessage imMessage);
-    
-    @Override
-    int update(ImMessage imMessage);
-    
-    @Override
-    int deleteByIds(Long[] ids);
-    
-    @Override
-    int deleteById(Long id);
-    
+    Long sendMessage(ImMessageSendRequest request, Long userId);
+
     /**
-     * 鏍规嵁浼氳瘽ID鏌ヨ娑堟伅鍒楄〃
-     * 
-     * @param conversationId 浼氳瘽ID
-     * @return 娑堟伅闆嗗悎
+     * 获取会话消息列表
+     *
+     * @param sessionId 会话ID
+     * @param userId 当前用户ID
+     * @param lastId 最后一条消息ID（分页用）
+     * @param limit 每页条数
+     * @return 消息列表
      */
-    public List<ImMessage> selectImMessageListByConversationId(Long conversationId);
-    
+    List<ImMessageVO> getMessages(Long sessionId, Long userId, Long lastId, Integer limit);
+
     /**
-     * 鏍规嵁浼氳瘽ID鍜屾椂闂磋寖鍥存煡璇㈡秷鎭垪琛?     * 
-     * @param conversationId 浼氳瘽ID
-     * @param startTime 寮€濮嬫椂闂?     * @param endTime 缁撴潫鏃堕棿
-     * @return 娑堟伅闆嗗悎
+     * 撤回消息
+     *
+     * @param messageId 消息ID
+     * @param userId 当前用户ID
      */
-    public List<ImMessage> selectImMessageListByConversationIdAndTimeRange(Long conversationId, java.time.LocalDateTime startTime, java.time.LocalDateTime endTime);
-    
+    void recallMessage(Long messageId, Long userId);
+
     /**
-     * 鍙戦€佹秷鎭?     * 
-     * @param conversationId 浼氳瘽ID
-     * @param senderId 鍙戦€佽€匢D
-     * @param type 娑堟伅绫诲瀷
-     * @param content 娑堟伅鍐呭
-     * @return 娑堟伅ID
+     * 标记消息已读
+     *
+     * @param sessionId 会话ID
+     * @param userId 当前用户ID
+     * @param messageIds 消息ID列表
      */
-    public Long sendMessage(Long conversationId, Long senderId, String type, String content);
-    
-    /**
-     * 鍙戦€佺鑱婃秷鎭?     * 
-     * @param senderId 鍙戦€佽€匢D
-     * @param receiverId 鎺ユ敹鑰匢D
-     * @param type 娑堟伅绫诲瀷
-     * @param content 娑堟伅鍐呭
-     * @return 娑堟伅ID
-     */
-    public Long sendPrivateMessage(Long senderId, Long receiverId, String type, String content);
-    
-    /**
-     * 鍙戦€佺兢鑱婃秷鎭?     * 
-     * @param senderId 鍙戦€佽€匢D
-     * @param groupId 缇ょ粍ID
-     * @param type 娑堟伅绫诲瀷
-     * @param content 娑堟伅鍐呭
-     * @return 娑堟伅ID
-     */
-    public Long sendGroupMessage(Long senderId, Long groupId, String type, String content);
-    
-    /**
-     * 鎾ゅ洖娑堟伅
-     * 
-     * @param messageId 娑堟伅ID
-     * @param operatorId 鎿嶄綔浜篒D
-     * @return 缁撴灉
-     */
-    public int revokeMessage(Long messageId, Long operatorId);
-    
-    /**
-     * 鏇存柊娑堟伅鐘舵€?     * 
-     * @param messageId 娑堟伅ID
-     * @param status 鏂扮姸鎬?     * @return 缁撴灉
-     */
-    public int updateMessageStatus(Long messageId, String status);
-    
-    /**
-     * 鍙戦€佸洖澶嶆秷鎭?     * 
-     * @param conversationId 浼氳瘽ID
-     * @param senderId 鍙戦€佽€匢D
-     * @param replyToMessageId 鍥炲鐨勬秷鎭疘D
-     * @param type 娑堟伅绫诲瀷
-     * @param content 娑堟伅鍐呭
-     * @return 娑堟伅ID
-     */
-    public Long sendReplyMessage(Long conversationId, Long senderId, Long replyToMessageId, String type, String content);
-    
-    /**
-     * 鍙戦€佽浆鍙戞秷鎭?     * 
-     * @param conversationId 浼氳瘽ID
-     * @param senderId 鍙戦€佽€匢D
-     * @param forwardFromMessageId 杞彂鐨勬秷鎭疘D
-     * @param type 娑堟伅绫诲瀷
-     * @param content 娑堟伅鍐呭
-     * @return 娑堟伅ID
-     */
-    public Long sendForwardMessage(Long conversationId, Long senderId, Long forwardFromMessageId, String type, String content);
+    void markAsRead(Long sessionId, Long userId, List<Long> messageIds);
 }

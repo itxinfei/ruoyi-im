@@ -31,8 +31,8 @@
               circle
               size="small"
               text
-              @click="handleDownload(file)"
               title="下载"
+              @click="handleDownload(file)"
             />
             <el-dropdown trigger="click" @command="cmd => handleFileAction(cmd, file)">
               <el-button :icon="MoreFilled" circle size="small" text />
@@ -63,9 +63,7 @@
             <i class="el-icon-document"></i>
           </div>
           <div class="empty-text">暂无文件</div>
-          <el-button type="primary" size="small" @click="handleUpload">
-            上传文件
-          </el-button>
+          <el-button type="primary" size="small" @click="handleUpload"> 上传文件 </el-button>
         </div>
       </transition>
     </div>

@@ -1,76 +1,82 @@
 package com.ruoyi.im.domain;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 缇ょ粍瀹炰綋
- * 
+ * 群组实体
+ *
  * @author ruoyi
  */
-public class ImGroup {
+public class ImGroup implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     /**
-     * 缇ょ粍ID
+     * 群组ID
      */
     private Long id;
-    
+
     /**
-     * 缇ょ粍鍚嶇О
+     * 群组名称
      */
     private String name;
-    
+
     /**
-     * 缇や富鐢ㄦ埛ID
+     * 群主用户ID
      */
     private Long ownerId;
-    
+
     /**
-     * 缇ゅ叕鍛?     */
+     * 群公告
+     */
     private String notice;
-    
+
     /**
-     * 缇ゅご鍍?     */
+     * 群头像
+     */
     private String avatar;
-    
+
     /**
-     * 鐘舵€侊紙NORMAL姝ｅ父 DISMISSED宸茶В鏁ｏ級
+     * 状态（NORMAL正常 DISMISSED已解散）
      */
     private String status;
-    
+
     /**
-     * 鎴愬憳鏁伴噺
+     * 成员数量
      */
     private Integer memberCount;
-    
+
     /**
-     * 鎴愬憳鏁伴噺闄愬埗
+     * 成员数量限制
      */
     private Integer memberLimit;
-    
+
     /**
-     * 缇ょ粍鎻忚堪
+     * 群组描述
      */
     private String description;
-    
+
     /**
-     * 缇ょ粍绫诲瀷
+     * 群组类型（PUBLIC公开群 PRIVATE私密群）
      */
     private String type;
 
     /**
-     * 鍒涘缓鏃堕棿
+     * 创建时间
      */
     private LocalDateTime createTime;
-    
+
     /**
-     * 鏇存柊鏃堕棿
+     * 更新时间
      */
     private LocalDateTime updateTime;
-    
+
     /**
-     * 缇や富鍚嶇О锛堥潪鏁版嵁搴撳瓧娈碉紝鐢ㄤ簬鏄剧ず锛?     */
+     * 群主名称（非数据库字段，用于显示）
+     */
     private String ownerName;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

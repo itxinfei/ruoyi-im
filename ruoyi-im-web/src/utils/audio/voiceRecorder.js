@@ -89,11 +89,7 @@ class VoiceRecorder {
    * @returns {boolean} 是否支持
    */
   static isSupported() {
-    return !!(
-      navigator.mediaDevices &&
-      navigator.mediaDevices.getUserMedia &&
-      window.MediaRecorder
-    )
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder)
   }
 
   /**
@@ -110,11 +106,11 @@ class VoiceRecorder {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          echoCancellation: true,    // 回声消除
-          noiseSuppression: true,    // 噪音抑制
-          autoGainControl: true,     // 自动增益
-          sampleRate: 44100,         // 采样率
-          channelCount: 1,           // 单声道
+          echoCancellation: true, // 回声消除
+          noiseSuppression: true, // 噪音抑制
+          autoGainControl: true, // 自动增益
+          sampleRate: 44100, // 采样率
+          channelCount: 1, // 单声道
         },
       })
       return stream
@@ -252,7 +248,7 @@ class VoiceRecorder {
       this.pausedTime = 0
 
       // 监听数据可用事件
-      this.mediaRecorder.ondataavailable = (event) => {
+      this.mediaRecorder.ondataavailable = event => {
         if (event.data.size > 0) {
           this.audioChunks.push(event.data)
         }
@@ -264,7 +260,7 @@ class VoiceRecorder {
       }
 
       // 监听错误事件
-      this.mediaRecorder.onerror = (event) => {
+      this.mediaRecorder.onerror = event => {
         this.onError(new Error(`录音错误: ${event.error?.message || '未知错误'}`))
         this._cleanup()
       }

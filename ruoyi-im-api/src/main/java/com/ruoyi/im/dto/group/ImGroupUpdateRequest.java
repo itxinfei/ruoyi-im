@@ -1,43 +1,45 @@
 package com.ruoyi.im.dto.group;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 
 /**
- * 群组更新请求DTO
- * 
+ * 群组更新请求
+ *
  * @author ruoyi
  */
-@ApiModel(description = "群组更新请求")
-public class ImGroupUpdateRequest {
+public class ImGroupUpdateRequest implements Serializable {
 
-    @ApiModelProperty(value = "群组ID", required = true, example = "1")
-    @NotNull(message = "群组ID不能为空")
-    @Positive(message = "群组ID必须为正数")
-    private Long id;
+    private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "群组名称", example = "技术交流群")
+    /**
+     * 群组名称
+     */
     @Size(max = 50, message = "群组名称长度不能超过50个字符")
     private String name;
 
-    @ApiModelProperty(value = "群组公告", example = "欢迎大家加入技术交流群")
-    @Size(max = 200, message = "群组公告长度不能超过200个字符")
-    private String notice;
-
-    @ApiModelProperty(value = "群组头像", example = "/profile/group.png")
+    /**
+     * 群头像
+     */
+    @Size(max = 255, message = "群头像URL长度不能超过255个字符")
     private String avatar;
 
-    public Long getId() {
-        return id;
-    }
+    /**
+     * 群公告
+     */
+    @Size(max = 500, message = "群公告长度不能超过500个字符")
+    private String notice;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    /**
+     * 群组描述
+     */
+    @Size(max = 500, message = "群组描述长度不能超过500个字符")
+    private String description;
+
+    /**
+     * 成员数量限制
+     */
+    private Integer memberLimit;
 
     public String getName() {
         return name;
@@ -45,6 +47,14 @@ public class ImGroupUpdateRequest {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public String getNotice() {
@@ -55,11 +65,19 @@ public class ImGroupUpdateRequest {
         this.notice = notice;
     }
 
-    public String getAvatar() {
-        return avatar;
+    public String getDescription() {
+        return description;
     }
 
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getMemberLimit() {
+        return memberLimit;
+    }
+
+    public void setMemberLimit(Integer memberLimit) {
+        this.memberLimit = memberLimit;
     }
 }

@@ -1,69 +1,56 @@
 package com.ruoyi.im.vo.message;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
- * 娑堟伅淇℃伅VO
- * 
- * @author zhangxy
+ * 消息响应VO
+ *
+ * @author ruoyi
  */
-@ApiModel(description = "娑堟伅淇℃伅")
-public class ImMessageVO {
+public class ImMessageVO implements Serializable {
 
-    @ApiModelProperty(value = "娑堟伅ID", example = "1")
+    private static final long serialVersionUID = 1L;
+
+    /** 消息ID */
     private Long id;
 
-    @ApiModelProperty(value = "浼氳瘽ID", example = "1")
-    private Long conversationId;
+    /** 会话ID */
+    private Long sessionId;
 
-    @ApiModelProperty(value = "鍙戦€佽€呯敤鎴稩D", example = "1")
+    /** 发送者ID */
     private Long senderId;
 
-    @ApiModelProperty(value = "鍙戦€佽€呯敤鎴峰悕", example = "zhangsan")
-    private String senderUsername;
+    /** 发送者昵称 */
+    private String senderName;
 
-    @ApiModelProperty(value = "鍙戦€佽€呮樀绉?, example = "寮犱笁")
-    private String senderNickname;
+    /** 发送者头像 */
+    private String senderAvatar;
 
-    @ApiModelProperty(value = "娑堟伅绫诲瀷", example = "TEXT")
+    /** 消息类型 */
     private String type;
 
-    @ApiModelProperty(value = "娑堟伅鍐呭", example = "浣犲ソ锛屼笘鐣岋紒")
+    /** 消息内容 */
     private String content;
 
-    @ApiModelProperty(value = "娑堟伅鐘舵€?, example = "NORMAL")
-    private String status;
+    /** 状态: 0=发送中, 1=已发送, 2=已送达, 3=已读, 4=发送失败, 5=已撤回 */
+    private Integer status;
 
-    @ApiModelProperty(value = "娑堟伅鐘舵€佹弿杩?, example = "姝ｅ父")
-    private String statusDesc;
+    /** 是否撤回 */
+    private Integer isRevoked;
 
-    @ApiModelProperty(value = "娑堟伅鎵╁睍瀛楁", example = "{\"fileName\":\"document.pdf\"}")
-    private String extData;
-
-    @ApiModelProperty(value = "琚洖澶嶇殑娑堟伅ID", example = "100")
-    private Long replyMessageId;
-
-    @ApiModelProperty(value = "琚洖澶嶇殑娑堟伅鍐呭", example = "鍘熷娑堟伅鍐呭")
-    private String replyMessageContent;
-
-    @ApiModelProperty(value = "鍒涘缓鏃堕棿", example = "2024-01-01 10:00:00")
+    /** 撤回时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createTime;
+    private LocalDateTime revokeTime;
 
-    @ApiModelProperty(value = "鏇存柊鏃堕棿", example = "2024-01-01 10:00:00")
+    /** 发送时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateTime;
+    private LocalDateTime sendTime;
 
-    @ApiModelProperty(value = "娑堟伅浜掑姩鍒楄〃")
-    private List<ImMessageReactionVO> reactions;
-
-    @ApiModelProperty(value = "宸茶鍥炴墽鍒楄〃")
-    private List<ImMessageReadReceiptVO> readReceipts;
+    /** 是否为当前用户发送的消息 */
+    private Boolean isSelf;
 
     public Long getId() {
         return id;
@@ -73,12 +60,12 @@ public class ImMessageVO {
         this.id = id;
     }
 
-    public Long getConversationId() {
-        return conversationId;
+    public Long getSessionId() {
+        return sessionId;
     }
 
-    public void setConversationId(Long conversationId) {
-        this.conversationId = conversationId;
+    public void setSessionId(Long sessionId) {
+        this.sessionId = sessionId;
     }
 
     public Long getSenderId() {
@@ -89,20 +76,20 @@ public class ImMessageVO {
         this.senderId = senderId;
     }
 
-    public String getSenderUsername() {
-        return senderUsername;
+    public String getSenderName() {
+        return senderName;
     }
 
-    public void setSenderUsername(String senderUsername) {
-        this.senderUsername = senderUsername;
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
     }
 
-    public String getSenderNickname() {
-        return senderNickname;
+    public String getSenderAvatar() {
+        return senderAvatar;
     }
 
-    public void setSenderNickname(String senderNickname) {
-        this.senderNickname = senderNickname;
+    public void setSenderAvatar(String senderAvatar) {
+        this.senderAvatar = senderAvatar;
     }
 
     public String getType() {
@@ -121,75 +108,43 @@ public class ImMessageVO {
         this.content = content;
     }
 
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
-    public String getStatusDesc() {
-        return statusDesc;
+    public Integer getIsRevoked() {
+        return isRevoked;
     }
 
-    public void setStatusDesc(String statusDesc) {
-        this.statusDesc = statusDesc;
+    public void setIsRevoked(Integer isRevoked) {
+        this.isRevoked = isRevoked;
     }
 
-    public String getExtData() {
-        return extData;
+    public LocalDateTime getRevokeTime() {
+        return revokeTime;
     }
 
-    public void setExtData(String extData) {
-        this.extData = extData;
+    public void setRevokeTime(LocalDateTime revokeTime) {
+        this.revokeTime = revokeTime;
     }
 
-    public Long getReplyMessageId() {
-        return replyMessageId;
+    public LocalDateTime getSendTime() {
+        return sendTime;
     }
 
-    public void setReplyMessageId(Long replyMessageId) {
-        this.replyMessageId = replyMessageId;
+    public void setSendTime(LocalDateTime sendTime) {
+        this.sendTime = sendTime;
     }
 
-    public String getReplyMessageContent() {
-        return replyMessageContent;
+    public Boolean getIsSelf() {
+        return isSelf;
     }
 
-    public void setReplyMessageContent(String replyMessageContent) {
-        this.replyMessageContent = replyMessageContent;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public List<ImMessageReactionVO> getReactions() {
-        return reactions;
-    }
-
-    public void setReactions(List<ImMessageReactionVO> reactions) {
-        this.reactions = reactions;
-    }
-
-    public List<ImMessageReadReceiptVO> getReadReceipts() {
-        return readReceipts;
-    }
-
-    public void setReadReceipts(List<ImMessageReadReceiptVO> readReceipts) {
-        this.readReceipts = readReceipts;
+    public void setIsSelf(Boolean isSelf) {
+        this.isSelf = isSelf;
     }
 }

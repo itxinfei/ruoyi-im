@@ -17,12 +17,8 @@
           <el-button type="primary" :icon="Upload">上传</el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="file" :icon="Upload">
-                上传文件
-              </el-dropdown-item>
-              <el-dropdown-item command="folder" :icon="Folder">
-                上传文件夹
-              </el-dropdown-item>
+              <el-dropdown-item command="file" :icon="Upload"> 上传文件 </el-dropdown-item>
+              <el-dropdown-item command="folder" :icon="Folder"> 上传文件夹 </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -71,27 +67,15 @@
               <el-button link :icon="More" size="default" />
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="preview" :icon="View">
-                    颼览
-                  </el-dropdown-item>
-                  <el-dropdown-item command="download" :icon="Download">
-                    下载
-                  </el-dropdown-item>
-                  <el-dropdown-item command="share" :icon="Share">
-                    分享
-                  </el-dropdown-item>
-                  <el-dropdown-item command="copyLink" :icon="Link">
-                    复制链接
-                  </el-dropdown-item>
+                  <el-dropdown-item command="preview" :icon="View"> 颼览 </el-dropdown-item>
+                  <el-dropdown-item command="download" :icon="Download"> 下载 </el-dropdown-item>
+                  <el-dropdown-item command="share" :icon="Share"> 分享 </el-dropdown-item>
+                  <el-dropdown-item command="copyLink" :icon="Link"> 复制链接 </el-dropdown-item>
                   <el-dropdown-item divided command="rename" :icon="Edit">
                     重命名
                   </el-dropdown-item>
-                  <el-dropdown-item command="move" :icon="FolderOpened">
-                    移动到
-                  </el-dropdown-item>
-                  <el-dropdown-item command="copy" :icon="CopyDocument">
-                    复制到
-                  </el-dropdown-item>
+                  <el-dropdown-item command="move" :icon="FolderOpened"> 移动到 </el-dropdown-item>
+                  <el-dropdown-item command="copy" :icon="CopyDocument"> 复制到 </el-dropdown-item>
                   <el-dropdown-item divided command="delete" :icon="Delete">
                     删除
                   </el-dropdown-item>
@@ -101,7 +85,10 @@
           </div>
         </div>
 
-        <el-empty v-if="currentFiles.length === 0" :description="searchText ? '没有找到相关文件' : '暂无文件'" />
+        <el-empty
+          v-if="currentFiles.length === 0"
+          :description="searchText ? '没有找到相关文件' : '暂无文件'"
+        />
       </div>
     </div>
 
@@ -126,8 +113,12 @@
             </p>
           </div>
           <div class="header-actions">
-            <el-button :icon="Download" @click="handleDownload(selectedFile)" size="default">下载</el-button>
-            <el-button type="primary" @click="handlePreview(selectedFile)" size="default">预览</el-button>
+            <el-button :icon="Download" size="default" @click="handleDownload(selectedFile)"
+              >下载</el-button
+            >
+            <el-button type="primary" size="default" @click="handlePreview(selectedFile)"
+              >预览</el-button
+            >
           </div>
         </div>
 
@@ -158,7 +149,9 @@
               </div>
               <div class="info-item">
                 <span class="label">修改时间</span>
-                <span class="value">{{ formatTime(selectedFile.updateTime || selectedFile.uploadTime) }}</span>
+                <span class="value">{{
+                  formatTime(selectedFile.updateTime || selectedFile.uploadTime)
+                }}</span>
               </div>
             </div>
           </div>
@@ -167,9 +160,15 @@
           <div class="info-section">
             <h4>快速操作</h4>
             <div class="quick-actions">
-              <el-button :icon="Share" @click="handleShare(selectedFile)" size="default">分享</el-button>
-              <el-button :icon="Link" @click="handleCopyLink(selectedFile)" size="default">复制链接</el-button>
-              <el-button :icon="Edit" @click="handleRename(selectedFile)" size="default">重命名</el-button>
+              <el-button :icon="Share" size="default" @click="handleShare(selectedFile)"
+                >分享</el-button
+              >
+              <el-button :icon="Link" size="default" @click="handleCopyLink(selectedFile)"
+                >复制链接</el-button
+              >
+              <el-button :icon="Edit" size="default" @click="handleRename(selectedFile)"
+                >重命名</el-button
+              >
             </div>
           </div>
         </div>
@@ -302,9 +301,7 @@ const filteredFiles = computed(() => {
     result = fileList.value
   } else {
     const keyword = searchText.value.toLowerCase()
-    result = fileList.value.filter(f => 
-      (f.fileName || '').toLowerCase().includes(keyword)
-    )
+    result = fileList.value.filter(f => (f.fileName || '').toLowerCase().includes(keyword))
   }
 
   // 按标签过滤
@@ -329,7 +326,11 @@ const currentFiles = computed(() => filteredFiles.value)
 const tabs = computed(() => [
   { key: 'all', label: '全部', count: fileList.value.length },
   { key: 'image', label: '图片', count: fileList.value.filter(f => f.fileType === 'image').length },
-  { key: 'document', label: '文档', count: fileList.value.filter(f => f.fileType === 'document').length },
+  {
+    key: 'document',
+    label: '文档',
+    count: fileList.value.filter(f => f.fileType === 'document').length,
+  },
   { key: 'video', label: '视频', count: fileList.value.filter(f => f.fileType === 'video').length },
   { key: 'audio', label: '音频', count: fileList.value.filter(f => f.fileType === 'audio').length },
 ])
@@ -344,12 +345,66 @@ const getList = async () => {
   try {
     // 模拟数据
     fileList.value = [
-      { fileId: 1, fileName: '项目文档.docx', fileType: 'document', fileSize: 1024000, uploadBy: '管理员', uploadTime: '2024-01-15 10:30:00', url: '', updateTime: '2024-01-15 10:30:00' },
-      { fileId: 2, fileName: '产品截图.png', fileType: 'image', fileSize: 512000, uploadBy: '张三', uploadTime: '2024-01-14 15:20:00', url: '', updateTime: '2024-01-14 15:20:00' },
-      { fileId: 3, fileName: '会议录音.mp3', fileType: 'audio', fileSize: 2048000, uploadBy: '李四', uploadTime: '2024-01-13 09:00:00', url: '', updateTime: '2024-01-13 09:00:00' },
-      { fileId: 4, fileName: '演示视频.mp4', fileType: 'video', fileSize: 10485760, uploadBy: '王五', uploadTime: '2024-01-12 14:30:00', url: '', updateTime: '2024-01-12 14:30:00' },
-      { fileId: 5, fileName: '合同模板.pdf', fileType: 'document', fileSize: 2048000, uploadBy: '赵六', uploadTime: '2024-01-11 11:15:00', url: '', updateTime: '2024-01-11 11:15:00' },
-      { fileId: 6, fileName: '设计图.psd', fileType: 'image', fileSize: 5120000, uploadBy: '孙七', uploadTime: '2024-01-10 16:45:00', url: '', updateTime: '2024-01-10 16:45:00' },
+      {
+        fileId: 1,
+        fileName: '项目文档.docx',
+        fileType: 'document',
+        fileSize: 1024000,
+        uploadBy: '管理员',
+        uploadTime: '2024-01-15 10:30:00',
+        url: '',
+        updateTime: '2024-01-15 10:30:00',
+      },
+      {
+        fileId: 2,
+        fileName: '产品截图.png',
+        fileType: 'image',
+        fileSize: 512000,
+        uploadBy: '张三',
+        uploadTime: '2024-01-14 15:20:00',
+        url: '',
+        updateTime: '2024-01-14 15:20:00',
+      },
+      {
+        fileId: 3,
+        fileName: '会议录音.mp3',
+        fileType: 'audio',
+        fileSize: 2048000,
+        uploadBy: '李四',
+        uploadTime: '2024-01-13 09:00:00',
+        url: '',
+        updateTime: '2024-01-13 09:00:00',
+      },
+      {
+        fileId: 4,
+        fileName: '演示视频.mp4',
+        fileType: 'video',
+        fileSize: 10485760,
+        uploadBy: '王五',
+        uploadTime: '2024-01-12 14:30:00',
+        url: '',
+        updateTime: '2024-01-12 14:30:00',
+      },
+      {
+        fileId: 5,
+        fileName: '合同模板.pdf',
+        fileType: 'document',
+        fileSize: 2048000,
+        uploadBy: '赵六',
+        uploadTime: '2024-01-11 11:15:00',
+        url: '',
+        updateTime: '2024-01-11 11:15:00',
+      },
+      {
+        fileId: 6,
+        fileName: '设计图.psd',
+        fileType: 'image',
+        fileSize: 5120000,
+        uploadBy: '孙七',
+        uploadTime: '2024-01-10 16:45:00',
+        url: '',
+        updateTime: '2024-01-10 16:45:00',
+      },
     ]
   } catch (error) {
     console.error('获取文件列表失败:', error)
@@ -369,14 +424,14 @@ const handleSearch = () => {
 /**
  * 选择文件
  */
-const selectFile = (file) => {
+const selectFile = file => {
   selectedFile.value = file
 }
 
 /**
  * 上传类型选择
  */
-const handleUploadType = (command) => {
+const handleUploadType = command => {
   if (command === 'file') {
     uploadDialogVisible.value = true
   } else if (command === 'folder') {
@@ -387,7 +442,7 @@ const handleUploadType = (command) => {
 /**
  * 上传前校验
  */
-const beforeUpload = (file) => {
+const beforeUpload = file => {
   const isLt100M = file.size / 1024 / 1024 < 100
   if (!isLt100M) {
     ElMessage.error('文件大小不能超过 100MB!')
@@ -399,7 +454,7 @@ const beforeUpload = (file) => {
 /**
  * 文件上传成功
  */
-const handleFileUploadSuccess = (response) => {
+const handleFileUploadSuccess = response => {
   if (response.code === 200) {
     ElMessage.success('上传成功')
     uploadDialogVisible.value = false
@@ -412,14 +467,14 @@ const handleFileUploadSuccess = (response) => {
 /**
  * 文件上传失败
  */
-const handleFileUploadError = (error) => {
+const handleFileUploadError = error => {
   ElMessage.error('上传失败：' + (error.message || '网络错误'))
 }
 
 /**
  * 颼览文件
  */
-const handlePreview = (file) => {
+const handlePreview = file => {
   currentFile.value = file
   previewDialogVisible.value = true
   previewLoading.value = true
@@ -437,7 +492,7 @@ const handlePreview = (file) => {
 /**
  * 下载文件
  */
-const handleDownload = async (file) => {
+const handleDownload = async file => {
   if (!file) return
 
   try {
@@ -505,42 +560,47 @@ const handleFileAction = async (command, file) => {
 /**
  * 分享文件
  */
-const handleShare = (file) => {
+const handleShare = file => {
   ElMessage.info('分享功能开发中...')
 }
 
 /**
  * 复制链接
  */
-const handleCopyLink = (file) => {
+const handleCopyLink = file => {
   const link = `${window.location.origin}/api/im/file/download/${file.fileId}`
-  navigator.clipboard.writeText(link).then(() => {
-    ElMessage.success('链接已复制到剪贴板')
-  }).catch(() => {
-    ElMessage.error('复制链接失败')
-  })
+  navigator.clipboard
+    .writeText(link)
+    .then(() => {
+      ElMessage.success('链接已复制到剪贴板')
+    })
+    .catch(() => {
+      ElMessage.error('复制链接失败')
+    })
 }
 
 /**
  * 重命名文件
  */
-const handleRename = (file) => {
+const handleRename = file => {
   ElMessageBox.prompt('请输入新的文件名', '重命名', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     inputValue: file.fileName,
-    inputValidator: (value) => {
+    inputValidator: value => {
       if (!value) return '文件名不能为空'
       if (value.length > 50) return '文件名不能超过50个字符'
       return true
-    }
-  }).then(({ value }) => {
-    // 模拟重命名
-    file.fileName = value
-    ElMessage.success('重命名成功')
-  }).catch(() => {
-    // 取消操作
+    },
   })
+    .then(({ value }) => {
+      // 模拟重命名
+      file.fileName = value
+      ElMessage.success('重命名成功')
+    })
+    .catch(() => {
+      // 取消操作
+    })
 }
 
 // formatFileSize 函数已从 @/utils/format/file 导入
@@ -548,7 +608,7 @@ const handleRename = (file) => {
 /**
  * 格式化时间
  */
-const formatTime = (time) => {
+const formatTime = time => {
   if (!time) return ''
   return time
 }
@@ -556,7 +616,7 @@ const formatTime = (time) => {
 /**
  * 获取文件图标组件
  */
-const getFileIconComponent = (type) => {
+const getFileIconComponent = type => {
   const icons = {
     image: Picture,
     document: Document,
@@ -570,14 +630,14 @@ const getFileIconComponent = (type) => {
 /**
  * 判断是否为图片
  */
-const isImage = (file) => {
+const isImage = file => {
   return file && file.fileType === 'image'
 }
 
 /**
  * 判断是否为文本
  */
-const isText = (file) => {
+const isText = file => {
   return file && ['txt', 'json', 'md', 'text'].includes(file.fileType)
 }
 
@@ -747,7 +807,9 @@ onMounted(() => {
         gap: 4px;
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.2s, visibility 0.2s;
+        transition:
+          opacity 0.2s,
+          visibility 0.2s;
 
         .el-button {
           padding: 4px;

@@ -62,7 +62,7 @@ export function batchDeleteFiles(fileIds) {
   return request({
     url: '/api/im/file/batch',
     method: 'delete',
-    data: fileIds
+    data: fileIds,
   })
 }
 

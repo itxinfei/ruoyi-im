@@ -31,7 +31,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { Close, SuccessFilled, InfoFilled, WarningFilled, CircleCloseFilled } from '@element-plus/icons-vue'
+import {
+  Close,
+  SuccessFilled,
+  InfoFilled,
+  WarningFilled,
+  CircleCloseFilled,
+} from '@element-plus/icons-vue'
 
 const store = useStore()
 

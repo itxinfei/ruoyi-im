@@ -15,8 +15,8 @@
         circle
         size="small"
         text
-        @click="toggleCollapse"
         class="collapse-btn"
+        @click="toggleCollapse"
       />
     </div>
 
@@ -147,16 +147,20 @@ const unreadCount = computed(() => store.getters['im/totalUnreadCount'] || 0)
 
 // 主导航菜单
 const mainMenus = computed(() => [
-  { key: 'message', icon: ChatDotRound, label: '消息', badge: unreadCount.value, route: '/im/chat' },
+  {
+    key: 'message',
+    icon: ChatDotRound,
+    label: '消息',
+    badge: unreadCount.value,
+    route: '/im/chat',
+  },
   { key: 'contacts', icon: User, label: '通讯录', badge: 0, route: '/im/contacts' },
   { key: 'group', icon: Grid, label: '群组', badge: 0, route: '/im/group' },
   { key: 'files', icon: Folder, label: '文件', badge: 0, route: '/im/file' },
 ])
 
 // 底部菜单
-const bottomMenus = [
-  { key: 'settings', icon: Setting, label: '设置', route: '/im/settings' },
-]
+const bottomMenus = [{ key: 'settings', icon: Setting, label: '设置', route: '/im/settings' }]
 
 // 状态选项
 const statusOptions = [
@@ -172,7 +176,7 @@ const showUserPanel = () => {
 }
 
 // 菜单点击
-const handleMenuClick = (item) => {
+const handleMenuClick = item => {
   activeMenu.value = item.key
   if (item.route) {
     router.push(item.route)
@@ -181,7 +185,7 @@ const handleMenuClick = (item) => {
 }
 
 // 修改状态
-const changeStatus = (status) => {
+const changeStatus = status => {
   onlineStatus.value = status
   store.dispatch('im/updateOnlineStatus', { userId: userInfo.value.userId, status })
   userPanelVisible.value = false
@@ -389,7 +393,7 @@ onMounted(() => {
   &.active {
     color: $nav-rail-text-active;
     background-color: $nav-rail-icon-active-bg;
-    
+
     &::before {
       content: '';
       position: absolute;
@@ -478,10 +482,18 @@ onMounted(() => {
         border-radius: $border-radius-round;
         flex-shrink: 0;
 
-        &.online { background-color: $success-color; }
-        &.busy { background-color: $error-color; }
-        &.away { background-color: $warning-color; }
-        &.offline { background-color: $text-disabled; }
+        &.online {
+          background-color: $success-color;
+        }
+        &.busy {
+          background-color: $error-color;
+        }
+        &.away {
+          background-color: $warning-color;
+        }
+        &.offline {
+          background-color: $text-disabled;
+        }
       }
     }
   }

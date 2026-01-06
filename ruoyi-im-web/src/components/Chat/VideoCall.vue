@@ -1,7 +1,11 @@
 <template>
   <div class="video-call-container">
     <!-- 视频通话主界面 -->
-    <div v-if="callState.status !== 'idle'" class="video-call-modal" :class="{ minimized: isMinimized }">
+    <div
+      v-if="callState.status !== 'idle'"
+      class="video-call-modal"
+      :class="{ minimized: isMinimized }"
+    >
       <!-- 最小化时的悬浮球 -->
       <div v-if="isMinimized" class="minimized-ball" @click="toggleMinimize">
         <div class="ball-content">
@@ -29,7 +33,7 @@
             loop
             muted
           >
-            <source :src="callState.type === 'video' ? videoPlaceholder : ''" type="video/mp4">
+            <source :src="callState.type === 'video' ? videoPlaceholder : ''" type="video/mp4" />
           </video>
 
           <!-- 等待提示 -->
@@ -139,7 +143,7 @@
               <el-icon><Close /></el-icon>
             </el-button>
           </div>
-          <div class="chat-messages" ref="chatMessagesRef">
+          <div ref="chatMessagesRef" class="chat-messages">
             <div
               v-for="msg in callMessages"
               :key="msg.id"
@@ -151,11 +155,7 @@
             </div>
           </div>
           <div class="chat-input">
-            <el-input
-              v-model="chatInput"
-              placeholder="输入消息..."
-              @keyup.enter="sendChatMessage"
-            >
+            <el-input v-model="chatInput" placeholder="输入消息..." @keyup.enter="sendChatMessage">
               <template #append>
                 <el-button @click="sendChatMessage">
                   <el-icon><Promotion /></el-icon>
@@ -176,12 +176,7 @@
     >
       <div class="dial-dialog">
         <div class="user-selector">
-          <el-select
-            v-model="selectedUser"
-            placeholder="选择联系人"
-            filterable
-            style="width: 100%"
-          >
+          <el-select v-model="selectedUser" placeholder="选择联系人" filterable style="width: 100%">
             <el-option
               v-for="user in contacts"
               :key="user.id"
@@ -214,9 +209,7 @@
 
       <template #footer>
         <el-button @click="showDialDialog = false">取消</el-button>
-        <el-button type="primary" @click="startCall" :disabled="!selectedUser">
-          呼叫
-        </el-button>
+        <el-button type="primary" :disabled="!selectedUser" @click="startCall"> 呼叫 </el-button>
       </template>
     </el-dialog>
   </div>
@@ -226,8 +219,19 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import {
-  Phone, VideoCamera, Microphone, Mute, PhoneFilled, VideoCameraFilled,
-  Loading, Minus, Close, ChatDotRound, Promotion, FullScreen, Refresh,
+  Phone,
+  VideoCamera,
+  Microphone,
+  Mute,
+  PhoneFilled,
+  VideoCameraFilled,
+  Loading,
+  Minus,
+  Close,
+  ChatDotRound,
+  Promotion,
+  FullScreen,
+  Refresh,
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -498,7 +502,7 @@ const stopCallTimer = () => {
 }
 
 // 格式化时间
-const formatTime = (seconds) => {
+const formatTime = seconds => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`

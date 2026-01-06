@@ -129,7 +129,13 @@ const unreadCount = computed(() => store.getters['im/totalUnreadCount'] || 0)
 
 // 主导航菜单
 const mainMenus = computed(() => [
-  { key: 'message', icon: ChatDotRound, label: '消息', badge: unreadCount.value, route: '/im/chat' },
+  {
+    key: 'message',
+    icon: ChatDotRound,
+    label: '消息',
+    badge: unreadCount.value,
+    route: '/im/chat',
+  },
   { key: 'contacts', icon: User, label: '通讯录', badge: 0, route: '/im/contacts' },
   { key: 'workspace', icon: Grid, label: '工作台', badge: 0, route: '/im/workspace' },
   { key: 'calendar', icon: Calendar, label: '日历', badge: 0, route: '/im/calendar' },
@@ -156,7 +162,7 @@ const showUserPanel = () => {
 }
 
 // 菜单点击
-const handleMenuClick = (item) => {
+const handleMenuClick = item => {
   activeMenu.value = item.key
   if (item.route) {
     router.push(item.route)
@@ -165,7 +171,7 @@ const handleMenuClick = (item) => {
 }
 
 // 修改状态
-const changeStatus = (status) => {
+const changeStatus = status => {
   onlineStatus.value = status
   store.dispatch('im/updateOnlineStatus', { userId: userInfo.value.userId, status })
   userPanelVisible.value = false
@@ -383,10 +389,18 @@ onMounted(() => {
         height: 8px;
         border-radius: 50%;
 
-        &.online { background-color: #67c23a; }
-        &.busy { background-color: #f56c6c; }
-        &.away { background-color: #e6a23c; }
-        &.offline { background-color: #909399; }
+        &.online {
+          background-color: #67c23a;
+        }
+        &.busy {
+          background-color: #f56c6c;
+        }
+        &.away {
+          background-color: #e6a23c;
+        }
+        &.offline {
+          background-color: #909399;
+        }
       }
     }
   }

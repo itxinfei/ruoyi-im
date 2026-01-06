@@ -21,7 +21,12 @@
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="用户状态" clearable style="width: 120px">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="用户状态"
+          clearable
+          style="width: 120px"
+        >
           <el-option label="正常" value="0" />
           <el-option label="停用" value="1" />
         </el-select>
@@ -44,20 +49,29 @@
           :icon="Delete"
           :disabled="selectedIds.length === 0"
           @click="handleBatchDelete"
-        >批量删除</el-button>
+          >批量删除</el-button
+        >
       </el-col>
     </el-row>
 
     <!-- 用户列表 -->
-    <el-table
-      v-loading="loading"
-      :data="userList"
-      @selection-change="handleSelectionChange"
-    >
+    <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="用户编号" align="center" prop="userId" width="100" />
-      <el-table-column label="用户名称" align="center" prop="userName" min-width="120" show-overflow-tooltip />
-      <el-table-column label="用户昵称" align="center" prop="nickName" min-width="120" show-overflow-tooltip />
+      <el-table-column
+        label="用户名称"
+        align="center"
+        prop="userName"
+        min-width="120"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        label="用户昵称"
+        align="center"
+        prop="nickName"
+        min-width="120"
+        show-overflow-tooltip
+      />
       <el-table-column label="手机号码" align="center" prop="phonenumber" width="130" />
       <el-table-column label="状态" align="center" prop="status" width="100">
         <template #default="scope">
@@ -72,8 +86,12 @@
       <el-table-column label="创建时间" align="center" prop="createTime" width="180" />
       <el-table-column label="操作" align="center" width="180">
         <template #default="scope">
-          <el-button link type="primary" :icon="Edit" @click="handleEdit(scope.row)">编辑</el-button>
-          <el-button link type="danger" :icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button link type="primary" :icon="Edit" @click="handleEdit(scope.row)"
+            >编辑</el-button
+          >
+          <el-button link type="danger" :icon="Delete" @click="handleDelete(scope.row)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -107,7 +125,12 @@
           <el-input v-model="form.email" placeholder="请输入邮箱" />
         </el-form-item>
         <el-form-item v-if="!form.userId" label="密码" prop="password">
-          <el-input v-model="form.password" type="password" placeholder="请输入密码" show-password />
+          <el-input
+            v-model="form.password"
+            type="password"
+            placeholder="请输入密码"
+            show-password
+          />
         </el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
@@ -131,7 +154,14 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus, Edit, Delete } from '@element-plus/icons-vue'
-import { listUser, getUser, addUser, updateUser, delUser, changeUserStatus } from '@/api/system/user'
+import {
+  listUser,
+  getUser,
+  addUser,
+  updateUser,
+  delUser,
+  changeUserStatus,
+} from '@/api/system/user'
 
 // 响应式状态
 const loading = ref(false)
@@ -205,19 +235,19 @@ const resetQuery = () => {
 }
 
 // 分页大小变化
-const handleSizeChange = (size) => {
+const handleSizeChange = size => {
   queryParams.pageSize = size
   getList()
 }
 
 // 页码变化
-const handleCurrentChange = (page) => {
+const handleCurrentChange = page => {
   queryParams.pageNum = page
   getList()
 }
 
 // 多选框选中
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = selection => {
   selectedIds.value = selection.map(item => item.userId)
 }
 
@@ -229,7 +259,7 @@ const handleAdd = () => {
 }
 
 // 编辑用户
-const handleEdit = async (row) => {
+const handleEdit = async row => {
   resetForm()
   try {
     const response = await getUser(row.userId)
@@ -244,7 +274,7 @@ const handleEdit = async (row) => {
 }
 
 // 删除用户
-const handleDelete = async (row) => {
+const handleDelete = async row => {
   try {
     await ElMessageBox.confirm('是否确认删除该用户？', '警告', { type: 'warning' })
     await delUser(row.userId)
@@ -276,7 +306,7 @@ const handleBatchDelete = async () => {
 }
 
 // 状态修改
-const handleStatusChange = async (row) => {
+const handleStatusChange = async row => {
   const text = row.status === '0' ? '启用' : '停用'
   try {
     await changeUserStatus(row.userId, row.status)

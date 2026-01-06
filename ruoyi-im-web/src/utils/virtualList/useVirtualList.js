@@ -18,13 +18,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
  * @returns {Object} 虚拟列表相关的状态和方法
  */
 export function useVirtualList(options = {}) {
-  const {
-    items,
-    itemHeight = 0,
-    estimateHeight = () => 60,
-    bufferSize = 5,
-    containerRef,
-  } = options
+  const { items, itemHeight = 0, estimateHeight = () => 60, bufferSize = 5, containerRef } = options
 
   // ==================== 响应式状态 ====================
 
@@ -107,7 +101,7 @@ export function useVirtualList(options = {}) {
    * @param {number} index - 列表项索引
    * @returns {number} 高度
    */
-  const getItemHeight = (index) => {
+  const getItemHeight = index => {
     if (isFixedHeight.value) {
       return itemHeight
     }
@@ -126,7 +120,7 @@ export function useVirtualList(options = {}) {
    * @param {number} index - 列表项索引
    * @returns {number} 顶部位置
    */
-  const getItemTop = (index) => {
+  const getItemTop = index => {
     if (isFixedHeight.value) {
       return index * itemHeight
     }
@@ -152,7 +146,7 @@ export function useVirtualList(options = {}) {
    * @param {number} index - 列表项索引
    * @returns {Object} 样式对象
    */
-  const getItemStyle = (index) => ({
+  const getItemStyle = index => ({
     position: 'absolute',
     top: `${getItemTop(index)}px`,
     left: 0,
@@ -165,7 +159,7 @@ export function useVirtualList(options = {}) {
    * @param {number} scrollTop - 滚动位置
    * @returns {number} 起始索引
    */
-  const findStartIndex = (scrollTop) => {
+  const findStartIndex = scrollTop => {
     if (isFixedHeight.value) {
       return Math.floor(scrollTop / itemHeight)
     }
@@ -196,7 +190,7 @@ export function useVirtualList(options = {}) {
    * @param {number} startIndex - 起始索引
    * @returns {number} 结束索引
    */
-  const findEndIndex = (startIndex) => {
+  const findEndIndex = startIndex => {
     if (isFixedHeight.value) {
       return Math.min(
         items.value.length,
@@ -230,7 +224,7 @@ export function useVirtualList(options = {}) {
    * 处理滚动事件
    * @param {Event} event - 滚动事件
    */
-  const handleScroll = (event) => {
+  const handleScroll = event => {
     scrollTop.value = event.target.scrollTop
     isScrolling.value = true
 
@@ -377,13 +371,17 @@ export function useVirtualList(options = {}) {
   /**
    * 监听数据源变化
    */
-  watch(items, () => {
-    // 清除高度缓存
-    heightCache.value.clear()
-    positionCache.value = []
+  watch(
+    items,
+    () => {
+      // 清除高度缓存
+      heightCache.value.clear()
+      positionCache.value = []
 
-    nextTick(updateVisibleRange)
-  }, { deep: true })
+      nextTick(updateVisibleRange)
+    },
+    { deep: true }
+  )
 
   /**
    * 监听容器引用变化

@@ -42,7 +42,7 @@
         </div>
 
         <!-- 用户信息 -->
-        <el-dropdown @command="handleUserCommand" trigger="click" placement="bottom-end">
+        <el-dropdown trigger="click" placement="bottom-end" @command="handleUserCommand">
           <div class="user-dropdown">
             <el-avatar :size="32" :src="currentUser?.avatar">
               {{ currentUser?.name?.charAt(0) || 'U' }}
@@ -171,12 +171,26 @@
                   <el-icon><Warning /></el-icon>
                   <span>连接中...</span>
                 </div>
-                <div v-for="msg in messages" :key="msg.id || msg.clientMsgId" class="message-item" :class="{ isOwn: msg.isOwn || msg.senderId === currentUser?.userId }">
-                  <el-avatar v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)" :size="36" :src="msg.senderAvatar || msg.avatar">
+                <div
+                  v-for="msg in messages"
+                  :key="msg.id || msg.clientMsgId"
+                  class="message-item"
+                  :class="{ isOwn: msg.isOwn || msg.senderId === currentUser?.userId }"
+                >
+                  <el-avatar
+                    v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)"
+                    :size="36"
+                    :src="msg.senderAvatar || msg.avatar"
+                  >
                     {{ (msg.senderName || msg.sender?.name)?.charAt(0) || 'U' }}
                   </el-avatar>
                   <div class="message-content" @click.right.prevent="showMessageMenu($event, msg)">
-                    <div v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)" class="sender-name">{{ msg.senderName || msg.sender?.name }}</div>
+                    <div
+                      v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)"
+                      class="sender-name"
+                    >
+                      {{ msg.senderName || msg.sender?.name }}
+                    </div>
 
                     <!-- 引用回复内容 -->
                     <div v-if="msg.replyTo" class="message-quote">
@@ -185,7 +199,14 @@
                     </div>
 
                     <!-- 文本消息 -->
-                    <div v-if="msg.type === 'text' || !msg.type" class="message-bubble" :class="{ 'sending': msg.status === 'sending', 'failed': msg.status === 'failed' }">
+                    <div
+                      v-if="msg.type === 'text' || !msg.type"
+                      class="message-bubble"
+                      :class="{
+                        sending: msg.status === 'sending',
+                        failed: msg.status === 'failed',
+                      }"
+                    >
                       <span v-html="formatMessageContent(msg.content)"></span>
                     </div>
 
@@ -196,38 +217,65 @@
                         :preview-src-list="[msg.content]"
                         fit="cover"
                         class="image-content"
-                        :class="{ 'sending': msg.status === 'sending' }"
+                        :class="{ sending: msg.status === 'sending' }"
                       />
                     </div>
 
                     <!-- 文件消息 -->
-                    <div v-else-if="msg.type === 'file'" class="message-file" :class="{ 'sending': msg.status === 'sending' }">
+                    <div
+                      v-else-if="msg.type === 'file'"
+                      class="message-file"
+                      :class="{ sending: msg.status === 'sending' }"
+                    >
                       <div class="file-icon">
                         <el-icon><Document /></el-icon>
                       </div>
                       <div class="file-info">
                         <div class="file-name">{{ msg.fileName || '文件' }}</div>
-                        <div class="file-size">{{ msg.fileSize ? formatFileSize(msg.fileSize) : '' }}</div>
+                        <div class="file-size">
+                          {{ msg.fileSize ? formatFileSize(msg.fileSize) : '' }}
+                        </div>
                       </div>
-                      <el-button type="primary" size="small" @click.stop="downloadFile(msg)">下载</el-button>
+                      <el-button type="primary" size="small" @click.stop="downloadFile(msg)"
+                        >下载</el-button
+                      >
                     </div>
 
                     <!-- 语音消息 -->
-                    <div v-else-if="msg.type === 'voice'" class="message-voice" :class="{ 'sending': msg.status === 'sending' }">
+                    <div
+                      v-else-if="msg.type === 'voice'"
+                      class="message-voice"
+                      :class="{ sending: msg.status === 'sending' }"
+                    >
                       <el-icon class="voice-icon"><Microphone /></el-icon>
                       <span class="voice-duration">{{ msg.duration || 0 }}''</span>
                     </div>
 
                     <!-- 其他类型 -->
-                    <div v-else class="message-bubble" :class="{ 'sending': msg.status === 'sending' }">
+                    <div
+                      v-else
+                      class="message-bubble"
+                      :class="{ sending: msg.status === 'sending' }"
+                    >
                       [{{ msg.type }}消息]
                     </div>
 
                     <div class="message-time">
                       {{ formatTime(msg.timestamp || msg.time) }}
-                      <el-icon v-if="msg.status === 'sending'" class="status-icon sending"><Loading /></el-icon>
-                      <el-icon v-else-if="msg.status === 'failed'" class="status-icon failed" @click="resendMessage(msg)"><WarningFilled /></el-icon>
-                      <el-icon v-else-if="msg.isOwn || msg.senderId === currentUser?.userId" class="status-icon sent"><SuccessFilled /></el-icon>
+                      <el-icon v-if="msg.status === 'sending'" class="status-icon sending"
+                        ><Loading
+                      /></el-icon>
+                      <el-icon
+                        v-else-if="msg.status === 'failed'"
+                        class="status-icon failed"
+                        @click="resendMessage(msg)"
+                        ><WarningFilled
+                      /></el-icon>
+                      <el-icon
+                        v-else-if="msg.isOwn || msg.senderId === currentUser?.userId"
+                        class="status-icon sent"
+                        ><SuccessFilled
+                      /></el-icon>
                     </div>
                   </div>
                 </div>
@@ -305,7 +353,10 @@
                 </div>
 
                 <!-- @提及建议 -->
-                <div v-if="showMentionSuggestions && mentionSuggestions.length > 0" class="mention-suggestions">
+                <div
+                  v-if="showMentionSuggestions && mentionSuggestions.length > 0"
+                  class="mention-suggestions"
+                >
                   <div
                     v-for="user in mentionSuggestions"
                     :key="user.id"
@@ -334,17 +385,27 @@
                     />
                   </el-tooltip>
                   <el-tooltip content="文件" placement="top">
-                    <el-button :icon="Folder" text :disabled="uploading" @click="triggerFileSelect" />
+                    <el-button
+                      :icon="Folder"
+                      text
+                      :disabled="uploading"
+                      @click="triggerFileSelect"
+                    />
                   </el-tooltip>
                   <el-tooltip content="图片" placement="top">
-                    <el-button :icon="PictureFilled" text :disabled="uploading" @click="selectImage" />
+                    <el-button
+                      :icon="PictureFilled"
+                      text
+                      :disabled="uploading"
+                      @click="selectImage"
+                    />
                   </el-tooltip>
                   <el-tooltip content="语音" placement="top">
                     <el-button
                       :icon="Microphone"
                       text
                       :disabled="uploading"
-                      :class="{ 'recording': isRecording }"
+                      :class="{ recording: isRecording }"
                       @click="isRecording ? stopVoiceRecord() : startVoiceRecord()"
                     />
                   </el-tooltip>
@@ -410,11 +471,14 @@
             </div>
 
             <!-- 好友列表 / 群组列表（带A-Z索引） -->
-            <div v-if="contactCategory === 'friends' || contactCategory === 'groups'" class="indexed-contacts">
+            <div
+              v-if="contactCategory === 'friends' || contactCategory === 'groups'"
+              class="indexed-contacts"
+            >
               <div
                 v-for="group in searchedGroups"
-                :key="group.letter"
                 :id="`contact-section-${group.letter}`"
+                :key="group.letter"
                 class="contact-section"
               >
                 <div class="section-header">{{ group.letter }}</div>
@@ -422,14 +486,22 @@
                   v-for="contact in group.contacts"
                   :key="contact.id"
                   class="contact-item-row"
-                  @click="contactCategory === 'friends' ? selectContact(contact) : selectGroupContact(contact)"
+                  @click="
+                    contactCategory === 'friends'
+                      ? selectContact(contact)
+                      : selectGroupContact(contact)
+                  "
                 >
                   <el-avatar :size="44" :src="contact.avatar">
                     {{ (contact.name || contact.groupName || contact.nickname)?.charAt(0) || 'U' }}
                   </el-avatar>
                   <div class="contact-row-info">
-                    <div class="contact-row-name">{{ contact.name || contact.groupName || contact.nickname }}</div>
-                    <div v-if="contactCategory === 'friends'" class="contact-row-desc">{{ contact.signature || contact.remark || '' }}</div>
+                    <div class="contact-row-name">
+                      {{ contact.name || contact.groupName || contact.nickname }}
+                    </div>
+                    <div v-if="contactCategory === 'friends'" class="contact-row-desc">
+                      {{ contact.signature || contact.remark || '' }}
+                    </div>
                     <div v-else class="contact-row-desc">{{ contact.memberCount || 0 }}人</div>
                   </div>
                 </div>
@@ -468,9 +540,16 @@
                   </el-avatar>
                   <div class="contact-info">
                     <div class="contact-name">{{ member.name || member.nickname }}</div>
-                    <div class="contact-signature">{{ member.position || member.signature || '-' }}</div>
+                    <div class="contact-signature">
+                      {{ member.position || member.signature || '-' }}
+                    </div>
                   </div>
-                  <el-button v-if="!member.isFriend" size="small" @click.stop="sendFriendRequest(member)">添加</el-button>
+                  <el-button
+                    v-if="!member.isFriend"
+                    size="small"
+                    @click.stop="sendFriendRequest(member)"
+                    >添加</el-button
+                  >
                   <div v-else-if="member.online" class="online-dot"></div>
                 </div>
               </div>
@@ -478,11 +557,7 @@
 
             <!-- 新朋友 -->
             <div v-else-if="contactCategory === 'new'" class="new-friends">
-              <div
-                v-for="request in friendRequests"
-                :key="request.id"
-                class="friend-request-item"
-              >
+              <div v-for="request in friendRequests" :key="request.id" class="friend-request-item">
                 <el-avatar :size="48" :src="request.avatar">
                   {{ (request.name || request.nickname)?.charAt(0) || 'U' }}
                 </el-avatar>
@@ -516,12 +591,18 @@
             </div>
 
             <!-- A-Z 索引侧边栏 -->
-            <div v-if="contactCategory === 'friends' || contactCategory === 'groups'" class="index-sidebar">
+            <div
+              v-if="contactCategory === 'friends' || contactCategory === 'groups'"
+              class="index-sidebar"
+            >
               <div
                 v-for="letter in indexLetters"
                 :key="letter"
                 class="index-item"
-                :class="{ active: activeLetter === letter, disabled: !searchedGroups.find(g => g.letter === letter) }"
+                :class="{
+                  active: activeLetter === letter,
+                  disabled: !searchedGroups.find(g => g.letter === letter),
+                }"
                 @click="scrollToLetter(letter)"
               >
                 {{ letter }}
@@ -545,8 +626,12 @@
               </div>
 
               <div class="detail-actions">
-                <el-button type="primary" :icon="ChatDotRound" @click="startChat(selectedContact)">发消息</el-button>
-                <el-button :icon="VideoCamera" @click="startVideoCall(selectedContact)">视频通话</el-button>
+                <el-button type="primary" :icon="ChatDotRound" @click="startChat(selectedContact)"
+                  >发消息</el-button
+                >
+                <el-button :icon="VideoCamera" @click="startVideoCall(selectedContact)"
+                  >视频通话</el-button
+                >
               </div>
 
               <div class="detail-info">
@@ -635,11 +720,7 @@
               </div>
 
               <div class="approval-items">
-                <div
-                  v-for="item in mockApprovals"
-                  :key="item.id"
-                  class="approval-item"
-                >
+                <div v-for="item in mockApprovals" :key="item.id" class="approval-item">
                   <div class="approval-icon" :style="{ background: item.color }">
                     <el-icon :size="20" color="white">
                       <component :is="item.icon" />
@@ -654,7 +735,9 @@
                     <div class="approval-applicant">申请人: {{ item.applicant }}</div>
                   </div>
                   <div class="approval-actions">
-                    <el-button type="primary" size="small" @click="handleApproval(item, 'approve')">同意</el-button>
+                    <el-button type="primary" size="small" @click="handleApproval(item, 'approve')"
+                      >同意</el-button
+                    >
                     <el-button size="small" @click="handleApproval(item, 'reject')">拒绝</el-button>
                   </div>
                 </div>
@@ -679,19 +762,13 @@
                 >
                   立即打卡
                 </el-button>
-                <div v-else class="check-time">
-                  打卡时间: {{ checkInTime }}
-                </div>
+                <div v-else class="check-time">打卡时间: {{ checkInTime }}</div>
               </div>
 
               <div class="attendance-records">
                 <h4>本周打卡记录</h4>
                 <div class="record-list">
-                  <div
-                    v-for="record in weeklyRecords"
-                    :key="record.date"
-                    class="record-item"
-                  >
+                  <div v-for="record in weeklyRecords" :key="record.date" class="record-item">
                     <div class="record-day">{{ record.day }}</div>
                     <div class="record-time">{{ record.checkInTime || '-' }}</div>
                     <div class="record-status" :class="record.status">
@@ -706,7 +783,9 @@
             <div v-else-if="workbenchCategory === 'schedule'" class="schedule-panel">
               <div class="schedule-header">
                 <h3>我的日程</h3>
-                <el-button :icon="Plus" type="primary" size="small" @click="showAddSchedule">新建日程</el-button>
+                <el-button :icon="Plus" type="primary" size="small" @click="showAddSchedule"
+                  >新建日程</el-button
+                >
               </div>
 
               <div class="schedule-calendar">
@@ -739,7 +818,7 @@
                   <div class="schedule-time">{{ schedule.time }}</div>
                   <div class="schedule-content">
                     <div class="schedule-title">{{ schedule.title }}</div>
-                    <div class="schedule-location" v-if="schedule.location">
+                    <div v-if="schedule.location" class="schedule-location">
                       <el-icon><Location /></el-icon>
                       {{ schedule.location }}
                     </div>
@@ -772,7 +851,7 @@
               </div>
             </div>
 
-            <div class="section-title" style="margin-top: 20px;">存储空间</div>
+            <div class="section-title" style="margin-top: 20px">存储空间</div>
             <div class="storage-info">
               <el-progress :percentage="storagePercent" :stroke-width="6" />
               <div class="storage-text">已使用 {{ storageUsed }} / {{ storageTotal }}</div>
@@ -798,7 +877,9 @@
                 </el-upload>
                 <el-button :icon="Folder" @click="createFolder">新建文件夹</el-button>
                 <el-button :icon="Download" :disabled="!selectedFile">下载</el-button>
-                <el-button :icon="Delete" :disabled="!selectedFile" @click="deleteFile">删除</el-button>
+                <el-button :icon="Delete" :disabled="!selectedFile" @click="deleteFile"
+                  >删除</el-button
+                >
               </div>
             </div>
 
@@ -838,15 +919,25 @@
                 </div>
                 <div class="file-info">
                   <div class="file-name">{{ file.name }}</div>
-                  <div class="file-meta">{{ formatFileSize(file.size) }} · {{ formatTime(file.updateTime) }}</div>
+                  <div class="file-meta">
+                    {{ formatFileSize(file.size) }} · {{ formatTime(file.updateTime) }}
+                  </div>
                 </div>
                 <div class="file-actions">
                   <el-button :icon="Share" size="small" circle @click.stop="shareFile(file)" />
-                  <el-button :icon="Download" size="small" circle @click.stop="downloadSingleFile(file)" />
+                  <el-button
+                    :icon="Download"
+                    size="small"
+                    circle
+                    @click.stop="downloadSingleFile(file)"
+                  />
                 </div>
               </div>
 
-              <el-empty v-if="currentFolders.length === 0 && currentFiles.length === 0" description="暂无文件" />
+              <el-empty
+                v-if="currentFolders.length === 0 && currentFiles.length === 0"
+                description="暂无文件"
+              />
             </div>
           </div>
         </div>
@@ -860,9 +951,19 @@
       width="500px"
       @close="resetCreateGroupForm"
     >
-      <el-form ref="createGroupFormRef" :model="createGroupForm" :rules="createGroupRules" label-width="80px">
+      <el-form
+        ref="createGroupFormRef"
+        :model="createGroupForm"
+        :rules="createGroupRules"
+        label-width="80px"
+      >
         <el-form-item label="群组名称" prop="name">
-          <el-input v-model="createGroupForm.name" placeholder="请输入群组名称" maxlength="20" show-word-limit />
+          <el-input
+            v-model="createGroupForm.name"
+            placeholder="请输入群组名称"
+            maxlength="20"
+            show-word-limit
+          />
         </el-form-item>
         <el-form-item label="群组头像" prop="avatar">
           <div class="avatar-upload">
@@ -902,11 +1003,21 @@
               >
                 {{ member.name || member.nickname }}
               </el-tag>
-              <el-button v-if="selectedGroupMembers.length < 1" text size="small" @click="showMemberSelector">
+              <el-button
+                v-if="selectedGroupMembers.length < 1"
+                text
+                size="small"
+                @click="showMemberSelector"
+              >
                 选择成员
               </el-button>
             </div>
-            <el-button v-if="selectedGroupMembers.length > 0" text size="small" @click="showMemberSelector">
+            <el-button
+              v-if="selectedGroupMembers.length > 0"
+              text
+              size="small"
+              @click="showMemberSelector"
+            >
               <el-icon><Plus /></el-icon> 添加成员
             </el-button>
           </div>
@@ -921,16 +1032,14 @@
       </el-form>
       <template #footer>
         <el-button @click="createGroupDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="creatingGroup" @click="submitCreateGroup">创建</el-button>
+        <el-button type="primary" :loading="creatingGroup" @click="submitCreateGroup"
+          >创建</el-button
+        >
       </template>
     </el-dialog>
 
     <!-- 选择成员对话框 -->
-    <el-dialog
-      v-model="memberSelectorVisible"
-      title="选择成员"
-      width="500px"
-    >
+    <el-dialog v-model="memberSelectorVisible" title="选择成员" width="500px">
       <div class="member-selector-content">
         <el-input
           v-model="memberSearchKeyword"
@@ -954,7 +1063,10 @@
               <span class="member-name">{{ user.name || user.nickname }}</span>
               <span class="member-dept">{{ user.deptName || user.position || '' }}</span>
             </div>
-            <el-checkbox :model-value="isGroupMemberSelected(user)" @change="toggleGroupMember(user)" />
+            <el-checkbox
+              :model-value="isGroupMemberSelected(user)"
+              @change="toggleGroupMember(user)"
+            />
           </div>
         </div>
       </div>
@@ -965,11 +1077,7 @@
     </el-dialog>
 
     <!-- 群组管理对话框 -->
-    <el-dialog
-      v-model="groupManageDialogVisible"
-      title="群组管理"
-      width="600px"
-    >
+    <el-dialog v-model="groupManageDialogVisible" title="群组管理" width="600px">
       <div v-if="managingGroup" class="group-manage">
         <div class="group-info-header">
           <el-avatar :size="64" :src="managingGroup.avatar">
@@ -993,7 +1101,12 @@
                   clearable
                   class="member-search-input"
                 />
-                <el-button v-if="canAddMembers" :icon="Plus" size="small" @click="showAddGroupMember">
+                <el-button
+                  v-if="canAddMembers"
+                  :icon="Plus"
+                  size="small"
+                  @click="showAddGroupMember"
+                >
                   添加成员
                 </el-button>
               </div>
@@ -1009,26 +1122,37 @@
                   <div class="member-info">
                     <div class="member-name">
                       {{ member.name || member.nickname }}
-                      <el-tag v-if="member.role === 'owner'" size="small" type="danger">群主</el-tag>
+                      <el-tag v-if="member.role === 'owner'" size="small" type="danger"
+                        >群主</el-tag
+                      >
                       <el-tag v-else-if="member.role === 'admin'" size="small">管理员</el-tag>
                     </div>
                     <div class="member-role">{{ member.roleText || '成员' }}</div>
                   </div>
-                  <el-dropdown v-if="canManageMember(member)" @command="(cmd) => handleMemberCommand(cmd, member)">
+                  <el-dropdown
+                    v-if="canManageMember(member)"
+                    @command="cmd => handleMemberCommand(cmd, member)"
+                  >
                     <el-button :icon="More" circle size="small" text />
                     <template #dropdown>
                       <el-dropdown-menu>
-                        <el-dropdown-item v-if="member.role !== 'admin'" command="setAdmin">设为管理员</el-dropdown-item>
-                        <el-dropdown-item v-if="member.role === 'admin'" command="removeAdmin">取消管理员</el-dropdown-item>
+                        <el-dropdown-item v-if="member.role !== 'admin'" command="setAdmin"
+                          >设为管理员</el-dropdown-item
+                        >
+                        <el-dropdown-item v-if="member.role === 'admin'" command="removeAdmin"
+                          >取消管理员</el-dropdown-item
+                        >
                         <el-dropdown-item v-if="!member.isMuted" command="mute">
                           <el-icon><Mute /></el-icon>
                           禁言成员
                         </el-dropdown-item>
-<el-dropdown-item v-if="member.isMuted" command="unmute">
-                           <el-icon><Unlock /></el-icon>
-                           取消禁言
-                         </el-dropdown-item>
-                        <el-dropdown-item command="remove" style="color: #f5222d">移出群组</el-dropdown-item>
+                        <el-dropdown-item v-if="member.isMuted" command="unmute">
+                          <el-icon><Unlock /></el-icon>
+                          取消禁言
+                        </el-dropdown-item>
+                        <el-dropdown-item command="remove" style="color: #f5222d"
+                          >移出群组</el-dropdown-item
+                        >
                       </el-dropdown-menu>
                     </template>
                   </el-dropdown>
@@ -1045,7 +1169,12 @@
                 <el-input v-model="managingGroup.description" type="textarea" :rows="3" />
               </el-form-item>
               <el-form-item label="群公告">
-                <el-input v-model="managingGroup.announcement" type="textarea" :rows="4" placeholder="暂无公告" />
+                <el-input
+                  v-model="managingGroup.announcement"
+                  type="textarea"
+                  :rows="4"
+                  placeholder="暂无公告"
+                />
               </el-form-item>
               <el-form-item label="加群方式">
                 <el-select v-model="managingGroup.joinType">
@@ -1086,13 +1215,15 @@
                       <span>{{ file.uploader }}</span>
                     </div>
                   </div>
-                  <el-dropdown @command="(cmd) => handleFileCommand(cmd, file)">
+                  <el-dropdown @command="cmd => handleFileCommand(cmd, file)">
                     <el-button :icon="More" circle size="small" text />
                     <template #dropdown>
                       <el-dropdown-menu>
                         <el-dropdown-item command="download">下载</el-dropdown-item>
                         <el-dropdown-item command="rename">重命名</el-dropdown-item>
-                        <el-dropdown-item command="delete" style="color: #f5222d">删除</el-dropdown-item>
+                        <el-dropdown-item command="delete" style="color: #f5222d"
+                          >删除</el-dropdown-item
+                        >
                       </el-dropdown-menu>
                     </template>
                   </el-dropdown>
@@ -1123,7 +1254,11 @@
         <el-icon><DocumentCopy /></el-icon>
         <span>复制</span>
       </div>
-      <div class="menu-item" @click="deleteMessage" v-if="selectedMessage?.isOwn || selectedMessage?.senderId === currentUser?.userId">
+      <div
+        v-if="selectedMessage?.isOwn || selectedMessage?.senderId === currentUser?.userId"
+        class="menu-item"
+        @click="deleteMessage"
+      >
         <el-icon><Delete /></el-icon>
         <span>删除</span>
       </div>
@@ -1146,8 +1281,8 @@
         placeholder="搜索消息内容..."
         :prefix-icon="Search"
         clearable
-        @input="searchMessages"
         class="search-input"
+        @input="searchMessages"
       />
       <div class="search-results">
         <div
@@ -1160,17 +1295,15 @@
           <div class="result-sender">{{ result.senderName }}</div>
           <div class="result-content">{{ highlightKeyword(result.content) }}</div>
         </div>
-        <el-empty v-if="searchResults.length === 0 && messageSearchKeyword" description="没有找到相关消息" />
+        <el-empty
+          v-if="searchResults.length === 0 && messageSearchKeyword"
+          description="没有找到相关消息"
+        />
       </div>
     </el-dialog>
 
     <!-- 转发消息对话框 -->
-    <el-dialog
-      v-model="forwardDialogVisible"
-      title="转发消息"
-      width="500px"
-      :append-to-body="true"
-    >
+    <el-dialog v-model="forwardDialogVisible" title="转发消息" width="500px" :append-to-body="true">
       <div class="forward-content">
         <div class="forward-message">{{ selectedMessage?.content }}</div>
         <el-input
@@ -1199,7 +1332,9 @@
       </div>
       <template #footer>
         <el-button @click="forwardDialogVisible = false">取消</el-button>
-        <el-button type="primary" :disabled="!selectedForwardTarget" @click="confirmForward">发送</el-button>
+        <el-button type="primary" :disabled="!selectedForwardTarget" @click="confirmForward"
+          >发送</el-button
+        >
       </template>
     </el-dialog>
 
@@ -1230,12 +1365,7 @@
     </el-dialog>
 
     <!-- 主题设置对话框 -->
-    <el-dialog
-      v-model="themeSettingsVisible"
-      title="主题设置"
-      width="400px"
-      :append-to-body="true"
-    >
+    <el-dialog v-model="themeSettingsVisible" title="主题设置" width="400px" :append-to-body="true">
       <div class="theme-settings">
         <div class="setting-item">
           <span class="setting-label">深色模式</span>
@@ -1253,11 +1383,7 @@
     </el-dialog>
 
     <!-- 文件分享对话框 -->
-    <el-dialog
-      v-model="shareFileDialogVisible"
-      title="分享文件"
-      width="500px"
-    >
+    <el-dialog v-model="shareFileDialogVisible" title="分享文件" width="500px">
       <div v-if="sharingFile" class="share-file-dialog">
         <div class="share-file-info">
           <div class="file-icon-large">
@@ -1289,7 +1415,11 @@
                 <el-checkbox v-model="shareOptions.expire">设置过期时间</el-checkbox>
               </div>
               <div v-if="shareOptions.password" class="share-password-input">
-                <el-input v-model="shareOptions.passwordValue" placeholder="请输入分享密码" maxlength="6" />
+                <el-input
+                  v-model="shareOptions.passwordValue"
+                  placeholder="请输入分享密码"
+                  maxlength="6"
+                />
               </div>
               <div v-if="shareOptions.expire" class="share-expire-input">
                 <el-select v-model="shareOptions.expireDays" placeholder="选择有效期">
@@ -1346,17 +1476,15 @@
             </div>
           </div>
           <el-progress :percentage="upload.percent" :status="upload.status" />
-          <div v-if="upload.status === 'success'" class="upload-success">
-            上传成功
-          </div>
-          <div v-else-if="upload.status === 'exception'" class="upload-error">
-            上传失败，请重试
-          </div>
+          <div v-if="upload.status === 'success'" class="upload-success">上传成功</div>
+          <div v-else-if="upload.status === 'exception'" class="upload-error">上传失败，请重试</div>
         </div>
       </div>
       <template #footer>
-        <el-button @click="cancelAllUploads" :disabled="allUploadsComplete">取消全部</el-button>
-        <el-button type="primary" @click="closeUploadDialog" :disabled="!allUploadsComplete">关闭</el-button>
+        <el-button :disabled="allUploadsComplete" @click="cancelAllUploads">取消全部</el-button>
+        <el-button type="primary" :disabled="!allUploadsComplete" @click="closeUploadDialog"
+          >关闭</el-button
+        >
       </template>
     </el-dialog>
   </div>
@@ -1406,7 +1534,7 @@ import {
   ArrowRight,
   ArrowLeft,
   SwitchButton,
-  Folder
+  Folder,
 } from '@element-plus/icons-vue'
 import { formatTime as formatTimeUtil } from '@/utils/format/time'
 import { useImWebSocket } from '@/composables/useImWebSocket'
@@ -1419,7 +1547,7 @@ import {
   addContact,
   searchContacts,
   getFriendRequests,
-  handleFriendRequest as apiHandleFriendRequest
+  handleFriendRequest as apiHandleFriendRequest,
 } from '@/api/im/contact'
 
 const router = useRouter()
@@ -1458,13 +1586,13 @@ const {
   stopRecording,
   cancelRecording,
   clearResult,
-  getVolumeBars
+  getVolumeBars,
 } = useVoiceRecorder({
   maxDuration: 60,
   minDuration: 1,
-  onRecordComplete: async (result) => {
+  onRecordComplete: async result => {
     await sendVoiceMessage(result)
-  }
+  },
 })
 
 // ==================== 联系人模块 ====================
@@ -1479,10 +1607,38 @@ const friendRequests = ref([])
 const activeLetter = ref('') // 当前激活的字母索引
 
 // A-Z 索引字母
-const indexLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#']
+const indexLetters = [
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'F',
+  'G',
+  'H',
+  'I',
+  'J',
+  'K',
+  'L',
+  'M',
+  'N',
+  'O',
+  'P',
+  'Q',
+  'R',
+  'S',
+  'T',
+  'U',
+  'V',
+  'W',
+  'X',
+  'Y',
+  'Z',
+  '#',
+]
 
 // 获取拼音首字母（简化版，实际项目建议使用pinyin库）
-const getFirstLetter = (str) => {
+const getFirstLetter = str => {
   if (!str) return '#'
   const char = str.charAt(0).toUpperCase()
 
@@ -1491,27 +1647,195 @@ const getFirstLetter = (str) => {
 
   // 中文转拼音首字母（常用字映射）
   const pinyinMap = {
-    '阿': 'A', '艾': 'A', '安': 'A',
-    '八': 'B', '白': 'B', '包': 'B', '贝': 'B', '毕': 'B', '博': 'B', '布': 'B', '蔡': 'C', '曹': 'C', '柴': 'C', '陈': 'C', '成': 'C', '程': 'C', '崔': 'C',
-    '达': 'D', '戴': 'D', '邓': 'D', '狄': 'D', '丁': 'D', '董': 'D', '杜': 'D', '段': 'D',
-    '恩': 'E',
-    '发': 'F', '范': 'F', '方': 'F', '费': 'F', '冯': 'F', '傅': 'F', '付': 'F',
-    '高': 'G', '葛': 'G', '耿': 'G', '龚': 'G', '古': 'G', '谷': 'G', '关': 'G', '郭': 'G',
-    '哈': 'H', '海': 'H', '韩': 'H', '郝': 'H', '何': 'H', '贺': 'H', '洪': 'H', '侯': 'H', '胡': 'H', '华': 'H', '黄': 'H',
-    '姬': 'J', '季': 'J', '简': 'J', '江': 'J', '姜': 'J', '蒋': 'J', '焦': 'J', '金': 'J', '晋': 'J', '荆': 'J',
-    '康': 'K', '柯': 'K', '孔': 'K', '库': 'K', '匡': 'K', '赖': 'L', '兰': 'L', '郎': 'L', '乐': 'L', '雷': 'L', '黎': 'L', '李': 'L', '梁': 'L', '廖': 'L', '林': 'L', '刘': 'L', '柳': 'L', '龙': 'L', '卢': 'L', '鲁': 'L', '陆': 'L', '吕': 'L', '罗': 'L',
-    '马': 'M', '麦': 'M', '毛': 'M', '梅': 'M', '孟': 'M', '莫': 'M', '穆': 'M',
-    '那': 'N', '南': 'N', '倪': 'N', '牛': 'N', '钮': 'N',
-    '欧': 'O',
-    '潘': 'P', '庞': 'P', '裴': 'P', '彭': 'P', '皮': 'P', '蒲': 'P', '浦': 'P',
-    '戚': 'Q', '祁': 'Q', '齐': 'Q', '钱': 'Q', '乔': 'Q', '秦': 'Q', '邱': 'Q', '屈': 'Q', '瞿': 'Q',
-    '冉': 'R', '饶': 'R', '任': 'R', '荣': 'R', '容': 'R', '茹': 'R', '阮': 'R',
-    '桑': 'S', '沙': 'S', '商': 'S', '尚': 'S', '邵': 'S', '施': 'S', '石': 'S', '时': 'S', '史': 'S', '舒': 'S', '宋': 'S', '苏': 'S', '孙': 'S',
-    '谭': 'T', '汤': 'T', '唐': 'T', '陶': 'T', '滕': 'T', '田': 'T', '童': 'T',
-    '万': 'W', '王': 'W', '汪': 'W', '魏': 'W', '文': 'W', '翁': 'W', '沃': 'W', '吴': 'W', '武': 'W',
-    '西': 'X', '夏': 'X', '向': 'X', '项': 'X', '萧': 'X', '谢': 'X', '辛': 'X', '邢': 'X', '徐': 'X', '许': 'X', '薛': 'X',
-    '严': 'Y', '颜': 'Y', '晏': 'Y', '燕': 'Y', '杨': 'Y', '姚': 'Y', '叶': 'Y', '易': 'Y', '殷': 'Y', '尹': 'Y', '于': 'Y', '余': 'Y', '袁': 'Y', '岳': 'Y', '云': 'Y',
-    '詹': 'Z', '张': 'Z', '章': 'Z', '赵': 'Z', '甄': 'Z', '郑': 'Z', '钟': 'Z', '周': 'Z', '朱': 'Z', '诸': 'Z', '庄': 'Z', '邹': 'Z', '祖': 'Z'
+    阿: 'A',
+    艾: 'A',
+    安: 'A',
+    八: 'B',
+    白: 'B',
+    包: 'B',
+    贝: 'B',
+    毕: 'B',
+    博: 'B',
+    布: 'B',
+    蔡: 'C',
+    曹: 'C',
+    柴: 'C',
+    陈: 'C',
+    成: 'C',
+    程: 'C',
+    崔: 'C',
+    达: 'D',
+    戴: 'D',
+    邓: 'D',
+    狄: 'D',
+    丁: 'D',
+    董: 'D',
+    杜: 'D',
+    段: 'D',
+    恩: 'E',
+    发: 'F',
+    范: 'F',
+    方: 'F',
+    费: 'F',
+    冯: 'F',
+    傅: 'F',
+    付: 'F',
+    高: 'G',
+    葛: 'G',
+    耿: 'G',
+    龚: 'G',
+    古: 'G',
+    谷: 'G',
+    关: 'G',
+    郭: 'G',
+    哈: 'H',
+    海: 'H',
+    韩: 'H',
+    郝: 'H',
+    何: 'H',
+    贺: 'H',
+    洪: 'H',
+    侯: 'H',
+    胡: 'H',
+    华: 'H',
+    黄: 'H',
+    姬: 'J',
+    季: 'J',
+    简: 'J',
+    江: 'J',
+    姜: 'J',
+    蒋: 'J',
+    焦: 'J',
+    金: 'J',
+    晋: 'J',
+    荆: 'J',
+    康: 'K',
+    柯: 'K',
+    孔: 'K',
+    库: 'K',
+    匡: 'K',
+    赖: 'L',
+    兰: 'L',
+    郎: 'L',
+    乐: 'L',
+    雷: 'L',
+    黎: 'L',
+    李: 'L',
+    梁: 'L',
+    廖: 'L',
+    林: 'L',
+    刘: 'L',
+    柳: 'L',
+    龙: 'L',
+    卢: 'L',
+    鲁: 'L',
+    陆: 'L',
+    吕: 'L',
+    罗: 'L',
+    马: 'M',
+    麦: 'M',
+    毛: 'M',
+    梅: 'M',
+    孟: 'M',
+    莫: 'M',
+    穆: 'M',
+    那: 'N',
+    南: 'N',
+    倪: 'N',
+    牛: 'N',
+    钮: 'N',
+    欧: 'O',
+    潘: 'P',
+    庞: 'P',
+    裴: 'P',
+    彭: 'P',
+    皮: 'P',
+    蒲: 'P',
+    浦: 'P',
+    戚: 'Q',
+    祁: 'Q',
+    齐: 'Q',
+    钱: 'Q',
+    乔: 'Q',
+    秦: 'Q',
+    邱: 'Q',
+    屈: 'Q',
+    瞿: 'Q',
+    冉: 'R',
+    饶: 'R',
+    任: 'R',
+    荣: 'R',
+    容: 'R',
+    茹: 'R',
+    阮: 'R',
+    桑: 'S',
+    沙: 'S',
+    商: 'S',
+    尚: 'S',
+    邵: 'S',
+    施: 'S',
+    石: 'S',
+    时: 'S',
+    史: 'S',
+    舒: 'S',
+    宋: 'S',
+    苏: 'S',
+    孙: 'S',
+    谭: 'T',
+    汤: 'T',
+    唐: 'T',
+    陶: 'T',
+    滕: 'T',
+    田: 'T',
+    童: 'T',
+    万: 'W',
+    王: 'W',
+    汪: 'W',
+    魏: 'W',
+    文: 'W',
+    翁: 'W',
+    沃: 'W',
+    吴: 'W',
+    武: 'W',
+    西: 'X',
+    夏: 'X',
+    向: 'X',
+    项: 'X',
+    萧: 'X',
+    谢: 'X',
+    辛: 'X',
+    邢: 'X',
+    徐: 'X',
+    许: 'X',
+    薛: 'X',
+    严: 'Y',
+    颜: 'Y',
+    晏: 'Y',
+    燕: 'Y',
+    杨: 'Y',
+    姚: 'Y',
+    叶: 'Y',
+    易: 'Y',
+    殷: 'Y',
+    尹: 'Y',
+    于: 'Y',
+    余: 'Y',
+    袁: 'Y',
+    岳: 'Y',
+    云: 'Y',
+    詹: 'Z',
+    张: 'Z',
+    章: 'Z',
+    赵: 'Z',
+    甄: 'Z',
+    郑: 'Z',
+    钟: 'Z',
+    周: 'Z',
+    朱: 'Z',
+    诸: 'Z',
+    庄: 'Z',
+    邹: 'Z',
+    祖: 'Z',
   }
 
   return pinyinMap[char] || '#'
@@ -1543,7 +1867,7 @@ const groupedFriends = computed(() => {
           const nameA = a.name || a.nickname || ''
           const nameB = b.name || b.nickname || ''
           return nameA.localeCompare(nameB, 'zh-CN')
-        })
+        }),
       })
     }
   })
@@ -1578,7 +1902,7 @@ const groupedGroups = computed(() => {
           const nameA = a.name || a.groupName || ''
           const nameB = b.name || b.groupName || ''
           return nameA.localeCompare(nameB, 'zh-CN')
-        })
+        }),
       })
     }
   })
@@ -1591,7 +1915,12 @@ const contactCategories = computed(() => [
   { key: 'friends', label: '我的好友', icon: User, count: friends.value.length },
   { key: 'groups', label: '我的群组', icon: ChatDotRound, count: groupSessions.value.length },
   { key: 'org', label: '组织架构', icon: Folder, count: 0 },
-  { key: 'new', label: '新朋友', icon: Bell, count: friendRequests.value.filter(r => r.status === 'pending').length }
+  {
+    key: 'new',
+    label: '新朋友',
+    icon: Bell,
+    count: friendRequests.value.filter(r => r.status === 'pending').length,
+  },
 ])
 
 // 搜索过滤后的分组好友
@@ -1625,7 +1954,7 @@ const searchedGroups = computed(() => {
     if (groups[letter].length > 0) {
       result.push({
         letter,
-        contacts: groups[letter]
+        contacts: groups[letter],
       })
     }
   })
@@ -1643,11 +1972,13 @@ const loadFriends = async () => {
   try {
     const res = await listContact()
     const dataRows = res.rows || res.data?.rows || res.data || []
-    friends.value = Array.isArray(dataRows) ? dataRows.map(f => ({
-      ...f,
-      online: f.status === 'ACTIVE',
-      name: f.remark || f.friendName || f.name
-    })) : []
+    friends.value = Array.isArray(dataRows)
+      ? dataRows.map(f => ({
+          ...f,
+          online: f.status === 'ACTIVE',
+          name: f.remark || f.friendName || f.name,
+        }))
+      : []
   } catch (error) {
     console.error('加载好友列表失败:', error)
     friends.value = []
@@ -1681,8 +2012,8 @@ const initOrgTree = () => {
           children: [
             { id: 111, name: '前端组', userCount: 12 },
             { id: 112, name: '后端组', userCount: 15 },
-            { id: 113, name: '测试组', userCount: 8 }
-          ]
+            { id: 113, name: '测试组', userCount: 8 },
+          ],
         },
         {
           id: 12,
@@ -1690,8 +2021,8 @@ const initOrgTree = () => {
           userCount: 20,
           children: [
             { id: 121, name: '产品设计', userCount: 8 },
-            { id: 122, name: '用户研究', userCount: 12 }
-          ]
+            { id: 122, name: '用户研究', userCount: 12 },
+          ],
         },
         {
           id: 13,
@@ -1699,26 +2030,26 @@ const initOrgTree = () => {
           userCount: 25,
           children: [
             { id: 131, name: '销售组', userCount: 15 },
-            { id: 132, name: '推广组', userCount: 10 }
-          ]
+            { id: 132, name: '推广组', userCount: 10 },
+          ],
         },
         {
           id: 14,
           name: '人事部',
-          userCount: 10
+          userCount: 10,
         },
         {
           id: 15,
           name: '财务部',
-          userCount: 10
-        }
-      ]
-    }
+          userCount: 10,
+        },
+      ],
+    },
   ]
 }
 
 // 组织架构节点点击
-const handleOrgNodeClick = async (data) => {
+const handleOrgNodeClick = async data => {
   currentDept.value = data
   // 模拟获取部门成员
   if (data.userCount) {
@@ -1731,7 +2062,7 @@ const handleOrgNodeClick = async (data) => {
         position: '工程师',
         deptName: data.name,
         online: true,
-        isFriend: false
+        isFriend: false,
       },
       {
         id: `u_${Date.now()}_2`,
@@ -1741,7 +2072,7 @@ const handleOrgNodeClick = async (data) => {
         position: '设计师',
         deptName: data.name,
         online: false,
-        isFriend: false
+        isFriend: false,
       },
       {
         id: `u_${Date.now()}_3`,
@@ -1751,8 +2082,8 @@ const handleOrgNodeClick = async (data) => {
         position: '产品经理',
         deptName: data.name,
         online: true,
-        isFriend: true
-      }
+        isFriend: true,
+      },
     ]
   } else {
     orgMembers.value = []
@@ -1760,12 +2091,12 @@ const handleOrgNodeClick = async (data) => {
 }
 
 // 选择联系人
-const selectContact = (contact) => {
+const selectContact = contact => {
   selectedContact.value = { ...contact }
 }
 
 // 滚动到指定字母
-const scrollToLetter = (letter) => {
+const scrollToLetter = letter => {
   activeLetter.value = letter
   const element = document.getElementById(`contact-section-${letter}`)
   if (element) {
@@ -1778,7 +2109,7 @@ const scrollToLetter = (letter) => {
 }
 
 // 选择群组（从联系人列表）
-const selectGroupContact = (group) => {
+const selectGroupContact = group => {
   // 切换到聊天模块并打开该群组
   store.dispatch('im/switchSession', group.id)
   activeModule.value = 'chat'
@@ -1787,7 +2118,7 @@ const selectGroupContact = (group) => {
 }
 
 // 开始聊天
-const startChat = async (contact) => {
+const startChat = async contact => {
   await store.dispatch('im/switchToContact', contact)
   activeModule.value = 'chat'
   currentSessionId.value = store.state.im.currentSession?.id
@@ -1795,27 +2126,27 @@ const startChat = async (contact) => {
 }
 
 // 视频通话
-const startVideoCall = (contact) => {
+const startVideoCall = contact => {
   ElMessage.info(`正在发起视频通话: ${contact.name || contact.nickname}`)
 }
 
 // 发送好友请求
-const sendFriendRequest = async (user) => {
+const sendFriendRequest = async user => {
   try {
     await ElMessageBox.prompt('请输入验证消息', '添加好友', {
       confirmButtonText: '发送',
       cancelButtonText: '取消',
-      inputValue: '我是' + currentUser.value?.name
+      inputValue: '我是' + currentUser.value?.name,
     })
     const { value } = await ElMessageBox.prompt('请输入验证消息', '添加好友', {
       confirmButtonText: '发送',
       cancelButtonText: '取消',
-      inputValue: '我是' + (currentUser.value?.name || '我')
+      inputValue: '我是' + (currentUser.value?.name || '我'),
     })
 
     await addContact({
       friendId: user.id,
-      message: value
+      message: value,
     })
 
     ElMessage.success('好友请求已发送')
@@ -1831,7 +2162,7 @@ const handleFriendRequest = async (request, action) => {
   try {
     await apiHandleFriendRequest({
       requestId: request.id,
-      action: action // accept or reject
+      action: action, // accept or reject
     })
 
     request.status = action === 'accept' ? 'accepted' : 'rejected'
@@ -1851,12 +2182,14 @@ const handleFriendRequest = async (request, action) => {
 const showAddFriendDialog = () => {
   ElMessageBox.prompt('请输入用户名或手机号', '添加好友', {
     confirmButtonText: '搜索',
-    cancelButtonText: '取消'
-  }).then(async ({ value }) => {
-    if (!value) return
-    // TODO: 调用搜索用户API
-    ElMessage.info('搜索用户功能开发中...')
-  }).catch(() => {})
+    cancelButtonText: '取消',
+  })
+    .then(async ({ value }) => {
+      if (!value) return
+      // TODO: 调用搜索用户API
+      ElMessage.info('搜索用户功能开发中...')
+    })
+    .catch(() => {})
 }
 
 // ==================== 工作台模块 ====================
@@ -1868,16 +2201,56 @@ const workbenchCategories = computed(() => [
   { key: 'all', label: '全部应用', icon: Grid, count: 0 },
   { key: 'approval', label: '待办审批', icon: Document, count: 5 },
   { key: 'attendance', label: '考勤打卡', icon: Odometer, count: 0 },
-  { key: 'schedule', label: '日程管理', icon: Calendar, count: 3 }
+  { key: 'schedule', label: '日程管理', icon: Calendar, count: 3 },
 ])
 
 // 模拟审批数据
 const mockApprovals = ref([
-  { id: 1, title: '采购申请 - 办公用品', type: '采购审批', applicant: '张三', time: Date.now() - 3600000, icon: Document, color: '#1677ff' },
-  { id: 2, title: '请假申请 - 年假', type: '请假审批', applicant: '李四', time: Date.now() - 7200000, icon: Edit, color: '#52c41a' },
-  { id: 3, title: '报销申请 - 差旅费', type: '报销审批', applicant: '王五', time: Date.now() - 86400000, icon: Files, color: '#faad14' },
-  { id: 4, title: '用印申请 - 合同盖章', type: '用印审批', applicant: '赵六', time: Date.now() - 172800000, icon: Notification, color: '#eb2f96' },
-  { id: 5, title: '物品领用 - 笔记本电脑', type: '领用审批', applicant: '钱七', time: Date.now() - 259200000, icon: Odometer, color: '#13c2c2' }
+  {
+    id: 1,
+    title: '采购申请 - 办公用品',
+    type: '采购审批',
+    applicant: '张三',
+    time: Date.now() - 3600000,
+    icon: Document,
+    color: '#1677ff',
+  },
+  {
+    id: 2,
+    title: '请假申请 - 年假',
+    type: '请假审批',
+    applicant: '李四',
+    time: Date.now() - 7200000,
+    icon: Edit,
+    color: '#52c41a',
+  },
+  {
+    id: 3,
+    title: '报销申请 - 差旅费',
+    type: '报销审批',
+    applicant: '王五',
+    time: Date.now() - 86400000,
+    icon: Files,
+    color: '#faad14',
+  },
+  {
+    id: 4,
+    title: '用印申请 - 合同盖章',
+    type: '用印审批',
+    applicant: '赵六',
+    time: Date.now() - 172800000,
+    icon: Notification,
+    color: '#eb2f96',
+  },
+  {
+    id: 5,
+    title: '物品领用 - 笔记本电脑',
+    type: '领用审批',
+    applicant: '钱七',
+    time: Date.now() - 259200000,
+    icon: Odometer,
+    color: '#13c2c2',
+  },
 ])
 
 // 考勤相关
@@ -1892,7 +2265,7 @@ const weeklyRecords = ref([
   { day: '周二', date: '2024-01-09', checkInTime: '09:02', status: 'late', statusText: '迟到' },
   { day: '周三', date: '2024-01-10', checkInTime: '08:58', status: 'normal', statusText: '正常' },
   { day: '周四', date: '2024-01-11', checkInTime: '08:45', status: 'normal', statusText: '正常' },
-  { day: '周五', date: '2024-01-12', checkInTime: '-', status: 'pending', statusText: '未打卡' }
+  { day: '周五', date: '2024-01-12', checkInTime: '-', status: 'pending', statusText: '未打卡' },
 ])
 
 // 日程相关
@@ -1901,11 +2274,46 @@ const currentWeekStart = ref(getWeekStart(new Date()))
 
 const weekDays = ref(getWeekDays(new Date()))
 const schedules = ref([
-  { id: 1, title: '周会', date: getWeekDays(new Date())[0].date, time: '09:00', location: '会议室A', color: '#1677ff' },
-  { id: 2, title: '产品评审', date: getWeekDays(new Date())[1].date, time: '14:00', location: '会议室B', color: '#52c41a' },
-  { id: 3, title: '技术分享', date: getWeekDays(new Date())[2].date, time: '16:00', location: '线上', color: '#faad14' },
-  { id: 4, title: '项目讨论', date: getWeekDays(new Date())[3].date, time: '10:00', location: '会议室C', color: '#722ed1' },
-  { id: 5, title: '需求评审', date: getWeekDays(new Date())[4].date, time: '15:00', location: '会议室A', color: '#eb2f96' }
+  {
+    id: 1,
+    title: '周会',
+    date: getWeekDays(new Date())[0].date,
+    time: '09:00',
+    location: '会议室A',
+    color: '#1677ff',
+  },
+  {
+    id: 2,
+    title: '产品评审',
+    date: getWeekDays(new Date())[1].date,
+    time: '14:00',
+    location: '会议室B',
+    color: '#52c41a',
+  },
+  {
+    id: 3,
+    title: '技术分享',
+    date: getWeekDays(new Date())[2].date,
+    time: '16:00',
+    location: '线上',
+    color: '#faad14',
+  },
+  {
+    id: 4,
+    title: '项目讨论',
+    date: getWeekDays(new Date())[3].date,
+    time: '10:00',
+    location: '会议室C',
+    color: '#722ed1',
+  },
+  {
+    id: 5,
+    title: '需求评审',
+    date: getWeekDays(new Date())[4].date,
+    time: '15:00',
+    location: '会议室A',
+    color: '#eb2f96',
+  },
 ])
 
 // 获取本周日期范围
@@ -1931,7 +2339,7 @@ function getWeekDays(date) {
       name: dayNames[i],
       date: dateStr,
       dayNum: d.getDate(),
-      isToday: dateStr === today
+      isToday: dateStr === today,
     })
   }
   return days
@@ -1953,8 +2361,17 @@ const selectedDateSchedules = computed(() => {
 // 更新时间
 const updateTime = () => {
   const now = new Date()
-  currentTime.value = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-  currentDate.value = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
+  currentTime.value = now.toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
+  currentDate.value = now.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long',
+  })
 }
 
 // 审批操作
@@ -1962,7 +2379,7 @@ const handleApproval = async (item, action) => {
   try {
     const actionText = action === 'approve' ? '同意' : '拒绝'
     await ElMessageBox.confirm(`确定要${actionText}该申请吗？`, '确认', {
-      type: 'warning'
+      type: 'warning',
     })
 
     // 从列表中移除
@@ -2000,7 +2417,7 @@ const nextWeek = () => {
   weekDays.value = getWeekDays(newStart)
 }
 
-const selectDate = (date) => {
+const selectDate = date => {
   selectedDate.value = date
 }
 
@@ -2033,7 +2450,7 @@ const driveCategories = computed(() => [
   { key: 'personal', label: '个人文件', icon: User, count: allFiles.value.length },
   { key: 'shared', label: '企业共享', icon: Grid, count: 0 },
   { key: 'department', label: '部门文件', icon: Grid, count: 0 },
-  { key: 'favorite', label: '我的收藏', icon: Star, count: 0 }
+  { key: 'favorite', label: '我的收藏', icon: Star, count: 0 },
 ])
 
 // 存储空间
@@ -2055,7 +2472,7 @@ const shareOptions = ref({
   password: false,
   passwordValue: '',
   expire: false,
-  expireDays: 7
+  expireDays: 7,
 })
 
 // 过滤好友列表用于分享
@@ -2070,17 +2487,54 @@ const filteredFriendsForShare = computed(() => {
 const uploadProgressDialogVisible = ref(false)
 const uploadProgressList = ref([])
 const allUploadsComplete = computed(() => {
-  return uploadProgressList.value.length > 0 &&
+  return (
+    uploadProgressList.value.length > 0 &&
     uploadProgressList.value.every(u => u.status === 'success' || u.status === 'exception')
+  )
 })
 
 // 模拟文件和文件夹数据
 const allFiles = ref([
-  { id: 'f1', name: '项目文档.docx', type: 'word', size: 245760, updateTime: Date.now() - 86400000, folderId: null },
-  { id: 'f2', name: '产品需求.pdf', type: 'pdf', size: 524288, updateTime: Date.now() - 172800000, folderId: null },
-  { id: 'f3', name: '设计稿.png', type: 'image', size: 2097152, updateTime: Date.now() - 259200000, folderId: null },
-  { id: 'f4', name: '会议记录.xlsx', type: 'excel', size: 102400, updateTime: Date.now() - 345600000, folderId: null },
-  { id: 'f5', name: '演示文稿.pptx', type: 'ppt', size: 5242880, updateTime: Date.now() - 432000000, folderId: null },
+  {
+    id: 'f1',
+    name: '项目文档.docx',
+    type: 'word',
+    size: 245760,
+    updateTime: Date.now() - 86400000,
+    folderId: null,
+  },
+  {
+    id: 'f2',
+    name: '产品需求.pdf',
+    type: 'pdf',
+    size: 524288,
+    updateTime: Date.now() - 172800000,
+    folderId: null,
+  },
+  {
+    id: 'f3',
+    name: '设计稿.png',
+    type: 'image',
+    size: 2097152,
+    updateTime: Date.now() - 259200000,
+    folderId: null,
+  },
+  {
+    id: 'f4',
+    name: '会议记录.xlsx',
+    type: 'excel',
+    size: 102400,
+    updateTime: Date.now() - 345600000,
+    folderId: null,
+  },
+  {
+    id: 'f5',
+    name: '演示文稿.pptx',
+    type: 'ppt',
+    size: 5242880,
+    updateTime: Date.now() - 432000000,
+    folderId: null,
+  },
 ])
 
 const allFolders = ref([
@@ -2099,7 +2553,7 @@ const currentFiles = computed(() => {
 })
 
 // 获取文件图标
-const getFileIcon = (type) => {
+const getFileIcon = type => {
   const iconMap = {
     word: Document,
     excel: Document,
@@ -2109,7 +2563,7 @@ const getFileIcon = (type) => {
     video: VideoCamera,
     audio: Microphone,
     archive: Folder,
-    default: Document
+    default: Document,
   }
   return iconMap[type] || iconMap.default
 }
@@ -2122,27 +2576,28 @@ const navigateToRoot = () => {
 }
 
 // 选择文件/文件夹
-const selectFile = (file) => {
+const selectFile = file => {
   selectedFile.value = file
 }
 
 // 打开文件夹
-const openFolder = (folder) => {
+const openFolder = folder => {
   currentFolderId.value = folder.id
   breadcrumbs.value.push({ id: folder.id, name: folder.name })
   selectedFile.value = null
 }
 
 // 打开文件
-const openFile = (file) => {
+const openFile = file => {
   ElMessage.info(`打开文件: ${file.name}`)
   // TODO: 实现文件预览
 }
 
 // 上传文件
-const handleFileUpload = async (file) => {
+const handleFileUpload = async file => {
   // 大文件显示上传进度
-  if (file.size > 10 * 1024 * 1024) { // 大于10MB
+  if (file.size > 10 * 1024 * 1024) {
+    // 大于10MB
     return handleLargeFileUpload(file)
   }
 
@@ -2152,7 +2607,7 @@ const handleFileUpload = async (file) => {
     type: getFileType(file.name),
     size: file.size,
     updateTime: Date.now(),
-    folderId: currentFolderId.value
+    folderId: currentFolderId.value,
   }
   allFiles.value.push(newFile)
   ElMessage.success('文件上传成功')
@@ -2160,13 +2615,13 @@ const handleFileUpload = async (file) => {
 }
 
 // 处理大文件上传
-const handleLargeFileUpload = (file) => {
+const handleLargeFileUpload = file => {
   const uploadId = `upload_${Date.now()}`
   const uploadItem = {
     id: uploadId,
     file: file,
     percent: 0,
-    status: ''
+    status: '',
   }
 
   uploadProgressList.value.push(uploadItem)
@@ -2189,7 +2644,7 @@ const handleLargeFileUpload = (file) => {
         type: getFileType(file.name),
         size: file.size,
         updateTime: Date.now(),
-        folderId: currentFolderId.value
+        folderId: currentFolderId.value,
       }
       allFiles.value.push(newFile)
       ElMessage.success('文件上传成功')
@@ -2202,7 +2657,7 @@ const handleLargeFileUpload = (file) => {
 }
 
 // 分享文件
-const shareFile = (file) => {
+const shareFile = file => {
   sharingFile.value = file
   shareLink.value = `https://im.example.com/share/${file.id}`
   shareFileDialogVisible.value = true
@@ -2210,15 +2665,18 @@ const shareFile = (file) => {
 
 // 复制分享链接
 const copyShareLink = () => {
-  navigator.clipboard.writeText(shareLink.value).then(() => {
-    ElMessage.success('链接已复制到剪贴板')
-  }).catch(() => {
-    ElMessage.error('复制失败，请手动复制')
-  })
+  navigator.clipboard
+    .writeText(shareLink.value)
+    .then(() => {
+      ElMessage.success('链接已复制到剪贴板')
+    })
+    .catch(() => {
+      ElMessage.error('复制失败，请手动复制')
+    })
 }
 
 // 发送文件给好友
-const sendToFile = (friend) => {
+const sendToFile = friend => {
   ElMessage.success(`已将"${sharingFile.value?.name}"发送给${friend.name || friend.nickname}`)
   shareFileDialogVisible.value = false
 }
@@ -2236,17 +2694,27 @@ const closeUploadDialog = () => {
 }
 
 // 获取文件类型
-const getFileType = (fileName) => {
+const getFileType = fileName => {
   const ext = fileName.split('.').pop()?.toLowerCase()
   const typeMap = {
-    doc: 'word', docx: 'word',
-    xls: 'excel', xlsx: 'excel',
-    ppt: 'ppt', pptx: 'ppt',
+    doc: 'word',
+    docx: 'word',
+    xls: 'excel',
+    xlsx: 'excel',
+    ppt: 'ppt',
+    pptx: 'ppt',
     pdf: 'pdf',
-    jpg: 'image', jpeg: 'image', png: 'image', gif: 'image',
-    mp4: 'video', avi: 'video',
-    mp3: 'audio', wav: 'audio',
-    zip: 'archive', rar: 'archive', '7z': 'archive'
+    jpg: 'image',
+    jpeg: 'image',
+    png: 'image',
+    gif: 'image',
+    mp4: 'video',
+    avi: 'video',
+    mp3: 'audio',
+    wav: 'audio',
+    zip: 'archive',
+    rar: 'archive',
+    '7z': 'archive',
   }
   return typeMap[ext] || 'default'
 }
@@ -2256,18 +2724,20 @@ const createFolder = () => {
   ElMessageBox.prompt('请输入文件夹名称', '新建文件夹', {
     confirmButtonText: '创建',
     cancelButtonText: '取消',
-    inputValue: '新建文件夹'
-  }).then(({ value }) => {
-    if (!value) return
-    const newFolder = {
-      id: `fol_${Date.now()}`,
-      name: value,
-      itemCount: 0,
-      parentId: currentFolderId.value
-    }
-    allFolders.value.push(newFolder)
-    ElMessage.success('文件夹创建成功')
-  }).catch(() => {})
+    inputValue: '新建文件夹',
+  })
+    .then(({ value }) => {
+      if (!value) return
+      const newFolder = {
+        id: `fol_${Date.now()}`,
+        name: value,
+        itemCount: 0,
+        parentId: currentFolderId.value,
+      }
+      allFolders.value.push(newFolder)
+      ElMessage.success('文件夹创建成功')
+    })
+    .catch(() => {})
 }
 
 // 删除文件
@@ -2275,24 +2745,26 @@ const deleteFile = () => {
   if (!selectedFile.value) return
 
   ElMessageBox.confirm('确定要删除所选文件吗？', '确认删除', {
-    type: 'warning'
-  }).then(() => {
-    if (selectedFile.value.id.startsWith('fol')) {
-      // 删除文件夹
-      const index = allFolders.value.findIndex(f => f.id === selectedFile.value.id)
-      if (index > -1) allFolders.value.splice(index, 1)
-    } else {
-      // 删除文件
-      const index = allFiles.value.findIndex(f => f.id === selectedFile.value.id)
-      if (index > -1) allFiles.value.splice(index, 1)
-    }
-    selectedFile.value = null
-    ElMessage.success('删除成功')
-  }).catch(() => {})
+    type: 'warning',
+  })
+    .then(() => {
+      if (selectedFile.value.id.startsWith('fol')) {
+        // 删除文件夹
+        const index = allFolders.value.findIndex(f => f.id === selectedFile.value.id)
+        if (index > -1) allFolders.value.splice(index, 1)
+      } else {
+        // 删除文件
+        const index = allFiles.value.findIndex(f => f.id === selectedFile.value.id)
+        if (index > -1) allFiles.value.splice(index, 1)
+      }
+      selectedFile.value = null
+      ElMessage.success('删除成功')
+    })
+    .catch(() => {})
 }
 
 // 下载单个文件
-const downloadSingleFile = (file) => {
+const downloadSingleFile = file => {
   ElMessage.info(`下载文件: ${file.name}`)
   // TODO: 实现文件下载
 }
@@ -2303,7 +2775,7 @@ const currentUser = computed(() => {
   return {
     name: userInfo.nickName || userInfo.userName || '用户',
     avatar: userInfo.avatar || null,
-    userId: userInfo.userId
+    userId: userInfo.userId,
   }
 })
 
@@ -2328,7 +2800,7 @@ const navModules = ref([
   { key: 'chat', label: '消息', icon: ChatLineSquare },
   { key: 'contacts', label: '联系人', icon: User },
   { key: 'workbench', label: '工作台', icon: Grid },
-  { key: 'drive', label: '钉盘', icon: Folder }
+  { key: 'drive', label: '钉盘', icon: Folder },
 ])
 
 // 部门数据
@@ -2354,12 +2826,12 @@ const workbenchApps = ref([
 ])
 
 // 方法
-const getModuleTitle = (key) => {
+const getModuleTitle = key => {
   const titles = {
     chat: '消息',
     contacts: '联系人',
     workbench: '工作台',
-    drive: '钉盘'
+    drive: '钉盘',
   }
   return titles[key] || ''
 }
@@ -2369,7 +2841,7 @@ const toggleNavCollapse = () => {
   localStorage.setItem('navCollapsed', String(isNavCollapsed.value))
 }
 
-const switchModule = (moduleKey) => {
+const switchModule = moduleKey => {
   activeModule.value = moduleKey
   // 只更新URL用于状态保持，不触发路由导航
   // 使用replace避免产生历史记录
@@ -2383,7 +2855,7 @@ const switchModule = (moduleKey) => {
   }
 }
 
-const selectSession = async (session) => {
+const selectSession = async session => {
   // 切换会话
   await store.dispatch('im/switchSession', session)
   // 滚动到底部
@@ -2400,13 +2872,17 @@ const scrollToBottom = () => {
 }
 
 // 监听消息变化，自动滚动到底部
-watch(messages, () => {
-  nextTick(() => {
-    scrollToBottom()
-  })
-}, { deep: true })
+watch(
+  messages,
+  () => {
+    nextTick(() => {
+      scrollToBottom()
+    })
+  },
+  { deep: true }
+)
 
-const handleEnter = (e) => {
+const handleEnter = e => {
   if (!e.shiftKey) {
     sendMessage()
   }
@@ -2423,7 +2899,7 @@ const selectImage = () => {
 }
 
 // 处理文件选择
-const handleFileSelect = async (event) => {
+const handleFileSelect = async event => {
   const file = event.target.files?.[0]
   if (!file || !currentSessionId.value) return
 
@@ -2432,7 +2908,7 @@ const handleFileSelect = async (event) => {
 }
 
 // 处理图片选择
-const handleImageSelect = async (event) => {
+const handleImageSelect = async event => {
   const file = event.target.files?.[0]
   if (!file || !currentSessionId.value) return
 
@@ -2457,7 +2933,7 @@ const uploadAndSendFile = async (file, type) => {
   try {
     // 调用上传接口
     const uploadApi = type === 'image' ? uploadImage : uploadFile
-    const response = await uploadApi(file, (progressEvent) => {
+    const response = await uploadApi(file, progressEvent => {
       const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
       // 可以在这里更新上传进度 UI
     })
@@ -2474,7 +2950,7 @@ const uploadAndSendFile = async (file, type) => {
       type: type,
       content: fileUrl,
       fileName: file.name,
-      fileSize: file.size
+      fileSize: file.size,
     }
 
     await store.dispatch('im/sendMessage', messageData)
@@ -2493,7 +2969,7 @@ const uploadAndSendFile = async (file, type) => {
 }
 
 // 发送语音消息
-const sendVoiceMessage = async (result) => {
+const sendVoiceMessage = async result => {
   if (!currentSessionId.value || !result.blob) {
     ElMessage.error('发送语音失败')
     clearResult()
@@ -2520,7 +2996,7 @@ const sendVoiceMessage = async (result) => {
       sessionId: currentSessionId.value,
       type: 'voice',
       content: voiceUrl,
-      duration: result.duration
+      duration: result.duration,
     }
 
     await store.dispatch('im/sendMessage', messageData)
@@ -2560,7 +3036,7 @@ const stopVoiceRecord = () => {
 }
 
 // 下载文件
-const downloadFile = async (msg) => {
+const downloadFile = async msg => {
   if (!msg.content) return
 
   try {
@@ -2577,7 +3053,7 @@ const downloadFile = async (msg) => {
 }
 
 // 重发消息
-const resendMessage = async (msg) => {
+const resendMessage = async msg => {
   if (msg.status !== 'failed') return
 
   try {
@@ -2588,7 +3064,7 @@ const resendMessage = async (msg) => {
 }
 
 // 格式化文件大小
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (!bytes || bytes === 0) return '0 B'
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
@@ -2598,7 +3074,7 @@ const formatFileSize = (bytes) => {
 
 const formatTime = formatTimeUtil
 
-const openApp = (appKey) => {
+const openApp = appKey => {
   ElMessage.info(`打开应用：${appKey}`)
 }
 
@@ -2618,17 +3094,489 @@ const emojiTabs = [
   { key: 'activities', icon: '⚽' },
   { key: 'travel', icon: '🚗' },
   { key: 'objects', icon: '💡' },
-  { key: 'symbols', icon: '❤️' }
+  { key: 'symbols', icon: '❤️' },
 ]
 const emojis = {
-  smile: ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😜', '🤪', '😝', '🤗', '🤭', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥵', '🥶', '😶‍🌫️', '🥴', '😵', '🤯', '🤠', '🥳', '🥸', '😎', '🤓', '🧐'],
-  people: ['👋', '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💪', '🦾', '🦿', '🦵', '🦶', '👂', '🦻', '👃', '🧠', '🫀', '🫁', '🦷', '🦴', '👀', '👁️', '👅', '👄'],
-  animals: ['🐱', '🐶', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜', '🦟', '🦗', '🕷️', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦞', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋'],
-  food: ['🍔', '🍟', '🍕', '🌭', '🥪', '🌮', '🌯', '🥙', '🧆', '🥚', '🍳', '🥘', '🍲', '🥣', '🥗', '🍿', '🧈', '🧂', '🥫', '🍱', '🍘', '🍙', '🍚', '🍛', '🍜', '🍝', '🍠', '🍢', '🍣', '🍤', '🍥', '🥮', '🍡', '🥟', '🥠', '🥡', '🦀', '🦞', '🦐', '🦑', '🦪', '🍦', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🧁', '🥧', '🍫', '🍬', '🍭', '🍮', '🍯', '🍼', '🥛', '☕', '🍵', '🍶'],
-  activities: ['⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🪀', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🥅', '⛳', '🪁', '🏹', '🎣', '🤿', '🥊', '🥋', '🎽', '🛹', '🛼', '🛷', '⛸️', '🥌', '🎿', '⛷️', '🏂', '🪂', '🏋️', '🤼', '🤸', '🤾', '🏌️', '🏇', '🧘', '🏊', '🤽', '🚣', '🧗', '🚴', '🚵'],
-  travel: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐', '🛻', '🚚', '🚛', '🚜', '🦯', '🦽', '🦼', '🛴', '🚲', '🛵', '🏍️', '🛺', '🚨', '🚔', '🚍', '🚘', '🚖', '🚡', '🚠', '🚟', '🚃', '🚋', '🚞', '🚝', '🚄', '🚅', '🚈', '🚂', '🚆', '🚇', '🚊', '🚉', '✈️', '🛫', '🛬', '🛩️', '💺', '🛰️', '🚀', '🛸', '🚁', '🛶', '⛵', '🚤', '🛥️', '🛳️', '⛴️', '⚓', '⛽', '🚧', '🚦', '🚥', '🚏'],
-  objects: ['💡', '🔦', '🏮', '📱', '💻', '🖥️', '🖨️', '⌨️', '🖱️', '🖲️', '💽', '💾', '💿', '📀', '🧮', '🎥', '📷', '📸', '📹', '📼', '🔍', '🔎', '🕯️', '💰', '💳', '💎', '⚖️', '🔧', '🔨', '⚒️', '🛠️', '⛏️', '🔩', '⚙️', '🧲', '🔫', '💣', '🔪', '🗡️', '⚔️', '🛡️', '🚬', '⚰️', '🏺', '🔮', '📿', '🧿', '💈', '⚗️', '🔭', '🔬', '🕳️', '🩹', '🩺', '💊', '💉', '🩸', '🧬', '🦠', '🧫', '🧪'],
-  symbols: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉️', '☸️', '✡️', '🔯', '🕎', '☯️', '☦️', '🛐', '⛎', '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️', '☣️', '📴', '📳', '🈶', '🈚', '🈸', '🈺', '🈷️', '✴️', '🆚', '💮', '🉐', '㊙️', '㊗️', '🈴', '🈵', '🈲', '🅰️', '🅱️']
+  smile: [
+    '😀',
+    '😃',
+    '😄',
+    '😁',
+    '😅',
+    '😂',
+    '🤣',
+    '😊',
+    '😇',
+    '🙂',
+    '😉',
+    '😌',
+    '😍',
+    '🥰',
+    '😘',
+    '😗',
+    '😙',
+    '😚',
+    '😋',
+    '😛',
+    '😜',
+    '🤪',
+    '😝',
+    '🤗',
+    '🤭',
+    '🤔',
+    '🤐',
+    '🤨',
+    '😐',
+    '😑',
+    '😶',
+    '😏',
+    '😒',
+    '🙄',
+    '😬',
+    '🤥',
+    '😌',
+    '😔',
+    '😪',
+    '🤤',
+    '😴',
+    '😷',
+    '🤒',
+    '🤕',
+    '🤢',
+    '🤮',
+    '🤧',
+    '🥵',
+    '🥶',
+    '😶‍🌫️',
+    '🥴',
+    '😵',
+    '🤯',
+    '🤠',
+    '🥳',
+    '🥸',
+    '😎',
+    '🤓',
+    '🧐',
+  ],
+  people: [
+    '👋',
+    '🤚',
+    '🖐️',
+    '✋',
+    '🖖',
+    '👌',
+    '🤌',
+    '🤏',
+    '✌️',
+    '🤞',
+    '🤟',
+    '🤘',
+    '🤙',
+    '👈',
+    '👉',
+    '👆',
+    '👇',
+    '☝️',
+    '👍',
+    '👎',
+    '✊',
+    '👊',
+    '🤛',
+    '🤜',
+    '👏',
+    '🙌',
+    '👐',
+    '🤲',
+    '🤝',
+    '🙏',
+    '✍️',
+    '💪',
+    '🦾',
+    '🦿',
+    '🦵',
+    '🦶',
+    '👂',
+    '🦻',
+    '👃',
+    '🧠',
+    '🫀',
+    '🫁',
+    '🦷',
+    '🦴',
+    '👀',
+    '👁️',
+    '👅',
+    '👄',
+  ],
+  animals: [
+    '🐱',
+    '🐶',
+    '🐭',
+    '🐹',
+    '🐰',
+    '🦊',
+    '🐻',
+    '🐼',
+    '🐨',
+    '🐯',
+    '🦁',
+    '🐮',
+    '🐷',
+    '🐸',
+    '🐵',
+    '🙈',
+    '🙉',
+    '🙊',
+    '🐒',
+    '🐔',
+    '🐧',
+    '🐦',
+    '🐤',
+    '🐣',
+    '🐥',
+    '🦆',
+    '🦅',
+    '🦉',
+    '🦇',
+    '🐺',
+    '🐗',
+    '🐴',
+    '🦄',
+    '🐝',
+    '🐛',
+    '🦋',
+    '🐌',
+    '🐞',
+    '🐜',
+    '🦟',
+    '🦗',
+    '🕷️',
+    '🦂',
+    '🐢',
+    '🐍',
+    '🦎',
+    '🦖',
+    '🦕',
+    '🐙',
+    '🦑',
+    '🦐',
+    '🦞',
+    '🦀',
+    '🐡',
+    '🐠',
+    '🐟',
+    '🐬',
+    '🐳',
+    '🐋',
+  ],
+  food: [
+    '🍔',
+    '🍟',
+    '🍕',
+    '🌭',
+    '🥪',
+    '🌮',
+    '🌯',
+    '🥙',
+    '🧆',
+    '🥚',
+    '🍳',
+    '🥘',
+    '🍲',
+    '🥣',
+    '🥗',
+    '🍿',
+    '🧈',
+    '🧂',
+    '🥫',
+    '🍱',
+    '🍘',
+    '🍙',
+    '🍚',
+    '🍛',
+    '🍜',
+    '🍝',
+    '🍠',
+    '🍢',
+    '🍣',
+    '🍤',
+    '🍥',
+    '🥮',
+    '🍡',
+    '🥟',
+    '🥠',
+    '🥡',
+    '🦀',
+    '🦞',
+    '🦐',
+    '🦑',
+    '🦪',
+    '🍦',
+    '🍧',
+    '🍨',
+    '🍩',
+    '🍪',
+    '🎂',
+    '🍰',
+    '🧁',
+    '🥧',
+    '🍫',
+    '🍬',
+    '🍭',
+    '🍮',
+    '🍯',
+    '🍼',
+    '🥛',
+    '☕',
+    '🍵',
+    '🍶',
+  ],
+  activities: [
+    '⚽',
+    '🏀',
+    '🏈',
+    '⚾',
+    '🥎',
+    '🎾',
+    '🏐',
+    '🏉',
+    '🥏',
+    '🎱',
+    '🪀',
+    '🏓',
+    '🏸',
+    '🏒',
+    '🏑',
+    '🥍',
+    '🏏',
+    '🥅',
+    '⛳',
+    '🪁',
+    '🏹',
+    '🎣',
+    '🤿',
+    '🥊',
+    '🥋',
+    '🎽',
+    '🛹',
+    '🛼',
+    '🛷',
+    '⛸️',
+    '🥌',
+    '🎿',
+    '⛷️',
+    '🏂',
+    '🪂',
+    '🏋️',
+    '🤼',
+    '🤸',
+    '🤾',
+    '🏌️',
+    '🏇',
+    '🧘',
+    '🏊',
+    '🤽',
+    '🚣',
+    '🧗',
+    '🚴',
+    '🚵',
+  ],
+  travel: [
+    '🚗',
+    '🚕',
+    '🚙',
+    '🚌',
+    '🚎',
+    '🏎️',
+    '🚓',
+    '🚑',
+    '🚒',
+    '🚐',
+    '🛻',
+    '🚚',
+    '🚛',
+    '🚜',
+    '🦯',
+    '🦽',
+    '🦼',
+    '🛴',
+    '🚲',
+    '🛵',
+    '🏍️',
+    '🛺',
+    '🚨',
+    '🚔',
+    '🚍',
+    '🚘',
+    '🚖',
+    '🚡',
+    '🚠',
+    '🚟',
+    '🚃',
+    '🚋',
+    '🚞',
+    '🚝',
+    '🚄',
+    '🚅',
+    '🚈',
+    '🚂',
+    '🚆',
+    '🚇',
+    '🚊',
+    '🚉',
+    '✈️',
+    '🛫',
+    '🛬',
+    '🛩️',
+    '💺',
+    '🛰️',
+    '🚀',
+    '🛸',
+    '🚁',
+    '🛶',
+    '⛵',
+    '🚤',
+    '🛥️',
+    '🛳️',
+    '⛴️',
+    '⚓',
+    '⛽',
+    '🚧',
+    '🚦',
+    '🚥',
+    '🚏',
+  ],
+  objects: [
+    '💡',
+    '🔦',
+    '🏮',
+    '📱',
+    '💻',
+    '🖥️',
+    '🖨️',
+    '⌨️',
+    '🖱️',
+    '🖲️',
+    '💽',
+    '💾',
+    '💿',
+    '📀',
+    '🧮',
+    '🎥',
+    '📷',
+    '📸',
+    '📹',
+    '📼',
+    '🔍',
+    '🔎',
+    '🕯️',
+    '💰',
+    '💳',
+    '💎',
+    '⚖️',
+    '🔧',
+    '🔨',
+    '⚒️',
+    '🛠️',
+    '⛏️',
+    '🔩',
+    '⚙️',
+    '🧲',
+    '🔫',
+    '💣',
+    '🔪',
+    '🗡️',
+    '⚔️',
+    '🛡️',
+    '🚬',
+    '⚰️',
+    '🏺',
+    '🔮',
+    '📿',
+    '🧿',
+    '💈',
+    '⚗️',
+    '🔭',
+    '🔬',
+    '🕳️',
+    '🩹',
+    '🩺',
+    '💊',
+    '💉',
+    '🩸',
+    '🧬',
+    '🦠',
+    '🧫',
+    '🧪',
+  ],
+  symbols: [
+    '❤️',
+    '🧡',
+    '💛',
+    '💚',
+    '💙',
+    '💜',
+    '🖤',
+    '🤍',
+    '🤎',
+    '💔',
+    '❣️',
+    '💕',
+    '💞',
+    '💓',
+    '💗',
+    '💖',
+    '💘',
+    '💝',
+    '💟',
+    '☮️',
+    '✝️',
+    '☪️',
+    '🕉️',
+    '☸️',
+    '✡️',
+    '🔯',
+    '🕎',
+    '☯️',
+    '☦️',
+    '🛐',
+    '⛎',
+    '♈',
+    '♉',
+    '♊',
+    '♋',
+    '♌',
+    '♍',
+    '♎',
+    '♏',
+    '♐',
+    '♑',
+    '♒',
+    '♓',
+    '🆔',
+    '⚛️',
+    '🉑',
+    '☢️',
+    '☣️',
+    '📴',
+    '📳',
+    '🈶',
+    '🈚',
+    '🈸',
+    '🈺',
+    '🈷️',
+    '✴️',
+    '🆚',
+    '💮',
+    '🉐',
+    '㊙️',
+    '㊗️',
+    '🈴',
+    '🈵',
+    '🈲',
+    '🅰️',
+    '🅱️',
+  ],
 }
 const currentEmojis = computed(() => emojis[activeEmojiTab.value] || emojis.smile)
 
@@ -2664,7 +3612,9 @@ const previewingFile = ref(null)
 const themeSettingsVisible = ref(false)
 const isDarkMode = ref(localStorage.getItem('darkMode') === 'true')
 const messageSoundEnabled = ref(localStorage.getItem('messageSoundEnabled') !== 'false')
-const desktopNotificationEnabled = ref(localStorage.getItem('desktopNotificationEnabled') !== 'false')
+const desktopNotificationEnabled = ref(
+  localStorage.getItem('desktopNotificationEnabled') !== 'false'
+)
 
 // 输入框引用
 const inputRef = ref(null)
@@ -2672,7 +3622,7 @@ const inputRef = ref(null)
 // ==================== 新增功能函数 ====================
 
 // 表情相关
-const insertEmoji = (emoji) => {
+const insertEmoji = emoji => {
   const input = inputRef.value?.$el?.querySelector('textarea')
   if (!input) return
 
@@ -2691,13 +3641,10 @@ const insertEmoji = (emoji) => {
 }
 
 // 格式化消息内容（处理@提及和换行）
-const formatMessageContent = (content) => {
+const formatMessageContent = content => {
   if (!content) return ''
   // 转义HTML
-  let formatted = content
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+  let formatted = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   // 处理@提及
   formatted = formatted.replace(/@([^\s]+)/g, '<span class="mention">@$1</span>')
   // 处理换行
@@ -2706,7 +3653,7 @@ const formatMessageContent = (content) => {
 }
 
 // 处理输入变化（检测@符号）
-const handleInputChange = (value) => {
+const handleInputChange = value => {
   const textarea = inputRef.value?.$el?.querySelector('textarea')
   if (!textarea) return
 
@@ -2726,21 +3673,21 @@ const handleInputChange = (value) => {
         // 先添加@所有人选项（如果是群组且用户有权限）
         const suggestions = []
         // 只有群主和管理员可以@所有人
-        const isOwnerOrAdmin = currentSession.creatorId === currentUser.value?.userId ||
-                               currentSession.isAdmin === true
+        const isOwnerOrAdmin =
+          currentSession.creatorId === currentUser.value?.userId || currentSession.isAdmin === true
         if (isOwnerOrAdmin) {
           suggestions.push({ id: 'all', name: '所有人', nickname: '所有人', isAll: true })
         }
         // 添加匹配的成员
-        const matchedMembers = groupMembers.value.filter(m =>
-          m.name?.toLowerCase().includes(textAfterAt.toLowerCase())
-        ).slice(0, 5)
+        const matchedMembers = groupMembers.value
+          .filter(m => m.name?.toLowerCase().includes(textAfterAt.toLowerCase()))
+          .slice(0, 5)
         suggestions.push(...matchedMembers)
         mentionSuggestions.value = suggestions.slice(0, 6)
       } else {
-        mentionSuggestions.value = friends.value.filter(f =>
-          f.name?.toLowerCase().includes(textAfterAt.toLowerCase())
-        ).slice(0, 5)
+        mentionSuggestions.value = friends.value
+          .filter(f => f.name?.toLowerCase().includes(textAfterAt.toLowerCase()))
+          .slice(0, 5)
       }
       showMentionSuggestions.value = mentionSuggestions.value.length > 0
       return
@@ -2752,7 +3699,7 @@ const handleInputChange = (value) => {
 }
 
 // 选择@提及
-const selectMention = (user) => {
+const selectMention = user => {
   const textarea = inputRef.value?.$el?.querySelector('textarea')
   if (!textarea) return
 
@@ -2763,7 +3710,8 @@ const selectMention = (user) => {
   if (user.isAll) {
     inputMessage.value = textBeforeMention + '@所有人 ' + textAfterMention
   } else {
-    inputMessage.value = textBeforeMention + '@' + (user.name || user.nickname) + ' ' + textAfterMention
+    inputMessage.value =
+      textBeforeMention + '@' + (user.name || user.nickname) + ' ' + textAfterMention
   }
 
   showMentionSuggestions.value = false
@@ -2775,7 +3723,7 @@ const selectMention = (user) => {
 }
 
 // 处理键盘事件
-const handleInputKeydown = (e) => {
+const handleInputKeydown = e => {
   // Ctrl+Enter 发送
   if (e.ctrlKey && e.key === 'Enter') {
     e.preventDefault()
@@ -2847,14 +3795,14 @@ const forwardMessage = () => {
   // 收集可转发的目标（好友和群组）
   forwardTargets.value = [
     ...friends.value.map(f => ({ ...f, type: 'friend' })),
-    ...groupSessions.value.map(g => ({ ...g, type: 'group' }))
+    ...groupSessions.value.map(g => ({ ...g, type: 'group' })),
   ]
   forwardDialogVisible.value = true
   messageMenuVisible.value = false
 }
 
 // 选择转发目标
-const selectForwardTarget = (target) => {
+const selectForwardTarget = target => {
   selectedForwardTarget.value = target
 }
 
@@ -2879,7 +3827,7 @@ const confirmForward = async () => {
     await store.dispatch('im/sendMessage', {
       sessionId: sessionId,
       type: 'text',
-      content: `[转发消息] ${selectedMessage.value.content}`
+      content: `[转发消息] ${selectedMessage.value.content}`,
     })
 
     ElMessage.success('转发成功')
@@ -2903,7 +3851,7 @@ const copyMessage = () => {
 const deleteMessage = async () => {
   try {
     await ElMessageBox.confirm('确定要删除这条消息吗？', '提示', {
-      type: 'warning'
+      type: 'warning',
     })
     await store.dispatch('im/deleteMessage', selectedMessage.value.id)
     ElMessage.success('已删除')
@@ -2934,13 +3882,13 @@ const searchMessages = () => {
     .filter(msg => msg.content?.toLowerCase().includes(keyword))
     .map(msg => ({
       ...msg,
-      sessionId: currentSessionId.value
+      sessionId: currentSessionId.value,
     }))
     .slice(0, 50) // 限制结果数量
 }
 
 // 高亮关键词
-const highlightKeyword = (content) => {
+const highlightKeyword = content => {
   if (!messageSearchKeyword.value) return content
   const keyword = messageSearchKeyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const regex = new RegExp(`(${keyword})`, 'gi')
@@ -2948,7 +3896,7 @@ const highlightKeyword = (content) => {
 }
 
 // 跳转到消息
-const jumpToMessage = (message) => {
+const jumpToMessage = message => {
   messageSearchDialogVisible.value = false
   // 滚动到指定消息
   nextTick(() => {
@@ -2962,13 +3910,13 @@ const jumpToMessage = (message) => {
 }
 
 // 文件预览相关
-const isImageFile = (file) => {
+const isImageFile = file => {
   if (!file) return false
   const ext = (file.name || '').split('.').pop()?.toLowerCase()
   return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(ext)
 }
 
-const isPdfFile = (file) => {
+const isPdfFile = file => {
   if (!file) return false
   const ext = (file.name || '').split('.').pop()?.toLowerCase()
   return ext === 'pdf'
@@ -2996,11 +3944,15 @@ const toggleDesktopNotification = async () => {
 
 // 显示桌面通知
 const showDesktopNotification = (title, body) => {
-  if (desktopNotificationEnabled.value && 'Notification' in window && Notification.permission === 'granted') {
+  if (
+    desktopNotificationEnabled.value &&
+    'Notification' in window &&
+    Notification.permission === 'granted'
+  ) {
     new Notification(title, {
       body: body,
       icon: '/logo.png',
-      badge: '/logo.png'
+      badge: '/logo.png',
     })
   }
 }
@@ -3021,7 +3973,7 @@ const sendMessage = async () => {
   const messageData = {
     sessionId: currentSessionId.value,
     type: 'text',
-    content: inputMessage.value.trim()
+    content: inputMessage.value.trim(),
   }
 
   // 添加引用回复
@@ -3029,7 +3981,7 @@ const sendMessage = async () => {
     messageData.replyTo = {
       messageId: replyingMessage.value.id,
       senderName: replyingMessage.value.senderName,
-      content: replyingMessage.value.content
+      content: replyingMessage.value.content,
     }
     replyingMessage.value = null
   }
@@ -3061,23 +4013,27 @@ if (isDarkMode.value) {
 }
 
 // 监听消息播放提示音
-watch(() => store.state.im.messages, (newMessages, oldMessages) => {
-  if (newMessages.length > (oldMessages?.length || 0)) {
-    const latestMessage = newMessages[newMessages.length - 1]
-    if (!latestMessage.isOwn) {
-      playMessageSound()
-      showDesktopNotification('新消息', `${latestMessage.senderName}: ${latestMessage.content}`)
+watch(
+  () => store.state.im.messages,
+  (newMessages, oldMessages) => {
+    if (newMessages.length > (oldMessages?.length || 0)) {
+      const latestMessage = newMessages[newMessages.length - 1]
+      if (!latestMessage.isOwn) {
+        playMessageSound()
+        showDesktopNotification('新消息', `${latestMessage.senderName}: ${latestMessage.content}`)
+      }
     }
-  }
-}, { deep: true })
+  },
+  { deep: true }
+)
 
-const handleUserCommand = async (command) => {
+const handleUserCommand = async command => {
   if (command === 'logout') {
     try {
       await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'warning'
+        type: 'warning',
       })
       ElMessage.success('已退出登录')
       router.push('/login')
@@ -3154,7 +4110,7 @@ const loadSessions = async () => {
       lastMessage: s.lastMessage?.content || s.lastMessage,
       lastMessageTime: s.lastMessage?.timestamp || s.updatedAt,
       pinned: s.pinned || false,
-      muted: s.muted || false
+      muted: s.muted || false,
     }))
 
     store.commit('im/SET_SESSIONS', formattedSessions)
@@ -3174,17 +4130,15 @@ const createGroupForm = ref({
   avatar: '',
   description: '',
   memberIds: [],
-  joinType: 'needApproval'
+  joinType: 'needApproval',
 })
 
 const createGroupRules = {
   name: [
     { required: true, message: '请输入群组名称', trigger: 'blur' },
-    { min: 2, max: 20, message: '群组名称长度在2-20个字符', trigger: 'blur' }
+    { min: 2, max: 20, message: '群组名称长度在2-20个字符', trigger: 'blur' },
   ],
-  memberIds: [
-    { required: true, message: '请至少选择一个成员', trigger: 'change' }
-  ]
+  memberIds: [{ required: true, message: '请至少选择一个成员', trigger: 'change' }],
 }
 
 // 成员选择器相关
@@ -3200,7 +4154,7 @@ const availableUsers = computed(() => {
     nickname: f.nickname,
     avatar: f.avatar,
     deptName: f.deptName,
-    position: f.position
+    position: f.position,
   }))
 })
 
@@ -3220,9 +4174,30 @@ const managingGroup = ref(null)
 const groupMemberSearch = ref('')
 const managedGroupMembers = ref([])
 const groupFiles = ref([
-  { id: '1', name: '项目计划.docx', type: 'document', size: '2.3 MB', uploadTime: '2024-01-10', uploader: '张三' },
-  { id: '2', name: '会议记录.pdf', type: 'pdf', size: '1.1 MB', uploadTime: '2024-01-09', uploader: '李四' },
-  { id: '3', name: '产品截图', type: 'image', size: '5.6 MB', uploadTime: '2024-01-08', uploader: '王五' }
+  {
+    id: '1',
+    name: '项目计划.docx',
+    type: 'document',
+    size: '2.3 MB',
+    uploadTime: '2024-01-10',
+    uploader: '张三',
+  },
+  {
+    id: '2',
+    name: '会议记录.pdf',
+    type: 'pdf',
+    size: '1.1 MB',
+    uploadTime: '2024-01-09',
+    uploader: '李四',
+  },
+  {
+    id: '3',
+    name: '产品截图',
+    type: 'image',
+    size: '5.6 MB',
+    uploadTime: '2024-01-08',
+    uploader: '王五',
+  },
 ])
 
 // 过滤后的会话列表
@@ -3247,9 +4222,9 @@ const filteredGroupMembers = computed(() => {
 
 // 是否可以添加成员
 const canAddMembers = computed(() => {
-  return managingGroup.value && (
-    managingGroup.value.role === 'owner' ||
-    managingGroup.value.role === 'admin'
+  return (
+    managingGroup.value &&
+    (managingGroup.value.role === 'owner' || managingGroup.value.role === 'admin')
   )
 })
 
@@ -3265,19 +4240,19 @@ const resetCreateGroupForm = () => {
     avatar: '',
     description: '',
     memberIds: [],
-    joinType: 'needApproval'
+    joinType: 'needApproval',
   }
   selectedGroupMembers.value = []
   createGroupFormRef.value?.resetFields()
 }
 
 // 群组头像上传成功
-const handleGroupAvatarSuccess = (response) => {
+const handleGroupAvatarSuccess = response => {
   createGroupForm.value.avatar = response.url || response.data?.url
 }
 
 // 群组头像上传前检查
-const beforeGroupAvatarUpload = (file) => {
+const beforeGroupAvatarUpload = file => {
   const isImage = file.type.startsWith('image/')
   const isLt2M = file.size / 1024 / 1024 < 2
 
@@ -3293,7 +4268,7 @@ const beforeGroupAvatarUpload = (file) => {
 }
 
 // 自定义群组头像上传
-const customGroupAvatarUpload = async (options) => {
+const customGroupAvatarUpload = async options => {
   try {
     const response = await uploadImage(options.file)
     options.onSuccess(response)
@@ -3309,12 +4284,12 @@ const showMemberSelector = () => {
 }
 
 // 判断成员是否已选中
-const isGroupMemberSelected = (user) => {
+const isGroupMemberSelected = user => {
   return selectedGroupMembers.value.some(m => m.id === user.id)
 }
 
 // 切换成员选中状态
-const toggleGroupMember = (user) => {
+const toggleGroupMember = user => {
   const index = selectedGroupMembers.value.findIndex(m => m.id === user.id)
   if (index > -1) {
     selectedGroupMembers.value.splice(index, 1)
@@ -3324,7 +4299,7 @@ const toggleGroupMember = (user) => {
 }
 
 // 移除成员
-const removeGroupMember = (member) => {
+const removeGroupMember = member => {
   const index = selectedGroupMembers.value.findIndex(m => m.id === member.id)
   if (index > -1) {
     selectedGroupMembers.value.splice(index, 1)
@@ -3354,7 +4329,7 @@ const submitCreateGroup = async () => {
       avatar: createGroupForm.value.avatar,
       description: createGroupForm.value.description,
       memberIds: selectedGroupMembers.value.map(m => m.id),
-      joinType: createGroupForm.value.joinType
+      joinType: createGroupForm.value.joinType,
     }
 
     // TODO: 调用实际的创建群组API
@@ -3379,17 +4354,22 @@ const submitCreateGroup = async () => {
 }
 
 // 打开群组管理
-const openGroupManage = (group) => {
+const openGroupManage = group => {
   managingGroup.value = { ...group }
   managedGroupMembers.value = [
-    { id: currentUser.value?.userId, name: currentUser.value?.name || '我', role: 'owner', roleText: '群主' },
-    ...selectedGroupMembers.value.map(m => ({ ...m, role: 'member', roleText: '成员' }))
+    {
+      id: currentUser.value?.userId,
+      name: currentUser.value?.name || '我',
+      role: 'owner',
+      roleText: '群主',
+    },
+    ...selectedGroupMembers.value.map(m => ({ ...m, role: 'member', roleText: '成员' })),
   ]
   groupManageDialogVisible.value = true
 }
 
 // 是否可以管理成员
-const canManageMember = (member) => {
+const canManageMember = member => {
   if (!managingGroup.value) return false
   const currentRole = 'owner' // 当前用户角色
   if (currentRole === 'owner') return member.role !== 'owner'
@@ -3448,7 +4428,7 @@ const uploadGroupFile = () => {
 }
 
 // 预览群文件
-const previewGroupFile = (file) => {
+const previewGroupFile = file => {
   previewingFile.value = file
   filePreviewDialogVisible.value = true
 }
@@ -3487,7 +4467,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@use "sass:color";
+@use 'sass:color';
 
 // Web IM 布局变量
 $nav-width: 180px;
@@ -3511,8 +4491,12 @@ $text-secondary: #595959;
 $text-tertiary: #8c8c8c;
 $text-light: #bfbfbf;
 $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-md:
+  0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg:
+  0 10px 15px -3px rgba(0, 0, 0, 0.1),
+  0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
 // 滚动条样式
 @mixin web-scrollbar {
@@ -5989,7 +6973,8 @@ $shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.
 }
 
 @keyframes highlightPulse {
-  0%, 100% {
+  0%,
+  100% {
     background: transparent;
   }
   50% {

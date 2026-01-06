@@ -1,7 +1,7 @@
 <template>
   <div class="group-detail-container">
     <div class="detail-header">
-      <el-button :icon="ArrowLeft" @click="goBack" class="back-button">返回</el-button>
+      <el-button :icon="ArrowLeft" class="back-button" @click="goBack">返回</el-button>
       <h2>群组详情</h2>
     </div>
 
@@ -56,7 +56,7 @@
               <div class="member-name">{{ member.name }}</div>
               <div class="member-role">{{ member.role }}</div>
             </div>
-            <el-dropdown trigger="click" @command="(cmd) => handleMemberCommand(cmd, member)">
+            <el-dropdown trigger="click" @command="cmd => handleMemberCommand(cmd, member)">
               <el-button :icon="More" circle size="small" />
               <template #dropdown>
                 <el-dropdown-menu>
@@ -79,13 +79,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  ArrowLeft,
-  Comment,
-  Setting,
-  Plus,
-  More,
-} from '@element-plus/icons-vue'
+import { ArrowLeft, Comment, Setting, Plus, More } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -127,7 +121,7 @@ const handleMemberCommand = (command, member) => {
   }
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleString('zh-CN')
 }

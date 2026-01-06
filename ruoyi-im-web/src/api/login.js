@@ -4,7 +4,7 @@ import request from '@/utils/request'
 export function login(username, password) {
   const data = {
     username,
-    password
+    password,
   }
   return request({
     url: '/api/auth/login',

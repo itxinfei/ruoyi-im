@@ -275,17 +275,10 @@
     <!-- 功能弹窗 -->
 
     <!-- 位置选择器 -->
-    <location-picker
-      v-model="showLocationPicker"
-      @confirm="handleLocationConfirm"
-    />
+    <location-picker v-model="showLocationPicker" @confirm="handleLocationConfirm" />
 
     <!-- 投票对话框 -->
-    <vote-dialog
-      v-model="showVoteDialog"
-      :session-id="sessionId"
-      @confirm="handleVoteConfirm"
-    />
+    <vote-dialog v-model="showVoteDialog" :session-id="sessionId" @confirm="handleVoteConfirm" />
 
     <!-- 代码片段对话框 -->
     <code-snippet-dialog
@@ -688,7 +681,7 @@ const handleMoreCommand = command => {
  * 处理位置选择确认
  * @param {Object} locationData - 位置数据
  */
-const handleLocationConfirm = (locationData) => {
+const handleLocationConfirm = locationData => {
   emit('send-location', locationData)
 }
 
@@ -696,7 +689,7 @@ const handleLocationConfirm = (locationData) => {
  * 处理投票创建确认
  * @param {Object} voteData - 投票数据
  */
-const handleVoteConfirm = (voteData) => {
+const handleVoteConfirm = voteData => {
   emit('send-vote', voteData)
 }
 
@@ -704,7 +697,7 @@ const handleVoteConfirm = (voteData) => {
  * 处理代码片段发送
  * @param {Object} codeData - 代码数据
  */
-const handleCodeSend = (codeData) => {
+const handleCodeSend = codeData => {
   emit('send-code', codeData)
 }
 

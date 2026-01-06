@@ -1,4 +1,10 @@
-import { sendMessage as apiSendMessage, listMessage, recallMessage, forwardMessage, searchMessages as apiSearchMessages } from '@/api/im/message'
+import {
+  sendMessage as apiSendMessage,
+  listMessage,
+  recallMessage,
+  forwardMessage,
+  searchMessages as apiSearchMessages,
+} from '@/api/im/message'
 import { listSession, updateSession, deleteSession as apiDeleteSession } from '@/api/im/session'
 import { ElMessage } from 'element-plus'
 
@@ -67,7 +73,11 @@ function saveMessageCache(messageList) {
  */
 function generateMessageKey(message) {
   // 优先使用clientMsgId，其次使用id
-  return message.clientMsgId || message.id || `${message.senderId}_${message.timestamp}_${message.content?.substring?.(0, 20) || ''}`
+  return (
+    message.clientMsgId ||
+    message.id ||
+    `${message.senderId}_${message.timestamp}_${message.content?.substring?.(0, 20) || ''}`
+  )
 }
 
 const state = {
@@ -190,7 +200,9 @@ const mutations = {
   },
   UPDATE_MESSAGE: (state, { sessionId, messageId, updates }) => {
     if (state.messageList[sessionId]) {
-      const index = state.messageList[sessionId].findIndex(m => m.id === messageId || m.clientMsgId === messageId)
+      const index = state.messageList[sessionId].findIndex(
+        m => m.id === messageId || m.clientMsgId === messageId
+      )
       if (index !== -1) {
         const oldMessage = state.messageList[sessionId][index]
         const newMessage = { ...oldMessage, ...updates }
@@ -272,7 +284,10 @@ const mutations = {
   // 清理过期的消息缓存
   CLEAR_OLD_MESSAGES: (state, { sessionId, keepCount = 200 }) => {
     if (state.messageList[sessionId] && state.messageList[sessionId].length > keepCount) {
-      const removed = state.messageList[sessionId].splice(0, state.messageList[sessionId].length - keepCount)
+      const removed = state.messageList[sessionId].splice(
+        0,
+        state.messageList[sessionId].length - keepCount
+      )
       // 清理ID集合
       for (const msg of removed) {
         const key = generateMessageKey(msg)

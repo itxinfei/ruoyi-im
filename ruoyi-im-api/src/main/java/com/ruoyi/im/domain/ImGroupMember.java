@@ -1,64 +1,77 @@
 package com.ruoyi.im.domain;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 缇ょ粍鎴愬憳瀹炰綋
- * 
+ * 群组成员实体
+ *
  * @author ruoyi
  */
-public class ImGroupMember {
+public class ImGroupMember implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     /**
-     * 涓婚敭ID
+     * 主键ID
      */
     private Long id;
-    
+
     /**
-     * 缇ょ粍ID
+     * 群组ID
      */
     private Long groupId;
-    
+
     /**
-     * 鐢ㄦ埛ID
+     * 用户ID
      */
     private Long userId;
-    
+
     /**
-     * 瑙掕壊锛圤WNER缇や富 ADMIN绠＄悊鍛?MEMBER鏅€氭垚鍛橈級
+     * 角色（OWNER群主 ADMIN管理员 MEMBER普通成员）
      */
     private String role;
-    
+
     /**
-     * 缇ゅ唴鏄电О
+     * 群内昵称
      */
     private String groupNickname;
-    
+
     /**
-     * 绂佽█鎴鏃堕棿
+     * 禁言止时间
      */
     private LocalDateTime muteEndTime;
-    
+
     /**
-     * 閭€璇蜂汉鐢ㄦ埛ID
+     * 邀请人用户ID
      */
     private Long inviterId;
-    
+
     /**
-     * 鍔犲叆鏃堕棿
+     * 加入时间
      */
     private LocalDateTime joinedTime;
-    
+
     /**
-     * 鍒涘缓鏃堕棿
+     * 创建时间
      */
     private LocalDateTime createTime;
-    
+
     /**
-     * 鏇存柊鏃堕棿
+     * 更新时间
      */
     private LocalDateTime updateTime;
 
-    // Getters and Setters
+    /**
+     * 用户名称（非数据库字段，用于显示）
+     */
+    private String userName;
+
+    /**
+     * 用户头像（非数据库字段，用于显示）
+     */
+    private String userAvatar;
+
     public Long getId() {
         return id;
     }
@@ -137,5 +150,21 @@ public class ImGroupMember {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserAvatar() {
+        return userAvatar;
+    }
+
+    public void setUserAvatar(String userAvatar) {
+        this.userAvatar = userAvatar;
     }
 }

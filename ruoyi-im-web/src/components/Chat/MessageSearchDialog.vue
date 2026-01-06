@@ -4,8 +4,8 @@
     title="搜索消息"
     :width="600"
     :close-on-click-modal="false"
-    @close="handleClose"
     class="message-search-dialog"
+    @close="handleClose"
   >
     <div class="search-container">
       <!-- 搜索输入框 -->
@@ -70,7 +70,11 @@
             </div>
             <div class="result-content">
               <!-- 文本消息 -->
-              <div v-if="item.type === 'text'" class="content-text" v-html="highlightKeyword(item.content)"></div>
+              <div
+                v-if="item.type === 'text'"
+                class="content-text"
+                v-html="highlightKeyword(item.content)"
+              ></div>
               <!-- 图片消息 -->
               <div v-else-if="item.type === 'image'" class="content-image">
                 <img :src="item.content" alt="图片" />
@@ -110,7 +114,14 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
-import { Search, Loading, DocumentDelete, Document, Microphone, VideoCamera } from '@element-plus/icons-vue'
+import {
+  Search,
+  Loading,
+  DocumentDelete,
+  Document,
+  Microphone,
+  VideoCamera,
+} from '@element-plus/icons-vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 
@@ -140,14 +151,14 @@ const currentPage = ref(1)
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val),
+  set: val => emit('update:modelValue', val),
 })
 
 // 防抖计时器
 let searchTimer = null
 
 // 监听对话框打开，自动聚焦搜索框
-watch(visible, (val) => {
+watch(visible, val => {
   if (val) {
     nextTick(() => {
       searchInput.value?.focus()
@@ -228,7 +239,7 @@ const loadMore = () => {
 }
 
 // 高亮关键词
-const highlightKeyword = (text) => {
+const highlightKeyword = text => {
   if (!searchKeyword.value) return text
   const keyword = searchKeyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const regex = new RegExp(`(${keyword})`, 'gi')
@@ -236,7 +247,7 @@ const highlightKeyword = (text) => {
 }
 
 // 格式化时间
-const formatTime = (timestamp) => {
+const formatTime = timestamp => {
   if (!timestamp) return ''
   const date = new Date(timestamp)
   const now = new Date()
@@ -251,12 +262,15 @@ const formatTime = (timestamp) => {
     return '昨天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
   }
   // 更早
-  return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) + ' ' +
+  return (
+    date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) +
+    ' ' +
     date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  )
 }
 
 // 点击搜索结果
-const handleResultClick = (message) => {
+const handleResultClick = message => {
   emit('select-message', message)
   visible.value = false
 }

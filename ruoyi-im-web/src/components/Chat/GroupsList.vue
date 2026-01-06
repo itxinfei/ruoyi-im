@@ -29,8 +29,8 @@
               circle
               size="small"
               text
-              @click="handleInvite(group)"
               title="邀请成员"
+              @click="handleInvite(group)"
             />
             <el-dropdown trigger="click" @command="cmd => handleGroupAction(cmd, group)">
               <el-button :icon="MoreFilled" circle size="small" text />
@@ -61,9 +61,7 @@
             <i class="el-icon-user-solid"></i>
           </div>
           <div class="empty-text">暂无群组</div>
-          <el-button type="primary" size="small" @click="handleCreateGroup">
-            创建群组
-          </el-button>
+          <el-button type="primary" size="small" @click="handleCreateGroup"> 创建群组 </el-button>
         </div>
       </transition>
     </div>

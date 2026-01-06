@@ -29,17 +29,9 @@
       <!-- 投票选项 -->
       <el-form-item label="投票选项" prop="options" class="options-form-item">
         <div class="options-list">
-          <div
-            v-for="(option, index) in voteForm.options"
-            :key="index"
-            class="option-item"
-          >
+          <div v-for="(option, index) in voteForm.options" :key="index" class="option-item">
             <div class="option-index">{{ index + 1 }}</div>
-            <el-input
-              v-model="option.text"
-              :placeholder="`选项 ${index + 1}`"
-              maxlength="50"
-            />
+            <el-input v-model="option.text" :placeholder="`选项 ${index + 1}`" maxlength="50" />
             <el-button
               v-if="voteForm.options.length > 2"
               :icon="Delete"
@@ -140,11 +132,7 @@
       <div class="preview-content">
         <div class="preview-title">{{ voteForm.title || '投票标题' }}</div>
         <div class="preview-options">
-          <div
-            v-for="(option, index) in validOptions"
-            :key="index"
-            class="preview-option"
-          >
+          <div v-for="(option, index) in validOptions" :key="index" class="preview-option">
             <el-radio v-if="voteForm.type === 'single'" :value="index" disabled>
               {{ option.text || `选项 ${index + 1}` }}
             </el-radio>
@@ -172,11 +160,7 @@
         </el-button>
         <div class="footer-actions">
           <el-button @click="handleClose">取消</el-button>
-          <el-button
-            type="primary"
-            :loading="submitting"
-            @click="handleSubmit"
-          >
+          <el-button type="primary" :loading="submitting" @click="handleSubmit">
             发起投票
           </el-button>
         </div>
@@ -195,13 +179,7 @@
 
 import { ref, computed, reactive, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import {
-  Plus,
-  Delete,
-  View,
-  Hide,
-  Clock,
-} from '@element-plus/icons-vue'
+import { Plus, Delete, View, Hide, Clock } from '@element-plus/icons-vue'
 
 // ==================== Props 定义 ====================
 const props = defineProps({
@@ -224,7 +202,7 @@ const props = defineProps({
 // ==================== Emits 定义 ====================
 const emit = defineEmits([
   'update:modelValue',
-  'confirm',  // 确认创建投票时触发
+  'confirm', // 确认创建投票时触发
 ])
 
 // ==================== 常量定义 ====================
@@ -281,7 +259,7 @@ const dateShortcuts = [
 /** 对话框显示状态 */
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val),
+  set: val => emit('update:modelValue', val),
 })
 
 /** 表单引用 */
@@ -296,16 +274,13 @@ const submitting = ref(false)
 /** 投票表单数据 */
 const voteForm = reactive({
   title: '',
-  options: [
-    { text: '' },
-    { text: '' },
-  ],
-  type: 'single',         // 'single' | 'multiple'
-  maxChoices: 2,          // 多选时最大选择数
-  anonymous: false,       // 是否匿名
-  showResultBeforeVote: false,  // 投票前是否可查看结果
-  deadline: null,         // 截止时间
-  description: '',        // 补充说明
+  options: [{ text: '' }, { text: '' }],
+  type: 'single', // 'single' | 'multiple'
+  maxChoices: 2, // 多选时最大选择数
+  anonymous: false, // 是否匿名
+  showResultBeforeVote: false, // 投票前是否可查看结果
+  deadline: null, // 截止时间
+  description: '', // 补充说明
 })
 
 /** 表单验证规则 */
@@ -355,7 +330,7 @@ const addOption = () => {
  * 移除选项
  * @param {number} index - 选项索引
  */
-const removeOption = (index) => {
+const removeOption = index => {
   if (voteForm.options.length <= 2) {
     ElMessage.warning('至少需要保留2个选项')
     return
@@ -380,7 +355,7 @@ const togglePreview = () => {
  * @param {Date} date - 日期对象
  * @returns {boolean} 是否禁用
  */
-const disabledDate = (date) => {
+const disabledDate = date => {
   return date.getTime() < Date.now() - 8.64e7
 }
 
@@ -389,7 +364,7 @@ const disabledDate = (date) => {
  * @param {string} deadline - 截止时间字符串
  * @returns {string} 格式化后的时间
  */
-const formatDeadline = (deadline) => {
+const formatDeadline = deadline => {
   if (!deadline) return ''
   const date = new Date(deadline)
   const month = date.getMonth() + 1
@@ -435,7 +410,7 @@ const handleSubmit = async () => {
       description: voteForm.description.trim(),
       createdAt: new Date().toISOString(),
       totalVotes: 0,
-      status: 'active',  // 'active' | 'ended'
+      status: 'active', // 'active' | 'ended'
     }
 
     // 触发确认事件
@@ -482,7 +457,7 @@ const resetForm = () => {
 /**
  * 监听对话框关闭时重置表单
  */
-watch(visible, (newVal) => {
+watch(visible, newVal => {
   if (!newVal) {
     resetForm()
   }

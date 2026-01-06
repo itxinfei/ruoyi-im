@@ -17,7 +17,12 @@
         </el-select>
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="群组状态" clearable style="width: 120px">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="群组状态"
+          clearable
+          style="width: 120px"
+        >
           <el-option label="正常" value="0" />
           <el-option label="停用" value="1" />
         </el-select>
@@ -39,19 +44,28 @@
           :icon="Delete"
           :disabled="selectedIds.length === 0"
           @click="handleBatchDelete"
-        >批量删除</el-button>
+          >批量删除</el-button
+        >
       </el-col>
     </el-row>
 
-    <el-table
-      v-loading="loading"
-      :data="groupList"
-      @selection-change="handleSelectionChange"
-    >
+    <el-table v-loading="loading" :data="groupList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="群组编号" align="center" prop="groupId" width="100" />
-      <el-table-column label="群组名称" align="center" prop="groupName" min-width="150" show-overflow-tooltip />
-      <el-table-column label="群组简介" align="center" prop="description" min-width="200" show-overflow-tooltip />
+      <el-table-column
+        label="群组名称"
+        align="center"
+        prop="groupName"
+        min-width="150"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        label="群组简介"
+        align="center"
+        prop="description"
+        min-width="200"
+        show-overflow-tooltip
+      />
       <el-table-column label="群组类型" align="center" prop="type" width="100">
         <template #default="scope">
           <el-tag :type="scope.row.type === '1' ? 'success' : 'info'">
@@ -74,10 +88,18 @@
       <el-table-column label="创建时间" align="center" prop="createTime" width="180" />
       <el-table-column label="操作" align="center" width="300" fixed="right">
         <template #default="scope">
-          <el-button link type="primary" :icon="Edit" @click="handleEdit(scope.row)">编辑</el-button>
-          <el-button link type="primary" :icon="Setting" @click="handleManage(scope.row)">成员管理</el-button>
-          <el-button link type="primary" :icon="Setting" @click="handleSettings(scope.row)">群组设置</el-button>
-          <el-button link type="danger" :icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button link type="primary" :icon="Edit" @click="handleEdit(scope.row)"
+            >编辑</el-button
+          >
+          <el-button link type="primary" :icon="Setting" @click="handleManage(scope.row)"
+            >成员管理</el-button
+          >
+          <el-button link type="primary" :icon="Setting" @click="handleSettings(scope.row)"
+            >群组设置</el-button
+          >
+          <el-button link type="danger" :icon="Delete" @click="handleDelete(scope.row)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -97,10 +119,19 @@
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" @close="resetForm">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="群组名称" prop="groupName">
-          <el-input v-model="form.groupName" placeholder="请输入群组名称" :disabled="form.groupId" />
+          <el-input
+            v-model="form.groupName"
+            placeholder="请输入群组名称"
+            :disabled="form.groupId"
+          />
         </el-form-item>
         <el-form-item label="群组简介" prop="description">
-          <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入群组简介" />
+          <el-input
+            v-model="form.description"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入群组简介"
+          />
         </el-form-item>
         <el-form-item label="群组类型" prop="type">
           <el-select v-model="form.type" placeholder="请选择群组类型" style="width: 100%">
@@ -125,7 +156,12 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="群组公告" prop="announcement">
-          <el-input v-model="form.announcement" type="textarea" :rows="4" placeholder="请输入群组公告" />
+          <el-input
+            v-model="form.announcement"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入群组公告"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -141,7 +177,14 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus, Edit, Delete, Setting } from '@element-plus/icons-vue'
-import { listGroup, getGroup, addGroup, updateGroup, delGroup, updateGroupSettings } from '@/api/im/group'
+import {
+  listGroup,
+  getGroup,
+  addGroup,
+  updateGroup,
+  delGroup,
+  updateGroupSettings,
+} from '@/api/im/group'
 
 const router = useRouter()
 
@@ -213,17 +256,17 @@ const resetQuery = () => {
   handleQuery()
 }
 
-const handleSizeChange = (size) => {
+const handleSizeChange = size => {
   queryParams.pageSize = size
   getList()
 }
 
-const handleCurrentChange = (page) => {
+const handleCurrentChange = page => {
   queryParams.pageNum = page
   getList()
 }
 
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = selection => {
   selectedIds.value = selection.map(item => item.groupId)
 }
 
@@ -233,7 +276,7 @@ const handleAdd = () => {
   dialogVisible.value = true
 }
 
-const handleEdit = async (row) => {
+const handleEdit = async row => {
   resetForm()
   try {
     const response = await getGroup(row.groupId)
@@ -247,15 +290,15 @@ const handleEdit = async (row) => {
   }
 }
 
-const handleManage = (row) => {
+const handleManage = row => {
   router.push({ path: '/im/group/manage', query: { groupId: row.groupId } })
 }
 
-const handleSettings = (row) => {
+const handleSettings = row => {
   router.push({ path: '/im/group/settings', query: { groupId: row.groupId } })
 }
 
-const handleDelete = async (row) => {
+const handleDelete = async row => {
   try {
     await ElMessageBox.confirm('是否确认删除该群组？', '警告', { type: 'warning' })
     await delGroup(row.groupId)
@@ -285,12 +328,12 @@ const handleBatchDelete = async () => {
   }
 }
 
-const handleStatusChange = async (row) => {
+const handleStatusChange = async row => {
   const text = row.status === '0' ? '启用' : '停用'
   try {
     await updateGroupSettings({
       groupId: row.groupId,
-      status: row.status
+      status: row.status,
     })
     ElMessage.success(`${text}成功`)
   } catch (error) {

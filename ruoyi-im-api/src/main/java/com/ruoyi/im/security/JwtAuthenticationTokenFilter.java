@@ -17,7 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * JWT璁よ瘉杩囨护鍣? * 
+ * JWT认证过滤器
+ * 
  * @author ruoyi
  */
 @Component
@@ -32,18 +33,20 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        // 浠庤姹傚ご涓幏鍙杢oken
+        // 从请求头中获取token
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             String username = jwtUtils.getUsernameFromToken(token);
             
-            // 楠岃瘉token涓斿綋鍓嶅畨鍏ㄤ笂涓嬫枃涓病鏈夎璇佷俊鎭?            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            // 验证token并当前安全上下文中没有认证信息
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 ImUser user = userService.findByUsername(username);
                 
                 if (user != null && jwtUtils.validateToken(token, username)) {
-                    // 濡傛灉token鏈夋晥锛岃缃璇佷俊鎭?                    UsernamePasswordAuthenticationToken authentication = 
+                    // 如果token有效，设置认证信息
+                    UsernamePasswordAuthenticationToken authentication = 
                         new UsernamePasswordAuthenticationToken(user, null, null);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);

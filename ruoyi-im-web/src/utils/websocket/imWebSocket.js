@@ -12,7 +12,7 @@ export const WS_STATUS = {
   CONNECTED: 'connected',
   DISCONNECTED: 'disconnected',
   RECONNECTING: 'reconnecting',
-  ERROR: 'error'
+  ERROR: 'error',
 }
 
 // 消息类型
@@ -41,7 +41,7 @@ export const MSG_TYPE = {
   // 回执
   READ: 'read',
   RECEIVED: 'received',
-  RECALL: 'recall'
+  RECALL: 'recall',
 }
 
 class ImWebSocket {
@@ -66,7 +66,10 @@ class ImWebSocket {
    * @param {string} wsUrl WebSocket地址
    */
   connect(token, wsUrl) {
-    if (this.ws && (this.ws.readyState === WebSocket.CONNECTING || this.ws.readyState === WebSocket.OPEN)) {
+    if (
+      this.ws &&
+      (this.ws.readyState === WebSocket.CONNECTING || this.ws.readyState === WebSocket.OPEN)
+    ) {
       this.log('WebSocket 已连接或正在连接')
       return
     }
@@ -117,17 +120,17 @@ class ImWebSocket {
       ElMessage.success('连接成功')
     }
 
-    this.ws.onmessage = (event) => {
+    this.ws.onmessage = event => {
       this.handleMessage(event.data)
     }
 
-    this.ws.onerror = (error) => {
+    this.ws.onerror = error => {
       this.error('WebSocket 错误:', error)
       this.status = WS_STATUS.ERROR
       this.emit('statusChange', this.status)
     }
 
-    this.ws.onclose = (event) => {
+    this.ws.onclose = event => {
       this.log(`WebSocket 关闭: code=${event.code}, reason=${event.reason}`)
       this.stopHeartbeat()
 
@@ -204,7 +207,7 @@ class ImWebSocket {
           if (store && store.dispatch) {
             store.dispatch('im/updateOnlineStatus', {
               userId: message.userId,
-              status: message.type === MSG_TYPE.ONLINE ? 'online' : 'offline'
+              status: message.type === MSG_TYPE.ONLINE ? 'online' : 'offline',
             })
           }
           break
@@ -228,7 +231,7 @@ class ImWebSocket {
       type: MSG_TYPE.AUTH,
       token: token,
       userId: userInfo.userId,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
   }
 
@@ -237,10 +240,13 @@ class ImWebSocket {
    * @param {Object} message 消息对象
    */
   send(message) {
-    const data = typeof message === 'string' ? message : JSON.stringify({
-      ...message,
-      timestamp: Date.now()
-    })
+    const data =
+      typeof message === 'string'
+        ? message
+        : JSON.stringify({
+            ...message,
+            timestamp: Date.now(),
+          })
 
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(data)
@@ -263,7 +269,7 @@ class ImWebSocket {
       conversationId: message.conversationId,
       content: message.content,
       replyToMessageId: message.replyToMessageId,
-      clientMsgId: message.clientMsgId
+      clientMsgId: message.clientMsgId,
     })
   }
 

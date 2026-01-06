@@ -51,32 +51,17 @@
         <div class="toolbar-right">
           <!-- 格式化按钮 -->
           <el-tooltip content="格式化代码" placement="top">
-            <el-button
-              :icon="MagicStick"
-              size="small"
-              circle
-              @click="formatCode"
-            />
+            <el-button :icon="MagicStick" size="small" circle @click="formatCode" />
           </el-tooltip>
 
           <!-- 清空按钮 -->
           <el-tooltip content="清空代码" placement="top">
-            <el-button
-              :icon="Delete"
-              size="small"
-              circle
-              @click="clearCode"
-            />
+            <el-button :icon="Delete" size="small" circle @click="clearCode" />
           </el-tooltip>
 
           <!-- 复制按钮 -->
           <el-tooltip content="复制代码" placement="top">
-            <el-button
-              :icon="DocumentCopy"
-              size="small"
-              circle
-              @click="copyCode"
-            />
+            <el-button :icon="DocumentCopy" size="small" circle @click="copyCode" />
           </el-tooltip>
         </div>
       </div>
@@ -84,12 +69,12 @@
       <!-- 代码输入区 -->
       <div class="code-input-wrapper">
         <!-- 行号 -->
-        <div class="line-numbers" ref="lineNumbersRef">
+        <div ref="lineNumbersRef" class="line-numbers">
           <div
             v-for="line in lineCount"
             :key="line"
             class="line-number"
-            :class="{ 'current': currentLine === line }"
+            :class="{ current: currentLine === line }"
           >
             {{ line }}
           </div>
@@ -134,17 +119,15 @@
           <el-icon><View /></el-icon>
           <span>代码预览</span>
         </div>
-        <el-button
-          type="primary"
-          link
-          size="small"
-          @click="showPreview = false"
-        >
+        <el-button type="primary" link size="small" @click="showPreview = false">
           隐藏预览
         </el-button>
       </div>
       <div class="preview-content">
-        <pre class="code-block" :class="`language-${selectedLanguage}`"><code>{{ codeContent }}</code></pre>
+        <pre
+          class="code-block"
+          :class="`language-${selectedLanguage}`"
+        ><code>{{ codeContent }}</code></pre>
       </div>
     </div>
 
@@ -163,22 +146,12 @@
     <!-- 底部操作 -->
     <template #footer>
       <div class="dialog-footer">
-        <el-button
-          v-if="!showPreview && codeContent"
-          link
-          @click="showPreview = true"
-        >
+        <el-button v-if="!showPreview && codeContent" link @click="showPreview = true">
           显示预览
         </el-button>
         <div class="footer-actions">
           <el-button @click="handleClose">取消</el-button>
-          <el-button
-            type="primary"
-            :disabled="!canSend"
-            @click="handleSend"
-          >
-            发送代码
-          </el-button>
+          <el-button type="primary" :disabled="!canSend" @click="handleSend"> 发送代码 </el-button>
         </div>
       </div>
     </template>
@@ -195,14 +168,7 @@
 
 import { ref, computed, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
-import {
-  Document,
-  DocumentCopy,
-  Delete,
-  MagicStick,
-  View,
-  EditPen,
-} from '@element-plus/icons-vue'
+import { Document, DocumentCopy, Delete, MagicStick, View, EditPen } from '@element-plus/icons-vue'
 
 // ==================== Props 定义 ====================
 const props = defineProps({
@@ -239,7 +205,7 @@ const props = defineProps({
 // ==================== Emits 定义 ====================
 const emit = defineEmits([
   'update:modelValue',
-  'send',  // 发送代码片段时触发
+  'send', // 发送代码片段时触发
 ])
 
 // ==================== 常量定义 ====================
@@ -284,8 +250,10 @@ const languageOptions = [
  * 不同语言的占位符示例
  */
 const placeholderExamples = {
-  javascript: '// 在这里输入 JavaScript 代码\nfunction hello() {\n  console.log("Hello World!");\n}',
-  typescript: '// 在这里输入 TypeScript 代码\nfunction greet(name: string): void {\n  console.log(`Hello, ${name}!`);\n}',
+  javascript:
+    '// 在这里输入 JavaScript 代码\nfunction hello() {\n  console.log("Hello World!");\n}',
+  typescript:
+    '// 在这里输入 TypeScript 代码\nfunction greet(name: string): void {\n  console.log(`Hello, ${name}!`);\n}',
   python: '# 在这里输入 Python 代码\ndef hello():\n    print("Hello World!")',
   java: '// 在这里输入 Java 代码\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello World!");\n    }\n}',
   sql: '-- 在这里输入 SQL 语句\nSELECT * FROM users WHERE status = 1;',
@@ -298,7 +266,7 @@ const placeholderExamples = {
 /** 对话框显示状态 */
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val),
+  set: val => emit('update:modelValue', val),
 })
 
 /** 选中的编程语言 */
@@ -361,7 +329,7 @@ const codePlaceholder = computed(() => {
  * @param {string} value - 语言值
  * @returns {string} 语言名称
  */
-const getLanguageLabel = (value) => {
+const getLanguageLabel = value => {
   const lang = languageOptions.find(l => l.value === value)
   return lang ? lang.label : value
 }
@@ -396,7 +364,7 @@ const syncScroll = () => {
  * 处理键盘事件
  * @param {KeyboardEvent} event - 键盘事件
  */
-const handleKeyDown = (event) => {
+const handleKeyDown = event => {
   // Tab 键插入空格
   if (event.key === 'Tab') {
     event.preventDefault()
@@ -406,9 +374,7 @@ const handleKeyDown = (event) => {
 
     const spaces = '  ' // 2个空格
     codeContent.value =
-      codeContent.value.substring(0, start) +
-      spaces +
-      codeContent.value.substring(end)
+      codeContent.value.substring(0, start) + spaces + codeContent.value.substring(end)
 
     // 恢复光标位置
     nextTick(() => {
@@ -566,7 +532,7 @@ const resetForm = () => {
 /**
  * 监听对话框打开，聚焦到代码输入框
  */
-watch(visible, (newVal) => {
+watch(visible, newVal => {
   if (newVal) {
     nextTick(() => {
       codeTextarea.value?.focus()
@@ -579,20 +545,26 @@ watch(visible, (newVal) => {
 /**
  * 监听初始代码变化
  */
-watch(() => props.initialCode, (newVal) => {
-  if (newVal) {
-    codeContent.value = newVal
+watch(
+  () => props.initialCode,
+  newVal => {
+    if (newVal) {
+      codeContent.value = newVal
+    }
   }
-})
+)
 
 /**
  * 监听初始语言变化
  */
-watch(() => props.initialLanguage, (newVal) => {
-  if (newVal) {
-    selectedLanguage.value = newVal
+watch(
+  () => props.initialLanguage,
+  newVal => {
+    if (newVal) {
+      selectedLanguage.value = newVal
+    }
   }
-})
+)
 </script>
 
 <style lang="scss" scoped>

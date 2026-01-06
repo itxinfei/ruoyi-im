@@ -1,12 +1,17 @@
 <template>
-  <div class="dingtalk-layout" :class="{ 'mobile': isMobile, 'sidebar-collapsed': isSidebarCollapsed }">
+  <div
+    class="dingtalk-layout"
+    :class="{ mobile: isMobile, 'sidebar-collapsed': isSidebarCollapsed }"
+  >
     <!-- 最左侧图标导航栏 -->
     <aside class="nav-rail">
       <!-- Logo -->
       <div class="nav-rail-logo">
         <div class="logo-icon">
           <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+            />
           </svg>
         </div>
       </div>
@@ -25,7 +30,7 @@
               <el-badge v-if="item.badge" :value="item.badge" :max="99" class="nav-badge">
                 <component :is="item.icon" class="nav-icon" />
               </el-badge>
-              <component v-else :is="item.icon" class="nav-icon" />
+              <component :is="item.icon" v-else class="nav-icon" />
             </div>
           </el-tooltip>
         </div>
@@ -93,14 +98,18 @@
         <el-badge v-if="item.badge" :value="item.badge" :max="99" :offset="[-2, 2]">
           <component :is="item.icon" class="mobile-nav-icon" />
         </el-badge>
-        <component v-else :is="item.icon" class="mobile-nav-icon" />
+        <component :is="item.icon" v-else class="mobile-nav-icon" />
         <span class="mobile-nav-label">{{ item.label }}</span>
       </div>
     </nav>
 
     <!-- 移动端遮罩 -->
     <transition name="fade">
-      <div v-if="isMobile && isMobileSidebarOpen" class="mobile-overlay" @click="closeMobileSidebar"></div>
+      <div
+        v-if="isMobile && isMobileSidebarOpen"
+        class="mobile-overlay"
+        @click="closeMobileSidebar"
+      ></div>
     </transition>
   </div>
 </template>
@@ -216,7 +225,7 @@ const mobileMenuItems = computed(() => [
 ])
 
 // 判断当前激活菜单
-const isActiveMenu = (path) => {
+const isActiveMenu = path => {
   const currentPath = route.path
   if (currentPath === path) return true
   if (currentPath.startsWith(path + '/')) return true
@@ -225,7 +234,7 @@ const isActiveMenu = (path) => {
 }
 
 // 菜单点击
-const handleMenuClick = (item) => {
+const handleMenuClick = item => {
   if (route.path !== item.path) {
     router.push(item.path)
   }
@@ -235,7 +244,7 @@ const handleMenuClick = (item) => {
 }
 
 // 用户菜单命令
-const handleUserCommand = (command) => {
+const handleUserCommand = command => {
   switch (command) {
     case 'profile':
       router.push('/im/settings')
@@ -285,7 +294,7 @@ const handleResize = () => {
 }
 
 // 键盘快捷键
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   // Ctrl/Cmd + B 切换侧边栏
   if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
     e.preventDefault()

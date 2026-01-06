@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.io.Serializable;
 
 /**
- * 璁よ瘉鍏ュ彛鐐? * 
- * 褰撴湭璁よ瘉鐢ㄦ埛灏濊瘯璁块棶鍙椾繚鎶よ祫婧愭椂鐨勫鐞? * 
+ * 认证入口点
+ * 
+ * 当未认证用户尝试访问受保护资源时的处理
+ * 
  * @author ruoyi
  */
 @Component
@@ -23,6 +25,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Se
     public void commence(HttpServletRequest request,
                         HttpServletResponse response,
                         AuthenticationException authException) throws IOException {
-        // 杩斿洖401鏈巿鏉冪姸鎬?        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        // 返回401未授权状态
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
     }
 }

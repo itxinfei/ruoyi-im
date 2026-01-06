@@ -103,7 +103,7 @@ export function useVoiceRecorder(options = {}) {
         error.value = null
         recordResult.value = null
       },
-      onStop: (result) => {
+      onStop: result => {
         isRecording.value = false
         isPaused.value = false
 
@@ -126,16 +126,16 @@ export function useVoiceRecorder(options = {}) {
       onResume: () => {
         isPaused.value = false
       },
-      onError: (err) => {
+      onError: err => {
         error.value = err.message
         isRecording.value = false
         isPaused.value = false
         onError(err)
       },
-      onTimeUpdate: (time) => {
+      onTimeUpdate: time => {
         duration.value = time
       },
-      onVolumeChange: (vol) => {
+      onVolumeChange: vol => {
         volume.value = vol
       },
     })

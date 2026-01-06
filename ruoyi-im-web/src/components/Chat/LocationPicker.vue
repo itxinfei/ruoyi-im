@@ -31,12 +31,7 @@
         <!-- 模拟地图显示 -->
         <div v-else class="map-mock">
           <div class="map-grid">
-            <div
-              v-for="i in 9"
-              :key="i"
-              class="grid-cell"
-              :class="{ 'center': i === 5 }"
-            ></div>
+            <div v-for="i in 9" :key="i" class="grid-cell" :class="{ center: i === 5 }"></div>
           </div>
           <!-- 中心标记 -->
           <div class="center-marker">
@@ -54,13 +49,7 @@
     <div class="location-list">
       <div class="list-header">
         <span class="header-title">附近地点</span>
-        <el-button
-          type="primary"
-          link
-          :icon="Refresh"
-          :loading="loading"
-          @click="refreshLocations"
-        >
+        <el-button type="primary" link :icon="Refresh" :loading="loading" @click="refreshLocations">
           刷新
         </el-button>
       </div>
@@ -70,7 +59,7 @@
           v-for="(location, index) in locationList"
           :key="index"
           class="location-item"
-          :class="{ 'active': selectedLocation?.id === location.id }"
+          :class="{ active: selectedLocation?.id === location.id }"
           @click="selectLocation(location)"
         >
           <div class="location-icon">
@@ -104,11 +93,7 @@
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>
-        <el-button
-          type="primary"
-          :disabled="!selectedLocation"
-          @click="handleConfirm"
-        >
+        <el-button type="primary" :disabled="!selectedLocation" @click="handleConfirm">
           发送位置
         </el-button>
       </div>
@@ -143,8 +128,8 @@ const props = defineProps({
 // ==================== Emits 定义 ====================
 const emit = defineEmits([
   'update:modelValue',
-  'select',   // 选择位置时触发
-  'confirm',  // 确认发送时触发
+  'select', // 选择位置时触发
+  'confirm', // 确认发送时触发
 ])
 
 // ==================== 响应式状态 ====================
@@ -152,7 +137,7 @@ const emit = defineEmits([
 /** 对话框显示状态 */
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val),
+  set: val => emit('update:modelValue', val),
 })
 
 /** 搜索关键词 */
@@ -172,7 +157,7 @@ const selectedLocation = ref(null)
 
 /** 当前定位坐标 */
 const currentCoords = ref({
-  latitude: 39.9042,   // 默认北京坐标
+  latitude: 39.9042, // 默认北京坐标
   longitude: 116.4074,
 })
 
@@ -226,14 +211,14 @@ const getCurrentPosition = () => {
   loading.value = true
 
   navigator.geolocation.getCurrentPosition(
-    (position) => {
+    position => {
       currentCoords.value = {
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
       }
       loadNearbyLocations()
     },
-    (error) => {
+    error => {
       console.warn('获取位置失败:', error.message)
       ElMessage.warning('无法获取当前位置，已使用默认位置')
       loadDefaultLocations()
@@ -315,9 +300,8 @@ const handleSearch = () => {
     const searchResults = generateMockLocations(
       currentCoords.value.latitude,
       currentCoords.value.longitude
-    ).filter(loc =>
-      loc.name.toLowerCase().includes(keyword) ||
-      loc.address.toLowerCase().includes(keyword)
+    ).filter(
+      loc => loc.name.toLowerCase().includes(keyword) || loc.address.toLowerCase().includes(keyword)
     )
 
     locationList.value = searchResults
@@ -338,7 +322,7 @@ const handleSearchDebounced = debounce(handleSearch, 500)
  * 选择位置
  * @param {Object} location - 位置对象
  */
-const selectLocation = (location) => {
+const selectLocation = location => {
   selectedLocation.value = location
   emit('select', location)
 }
@@ -372,7 +356,7 @@ const handleConfirm = () => {
  * @param {Object} location - 位置对象
  * @returns {string} 静态地图URL
  */
-const generateStaticMapUrl = (location) => {
+const generateStaticMapUrl = location => {
   // 实际项目中使用高德/百度地图静态图API
   // 示例: https://restapi.amap.com/v3/staticmap?location=${lng},${lat}&zoom=15&size=400*300&markers=mid,,A:${lng},${lat}&key=YOUR_KEY
   return `https://placeholder.map/${location.longitude},${location.latitude}`
@@ -392,7 +376,7 @@ const handleClose = () => {
 /**
  * 监听对话框显示状态
  */
-watch(visible, (newVal) => {
+watch(visible, newVal => {
   if (newVal) {
     // 对话框打开时获取位置
     getCurrentPosition()
@@ -619,7 +603,8 @@ onUnmounted(() => {
 
 // 动画
 @keyframes marker-bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(-50%, -100%);
   }
   50% {

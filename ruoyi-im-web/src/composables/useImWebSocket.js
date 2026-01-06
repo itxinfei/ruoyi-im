@@ -62,21 +62,21 @@ export function useImWebSocket() {
   /**
    * 发送消息
    */
-  const send = (message) => {
+  const send = message => {
     return imWebSocket.send(message)
   }
 
   /**
    * 发送聊天消息
    */
-  const sendMessage = (message) => {
+  const sendMessage = message => {
     return imWebSocket.sendMessage(message)
   }
 
   /**
    * 处理状态变化
    */
-  const handleStatusChange = (status) => {
+  const handleStatusChange = status => {
     wsStatus.value = status
     store.dispatch('im/setWsConnected', status === WS_STATUS.CONNECTED)
   }
@@ -84,7 +84,7 @@ export function useImWebSocket() {
   /**
    * 处理接收到的消息
    */
-  const handleMessage = (message) => {
+  const handleMessage = message => {
     // 消息已由 WebSocket 处理器更新到 store
     // 这里可以添加额外的处理逻辑
   }
@@ -92,27 +92,27 @@ export function useImWebSocket() {
   /**
    * 处理通知消息
    */
-  const handleNotification = (message) => {
+  const handleNotification = message => {
     // 通知消息处理
   }
 
   /**
    * 处理系统消息
    */
-  const handleSystem = (message) => {
+  const handleSystem = message => {
     // 系统消息处理
   }
 
   /**
    * 处理消息已读回执
    */
-  const handleMessageRead = (message) => {
+  const handleMessageRead = message => {
     // 更新消息已读状态
     if (message.messageId && message.sessionId) {
       store.commit('im/UPDATE_MESSAGE', {
         sessionId: message.sessionId,
         messageId: message.messageId,
-        updates: { read: true }
+        updates: { read: true },
       })
     }
   }
@@ -120,7 +120,7 @@ export function useImWebSocket() {
   /**
    * 处理消息撤回
    */
-  const handleMessageRecall = (message) => {
+  const handleMessageRecall = message => {
     // 处理消息撤回
   }
 
@@ -146,7 +146,7 @@ export function useImWebSocket() {
     MSG_TYPE,
 
     // 原始实例
-    ws: imWebSocket
+    ws: imWebSocket,
   }
 }
 

@@ -11,7 +11,9 @@
       <div class="message-content" @dblclick="handleDoubleClick">
         <!-- 撤回的消息 -->
         <div v-if="message.status === 'recalled' || message.revoked" class="recalled-message">
-          <span>{{ isSelf ? '你撤回了一条消息' : `${message.senderName || '对方'}撤回了一条消息` }}</span>
+          <span>{{
+            isSelf ? '你撤回了一条消息' : `${message.senderName || '对方'}撤回了一条消息`
+          }}</span>
         </div>
 
         <!-- 文本消息 -->
@@ -105,9 +107,7 @@
         </div>
 
         <!-- 转发消息标记 -->
-        <div v-if="message.forwarded" class="forward-tag">
-          <i class="el-icon-share"></i> 转发
-        </div>
+        <div v-if="message.forwarded" class="forward-tag"><i class="el-icon-share"></i> 转发</div>
 
         <!-- 投票消息 -->
         <div v-else-if="message.type === 'vote'" class="vote-message">
@@ -169,7 +169,11 @@
       </div>
 
       <!-- 消息操作按钮 -->
-      <div v-if="!message.revoked && message.status !== 'recalled'" class="message-actions" :class="{ visible: showActions }">
+      <div
+        v-if="!message.revoked && message.status !== 'recalled'"
+        class="message-actions"
+        :class="{ visible: showActions }"
+      >
         <el-tooltip content="回复" placement="top">
           <i class="el-icon-chat-line-round action-icon" @click.stop="handleReply"></i>
         </el-tooltip>
@@ -198,9 +202,7 @@
           <div class="menu-item" @click="handleReply">
             <i class="el-icon-chat-line-round"></i> 回复
           </div>
-          <div class="menu-item" @click="handleForward">
-            <i class="el-icon-share"></i> 转发
-          </div>
+          <div class="menu-item" @click="handleForward"><i class="el-icon-share"></i> 转发</div>
           <div class="menu-item" @click="handleCopy">
             <i class="el-icon-copy-document"></i> 复制
           </div>
@@ -355,11 +357,14 @@ export default {
       }
 
       if (content) {
-        navigator.clipboard.writeText(content).then(() => {
-          this.$emit('copy', this.message)
-        }).catch(err => {
-          console.error('复制失败:', err)
-        })
+        navigator.clipboard
+          .writeText(content)
+          .then(() => {
+            this.$emit('copy', this.message)
+          })
+          .catch(err => {
+            console.error('复制失败:', err)
+          })
       }
     },
 

@@ -4,8 +4,8 @@
     title="转发消息"
     :width="500"
     :close-on-click-modal="false"
-    @close="handleClose"
     class="message-forward-dialog"
+    @close="handleClose"
   >
     <!-- 消息预览 -->
     <div class="message-preview">
@@ -66,7 +66,11 @@
                 <el-icon><Check /></el-icon>
               </div>
             </div>
-            <el-empty v-if="recentContacts.length === 0" description="暂无最近联系人" :image-size="80" />
+            <el-empty
+              v-if="recentContacts.length === 0"
+              description="暂无最近联系人"
+              :image-size="80"
+            />
           </div>
         </el-tab-pane>
 
@@ -110,9 +114,7 @@
     <!-- 底部操作按钮 -->
     <template #footer>
       <div class="dialog-footer">
-        <div class="selected-count">
-          已选择 {{ selectedTargets.length }} 个对象
-        </div>
+        <div class="selected-count">已选择 {{ selectedTargets.length }} 个对象</div>
         <div class="footer-buttons">
           <el-button @click="handleClose">取消</el-button>
           <el-button type="primary" :disabled="selectedTargets.length === 0" @click="handleForward">
@@ -126,7 +128,14 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { Document, Microphone, VideoCamera, Check, UserFilled, Search } from '@element-plus/icons-vue'
+import {
+  Document,
+  Microphone,
+  VideoCamera,
+  Check,
+  UserFilled,
+  Search,
+} from '@element-plus/icons-vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 
@@ -178,7 +187,7 @@ const groups = computed(() => {
 })
 
 // 根据关键词过滤
-const filterByKeyword = (list) => {
+const filterByKeyword = list => {
   if (!searchKeyword.value) return list
   const keyword = searchKeyword.value.toLowerCase()
   return list.filter(item => {
@@ -188,7 +197,7 @@ const filterByKeyword = (list) => {
 }
 
 // 切换选择目标
-const toggleTarget = (id) => {
+const toggleTarget = id => {
   const index = selectedTargets.value.indexOf(id)
   if (index > -1) {
     selectedTargets.value.splice(index, 1)
@@ -225,12 +234,15 @@ const handleClose = () => {
 }
 
 // 监听对话框关闭，清空选择
-watch(() => props.modelValue, (val) => {
-  if (!val) {
-    selectedTargets.value = []
-    searchKeyword.value = ''
+watch(
+  () => props.modelValue,
+  val => {
+    if (!val) {
+      selectedTargets.value = []
+      searchKeyword.value = ''
+    }
   }
-})
+)
 </script>
 
 <style lang="scss" scoped>

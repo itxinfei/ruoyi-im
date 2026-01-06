@@ -1,80 +1,60 @@
 package com.ruoyi.im.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 娑堟伅瀹炰綋
- * 
+ * IM消息实体
+ *
  * @author ruoyi
  */
-public class ImMessage {
-    /**
-     * 娑堟伅ID
-     */
+@TableName("im_message")
+public class ImMessage implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    /** 消息ID */
+    @TableId(type = IdType.AUTO)
     private Long id;
-    
-    /**
-     * 浼氳瘽ID
-     */
-    private Long conversationId;
-    
-    /**
-     * 鍙戦€佽€呯敤鎴稩D
-     */
+
+    /** 会话ID */
+    private Long sessionId;
+
+    /** 发送者ID */
     private Long senderId;
-    
-    /**
-     * 娑堟伅绫诲瀷锛圱EXT鏂囨湰 FILE鏂囦欢 NOTICE閫氱煡 RECALL鎾ゅ洖 REPLY鍥炲 FORWARD杞彂 IMAGE鍥剧墖 VOICE璇煶锛?     */
+
+    /** 接收者ID（群组消息时为群组ID） */
+    private Long receiverId;
+
+    /** 消息类型: text=文本, image=图片, file=文件, voice=语音, video=视频, location=位置, system=系统 */
     private String type;
-    
-    /**
-     * 娑堟伅鍐呭锛圝SON鏍煎紡锛?     */
+
+    /** 消息内容 */
     private String content;
-    
-    /**
-     * 鍥炲鐨勬秷鎭疘D
-     */
-    private Long replyToMessageId;
-    
-    /**
-     * 杞彂鐨勬秷鎭疘D
-     */
-    private Long forwardFromMessageId;
-    
-    /**
-     * 娑堟伅鐘舵€侊紙SENT宸插彂閫?DELIVERED宸查€佽揪 READ宸茶 REVOKED宸叉挙鍥烇級
-     */
-    private String status;
-    
-    /**
-     * 鏁忔劅绾у埆锛圢ONE鏃?WARN璀﹀憡 BLOCK鎷︽埅锛?     */
-    private String sensitiveLevel;
-    
-    /**
-     * 鎾ゅ洖鏃堕棿
-     */
-    private LocalDateTime revokedTime;
-    
-    /**
-     * 鎵╁睍鏁版嵁锛圝SON鏍煎紡锛?     */
-    private String extData;
-    
-    /**
-     * 鍥炲娑堟伅ID锛堝埆鍚嶏級
-     */
-    private Long replyMessageId;
 
-    /**
-     * 鍒涘缓鏃堕棿
-     */
+    /** 状态: 0=发送中, 1=已发送, 2=已送达, 3=已读, 4=发送失败, 5=已撤回 */
+    private Integer status;
+
+    /** 是否撤回: 0=否, 1=是 */
+    private Integer isRevoked;
+
+    /** 撤回时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime revokeTime;
+
+    /** 发送时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime sendTime;
+
+    /** 创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
-    
-    /**
-     * 鏇存柊鏃堕棿
-     */
-    private LocalDateTime updateTime;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -83,12 +63,12 @@ public class ImMessage {
         this.id = id;
     }
 
-    public Long getConversationId() {
-        return conversationId;
+    public Long getSessionId() {
+        return sessionId;
     }
 
-    public void setConversationId(Long conversationId) {
-        this.conversationId = conversationId;
+    public void setSessionId(Long sessionId) {
+        this.sessionId = sessionId;
     }
 
     public Long getSenderId() {
@@ -97,6 +77,14 @@ public class ImMessage {
 
     public void setSenderId(Long senderId) {
         this.senderId = senderId;
+    }
+
+    public Long getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(Long receiverId) {
+        this.receiverId = receiverId;
     }
 
     public String getType() {
@@ -115,60 +103,36 @@ public class ImMessage {
         this.content = content;
     }
 
-    public Long getReplyToMessageId() {
-        return replyToMessageId;
-    }
-
-    public void setReplyToMessageId(Long replyToMessageId) {
-        this.replyToMessageId = replyToMessageId;
-    }
-
-    public Long getForwardFromMessageId() {
-        return forwardFromMessageId;
-    }
-
-    public void setForwardFromMessageId(Long forwardFromMessageId) {
-        this.forwardFromMessageId = forwardFromMessageId;
-    }
-
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
-    public String getSensitiveLevel() {
-        return sensitiveLevel;
+    public Integer getIsRevoked() {
+        return isRevoked;
     }
 
-    public void setSensitiveLevel(String sensitiveLevel) {
-        this.sensitiveLevel = sensitiveLevel;
+    public void setIsRevoked(Integer isRevoked) {
+        this.isRevoked = isRevoked;
     }
 
-    public LocalDateTime getRevokedTime() {
-        return revokedTime;
+    public LocalDateTime getRevokeTime() {
+        return revokeTime;
     }
 
-    public void setRevokedTime(LocalDateTime revokedTime) {
-        this.revokedTime = revokedTime;
+    public void setRevokeTime(LocalDateTime revokeTime) {
+        this.revokeTime = revokeTime;
     }
 
-    public String getExtData() {
-        return extData;
+    public LocalDateTime getSendTime() {
+        return sendTime;
     }
 
-    public void setExtData(String extData) {
-        this.extData = extData;
-    }
-
-    public Long getReplyMessageId() {
-        return replyMessageId;
-    }
-
-    public void setReplyMessageId(Long replyMessageId) {
-        this.replyMessageId = replyMessageId;
+    public void setSendTime(LocalDateTime sendTime) {
+        this.sendTime = sendTime;
     }
 
     public LocalDateTime getCreateTime() {
@@ -177,13 +141,5 @@ public class ImMessage {
 
     public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
     }
 }

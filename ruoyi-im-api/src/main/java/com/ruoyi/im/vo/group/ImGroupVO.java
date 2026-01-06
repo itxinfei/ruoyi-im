@@ -1,74 +1,86 @@
 package com.ruoyi.im.vo.group;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 缇ょ粍淇℃伅VO
- * 
+ * 群组视图对象
+ *
  * @author ruoyi
  */
-@ApiModel(description = "缇ょ粍淇℃伅")
-public class ImGroupVO {
+public class ImGroupVO implements Serializable {
 
-    @ApiModelProperty(value = "缇ょ粍ID", example = "1")
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 群组ID
+     */
     private Long id;
 
-    @ApiModelProperty(value = "缇ょ粍鍚嶇О", example = "鎶€鏈氦娴佺兢")
+    /**
+     * 群组名称
+     */
     private String name;
 
-    @ApiModelProperty(value = "缇や富ID", example = "1")
+    /**
+     * 群主用户ID
+     */
     private Long ownerId;
 
-    @ApiModelProperty(value = "缇や富鐢ㄦ埛鍚?, example = "zhangsan")
-    private String ownerUsername;
+    /**
+     * 群主名称
+     */
+    private String ownerName;
 
-    @ApiModelProperty(value = "缇や富鏄电О", example = "寮犱笁")
-    private String ownerNickname;
-
-    @ApiModelProperty(value = "缇ょ粍鍏憡", example = "娆㈣繋澶у鍔犲叆鎶€鏈氦娴佺兢")
+    /**
+     * 群公告
+     */
     private String notice;
 
-    @ApiModelProperty(value = "缇ょ粍澶村儚", example = "/profile/group.png")
+    /**
+     * 群头像
+     */
     private String avatar;
 
-    @ApiModelProperty(value = "缇ょ粍鐘舵€?, example = "ACTIVE")
+    /**
+     * 状态（NORMAL正常 DISMISSED已解散）
+     */
     private String status;
 
-    @ApiModelProperty(value = "缇ょ粍鐘舵€佹弿杩?, example = "娲昏穬")
-    private String statusDesc;
-
-    @ApiModelProperty(value = "鎴愬憳鏁伴噺", example = "10")
+    /**
+     * 成员数量
+     */
     private Integer memberCount;
 
-    @ApiModelProperty(value = "鍒涘缓鏃堕棿", example = "2024-01-01 10:00:00")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    /**
+     * 成员数量限制
+     */
+    private Integer memberLimit;
+
+    /**
+     * 群组描述
+     */
+    private String description;
+
+    /**
+     * 群组类型（PUBLIC公开群 PRIVATE私密群）
+     */
+    private String type;
+
+    /**
+     * 创建时间
+     */
     private LocalDateTime createTime;
 
-    @ApiModelProperty(value = "鏇存柊鏃堕棿", example = "2024-01-01 10:00:00")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateTime;
-    
-    @ApiModelProperty(value = "缇ょ粍鍚嶇О锛堝埆鍚嶏級", example = "鎶€鏈氦娴佺兢")
-    private String groupName;
-    
-    @ApiModelProperty(value = "缇ょ粍鎻忚堪", example = "杩欐槸涓€涓妧鏈氦娴佺兢")
-    private String groupDesc;
-    
-    @ApiModelProperty(value = "缇ょ粍绫诲瀷", example = "COMMON")
-    private String groupType;
-    
-    @ApiModelProperty(value = "鎴愬憳鏁伴噺闄愬埗", example = "200")
-    private Integer memberLimit;
-    
-    @ApiModelProperty(value = "缇や富鍚嶇О", example = "寮犱笁")
-    private String ownerName;
-    
-    @ApiModelProperty(value = "缇や富澶村儚", example = "/profile/avatar.png")
-    private String ownerAvatar;
+    /**
+     * 当前用户在群中的角色（OWNER群主 ADMIN管理员 MEMBER普通成员）
+     */
+    private String myRole;
+
+    /**
+     * 当前用户是否被禁言
+     */
+    private Boolean isMuted;
 
     public Long getId() {
         return id;
@@ -94,20 +106,12 @@ public class ImGroupVO {
         this.ownerId = ownerId;
     }
 
-    public String getOwnerUsername() {
-        return ownerUsername;
+    public String getOwnerName() {
+        return ownerName;
     }
 
-    public void setOwnerUsername(String ownerUsername) {
-        this.ownerUsername = ownerUsername;
-    }
-
-    public String getOwnerNickname() {
-        return ownerNickname;
-    }
-
-    public void setOwnerNickname(String ownerNickname) {
-        this.ownerNickname = ownerNickname;
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
     }
 
     public String getNotice() {
@@ -134,60 +138,12 @@ public class ImGroupVO {
         this.status = status;
     }
 
-    public String getStatusDesc() {
-        return statusDesc;
-    }
-
-    public void setStatusDesc(String statusDesc) {
-        this.statusDesc = statusDesc;
-    }
-
     public Integer getMemberCount() {
         return memberCount;
     }
 
     public void setMemberCount(Integer memberCount) {
         this.memberCount = memberCount;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    public String getGroupDesc() {
-        return groupDesc;
-    }
-
-    public void setGroupDesc(String groupDesc) {
-        this.groupDesc = groupDesc;
-    }
-
-    public String getGroupType() {
-        return groupType;
-    }
-
-    public void setGroupType(String groupType) {
-        this.groupType = groupType;
     }
 
     public Integer getMemberLimit() {
@@ -198,19 +154,43 @@ public class ImGroupVO {
         this.memberLimit = memberLimit;
     }
 
-    public String getOwnerName() {
-        return ownerName;
+    public String getDescription() {
+        return description;
     }
 
-    public void setOwnerName(String ownerName) {
-        this.ownerName = ownerName;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getOwnerAvatar() {
-        return ownerAvatar;
+    public String getType() {
+        return type;
     }
 
-    public void setOwnerAvatar(String ownerAvatar) {
-        this.ownerAvatar = ownerAvatar;
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getMyRole() {
+        return myRole;
+    }
+
+    public void setMyRole(String myRole) {
+        this.myRole = myRole;
+    }
+
+    public Boolean getIsMuted() {
+        return isMuted;
+    }
+
+    public void setIsMuted(Boolean isMuted) {
+        this.isMuted = isMuted;
     }
 }

@@ -54,9 +54,9 @@
         </div>
         <div class="preview-time">{{ formatTime(audioDuration) }}</div>
         <div class="preview-controls">
-          <el-button @click="playAudio" :icon="isPlaying ? VideoPause : VideoClock" circle />
-          <el-button type="danger" @click="deleteAudio" :icon="Delete" circle />
-          <el-button type="primary" @click="sendAudio" :icon="Promotion" circle />
+          <el-button :icon="isPlaying ? VideoPause : VideoClock" circle @click="playAudio" />
+          <el-button type="danger" :icon="Delete" circle @click="deleteAudio" />
+          <el-button type="primary" :icon="Promotion" circle @click="sendAudio" />
         </div>
       </div>
     </el-dialog>
@@ -118,7 +118,7 @@ const popoverStyle = ref({
 })
 
 // 开始录音
-const handleStart = async (event) => {
+const handleStart = async event => {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     ElMessage.error('浏览器不支持录音功能')
     return
@@ -146,7 +146,7 @@ const handleStart = async (event) => {
     mediaRecorder = new MediaRecorder(stream)
     audioChunks = []
 
-    mediaRecorder.ondataavailable = (e) => {
+    mediaRecorder.ondataavailable = e => {
       if (e.data.size > 0) {
         audioChunks.push(e.data)
       }
@@ -330,7 +330,7 @@ const drawWaveform = () => {
 }
 
 // 格式化时间
-const formatTime = (seconds) => {
+const formatTime = seconds => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
@@ -408,11 +408,21 @@ onUnmounted(() => {
       border-radius: 2px;
       animation: wave 0.5s ease-in-out infinite alternate;
 
-      &:nth-child(1) { animation-delay: 0s; }
-      &:nth-child(2) { animation-delay: 0.1s; }
-      &:nth-child(3) { animation-delay: 0.2s; }
-      &:nth-child(4) { animation-delay: 0.3s; }
-      &:nth-child(5) { animation-delay: 0.4s; }
+      &:nth-child(1) {
+        animation-delay: 0s;
+      }
+      &:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      &:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+      &:nth-child(4) {
+        animation-delay: 0.3s;
+      }
+      &:nth-child(5) {
+        animation-delay: 0.4s;
+      }
     }
   }
 }
@@ -525,7 +535,8 @@ onUnmounted(() => {
 }
 
 @keyframes recording-pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 4px 12px rgba(240, 147, 251, 0.4);
   }
   50% {
@@ -543,7 +554,8 @@ onUnmounted(() => {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {

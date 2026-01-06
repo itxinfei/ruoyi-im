@@ -1,61 +1,70 @@
 package com.ruoyi.im.service;
 
-import com.ruoyi.im.domain.ImSession;
-import com.ruoyi.im.dto.session.ImSessionQueryRequest;
+import com.ruoyi.im.dto.session.ImSessionUpdateRequest;
+import com.ruoyi.im.vo.session.ImSessionVO;
+
 import java.util.List;
 
 /**
- * 浼氳瘽Service鎺ュ彛
- * 
+ * 会话服务接口
+ *
  * @author ruoyi
  */
 public interface ImSessionService {
-    
+
     /**
-     * 鏍规嵁ID鏌ヨ浼氳瘽
-     * 
-     * @param id 浼氳瘽ID
-     * @return 浼氳瘽
+     * 获取用户会话列表
+     *
+     * @param userId 用户ID
+     * @return 会话列表
      */
-    ImSession selectById(Long id);
-    
+    List<ImSessionVO> getSessionList(Long userId);
+
     /**
-     * 鏌ヨ浼氳瘽鍒楄〃
-     * 
-     * @param request 鏌ヨ鏉′欢
-     * @return 浼氳瘽闆嗗悎
+     * 根据ID获取会话信息
+     *
+     * @param sessionId 会话ID
+     * @return 会话信息
      */
-    List<ImSession> selectImSessionList(ImSessionQueryRequest request);
-    
+    ImSessionVO getSessionById(Long sessionId);
+
     /**
-     * 鏂板浼氳瘽
-     * 
-     * @param imSession 浼氳瘽
-     * @return 缁撴灉
+     * 更新会话信息
+     *
+     * @param sessionId 会话ID
+     * @param request 更新请求
      */
-    int insert(ImSession imSession);
-    
+    void updateSession(Long sessionId, ImSessionUpdateRequest request);
+
     /**
-     * 淇敼浼氳瘽
-     * 
-     * @param imSession 浼氳瘽
-     * @return 缁撴灉
+     * 删除会话
+     *
+     * @param sessionId 会话ID
+     * @param userId 用户ID
      */
-    int update(ImSession imSession);
-    
+    void deleteSession(Long sessionId, Long userId);
+
     /**
-     * 鎵归噺鍒犻櫎浼氳瘽
-     * 
-     * @param ids 闇€瑕佸垹闄ょ殑浼氳瘽ID
-     * @return 缁撴灉
+     * 清空未读消息数
+     *
+     * @param sessionId 会话ID
+     * @param userId 用户ID
      */
-    int deleteByIds(Long[] ids);
-    
+    void clearUnread(Long sessionId, Long userId);
+
     /**
-     * 鍒犻櫎浼氳瘽淇℃伅
-     * 
-     * @param id 浼氳瘽ID
-     * @return 缁撴灉
+     * 置顶/取消置顶会话
+     *
+     * @param sessionId 会话ID
+     * @param pinned 是否置顶
      */
-    int deleteById(Long id);
+    void togglePin(Long sessionId, Integer pinned);
+
+    /**
+     * 免打扰/取消免打扰会话
+     *
+     * @param sessionId 会话ID
+     * @param muted 是否免打扰
+     */
+    void toggleMute(Long sessionId, Integer muted);
 }
