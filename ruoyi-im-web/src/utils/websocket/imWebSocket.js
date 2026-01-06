@@ -57,6 +57,7 @@ class ImWebSocket {
     this.listeners = new Map()
     this.pendingMessages = [] // 待发送消息
     this.isManualClose = false
+    this.firstConnected = false // 标记是否首次连接
     this.debug = import.meta.env.DEV // 开发环境开启调试
   }
 
@@ -116,8 +117,11 @@ class ImWebSocket {
       // 发送待发送消息
       this.sendPendingMessages()
 
-      // 通知连接成功
-      ElMessage.success('连接成功')
+      // 只在首次连接时显示提示
+      if (!this.firstConnected) {
+        ElMessage.success('连接成功')
+        this.firstConnected = true
+      }
     }
 
     this.ws.onmessage = event => {
@@ -321,6 +325,11 @@ class ImWebSocket {
     const delay = this.reconnectDelay * Math.min(2, this.reconnectAttempts)
 
     this.log(`${delay}ms 后进行第 ${this.reconnectAttempts} 次重连...`)
+
+    // 只在首次重连时显示提示
+    if (this.reconnectAttempts === 1) {
+      ElMessage.warning('连接断开，正在重新连接...')
+    }
 
     setTimeout(() => {
       const token = localStorage.getItem('Admin-Token') || localStorage.getItem('token')

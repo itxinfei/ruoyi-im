@@ -41,6 +41,28 @@ public interface ImMessageService {
     void recallMessage(Long messageId, Long userId);
 
     /**
+     * 转发消息
+     *
+     * @param messageId 消息ID
+     * @param toSessionId 目标会话ID（为空表示转发到原会话）
+     * @param toUserId 目标用户ID（为空表示转发给原发送者）
+     * @param content 转发时附加内容
+     * @param userId 当前用户ID
+     * @return 新消息ID
+     */
+    Long forwardMessage(Long messageId, Long toSessionId, Long toUserId, String content, Long userId);
+
+    /**
+     * 引用/回复消息
+     *
+     * @param messageId 原消息ID
+     * @param content 引用内容
+     * @param userId 当前用户ID
+     * @return 引用消息ID
+     */
+    Long replyMessage(Long messageId, String content, Long userId);
+
+    /**
      * 标记消息已读
      *
      * @param sessionId 会话ID
