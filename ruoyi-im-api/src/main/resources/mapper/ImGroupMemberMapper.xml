@@ -11,10 +11,12 @@
         <result property="muteEndTime" column="mute_end_time"/>
         <result property="inviterId" column="inviter_id"/>
         <result property="joinedTime" column="joined_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <sql id="selectImGroupMemberVo">
-        select id, group_id, user_id, role, group_nickname, mute_end_time, inviter_id, joined_time 
+        select id, group_id, user_id, role, group_nickname, mute_end_time, inviter_id, joined_time, create_time, update_time 
         from im_group_member
     </sql>
 
@@ -42,6 +44,8 @@
             <if test="muteEndTime != null">mute_end_time,</if>
             <if test="inviterId != null">inviter_id,</if>
             <if test="joinedTime != null">joined_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="groupId != null">#{groupId},</if>
@@ -51,6 +55,8 @@
             <if test="muteEndTime != null">#{muteEndTime},</if>
             <if test="inviterId != null">#{inviterId},</if>
             <if test="joinedTime != null">#{joinedTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
         </trim>
     </insert>
 
@@ -62,6 +68,7 @@
             <if test="role != null and role != ''">role = #{role},</if>
             <if test="groupNickname != null and groupNickname != ''">group_nickname = #{groupNickname},</if>
             <if test="muteEndTime != null">mute_end_time = #{muteEndTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>
         where id = #{id}
     </update>
@@ -78,13 +85,13 @@
     </delete>
     
     <select id="selectImGroupMemberByGroupIdAndUserId" parameterType="map" resultMap="ImGroupMemberResult">
-        select id, group_id, user_id, role, group_nickname, mute_end_time, inviter_id, joined_time
+        select id, group_id, user_id, role, group_nickname, mute_end_time, inviter_id, joined_time, create_time, update_time
         from im_group_member
         where group_id = #{groupId} and user_id = #{userId}
     </select>
     
     <select id="selectImGroupMemberListByGroupId" parameterType="Long" resultMap="ImGroupMemberResult">
-        select id, group_id, user_id, role, group_nickname, mute_end_time, inviter_id, joined_time
+        select id, group_id, user_id, role, group_nickname, mute_end_time, inviter_id, joined_time, create_time, update_time
         from im_group_member
         where group_id = #{groupId}
     </select>
