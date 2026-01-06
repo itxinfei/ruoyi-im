@@ -80,4 +80,11 @@ public interface ImUserService {
      * @return 是否成功
      */
     boolean changePassword(Long userId, String oldPassword, String newPassword);
+
+    /**
+     * Get total user count
+     *
+     * @return total user count
+     */
+    int getTotalUserCount();
 }

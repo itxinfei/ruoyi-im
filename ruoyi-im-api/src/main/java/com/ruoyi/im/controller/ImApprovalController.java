@@ -4,8 +4,8 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImApproval;
 import com.ruoyi.im.domain.ImApprovalTemplate;
 import com.ruoyi.im.service.ImApprovalService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +17,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Api(tags = "审批中心")
+@Tag(name = "审批中心")
 @RestController
 @RequestMapping("/api/im/approval")
 public class ImApprovalController {
@@ -28,7 +28,7 @@ public class ImApprovalController {
     /**
      * 发起审批
      */
-    @ApiOperation("发起审批")
+    @Operation(summary = "发起审批")
     @PostMapping("/create")
     public Result<Long> createApproval(@RequestParam Long templateId,
                                       @RequestParam String title,
@@ -44,7 +44,7 @@ public class ImApprovalController {
     /**
      * 获取审批详情
      */
-    @ApiOperation("获取审批详情")
+    @Operation(summary = "获取审批详情")
     @GetMapping("/{id}")
     public Result<Map<String, Object>> getDetail(@PathVariable Long id) {
         Map<String, Object> detail = approvalService.getApprovalDetail(id);
@@ -54,7 +54,7 @@ public class ImApprovalController {
     /**
      * 获取待我审批列表
      */
-    @ApiOperation("获取待我审批列表")
+    @Operation(summary = "获取待我审批列表")
     @GetMapping("/pending")
     public Result<List<ImApproval>> getPendingApprovals(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -67,7 +67,7 @@ public class ImApprovalController {
     /**
      * 获取我发起的审批列表
      */
-    @ApiOperation("获取我发起的审批列表")
+    @Operation(summary = "获取我发起的审批列表")
     @GetMapping("/my")
     public Result<List<ImApproval>> getMyApprovals(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -80,7 +80,7 @@ public class ImApprovalController {
     /**
      * 获取我已审批列表
      */
-    @ApiOperation("获取我已审批列表")
+    @Operation(summary = "获取我已审批列表")
     @GetMapping("/processed")
     public Result<List<ImApproval>> getProcessedApprovals(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -93,7 +93,7 @@ public class ImApprovalController {
     /**
      * 通过审批
      */
-    @ApiOperation("通过审批")
+    @Operation(summary = "通过审批")
     @PostMapping("/{id}/approve")
     public Result<Void> approve(@PathVariable Long id,
                                @RequestParam(required = false) String comment,
@@ -108,7 +108,7 @@ public class ImApprovalController {
     /**
      * 驳回审批
      */
-    @ApiOperation("驳回审批")
+    @Operation(summary = "驳回审批")
     @PostMapping("/{id}/reject")
     public Result<Void> reject(@PathVariable Long id,
                               @RequestParam String comment,
@@ -123,7 +123,7 @@ public class ImApprovalController {
     /**
      * 撤回审批
      */
-    @ApiOperation("撤回审批")
+    @Operation(summary = "撤回审批")
     @PostMapping("/{id}/cancel")
     public Result<Void> cancel(@PathVariable Long id,
                               @RequestHeader(value = "userId", required = false) Long userId) {
@@ -137,7 +137,7 @@ public class ImApprovalController {
     /**
      * 获取审批模板列表
      */
-    @ApiOperation("获取审批模板列表")
+    @Operation(summary = "获取审批模板列表")
     @GetMapping("/templates")
     public Result<List<ImApprovalTemplate>> getTemplates() {
         List<ImApprovalTemplate> list = approvalService.getTemplates();
@@ -147,7 +147,7 @@ public class ImApprovalController {
     /**
      * 获取启用的审批模板列表
      */
-    @ApiOperation("获取启用的审批模板列表")
+    @Operation(summary = "获取启用的审批模板列表")
     @GetMapping("/templates/active")
     public Result<List<ImApprovalTemplate>> getActiveTemplates() {
         List<ImApprovalTemplate> list = approvalService.getActiveTemplates();

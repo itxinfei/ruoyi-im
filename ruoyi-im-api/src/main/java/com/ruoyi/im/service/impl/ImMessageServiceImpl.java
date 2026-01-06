@@ -7,6 +7,7 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageService;
+import com.ruoyi.im.utils.MessageEncryptionUtil;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +17,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 消息服务实现
- *
- * @author ruoyi
- */
 @Service
 public class ImMessageServiceImpl implements ImMessageService {
 
@@ -30,52 +26,60 @@ public class ImMessageServiceImpl implements ImMessageService {
     @Autowired
     private ImUserMapper imUserMapper;
 
+    @Autowired
+    private MessageEncryptionUtil encryptionUtil;
+
     @Override
     public Long sendMessage(ImMessageSendRequest request, Long userId) {
         ImUser sender = imUserMapper.selectImUserById(userId);
         if (sender == null) {
             throw new BusinessException("发送者不存在");
         }
-        
+
         ImMessage message = new ImMessage();
         message.setSessionId(request.getSessionId());
         message.setSenderId(userId);
         message.setReceiverId(request.getReceiverId());
         message.setType(request.getType());
-        message.setContent(request.getContent());
+
+        String contentToSave = encryptionUtil.encryptMessage(request.getContent());
+        message.setContent(contentToSave);
         message.setStatus(1);
         message.setIsRevoked(0);
         message.setSendTime(LocalDateTime.now());
         message.setCreateTime(LocalDateTime.now());
-        
+
         imMessageMapper.insertImMessage(message);
-        
+
         return message.getId();
     }
 
     @Override
     public List<ImMessageVO> getMessages(Long sessionId, Long userId, Long lastId, Integer limit) {
         List<ImMessageVO> voList = new ArrayList<>();
-        
+
         ImMessage query = new ImMessage();
         query.setSessionId(sessionId);
-        
+
         List<ImMessage> messageList = imMessageMapper.selectImMessageList(query);
-        
+
         for (ImMessage message : messageList) {
             ImMessageVO vo = new ImMessageVO();
             BeanUtils.copyProperties(message, vo);
-            
+
+            String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
+            vo.setContent(decryptedContent);
+
             ImUser sender = imUserMapper.selectImUserById(message.getSenderId());
             if (sender != null) {
                 vo.setSenderName(sender.getNickname());
                 vo.setSenderAvatar(sender.getAvatar());
             }
-            
+
             vo.setIsSelf(message.getSenderId().equals(userId));
             voList.add(vo);
         }
-        
+
         return voList;
     }
 

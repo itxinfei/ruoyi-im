@@ -172,4 +172,9 @@ public class ImUserServiceImpl implements ImUserService {
         }
         return permissions;
     }
+
+    @Override
+    public int getTotalUserCount() {
+        return imUserMapper.countImUsers();
+    }
 }

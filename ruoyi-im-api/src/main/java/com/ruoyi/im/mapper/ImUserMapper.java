@@ -168,4 +168,11 @@ public interface ImUserMapper {
      * @return 用户列表
      */
     List<ImUser> selectImUserByKeyword(String keyword);
+
+    /**
+     * Count total users
+     *
+     * @return total user count
+     */
+    int countImUsers();
 }

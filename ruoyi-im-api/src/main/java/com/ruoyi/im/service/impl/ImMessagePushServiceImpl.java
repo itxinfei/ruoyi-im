@@ -17,6 +17,7 @@ import org.springframework.web.socket.WebSocketSession;
 import javax.websocket.Session;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * IM Message Push Service Implementation

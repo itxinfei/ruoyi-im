@@ -4,18 +4,18 @@ import com.ruoyi.im.utils.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
-import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @Component
-public class WebSocketHandshakeInterceptor extends WebSocketHandlerDecorator {
+public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketHandshakeInterceptor.class);
 
@@ -24,13 +24,10 @@ public class WebSocketHandshakeInterceptor extends WebSocketHandlerDecorator {
 
     private List<String> ipWhitelist;
 
-    public WebSocketHandshakeInterceptor(TextWebSocketHandler delegate) {
-        super(delegate);
-    }
-
     @Override
-    public boolean beforeHandshake(WebSocketSession session) {
-        URI uri = session.getUri();
+    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
+                                  WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+        URI uri = request.getURI();
         if (uri == null) {
             log.warn("WebSocket connection failed: URI is null");
             return false;
@@ -60,41 +57,24 @@ public class WebSocketHandshakeInterceptor extends WebSocketHandlerDecorator {
         }
 
         if (ipWhitelist != null && !ipWhitelist.isEmpty()) {
-            String clientIp = extractClientIp(session);
+            String clientIp = extractClientIp(request);
             if (!isIpAllowed(clientIp)) {
-                log.warn("WebSocket connection failed: IP not in whitelist, clientIp={}, userId={}", clientIp, userId);
+                log.warn("WebSocket connection failed: IP not in whitelist");
                 return false;
             }
         }
 
-        session.getAttributes().put("userId", userId);
-        session.getAttributes().put("token", token);
+        attributes.put("userId", userId);
+        attributes.put("token", token);
 
-        log.info("WebSocket connection authenticated: userId={}, sessionId={}", userId, session.getId());
+        log.info("WebSocket connection authenticated: userId={}", userId);
         return true;
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session, TextMessage message) {
-        super.afterConnectionEstablished(session, message);
-        Long userId = (Long) session.getAttributes().get("userId");
-        log.info("WebSocket connection established: userId={}, sessionId={}", userId, session.getId());
-    }
-
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus, TextMessage message) {
-        super.afterConnectionClosed(session, closeStatus, message);
-        Long userId = (Long) session.getAttributes().get("userId");
-        log.info("WebSocket connection closed: userId={}, statusCode={}, sessionId={}",
-                userId, closeStatus.getCode(), session.getId());
-    }
-
-    @Override
-    public void handleTransportError(WebSocketSession session, Throwable exception) {
-        super.handleTransportError(session, exception);
-        Long userId = (Long) session.getAttributes().get("userId");
-        log.error("WebSocket transport error: userId={}, sessionId={}",
-                userId, session != null ? session.getId() : "null", exception);
+    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
+                               WebSocketHandler wsHandler, Exception exception) {
+        log.info("WebSocket handshake completed");
     }
 
     private String extractToken(String queryString) {
@@ -111,20 +91,17 @@ public class WebSocketHandshakeInterceptor extends WebSocketHandlerDecorator {
         return null;
     }
 
-    private String extractClientIp(WebSocketSession session) {
-        String ip = null;
-
-        Object ipObj = session.getAttributes().get("javax.websocket.endpoint.remoteAddress");
-        if (ipObj != null) {
-            ip = ipObj.toString();
-            if (ip != null && ip.contains("/")) {
-                int lastSlash = ip.lastIndexOf("/");
-                if (lastSlash > 0) {
-                    ip = ip.substring(0, lastSlash);
-                }
+    private String extractClientIp(ServerHttpRequest request) {
+        if (request.getRemoteAddress() == null) {
+            return null;
+        }
+        String ip = request.getRemoteAddress().toString();
+        if (ip != null && ip.contains("/")) {
+            int lastSlash = ip.lastIndexOf("/");
+            if (lastSlash >= 0 && lastSlash < ip.length() - 1) {
+                ip = ip.substring(lastSlash + 1);
             }
         }
-
         return ip;
     }
 
@@ -151,7 +128,7 @@ public class WebSocketHandshakeInterceptor extends WebSocketHandlerDecorator {
 
     public void setIpWhitelist(List<String> ipWhitelist) {
         this.ipWhitelist = ipWhitelist;
-        log.info("IP whitelist updated: {}", ipWhitelist);
+        log.info("IP whitelist updated");
     }
 
     public List<String> getIpWhitelist() {

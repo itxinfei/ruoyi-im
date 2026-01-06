@@ -177,4 +177,9 @@
         </where>
         limit 50
     </select>
+
+    <!-- Count total users -->
+    <select id="countImUsers" resultType="java.lang.Integer">
+        select count(*) from im_user
+    </select>
 </mapper>

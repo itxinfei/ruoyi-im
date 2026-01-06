@@ -3,8 +3,8 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImTodoItem;
 import com.ruoyi.im.service.ImTodoItemService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +17,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Api(tags = "工作台管理")
+@Tag(name = "工作台管理")
 @RestController
 @RequestMapping("/api/im/workbench")
 public class ImWorkbenchController {
@@ -28,7 +28,7 @@ public class ImWorkbenchController {
     /**
      * 获取工作台数据概览
      */
-    @ApiOperation("获取工作台数据概览")
+    @Operation(summary = "获取工作台数据概览")
     @GetMapping("/overview")
     public Result<Map<String, Object>> getOverview(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -48,7 +48,7 @@ public class ImWorkbenchController {
     /**
      * 获取待办列表
      */
-    @ApiOperation("获取待办列表")
+    @Operation(summary = "获取待办列表")
     @GetMapping("/todos")
     public Result<List<ImTodoItem>> getTodos(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -61,7 +61,7 @@ public class ImWorkbenchController {
     /**
      * 创建待办
      */
-    @ApiOperation("创建待办")
+    @Operation(summary = "创建待办")
     @PostMapping("/todos")
     public Result<Long> createTodo(@RequestParam String title,
                                    @RequestParam(required = false) String description,
@@ -78,7 +78,7 @@ public class ImWorkbenchController {
     /**
      * 完成待办
      */
-    @ApiOperation("完成待办")
+    @Operation(summary = "完成待办")
     @PutMapping("/todos/{id}/complete")
     public Result<Void> completeTodo(@PathVariable Long id,
                                     @RequestHeader(value = "userId", required = false) Long userId) {
@@ -92,7 +92,7 @@ public class ImWorkbenchController {
     /**
      * 删除待办
      */
-    @ApiOperation("删除待办")
+    @Operation(summary = "删除待办")
     @DeleteMapping("/todos/{id}")
     public Result<Void> deleteTodo(@PathVariable Long id,
                                   @RequestHeader(value = "userId", required = false) Long userId) {
@@ -106,7 +106,7 @@ public class ImWorkbenchController {
     /**
      * 更新待办
      */
-    @ApiOperation("更新待办")
+    @Operation(summary = "更新待办")
     @PutMapping("/todos/{id}")
     public Result<Void> updateTodo(@PathVariable Long id,
                                   @RequestParam String title,
