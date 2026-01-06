@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImTodoItemMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImTodoItem" id="ImTodoItemResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="type" column="type"/>
+        <result property="relatedId" column="related_id"/>
+        <result property="priority" column="priority"/>
+        <result property="dueDate" column="due_date"/>
+        <result property="isCompleted" column="is_completed"/>
+        <result property="completedTime" column="completed_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImTodoItemVo">
+        select id, user_id, title, description, type, related_id, priority, due_date, is_completed, completed_time, create_time, update_time
+        from im_todo_item
+    </sql>
+
+    <select id="selectImTodoItemById" parameterType="Long" resultMap="ImTodoItemResult">
+        <include refid="selectImTodoItemVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectImTodoItemList" parameterType="com.ruoyi.im.domain.ImTodoItem" resultMap="ImTodoItemResult">
+        <include refid="selectImTodoItemVo"/>
+        <where>
+            <if test="userId != null">and user_id = #{userId}</if>
+            <if test="type != null and type != ''">and type = #{type}</if>
+            <if test="priority != null and priority != ''">and priority = #{priority}</if>
+            <if test="isCompleted != null">and is_completed = #{isCompleted}</if>
+        </where>
+        order by is_completed asc, create_time desc
+    </select>
+
+    <select id="selectTodoItemsByUserId" parameterType="Long" resultMap="ImTodoItemResult">
+        <include refid="selectImTodoItemVo"/>
+        where user_id = #{userId}
+        order by is_completed asc, priority desc, create_time desc
+    </select>
+
+    <select id="countUncompletedByUserId" parameterType="Long" resultType="int">
+        select count(*) from im_todo_item
+        where user_id = #{userId}
+        and is_completed = false
+    </select>
+
+    <insert id="insertImTodoItem" parameterType="com.ruoyi.im.domain.ImTodoItem" useGeneratedKeys="true" keyProperty="id">
+        insert into im_todo_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="description != null">description,</if>
+            <if test="type != null">type,</if>
+            <if test="relatedId != null">related_id,</if>
+            <if test="priority != null">priority,</if>
+            <if test="dueDate != null">due_date,</if>
+            <if test="isCompleted != null">is_completed,</if>
+            <if test="completedTime != null">completed_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="description != null">#{description},</if>
+            <if test="type != null">#{type},</if>
+            <if test="relatedId != null">#{relatedId},</if>
+            <if test="priority != null">#{priority},</if>
+            <if test="dueDate != null">#{dueDate},</if>
+            <if test="isCompleted != null">#{isCompleted},</if>
+            <if test="completedTime != null">#{completedTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImTodoItem" parameterType="com.ruoyi.im.domain.ImTodoItem">
+        update im_todo_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="dueDate != null">due_date = #{dueDate},</if>
+            <if test="isCompleted != null">is_completed = #{isCompleted},</if>
+            <if test="completedTime != null">completed_time = #{completedTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="markAsCompleted" parameterType="Long">
+        update im_todo_item
+        set is_completed = true,
+            completed_time = now(),
+            update_time = now()
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImTodoItemById" parameterType="Long">
+        delete from im_todo_item where id = #{id}
+    </delete>
+
+    <delete id="deleteImTodoItemByIds" parameterType="Long[]">
+        delete from im_todo_item where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

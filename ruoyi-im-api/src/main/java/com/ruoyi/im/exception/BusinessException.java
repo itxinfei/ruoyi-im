@@ -1,6 +1,7 @@
 package com.ruoyi.im.exception;
 
 import com.ruoyi.im.constant.ImErrorCode;
+import lombok.Data;
 
 /**
  * 业务异常类

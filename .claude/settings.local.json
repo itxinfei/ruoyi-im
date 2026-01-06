@@ -5,7 +5,10 @@
       "Bash(npm run build:*)",
       "Bash(mvn compile:*)",
       "Bash(done)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(mvn clean compile:*)",
+      "Bash(ls:*)",
+      "Bash(xargs:*)"
     ]
   }
 }

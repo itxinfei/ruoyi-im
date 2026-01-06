@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImApprovalMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImApproval" id="ImApprovalResult">
+        <id property="id" column="id"/>
+        <result property="templateId" column="template_id"/>
+        <result property="title" column="title"/>
+        <result property="applicantId" column="applicant_id"/>
+        <result property="status" column="status"/>
+        <result property="relatedId" column="related_id"/>
+        <result property="relatedType" column="related_type"/>
+        <result property="comment" column="comment"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="applicantName" column="applicant_name"/>
+    </resultMap>
+
+    <sql id="selectImApprovalVo">
+        select id, template_id, title, applicant_id, status, related_id, related_type, comment, create_time, update_time
+        from im_approval
+    </sql>
+
+    <select id="selectImApprovalById" parameterType="Long" resultMap="ImApprovalResult">
+        <include refid="selectImApprovalVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectImApprovalList" parameterType="com.ruoyi.im.domain.ImApproval" resultMap="ImApprovalResult">
+        select a.id, a.template_id, a.title, a.applicant_id, a.status, a.related_id, a.related_type, a.comment, a.create_time, a.update_time,
+               u.nickname as applicant_name
+        from im_approval a
+        left join im_user u on a.applicant_id = u.id
+        <where>
+            <if test="templateId != null">and a.template_id = #{templateId}</if>
+            <if test="applicantId != null">and a.applicant_id = #{applicantId}</if>
+            <if test="status != null and status != ''">and a.status = #{status}</if>
+        </where>
+        order by a.create_time desc
+    </select>
+
+    <select id="selectPendingApprovalByApproverId" parameterType="Long" resultMap="ImApprovalResult">
+        select distinct a.id, a.template_id, a.title, a.applicant_id, a.status, a.create_time,
+               u.nickname as applicant_name
+        from im_approval a
+        inner join im_approval_node n on a.id = n.approval_id
+        left join im_user u on a.applicant_id = u.id
+        where a.status = 'PENDING'
+        and n.status = 'PENDING'
+        and find_in_set(#{approverId}, n.approver_ids)
+        order by a.create_time desc
+    </select>
+
+    <select id="selectApprovalByApplicantId" parameterType="Long" resultMap="ImApprovalResult">
+        select a.id, a.template_id, a.title, a.applicant_id, a.status, a.create_time,
+               u.nickname as applicant_name
+        from im_approval a
+        left join im_user u on a.applicant_id = u.id
+        where a.applicant_id = #{applicantId}
+        order by a.create_time desc
+    </select>
+
+    <insert id="insertImApproval" parameterType="com.ruoyi.im.domain.ImApproval" useGeneratedKeys="true" keyProperty="id">
+        insert into im_approval
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="templateId != null">template_id,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="applicantId != null">applicant_id,</if>
+            <if test="status != null">status,</if>
+            <if test="relatedId != null">related_id,</if>
+            <if test="relatedType != null">related_type,</if>
+            <if test="comment != null">comment,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="templateId != null">#{templateId},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="applicantId != null">#{applicantId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="relatedId != null">#{relatedId},</if>
+            <if test="relatedType != null">#{relatedType},</if>
+            <if test="comment != null">#{comment},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImApproval" parameterType="com.ruoyi.im.domain.ImApproval">
+        update im_approval
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="status != null">status = #{status},</if>
+            <if test="comment != null">comment = #{comment},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImApprovalById" parameterType="Long">
+        delete from im_approval where id = #{id}
+    </delete>
+
+    <delete id="deleteImApprovalByIds" parameterType="Long[]">
+        delete from im_approval where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

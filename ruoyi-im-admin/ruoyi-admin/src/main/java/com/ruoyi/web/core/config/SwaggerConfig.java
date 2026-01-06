@@ -1,6 +1,7 @@
 package com.ruoyi.web.core.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.ruoyi.common.config.RuoYiConfig;
@@ -19,6 +20,7 @@ import springfox.documentation.spring.web.plugins.Docket;
  * @author ruoyi
  */
 @Configuration
+@ConditionalOnProperty(name = "swagger.enabled", havingValue = "true", matchIfMissing = false)
 public class SwaggerConfig
 {
     /** 是否开启swagger */

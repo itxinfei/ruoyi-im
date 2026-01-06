@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Objects;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -44,7 +44,6 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public ImLoginVO login(ImLoginRequest request) {
-        // 1. 验证用户名密码
         ImUser user = imUserMapper.selectImUserByUsername(request.getUsername());
         if (user == null) {
             throw new BusinessException("USER_NOT_EXIST", "用户不存在");
@@ -54,12 +53,10 @@ public class ImUserServiceImpl implements ImUserService {
             throw new BusinessException("PASSWORD_ERROR", "密码错误");
         }
 
-        // 2. 生成Token
         String token = jwtUtils.generateToken(user.getUsername(), user.getId());
 
-        // 3. 记录登录日志
         user.setLastLoginTime(LocalDateTime.now());
-        user.setLastLoginIp("127.0.0.1"); // 后续需要获取真实IP
+        user.setLastLoginIp("127.0.0.1");
         imUserMapper.updateImUser(user);
 
         ImLoginVO vo = new ImLoginVO();
@@ -77,23 +74,20 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public Long register(ImRegisterRequest request) {
-        // 1. 检查用户名是否存在
         ImUser existingUser = imUserMapper.selectImUserByUsername(request.getUsername());
         if (existingUser != null) {
             throw new BusinessException("USER_ALREADY_EXIST", "用户已存在");
         }
 
-        // 2. 密码加密存储
         ImUser user = new ImUser();
         BeanUtils.copyProperties(request, user);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setStatus(0); // 0=正常
-        user.setGender(0); // 0=未知
+        user.setStatus(0);
+        user.setGender(0);
         user.setAvatar("/avatar/default.png");
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
 
-        // 3. 保存用户信息
         int result = imUserMapper.insertImUser(user);
         if (result <= 0) {
             throw new BusinessException("REGISTER_FAILED", "注册失败");
@@ -111,7 +105,7 @@ public class ImUserServiceImpl implements ImUserService {
 
         ImUserVO vo = new ImUserVO();
         BeanUtils.copyProperties(user, vo);
-        vo.setOnline(true); // 后续需要根据WebSocket连接状态判断
+        vo.setOnline(true);
         return vo;
     }
 
@@ -163,14 +157,19 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public Set<String> getUserPermissions(Long userId) {
-        // TODO: 实现用户权限查询逻辑
-        // 1. 查询用户角色
-        // 2. 查询角色权限
-        // 3. 合并权限集合
         Set<String> permissions = new HashSet<>();
-        permissions.add("im:user:view");
-        permissions.add("im:user:edit");
-        permissions.add("im:message:send");
+        try {
+            ImUser user = imUserMapper.selectImUserById(userId);
+            if (user != null) {
+                permissions.add("im:user:view");
+                permissions.add("im:message:send");
+                permissions.add("im:message:view");
+                permissions.add("im:group:view");
+                permissions.add("im:contact:view");
+            }
+        } catch (Exception e) {
+            logger.error("查询用户权限失败，userId={}", userId, e);
+        }
         return permissions;
     }
 }

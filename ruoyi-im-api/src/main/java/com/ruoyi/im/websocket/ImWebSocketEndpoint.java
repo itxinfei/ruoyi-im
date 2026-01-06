@@ -43,6 +43,7 @@ public class ImWebSocketEndpoint {
     private static ImMessageService staticImMessageService;
     private static JwtUtils staticJwtUtils;
     private static ImUserService staticImUserService;
+    private static com.ruoyi.im.service.ImSessionService staticImSessionService;
 
     @Autowired
     private ImMessageService imMessageService;
@@ -52,6 +53,9 @@ public class ImWebSocketEndpoint {
 
     @Autowired
     private ImUserService imUserService;
+
+    @Autowired
+    private com.ruoyi.im.service.ImSessionService imSessionService;
 
     @Autowired
     public void setImMessageService(ImMessageService imMessageService) {
@@ -68,8 +72,16 @@ public class ImWebSocketEndpoint {
         staticImUserService = imUserService;
     }
 
+    @Autowired
+    public void setImSessionService(com.ruoyi.im.service.ImSessionService imSessionService) {
+        staticImSessionService = imSessionService;
+    }
+
     /**
      * 客户端连接时调用
+     * 验证 token 并建立 WebSocket 连接
+     *
+     * @param session WebSocket 会话
      */
     @OnOpen
     public void onOpen(Session session) {
@@ -86,9 +98,31 @@ public class ImWebSocketEndpoint {
                 return;
             }
 
-            // 验证 token 并获取用户ID（暂时简化处理）
-            // TODO: 从JWT token中解析用户ID
-            Long userId = 1L;
+            // 验证 token 有效性
+            if (!staticJwtUtils.validateToken(tokenValue)) {
+                log.warn("WebSocket 连接失败: token 无效");
+                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "token 无效或已过期"));
+                return;
+            }
+
+            // 从 JWT token 中解析用户ID
+            Long userId = staticJwtUtils.getUserIdFromToken(tokenValue);
+            if (userId == null) {
+                log.warn("WebSocket 连接失败: 无法从 token 中解析用户ID");
+                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "token 解析失败"));
+                return;
+            }
+
+            // 检查用户是否已存在在线连接，如果存在则关闭旧连接
+            Session oldSession = onlineUsers.get(userId);
+            if (oldSession != null && oldSession.isOpen()) {
+                log.info("用户已存在连接，关闭旧连接: userId={}", userId);
+                try {
+                    oldSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "新连接建立"));
+                } catch (IOException e) {
+                    log.error("关闭旧连接异常", e);
+                }
+            }
 
             // 保存用户会话
             onlineUsers.put(userId, session);
@@ -105,7 +139,7 @@ public class ImWebSocketEndpoint {
         } catch (Exception e) {
             log.error("WebSocket 连接处理异常", e);
             try {
-                session.close();
+                session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, "服务器内部错误"));
             } catch (IOException ex) {
                 log.error("关闭 WebSocket 会话异常", ex);
             }
@@ -114,6 +148,10 @@ public class ImWebSocketEndpoint {
 
     /**
      * 接收客户端消息
+     * 根据消息类型分发到不同的处理方法
+     *
+     * @param message 消息内容
+     * @param session WebSocket 会话
      */
     @OnMessage
     public void onMessage(String message, Session session) {
@@ -161,6 +199,9 @@ public class ImWebSocketEndpoint {
 
     /**
      * 客户端断开连接时调用
+     * 清理用户会话信息并广播离线状态
+     *
+     * @param session WebSocket 会话
      */
     @OnClose
     public void onClose(Session session) {
@@ -180,6 +221,10 @@ public class ImWebSocketEndpoint {
 
     /**
      * 连接异常时调用
+     * 清理异常连接并记录错误日志
+     *
+     * @param session WebSocket 会话
+     * @param error 异常信息
      */
     @OnError
     public void onError(Session session, Throwable error) {
@@ -197,6 +242,10 @@ public class ImWebSocketEndpoint {
 
     /**
      * 处理聊天消息
+     * 保存消息到数据库并推送给会话中的其他用户
+     *
+     * @param userId 发送者用户ID
+     * @param payload 消息数据
      */
     private void handleChatMessage(Long userId, Object payload) {
         try {
@@ -207,14 +256,18 @@ public class ImWebSocketEndpoint {
             String messageType = (String) messageData.get("type");
             String content = (String) messageData.get("content");
 
-            // TODO: 保存消息到数据库
-            // 暂时返回模拟ID
-            Long messageId = 1L;
+            // 构建消息发送请求
+            com.ruoyi.im.dto.message.ImMessageSendRequest request = new com.ruoyi.im.dto.message.ImMessageSendRequest();
+            request.setSessionId(sessionId);
+            request.setType(messageType);
+            request.setContent(content);
+
+            // 保存消息到数据库
+            Long messageId = staticImMessageService.sendMessage(request, userId);
 
             if (messageId != null) {
                 // 获取完整消息对象
-                // TODO: 从数据库获取消息
-                ImMessage message = new ImMessage();
+                com.ruoyi.im.domain.ImMessage message = new com.ruoyi.im.domain.ImMessage();
                 message.setId(messageId);
                 message.setSessionId(sessionId);
                 message.setSenderId(userId);
@@ -224,7 +277,7 @@ public class ImWebSocketEndpoint {
                 // 广播消息给会话中的所有用户
                 broadcastMessageToSession(sessionId, message);
 
-                log.info("消息已发送: messageId={}, sessionId={}", messageId, sessionId);
+                log.info("消息已发送: messageId={}, sessionId={}, senderId={}", messageId, sessionId, userId);
             }
 
         } catch (Exception e) {
@@ -234,6 +287,10 @@ public class ImWebSocketEndpoint {
 
     /**
      * 处理正在输入状态
+     * 广播用户的输入状态给会话中的其他用户
+     *
+     * @param userId 用户ID
+     * @param payload 输入状态数据
      */
     private void handleTypingStatus(Long userId, Object payload) {
         try {
@@ -253,6 +310,10 @@ public class ImWebSocketEndpoint {
 
     /**
      * 处理消息已读
+     * 更新消息的已读状态并广播已读回执
+     *
+     * @param userId 用户ID
+     * @param payload 已读数据
      */
     private void handleReadReceipt(Long userId, Object payload) {
         try {
@@ -279,8 +340,12 @@ public class ImWebSocketEndpoint {
 
     /**
      * 广播消息给会话中的所有用户
+     * 根据会话类型（私聊/群聊）获取相关用户并推送消息
+     *
+     * @param sessionId 会话ID
+     * @param message 消息对象
      */
-    private void broadcastMessageToSession(Long sessionId, ImMessage message) {
+    private void broadcastMessageToSession(Long sessionId, com.ruoyi.im.domain.ImMessage message) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> messageMap = new HashMap<>();
@@ -289,9 +354,45 @@ public class ImWebSocketEndpoint {
 
             String messageJson = mapper.writeValueAsString(messageMap);
 
-            // 这里应该根据 sessionId 获取会话中的所有用户
-            // 简化起见，广播给所有在线用户
-            broadcastToAllOnline(messageJson);
+            // 获取会话信息，确定会话类型和参与者
+            com.ruoyi.im.vo.session.ImSessionVO sessionVO = staticImSessionService.getSessionById(sessionId);
+            if (sessionVO == null) {
+                log.warn("会话不存在，无法广播消息: sessionId={}", sessionId);
+                return;
+            }
+
+            // 根据会话类型获取目标用户列表
+            List<Long> targetUserIds = new ArrayList<>();
+            if ("private".equals(sessionVO.getType())) {
+                // 私聊会话：发送者和接收者
+                targetUserIds.add(message.getSenderId());
+                if (message.getReceiverId() != null) {
+                    targetUserIds.add(message.getReceiverId());
+                }
+            } else if ("group".equals(sessionVO.getType())) {
+                // 群聊会话：获取群组成员列表
+                // TODO: 从群组服务获取群组成员列表
+                // 暂时使用会话中的 peerId 作为群组ID
+                Long groupId = sessionVO.getPeerId();
+                if (groupId != null) {
+                    // 这里应该调用群组服务获取成员列表
+                    // 暂时简化处理
+                    targetUserIds.add(message.getSenderId());
+                }
+            }
+
+            // 向目标用户发送消息
+            for (Long targetUserId : targetUserIds) {
+                Session targetSession = onlineUsers.get(targetUserId);
+                if (targetSession != null && targetSession.isOpen()) {
+                    try {
+                        targetSession.getBasicRemote().sendText(messageJson);
+                        log.debug("消息已发送给用户: userId={}, messageId={}", targetUserId, message.getId());
+                    } catch (IOException e) {
+                        log.error("发送消息给用户失败: userId={}", targetUserId, e);
+                    }
+                }
+            }
 
         } catch (Exception e) {
             log.error("广播消息异常", e);
@@ -300,6 +401,11 @@ public class ImWebSocketEndpoint {
 
     /**
      * 广播正在输入状态
+     * 向会话中的其他用户发送输入状态通知
+     *
+     * @param sessionId 会话ID
+     * @param userId 用户ID
+     * @param isTyping 是否正在输入
      */
     private void broadcastTypingStatus(Long sessionId, Long userId, boolean isTyping) {
         try {
@@ -321,6 +427,11 @@ public class ImWebSocketEndpoint {
 
     /**
      * 广播已读回执
+     * 向会话中的其他用户发送消息已读通知
+     *
+     * @param sessionId 会话ID
+     * @param userId 用户ID
+     * @param messageIds 消息ID列表
      */
     private void broadcastReadReceipt(Long sessionId, Long userId, List<Long> messageIds) {
         try {
@@ -343,6 +454,10 @@ public class ImWebSocketEndpoint {
 
     /**
      * 广播用户在线状态
+     * 向所有在线用户发送用户上线/离线通知
+     *
+     * @param userId 用户ID
+     * @param online 是否在线
      */
     private void broadcastOnlineStatus(Long userId, boolean online) {
         try {
@@ -360,6 +475,10 @@ public class ImWebSocketEndpoint {
 
     /**
      * 发送消息给指定会话
+     * 将消息对象序列化为 JSON 并发送给指定的 WebSocket 会话
+     *
+     * @param session WebSocket 会话
+     * @param message 消息对象
      */
     private void sendMessage(Session session, Object message) {
         try {
@@ -375,6 +494,9 @@ public class ImWebSocketEndpoint {
 
     /**
      * 广播消息给所有在线用户
+     * 遍历所有在线用户的 WebSocket 会话并发送消息
+     *
+     * @param messageJson JSON 格式的消息内容
      */
     private void broadcastToAllOnline(String messageJson) {
         List<Session> sessions = new ArrayList<>(onlineUsers.values());
@@ -391,6 +513,12 @@ public class ImWebSocketEndpoint {
 
     /**
      * 构建状态消息
+     * 创建标准格式的状态消息对象
+     *
+     * @param type 消息类型
+     * @param userId 用户ID
+     * @param data 消息数据
+     * @return 状态消息 Map
      */
     private Map<String, Object> buildStatusMessage(String type, Long userId, Object data) {
         Map<String, Object> message = new HashMap<>();
@@ -403,6 +531,10 @@ public class ImWebSocketEndpoint {
 
     /**
      * 从查询字符串中提取 token
+     * 解析 WebSocket 连接 URL 的查询参数，提取认证 token
+     *
+     * @param queryString 查询字符串（格式：token=xxx&param2=yyy）
+     * @return token 值，如果未找到则返回 null
      */
     private String extractTokenFromQuery(String queryString) {
         if (queryString == null || queryString.isEmpty()) {
@@ -420,6 +552,9 @@ public class ImWebSocketEndpoint {
 
     /**
      * 获取在线用户数
+     * 统计当前在线用户的总数
+     *
+     * @return 在线用户数量
      */
     public static int getOnlineUserCount() {
         return onlineUsers.size();
@@ -427,6 +562,10 @@ public class ImWebSocketEndpoint {
 
     /**
      * 检查用户是否在线
+     * 判断指定用户是否建立了 WebSocket 连接
+     *
+     * @param userId 用户ID
+     * @return true 如果用户在线，否则 false
      */
     public static boolean isUserOnline(Long userId) {
         return onlineUsers.containsKey(userId);
@@ -434,6 +573,9 @@ public class ImWebSocketEndpoint {
 
     /**
      * 获取所有在线用户ID
+     * 返回当前所有在线用户的 ID 集合
+     *
+     * @return 在线用户 ID 集合
      */
     public static Set<Long> getOnlineUserIds() {
         return new HashSet<>(onlineUsers.keySet());
@@ -441,6 +583,10 @@ public class ImWebSocketEndpoint {
 
     /**
      * 发送消息给指定用户
+     * 向指定在线用户发送消息，如果用户不在线则忽略
+     *
+     * @param userId 目标用户ID
+     * @param message 消息对象
      */
     public static void sendToUser(Long userId, Object message) {
         Session session = onlineUsers.get(userId);

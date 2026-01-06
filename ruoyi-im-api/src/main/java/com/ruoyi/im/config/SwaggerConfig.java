@@ -10,15 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.ApiKey;
-import springfox.documentation.service.AuthorizationScope;
-import springfox.documentation.service.Contact;
-import springfox.documentation.service.SecurityReference;
-import springfox.documentation.service.SecurityScheme;
 import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -27,7 +20,7 @@ import java.util.List;
 
 @Configuration
 @EnableSwagger2
-@ConditionalOnProperty(name = "swagger.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "swagger.enabled", havingValue = "true", matchIfMissing = false)
 public class SwaggerConfig implements ApplicationRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(SwaggerConfig.class);
@@ -45,49 +38,25 @@ public class SwaggerConfig implements ApplicationRunner {
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.ruoyi.im.controller"))
                 .paths(PathSelectors.any())
-                .build()
-                .securitySchemes(securitySchemes())
-                .securityContexts(securityContexts());
+                .build();
     }
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("IM即时通讯系统API文档")
-                .description("提供用户管理、消息发送、会话管理、联系人管理、群组管理等功能的API接口")
-                .contact(new Contact("RuoYi", "", ""))
+                .title("IM System API")
+                .description("Instant messaging and collaboration platform")
                 .version("1.0.0")
+                .contact(new Contact("RuoYi", "", ""))
                 .build();
-    }
-
-    private List<SecurityScheme> securitySchemes() {
-        ApiKey apiKey = new ApiKey("Authorization", "Authorization", "header");
-        return Collections.singletonList(apiKey);
-    }
-
-    private List<SecurityContext> securityContexts() {
-        SecurityContext securityContext = SecurityContext.builder()
-                .securityReferences(defaultAuth())
-                .forPaths(PathSelectors.regex("/.*"))
-                .build();
-        return Collections.singletonList(securityContext);
-    }
-
-    private List<SecurityReference> defaultAuth() {
-        AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
-        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-        authorizationScopes[0] = authorizationScope;
-        return Collections.singletonList(new SecurityReference("Authorization", authorizationScopes));
     }
 
     @Override
     public void run(ApplicationArguments args) {
         String swaggerUiUrl = "http://localhost:" + port + contextPath + "/swagger-ui.html";
         String swaggerApiDocsUrl = "http://localhost:" + port + contextPath + "/v2/api-docs";
-        
-        logger.info("============================================================");
-        logger.info("Swagger API文档已启用");
-        logger.info("Swagger UI访问地址: {}", swaggerUiUrl);
-        logger.info("API文档JSON地址: {}", swaggerApiDocsUrl);
-        logger.info("============================================================");
+
+        logger.info("Swagger enabled");
+        logger.info("Swagger UI URL: {}", swaggerUiUrl);
+        logger.info("API Docs URL: {}", swaggerApiDocsUrl);
     }
 }

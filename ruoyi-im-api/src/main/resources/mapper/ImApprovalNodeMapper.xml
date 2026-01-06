@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImApprovalNodeMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImApprovalNode" id="ImApprovalNodeResult">
+        <id property="id" column="id"/>
+        <result property="approvalId" column="approval_id"/>
+        <result property="nodeName" column="node_name"/>
+        <result property="nodeType" column="node_type"/>
+        <result property="approverIds" column="approver_ids"/>
+        <result property="approveType" column="approve_type"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="status" column="status"/>
+        <result property="processTime" column="process_time"/>
+        <result property="processorId" column="processor_id"/>
+    </resultMap>
+
+    <sql id="selectImApprovalNodeVo">
+        select id, approval_id, node_name, node_type, approver_ids, approve_type, sort_order, status, process_time, processor_id
+        from im_approval_node
+    </sql>
+
+    <select id="selectImApprovalNodeById" parameterType="Long" resultMap="ImApprovalNodeResult">
+        <include refid="selectImApprovalNodeVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectNodesByApprovalId" parameterType="Long" resultMap="ImApprovalNodeResult">
+        <include refid="selectImApprovalNodeVo"/>
+        where approval_id = #{approvalId}
+        order by sort_order
+    </select>
+
+    <select id="selectImApprovalNodeList" parameterType="com.ruoyi.im.domain.ImApprovalNode" resultMap="ImApprovalNodeResult">
+        <include refid="selectImApprovalNodeVo"/>
+        <where>
+            <if test="approvalId != null">and approval_id = #{approvalId}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by sort_order
+    </select>
+
+    <select id="selectPendingNodesByApproverId" parameterType="Long" resultMap="ImApprovalNodeResult">
+        <include refid="selectImApprovalNodeVo"/>
+        where status = 'PENDING'
+        and find_in_set(#{approverId}, approver_ids)
+        order by approval_id, sort_order
+    </select>
+
+    <insert id="insertImApprovalNode" parameterType="com.ruoyi.im.domain.ImApprovalNode" useGeneratedKeys="true" keyProperty="id">
+        insert into im_approval_node
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="approvalId != null">approval_id,</if>
+            <if test="nodeName != null and nodeName != ''">node_name,</if>
+            <if test="nodeType != null and nodeType != ''">node_type,</if>
+            <if test="approverIds != null and approverIds != ''">approver_ids,</if>
+            <if test="approveType != null and approveType != ''">approve_type,</if>
+            <if test="sortOrder != null">sort_order,</if>
+            <if test="status != null">status,</if>
+            <if test="processTime != null">process_time,</if>
+            <if test="processorId != null">processor_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="approvalId != null">#{approvalId},</if>
+            <if test="nodeName != null and nodeName != ''">#{nodeName},</if>
+            <if test="nodeType != null and nodeType != ''">#{nodeType},</if>
+            <if test="approverIds != null and approverIds != ''">#{approverIds},</if>
+            <if test="approveType != null and approveType != ''">#{approveType},</if>
+            <if test="sortOrder != null">#{sortOrder},</if>
+            <if test="status != null">#{status},</if>
+            <if test="processTime != null">#{processTime},</if>
+            <if test="processorId != null">#{processorId},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImApprovalNode" parameterType="com.ruoyi.im.domain.ImApprovalNode">
+        update im_approval_node
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="status != null">status = #{status},</if>
+            <if test="processTime != null">process_time = #{processTime},</if>
+            <if test="processorId != null">processor_id = #{processorId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImApprovalNodeById" parameterType="Long">
+        delete from im_approval_node where id = #{id}
+    </delete>
+
+    <delete id="deleteNodesByApprovalId" parameterType="Long">
+        delete from im_approval_node where approval_id = #{approvalId}
+    </delete>
+</mapper>

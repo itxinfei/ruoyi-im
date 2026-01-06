@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImApprovalRecordMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImApprovalRecord" id="ImApprovalRecordResult">
+        <id property="id" column="id"/>
+        <result property="approvalId" column="approval_id"/>
+        <result property="nodeId" column="node_id"/>
+        <result property="approverId" column="approver_id"/>
+        <result property="action" column="action"/>
+        <result property="comment" column="comment"/>
+        <result property="attachments" column="attachments"/>
+        <result property="actionTime" column="action_time"/>
+    </resultMap>
+
+    <sql id="selectImApprovalRecordVo">
+        select id, approval_id, node_id, approver_id, action, comment, attachments, action_time
+        from im_approval_record
+    </sql>
+
+    <select id="selectImApprovalRecordById" parameterType="Long" resultMap="ImApprovalRecordResult">
+        <include refid="selectImApprovalRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectRecordsByApprovalId" parameterType="Long" resultMap="ImApprovalRecordResult">
+        <include refid="selectImApprovalRecordVo"/>
+        where approval_id = #{approvalId}
+        order by action_time
+    </select>
+
+    <select id="selectImApprovalRecordList" parameterType="com.ruoyi.im.domain.ImApprovalRecord" resultMap="ImApprovalRecordResult">
+        <include refid="selectImApprovalRecordVo"/>
+        <where>
+            <if test="approvalId != null">and approval_id = #{approvalId}</if>
+            <if test="nodeId != null">and node_id = #{nodeId}</if>
+            <if test="approverId != null">and approver_id = #{approverId}</if>
+            <if test="action != null and action != ''">and action = #{action}</if>
+        </where>
+        order by action_time desc
+    </select>
+
+    <insert id="insertImApprovalRecord" parameterType="com.ruoyi.im.domain.ImApprovalRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into im_approval_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="approvalId != null">approval_id,</if>
+            <if test="nodeId != null">node_id,</if>
+            <if test="approverId != null">approver_id,</if>
+            <if test="action != null and action != ''">action,</if>
+            <if test="comment != null">comment,</if>
+            <if test="attachments != null">attachments,</if>
+            <if test="actionTime != null">action_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="approvalId != null">#{approvalId},</if>
+            <if test="nodeId != null">#{nodeId},</if>
+            <if test="approverId != null">#{approverId},</if>
+            <if test="action != null and action != ''">#{action},</if>
+            <if test="comment != null">#{comment},</if>
+            <if test="attachments != null">#{attachments},</if>
+            <if test="actionTime != null">#{actionTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImApprovalRecord" parameterType="com.ruoyi.im.domain.ImApprovalRecord">
+        update im_approval_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="action != null">action = #{action},</if>
+            <if test="comment != null">comment = #{comment},</if>
+            <if test="attachments != null">attachments = #{attachments},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImApprovalRecordById" parameterType="Long">
+        delete from im_approval_record where id = #{id}
+    </delete>
+
+    <delete id="deleteRecordsByApprovalId" parameterType="Long">
+        delete from im_approval_record where approval_id = #{approvalId}
+    </delete>
+</mapper>

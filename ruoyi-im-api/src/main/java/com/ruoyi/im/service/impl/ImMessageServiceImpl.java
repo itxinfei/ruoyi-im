@@ -1,8 +1,15 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.domain.ImMessage;
+import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
+import com.ruoyi.im.exception.BusinessException;
+import com.ruoyi.im.mapper.ImMessageMapper;
+import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.vo.message.ImMessageVO;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,66 +24,99 @@ import java.util.List;
 @Service
 public class ImMessageServiceImpl implements ImMessageService {
 
+    @Autowired
+    private ImMessageMapper imMessageMapper;
+
+    @Autowired
+    private ImUserMapper imUserMapper;
+
     @Override
     public Long sendMessage(ImMessageSendRequest request, Long userId) {
-        // TODO: 实现发送消息逻辑
-        // 1. 保存消息到数据库
-        // 2. 通过 WebSocket 推送消息
-        // 3. 更新会话最后消息信息
-        return System.currentTimeMillis();
+        ImUser sender = imUserMapper.selectImUserById(userId);
+        if (sender == null) {
+            throw new BusinessException("发送者不存在");
+        }
+        
+        ImMessage message = new ImMessage();
+        message.setSessionId(request.getSessionId());
+        message.setSenderId(userId);
+        message.setReceiverId(request.getReceiverId());
+        message.setType(request.getType());
+        message.setContent(request.getContent());
+        message.setStatus(1);
+        message.setIsRevoked(0);
+        message.setSendTime(LocalDateTime.now());
+        message.setCreateTime(LocalDateTime.now());
+        
+        imMessageMapper.insertImMessage(message);
+        
+        return message.getId();
     }
 
     @Override
     public List<ImMessageVO> getMessages(Long sessionId, Long userId, Long lastId, Integer limit) {
-        // TODO: 从数据库查询消息列表
-        List<ImMessageVO> list = new ArrayList<>();
-
-        // 模拟数据
-        ImMessageVO vo1 = new ImMessageVO();
-        vo1.setId(1L);
-        vo1.setSessionId(sessionId);
-        vo1.setSenderId(2L);
-        vo1.setSenderName("张三");
-        vo1.setSenderAvatar("/avatar/user1.png");
-        vo1.setType("text");
-        vo1.setContent("你好，在吗？");
-        vo1.setStatus(3);
-        vo1.setIsRevoked(0);
-        vo1.setSendTime(LocalDateTime.now());
-        vo1.setIsSelf(false);
-        list.add(vo1);
-
-        ImMessageVO vo2 = new ImMessageVO();
-        vo2.setId(2L);
-        vo2.setSessionId(sessionId);
-        vo2.setSenderId(userId);
-        vo2.setSenderName("我");
-        vo2.setSenderAvatar("/avatar/me.png");
-        vo2.setType("text");
-        vo2.setContent("在的，有什么事吗？");
-        vo2.setStatus(3);
-        vo2.setIsRevoked(0);
-        vo2.setSendTime(LocalDateTime.now());
-        vo2.setIsSelf(true);
-        list.add(vo2);
-
-        return list;
+        List<ImMessageVO> voList = new ArrayList<>();
+        
+        ImMessage query = new ImMessage();
+        query.setSessionId(sessionId);
+        
+        List<ImMessage> messageList = imMessageMapper.selectImMessageList(query);
+        
+        for (ImMessage message : messageList) {
+            ImMessageVO vo = new ImMessageVO();
+            BeanUtils.copyProperties(message, vo);
+            
+            ImUser sender = imUserMapper.selectImUserById(message.getSenderId());
+            if (sender != null) {
+                vo.setSenderName(sender.getNickname());
+                vo.setSenderAvatar(sender.getAvatar());
+            }
+            
+            vo.setIsSelf(message.getSenderId().equals(userId));
+            voList.add(vo);
+        }
+        
+        return voList;
     }
 
     @Override
     public void recallMessage(Long messageId, Long userId) {
-        // TODO: 实现撤回消息逻辑
-        // 1. 检查消息是否属于当前用户
-        // 2. 检查消息是否超过撤回时间限制（如2分钟）
-        // 3. 更新消息状态为已撤回
-        // 4. 通过 WebSocket 推送撤回通知
+        ImMessage message = imMessageMapper.selectImMessageById(messageId);
+        if (message == null) {
+            throw new BusinessException("消息不存在");
+        }
+        
+        if (!message.getSenderId().equals(userId)) {
+            throw new BusinessException("无权撤回该消息");
+        }
+        
+        if (message.getIsRevoked() == 1) {
+            throw new BusinessException("消息已撤回");
+        }
+        
+        LocalDateTime now = LocalDateTime.now();
+        if (message.getSendTime().plusMinutes(2).isBefore(now)) {
+            throw new BusinessException("消息发送超过2分钟，无法撤回");
+        }
+        
+        message.setIsRevoked(1);
+        message.setRevokeTime(now);
+        message.setStatus(5);
+        imMessageMapper.updateImMessage(message);
     }
 
     @Override
     public void markAsRead(Long sessionId, Long userId, List<Long> messageIds) {
-        // TODO: 实现标记已读逻辑
-        // 1. 批量更新消息状态
-        // 2. 更新会话未读数
-        // 3. 通过 WebSocket 推送已读回执
+        if (messageIds == null || messageIds.isEmpty()) {
+            return;
+        }
+        
+        for (Long messageId : messageIds) {
+            ImMessage message = imMessageMapper.selectImMessageById(messageId);
+            if (message != null && !message.getSenderId().equals(userId)) {
+                message.setStatus(3);
+                imMessageMapper.updateImMessage(message);
+            }
+        }
     }
 }

@@ -1,17 +1,31 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.domain.ImFriend;
 import com.ruoyi.im.domain.ImFriendRequest;
+import com.ruoyi.im.domain.ImSession;
+import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.contact.ImFriendAddRequest;
 import com.ruoyi.im.dto.contact.ImFriendUpdateRequest;
+import com.ruoyi.im.exception.BusinessException;
+import com.ruoyi.im.mapper.ImFriendMapper;
+import com.ruoyi.im.mapper.ImFriendRequestMapper;
+import com.ruoyi.im.mapper.ImSessionMapper;
+import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImFriendService;
 import com.ruoyi.im.vo.contact.ImContactGroupVO;
 import com.ruoyi.im.vo.contact.ImFriendVO;
 import com.ruoyi.im.vo.user.ImUserVO;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 好友服务实现
@@ -21,129 +35,345 @@ import java.util.List;
 @Service
 public class ImFriendServiceImpl implements ImFriendService {
 
+    @Autowired
+    private ImFriendMapper imFriendMapper;
+
+    @Autowired
+    private ImFriendRequestMapper imFriendRequestMapper;
+
+    @Autowired
+    private ImUserMapper imUserMapper;
+
+    @Autowired
+    private ImSessionMapper imSessionMapper;
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long sendFriendRequest(ImFriendAddRequest request, Long userId) {
-        // TODO: 实现发送好友申请逻辑
-        // 1. 检查是否已经是好友
-        // 2. 检查是否已有待处理的申请
-        // 3. 创建好友申请记录
-        // 4. 发送通知给目标用户
-        return 1L;
-    }
+        // 检查是否添加自己为好友
+        if (userId.equals(request.getTargetUserId())) {
+            throw new BusinessException("不能添加自己为好友");
+        }
 
-    @Override
-    public List<ImFriendRequest> getReceivedRequests(Long userId) {
-        // TODO: 从数据库查询收到的好友申请
-        List<ImFriendRequest> list = new ArrayList<>();
+        // 查询目标用户是否存在
+        ImUser toUser = imUserMapper.selectImUserById(request.getTargetUserId());
+        if (toUser == null) {
+            throw new BusinessException("目标用户不存在");
+        }
 
-        ImFriendRequest request = new ImFriendRequest();
-        request.setId(1L);
-        request.setFromUserId(2L);
-        request.setToUserId(userId);
-        request.setMessage("你好，我想加你为好友");
-        request.setStatus("PENDING");
-        request.setCreateTime(LocalDateTime.now());
-        request.setFromUserName("张三");
-        request.setFromUserAvatar("/avatar/user2.png");
-        list.add(request);
+        // 检查是否已经是好友
+        ImFriend query = new ImFriend();
+        query.setUserId(userId);
+        query.setFriendId(request.getTargetUserId());
+        List<ImFriend> existingFriends = imFriendMapper.selectImFriendList(query);
+        if (existingFriends != null && !existingFriends.isEmpty()) {
+            ImFriend existingFriend = existingFriends.get(0);
+            if ("DELETED".equals(existingFriend.getStatus())) {
+                // 恢复已删除的好友关系
+                existingFriend.setStatus("NORMAL");
+                existingFriend.setGroupName(request.getGroupName());
+                existingFriend.setUpdateTime(LocalDateTime.now());
+                imFriendMapper.updateImFriend(existingFriend);
+                return existingFriend.getId();
+            } else {
+                throw new BusinessException("已经是好友关系");
+            }
+        }
 
-        return list;
+        // 创建好友申请
+        ImFriendRequest friendRequest = new ImFriendRequest();
+        friendRequest.setFromUserId(userId);
+        friendRequest.setToUserId(request.getTargetUserId());
+        friendRequest.setMessage(request.getMessage());
+        friendRequest.setStatus("PENDING");
+        friendRequest.setCreateTime(LocalDateTime.now());
+        imFriendRequestMapper.insertImFriendRequest(friendRequest);
+
+        return friendRequest.getId();
     }
 
     @Override
     public List<ImFriendRequest> getSentRequests(Long userId) {
-        // TODO: 从数据库查询发送的好友申请
-        List<ImFriendRequest> list = new ArrayList<>();
-        return list;
+        ImFriendRequest query = new ImFriendRequest();
+        query.setFromUserId(userId);
+        List<ImFriendRequest> requestList = imFriendRequestMapper.selectImFriendRequestList(query);
+
+        List<ImFriendRequest> pendingList = new ArrayList<>();
+        for (ImFriendRequest request : requestList) {
+            if ("PENDING".equals(request.getStatus())) {
+                // 查询目标用户信息
+                ImUser toUser = imUserMapper.selectImUserById(request.getToUserId());
+                if (toUser != null) {
+                    request.setFromUserName(toUser.getNickname() != null ? toUser.getNickname() : toUser.getUsername());
+                    request.setFromUserAvatar(toUser.getAvatar());
+                }
+                pendingList.add(request);
+            }
+        }
+
+        return pendingList;
     }
 
     @Override
-    public void handleFriendRequest(Long requestId, Boolean approved, Long userId) {
-        // TODO: 实现处理好友申请逻辑
-        // 1. 更新申请状态
-        // 2. 如果同意，创建双向好友关系
-        // 3. 发送通知给申请人
+    @Transactional(rollbackFor = Exception.class)
+    public void updateFriend(Long friendId, ImFriendUpdateRequest request, Long userId) {
+        ImFriend friend = imFriendMapper.selectImFriendById(friendId);
+        if (friend == null) {
+            throw new BusinessException("好友关系不存在");
+        }
+
+        // 只能修改自己的好友关系
+        if (!friend.getUserId().equals(userId)) {
+            throw new BusinessException("无权限操作");
+        }
+
+        // 只能修改备注、分组
+        if (request.getRemark() != null) {
+            friend.setRemark(request.getRemark());
+        }
+        if (request.getGroupName() != null) {
+            friend.setGroupName(request.getGroupName());
+        }
+        friend.setUpdateTime(LocalDateTime.now());
+        imFriendMapper.updateImFriend(friend);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteFriend(Long friendId, Long userId) {
+        ImFriend friend = imFriendMapper.selectImFriendById(friendId);
+        if (friend == null) {
+            throw new BusinessException("好友关系不存在");
+        }
+
+        // 只能删除自己的好友关系
+        if (!friend.getUserId().equals(userId)) {
+            throw new BusinessException("无权限操作");
+        }
+
+        // 将状态设为已删除
+        friend.setStatus("DELETED");
+        friend.setUpdateTime(LocalDateTime.now());
+        imFriendMapper.updateImFriend(friend);
     }
 
     @Override
     public List<ImFriendVO> getFriendList(Long userId) {
-        // TODO: 从数据库查询好友列表
-        List<ImFriendVO> list = new ArrayList<>();
+        ImFriend query = new ImFriend();
+        query.setUserId(userId);
+        List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
 
-        ImFriendVO vo = new ImFriendVO();
-        vo.setId(1L);
-        vo.setFriendId(2L);
-        vo.setFriendName("张三");
-        vo.setFriendAvatar("/avatar/user2.png");
-        vo.setRemark("我的好友");
-        vo.setGroupName("默认分组");
-        vo.setStatus("NORMAL");
-        vo.setOnline(true);
-        vo.setCreateTime(LocalDateTime.now());
-        list.add(vo);
+        List<ImFriendVO> voList = new ArrayList<>();
+        for (ImFriend friend : friendList) {
+            if ("DELETED".equals(friend.getStatus())) {
+                continue;
+            }
+            ImFriendVO vo = new ImFriendVO();
+            BeanUtils.copyProperties(friend, vo);
+            vo.setOnline("ONLINE".equals(friend.getStatus()));
 
-        return list;
+            // 查询好友用户信息
+            ImUser friendUser = imUserMapper.selectImUserById(friend.getFriendId());
+            if (friendUser != null) {
+                vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
+                vo.setFriendAvatar(friendUser.getAvatar());
+            }
+            voList.add(vo);
+        }
+
+        return voList;
+    }
+
+    @Override
+    public List<ImFriendRequest> getReceivedRequests(Long userId) {
+        List<ImFriendRequest> requestList = imFriendRequestMapper.selectImFriendRequestListByToUserId(userId);
+
+        List<ImFriendRequest> pendingList = new ArrayList<>();
+        for (ImFriendRequest request : requestList) {
+            if ("PENDING".equals(request.getStatus())) {
+                ImUser fromUser = imUserMapper.selectImUserById(request.getFromUserId());
+                if (fromUser != null) {
+                    request.setFromUserName(fromUser.getNickname() != null ? fromUser.getNickname() : fromUser.getUsername());
+                    request.setFromUserAvatar(fromUser.getAvatar());
+                }
+                pendingList.add(request);
+            }
+        }
+
+        return pendingList;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void handleFriendRequest(Long requestId, Boolean approved, Long userId) {
+        ImFriendRequest request = imFriendRequestMapper.selectImFriendRequestById(requestId);
+        if (request == null) {
+            throw new BusinessException("好友申请不存在");
+        }
+
+        if (!request.getToUserId().equals(userId)) {
+            throw new BusinessException("无权限操作该申请");
+        }
+
+        if (approved) {
+            // 同意：创建好友关系
+            ImFriend friend = new ImFriend();
+            friend.setUserId(request.getToUserId());
+            friend.setFriendId(request.getFromUserId());
+            friend.setStatus("NORMAL");
+            friend.setRemark("");
+            friend.setGroupName("默认分组");
+            friend.setCreateTime(LocalDateTime.now());
+            friend.setUpdateTime(LocalDateTime.now());
+            imFriendMapper.insertImFriend(friend);
+
+            // 创建私聊会话
+            createPrivateSession(request.getToUserId(), request.getFromUserId());
+
+            // 更新申请状态
+            request.setStatus("APPROVED");
+            request.setHandledTime(LocalDateTime.now());
+            imFriendRequestMapper.updateImFriendRequest(request);
+        } else {
+            // 拒绝
+            request.setStatus("REJECTED");
+            request.setHandledTime(LocalDateTime.now());
+            imFriendRequestMapper.updateImFriendRequest(request);
+        }
     }
 
     @Override
     public List<ImContactGroupVO> getGroupedFriendList(Long userId) {
-        // TODO: 从数据库查询分组好友列表
-        List<ImContactGroupVO> list = new ArrayList<>();
+        ImFriend query = new ImFriend();
+        query.setUserId(userId);
+        List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
 
-        ImContactGroupVO groupVO = new ImContactGroupVO();
-        groupVO.setGroupName("默认分组");
-        groupVO.setCount(1);
-        groupVO.setFriends(getFriendList(userId));
-        list.add(groupVO);
+        Map<String, List<ImFriendVO>> groupMap = new HashMap<>();
+        for (ImFriend friend : friendList) {
+            if ("DELETED".equals(friend.getStatus())) {
+                continue;
+            }
+            String groupName = friend.getGroupName();
+            if (groupName == null) {
+                groupName = "默认分组";
+            }
+            if (!groupMap.containsKey(groupName)) {
+                groupMap.put(groupName, new ArrayList<>());
+            }
+            ImFriendVO vo = new ImFriendVO();
+            BeanUtils.copyProperties(friend, vo);
 
-        return list;
+            // 查询好友用户信息
+            ImUser friendUser = imUserMapper.selectImUserById(friend.getFriendId());
+            if (friendUser != null) {
+                vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
+                vo.setFriendAvatar(friendUser.getAvatar());
+            }
+            groupMap.get(groupName).add(vo);
+        }
+
+        List<ImContactGroupVO> result = new ArrayList<>();
+        for (Map.Entry<String, List<ImFriendVO>> entry : groupMap.entrySet()) {
+            ImContactGroupVO vo = new ImContactGroupVO();
+            vo.setGroupName(entry.getKey());
+            vo.setFriends(entry.getValue());
+            vo.setCount(entry.getValue().size());
+            result.add(vo);
+        }
+
+        return result;
     }
 
     @Override
     public ImFriendVO getFriendById(Long friendId, Long userId) {
-        // TODO: 从数据库查询好友信息
+        ImFriend friend = imFriendMapper.selectImFriendById(friendId);
+        if (friend == null) {
+            throw new BusinessException("好友关系不存在");
+        }
+
+        if (!friend.getUserId().equals(userId)) {
+            throw new BusinessException("无权限查看");
+        }
+
         ImFriendVO vo = new ImFriendVO();
-        vo.setFriendId(friendId);
-        vo.setFriendName("张三");
-        vo.setFriendAvatar("/avatar/user2.png");
-        vo.setStatus("NORMAL");
-        vo.setOnline(true);
+        BeanUtils.copyProperties(friend, vo);
+        vo.setOnline("ONLINE".equals(friend.getStatus()));
+
+        // 查询好友用户信息
+        ImUser friendUser = imUserMapper.selectImUserById(friend.getFriendId());
+        if (friendUser != null) {
+            vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
+            vo.setFriendAvatar(friendUser.getAvatar());
+        }
+
         return vo;
     }
 
     @Override
-    public void updateFriend(Long friendId, ImFriendUpdateRequest request, Long userId) {
-        // TODO: 实现更新好友信息逻辑
-        // 1. 更新备注和分组
-    }
-
-    @Override
-    public void deleteFriend(Long friendId, Long userId) {
-        // TODO: 实现删除好友逻辑
-        // 1. 删除双向好友关系
-        // 2. 删除相关会话
-    }
-
-    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void blockFriend(Long friendId, Boolean blocked, Long userId) {
-        // TODO: 实现拉黑/解除拉黑逻辑
-        // 1. 更新好友状态为BLOCKED或NORMAL
+        ImFriend friend = imFriendMapper.selectImFriendById(friendId);
+        if (friend == null) {
+            throw new BusinessException("好友关系不存在");
+        }
+
+        if (!friend.getUserId().equals(userId)) {
+            throw new BusinessException("无权限操作");
+        }
+
+        // 使用status字段表示拉黑状态
+        friend.setStatus(blocked ? "BLOCKED" : "NORMAL");
+        friend.setUpdateTime(LocalDateTime.now());
+        imFriendMapper.updateImFriend(friend);
     }
 
     @Override
     public List<ImUserVO> searchUsers(String keyword, Long userId) {
-        // TODO: 实现搜索用户逻辑
-        // 1. 根据用户名或手机号搜索
-        // 2. 过滤自己和已经是好友的用户
-        List<ImUserVO> list = new ArrayList<>();
+        // 根据关键词搜索用户
+        List<ImUser> userList = imUserMapper.selectImUserByKeyword(keyword);
 
-        ImUserVO vo = new ImUserVO();
-        vo.setId(2L);
-        vo.setUsername("张三");
-        vo.setNickname("张三");
-        vo.setAvatar("/avatar/user2.png");
-        list.add(vo);
+        List<ImUserVO> result = new ArrayList<>();
+        for (ImUser user : userList) {
+            // 排除自己和已经是好友的用户
+            if (user.getId().equals(userId)) {
+                continue;
+            }
 
-        return list;
+            // 检查是否已经是好友
+            ImFriend query = new ImFriend();
+            query.setUserId(userId);
+            query.setFriendId(user.getId());
+            List<ImFriend> existingFriends = imFriendMapper.selectImFriendList(query);
+            boolean isFriend = existingFriends != null && !existingFriends.isEmpty()
+                    && !"DELETED".equals(existingFriends.get(0).getStatus());
+
+            ImUserVO vo = new ImUserVO();
+            BeanUtils.copyProperties(user, vo);
+            // 可以添加额外的状态标识
+            result.add(vo);
+        }
+
+        return result;
+    }
+
+    /**
+     * 创建私聊会话
+     */
+    private void createPrivateSession(Long userId, Long peerId) {
+        // 检查是否已存在会话
+        ImSession existingSession = imSessionMapper.selectPrivateSession(userId, peerId);
+        if (existingSession != null) {
+            return;
+        }
+
+        ImSession session = new ImSession();
+        session.setType("PRIVATE");
+        session.setUserId(userId);
+        session.setPeerId(peerId);
+        session.setUnreadCount(0);
+        session.setIsPinned(0);
+        session.setIsMuted(0);
+        session.setCreateTime(LocalDateTime.now());
+        imSessionMapper.insertImSession(session);
     }
 }

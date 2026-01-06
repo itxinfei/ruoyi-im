@@ -1,0 +1,71 @@
+// 钉钉风格对话框动画
+.ding-dialog {
+  .el-dialog {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .el-dialog__header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .el-dialog__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .el-dialog__body {
+    padding: 24px;
+  }
+
+  .el-dialog__footer {
+    padding: 16px 24px;
+    border-top: 1px solid #f0f0f0;
+  }
+}
+
+// 对话框进入动画
+.dialog-enter-active {
+  animation: dialogIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dialogIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// 抽屉样式
+.ding-drawer {
+  .el-drawer {
+    border-radius: 12px 0 0 12px;
+  }
+
+  .el-drawer__header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 0;
+  }
+
+  .el-drawer__body {
+    padding: 24px;
+  }
+}
+
+// 抽屉滑动动画
+.drawer-slide-enter-active,
+.drawer-slide-leave-active {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer-slide-enter-from,
+.drawer-slide-leave-to {
+  transform: translateX(100%);
+}

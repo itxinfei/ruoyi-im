@@ -160,4 +160,12 @@ public interface ImUserMapper {
      * @return 角色集合
      */
     Set<String> selectUserRolesByUserId(Long userId);
+
+    /**
+     * 根据关键词搜索用户
+     *
+     * @param keyword 关键词（用户名或昵称）
+     * @return 用户列表
+     */
+    List<ImUser> selectImUserByKeyword(String keyword);
 }

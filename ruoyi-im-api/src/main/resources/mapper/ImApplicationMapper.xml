@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImApplicationMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImApplication" id="ImApplicationResult">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="icon" column="icon"/>
+        <result property="category" column="category"/>
+        <result property="description" column="description"/>
+        <result property="appType" column="app_type"/>
+        <result property="appUrl" column="app_url"/>
+        <result property="isSystem" column="is_system"/>
+        <result property="isVisible" column="is_visible"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="permissions" column="permissions"/>
+    </resultMap>
+
+    <sql id="selectImApplicationVo">
+        select id, name, code, icon, category, description, app_type, app_url, is_system, is_visible, sort_order, permissions
+        from im_application
+    </sql>
+
+    <select id="selectImApplicationById" parameterType="Long" resultMap="ImApplicationResult">
+        <include refid="selectImApplicationVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectImApplicationByCode" parameterType="String" resultMap="ImApplicationResult">
+        <include refid="selectImApplicationVo"/>
+        where code = #{code}
+    </select>
+
+    <select id="selectImApplicationList" parameterType="com.ruoyi.im.domain.ImApplication" resultMap="ImApplicationResult">
+        <include refid="selectImApplicationVo"/>
+        <where>
+            <if test="name != null and name != ''">and name like concat('%', #{name}, '%')</if>
+            <if test="code != null and code != ''">and code = #{code}</if>
+            <if test="category != null and category != ''">and category = #{category}</if>
+            <if test="isSystem != null">and is_system = #{isSystem}</if>
+            <if test="isVisible != null">and is_visible = #{isVisible}</if>
+        </where>
+        order by sort_order, id
+    </select>
+
+    <select id="selectVisibleApplications" resultMap="ImApplicationResult">
+        <include refid="selectImApplicationVo"/>
+        where is_visible = true
+        order by sort_order, id
+    </select>
+
+    <select id="selectApplicationsByCategory" parameterType="String" resultMap="ImApplicationResult">
+        <include refid="selectImApplicationVo"/>
+        where is_visible = true
+        <if test="category != null and category != ''">
+            and category = #{category}
+        </if>
+        order by sort_order, id
+    </select>
+
+    <insert id="insertImApplication" parameterType="com.ruoyi.im.domain.ImApplication" useGeneratedKeys="true" keyProperty="id">
+        insert into im_application
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="code != null and code != ''">code,</if>
+            <if test="icon != null">icon,</if>
+            <if test="category != null">category,</if>
+            <if test="description != null">description,</if>
+            <if test="appType != null">app_type,</if>
+            <if test="appUrl != null">app_url,</if>
+            <if test="isSystem != null">is_system,</if>
+            <if test="isVisible != null">is_visible,</if>
+            <if test="sortOrder != null">sort_order,</if>
+            <if test="permissions != null">permissions,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="code != null and code != ''">#{code},</if>
+            <if test="icon != null">#{icon},</if>
+            <if test="category != null">#{category},</if>
+            <if test="description != null">#{description},</if>
+            <if test="appType != null">#{appType},</if>
+            <if test="appUrl != null">#{appUrl},</if>
+            <if test="isSystem != null">#{isSystem},</if>
+            <if test="isVisible != null">#{isVisible},</if>
+            <if test="sortOrder != null">#{sortOrder},</if>
+            <if test="permissions != null">#{permissions},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImApplication" parameterType="com.ruoyi.im.domain.ImApplication">
+        update im_application
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="code != null and code != ''">code = #{code},</if>
+            <if test="icon != null">icon = #{icon},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="appType != null">app_type = #{appType},</if>
+            <if test="appUrl != null">app_url = #{appUrl},</if>
+            <if test="isSystem != null">is_system = #{isSystem},</if>
+            <if test="isVisible != null">is_visible = #{isVisible},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="permissions != null">permissions = #{permissions},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImApplicationById" parameterType="Long">
+        delete from im_application where id = #{id}
+    </delete>
+
+    <delete id="deleteImApplicationByIds" parameterType="Long[]">
+        delete from im_application where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

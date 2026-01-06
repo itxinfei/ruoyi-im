@@ -3,8 +3,8 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImSystemNotification;
 import com.ruoyi.im.service.ImSystemNotificationService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
-@Api(tags = "通知管理")
+@Tag(name = "通知管理")
 @RestController
 @RequestMapping("/api/im/notification")
 public class ImNotificationController {
@@ -26,7 +26,7 @@ public class ImNotificationController {
     /**
      * 获取用户通知列表
      */
-    @ApiOperation("获取用户通知列表")
+    @Operation(summary = "获取用户通知列表")
     @GetMapping("/list")
     public Result<List<ImSystemNotification>> getNotifications(
             @RequestParam(required = false) String type,
@@ -41,7 +41,7 @@ public class ImNotificationController {
     /**
      * 获取未读通知数量
      */
-    @ApiOperation("获取未读通知数量")
+    @Operation(summary = "获取未读通知数量")
     @GetMapping("/unread-count")
     public Result<Integer> getUnreadCount(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -54,7 +54,7 @@ public class ImNotificationController {
     /**
      * 标记通知为已读
      */
-    @ApiOperation("标记通知为已读")
+    @Operation(summary = "标记通知为已读")
     @PutMapping("/{id}/read")
     public Result<Void> markAsRead(@PathVariable Long id,
                                   @RequestHeader(value = "userId", required = false) Long userId) {
@@ -68,7 +68,7 @@ public class ImNotificationController {
     /**
      * 标记所有通知为已读
      */
-    @ApiOperation("标记所有通知为已读")
+    @Operation(summary = "标记所有通知为已读")
     @PutMapping("/read-all")
     public Result<Void> markAllAsRead(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -81,7 +81,7 @@ public class ImNotificationController {
     /**
      * 删除通知
      */
-    @ApiOperation("删除通知")
+    @Operation(summary = "删除通知")
     @DeleteMapping("/{id}")
     public Result<Void> deleteNotification(@PathVariable Long id,
                                           @RequestHeader(value = "userId", required = false) Long userId) {
@@ -95,7 +95,7 @@ public class ImNotificationController {
     /**
      * 发送通知（管理员）
      */
-    @ApiOperation("发送通知")
+    @Operation(summary = "发送通知")
     @PostMapping("/send")
     public Result<Long> sendNotification(@RequestParam Long receiverId,
                                         @RequestParam String type,

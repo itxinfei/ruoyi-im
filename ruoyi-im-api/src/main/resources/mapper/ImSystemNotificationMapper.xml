@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImSystemNotificationMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImSystemNotification" id="ImSystemNotificationResult">
+        <id property="id" column="id"/>
+        <result property="receiverId" column="receiver_id"/>
+        <result property="type" column="type"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="relatedId" column="related_id"/>
+        <result property="relatedType" column="related_type"/>
+        <result property="isRead" column="is_read"/>
+        <result property="readTime" column="read_time"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectImSystemNotificationVo">
+        select id, receiver_id, type, title, content, related_id, related_type, is_read, read_time, create_time
+        from im_system_notification
+    </sql>
+
+    <select id="selectImSystemNotificationById" parameterType="Long" resultMap="ImSystemNotificationResult">
+        <include refid="selectImSystemNotificationVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectImSystemNotificationList" parameterType="com.ruoyi.im.domain.ImSystemNotification" resultMap="ImSystemNotificationResult">
+        <include refid="selectImSystemNotificationVo"/>
+        <where>
+            <if test="receiverId != null">and receiver_id = #{receiverId}</if>
+            <if test="type != null and type != ''">and type = #{type}</if>
+            <if test="isRead != null">and is_read = #{isRead}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectNotificationsByReceiverId" parameterType="Long" resultMap="ImSystemNotificationResult">
+        <include refid="selectImSystemNotificationVo"/>
+        where receiver_id = #{receiverId}
+        order by is_read asc, create_time desc
+    </select>
+
+    <select id="countUnreadByReceiverId" parameterType="Long" resultType="int">
+        select count(*) from im_system_notification
+        where receiver_id = #{receiverId}
+        and is_read = false
+    </select>
+
+    <select id="selectNotificationsByType" resultMap="ImSystemNotificationResult">
+        <include refid="selectImSystemNotificationVo"/>
+        where receiver_id = #{receiverId}
+        and type = #{type}
+        order by is_read asc, create_time desc
+    </select>
+
+    <insert id="insertImSystemNotification" parameterType="com.ruoyi.im.domain.ImSystemNotification" useGeneratedKeys="true" keyProperty="id">
+        insert into im_system_notification
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="receiverId != null">receiver_id,</if>
+            <if test="type != null and type != ''">type,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="content != null">content,</if>
+            <if test="relatedId != null">related_id,</if>
+            <if test="relatedType != null">related_type,</if>
+            <if test="isRead != null">is_read,</if>
+            <if test="readTime != null">read_time,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="receiverId != null">#{receiverId},</if>
+            <if test="type != null and type != ''">#{type},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="content != null">#{content},</if>
+            <if test="relatedId != null">#{relatedId},</if>
+            <if test="relatedType != null">#{relatedType},</if>
+            <if test="isRead != null">#{isRead},</if>
+            <if test="readTime != null">#{readTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImSystemNotification" parameterType="com.ruoyi.im.domain.ImSystemNotification">
+        update im_system_notification
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="isRead != null">is_read = #{isRead},</if>
+            <if test="readTime != null">read_time = #{readTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="markAsRead" parameterType="Long">
+        update im_system_notification
+        set is_read = true,
+            read_time = now()
+        where id = #{id}
+    </update>
+
+    <update id="batchMarkAsRead" parameterType="Long[]">
+        update im_system_notification
+        set is_read = true,
+            read_time = now()
+        where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="markAllAsRead" parameterType="Long">
+        update im_system_notification
+        set is_read = true,
+            read_time = now()
+        where receiver_id = #{receiverId}
+        and is_read = false
+    </update>
+
+    <delete id="deleteImSystemNotificationById" parameterType="Long">
+        delete from im_system_notification where id = #{id}
+    </delete>
+
+    <delete id="deleteImSystemNotificationByIds" parameterType="Long[]">
+        delete from im_system_notification where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

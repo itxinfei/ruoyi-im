@@ -62,6 +62,7 @@ declare module 'vue' {
     MessageForwardDialog: typeof import('./components/Chat/MessageForwardDialog.vue')['default']
     MessageList: typeof import('./components/Chat/MessageList.vue')['default']
     MessageSearchDialog: typeof import('./components/Chat/MessageSearchDialog.vue')['default']
+    NotificationPanel: typeof import('./components/Notification/NotificationPanel.vue')['default']
     NotificationToast: typeof import('./components/Common/NotificationToast.vue')['default']
     Pagination: typeof import('./components/Pagination/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

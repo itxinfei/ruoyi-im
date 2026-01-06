@@ -166,4 +166,15 @@
         WHERE ur.user_id = #{userId} AND r.status = 'ACTIVE'
         ORDER BY r.role_key
     </select>
+
+    <!-- 根据关键词搜索用户 -->
+    <select id="selectImUserByKeyword" parameterType="String" resultMap="ImUserResult">
+        <include refid="selectImUserVo"/>
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (username like concat('%', #{keyword}, '%') or nickname like concat('%', #{keyword}, '%'))
+            </if>
+        </where>
+        limit 50
+    </select>
 </mapper>

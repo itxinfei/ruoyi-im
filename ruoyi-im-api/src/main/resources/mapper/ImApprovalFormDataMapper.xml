@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImApprovalFormDataMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImApprovalFormData" id="ImApprovalFormDataResult">
+        <id property="id" column="id"/>
+        <result property="approvalId" column="approval_id"/>
+        <result property="fieldName" column="field_name"/>
+        <result property="fieldLabel" column="field_label"/>
+        <result property="fieldValue" column="field_value"/>
+        <result property="fieldType" column="field_type"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectImApprovalFormDataVo">
+        select id, approval_id, field_name, field_label, field_value, field_type, create_time
+        from im_approval_form_data
+    </sql>
+
+    <select id="selectImApprovalFormDataById" parameterType="Long" resultMap="ImApprovalFormDataResult">
+        <include refid="selectImApprovalFormDataVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectFormDataByApprovalId" parameterType="Long" resultMap="ImApprovalFormDataResult">
+        <include refid="selectImApprovalFormDataVo"/>
+        where approval_id = #{approvalId}
+        order by id
+    </select>
+
+    <select id="selectImApprovalFormDataList" parameterType="com.ruoyi.im.domain.ImApprovalFormData" resultMap="ImApprovalFormDataResult">
+        <include refid="selectImApprovalFormDataVo"/>
+        <where>
+            <if test="approvalId != null">and approval_id = #{approvalId}</if>
+            <if test="fieldType != null and fieldType != ''">and field_type = #{fieldType}</if>
+        </where>
+        order by id
+    </select>
+
+    <insert id="insertImApprovalFormData" parameterType="com.ruoyi.im.domain.ImApprovalFormData" useGeneratedKeys="true" keyProperty="id">
+        insert into im_approval_form_data
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="approvalId != null">approval_id,</if>
+            <if test="fieldName != null and fieldName != ''">field_name,</if>
+            <if test="fieldLabel != null">field_label,</if>
+            <if test="fieldValue != null">field_value,</if>
+            <if test="fieldType != null">field_type,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="approvalId != null">#{approvalId},</if>
+            <if test="fieldName != null and fieldName != ''">#{fieldName},</if>
+            <if test="fieldLabel != null">#{fieldLabel},</if>
+            <if test="fieldValue != null">#{fieldValue},</if>
+            <if test="fieldType != null">#{fieldType},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImApprovalFormData" parameterType="com.ruoyi.im.domain.ImApprovalFormData">
+        update im_approval_form_data
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fieldValue != null">field_value = #{fieldValue},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImApprovalFormDataById" parameterType="Long">
+        delete from im_approval_form_data where id = #{id}
+    </delete>
+
+    <delete id="deleteFormDataByApprovalId" parameterType="Long">
+        delete from im_approval_form_data where approval_id = #{approvalId}
+    </delete>
+</mapper>

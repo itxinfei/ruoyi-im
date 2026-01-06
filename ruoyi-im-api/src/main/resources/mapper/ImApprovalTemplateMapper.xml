@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImApprovalTemplateMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImApprovalTemplate" id="ImApprovalTemplateResult">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="category" column="category"/>
+        <result property="description" column="description"/>
+        <result property="formSchema" column="form_schema"/>
+        <result property="flowConfig" column="flow_config"/>
+        <result property="icon" column="icon"/>
+        <result property="isSystem" column="is_system"/>
+        <result property="status" column="status"/>
+        <result property="sortOrder" column="sort_order"/>
+    </resultMap>
+
+    <sql id="selectImApprovalTemplateVo">
+        select id, name, code, category, description, form_schema, flow_config, icon, is_system, status, sort_order
+        from im_approval_template
+    </sql>
+
+    <select id="selectImApprovalTemplateById" parameterType="Long" resultMap="ImApprovalTemplateResult">
+        <include refid="selectImApprovalTemplateVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectImApprovalTemplateByCode" parameterType="String" resultMap="ImApprovalTemplateResult">
+        <include refid="selectImApprovalTemplateVo"/>
+        where code = #{code}
+    </select>
+
+    <select id="selectImApprovalTemplateList" parameterType="com.ruoyi.im.domain.ImApprovalTemplate" resultMap="ImApprovalTemplateResult">
+        <include refid="selectImApprovalTemplateVo"/>
+        <where>
+            <if test="name != null and name != ''">and name like concat('%', #{name}, '%')</if>
+            <if test="code != null and code != ''">and code = #{code}</if>
+            <if test="category != null and category != ''">and category = #{category}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="isSystem != null">and is_system = #{isSystem}</if>
+        </where>
+        order by sort_order, id
+    </select>
+
+    <select id="selectActiveTemplates" resultMap="ImApprovalTemplateResult">
+        <include refid="selectImApprovalTemplateVo"/>
+        where status = 'ACTIVE'
+        order by sort_order, id
+    </select>
+
+    <insert id="insertImApprovalTemplate" parameterType="com.ruoyi.im.domain.ImApprovalTemplate" useGeneratedKeys="true" keyProperty="id">
+        insert into im_approval_template
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="code != null and code != ''">code,</if>
+            <if test="category != null">category,</if>
+            <if test="description != null">description,</if>
+            <if test="formSchema != null">form_schema,</if>
+            <if test="flowConfig != null">flow_config,</if>
+            <if test="icon != null">icon,</if>
+            <if test="isSystem != null">is_system,</if>
+            <if test="status != null">status,</if>
+            <if test="sortOrder != null">sort_order,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="code != null and code != ''">#{code},</if>
+            <if test="category != null">#{category},</if>
+            <if test="description != null">#{description},</if>
+            <if test="formSchema != null">#{formSchema},</if>
+            <if test="flowConfig != null">#{flowConfig},</if>
+            <if test="icon != null">#{icon},</if>
+            <if test="isSystem != null">#{isSystem},</if>
+            <if test="status != null">#{status},</if>
+            <if test="sortOrder != null">#{sortOrder},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImApprovalTemplate" parameterType="com.ruoyi.im.domain.ImApprovalTemplate">
+        update im_approval_template
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="code != null and code != ''">code = #{code},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="formSchema != null">form_schema = #{formSchema},</if>
+            <if test="flowConfig != null">flow_config = #{flowConfig},</if>
+            <if test="icon != null">icon = #{icon},</if>
+            <if test="isSystem != null">is_system = #{isSystem},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImApprovalTemplateById" parameterType="Long">
+        delete from im_approval_template where id = #{id}
+    </delete>
+
+    <delete id="deleteImApprovalTemplateByIds" parameterType="Long[]">
+        delete from im_approval_template where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
