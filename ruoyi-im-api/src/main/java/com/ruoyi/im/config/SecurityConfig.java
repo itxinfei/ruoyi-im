@@ -63,7 +63,7 @@ public class SecurityConfig {
             // 配置权限访问
             .authorizeRequests()
             // 对于登录接口允许匿名访问
-            .antMatchers("/auth/login", "/auth/register", "/api/auth/login", "/api/auth/register", "/websocket/**", "/public/**").permitAll()
+            .antMatchers("/auth/login", "/auth/register", "/api/auth/login", "/api/auth/register", "/ws/**", "/websocket/**", "/public/**").permitAll()
             // 静态资源访问
             .antMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.gif").permitAll()
             // Swagger相关接口

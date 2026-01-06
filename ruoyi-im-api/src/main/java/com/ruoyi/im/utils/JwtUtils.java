@@ -21,10 +21,10 @@ public class JwtUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${jwt.secret:im-secret-key}")
+    @Value("${im.jwt.secret:im_secret_key_2024_for_api_system_that_is_long_enough_for_HS512_algorithm}")
     private String secret;
 
-    @Value("${jwt.expiration:86400000}")
+    @Value("${im.jwt.expiration:86400000}")
     private long expiration;
 
     /**

@@ -5,6 +5,7 @@ import com.ruoyi.im.dto.user.ImLoginRequest;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImUserService;
+import com.ruoyi.im.utils.JwtUtils;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +28,9 @@ public class ImAuthController {
 
     @Autowired
     private ImUserService imUserService;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     /**
      * 用户登录
@@ -73,7 +77,7 @@ public class ImAuthController {
     @GetMapping("/getInfo")
     public Result<ImLoginVO> getInfo(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+            throw new BusinessException("用户未认证");
         }
         
         ImUserVO userVO = imUserService.getUserById(userId);
@@ -81,8 +85,11 @@ public class ImAuthController {
             throw new BusinessException("用户不存在");
         }
         
+        // 生成新的JWT令牌
+        String token = jwtUtils.generateToken(userVO.getUsername(), userVO.getId());
+        
         ImLoginVO loginVO = new ImLoginVO();
-        loginVO.setToken("test-token-" + userId); // 为开发环境设置一个模拟的token
+        loginVO.setToken(token);
         
         // 设置用户信息
         ImLoginVO.UserInfo userInfo = new ImLoginVO.UserInfo();

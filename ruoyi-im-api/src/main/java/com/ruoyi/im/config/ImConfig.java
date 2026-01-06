@@ -219,7 +219,7 @@ public class ImConfig {
 
     public static class Security {
         /** 是否启用认证（测试时可设置为false） */
-        private Boolean enableAuth = false;
+        private Boolean enableAuth = true;
 
         /** 允许的跨域源 */
         private List<String> corsAllowOrigins = Arrays.asList();

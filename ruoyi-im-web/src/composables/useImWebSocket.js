@@ -6,6 +6,7 @@
 import { ref, computed, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import imWebSocket, { WS_STATUS, MSG_TYPE } from '@/utils/websocket/imWebSocket'
+import envConfig from '@/../env.config.js'
 
 /**
  * 使用 IM WebSocket
@@ -38,8 +39,8 @@ export function useImWebSocket() {
     imWebSocket.on('messageRead', handleMessageRead)
     imWebSocket.on('messageRecall', handleMessageRecall)
 
-    // 连接
-    imWebSocket.connect(token)
+    // 连接 - 传递配置的WebSocket URL
+    imWebSocket.connect(token, envConfig.wsAPI)
 
     return true
   }
