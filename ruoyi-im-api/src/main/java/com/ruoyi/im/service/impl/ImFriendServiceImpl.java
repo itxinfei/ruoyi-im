@@ -170,13 +170,18 @@ public class ImFriendServiceImpl implements ImFriendService {
             }
             ImFriendVO vo = new ImFriendVO();
             BeanUtils.copyProperties(friend, vo);
-            vo.setOnline("ONLINE".equals(friend.getStatus()));
+            
+            // 设置在线状态，这里暂时设置为false，实际在线状态需要从WebSocket连接中获取
+            vo.setOnline(false);
 
             // 查询好友用户信息
             ImUser friendUser = imUserMapper.selectImUserById(friend.getFriendId());
             if (friendUser != null) {
                 vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
                 vo.setFriendAvatar(friendUser.getAvatar());
+                
+                // 如果用户状态是ACTIVE，可以认为是在线的（这只是一个简化判断）
+                vo.setOnline("ACTIVE".equals(friendUser.getStatus()));
             }
             voList.add(vo);
         }

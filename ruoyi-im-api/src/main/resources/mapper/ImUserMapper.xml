@@ -17,15 +17,7 @@
 
     <sql id="selectImUserVo">
         select id, username, password, nickname, email, 
-               phone as mobile, avatar, 
-               CASE 
-                 WHEN status = 'ACTIVE' THEN 0
-                 WHEN status = 'INACTIVE' THEN 1
-                 WHEN status = 'NORMAL' THEN 0
-                 WHEN status = 'DISABLE' THEN 1
-                 WHEN status REGEXP '^[0-9]+$' THEN CAST(status AS SIGNED)
-                 ELSE 0
-               END as status,
+               phone as mobile, avatar, status,
                create_time, update_time 
         from im_user
     </sql>
@@ -100,15 +92,7 @@
     
     <select id="selectImUserByUsername" parameterType="String" resultMap="ImUserResult">
         select id, username, password, nickname, email, 
-               phone as mobile, avatar, 
-               CASE 
-                 WHEN status = 'ACTIVE' THEN 0
-                 WHEN status = 'INACTIVE' THEN 1
-                 WHEN status = 'NORMAL' THEN 0
-                 WHEN status = 'DISABLE' THEN 1
-                 WHEN status REGEXP '^[0-9]+$' THEN CAST(status AS SIGNED)
-                 ELSE 0
-               END as status,
+               phone as mobile, avatar, status,
                create_time, update_time
         from im_user
         where username = #{username}
@@ -116,15 +100,7 @@
     
     <select id="selectImUserByEmail" parameterType="String" resultMap="ImUserResult">
         select id, username, password, nickname, email, 
-               phone as mobile, avatar, 
-               CASE 
-                 WHEN status = 'ACTIVE' THEN 0
-                 WHEN status = 'INACTIVE' THEN 1
-                 WHEN status = 'NORMAL' THEN 0
-                 WHEN status = 'DISABLE' THEN 1
-                 WHEN status REGEXP '^[0-9]+$' THEN CAST(status AS SIGNED)
-                 ELSE 0
-               END as status,
+               phone as mobile, avatar, status,
                create_time, update_time
         from im_user
         where email = #{email}
@@ -203,15 +179,7 @@
     <!-- 根据关键词搜索用户 -->
     <select id="selectImUserByKeyword" parameterType="String" resultMap="ImUserResult">
         select id, username, password, nickname, email, 
-               phone as mobile, avatar, 
-               CASE 
-                 WHEN status = 'ACTIVE' THEN 0
-                 WHEN status = 'INACTIVE' THEN 1
-                 WHEN status = 'NORMAL' THEN 0
-                 WHEN status = 'DISABLE' THEN 1
-                 WHEN status REGEXP '^[0-9]+$' THEN CAST(status AS SIGNED)
-                 ELSE 0
-               END as status,
+               phone as mobile, avatar, status,
                create_time, update_time
         from im_user
         <where>

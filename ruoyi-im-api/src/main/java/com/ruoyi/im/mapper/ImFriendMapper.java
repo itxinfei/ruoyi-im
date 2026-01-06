@@ -66,4 +66,21 @@ public interface ImFriendMapper {
      * @return 结果
      */
     int deleteImFriendByCondition(ImFriend imFriend);
+
+    /**
+     * 根据用户ID查询好友列表
+     *
+     * @param userId 用户ID
+     * @return 好友集合
+     */
+    List<ImFriend> selectImFriendListByUserId(Long userId);
+
+    /**
+     * 根据用户ID和好友ID查询好友关系
+     *
+     * @param userId 用户ID
+     * @param friendId 好友ID
+     * @return 好友关系
+     */
+    ImFriend selectImFriendByUserIdAndFriendId(Long userId, Long friendId);
 }

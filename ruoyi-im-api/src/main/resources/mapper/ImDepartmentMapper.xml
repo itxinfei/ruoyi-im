@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImDepartmentMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.im.domain.ImDepartment">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="parent_id" property="parentId" />
+        <result column="ancestors" property="ancestors" />
+        <result column="order_num" property="orderNum" />
+        <result column="leader_id" property="leaderId" />
+        <result column="phone" property="phone" />
+        <result column="email" property="email" />
+        <result column="status" property="status" />
+        <result column="del_flag" property="delFlag" />
+        <result column="remark" property="remark" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, parent_id, ancestors, order_num, leader_id, phone, email, status, del_flag, remark, create_time, update_time
+    </sql>
+
+    <select id="selectAllDepartments" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM im_department
+        WHERE del_flag = 0
+        ORDER BY parent_id, order_num
+    </select>
+
+    <select id="selectChildrenByParentId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM im_department
+        WHERE parent_id = #{parentId} AND del_flag = 0
+        ORDER BY order_num
+    </select>
+
+    <select id="selectDepartmentAndChildrenIds" resultType="java.lang.Long">
+        SELECT id
+        FROM im_department
+        WHERE id = #{departmentId}
+           OR FIND_IN_SET(#{departmentId}, ancestors)
+          AND del_flag = 0
+    </select>
+
+    <select id="countChildrenByDepartmentId" resultType="int">
+        SELECT COUNT(1)
+        FROM im_department
+        WHERE parent_id = #{departmentId} AND del_flag = 0
+    </select>
+
+</mapper>

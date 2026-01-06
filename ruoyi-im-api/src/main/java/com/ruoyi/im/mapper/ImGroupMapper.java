@@ -58,4 +58,12 @@ public interface ImGroupMapper {
      * @return 结果
      */
     int deleteImGroupByIds(Long[] ids);
+
+    /**
+     * 根据群组ID列表删除群组成员
+     *
+     * @param groupIds 群组ID列表
+     * @return 结果
+     */
+    int deleteImGroupMemberByGroupIds(Long[] groupIds);
 }
