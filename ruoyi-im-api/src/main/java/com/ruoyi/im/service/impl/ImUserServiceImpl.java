@@ -9,6 +9,7 @@ import com.ruoyi.im.dto.user.ImUserUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImUserService;
+
 import com.ruoyi.im.utils.ImRedisUtil;
 import com.ruoyi.im.utils.JwtUtils;
 import com.ruoyi.im.vo.user.ImLoginVO;
@@ -47,6 +48,8 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Autowired
     private ImRedisUtil imRedisUtil;
+
+
 
     @Override
     public ImLoginVO login(ImLoginRequest request) {

@@ -60,6 +60,18 @@ public class ImErrorCode {
     /** 消息撤回超时 */
     public static final int MESSAGE_RECALL_TIMEOUT = 4010;
 
+    /** 会话已存在 */
+    public static final int CONVERSATION_ALREADY_EXISTS = 4012;
+
+    /** 会话不存在 */
+    public static final int CONVERSATION_NOT_FOUND = 4013;
+
+    /** 群聊会话不能删除 */
+    public static final int GROUP_CONVERSATION_CANNOT_DELETE = 4014;
+
+    /** 会话成员不存在 */
+    public static final int CONVERSATION_MEMBER_NOT_FOUND = 4015;
+
     // ========== WebSocket 错误码 5000-5999 ==========
 
     /** WebSocket 连接失败 */

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImUserService;
+
 import com.ruoyi.im.utils.ImRedisUtil;
 import com.ruoyi.im.utils.JwtUtils;
 import org.slf4j.Logger;
@@ -43,7 +44,6 @@ public class ImWebSocketEndpoint {
      */
     private static final Map<Session, Long> sessionUserMap = new ConcurrentHashMap<>();
 
-    private static ImMessageService staticImMessageService;
     private static JwtUtils staticJwtUtils;
     private static ImUserService staticImUserService;
     private static ImRedisUtil staticImRedisUtil;

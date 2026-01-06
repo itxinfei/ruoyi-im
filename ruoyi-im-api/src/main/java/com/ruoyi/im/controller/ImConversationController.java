@@ -1,0 +1,216 @@
+package com.ruoyi.im.controller;
+
+import com.ruoyi.im.common.Result;
+import com.ruoyi.im.dto.conversation.ImConversationCreateRequest;
+import com.ruoyi.im.dto.conversation.ImConversationUpdateRequest;
+import com.ruoyi.im.service.ImConversationService;
+import com.ruoyi.im.vo.conversation.ImConversationVO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+
+/**
+ * 会话控制器
+ * 提供会话创建、管理、未读消息统计、会话置顶、免打扰等功能
+ *
+ * @author ruoyi
+ */
+@RestController
+@RequestMapping("/api/im/conversation")
+public class ImConversationController {
+
+    @Autowired
+    private ImConversationService imConversationService;
+
+    /**
+     * 获取会话列表
+     * 查询当前用户的所有会话，包括单聊和群聊会话
+     *
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 会话列表，按最后消息时间倒序排列
+     * @apiNote 返回的会话信息包含未读消息数、最后消息、会话置顶状态等
+     */
+    @GetMapping("/list")
+    public Result<List<ImConversationVO>> getUserConversations(@RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L; // 开发环境默认用户
+        }
+        List<ImConversationVO> list = imConversationService.getUserConversations(userId);
+        return Result.success(list);
+    }
+
+    /**
+     * 获取会话详情
+     * 查询指定会话的详细信息
+     *
+     * @param id 会话ID
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 会话详细信息
+     * @apiNote 会话必须是当前用户的会话
+     */
+    @GetMapping("/{id}")
+    public Result<ImConversationVO> getConversationById(@PathVariable Long id,
+                                                      @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L; // 开发环境默认用户
+        }
+        ImConversationVO vo = imConversationService.getConversationById(id, userId);
+        return Result.success(vo);
+    }
+
+    /**
+     * 创建会话
+     * 创建一个新的会话，支持单聊和群聊
+     *
+     * @param request 会话创建请求参数
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 创建结果，包含新会话ID
+     * @apiNote 使用 @Valid 注解进行参数校验；会话类型包括PRIVATE(单聊)、GROUP(群聊)
+     */
+    @PostMapping("/create")
+    public Result<Long> createConversation(@Valid @RequestBody ImConversationCreateRequest request,
+                                         @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L; // 开发环境默认用户
+        }
+        Long conversationId = imConversationService.createConversation(request, userId);
+        return Result.success("创建成功", conversationId);
+    }
+
+    /**
+     * 更新会话设置
+     * 更新会话的置顶、免打扰等设置
+     *
+     * @param id 会话ID
+     * @param request 会话更新请求参数
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 更新结果
+     * @apiNote 使用 @Valid 注解进行参数校验；只能更新自己的会话设置
+     */
+    @PutMapping("/{id}")
+    public Result<Void> updateConversation(@PathVariable Long id,
+                                         @Valid @RequestBody ImConversationUpdateRequest request,
+                                         @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L; // 开发环境默认用户
+        }
+        imConversationService.updateConversation(id, request, userId);
+        return Result.success("更新成功");
+    }
+
+    /**
+     * 删除会话
+     * 从会话列表中删除指定会话（非物理删除）
+     *
+     * @param id 会话ID
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 删除结果
+     * @apiNote 删除后会话不再显示在会话列表中，但历史消息仍保留
+     */
+    @DeleteMapping("/{id}")
+    public Result<Void> deleteConversation(@PathVariable Long id,
+                                         @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L; // 开发环境默认用户
+        }
+        imConversationService.deleteConversation(id, userId);
+        return Result.success("删除成功");
+    }
+
+    /**
+     * 置顶/取消置顶会话
+     *
+     * @param id 会话ID
+     * @param pinned 是否置顶，true表示置顶，false表示取消置顶
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 操作结果
+     * @apiNote 置顶的会话会一直显示在会话列表顶部
+     */
+    @PutMapping("/{id}/pinned")
+    public Result<Void> setPinned(@PathVariable Long id,
+                                @RequestParam Boolean pinned,
+                                @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L; // 开发环境默认用户
+        }
+        imConversationService.setPinned(id, pinned, userId);
+        return Result.success(pinned ? "置顶成功" : "取消置顶成功");
+    }
+
+    /**
+     * 设置免打扰
+     *
+     * @param id 会话ID
+     * @param muted 是否免打扰，true表示免打扰，false表示取消免打扰
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 操作结果
+     * @apiNote 设置免打扰后，该会话的消息不会触发通知提醒
+     */
+    @PutMapping("/{id}/muted")
+    public Result<Void> setMuted(@PathVariable Long id,
+                               @RequestParam Boolean muted,
+                               @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L; // 开发环境默认用户
+        }
+        imConversationService.setMuted(id, muted, userId);
+        return Result.success(muted ? "免打扰设置成功" : "免打扰取消成功");
+    }
+
+    /**
+     * 搜索会话
+     * 根据关键词搜索会话
+     *
+     * @param keyword 搜索关键词
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 匹配的会话列表
+     * @apiNote 搜索会话名称、最近消息内容等
+     */
+    @GetMapping("/search")
+    public Result<List<ImConversationVO>> search(@RequestParam String keyword,
+                                               @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L; // 开发环境默认用户
+        }
+        List<ImConversationVO> list = imConversationService.searchConversations(keyword, userId);
+        return Result.success(list);
+    }
+
+    /**
+     * 标记会话为已读
+     * 将指定会话的所有未读消息标记为已读
+     *
+     * @param id 会话ID
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 操作结果
+     * @apiNote 标记后该会话的未读消息数将变为0
+     */
+    @PutMapping("/{id}/markAsRead")
+    public Result<Void> markAsRead(@PathVariable Long id,
+                                 @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L; // 开发环境默认用户
+        }
+        imConversationService.markAsRead(id, userId);
+        return Result.success("标记已读成功");
+    }
+
+    /**
+     * 获取未读消息总数
+     * 统计当前用户所有会话的未读消息总数
+     *
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 未读消息总数
+     * @apiNote 用于显示总的未读消息数提醒
+     */
+    @GetMapping("/unreadCount")
+    public Result<Integer> getTotalUnreadCount(@RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L; // 开发环境默认用户
+        }
+        Integer count = imConversationService.getTotalUnreadCount(userId);
+        return Result.success(count);
+    }
+}

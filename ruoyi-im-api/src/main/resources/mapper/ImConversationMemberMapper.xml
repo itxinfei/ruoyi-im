@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImConversationMemberMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.im.domain.ImConversationMember">
+        <id column="id" property="id" />
+        <result column="conversation_id" property="conversationId" />
+        <result column="user_id" property="userId" />
+        <result column="unread_count" property="unreadCount" />
+        <result column="last_read_message_id" property="lastReadMessageId" />
+        <result column="is_pinned" property="pinned" />
+        <result column="is_muted" property="muted" />
+        <result column="is_deleted" property="deleted" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, conversation_id, user_id, unread_count, last_read_message_id, is_pinned, is_muted, is_deleted, create_time, update_time
+    </sql>
+
+    <select id="selectByConversationIdAndUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM im_conversation_member
+        WHERE conversation_id = #{conversationId} AND user_id = #{userId}
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM im_conversation_member
+        WHERE user_id = #{userId} AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByConversationId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM im_conversation_member
+        WHERE conversation_id = #{conversationId} AND is_deleted = 0
+    </select>
+
+    <update id="updateUnreadCount">
+        UPDATE im_conversation_member
+        SET unread_count = #{unreadCount}, update_time = NOW()
+        WHERE conversation_id = #{conversationId} AND user_id = #{userId}
+    </update>
+
+    <update id="updateLastReadMessageId">
+        UPDATE im_conversation_member
+        SET last_read_message_id = #{lastReadMessageId}, update_time = NOW()
+        WHERE conversation_id = #{conversationId} AND user_id = #{userId}
+    </update>
+
+    <update id="updatePinned">
+        UPDATE im_conversation_member
+        SET is_pinned = #{isPinned}, update_time = NOW()
+        WHERE conversation_id = #{conversationId} AND user_id = #{userId}
+    </update>
+
+    <update id="updateMuted">
+        UPDATE im_conversation_member
+        SET is_muted = #{isMuted}, update_time = NOW()
+        WHERE conversation_id = #{conversationId} AND user_id = #{userId}
+    </update>
+
+    <update id="markAsDeleted">
+        UPDATE im_conversation_member
+        SET is_deleted = 1, update_time = NOW()
+        WHERE conversation_id = #{conversationId} AND user_id = #{userId}
+    </update>
+
+</mapper>
