@@ -1,9 +1,14 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.dto.message.ImMessageForwardRequest;
+import com.ruoyi.im.dto.message.ImMessageRecallRequest;
+import com.ruoyi.im.dto.message.ImMessageReplyRequest;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.vo.message.ImMessageVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +21,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
+@Tag(name = "消息管理", description = "消息发送、查询、撤回、转发、回复等接口")
 @RestController
 @RequestMapping("/api/im/message")
 public class ImMessageController {
@@ -107,5 +113,55 @@ public class ImMessageController {
         Long sessionId = 1L;
         imMessageService.markAsRead(sessionId, userId, messageIds);
         return Result.success("已标记为已读");
+    }
+
+    /**
+     * 转发消息
+     * 将消息转发到其他会话或用户
+     *
+     * @param request 转发请求参数，包含原消息ID、目标会话ID、目标用户ID等
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 转发结果，包含新消息ID
+     * @apiNote 转发时会创建新消息，原消息内容会被复制到新消息中
+     */
+    @Operation(summary = "转发消息", description = "将消息转发到其他会话或用户")
+    @PostMapping("/forward")
+    public Result<Long> forward(@Valid @RequestBody ImMessageForwardRequest request,
+                                @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        Long newMessageId = imMessageService.forwardMessage(
+                request.getMessageId(),
+                request.getToSessionId(),
+                request.getToUserId(),
+                request.getContent(),
+                userId
+        );
+        return Result.success("转发成功", newMessageId);
+    }
+
+    /**
+     * 回复消息
+     * 引用原消息进行回复
+     *
+     * @param request 回复请求参数，包含原消息ID和回复内容
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 回复结果，包含新消息ID
+     * @apiNote 回复消息会关联原消息ID，通过parentId字段建立消息引用关系
+     */
+    @Operation(summary = "回复消息", description = "引用原消息进行回复")
+    @PostMapping("/reply")
+    public Result<Long> reply(@Valid @RequestBody ImMessageReplyRequest request,
+                              @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        Long newMessageId = imMessageService.replyMessage(
+                request.getMessageId(),
+                request.getContent(),
+                userId
+        );
+        return Result.success("回复成功", newMessageId);
     }
 }

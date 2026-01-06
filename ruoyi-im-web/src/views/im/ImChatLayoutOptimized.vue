@@ -1254,6 +1254,15 @@
         <el-icon><DocumentCopy /></el-icon>
         <span>复制</span>
       </div>
+      <!-- 撤回：仅自己发送且在2分钟内的消息 -->
+      <div
+        v-if="canRecallMessage(selectedMessage)"
+        class="menu-item"
+        @click="recallMessage"
+      >
+        <el-icon><RefreshLeft /></el-icon>
+        <span>撤回</span>
+      </div>
       <div
         v-if="selectedMessage?.isOwn || selectedMessage?.senderId === currentUser?.userId"
         class="menu-item"
@@ -3822,12 +3831,13 @@ const confirmForward = async () => {
 
   try {
     const target = selectedForwardTarget.value
-    const sessionId = target.type === 'group' ? target.id : target.sessionId
+    const toSessionId = target.type === 'group' ? target.id : target.sessionId
+    const toUserId = target.type === 'friend' ? target.id : null
 
-    await store.dispatch('im/sendMessage', {
-      sessionId: sessionId,
-      type: 'text',
-      content: `[转发消息] ${selectedMessage.value.content}`,
+    await store.dispatch('im/forwardMessage', {
+      messageId: selectedMessage.value.id,
+      toSessionId,
+      toUserId,
     })
 
     ElMessage.success('转发成功')
@@ -3859,6 +3869,37 @@ const deleteMessage = async () => {
     // 取消
   }
   messageMenuVisible.value = false
+}
+
+// 判断是否可以撤回消息
+const canRecallMessage = message => {
+  if (!message) return false
+  // 只能撤回自己发送的消息
+  const isOwnMessage = message.isOwn || message.senderId === currentUser.value?.userId
+  if (!isOwnMessage) return false
+  // 只能撤回2分钟内发送的消息
+  const sendTime = new Date(message.sendTime || message.timestamp)
+  const now = new Date()
+  const twoMinutesInMs = 2 * 60 * 1000
+  return now - sendTime < twoMinutesInMs
+}
+
+// 撤回消息
+const recallMessage = async () => {
+  if (!selectedMessage.value) return
+
+  try {
+    await ElMessageBox.confirm('确定要撤回这条消息吗？', '提示', {
+      type: 'warning',
+    })
+    await store.dispatch('im/recallMessage', selectedMessage.value.id)
+    ElMessage.success('消息已撤回')
+    messageMenuVisible.value = false
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error(error?.message || '撤回失败')
+    }
+  }
 }
 
 // 显示消息搜索

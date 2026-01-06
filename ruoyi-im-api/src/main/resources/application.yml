@@ -9,6 +9,9 @@ app:
   # 是否启用认证：开发环境可设为false，生产环境必须设为true
   security:
     enabled: false
+  # 开发环境默认用户ID（当security.enabled=false时使用）
+  dev:
+    user-id: 1
 
 # Spring配置
 spring:
@@ -70,12 +73,18 @@ spring:
       matching-strategy: ant_path_matcher
 
 # Swagger配置
+# 注意：此配置项用于控制自定义的 SpringDocConfig 配置类
+# 真正的 SpringDoc 框架配置在下面的 springdoc 部分
 swagger:
+  # 是否开启swagger（控制自定义的 SpringDocConfig 配置类）
+  # true: 启用API文档，可通过 /swagger-ui.html 访问
+  # false: 禁用API文档，节省资源
   enabled: true
 
-# SpringDoc配置
+# SpringDoc配置（OpenAPI 3.0）
+# 注意：SpringDoc框架不支持 springdoc.enabled 配置项
+# 真正的配置项是 springdoc.api-docs.enabled 和 springdoc.swagger-ui.enabled
 springdoc:
-  enabled: true
   api-docs:
     enabled: true
     path: /v3/api-docs

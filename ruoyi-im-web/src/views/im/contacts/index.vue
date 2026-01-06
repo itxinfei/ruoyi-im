@@ -473,13 +473,13 @@ onMounted(async () => {
   min-width: 200px;
   height: 100%;
   background-color: #fff;
-  border-right: 1px solid $border-color-light;
+  border-right: 1px solid $border-light;
   display: flex;
   flex-direction: column;
 
   .category-header {
     padding: 16px;
-    border-bottom: 1px solid $border-color-lighter;
+    border-bottom: 1px solid $border-light;
 
     .category-title {
       font-size: 16px;
@@ -561,13 +561,13 @@ onMounted(async () => {
   min-width: 320px;
   height: 100%;
   background-color: #fff;
-  border-right: 1px solid $border-color-light;
+  border-right: 1px solid $border-light;
   display: flex;
   flex-direction: column;
 
   .panel-header {
     padding: 12px;
-    border-bottom: 1px solid $border-color-lighter;
+    border-bottom: 1px solid $border-light;
 
     .search-input {
       :deep(.el-input__wrapper) {
@@ -654,7 +654,7 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     gap: 16px;
-    border-bottom: 1px solid $border-color-lighter;
+    border-bottom: 1px solid $border-light;
 
     .header-info {
       flex: 1;

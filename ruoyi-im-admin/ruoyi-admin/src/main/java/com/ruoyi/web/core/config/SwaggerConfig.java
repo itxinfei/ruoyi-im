@@ -15,8 +15,23 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
 /**
- * Swagger2的接口配置
- * 
+ * Swagger2接口文档配置类
+ *
+ * 功能说明：
+ * 1. 根据配置文件中的 swagger.enabled 属性动态启用/禁用API文档
+ * 2. 扫描所有带有 @ApiOperation 注解的方法，生成API文档
+ * 3. 使用OpenAPI 3.0规范（DocumentationType.OAS_30）
+ *
+ * 配置说明：
+ * - 在 application.yml 中设置 swagger.enabled=true 启用文档
+ * - 在 application.yml 中设置 swagger.enabled=false 禁用文档
+ * - 启用后可通过 /swagger-ui.html 访问文档
+ *
+ * 注意事项：
+ * - 本配置与SpringDocConfig都使用 swagger.enabled 配置项
+ * - 建议在开发环境启用，生产环境禁用以节省资源
+ * - @ConditionalOnProperty 确保配置为true时才加载此配置类
+ *
  * @author ruoyi
  */
 @Configuration

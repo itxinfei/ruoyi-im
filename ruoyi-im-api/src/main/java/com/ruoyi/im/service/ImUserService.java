@@ -1,11 +1,13 @@
 package com.ruoyi.im.service;
 
 import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.im.dto.BasePageRequest;
 import com.ruoyi.im.dto.user.ImLoginRequest;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -82,9 +84,53 @@ public interface ImUserService {
     boolean changePassword(Long userId, String oldPassword, String newPassword);
 
     /**
-     * Get total user count
+     * 获取用户总数
      *
-     * @return total user count
+     * @return 用户总数
      */
     int getTotalUserCount();
+
+    /**
+     * 获取用户列表（分页）
+     *
+     * @param request 分页请求参数
+     * @return 用户列表
+     */
+    List<ImUserVO> getUserList(BasePageRequest request);
+
+    /**
+     * 创建用户
+     *
+     * @param request 创建请求参数
+     * @return 新用户ID
+     */
+    Long createUser(ImRegisterRequest request);
+
+    /**
+     * 删除用户
+     *
+     * @param userId 用户ID
+     */
+    void deleteUser(Long userId);
+
+    /**
+     * 批量删除用户
+     *
+     * @param userIds 用户ID列表
+     */
+    void batchDeleteUsers(List<Long> userIds);
+
+    /**
+     * 重置用户密码
+     *
+     * @param userId 用户ID
+     */
+    void resetPassword(Long userId);
+
+    /**
+     * 获取在线用户列表
+     *
+     * @return 在线用户列表
+     */
+    List<ImUserVO> getOnlineUsers();
 }

@@ -10,6 +10,33 @@ import org.springframework.context.annotation.Configuration;
 import org.springdoc.core.GroupedOpenApi;
 import org.springframework.boot.ApplicationArguments;
 
+/**
+ * SpringDoc API文档配置类（OpenAPI 3.0）
+ *
+ * 功能说明：
+ * 1. 根据配置文件中的 swagger.enabled 属性动态启用/禁用本配置类
+ * 2. 将IM模块的API接口按功能模块分组，便于管理和查看
+ * 3. 启动时在控制台输出API文档访问地址
+ *
+ * 配置说明：
+ * - 在 application.yml 中设置 swagger.enabled=true 启用本配置类
+ * - 在 application.yml 中设置 swagger.enabled=false 禁用本配置类
+ * - 启用后可通过 http://localhost:8080/swagger-ui.html 访问文档
+ *
+ * 重要说明：
+ * - swagger.enabled 配置项只控制本配置类，不影响 SpringDoc 框架本身
+ * - SpringDoc 框架的配置项是 springdoc.api-docs.enabled 和 springdoc.swagger-ui.enabled
+ * - 如果要完全禁用 SpringDoc，需要同时设置 springdoc.api-docs.enabled=false 和 springdoc.swagger-ui.enabled=false
+ *
+ * 分组说明：
+ * - IM Chat: 消息、历史记录、会话相关接口
+ * - Contact: 联系人相关接口
+ * - Workbench: 工作台相关接口
+ * - Approval: 审批相关接口
+ * - Application Center: 应用中心相关接口
+ *
+ * @author ruoyi
+ */
 @Configuration
 @ConditionalOnProperty(name = "swagger.enabled", havingValue = "true", matchIfMissing = true)
 public class SpringDocConfig implements ApplicationRunner {

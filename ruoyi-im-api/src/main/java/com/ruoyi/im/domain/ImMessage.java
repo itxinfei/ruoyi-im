@@ -59,4 +59,7 @@ public class ImMessage implements Serializable {
     /** 创建时间，记录消息创建的时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
+
+    /** 父消息ID，用于转发和回复消息的关联 */
+    private Long parentId;
 }

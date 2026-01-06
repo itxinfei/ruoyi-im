@@ -461,7 +461,7 @@ onMounted(() => {
     padding: 12px;
     cursor: pointer;
     transition: background-color 0.2s;
-    border-bottom: 1px solid $border-lighter;
+    border-bottom: 1px solid $border-light;
 
     &:last-child {
       border-bottom: none;

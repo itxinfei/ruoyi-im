@@ -45,8 +45,8 @@ export function markMessageRead(conversationId, data) {
 // 撤回消息
 export function recallMessage(messageId) {
   return request({
-    url: `/api/im/message/recall/${messageId}`,
-    method: 'put',
+    url: `/api/im/message/${messageId}/recall`,
+    method: 'delete',
   })
 }
 

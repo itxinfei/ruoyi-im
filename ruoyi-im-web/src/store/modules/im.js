@@ -1,8 +1,8 @@
 import {
   sendMessage as apiSendMessage,
   listMessage,
-  recallMessage,
-  forwardMessage,
+  recallMessage as apiRecallMessage,
+  forwardMessage as apiForwardMessage,
   searchMessages as apiSearchMessages,
 } from '@/api/im/message'
 import { listSession, updateSession, deleteSession as apiDeleteSession } from '@/api/im/session'
@@ -635,30 +635,39 @@ const actions = {
   },
 
   // 撤回消息
-  async recallMessage({ commit, state }, { sessionId, messageId }) {
+  async recallMessage({ commit, state }, messageId) {
     try {
-      await recallMessage(messageId)
-      // 更新消息状态为已撤回
-      commit('UPDATE_MESSAGE', {
-        sessionId,
-        messageId,
-        updates: { status: 'recalled', revoked: true, content: '[消息已撤回]' },
-      })
+      await apiRecallMessage(messageId)
+      // 查找并更新消息状态为已撤回
+      for (const sessionId in state.messageList) {
+        const msg = state.messageList[sessionId].find(m => m.id === messageId)
+        if (msg) {
+          commit('UPDATE_MESSAGE', {
+            sessionId,
+            messageId,
+            updates: { status: 'recalled', revoked: true, content: '[消息已撤回]' },
+          })
+          break
+        }
+      }
       ElMessage.success('消息已撤回')
     } catch (error) {
       console.error('撤回消息失败:', error)
-      ElMessage.error(error.message || '撤回失败，可能已超过撤回时间限制')
+      ElMessage.error(error?.response?.data?.message || error?.message || '撤回失败，可能已超过撤回时间限制')
+      throw error
     }
   },
 
   // 转发消息
-  async forwardMessage(_, { messageId, targetSessionIds }) {
+  async forwardMessage({ commit, state }, { messageId, toSessionId, toUserId, content }) {
     try {
-      const response = await forwardMessage({
+      const response = await apiForwardMessage({
         messageId,
-        targetSessionIds,
+        toSessionId,
+        toUserId,
+        content,
       })
-      ElMessage.success(`消息已转发到 ${targetSessionIds.length} 个会话`)
+      ElMessage.success('转发成功')
       return response.data
     } catch (error) {
       console.error('转发消息失败:', error)

@@ -5,6 +5,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -84,5 +85,50 @@ public class ImRedisUtil {
         }
         String key = "im:offline:messages:" + userId;
         redisTemplate.delete(key);
+    }
+
+    private static final String ONLINE_USERS_KEY = "im:online:users";
+
+    /**
+     * 添加在线用户
+     */
+    public void addOnlineUser(Long userId) {
+        if (redisTemplate == null) {
+            return;
+        }
+        redisTemplate.opsForSet().add(ONLINE_USERS_KEY, userId.toString());
+        redisTemplate.expire(ONLINE_USERS_KEY, 30, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 移除在线用户
+     */
+    public void removeOnlineUser(Long userId) {
+        if (redisTemplate == null) {
+            return;
+        }
+        redisTemplate.opsForSet().remove(ONLINE_USERS_KEY, userId.toString());
+    }
+
+    /**
+     * 获取在线用户列表
+     */
+    @SuppressWarnings("unchecked")
+    public Set<String> getOnlineUsers() {
+        if (redisTemplate == null) {
+            return new HashSet<>();
+        }
+        return redisTemplate.opsForSet().members(ONLINE_USERS_KEY);
+    }
+
+    /**
+     * 检查用户是否在线
+     */
+    public boolean isOnlineUser(Long userId) {
+        if (redisTemplate == null) {
+            return false;
+        }
+        Boolean isMember = redisTemplate.opsForSet().isMember(ONLINE_USERS_KEY, userId.toString());
+        return isMember != null && isMember;
     }
 }

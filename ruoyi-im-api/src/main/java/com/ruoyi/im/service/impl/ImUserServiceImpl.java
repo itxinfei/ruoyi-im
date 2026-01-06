@@ -2,12 +2,14 @@ package com.ruoyi.im.service.impl;
 
 import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.im.dto.BasePageRequest;
 import com.ruoyi.im.dto.user.ImLoginRequest;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImUserService;
+import com.ruoyi.im.utils.ImRedisUtil;
 import com.ruoyi.im.utils.JwtUtils;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
@@ -19,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -176,5 +179,99 @@ public class ImUserServiceImpl implements ImUserService {
     @Override
     public int getTotalUserCount() {
         return imUserMapper.countImUsers();
+    }
+
+    @Override
+    public List<ImUserVO> getUserList(BasePageRequest request) {
+        List<ImUser> users = imUserMapper.selectImUserList(request);
+        List<ImUserVO> voList = new ArrayList<>();
+        for (ImUser user : users) {
+            ImUserVO vo = new ImUserVO();
+            BeanUtils.copyProperties(user, vo);
+            vo.setOnline(true);
+            voList.add(vo);
+        }
+        return voList;
+    }
+
+    @Override
+    public Long createUser(ImRegisterRequest request) {
+        ImUser existingUser = imUserMapper.selectImUserByUsername(request.getUsername());
+        if (existingUser != null) {
+            throw new BusinessException(ImErrorCode.USER_ALREADY_EXIST, "用户名已存在");
+        }
+
+        ImUser user = new ImUser();
+        BeanUtils.copyProperties(request, user);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setStatus(0);
+        user.setGender(0);
+        if (user.getAvatar() == null || user.getAvatar().isEmpty()) {
+            user.setAvatar("/avatar/default.png");
+        }
+        user.setCreateTime(LocalDateTime.now());
+        user.setUpdateTime(LocalDateTime.now());
+
+        int result = imUserMapper.insertImUser(user);
+        if (result <= 0) {
+            throw new BusinessException(ImErrorCode.REGISTER_FAILED, "创建用户失败");
+        }
+        return user.getId();
+    }
+
+    @Override
+    public void deleteUser(Long userId) {
+        ImUser user = imUserMapper.selectImUserById(userId);
+        if (user == null) {
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
+        }
+        imUserMapper.deleteImUserById(userId);
+    }
+
+    @Override
+    public void batchDeleteUsers(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return;
+        }
+        for (Long userId : userIds) {
+            imUserMapper.deleteImUserById(userId);
+        }
+    }
+
+    @Override
+    public void resetPassword(Long userId) {
+        ImUser user = imUserMapper.selectImUserById(userId);
+        if (user == null) {
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
+        }
+
+        // 重置为默认密码 123456
+        String defaultPassword = "123456";
+        user.setPassword(passwordEncoder.encode(defaultPassword));
+        user.setUpdateTime(LocalDateTime.now());
+        imUserMapper.updateImUser(user);
+    }
+
+    @Override
+    public List<ImUserVO> getOnlineUsers() {
+        // 从Redis获取在线用户列表
+        Set<String> onlineUserIds = ImRedisUtil.getOnlineUsers();
+        List<ImUserVO> onlineUsers = new ArrayList<>();
+
+        for (String userIdStr : onlineUserIds) {
+            try {
+                Long userId = Long.parseLong(userIdStr);
+                ImUser user = imUserMapper.selectImUserById(userId);
+                if (user != null) {
+                    ImUserVO vo = new ImUserVO();
+                    BeanUtils.copyProperties(user, vo);
+                    vo.setOnline(true);
+                    onlineUsers.add(vo);
+                }
+            } catch (NumberFormatException e) {
+                logger.warn("无效的用户ID: {}", userIdStr);
+            }
+        }
+        return onlineUsers;
     }
 }

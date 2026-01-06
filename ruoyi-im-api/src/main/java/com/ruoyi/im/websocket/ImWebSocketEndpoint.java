@@ -8,6 +8,7 @@ import com.ruoyi.im.utils.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -44,6 +45,8 @@ public class ImWebSocketEndpoint {
     private static JwtUtils staticJwtUtils;
     private static ImUserService staticImUserService;
     private static com.ruoyi.im.service.ImSessionService staticImSessionService;
+    private static boolean staticSecurityEnabled;
+    private static Long staticDevUserId;
 
     @Autowired
     private ImMessageService imMessageService;
@@ -56,6 +59,12 @@ public class ImWebSocketEndpoint {
 
     @Autowired
     private com.ruoyi.im.service.ImSessionService imSessionService;
+
+    @Value("${app.security.enabled:true}")
+    private boolean securityEnabled;
+
+    @Value("${app.dev.user-id:1}")
+    private Long devUserId;
 
     @Autowired
     public void setImMessageService(ImMessageService imMessageService) {
@@ -77,6 +86,16 @@ public class ImWebSocketEndpoint {
         staticImSessionService = imSessionService;
     }
 
+    @Autowired
+    public void setSecurityEnabled(boolean securityEnabled) {
+        staticSecurityEnabled = securityEnabled;
+    }
+
+    @Autowired
+    public void setDevUserId(Long devUserId) {
+        staticDevUserId = devUserId;
+    }
+
     /**
      * 客户端连接时调用
      * 验证 token 并建立 WebSocket 连接
@@ -88,29 +107,39 @@ public class ImWebSocketEndpoint {
         try {
             log.info("WebSocket 连接请求: sessionId={}", session.getId());
 
-            // 从查询参数中获取 token
-            String queryString = session.getQueryString();
-            String tokenValue = extractTokenFromQuery(queryString);
+            Long userId;
 
-            if (tokenValue == null || tokenValue.isEmpty()) {
-                log.warn("WebSocket 连接失败: 缺少 token");
-                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "缺少认证 token"));
-                return;
-            }
+            if (staticSecurityEnabled) {
+                log.debug("生产环境模式：进行token验证");
+                
+                String queryString = session.getQueryString();
+                String tokenValue = extractTokenFromQuery(queryString);
 
-            // 验证 token 有效性
-            if (!staticJwtUtils.validateToken(tokenValue)) {
-                log.warn("WebSocket 连接失败: token 无效");
-                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "token 无效或已过期"));
-                return;
-            }
+                if (tokenValue == null || tokenValue.isEmpty()) {
+                    log.warn("WebSocket 连接失败: 缺少 token");
+                    session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "缺少认证 token"));
+                    return;
+                }
 
-            // 从 JWT token 中解析用户ID
-            Long userId = staticJwtUtils.getUserIdFromToken(tokenValue);
-            if (userId == null) {
-                log.warn("WebSocket 连接失败: 无法从 token 中解析用户ID");
-                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "token 解析失败"));
-                return;
+                if (!staticJwtUtils.validateToken(tokenValue)) {
+                    log.warn("WebSocket 连接失败: token 无效");
+                    session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "token 无效或已过期"));
+                    return;
+                }
+
+                userId = staticJwtUtils.getUserIdFromToken(tokenValue);
+                if (userId == null) {
+                    log.warn("WebSocket 连接失败: 无法从 token 中解析用户ID");
+                    session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "token 解析失败"));
+                    return;
+                }
+            } else {
+                log.debug("开发环境模式：跳过token验证，使用默认用户ID");
+                userId = staticDevUserId;
+                if (userId == null) {
+                    userId = 1L;
+                }
+                log.info("开发环境：使用默认用户ID连接: userId={}", userId);
             }
 
             // 检查用户是否已存在在线连接，如果存在则关闭旧连接

@@ -123,4 +123,66 @@ public class ImMessageServiceImpl implements ImMessageService {
             }
         }
     }
+
+    @Override
+    public Long forwardMessage(Long messageId, Long toSessionId, Long toUserId, String content, Long userId) {
+        ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
+        if (originalMessage == null) {
+            throw new BusinessException("消息不存在");
+        }
+
+        // 解密原消息内容
+        String decryptedContent = encryptionUtil.decryptMessage(originalMessage.getContent());
+
+        ImMessage forwardMessage = new ImMessage();
+        forwardMessage.setSessionId(toSessionId != null ? toSessionId : originalMessage.getSessionId());
+        forwardMessage.setSenderId(userId);
+        forwardMessage.setReceiverId(toUserId != null ? toUserId : originalMessage.getReceiverId());
+        forwardMessage.setType("forward");
+
+        // 构建转发消息内容，包含原消息信息
+        String forwardContent;
+        if (content != null && !content.isEmpty()) {
+            forwardContent = content + "\n\n[转发消息]" + decryptedContent;
+        } else {
+            forwardContent = "[转发消息]\n" + decryptedContent;
+        }
+        forwardMessage.setContent(encryptionUtil.encryptMessage(forwardContent));
+
+        forwardMessage.setParentId(messageId);
+        forwardMessage.setStatus(2); // 转发状态
+        forwardMessage.setIsRevoked(0);
+        forwardMessage.setSendTime(LocalDateTime.now());
+        forwardMessage.setCreateTime(LocalDateTime.now());
+
+        imMessageMapper.insertImMessage(forwardMessage);
+        return forwardMessage.getId();
+    }
+
+    @Override
+    public Long replyMessage(Long messageId, String content, Long userId) {
+        ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
+        if (originalMessage == null) {
+            throw new BusinessException("消息不存在");
+        }
+
+        if (content == null || content.trim().isEmpty()) {
+            throw new BusinessException("回复内容不能为空");
+        }
+
+        ImMessage replyMessage = new ImMessage();
+        replyMessage.setSessionId(originalMessage.getSessionId());
+        replyMessage.setReceiverId(originalMessage.getSenderId());
+        replyMessage.setSenderId(userId);
+        replyMessage.setParentId(messageId);
+        replyMessage.setType("reply");
+        replyMessage.setContent(encryptionUtil.encryptMessage(content));
+        replyMessage.setStatus(3); // 回复状态
+        replyMessage.setIsRevoked(0);
+        replyMessage.setSendTime(LocalDateTime.now());
+        replyMessage.setCreateTime(LocalDateTime.now());
+
+        imMessageMapper.insertImMessage(replyMessage);
+        return replyMessage.getId();
+    }
 }

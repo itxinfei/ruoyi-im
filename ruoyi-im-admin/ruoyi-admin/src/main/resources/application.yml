@@ -144,5 +144,7 @@ xss:
 
 # Swagger配置
 swagger:
-  # 是否开启swagger
+  # 是否开启swagger（同时控制Swagger2和SpringDoc）
+  # true: 启用API文档，可通过 /swagger-ui.html 访问
+  # false: 禁用API文档，节省资源
   enabled: true
