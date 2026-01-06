@@ -45,6 +45,9 @@ public class ImUserServiceImpl implements ImUserService {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Autowired
+    private ImRedisUtil imRedisUtil;
+
     @Override
     public ImLoginVO login(ImLoginRequest request) {
         ImUser user = imUserMapper.selectImUserByUsername(request.getUsername());
@@ -256,7 +259,7 @@ public class ImUserServiceImpl implements ImUserService {
     @Override
     public List<ImUserVO> getOnlineUsers() {
         // 从Redis获取在线用户列表
-        Set<String> onlineUserIds = ImRedisUtil.getOnlineUsers();
+        Set<String> onlineUserIds = imRedisUtil.getOnlineUsers();
         List<ImUserVO> onlineUsers = new ArrayList<>();
 
         for (String userIdStr : onlineUserIds) {

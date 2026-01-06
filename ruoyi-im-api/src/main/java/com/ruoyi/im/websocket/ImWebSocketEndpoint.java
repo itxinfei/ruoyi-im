@@ -96,12 +96,11 @@ public class ImWebSocketEndpoint {
         staticImSessionService = imSessionService;
     }
 
-    @Autowired
     public void setSecurityEnabled(boolean securityEnabled) {
         staticSecurityEnabled = securityEnabled;
     }
 
-    @Autowired
+    @Value("${app.dev.user-id:1}")
     public void setDevUserId(Long devUserId) {
         staticDevUserId = devUserId;
     }

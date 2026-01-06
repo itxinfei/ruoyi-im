@@ -7,6 +7,7 @@ import com.ruoyi.im.service.ImGroupMemberService;
 import com.ruoyi.im.service.ImMessagePushService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImSessionService;
+import com.ruoyi.im.utils.ImRedisUtil;
 import com.ruoyi.im.vo.session.ImSessionVO;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
@@ -189,10 +190,11 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
 
     @Override
     public void disconnectUser(Long userId) {
-        // 在ImWebSocketEndpoint中提供了断开用户连接的方法，但不是静态的
-        // 这里我们只是断开连接，实际断开由WebSocket端点处理
         log.info("Disconnecting user: userId={}", userId);
-        ImWebSocketEndpoint.sendToUser(userId, Map.of("type", "disconnect", "message", "User disconnected by admin"));
+        Map<String, String> disconnectMessage = new HashMap<>();
+        disconnectMessage.put("type", "disconnect");
+        disconnectMessage.put("message", "User disconnected by admin");
+        ImWebSocketEndpoint.sendToUser(userId, disconnectMessage);
     }
 
     @Override

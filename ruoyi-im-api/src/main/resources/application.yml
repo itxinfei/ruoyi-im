@@ -72,6 +72,12 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
 
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
+
 # Swagger配置
 # 注意：此配置项用于控制自定义的 SpringDocConfig 配置类
 # 真正的 SpringDoc 框架配置在下面的 springdoc 部分
@@ -116,6 +122,9 @@ im:
     maxLength: 2000  # 消息最大长度
     expireDays: 30   # 消息过期天数
     recallWindowSeconds: 120  # 消息撤回时间窗口(秒)
+    encryption:
+      enabled: true  # 是否启用消息加密
+      key: im_encryption_key_2024_for_message_encryption  # 加密密钥
   file:
     maxSizeMb: 20  # 文件最大大小(MB)
     allowExt: 
@@ -137,6 +146,12 @@ im:
     heartbeatInterval: 30  # WebSocket心跳间隔(秒)
     maxConnections: 10000  # 最大连接数
     jwt-secret: im_secret_key_2024_for_im_system_that_is_long_enough_for_HS512_algorithm
+
+# 文件上传配置
+file:
+  upload:
+    path: ${user.home}/uploads/  # 文件上传路径
+    url-prefix: /api/im/file/download/  # 文件URL前缀
 
 # 日志配置
 logging:

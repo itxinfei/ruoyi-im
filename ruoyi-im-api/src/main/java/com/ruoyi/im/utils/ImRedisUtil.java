@@ -119,7 +119,16 @@ public class ImRedisUtil {
             return new HashSet<>();
         }
         String onlineUsersKey = "im:online:users";
-        return redisTemplate.opsForSet().members(onlineUsersKey);
+        Set<Object> members = redisTemplate.opsForSet().members(onlineUsersKey);
+        Set<String> result = new HashSet<>();
+        if (members != null) {
+            for (Object member : members) {
+                if (member != null) {
+                    result.add(member.toString());
+                }
+            }
+        }
+        return result;
     }
 
     /**
