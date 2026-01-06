@@ -87,27 +87,27 @@ public class ImRedisUtil {
         redisTemplate.delete(key);
     }
 
-    private static final String ONLINE_USERS_KEY = "im:online:users";
-
     /**
-     * 添加在线用户
+     * 添加在线用户 - 由WebSocket端点调用
      */
     public void addOnlineUser(Long userId) {
         if (redisTemplate == null) {
             return;
         }
-        redisTemplate.opsForSet().add(ONLINE_USERS_KEY, userId.toString());
-        redisTemplate.expire(ONLINE_USERS_KEY, 30, TimeUnit.MINUTES);
+        String onlineUsersKey = "im:online:users";
+        redisTemplate.opsForSet().add(onlineUsersKey, userId.toString());
+        redisTemplate.expire(onlineUsersKey, 30, TimeUnit.MINUTES);
     }
 
     /**
-     * 移除在线用户
+     * 移除在线用户 - 由WebSocket端点调用
      */
     public void removeOnlineUser(Long userId) {
         if (redisTemplate == null) {
             return;
         }
-        redisTemplate.opsForSet().remove(ONLINE_USERS_KEY, userId.toString());
+        String onlineUsersKey = "im:online:users";
+        redisTemplate.opsForSet().remove(onlineUsersKey, userId.toString());
     }
 
     /**
@@ -118,7 +118,8 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return new HashSet<>();
         }
-        return redisTemplate.opsForSet().members(ONLINE_USERS_KEY);
+        String onlineUsersKey = "im:online:users";
+        return redisTemplate.opsForSet().members(onlineUsersKey);
     }
 
     /**
@@ -128,7 +129,8 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return false;
         }
-        Boolean isMember = redisTemplate.opsForSet().isMember(ONLINE_USERS_KEY, userId.toString());
+        String onlineUsersKey = "im:online:users";
+        Boolean isMember = redisTemplate.opsForSet().isMember(onlineUsersKey, userId.toString());
         return isMember != null && isMember;
     }
 }

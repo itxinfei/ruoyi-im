@@ -183,7 +183,8 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public List<ImUserVO> getUserList(BasePageRequest request) {
-        List<ImUser> users = imUserMapper.selectImUserList(request);
+        ImUser queryUser = new ImUser();
+        List<ImUser> users = imUserMapper.selectImUserList(queryUser);
         List<ImUserVO> voList = new ArrayList<>();
         for (ImUser user : users) {
             ImUserVO vo = new ImUserVO();

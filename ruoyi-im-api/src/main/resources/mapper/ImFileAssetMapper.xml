@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImFileAssetMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImFileAsset" id="ImFileAssetResult">
+        <result property="id" column="id" />
+        <result property="fileName" column="file_name" />
+        <result property="originalName" column="original_name" />
+        <result property="filePath" column="file_path" />
+        <result property="fileSize" column="file_size" />
+        <result property="fileType" column="file_type" />
+        <result property="mimeType" column="mime_type" />
+        <result property="uploaderId" column="uploader_id" />
+        <result property="uploadTime" column="upload_time" />
+        <result property="downloadCount" column="download_count" />
+        <result property="status" column="status" />
+        <result property="remark" column="remark" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <sql id="selectImFileAssetVo">
+        select id, file_name, original_name, file_path, file_size, file_type, mime_type, 
+               uploader_id, upload_time, download_count, status, remark, create_time, update_time 
+        from im_file_asset
+    </sql>
+
+    <select id="countTotalFiles" resultType="java.lang.Long">
+        select count(*) 
+        from im_file_asset
+        <where>
+            status = 1
+            <if test="startDate != null">
+                and date(create_time) &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                and date(create_time) &lt;= #{endDate}
+            </if>
+        </where>
+    </select>
+
+    <select id="countTodayUploads" resultType="java.lang.Long">
+        select count(*) 
+        from im_file_asset
+        where status = 1
+        and date(create_time) = #{date}
+    </select>
+
+    <select id="countTotalStorage" resultType="java.lang.Long">
+        select coalesce(sum(file_size), 0)
+        from im_file_asset
+        where status = 1
+    </select>
+
+    <select id="countTotalDownloads" resultType="java.lang.Long">
+        select coalesce(sum(download_count), 0)
+        from im_file_asset
+        <where>
+            status = 1
+            <if test="startDate != null">
+                and date(create_time) &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                and date(create_time) &lt;= #{endDate}
+            </if>
+        </where>
+    </select>
+
+</mapper>

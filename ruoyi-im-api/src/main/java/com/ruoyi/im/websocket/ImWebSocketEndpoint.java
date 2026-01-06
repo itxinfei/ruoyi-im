@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImUserService;
+import com.ruoyi.im.utils.ImRedisUtil;
 import com.ruoyi.im.utils.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ public class ImWebSocketEndpoint {
     private static ImMessageService staticImMessageService;
     private static JwtUtils staticJwtUtils;
     private static ImUserService staticImUserService;
+    private static ImRedisUtil staticImRedisUtil;
     private static com.ruoyi.im.service.ImSessionService staticImSessionService;
     private static boolean staticSecurityEnabled;
     private static Long staticDevUserId;
@@ -56,6 +58,9 @@ public class ImWebSocketEndpoint {
 
     @Autowired
     private ImUserService imUserService;
+
+    @Autowired
+    private ImRedisUtil imRedisUtil;
 
     @Autowired
     private com.ruoyi.im.service.ImSessionService imSessionService;
@@ -79,6 +84,11 @@ public class ImWebSocketEndpoint {
     @Autowired
     public void setImUserService(ImUserService imUserService) {
         staticImUserService = imUserService;
+    }
+
+    @Autowired
+    public void setImRedisUtil(ImRedisUtil imRedisUtil) {
+        staticImRedisUtil = imRedisUtil;
     }
 
     @Autowired
@@ -156,6 +166,11 @@ public class ImWebSocketEndpoint {
             // 保存用户会话
             onlineUsers.put(userId, session);
             sessionUserMap.put(session, userId);
+
+            // 同步更新Redis中的在线状态
+            if (staticImRedisUtil != null) {
+                staticImRedisUtil.addOnlineUser(userId);
+            }
 
             log.info("用户上线: userId={}, sessionId={}", userId, session.getId());
 
@@ -238,6 +253,12 @@ public class ImWebSocketEndpoint {
             Long userId = sessionUserMap.remove(session);
             if (userId != null) {
                 onlineUsers.remove(userId);
+                
+                // 同步更新Redis中的在线状态
+                if (staticImRedisUtil != null) {
+                    staticImRedisUtil.removeOnlineUser(userId);
+                }
+
                 log.info("用户离线: userId={}, sessionId={}", userId, session.getId());
 
                 // 广播用户离线消息
@@ -527,7 +548,7 @@ public class ImWebSocketEndpoint {
      *
      * @param messageJson JSON 格式的消息内容
      */
-    private void broadcastToAllOnline(String messageJson) {
+    public static void broadcastToAllOnline(String messageJson) {
         List<Session> sessions = new ArrayList<>(onlineUsers.values());
         for (Session session : sessions) {
             if (session.isOpen()) {

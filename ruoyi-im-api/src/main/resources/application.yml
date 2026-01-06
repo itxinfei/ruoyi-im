@@ -126,6 +126,9 @@ im:
       - jpg
       - txt
     downloadExpireMinutes: 60  # 下载链接过期时间(分钟)
+    upload:
+      path: uploads/  # 文件上传路径（项目根目录下的uploads文件夹）
+      url-prefix: /uploads/  # 文件URL前缀
   sensitive:
     enabled: true  # 是否启用敏感词检测
     onBlock: REJECT  # 敏感词拦截策略: REJECT | MASK | WARN

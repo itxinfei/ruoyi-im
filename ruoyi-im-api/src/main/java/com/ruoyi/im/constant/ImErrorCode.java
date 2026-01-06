@@ -36,6 +36,9 @@ public class ImErrorCode {
     /** 密码错误 */
     public static final int PASSWORD_ERROR = 4003;
 
+    /** 注册失败 */
+    public static final int REGISTER_FAILED = 4011;
+
     /** 会话不存在 */
     public static final int SESSION_NOT_EXIST = 4004;
 
