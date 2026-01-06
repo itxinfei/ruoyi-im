@@ -1,11 +1,9 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
-import com.ruoyi.im.dto.user.ImLoginRequest;
-import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
+import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImUserService;
-import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +12,8 @@ import javax.validation.Valid;
 
 /**
  * 用户控制器
- * 提供用户登录、注册、信息查询、信息更新、密码修改等功能
+ * 提供用户信息查询、更新、密码修改等用户管理功能
+ * 认证相关功能（登录、注册）请使用ImAuthController
  *
  * @author ruoyi
  */
@@ -24,36 +23,6 @@ public class ImUserController {
 
     @Autowired
     private ImUserService imUserService;
-
-    /**
-     * 用户登录
-     * 验证用户名和密码，验证成功后返回JWT Token和用户信息
-     *
-     * @param request 登录请求参数，包含用户名和密码
-     * @return 登录结果，包含JWT Token和用户基本信息
-     * @apiNote 使用 @Valid 注解进行参数校验，确保用户名和密码不为空
-     * @throws BusinessException 当用户不存在或密码错误时抛出业务异常
-     */
-    @PostMapping("/login")
-    public Result<ImLoginVO> login(@Valid @RequestBody ImLoginRequest request) {
-        ImLoginVO vo = imUserService.login(request);
-        return Result.success(vo);
-    }
-
-    /**
-     * 用户注册
-     * 创建新用户账号，密码会自动加密存储
-     *
-     * @param request 注册请求参数，包含用户名、密码、昵称等信息
-     * @return 注册结果，包含新创建的用户ID
-     * @apiNote 使用 @Valid 注解进行参数校验，确保必填字段不为空
-     * @throws BusinessException 当用户名已存在时抛出业务异常
-     */
-    @PostMapping("/register")
-    public Result<Long> register(@Valid @RequestBody ImRegisterRequest request) {
-        Long userId = imUserService.register(request);
-        return Result.success("注册成功", userId);
-    }
 
     /**
      * 获取当前用户信息

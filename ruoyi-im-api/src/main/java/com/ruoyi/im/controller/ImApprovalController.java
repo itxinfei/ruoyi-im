@@ -1,6 +1,8 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.domain.ImApproval;
+import com.ruoyi.im.domain.ImApprovalTemplate;
 import com.ruoyi.im.service.ImApprovalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -70,11 +72,11 @@ public class ImApprovalController {
      */
     @Operation(summary = "获取待我审批列表", description = "获取需要当前用户审批的审批列表")
     @GetMapping("/pending")
-    public Result<List<Map<String, Object>>> getPendingApprovals(@RequestHeader(value = "userId", required = false) Long userId) {
+    public Result<List<ImApproval>> getPendingApprovals(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
             userId = 1L; // 开发环境默认用户
         }
-        List<Map<String, Object>> list = approvalService.getPendingApprovals(userId);
+        List<ImApproval> list = approvalService.getPendingApprovals(userId);
         return Result.success(list);
     }
 
@@ -87,11 +89,11 @@ public class ImApprovalController {
      */
     @Operation(summary = "获取我发起的审批列表", description = "获取当前用户发起的审批列表")
     @GetMapping("/my")
-    public Result<List<Map<String, Object>>> getMyApprovals(@RequestHeader(value = "userId", required = false) Long userId) {
+    public Result<List<ImApproval>> getMyApprovals(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
             userId = 1L; // 开发环境默认用户
         }
-        List<Map<String, Object>> list = approvalService.getMyApprovals(userId);
+        List<ImApproval> list = approvalService.getMyApprovals(userId);
         return Result.success(list);
     }
 
@@ -104,11 +106,11 @@ public class ImApprovalController {
      */
     @Operation(summary = "获取我已审批列表", description = "获取当前用户已经审批的审批列表")
     @GetMapping("/processed")
-    public Result<List<Map<String, Object>>> getProcessedApprovals(@RequestHeader(value = "userId", required = false) Long userId) {
+    public Result<List<ImApproval>> getProcessedApprovals(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
             userId = 1L; // 开发环境默认用户
         }
-        List<Map<String, Object>> list = approvalService.getProcessedApprovals(userId);
+        List<ImApproval> list = approvalService.getProcessedApprovals(userId);
         return Result.success(list);
     }
 
@@ -181,8 +183,8 @@ public class ImApprovalController {
      */
     @Operation(summary = "获取审批模板列表", description = "获取所有审批模板")
     @GetMapping("/templates")
-    public Result<List<Map<String, Object>>> getTemplates() {
-        List<Map<String, Object>> list = approvalService.getTemplates();
+    public Result<List<ImApprovalTemplate>> getTemplates() {
+        List<ImApprovalTemplate> list = approvalService.getTemplates();
         return Result.success(list);
     }
 
@@ -194,8 +196,8 @@ public class ImApprovalController {
      */
     @Operation(summary = "获取启用的审批模板列表", description = "获取所有启用状态的审批模板")
     @GetMapping("/templates/active")
-    public Result<List<Map<String, Object>>> getActiveTemplates() {
-        List<Map<String, Object>> list = approvalService.getActiveTemplates();
+    public Result<List<ImApprovalTemplate>> getActiveTemplates() {
+        List<ImApprovalTemplate> list = approvalService.getActiveTemplates();
         return Result.success(list);
     }
 }

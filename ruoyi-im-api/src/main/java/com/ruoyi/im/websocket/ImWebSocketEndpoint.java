@@ -96,11 +96,11 @@ public class ImWebSocketEndpoint {
         staticImSessionService = imSessionService;
     }
 
+    @Value("${app.security.enabled:true}")
     public void setSecurityEnabled(boolean securityEnabled) {
         staticSecurityEnabled = securityEnabled;
     }
 
-    @Value("${app.dev.user-id:1}")
     public void setDevUserId(Long devUserId) {
         staticDevUserId = devUserId;
     }
@@ -215,6 +215,10 @@ public class ImWebSocketEndpoint {
             Object payload = messageMap.get("payload");
 
             switch (type) {
+                case "auth":
+                    // 处理认证消息
+                    handleAuthMessage(session, messageMap);
+                    break;
                 case "message":
                     // 处理聊天消息
                     handleChatMessage(userId, payload);
@@ -354,6 +358,85 @@ public class ImWebSocketEndpoint {
 
         } catch (Exception e) {
             log.error("处理正在输入状态异常", e);
+        }
+    }
+
+    /**
+     * 处理认证消息
+     * 验证用户身份并返回认证结果
+     *
+     * @param session WebSocket会话
+     * @param messageData 认证消息数据
+     */
+    private void handleAuthMessage(Session session, Map<String, Object> messageData) {
+        try {
+            String token = (String) messageData.get("token");
+            Long userId = null;
+
+            if (staticSecurityEnabled) {
+                // 生产环境验证token
+                if (token != null && staticJwtUtils.validateToken(token)) {
+                    userId = staticJwtUtils.getUserIdFromToken(token);
+                }
+            } else {
+                // 开发环境使用默认用户ID
+                userId = staticDevUserId;
+                if (userId == null) {
+                    userId = 1L;
+                }
+            }
+
+            if (userId != null) {
+                // 更新会话中的用户映射
+                Long oldUserId = sessionUserMap.get(session);
+                if (oldUserId != null && !oldUserId.equals(userId)) {
+                    // 如果当前会话绑定了其他用户ID，移除旧映射
+                    onlineUsers.remove(oldUserId);
+                }
+
+                sessionUserMap.put(session, userId);
+                onlineUsers.put(userId, session);
+
+                // 同步更新Redis中的在线状态
+                if (staticImRedisUtil != null) {
+                    staticImRedisUtil.addOnlineUser(userId);
+                }
+
+                // 发送认证成功消息
+                Map<String, Object> response = new HashMap<>();
+                response.put("type", "auth_response");
+                response.put("success", true);
+                response.put("userId", userId);
+                response.put("message", "认证成功");
+
+                sendMessage(session, response);
+                
+                log.info("用户认证成功: userId={}, sessionId={}", userId, session.getId());
+            } else {
+                // 发送认证失败消息
+                Map<String, Object> response = new HashMap<>();
+                response.put("type", "auth_response");
+                response.put("success", false);
+                response.put("message", "认证失败");
+
+                sendMessage(session, response);
+                
+                log.warn("用户认证失败: sessionId={}", session.getId());
+            }
+        } catch (Exception e) {
+            log.error("处理认证消息异常", e);
+            
+            // 发送认证失败消息
+            try {
+                Map<String, Object> response = new HashMap<>();
+                response.put("type", "auth_response");
+                response.put("success", false);
+                response.put("message", "认证异常: " + e.getMessage());
+
+                session.getBasicRemote().sendText(new ObjectMapper().writeValueAsString(response));
+            } catch (Exception ex) {
+                log.error("发送认证失败消息异常", ex);
+            }
         }
     }
 

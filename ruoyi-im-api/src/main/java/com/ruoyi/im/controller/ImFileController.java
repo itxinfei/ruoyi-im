@@ -51,7 +51,7 @@ public class ImFileController {
             userId = 1L; // 开发环境默认用户
         }
         if (file == null || file.isEmpty()) {
-            return Result.error("文件不能为空");
+            return Result.fail("文件不能为空");
         }
         
         ImFileVO fileVO = imFileService.uploadFile(file, userId);
@@ -74,7 +74,7 @@ public class ImFileController {
             userId = 1L; // 开发环境默认用户
         }
         if (files == null || files.isEmpty()) {
-            return Result.error("文件列表不能为空");
+            return Result.fail("文件列表不能为空");
         }
         
         List<ImFileVO> fileVOList = imFileService.uploadFiles(files, userId);
@@ -121,7 +121,7 @@ public class ImFileController {
         
         ImFileVO fileVO = imFileService.getFileById(fileId);
         if (fileVO == null) {
-            return Result.error("文件不存在");
+            return Result.fail("文件不存在");
         }
         
         return Result.success(fileVO.getFileUrl());

@@ -1,6 +1,7 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.domain.ImApplication;
 import com.ruoyi.im.service.ImApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,8 +34,8 @@ public class ImAppController {
      */
     @Operation(summary = "获取应用列表", description = "获取所有应用列表，可按分类筛选")
     @GetMapping("/list")
-    public Result<List<Map<String, Object>>> getApplications(@RequestParam(required = false) String category) {
-        List<Map<String, Object>> list = applicationService.getApplications(category);
+    public Result<List<ImApplication>> getApplications(@RequestParam(required = false) String category) {
+        List<ImApplication> list = applicationService.getApplications(category);
         return Result.success(list);
     }
 
@@ -46,8 +47,8 @@ public class ImAppController {
      */
     @Operation(summary = "获取可见应用列表", description = "获取当前用户可见的应用列表")
     @GetMapping("/visible")
-    public Result<List<Map<String, Object>>> getVisibleApplications() {
-        List<Map<String, Object>> list = applicationService.getVisibleApplications();
+    public Result<List<ImApplication>> getVisibleApplications() {
+        List<ImApplication> list = applicationService.getVisibleApplications();
         return Result.success(list);
     }
 
@@ -59,8 +60,8 @@ public class ImAppController {
      */
     @Operation(summary = "按分类获取应用", description = "按分类分组获取应用")
     @GetMapping("/category")
-    public Result<Map<String, List<Map<String, Object>>>> getApplicationsByCategory() {
-        Map<String, List<Map<String, Object>>> map = applicationService.getApplicationsByCategory();
+    public Result<Map<String, List<ImApplication>>> getApplicationsByCategory() {
+        Map<String, List<ImApplication>> map = applicationService.getApplicationsByCategory();
         return Result.success(map);
     }
 
@@ -73,8 +74,8 @@ public class ImAppController {
      */
     @Operation(summary = "获取应用详情", description = "获取应用详细信息")
     @GetMapping("/{id}")
-    public Result<Map<String, Object>> getApplicationById(@PathVariable Long id) {
-        Map<String, Object> app = applicationService.getApplicationById(id);
+    public Result<ImApplication> getApplicationById(@PathVariable Long id) {
+        ImApplication app = applicationService.getApplicationById(id);
         return Result.success(app);
     }
 
