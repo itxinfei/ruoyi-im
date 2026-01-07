@@ -63,3 +63,44 @@ export function listUserFriends(userId) {
     method: 'get',
   })
 }
+
+// 获取当前登录用户信息
+export function getCurrentUserInfo() {
+  return request({
+    url: '/api/im/user/info',
+    method: 'get',
+  })
+}
+
+// 更新个人资料
+export function updateProfile(userId, data) {
+  return request({
+    url: '/api/im/user/' + userId,
+    method: 'put',
+    data: data,
+  })
+}
+
+// 修改密码
+export function changePassword(userId, oldPassword, newPassword) {
+  return request({
+    url: '/api/im/user/' + userId + '/password',
+    method: 'put',
+    params: {
+      oldPassword,
+      newPassword,
+    },
+  })
+}
+
+// 上传用户头像
+export function uploadAvatar(data) {
+  return request({
+    url: '/api/im/user/avatar',
+    method: 'post',
+    data: data,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}

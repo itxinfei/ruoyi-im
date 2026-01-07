@@ -25,7 +25,7 @@
 
             <el-form :model="profileForm" label-width="100px" class="profile-form">
               <el-form-item label="昵称">
-                <el-input v-model="profileForm.nickName" placeholder="请输入昵称" maxlength="20" />
+                <el-input v-model="profileForm.nickname" placeholder="请输入昵称" maxlength="20" />
               </el-form-item>
               <el-form-item label="性别">
                 <el-radio-group v-model="profileForm.gender">
@@ -35,7 +35,7 @@
                 </el-radio-group>
               </el-form-item>
               <el-form-item label="手机号">
-                <el-input v-model="profileForm.phone" placeholder="请输入手机号" />
+                <el-input v-model="profileForm.mobile" placeholder="请输入手机号" />
               </el-form-item>
               <el-form-item label="邮箱">
                 <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
@@ -323,6 +323,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Check } from '@element-plus/icons-vue'
 import { getToken } from '@/utils/auth'
 import AvatarUpload from '@/components/AvatarUpload/index.vue'
+import { getCurrentUserInfo, updateProfile, changePassword } from '@/api/im/user'
 
 const router = useRouter()
 
@@ -355,9 +356,9 @@ const userInfo = ref({
 
 /** 个人资料表单 */
 const profileForm = reactive({
-  nickName: '',
+  nickname: '',
   gender: 0,
-  phone: '',
+  mobile: '',
   email: '',
   signature: '',
 })
@@ -445,9 +446,9 @@ const blockedUsers = ref([])
  */
 const initFormData = () => {
   Object.assign(profileForm, {
-    nickName: userInfo.value.nickName,
+    nickname: userInfo.value.nickName,
     gender: userInfo.value.gender,
-    phone: userInfo.value.phone,
+    mobile: userInfo.value.phone,
     email: userInfo.value.email,
     signature: userInfo.value.signature,
   })
@@ -474,12 +475,12 @@ const handleAvatarError = error => {
 const handleSaveProfile = async () => {
   profileLoading.value = true
   try {
-    // 模拟保存
-    await new Promise(resolve => setTimeout(resolve, 500))
+    const userId = userInfo.value.userId
+    await updateProfile(userId, profileForm)
     Object.assign(userInfo.value, profileForm)
     ElMessage.success('保存成功')
   } catch (error) {
-    ElMessage.error('保存失败')
+    ElMessage.error(error.message || '保存失败')
   } finally {
     profileLoading.value = false
   }
@@ -495,18 +496,19 @@ const handleChangePassword = async () => {
   passwordLoading.value = true
 
   try {
-    // 模拟修改密码
-    await new Promise(resolve => setTimeout(resolve, 500))
+    const userId = userInfo.value.userId
+    await changePassword(userId, passwordForm.oldPassword, passwordForm.newPassword)
     ElMessage.success('密码修改成功，请重新登录')
     showPasswordDialog.value = false
     // 清空表单
     passwordForm.oldPassword = ''
     passwordForm.newPassword = ''
     passwordForm.confirmPassword = ''
-    // 跳转登录页
+    // 清除Token并跳转登录页
+    localStorage.removeItem('token')
     router.push('/login')
   } catch (error) {
-    ElMessage.error('密码修改失败')
+    ElMessage.error(error.message || '密码修改失败')
   } finally {
     passwordLoading.value = false
   }
@@ -620,10 +622,33 @@ const loadLocalSettings = () => {
   }
 }
 
+/**
+ * 加载当前用户信息
+ */
+const loadUserInfo = async () => {
+  try {
+    const response = await getCurrentUserInfo()
+    if (response.code === 200 && response.data) {
+      userInfo.value = {
+        userId: response.data.id,
+        nickName: response.data.nickname,
+        avatar: response.data.avatar,
+        phone: response.data.mobile,
+        email: response.data.email,
+        gender: response.data.gender || 0,
+        signature: response.data.signature || '',
+      }
+      initFormData()
+    }
+  } catch (error) {
+    console.error('加载用户信息失败:', error)
+  }
+}
+
 // ==================== 生命周期 ====================
 
 onMounted(() => {
-  initFormData()
+  loadUserInfo()
   loadLocalSettings()
 })
 </script>

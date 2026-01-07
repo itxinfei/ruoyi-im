@@ -1,45 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.web.mapper.ImMessageMapper">
-    
+
     <resultMap type="com.ruoyi.web.domain.ImMessage" id="ImMessageResult">
         <id property="id" column="id"/>
         <result property="conversationId" column="conversation_id"/>
         <result property="senderId" column="sender_id"/>
         <result property="content" column="content"/>
-        <result property="messageType" column="message_type"/>
-        <result property="status" column="status"/>
+        <result property="type" column="message_type"/>
         <result property="createTime" column="create_time"/>
     </resultMap>
 
-    <select id="selectImMessageList" parameterType="com.ruoyi.web.domain.ImMessage" resultMap="ImMessageResult">
-        select id, conversation_id, sender_id, content, message_type, status, create_time
+    <sql id="selectImMessageVo">
+        select id, conversation_id, sender_id, content, message_type, create_time
         from im_message
+    </sql>
+
+    <select id="selectImMessageList" parameterType="com.ruoyi.web.domain.ImMessage" resultMap="ImMessageResult">
+        <include refid="selectImMessageVo"/>
         <where>
             <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
             <if test="senderId != null"> and sender_id = #{senderId} </if>
-            <if test="status != null and status != ''"> and status = #{status} </if>
         </where>
         order by create_time desc
     </select>
 
     <select id="selectImMessageListByConversationId" parameterType="Long" resultMap="ImMessageResult">
-        select id, conversation_id, sender_id, content, message_type, status, create_time
-        from im_message
+        <include refid="selectImMessageVo"/>
         where conversation_id = #{conversationId}
         order by create_time desc
     </select>
 
     <select id="selectImMessageListByTimeRange" resultMap="ImMessageResult">
-        select id, conversation_id, sender_id, content, message_type, status, create_time
-        from im_message
+        <include refid="selectImMessageVo"/>
         where conversation_id = #{conversationId}
         and create_time between #{startTime} and #{endTime}
         order by create_time desc
     </select>
 
     <select id="selectImMessageById" parameterType="Long" resultMap="ImMessageResult">
-        select * from im_message where id = #{id}
+        <include refid="selectImMessageVo"/>
+        where id = #{id}
     </select>
 
     <select id="countMessages" parameterType="com.ruoyi.web.domain.ImMessage" resultType="java.lang.Integer">
@@ -51,7 +52,7 @@
     </select>
 
     <select id="countSensitiveMessages" resultType="java.lang.Integer">
-        select count(*) from im_message where message_type in ('sensitive', 'alert')
+        select count(*) from im_message where sensitive_level in ('SENSITIVE', 'HIGH')
     </select>
 
     <delete id="deleteImMessageById" parameterType="Long">
@@ -66,6 +67,6 @@
     </delete>
 
     <update id="revokeMessage" parameterType="Long">
-        update im_message set status = 'revoked' where id = #{messageId}
+        update im_message set is_revoked = 1, revoked_time = NOW() where id = #{messageId}
     </update>
 </mapper>

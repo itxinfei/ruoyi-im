@@ -6,7 +6,7 @@
         <id property="id" column="id"/>
         <result property="conversationId" column="conversation_id"/>
         <result property="senderId" column="sender_id"/>
-        <result property="type" column="type"/>
+        <result property="type" column="message_type"/>
         <result property="content" column="content"/>
         <result property="isRevoked" column="is_revoked"/>
         <result property="revokedTime" column="revoked_time"/>

@@ -94,7 +94,7 @@ import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Camera, RefreshLeft, RefreshRight, Sort, Refresh } from '@element-plus/icons-vue'
 import VueCropper from 'vue-cropperjs'
-import { uploadAvatar } from '@/api/system/user'
+import { uploadAvatar } from '@/api/im/user'
 import { useStore } from 'vuex'
 
 const props = defineProps({

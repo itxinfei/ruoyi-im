@@ -7,6 +7,7 @@ import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Set;
 
@@ -133,4 +134,14 @@ public interface ImUserService {
      * @return 在线用户列表
      */
     List<ImUserVO> getOnlineUsers();
+
+    /**
+     * 上传用户头像
+     * 上传用户头像图片并更新用户头像字段
+     *
+     * @param userId 用户ID
+     * @param file 头像文件
+     * @return 头像URL
+     */
+    String uploadAvatar(Long userId, MultipartFile file);
 }

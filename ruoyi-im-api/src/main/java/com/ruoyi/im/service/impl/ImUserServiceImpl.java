@@ -10,6 +10,7 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImUserService;
 
+import com.ruoyi.im.utils.FileUtils;
 import com.ruoyi.im.utils.ImRedisUtil;
 import com.ruoyi.im.utils.JwtUtils;
 import com.ruoyi.im.vo.user.ImLoginVO;
@@ -18,14 +19,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * 用户服务实现
@@ -48,6 +56,12 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Autowired
     private ImRedisUtil imRedisUtil;
+
+    @Value("${file.upload.path}")
+    private String uploadPath;
+
+    @Value("${file.upload.url-prefix}")
+    private String urlPrefix;
 
 
 
@@ -287,5 +301,64 @@ public class ImUserServiceImpl implements ImUserService {
         }
         
         return onlineUsers;
+    }
+
+    @Override
+    public String uploadAvatar(Long userId, MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException("FILE_EMPTY", "头像文件不能为空");
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = FileUtils.getFileExtension(originalFilename);
+        
+        // 验证文件类型
+        if (!FileUtils.isImage(originalFilename)) {
+            throw new BusinessException("FILE_TYPE_ERROR", "只支持图片格式的头像");
+        }
+
+        // 验证文件大小（最大2MB）
+        long maxSize = 2 * 1024 * 1024;
+        if (file.getSize() > maxSize) {
+            throw new BusinessException("FILE_SIZE_ERROR", "头像文件大小不能超过2MB");
+        }
+
+        // 生成文件名和路径
+        String fileName = UUID.randomUUID().toString() + "." + fileExtension;
+        String datePath = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        String relativePath = "avatar/" + datePath + "/" + fileName;
+        String filePath = uploadPath + relativePath;
+
+        // 确保目录存在
+        File targetFile = new File(filePath);
+        File parentDir = targetFile.getParentFile();
+        if (!parentDir.exists()) {
+            parentDir.mkdirs();
+        }
+
+        // 保存文件
+        try {
+            file.transferTo(targetFile);
+        } catch (IOException e) {
+            logger.error("头像上传失败: {}", e.getMessage(), e);
+            throw new BusinessException("UPLOAD_FAILED", "头像上传失败");
+        }
+
+        // 生成访问URL
+        String avatarUrl = urlPrefix + relativePath;
+
+        // 更新用户头像
+        ImUser user = imUserMapper.selectImUserById(userId);
+        if (user == null) {
+            throw new BusinessException("USER_NOT_EXIST", "用户不存在");
+        }
+
+        user.setAvatar(avatarUrl);
+        user.setUpdateTime(LocalDateTime.now());
+        imUserMapper.updateImUser(user);
+
+        logger.info("用户头像上传成功，userId={}, avatarUrl={}", userId, avatarUrl);
+
+        return avatarUrl;
     }
 }

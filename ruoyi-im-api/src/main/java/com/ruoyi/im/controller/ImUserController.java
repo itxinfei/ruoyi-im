@@ -7,6 +7,7 @@ import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.vo.user.ImUserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
@@ -125,5 +126,25 @@ public class ImUserController {
             @RequestParam String newPassword) {
         boolean success = imUserService.changePassword(id, oldPassword, newPassword);
         return success ? Result.success("密码修改成功") : Result.fail("旧密码错误");
+    }
+
+    /**
+     * 上传用户头像
+     * 上传用户头像图片并更新用户头像字段
+     *
+     * @param file 头像文件，支持jpg、png、gif等图片格式
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 头像URL
+     * @apiNote 上传成功后自动更新用户头像字段，返回头像访问URL
+     * @throws BusinessException 当用户不存在或文件上传失败时抛出业务异常
+     */
+    @PostMapping("/avatar")
+    public Result<String> uploadAvatar(@RequestParam("avatarfile") MultipartFile file,
+                                       @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        String avatarUrl = imUserService.uploadAvatar(userId, file);
+        return Result.success("头像上传成功", avatarUrl);
     }
 }

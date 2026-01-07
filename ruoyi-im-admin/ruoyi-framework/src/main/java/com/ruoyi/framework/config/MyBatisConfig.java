@@ -99,17 +99,21 @@ public class MyBatisConfig
         {
             for (String mapperLocation : mapperLocations)
             {
+                mapperLocation = mapperLocation.trim();
                 try
                 {
                     Resource[] mappers = resourceResolver.getResources(mapperLocation);
                     resources.addAll(Arrays.asList(mappers));
+                    System.out.println("Loaded " + mappers.length + " mappers from: " + mapperLocation);
                 }
                 catch (IOException e)
                 {
-                    // ignore
+                    System.err.println("Failed to load mappers from: " + mapperLocation);
+                    e.printStackTrace();
                 }
             }
         }
+        System.out.println("Total mappers loaded: " + resources.size());
         return resources.toArray(new Resource[resources.size()]);
     }
 
