@@ -2,8 +2,8 @@ package com.ruoyi.web.controller.im;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.im.service.ImMessagePushService;
-import com.ruoyi.im.service.ImUserService;
+import com.ruoyi.web.service.ImMessagePushService;
+import com.ruoyi.web.service.ImUserService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,7 @@ import java.util.Set;
 
 /**
  * IM系统管理控制器
- * 
+ *
  * @author ruoyi
  */
 @RestController("adminImSystemController")
@@ -35,7 +35,6 @@ public class ImSystemAdminController extends BaseController {
     public AjaxResult getSystemStats() {
         Map<String, Object> stats = new HashMap<>();
         stats.put("onlineUserCount", messagePushService.getOnlineUserCount());
-        stats.put("totalUsers", userService.getTotalUserCount());
         stats.put("timestamp", System.currentTimeMillis());
         return AjaxResult.success(stats);
     }
@@ -80,8 +79,7 @@ public class ImSystemAdminController extends BaseController {
             @RequestParam String title,
             @RequestParam String content,
             @RequestParam(defaultValue = "info") String type) {
-        // 使用系统服务发送通知
-        // 这里需要根据实际的实现进行调整
+        messagePushService.sendMessageToUser(userId, content);
         return AjaxResult.success("通知已发送");
     }
 
@@ -94,8 +92,7 @@ public class ImSystemAdminController extends BaseController {
             @RequestParam String title,
             @RequestParam String content,
             @RequestParam(defaultValue = "info") String type) {
-        // 使用系统服务发送广播通知
-        // 这里需要根据实际的实现进行调整
+        messagePushService.broadcastMessage(content);
         return AjaxResult.success("通知已广播");
     }
 }

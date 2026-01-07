@@ -5,7 +5,7 @@
     <resultMap type="com.ruoyi.im.domain.ImFriend" id="ImFriendResult">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
-        <result property="friendId" column="friend_id"/>
+        <result property="friendId" column="friend_user_id"/>
         <result property="remark" column="remark"/>
         <result property="groupName" column="group_name"/>
         <result property="status" column="status"/>
@@ -14,7 +14,7 @@
     </resultMap>
 
     <sql id="selectImFriendVo">
-        select id, user_id, friend_id, remark, group_name, status, create_time, update_time 
+        select id, user_id, friend_user_id as friend_id, remark, group_name, status, create_time, update_time 
         from im_friend
     </sql>
 
@@ -33,23 +33,23 @@
     </select>
     
     <select id="selectImFriendListByUserId" parameterType="Long" resultMap="ImFriendResult">
-        select id, user_id, friend_id, remark, group_name, status, create_time, update_time
+        select id, user_id, friend_user_id as friend_id, remark, group_name, status, create_time, update_time
         from im_friend
         where user_id = #{userId}
     </select>
     
     <select id="selectImFriendByUserIdAndFriendId" 
             parameterType="map" resultMap="ImFriendResult">
-        select id, user_id, friend_id, remark, group_name, status, create_time, update_time
+        select id, user_id, friend_user_id as friend_id, remark, group_name, status, create_time, update_time
         from im_friend
-        where user_id = #{userId} and friend_id = #{friendId}
+        where user_id = #{userId} and friend_user_id = #{friendId}
     </select>
 
     <insert id="insertImFriend" parameterType="com.ruoyi.im.domain.ImFriend" useGeneratedKeys="true" keyProperty="id">
         insert into im_friend
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="userId != null">user_id,</if>
-            <if test="friendId != null">friend_id,</if>
+            <if test="friendId != null">friend_user_id,</if>
             <if test="remark != null">remark,</if>
             <if test="groupName != null">group_name,</if>
             <if test="status != null">status,</if>
@@ -71,7 +71,7 @@
         update im_friend
         <trim prefix="SET" suffixOverrides=",">
             <if test="userId != null">user_id = #{userId},</if>
-            <if test="friendId != null">friend_id = #{friendId},</if>
+            <if test="friendId != null">friend_user_id = #{friendId},</if>
             <if test="remark != null and remark != ''">remark = #{remark},</if>
             <if test="groupName != null and groupName != ''">group_name = #{groupName},</if>
             <if test="status != null and status != ''">status = #{status},</if>

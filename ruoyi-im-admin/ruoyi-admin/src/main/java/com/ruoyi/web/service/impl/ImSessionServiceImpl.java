@@ -1,91 +1,63 @@
 package com.ruoyi.web.service.impl;
 
-import java.util.List;
+import com.ruoyi.im.domain.ImSession;
+import com.ruoyi.web.mapper.ImSessionMapper;
+import com.ruoyi.web.service.ImSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.ruoyi.web.service.IImSessionService;
-import com.ruoyi.system.domain.ImSession;
+import java.util.List;
 
 /**
- * 会话Service业务层处理
- * 
- * @author ruoyi
+ * IM会话Service实现（Admin模块专用）
  */
-@Service("adminImSessionServiceImpl")
-public class ImSessionServiceImpl implements IImSessionService
-{
+@Service
+public class ImSessionServiceImpl implements ImSessionService {
+
     @Autowired
-    private com.ruoyi.system.service.IImSessionService systemSessionService;
+    private ImSessionMapper sessionMapper;
 
-    /**
-     * 查询会话
-     * 
-     * @param id 会话ID
-     * @return 会话
-     */
     @Override
-    public ImSession selectImSessionById(Long id)
-    {
-        return systemSessionService.selectImSessionById(id);
+    public List<ImSession> selectImSessionList(ImSession imSession) {
+        return sessionMapper.selectImSessionList(imSession);
     }
 
-    /**
-     * 查询会话列表
-     * 
-     * @param imSession 会话
-     * @return 会话
-     */
     @Override
-    public List<ImSession> selectImSessionList(ImSession imSession)
-    {
-        return systemSessionService.selectImSessionList(imSession);
+    public ImSession selectImSessionById(Long id) {
+        return sessionMapper.selectImSessionById(id);
     }
 
-    /**
-     * 新增会话
-     * 
-     * @param imSession 会话
-     * @return 结果
-     */
     @Override
-    public int insertImSession(ImSession imSession)
-    {
-        return systemSessionService.insertImSession(imSession);
+    public int insertImSession(ImSession imSession) {
+        return sessionMapper.insertImSession(imSession);
     }
 
-    /**
-     * 修改会话
-     * 
-     * @param imSession 会话
-     * @return 结果
-     */
     @Override
-    public int updateImSession(ImSession imSession)
-    {
-        return systemSessionService.updateImSession(imSession);
+    public int updateImSession(ImSession imSession) {
+        return sessionMapper.updateImSession(imSession);
     }
 
-    /**
-     * 批量删除会话
-     * 
-     * @param ids 需要删除的会话ID
-     * @return 结果
-     */
     @Override
-    public int deleteImSessionByIds(Long[] ids)
-    {
-        return systemSessionService.deleteImSessionByIds(ids);
+    public int deleteImSessionById(Long id) {
+        return sessionMapper.deleteImSessionById(id);
     }
 
-    /**
-     * 删除会话信息
-     * 
-     * @param id 会话ID
-     * @return 结果
-     */
     @Override
-    public int deleteImSessionById(Long id)
-    {
-        return systemSessionService.deleteImSessionById(id);
+    public int deleteImSessionByIds(Long[] ids) {
+        return sessionMapper.deleteImSessionByIds(ids);
+    }
+
+    @Override
+    public int countOnlineSessions() {
+        return sessionMapper.countOnlineSessions();
+    }
+
+    @Override
+    public List<ImSession> selectUserActiveSessions(Long userId) {
+        return sessionMapper.selectUserActiveSessions(userId);
+    }
+
+    @Override
+    public int kickOutSession(Long sessionId) {
+        return sessionMapper.kickOutSession(sessionId);
     }
 }

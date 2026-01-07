@@ -60,7 +60,7 @@
 
         <el-empty
           v-if="currentContacts.length === 0"
-          :description="searchText ? '没有找到相关联系人' : '暂无联系人'"
+          :description="emptyDescription"
         />
       </div>
     </div>
@@ -87,7 +87,16 @@
             </p>
           </div>
           <div class="header-actions">
-            <el-button type="primary" :icon="Comment" @click="startChat">发消息</el-button>
+            <!-- 发现用户模式：显示添加好友按钮 -->
+            <el-button
+              v-if="activeCategory === 'discover'"
+              type="primary"
+              :icon="Plus"
+              @click="sendFriendRequest"
+            >
+              添加好友
+            </el-button>
+            <el-button v-else type="primary" :icon="Comment" @click="startChat">发消息</el-button>
             <el-dropdown trigger="click" @command="handleAction">
               <el-button :icon="More" circle />
               <template #dropdown>
@@ -149,7 +158,21 @@
           <div class="info-section">
             <h4>快捷操作</h4>
             <div class="quick-actions">
-              <el-button :icon="ChatDotRound" @click="startChat">发消息</el-button>
+              <el-button
+                v-if="activeCategory === 'discover'"
+                type="primary"
+                :icon="Plus"
+                @click="sendFriendRequest"
+              >
+                添加好友
+              </el-button>
+              <el-button
+                v-if="activeCategory !== 'discover'"
+                :icon="ChatDotRound"
+                @click="startChat"
+              >
+                发消息
+              </el-button>
               <el-button :icon="Phone" @click="handleAction('call')">语音通话</el-button>
               <el-button :icon="VideoCamera" @click="handleAction('video')">视频通话</el-button>
             </div>
@@ -181,6 +204,7 @@ import {
   User,
   StarFilled,
   UserFilled,
+  Plus,
 } from '@element-plus/icons-vue'
 import {
   listContact,
@@ -190,17 +214,26 @@ import {
   getFriendGroups,
   updateContactRemark,
 } from '@/api/im/contact'
+import { listUser } from '@/api/im/user'
+import { addContact } from '@/api/im/contact'
 
 const router = useRouter()
 
 const searchText = ref('')
-const activeCategory = ref('all')
+const activeCategory = ref('discover')
 const selectedContact = ref(null)
 const loading = ref(false)
 const contacts = ref([])
 const friendGroups = ref([])
+const allUsers = ref([])
 
 const categories = computed(() => [
+  {
+    key: 'discover',
+    label: '发现用户',
+    icon: UserFilled,
+    count: allUsers.value.length,
+  },
   {
     key: 'all',
     label: '全部联系人',
@@ -226,13 +259,25 @@ const loadContacts = async () => {
   try {
     const res = await listContact()
     if (res.code === 200) {
-      const dataRows = res.data?.rows || res.rows || []
+      const dataRows = res.data?.rows || res.data || res.rows || []
+      // 后端返回的是 ImFriendVO，需要映射字段：
+      // friendId -> id, friendName -> name, friendAvatar -> avatar
       contacts.value = Array.isArray(dataRows)
         ? dataRows.map(c => ({
-            ...c,
-            online: c.status === 'ACTIVE' || Math.random() > 0.5,
-            starred: Math.random() > 0.7,
-            lastSeen: '刚刚',
+            id: c.friendId, // 使用 friendId 作为 id
+            name: c.friendName || c.remark || c.username, // 使用 friendName 或 remark 或 username
+            nickname: c.friendName || c.remark || c.username, // 使用 friendName 作为 nickname
+            username: c.username, // 使用 username
+            avatar: c.friendAvatar, // 使用 friendAvatar
+            email: c.email,
+            phone: c.phone,
+            signature: c.signature,
+            online: c.online || c.status === 'ACTIVE',
+            starred: c.starred || false,
+            lastSeen: c.lastSeen || '刚刚',
+            // 保留原始数据用于后续操作
+            _originalId: c.id, // 保存好友关系ID
+            _remark: c.remark, // 保存备注
           }))
         : []
     } else {
@@ -270,6 +315,47 @@ const loadFriendGroups = async () => {
   } catch (error) {
     console.error('加载好友分组失败:', error)
   }
+}
+
+// 加载所有用户（用于发现）
+const loadAllUsers = async () => {
+  loading.value = true
+  try {
+    const res = await listUser()
+    if (res.code === 200) {
+      const dataRows = res.data?.rows || res.data || res.rows || []
+      allUsers.value = Array.isArray(dataRows)
+        ? dataRows
+            .filter(u => u.id !== getCurrentUserId()) // 排除当前用户
+            .map(u => ({
+              id: u.id,
+              name: u.nickname || u.name,
+              nickname: u.nickname || u.name,
+              username: u.username,
+              avatar: u.avatar,
+              email: u.email,
+              phone: u.phone,
+              signature: u.signature,
+              online: u.status === 'ACTIVE' || Math.random() > 0.5,
+              starred: false,
+              lastSeen: '刚刚',
+            }))
+        : []
+    } else {
+      allUsers.value = []
+    }
+  } catch (error) {
+    console.error('加载用户列表失败:', error)
+    allUsers.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// 获取当前用户ID
+const getCurrentUserId = () => {
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+  return userInfo.userId || userInfo.id || 1
 }
 
 const handleSearch = async () => {
@@ -338,6 +424,8 @@ const starredContacts = computed(() => {
 
 const currentContacts = computed(() => {
   switch (activeCategory.value) {
+    case 'discover':
+      return discoverContacts.value
     case 'online':
       return onlineContacts.value
     case 'starred':
@@ -347,6 +435,27 @@ const currentContacts = computed(() => {
   }
 })
 
+// 发现用户列表（搜索）
+const discoverContacts = computed(() => {
+  const userList = Array.isArray(allUsers.value) ? allUsers.value : []
+  if (!searchText.value) return userList
+  const keyword = searchText.value.toLowerCase()
+  return userList.filter(u => {
+    const name = u.name?.toLowerCase() || ''
+    const nickname = u.nickname?.toLowerCase() || ''
+    const username = u.username?.toLowerCase() || ''
+    return name.includes(keyword) || nickname.includes(keyword) || username.includes(keyword)
+  })
+})
+
+// 空状态描述
+const emptyDescription = computed(() => {
+  if (activeCategory.value === 'discover') {
+    return searchText.value ? '没有找到相关用户' : '暂无其他用户'
+  }
+  return searchText.value ? '没有找到相关联系人' : '暂无联系人'
+})
+
 const selectContact = contact => {
   selectedContact.value = { ...contact }
 }
@@ -354,6 +463,36 @@ const selectContact = contact => {
 const startChat = () => {
   if (selectedContact.value) {
     router.push(`/im/chat?userId=${selectedContact.value.id}`)
+  }
+}
+
+// 发送好友请求
+const sendFriendRequest = async () => {
+  if (!selectedContact.value) return
+
+  try {
+    const result = await ElMessageBox.prompt(
+      `请输入添加 ${selectedContact.value.name || selectedContact.value.nickname || selectedContact.value.username} 为好友的申请理由`,
+      '添加好友',
+      {
+        confirmButtonText: '发送',
+        cancelButtonText: '取消',
+        inputPlaceholder: '我是...',
+        inputValue: '你好，我想添加你为好友',
+      }
+    )
+    const remark = result.value
+
+    await addContact({
+      targetUserId: selectedContact.value.id,
+      remark: remark,
+    })
+    ElMessage.success('好友申请已发送')
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('发送好友申请失败:', error)
+      ElMessage.error('发送好友申请失败')
+    }
   }
 }
 
@@ -453,6 +592,7 @@ const confirmDelete = async () => {
 }
 
 onMounted(async () => {
+  await loadAllUsers() // 先加载所有用户（发现）
   await loadContacts()
   await loadFriendGroups()
   await loadOnlineStatus()

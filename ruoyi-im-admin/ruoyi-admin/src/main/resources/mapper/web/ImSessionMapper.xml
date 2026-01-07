@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImSessionMapper">
+    
+    <resultMap type="com.ruoyi.im.domain.ImSession" id="ImSessionResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="token" column="token"/>
+        <result property="status" column="status"/>
+        <result property="loginTime" column="login_time"/>
+        <result property="lastActiveTime" column="last_active_time"/>
+    </resultMap>
+
+    <select id="selectImSessionList" parameterType="com.ruoyi.im.domain.ImSession" resultMap="ImSessionResult">
+        select id, user_id, token, status, login_time, last_active_time
+        from im_session
+        <where>
+            <if test="userId != null"> and user_id = #{userId} </if>
+            <if test="status != null and status != ''"> and status = #{status} </if>
+        </where>
+        order by login_time desc
+    </select>
+
+    <select id="selectImSessionById" parameterType="Long" resultMap="ImSessionResult">
+        select * from im_session where id = #{id}
+    </select>
+
+    <insert id="insertImSession" parameterType="com.ruoyi.im.domain.ImSession" useGeneratedKeys="true" keyProperty="id">
+        insert into im_session (user_id, token, status, login_time, last_active_time)
+        values (#{userId}, #{token}, #{status}, #{loginTime}, #{lastActiveTime})
+    </insert>
+
+    <update id="updateImSession" parameterType="com.ruoyi.im.domain.ImSession">
+        update im_session
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="token != null and token != ''">token = #{token},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="lastActiveTime != null">last_active_time = #{lastActiveTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImSessionById" parameterType="Long">
+        delete from im_session where id = #{id}
+    </delete>
+
+    <delete id="deleteImSessionByIds" parameterType="Long[]">
+        delete from im_session where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="countOnlineSessions" resultType="java.lang.Integer">
+        select count(*) from im_session where status = 'active'
+    </select>
+
+    <select id="selectUserActiveSessions" parameterType="Long" resultMap="ImSessionResult">
+        select * from im_session where user_id = #{userId} and status = 'active'
+    </select>
+
+    <update id="kickOutSession" parameterType="Long">
+        update im_session set status = 'kicked' where id = #{sessionId}
+    </update>
+</mapper>

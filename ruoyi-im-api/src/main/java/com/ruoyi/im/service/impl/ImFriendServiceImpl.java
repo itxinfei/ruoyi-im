@@ -2,15 +2,15 @@ package com.ruoyi.im.service.impl;
 
 import com.ruoyi.im.domain.ImFriend;
 import com.ruoyi.im.domain.ImFriendRequest;
-import com.ruoyi.im.domain.ImSession;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.contact.ImFriendAddRequest;
 import com.ruoyi.im.dto.contact.ImFriendUpdateRequest;
+import com.ruoyi.im.dto.conversation.ImPrivateConversationCreateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImFriendMapper;
 import com.ruoyi.im.mapper.ImFriendRequestMapper;
-import com.ruoyi.im.mapper.ImSessionMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
+import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImFriendService;
 import com.ruoyi.im.vo.contact.ImContactGroupVO;
 import com.ruoyi.im.vo.contact.ImFriendVO;
@@ -45,7 +45,7 @@ public class ImFriendServiceImpl implements ImFriendService {
     private ImUserMapper imUserMapper;
 
     @Autowired
-    private ImSessionMapper imSessionMapper;
+    private ImConversationService imConversationService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -170,7 +170,7 @@ public class ImFriendServiceImpl implements ImFriendService {
             }
             ImFriendVO vo = new ImFriendVO();
             BeanUtils.copyProperties(friend, vo);
-            
+
             // 设置在线状态，这里暂时设置为false，实际在线状态需要从WebSocket连接中获取
             vo.setOnline(false);
 
@@ -179,7 +179,11 @@ public class ImFriendServiceImpl implements ImFriendService {
             if (friendUser != null) {
                 vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
                 vo.setFriendAvatar(friendUser.getAvatar());
-                
+                vo.setUsername(friendUser.getUsername());
+                vo.setEmail(friendUser.getEmail());
+                vo.setPhone(friendUser.getMobile());
+                vo.setSignature(friendUser.getSignature());
+
                 // 如果用户状态是ACTIVE，可以认为是在线的（这只是一个简化判断）
                 vo.setOnline("ACTIVE".equals(friendUser.getStatus()));
             }
@@ -365,20 +369,8 @@ public class ImFriendServiceImpl implements ImFriendService {
      * 创建私聊会话
      */
     private void createPrivateSession(Long userId, Long peerId) {
-        // 检查是否已存在会话
-        ImSession existingSession = imSessionMapper.selectPrivateSession(userId, peerId);
-        if (existingSession != null) {
-            return;
-        }
-
-        ImSession session = new ImSession();
-        session.setType("PRIVATE");
-        session.setUserId(userId);
-        session.setPeerId(peerId);
-        session.setUnreadCount(0);
-        session.setIsPinned(0);
-        session.setIsMuted(0);
-        session.setCreateTime(LocalDateTime.now());
-        imSessionMapper.insertImSession(session);
+        ImPrivateConversationCreateRequest request = new ImPrivateConversationCreateRequest();
+        request.setPeerUserId(peerId);
+        imConversationService.createPrivateConversation(userId, request);
     }
 }

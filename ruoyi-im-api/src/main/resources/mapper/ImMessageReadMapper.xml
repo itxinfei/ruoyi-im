@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImMessageReadMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImMessageRead" id="ImMessageReadResult">
+        <id property="id" column="id"/>
+        <result property="messageId" column="message_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="conversationId" column="conversation_id"/>
+        <result property="readTime" column="read_time"/>
+        <result property="readType" column="read_type"/>
+        <result property="deviceType" column="device_type"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectImMessageReadVo">
+        select id, message_id, user_id, conversation_id, read_time, read_type, device_type, create_time
+        from im_message_read
+    </sql>
+
+    <select id="selectImMessageReadById" parameterType="Long" resultMap="ImMessageReadResult">
+        <include refid="selectImMessageReadVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectByMessageIdAndUserId" resultMap="ImMessageReadResult">
+        <include refid="selectImMessageReadVo"/>
+        where message_id = #{messageId} and user_id = #{userId}
+    </select>
+
+    <select id="selectImMessageReadList" parameterType="com.ruoyi.im.domain.ImMessageRead" resultMap="ImMessageReadResult">
+        <include refid="selectImMessageReadVo"/>
+        <where>
+            <if test="messageId != null"> and message_id = #{messageId} </if>
+            <if test="userId != null"> and user_id = #{userId} </if>
+            <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
+            <if test="readType != null and readType != ''"> and read_type = #{readType} </if>
+            <if test="deviceType != null and deviceType != ''"> and device_type = #{deviceType} </if>
+        </where>
+        order by read_time desc
+    </select>
+
+    <select id="selectReadUserIdsByMessageId" parameterType="Long" resultType="Long">
+        select distinct user_id
+        from im_message_read
+        where message_id = #{messageId}
+    </select>
+
+    <select id="selectByConversationIdAndUserId" resultMap="ImMessageReadResult">
+        <include refid="selectImMessageReadVo"/>
+        where conversation_id = #{conversationId} and user_id = #{userId}
+        order by read_time desc
+    </select>
+
+    <select id="selectByConversationId" parameterType="Long" resultMap="ImMessageReadResult">
+        <include refid="selectImMessageReadVo"/>
+        where conversation_id = #{conversationId}
+        order by read_time desc
+    </select>
+
+    <select id="countReadUsersByMessageId" parameterType="Long" resultType="int">
+        select count(distinct user_id)
+        from im_message_read
+        where message_id = #{messageId}
+    </select>
+
+    <insert id="insertImMessageRead" parameterType="com.ruoyi.im.domain.ImMessageRead" useGeneratedKeys="true" keyProperty="id">
+        insert into im_message_read
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="messageId != null">message_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="conversationId != null">conversation_id,</if>
+            <if test="readTime != null">read_time,</if>
+            <if test="readType != null">read_type,</if>
+            <if test="deviceType != null">device_type,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="messageId != null">#{messageId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="conversationId != null">#{conversationId},</if>
+            <if test="readTime != null">#{readTime},</if>
+            <if test="readType != null">#{readType},</if>
+            <if test="deviceType != null">#{deviceType},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <insert id="batchInsertImMessageRead" useGeneratedKeys="true" keyProperty="id">
+        insert into im_message_read (message_id, user_id, conversation_id, read_time, read_type, device_type, create_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.messageId}, #{item.userId}, #{item.conversationId}, #{item.readTime}, #{item.readType}, #{item.deviceType}, #{item.createTime})
+        </foreach>
+    </insert>
+
+    <delete id="deleteImMessageReadById" parameterType="Long">
+        delete from im_message_read where id = #{id}
+    </delete>
+
+    <delete id="deleteImMessageReadByMessageId" parameterType="Long">
+        delete from im_message_read where message_id = #{messageId}
+    </delete>
+
+</mapper>

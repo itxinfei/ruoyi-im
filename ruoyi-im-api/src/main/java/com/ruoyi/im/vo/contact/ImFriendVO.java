@@ -57,6 +57,26 @@ public class ImFriendVO implements Serializable {
      */
     private LocalDateTime createTime;
 
+    /**
+     * 好友用户名
+     */
+    private String username;
+
+    /**
+     * 好友邮箱
+     */
+    private String email;
+
+    /**
+     * 好友手机号
+     */
+    private String phone;
+
+    /**
+     * 好友个性签名
+     */
+    private String signature;
+
     public Long getId() {
         return id;
     }
@@ -127,5 +147,37 @@ public class ImFriendVO implements Serializable {
 
     public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
 }

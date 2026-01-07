@@ -8,6 +8,7 @@ import * as backupApi from './backup.js'
 import * as mfaApi from './mfa.js'
 import * as userApi from './user.js'
 import * as notificationApi from './notification.js'
+import * as conversationApi from './conversation.js'
 
 // 统一导出
 export {
@@ -20,6 +21,7 @@ export {
   mfaApi,
   userApi,
   notificationApi,
+  conversationApi,
 }
 
 export default {
@@ -32,6 +34,7 @@ export default {
   mfa: mfaApi,
   user: userApi,
   notification: notificationApi,
+  conversation: conversationApi,
 }
 
 // 常量定义

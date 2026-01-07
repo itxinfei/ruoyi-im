@@ -1,10 +1,11 @@
 package com.ruoyi.web.controller.im;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.im.domain.ImApproval;
-import com.ruoyi.im.domain.ImApprovalTemplate;
-import com.ruoyi.im.service.ImApprovalService;
+import com.ruoyi.web.service.ImApprovalService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,12 +14,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * IM审批管理控制器
- * 
+ * IM审批管理控制器（管理后台）
+ *
  * @author ruoyi
+ * @date 2025-01-07
  */
-@RestController("adminImApprovalController")
-@RequestMapping("/api/admin/im/approval")
+@RestController
+@RequestMapping("api/admin/im/approval")
 public class ImApprovalAdminController extends BaseController {
 
     @Autowired
@@ -27,7 +29,7 @@ public class ImApprovalAdminController extends BaseController {
     /**
      * 获取审批详情
      */
-    @RequiresPermissions("im:approval:detail")
+    @RequiresPermissions("im:approval:query")
     @GetMapping("/{id}")
     public AjaxResult getDetail(@PathVariable Long id) {
         Map<String, Object> detail = approvalService.getApprovalDetail(id);
@@ -40,17 +42,17 @@ public class ImApprovalAdminController extends BaseController {
     @RequiresPermissions("im:approval:list")
     @GetMapping("/list")
     public AjaxResult getList(@RequestParam(required = false) String status,
-                              @RequestParam(required = false) Long userId,
-                              @RequestParam(required = false) String title) {
-        // 这里需要根据实际的业务逻辑进行调整
-        List<ImApproval> list = approvalService.getApprovalsForAdmin(status, userId, title);
+                             @RequestParam(required = false) Long userId,
+                             @RequestParam(required = false) String title) {
+        startPage();
+        List<ImApproval> list = approvalService.selectApprovalListForAdmin(status, userId, title);
         return AjaxResult.success(list);
     }
 
     /**
      * 获取我发起的审批列表
      */
-    @RequiresPermissions("im:approval:my")
+    @RequiresPermissions("im:approval:list")
     @GetMapping("/my")
     public AjaxResult getMyApprovals(@RequestParam Long userId) {
         List<ImApproval> list = approvalService.getMyApprovals(userId);
@@ -60,30 +62,29 @@ public class ImApprovalAdminController extends BaseController {
     /**
      * 获取审批模板列表
      */
-    @RequiresPermissions("im:approval:template")
+    @RequiresPermissions("im:approval:query")
     @GetMapping("/templates")
     public AjaxResult getTemplates() {
-        List<ImApprovalTemplate> list = approvalService.getTemplates();
-        return AjaxResult.success(list);
+        return AjaxResult.success(approvalService.getTemplates());
     }
 
     /**
      * 获取启用的审批模板列表
      */
-    @RequiresPermissions("im:approval:template")
+    @RequiresPermissions("im:approval:query")
     @GetMapping("/templates/active")
     public AjaxResult getActiveTemplates() {
-        List<ImApprovalTemplate> list = approvalService.getActiveTemplates();
-        return AjaxResult.success(list);
+        return AjaxResult.success(approvalService.getActiveTemplates());
     }
 
     /**
      * 启用/禁用审批模板
      */
-    @RequiresPermissions("im:approval:template:edit")
+    @RequiresPermissions("im:approval:edit")
+    @Log(title = "修改审批模板状态", businessType = BusinessType.UPDATE)
     @PutMapping("/templates/{id}/status")
     public AjaxResult updateTemplateStatus(@PathVariable Long id,
-                                           @RequestParam Boolean isActive) {
+                                      @RequestParam Boolean isActive) {
         approvalService.updateTemplateStatus(id, isActive);
         return AjaxResult.success("更新成功");
     }
@@ -92,10 +93,11 @@ public class ImApprovalAdminController extends BaseController {
      * 通过审批
      */
     @RequiresPermissions("im:approval:approve")
+    @Log(title = "通过审批", businessType = BusinessType.UPDATE)
     @PostMapping("/{id}/approve")
     public AjaxResult approve(@PathVariable Long id,
-                              @RequestParam(required = false) String comment,
-                              @RequestParam Long userId) {
+                           @RequestParam(required = false) String comment,
+                           @RequestParam Long userId) {
         approvalService.processApproval(id, "APPROVE", comment, userId);
         return AjaxResult.success("已通过");
     }
@@ -104,10 +106,11 @@ public class ImApprovalAdminController extends BaseController {
      * 驳回审批
      */
     @RequiresPermissions("im:approval:reject")
+    @Log(title = "驳回审批", businessType = BusinessType.UPDATE)
     @PostMapping("/{id}/reject")
     public AjaxResult reject(@PathVariable Long id,
-                             @RequestParam String comment,
-                             @RequestParam Long userId) {
+                          @RequestParam String comment,
+                          @RequestParam Long userId) {
         approvalService.processApproval(id, "REJECT", comment, userId);
         return AjaxResult.success("已驳回");
     }
@@ -116,10 +119,22 @@ public class ImApprovalAdminController extends BaseController {
      * 撤销审批
      */
     @RequiresPermissions("im:approval:cancel")
+    @Log(title = "撤销审批", businessType = BusinessType.UPDATE)
     @PostMapping("/{id}/cancel")
     public AjaxResult cancel(@PathVariable Long id,
-                             @RequestParam Long userId) {
+                           @RequestParam Long userId) {
         approvalService.cancelApproval(id, userId);
         return AjaxResult.success("已撤销");
+    }
+
+    /**
+     * 获取审批统计
+     */
+    @RequiresPermissions("im:approval:list")
+    @GetMapping("/statistics")
+    public AjaxResult getStatistics(@RequestParam(required = false) String startTime,
+                                   @RequestParam(required = false) String endTime) {
+        Map<String, Object> stats = approvalService.getApprovalStatistics(startTime, endTime);
+        return AjaxResult.success(stats);
     }
 }

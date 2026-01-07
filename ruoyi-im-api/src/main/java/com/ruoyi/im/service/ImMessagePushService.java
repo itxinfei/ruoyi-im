@@ -26,11 +26,11 @@ public interface ImMessagePushService {
     /**
      * Push message to all users in specified session
      *
-     * @param sessionId Session ID
+     * @param conversationId Conversation ID
      * @param message Message object
      * @return Number of users pushed
      */
-    int pushToSession(Long sessionId, Object message);
+    int pushToSession(Long conversationId, Object message);
 
     /**
      * Push message to all members in specified group
@@ -60,20 +60,20 @@ public interface ImMessagePushService {
     /**
      * Push typing status
      *
-     * @param sessionId Session ID
+     * @param conversationId Conversation ID
      * @param userId User ID
      * @param typing true=typing, false=not typing
      */
-    void pushTypingStatus(Long sessionId, Long userId, boolean typing);
+    void pushTypingStatus(Long conversationId, Long userId, boolean typing);
 
     /**
      * Push read receipt
      *
-     * @param sessionId Session ID
+     * @param conversationId Conversation ID
      * @param userId User ID
      * @param messageIds Read message IDs
      */
-    void pushReadReceipt(Long sessionId, Long userId, List<Long> messageIds);
+    void pushReadReceipt(Long conversationId, Long userId, List<Long> messageIds);
 
     /**
      * Get online user count

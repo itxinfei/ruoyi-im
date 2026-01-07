@@ -24,13 +24,13 @@ public interface ImMessageService {
     /**
      * 获取会话消息列表
      *
-     * @param sessionId 会话ID
+     * @param conversationId 会话ID
      * @param userId 当前用户ID
      * @param lastId 最后一条消息ID（分页用）
      * @param limit 每页条数
      * @return 消息列表
      */
-    List<ImMessageVO> getMessages(Long sessionId, Long userId, Long lastId, Integer limit);
+    List<ImMessageVO> getMessages(Long conversationId, Long userId, Long lastId, Integer limit);
 
     /**
      * 撤回消息
@@ -44,13 +44,13 @@ public interface ImMessageService {
      * 转发消息
      *
      * @param messageId 消息ID
-     * @param toSessionId 目标会话ID（为空表示转发到原会话）
+     * @param toConversationId 目标会话ID（为空表示转发到原会话）
      * @param toUserId 目标用户ID（为空表示转发给原发送者）
      * @param content 转发时附加内容
      * @param userId 当前用户ID
      * @return 新消息ID
      */
-    Long forwardMessage(Long messageId, Long toSessionId, Long toUserId, String content, Long userId);
+    Long forwardMessage(Long messageId, Long toConversationId, Long toUserId, String content, Long userId);
 
     /**
      * 引用/回复消息
@@ -65,9 +65,9 @@ public interface ImMessageService {
     /**
      * 标记消息已读
      *
-     * @param sessionId 会话ID
+     * @param conversationId 会话ID
      * @param userId 当前用户ID
      * @param messageIds 消息ID列表
      */
-    void markAsRead(Long sessionId, Long userId, List<Long> messageIds);
+    void markAsRead(Long conversationId, Long userId, List<Long> messageIds);
 }

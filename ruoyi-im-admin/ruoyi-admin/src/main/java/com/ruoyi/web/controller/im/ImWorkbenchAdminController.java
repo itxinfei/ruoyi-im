@@ -1,24 +1,25 @@
 package com.ruoyi.web.controller.im;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.im.domain.ImTodoItem;
-import com.ruoyi.im.service.ImTodoItemService;
+import com.ruoyi.web.service.ImTodoItemService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * IM工作台管理控制器
- * 
+ * IM工作台管理控制器（管理后台）
+ *
  * @author ruoyi
+ * @date 2025-01-07
  */
-@RestController("adminImWorkbenchController")
-@RequestMapping("/api/admin/im/workbench")
+@RestController
+@RequestMapping("api/admin/im/workbench")
 public class ImWorkbenchAdminController extends BaseController {
 
     @Autowired
@@ -30,12 +31,24 @@ public class ImWorkbenchAdminController extends BaseController {
     @RequiresPermissions("im:workbench:overview")
     @GetMapping("/overview")
     public AjaxResult getOverview() {
-        Map<String, Object> overview = new HashMap<>();
-        // TODO: 添加统计信息
-        overview.put("todoCount", 0);
-        overview.put("messageCount", 0);
-        overview.put("approvalCount", 0);
-        overview.put("noticeCount", 0);
+        java.util.Map<String, Object> overview = new java.util.HashMap<>();
+
+        // 待办数量
+        int todoCount = todoItemService.countTodos(null, false);
+        overview.put("todoCount", todoCount);
+
+        // 消息数量
+        int messageCount = todoItemService.countRecentMessages(null);
+        overview.put("messageCount", messageCount);
+
+        // 审批数量
+        int approvalCount = todoItemService.countPendingApprovals(null);
+        overview.put("approvalCount", approvalCount);
+
+        // 通知数量
+        int noticeCount = todoItemService.countUnreadNotices(null);
+        overview.put("noticeCount", noticeCount);
+
         return AjaxResult.success(overview);
     }
 
@@ -44,8 +57,9 @@ public class ImWorkbenchAdminController extends BaseController {
      */
     @RequiresPermissions("im:workbench:todo")
     @GetMapping("/todos")
-    public AjaxResult getTodos() {
-        List<ImTodoItem> todos = todoItemService.getAllTodos();
+    public AjaxResult getTodos(@RequestParam(required = false) Long userId,
+                             @RequestParam(required = false, defaultValue = "false") Boolean completed) {
+        List<ImTodoItem> todos = todoItemService.getTodosForAdmin(userId, completed);
         return AjaxResult.success(todos);
     }
 
@@ -53,13 +67,15 @@ public class ImWorkbenchAdminController extends BaseController {
      * 创建待办
      */
     @RequiresPermissions("im:workbench:add")
+    @Log(title = "创建待办", businessType = BusinessType.INSERT)
     @PostMapping("/todos")
     public AjaxResult createTodo(@RequestParam String title,
-                                 @RequestParam(required = false) String description,
-                                 @RequestParam(required = false, defaultValue = "TASK") String type,
-                                 @RequestParam(required = false) Long relatedId,
-                                 @RequestParam Long userId) {
-        Long todoId = todoItemService.createTodo(title, description, type, relatedId, userId);
+                              @RequestParam(required = false) String description,
+                              @RequestParam(required = false) String type,
+                              @RequestParam(required = false) Long relatedId,
+                              @RequestParam(required = false) String relatedType,
+                              @RequestParam Long userId) {
+        Long todoId = todoItemService.createTodo(title, description, type, relatedId, relatedType, userId);
         return AjaxResult.success("创建成功", todoId);
     }
 
@@ -67,9 +83,10 @@ public class ImWorkbenchAdminController extends BaseController {
      * 完成待办
      */
     @RequiresPermissions("im:workbench:complete")
+    @Log(title = "完成待办", businessType = BusinessType.UPDATE)
     @PutMapping("/todos/{id}/complete")
     public AjaxResult completeTodo(@PathVariable Long id) {
-        todoItemService.markAsCompleted(id, null); // 管理员操作
+        todoItemService.markAsCompleted(id, null);
         return AjaxResult.success("已完成");
     }
 
@@ -77,21 +94,41 @@ public class ImWorkbenchAdminController extends BaseController {
      * 删除待办
      */
     @RequiresPermissions("im:workbench:delete")
+    @Log(title = "删除待办", businessType = BusinessType.DELETE)
     @DeleteMapping("/todos/{id}")
     public AjaxResult deleteTodo(@PathVariable Long id) {
-        todoItemService.deleteTodo(id, null); // 管理员操作
+        todoItemService.deleteTodo(id, null);
         return AjaxResult.success("删除成功");
     }
 
     /**
-     * 更新待办
+     * 获取近期消息
      */
-    @RequiresPermissions("im:workbench:edit")
-    @PutMapping("/todos/{id}")
-    public AjaxResult updateTodo(@PathVariable Long id,
-                                 @RequestParam String title,
-                                 @RequestParam(required = false) String description) {
-        todoItemService.updateTodo(id, title, description, null); // 管理员操作
-        return AjaxResult.success("更新成功");
+    @RequiresPermissions("im:workbench:message")
+    @GetMapping("/recent-messages")
+    public AjaxResult getRecentMessages(@RequestParam(required = false) Long userId,
+                                          @RequestParam(defaultValue = "10") Integer limit) {
+        List<?> messages = todoItemService.getRecentMessages(userId, limit);
+        return AjaxResult.success(messages);
+    }
+
+    /**
+     * 获取待审批列表
+     */
+    @RequiresPermissions("im:workbench:approval")
+    @GetMapping("/pending-approvals")
+    public AjaxResult getPendingApprovals(@RequestParam(required = false) Long userId) {
+        List<?> approvals = todoItemService.getPendingApprovals(userId);
+        return AjaxResult.success(approvals);
+    }
+
+    /**
+     * 获取未读通知
+     */
+    @RequiresPermissions("im:workbench:notice")
+    @GetMapping("/unread-notices")
+    public AjaxResult getUnreadNotices(@RequestParam(required = false) Long userId) {
+        List<?> notices = todoItemService.getUnreadNotices(userId);
+        return AjaxResult.success(notices);
     }
 }

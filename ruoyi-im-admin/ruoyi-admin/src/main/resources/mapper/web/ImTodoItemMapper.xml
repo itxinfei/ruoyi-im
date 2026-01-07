@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImTodoItemMapper">
+    
+    <resultMap type="com.ruoyi.im.domain.ImTodoItem" id="ImTodoItemResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="type" column="type"/>
+        <result property="isCompleted" column="is_completed"/>
+        <result property="relatedId" column="related_id"/>
+        <result property="relatedType" column="related_type"/>
+        <result property="createTime" column="create_time"/>
+        <result property="completeTime" column="complete_time"/>
+    </resultMap>
+
+    <select id="countTodos" resultType="java.lang.Integer">
+        select count(*) from im_todo_item
+        <where>
+            <if test="userId != null"> and user_id = #{userId} </if>
+            <if test="completed != null">
+                <if test="completed"> and is_completed = 1 </if>
+                <if test="!completed"> and is_completed = 0 </if>
+            </if>
+        </where>
+    </select>
+
+    <select id="countRecentMessages" resultType="java.lang.Integer">
+        select count(*) from im_message
+        <where>
+            <if test="userId != null"> and sender_id = #{userId} </if>
+            and create_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        </where>
+    </select>
+
+    <select id="countPendingApprovals" resultType="java.lang.Integer">
+        select count(*) from im_approval where status = 'pending'
+        <if test="userId != null"> and applicant_id = #{userId} </if>
+    </select>
+
+    <select id="countUnreadNotices" resultType="java.lang.Integer">
+        select count(*) from im_system_notification
+        <where>
+            <if test="userId != null"> and receiver_id = #{userId} </if>
+            and is_read = 0
+        </where>
+    </select>
+
+    <select id="getTodosForAdmin" resultMap="ImTodoItemResult">
+        select * from im_todo_item
+        <where>
+            <if test="userId != null"> and user_id = #{userId} </if>
+            <if test="completed != null">
+                <if test="completed"> and is_completed = 1 </if>
+                <if test="!completed"> and is_completed = 0 </if>
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <insert id="insertTodo" parameterType="com.ruoyi.im.domain.ImTodoItem" useGeneratedKeys="true" keyProperty="id">
+        insert into im_todo_item (user_id, title, description, type, related_id, related_type, is_completed, create_time)
+        values (#{userId}, #{title}, #{description}, #{type}, #{relatedId}, #{relatedType}, 0, NOW())
+    </insert>
+
+    <update id="markAsCompleted" parameterType="Long">
+        update im_todo_item set is_completed = 1, complete_time = NOW() where id = #{id}
+    </update>
+
+    <delete id="deleteTodoById" parameterType="Long">
+        delete from im_todo_item where id = #{id}
+    </delete>
+
+    <select id="getRecentMessages" resultType="java.util.Map">
+        select id, conversation_id, sender_id, content, create_time
+        from im_message
+        <where>
+            <if test="userId != null"> and sender_id = #{userId} </if>
+        </where>
+        order by create_time desc
+        <if test="limit != null"> limit #{limit} </if>
+    </select>
+
+    <select id="getPendingApprovals" resultType="java.util.Map">
+        select * from im_approval where status = 'pending'
+        <if test="userId != null"> and applicant_id = #{userId} </if>
+        order by create_time desc
+    </select>
+
+    <select id="getUnreadNotices" resultType="java.util.Map">
+        select * from im_system_notification
+        <where>
+            <if test="userId != null"> and receiver_id = #{userId} </if>
+            and is_read = 0
+        </where>
+        order by create_time desc
+    </select>
+</mapper>

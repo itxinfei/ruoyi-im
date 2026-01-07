@@ -91,7 +91,7 @@ public class ImUserServiceImpl implements ImUserService {
         ImUser user = new ImUser();
         BeanUtils.copyProperties(request, user);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setStatus(0);
+        user.setStatus("ACTIVE"); // 使用字符串状态值
         user.setGender(0);
         user.setAvatar("/avatar/default.png");
         user.setCreateTime(LocalDateTime.now());
@@ -131,7 +131,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
-    public void updateStatus(Long userId, Integer status) {
+    public void updateStatus(Long userId, String status) { // 修改参数类型为String
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
             throw new BusinessException("USER_NOT_EXIST", "用户不存在");
@@ -211,7 +211,7 @@ public class ImUserServiceImpl implements ImUserService {
         ImUser user = new ImUser();
         BeanUtils.copyProperties(request, user);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setStatus(0);
+        user.setStatus("ACTIVE"); // 使用字符串状态值
         user.setGender(0);
         if (user.getAvatar() == null || user.getAvatar().isEmpty()) {
             user.setAvatar("/avatar/default.png");
@@ -261,10 +261,10 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public List<ImUserVO> getOnlineUsers() {
-        // 从Redis获取在线用户列表
+        // 通过ImRedisUtil获取在线用户列表
         Set<String> onlineUserIds = imRedisUtil.getOnlineUsers();
         List<ImUserVO> onlineUsers = new ArrayList<>();
-
+        
         for (String userIdStr : onlineUserIds) {
             try {
                 Long userId = Long.parseLong(userIdStr);
@@ -276,9 +276,10 @@ public class ImUserServiceImpl implements ImUserService {
                     onlineUsers.add(vo);
                 }
             } catch (NumberFormatException e) {
-                logger.warn("无效的用户ID: {}", userIdStr);
+                // 忽略无效的用户ID
             }
         }
+        
         return onlineUsers;
     }
 }

@@ -10,41 +10,20 @@
         <result column="avatar" property="avatar" />
         <result column="last_message_id" property="lastMessageId" />
         <result column="last_message_time" property="lastMessageTime" />
-        <result column="create_time" property="createTime" />
-        <result column="update_time" property="updateTime" />
-    </resultMap>
-
-    <resultMap id="ConversationWithMemberResultMap" type="com.ruoyi.im.vo.conversation.ImConversationVO">
-        <id column="id" property="id" />
-        <result column="type" property="type" />
-        <result column="target_id" property="targetId" />
-        <result column="name" property="name" />
-        <result column="avatar" property="avatar" />
-        <result column="last_message_id" property="lastMessageId" />
-        <result column="last_message_content" property="lastMessage.content" />
-        <result column="last_message_type" property="lastMessage.type" />
-        <result column="last_message_sender_id" property="lastMessage.senderId" />
-        <result column="last_message_time" property="lastMessageTime" />
-        <result column="unread_count" property="unreadCount" />
-        <result column="is_pinned" property="isPinned" />
-        <result column="is_muted" property="isMuted" />
-        <result column="remark" property="remark" />
+        <result column="is_deleted" property="isDeleted" />
+        <result column="deleted_time" property="deletedTime" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, type, target_id, name, avatar, last_message_id, last_message_time, create_time, update_time
+        id, type, target_id, name, avatar, last_message_id, last_message_time, is_deleted, deleted_time, create_time, update_time
     </sql>
 
-    <select id="selectConversationsByUserId" resultMap="ConversationWithMemberResultMap">
-        SELECT c.id, c.type, c.target_id, c.name, c.avatar, c.last_message_id, c.last_message_time,
-               cm.unread_count, cm.is_pinned, cm.is_muted,
-               cm.remark, c.create_time, c.update_time,
-               m.content AS last_message_content, m.type AS last_message_type, m.sender_id AS last_message_sender_id
+    <select id="selectConversationsByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
         FROM im_conversation c
         JOIN im_conversation_member cm ON c.id = cm.conversation_id
-        LEFT JOIN im_message m ON c.last_message_id = m.id
         WHERE cm.user_id = #{userId} AND cm.is_deleted = 0
         ORDER BY cm.is_pinned DESC, c.last_message_time DESC
     </select>
@@ -67,30 +46,31 @@
     <select id="selectByTypeAndTarget" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List" />
         FROM im_conversation
-        WHERE type = #{type} AND ((target_id = #{targetId1} AND target_id = #{targetId2}) OR (target_id = #{targetId1} OR target_id = #{targetId2}))
+        WHERE type = #{type}
+          AND target_id IN (#{targetId1}, #{targetId2})
         LIMIT 1
     </select>
 
     <update id="updateLastMessage">
         UPDATE im_conversation
-        SET last_message_id = #{lastMessageId}, last_message_time = #{lastMessageTime}, update_time = NOW()
+        SET last_message_id = #{lastMessageId},
+            last_message_time = #{lastMessageTime},
+            update_time = NOW()
         WHERE id = #{conversationId}
     </update>
 
-    <select id="searchConversations" resultMap="ConversationWithMemberResultMap">
-        SELECT c.id, c.type, c.target_id, c.name, c.avatar, c.last_message_id, c.last_message_time,
-               cm.unread_count, cm.is_pinned, cm.is_muted,
-               cm.remark, c.create_time, c.update_time,
-               m.content AS last_message_content, m.type AS last_message_type, m.sender_id AS last_message_sender_id
+    <select id="searchConversations" resultMap="BaseResultMap">
+        SELECT DISTINCT c.*
         FROM im_conversation c
         JOIN im_conversation_member cm ON c.id = cm.conversation_id
         LEFT JOIN im_message m ON c.last_message_id = m.id
         WHERE cm.user_id = #{userId} AND cm.is_deleted = 0
-          AND (c.name LIKE CONCAT('%', #{keyword}, '%') OR m.content LIKE CONCAT('%', #{keyword}, '%'))
+          AND (c.name LIKE CONCAT('%', #{keyword}, '%')
+               OR m.content LIKE CONCAT('%', #{keyword}, '%'))
         ORDER BY cm.is_pinned DESC, c.last_message_time DESC
     </select>
 
-    <select id="getTotalUnreadCount" resultType="int">
+    <select id="getTotalUnreadCount" resultType="java.lang.Integer">
         SELECT COALESCE(SUM(unread_count), 0)
         FROM im_conversation_member
         WHERE user_id = #{userId} AND is_deleted = 0

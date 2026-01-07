@@ -2,6 +2,7 @@ package com.ruoyi.im.domain;
 
 import lombok.Data;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -36,6 +37,7 @@ public class ImFriend implements Serializable {
     /**
      * 好友ID，好友用户的ID
      */
+    @TableField("friend_user_id")
     private Long friendId;
 
     /**

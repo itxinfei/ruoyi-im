@@ -1,92 +1,68 @@
 package com.ruoyi.web.service.impl;
 
-import java.util.List;
+import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.web.mapper.ImUserMapper;
+import com.ruoyi.web.service.ImUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.ruoyi.web.service.IImUserService;
-import com.ruoyi.system.domain.ImUser;
-import com.ruoyi.system.mapper.ImUserMapper;
+import java.util.List;
 
 /**
- * IM用户Service业务层处理
- * 
- * @author ruoyi
+ * IM用户Service实现（Admin模块专用）
  */
-@Service("adminImUserServiceImpl")
-public class ImUserServiceImpl implements IImUserService
-{
+@Service
+public class ImUserServiceImpl implements ImUserService {
+
     @Autowired
-    private ImUserMapper imUserMapper;
+    private ImUserMapper userMapper;
 
-    /**
-     * 查询IM用户
-     * 
-     * @param id IM用户ID
-     * @return IM用户
-     */
     @Override
-    public ImUser selectImUserById(Long id)
-    {
-        return imUserMapper.selectImUserById(id);
+    public List<ImUser> selectImUserList(ImUser imUser) {
+        return userMapper.selectImUserList(imUser);
     }
 
-    /**
-     * 查询IM用户列表
-     * 
-     * @param imUser IM用户
-     * @return IM用户
-     */
     @Override
-    public List<ImUser> selectImUserList(ImUser imUser)
-    {
-        return imUserMapper.selectImUserList(imUser);
+    public ImUser selectImUserById(Long id) {
+        return userMapper.selectImUserById(id);
     }
 
-    /**
-     * 新增IM用户
-     * 
-     * @param imUser IM用户
-     * @return 结果
-     */
     @Override
-    public int insertImUser(ImUser imUser)
-    {
-        return imUserMapper.insertImUser(imUser);
+    public int insertImUser(ImUser imUser) {
+        return userMapper.insertImUser(imUser);
     }
 
-    /**
-     * 修改IM用户
-     * 
-     * @param imUser IM用户
-     * @return 结果
-     */
     @Override
-    public int updateImUser(ImUser imUser)
-    {
-        return imUserMapper.updateImUser(imUser);
+    public int updateImUser(ImUser imUser) {
+        return userMapper.updateImUser(imUser);
     }
 
-    /**
-     * 批量删除IM用户
-     * 
-     * @param ids 需要删除的IM用户ID
-     * @return 结果
-     */
     @Override
-    public int deleteImUserByIds(Long[] ids)
-    {
-        return imUserMapper.deleteImUserByIds(ids);
+    public int deleteImUserById(Long id) {
+        return userMapper.deleteImUserById(id);
     }
 
-    /**
-     * 删除IM用户信息
-     * 
-     * @param id IM用户ID
-     * @return 结果
-     */
     @Override
-    public int deleteImUserById(Long id)
-    {
-        return imUserMapper.deleteImUserById(id);
+    public int deleteImUserByIds(Long[] ids) {
+        return userMapper.deleteImUserByIds(ids);
+    }
+
+    @Override
+    public int resetPassword(Long id, String password) {
+        return userMapper.resetPassword(id, password);
+    }
+
+    @Override
+    public int changeStatus(Long id, String status) {
+        return userMapper.changeStatus(id, status);
+    }
+
+    @Override
+    public int countOnlineUsers() {
+        return userMapper.countOnlineUsers();
+    }
+
+    @Override
+    public boolean checkUsernameUnique(String username) {
+        return userMapper.checkUsernameUnique(username);
     }
 }

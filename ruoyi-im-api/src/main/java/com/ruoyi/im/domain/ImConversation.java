@@ -52,6 +52,13 @@ public class ImConversation extends BaseEntity implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
+    /** 是否删除: 0=否, 1=是 */
+    private Integer isDeleted;
+
+    /** 删除时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime deletedTime;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -123,5 +130,21 @@ public class ImConversation extends BaseEntity implements Serializable {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Integer getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public LocalDateTime getDeletedTime() {
+        return deletedTime;
+    }
+
+    public void setDeletedTime(LocalDateTime deletedTime) {
+        this.deletedTime = deletedTime;
     }
 }

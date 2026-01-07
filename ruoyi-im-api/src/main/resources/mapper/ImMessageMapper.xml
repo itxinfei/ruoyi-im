@@ -4,21 +4,23 @@
     
     <resultMap type="com.ruoyi.im.domain.ImMessage" id="ImMessageResult">
         <id property="id" column="id"/>
-        <result property="sessionId" column="session_id"/>
+        <result property="conversationId" column="conversation_id"/>
         <result property="senderId" column="sender_id"/>
-        <result property="receiverId" column="receiver_id"/>
         <result property="type" column="type"/>
         <result property="content" column="content"/>
-        <result property="status" column="status"/>
         <result property="isRevoked" column="is_revoked"/>
-        <result property="revokeTime" column="revoke_time"/>
-        <result property="sendTime" column="send_time"/>
+        <result property="revokedTime" column="revoked_time"/>
         <result property="createTime" column="create_time"/>
-        <result property="parentId" column="parent_id"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="replyToMessageId" column="reply_to_message_id"/>
+        <result property="forwardFromMessageId" column="forward_from_message_id"/>
+        <result property="sensitiveLevel" column="sensitive_level"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
     </resultMap>
 
     <sql id="selectImMessageVo">
-        select id, session_id, sender_id, receiver_id, type, content, status, is_revoked, revoke_time, send_time, create_time, parent_id
+        select id, conversation_id, sender_id, type, content, is_revoked, revoked_time, create_time, update_time, reply_to_message_id, forward_from_message_id, sensitive_level, is_deleted, deleted_time
         from im_message
     </sql>
 
@@ -30,57 +32,60 @@
     <select id="selectImMessageList" parameterType="com.ruoyi.im.domain.ImMessage" resultMap="ImMessageResult">
         <include refid="selectImMessageVo"/>
         <where>
-            <if test="sessionId != null"> and session_id = #{sessionId} </if>
+            <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
             <if test="senderId != null"> and sender_id = #{senderId} </if>
-            <if test="receiverId != null"> and receiver_id = #{receiverId} </if>
             <if test="type != null and type != ''"> and type = #{type} </if>
-            <if test="status != null and status != ''"> and status = #{status} </if>
         </where>
     </select>
 
     <insert id="insertImMessage" parameterType="com.ruoyi.im.domain.ImMessage" useGeneratedKeys="true" keyProperty="id">
         insert into im_message
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="sessionId != null">session_id,</if>
+            <if test="conversationId != null">conversation_id,</if>
             <if test="senderId != null">sender_id,</if>
-            <if test="receiverId != null">receiver_id,</if>
             <if test="type != null">type,</if>
             <if test="content != null">content,</if>
-            <if test="status != null">status,</if>
             <if test="isRevoked != null">is_revoked,</if>
-            <if test="revokeTime != null">revoke_time,</if>
-            <if test="sendTime != null">send_time,</if>
+            <if test="revokedTime != null">revoked_time,</if>
             <if test="createTime != null">create_time,</if>
-            <if test="parentId != null">parent_id,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="replyToMessageId != null">reply_to_message_id,</if>
+            <if test="forwardFromMessageId != null">forward_from_message_id,</if>
+            <if test="sensitiveLevel != null">sensitive_level,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="deletedTime != null">deleted_time,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="sessionId != null">#{sessionId},</if>
+            <if test="conversationId != null">#{conversationId},</if>
             <if test="senderId != null">#{senderId},</if>
-            <if test="receiverId != null">#{receiverId},</if>
             <if test="type != null">#{type},</if>
             <if test="content != null">#{content},</if>
-            <if test="status != null">#{status},</if>
             <if test="isRevoked != null">#{isRevoked},</if>
-            <if test="revokeTime != null">#{revokeTime},</if>
-            <if test="sendTime != null">#{sendTime},</if>
+            <if test="revokedTime != null">#{revokedTime},</if>
             <if test="createTime != null">#{createTime},</if>
-            <if test="parentId != null">#{parentId},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="replyToMessageId != null">#{replyToMessageId},</if>
+            <if test="forwardFromMessageId != null">#{forwardFromMessageId},</if>
+            <if test="sensitiveLevel != null">#{sensitiveLevel},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="deletedTime != null">#{deletedTime},</if>
         </trim>
     </insert>
 
     <update id="updateImMessage" parameterType="com.ruoyi.im.domain.ImMessage">
         update im_message
         <trim prefix="SET" suffixOverrides=",">
-            <if test="sessionId != null">session_id = #{sessionId},</if>
+            <if test="conversationId != null">conversation_id = #{conversationId},</if>
             <if test="senderId != null">sender_id = #{senderId},</if>
-            <if test="receiverId != null">receiver_id = #{receiverId},</if>
             <if test="type != null and type != ''">type = #{type},</if>
             <if test="content != null and content != ''">content = #{content},</if>
-            <if test="status != null and status != ''">status = #{status},</if>
             <if test="isRevoked != null">is_revoked = #{isRevoked},</if>
-            <if test="revokeTime != null">revoke_time = #{revokeTime},</if>
-            <if test="sendTime != null">send_time = #{sendTime},</if>
-            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="revokedTime != null">revoked_time = #{revokedTime},</if>
+            <if test="replyToMessageId != null">reply_to_message_id = #{replyToMessageId},</if>
+            <if test="forwardFromMessageId != null">forward_from_message_id = #{forwardFromMessageId},</if>
+            <if test="sensitiveLevel != null">sensitive_level = #{sensitiveLevel},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="deletedTime != null">deleted_time = #{deletedTime},</if>
         </trim>
         where id = #{id}
     </update>
@@ -97,9 +102,9 @@
     </delete>
     
     <select id="selectImMessageByConversationId" parameterType="map" resultMap="ImMessageResult">
-        select id, session_id, sender_id, receiver_id, type, content, status, is_revoked, revoke_time, send_time, create_time, parent_id
+        select id, conversation_id, sender_id, type, content, is_revoked, revoked_time, create_time, update_time, reply_to_message_id, forward_from_message_id, sensitive_level, is_deleted, deleted_time
         from im_message
-        where session_id = #{conversationId}
+        where conversation_id = #{conversationId}
         order by create_time desc
         limit #{limit}
     </select>
@@ -108,11 +113,9 @@
     <select id="selectImMessageByConversationIdWithPagination" parameterType="map" resultMap="ImMessageResult">
         <include refid="selectImMessageVo"/>
         <where>
-            <if test="conversationId != null"> and session_id = #{conversationId} </if>
+            <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
             <if test="senderId != null"> and sender_id = #{senderId} </if>
-            <if test="receiverId != null"> and receiver_id = #{receiverId} </if>
             <if test="type != null and type != ''"> and type = #{type} </if>
-            <if test="status != null and status != ''"> and status = #{status} </if>
         </where>
         order by create_time desc
         limit #{limit} offset #{offset}
@@ -120,11 +123,11 @@
     
     <!-- 批量插入消息 - 性能优化 -->
     <insert id="batchInsertImMessage" parameterType="java.util.List">
-        insert into im_message (session_id, sender_id, receiver_id, type, content, status, is_revoked, revoke_time, send_time, create_time, parent_id)
+        insert into im_message (conversation_id, sender_id, type, content, is_revoked, revoked_time, create_time, update_time, reply_to_message_id, forward_from_message_id, sensitive_level, is_deleted, deleted_time)
         values
         <foreach collection="list" item="message" separator=",">
-            (#{message.sessionId}, #{message.senderId}, #{message.receiverId}, #{message.type}, #{message.content}, 
-             #{message.status}, #{message.isRevoked}, #{message.revokeTime}, #{message.sendTime}, #{message.createTime}, #{message.parentId})
+            (#{message.conversationId}, #{message.senderId}, #{message.type}, #{message.content}, 
+             #{message.isRevoked}, #{message.revokedTime}, #{message.createTime}, #{message.updateTime}, #{message.replyToMessageId}, #{message.forwardFromMessageId}, #{message.sensitiveLevel}, #{message.isDeleted}, #{message.deletedTime})
         </foreach>
     </insert>
     
@@ -151,13 +154,13 @@
     <select id="countMessagesByConversationId" parameterType="Long" resultType="java.lang.Long">
         select count(*)
         from im_message
-        where session_id = #{conversationId}
+        where conversation_id = #{conversationId}
     </select>
     
     <!-- 检查会话是否存在消息 - 性能优化 -->
     <select id="existsByConversationId" parameterType="Long" resultType="java.lang.Boolean">
         select case when count(*) > 0 then true else false end
         from im_message
-        where session_id = #{conversationId}
+        where conversation_id = #{conversationId}
     </select>
 </mapper>

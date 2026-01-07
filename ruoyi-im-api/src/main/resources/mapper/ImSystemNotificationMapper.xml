@@ -124,4 +124,10 @@
             #{id}
         </foreach>
     </delete>
+
+    <!-- 删除用户所有通知 -->
+    <delete id="deleteAllByReceiverId" parameterType="Long">
+        DELETE FROM im_system_notification
+        WHERE receiver_id = #{receiverId}
+    </delete>
 </mapper>

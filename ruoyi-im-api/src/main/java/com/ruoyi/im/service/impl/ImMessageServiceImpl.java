@@ -37,7 +37,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         }
 
         ImMessage message = new ImMessage();
-        message.setSessionId(request.getSessionId());
+        message.setConversationId(request.getConversationId());
         message.setSenderId(userId);
         message.setReceiverId(request.getReceiverId());
         message.setType(request.getType());
@@ -55,11 +55,11 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     @Override
-    public List<ImMessageVO> getMessages(Long sessionId, Long userId, Long lastId, Integer limit) {
+    public List<ImMessageVO> getMessages(Long conversationId, Long userId, Long lastId, Integer limit) {
         List<ImMessageVO> voList = new ArrayList<>();
 
         ImMessage query = new ImMessage();
-        query.setSessionId(sessionId);
+        query.setConversationId(conversationId);
 
         List<ImMessage> messageList = imMessageMapper.selectImMessageList(query);
 
@@ -110,7 +110,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     @Override
-    public void markAsRead(Long sessionId, Long userId, List<Long> messageIds) {
+    public void markAsRead(Long conversationId, Long userId, List<Long> messageIds) {
         if (messageIds == null || messageIds.isEmpty()) {
             return;
         }
@@ -125,7 +125,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     @Override
-    public Long forwardMessage(Long messageId, Long toSessionId, Long toUserId, String content, Long userId) {
+    public Long forwardMessage(Long messageId, Long toConversationId, Long toUserId, String content, Long userId) {
         ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
         if (originalMessage == null) {
             throw new BusinessException("消息不存在");
@@ -135,7 +135,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         String decryptedContent = encryptionUtil.decryptMessage(originalMessage.getContent());
 
         ImMessage forwardMessage = new ImMessage();
-        forwardMessage.setSessionId(toSessionId != null ? toSessionId : originalMessage.getSessionId());
+        forwardMessage.setConversationId(toConversationId != null ? toConversationId : originalMessage.getConversationId());
         forwardMessage.setSenderId(userId);
         forwardMessage.setReceiverId(toUserId != null ? toUserId : originalMessage.getReceiverId());
         forwardMessage.setType("forward");
@@ -171,7 +171,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         }
 
         ImMessage replyMessage = new ImMessage();
-        replyMessage.setSessionId(originalMessage.getSessionId());
+        replyMessage.setConversationId(originalMessage.getConversationId());
         replyMessage.setReceiverId(originalMessage.getSenderId());
         replyMessage.setSenderId(userId);
         replyMessage.setParentId(messageId);

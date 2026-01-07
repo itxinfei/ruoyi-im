@@ -24,7 +24,7 @@ export function listMessage(params) {
     method: 'get',
     params: {
       limit: params.pageSize || 20,
-      lastId: params.lastMessageId,
+      lastId: params.lastId || params.lastMessageId,
     },
   })
 }
@@ -35,9 +35,12 @@ export const getConversationMessages = listMessage
 // 标记消息已读
 export function markMessageRead(conversationId, data) {
   return request({
-    url: `/api/im/message/read/${conversationId}`,
+    url: `/api/im/message/read`,
     method: 'put',
-    data: data,
+    data: {
+      conversationId,
+      messageIds: Array.isArray(data) ? data : [data],
+    },
   })
 }
 

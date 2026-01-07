@@ -53,7 +53,7 @@ public class ImMessageController {
      * 获取会话消息列表
      * 分页查询指定会话的历史消息，支持从指定消息ID开始查询
      *
-     * @param sessionId 会话ID
+     * @param conversationId 会话ID
      * @param lastId 最后一条消息ID，用于分页查询（可选）
      * @param limit 每页消息数量，默认20条
      * @param userId 当前登录用户ID，从请求头中获取
@@ -61,16 +61,16 @@ public class ImMessageController {
      * @apiNote 返回的消息会标记是否为当前用户发送的消息（isSelf字段）
      * @throws BusinessException 当会话不存在时抛出业务异常
      */
-    @GetMapping("/list/{sessionId}")
+    @GetMapping("/list/{conversationId}")
     public Result<List<ImMessageVO>> getMessages(
-            @PathVariable Long sessionId,
+            @PathVariable Long conversationId,
             @RequestParam(required = false) Long lastId,
             @RequestParam(required = false, defaultValue = "20") Integer limit,
             @RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
             userId = 1L;
         }
-        List<ImMessageVO> list = imMessageService.getMessages(sessionId, userId, lastId, limit);
+        List<ImMessageVO> list = imMessageService.getMessages(conversationId, userId, lastId, limit);
         return Result.success(list);
     }
 
@@ -110,8 +110,8 @@ public class ImMessageController {
         if (userId == null) {
             userId = 1L;
         }
-        Long sessionId = 1L;
-        imMessageService.markAsRead(sessionId, userId, messageIds);
+        Long conversationId = 1L;
+        imMessageService.markAsRead(conversationId, userId, messageIds);
         return Result.success("已标记为已读");
     }
 
@@ -133,7 +133,7 @@ public class ImMessageController {
         }
         Long newMessageId = imMessageService.forwardMessage(
                 request.getMessageId(),
-                request.getToSessionId(),
+                request.getToConversationId(),
                 request.getToUserId(),
                 request.getContent(),
                 userId

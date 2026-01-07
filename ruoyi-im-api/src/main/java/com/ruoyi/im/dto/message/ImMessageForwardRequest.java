@@ -22,7 +22,7 @@ public class ImMessageForwardRequest implements Serializable {
     private Long messageId;
 
     @Schema(description = "目标会话ID，为空则转发到原会话")
-    private Long toSessionId;
+    private Long toConversationId;
 
     @Schema(description = "目标用户ID，为空则转发给原接收者")
     private Long toUserId;

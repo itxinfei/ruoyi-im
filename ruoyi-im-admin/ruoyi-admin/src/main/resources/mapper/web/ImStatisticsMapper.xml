@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImStatisticsMapper">
+    
+    <select id="getSystemStatistics" resultType="java.util.Map">
+        select 
+            (select count(*) from im_user) as total_users,
+            (select count(*) from im_user where status = 'online') as online_users,
+            (select count(*) from im_group) as total_groups,
+            (select count(*) from im_message) as total_messages,
+            (select count(*) from im_conversation) as total_conversations
+    </select>
+
+    <select id="getUserStatistics" resultType="java.util.Map">
+        select 
+            count(*) as sent_messages,
+            sum(case when message_type = 'text' then 1 else 0 end) as text_messages,
+            sum(case when message_type = 'image' then 1 else 0 end) as image_messages
+        from im_message
+        where sender_id = #{userId}
+        <if test="startTime != null and startTime != ''"> and create_time >= #{startTime} </if>
+        <if test="endTime != null and endTime != ''"> and create_time &lt;= #{endTime} </if>
+    </select>
+
+    <select id="getGroupStatistics" resultType="java.util.Map">
+        select 
+            (select count(*) from im_group_member where group_id = #{groupId}) as member_count,
+            (select count(*) from im_message where conversation_id in (
+                select id from im_conversation where type = 'group' and related_id = #{groupId}
+            )) as message_count
+    </select>
+
+    <select id="getMessageStatistics" resultType="java.util.Map">
+        select 
+            count(*) as total,
+            count(distinct sender_id) as unique_senders,
+            date_format(create_time, '%Y-%m-%d') as date_group
+        from im_message
+        <where>
+            <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
+            <if test="startTime != null and startTime != ''"> and create_time >= #{startTime} </if>
+            <if test="endTime != null and endTime != ''"> and create_time &lt;= #{endTime} </if>
+        </where>
+        group by date_group
+    </select>
+
+    <select id="getFileStatistics" resultType="java.util.Map">
+        select 
+            count(*) as total_files,
+            coalesce(sum(file_size), 0) as total_size,
+            count(distinct uploader_id) as unique_uploaders
+        from im_file_asset
+    </select>
+
+    <select id="getActiveRanking" resultType="java.util.Map">
+        select 
+            u.id, u.username, u.nickname,
+            count(m.id) as message_count
+        from im_user u
+        left join im_message m on u.id = m.sender_id
+            and m.create_time >= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+        group by u.id, u.username, u.nickname
+        order by message_count desc
+        limit 20
+    </select>
+
+    <select id="getOnlineStatistics" resultType="java.util.Map">
+        select 
+            count(*) as online_count,
+            (select count(*) from im_session where status = 'active') as active_sessions
+        from im_user where status = 'online'
+    </select>
+</mapper>

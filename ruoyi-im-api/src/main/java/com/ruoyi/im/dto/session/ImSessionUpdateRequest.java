@@ -5,10 +5,15 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 /**
- * 会话更新请求
+ * 会话更新请求（已废弃）
  *
+ * 该请求已被 ImConversationMemberUpdateRequest 替代
+ * 请使用 ImConversationMemberUpdateRequest 更新会话成员信息
+ *
+ * @deprecated 使用 {@link ImConversationMemberUpdateRequest} 替代
  * @author ruoyi
  */
+@Deprecated
 public class ImSessionUpdateRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;

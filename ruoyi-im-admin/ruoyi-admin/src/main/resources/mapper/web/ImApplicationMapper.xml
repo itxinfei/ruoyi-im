@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImApplicationMapper">
+    
+    <resultMap type="com.ruoyi.im.domain.ImApplication" id="ImApplicationResult">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="category" column="category"/>
+        <result property="appType" column="app_type"/>
+        <result property="appUrl" column="app_url"/>
+        <result property="icon" column="icon"/>
+        <result property="isVisible" column="is_visible"/>
+    </resultMap>
+
+    <select id="getApplications" resultMap="ImApplicationResult">
+        select * from im_application
+        <if test="category != null and category != ''"> where category = #{category} </if>
+        order by sort_order, id
+    </select>
+
+    <select id="getApplicationsByCategory" resultType="java.util.Map">
+        select * from im_application order by category, sort_order
+    </select>
+
+    <select id="getApplicationById" parameterType="Long" resultMap="ImApplicationResult">
+        select * from im_application where id = #{id}
+    </select>
+
+    <insert id="insertApplication" parameterType="com.ruoyi.im.domain.ImApplication" useGeneratedKeys="true" keyProperty="id">
+        insert into im_application (name, code, category, app_type, app_url, icon, is_visible)
+        values (#{name}, #{code}, #{category}, #{appType}, #{appUrl}, #{icon}, 1)
+    </insert>
+
+    <update id="updateApplication">
+        update im_application
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="icon != null">icon = #{icon},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteApplication" parameterType="Long">
+        delete from im_application where id = #{id}
+    </delete>
+
+    <update id="setVisibility">
+        update im_application set is_visible = #{isVisible} where id = #{id}
+    </update>
+
+    <select id="getApplicationStatistics" resultType="java.util.Map">
+        select 
+            count(*) as total_apps,
+            sum(case when is_visible = 1 then 1 else 0 end) as visible_apps,
+            sum(case when is_visible = 0 then 1 else 0 end) as hidden_apps
+        from im_application
+    </select>
+</mapper>

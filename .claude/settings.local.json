@@ -10,7 +10,12 @@
       "Bash(ls:*)",
       "Bash(xargs:*)",
       "Bash(cat:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(taskkill:*)",
+      "Bash(mysql:*)",
+      "Bash(dir:*)",
+      "Bash(mvn dependency:tree:*)",
+      "Bash(mvn clean install:*)"
     ]
   }
 }

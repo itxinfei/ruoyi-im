@@ -5,10 +5,15 @@ import com.ruoyi.im.domain.ImSession;
 import java.util.List;
 
 /**
- * 会话Mapper接口
+ * 会话Mapper接口（已废弃）
  *
+ * 该接口已被 ImConversationMemberMapper 替代
+ * 请使用 ImConversationMemberMapper 进行会话成员数据操作
+ *
+ * @deprecated 使用 {@link ImConversationMemberMapper} 替代
  * @author ruoyi
  */
+@Deprecated
 public interface ImSessionMapper {
 
     /**

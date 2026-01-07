@@ -6,10 +6,15 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 会话响应VO
+ * 会话响应VO（已废弃）
  *
+ * 该VO已被 ImConversationMemberVO 替代
+ * 请使用 ImConversationMemberVO 表示会话成员信息
+ *
+ * @deprecated 使用 {@link ImConversationMemberVO} 替代
  * @author ruoyi
  */
+@Deprecated
 public class ImSessionVO implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -76,7 +76,7 @@
 
 - JDK：1.8+（推荐 1.8.0_381），配置环境变量 JAVA_HOME，PATH 添加 %JAVA_HOME%/bin
 
-- MySQL：5.7 或 8.0，配置字符集为 utf8mb4（支持表情符号），排序规则 utf8mb4_general_ci，max_connections ≥ 1000
+- MySQL：5.7.44，配置字符集为 utf8mb4（支持表情符号），排序规则 utf8mb4_general_ci，max_connections ≥ 1000
 
 - Redis：3.0+，配置 requirepass 密码，bind 限制访问 IP（生产环境），默认端口 6379
 

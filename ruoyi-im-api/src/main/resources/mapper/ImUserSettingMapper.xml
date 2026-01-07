@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImUserSettingMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImUserSetting" id="ImUserSettingResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="settingKey" column="setting_key"/>
+        <result property="settingValue" column="setting_value"/>
+        <result property="settingType" column="setting_type"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImUserSettingVo">
+        select id, user_id, setting_key, setting_value, setting_type, create_time, update_time
+        from im_user_setting
+    </sql>
+
+    <select id="selectImUserSettingById" parameterType="Long" resultMap="ImUserSettingResult">
+        <include refid="selectImUserSettingVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectByUserIdAndKey" resultMap="ImUserSettingResult">
+        <include refid="selectImUserSettingVo"/>
+        where user_id = #{userId} and setting_key = #{settingKey}
+    </select>
+
+    <select id="selectImUserSettingList" parameterType="com.ruoyi.im.domain.ImUserSetting" resultMap="ImUserSettingResult">
+        <include refid="selectImUserSettingVo"/>
+        <where>
+            <if test="userId != null"> and user_id = #{userId} </if>
+            <if test="settingKey != null and settingKey != ''"> and setting_key = #{settingKey} </if>
+            <if test="settingType != null and settingType != ''"> and setting_type = #{settingType} </if>
+        </where>
+        order by setting_type, setting_key
+    </select>
+
+    <select id="selectByUserId" parameterType="Long" resultMap="ImUserSettingResult">
+        <include refid="selectImUserSettingVo"/>
+        where user_id = #{userId}
+        order by setting_type, setting_key
+    </select>
+
+    <select id="selectByUserIdAndType" resultMap="ImUserSettingResult">
+        <include refid="selectImUserSettingVo"/>
+        where user_id = #{userId} and setting_type = #{settingType}
+        order by setting_key
+    </select>
+
+    <insert id="insertImUserSetting" parameterType="com.ruoyi.im.domain.ImUserSetting" useGeneratedKeys="true" keyProperty="id">
+        insert into im_user_setting
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="settingKey != null">setting_key,</if>
+            <if test="settingValue != null">setting_value,</if>
+            <if test="settingType != null">setting_type,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="settingKey != null">#{settingKey},</if>
+            <if test="settingValue != null">#{settingValue},</if>
+            <if test="settingType != null">#{settingType},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <insert id="batchInsertImUserSetting" useGeneratedKeys="true" keyProperty="id">
+        insert into im_user_setting (user_id, setting_key, setting_value, setting_type, create_time, update_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userId}, #{item.settingKey}, #{item.settingValue}, #{item.settingType}, #{item.createTime}, #{item.updateTime})
+        </foreach>
+    </insert>
+
+    <update id="updateImUserSetting" parameterType="com.ruoyi.im.domain.ImUserSetting">
+        update im_user_setting
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="settingValue != null">setting_value = #{settingValue},</if>
+            <if test="settingType != null">setting_type = #{settingType},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImUserSettingById" parameterType="Long">
+        delete from im_user_setting where id = #{id}
+    </delete>
+
+    <delete id="deleteImUserSettingByUserId" parameterType="Long">
+        delete from im_user_setting where user_id = #{userId}
+    </delete>
+
+</mapper>

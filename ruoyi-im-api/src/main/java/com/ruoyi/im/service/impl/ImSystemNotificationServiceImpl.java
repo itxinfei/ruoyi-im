@@ -97,4 +97,14 @@ public class ImSystemNotificationServiceImpl implements ImSystemNotificationServ
         }
         notificationMapper.deleteImSystemNotificationById(notificationId);
     }
+
+    @Override
+    public ImSystemNotification getNotificationById(Long notificationId) {
+        return notificationMapper.selectImSystemNotificationById(notificationId);
+    }
+
+    @Override
+    public void clearAllNotifications(Long userId) {
+        notificationMapper.deleteAllByReceiverId(userId);
+    }
 }

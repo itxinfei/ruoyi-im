@@ -70,7 +70,56 @@ public interface ImSystemNotificationService {
      * 删除通知
      *
      * @param notificationId 通知ID
-     * @param userId 用户ID
+     * @param userId 用户ID（可选，为null时表示管理员操作）
      */
     void deleteNotification(Long notificationId, Long userId);
+
+    /**
+     * 获取通知详情
+     *
+     * @param notificationId 通知ID
+     * @return 通知详情
+     */
+    ImSystemNotification getNotificationById(Long notificationId);
+
+    /**
+     * 清空用户所有通知
+     *
+     * @param userId 用户ID
+     */
+    void clearAllNotifications(Long userId);
+
+    // ==================== 管理后台专用方法 ====================
+
+    /**
+     * 查询通知列表（管理员可查看所有通知）
+     *
+     * @param notification 查询条件
+     * @return 通知列表
+     */
+    List<ImSystemNotification> selectNotificationList(ImSystemNotification notification);
+
+    /**
+     * 新增通知
+     *
+     * @param notification 通知信息
+     * @return 结果
+     */
+    int insertNotification(ImSystemNotification notification);
+
+    /**
+     * 修改通知
+     *
+     * @param notification 通知信息
+     * @return 结果
+     */
+    int updateNotification(ImSystemNotification notification);
+
+    /**
+     * 批量删除通知
+     *
+     * @param ids 通知ID数组
+     * @return 结果
+     */
+    int deleteNotificationByIds(Long[] ids);
 }

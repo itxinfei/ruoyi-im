@@ -6,10 +6,15 @@ import com.ruoyi.im.vo.session.ImSessionVO;
 import java.util.List;
 
 /**
- * 会话服务接口
+ * 会话服务接口（已废弃）
  *
+ * 该接口已被 ImConversationMemberService 替代
+ * 请使用 ImConversationMemberService 进行会话成员管理
+ *
+ * @deprecated 使用 {@link ImConversationMemberService} 替代
  * @author ruoyi
  */
+@Deprecated
 public interface ImSessionService {
 
     /**

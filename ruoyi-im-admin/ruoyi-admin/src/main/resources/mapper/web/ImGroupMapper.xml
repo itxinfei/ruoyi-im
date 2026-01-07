@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImGroupMapper">
+    
+    <resultMap type="com.ruoyi.im.domain.ImGroup" id="ImGroupResult">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="avatar" column="avatar"/>
+        <result property="description" column="description"/>
+        <result property="ownerId" column="owner_id"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectImGroupList" parameterType="com.ruoyi.im.domain.ImGroup" resultMap="ImGroupResult">
+        select id, name, avatar, description, owner_id, status, create_time, update_time
+        from im_group
+        <where>
+            <if test="name != null and name != ''"> and name like concat('%', #{name}, '%') </if>
+            <if test="status != null and status != ''"> and status = #{status} </if>
+        </where>
+    </select>
+
+    <select id="selectImGroupById" parameterType="Long" resultMap="ImGroupResult">
+        select id, name, avatar, description, owner_id, status, create_time, update_time
+        from im_group
+        where id = #{id}
+    </select>
+
+    <insert id="insertImGroup" parameterType="com.ruoyi.im.domain.ImGroup" useGeneratedKeys="true" keyProperty="id">
+        insert into im_group (name, avatar, description, owner_id, status, create_time, update_time)
+        values (#{name}, #{avatar}, #{description}, #{ownerId}, #{status}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updateImGroup" parameterType="com.ruoyi.im.domain.ImGroup">
+        update im_group
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImGroupById" parameterType="Long">
+        delete from im_group where id = #{id}
+    </delete>
+
+    <delete id="deleteImGroupByIds" parameterType="Long[]">
+        delete from im_group where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectGroupMembersByGroupId" parameterType="Long" resultMap="com.ruoyi.im.domain.ImGroupMember">
+        select * from im_group_member where group_id = #{groupId}
+    </select>
+
+    <insert id="addGroupMember">
+        insert into im_group_member (group_id, user_id, role, inviter_id, join_time)
+        values (#{groupId}, #{userId}, #{role}, #{inviterId}, NOW())
+    </insert>
+
+    <delete id="dismissGroup" parameterType="Long">
+        delete from im_group where id = #{groupId}
+    </delete>
+</mapper>

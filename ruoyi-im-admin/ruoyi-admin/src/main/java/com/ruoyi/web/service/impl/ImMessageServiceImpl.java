@@ -1,91 +1,63 @@
 package com.ruoyi.web.service.impl;
 
-import java.util.List;
+import com.ruoyi.im.domain.ImMessage;
+import com.ruoyi.web.mapper.ImMessageMapper;
+import com.ruoyi.web.service.ImMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.ruoyi.web.service.IImMessageService;
-import com.ruoyi.system.domain.ImMessage;
+import java.util.List;
 
 /**
- * 消息Service业务层处理
- * 
- * @author ruoyi
+ * IM消息Service实现（Admin模块专用）
  */
-@Service("adminImMessageServiceImpl")
-public class ImMessageServiceImpl implements IImMessageService
-{
+@Service
+public class ImMessageServiceImpl implements ImMessageService {
+
     @Autowired
-    private com.ruoyi.system.service.IImMessageService systemMessageService;
+    private ImMessageMapper messageMapper;
 
-    /**
-     * 查询消息
-     * 
-     * @param id 消息ID
-     * @return 消息
-     */
     @Override
-    public ImMessage selectImMessageById(Long id)
-    {
-        return systemMessageService.selectImMessageById(id);
+    public List<ImMessage> selectImMessageList(ImMessage imMessage) {
+        return messageMapper.selectImMessageList(imMessage);
     }
 
-    /**
-     * 查询消息列表
-     * 
-     * @param imMessage 消息
-     * @return 消息
-     */
     @Override
-    public List<ImMessage> selectImMessageList(ImMessage imMessage)
-    {
-        return systemMessageService.selectImMessageList(imMessage);
+    public List<ImMessage> selectImMessageListByConversationId(Long conversationId) {
+        return messageMapper.selectImMessageListByConversationId(conversationId);
     }
 
-    /**
-     * 新增消息
-     * 
-     * @param imMessage 消息
-     * @return 结果
-     */
     @Override
-    public int insertImMessage(ImMessage imMessage)
-    {
-        return systemMessageService.insertImMessage(imMessage);
+    public List<ImMessage> selectImMessageListByTimeRange(Long conversationId, String startTime, String endTime) {
+        return messageMapper.selectImMessageListByTimeRange(conversationId, startTime, endTime);
     }
 
-    /**
-     * 修改消息
-     * 
-     * @param imMessage 消息
-     * @return 结果
-     */
     @Override
-    public int updateImMessage(ImMessage imMessage)
-    {
-        return systemMessageService.updateImMessage(imMessage);
+    public ImMessage selectImMessageById(Long id) {
+        return messageMapper.selectImMessageById(id);
     }
 
-    /**
-     * 批量删除消息
-     * 
-     * @param ids 需要删除的消息ID
-     * @return 结果
-     */
     @Override
-    public int deleteImMessageByIds(Long[] ids)
-    {
-        return systemMessageService.deleteImMessageByIds(ids);
+    public int countMessages(ImMessage imMessage) {
+        return messageMapper.countMessages(imMessage);
     }
 
-    /**
-     * 删除消息信息
-     * 
-     * @param id 消息ID
-     * @return 结果
-     */
     @Override
-    public int deleteImMessageById(Long id)
-    {
-        return systemMessageService.deleteImMessageById(id);
+    public int countSensitiveMessages() {
+        return messageMapper.countSensitiveMessages();
+    }
+
+    @Override
+    public int deleteImMessageById(Long id) {
+        return messageMapper.deleteImMessageById(id);
+    }
+
+    @Override
+    public int deleteImMessageByIds(Long[] ids) {
+        return messageMapper.deleteImMessageByIds(ids);
+    }
+
+    @Override
+    public int revokeMessage(Long messageId) {
+        return messageMapper.revokeMessage(messageId);
     }
 }

@@ -1,91 +1,64 @@
 package com.ruoyi.web.service.impl;
 
-import java.util.List;
+import com.ruoyi.im.domain.ImGroup;
+import com.ruoyi.im.domain.ImGroupMember;
+import com.ruoyi.web.mapper.ImGroupMapper;
+import com.ruoyi.web.service.ImGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.ruoyi.web.service.IImGroupService;
-import com.ruoyi.system.domain.ImGroup;
+import java.util.List;
 
 /**
- * 群组Service业务层处理
- * 
- * @author ruoyi
+ * IM群组Service实现（Admin模块专用）
  */
-@Service("adminImGroupServiceImpl")
-public class ImGroupServiceImpl implements IImGroupService
-{
+@Service
+public class ImGroupServiceImpl implements ImGroupService {
+
     @Autowired
-    private com.ruoyi.system.service.IImGroupService systemGroupService;
+    private ImGroupMapper groupMapper;
 
-    /**
-     * 查询群组
-     * 
-     * @param id 群组ID
-     * @return 群组
-     */
     @Override
-    public ImGroup selectImGroupById(Long id)
-    {
-        return systemGroupService.selectImGroupById(id);
+    public List<ImGroup> selectImGroupList(ImGroup imGroup) {
+        return groupMapper.selectImGroupList(imGroup);
     }
 
-    /**
-     * 查询群组列表
-     * 
-     * @param imGroup 群组
-     * @return 群组
-     */
     @Override
-    public List<ImGroup> selectImGroupList(ImGroup imGroup)
-    {
-        return systemGroupService.selectImGroupList(imGroup);
+    public ImGroup selectImGroupById(Long id) {
+        return groupMapper.selectImGroupById(id);
     }
 
-    /**
-     * 新增群组
-     * 
-     * @param imGroup 群组
-     * @return 结果
-     */
     @Override
-    public int insertImGroup(ImGroup imGroup)
-    {
-        return systemGroupService.insertImGroup(imGroup);
+    public int insertImGroup(ImGroup imGroup) {
+        return groupMapper.insertImGroup(imGroup);
     }
 
-    /**
-     * 修改群组
-     * 
-     * @param imGroup 群组
-     * @return 结果
-     */
     @Override
-    public int updateImGroup(ImGroup imGroup)
-    {
-        return systemGroupService.updateImGroup(imGroup);
+    public int updateImGroup(ImGroup imGroup) {
+        return groupMapper.updateImGroup(imGroup);
     }
 
-    /**
-     * 批量删除群组
-     * 
-     * @param ids 需要删除的群组ID
-     * @return 结果
-     */
     @Override
-    public int deleteImGroupByIds(Long[] ids)
-    {
-        return systemGroupService.deleteImGroupByIds(ids);
+    public int deleteImGroupById(Long id) {
+        return groupMapper.deleteImGroupById(id);
     }
 
-    /**
-     * 删除群组信息
-     * 
-     * @param id 群组ID
-     * @return 结果
-     */
     @Override
-    public int deleteImGroupById(Long id)
-    {
-        return systemGroupService.deleteImGroupById(id);
+    public int deleteImGroupByIds(Long[] ids) {
+        return groupMapper.deleteImGroupByIds(ids);
+    }
+
+    @Override
+    public List<ImGroupMember> selectGroupMembersByGroupId(Long groupId) {
+        return groupMapper.selectGroupMembersByGroupId(groupId);
+    }
+
+    @Override
+    public int addGroupMember(Long groupId, Long userId, String role, Long inviterId) {
+        return groupMapper.addGroupMember(groupId, userId, role, inviterId);
+    }
+
+    @Override
+    public int dismissGroup(Long groupId) {
+        return groupMapper.dismissGroup(groupId);
     }
 }

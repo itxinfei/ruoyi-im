@@ -1,14 +1,17 @@
 package com.ruoyi.im.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ruoyi.im.domain.ImConversation;
+import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImGroupMember;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
+import com.ruoyi.im.service.ImConversationMemberService;
+import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImGroupMemberService;
 import com.ruoyi.im.service.ImMessagePushService;
 import com.ruoyi.im.service.ImMessageService;
-import com.ruoyi.im.service.ImSessionService;
 import com.ruoyi.im.utils.ImRedisUtil;
-import com.ruoyi.im.vo.session.ImSessionVO;
+import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +39,10 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
     private ImMessageService imMessageService;
 
     @Autowired
-    private ImSessionService imSessionService;
+    private ImConversationMemberService conversationMemberService;
+
+    @Autowired
+    private ImConversationService conversationService;
 
     @Autowired
     private ImGroupMemberService imGroupMemberService;
@@ -57,11 +63,11 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
     }
 
     @Override
-    public int pushToSession(Long sessionId, Object message) {
+    public int pushToSession(Long conversationId, Object message) {
         // 获取会话中的所有用户
         // 这里需要获取会话中的所有在线用户并推送消息
         // 由于ImWebSocketEndpoint中没有直接的方法来获取会话中的用户，
-        // 我们将消息发送给所有在线用户，前端根据sessionId过滤处理
+        // 我们将消息发送给所有在线用户，前端根据conversationId过滤处理
         return ImWebSocketEndpoint.getOnlineUserCount(); // 先返回在线用户数，具体推送逻辑由前端处理
     }
 
@@ -121,10 +127,10 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
     }
 
     @Override
-    public void pushTypingStatus(Long sessionId, Long userId, boolean typing) {
+    public void pushTypingStatus(Long conversationId, Long userId, boolean typing) {
         Map<String, Object> typingMessage = new HashMap<>();
         typingMessage.put("type", "typing");
-        typingMessage.put("sessionId", sessionId);
+        typingMessage.put("conversationId", conversationId);
         typingMessage.put("userId", userId);
         typingMessage.put("typing", typing);
         typingMessage.put("timestamp", System.currentTimeMillis());
@@ -140,10 +146,10 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
     }
 
     @Override
-    public void pushReadReceipt(Long sessionId, Long userId, List<Long> messageIds) {
+    public void pushReadReceipt(Long conversationId, Long userId, List<Long> messageIds) {
         Map<String, Object> receiptMessage = new HashMap<>();
         receiptMessage.put("type", "read_receipt");
-        receiptMessage.put("sessionId", sessionId);
+        receiptMessage.put("conversationId", conversationId);
         receiptMessage.put("userId", userId);
         receiptMessage.put("messageIds", messageIds);
         receiptMessage.put("timestamp", System.currentTimeMillis());
@@ -156,7 +162,7 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
             }
         }
 
-        log.debug("Pushed read receipt: sessionId={}, count={}", sessionId, messageIds.size());
+        log.debug("Pushed read receipt: conversationId={}, count={}", conversationId, messageIds.size());
     }
 
     @Override
@@ -230,27 +236,25 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
             return null;
         }
 
-        ImSessionVO sessionVO = imSessionService.getSessionById(request.getSessionId());
-        if (sessionVO == null) {
-            log.warn("Session not found: sessionId={}", request.getSessionId());
+        ImConversation conversation = conversationService.selectImConversationById(request.getConversationId());
+        if (conversation == null) {
+            log.warn("Conversation not found: conversationId={}", request.getConversationId());
             return messageId;
         }
 
         Map<String, Object> pushMessage = new HashMap<>();
         pushMessage.put("type", "message");
         pushMessage.put("messageId", messageId);
-        pushMessage.put("sessionId", request.getSessionId());
+        pushMessage.put("conversationId", request.getConversationId());
         pushMessage.put("senderId", senderId);
         pushMessage.put("messageType", request.getType());
         pushMessage.put("content", request.getContent());
         pushMessage.put("timestamp", System.currentTimeMillis());
 
-        if ("group".equals(sessionVO.getType())) {
-            pushToGroup(sessionVO.getPeerId(), pushMessage);
-        } else {
-            Long receiverId = sessionVO.getPeerId();
-            if (!receiverId.equals(senderId)) {
-                pushToUser(receiverId, pushMessage);
+        List<ImConversationMemberVO> members = conversationMemberService.getConversationMemberList(null);
+        for (ImConversationMemberVO member : members) {
+            if (!member.getUserId().equals(senderId) && member.getConversationId().equals(request.getConversationId())) {
+                pushToUser(member.getUserId(), pushMessage);
             }
         }
 

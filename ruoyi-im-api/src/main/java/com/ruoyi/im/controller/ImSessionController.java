@@ -1,9 +1,9 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
-import com.ruoyi.im.dto.session.ImSessionUpdateRequest;
-import com.ruoyi.im.service.ImSessionService;
-import com.ruoyi.im.vo.session.ImSessionVO;
+import com.ruoyi.im.dto.conversation.ImConversationMemberUpdateRequest;
+import com.ruoyi.im.service.ImConversationMemberService;
+import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,7 +11,9 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * 会话控制器
+ * 会话成员控制器
+ *
+ * 用于管理用户与会话的关系，包括会话列表、未读消息数、置顶、免打扰等功能
  *
  * @author ruoyi
  */
@@ -20,7 +22,7 @@ import java.util.List;
 public class ImSessionController {
 
     @Autowired
-    private ImSessionService imSessionService;
+    private ImConversationMemberService conversationMemberService;
 
     /**
      * 获取当前用户会话列表
@@ -31,55 +33,65 @@ public class ImSessionController {
      * @apiNote 每个会话包含最后一条消息、未读消息数等信息
      */
     @GetMapping("/list")
-    public Result<List<ImSessionVO>> getList(
+    public Result<List<ImConversationMemberVO>> getList(
             @RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
             userId = 1L;
         }
-        List<ImSessionVO> list = imSessionService.getSessionList(userId);
+        List<ImConversationMemberVO> list = conversationMemberService.getConversationMemberList(userId);
         return Result.success(list);
     }
 
     /**
-     * 获取会话详情
-     * 根据会话ID查询会话的详细信息
+     * 获取会话成员详情
+     * 根据会话ID和用户ID查询会话成员的详细信息
      *
      * @param id 会话ID
-     * @return 会话详细信息，包含会话基本信息、参与用户、最后消息等
-     * @apiNote 会话不存在时返回null，调用方需要判空处理
-     * @throws BusinessException 当会话ID无效时抛出业务异常
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 会话成员详细信息，包含未读消息数、置顶状态、免打扰状态等
+     * @apiNote 会话成员不存在时抛出业务异常
+     * @throws BusinessException 当会话ID无效或用户不在会话中时抛出业务异常
      */
     @GetMapping("/{id}")
-    public Result<ImSessionVO> getById(@PathVariable Long id) {
-        ImSessionVO vo = imSessionService.getSessionById(id);
+    public Result<ImConversationMemberVO> getById(@PathVariable Long id,
+                                                    @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        ImConversationMemberVO vo = conversationMemberService.getConversationMember(id, userId);
         return Result.success(vo);
     }
 
     /**
-     * 更新会话信息
-     * 更新会话的基本信息，如会话名称、头像等
+     * 更新会话成员信息
+     * 更新会话成员的基本信息，如置顶状态、免打扰状态等
      *
      * @param id 会话ID
-     * @param request 会话更新请求参数，包含会话名称、头像URL等
+     * @param request 会话成员更新请求参数，包含置顶状态、免打扰状态等
+     * @param userId 当前登录用户ID，从请求头中获取
      * @return 更新结果
-     * @apiNote 使用 @Valid 注解进行参数校验；仅支持更新单聊会话的名称和头像
-     * @throws BusinessException 当会话不存在或参数无效时抛出业务异常
+     * @apiNote 使用 @Valid 注解进行参数校验；仅支持更新置顶状态和免打扰状态
+     * @throws BusinessException 当会话不存在或用户不在会话中时抛出业务异常
      */
     @PutMapping("/{id}")
     public Result<Void> update(@PathVariable Long id,
-                              @Valid @RequestBody ImSessionUpdateRequest request) {
-        imSessionService.updateSession(id, request);
+                              @Valid @RequestBody ImConversationMemberUpdateRequest request,
+                              @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        conversationMemberService.updateConversationMember(id, userId, request);
         return Result.success("更新成功");
     }
 
     /**
-     * 删除会话
+     * 删除会话成员
      * 从当前用户的会话列表中删除指定会话，不会删除实际的聊天记录
      *
      * @param id 会话ID
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 删除结果
-     * @apiNote 删除会话后，该会话将从用户的会话列表中移除；对方不受影响
+     * @apiNote 删除会话后，该会话将从用户的会话列表中移除；其他成员不受影响
      * @throws BusinessException 当会话不存在或不属于当前用户时抛出业务异常
      */
     @DeleteMapping("/{id}")
@@ -88,7 +100,7 @@ public class ImSessionController {
         if (userId == null) {
             userId = 1L;
         }
-        imSessionService.deleteSession(id, userId);
+        conversationMemberService.deleteConversationMember(id, userId);
         return Result.success("删除成功");
     }
 
@@ -108,7 +120,7 @@ public class ImSessionController {
         if (userId == null) {
             userId = 1L;
         }
-        imSessionService.clearUnread(id, userId);
+        conversationMemberService.clearUnread(id, userId);
         return Result.success("已清空未读消息");
     }
 
@@ -118,14 +130,19 @@ public class ImSessionController {
      *
      * @param id 会话ID
      * @param pinned 置顶状态，1表示置顶，0表示取消置顶
+     * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      * @apiNote 置顶的会话将固定显示在会话列表最上方，不受最后消息时间影响
      * @throws BusinessException 当会话不存在时抛出业务异常
      */
     @PutMapping("/{id}/pin")
     public Result<Void> togglePin(@PathVariable Long id,
-                                 @RequestParam Integer pinned) {
-        imSessionService.togglePin(id, pinned);
+                                 @RequestParam Integer pinned,
+                                 @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        conversationMemberService.togglePin(id, userId, pinned);
         return Result.success(pinned == 1 ? "已置顶" : "已取消置顶");
     }
 
@@ -141,8 +158,12 @@ public class ImSessionController {
      */
     @PutMapping("/{id}/mute")
     public Result<Void> toggleMute(@PathVariable Long id,
-                                   @RequestParam Integer muted) {
-        imSessionService.toggleMute(id, muted);
+                                   @RequestParam Integer muted,
+                                   @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        conversationMemberService.toggleMute(id, userId, muted);
         return Result.success(muted == 1 ? "已设为免打扰" : "已取消免打扰");
     }
 }

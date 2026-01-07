@@ -229,8 +229,21 @@ const getList = async () => {
   try {
     const response = await listGroup(queryParams)
     if (response.code === 200) {
-      groupList.value = response.rows || []
-      total.value = response.total || 0
+      const data = response.data ?? []
+      // 后端返回的 ImGroupVO 字段需要映射到前端期望的字段：
+      // id -> groupId, name -> groupName, memberLimit -> maxMemberCount
+      groupList.value = Array.isArray(data) ? data.map(g => ({
+        groupId: g.id,
+        groupName: g.name,
+        description: g.description,
+        type: g.type === 'PRIVATE' ? '0' : (g.type === 'PUBLIC' ? '1' : g.type),
+        memberCount: g.memberCount,
+        maxMemberCount: g.memberLimit,
+        status: g.status === 'NORMAL' ? '0' : '1',
+        announcement: g.notice,
+        ...g, // 保留原始字段
+      })) : []
+      total.value = Array.isArray(data) ? data.length : 0
     } else {
       groupList.value = []
       total.value = 0
@@ -281,7 +294,16 @@ const handleEdit = async row => {
   try {
     const response = await getGroup(row.groupId)
     if (response.code === 200 && response.data) {
-      Object.assign(form, response.data)
+      // 后端 ImGroupVO 字段映射到前端表单字段
+      const data = response.data
+      form.groupId = data.id
+      form.groupName = data.name
+      form.description = data.description
+      form.type = data.type === 'PRIVATE' ? '0' : (data.type === 'PUBLIC' ? '1' : data.type)
+      form.maxMemberCount = data.memberLimit
+      form.joinAuth = '1' // 默认需要验证
+      form.status = data.status === 'NORMAL' ? '0' : '1'
+      form.announcement = data.notice || ''
     }
     dialogTitle.value = '编辑群组'
     dialogVisible.value = true
@@ -357,11 +379,21 @@ const resetForm = () => {
 const submitForm = async () => {
   try {
     await formRef.value.validate()
+    // 将前端表单字段映射到后端期望的字段
+    const requestData = {
+      id: form.groupId,
+      name: form.groupName,
+      description: form.description,
+      type: form.type === '0' ? 'PRIVATE' : 'PUBLIC',
+      memberLimit: form.maxMemberCount,
+      notice: form.announcement,
+      status: form.status === '0' ? 'NORMAL' : 'DISMISSED',
+    }
     if (form.groupId) {
-      await updateGroup(form)
+      await updateGroup(form.groupId, requestData)
       ElMessage.success('修改成功')
     } else {
-      await addGroup(form)
+      await addGroup(requestData)
       ElMessage.success('新增成功')
     }
     dialogVisible.value = false

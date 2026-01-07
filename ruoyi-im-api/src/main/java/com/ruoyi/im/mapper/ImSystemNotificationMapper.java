@@ -115,4 +115,12 @@ public interface ImSystemNotificationMapper {
      * @return 结果
      */
     int deleteImSystemNotificationByIds(Long[] ids);
+
+    /**
+     * 删除用户的所有通知
+     *
+     * @param receiverId 接收者ID
+     * @return 结果
+     */
+    int deleteAllByReceiverId(Long receiverId);
 }

@@ -8,15 +8,16 @@
         <result column="user_id" property="userId" />
         <result column="unread_count" property="unreadCount" />
         <result column="last_read_message_id" property="lastReadMessageId" />
-        <result column="is_pinned" property="pinned" />
-        <result column="is_muted" property="muted" />
-        <result column="is_deleted" property="deleted" />
+        <result column="is_pinned" property="isPinned" />
+        <result column="is_muted" property="isMuted" />
+        <result column="is_deleted" property="isDeleted" />
+        <result column="deleted_time" property="deletedTime" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, conversation_id, user_id, unread_count, last_read_message_id, is_pinned, is_muted, is_deleted, create_time, update_time
+        id, conversation_id, user_id, unread_count, last_read_message_id, is_pinned, is_muted, is_deleted, deleted_time, create_time, update_time
     </sql>
 
     <select id="selectByConversationIdAndUserId" resultMap="BaseResultMap">
@@ -67,5 +68,15 @@
         SET is_deleted = 1, update_time = NOW()
         WHERE conversation_id = #{conversationId} AND user_id = #{userId}
     </update>
+
+    <delete id="deleteByConversationIdAndUserId">
+        DELETE FROM im_conversation_member
+        WHERE conversation_id = #{conversationId} AND user_id = #{userId}
+    </delete>
+
+    <insert id="insertImConversationMember" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO im_conversation_member (conversation_id, user_id, unread_count, is_pinned, is_muted, is_deleted, create_time, update_time)
+        VALUES (#{conversationId}, #{userId}, #{unreadCount}, #{isPinned}, #{isMuted}, #{isDeleted}, #{createTime}, #{updateTime})
+    </insert>
 
 </mapper>

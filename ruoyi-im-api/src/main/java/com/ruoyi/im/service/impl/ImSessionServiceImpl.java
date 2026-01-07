@@ -14,10 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 会话服务实现
+ * 会话服务实现（已废弃）
  *
+ * 该实现已被 ImConversationMemberServiceImpl 替代
+ * 请使用 ImConversationMemberServiceImpl 进行会话成员管理
+ *
+ * @deprecated 使用 {@link ImConversationMemberServiceImpl} 替代
  * @author ruoyi
  */
+@Deprecated
 @Service
 public class ImSessionServiceImpl implements ImSessionService {
 

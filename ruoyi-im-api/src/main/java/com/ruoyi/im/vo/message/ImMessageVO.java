@@ -18,7 +18,7 @@ public class ImMessageVO implements Serializable {
     private Long id;
 
     /** 会话ID */
-    private Long sessionId;
+    private Long conversationId;
 
     /** 发送者ID */
     private Long senderId;
@@ -60,12 +60,12 @@ public class ImMessageVO implements Serializable {
         this.id = id;
     }
 
-    public Long getSessionId() {
-        return sessionId;
+    public Long getConversationId() {
+        return conversationId;
     }
 
-    public void setSessionId(Long sessionId) {
-        this.sessionId = sessionId;
+    public void setConversationId(Long conversationId) {
+        this.conversationId = conversationId;
     }
 
     public Long getSenderId() {

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImApprovalMapper">
+    
+    <resultMap type="com.ruoyi.im.domain.ImApproval" id="ImApprovalResult">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="type" column="type"/>
+        <result property="status" column="status"/>
+        <result property="applicantId" column="applicant_id"/>
+        <result property="approverId" column="approver_id"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="getApprovalDetail" parameterType="Long" resultType="java.util.Map">
+        select a.*, u.username as applicant_name, 
+               (select username from im_user where id = a.approver_id) as approver_name
+        from im_approval a
+        left join im_user u on a.applicant_id = u.id
+        where a.id = #{id}
+    </select>
+
+    <select id="selectApprovalListForAdmin" resultMap="ImApprovalResult">
+        select * from im_approval
+        <where>
+            <if test="status != null and status != ''"> and status = #{status} </if>
+            <if test="userId != null"> and applicant_id = #{userId} </if>
+            <if test="title != null and title != ''"> and title like concat('%', #{title}, '%') </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="getMyApprovals" resultMap="ImApprovalResult">
+        select * from im_approval where applicant_id = #{userId}
+        order by create_time desc
+    </select>
+
+    <select id="getTemplates" resultType="java.util.Map">
+        select * from im_approval_template order by create_time desc
+    </select>
+
+    <select id="getActiveTemplates" resultType="java.util.Map">
+        select * from im_approval_template where is_active = 1
+    </select>
+
+    <update id="updateTemplateStatus">
+        update im_approval_template set is_active = #{isActive} where id = #{id}
+    </update>
+
+    <update id="processApproval">
+        update im_approval set status = #{action}, comment = #{comment}, 
+            approver_id = #{userId}, process_time = NOW()
+        where id = #{id}
+    </update>
+
+    <update id="cancelApproval">
+        update im_approval set status = 'cancelled' where id = #{id}
+    </update>
+
+    <select id="getApprovalStatistics" resultType="java.util.Map">
+        select 
+            count(*) as total,
+            sum(case when status = 'approved' then 1 else 0 end) as approved,
+            sum(case when status = 'rejected' then 1 else 0 end) as rejected,
+            sum(case when status = 'pending' then 1 else 0 end) as pending
+        from im_approval
+        <where>
+            <if test="startTime != null and startTime != ''"> and create_time >= #{startTime} </if>
+            <if test="endTime != null and endTime != ''"> and create_time &lt;= #{endTime} </if>
+        </where>
+    </select>
+</mapper>

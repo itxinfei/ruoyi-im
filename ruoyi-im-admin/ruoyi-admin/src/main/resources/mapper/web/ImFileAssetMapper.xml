@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImFileAssetMapper">
+    
+    <resultMap type="com.ruoyi.im.domain.ImFileAsset" id="ImFileAssetResult">
+        <id property="id" column="id"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileType" column="file_type"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="filePath" column="file_path"/>
+        <result property="uploaderId" column="uploader_id"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="selectImFileAssetList" parameterType="com.ruoyi.im.domain.ImFileAsset" resultMap="ImFileAssetResult">
+        select id, file_name, file_type, file_size, file_path, uploader_id, create_time
+        from im_file_asset
+        <where>
+            <if test="fileName != null and fileName != ''"> and file_name like concat('%', #{fileName}, '%') </if>
+            <if test="fileType != null and fileType != ''"> and file_type = #{fileType} </if>
+            <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectImFileAssetById" parameterType="Long" resultMap="ImFileAssetResult">
+        select * from im_file_asset where id = #{id}
+    </select>
+
+    <insert id="insertImFileAsset" parameterType="com.ruoyi.im.domain.ImFileAsset" useGeneratedKeys="true" keyProperty="id">
+        insert into im_file_asset (file_name, file_type, file_size, file_path, uploader_id, create_time)
+        values (#{fileName}, #{fileType}, #{fileSize}, #{filePath}, #{uploaderId}, #{createTime})
+    </insert>
+
+    <update id="updateImFileAsset" parameterType="com.ruoyi.im.domain.ImFileAsset">
+        update im_file_asset
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fileName != null and fileName != ''">file_name = #{fileName},</if>
+            <if test="filePath != null and filePath != ''">file_path = #{filePath},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImFileAssetById" parameterType="Long">
+        delete from im_file_asset where id = #{id}
+    </delete>
+
+    <delete id="deleteImFileAssetByIds" parameterType="Long[]">
+        delete from im_file_asset where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="countTotalFiles" parameterType="com.ruoyi.im.domain.ImFileAsset" resultType="java.lang.Integer">
+        select count(*) from im_file_asset
+        <where>
+            <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>
+        </where>
+    </select>
+
+    <select id="countTodayUploads" parameterType="com.ruoyi.im.domain.ImFileAsset" resultType="java.lang.Integer">
+        select count(*) from im_file_asset
+        where date(create_time) = curdate()
+        <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>
+    </select>
+
+    <select id="countTotalStorage" resultType="java.lang.Long">
+        select coalesce(sum(file_size), 0) from im_file_asset
+    </select>
+
+    <delete id="cleanInvalidFiles">
+        delete from im_file_asset where file_path is null or file_path = ''
+    </delete>
+
+    <select id="getFileStatistics" resultType="java.util.Map">
+        select 
+            count(*) as total_files,
+            coalesce(sum(file_size), 0) as total_storage,
+            count(case when date(create_time) = curdate() then 1 end) as today_uploads
+        from im_file_asset
+    </select>
+</mapper>

@@ -3,6 +3,8 @@ package com.ruoyi.im.websocket;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImMessage;
+import com.ruoyi.im.service.ImConversationMemberService;
+import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImUserService;
 
@@ -48,7 +50,8 @@ public class ImWebSocketEndpoint {
     private static JwtUtils staticJwtUtils;
     private static ImUserService staticImUserService;
     private static ImRedisUtil staticImRedisUtil;
-    private static com.ruoyi.im.service.ImSessionService staticImSessionService;
+    private static ImConversationMemberService staticConversationMemberService;
+    private static ImConversationService staticConversationService;
     private static boolean staticSecurityEnabled;
     private static Long staticDevUserId;
 
@@ -65,7 +68,10 @@ public class ImWebSocketEndpoint {
     private ImRedisUtil imRedisUtil;
 
     @Autowired
-    private com.ruoyi.im.service.ImSessionService imSessionService;
+    private ImConversationMemberService conversationMemberService;
+
+    @Autowired
+    private ImConversationService conversationService;
 
     @Value("${app.security.enabled:true}")
     private boolean securityEnabled;
@@ -94,8 +100,13 @@ public class ImWebSocketEndpoint {
     }
 
     @Autowired
-    public void setImSessionService(com.ruoyi.im.service.ImSessionService imSessionService) {
-        staticImSessionService = imSessionService;
+    public void setConversationMemberService(ImConversationMemberService conversationMemberService) {
+        staticConversationMemberService = conversationMemberService;
+    }
+
+    @Autowired
+    public void setConversationService(ImConversationService conversationService) {
+        staticConversationService = conversationService;
     }
 
     @Value("${app.security.enabled:true}")
@@ -306,13 +317,13 @@ public class ImWebSocketEndpoint {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> messageData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
 
-            Long sessionId = Long.valueOf(messageData.get("sessionId").toString());
+            Long conversationId = Long.valueOf(messageData.get("sessionId").toString());
             String messageType = (String) messageData.get("type");
             String content = (String) messageData.get("content");
 
             // 构建消息发送请求
             com.ruoyi.im.dto.message.ImMessageSendRequest request = new com.ruoyi.im.dto.message.ImMessageSendRequest();
-            request.setSessionId(sessionId);
+            request.setConversationId(conversationId);
             request.setType(messageType);
             request.setContent(content);
 
@@ -323,15 +334,15 @@ public class ImWebSocketEndpoint {
                 // 获取完整消息对象
                 com.ruoyi.im.domain.ImMessage message = new com.ruoyi.im.domain.ImMessage();
                 message.setId(messageId);
-                message.setSessionId(sessionId);
+                message.setConversationId(conversationId);
                 message.setSenderId(userId);
                 message.setType(messageType);
                 message.setContent(content);
 
                 // 广播消息给会话中的所有用户
-                broadcastMessageToSession(sessionId, message);
+                broadcastMessageToSession(conversationId, message);
 
-                log.info("消息已发送: messageId={}, sessionId={}, senderId={}", messageId, sessionId, userId);
+                log.info("消息已发送: messageId={}, conversationId={}, senderId={}", messageId, conversationId, userId);
             }
 
         } catch (Exception e) {
@@ -351,11 +362,11 @@ public class ImWebSocketEndpoint {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> typingData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
 
-            Long sessionId = Long.valueOf(typingData.get("sessionId").toString());
+            Long conversationId = Long.valueOf(typingData.get("sessionId").toString());
             boolean isTyping = (boolean) typingData.get("isTyping");
 
             // 广播正在输入状态
-            broadcastTypingStatus(sessionId, userId, isTyping);
+            broadcastTypingStatus(conversationId, userId, isTyping);
 
         } catch (Exception e) {
             log.error("处理正在输入状态异常", e);
@@ -453,18 +464,18 @@ public class ImWebSocketEndpoint {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> readData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
 
-            Long sessionId = Long.valueOf(readData.get("sessionId").toString());
+            Long conversationId = Long.valueOf(readData.get("sessionId").toString());
             List<Long> messageIds = (List<Long>) readData.get("messageIds");
 
             // 更新消息状态为已读
             if (messageIds != null && !messageIds.isEmpty()) {
-                staticImMessageService.markAsRead(sessionId, userId, messageIds);
+                staticImMessageService.markAsRead(conversationId, userId, messageIds);
             }
 
             // 广播已读回执
-            broadcastReadReceipt(sessionId, userId, messageIds);
+            broadcastReadReceipt(conversationId, userId, messageIds);
 
-            log.info("消息已读: sessionId={}, userId={}", sessionId, userId);
+            log.info("消息已读: conversationId={}, userId={}", conversationId, userId);
 
         } catch (Exception e) {
             log.error("处理消息已读异常", e);
@@ -475,10 +486,10 @@ public class ImWebSocketEndpoint {
      * 广播消息给会话中的所有用户
      * 根据会话类型（私聊/群聊）获取相关用户并推送消息
      *
-     * @param sessionId 会话ID
+     * @param conversationId 会话ID
      * @param message 消息对象
      */
-    private void broadcastMessageToSession(Long sessionId, com.ruoyi.im.domain.ImMessage message) {
+    private void broadcastMessageToSession(Long conversationId, com.ruoyi.im.domain.ImMessage message) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> messageMap = new HashMap<>();
@@ -488,29 +499,29 @@ public class ImWebSocketEndpoint {
             String messageJson = mapper.writeValueAsString(messageMap);
 
             // 获取会话信息，确定会话类型和参与者
-            com.ruoyi.im.vo.session.ImSessionVO sessionVO = staticImSessionService.getSessionById(sessionId);
-            if (sessionVO == null) {
-                log.warn("会话不存在，无法广播消息: sessionId={}", sessionId);
+            com.ruoyi.im.vo.conversation.ImConversationVO conversationVO = staticConversationService.getConversationById(conversationId, message.getSenderId());
+            if (conversationVO == null) {
+                log.warn("会话不存在，无法广播消息: conversationId={}", conversationId);
                 return;
             }
 
             // 根据会话类型获取目标用户列表
             List<Long> targetUserIds = new ArrayList<>();
-            if ("private".equals(sessionVO.getType())) {
-                // 私聊会话：发送者和接收者
-                targetUserIds.add(message.getSenderId());
-                if (message.getReceiverId() != null) {
-                    targetUserIds.add(message.getReceiverId());
+            if ("private".equals(conversationVO.getType())) {
+                // 私聊会话：获取会话成员列表
+                List<com.ruoyi.im.vo.conversation.ImConversationMemberVO> members = staticConversationMemberService.getConversationMemberList(message.getSenderId());
+                for (com.ruoyi.im.vo.conversation.ImConversationMemberVO member : members) {
+                    if (member.getConversationId().equals(conversationId)) {
+                        targetUserIds.add(member.getUserId());
+                    }
                 }
-            } else if ("group".equals(sessionVO.getType())) {
-                // 群聊会话：获取群组成员列表
-                // TODO: 从群组服务获取群组成员列表
-                // 暂时使用会话中的 peerId 作为群组ID
-                Long groupId = sessionVO.getPeerId();
-                if (groupId != null) {
-                    // 这里应该调用群组服务获取成员列表
-                    // 暂时简化处理
-                    targetUserIds.add(message.getSenderId());
+            } else if ("group".equals(conversationVO.getType())) {
+                // 群聊会话：获取会话成员列表
+                List<com.ruoyi.im.vo.conversation.ImConversationMemberVO> members = staticConversationMemberService.getConversationMemberList(message.getSenderId());
+                for (com.ruoyi.im.vo.conversation.ImConversationMemberVO member : members) {
+                    if (member.getConversationId().equals(conversationId)) {
+                        targetUserIds.add(member.getUserId());
+                    }
                 }
             }
 
@@ -536,15 +547,15 @@ public class ImWebSocketEndpoint {
      * 广播正在输入状态
      * 向会话中的其他用户发送输入状态通知
      *
-     * @param sessionId 会话ID
+     * @param conversationId 会话ID
      * @param userId 用户ID
      * @param isTyping 是否正在输入
      */
-    private void broadcastTypingStatus(Long sessionId, Long userId, boolean isTyping) {
+    private void broadcastTypingStatus(Long conversationId, Long userId, boolean isTyping) {
         try {
             Map<String, Object> statusMap = new HashMap<>();
             statusMap.put("type", "typing");
-            statusMap.put("sessionId", sessionId);
+            statusMap.put("conversationId", conversationId);
             statusMap.put("userId", userId);
             statusMap.put("isTyping", isTyping);
 
@@ -562,15 +573,15 @@ public class ImWebSocketEndpoint {
      * 广播已读回执
      * 向会话中的其他用户发送消息已读通知
      *
-     * @param sessionId 会话ID
+     * @param conversationId 会话ID
      * @param userId 用户ID
      * @param messageIds 消息ID列表
      */
-    private void broadcastReadReceipt(Long sessionId, Long userId, List<Long> messageIds) {
+    private void broadcastReadReceipt(Long conversationId, Long userId, List<Long> messageIds) {
         try {
             Map<String, Object> receiptMap = new HashMap<>();
             receiptMap.put("type", "read_receipt");
-            receiptMap.put("sessionId", sessionId);
+            receiptMap.put("conversationId", conversationId);
             receiptMap.put("userId", userId);
             receiptMap.put("messageIds", messageIds);
             receiptMap.put("timestamp", System.currentTimeMillis());

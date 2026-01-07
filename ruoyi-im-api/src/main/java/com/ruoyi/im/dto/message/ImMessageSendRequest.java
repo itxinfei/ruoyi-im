@@ -15,7 +15,7 @@ public class ImMessageSendRequest implements Serializable {
 
     /** 会话ID */
     @NotNull(message = "会话ID不能为空")
-    private Long sessionId;
+    private Long conversationId;
 
     /** 消息类型 */
     @NotBlank(message = "消息类型不能为空")
@@ -31,12 +31,12 @@ public class ImMessageSendRequest implements Serializable {
     /** 扩展数据（JSON格式，用于文件、图片等） */
     private String extra;
 
-    public Long getSessionId() {
-        return sessionId;
+    public Long getConversationId() {
+        return conversationId;
     }
 
-    public void setSessionId(Long sessionId) {
-        this.sessionId = sessionId;
+    public void setConversationId(Long conversationId) {
+        this.conversationId = conversationId;
     }
 
     public String getType() {
