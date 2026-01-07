@@ -51,13 +51,10 @@ public class ImUser extends BaseEntity implements Serializable {
     /** 状态: ACTIVE=在线, OFFLINE=离线 */
     private String status;
 
-    /** 签名，用户个人简介或个性签名 */
+    /** 签名,用户个人简介或个性签名 */
     private String signature;
 
-    /** 最后登录时间，记录用户最近一次登录的时间 */
+    /** 最后在线时间,记录用户最近一次在线的时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime lastLoginTime;
-
-    /** 最后登录IP，记录用户最近一次登录的IP地址 */
-    private String lastLoginIp;
+    private LocalDateTime lastOnlineTime;
 }

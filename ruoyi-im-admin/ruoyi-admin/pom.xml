@@ -24,11 +24,12 @@
         </dependency>
 
         <!-- spring-boot-devtools -->
-        <dependency>
+        <!-- 暂时禁用以排查启动问题 -->
+        <!--<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
-        </dependency>
+        </dependency>-->
 
         <!-- SpringDoc OpenAPI 3-->
         <dependency>

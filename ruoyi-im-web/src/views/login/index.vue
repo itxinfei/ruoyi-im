@@ -135,8 +135,8 @@ const showRegisterDialog = ref(false)
 
 // 登录表单
 const loginForm = reactive({
-  username: '',
-  password: '',
+  username: 'lisi',
+  password: '123456',
   rememberMe: false,
 })
 

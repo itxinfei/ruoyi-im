@@ -22,7 +22,7 @@ import java.util.List;
  * @date 2024-01-01
  */
 @RestController("adminImSessionController")
-@RequestMapping("/api/admin/im/session")
+@RequestMapping("/im/session")
 public class ImSessionController extends BaseController {
 
     @Autowired

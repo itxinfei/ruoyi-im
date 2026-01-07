@@ -11,7 +11,7 @@
  Target Server Version : 50744 (5.7.44-log)
  File Encoding         : 65001
 
- Date: 07/01/2026 09:31:58
+ Date: 07/01/2026 15:04:39
 */
 
 SET NAMES utf8mb4;
@@ -551,82 +551,61 @@ INSERT INTO `im_audit_log` VALUES (1001, 2, 'LOGIN', NULL, NULL, 'SUCCESS', NULL
 DROP TABLE IF EXISTS `im_conversation`;
 CREATE TABLE `im_conversation`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '会话ID',
-  `type` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '会话类型（PRIVATE私聊 GROUP群聊）',
-  `target_id` bigint(20) NOT NULL COMMENT '目标ID（私聊为好友ID，群聊为群组ID）',
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '会话名称（群聊为群组名称，私聊为对方昵称）',
-  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '会话图标（群聊为群组图标，私聊为对方头像）',
-  `last_message_id` bigint(20) NULL DEFAULT NULL COMMENT '最后一条消息ID',
-  `last_message_time` datetime NULL DEFAULT NULL COMMENT '最后消息时间',
+  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '会话类型（PRIVATE私聊 GROUP群聊）',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '会话名称',
+  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '会话头像',
+  `owner_id` bigint(20) NULL DEFAULT NULL COMMENT '群主ID（群聊时使用）',
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '会话描述',
+  `max_members` int(11) NULL DEFAULT 500 COMMENT '最大成员数',
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除（0否 1是）',
   `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_type_target`(`type`, `target_id`) USING BTREE,
-  INDEX `idx_last_message`(`last_message_id`) USING BTREE,
+  INDEX `idx_type`(`type`) USING BTREE,
+  INDEX `idx_owner_id`(`owner_id`) USING BTREE,
   INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
-  CONSTRAINT `fk_conversation_last_message` FOREIGN KEY (`last_message_id`) REFERENCES `im_message` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表' ROW_FORMAT = DYNAMIC;
+  INDEX `idx_create_time`(`create_time`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of im_conversation
 -- ----------------------------
-INSERT INTO `im_conversation` VALUES (1, 'GROUP', 1, '技术交流群', '/default/group.png', NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation` VALUES (2, 'GROUP', 2, '产品讨论组', '/default/group2.png', NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation` VALUES (3, 'GROUP', 3, '项目协作群', '/default/group3.png', NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation` VALUES (4, 'PRIVATE', 2, '张三', '/default/user2.png', NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation` VALUES (5, 'PRIVATE', 3, '李四', '/default/user3.png', NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
 
 -- ----------------------------
 -- Table structure for im_conversation_member
 -- ----------------------------
 DROP TABLE IF EXISTS `im_conversation_member`;
 CREATE TABLE `im_conversation_member`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '成员ID',
   `conversation_id` bigint(20) NOT NULL COMMENT '会话ID',
   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '成员昵称',
+  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'MEMBER' COMMENT '角色（OWNER管理员 MEMBER普通成员）',
   `unread_count` int(11) NOT NULL DEFAULT 0 COMMENT '未读消息数',
-  `last_read_message_id` bigint(20) NULL DEFAULT NULL COMMENT '最后阅读消息ID',
-  `is_pinned` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否置顶',
-  `is_muted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否免打扰',
+  `is_pinned` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否置顶（0否 1是）',
+  `is_muted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否免打扰（0否 1是）',
+  `last_read_message_id` bigint(20) NULL DEFAULT NULL COMMENT '最后已读消息ID',
+  `last_read_time` datetime NULL DEFAULT NULL COMMENT '最后已读时间',
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除（0否 1是）',
   `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_conversation_user`(`conversation_id`, `user_id`) USING BTREE,
-  INDEX `idx_conversation_id`(`conversation_id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_unread_count`(`unread_count`) USING BTREE,
+  INDEX `idx_is_pinned`(`is_pinned`) USING BTREE,
+  INDEX `idx_is_muted`(`is_muted`) USING BTREE,
   INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
-  INDEX `idx_last_read_message_id`(`last_read_message_id`) USING BTREE,
+  INDEX `idx_update_time`(`update_time`) USING BTREE,
   CONSTRAINT `fk_conversation_member_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `im_conversation` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
-  CONSTRAINT `fk_conversation_member_last_read_message` FOREIGN KEY (`last_read_message_id`) REFERENCES `im_message` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
   CONSTRAINT `fk_conversation_member_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1028 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话成员表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话成员表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of im_conversation_member
 -- ----------------------------
-INSERT INTO `im_conversation_member` VALUES (1000, 1, 1, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation_member` VALUES (1001, 1, 2, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation_member` VALUES (1002, 1, 3, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19');
-INSERT INTO `im_conversation_member` VALUES (1003, 2, 1, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation_member` VALUES (1004, 2, 2, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19');
-INSERT INTO `im_conversation_member` VALUES (1005, 2, 3, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation_member` VALUES (1006, 2, 4, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19');
-INSERT INTO `im_conversation_member` VALUES (1007, 2, 5, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19');
-INSERT INTO `im_conversation_member` VALUES (1008, 3, 1, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19');
-INSERT INTO `im_conversation_member` VALUES (1009, 3, 2, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation_member` VALUES (1010, 3, 4, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation_member` VALUES (1011, 3, 6, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19');
-INSERT INTO `im_conversation_member` VALUES (1012, 4, 1, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation_member` VALUES (1013, 4, 2, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation_member` VALUES (1014, 5, 1, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19');
-INSERT INTO `im_conversation_member` VALUES (1015, 5, 3, 0, NULL, 0, 0, 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19');
-INSERT INTO `im_conversation_member` VALUES (1016, 4, 3, 0, 8, 0, 0, 0, NULL, '2026-01-07 09:31:45', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation_member` VALUES (1017, 4, 4, 0, 8, 0, 0, 0, NULL, '2026-01-07 09:31:45', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation_member` VALUES (1018, 4, 5, 0, 8, 0, 0, 0, NULL, '2026-01-07 09:31:45', '2026-01-07 09:31:45');
-INSERT INTO `im_conversation_member` VALUES (1019, 5, 2, 0, 10, 0, 1, 0, NULL, '2026-01-07 09:31:45', '2026-01-07 09:31:45');
 
 -- ----------------------------
 -- Table structure for im_file_asset
@@ -663,34 +642,26 @@ INSERT INTO `im_file_asset` VALUES (1002, '项目计划.xlsx', '/files/project_p
 -- ----------------------------
 DROP TABLE IF EXISTS `im_friend`;
 CREATE TABLE `im_friend`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '好友ID',
   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
-  `friend_user_id` bigint(20) NOT NULL COMMENT '好友用户ID',
-  `alias` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '好友别名',
-  `remark` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注信息',
-  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'NORMAL' COMMENT '状态（NORMAL正常 BLOCKED拉黑）',
+  `friend_id` bigint(20) NOT NULL COMMENT '好友ID',
+  `remark` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '好友备注',
+  `group_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '分组名称',
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除（0否 1是）',
   `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `group_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_user_friend`(`user_id`, `friend_user_id`) USING BTREE,
-  INDEX `idx_user_id`(`user_id`) USING BTREE,
-  INDEX `idx_friend_user_id`(`friend_user_id`) USING BTREE,
+  UNIQUE INDEX `uk_user_friend`(`user_id`, `friend_id`) USING BTREE,
+  INDEX `idx_friend_id`(`friend_id`) USING BTREE,
   INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
-  CONSTRAINT `fk_friend_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
-  CONSTRAINT `fk_friend_user_friend` FOREIGN KEY (`friend_user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1032 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '好友关系表' ROW_FORMAT = DYNAMIC;
+  CONSTRAINT `fk_friend_friend` FOREIGN KEY (`friend_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_friend_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '好友表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of im_friend
 -- ----------------------------
-INSERT INTO `im_friend` VALUES (1000, 1, 2, '张三', '同事', 'NORMAL', 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19', NULL);
-INSERT INTO `im_friend` VALUES (1001, 1, 3, '李四', '朋友', 'NORMAL', 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19', NULL);
-INSERT INTO `im_friend` VALUES (1002, 1, 4, '王五', '同学', 'NORMAL', 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19', NULL);
-INSERT INTO `im_friend` VALUES (1003, 2, 3, '李四', '共同好友', 'NORMAL', 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19', NULL);
-INSERT INTO `im_friend` VALUES (1004, 2, 4, '王五', '同事', 'NORMAL', 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19', NULL);
 
 -- ----------------------------
 -- Table structure for im_friend_request
@@ -707,15 +678,14 @@ CREATE TABLE `im_friend_request`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_from_user`(`from_user_id`) USING BTREE,
   INDEX `idx_to_user`(`to_user_id`) USING BTREE,
-  INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1003 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '好友申请表' ROW_FORMAT = DYNAMIC;
+  INDEX `idx_status`(`status`) USING BTREE,
+  CONSTRAINT `fk_friend_request_from_user` FOREIGN KEY (`from_user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `fk_friend_request_to_user` FOREIGN KEY (`to_user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '好友申请表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_friend_request
 -- ----------------------------
-INSERT INTO `im_friend_request` VALUES (1000, 2, 1, '你好，我是张三，希望添加你为好友', 'APPROVED', '2025-12-31 15:08:20', NULL);
-INSERT INTO `im_friend_request` VALUES (1001, 3, 1, '李四建议我们加个好友', 'APPROVED', '2025-12-31 15:08:20', NULL);
-INSERT INTO `im_friend_request` VALUES (1002, 4, 1, '王五申请添加好友', 'PENDING', '2025-12-31 15:08:20', NULL);
 
 -- ----------------------------
 -- Table structure for im_group
@@ -723,124 +693,116 @@ INSERT INTO `im_friend_request` VALUES (1002, 4, 1, '王五申请添加好友', 
 DROP TABLE IF EXISTS `im_group`;
 CREATE TABLE `im_group`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '群组ID',
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '群组名称',
-  `owner_id` bigint(20) NOT NULL COMMENT '群主用户ID',
-  `notice` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群公告',
-  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群头像',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '群组名称',
+  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群组头像',
+  `owner_id` bigint(20) NOT NULL COMMENT '群主ID',
   `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群组描述',
-  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'PRIVATE' COMMENT '群组类型（PUBLIC公开群 PRIVATE私密群）',
-  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'NORMAL' COMMENT '状态（NORMAL正常 DISMISSED已解散）',
-  `member_count` int(11) NOT NULL DEFAULT 0 COMMENT '成员数量',
-  `member_limit` int(11) NULL DEFAULT 200 COMMENT '成员数量限制',
+  `max_members` int(11) NOT NULL DEFAULT 500 COMMENT '最大成员数',
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除（0否 1是）',
   `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_owner_id`(`owner_id`) USING BTREE,
-  INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
   CONSTRAINT `fk_group_owner` FOREIGN KEY (`owner_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '群组表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '群组表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of im_group
 -- ----------------------------
-INSERT INTO `im_group` VALUES (1, '测试群组1', 1, '这是第一个测试群组', '/profile/group1.png', NULL, 'PRIVATE', 'NORMAL', 3, 200, 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19');
-INSERT INTO `im_group` VALUES (2, '开发技术交流群', 1, 'Java、Spring Boot、Vue等技术交流', '/profile/group2.png', NULL, 'PRIVATE', 'NORMAL', 5, 200, 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19');
-INSERT INTO `im_group` VALUES (3, '项目讨论组', 1, '项目相关讨论', '/profile/group3.png', NULL, 'PRIVATE', 'NORMAL', 4, 200, 0, NULL, '2025-12-31 15:08:19', '2025-12-31 15:08:19');
+
+-- ----------------------------
+-- Table structure for im_group_blacklist
+-- ----------------------------
+DROP TABLE IF EXISTS `im_group_blacklist`;
+CREATE TABLE `im_group_blacklist`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `group_id` bigint(20) NOT NULL COMMENT '群组ID',
+  `user_id` bigint(20) NOT NULL COMMENT '被禁言/拉黑用户ID',
+  `operator_id` bigint(20) NOT NULL COMMENT '操作人ID',
+  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'MUTE' COMMENT '类型（MUTE禁言 BLACKLIST黑名单）',
+  `reason` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '原因',
+  `expire_time` datetime NULL DEFAULT NULL COMMENT '过期时间（NULL表示永久）',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1 COMMENT '是否生效（0否 1是）',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_group_user_type`(`group_id`, `user_id`, `type`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_is_active`(`is_active`) USING BTREE,
+  INDEX `idx_expire_time`(`expire_time`) USING BTREE,
+  INDEX `fk_group_blacklist_operator`(`operator_id`) USING BTREE,
+  CONSTRAINT `fk_group_blacklist_group` FOREIGN KEY (`group_id`) REFERENCES `im_group` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_group_blacklist_operator` FOREIGN KEY (`operator_id`) REFERENCES `im_user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_group_blacklist_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '群组黑名单/禁言表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_group_blacklist
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for im_group_member
 -- ----------------------------
 DROP TABLE IF EXISTS `im_group_member`;
 CREATE TABLE `im_group_member`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '成员ID',
   `group_id` bigint(20) NOT NULL COMMENT '群组ID',
   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
-  `role` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'MEMBER' COMMENT '角色（OWNER群主 ADMIN管理员 MEMBER普通成员）',
-  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群内昵称',
-  `mute_until` datetime NULL DEFAULT NULL COMMENT '禁言截止时间',
-  `joined_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '加入时间',
-  `inviter_id` bigint(20) NULL DEFAULT NULL COMMENT '邀请人用户ID',
+  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群昵称',
+  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'MEMBER' COMMENT '角色（OWNER管理员 MEMBER普通成员）',
+  `is_muted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否禁言（0否 1是）',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除（0否 1是）',
+  `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_group_user`(`group_id`, `user_id`) USING BTREE,
-  INDEX `idx_group_id`(`group_id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_role`(`role`) USING BTREE,
+  INDEX `idx_is_muted`(`is_muted`) USING BTREE,
+  INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
   CONSTRAINT `fk_group_member_group` FOREIGN KEY (`group_id`) REFERENCES `im_group` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_group_member_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1012 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '群组成员表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '群组成员表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of im_group_member
 -- ----------------------------
-INSERT INTO `im_group_member` VALUES (1000, 1, 1, 'OWNER', '群主', NULL, '2025-12-31 15:08:19', NULL, '2026-01-07 08:56:04', '2026-01-07 08:56:05');
-INSERT INTO `im_group_member` VALUES (1001, 1, 2, 'MEMBER', '张三', NULL, '2025-12-31 15:08:19', NULL, '2026-01-07 08:56:04', '2026-01-07 08:56:05');
-INSERT INTO `im_group_member` VALUES (1002, 1, 3, 'MEMBER', '李四', NULL, '2025-12-31 15:08:19', NULL, '2026-01-07 08:56:04', '2026-01-07 08:56:05');
-INSERT INTO `im_group_member` VALUES (1003, 2, 1, 'OWNER', '群主', NULL, '2025-12-31 15:08:19', NULL, '2026-01-07 08:56:04', '2026-01-07 08:56:05');
-INSERT INTO `im_group_member` VALUES (1004, 2, 2, 'MEMBER', '张三', NULL, '2025-12-31 15:08:19', NULL, '2026-01-07 08:56:04', '2026-01-07 08:56:05');
-INSERT INTO `im_group_member` VALUES (1005, 2, 3, 'MEMBER', '李四', NULL, '2025-12-31 15:08:19', NULL, '2026-01-07 08:56:04', '2026-01-07 08:56:05');
-INSERT INTO `im_group_member` VALUES (1006, 2, 4, 'MEMBER', '王五', NULL, '2025-12-31 15:08:19', NULL, '2026-01-07 08:56:04', '2026-01-07 08:56:05');
-INSERT INTO `im_group_member` VALUES (1007, 2, 5, 'MEMBER', '赵六', NULL, '2025-12-31 15:08:19', NULL, '2026-01-07 08:56:04', '2026-01-07 08:56:05');
-INSERT INTO `im_group_member` VALUES (1008, 3, 1, 'OWNER', '群主', NULL, '2025-12-31 15:08:19', NULL, '2026-01-07 08:56:04', '2026-01-07 08:56:05');
-INSERT INTO `im_group_member` VALUES (1009, 3, 2, 'MEMBER', '张三', NULL, '2025-12-31 15:08:19', NULL, '2026-01-07 08:56:04', '2026-01-07 08:56:05');
-INSERT INTO `im_group_member` VALUES (1010, 3, 4, 'MEMBER', '王五', NULL, '2025-12-31 15:08:19', NULL, '2026-01-07 08:56:04', '2026-01-07 08:56:05');
-INSERT INTO `im_group_member` VALUES (1011, 3, 6, 'MEMBER', '钱七', NULL, '2025-12-31 15:08:19', NULL, '2026-01-07 08:56:04', '2026-01-07 08:56:05');
 
 -- ----------------------------
 -- Table structure for im_message
 -- ----------------------------
 DROP TABLE IF EXISTS `im_message`;
 CREATE TABLE `im_message`  (
-  `id` bigint(20) NOT NULL COMMENT '消息ID',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '消息ID',
   `conversation_id` bigint(20) NOT NULL COMMENT '会话ID',
-  `sender_id` bigint(20) NOT NULL COMMENT '发送者用户ID',
-  `receiver_id` bigint(20) NULL DEFAULT NULL COMMENT '接收者ID（私聊为接收用户ID，群聊为群组ID）',
-  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '消息类型（TEXT文本 FILE文件 NOTICE通知 RECALL撤回 REPLY回复 FORWARD转发 IMAGE图片 VOICE语音 VIDEO视频）',
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '消息内容（JSON格式）',
-  `reply_to_message_id` bigint(20) NULL DEFAULT NULL COMMENT '回复的消息ID',
-  `forward_from_message_id` bigint(20) NULL DEFAULT NULL COMMENT '转发的消息ID',
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'SENT' COMMENT '消息状态（SENT已发送 DELIVERED已送达 READ已读 REVOKED已撤回）',
+  `sender_id` bigint(20) NOT NULL COMMENT '发送者ID',
+  `message_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '消息类型（TEXT文本 IMAGE图片 VIDEO视频 AUDIO语音 FILE文件）',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '消息内容',
+  `file_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '文件URL',
+  `file_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '文件名',
+  `file_size` bigint(20) NULL DEFAULT NULL COMMENT '文件大小（字节）',
+  `sensitive_level` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'NORMAL' COMMENT '敏感级别（NORMAL普通 SENSITIVE敏感 HIGH高度敏感）',
   `is_revoked` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否撤回（0否 1是）',
-  `sensitive_level` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'NONE' COMMENT '敏感级别（NONE无 WARN警告 BLOCK拦截）',
   `revoked_time` datetime NULL DEFAULT NULL COMMENT '撤回时间',
-  `send_time` datetime NULL DEFAULT NULL COMMENT '发送时间',
-  `parent_id` bigint(20) NULL DEFAULT NULL COMMENT '父消息ID（用于转发和回复消息的关联）',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除（0否 1是）',
-  `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  `revoker_id` bigint(20) NULL DEFAULT NULL COMMENT '撤回者ID',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_conversation_id`(`conversation_id`) USING BTREE,
   INDEX `idx_sender_id`(`sender_id`) USING BTREE,
+  INDEX `idx_message_type`(`message_type`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE,
+  INDEX `idx_is_revoked`(`is_revoked`) USING BTREE,
   INDEX `idx_conversation_time`(`conversation_id`, `create_time`) USING BTREE,
-  INDEX `idx_reply_to_message_id`(`reply_to_message_id`) USING BTREE,
-  INDEX `idx_forward_from_message_id`(`forward_from_message_id`) USING BTREE,
-  FULLTEXT INDEX `ft_content`(`content`),
-  INDEX `idx_receiver_id`(`receiver_id`) USING BTREE,
-  INDEX `idx_parent_id`(`parent_id`) USING BTREE,
   CONSTRAINT `fk_message_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `im_conversation` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
-  CONSTRAINT `fk_message_forward_from` FOREIGN KEY (`forward_from_message_id`) REFERENCES `im_message` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
-  CONSTRAINT `fk_message_reply_to` FOREIGN KEY (`reply_to_message_id`) REFERENCES `im_message` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
   CONSTRAINT `fk_message_sender` FOREIGN KEY (`sender_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of im_message
 -- ----------------------------
-INSERT INTO `im_message` VALUES (1, 1, 1, NULL, 'TEXT', '{\"text\":\"大家好，欢迎加入测试群组1！\"}', NULL, NULL, 'SENT', 0, 'NONE', NULL, NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_message` VALUES (2, 1, 2, NULL, 'TEXT', '{\"text\":\"你好，张三！\"}', NULL, NULL, 'SENT', 0, 'NONE', NULL, NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_message` VALUES (3, 1, 3, NULL, 'TEXT', '{\"text\":\"大家好，我是李四。\"}', NULL, NULL, 'SENT', 0, 'NONE', NULL, NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_message` VALUES (4, 2, 1, NULL, 'TEXT', '{\"text\":\"今天讨论Spring Boot相关技术\"}', NULL, NULL, 'SENT', 0, 'NONE', NULL, NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_message` VALUES (5, 2, 2, NULL, 'TEXT', '{\"text\":\"好的，我有一些关于Spring Security的问题\"}', NULL, NULL, 'SENT', 0, 'NONE', NULL, NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_message` VALUES (6, 4, 1, NULL, 'TEXT', '{\"text\":\"你好，张三，最近工作怎么样？\"}', NULL, NULL, 'SENT', 0, 'NONE', NULL, NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_message` VALUES (7, 4, 2, NULL, 'TEXT', '{\"text\":\"还不错，项目进展顺利\"}', NULL, NULL, 'SENT', 0, 'NONE', NULL, NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_message` VALUES (8, 5, 1, NULL, 'TEXT', '{\"text\":\"李四，项目文档你看了吗？\"}', NULL, NULL, 'SENT', 0, 'NONE', NULL, NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_message` VALUES (9, 5, 3, NULL, 'TEXT', '{\"text\":\"看了，有一些疑问需要讨论\"}', NULL, NULL, 'SENT', 0, 'NONE', NULL, NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
-INSERT INTO `im_message` VALUES (10, 2, 1, NULL, 'IMAGE', '{\"url\":\"/profile/test-image.jpg\",\"name\":\"test.jpg\",\"size\":102400}', NULL, NULL, 'SENT', 0, 'NONE', NULL, NULL, NULL, 0, NULL, '2025-12-31 15:08:19', '2026-01-07 09:31:45');
 
 -- ----------------------------
 -- Table structure for im_message_reaction
@@ -868,26 +830,47 @@ CREATE TABLE `im_message_reaction`  (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for im_message_read
+-- ----------------------------
+DROP TABLE IF EXISTS `im_message_read`;
+CREATE TABLE `im_message_read`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `message_id` bigint(20) NOT NULL COMMENT '消息ID',
+  `user_id` bigint(20) NOT NULL COMMENT '已读用户ID',
+  `conversation_id` bigint(20) NOT NULL COMMENT '会话ID（冗余字段，用于快速查询）',
+  `read_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '已读时间',
+  `read_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'READ' COMMENT '已读类型（READ已读 RECEIPT已读回执）',
+  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '设备类型（WEB MOBILE PC）',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_message_user`(`message_id`, `user_id`) USING BTREE,
+  INDEX `idx_user_read_time`(`user_id`, `read_time`) USING BTREE,
+  INDEX `idx_conversation_user`(`conversation_id`, `user_id`) USING BTREE,
+  CONSTRAINT `fk_message_read_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `im_conversation` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_message_read_message` FOREIGN KEY (`message_id`) REFERENCES `im_message` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_message_read_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息已读回执表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_message_read
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for im_message_read_receipt
 -- ----------------------------
 DROP TABLE IF EXISTS `im_message_read_receipt`;
 CREATE TABLE `im_message_read_receipt`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '回执ID',
   `message_id` bigint(20) NOT NULL COMMENT '消息ID',
-  `user_id` bigint(20) NOT NULL COMMENT '已读用户ID',
-  `conversation_id` bigint(20) NOT NULL COMMENT '会话ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
   `read_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '已读时间',
-  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '设备类型（PC MOBILE WEB）',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_message_user`(`message_id`, `user_id`) USING BTREE,
-  INDEX `idx_conversation_id`(`conversation_id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_read_time`(`read_time`) USING BTREE,
-  CONSTRAINT `fk_read_receipt_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `im_conversation` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_read_receipt_message` FOREIGN KEY (`message_id`) REFERENCES `im_message` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_read_receipt_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息已读回执表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息已读回执表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of im_message_read_receipt
@@ -938,52 +921,6 @@ CREATE TABLE `im_sensitive_word`  (
 -- ----------------------------
 -- Records of im_sensitive_word
 -- ----------------------------
-
--- ----------------------------
--- Table structure for im_session
--- ----------------------------
-DROP TABLE IF EXISTS `im_session`;
-CREATE TABLE `im_session`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '会话ID',
-  `conversation_id` bigint(20) NOT NULL COMMENT '会话ID（关联im_conversation表）',
-  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '会话类型（private私聊 group群聊）',
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '会话名称（私聊为对方昵称，群聊为群组名称）',
-  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '会话头像（私聊为对方头像，群聊为群组头像）',
-  `peer_id` bigint(20) NULL DEFAULT NULL COMMENT '对方ID（私聊为对方用户ID，群聊为群组ID）',
-  `user_id` bigint(20) NOT NULL COMMENT '所属用户ID（该会话属于哪个用户）',
-  `unread_count` int(11) NOT NULL DEFAULT 0 COMMENT '未读消息数',
-  `is_pinned` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否置顶（0否 1是）',
-  `is_muted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否免打扰（0否 1是）',
-  `last_message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '最后消息内容',
-  `last_message_time` datetime NULL DEFAULT NULL COMMENT '最后消息时间',
-  `last_message_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '最后消息类型',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_user_id`(`user_id`) USING BTREE,
-  INDEX `idx_peer_id`(`peer_id`) USING BTREE,
-  INDEX `idx_conversation_id`(`conversation_id`) USING BTREE,
-  INDEX `idx_type`(`type`) USING BTREE,
-  INDEX `idx_last_message_time`(`last_message_time`) USING BTREE,
-  INDEX `idx_user_peer`(`user_id`, `peer_id`) USING BTREE,
-  INDEX `idx_user_pinned`(`user_id`, `is_pinned`, `last_message_time`) USING BTREE,
-  CONSTRAINT `fk_session_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
-  CONSTRAINT `fk_session_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `im_conversation` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of im_session
--- ----------------------------
-INSERT INTO `im_session` VALUES (1, 'private', '李四', 'https://example.com/avatar/2.jpg', 2, 1, 2, 0, 0, '周末有空一起吃饭吗？', '2026-01-07 15:00:00', 'text', '2026-01-07 09:31:45', '2026-01-07 09:31:45');
-INSERT INTO `im_session` VALUES (2, 'private', '王五', 'https://example.com/avatar/3.jpg', 3, 1, 0, 1, 0, '项目进度如何了？', '2026-01-07 14:30:00', 'text', '2026-01-07 09:31:45', '2026-01-07 09:31:45');
-INSERT INTO `im_session` VALUES (3, 'private', '张三', 'https://example.com/avatar/1.jpg', 1, 2, 0, 0, 0, '周末有空一起吃饭吗？', '2026-01-07 15:00:00', 'text', '2026-01-07 09:31:45', '2026-01-07 09:31:45');
-INSERT INTO `im_session` VALUES (4, 'private', '赵六', 'https://example.com/avatar/4.jpg', 4, 2, 1, 0, 0, '明天有空吗？', '2026-01-07 13:45:00', 'text', '2026-01-07 09:31:45', '2026-01-07 09:31:45');
-INSERT INTO `im_session` VALUES (5, 'group', '技术交流群', 'https://example.com/group/1.jpg', 1, 1, 5, 1, 0, '好的，期待大家的分享', '2026-01-07 16:20:00', 'text', '2026-01-07 09:31:45', '2026-01-07 09:31:45');
-INSERT INTO `im_session` VALUES (6, 'group', '产品讨论组', 'https://example.com/group/2.jpg', 2, 2, 0, 0, 1, '产品需求文档已经更新了', '2026-01-07 12:00:00', 'text', '2026-01-07 09:31:45', '2026-01-07 09:31:45');
-INSERT INTO `im_session` VALUES (7, 'private', '王五', 'https://example.com/avatar/3.jpg', 3, 4, 0, 0, 0, '项目进度如何了？', '2026-01-07 14:30:00', 'text', '2026-01-07 09:31:45', '2026-01-07 09:31:45');
-INSERT INTO `im_session` VALUES (8, 'private', '张三', 'https://example.com/avatar/1.jpg', 1, 3, 0, 0, 0, '项目进度如何了？', '2026-01-07 14:30:00', 'text', '2026-01-07 09:31:45', '2026-01-07 09:31:45');
-INSERT INTO `im_session` VALUES (9, 'group', '技术交流群', 'https://example.com/group/1.jpg', 1, 3, 5, 0, 0, '好的，期待大家的分享', '2026-01-07 16:20:00', 'text', '2026-01-07 09:31:45', '2026-01-07 09:31:45');
-INSERT INTO `im_session` VALUES (10, 'group', '技术交流群', 'https://example.com/group/1.jpg', 1, 4, 5, 0, 0, '好的，期待大家的分享', '2026-01-07 16:20:00', 'text', '2026-01-07 09:31:45', '2026-01-07 09:31:45');
 
 -- ----------------------------
 -- Table structure for im_session_group
@@ -1040,21 +977,27 @@ INSERT INTO `im_system_config` VALUES (1005, 'websocket.heartbeat.interval', '30
 -- ----------------------------
 DROP TABLE IF EXISTS `im_system_notification`;
 CREATE TABLE `im_system_notification`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '通知ID',
-  `receiver_id` bigint(20) NOT NULL COMMENT '接收者ID',
-  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '通知类型：SYSTEM系统/APPROVAL审批/MESSAGE消息/REMINDER提醒',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `receiver_id` bigint(20) NOT NULL COMMENT '接收者用户ID',
+  `sender_id` bigint(20) NULL DEFAULT NULL COMMENT '发送者用户ID（系统通知为NULL）',
+  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '通知类型（SYSTEM系统 APPROVAL审批 MESSAGE消息 GROUP群组 FRIEND好友）',
   `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '通知标题',
   `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '通知内容',
+  `related_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '关联类型（USER MESSAGE GROUP CONVERSATION APPROVAL）',
   `related_id` bigint(20) NULL DEFAULT NULL COMMENT '关联ID',
-  `related_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '关联类型',
-  `is_read` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否已读',
-  `read_time` datetime NULL DEFAULT NULL COMMENT '阅读时间',
+  `is_read` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否已读（0否 1是）',
+  `read_time` datetime NULL DEFAULT NULL COMMENT '已读时间',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_receiver`(`receiver_id`) USING BTREE,
-  INDEX `idx_read`(`is_read`) USING BTREE,
-  INDEX `idx_type`(`type`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统通知表' ROW_FORMAT = Dynamic;
+  INDEX `idx_receiver_id`(`receiver_id`) USING BTREE,
+  INDEX `idx_type`(`type`) USING BTREE,
+  INDEX `idx_is_read`(`is_read`) USING BTREE,
+  INDEX `idx_create_time`(`create_time`) USING BTREE,
+  INDEX `fk_system_notification_sender`(`sender_id`) USING BTREE,
+  CONSTRAINT `fk_system_notification_receiver` FOREIGN KEY (`receiver_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_system_notification_sender` FOREIGN KEY (`sender_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统通知表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_system_notification
@@ -1065,25 +1008,23 @@ CREATE TABLE `im_system_notification`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_todo_item`;
 CREATE TABLE `im_todo_item`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
   `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '待办标题',
-  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '描述',
-  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '类型：APPROVAL审批/MESSAGE消息/TASK任务',
-  `related_id` bigint(20) NULL DEFAULT NULL COMMENT '关联ID',
-  `priority` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'NORMAL' COMMENT '优先级：HIGH高/NORMAL普通/LOW低',
-  `due_date` datetime NULL DEFAULT NULL COMMENT '截止日期',
-  `is_completed` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否完成',
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '待办描述',
+  `priority` tinyint(1) NOT NULL DEFAULT 1 COMMENT '优先级（1低 2中 3高）',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PENDING' COMMENT '状态（PENDING待处理 IN_PROGRESS进行中 COMPLETED已完成 CANCELLED已取消）',
+  `due_date` date NULL DEFAULT NULL COMMENT '截止日期',
   `completed_time` datetime NULL DEFAULT NULL COMMENT '完成时间',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '创建者',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '更新者',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_user`(`user_id`) USING BTREE,
-  INDEX `idx_status`(`is_completed`) USING BTREE,
-  INDEX `idx_due_date`(`due_date`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '待办事项表' ROW_FORMAT = Dynamic;
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE,
+  INDEX `idx_priority`(`priority`) USING BTREE,
+  INDEX `idx_due_date`(`due_date`) USING BTREE,
+  CONSTRAINT `fk_todo_item_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '待办事项表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_todo_item
@@ -1096,41 +1037,28 @@ DROP TABLE IF EXISTS `im_user`;
 CREATE TABLE `im_user`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '用户ID',
   `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户名',
-  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码',
-  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '昵称',
-  `signature` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '个性签名',
-  `gender` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '性别（MALE男 FEMALE女 UNKNOWN未知）',
-  `birthday` date NULL DEFAULT NULL COMMENT '生日',
-  `region` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '地区',
-  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
+  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码（BCrypt加密）',
+  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '昵称',
+  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '头像URL',
+  `gender` tinyint(1) NULL DEFAULT 0 COMMENT '性别（0未知 1男 2女）',
   `mobile` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '手机号',
-  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '手机号',
-  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '头像路径',
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE' COMMENT '状态（ACTIVE在线 OFFLINE离线）',
-  `last_login_time` datetime NULL DEFAULT NULL COMMENT '最后登录时间',
-  `last_login_ip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '最后登录IP',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除（0否 1是）',
-  `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
+  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '状态（0禁用 1正常）',
+  `signature` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '个性签名',
+  `last_online_time` datetime NULL DEFAULT NULL COMMENT '最后在线时间',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_username`(`username`) USING BTREE,
+  INDEX `idx_mobile`(`mobile`) USING BTREE,
   INDEX `idx_email`(`email`) USING BTREE,
-  INDEX `idx_phone`(`phone`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE,
-  INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
-  INDEX `idx_mobile`(`mobile`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'IM用户表' ROW_FORMAT = DYNAMIC;
+  INDEX `idx_last_online_time`(`last_online_time`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'IM用户表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of im_user
 -- ----------------------------
-INSERT INTO `im_user` VALUES (1, 'admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '管理员', '系统管理员', 'UNKNOWN', NULL, '北京', 'admin@example.com', '13800000001', '13800000001', '/avatar/1.jpg', 'ACTIVE', NULL, NULL, 0, NULL, '2025-12-31 10:00:00', '2026-01-07 09:31:45');
-INSERT INTO `im_user` VALUES (2, 'zhangsan', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '张三', '努力工作，快乐生活', 'MALE', '1990-01-15', '上海', 'zhangsan@example.com', '13800000002', '13800000002', '/avatar/2.jpg', 'ACTIVE', NULL, NULL, 0, NULL, '2025-12-31 10:00:00', '2026-01-07 09:31:45');
-INSERT INTO `im_user` VALUES (3, 'lisi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '李四', '热爱编程，追求卓越', 'FEMALE', '1992-05-20', '广州', 'lisi@example.com', '13800000003', '13800000003', '/avatar/3.jpg', 'ACTIVE', NULL, NULL, 0, NULL, '2025-12-31 10:00:00', '2026-01-07 09:31:45');
-INSERT INTO `im_user` VALUES (4, 'wangwu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '王五', '学习不止，进步不息', 'MALE', '1988-11-10', '深圳', 'wangwu@example.com', '13800000004', '13800000004', '/avatar/4.jpg', 'ACTIVE', NULL, NULL, 0, NULL, '2025-12-31 10:00:00', '2026-01-07 09:31:45');
-INSERT INTO `im_user` VALUES (5, 'zhaoliu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '赵六', '生活不止眼前的苟且', 'FEMALE', '1995-03-25', '杭州', 'zhaoliu@example.com', '13800000005', '13800000005', '/avatar/5.jpg', 'ACTIVE', NULL, NULL, 0, NULL, '2025-12-31 10:00:00', '2026-01-07 09:31:45');
-INSERT INTO `im_user` VALUES (6, 'qianqi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '钱七', '还有诗和远方', 'MALE', '1993-08-30', '成都', 'qianqi@example.com', '13800000006', '13800000006', '/avatar/6.jpg', 'ACTIVE', NULL, NULL, 0, NULL, '2025-12-31 10:00:00', '2026-01-07 09:16:53');
 
 -- ----------------------------
 -- Table structure for im_user_backup
@@ -1167,7 +1095,7 @@ CREATE TABLE `im_user_device`  (
   `app_version` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '应用版本',
   `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'IP地址',
   `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '地理位置',
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ONLINE' COMMENT '状态（ONLINE在线 OFFLINE离线）',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ONLINE' COMMENT '状态（ONLINE在线 OFFLINE离线 AWAY离开 BUSY忙碌）',
   `last_active_time` datetime NULL DEFAULT NULL COMMENT '最后活跃时间',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -1178,13 +1106,33 @@ CREATE TABLE `im_user_device`  (
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_last_active_time`(`last_active_time`) USING BTREE,
   CONSTRAINT `fk_user_device_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1002 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户设备表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户设备表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_user_device
 -- ----------------------------
-INSERT INTO `im_user_device` VALUES (1000, 1, 'PC', 'pc-device-001', 'Windows PC', 'Windows 11', '1.0.0', '192.168.1.100', '北京', 'ONLINE', '2025-12-31 15:08:19', '2025-12-31 15:08:19', '2025-12-31 15:08:19');
-INSERT INTO `im_user_device` VALUES (1001, 2, 'MOBILE', 'mobile-device-001', 'iPhone 14', 'iOS 16', '1.0.0', '192.168.1.101', '上海', 'ONLINE', '2025-12-31 15:08:19', '2025-12-31 15:08:19', '2025-12-31 15:08:19');
+
+-- ----------------------------
+-- Table structure for im_user_setting
+-- ----------------------------
+DROP TABLE IF EXISTS `im_user_setting`;
+CREATE TABLE `im_user_setting`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `setting_key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '设置键名',
+  `setting_value` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '设置值（JSON格式）',
+  `setting_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'NOTIFICATION' COMMENT '设置类型（NOTIFICATION通知 PRIVACY隐私 DISPLAY显示）',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_user_setting_key`(`user_id`, `setting_key`) USING BTREE,
+  INDEX `idx_setting_type`(`setting_type`) USING BTREE,
+  CONSTRAINT `fk_user_setting_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户设置表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_user_setting
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for sys_config
@@ -1468,7 +1416,7 @@ CREATE TABLE `sys_menu`  (
 INSERT INTO `sys_menu` VALUES (1, '系统管理', 0, 1, '#', '', 'M', '0', '1', '', 'fa fa-gear', 'admin', '2025-12-27 12:11:36', '', NULL, '系统管理目录');
 INSERT INTO `sys_menu` VALUES (2, '系统监控', 0, 2, '#', '', 'M', '0', '1', '', 'fa fa-video-camera', 'admin', '2025-12-27 12:11:37', '', NULL, '系统监控目录');
 INSERT INTO `sys_menu` VALUES (3, '系统工具', 0, 3, '#', '', 'M', '0', '1', '', 'fa fa-bars', 'admin', '2025-12-27 12:11:37', '', NULL, '系统工具目录');
-INSERT INTO `sys_menu` VALUES (4, '若依官网', 0, 4, 'http://ruoyi.vip', 'menuBlank', 'C', '0', '1', '', 'fa fa-location-arrow', 'admin', '2025-12-27 12:11:37', '', NULL, '若依官网地址');
+INSERT INTO `sys_menu` VALUES (4, 'IM管理', 0, 4, '#', '', 'M', '0', '1', '', 'fa fa-comments', 'admin', '2025-12-27 12:11:37', '', NULL, 'IM管理目录');
 INSERT INTO `sys_menu` VALUES (100, '用户管理', 1, 1, '/system/user', '', 'C', '0', '1', 'system:user:view', 'fa fa-user-o', 'admin', '2025-12-27 12:11:37', '', NULL, '用户管理菜单');
 INSERT INTO `sys_menu` VALUES (101, '角色管理', 1, 2, '/system/role', '', 'C', '0', '1', 'system:role:view', 'fa fa-user-secret', 'admin', '2025-12-27 12:11:37', '', NULL, '角色管理菜单');
 INSERT INTO `sys_menu` VALUES (102, '菜单管理', 1, 3, '/system/menu', '', 'C', '0', '1', 'system:menu:view', 'fa fa-th-list', 'admin', '2025-12-27 12:11:37', '', NULL, '菜单管理菜单');
@@ -1488,6 +1436,11 @@ INSERT INTO `sys_menu` VALUES (115, '代码生成', 3, 2, '/tool/gen', '', 'C', 
 INSERT INTO `sys_menu` VALUES (116, '系统接口', 3, 3, '/tool/swagger', '', 'C', '0', '1', 'tool:swagger:view', 'fa fa-gg', 'admin', '2025-12-27 12:11:39', '', NULL, '系统接口菜单');
 INSERT INTO `sys_menu` VALUES (500, '操作日志', 108, 1, '/monitor/operlog', '', 'C', '0', '1', 'monitor:operlog:view', 'fa fa-address-book', 'admin', '2025-12-27 12:11:39', '', NULL, '操作日志菜单');
 INSERT INTO `sys_menu` VALUES (501, '登录日志', 108, 2, '/monitor/logininfor', '', 'C', '0', '1', 'monitor:logininfor:view', 'fa fa-file-image-o', 'admin', '2025-12-27 12:11:39', '', NULL, '登录日志菜单');
+INSERT INTO `sys_menu` VALUES (502, 'IM用户', 4, 1, '/im/user', '', 'C', '0', '1', 'im:user:view', 'fa fa-user', 'admin', '2025-12-27 12:11:39', '', NULL, 'IM用户管理菜单');
+INSERT INTO `sys_menu` VALUES (503, '消息管理', 4, 2, '/im/message', '', 'C', '0', '1', 'im:message:view', 'fa fa-envelope', 'admin', '2025-12-27 12:11:39', '', NULL, 'IM消息管理菜单');
+INSERT INTO `sys_menu` VALUES (504, '群组管理', 4, 3, '/im/group', '', 'C', '0', '1', 'im:group:view', 'fa fa-users', 'admin', '2025-12-27 12:11:39', '', NULL, 'IM群组管理菜单');
+INSERT INTO `sys_menu` VALUES (505, '会话管理', 4, 4, '/im/session', '', 'C', '0', '1', 'im:session:view', 'fa fa-comments', 'admin', '2025-12-27 12:11:39', '', NULL, 'IM会话管理菜单');
+INSERT INTO `sys_menu` VALUES (506, '文件管理', 4, 5, '/im/file', '', 'C', '0', '1', 'im:file:view', 'fa fa-file', 'admin', '2025-12-27 12:11:39', '', NULL, 'IM文件管理菜单');
 INSERT INTO `sys_menu` VALUES (1000, '用户查询', 100, 1, '#', '', 'F', '0', '1', 'system:user:list', '#', 'admin', '2025-12-27 12:11:39', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (1001, '用户新增', 100, 2, '#', '', 'F', '0', '1', 'system:user:add', '#', 'admin', '2025-12-27 12:11:40', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (1002, '用户修改', 100, 3, '#', '', 'F', '0', '1', 'system:user:edit', '#', 'admin', '2025-12-27 12:11:40', '', NULL, '');
@@ -1713,6 +1666,11 @@ INSERT INTO `sys_role_menu` VALUES (2, 115);
 INSERT INTO `sys_role_menu` VALUES (2, 116);
 INSERT INTO `sys_role_menu` VALUES (2, 500);
 INSERT INTO `sys_role_menu` VALUES (2, 501);
+INSERT INTO `sys_role_menu` VALUES (2, 502);
+INSERT INTO `sys_role_menu` VALUES (2, 503);
+INSERT INTO `sys_role_menu` VALUES (2, 504);
+INSERT INTO `sys_role_menu` VALUES (2, 505);
+INSERT INTO `sys_role_menu` VALUES (2, 506);
 INSERT INTO `sys_role_menu` VALUES (2, 1000);
 INSERT INTO `sys_role_menu` VALUES (2, 1001);
 INSERT INTO `sys_role_menu` VALUES (2, 1002);
@@ -1866,5 +1824,11 @@ CREATE TABLE `sys_user_role`  (
 -- ----------------------------
 INSERT INTO `sys_user_role` VALUES (1, 1);
 INSERT INTO `sys_user_role` VALUES (2, 2);
+
+-- ----------------------------
+-- View structure for im_session
+-- ----------------------------
+DROP VIEW IF EXISTS `im_session`;
+CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `im_session` AS select `cm`.`id` AS `id`,`c`.`type` AS `type`,`cm`.`user_id` AS `user_id`,`u`.`username` AS `user_name`,(case when (`c`.`type` = 'PRIVATE') then (select `u2`.`username` from (`im_user` `u2` join `im_conversation_member` `cm2` on((`u2`.`id` = `cm2`.`user_id`))) where ((`cm2`.`conversation_id` = `cm`.`conversation_id`) and (`cm2`.`user_id` <> `cm`.`user_id`)) limit 1) when (`c`.`type` = 'GROUP') then `c`.`name` else NULL end) AS `target_name`,(case when (`c`.`type` = 'PRIVATE') then (select `cm2`.`user_id` from `im_conversation_member` `cm2` where ((`cm2`.`conversation_id` = `cm`.`conversation_id`) and (`cm2`.`user_id` <> `cm`.`user_id`)) limit 1) when (`c`.`type` = 'GROUP') then `c`.`id` else NULL end) AS `target_id`,(select `m`.`id` from `im_message` `m` where (`m`.`conversation_id` = `cm`.`conversation_id`) order by `m`.`create_time` desc limit 1) AS `last_message_id`,(select `m`.`content` from `im_message` `m` where (`m`.`conversation_id` = `cm`.`conversation_id`) order by `m`.`create_time` desc limit 1) AS `last_message`,`cm`.`unread_count` AS `unread_count`,`cm`.`create_time` AS `create_time`,`cm`.`update_time` AS `update_time` from ((`im_conversation_member` `cm` join `im_conversation` `c` on((`cm`.`conversation_id` = `c`.`id`))) join `im_user` `u` on((`cm`.`user_id` = `u`.`id`))) where (`cm`.`is_deleted` = 0);
 
 SET FOREIGN_KEY_CHECKS = 1;

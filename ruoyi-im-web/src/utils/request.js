@@ -46,6 +46,11 @@ service.interceptors.request.use(
       config.headers['Authorization'] = 'Bearer ' + token
     }
 
+    // 设置默认Content-Type为application/json
+    if (!config.headers['Content-Type'] && config.method === 'post') {
+      config.headers['Content-Type'] = 'application/json;charset=UTF-8'
+    }
+
     return config
   },
   error => {

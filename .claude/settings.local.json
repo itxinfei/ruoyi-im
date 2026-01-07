@@ -38,7 +38,8 @@
       "Bash(java:*)",
       "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" dependency:build-classpath -pl ruoyi-admin)",
       "Bash(unzip:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(findstr:*)"
     ]
   }
 }

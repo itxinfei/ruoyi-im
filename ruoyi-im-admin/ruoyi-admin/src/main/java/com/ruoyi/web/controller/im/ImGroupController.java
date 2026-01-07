@@ -20,7 +20,7 @@ import java.util.List;
  * @date 2025-01-07
  */
 @RestController
-@RequestMapping("api/admin/im/group")
+@RequestMapping("/im/group")
 public class ImGroupController extends BaseController {
 
     @Autowired

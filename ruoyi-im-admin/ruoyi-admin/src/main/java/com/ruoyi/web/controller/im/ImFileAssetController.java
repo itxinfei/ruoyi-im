@@ -20,7 +20,7 @@ import java.util.List;
  * @date 2025-01-07
  */
 @RestController
-@RequestMapping("api/admin/im/file")
+@RequestMapping("/im/file")
 public class ImFileAssetController extends BaseController {
 
     @Autowired

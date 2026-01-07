@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.security.CipherUtils;
@@ -48,6 +49,8 @@ import at.pollux.thymeleaf.shiro.dialect.ShiroDialect;
 @Configuration
 public class ShiroConfig
 {
+    @Autowired
+    private PermitAllUrlProperties permitAllUrlProperties;
     /**
      * Session超时时间，单位为毫秒（默认30分钟）
      */
@@ -301,7 +304,7 @@ public class ShiroConfig
         filterChainDefinitionMap.put("/ruoyi/**", "anon");
         filterChainDefinitionMap.put("/captcha/captchaImage**", "anon");
         // 匿名访问不鉴权注解列表
-        List<String> permitAllUrl = SpringUtils.getBean(PermitAllUrlProperties.class).getUrls();
+        List<String> permitAllUrl = permitAllUrlProperties.getUrls();
         if (StringUtils.isNotEmpty(permitAllUrl))
         {
             permitAllUrl.forEach(url -> filterChainDefinitionMap.put(url, "anon"));

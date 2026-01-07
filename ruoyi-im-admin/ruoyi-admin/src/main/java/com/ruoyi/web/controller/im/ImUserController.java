@@ -21,7 +21,7 @@ import java.util.List;
  * @date 2025-01-07
  */
 @RestController
-@RequestMapping("api/admin/im/user")
+@RequestMapping("/im/user")
 public class ImUserController extends BaseController {
 
     @Autowired

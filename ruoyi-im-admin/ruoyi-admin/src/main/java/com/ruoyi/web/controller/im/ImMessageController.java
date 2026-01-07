@@ -20,7 +20,7 @@ import java.util.List;
  * @date 2025-01-07
  */
 @RestController
-@RequestMapping("api/admin/im/message")
+@RequestMapping("/im/message")
 public class ImMessageController extends BaseController {
 
     @Autowired

@@ -11,12 +11,14 @@ import com.ruoyi.common.constant.Constants;
 
 /**
  * 资源文件配置加载
- * 
+ *
  * @author ruoyi
  */
 @Configuration
 public class I18nConfig implements WebMvcConfigurer
 {
+    private LocaleChangeInterceptor localeChangeInterceptor;
+
     @Bean
     public LocaleResolver localeResolver()
     {
@@ -32,12 +34,16 @@ public class I18nConfig implements WebMvcConfigurer
         LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
         // 参数名
         lci.setParamName("lang");
+        this.localeChangeInterceptor = lci;
         return lci;
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry)
     {
-        registry.addInterceptor(localeChangeInterceptor());
+        if (localeChangeInterceptor != null)
+        {
+            registry.addInterceptor(localeChangeInterceptor);
+        }
     }
 }

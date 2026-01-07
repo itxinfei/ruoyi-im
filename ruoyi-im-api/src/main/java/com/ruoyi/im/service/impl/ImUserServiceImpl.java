@@ -58,14 +58,20 @@ public class ImUserServiceImpl implements ImUserService {
             throw new BusinessException("USER_NOT_EXIST", "用户不存在");
         }
 
+        logger.info("用户登录 - 用户名: {}, 请求密码: {}, 数据库密码: {}", 
+            request.getUsername(), request.getPassword(), user.getPassword());
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            logger.error("密码验证失败 - 用户名: {}, 请求密码长度: {}, 数据库密码长度: {}", 
+                request.getUsername(), request.getPassword().length(), user.getPassword().length());
             throw new BusinessException("PASSWORD_ERROR", "密码错误");
         }
 
+        logger.info("密码验证成功 - 用户名: {}", request.getUsername());
+
         String token = jwtUtils.generateToken(user.getUsername(), user.getId());
 
-        user.setLastLoginTime(LocalDateTime.now());
-        user.setLastLoginIp("127.0.0.1");
+        user.setLastOnlineTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
 
         ImLoginVO vo = new ImLoginVO();

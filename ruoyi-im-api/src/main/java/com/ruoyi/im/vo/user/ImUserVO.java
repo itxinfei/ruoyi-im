@@ -44,9 +44,9 @@ public class ImUserVO implements Serializable {
     /** 在线状态 */
     private Boolean online;
 
-    /** 最后登录时间 */
+    /** 最后在线时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime lastLoginTime;
+    private LocalDateTime lastOnlineTime;
 
     public Long getId() {
         return id;
@@ -128,11 +128,11 @@ public class ImUserVO implements Serializable {
         this.online = online;
     }
 
-    public LocalDateTime getLastLoginTime() {
-        return lastLoginTime;
+    public LocalDateTime getLastOnlineTime() {
+        return lastOnlineTime;
     }
 
-    public void setLastLoginTime(LocalDateTime lastLoginTime) {
-        this.lastLoginTime = lastLoginTime;
+    public void setLastOnlineTime(LocalDateTime lastOnlineTime) {
+        this.lastOnlineTime = lastOnlineTime;
     }
 }
