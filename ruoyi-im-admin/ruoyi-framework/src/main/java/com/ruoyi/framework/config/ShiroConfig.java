@@ -351,7 +351,8 @@ public class ShiroConfig
         
                 // 所有请求需要认证，但IM相关路径需要特殊处理
                 filterChainDefinitionMap.put("/im/**", "anon"); // IM API允许匿名访问
-                filterChainDefinitionMap.put("/**", "user,kickout,onlineSession,syncOnlineSession");        shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
+                filterChainDefinitionMap.put("/**", "user,kickout,onlineSession,syncOnlineSession");
+                shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
 
         return shiroFilterFactoryBean;
     }

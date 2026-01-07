@@ -15,7 +15,8 @@
       "Bash(mysql:*)",
       "Bash(dir:*)",
       "Bash(mvn dependency:tree:*)",
-      "Bash(mvn clean install:*)"
+      "Bash(mvn clean install:*)",
+      "Bash(mvn clean:*)"
     ]
   }
 }
