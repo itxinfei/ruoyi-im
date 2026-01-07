@@ -22,7 +22,8 @@
       "Bash(timeout:*)",
       "Bash(curl:*)",
       "Bash(netstat:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(mvn package:*)"
     ]
   }
 }

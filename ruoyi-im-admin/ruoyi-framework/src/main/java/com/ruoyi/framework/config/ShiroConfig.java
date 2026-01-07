@@ -145,10 +145,10 @@ public class ShiroConfig
             try
             {
                 InputStream inputStream = getCacheManagerConfigFileInputStream();
-                em.setCacheManager(new net.sf.ehcache.CacheManager(in));
+                em.setCacheManager(new net.sf.ehcache.CacheManager(inputStream));
                 return em;
             }
-                return em;
+            catch (Exception e)
             {
                 throw new ConfigurationException("Unable to obtain input stream for cacheManagerConfigFile [classpath:ehcache/ehcache-shiro.xml]", e);
             }
@@ -185,23 +185,7 @@ public class ShiroConfig
         }
     }
 
-    /**
-     * 返回配置文件流 使用Spring的ResourceLoader加载资源
-     */
-    protected InputStream getCacheManagerConfigFileInputStreamSpring()
-    {
-        try
-        {
-            org.springframework.core.io.Resource resource = SpringUtils.getBean(org.springframework.core.io.ResourceLoader.class).getResource("classpath:ehcache/ehcache-shiro.xml");
-            InputStream inputStream = resource.getInputStream();
-            byte[] b = IOUtils.toByteArray(inputStream);
-            return new ByteArrayInputStream(b);
-        }
-        catch (IOException e)
-        {
-            throw new ConfigurationException("Unable to obtain input stream for cacheManagerConfigFile [classpath:ehcache/ehcache-shiro.xml]", e);
-        }
-    }
+
 
     /**
      * 自定义Realm

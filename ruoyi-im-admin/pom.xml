@@ -11,6 +11,16 @@
     <url>http://www.ruoyi.vip</url>
     <description>若依管理系统</description>
 
+    <modules>
+        <module>ruoyi-admin</module>
+        <module>ruoyi-framework</module>
+        <module>ruoyi-system</module>
+        <module>ruoyi-quartz</module>
+        <module>ruoyi-generator</module>
+        <module>ruoyi-common</module>
+    </modules>
+    <packaging>pom</packaging>
+
     <properties>
         <ruoyi.version>4.8.0</ruoyi.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -238,24 +248,8 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
-
         </dependencies>
     </dependencyManagement>
-
-    <modules>
-        <module>ruoyi-admin</module>
-        <module>ruoyi-framework</module>
-        <module>ruoyi-system</module>
-        <module>ruoyi-quartz</module>
-        <module>ruoyi-generator</module>
-        <module>ruoyi-common</module>
-    </modules>
-    <packaging>pom</packaging>
-
-
-    <dependencies>
-
-    </dependencies>
 
     <build>
         <plugins>

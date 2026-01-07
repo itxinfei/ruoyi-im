@@ -9,14 +9,14 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
  * 
  * @author ruoyi
  */
-@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class }, scanBasePackages = {"com.ruoyi.system", "com.ruoyi.web", "com.ruoyi.common", "com.ruoyi.framework"})
+@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class }, scanBasePackages = {"com.ruoyi.system", "com.ruoyi.web", "com.ruoyi.common", "com.ruoyi.framework", "com.ruoyi.quartz"})
 public class RuoYiApplication
 {
     public static void main(String[] args)
     {
         // System.setProperty("spring.devtools.restart.enabled", "false");
         SpringApplication.run(RuoYiApplication.class, args);
-        System.out.println("(♥◠‿◠)ﾉﾞ  IM若依--启动成功   ლ(´ڡ`ლ)ﾞ  \n" +
+        System.out.println("(♥◠‿◠)ﾉﾞ  IM-admin 若依管理系统--启动成功   ლ(´ڡ`ლ)ﾞ  \n" +
                 " .-------.       ____     __        \n" +
                 " |  _ _   \\      \\   \\   /  /    \n" +
                 " | ( ' )  |       \\  _. /  '       \n" +
