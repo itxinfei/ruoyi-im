@@ -1,6 +1,6 @@
 package com.ruoyi.web.service.impl;
 
-import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.mapper.ImUserMapper;
 import com.ruoyi.web.service.ImUserService;
 import org.springframework.beans.factory.annotation.Autowired;

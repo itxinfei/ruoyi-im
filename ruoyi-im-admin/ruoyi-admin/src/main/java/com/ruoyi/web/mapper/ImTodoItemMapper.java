@@ -1,6 +1,6 @@
 package com.ruoyi.web.mapper;
 
-import com.ruoyi.im.domain.ImTodoItem;
+import com.ruoyi.web.domain.ImTodoItem;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;

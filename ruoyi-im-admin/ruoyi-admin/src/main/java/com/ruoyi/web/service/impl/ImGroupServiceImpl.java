@@ -1,7 +1,7 @@
 package com.ruoyi.web.service.impl;
 
-import com.ruoyi.im.domain.ImGroup;
-import com.ruoyi.im.domain.ImGroupMember;
+import com.ruoyi.web.domain.ImGroup;
+import com.ruoyi.web.domain.ImGroupMember;
 import com.ruoyi.web.mapper.ImGroupMapper;
 import com.ruoyi.web.service.ImGroupService;
 import org.springframework.beans.factory.annotation.Autowired;

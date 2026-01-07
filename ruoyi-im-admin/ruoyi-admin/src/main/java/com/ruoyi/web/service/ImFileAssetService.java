@@ -1,6 +1,6 @@
 package com.ruoyi.web.service;
 
-import com.ruoyi.im.domain.ImFileAsset;
+import com.ruoyi.web.domain.ImFileAsset;
 import java.util.List;
 import java.util.Map;
 

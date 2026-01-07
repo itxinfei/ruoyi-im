@@ -1,6 +1,7 @@
 package com.ruoyi.web.mapper;
 
-import com.ruoyi.im.domain.ImGroup;
+import com.ruoyi.web.domain.ImGroup;
+import com.ruoyi.web.domain.ImGroupMember;
 import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 

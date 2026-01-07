@@ -1,6 +1,6 @@
 package com.ruoyi.web.mapper;
 
-import com.ruoyi.im.domain.ImMessage;
+import com.ruoyi.web.domain.ImMessage;
 import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 

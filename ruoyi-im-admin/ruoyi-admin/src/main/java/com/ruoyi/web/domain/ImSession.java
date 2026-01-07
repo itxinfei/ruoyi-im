@@ -1,8 +1,5 @@
-package com.ruoyi.im.domain;
+package com.ruoyi.web.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serializable;
@@ -14,17 +11,15 @@ import java.time.LocalDateTime;
  * 该实体已被 ImConversationMember 替代
  * 请使用 ImConversationMember 进行会话成员管理
  *
- * @deprecated 使用 {@link ImConversationMember} 替代
+ * @deprecated 使用 {@link } 替代
  * @author ruoyi
  */
 @Deprecated
-@TableName("im_session")
 public class ImSession implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /** 会话ID，主键，自增 */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /** 会话类型: private=私聊, group=群聊 */

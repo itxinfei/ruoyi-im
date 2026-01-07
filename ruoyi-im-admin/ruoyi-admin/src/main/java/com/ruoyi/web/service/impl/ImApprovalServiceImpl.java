@@ -1,6 +1,6 @@
 package com.ruoyi.web.service.impl;
 
-import com.ruoyi.im.domain.ImApproval;
+import com.ruoyi.web.domain.ImApproval;
 import com.ruoyi.web.mapper.ImApprovalMapper;
 import com.ruoyi.web.service.ImApprovalService;
 import org.springframework.beans.factory.annotation.Autowired;

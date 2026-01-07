@@ -14,7 +14,7 @@ import org.mybatis.spring.annotation.MapperScan;
 public class ImApplication {
     public static void main(String[] args) {
         SpringApplication.run(ImApplication.class, args);
-        System.out.println("(♥◠‿◠)ﾉﾞ  IM模块启动成功   ლ(´∀`ლ)\n" +
+        System.out.println("(♥◠‿◠)ﾉﾞ  ruoyi-im-api 模块启动成功   ლ(´∀`ლ)\n" +
                 " .-------.       ____     __        \n" +
                 " |  _ _   \\      \\   \\   /  /    \n" +
                 " | ( ' )  |       \\  _. /  '       \n" +

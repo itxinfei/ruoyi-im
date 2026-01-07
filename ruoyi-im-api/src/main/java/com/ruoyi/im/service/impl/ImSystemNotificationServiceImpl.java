@@ -107,4 +107,25 @@ public class ImSystemNotificationServiceImpl implements ImSystemNotificationServ
     public void clearAllNotifications(Long userId) {
         notificationMapper.deleteAllByReceiverId(userId);
     }
+
+    @Override
+    public List<ImSystemNotification> selectNotificationList(ImSystemNotification notification) {
+        return notificationMapper.selectImSystemNotificationList(notification);
+    }
+
+    @Override
+    public int insertNotification(ImSystemNotification notification) {
+        notification.setCreateTime(LocalDateTime.now());
+        return notificationMapper.insertImSystemNotification(notification);
+    }
+
+    @Override
+    public int updateNotification(ImSystemNotification notification) {
+        return notificationMapper.updateImSystemNotification(notification);
+    }
+
+    @Override
+    public int deleteNotificationByIds(Long[] ids) {
+        return notificationMapper.deleteImSystemNotificationByIds(ids);
+    }
 }

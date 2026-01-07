@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.web.mapper.ImGroupMapper">
     
-    <resultMap type="com.ruoyi.im.domain.ImGroup" id="ImGroupResult">
+    <resultMap type="com.ruoyi.web.domain.ImGroup" id="ImGroupResult">
         <id property="id" column="id"/>
         <result property="name" column="name"/>
         <result property="avatar" column="avatar"/>
@@ -13,7 +13,7 @@
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
-    <select id="selectImGroupList" parameterType="com.ruoyi.im.domain.ImGroup" resultMap="ImGroupResult">
+    <select id="selectImGroupList" parameterType="com.ruoyi.web.domain.ImGroup" resultMap="ImGroupResult">
         select id, name, avatar, description, owner_id, status, create_time, update_time
         from im_group
         <where>
@@ -28,12 +28,12 @@
         where id = #{id}
     </select>
 
-    <insert id="insertImGroup" parameterType="com.ruoyi.im.domain.ImGroup" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertImGroup" parameterType="com.ruoyi.web.domain.ImGroup" useGeneratedKeys="true" keyProperty="id">
         insert into im_group (name, avatar, description, owner_id, status, create_time, update_time)
         values (#{name}, #{avatar}, #{description}, #{ownerId}, #{status}, #{createTime}, #{updateTime})
     </insert>
 
-    <update id="updateImGroup" parameterType="com.ruoyi.im.domain.ImGroup">
+    <update id="updateImGroup" parameterType="com.ruoyi.web.domain.ImGroup">
         update im_group
         <trim prefix="SET" suffixOverrides=",">
             <if test="name != null and name != ''">name = #{name},</if>
@@ -56,7 +56,7 @@
         </foreach>
     </delete>
 
-    <select id="selectGroupMembersByGroupId" parameterType="Long" resultMap="com.ruoyi.im.domain.ImGroupMember">
+    <select id="selectGroupMembersByGroupId" parameterType="Long" resultMap="com.ruoyi.web.domain.ImGroupMember">
         select * from im_group_member where group_id = #{groupId}
     </select>
 

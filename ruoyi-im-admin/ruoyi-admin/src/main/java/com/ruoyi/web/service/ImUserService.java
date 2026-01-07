@@ -1,6 +1,6 @@
 package com.ruoyi.web.service;
 
-import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.web.domain.ImUser;
 import java.util.List;
 
 /**

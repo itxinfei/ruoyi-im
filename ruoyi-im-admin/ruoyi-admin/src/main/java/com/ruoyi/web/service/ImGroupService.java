@@ -1,7 +1,7 @@
 package com.ruoyi.web.service;
 
-import com.ruoyi.im.domain.ImGroup;
-import com.ruoyi.im.domain.ImGroupMember;
+import com.ruoyi.web.domain.ImGroup;
+import com.ruoyi.web.domain.ImGroupMember;
 import java.util.List;
 
 /**

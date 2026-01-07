@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.web.mapper.ImApplicationMapper">
     
-    <resultMap type="com.ruoyi.im.domain.ImApplication" id="ImApplicationResult">
+    <resultMap type="com.ruoyi.web.domain.ImApplication" id="ImApplicationResult">
         <id property="id" column="id"/>
         <result property="name" column="name"/>
         <result property="code" column="code"/>
@@ -27,7 +27,7 @@
         select * from im_application where id = #{id}
     </select>
 
-    <insert id="insertApplication" parameterType="com.ruoyi.im.domain.ImApplication" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertApplication" parameterType="com.ruoyi.web.domain.ImApplication" useGeneratedKeys="true" keyProperty="id">
         insert into im_application (name, code, category, app_type, app_url, icon, is_visible)
         values (#{name}, #{code}, #{category}, #{appType}, #{appUrl}, #{icon}, 1)
     </insert>

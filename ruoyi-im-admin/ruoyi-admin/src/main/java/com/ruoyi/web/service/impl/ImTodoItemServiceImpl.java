@@ -1,6 +1,6 @@
 package com.ruoyi.web.service.impl;
 
-import com.ruoyi.im.domain.ImTodoItem;
+import com.ruoyi.web.domain.ImTodoItem;
 import com.ruoyi.web.mapper.ImTodoItemMapper;
 import com.ruoyi.web.service.ImTodoItemService;
 import org.springframework.beans.factory.annotation.Autowired;

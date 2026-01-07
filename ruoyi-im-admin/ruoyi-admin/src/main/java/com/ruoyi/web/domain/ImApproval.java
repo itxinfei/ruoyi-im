@@ -1,10 +1,6 @@
-package com.ruoyi.im.domain;
+package com.ruoyi.web.domain;
 
-import lombok.Data;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.ruoyi.im.common.BaseEntity;
+import com.ruoyi.common.core.domain.BaseEntity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -17,8 +13,6 @@ import java.time.LocalDateTime;
  *
  * @author ruoyi
  */
-@TableName("im_approval")
-@Data
 public class ImApproval extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -26,7 +20,6 @@ public class ImApproval extends BaseEntity implements Serializable {
     /**
      * 审批ID，主键，唯一标识审批实例
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -72,4 +65,77 @@ public class ImApproval extends BaseEntity implements Serializable {
      * 完成时间，审批流程的完成时间
      */
     private LocalDateTime completedTime;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getTemplateId() {
+        return templateId;
+    }
+
+    public void setTemplateId(Long templateId) {
+        this.templateId = templateId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Long getApplicantId() {
+        return applicantId;
+    }
+
+    public void setApplicantId(Long applicantId) {
+        this.applicantId = applicantId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Long getCurrentNodeId() {
+        return currentNodeId;
+    }
+
+    public void setCurrentNodeId(Long currentNodeId) {
+        this.currentNodeId = currentNodeId;
+    }
+
+    public String getFormData() {
+        return formData;
+    }
+
+    public void setFormData(String formData) {
+        this.formData = formData;
+    }
+
+    public String getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(String attachments) {
+        this.attachments = attachments;
+    }
+
+    public LocalDateTime getCompletedTime() {
+        return completedTime;
+    }
+
+    public void setCompletedTime(LocalDateTime completedTime) {
+        this.completedTime = completedTime;
+    }
+
 }

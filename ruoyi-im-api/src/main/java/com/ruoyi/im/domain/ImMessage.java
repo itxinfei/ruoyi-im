@@ -31,6 +31,23 @@ public class ImMessage implements Serializable {
     /** 发送者用户ID，关联到im_user表 */
     private Long senderId;
 
+    /** 接收者用户ID，关联到im_user表 */
+    private Long receiverId;
+
+    /** 父消息ID（用于回复和转发） */
+    private Long parentId;
+
+    /** 消息状态：0正常 1撤回 2删除 */
+    private Integer status;
+
+    /** 发送时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime sendTime;
+
+    /** 撤回时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime revokeTime;
+
     /** 消息类型：TEXT文本 FILE文件 NOTICE通知 RECALL撤回 REPLY回复 FORWARD转发 IMAGE图片 VOICE语音 VIDEO视频 */
     private String type;
 
@@ -90,6 +107,46 @@ public class ImMessage implements Serializable {
 
     public void setSenderId(Long senderId) {
         this.senderId = senderId;
+    }
+
+    public Long getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(Long receiverId) {
+        this.receiverId = receiverId;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getSendTime() {
+        return sendTime;
+    }
+
+    public void setSendTime(LocalDateTime sendTime) {
+        this.sendTime = sendTime;
+    }
+
+    public LocalDateTime getRevokeTime() {
+        return revokeTime;
+    }
+
+    public void setRevokeTime(LocalDateTime revokeTime) {
+        this.revokeTime = revokeTime;
     }
 
     public String getType() {

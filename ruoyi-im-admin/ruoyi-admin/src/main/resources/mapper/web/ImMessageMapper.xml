@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.web.mapper.ImMessageMapper">
     
-    <resultMap type="com.ruoyi.im.domain.ImMessage" id="ImMessageResult">
+    <resultMap type="com.ruoyi.web.domain.ImMessage" id="ImMessageResult">
         <id property="id" column="id"/>
         <result property="conversationId" column="conversation_id"/>
         <result property="senderId" column="sender_id"/>
@@ -12,7 +12,7 @@
         <result property="createTime" column="create_time"/>
     </resultMap>
 
-    <select id="selectImMessageList" parameterType="com.ruoyi.im.domain.ImMessage" resultMap="ImMessageResult">
+    <select id="selectImMessageList" parameterType="com.ruoyi.web.domain.ImMessage" resultMap="ImMessageResult">
         select id, conversation_id, sender_id, content, message_type, status, create_time
         from im_message
         <where>
@@ -42,7 +42,7 @@
         select * from im_message where id = #{id}
     </select>
 
-    <select id="countMessages" parameterType="com.ruoyi.im.domain.ImMessage" resultType="java.lang.Integer">
+    <select id="countMessages" parameterType="com.ruoyi.web.domain.ImMessage" resultType="java.lang.Integer">
         select count(*) from im_message
         <where>
             <if test="conversationId != null"> and conversation_id = #{conversationId} </if>

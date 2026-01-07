@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.web.mapper.ImUserMapper">
     
-    <resultMap type="com.ruoyi.im.domain.ImUser" id="ImUserResult">
+    <resultMap type="com.ruoyi.web.domain.ImUser" id="ImUserResult">
         <id property="id" column="id"/>
         <result property="username" column="username"/>
         <result property="password" column="password"/>
@@ -32,7 +32,7 @@
         where id = #{id}
     </select>
     
-    <select id="selectImUserList" parameterType="com.ruoyi.im.domain.ImUser" resultMap="ImUserResult">
+    <select id="selectImUserList" parameterType="com.ruoyi.web.domain.ImUser" resultMap="ImUserResult">
         <include refid="selectImUserVo"/>
         <where>
             <if test="username != null and username != ''"> and username like concat('%', #{username}, '%') </if>
@@ -43,7 +43,7 @@
         </where>
     </select>
 
-    <insert id="insertImUser" parameterType="com.ruoyi.im.domain.ImUser" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertImUser" parameterType="com.ruoyi.web.domain.ImUser" useGeneratedKeys="true" keyProperty="id">
         insert into im_user
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="username != null">username,</if>
@@ -77,7 +77,7 @@
         </trim>
     </insert>
 
-    <update id="updateImUser" parameterType="com.ruoyi.im.domain.ImUser">
+    <update id="updateImUser" parameterType="com.ruoyi.web.domain.ImUser">
         update im_user
         <trim prefix="SET" suffixOverrides=",">
             <if test="username != null and username != ''">username = #{username},</if>

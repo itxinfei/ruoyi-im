@@ -1,6 +1,6 @@
 package com.ruoyi.web.service;
 
-import com.ruoyi.im.domain.ImSystemNotification;
+import com.ruoyi.web.domain.ImSystemNotification;
 import java.util.List;
 
 /**

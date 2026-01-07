@@ -1,6 +1,6 @@
 package com.ruoyi.web.service.impl;
 
-import com.ruoyi.im.domain.ImFileAsset;
+import com.ruoyi.web.domain.ImFileAsset;
 import com.ruoyi.web.mapper.ImFileAssetMapper;
 import com.ruoyi.web.service.ImFileAssetService;
 import org.springframework.beans.factory.annotation.Autowired;

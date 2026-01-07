@@ -1,6 +1,6 @@
 package com.ruoyi.web.mapper;
 
-import com.ruoyi.im.domain.ImFileAsset;
+import com.ruoyi.web.domain.ImFileAsset;
 import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 import java.util.Map;

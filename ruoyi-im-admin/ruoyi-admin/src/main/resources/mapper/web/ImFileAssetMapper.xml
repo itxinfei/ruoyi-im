@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.web.mapper.ImFileAssetMapper">
     
-    <resultMap type="com.ruoyi.im.domain.ImFileAsset" id="ImFileAssetResult">
+    <resultMap type="com.ruoyi.web.domain.ImFileAsset" id="ImFileAssetResult">
         <id property="id" column="id"/>
         <result property="fileName" column="file_name"/>
         <result property="fileType" column="file_type"/>
@@ -12,7 +12,7 @@
         <result property="createTime" column="create_time"/>
     </resultMap>
 
-    <select id="selectImFileAssetList" parameterType="com.ruoyi.im.domain.ImFileAsset" resultMap="ImFileAssetResult">
+    <select id="selectImFileAssetList" parameterType="com.ruoyi.web.domain.ImFileAsset" resultMap="ImFileAssetResult">
         select id, file_name, file_type, file_size, file_path, uploader_id, create_time
         from im_file_asset
         <where>
@@ -27,12 +27,12 @@
         select * from im_file_asset where id = #{id}
     </select>
 
-    <insert id="insertImFileAsset" parameterType="com.ruoyi.im.domain.ImFileAsset" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertImFileAsset" parameterType="com.ruoyi.web.domain.ImFileAsset" useGeneratedKeys="true" keyProperty="id">
         insert into im_file_asset (file_name, file_type, file_size, file_path, uploader_id, create_time)
         values (#{fileName}, #{fileType}, #{fileSize}, #{filePath}, #{uploaderId}, #{createTime})
     </insert>
 
-    <update id="updateImFileAsset" parameterType="com.ruoyi.im.domain.ImFileAsset">
+    <update id="updateImFileAsset" parameterType="com.ruoyi.web.domain.ImFileAsset">
         update im_file_asset
         <trim prefix="SET" suffixOverrides=",">
             <if test="fileName != null and fileName != ''">file_name = #{fileName},</if>
@@ -52,14 +52,14 @@
         </foreach>
     </delete>
 
-    <select id="countTotalFiles" parameterType="com.ruoyi.im.domain.ImFileAsset" resultType="java.lang.Integer">
+    <select id="countTotalFiles" parameterType="com.ruoyi.web.domain.ImFileAsset" resultType="java.lang.Integer">
         select count(*) from im_file_asset
         <where>
             <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>
         </where>
     </select>
 
-    <select id="countTodayUploads" parameterType="com.ruoyi.im.domain.ImFileAsset" resultType="java.lang.Integer">
+    <select id="countTodayUploads" parameterType="com.ruoyi.web.domain.ImFileAsset" resultType="java.lang.Integer">
         select count(*) from im_file_asset
         where date(create_time) = curdate()
         <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>

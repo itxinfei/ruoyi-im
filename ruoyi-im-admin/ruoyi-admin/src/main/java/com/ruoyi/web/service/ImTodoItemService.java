@@ -1,6 +1,6 @@
 package com.ruoyi.web.service;
 
-import com.ruoyi.im.domain.ImTodoItem;
+import com.ruoyi.web.domain.ImTodoItem;
 import java.util.List;
 
 /**

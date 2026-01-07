@@ -1,6 +1,6 @@
 package com.ruoyi.web.service.impl;
 
-import com.ruoyi.im.domain.ImSession;
+import com.ruoyi.web.domain.ImSession;
 import com.ruoyi.web.mapper.ImSessionMapper;
 import com.ruoyi.web.service.ImSessionService;
 import org.springframework.beans.factory.annotation.Autowired;

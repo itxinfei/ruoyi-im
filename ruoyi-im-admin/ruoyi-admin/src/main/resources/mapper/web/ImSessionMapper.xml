@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.web.mapper.ImSessionMapper">
     
-    <resultMap type="com.ruoyi.im.domain.ImSession" id="ImSessionResult">
+    <resultMap type="com.ruoyi.web.domain.ImSession" id="ImSessionResult">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="token" column="token"/>
@@ -11,7 +11,7 @@
         <result property="lastActiveTime" column="last_active_time"/>
     </resultMap>
 
-    <select id="selectImSessionList" parameterType="com.ruoyi.im.domain.ImSession" resultMap="ImSessionResult">
+    <select id="selectImSessionList" parameterType="com.ruoyi.web.domain.ImSession" resultMap="ImSessionResult">
         select id, user_id, token, status, login_time, last_active_time
         from im_session
         <where>
@@ -25,12 +25,12 @@
         select * from im_session where id = #{id}
     </select>
 
-    <insert id="insertImSession" parameterType="com.ruoyi.im.domain.ImSession" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertImSession" parameterType="com.ruoyi.web.domain.ImSession" useGeneratedKeys="true" keyProperty="id">
         insert into im_session (user_id, token, status, login_time, last_active_time)
         values (#{userId}, #{token}, #{status}, #{loginTime}, #{lastActiveTime})
     </insert>
 
-    <update id="updateImSession" parameterType="com.ruoyi.im.domain.ImSession">
+    <update id="updateImSession" parameterType="com.ruoyi.web.domain.ImSession">
         update im_session
         <trim prefix="SET" suffixOverrides=",">
             <if test="token != null and token != ''">token = #{token},</if>

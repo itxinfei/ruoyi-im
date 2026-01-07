@@ -1,6 +1,6 @@
 package com.ruoyi.web.mapper;
 
-import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.web.domain.ImUser;
 import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 
@@ -66,5 +66,5 @@ public interface ImUserMapper {
     /**
      * 查询用户名是否存在
      */
-    ImUser checkUsernameUnique(String username);
+    Boolean checkUsernameUnique(String username);
 }

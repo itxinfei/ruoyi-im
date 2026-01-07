@@ -5,6 +5,7 @@ import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImGroupMember;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
+import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImGroupMemberService;
@@ -43,6 +44,9 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
 
     @Autowired
     private ImConversationService conversationService;
+
+    @Autowired
+    private ImConversationMapper imConversationMapper;
 
     @Autowired
     private ImGroupMemberService imGroupMemberService;
@@ -236,7 +240,7 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
             return null;
         }
 
-        ImConversation conversation = conversationService.selectImConversationById(request.getConversationId());
+        ImConversation conversation = imConversationMapper.selectById(request.getConversationId());
         if (conversation == null) {
             log.warn("Conversation not found: conversationId={}", request.getConversationId());
             return messageId;

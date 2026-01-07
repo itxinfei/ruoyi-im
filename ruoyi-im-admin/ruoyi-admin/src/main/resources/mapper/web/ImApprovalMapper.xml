@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.web.mapper.ImApprovalMapper">
     
-    <resultMap type="com.ruoyi.im.domain.ImApproval" id="ImApprovalResult">
+    <resultMap type="com.ruoyi.web.domain.ImApproval" id="ImApprovalResult">
         <id property="id" column="id"/>
         <result property="title" column="title"/>
         <result property="type" column="type"/>

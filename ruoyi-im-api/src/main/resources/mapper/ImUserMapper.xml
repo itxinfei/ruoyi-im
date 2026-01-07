@@ -213,7 +213,4 @@
     <select id="countImUsers" resultType="java.lang.Integer">
         select count(*) from im_user
     </select>
-</mapper>ct id="countImUsers" resultType="java.lang.Integer">
-        select count(*) from im_user
-    </select>
 </mapper>

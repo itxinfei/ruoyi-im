@@ -1,6 +1,6 @@
 package com.ruoyi.web.service.impl;
 
-import com.ruoyi.im.domain.ImMessage;
+import com.ruoyi.web.domain.ImMessage;
 import com.ruoyi.web.mapper.ImMessageMapper;
 import com.ruoyi.web.service.ImMessageService;
 import org.springframework.beans.factory.annotation.Autowired;

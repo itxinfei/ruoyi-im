@@ -1,14 +1,11 @@
-package com.ruoyi.im.domain;
+package com.ruoyi.web.domain;
 
-import lombok.Data;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
+
  * 系统通知实体
  *
  * 用于存储IM系统中的系统通知信息，包括系统消息、审批通知、消息提醒等
@@ -17,8 +14,6 @@ import java.time.LocalDateTime;
  *
  * @author ruoyi
  */
-@TableName("im_system_notification")
-@Data
 public class ImSystemNotification implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -26,7 +21,6 @@ public class ImSystemNotification implements Serializable {
     /**
      * 通知ID，主键，唯一标识通知
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -79,4 +73,85 @@ public class ImSystemNotification implements Serializable {
      * 创建时间，通知创建的时间
      */
     private LocalDateTime createTime;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(Long receiverId) {
+        this.receiverId = receiverId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public Long getRelatedId() {
+        return relatedId;
+    }
+
+    public void setRelatedId(Long relatedId) {
+        this.relatedId = relatedId;
+    }
+
+    public String getRelatedType() {
+        return relatedType;
+    }
+
+    public void setRelatedType(String relatedType) {
+        this.relatedType = relatedType;
+    }
+
+    public Boolean getIsRead() {
+        return isRead;
+    }
+
+    public void setIsRead(Boolean isRead) {
+        this.isRead = isRead;
+    }
+
+    public LocalDateTime getReadTime() {
+        return readTime;
+    }
+
+    public void setReadTime(LocalDateTime readTime) {
+        this.readTime = readTime;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
 }

@@ -1,6 +1,6 @@
 package com.ruoyi.web.service.impl;
 
-import com.ruoyi.im.domain.ImSystemNotification;
+import com.ruoyi.web.domain.ImSystemNotification;
 import com.ruoyi.web.mapper.ImSystemNotificationMapper;
 import com.ruoyi.web.service.ImSystemNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
