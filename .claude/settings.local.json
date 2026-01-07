@@ -23,7 +23,22 @@
       "Bash(curl:*)",
       "Bash(netstat:*)",
       "Bash(tasklist:*)",
-      "Bash(mvn package:*)"
+      "Bash(mvn package:*)",
+      "Bash(mvn spring-boot:run:*)",
+      "Bash(powershell:*)",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" clean package -DskipTests)",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" package -DskipTests)",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" compile -DskipTests)",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" spring-boot:run)",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" install -DskipTests)",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" spring-boot:run -Dspring-boot.run.fork=false)",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" spring-boot:run -pl ruoyi-admin -am)",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" clean compile -pl ruoyi-quartz)",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" clean compile -DskipTests)",
+      "Bash(java:*)",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" dependency:build-classpath -pl ruoyi-admin)",
+      "Bash(unzip:*)",
+      "Bash(rm:*)"
     ]
   }
 }
