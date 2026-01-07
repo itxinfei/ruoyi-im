@@ -82,7 +82,7 @@ spring:
 # MyBatis
 mybatis:
   # 搜索指定包别名
-  typeAliasesPackage: com.ruoyi.system.domain, com.ruoyi.web.domain, com.ruoyi.im.domain
+  typeAliasesPackage: com.ruoyi.common.core.domain.entity, com.ruoyi.system.domain, com.ruoyi.web.domain
   # 配置mapper的扫描，找到所有的mapper.xml映射文件
   mapperLocations: classpath*:mapper/system/**/*Mapper.xml, classpath*:mapper/web/**/*Mapper.xml
   # 加载全局的配置文件

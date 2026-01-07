@@ -16,7 +16,13 @@
       "Bash(dir:*)",
       "Bash(mvn dependency:tree:*)",
       "Bash(mvn clean install:*)",
-      "Bash(mvn clean:*)"
+      "Bash(mvn clean:*)",
+      "Bash(jar:*)",
+      "Bash(python:*)",
+      "Bash(timeout:*)",
+      "Bash(curl:*)",
+      "Bash(netstat:*)",
+      "Bash(tasklist:*)"
     ]
   }
 }

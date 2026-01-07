@@ -144,14 +144,11 @@ public class ShiroConfig
         {
             try
             {
-                org.springframework.core.io.Resource resource = SpringUtils.getBean(org.springframework.core.io.ResourceLoader.class).getResource("classpath:ehcache/ehcache-shiro.xml");
-                InputStream inputStream = resource.getInputStream();
-                byte[] b = IOUtils.toByteArray(inputStream);
-                InputStream in = new ByteArrayInputStream(b);
+                InputStream inputStream = getCacheManagerConfigFileInputStream();
                 em.setCacheManager(new net.sf.ehcache.CacheManager(in));
                 return em;
             }
-            catch (IOException e)
+                return em;
             {
                 throw new ConfigurationException("Unable to obtain input stream for cacheManagerConfigFile [classpath:ehcache/ehcache-shiro.xml]", e);
             }
