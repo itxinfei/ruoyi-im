@@ -4,7 +4,7 @@
       <span class="panel-title">通知</span>
       <div class="header-actions">
         <el-badge :value="unreadCount" :hidden="unreadCount === 0" />
-        <el-button link type="primary" size="small" @click="markAllRead" v-if="unreadCount > 0">
+        <el-button v-if="unreadCount > 0" link type="primary" size="small" @click="markAllRead">
           全部已读
         </el-button>
       </div>
@@ -33,7 +33,7 @@
       </el-tab-pane>
     </el-tabs>
 
-    <div class="panel-content" v-loading="loading">
+    <div v-loading="loading" class="panel-content">
       <div class="notification-list">
         <div
           v-for="item in notificationList"
@@ -70,7 +70,13 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Bell, ChatDotRound, Document, Warning, Delete } from '@element-plus/icons-vue'
-import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification } from '@/api/im/notification'
+import {
+  getNotifications,
+  getUnreadCount,
+  markAsRead,
+  markAllAsRead,
+  deleteNotification,
+} from '@/api/im/notification'
 
 const props = defineProps({
   visible: Boolean,
@@ -113,7 +119,7 @@ const loadUnreadCount = async () => {
   }
 }
 
-const handleNotificationClick = async (item) => {
+const handleNotificationClick = async item => {
   if (!item.isRead) {
     try {
       await markAsRead(item.id)
@@ -134,7 +140,7 @@ const handleNavigation = (type, id) => {
   console.log('跳转:', type, id)
 }
 
-const handleDelete = async (item) => {
+const handleDelete = async item => {
   try {
     await deleteNotification(item.id)
     notificationList.value = notificationList.value.filter(n => n.id !== item.id)
@@ -165,7 +171,7 @@ const viewAll = () => {
   // 跳转到通知页面
 }
 
-const getTypeIcon = (type) => {
+const getTypeIcon = type => {
   const map = {
     SYSTEM: Warning,
     APPROVAL: Document,
@@ -174,7 +180,7 @@ const getTypeIcon = (type) => {
   return map[type] || Bell
 }
 
-const formatTime = (time) => {
+const formatTime = time => {
   if (!time) return ''
   const date = new Date(time)
   const now = new Date()
@@ -192,12 +198,15 @@ watch(activeTab, () => {
   loadNotifications()
 })
 
-watch(() => props.visible, (visible) => {
-  if (visible) {
-    loadNotifications()
-    loadUnreadCount()
+watch(
+  () => props.visible,
+  visible => {
+    if (visible) {
+      loadNotifications()
+      loadUnreadCount()
+    }
   }
-})
+)
 
 onMounted(() => {
   loadUnreadCount()

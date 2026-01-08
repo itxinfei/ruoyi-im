@@ -100,6 +100,16 @@ export default [
         },
       },
       {
+        path: 'drive',
+        redirect: '/im/file',
+        meta: {
+          title: '钉盘',
+          icon: 'file',
+          keepAlive: false,
+          activeMenu: '/im/file',
+        },
+      },
+      {
         path: 'approval',
         name: 'Approval',
         component: () => import('@/views/im/approval/index.vue'),

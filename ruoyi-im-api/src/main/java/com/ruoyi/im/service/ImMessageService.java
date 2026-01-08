@@ -1,6 +1,7 @@
 package com.ruoyi.im.service;
 
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
+import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
 
 import java.util.List;
@@ -70,4 +71,26 @@ public interface ImMessageService {
      * @param messageIds 消息ID列表
      */
     void markAsRead(Long conversationId, Long userId, List<Long> messageIds);
+
+    /**
+     * 搜索消息
+     * 支持关键词搜索、时间范围筛选、消息类型筛选等
+     *
+     * @param conversationId 会话ID（可选，为空则搜索所有会话）
+     * @param keyword 搜索关键词（可选）
+     * @param messageType 消息类型（可选）
+     * @param senderId 发送者ID（可选）
+     * @param startTime 开始时间（可选）
+     * @param endTime 结束时间（可选）
+     * @param pageNum 页码
+     * @param pageSize 每页数量
+     * @param includeRevoked 是否包含撤回的消息
+     * @param exactMatch 是否精确匹配
+     * @param userId 当前用户ID
+     * @return 搜索结果
+     */
+    ImMessageSearchResultVO searchMessages(Long conversationId, String keyword, String messageType,
+                                           Long senderId, java.time.LocalDateTime startTime,
+                                           java.time.LocalDateTime endTime, Integer pageNum, Integer pageSize,
+                                           Boolean includeRevoked, Boolean exactMatch, Long userId);
 }

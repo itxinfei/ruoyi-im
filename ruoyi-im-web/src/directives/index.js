@@ -6,7 +6,7 @@ import { ElMessage } from 'element-plus'
 
 export default {
   mounted(el, binding) {
-    const handleClick = (e) => {
+    const handleClick = e => {
       el.classList.add('clicking')
       setTimeout(() => {
         el.classList.remove('clicking')

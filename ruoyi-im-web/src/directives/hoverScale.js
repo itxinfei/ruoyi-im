@@ -8,7 +8,7 @@ const hoverScale = {
     el.removeEventListener('mouseenter', handleMouseEnter)
     el.removeEventListener('mouseleave', handleMouseLeave)
     el.style.transform = ''
-  }
+  },
 }
 
 function handleMouseEnter(e) {

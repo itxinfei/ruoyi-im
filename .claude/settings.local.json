@@ -42,7 +42,17 @@
       "Bash(findstr:*)",
       "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" dependency:tree -pl ruoyi-admin)",
       "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" clean package -DskipTests -q)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" package -DskipTests -q)",
+      "mcp__filesystem__edit_file",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" spring-boot:run -pl ruoyi-im-admin/ruoyi-admin -Dspring-boot.run.fork=false)",
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" clean compile -DskipTests -q)",
+      "WebSearch",
+      "mcp__puppeteer__puppeteer_navigate",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "mcp__filesystem__directory_tree",
+      "Bash(mvn:*)",
+      "Bash(npm install)"
     ]
   }
 }

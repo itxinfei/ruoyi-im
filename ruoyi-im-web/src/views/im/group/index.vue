@@ -232,17 +232,19 @@ const getList = async () => {
       const data = response.data ?? []
       // 后端返回的 ImGroupVO 字段需要映射到前端期望的字段：
       // id -> groupId, name -> groupName, memberLimit -> maxMemberCount
-      groupList.value = Array.isArray(data) ? data.map(g => ({
-        groupId: g.id,
-        groupName: g.name,
-        description: g.description,
-        type: g.type === 'PRIVATE' ? '0' : (g.type === 'PUBLIC' ? '1' : g.type),
-        memberCount: g.memberCount,
-        maxMemberCount: g.memberLimit,
-        status: g.status === 'NORMAL' ? '0' : '1',
-        announcement: g.notice,
-        ...g, // 保留原始字段
-      })) : []
+      groupList.value = Array.isArray(data)
+        ? data.map(g => ({
+            groupId: g.id,
+            groupName: g.name,
+            description: g.description,
+            type: g.type === 'PRIVATE' ? '0' : g.type === 'PUBLIC' ? '1' : g.type,
+            memberCount: g.memberCount,
+            maxMemberCount: g.memberLimit,
+            status: g.status === 'NORMAL' ? '0' : '1',
+            announcement: g.notice,
+            ...g, // 保留原始字段
+          }))
+        : []
       total.value = Array.isArray(data) ? data.length : 0
     } else {
       groupList.value = []
@@ -299,7 +301,7 @@ const handleEdit = async row => {
       form.groupId = data.id
       form.groupName = data.name
       form.description = data.description
-      form.type = data.type === 'PRIVATE' ? '0' : (data.type === 'PUBLIC' ? '1' : data.type)
+      form.type = data.type === 'PRIVATE' ? '0' : data.type === 'PUBLIC' ? '1' : data.type
       form.maxMemberCount = data.memberLimit
       form.joinAuth = '1' // 默认需要验证
       form.status = data.status === 'NORMAL' ? '0' : '1'

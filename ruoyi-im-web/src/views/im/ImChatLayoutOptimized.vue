@@ -1255,11 +1255,7 @@
         <span>复制</span>
       </div>
       <!-- 撤回：仅自己发送且在2分钟内的消息 -->
-      <div
-        v-if="canRecallMessage(selectedMessage)"
-        class="menu-item"
-        @click="recallMessage"
-      >
+      <div v-if="canRecallMessage(selectedMessage)" class="menu-item" @click="recallMessage">
         <el-icon><RefreshLeft /></el-icon>
         <span>撤回</span>
       </div>
@@ -2854,11 +2850,16 @@ const switchModule = moduleKey => {
   activeModule.value = moduleKey
   // 只更新URL用于状态保持，不触发路由导航
   // 使用replace避免产生历史记录
-  const validRoutes = ['chat', 'contacts']
+  const validRoutes = ['chat', 'contacts', 'drive']
   if (validRoutes.includes(moduleKey)) {
-    router.push(`/im/${moduleKey}`)
+    // 钉盘模块跳转到文件管理页面
+    if (moduleKey === 'drive') {
+      router.push('/im/file')
+    } else {
+      router.push(`/im/${moduleKey}`)
+    }
   } else {
-    // 工作台和钉盘是内嵌模块，不更新路由
+    // 工作台是内嵌模块，不更新路由
     // 只更新浏览器URL状态（可选）
     window.history.replaceState(null, '', `/im/${moduleKey}`)
   }

@@ -11,7 +11,7 @@ export default {
     return request({
       url: '/api/im/conversation/list',
       method: 'get',
-      params
+      params,
     })
   },
 
@@ -21,7 +21,7 @@ export default {
   get(id) {
     return request({
       url: `/api/im/conversation/${id}`,
-      method: 'get'
+      method: 'get',
     })
   },
 
@@ -32,7 +32,7 @@ export default {
     return request({
       url: '/api/im/conversation/create',
       method: 'post',
-      data
+      data,
     })
   },
 
@@ -43,7 +43,7 @@ export default {
     return request({
       url: `/api/im/conversation/${id}`,
       method: 'put',
-      data
+      data,
     })
   },
 
@@ -53,7 +53,7 @@ export default {
   delete(id) {
     return request({
       url: `/api/im/conversation/${id}`,
-      method: 'delete'
+      method: 'delete',
     })
   },
 
@@ -64,7 +64,7 @@ export default {
     return request({
       url: `/api/im/conversation/${id}/pinned`,
       method: 'put',
-      params: { pinned }
+      params: { pinned },
     })
   },
 
@@ -75,7 +75,7 @@ export default {
     return request({
       url: `/api/im/conversation/${id}/muted`,
       method: 'put',
-      params: { muted }
+      params: { muted },
     })
   },
 
@@ -86,7 +86,7 @@ export default {
     return request({
       url: '/api/im/conversation/search',
       method: 'get',
-      params: { keyword }
+      params: { keyword },
     })
   },
 
@@ -96,7 +96,7 @@ export default {
   markAsRead(id) {
     return request({
       url: `/api/im/conversation/${id}/markAsRead`,
-      method: 'put'
+      method: 'put',
     })
   },
 
@@ -106,7 +106,7 @@ export default {
   getTotalUnreadCount() {
     return request({
       url: '/api/im/conversation/unreadCount',
-      method: 'get'
+      method: 'get',
     })
   },
 
@@ -116,7 +116,7 @@ export default {
   createPrivate(peerUserId) {
     return this.create({
       type: 'PRIVATE',
-      targetId: peerUserId
+      targetId: peerUserId,
     })
   },
 
@@ -126,7 +126,7 @@ export default {
   createGroup(data) {
     return this.create({
       type: 'GROUP',
-      ...data
+      ...data,
     })
-  }
+  },
 }

@@ -58,10 +58,7 @@
           </div>
         </div>
 
-        <el-empty
-          v-if="currentContacts.length === 0"
-          :description="emptyDescription"
-        />
+        <el-empty v-if="currentContacts.length === 0" :description="emptyDescription" />
       </div>
     </div>
 

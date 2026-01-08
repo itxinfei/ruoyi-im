@@ -3,7 +3,7 @@
     <!-- 顶部概览卡片 -->
     <div class="overview-section">
       <el-row :gutter="16">
-        <el-col :span="6" v-for="item in overviewStats" :key="item.key">
+        <el-col v-for="item in overviewStats" :key="item.key" :span="6">
           <div class="stat-card" :class="item.className">
             <div class="stat-icon" :style="{ backgroundColor: item.color }">
               <el-icon :size="24"><component :is="item.icon" /></el-icon>
@@ -24,7 +24,9 @@
         <div class="content-card">
           <div class="card-header">
             <span class="card-title">待办事项</span>
-            <el-button link type="primary" :icon="Plus" @click="showAddTodoDialog">新建待办</el-button>
+            <el-button link type="primary" :icon="Plus" @click="showAddTodoDialog"
+              >新建待办</el-button
+            >
           </div>
           <div class="todo-list">
             <div
@@ -34,14 +36,11 @@
               :class="{ completed: todo.isCompleted }"
             >
               <div class="todo-checkbox">
-                <el-checkbox
-                  :model-value="todo.isCompleted"
-                  @change="handleTodoComplete(todo)"
-                />
+                <el-checkbox :model-value="todo.isCompleted" @change="handleTodoComplete(todo)" />
               </div>
               <div class="todo-content">
                 <div class="todo-title">{{ todo.title }}</div>
-                <div class="todo-desc" v-if="todo.description">{{ todo.description }}</div>
+                <div v-if="todo.description" class="todo-desc">{{ todo.description }}</div>
               </div>
               <div class="todo-actions">
                 <el-tag :type="getPriorityType(todo.priority)" size="small">
@@ -111,21 +110,48 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Document, ChatDotRound, Timer, Bell, Plus, Delete } from '@element-plus/icons-vue'
 import {
-  Document,
-  ChatDotRound,
-  Timer,
-  Bell,
-  Plus,
-  Delete,
-} from '@element-plus/icons-vue'
-import { getWorkbenchOverview, getTodos, createTodo, completeTodo, deleteTodo } from '@/api/im/workbench'
+  getWorkbenchOverview,
+  getTodos,
+  createTodo,
+  completeTodo,
+  deleteTodo,
+} from '@/api/im/workbench'
 
 const overviewStats = ref([
-  { key: 'todo', label: '待办事项', value: 0, icon: Timer, color: '#1677ff', className: 'stat-todo' },
-  { key: 'message', label: '未读消息', value: 0, icon: ChatDotRound, color: '#52c41a', className: 'stat-message' },
-  { key: 'approval', label: '待审批', value: 0, icon: Document, color: '#faad14', className: 'stat-approval' },
-  { key: 'notice', label: '系统通知', value: 0, icon: Bell, color: '#ff4d4f', className: 'stat-notice' },
+  {
+    key: 'todo',
+    label: '待办事项',
+    value: 0,
+    icon: Timer,
+    color: '#1677ff',
+    className: 'stat-todo',
+  },
+  {
+    key: 'message',
+    label: '未读消息',
+    value: 0,
+    icon: ChatDotRound,
+    color: '#52c41a',
+    className: 'stat-message',
+  },
+  {
+    key: 'approval',
+    label: '待审批',
+    value: 0,
+    icon: Document,
+    color: '#faad14',
+    className: 'stat-approval',
+  },
+  {
+    key: 'notice',
+    label: '系统通知',
+    value: 0,
+    icon: Bell,
+    color: '#ff4d4f',
+    className: 'stat-notice',
+  },
 ])
 
 const todoList = ref([])
@@ -194,7 +220,7 @@ const handleAddTodo = async () => {
   }
 }
 
-const handleTodoComplete = async (todo) => {
+const handleTodoComplete = async todo => {
   if (todo.isCompleted) return
   try {
     await completeTodo(todo.id)
@@ -206,7 +232,7 @@ const handleTodoComplete = async (todo) => {
   }
 }
 
-const handleTodoDelete = async (todo) => {
+const handleTodoDelete = async todo => {
   try {
     await deleteTodo(todo.id)
     ElMessage.success('删除成功')
@@ -217,17 +243,17 @@ const handleTodoDelete = async (todo) => {
   }
 }
 
-const handleAppClick = (app) => {
+const handleAppClick = app => {
   // 跳转到对应页面
   console.log('点击应用:', app)
 }
 
-const getPriorityType = (priority) => {
+const getPriorityType = priority => {
   const map = { HIGH: 'danger', NORMAL: 'info', LOW: 'success' }
   return map[priority] || 'info'
 }
 
-const getPriorityText = (priority) => {
+const getPriorityText = priority => {
   const map = { HIGH: '高', NORMAL: '普通', LOW: '低' }
   return map[priority] || '普通'
 }

@@ -653,7 +653,9 @@ const actions = {
       ElMessage.success('消息已撤回')
     } catch (error) {
       console.error('撤回消息失败:', error)
-      ElMessage.error(error?.response?.data?.message || error?.message || '撤回失败，可能已超过撤回时间限制')
+      ElMessage.error(
+        error?.response?.data?.message || error?.message || '撤回失败，可能已超过撤回时间限制'
+      )
       throw error
     }
   },

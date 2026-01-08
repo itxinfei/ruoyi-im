@@ -343,69 +343,12 @@ const tabs = computed(() => [
 const getList = async () => {
   loading.value = true
   try {
-    // 模拟数据
-    fileList.value = [
-      {
-        fileId: 1,
-        fileName: '项目文档.docx',
-        fileType: 'document',
-        fileSize: 1024000,
-        uploadBy: '管理员',
-        uploadTime: '2024-01-15 10:30:00',
-        url: '',
-        updateTime: '2024-01-15 10:30:00',
-      },
-      {
-        fileId: 2,
-        fileName: '产品截图.png',
-        fileType: 'image',
-        fileSize: 512000,
-        uploadBy: '张三',
-        uploadTime: '2024-01-14 15:20:00',
-        url: '',
-        updateTime: '2024-01-14 15:20:00',
-      },
-      {
-        fileId: 3,
-        fileName: '会议录音.mp3',
-        fileType: 'audio',
-        fileSize: 2048000,
-        uploadBy: '李四',
-        uploadTime: '2024-01-13 09:00:00',
-        url: '',
-        updateTime: '2024-01-13 09:00:00',
-      },
-      {
-        fileId: 4,
-        fileName: '演示视频.mp4',
-        fileType: 'video',
-        fileSize: 10485760,
-        uploadBy: '王五',
-        uploadTime: '2024-01-12 14:30:00',
-        url: '',
-        updateTime: '2024-01-12 14:30:00',
-      },
-      {
-        fileId: 5,
-        fileName: '合同模板.pdf',
-        fileType: 'document',
-        fileSize: 2048000,
-        uploadBy: '赵六',
-        uploadTime: '2024-01-11 11:15:00',
-        url: '',
-        updateTime: '2024-01-11 11:15:00',
-      },
-      {
-        fileId: 6,
-        fileName: '设计图.psd',
-        fileType: 'image',
-        fileSize: 5120000,
-        uploadBy: '孙七',
-        uploadTime: '2024-01-10 16:45:00',
-        url: '',
-        updateTime: '2024-01-10 16:45:00',
-      },
-    ]
+    const response = await listFile({})
+    if (response.code === 200 || response.success) {
+      fileList.value = response.data || response.rows || []
+    } else {
+      fileList.value = []
+    }
   } catch (error) {
     console.error('获取文件列表失败:', error)
     fileList.value = []

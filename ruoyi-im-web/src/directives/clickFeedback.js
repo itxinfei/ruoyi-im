@@ -6,7 +6,7 @@ const clickFeedback = {
   },
   unmounted(el) {
     el.removeEventListener('click', handleClick)
-  }
+  },
 }
 
 function handleClick(e) {
@@ -24,20 +24,20 @@ function handleClick(e) {
     margin-left: -50px;
     margin-top: -50px;
   `
-  
+
   const rect = e.currentTarget.getBoundingClientRect()
   const size = Math.max(rect.width, rect.height)
   ripple.style.width = ripple.style.height = size + 'px'
-  
+
   e.currentTarget.style.position = 'relative'
   e.currentTarget.style.overflow = 'hidden'
   e.currentTarget.appendChild(ripple)
-  
+
   requestAnimationFrame(() => {
     ripple.style.transform = 'scale(2)'
     ripple.style.opacity = '0'
   })
-  
+
   setTimeout(() => {
     if (ripple.parentNode) {
       ripple.parentNode.removeChild(ripple)

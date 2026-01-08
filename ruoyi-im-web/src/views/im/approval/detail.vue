@@ -38,7 +38,7 @@
       </div>
 
       <!-- 表单数据 -->
-      <div class="info-card" v-if="detail.formData?.length > 0">
+      <div v-if="detail.formData?.length > 0" class="info-card">
         <div class="card-title">表单内容</div>
         <el-form label-width="120px" class="form-display">
           <el-form-item
@@ -66,7 +66,7 @@
       </div>
 
       <!-- 审批记录 -->
-      <div class="info-card" v-if="detail.records?.length > 0">
+      <div v-if="detail.records?.length > 0" class="info-card">
         <div class="card-title">审批记录</div>
         <el-timeline>
           <el-timeline-item
@@ -77,14 +77,11 @@
           >
             <div class="record-item">
               <div class="record-action">
-                <el-tag
-                  :type="record.action === 'APPROVE' ? 'success' : 'danger'"
-                  size="small"
-                >
+                <el-tag :type="record.action === 'APPROVE' ? 'success' : 'danger'" size="small">
                   {{ record.action === 'APPROVE' ? '通过' : '驳回' }}
                 </el-tag>
               </div>
-              <div class="record-comment" v-if="record.comment">
+              <div v-if="record.comment" class="record-comment">
                 {{ record.comment }}
               </div>
             </div>
@@ -93,23 +90,18 @@
       </div>
 
       <!-- 操作按钮 -->
-      <div class="action-buttons" v-if="detail.approval?.status === 'PENDING' && isApprover">
+      <div v-if="detail.approval?.status === 'PENDING' && isApprover" class="action-buttons">
         <el-button type="success" :icon="Select" @click="handleApprove">通过</el-button>
         <el-button type="danger" :icon="Close" @click="handleReject">驳回</el-button>
       </div>
-      <div class="action-buttons" v-if="detail.approval?.status === 'PENDING' && isApplicant">
+      <div v-if="detail.approval?.status === 'PENDING' && isApplicant" class="action-buttons">
         <el-button :icon="Close" @click="handleCancel">撤回</el-button>
       </div>
     </div>
 
     <!-- 审批意见对话框 -->
     <el-dialog v-model="commentDialogVisible" :title="commentTitle" width="500px">
-      <el-input
-        v-model="commentText"
-        type="textarea"
-        :rows="4"
-        placeholder="请输入审批意见"
-      />
+      <el-input v-model="commentText" type="textarea" :rows="4" placeholder="请输入审批意见" />
       <template #footer>
         <el-button @click="commentDialogVisible = false">取消</el-button>
         <el-button type="primary" @click="handleSubmitComment">确定</el-button>
@@ -188,7 +180,7 @@ const getCurrentStep = () => {
   return completedCount
 }
 
-const getNodeStatus = (status) => {
+const getNodeStatus = status => {
   const map = {
     PENDING: 'wait',
     APPROVED: 'success',
@@ -198,7 +190,7 @@ const getNodeStatus = (status) => {
   return map[status] || 'wait'
 }
 
-const getNodeDescription = (node) => {
+const getNodeDescription = node => {
   if (node.status === 'PENDING') return '待审批'
   if (node.status === 'APPROVED') return '已通过'
   if (node.status === 'REJECTED') return '已驳回'
@@ -252,7 +244,7 @@ const handleSubmitComment = async () => {
   }
 }
 
-const getStatusType = (status) => {
+const getStatusType = status => {
   const map = {
     PENDING: 'warning',
     APPROVED: 'success',
@@ -262,7 +254,7 @@ const getStatusType = (status) => {
   return map[status] || 'info'
 }
 
-const getStatusText = (status) => {
+const getStatusText = status => {
   const map = {
     PENDING: '待审批',
     APPROVED: '已通过',
@@ -272,7 +264,7 @@ const getStatusText = (status) => {
   return map[status] || status
 }
 
-const getStatusIcon = (status) => {
+const getStatusIcon = status => {
   const map = {
     PENDING: Loading,
     APPROVED: CircleCheck,
@@ -282,7 +274,7 @@ const getStatusIcon = (status) => {
   return map[status] || Warning
 }
 
-const getStatusColor = (status) => {
+const getStatusColor = status => {
   const map = {
     PENDING: '#faad14',
     APPROVED: '#52c41a',

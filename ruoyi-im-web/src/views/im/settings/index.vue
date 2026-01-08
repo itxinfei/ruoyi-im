@@ -11,36 +11,42 @@
               <div class="avatar-container">
                 <AvatarUpload
                   :avatar="userInfo.avatar"
-                  :default-text="userInfo.nickName?.charAt(0) || 'U'"
+                  :default-text="userInfo.nickname?.charAt(0) || 'U'"
                   :size="80"
                   @success="handleAvatarSuccess"
                   @error="handleAvatarError"
                 />
               </div>
               <div class="user-basic">
-                <h3>{{ userInfo.nickName || '用户' }}</h3>
+                <h3>{{ userInfo.nickname || '用户' }}</h3>
                 <p class="user-id">ID: {{ userInfo.userId || '-' }}</p>
               </div>
             </div>
 
-            <el-form :model="profileForm" label-width="100px" class="profile-form">
-              <el-form-item label="昵称">
+            <el-form
+              ref="profileFormRef"
+              :model="profileForm"
+              :rules="profileRules"
+              label-width="100px"
+              class="profile-form"
+            >
+              <el-form-item label="昵称" prop="nickname">
                 <el-input v-model="profileForm.nickname" placeholder="请输入昵称" maxlength="20" />
               </el-form-item>
-              <el-form-item label="性别">
+              <el-form-item label="性别" prop="gender">
                 <el-radio-group v-model="profileForm.gender">
                   <el-radio :value="0">男</el-radio>
                   <el-radio :value="1">女</el-radio>
                   <el-radio :value="2">保密</el-radio>
                 </el-radio-group>
               </el-form-item>
-              <el-form-item label="手机号">
+              <el-form-item label="手机号" prop="mobile">
                 <el-input v-model="profileForm.mobile" placeholder="请输入手机号" />
               </el-form-item>
-              <el-form-item label="邮箱">
+              <el-form-item label="邮箱" prop="email">
                 <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
               </el-form-item>
-              <el-form-item label="个性签名">
+              <el-form-item label="个性签名" prop="signature">
                 <el-input
                   v-model="profileForm.signature"
                   type="textarea"
@@ -317,15 +323,16 @@
  * @file 设置页面
  * @description IM系统用户设置功能
  */
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Check } from '@element-plus/icons-vue'
-import { getToken } from '@/utils/auth'
 import AvatarUpload from '@/components/AvatarUpload/index.vue'
 import { getCurrentUserInfo, updateProfile, changePassword } from '@/api/im/user'
 
 const router = useRouter()
+const store = useStore()
 
 // ==================== 响应式状态 ====================
 
@@ -337,6 +344,7 @@ const profileLoading = ref(false)
 const passwordLoading = ref(false)
 
 /** 表单引用 */
+const profileFormRef = ref(null)
 const passwordFormRef = ref(null)
 
 /** 对话框显示控制 */
@@ -346,9 +354,9 @@ const showBlockDialog = ref(false)
 /** 用户信息 */
 const userInfo = ref({
   userId: '10001',
-  nickName: '测试用户',
+  nickname: '测试用户',
   avatar: '',
-  phone: '138****8888',
+  mobile: '138****8888',
   email: 'test@example.com',
   gender: 0,
   signature: '',
@@ -362,6 +370,29 @@ const profileForm = reactive({
   email: '',
   signature: '',
 })
+
+/** 个人资料验证规则 */
+const profileRules = {
+  nickname: [
+    { required: true, message: '请输入昵称', trigger: 'blur' },
+    { min: 2, max: 20, message: '昵称长度在 2 到 20 个字符', trigger: 'blur' },
+  ],
+  email: [
+    {
+      pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      message: '请输入正确的邮箱地址',
+      trigger: 'blur',
+    },
+  ],
+  mobile: [
+    {
+      pattern: /^1[3-9]\d{9}$/,
+      message: '请输入正确的手机号码',
+      trigger: 'blur',
+    },
+  ],
+  signature: [{ max: 100, message: '个性签名不能超过100个字符', trigger: 'blur' }],
+}
 
 /** 密码表单 */
 const passwordForm = reactive({
@@ -446,9 +477,9 @@ const blockedUsers = ref([])
  */
 const initFormData = () => {
   Object.assign(profileForm, {
-    nickname: userInfo.value.nickName,
+    nickname: userInfo.value.nickname,
     gender: userInfo.value.gender,
-    mobile: userInfo.value.phone,
+    mobile: userInfo.value.mobile,
     email: userInfo.value.email,
     signature: userInfo.value.signature,
   })
@@ -459,6 +490,7 @@ const initFormData = () => {
  */
 const handleAvatarSuccess = avatarUrl => {
   userInfo.value.avatar = avatarUrl
+  store.commit('user/SET_AVATAR', avatarUrl)
   ElMessage.success('头像更新成功')
 }
 
@@ -473,11 +505,23 @@ const handleAvatarError = error => {
  * 保存个人资料
  */
 const handleSaveProfile = async () => {
+  if (!profileFormRef.value) return
+
+  try {
+    await profileFormRef.value.validate()
+  } catch (error) {
+    return
+  }
+
   profileLoading.value = true
   try {
     const userId = userInfo.value.userId
     await updateProfile(userId, profileForm)
     Object.assign(userInfo.value, profileForm)
+
+    store.commit('user/SET_NAME', profileForm.nickname)
+    store.commit('user/SET_AVATAR', userInfo.value.avatar)
+
     ElMessage.success('保存成功')
   } catch (error) {
     ElMessage.error(error.message || '保存失败')
@@ -631,9 +675,9 @@ const loadUserInfo = async () => {
     if (response.code === 200 && response.data) {
       userInfo.value = {
         userId: response.data.id,
-        nickName: response.data.nickname,
+        nickname: response.data.nickname,
         avatar: response.data.avatar,
-        phone: response.data.mobile,
+        mobile: response.data.mobile,
         email: response.data.email,
         gender: response.data.gender || 0,
         signature: response.data.signature || '',

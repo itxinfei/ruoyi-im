@@ -1,5 +1,6 @@
 package com.ruoyi.im.dto.message;
 
+import com.ruoyi.im.dto.mention.ImMentionInfo;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -30,6 +31,9 @@ public class ImMessageSendRequest implements Serializable {
 
     /** 扩展数据（JSON格式，用于文件、图片等） */
     private String extra;
+
+    /** @提及信息 */
+    private ImMentionInfo mentionInfo;
 
     public Long getConversationId() {
         return conversationId;
@@ -69,5 +73,13 @@ public class ImMessageSendRequest implements Serializable {
 
     public void setExtra(String extra) {
         this.extra = extra;
+    }
+
+    public ImMentionInfo getMentionInfo() {
+        return mentionInfo;
+    }
+
+    public void setMentionInfo(ImMentionInfo mentionInfo) {
+        this.mentionInfo = mentionInfo;
     }
 }

@@ -40,6 +40,6 @@ export function createImSocket(url, onMessage) {
     close() {
       shouldReconnect = false
       ws && ws.close()
-    }
+    },
   }
 }

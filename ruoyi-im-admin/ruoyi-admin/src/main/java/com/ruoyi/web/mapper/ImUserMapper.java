@@ -67,4 +67,9 @@ public interface ImUserMapper {
      * 查询用户名是否存在
      */
     Boolean checkUsernameUnique(String username);
+
+    /**
+     * 搜索用户
+     */
+    List<ImUser> searchUsers(String keyword);
 }

@@ -3,10 +3,12 @@
     <div class="approval-header">
       <el-tabs v-model="activeTab" @tab-change="handleTabChange">
         <el-tab-pane label="待我审批" name="pending">
-          <span slot="label">
-            待我审批
-            <el-badge v-if="pendingCount > 0" :value="pendingCount" />
-          </span>
+          <template #label>
+            <span>
+              待我审批
+              <el-badge v-if="pendingCount > 0" :value="pendingCount" />
+            </span>
+          </template>
         </el-tab-pane>
         <el-tab-pane label="我发起的" name="my" />
         <el-tab-pane label="我已审批" name="processed" />
@@ -45,7 +47,7 @@
             {{ getStatusText(approval.status) }}
           </el-tag>
         </div>
-        <div class="approval-actions" v-if="activeTab === 'pending'">
+        <div v-if="activeTab === 'pending'" class="approval-actions">
           <el-button type="success" size="small" @click.stop="handleApprove(approval)">
             通过
           </el-button>
@@ -61,7 +63,11 @@
     <el-dialog v-model="createDialogVisible" title="发起审批" width="600px">
       <el-form :model="approvalForm" label-width="100px">
         <el-form-item label="审批模板">
-          <el-select v-model="approvalForm.templateId" placeholder="请选择审批模板" style="width: 100%">
+          <el-select
+            v-model="approvalForm.templateId"
+            placeholder="请选择审批模板"
+            style="width: 100%"
+          >
             <el-option
               v-for="template in templates"
               :key="template.id"
@@ -90,12 +96,7 @@
 
     <!-- 审批意见对话框 -->
     <el-dialog v-model="commentDialogVisible" :title="commentTitle" width="500px">
-      <el-input
-        v-model="commentText"
-        type="textarea"
-        :rows="4"
-        placeholder="请输入审批意见"
-      />
+      <el-input v-model="commentText" type="textarea" :rows="4" placeholder="请输入审批意见" />
       <template #footer>
         <el-button @click="commentDialogVisible = false">取消</el-button>
         <el-button type="primary" @click="handleSubmitComment">确定</el-button>
@@ -212,18 +213,18 @@ const handleCreate = async () => {
   }
 }
 
-const handleViewDetail = (approval) => {
+const handleViewDetail = approval => {
   router.push({ path: `/im/approval/detail/${approval.id}` })
 }
 
-const handleApprove = (approval) => {
+const handleApprove = approval => {
   currentApproval.value = approval
   commentTitle.value = '通过审批'
   commentText.value = ''
   commentDialogVisible.value = true
 }
 
-const handleReject = (approval) => {
+const handleReject = approval => {
   currentApproval.value = approval
   commentTitle.value = '驳回审批'
   commentText.value = ''
@@ -254,7 +255,7 @@ const handleSubmitComment = async () => {
   }
 }
 
-const getStatusType = (status) => {
+const getStatusType = status => {
   const map = {
     PENDING: 'warning',
     APPROVED: 'success',
@@ -264,7 +265,7 @@ const getStatusType = (status) => {
   return map[status] || 'info'
 }
 
-const getStatusText = (status) => {
+const getStatusText = status => {
   const map = {
     PENDING: '待审批',
     APPROVED: '已通过',
@@ -274,7 +275,7 @@ const getStatusText = (status) => {
   return map[status] || status
 }
 
-const getStatusIcon = (status) => {
+const getStatusIcon = status => {
   const map = {
     PENDING: Loading,
     APPROVED: CircleCheck,
@@ -284,7 +285,7 @@ const getStatusIcon = (status) => {
   return map[status] || Warning
 }
 
-const getStatusColor = (status) => {
+const getStatusColor = status => {
   const map = {
     PENDING: '#faad14',
     APPROVED: '#52c41a',

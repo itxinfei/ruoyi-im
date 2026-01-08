@@ -25,6 +25,8 @@ public interface ImUserService {
     int changeStatus(Long id, String status);
     
     int countOnlineUsers();
-    
+
     boolean checkUsernameUnique(String username);
+
+    List<ImUser> searchUsers(String keyword);
 }

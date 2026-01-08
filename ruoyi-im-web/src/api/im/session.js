@@ -34,8 +34,8 @@ export function updateSession(sessionId, data) {
       url: `/api/im/session/${sessionId}/pin`,
       method: 'put',
       params: {
-        pinned: data.pinned ? 1 : 0
-      }
+        pinned: data.pinned ? 1 : 0,
+      },
     })
   }
   // 如果是静音操作
@@ -44,8 +44,8 @@ export function updateSession(sessionId, data) {
       url: `/api/im/session/${sessionId}/mute`,
       method: 'put',
       params: {
-        muted: data.muted ? 1 : 0
-      }
+        muted: data.muted ? 1 : 0,
+      },
     })
   }
   // 其他更新操作
@@ -72,32 +72,32 @@ export function delSession(sessionId) {
 // 批量删除会话 - 后端没有提供此API，需要逐个删除
 export function delSessions(sessionIds) {
   // 使用Promise.all同时删除多个会话
-  const promises = sessionIds.map(id => 
+  const promises = sessionIds.map(id =>
     request({
       url: `/api/im/session/${id}`,
       method: 'delete',
     })
-  );
-  return Promise.all(promises);
+  )
+  return Promise.all(promises)
 }
 
 // 获取会话成员列表 - 群聊相关，应该在群组API中
 export function listSessionMembers(sessionId) {
   // 实际上群成员信息应该通过群组API获取
   // 这里暂时返回空，实际应用中需要调用群组相关API
-  return Promise.resolve({ data: [] });
+  return Promise.resolve({ data: [] })
 }
 
 // 添加会话成员 - 群聊相关，应该在群组API中
 export function addSessionMember(data) {
   // 实际上添加群成员应该通过群组API处理
-  return Promise.resolve({ data: null });
+  return Promise.resolve({ data: null })
 }
 
 // 移除会话成员 - 群聊相关，应该在群组API中
 export function removeSessionMember(sessionId, memberIds) {
   // 实际上移除群成员应该通过群组API处理
-  return Promise.resolve({ data: null });
+  return Promise.resolve({ data: null })
 }
 
 // 获取会话未读消息数 - 使用clearUnread接口的逆向逻辑，实际上应该在会话VO中有未读数
@@ -114,20 +114,20 @@ export function getActiveCount() {
     url: '/api/im/session/list',
     method: 'get',
   }).then(response => {
-    return { data: response.data ? response.data.length : 0 };
-  });
+    return { data: response.data ? response.data.length : 0 }
+  })
 }
 
 // 清理过期会话 - 后端没有此API
 export function cleanExpiredSessions(days) {
   // 这个功能可能由后端定时任务处理，前端不需要直接调用
-  return Promise.resolve({ data: null });
+  return Promise.resolve({ data: null })
 }
 
 // 更新会话活动时间 - 后端没有此API
 export function updateActiveTime(sessionId) {
   // 通常在发送消息或查看会话时自动更新，不需要单独的API
-  return Promise.resolve({ data: null });
+  return Promise.resolve({ data: null })
 }
 
 // 获取会话消息列表 - 实际上应该调用消息模块的API
@@ -142,7 +142,7 @@ export function listSessionMessages(sessionId, params = {}) {
 // 导出会话消息 - 后端没有此API
 export function exportSessionMessages(sessionId) {
   // 这个功能可能需要后端实现，暂时返回空
-  return Promise.resolve({ data: null });
+  return Promise.resolve({ data: null })
 }
 
 // 获取会话统计信息 - 后端没有此API
@@ -151,5 +151,5 @@ export function getSessionStats(sessionId) {
   return request({
     url: `/api/im/session/${sessionId}`,
     method: 'get',
-  });
+  })
 }

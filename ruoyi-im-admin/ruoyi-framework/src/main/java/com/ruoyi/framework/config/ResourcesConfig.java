@@ -46,13 +46,21 @@ public class ResourcesConfig implements WebMvcConfigurer
         /** swagger配置 - SpringDoc */
         registry.addResourceHandler("/swagger-ui/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/springdoc-openapi-ui/");
-        
+
         /** 兼容旧版swagger路径 */
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
-        
+
         registry.addResourceHandler("/v3/api-docs/**")
                 .addResourceLocations("classpath:/META-INF/resources/");
+
+        /** 静态资源映射 */
+        registry.addResourceHandler("/ajax/**").addResourceLocations("classpath:/static/ajax/");
+        registry.addResourceHandler("/css/**").addResourceLocations("classpath:/static/css/");
+        registry.addResourceHandler("/js/**").addResourceLocations("classpath:/static/js/");
+        registry.addResourceHandler("/fonts/**").addResourceLocations("classpath:/static/fonts/");
+        registry.addResourceHandler("/img/**").addResourceLocations("classpath:/static/img/");
+        registry.addResourceHandler("/ruoyi/**").addResourceLocations("classpath:/static/ruoyi/");
     }
 
     /**

@@ -61,15 +61,15 @@ const props = defineProps({
   visible: Boolean,
   statistics: {
     type: Object,
-    default: () => ({})
-  }
+    default: () => ({}),
+  },
 })
 
 const emit = defineEmits(['close'])
 
 const mobilePanelVisible = computed({
   get: () => props.visible,
-  set: val => emit('close', val)
+  set: val => emit('close', val),
 })
 
 const closeMobilePanel = () => {

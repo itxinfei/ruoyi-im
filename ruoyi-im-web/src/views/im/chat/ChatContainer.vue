@@ -9,15 +9,15 @@
           </div>
         </div>
         <div class="header-right">
-          <button @click="startCall" class="icon-btn">语音</button>
-          <button @click="startCall" class="icon-btn">视频</button>
+          <button class="icon-btn" @click="startCall">语音</button>
+          <button class="icon-btn" @click="startCall">视频</button>
         </div>
       </div>
 
       <div ref="messageListRef" class="message-list" @scroll="handleScrollTop">
         <div v-for="msg in displayedMessages" :key="msg.id" class="message">
-          <div class="message-content" v-if="msg.type === 'text'">{{ msg.content }}</div>
-          <div class="message-content" v-else-if="msg.type === 'image'">
+          <div v-if="msg.type === 'text'" class="message-content">{{ msg.content }}</div>
+          <div v-else-if="msg.type === 'image'" class="message-content">
             <img :src="msg.content" class="image-preview" />
           </div>
         </div>
@@ -25,7 +25,13 @@
       </div>
 
       <div class="chat-input-area">
-        <textarea v-model="inputMessage" placeholder="输入消息..." rows="2" @keydown.enter="handleEnterPress" class="message-input"></textarea>
+        <textarea
+          v-model="inputMessage"
+          placeholder="输入消息..."
+          rows="2"
+          class="message-input"
+          @keydown.enter="handleEnterPress"
+        ></textarea>
         <button class="send-btn" @click="sendMessage">发送</button>
       </div>
     </template>
@@ -65,7 +71,7 @@ const sessionAvatar = computed(() => currentSession.value?.avatar || defaultAvat
 const isGroupChat = computed(() => currentSession.value?.type === 'group')
 
 // 监听会话变化，自动滚动到底部
-watch(currentSession, async (newSession) => {
+watch(currentSession, async newSession => {
   if (newSession?.id) {
     await nextTick()
     scrollToBottom()
@@ -95,7 +101,7 @@ async function sendMessage() {
     timestamp: Date.now(),
     time: new Date().toISOString(),
     status: 'sending',
-    isOwn: true
+    isOwn: true,
   }
 
   // 通过 store 发送消息
@@ -106,7 +112,7 @@ async function sendMessage() {
     sessionId: currentSession.value.id,
     type: 'text',
     content: text,
-    tempId // 传递临时ID用于去重
+    tempId, // 传递临时ID用于去重
   })
 }
 
@@ -118,7 +124,7 @@ async function fetchHistory() {
     await store.dispatch('im/loadMessages', {
       sessionId: currentSession.value.id,
       page: 1,
-      pageSize: 20
+      pageSize: 20,
     })
   } finally {
     loadingMore.value = false
@@ -163,17 +169,82 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.chat-content { display: flex; flex-direction: column; height: 100%; }
-.chat-header { display: flex; justify-content: space-between; align-items: center; height: 56px; padding: 0 12px; border-bottom: 1px solid #eee; background: #fff; }
-.header-left { display: flex; align-items: center; gap: 8px; }
-.header-avatar { width: 36px; height: 36px; border-radius: 50%; }
-.chat-title { font-size: 14px; font-weight: 600; }
-.message-list { flex: 1; overflow: auto; padding: 12px; background: #f5f5f5; flex: 1; }
-.message { margin: 6px 0; }
-.message-content { padding: 8px 12px; border-radius: 8px; background: #fff; display: inline-block; }
-.image-preview { max-width: 180px; border-radius: 6px; }
-.chat-input-area { padding: 8px; border-top: 1px solid #eee; display: flex; align-items: center; gap: 8px; }
-.message-input { width: 100%; min-height: 40px; padding: 6px 8px; border: 1px solid #ddd; border-radius: 6px; resize: none; }
-.send-btn { padding: 6px 12px; background: #1677ff; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
-.icon-btn { background: #f0f2f5; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
+.chat-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 56px;
+  padding: 0 12px;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.chat-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.message-list {
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+  background: #f5f5f5;
+  flex: 1;
+}
+.message {
+  margin: 6px 0;
+}
+.message-content {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #fff;
+  display: inline-block;
+}
+.image-preview {
+  max-width: 180px;
+  border-radius: 6px;
+}
+.chat-input-area {
+  padding: 8px;
+  border-top: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.message-input {
+  width: 100%;
+  min-height: 40px;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  resize: none;
+}
+.send-btn {
+  padding: 6px 12px;
+  background: #1677ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.icon-btn {
+  background: #f0f2f5;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
 </style>

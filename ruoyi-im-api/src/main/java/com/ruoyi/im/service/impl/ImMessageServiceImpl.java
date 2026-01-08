@@ -1,13 +1,20 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.im.dto.conversation.ImPrivateConversationCreateRequest;
+import com.ruoyi.im.dto.mention.ImMentionInfo;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.exception.BusinessException;
+import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
+import com.ruoyi.im.service.ImConversationService;
+import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.utils.MessageEncryptionUtil;
+import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +34,16 @@ public class ImMessageServiceImpl implements ImMessageService {
     private ImUserMapper imUserMapper;
 
     @Autowired
+    private ImConversationMapper imConversationMapper;
+
+    @Autowired
+    private ImConversationService imConversationService;
+
+    @Autowired
     private MessageEncryptionUtil encryptionUtil;
+
+    @Autowired
+    private ImMessageMentionService messageMentionService;
 
     @Override
     public Long sendMessage(ImMessageSendRequest request, Long userId) {
@@ -36,8 +52,25 @@ public class ImMessageServiceImpl implements ImMessageService {
             throw new BusinessException("发送者不存在");
         }
 
+        Long conversationId = request.getConversationId();
+
+        if (conversationId == null || conversationId == 0) {
+            if (request.getReceiverId() == null || request.getReceiverId() == 0) {
+                throw new BusinessException("会话ID和接收者ID不能同时为空");
+            }
+
+            ImPrivateConversationCreateRequest createRequest = new ImPrivateConversationCreateRequest();
+            createRequest.setPeerUserId(request.getReceiverId());
+            conversationId = imConversationService.createPrivateConversation(userId, createRequest);
+        } else {
+            ImConversation conversation = imConversationMapper.selectById(conversationId);
+            if (conversation == null) {
+                throw new BusinessException("会话不存在");
+            }
+        }
+
         ImMessage message = new ImMessage();
-        message.setConversationId(request.getConversationId());
+        message.setConversationId(conversationId);
         message.setSenderId(userId);
         message.setReceiverId(request.getReceiverId());
         message.setType(request.getType());
@@ -50,6 +83,16 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setCreateTime(LocalDateTime.now());
 
         imMessageMapper.insertImMessage(message);
+
+        // 处理@提及
+        ImMentionInfo mentionInfo = request.getMentionInfo();
+        if (mentionInfo == null && request.getContent() != null) {
+            // 自动解析消息内容中的@提及
+            mentionInfo = messageMentionService.parseMentions(request.getContent());
+        }
+        if (mentionInfo != null && (mentionInfo.getUserIds() != null || Boolean.TRUE.equals(mentionInfo.getMentionAll()))) {
+            messageMentionService.createMentions(message.getId(), mentionInfo, userId);
+        }
 
         return message.getId();
     }
@@ -77,10 +120,75 @@ public class ImMessageServiceImpl implements ImMessageService {
             }
 
             vo.setIsSelf(message.getSenderId().equals(userId));
+
+            // 处理引用消息（回复）
+            if (message.getReplyToMessageId() != null && message.getReplyToMessageId() > 0) {
+                vo.setReplyToMessageId(message.getReplyToMessageId());
+                ImMessageVO.QuotedMessageVO quotedMessage = buildQuotedMessage(message.getReplyToMessageId());
+                vo.setQuotedMessage(quotedMessage);
+            }
+
             voList.add(vo);
         }
 
         return voList;
+    }
+
+    /**
+     * 构建引用消息VO
+     * 获取被回复消息的简要信息
+     *
+     * @param messageId 被回复的消息ID
+     * @return 引用消息VO
+     */
+    private ImMessageVO.QuotedMessageVO buildQuotedMessage(Long messageId) {
+        ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
+        if (originalMessage == null) {
+            return null;
+        }
+
+        ImMessageVO.QuotedMessageVO quotedMessage = new ImMessageVO.QuotedMessageVO();
+        quotedMessage.setId(originalMessage.getId());
+        quotedMessage.setType(originalMessage.getType());
+        quotedMessage.setSendTime(originalMessage.getSendTime());
+
+        // 获取发送者信息
+        ImUser sender = imUserMapper.selectImUserById(originalMessage.getSenderId());
+        if (sender != null) {
+            quotedMessage.setSenderName(sender.getNickname());
+        } else {
+            quotedMessage.setSenderName("未知用户");
+        }
+
+        // 解密并截取消息内容
+        String content = encryptionUtil.decryptMessage(originalMessage.getContent());
+
+        // 根据消息类型处理内容
+        String messageType = originalMessage.getType();
+        if ("IMAGE".equalsIgnoreCase(messageType) || "FILE".equalsIgnoreCase(messageType)
+                || "VIDEO".equalsIgnoreCase(messageType) || "VOICE".equalsIgnoreCase(messageType)) {
+            quotedMessage.setIsFile(true);
+            // 文件类型消息显示文件名或类型标识
+            if ("IMAGE".equalsIgnoreCase(messageType)) {
+                quotedMessage.setContent("[图片]");
+            } else if ("VIDEO".equalsIgnoreCase(messageType)) {
+                quotedMessage.setContent("[视频]");
+            } else if ("VOICE".equalsIgnoreCase(messageType)) {
+                quotedMessage.setContent("[语音]");
+            } else {
+                quotedMessage.setContent("[文件]");
+            }
+        } else {
+            // 文本消息截取前50个字符
+            quotedMessage.setIsFile(false);
+            if (content != null && content.length() > 50) {
+                quotedMessage.setContent(content.substring(0, 50) + "...");
+            } else {
+                quotedMessage.setContent(content);
+            }
+        }
+
+        return quotedMessage;
     }
 
     @Override
@@ -175,6 +283,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         replyMessage.setReceiverId(originalMessage.getSenderId());
         replyMessage.setSenderId(userId);
         replyMessage.setParentId(messageId);
+        replyMessage.setReplyToMessageId(messageId); // 设置回复消息ID
         replyMessage.setType("reply");
         replyMessage.setContent(encryptionUtil.encryptMessage(content));
         replyMessage.setStatus(3); // 回复状态
@@ -184,5 +293,129 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         imMessageMapper.insertImMessage(replyMessage);
         return replyMessage.getId();
+    }
+
+    @Override
+    public ImMessageSearchResultVO searchMessages(Long conversationId, String keyword, String messageType,
+                                                   Long senderId, LocalDateTime startTime, LocalDateTime endTime,
+                                                   Integer pageNum, Integer pageSize, Boolean includeRevoked,
+                                                   Boolean exactMatch, Long userId) {
+        // 参数校验和默认值设置
+        if (pageNum == null || pageNum < 1) {
+            pageNum = 1;
+        }
+        if (pageSize == null || pageSize < 1 || pageSize > 100) {
+            pageSize = 20;
+        }
+        if (includeRevoked == null) {
+            includeRevoked = false;
+        }
+        if (exactMatch == null) {
+            exactMatch = false;
+        }
+
+        // 计算偏移量
+        int offset = (pageNum - 1) * pageSize;
+
+        // 统计总数
+        int total = imMessageMapper.countSearchResults(conversationId, keyword, messageType,
+                senderId, startTime, endTime, includeRevoked, exactMatch);
+
+        // 计算总页数
+        int totalPages = (int) Math.ceil((double) total / pageSize);
+
+        // 查询结果
+        List<ImMessage> messageList = imMessageMapper.searchMessages(conversationId, keyword, messageType,
+                senderId, startTime, endTime, includeRevoked, exactMatch, offset, pageSize);
+
+        // 构建结果VO
+        ImMessageSearchResultVO resultVO = new ImMessageSearchResultVO();
+        resultVO.setTotal(total);
+        resultVO.setPageNum(pageNum);
+        resultVO.setPageSize(pageSize);
+        resultVO.setTotalPages(totalPages);
+
+        List<ImMessageSearchResultVO.SearchResultItem> items = new ArrayList<>();
+
+        for (ImMessage message : messageList) {
+            ImMessageSearchResultVO.SearchResultItem item = new ImMessageSearchResultVO.SearchResultItem();
+            item.setId(message.getId());
+            item.setConversationId(message.getConversationId());
+            item.setSenderId(message.getSenderId());
+            item.setType(message.getType());
+            item.setSendTime(message.getCreateTime());
+
+            // 解密消息内容
+            String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
+            item.setContent(decryptedContent);
+
+            // 生成高亮片段
+            if (keyword != null && !keyword.isEmpty()) {
+                item.setHighlightSnippet(generateHighlightSnippet(decryptedContent, keyword, 100));
+            }
+
+            // 获取发送者信息
+            ImUser sender = imUserMapper.selectImUserById(message.getSenderId());
+            if (sender != null) {
+                item.setSenderName(sender.getNickname());
+                item.setSenderAvatar(sender.getAvatar());
+            } else {
+                item.setSenderName("未知用户");
+            }
+
+            item.setIsSelf(message.getSenderId().equals(userId));
+            items.add(item);
+        }
+
+        resultVO.setItems(items);
+        return resultVO;
+    }
+
+    /**
+     * 生成高亮片段
+     * 截取包含关键词的上下文
+     *
+     * @param content   原始内容
+     * @param keyword   关键词
+     * @param snippetLength 片段长度
+     * @return 高亮片段
+     */
+    private String generateHighlightSnippet(String content, String keyword, int snippetLength) {
+        if (content == null || content.isEmpty()) {
+            return "";
+        }
+
+        // 查找关键词位置
+        int keywordIndex = content.toLowerCase().indexOf(keyword.toLowerCase());
+        if (keywordIndex == -1) {
+            // 未找到关键词，返回前N个字符
+            if (content.length() > snippetLength) {
+                return content.substring(0, snippetLength) + "...";
+            }
+            return content;
+        }
+
+        // 计算片段起始位置
+        int start = Math.max(0, keywordIndex - snippetLength / 2);
+        int end = Math.min(content.length(), start + snippetLength);
+
+        // 调整起始位置以确保片段包含完整关键词
+        if (end - start < snippetLength && start > 0) {
+            start = Math.max(0, end - snippetLength);
+        }
+
+        String snippet = content.substring(start, end);
+
+        // 添加省略号
+        if (start > 0) {
+            snippet = "..." + snippet;
+        }
+        if (end < content.length()) {
+            snippet = snippet + "...";
+        }
+
+        // 高亮关键词（使用简单的标记，前端可以进一步处理）
+        // 注意：这里只是简单的标记，实际高亮由前端CSS实现
+        return snippet;
     }
 }

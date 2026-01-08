@@ -552,18 +552,18 @@ DROP TABLE IF EXISTS `im_conversation`;
 CREATE TABLE `im_conversation`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '会话ID',
   `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '会话类型（PRIVATE私聊 GROUP群聊）',
+  `target_id` bigint(20) NULL DEFAULT NULL COMMENT '目标ID（私聊时为对方用户ID，群聊时为群组ID）',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '会话名称',
   `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '会话头像',
-  `owner_id` bigint(20) NULL DEFAULT NULL COMMENT '群主ID（群聊时使用）',
-  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '会话描述',
-  `max_members` int(11) NULL DEFAULT 500 COMMENT '最大成员数',
+  `last_message_id` bigint(20) NULL DEFAULT NULL COMMENT '最后一条消息ID',
+  `last_message_time` datetime NULL DEFAULT NULL COMMENT '最后一条消息时间',
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除（0否 1是）',
   `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_type`(`type`) USING BTREE,
-  INDEX `idx_owner_id`(`owner_id`) USING BTREE,
+  INDEX `idx_target_id`(`target_id`) USING BTREE,
   INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表' ROW_FORMAT = Dynamic;
@@ -1439,7 +1439,7 @@ INSERT INTO `sys_menu` VALUES (501, '登录日志', 108, 2, '/monitor/logininfor
 INSERT INTO `sys_menu` VALUES (502, 'IM用户', 4, 1, '/im/user', '', 'C', '0', '1', 'im:user:view', 'fa fa-user', 'admin', '2025-12-27 12:11:39', '', NULL, 'IM用户管理菜单');
 INSERT INTO `sys_menu` VALUES (503, '消息管理', 4, 2, '/im/message', '', 'C', '0', '1', 'im:message:view', 'fa fa-envelope', 'admin', '2025-12-27 12:11:39', '', NULL, 'IM消息管理菜单');
 INSERT INTO `sys_menu` VALUES (504, '群组管理', 4, 3, '/im/group', '', 'C', '0', '1', 'im:group:view', 'fa fa-users', 'admin', '2025-12-27 12:11:39', '', NULL, 'IM群组管理菜单');
-INSERT INTO `sys_menu` VALUES (505, '会话管理', 4, 4, '/im/session', '', 'C', '0', '1', 'im:session:view', 'fa fa-comments', 'admin', '2025-12-27 12:11:39', '', NULL, 'IM会话管理菜单');
+INSERT INTO `sys_menu` VALUES (505, '会话管理', 4, 4, '/im/session/page', '', 'C', '0', '1', 'im:session:view', 'fa fa-comments', 'admin', '2025-12-27 12:11:39', '', NULL, 'IM会话管理菜单');
 INSERT INTO `sys_menu` VALUES (506, '文件管理', 4, 5, '/im/file', '', 'C', '0', '1', 'im:file:view', 'fa fa-file', 'admin', '2025-12-27 12:11:39', '', NULL, 'IM文件管理菜单');
 INSERT INTO `sys_menu` VALUES (1000, '用户查询', 100, 1, '#', '', 'F', '0', '1', 'system:user:list', '#', 'admin', '2025-12-27 12:11:39', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (1001, '用户新增', 100, 2, '#', '', 'F', '0', '1', 'system:user:add', '#', 'admin', '2025-12-27 12:11:40', '', NULL, '');
@@ -1832,3 +1832,79 @@ DROP VIEW IF EXISTS `im_session`;
 CREATE ALGORITHM = UNDEFINED SQL SECURITY DEFINER VIEW `im_session` AS select `cm`.`id` AS `id`,`c`.`type` AS `type`,`cm`.`user_id` AS `user_id`,`u`.`username` AS `user_name`,(case when (`c`.`type` = 'PRIVATE') then (select `u2`.`username` from (`im_user` `u2` join `im_conversation_member` `cm2` on((`u2`.`id` = `cm2`.`user_id`))) where ((`cm2`.`conversation_id` = `cm`.`conversation_id`) and (`cm2`.`user_id` <> `cm`.`user_id`)) limit 1) when (`c`.`type` = 'GROUP') then `c`.`name` else NULL end) AS `target_name`,(case when (`c`.`type` = 'PRIVATE') then (select `cm2`.`user_id` from `im_conversation_member` `cm2` where ((`cm2`.`conversation_id` = `cm`.`conversation_id`) and (`cm2`.`user_id` <> `cm`.`user_id`)) limit 1) when (`c`.`type` = 'GROUP') then `c`.`id` else NULL end) AS `target_id`,(select `m`.`id` from `im_message` `m` where (`m`.`conversation_id` = `cm`.`conversation_id`) order by `m`.`create_time` desc limit 1) AS `last_message_id`,(select `m`.`content` from `im_message` `m` where (`m`.`conversation_id` = `cm`.`conversation_id`) order by `m`.`create_time` desc limit 1) AS `last_message`,`cm`.`unread_count` AS `unread_count`,`cm`.`create_time` AS `create_time`,`cm`.`update_time` AS `update_time` from ((`im_conversation_member` `cm` join `im_conversation` `c` on((`cm`.`conversation_id` = `c`.`id`))) join `im_user` `u` on((`cm`.`user_id` = `u`.`id`))) where (`cm`.`is_deleted` = 0);
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- ============================================
+-- IM用户端菜单配置
+-- ============================================
+
+-- 即时通讯（用户端父菜单）
+INSERT INTO `sys_menu` VALUES (2000, '即时通讯', 0, 5, '/im', '', 'M', '0', '1', '', 'fa fa-comments', 'admin', NOW(), '', NULL, '即时通讯用户端目录');
+
+-- 工作台
+INSERT INTO `sys_menu` VALUES (2001, '工作台', 2000, 1, '/im/workbench', '', 'C', '0', '1', 'im:workbench:view', 'fa fa-dashboard', 'admin', NOW(), '', NULL, '工作台菜单');
+
+-- 聊天
+INSERT INTO `sys_menu` VALUES (2002, '聊天', 2000, 2, '/im/chat', '', 'C', '0', '1', 'im:chat:view', 'fa fa-commenting', 'admin', NOW(), '', NULL, '聊天菜单');
+
+-- 联系人
+INSERT INTO `sys_menu` VALUES (2003, '联系人', 2000, 3, '/im/contacts', '', 'C', '0', '1', 'im:contacts:view', 'fa fa-address-book', 'admin', NOW(), '', NULL, '联系人菜单');
+
+-- 群组
+INSERT INTO `sys_menu` VALUES (2004, '群组', 2000, 4, '/im/group', '', 'C', '0', '1', 'im:group:view', 'fa fa-users', 'admin', NOW(), '', NULL, '群组菜单');
+
+-- 钉盘
+INSERT INTO `sys_menu` VALUES (2005, '钉盘', 2000, 5, '/im/drive', '', 'C', '0', '1', 'im:drive:view', 'fa fa-cloud', 'admin', NOW(), '', NULL, '钉盘菜单');
+
+-- 审批中心
+INSERT INTO `sys_menu` VALUES (2006, '审批中心', 2000, 6, '/im/approval', '', 'C', '0', '1', 'im:approval:view', 'fa fa-check-circle', 'admin', NOW(), '', NULL, '审批中心菜单');
+
+-- 应用中心
+INSERT INTO `sys_menu` VALUES (2007, '应用中心', 2000, 7, '/im/app-center', '', 'C', '0', '1', 'im:appcenter:view', 'fa fa-th', 'admin', NOW(), '', NULL, '应用中心菜单');
+
+-- 设置
+INSERT INTO `sys_menu` VALUES (2008, '设置', 2000, 8, '/im/settings', '', 'C', '0', '1', 'im:settings:view', 'fa fa-cog', 'admin', NOW(), '', NULL, '设置菜单');
+
+-- ============================================
+-- IM用户端菜单按钮权限配置
+-- ============================================
+
+-- 工作台按钮权限
+INSERT INTO `sys_menu` VALUES (2010, '工作台查询', 2001, 1, '#', '', 'F', '0', '1', 'im:workbench:list', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2011, '工作台操作', 2001, 2, '#', '', 'F', '0', '1', 'im:workbench:operate', '#', 'admin', NOW(), '', NULL, '');
+
+-- 聊天按钮权限
+INSERT INTO `sys_menu` VALUES (2020, '发送消息', 2002, 1, '#', '', 'F', '0', '1', 'im:chat:send', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2021, '接收消息', 2002, 2, '#', '', 'F', '0', '1', 'im:chat:receive', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2022, '消息撤回', 2002, 3, '#', '', 'F', '0', '1', 'im:chat:revoke', '#', 'admin', NOW(), '', NULL, '');
+
+-- 联系人按钮权限
+INSERT INTO `sys_menu` VALUES (2030, '联系人查询', 2003, 1, '#', '', 'F', '0', '1', 'im:contacts:list', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2031, '添加联系人', 2003, 2, '#', '', 'F', '0', '1', 'im:contacts:add', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2032, '删除联系人', 2003, 3, '#', '', 'F', '0', '1', 'im:contacts:remove', '#', 'admin', NOW(), '', NULL, '');
+
+-- 群组按钮权限
+INSERT INTO `sys_menu` VALUES (2040, '创建群组', 2004, 1, '#', '', 'F', '0', '1', 'im:group:add', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2041, '加入群组', 2004, 2, '#', '', 'F', '0', '1', 'im:group:join', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2042, '退出群组', 2004, 3, '#', '', 'F', '0', '1', 'im:group:leave', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2043, '群组管理', 2004, 4, '#', '', 'F', '0', '1', 'im:group:manage', '#', 'admin', NOW(), '', NULL, '');
+
+-- 钉盘按钮权限
+INSERT INTO `sys_menu` VALUES (2050, '文件上传', 2005, 1, '#', '', 'F', '0', '1', 'im:drive:upload', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2051, '文件下载', 2005, 2, '#', '', 'F', '0', '1', 'im:drive:download', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2052, '文件删除', 2005, 3, '#', '', 'F', '0', '1', 'im:drive:remove', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2053, '文件分享', 2005, 4, '#', '', 'F', '0', '1', 'im:drive:share', '#', 'admin', NOW(), '', NULL, '');
+
+-- 审批中心按钮权限
+INSERT INTO `sys_menu` VALUES (2060, '发起审批', 2006, 1, '#', '', 'F', '0', '1', 'im:approval:create', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2061, '审批处理', 2006, 2, '#', '', 'F', '0', '1', 'im:approval:handle', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2062, '审批查询', 2006, 3, '#', '', 'F', '0', '1', 'im:approval:list', '#', 'admin', NOW(), '', NULL, '');
+
+-- 应用中心按钮权限
+INSERT INTO `sys_menu` VALUES (2070, '应用安装', 2007, 1, '#', '', 'F', '0', '1', 'im:appcenter:install', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2071, '应用卸载', 2007, 2, '#', '', 'F', '0', '1', 'im:appcenter:uninstall', '#', 'admin', NOW(), '', NULL, '');
+
+-- 设置按钮权限
+INSERT INTO `sys_menu` VALUES (2080, '个人信息', 2008, 1, '#', '', 'F', '0', '1', 'im:settings:profile', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2081, '账号安全', 2008, 2, '#', '', 'F', '0', '1', 'im:settings:security', '#', 'admin', NOW(), '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2082, '通知设置', 2008, 3, '#', '', 'F', '0', '1', 'im:settings:notification', '#', 'admin', NOW(), '', NULL, '');

@@ -120,4 +120,14 @@
         from im_user
         where username = #{username}
     </select>
+
+    <select id="searchUsers" parameterType="String" resultMap="ImUserResult">
+        <include refid="selectImUserVo"/>
+        <where>
+            (username like concat('%', #{keyword}, '%')
+            or nickname like concat('%', #{keyword}, '%')
+            or mobile like concat('%', #{keyword}, '%'))
+        </where>
+        limit 20
+    </select>
 </mapper>

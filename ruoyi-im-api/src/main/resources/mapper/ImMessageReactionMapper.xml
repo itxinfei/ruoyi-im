@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImMessageReactionMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImMessageReaction" id="ImMessageReactionResult">
+        <id     property="id"           column="id"            />
+        <result property="messageId"    column="message_id"    />
+        <result property="userId"       column="user_id"       />
+        <result property="reactionType" column="reaction_type" />
+        <result property="emoji"        column="emoji"         />
+        <result property="createTime"   column="create_time"   />
+    </resultMap>
+
+    <sql id="selectImMessageReactionVo">
+        select id, message_id, user_id, reaction_type, emoji, create_time
+        from im_message_reaction
+    </sql>
+
+    <!-- 查询消息的所有反应 -->
+    <select id="selectReactionsByMessageId" resultMap="ImMessageReactionResult">
+        <include refid="selectImMessageReactionVo"/>
+        where message_id = #{messageId}
+        order by create_time desc
+    </select>
+
+    <!-- 查询用户对消息的反应 -->
+    <select id="selectUserReaction" resultMap="ImMessageReactionResult">
+        <include refid="selectImMessageReactionVo"/>
+        where message_id = #{messageId} and user_id = #{userId}
+        limit 1
+    </select>
+
+    <!-- 查询消息的反应统计 -->
+    <select id="selectReactionStats" resultMap="ImMessageReactionResult">
+        select emoji, reaction_type, count(*) as id
+        from im_message_reaction
+        where message_id = #{messageId}
+        group by emoji, reaction_type
+        order by count(*) desc
+    </select>
+
+    <!-- 删除消息反应 -->
+    <delete id="deleteReaction">
+        delete from im_message_reaction where id = #{id}
+    </delete>
+
+    <!-- 删除用户对消息的反应 -->
+    <delete id="deleteUserReaction">
+        delete from im_message_reaction
+        where message_id = #{messageId} and user_id = #{userId}
+    </delete>
+
+</mapper>

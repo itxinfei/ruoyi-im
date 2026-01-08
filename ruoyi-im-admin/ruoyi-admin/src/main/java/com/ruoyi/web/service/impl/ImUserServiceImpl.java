@@ -65,4 +65,9 @@ public class ImUserServiceImpl implements ImUserService {
     public boolean checkUsernameUnique(String username) {
         return userMapper.checkUsernameUnique(username);
     }
+
+    @Override
+    public List<ImUser> searchUsers(String keyword) {
+        return userMapper.searchUsers(keyword);
+    }
 }

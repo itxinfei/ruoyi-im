@@ -16,27 +16,26 @@
       <div v-for="(apps, category) in groupedApps" :key="category" class="category-section">
         <div class="category-title">{{ getCategoryName(category) }}</div>
         <div class="app-grid">
-          <div
-            v-for="app in apps"
-            :key="app.id"
-            class="app-card"
-            @click="handleAppClick(app)"
-          >
+          <div v-for="app in apps" :key="app.id" class="app-card" @click="handleAppClick(app)">
             <div class="app-icon" :style="{ backgroundColor: app.iconColor || '#1677ff' }">
               <img v-if="app.icon && app.icon.startsWith('/')" :src="app.icon" :alt="app.name" />
               <span v-else class="app-icon-text">{{ app.name?.charAt(0) || 'A' }}</span>
             </div>
             <div class="app-name">{{ app.name }}</div>
-            <div class="app-desc" v-if="app.description">{{ app.description }}</div>
+            <div v-if="app.description" class="app-desc">{{ app.description }}</div>
           </div>
         </div>
       </div>
-      <el-empty v-if="Object.keys(groupedApps).length === 0" description="暂无应用" :image-size="100" />
+      <el-empty
+        v-if="Object.keys(groupedApps).length === 0"
+        description="暂无应用"
+        :image-size="100"
+      />
     </div>
 
     <!-- 应用详情抽屉 -->
     <el-drawer v-model="drawerVisible" :title="currentApp?.name" size="400px">
-      <div class="app-detail" v-if="currentApp">
+      <div v-if="currentApp" class="app-detail">
         <div class="detail-icon" :style="{ backgroundColor: currentApp.iconColor || '#1677ff' }">
           <span class="app-icon-text">{{ currentApp.name?.charAt(0) || 'A' }}</span>
         </div>
@@ -57,7 +56,7 @@
             <span class="info-label">应用类型</span>
             <span class="info-value">{{ getAppTypeText(currentApp.appType) }}</span>
           </div>
-          <div class="info-row" v-if="currentApp.description">
+          <div v-if="currentApp.description" class="info-row">
             <span class="info-label">应用描述</span>
             <span class="info-value">{{ currentApp.description }}</span>
           </div>
@@ -105,7 +104,7 @@ const handleCategoryChange = () => {
   // 分类切换时，数据由computed处理
 }
 
-const handleAppClick = (app) => {
+const handleAppClick = app => {
   currentApp.value = app
   drawerVisible.value = true
 }
@@ -128,7 +127,7 @@ const handleOpenApp = () => {
   }
 }
 
-const getCategoryName = (category) => {
+const getCategoryName = category => {
   const map = {
     OFFICE: '办公',
     DATA: '数据',
@@ -138,7 +137,7 @@ const getCategoryName = (category) => {
   return map[category] || category
 }
 
-const getAppTypeText = (appType) => {
+const getAppTypeText = appType => {
   const map = {
     ROUTE: '路由',
     IFRAME: '嵌入',

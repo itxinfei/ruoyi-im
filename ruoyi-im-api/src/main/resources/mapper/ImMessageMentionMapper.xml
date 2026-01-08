@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImMessageMentionMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImMessageMention" id="ImMessageMentionResult">
+        <id     property="id"               column="id"                />
+        <result property="messageId"        column="message_id"       />
+        <result property="mentionedUserId"  column="mentioned_user_id"/>
+        <result property="mentionedBy"      column="mentioned_by"     />
+        <result property="mentionType"      column="mention_type"     />
+        <result property="isRead"           column="is_read"          />
+        <result property="createTime"       column="create_time"      />
+    </resultMap>
+
+    <sql id="selectImMessageMentionVo">
+        select id, message_id, mentioned_user_id, mentioned_by, mention_type, is_read, create_time
+        from im_message_mention
+    </sql>
+
+    <!-- 查询消息的所有@提及 -->
+    <select id="selectMentionsByMessageId" resultMap="ImMessageMentionResult">
+        <include refid="selectImMessageMentionVo"/>
+        where message_id = #{messageId}
+        order by create_time desc
+    </select>
+
+    <!-- 查询用户收到的未读@提及 -->
+    <select id="selectUnreadMentions" resultMap="ImMessageMentionResult">
+        <include refid="selectImMessageMentionVo"/>
+        where mentioned_user_id = #{userId}
+          and is_read = 0
+        order by create_time desc
+    </select>
+
+    <!-- 查询用户收到的@提及数量 -->
+    <select id="countUnreadMentions" resultType="int">
+        select count(*)
+        from im_message_mention
+        where mentioned_user_id = #{userId}
+          and is_read = 0
+    </select>
+
+    <!-- 标记@提及为已读 -->
+    <update id="markAsRead">
+        update im_message_mention
+        set is_read = 1
+        where message_id = #{messageId}
+          and mentioned_user_id = #{userId}
+    </update>
+
+    <!-- 批量标记@提及为已读 -->
+    <update id="batchMarkAsRead">
+        update im_message_mention
+        set is_read = 1
+        where id in
+        <foreach collection="mentionIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- 查询会话中的@提及 -->
+    <select id="selectMentionsByConversation" resultMap="ImMessageMentionResult">
+        select m.*
+        from im_message_mention m
+        inner join im_message msg on m.message_id = msg.id
+        where msg.conversation_id = #{conversationId}
+          and m.mentioned_user_id = #{userId}
+        order by m.create_time desc
+    </select>
+
+</mapper>

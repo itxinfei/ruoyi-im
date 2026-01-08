@@ -116,4 +116,14 @@ public class ImUserController extends BaseController {
     public AjaxResult getOnlineStatus() {
         return AjaxResult.success(imUserService.countOnlineUsers());
     }
+
+    /**
+     * 搜索用户
+     */
+    @RequiresPermissions("im:user:list")
+    @GetMapping("/search")
+    public AjaxResult searchUsers(@RequestParam String keyword) {
+        List<ImUser> list = imUserService.searchUsers(keyword);
+        return AjaxResult.success(list);
+    }
 }

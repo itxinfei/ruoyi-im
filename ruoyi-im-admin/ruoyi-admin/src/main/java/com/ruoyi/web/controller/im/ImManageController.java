@@ -45,7 +45,7 @@ public class ImManageController
     /**
      * 会话管理页面
      */
-    @GetMapping("/session")
+    @GetMapping("/session/page")
     public String session()
     {
         return prefix + "/session/session";

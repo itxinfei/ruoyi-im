@@ -66,7 +66,7 @@ export function updateGroupAnnouncement(groupId, announcement) {
     url: `/api/im/group/${groupId}`,
     method: 'put',
     data: {
-      announcement: announcement
+      announcement: announcement,
     },
   })
 }
@@ -77,6 +77,6 @@ export function getGroupAnnouncement(groupId) {
     url: `/api/im/group/${groupId}`,
     method: 'get',
   }).then(response => {
-    return { data: response.data?.announcement || '' };
-  });
+    return { data: response.data?.announcement || '' }
+  })
 }

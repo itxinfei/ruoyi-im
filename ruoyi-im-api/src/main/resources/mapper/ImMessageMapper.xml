@@ -20,7 +20,7 @@
     </resultMap>
 
     <sql id="selectImMessageVo">
-        select id, conversation_id, sender_id, type, content, is_revoked, revoked_time, create_time, update_time, reply_to_message_id, forward_from_message_id, sensitive_level, is_deleted, deleted_time
+        select id, conversation_id, sender_id, message_type, content, is_revoked, revoked_time, create_time, update_time, reply_to_message_id, forward_from_message_id, sensitive_level, is_deleted, deleted_time
         from im_message
     </sql>
 
@@ -34,7 +34,7 @@
         <where>
             <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
             <if test="senderId != null"> and sender_id = #{senderId} </if>
-            <if test="type != null and type != ''"> and type = #{type} </if>
+            <if test="type != null and type != ''"> and message_type = #{type} </if>
         </where>
     </select>
 
@@ -43,7 +43,7 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="conversationId != null">conversation_id,</if>
             <if test="senderId != null">sender_id,</if>
-            <if test="type != null">type,</if>
+            <if test="type != null">message_type,</if>
             <if test="content != null">content,</if>
             <if test="isRevoked != null">is_revoked,</if>
             <if test="revokedTime != null">revoked_time,</if>
@@ -77,7 +77,7 @@
         <trim prefix="SET" suffixOverrides=",">
             <if test="conversationId != null">conversation_id = #{conversationId},</if>
             <if test="senderId != null">sender_id = #{senderId},</if>
-            <if test="type != null and type != ''">type = #{type},</if>
+            <if test="type != null and type != ''">message_type = #{type},</if>
             <if test="content != null and content != ''">content = #{content},</if>
             <if test="isRevoked != null">is_revoked = #{isRevoked},</if>
             <if test="revokedTime != null">revoked_time = #{revokedTime},</if>
@@ -102,7 +102,7 @@
     </delete>
     
     <select id="selectImMessageByConversationId" parameterType="map" resultMap="ImMessageResult">
-        select id, conversation_id, sender_id, type, content, is_revoked, revoked_time, create_time, update_time, reply_to_message_id, forward_from_message_id, sensitive_level, is_deleted, deleted_time
+        select id, conversation_id, sender_id, message_type, content, is_revoked, revoked_time, create_time, update_time, reply_to_message_id, forward_from_message_id, sensitive_level, is_deleted, deleted_time
         from im_message
         where conversation_id = #{conversationId}
         order by create_time desc
@@ -115,7 +115,7 @@
         <where>
             <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
             <if test="senderId != null"> and sender_id = #{senderId} </if>
-            <if test="type != null and type != ''"> and type = #{type} </if>
+            <if test="type != null and type != ''"> and message_type = #{type} </if>
         </where>
         order by create_time desc
         limit #{limit} offset #{offset}
@@ -123,7 +123,7 @@
     
     <!-- 批量插入消息 - 性能优化 -->
     <insert id="batchInsertImMessage" parameterType="java.util.List">
-        insert into im_message (conversation_id, sender_id, type, content, is_revoked, revoked_time, create_time, update_time, reply_to_message_id, forward_from_message_id, sensitive_level, is_deleted, deleted_time)
+        insert into im_message (conversation_id, sender_id, message_type, content, is_revoked, revoked_time, create_time, update_time, reply_to_message_id, forward_from_message_id, sensitive_level, is_deleted, deleted_time)
         values
         <foreach collection="list" item="message" separator=",">
             (#{message.conversationId}, #{message.senderId}, #{message.type}, #{message.content}, 
@@ -162,5 +162,68 @@
         select case when count(*) > 0 then true else false end
         from im_message
         where conversation_id = #{conversationId}
+    </select>
+
+    <!-- ==================== 消息搜索相关SQL ==================== -->
+
+    <!-- 搜索消息 -->
+    <select id="searchMessages" resultMap="ImMessageResult">
+        <include refid="selectImMessageVo"/>
+        <where>
+            <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
+            <if test="keyword != null and keyword != ''">
+                <choose>
+                    <when test="exactMatch">
+                        and content = #{keyword}
+                    </when>
+                    <otherwise>
+                        and content like CONCAT('%', #{keyword}, '%')
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="messageType != null and messageType != ''"> and message_type = #{messageType} </if>
+            <if test="senderId != null"> and sender_id = #{senderId} </if>
+            <if test="startTime != null"> and create_time &gt;= #{startTime} </if>
+            <if test="endTime != null"> and create_time &lt;= #{endTime} </if>
+            <if test="includeRevoked == null or includeRevoked == false"> and is_revoked = 0 </if>
+            and is_deleted = 0
+        </where>
+        order by create_time desc
+        <if test="limit != null">
+            limit #{limit}
+            <if test="offset != null"> offset #{offset} </if>
+        </if>
+    </select>
+
+    <!-- 统计搜索结果数量 -->
+    <select id="countSearchResults" resultType="java.lang.Integer">
+        select count(*)
+        from im_message
+        <where>
+            <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
+            <if test="keyword != null and keyword != ''">
+                <choose>
+                    <when test="exactMatch">
+                        and content = #{keyword}
+                    </when>
+                    <otherwise>
+                        and content like CONCAT('%', #{keyword}, '%')
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="messageType != null and messageType != ''"> and message_type = #{messageType} </if>
+            <if test="senderId != null"> and sender_id = #{senderId} </if>
+            <if test="startTime != null"> and create_time &gt;= #{startTime} </if>
+            <if test="endTime != null"> and create_time &lt;= #{endTime} </if>
+            <if test="includeRevoked == null or includeRevoked == false"> and is_revoked = 0 </if>
+            and is_deleted = 0
+        </where>
+    </select>
+
+    <!-- 获取搜索结果的高亮上下文 -->
+    <select id="getHighlightContext" resultType="java.lang.String">
+        select content
+        from im_message
+        where id = #{messageId}
     </select>
 </mapper>

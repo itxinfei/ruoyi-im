@@ -46,7 +46,7 @@ export function updateContactRemark(friendId, data) {
 // 获取联系人在线状态 - 后端没有此API，需要通过WebSocket获取或从用户信息中获取
 export function getContactStatus(userIds) {
   // 现在在线状态主要通过WebSocket维护和获取
-  return Promise.resolve({ data: [] });
+  return Promise.resolve({ data: [] })
 }
 
 // 搜索联系人
@@ -80,8 +80,8 @@ export function handleFriendRequest(requestId, approved) {
     url: `/api/im/contact/request/${requestId}/handle`,
     method: 'post',
     params: {
-      approved: approved
-    }
+      approved: approved,
+    },
   })
 }
 
