@@ -5274,7 +5274,7 @@ $shadow-lg:
                 .el-button {
                   --el-button-border-color: transparent;
                   --el-button-bg-color: transparent;
-                  --el-button-text-color: $text-secondary;
+                  --el-button-text-color: #606266; // 使用更深的颜色，确保图标可见
                   padding: 8px;
 
                   &:hover {
@@ -5323,6 +5323,7 @@ $shadow-lg:
       .contacts-workspace {
         display: flex;
         width: 100%;
+        height: 100%; // 确保高度充满父容器
 
         .contacts-sidebar {
           width: 200px;
@@ -5330,6 +5331,8 @@ $shadow-lg:
           border-right: 1px solid $border-color;
           display: flex;
           flex-direction: column;
+          height: 100%; // 确保高度充满父容器
+          min-height: 0; // 允许flex子元素正确收缩
 
           .section-title {
             padding: 16px 16px 8px;
@@ -5388,6 +5391,8 @@ $shadow-lg:
           border-right: 1px solid $border-color;
           display: flex;
           flex-direction: column;
+          height: 100%; // 确保高度充满父容器
+          min-height: 0; // 允许flex子元素正确收缩
 
           .list-header {
             padding: 12px 16px;
@@ -5649,6 +5654,7 @@ $shadow-lg:
           display: flex;
           flex-direction: column;
           overflow: hidden;
+          min-height: 0; // 允许flex子元素正确收缩
 
           .detail-header {
             padding: 24px;

@@ -8,7 +8,7 @@ app:
   env: prod
   # 是否启用认证：开发环境可设为false，生产环境必须设为true
   security:
-    enabled: true
+    enabled: false
   # 开发环境默认用户ID（当security.enabled=false时使用）
   dev:
     user-id: 1

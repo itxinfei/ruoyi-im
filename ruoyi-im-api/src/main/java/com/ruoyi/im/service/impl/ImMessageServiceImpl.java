@@ -83,13 +83,12 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setConversationId(conversationId);
         message.setSenderId(userId);
         message.setReceiverId(request.getReceiverId());
-        message.setType(request.getType());
+        message.setMessageType(request.getType()); // 使用messageType而不是type（type是非数据库字段）
+        message.setReplyToMessageId(request.getReplyToMessageId()); // 设置回复消息ID
 
         String contentToSave = encryptionUtil.encryptMessage(request.getContent());
         message.setContent(contentToSave);
-        message.setStatus(1);
         message.setIsRevoked(0);
-        message.setSendTime(LocalDateTime.now());
         message.setCreateTime(LocalDateTime.now());
 
         imMessageMapper.insertImMessage(message);
@@ -170,8 +169,8 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         ImMessageVO.QuotedMessageVO quotedMessage = new ImMessageVO.QuotedMessageVO();
         quotedMessage.setId(originalMessage.getId());
-        quotedMessage.setType(originalMessage.getType());
-        quotedMessage.setSendTime(originalMessage.getSendTime());
+        quotedMessage.setType(originalMessage.getMessageType()); // 使用getMessageType而不是getType
+        quotedMessage.setSendTime(originalMessage.getCreateTime()); // 使用createTime而不是sendTime
 
         // 获取发送者信息
         ImUser sender = imUserMapper.selectImUserById(originalMessage.getSenderId());
@@ -228,13 +227,12 @@ public class ImMessageServiceImpl implements ImMessageService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        if (message.getSendTime().plusMinutes(2).isBefore(now)) {
+        if (message.getCreateTime().plusMinutes(2).isBefore(now)) {
             throw new BusinessException("消息发送超过2分钟，无法撤回");
         }
 
         message.setIsRevoked(1);
-        message.setRevokeTime(now);
-        message.setStatus(5);
+        message.setRevokedTime(now); // 使用revokedTime而不是revokeTime（revokeTime是非数据库字段）
         imMessageMapper.updateImMessage(message);
     }
 
@@ -295,8 +293,8 @@ public class ImMessageServiceImpl implements ImMessageService {
         for (Long messageId : messageIds) {
             ImMessage message = imMessageMapper.selectImMessageById(messageId);
             if (message != null && !message.getSenderId().equals(userId)) {
-                message.setStatus(3);
-                imMessageMapper.updateImMessage(message);
+                // 不再更新消息状态（status是非数据库字段）
+                // 已读状态通过im_message_read表记录
                 readCount++;
                 if (maxMessageId == null || messageId > maxMessageId) {
                     maxMessageId = messageId;
@@ -328,7 +326,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         forwardMessage.setConversationId(toConversationId != null ? toConversationId : originalMessage.getConversationId());
         forwardMessage.setSenderId(userId);
         forwardMessage.setReceiverId(toUserId != null ? toUserId : originalMessage.getReceiverId());
-        forwardMessage.setType("forward");
+        forwardMessage.setMessageType(originalMessage.getMessageType()); // 转发时保留原消息类型
 
         // 构建转发消息内容，包含原消息信息
         String forwardContent;
@@ -339,10 +337,8 @@ public class ImMessageServiceImpl implements ImMessageService {
         }
         forwardMessage.setContent(encryptionUtil.encryptMessage(forwardContent));
 
-        forwardMessage.setParentId(messageId);
-        forwardMessage.setStatus(2); // 转发状态
+        forwardMessage.setForwardFromMessageId(messageId); // 设置转发来源消息ID
         forwardMessage.setIsRevoked(0);
-        forwardMessage.setSendTime(LocalDateTime.now());
         forwardMessage.setCreateTime(LocalDateTime.now());
 
         imMessageMapper.insertImMessage(forwardMessage);
@@ -364,13 +360,10 @@ public class ImMessageServiceImpl implements ImMessageService {
         replyMessage.setConversationId(originalMessage.getConversationId());
         replyMessage.setReceiverId(originalMessage.getSenderId());
         replyMessage.setSenderId(userId);
-        replyMessage.setParentId(messageId);
         replyMessage.setReplyToMessageId(messageId); // 设置回复消息ID
-        replyMessage.setType("reply");
+        replyMessage.setMessageType("TEXT"); // 回复消息类型为TEXT
         replyMessage.setContent(encryptionUtil.encryptMessage(content));
-        replyMessage.setStatus(3); // 回复状态
         replyMessage.setIsRevoked(0);
-        replyMessage.setSendTime(LocalDateTime.now());
         replyMessage.setCreateTime(LocalDateTime.now());
 
         imMessageMapper.insertImMessage(replyMessage);
@@ -424,7 +417,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             item.setId(message.getId());
             item.setConversationId(message.getConversationId());
             item.setSenderId(message.getSenderId());
-            item.setType(message.getType());
+            item.setType(message.getMessageType()); // 使用getMessageType而不是getType
             item.setSendTime(message.getCreateTime());
 
             // 解密消息内容

@@ -29,6 +29,12 @@ public class ImMessageSendRequest implements Serializable {
     /** 接收者ID（群组消息时必填） */
     private Long receiverId;
 
+    /** 回复消息ID（用于回复/引用功能） */
+    private Long replyToMessageId;
+
+    /** 客户端消息ID（用于去重） */
+    private String clientMsgId;
+
     /** 扩展数据（JSON格式，用于文件、图片等） */
     private String extra;
 
@@ -65,6 +71,22 @@ public class ImMessageSendRequest implements Serializable {
 
     public void setReceiverId(Long receiverId) {
         this.receiverId = receiverId;
+    }
+
+    public Long getReplyToMessageId() {
+        return replyToMessageId;
+    }
+
+    public void setReplyToMessageId(Long replyToMessageId) {
+        this.replyToMessageId = replyToMessageId;
+    }
+
+    public String getClientMsgId() {
+        return clientMsgId;
+    }
+
+    public void setClientMsgId(String clientMsgId) {
+        this.clientMsgId = clientMsgId;
     }
 
     public String getExtra() {

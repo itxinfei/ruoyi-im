@@ -106,6 +106,115 @@ GET /api/im/group/list 返回 500 错误
 
 ---
 
+### 5. ImMessageServiceImpl 使用非数据库字段
+
+**问题描述：**
+```
+POST /api/im/message/send 返回 500 错误
+```
+
+**原因：**
+- `ImMessage` 实体存在以下非数据库字段（`@TableField(exist = false)`）：
+  - `type` (实际数据库字段是 `message_type`)
+  - `status`
+  - `sendTime` (实际数据库字段是 `create_time`)
+  - `revokeTime` (实际数据库字段是 `revoked_time`)
+  - `parentId`
+- 服务代码错误地使用 `setType()` 而非 `setMessageType()`，导致消息类型未被持久化
+- `setStatus()`, `setSendTime()`, `setRevokeTime()` 设置的字段不会保存到数据库
+
+**修复内容：**
+- `sendMessage()` 方法：
+  - `message.setType(...)` → `message.setMessageType(...)`
+  - 移除 `message.setStatus(1)`
+  - 移除 `message.setSendTime(...)`
+- `recallMessage()` 方法：
+  - `message.getSendTime()` → `message.getCreateTime()`
+  - `message.setRevokeTime(...)` → `message.setRevokedTime(...)`
+  - 移除 `message.setStatus(5)`
+- `markAsRead()` 方法：移除 `message.setStatus(3)`
+- `forwardMessage()` 方法：
+  - `message.setType("forward")` → `message.setMessageType(originalMessage.getMessageType())`
+  - `message.setParentId(...)` → `message.setForwardFromMessageId(...)`
+  - 移除 `message.setStatus(2)`, `message.setSendTime(...)`
+- `replyMessage()` 方法：
+  - `message.setType("reply")` → `message.setMessageType("TEXT")`
+  - 移除 `message.setParentId(...)`, `message.setStatus(3)`, `message.setSendTime(...)`
+- `buildQuotedMessage()` 方法：
+  - `originalMessage.getType()` → `originalMessage.getMessageType()`
+  - `originalMessage.getSendTime()` → `originalMessage.getCreateTime()`
+- `searchMessages()` 方法：`message.getType()` → `message.getMessageType()`
+
+**修改文件：**
+- `ruoyi-im-api/src/main/java/com/ruoyi/im/service/impl/ImMessageServiceImpl.java`
+
+---
+
+### 6. WebMvcConfig 静态资源配置
+
+**问题描述：**
+```
+GET http://localhost:8080/avatar/1.jpg 返回 404 错误
+```
+
+**原因：**
+- 缺少静态资源映射配置
+- Spring Security 虽然允许 `/avatar/**` 访问，但没有 URL 到文件系统的映射
+
+**修复内容：**
+- 创建 `WebMvcConfig.java` 配置类
+- 添加 `/avatar/**` → `classpath:/static/avatar/` 映射
+- 添加 `/uploads/**` → `file:uploads/` 映射
+- 添加 `/profile/**` → `classpath:/static/profile/` 映射
+
+**修改文件：**
+- `ruoyi-im-api/src/main/java/com/ruoyi/im/config/WebMvcConfig.java` (新建)
+
+---
+
+### 7. ImMessageSendRequest 缺少 replyToMessageId 字段
+
+**问题描述：**
+```
+POST http://localhost:8080/api/im/message/send 返回 400 错误
+```
+
+**原因：**
+- 前端发送 `replyToMessageId` 和 `clientMsgId` 字段
+- 后端 DTO `ImMessageSendRequest` 没有这些字段
+- 虽然未知字段通常会被忽略，但可能导致反序列化问题
+
+**修复内容：**
+- `ImMessageSendRequest.java` 添加 `replyToMessageId` 字段（Long类型）
+- `ImMessageSendRequest.java` 添加 `clientMsgId` 字段（String类型）
+- `ImMessageServiceImpl.sendMessage()` 设置 `message.setReplyToMessageId(request.getReplyToMessageId())`
+
+**修改文件：**
+- `ruoyi-im-api/src/main/java/com/ruoyi/im/dto/message/ImMessageSendRequest.java`
+- `ruoyi-im-api/src/main/java/com/ruoyi/im/service/impl/ImMessageServiceImpl.java`
+
+---
+
+### 8. WebSocket 重连消息频繁提示
+
+**问题描述：**
+```
+连接断开，正在重新连接... 提示太频繁，很烦
+```
+
+**原因：**
+- 每次连接断开后重连时都会显示提示
+- `reconnectAttempts` 在连接成功后重置为0，导致每次新的重连周期都会显示消息
+
+**修复内容：**
+- 添加 `hasShownReconnectMessage` 标记，整个会话期间只显示一次重连提示
+- 将 `if (this.reconnectAttempts === 1)` 改为 `if (!this.hasShownReconnectMessage)`
+
+**修改文件：**
+- `ruoyi-im-web/src/utils/websocket/imWebSocket.js`
+
+---
+
 ## 待修复问题
 
 ### 1. 登录接口返回 500 (用户不存在)

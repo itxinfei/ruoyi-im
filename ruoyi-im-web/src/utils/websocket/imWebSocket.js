@@ -58,6 +58,7 @@ class ImWebSocket {
     this.pendingMessages = [] // 待发送消息
     this.isManualClose = false
     this.firstConnected = false // 标记是否首次连接
+    this.hasShownReconnectMessage = false // 标记是否已显示过重连消息（整个会话只显示一次）
     this.debug = import.meta.env.DEV // 开发环境开启调试
   }
 
@@ -326,10 +327,11 @@ class ImWebSocket {
 
     this.log(`${delay}ms 后进行第 ${this.reconnectAttempts} 次重连...`)
 
-    // 只在首次重连时显示提示
-    if (this.reconnectAttempts === 1) {
-      ElMessage.warning('连接断开，正在重新连接...')
-    }
+    // 不再显示重连提示弹窗（用户请求取消）
+    // if (!this.hasShownReconnectMessage) {
+    //   ElMessage.warning('连接断开，正在重新连接...')
+    //   this.hasShownReconnectMessage = true
+    // }
 
     setTimeout(() => {
       const token = localStorage.getItem('Admin-Token') || localStorage.getItem('token')
