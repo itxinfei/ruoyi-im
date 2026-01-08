@@ -111,7 +111,7 @@ public class ImUserServiceImpl implements ImUserService {
         ImUser user = new ImUser();
         BeanUtils.copyProperties(request, user);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setStatus("ACTIVE"); // 使用字符串状态值
+        user.setStatus(1); // 1=启用
         user.setGender(0);
         user.setAvatar("/avatar/default.png");
         user.setCreateTime(LocalDateTime.now());
@@ -151,7 +151,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
-    public void updateStatus(Long userId, String status) { // 修改参数类型为String
+    public void updateStatus(Long userId, Integer status) { // 0=禁用, 1=启用
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
             throw new BusinessException("USER_NOT_EXIST", "用户不存在");
@@ -231,7 +231,7 @@ public class ImUserServiceImpl implements ImUserService {
         ImUser user = new ImUser();
         BeanUtils.copyProperties(request, user);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setStatus("ACTIVE"); // 使用字符串状态值
+        user.setStatus(1); // 1=启用
         user.setGender(0);
         if (user.getAvatar() == null || user.getAvatar().isEmpty()) {
             user.setAvatar("/avatar/default.png");

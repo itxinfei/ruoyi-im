@@ -27,10 +27,9 @@ public class ImTodoItemServiceImpl implements ImTodoItemService {
         todo.setUserId(userId);
         todo.setTitle(title);
         todo.setDescription(description);
-        todo.setType(type);
-        todo.setRelatedId(relatedId);
-        todo.setPriority("NORMAL");
-        todo.setIsCompleted(false);
+        // type和relatedId不在数据库表中，跳过设置
+        todo.setPriority(2); // 2=中
+        todo.setStatus("PENDING");
         todo.setCreateTime(LocalDateTime.now());
         todoItemMapper.insertImTodoItem(todo);
         return todo.getId();

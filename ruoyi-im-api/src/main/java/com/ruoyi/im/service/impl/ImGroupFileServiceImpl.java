@@ -57,7 +57,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
 
         // 验证文件资产是否存在
         ImFileAsset fileAsset = fileAssetMapper.selectById(request.getFileId());
-        if (fileAsset == null || fileAsset.getStatus() == 0) {
+        if (fileAsset == null || "DELETED".equals(fileAsset.getStatus())) {
             throw new BusinessException("文件不存在");
         }
 
@@ -259,7 +259,8 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         // 更新下载次数
         groupFileMapper.incrementDownloadCount(groupFileId);
 
-        return fileAsset.getFileUrl();
+        // 返回文件URL - 从配置的前缀和文件路径拼接
+        return fileAsset.getFilePath();
     }
 
     @Override

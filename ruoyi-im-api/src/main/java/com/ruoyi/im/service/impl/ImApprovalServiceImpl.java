@@ -146,7 +146,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         List<ImApprovalFormData> formDataList = formDataMapper.selectFormDataByApprovalId(approvalId);
         Map<String, Object> formDataMap = new HashMap<>();
         for (ImApprovalFormData data : formDataList) {
-            formDataMap.put(data.getFieldName(), data.getFieldValue());
+            formDataMap.put(data.getFieldKey(), data.getFieldValue());
         }
         result.put("formData", formDataMap);
 
@@ -361,7 +361,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         for (Map.Entry<String, Object> entry : formData.entrySet()) {
             ImApprovalFormData data = new ImApprovalFormData();
             data.setApprovalId(approvalId);
-            data.setFieldName(entry.getKey());
+            data.setFieldKey(entry.getKey());
             data.setFieldValue(JSON.toJSONString(entry.getValue()));
             data.setFieldType("TEXT");
             data.setCreateTime(LocalDateTime.now());
@@ -465,7 +465,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
             // 所有节点已审批完成，更新审批状态
             ImApproval approval = approvalMapper.selectImApprovalById(approvalId);
             approval.setStatus("APPROVED");
-            approval.setCompletedTime(LocalDateTime.now());
+            approval.setFinishTime(LocalDateTime.now());
             approval.setUpdateTime(LocalDateTime.now());
             approvalMapper.updateImApproval(approval);
         } else if (nextNode != null) {

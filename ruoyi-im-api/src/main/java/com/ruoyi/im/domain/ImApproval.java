@@ -1,9 +1,12 @@
 package com.ruoyi.im.domain;
 
-import lombok.Data;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import com.ruoyi.im.common.BaseEntity;
 
 import java.io.Serializable;
@@ -12,64 +15,62 @@ import java.time.LocalDateTime;
 /**
  * 审批实例实体
  *
- * 用于存储IM系统中的审批实例信息，包括审批流程的发起、流转、审批等全生命周期管理
- * 支持基于模板的审批流程，记录申请人、审批状态、当前节点、表单数据等关键信息
- *
  * @author ruoyi
  */
 @TableName("im_approval")
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ImApproval extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 审批ID，主键，唯一标识审批实例
-     */
+    /** 审批ID，主键，唯一标识审批实例 */
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 模板ID，关联到im_approval_template表，指定该审批使用的模板
-     */
+    /** 模板ID，关联到im_approval_template表 */
+    @TableField("template_id")
     private Long templateId;
 
-    /**
-     * 审批标题，用于描述审批事项的简短标题
-     */
+    /** 审批标题，用于描述审批事项的简短标题 */
     private String title;
 
-    /**
-     * 申请人ID，发起审批的用户ID，关联到im_user表
-     */
+    /** 申请人ID，发起审批的用户ID */
+    @TableField("applicant_id")
     private Long applicantId;
 
-    /**
-     * 状态（PENDING待审批 APPROVED已通过 REJECTED已驳回 CANCELLED已取消）
-     * PENDING: 审批已发起，等待审批人处理
-     * APPROVED: 审批流程已全部通过
-     * REJECTED: 审批流程被驳回，需要重新申请或终止
-     * CANCELLED: 审批流程被申请人主动取消
-     */
+    /** 状态（PENDING待审批 APPROVED已通过 REJECTED已驳回 CANCELLED已取消） */
     private String status;
 
-    /**
-     * 当前节点ID，审批流程当前所处的节点ID，用于跟踪审批进度
-     */
+    /** 当前节点ID，审批流程当前所处的节点ID */
+    @TableField("current_node_id")
     private Long currentNodeId;
 
-    /**
-     * 表单数据（JSON格式），申请人填写的表单数据，以JSON字符串形式存储
-     */
+    /** 表单数据（JSON格式），申请人填写的表单数据 */
+    @TableField("form_data")
     private String formData;
 
-    /**
-     * 附件列表（JSON格式），审批相关的附件信息，以JSON字符串形式存储
-     */
+    /** 附件列表（JSON格式），审批相关的附件信息 */
     private String attachments;
 
-    /**
-     * 完成时间，审批流程的完成时间
-     */
-    private LocalDateTime completedTime;
+    /** 申请时间，审批发起的时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @TableField("apply_time")
+    private LocalDateTime applyTime;
+
+    /** 完成时间，审批流程的完成时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @TableField("finish_time")
+    private LocalDateTime finishTime;
+
+    /** 创建者 */
+    @TableField("create_by")
+    private String createBy;
+
+    /** 更新者 */
+    @TableField("update_by")
+    private String updateBy;
+
+    /** 备注 */
+    private String remark;
 }

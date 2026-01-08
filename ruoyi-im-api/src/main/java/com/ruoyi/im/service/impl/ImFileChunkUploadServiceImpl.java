@@ -245,15 +245,12 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
             // 保存文件信息到im_file_asset表
             ImFileAsset fileAsset = new ImFileAsset();
             fileAsset.setFileName(chunkUpload.getFileName());
-            fileAsset.setOriginalName(chunkUpload.getFileName());
             fileAsset.setFilePath(finalFilePath);
             fileAsset.setFileSize(chunkUpload.getFileSize());
             fileAsset.setFileType(getFileType(chunkUpload.getFileName()));
-            fileAsset.setFileExtension(getFileExtension(chunkUpload.getFileName()));
-            fileAsset.setFileUrl(fileUrl);
+            fileAsset.setFileExt(getFileExtension(chunkUpload.getFileName()));
             fileAsset.setUploaderId(userId);
-            fileAsset.setStatus(1);
-            fileAsset.setDeleted(false);
+            fileAsset.setStatus("ACTIVE");
             fileAsset.setDownloadCount(0);
             fileAsset.setCreateTime(LocalDateTime.now());
             fileAssetMapper.insert(fileAsset);

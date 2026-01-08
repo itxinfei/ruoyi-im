@@ -75,10 +75,10 @@ public class ImFilePreviewServiceImpl implements ImFilePreviewService {
         vo.setFileId(fileAsset.getId());
         vo.setFileName(fileAsset.getFileName());
         vo.setFileType(fileAsset.getFileType());
-        vo.setFileExtension(fileAsset.getFileExtension());
+        vo.setFileExtension(fileAsset.getFileExt());
         vo.setFileSize(fileAsset.getFileSize());
 
-        String extension = fileAsset.getFileExtension() != null ? fileAsset.getFileExtension().toLowerCase() : "";
+        String extension = fileAsset.getFileExt() != null ? fileAsset.getFileExt().toLowerCase() : "";
 
         // 确定预览类型
         if (IMAGE_FORMATS.contains(extension)) {
@@ -110,8 +110,9 @@ public class ImFilePreviewServiceImpl implements ImFilePreviewService {
         }
 
         // 设置预览URL
-        vo.setPreviewUrl(fileAsset.getFileUrl());
-        vo.setDownloadUrl(fileAsset.getFileUrl());
+        String fileUrl = urlPrefix + fileAsset.getFilePath();
+        vo.setPreviewUrl(fileUrl);
+        vo.setDownloadUrl(fileUrl);
 
         // 生成缩略图（仅图片）
         if ("image".equals(vo.getPreviewType())) {
@@ -202,9 +203,9 @@ public class ImFilePreviewServiceImpl implements ImFilePreviewService {
             case "html":
                 // 对于PDF/Office等，需要转换后返回URL
                 // 这里简化处理，直接返回原文件URL
-                return fileAsset.getFileUrl();
+                return urlPrefix + fileAsset.getFilePath();
             default:
-                return fileAsset.getFileUrl();
+                return urlPrefix + fileAsset.getFilePath();
         }
     }
 

@@ -50,7 +50,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setAvatar(request.getAvatar());
         group.setDescription(request.getDescription());
         group.setType(request.getType() != null ? request.getType() : "PRIVATE");
-        group.setMemberLimit(request.getMemberLimit() != null ? request.getMemberLimit() : 500);
+        group.setMaxMembers(request.getMemberLimit() != null ? request.getMemberLimit() : 500);
         group.setMemberCount(1);
         group.setStatus("NORMAL");
         group.setCreateTime(LocalDateTime.now());
@@ -111,7 +111,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             group.setDescription(request.getDescription());
         }
         if (request.getMemberLimit() != null) {
-            group.setMemberLimit(request.getMemberLimit());
+            group.setMaxMembers(request.getMemberLimit());
         }
         group.setUpdateTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
@@ -216,7 +216,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             throw new BusinessException("无权限添加成员");
         }
 
-        if (group.getMemberCount() + userIds.size() > group.getMemberLimit()) {
+        if (group.getMemberCount() + userIds.size() > group.getMaxMembers()) {
             throw new BusinessException("群组成员数量已达上限");
         }
 

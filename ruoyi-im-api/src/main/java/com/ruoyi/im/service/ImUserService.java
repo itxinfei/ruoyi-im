@@ -72,7 +72,7 @@ public interface ImUserService {
      * @param userId 用户ID
      * @param status 状态
      */
-    void updateStatus(Long userId, String status); // 修改参数类型为String
+    void updateStatus(Long userId, Integer status); // 0=禁用, 1=启用
 
     /**
      * 修改密码

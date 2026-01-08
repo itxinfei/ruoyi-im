@@ -1,8 +1,10 @@
 package com.ruoyi.im.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -10,9 +12,6 @@ import java.time.LocalDateTime;
 
 /**
  * 群组文件实体
- *
- * 用于存储IM系统中的群组共享文件信息
- * 支持文件分类、权限控制、下载统计等功能
  *
  * @author ruoyi
  */
@@ -22,84 +21,66 @@ public class ImGroupFile implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 文件ID，主键
-     */
+    /** 文件ID */
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 群组ID
-     */
+    /** 群组ID */
+    @TableField("group_id")
     private Long groupId;
 
-    /**
-     * 文件资产ID（关联im_file_asset表）
-     */
+    /** 文件资产ID */
+    @TableField("file_id")
     private Long fileId;
 
-    /**
-     * 文件名称
-     */
+    /** 文件名称 */
+    @TableField("file_name")
     private String fileName;
 
-    /**
-     * 文件类型：image/video/audio/document/other
-     */
+    /** 文件类型 */
+    @TableField("file_type")
     private String fileType;
 
-    /**
-     * 文件大小（字节）
-     */
+    /** 文件大小 */
+    @TableField("file_size")
     private Long fileSize;
 
-    /**
-     * 文件分类：default/document/image/video/audio
-     */
+    /** 文件分类 */
     private String category;
 
-    /**
-     * 下载权限：ALL=所有人, ADMIN=仅管理员
-     */
+    /** 下载权限 */
     private String permission;
 
-    /**
-     * 上传者ID
-     */
+    /** 上传者ID */
+    @TableField("uploader_id")
     private Long uploaderId;
 
-    /**
-     * 上传者名称（非数据库字段，冗余显示）
-     */
+    /** 上传者名称 */
+    @TableField("uploader_name")
     private String uploaderName;
 
-    /**
-     * 下载次数
-     */
+    /** 下载次数 */
+    @TableField("download_count")
     private Integer downloadCount;
 
-    /**
-     * 状态：1=正常, 0=已删除
-     */
+    /** 状态：1=正常, 0=已删除 */
     private Integer status;
 
-    /**
-     * 创建时间
-     */
+    /** 创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
-    /**
-     * 更新时间
-     */
+    /** 更新时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
-    /**
-     * 文件URL（非数据库字段，关联查询）
-     */
+    // ==================== 非数据库字段 ====================
+
+    /** 文件URL */
+    @TableField(exist = false)
     private String fileUrl;
 
-    /**
-     * 文件缩略图URL（非数据库字段，关联查询）
-     */
+    /** 文件缩略图URL */
+    @TableField(exist = false)
     private String thumbnailUrl;
 }

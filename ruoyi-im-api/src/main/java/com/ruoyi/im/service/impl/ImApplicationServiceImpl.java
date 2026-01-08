@@ -66,8 +66,8 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         app.setAppType(appType);
         app.setAppUrl(appUrl);
         app.setIcon(icon);
-        app.setIsVisible(true);
-        app.setIsSystem(false);
+        app.setIsVisible(1);
+        app.setIsSystem(0);
         app.setSortOrder(0);
         app.setCreateTime(LocalDateTime.now());
         applicationMapper.insertImApplication(app);
@@ -92,7 +92,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         if (app == null) {
             throw new BusinessException("应用不存在");
         }
-        if (app.getIsSystem()) {
+        if (app.getIsSystem() == 1) {
             throw new BusinessException("系统应用不能删除");
         }
         applicationMapper.deleteImApplicationById(appId);
@@ -104,7 +104,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         if (app == null) {
             throw new BusinessException("应用不存在");
         }
-        app.setIsVisible(isVisible);
+        app.setIsVisible(isVisible ? 1 : 0);
         applicationMapper.updateImApplication(app);
     }
 }

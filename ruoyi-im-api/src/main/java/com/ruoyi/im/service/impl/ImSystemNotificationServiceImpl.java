@@ -31,7 +31,7 @@ public class ImSystemNotificationServiceImpl implements ImSystemNotificationServ
         notification.setContent(content);
         notification.setRelatedId(relatedId);
         notification.setRelatedType(relatedType);
-        notification.setIsRead(false);
+        notification.setIsRead(0);
         notification.setCreateTime(LocalDateTime.now());
         notificationMapper.insertImSystemNotification(notification);
         return notification.getId();
@@ -49,7 +49,7 @@ public class ImSystemNotificationServiceImpl implements ImSystemNotificationServ
             notification.setType(type);
             notification.setTitle(title);
             notification.setContent(content);
-            notification.setIsRead(false);
+            notification.setIsRead(0);
             notification.setCreateTime(LocalDateTime.now());
             notifications.add(notification);
         }

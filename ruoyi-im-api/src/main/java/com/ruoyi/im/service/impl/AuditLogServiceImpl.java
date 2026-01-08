@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.ruoyi.im.domain.ImAuditLog;
 import com.ruoyi.im.mapper.ImAuditLogMapper;
 import com.ruoyi.im.service.IAuditLogService;
@@ -8,7 +9,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 操作审计日志服务实现
@@ -24,8 +24,11 @@ public class AuditLogServiceImpl implements IAuditLogService {
     @Override
     @Async
     public void saveLog(ImAuditLog auditLog) {
-        if (auditLog.getOperationTime() == null) {
-            auditLog.setOperationTime(LocalDateTime.now());
+        if (auditLog.getCreateTime() == null) {
+            auditLog.setCreateTime(LocalDateTime.now());
+        }
+        if (StrUtil.isBlank(auditLog.getOperationResult())) {
+            auditLog.setOperationResult("SUCCESS");
         }
         auditLogMapper.insertImAuditLog(auditLog);
     }
@@ -35,27 +38,26 @@ public class AuditLogServiceImpl implements IAuditLogService {
     public void saveLog(Long userId, String userName, String module, String operationType, String description, String status) {
         ImAuditLog auditLog = new ImAuditLog();
         auditLog.setUserId(userId);
-        auditLog.setUserName(userName);
-        auditLog.setModule(module);
         auditLog.setOperationType(operationType);
-        auditLog.setDescription(description);
-        auditLog.setStatus(status);
-        auditLog.setOperationTime(LocalDateTime.now());
+        auditLog.setTargetType(module);
+        auditLog.setOperationResult(status);
+        auditLog.setErrorMessage(description);
+        auditLog.setCreateTime(LocalDateTime.now());
         saveLog(auditLog);
     }
 
     @Override
-    public List<ImAuditLog> selectLogList(ImAuditLog auditLog) {
+    public java.util.List<ImAuditLog> selectLogList(ImAuditLog auditLog) {
         return auditLogMapper.selectImAuditLogList(auditLog);
     }
 
     @Override
-    public List<ImAuditLog> selectUserLogs(Long userId, LocalDateTime startTime, LocalDateTime endTime) {
+    public java.util.List<ImAuditLog> selectUserLogs(Long userId, java.time.LocalDateTime startTime, java.time.LocalDateTime endTime) {
         return auditLogMapper.selectUserLogs(userId, startTime, endTime);
     }
 
     @Override
-    public int deleteExpiredLogs(LocalDateTime beforeDate) {
+    public int deleteExpiredLogs(java.time.LocalDateTime beforeDate) {
         return auditLogMapper.deleteExpiredLogs(beforeDate);
     }
 }

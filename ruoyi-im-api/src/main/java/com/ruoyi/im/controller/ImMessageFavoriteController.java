@@ -1,0 +1,136 @@
+package com.ruoyi.im.controller;
+
+import com.ruoyi.im.common.Result;
+import com.ruoyi.im.service.ImMessageFavoriteService;
+import com.ruoyi.im.vo.favorite.FavoriteMessageVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.List;
+
+/**
+ * 消息收藏控制器
+ *
+ * @author ruoyi
+ */
+@Tag(name = "消息收藏", description = "消息收藏管理接口")
+@RestController
+@RequestMapping("/api/im/message/favorite")
+public class ImMessageFavoriteController {
+
+    @Autowired
+    private ImMessageFavoriteService messageFavoriteService;
+
+    /**
+     * 收藏消息
+     */
+    @Operation(summary = "收藏消息")
+    @PostMapping("/{messageId}")
+    public Result<Long> addFavorite(
+            @PathVariable Long messageId,
+            @RequestParam(required = false) Long conversationId,
+            @RequestParam(required = false) String remark,
+            @RequestParam(required = false) String tags,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        Long favoriteId = messageFavoriteService.addFavorite(messageId, conversationId, userId, remark, tags);
+        return Result.success("收藏成功", favoriteId);
+    }
+
+    /**
+     * 取消收藏
+     */
+    @Operation(summary = "取消收藏")
+    @DeleteMapping("/{messageId}")
+    public Result<Void> removeFavorite(
+            @PathVariable Long messageId,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        messageFavoriteService.removeFavorite(messageId, userId);
+        return Result.success("取消收藏成功");
+    }
+
+    /**
+     * 检查消息是否已收藏
+     */
+    @Operation(summary = "检查消息是否已收藏")
+    @GetMapping("/{messageId}/check")
+    public Result<Boolean> isFavorited(
+            @PathVariable Long messageId,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        boolean favorited = messageFavoriteService.isFavorited(messageId, userId);
+        return Result.success(favorited);
+    }
+
+    /**
+     * 获取用户收藏的消息列表
+     */
+    @Operation(summary = "获取用户收藏的消息列表")
+    @GetMapping("/list")
+    public Result<List<FavoriteMessageVO>> getUserFavorites(
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        List<FavoriteMessageVO> favorites = messageFavoriteService.getUserFavorites(userId);
+        return Result.success(favorites);
+    }
+
+    /**
+     * 获取会话中收藏的消息列表
+     */
+    @Operation(summary = "获取会话中收藏的消息列表")
+    @GetMapping("/conversation/{conversationId}")
+    public Result<List<FavoriteMessageVO>> getConversationFavorites(
+            @PathVariable Long conversationId,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        List<FavoriteMessageVO> favorites = messageFavoriteService.getConversationFavorites(conversationId, userId);
+        return Result.success(favorites);
+    }
+
+    /**
+     * 根据标签获取收藏消息
+     */
+    @Operation(summary = "根据标签获取收藏消息")
+    @GetMapping("/tag/{tag}")
+    public Result<List<FavoriteMessageVO>> getFavoritesByTag(
+            @PathVariable String tag,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        List<FavoriteMessageVO> favorites = messageFavoriteService.getFavoritesByTag(userId, tag);
+        return Result.success(favorites);
+    }
+
+    /**
+     * 更新收藏备注和标签
+     */
+    @Operation(summary = "更新收藏备注和标签")
+    @PutMapping("/{messageId}")
+    public Result<Void> updateFavorite(
+            @PathVariable Long messageId,
+            @RequestParam(required = false) String remark,
+            @RequestParam(required = false) String tags,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        messageFavoriteService.updateFavorite(messageId, userId, remark, tags);
+        return Result.success("更新成功");
+    }
+}

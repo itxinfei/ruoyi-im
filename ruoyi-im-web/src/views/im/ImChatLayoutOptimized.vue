@@ -120,6 +120,21 @@
               <el-button :icon="Plus" size="small" circle @click="showCreateGroupDialog" />
             </div>
             <div class="session-list">
+              <!-- 空状态提示 -->
+              <div v-if="filteredSessions.length === 0" class="empty-sessions">
+                <el-empty description="暂无会话">
+                  <template #image>
+                    <el-icon :size="60" color="#cccccc">
+                      <ChatDotRound />
+                    </el-icon>
+                  </template>
+                  <template #default>
+                    <p class="empty-tip">开始聊天吧</p>
+                    <el-button type="primary" @click="showStartChatDialog">发起聊天</el-button>
+                  </template>
+                </el-empty>
+              </div>
+              <!-- 会话列表 -->
               <div
                 v-for="session in filteredSessions"
                 :key="session.id"
@@ -1491,6 +1506,36 @@
           >关闭</el-button
         >
       </template>
+    </el-dialog>
+
+    <!-- 发起聊天对话框 -->
+    <el-dialog v-model="startChatDialogVisible" title="发起聊天" width="500px">
+      <div class="start-chat-dialog">
+        <el-input
+          v-model="memberSearchKeyword"
+          placeholder="搜索好友..."
+          :prefix-icon="Search"
+          clearable
+          class="search-input"
+        />
+        <div class="friend-list">
+          <div
+            v-for="friend in filteredUsers"
+            :key="friend.id"
+            class="friend-item"
+            @click="startPrivateChat(friend)"
+          >
+            <el-avatar :size="40" :src="friend.avatar">
+              {{ (friend.name || friend.nickname || 'U').charAt(0) }}
+            </el-avatar>
+            <div class="friend-info">
+              <div class="friend-name">{{ friend.name || friend.nickname }}</div>
+              <div class="friend-dept">{{ friend.deptName || '' }}</div>
+            </div>
+            <el-icon class="arrow-icon"><ArrowRight /></el-icon>
+          </div>
+        </div>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -4166,6 +4211,28 @@ const loadSessions = async () => {
 const createGroupDialogVisible = ref(false)
 const createGroupFormRef = ref(null)
 const creatingGroup = ref(false)
+
+// 发起聊天对话框
+const startChatDialogVisible = ref(false)
+const selectedFriendForChat = ref(null)
+
+// 显示发起聊天对话框
+const showStartChatDialog = () => {
+  if (friends.value.length === 0) {
+    ElMessage.warning('请先添加好友')
+    return
+  }
+  startChatDialogVisible.value = true
+}
+
+// 发起私聊
+const startPrivateChat = friend => {
+  selectedFriendForChat.value = friend
+  // 通过发送消息来触发会话创建（如果不存在）
+  startChatDialogVisible.value = false
+  // TODO: 跳转到与该好友的聊天界面
+  ElMessage.success(`开始与 ${friend.name || friend.nickname} 聊天`)
+}
 
 const createGroupForm = ref({
   name: '',
@@ -7038,6 +7105,68 @@ $shadow-lg:
 
   &.read {
     color: $success-color;
+  }
+}
+
+// 空会话列表样式
+.empty-sessions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px 20px;
+
+  .empty-tip {
+    margin: 12px 0 20px;
+    color: #999;
+    font-size: 14px;
+  }
+}
+
+// 发起聊天对话框样式
+.start-chat-dialog {
+  .search-input {
+    margin-bottom: 16px;
+  }
+
+  .friend-list {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+  }
+
+  .friend-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f5f7fa;
+    }
+
+    .friend-info {
+      flex: 1;
+      margin-left: 12px;
+
+      .friend-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .friend-dept {
+        font-size: 12px;
+        color: #999;
+        margin-top: 4px;
+      }
+    }
+
+    .arrow-icon {
+      color: #ccc;
+    }
   }
 }
 </style>

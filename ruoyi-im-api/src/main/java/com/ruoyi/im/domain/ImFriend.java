@@ -32,12 +32,13 @@ public class ImFriend implements Serializable {
     /**
      * 用户ID，当前用户的ID
      */
+    @TableField("user_id")
     private Long userId;
 
     /**
      * 好友ID，好友用户的ID
      */
-    @TableField("friend_user_id")
+    @TableField("friend_id")
     private Long friendId;
 
     /**
@@ -48,35 +49,56 @@ public class ImFriend implements Serializable {
     /**
      * 好友分组，好友所属的分组名称，用于分类管理好友
      */
+    @TableField("group_name")
     private String groupName;
 
     /**
-     * 好友状态（NORMAL正常 BLOCKED已拉黑 DELETED已删除）
+     * 是否删除：0=否, 1=是
      */
-    private String status;
+    @TableField("is_deleted")
+    private Integer isDeleted;
+
+    /**
+     * 删除时间
+     */
+    @TableField("deleted_time")
+    private LocalDateTime deletedTime;
 
     /**
      * 创建时间，建立好友关系的时间
      */
+    @TableField("create_time")
     private LocalDateTime createTime;
 
     /**
      * 更新时间，好友关系信息最后更新的时间
      */
+    @TableField("update_time")
     private LocalDateTime updateTime;
+
+    // ==================== 以下字段为非数据库字段 ====================
+
+    /**
+     * 好友状态（非数据库字段）
+     */
+    @TableField(exist = false)
+    private String status;
 
     /**
      * 好友名称，非数据库字段，用于显示好友的昵称
      */
+    @TableField(exist = false)
     private String friendName;
 
     /**
      * 好友头像，非数据库字段，用于显示好友的头像URL
      */
+    @TableField(exist = false)
     private String friendAvatar;
 
     /**
      * 好友在线状态，非数据库字段，用于显示好友是否在线
      */
+    @TableField(exist = false)
     private Boolean online;
 }

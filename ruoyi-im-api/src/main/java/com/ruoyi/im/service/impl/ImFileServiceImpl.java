@@ -73,15 +73,14 @@ public class ImFileServiceImpl implements ImFileService {
 
         ImFileAsset fileAsset = new ImFileAsset();
         fileAsset.setFileName(fileName);
-        fileAsset.setOriginalName(originalFilename);
         fileAsset.setFilePath(relativePath);
         fileAsset.setFileSize(file.getSize());
         fileAsset.setFileType(fileType);
-        fileAsset.setMimeType(file.getContentType());
+        fileAsset.setFileExt(fileExtension);
         fileAsset.setUploaderId(userId);
-        fileAsset.setUploadTime(LocalDateTime.now());
+        fileAsset.setCreateTime(LocalDateTime.now());
         fileAsset.setDownloadCount(0);
-        fileAsset.setStatus(1);
+        fileAsset.setStatus("ACTIVE");
 
         imFileAssetMapper.insert(fileAsset);
 
@@ -115,7 +114,7 @@ public class ImFileServiceImpl implements ImFileService {
             throw new BusinessException("文件不存在");
         }
 
-        fileAsset.setStatus(0);
+        fileAsset.setStatus("DELETED");
         imFileAssetMapper.updateById(fileAsset);
     }
 
@@ -124,7 +123,7 @@ public class ImFileServiceImpl implements ImFileService {
         List<ImFileAsset> list = imFileAssetMapper.selectList(null);
         List<ImFileVO> result = new ArrayList<>();
         for (ImFileAsset asset : list) {
-            if (asset.getStatus() == 1) {
+            if ("ACTIVE".equals(asset.getStatus())) {
                 if (fileType == null || fileType.isEmpty() || fileType.equals(asset.getFileType())) {
                     result.add(convertToVO(asset));
                 }
@@ -165,10 +164,10 @@ public class ImFileServiceImpl implements ImFileService {
         ImFileVO vo = new ImFileVO();
         BeanUtils.copyProperties(asset, vo);
         vo.setFileId(asset.getId());
-        vo.setFileExtension(FileUtils.getFileExtension(asset.getOriginalName()));
+        vo.setFileExtension(asset.getFileExt());
         vo.setFileUrl(urlPrefix + asset.getFilePath());
-        vo.setUploadTime(asset.getUploadTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        vo.setDeleted(asset.getStatus() == 0);
+        vo.setUploadTime(asset.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        vo.setDeleted("DELETED".equals(asset.getStatus()));
         return vo;
     }
 }

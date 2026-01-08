@@ -1,8 +1,10 @@
 package com.ruoyi.im.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -10,8 +12,6 @@ import java.time.LocalDateTime;
 
 /**
  * 操作审计日志实体
- *
- * 用于记录系统中的敏感操作，如用户登录、权限变更、数据删除等
  *
  * @author ruoyi
  */
@@ -21,84 +21,43 @@ public class ImAuditLog implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 日志ID，主键
-     */
+    /** 日志ID，主键 */
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 操作用户ID
-     */
+    /** 操作用户ID */
+    @TableField("user_id")
     private Long userId;
 
-    /**
-     * 操作用户名
-     */
-    private String userName;
-
-    /**
-     * 操作模块（LOGIN登录、MESSAGE消息、GROUP群组、USER用户、FILE文件、APPROVAL审批等）
-     */
-    private String module;
-
-    /**
-     * 操作类型（CREATE新增、UPDATE修改、DELETE删除、QUERY查询、EXPORT导出、IMPORT导入等）
-     */
+    /** 操作类型（LOGIN登录 LOGOUT登出 SEND_MESSAGE发送消息 DELETE_MESSAGE撤回消息 CREATE_GROUP创建群组 JOIN_GROUP加入群组 LEAVE_GROUP退出群组 ADD_FRIEND添加好友 DELETE_FRIEND删除好友） */
+    @TableField("operation_type")
     private String operationType;
 
-    /**
-     * 操作描述
-     */
-    private String description;
+    /** 目标类型（USER MESSAGE GROUP CONVERSATION FRIEND） */
+    @TableField("target_type")
+    private String targetType;
 
-    /**
-     * 请求方法
-     */
-    private String requestMethod;
+    /** 目标ID */
+    @TableField("target_id")
+    private Long targetId;
 
-    /**
-     * 请求URL
-     */
-    private String requestUrl;
+    /** 操作结果（SUCCESS成功 FAILED失败） */
+    @TableField("operation_result")
+    private String operationResult;
 
-    /**
-     * 请求参数
-     */
-    private String requestParams;
+    /** 错误信息 */
+    @TableField("error_message")
+    private String errorMessage;
 
-    /**
-     * 响应结果
-     */
-    private String responseData;
+    /** 客户端IP */
+    @TableField("ip_address")
+    private String ipAddress;
 
-    /**
-     * 操作状态（SUCCESS成功、FAILURE失败）
-     */
-    private String status;
-
-    /**
-     * 错误信息
-     */
-    private String errorMsg;
-
-    /**
-     * 执行时长（毫秒）
-     */
-    private Long executionTime;
-
-    /**
-     * 客户端IP
-     */
-    private String clientIp;
-
-    /**
-     * 用户代理
-     */
+    /** 用户代理 */
+    @TableField("user_agent")
     private String userAgent;
 
-    /**
-     * 操作时间
-     */
-    private LocalDateTime operationTime;
+    /** 操作时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createTime;
 }

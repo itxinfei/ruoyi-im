@@ -1,6 +1,7 @@
 package com.ruoyi.im.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.im.common.BaseEntity;
@@ -26,39 +27,61 @@ public class ImConversationMember extends BaseEntity implements Serializable {
     private Long id;
 
     /** 会话ID */
+    @TableField("conversation_id")
     private Long conversationId;
 
     /** 用户ID */
+    @TableField("user_id")
     private Long userId;
 
+    /** 群内昵称 */
+    private String nickname;
+
+    /** 角色 */
+    private String role;
+
     /** 未读消息数 */
+    @TableField("unread_count")
     private Integer unreadCount;
 
-    /** 最后已读消息ID */
-    private Long lastReadMessageId;
-
     /** 是否置顶 */
+    @TableField("is_pinned")
     private Integer isPinned;
 
     /** 是否免打扰 */
+    @TableField("is_muted")
     private Integer isMuted;
 
-    /** 是否已删除（用户退出会话） */
+    /** 最后已读消息ID */
+    @TableField("last_read_message_id")
+    private Long lastReadMessageId;
+
+    /** 最后已读时间 */
+    @TableField("last_read_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime lastReadTime;
+
+    /** 是否删除：0=否, 1=是 */
+    @TableField("is_deleted")
     private Integer isDeleted;
 
     /** 删除时间 */
+    @TableField("deleted_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime deletedTime;
 
     /** 创建时间 */
+    @TableField("create_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     /** 更新时间 */
+    @TableField("update_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
-    // Getters and Setters
+    // ==================== Getters and Setters ====================
+
     public Long getId() {
         return id;
     }
@@ -83,20 +106,28 @@ public class ImConversationMember extends BaseEntity implements Serializable {
         this.userId = userId;
     }
 
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     public Integer getUnreadCount() {
         return unreadCount;
     }
 
     public void setUnreadCount(Integer unreadCount) {
         this.unreadCount = unreadCount;
-    }
-
-    public Long getLastReadMessageId() {
-        return lastReadMessageId;
-    }
-
-    public void setLastReadMessageId(Long lastReadMessageId) {
-        this.lastReadMessageId = lastReadMessageId;
     }
 
     public Integer getIsPinned() {
@@ -113,6 +144,22 @@ public class ImConversationMember extends BaseEntity implements Serializable {
 
     public void setIsMuted(Integer isMuted) {
         this.isMuted = isMuted;
+    }
+
+    public Long getLastReadMessageId() {
+        return lastReadMessageId;
+    }
+
+    public void setLastReadMessageId(Long lastReadMessageId) {
+        this.lastReadMessageId = lastReadMessageId;
+    }
+
+    public LocalDateTime getLastReadTime() {
+        return lastReadTime;
+    }
+
+    public void setLastReadTime(LocalDateTime lastReadTime) {
+        this.lastReadTime = lastReadTime;
     }
 
     public Integer getIsDeleted() {
