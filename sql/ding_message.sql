@@ -84,20 +84,20 @@ INSERT INTO `im_ding_template` (`name`, `content`, `category`, `is_system`, `sor
 ('生日祝福', '【生日祝福】祝{name}生日快乐！', 'REMIND', 1, 8);
 
 -- ============================================
--- 初始化测试DING消息
+-- 初始化测试DING消息（使用实际存在的用户ID）
 -- ============================================
 
 INSERT INTO `im_ding_message` (`sender_id`, `content`, `ding_type`, `is_urgent`, `send_time`, `status`, `total_count`, `read_count`, `confirmed_count`)
 VALUES
-  (1, '【会议提醒】今天下午3点在会议室A召开项目进度会议，请大家准时参加。', 'APP', 1, NOW(), 'SENT', 3, 2, 1),
-  (1, '【工作安排】请各位在本周五前完成月度工作总结。', 'APP', 0, NOW(), 'SENT', 3, 1, 0);
+  (2, '【会议提醒】今天下午3点在会议室A召开项目进度会议，请大家准时参加。', 'APP', 1, NOW(), 'SENT', 3, 2, 1),
+  (2, '【工作安排】请各位在本周五前完成月度工作总结。', 'APP', 0, NOW(), 'SENT', 3, 1, 0);
 
--- 添加回执记录
+-- 添加回执记录（使用实际存在的用户ID 3, 4, 5）
 INSERT INTO `im_ding_receipt` (`ding_id`, `receiver_id`, `read_time`, `confirmed`, `confirm_time`)
 VALUES
-  (1, 2, NOW(), 1, NOW()),
-  (1, 3, NOW(), 0, NULL),
-  (2, 2, NULL, 0, NULL);
+  (1, 3, NOW(), 1, NOW()),
+  (1, 4, NOW(), 0, NULL),
+  (2, 3, NULL, 0, NULL);
 
 SELECT 'DING消息表创建完成！' AS message;
 SELECT COUNT(*) AS ding_count FROM `im_ding_message`;

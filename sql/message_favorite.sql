@@ -27,11 +27,11 @@ CREATE TABLE `im_message_favorite` (
 -- 初始化测试数据
 -- ============================================
 
--- 用户1收藏一些消息（假设已有消息数据）
+-- 用户2收藏一些消息（假设已有消息数据）
 INSERT INTO `im_message_favorite` (`user_id`, `message_id`, `conversation_id`, `remark`, `tags`)
 VALUES
-  (1, 1, 1, '重要通知', '工作,通知'),
-  (1, 6, 3, '会议提醒', '会议,重要')
+  (2, 1, 1, '重要通知', '工作,通知'),
+  (2, 6, 3, '会议提醒', '会议,重要')
 ON DUPLICATE KEY UPDATE `remark` = VALUES(`remark`);
 
 SELECT '消息收藏表创建完成！' AS message;

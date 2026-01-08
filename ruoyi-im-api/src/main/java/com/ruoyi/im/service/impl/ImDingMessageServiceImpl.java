@@ -132,7 +132,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
         // 获取发送者信息
         ImUser sender = userMapper.selectImUserById(ding.getSenderId());
         if (sender != null) {
-            vo.setSenderName(sender.getNickName());
+            vo.setSenderName(sender.getNickname());
             vo.setSenderAvatar(sender.getAvatar());
         }
 
@@ -211,7 +211,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
 
             ImUser receiver = userMapper.selectImUserById(receipt.getReceiverId());
             if (receiver != null) {
-                vo.setReceiverName(receiver.getNickName());
+                vo.setReceiverName(receiver.getNickname());
                 vo.setReceiverAvatar(receiver.getAvatar());
             }
 
