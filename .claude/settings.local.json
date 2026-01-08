@@ -80,7 +80,8 @@
       "Bash(__NEW_LINE__ echo \"=== 待办列表 ===\")",
       "Bash(__NEW_LINE__ echo \"=== 组织架构树 ===\")",
       "Bash(__NEW_LINE__ echo \"=== 应用列表 ===\")",
-      "Bash(__NEW_LINE__ echo \"=== 配置信息 ===\")"
+      "Bash(__NEW_LINE__ echo \"=== 配置信息 ===\")",
+      "Bash(git commit:*)"
     ]
   }
 }
