@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImScheduleEventMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImScheduleEvent" id="ImScheduleEventResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="location" column="location"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="isAllDay" column="is_all_day"/>
+        <result property="recurrenceType" column="recurrence_type"/>
+        <result property="recurrenceEndDate" column="recurrence_end_date"/>
+        <result property="recurrenceInterval" column="recurrence_interval"/>
+        <result property="recurrenceDays" column="recurrence_days"/>
+        <result property="color" column="color"/>
+        <result property="visibility" column="visibility"/>
+        <result property="status" column="status"/>
+        <result property="reminderMinutes" column="reminder_minutes"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="userName" column="user_name"/>
+        <result property="userAvatar" column="user_avatar"/>
+        <result property="participantCount" column="participant_count"/>
+    </resultMap>
+
+    <sql id="selectImScheduleEventVo">
+        select e.id, e.user_id, e.title, e.description, e.location,
+               e.start_time, e.end_time, e.is_all_day, e.recurrence_type,
+               e.recurrence_end_date, e.recurrence_interval, e.recurrence_days,
+               e.color, e.visibility, e.status, e.reminder_minutes,
+               e.create_time, e.update_time,
+               u.nickname as user_name, u.avatar as user_avatar,
+               (select count(*) from im_schedule_participant where event_id = e.id) as participant_count
+        from im_schedule_event e
+        left join im_user u on e.user_id = u.id
+    </sql>
+
+    <select id="selectEventPage" resultMap="ImScheduleEventResult">
+        <include refid="selectImScheduleEventVo"/>
+        <where>
+            <if test="req.startTime != null">
+                and e.start_time &lt;= #{req.endTime}
+            </if>
+            <if test="req.endTime != null">
+                and e.end_time &gt;= #{req.startTime}
+            </if>
+            <if test="req.status != null and req.status != ''">
+                and e.status = #{req.status}
+            </if>
+            <if test="req.keyword != null and req.keyword != ''">
+                and (e.title like concat('%', #{req.keyword}, '%')
+                     or e.description like concat('%', #{req.keyword}, '%')
+                     or e.location like concat('%', #{req.keyword}, '%'))
+            </if>
+            and (e.user_id = #{userId}
+                 <if test="req.onlyParticipated">
+                     or e.id in (select event_id from im_schedule_participant where user_id = #{userId})
+                 </if>
+                 )
+        </where>
+        order by e.start_time asc
+    </select>
+
+</mapper>

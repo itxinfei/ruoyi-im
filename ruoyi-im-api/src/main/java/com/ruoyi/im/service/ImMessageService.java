@@ -42,6 +42,15 @@ public interface ImMessageService {
     void recallMessage(Long messageId, Long userId);
 
     /**
+     * 编辑消息
+     *
+     * @param messageId 消息ID
+     * @param newContent 新内容
+     * @param userId 当前用户ID
+     */
+    void editMessage(Long messageId, String newContent, Long userId);
+
+    /**
      * 转发消息
      *
      * @param messageId 消息ID

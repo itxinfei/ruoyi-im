@@ -2,12 +2,14 @@ package com.ruoyi.im.service.impl;
 
 import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImMessage;
+import com.ruoyi.im.domain.ImMessageEditHistory;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.conversation.ImPrivateConversationCreateRequest;
 import com.ruoyi.im.dto.mention.ImMentionInfo;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImConversationMapper;
+import com.ruoyi.im.mapper.ImMessageEditHistoryMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
@@ -19,6 +21,7 @@ import com.ruoyi.im.vo.message.ImMessageVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,6 +47,9 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     @Autowired
     private ImMessageMentionService messageMentionService;
+
+    @Autowired
+    private ImMessageEditHistoryMapper editHistoryMapper;
 
     @Override
     public Long sendMessage(ImMessageSendRequest request, Long userId) {
@@ -199,23 +205,68 @@ public class ImMessageServiceImpl implements ImMessageService {
         if (message == null) {
             throw new BusinessException("消息不存在");
         }
-        
+
         if (!message.getSenderId().equals(userId)) {
             throw new BusinessException("无权撤回该消息");
         }
-        
+
         if (message.getIsRevoked() == 1) {
             throw new BusinessException("消息已撤回");
         }
-        
+
         LocalDateTime now = LocalDateTime.now();
         if (message.getSendTime().plusMinutes(2).isBefore(now)) {
             throw new BusinessException("消息发送超过2分钟，无法撤回");
         }
-        
+
         message.setIsRevoked(1);
         message.setRevokeTime(now);
         message.setStatus(5);
+        imMessageMapper.updateImMessage(message);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void editMessage(Long messageId, String newContent, Long userId) {
+        ImMessage message = imMessageMapper.selectImMessageById(messageId);
+        if (message == null) {
+            throw new BusinessException("消息不存在");
+        }
+
+        if (!message.getSenderId().equals(userId)) {
+            throw new BusinessException("无权编辑该消息");
+        }
+
+        if (!"TEXT".equals(message.getMessageType())) {
+            throw new BusinessException("只能编辑文本消息");
+        }
+
+        if (message.getIsRevoked() == 1) {
+            throw new BusinessException("已撤回的消息不能编辑");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        // 限制：消息发送超过15分钟不能编辑
+        if (message.getCreateTime().plusMinutes(15).isBefore(now)) {
+            throw new BusinessException("消息发送超过15分钟，无法编辑");
+        }
+
+        // 保存编辑历史
+        String oldContent = message.getIsEdited() == 1 ? message.getEditedContent() : message.getContent();
+        ImMessageEditHistory history = new ImMessageEditHistory();
+        history.setMessageId(messageId);
+        history.setOldContent(oldContent);
+        history.setNewContent(newContent);
+        history.setEditorId(userId);
+        history.setEditTime(now);
+        history.setCreateTime(now);
+        editHistoryMapper.insert(history);
+
+        // 更新消息
+        message.setEditedContent(newContent);
+        message.setIsEdited(1);
+        message.setEditCount(message.getEditCount() == null ? 1 : message.getEditCount() + 1);
+        message.setEditTime(now);
         imMessageMapper.updateImMessage(message);
     }
 

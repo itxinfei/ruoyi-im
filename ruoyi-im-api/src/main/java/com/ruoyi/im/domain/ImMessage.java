@@ -68,6 +68,23 @@ public class ImMessage implements Serializable {
     @TableField("revoker_id")
     private Long revokerId;
 
+    /** 是否已编辑：0否 1是 */
+    @TableField("is_edited")
+    private Integer isEdited;
+
+    /** 编辑后的内容 */
+    @TableField("edited_content")
+    private String editedContent;
+
+    /** 编辑次数 */
+    @TableField("edit_count")
+    private Integer editCount;
+
+    /** 最后编辑时间 */
+    @TableField("edit_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime editTime;
+
     /** 创建时间 */
     @TableField("create_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -333,5 +350,37 @@ public class ImMessage implements Serializable {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Integer getIsEdited() {
+        return isEdited;
+    }
+
+    public void setIsEdited(Integer isEdited) {
+        this.isEdited = isEdited;
+    }
+
+    public String getEditedContent() {
+        return editedContent;
+    }
+
+    public void setEditedContent(String editedContent) {
+        this.editedContent = editedContent;
+    }
+
+    public Integer getEditCount() {
+        return editCount;
+    }
+
+    public void setEditCount(Integer editCount) {
+        this.editCount = editCount;
+    }
+
+    public LocalDateTime getEditTime() {
+        return editTime;
+    }
+
+    public void setEditTime(LocalDateTime editTime) {
+        this.editTime = editTime;
     }
 }

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImWorkReportMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImWorkReport" id="ImWorkReportResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="reportType" column="report_type"/>
+        <result property="reportDate" column="report_date"/>
+        <result property="workContent" column="work_content"/>
+        <result property="completionStatus" column="completion_status"/>
+        <result property="tomorrowPlan" column="tomorrow_plan"/>
+        <result property="issues" column="issues"/>
+        <result property="attachments" column="attachments"/>
+        <result property="workHours" column="work_hours"/>
+        <result property="visibility" column="visibility"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="status" column="status"/>
+        <result property="approverId" column="approver_id"/>
+        <result property="approveTime" column="approve_time"/>
+        <result property="approveRemark" column="approve_remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="userName" column="user_name"/>
+        <result property="userAvatar" column="user_avatar"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="commentCount" column="comment_count"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="isLiked" column="is_liked"/>
+    </resultMap>
+
+    <sql id="selectImWorkReportVo">
+        select r.id, r.user_id, r.report_type, r.report_date, r.work_content, r.completion_status,
+               r.tomorrow_plan, r.issues, r.attachments, r.work_hours, r.visibility, r.submit_time,
+               r.status, r.approver_id, r.approve_time, r.approve_remark, r.create_time, r.update_time,
+               u.nickname as user_name, u.avatar as user_avatar,
+               (select count(*) from im_work_report_comment where report_id = r.id) as comment_count,
+               (select count(*) from im_work_report_like where report_id = r.id) as like_count
+        from im_work_report r
+        left join im_user u on r.user_id = u.id
+    </sql>
+
+    <select id="selectReportPage" resultMap="ImWorkReportResult">
+        <include refid="selectImWorkReportVo"/>
+        <where>
+            <if test="req.reportType != null and req.reportType != ''">
+                and r.report_type = #{req.reportType}
+            </if>
+            <if test="req.startDate != null">
+                and r.report_date &gt;= #{req.startDate}
+            </if>
+            <if test="req.endDate != null">
+                and r.report_date &lt;= #{req.endDate}
+            </if>
+            <if test="req.userId != null">
+                and r.user_id = #{req.userId}
+            </if>
+            <if test="req.status != null and req.status != ''">
+                and r.status = #{req.status}
+            </if>
+            <if test="req.keyword != null and req.keyword != ''">
+                and (r.work_content like concat('%', #{req.keyword}, '%')
+                     or r.tomorrow_plan like concat('%', #{req.keyword}, '%')
+                     or u.nickname like concat('%', #{req.keyword}, '%'))
+            </if>
+        </where>
+        order by r.submit_time desc
+    </select>
+
+</mapper>

@@ -7,6 +7,7 @@ import com.ruoyi.im.dto.message.ImMessageRecallRequest;
 import com.ruoyi.im.dto.message.ImMessageReplyRequest;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.dto.message.ImMessageSearchRequest;
+import com.ruoyi.im.dto.message.MessageEditRequest;
 import com.ruoyi.im.dto.reaction.ImMessageReactionAddRequest;
 import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImMessageReactionService;
@@ -105,6 +106,30 @@ public class ImMessageController {
         }
         imMessageService.recallMessage(messageId, userId);
         return Result.success("消息已撤回");
+    }
+
+    /**
+     * 编辑消息
+     * 编辑已发送的文本消息
+     *
+     * @param messageId 消息ID
+     * @param request 编辑请求参数，包含新内容
+     * @param userId 当前登录用户ID
+     * @return 编辑结果
+     * @apiNote 消息编辑有时间限制（15分钟），只能编辑文本消息；编辑后会通过WebSocket通知接收方
+     * @throws BusinessException 当消息不存在、无权限编辑、超时或消息类型不支持时抛出业务异常
+     */
+    @Operation(summary = "编辑消息", description = "编辑已发送的文本消息")
+    @PutMapping("/{messageId}/edit")
+    public Result<Void> edit(
+            @PathVariable Long messageId,
+            @RequestBody MessageEditRequest request,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        imMessageService.editMessage(messageId, request.getNewContent(), userId);
+        return Result.success("消息已编辑");
     }
 
     /**
