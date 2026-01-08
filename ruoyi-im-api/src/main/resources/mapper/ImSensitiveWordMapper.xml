@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImSensitiveWordMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImSensitiveWord" id="ImSensitiveWordResult">
+        <id property="id" column="id"/>
+        <result property="word" column="word"/>
+        <result property="wordType" column="word_type"/>
+        <result property="level" column="level"/>
+        <result property="action" column="action"/>
+        <result property="replacement" column="replacement"/>
+        <result property="isEnabled" column="is_enabled"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImSensitiveWordVo">
+        select id, word, word_type, level, action, replacement, is_enabled, create_time, update_time
+        from im_sensitive_word
+    </sql>
+
+    <select id="selectAllEnabledWords" resultType="java.lang.String">
+        select word from im_sensitive_word where is_enabled = true
+    </select>
+
+    <select id="selectImSensitiveWordById" parameterType="Long" resultMap="ImSensitiveWordResult">
+        <include refid="selectImSensitiveWordVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectImSensitiveWordList" parameterType="com.ruoyi.im.domain.ImSensitiveWord" resultMap="ImSensitiveWordResult">
+        <include refid="selectImSensitiveWordVo"/>
+        <where>
+            <if test="word != null and word != ''">and word like concat('%', #{word}, '%')</if>
+            <if test="wordType != null and wordType != ''">and word_type = #{wordType}</if>
+            <if test="level != null">and level = #{level}</if>
+            <if test="isEnabled != null">and is_enabled = #{isEnabled}</if>
+        </where>
+        order by level desc, id
+    </select>
+
+    <insert id="insertImSensitiveWord" parameterType="com.ruoyi.im.domain.ImSensitiveWord" useGeneratedKeys="true" keyProperty="id">
+        insert into im_sensitive_word
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="word != null and word != ''">word,</if>
+            <if test="wordType != null and wordType != ''">word_type,</if>
+            <if test="level != null">level,</if>
+            <if test="action != null and action != ''">action,</if>
+            <if test="replacement != null">replacement,</if>
+            <if test="isEnabled != null">is_enabled,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="word != null and word != ''">#{word},</if>
+            <if test="wordType != null and wordType != ''">#{wordType},</if>
+            <if test="level != null">#{level},</if>
+            <if test="action != null and action != ''">#{action},</if>
+            <if test="replacement != null">#{replacement},</if>
+            <if test="isEnabled != null">#{isEnabled},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImSensitiveWord" parameterType="com.ruoyi.im.domain.ImSensitiveWord">
+        update im_sensitive_word
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="word != null and word != ''">word = #{word},</if>
+            <if test="wordType != null and wordType != ''">word_type = #{wordType},</if>
+            <if test="level != null">level = #{level},</if>
+            <if test="action != null and action != ''">action = #{action},</if>
+            <if test="replacement != null">replacement = #{replacement},</if>
+            <if test="isEnabled != null">is_enabled = #{isEnabled},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImSensitiveWordById" parameterType="Long">
+        delete from im_sensitive_word where id = #{id}
+    </delete>
+
+    <delete id="deleteImSensitiveWordByIds" parameterType="Long">
+        delete from im_sensitive_word where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>
