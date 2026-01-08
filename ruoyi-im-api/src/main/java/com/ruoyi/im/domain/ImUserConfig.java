@@ -11,12 +11,13 @@ import java.time.LocalDateTime;
 
 /**
  * 用户配置实体
+ * 映射到 im_user_setting 表
  *
  * 用于存储用户的个人配置，如通知设置、隐私设置、通用设置等
  *
  * @author ruoyi
  */
-@TableName("im_user_config")
+@TableName("im_user_setting")
 public class ImUserConfig implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -29,16 +30,16 @@ public class ImUserConfig implements Serializable {
     @TableField("user_id")
     private Long userId;
 
-    /** 配置类型：notification=通知设置, privacy=隐私设置, general=通用设置 */
-    @TableField("config_type")
+    /** 配置类型：NOTIFICATION=通知设置, PRIVACY=隐私设置, DISPLAY=显示设置 */
+    @TableField("setting_type")
     private String configType;
 
     /** 配置键 */
-    @TableField("config_key")
+    @TableField("setting_key")
     private String configKey;
 
     /** 配置值（JSON格式） */
-    @TableField("config_value")
+    @TableField("setting_value")
     private String configValue;
 
     /** 创建时间 */

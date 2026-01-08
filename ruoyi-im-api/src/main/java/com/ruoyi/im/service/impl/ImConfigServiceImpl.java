@@ -65,35 +65,35 @@ public class ImConfigServiceImpl implements ImConfigService {
 
     @Override
     public Map<String, Object> getNotificationSettings(Long userId) {
-        return getUserSettings(userId, "notification", DEFAULT_NOTIFICATION_SETTINGS);
+        return getUserSettings(userId, "NOTIFICATION", DEFAULT_NOTIFICATION_SETTINGS);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateNotificationSettings(Long userId, Map<String, Object> settings) {
-        updateUserSettings(userId, "notification", settings);
+        updateUserSettings(userId, "NOTIFICATION", settings);
     }
 
     @Override
     public Map<String, Object> getPrivacySettings(Long userId) {
-        return getUserSettings(userId, "privacy", DEFAULT_PRIVACY_SETTINGS);
+        return getUserSettings(userId, "PRIVACY", DEFAULT_PRIVACY_SETTINGS);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updatePrivacySettings(Long userId, Map<String, Object> settings) {
-        updateUserSettings(userId, "privacy", settings);
+        updateUserSettings(userId, "PRIVACY", settings);
     }
 
     @Override
     public Map<String, Object> getGeneralSettings(Long userId) {
-        return getUserSettings(userId, "general", DEFAULT_GENERAL_SETTINGS);
+        return getUserSettings(userId, "DISPLAY", DEFAULT_GENERAL_SETTINGS);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateGeneralSettings(Long userId, Map<String, Object> settings) {
-        updateUserSettings(userId, "general", settings);
+        updateUserSettings(userId, "DISPLAY", settings);
     }
 
     @Override

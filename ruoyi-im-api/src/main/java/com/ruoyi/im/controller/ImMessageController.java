@@ -136,19 +136,22 @@ public class ImMessageController {
      * 标记消息已读
      * 批量标记指定消息为已读状态，并更新会话未读消息数
      *
-     * @param messageIds 消息ID列表
+     * @param data 包含conversationId和messageIds的请求数据
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 标记结果
      * @apiNote 标记已读后会更新会话的未读消息数，并通过WebSocket推送已读回执给发送方
      * @throws BusinessException 当消息不存在或会话不存在时抛出业务异常
      */
     @PutMapping("/read")
-    public Result<Void> markAsRead(@RequestBody List<Long> messageIds,
+    public Result<Void> markAsRead(@RequestBody java.util.Map<String, Object> data,
                                   @RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
             userId = 1L;
         }
-        Long conversationId = 1L;
+        Long conversationId = data.get("conversationId") != null ?
+            Long.valueOf(data.get("conversationId").toString()) : null;
+        @SuppressWarnings("unchecked")
+        List<Long> messageIds = (List<Long>) data.get("messageIds");
         imMessageService.markAsRead(conversationId, userId, messageIds);
         return Result.success("已标记为已读");
     }
