@@ -65,9 +65,10 @@ public class SecurityConfig {
             // 对于登录接口允许匿名访问
             .antMatchers("/", "/health", "/auth/login", "/auth/register", "/api/auth/login", "/api/auth/register", "/ws/**", "/websocket/**", "/public/**", "/error", "/test/**").permitAll()
             // 静态资源访问
-            .antMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.gif").permitAll()
+            .antMatchers("/avatar/**", "/uploads/**", "/profile/**").permitAll()
+            .antMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.gif", "/**/*.jpeg", "/**/*.svg", "/**/*.ico").permitAll()
             // Swagger相关接口
-            .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
+            .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
 
         // 根据配置决定是否启用认证
         if (securityEnabled) {

@@ -742,15 +742,15 @@ INSERT INTO `im_conversation` VALUES (2, 'SINGLE', 4, '王五', '/avatar/3.jpg',
 INSERT INTO `im_conversation` VALUES (3, 'SINGLE', 5, '赵六', '/avatar/1.jpg', 10, '2024-01-01 13:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
 INSERT INTO `im_conversation` VALUES (4, 'SINGLE', 6, '孙七', '/avatar/2.jpg', 8, '2024-01-01 12:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
 INSERT INTO `im_conversation` VALUES (5, 'SINGLE', 7, '周八', '/avatar/3.jpg', 9, '2024-01-01 12:01:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation` VALUES (6, 'GROUP', 1, '技术交流群', '/avatar/group_default.png', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (7, 'GROUP', 2, '产品讨论群', '/avatar/group_default.png', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (8, 'GROUP', 3, '项目开发群', '/avatar/group_default.png', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (9, 'GROUP', 4, '公司全员群', '/avatar/group_default.png', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (6, 'GROUP', 1, '技术交流群', '/avatar/group_default.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (7, 'GROUP', 2, '产品讨论群', '/avatar/group_default.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (8, 'GROUP', 3, '项目开发群', '/avatar/group_default.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (9, 'GROUP', 4, '公司全员群', '/avatar/group_default.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 INSERT INTO `im_conversation` VALUES (10, 'SINGLE', 8, '吴九', '/avatar/1.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 INSERT INTO `im_conversation` VALUES (11, 'SINGLE', 9, '郑十', '/avatar/2.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (12, 'GROUP', 5, '篮球爱好者', '/avatar/group_default.png', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (12, 'GROUP', 5, '篮球爱好者', '/avatar/group_default.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 INSERT INTO `im_conversation` VALUES (13, 'SINGLE', 10, '陈一', '/avatar/3.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (14, 'GROUP', 6, '读书分享会', '/avatar/group_default.png', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (14, 'GROUP', 6, '读书分享会', '/avatar/group_default.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 INSERT INTO `im_conversation` VALUES (15, 'SINGLE', 11, '林二', '/avatar/1.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 
 -- ----------------------------
@@ -1240,16 +1240,16 @@ CREATE TABLE `im_group`  (
 -- ----------------------------
 -- Records of im_group
 -- ----------------------------
-INSERT INTO `im_group` VALUES (1, '技术交流群', '/avatar/group_default.png', 2, '欢迎大家交流技术问题', 500, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (2, '产品讨论群', '/avatar/group_default.png', 3, '产品需求讨论', 200, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (3, '项目开发群', '/avatar/group_default.png', 4, '项目进度同步', 50, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (4, '公司全员群', '/avatar/group_default.png', 2, '公司通知发布', 1000, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (5, '篮球爱好者', '/avatar/group_default.png', 5, '每周组织篮球活动', 100, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (6, '读书分享会', '/avatar/group_default.png', 6, '分享读书心得', 200, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (7, '前端开发群', '/avatar/group_default.png', 7, '前端技术交流', 300, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (8, '后端开发群', '/avatar/group_default.png', 8, '后端技术交流', 300, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (9, '设计团队', '/avatar/group_default.png', 9, 'UI/UX设计讨论', 50, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (10, '测试团队', '/avatar/group_default.png', 10, '质量保证交流', 100, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (1, '技术交流群', '/avatar/group_default.jpg', 2, '欢迎大家交流技术问题', 500, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (2, '产品讨论群', '/avatar/group_default.jpg', 3, '产品需求讨论', 200, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (3, '项目开发群', '/avatar/group_default.jpg', 4, '项目进度同步', 50, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (4, '公司全员群', '/avatar/group_default.jpg', 2, '公司通知发布', 1000, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (5, '篮球爱好者', '/avatar/group_default.jpg', 5, '每周组织篮球活动', 100, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (6, '读书分享会', '/avatar/group_default.jpg', 6, '分享读书心得', 200, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (7, '前端开发群', '/avatar/group_default.jpg', 7, '前端技术交流', 300, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (8, '后端开发群', '/avatar/group_default.jpg', 8, '后端技术交流', 300, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (9, '设计团队', '/avatar/group_default.jpg', 9, 'UI/UX设计讨论', 50, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (10, '测试团队', '/avatar/group_default.jpg', 10, '质量保证交流', 100, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 
 -- ----------------------------
 -- Table structure for im_group_announcement
@@ -1910,26 +1910,26 @@ CREATE TABLE `im_user`  (
 -- ----------------------------
 -- Records of im_user
 -- ----------------------------
-INSERT INTO `im_user` VALUES (2, 'zhangsan', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '张三', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC2', 1, '13800000002', 'zhangsan@example.com', 1, '努力工作，快乐生活', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (3, 'lisi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '李四', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC3', 1, '13800000003', 'lisi@example.com', 1, '学无止境', '2026-01-08 12:16:27', '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (4, 'wangwu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '王五', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC4', 1, '13800000004', 'wangwu@example.com', 1, '代码改变世界', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (5, 'zhaoliu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '赵六', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC5', 0, '13800000005', 'zhaoliu@example.com', 1, '保持热爱', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (6, 'sunqi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '孙七', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC6', 1, '13800000006', 'sunqi@example.com', 1, '今天也要加油', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (7, 'zhouba', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '周八', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC7', 0, '13800000007', 'zhouba@example.com', 1, '未来可期', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (8, 'wujiu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '吴九', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC8', 1, '13800000008', 'wujiu@example.com', 1, '行稳致远', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (9, 'zhengshi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '郑十', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC9', 1, '13800000009', 'zhengshi@example.com', 1, '不忘初心', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (10, 'chenyi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '陈一', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCA', 0, '13800000010', 'chenyi@example.com', 1, '砥砺前行', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (11, 'liner', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '林二', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCB', 1, '13800000011', 'liner@example.com', 1, '天天向上', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (12, 'huangsan', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '黄三', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCC', 1, '13800000012', 'huangsan@example.com', 1, '追求卓越', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (13, 'liusi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '刘四', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCD', 0, '13800000013', 'liusi@example.com', 1, '梦想成真', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (14, 'hewu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '何五', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCE', 1, '13800000014', 'hewu@example.com', 1, '珍惜当下', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (15, 'luoliu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '罗六', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCF', 1, '13800000015', 'luoliu@example.com', 1, '勇往直前', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (16, 'liangqi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '梁七', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG', 0, '13800000016', 'liangqi@example.com', 1, '脚踏实地', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (17, 'songba', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '宋八', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCH', 1, '13800000017', 'songba@example.com', 1, '天道酬勤', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (18, 'tangjiu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '唐九', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCI', 1, '13800000018', 'tangjiu@example.com', 1, '感恩有你', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (19, 'fengshi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '冯十', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCJ', 0, '13800000019', 'fengshi@example.com', 1, '知足常乐', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (20, 'yushiyi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '于十一', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCK', 1, '13800000020', 'yushiyi@example.com', 1, '生活美好', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (21, 'dongshier', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '董十二', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCL', 1, '13800000021', 'dongshier@example.com', 1, '越努力越幸运', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (2, 'zhangsan', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '张三', '/avatar/1.jpg', 1, '13800000002', 'zhangsan@example.com', 1, '努力工作，快乐生活', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (3, 'lisi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '李四', '/avatar/2.jpg', 1, '13800000003', 'lisi@example.com', 1, '学无止境', '2026-01-08 12:16:27', '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (4, 'wangwu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '王五', '/avatar/3.jpg', 1, '13800000004', 'wangwu@example.com', 1, '代码改变世界', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (5, 'zhaoliu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '赵六', '/avatar/1.jpg', 0, '13800000005', 'zhaoliu@example.com', 1, '保持热爱', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (6, 'sunqi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '孙七', '/avatar/2.jpg', 1, '13800000006', 'sunqi@example.com', 1, '今天也要加油', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (7, 'zhouba', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '周八', '/avatar/3.jpg', 0, '13800000007', 'zhouba@example.com', 1, '未来可期', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (8, 'wujiu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '吴九', '/avatar/1.jpg', 1, '13800000008', 'wujiu@example.com', 1, '行稳致远', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (9, 'zhengshi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '郑十', '/avatar/2.jpg', 1, '13800000009', 'zhengshi@example.com', 1, '不忘初心', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (10, 'chenyi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '陈一', '/avatar/3.jpg', 0, '13800000010', 'chenyi@example.com', 1, '砥砺前行', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (11, 'liner', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '林二', '/avatar/1.jpg', 1, '13800000011', 'liner@example.com', 1, '天天向上', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (12, 'huangsan', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '黄三', '/avatar/2.jpg', 1, '13800000012', 'huangsan@example.com', 1, '追求卓越', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (13, 'liusi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '刘四', '/avatar/3.jpg', 0, '13800000013', 'liusi@example.com', 1, '梦想成真', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (14, 'hewu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '何五', '/avatar/1.jpg', 1, '13800000014', 'hewu@example.com', 1, '珍惜当下', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (15, 'luoliu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '罗六', '/avatar/2.jpg', 1, '13800000015', 'luoliu@example.com', 1, '勇往直前', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (16, 'liangqi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '梁七', '/avatar/3.jpg', 0, '13800000016', 'liangqi@example.com', 1, '脚踏实地', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (17, 'songba', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '宋八', '/avatar/1.jpg', 1, '13800000017', 'songba@example.com', 1, '天道酬勤', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (18, 'tangjiu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '唐九', '/avatar/2.jpg', 1, '13800000018', 'tangjiu@example.com', 1, '感恩有你', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (19, 'fengshi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '冯十', '/avatar/3.jpg', 0, '13800000019', 'fengshi@example.com', 1, '知足常乐', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (20, 'yushiyi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '于十一', '/avatar/1.jpg', 1, '13800000020', 'yushiyi@example.com', 1, '生活美好', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (21, 'dongshier', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '董十二', '/avatar/2.jpg', 1, '13800000021', 'dongshier@example.com', 1, '越努力越幸运', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
 
 -- ----------------------------
 -- Table structure for im_user_backup
