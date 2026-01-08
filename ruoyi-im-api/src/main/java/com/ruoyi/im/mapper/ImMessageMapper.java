@@ -69,6 +69,14 @@ public interface ImMessageMapper {
     List<ImMessage> selectImMessageListByConversationId(Long conversationId);
 
     /**
+     * 获取会话最后一条消息
+     *
+     * @param conversationId 会话ID
+     * @return 最后一条消息
+     */
+    ImMessage selectLastMessageByConversationId(@Param("conversationId") Long conversationId);
+
+    /**
      * 根据会话ID和时间范围查询消息列表
      *
      * @param conversationId 会话ID

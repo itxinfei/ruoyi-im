@@ -9,6 +9,7 @@ import com.ruoyi.im.dto.mention.ImMentionInfo;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImConversationMapper;
+import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImMessageEditHistoryMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
@@ -38,6 +39,9 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     @Autowired
     private ImConversationMapper imConversationMapper;
+
+    @Autowired
+    private ImConversationMemberMapper imConversationMemberMapper;
 
     @Autowired
     private ImConversationService imConversationService;
@@ -89,6 +93,15 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setCreateTime(LocalDateTime.now());
 
         imMessageMapper.insertImMessage(message);
+
+        // 增加会话中其他成员的未读消息数
+        List<com.ruoyi.im.domain.ImConversationMember> members =
+            imConversationMemberMapper.selectByConversationId(conversationId);
+        for (com.ruoyi.im.domain.ImConversationMember member : members) {
+            if (!member.getUserId().equals(userId)) {
+                imConversationMemberMapper.incrementUnreadCount(conversationId, member.getUserId(), 1);
+            }
+        }
 
         // 处理@提及
         ImMentionInfo mentionInfo = request.getMentionInfo();
@@ -275,12 +288,28 @@ public class ImMessageServiceImpl implements ImMessageService {
         if (messageIds == null || messageIds.isEmpty()) {
             return;
         }
-        
+
+        int readCount = 0;
+        Long maxMessageId = null;
+
         for (Long messageId : messageIds) {
             ImMessage message = imMessageMapper.selectImMessageById(messageId);
             if (message != null && !message.getSenderId().equals(userId)) {
                 message.setStatus(3);
                 imMessageMapper.updateImMessage(message);
+                readCount++;
+                if (maxMessageId == null || messageId > maxMessageId) {
+                    maxMessageId = messageId;
+                }
+            }
+        }
+
+        // 减少未读消息数
+        if (readCount > 0) {
+            imConversationMemberMapper.decrementUnreadCount(conversationId, userId, readCount);
+            // 更新最后已读消息ID
+            if (maxMessageId != null) {
+                imConversationMemberMapper.updateLastReadMessageId(conversationId, userId, maxMessageId);
             }
         }
     }

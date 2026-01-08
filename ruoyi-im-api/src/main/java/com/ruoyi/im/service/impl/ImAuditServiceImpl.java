@@ -39,7 +39,7 @@ public class ImAuditServiceImpl implements ImAuditService {
         int fromIndex = (pageNum - 1) * pageSize;
         int toIndex = Math.min(fromIndex + pageSize, total);
         if (fromIndex >= total) {
-            list = List.of();
+            list = java.util.Collections.emptyList();
         } else if (fromIndex > 0 || toIndex < total) {
             list = list.subList(fromIndex, toIndex);
         }

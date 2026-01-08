@@ -147,6 +147,21 @@
         limit #{limit}
     </select>
 
+    <!-- 根据会话ID查询消息列表 -->
+    <select id="selectImMessageListByConversationId" parameterType="Long" resultMap="ImMessageResult">
+        <include refid="selectImMessageVo"/>
+        where conversation_id = #{conversationId}
+        order by create_time desc
+    </select>
+
+    <!-- 获取会话最后一条消息 -->
+    <select id="selectLastMessageByConversationId" parameterType="Long" resultMap="ImMessageResult">
+        <include refid="selectImMessageVo"/>
+        where conversation_id = #{conversationId}
+        order by create_time desc
+        limit 1
+    </select>
+
     <!-- 分页查询会话消息 - 性能优化 -->
     <select id="selectImMessageByConversationIdWithPagination" parameterType="map" resultMap="ImMessageResult">
         <include refid="selectImMessageVo"/>

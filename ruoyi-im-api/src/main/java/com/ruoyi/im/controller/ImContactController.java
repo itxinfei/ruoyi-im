@@ -276,7 +276,13 @@ public class ImContactController {
         if (userId == null) {
             userId = 1L;
         }
-        imFriendService.renameGroup(userId, java.net.URLDecoder.decode(oldName, java.nio.charset.StandardCharsets.UTF_8.name()), request.getNewName());
+        try {
+            String decodedName = java.net.URLDecoder.decode(oldName, "UTF-8");
+            imFriendService.renameGroup(userId, decodedName, request.getNewName());
+        } catch (java.io.UnsupportedEncodingException e) {
+            // UTF-8 is always supported, this should never happen
+            imFriendService.renameGroup(userId, oldName, request.getNewName());
+        }
         return Result.success("重命名成功");
     }
 
@@ -296,7 +302,13 @@ public class ImContactController {
         if (userId == null) {
             userId = 1L;
         }
-        imFriendService.deleteGroup(userId, java.net.URLDecoder.decode(groupName, java.nio.charset.StandardCharsets.UTF_8.name()));
+        try {
+            String decodedName = java.net.URLDecoder.decode(groupName, "UTF-8");
+            imFriendService.deleteGroup(userId, decodedName);
+        } catch (java.io.UnsupportedEncodingException e) {
+            // UTF-8 is always supported, this should never happen
+            imFriendService.deleteGroup(userId, groupName);
+        }
         return Result.success("删除成功");
     }
 

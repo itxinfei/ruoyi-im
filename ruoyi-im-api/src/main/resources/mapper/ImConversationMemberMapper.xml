@@ -45,6 +45,18 @@
         WHERE conversation_id = #{conversationId} AND user_id = #{userId}
     </update>
 
+    <update id="incrementUnreadCount">
+        UPDATE im_conversation_member
+        SET unread_count = unread_count + #{count}, update_time = NOW()
+        WHERE conversation_id = #{conversationId} AND user_id = #{userId}
+    </update>
+
+    <update id="decrementUnreadCount">
+        UPDATE im_conversation_member
+        SET unread_count = GREATEST(unread_count - #{count}, 0), update_time = NOW()
+        WHERE conversation_id = #{conversationId} AND user_id = #{userId}
+    </update>
+
     <update id="updateLastReadMessageId">
         UPDATE im_conversation_member
         SET last_read_message_id = #{lastReadMessageId}, update_time = NOW()

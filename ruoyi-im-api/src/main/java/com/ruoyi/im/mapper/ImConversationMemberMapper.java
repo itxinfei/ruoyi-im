@@ -53,6 +53,26 @@ public interface ImConversationMemberMapper extends BaseMapper<ImConversationMem
     int updateUnreadCount(@Param("conversationId") Long conversationId, @Param("userId") Long userId, @Param("unreadCount") Integer unreadCount);
 
     /**
+     * 增加未读消息数
+     *
+     * @param conversationId 会话ID
+     * @param userId 用户ID
+     * @param count 增加的数量
+     * @return 更新行数
+     */
+    int incrementUnreadCount(@Param("conversationId") Long conversationId, @Param("userId") Long userId, @Param("count") Integer count);
+
+    /**
+     * 减少未读消息数
+     *
+     * @param conversationId 会话ID
+     * @param userId 用户ID
+     * @param count 减少的数量
+     * @return 更新行数
+     */
+    int decrementUnreadCount(@Param("conversationId") Long conversationId, @Param("userId") Long userId, @Param("count") Integer count);
+
+    /**
      * 更新最后已读消息ID
      *
      * @param conversationId 会话ID

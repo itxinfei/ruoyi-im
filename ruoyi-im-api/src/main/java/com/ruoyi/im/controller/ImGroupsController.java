@@ -74,7 +74,7 @@ public class ImGroupsController {
         if (userId == null) {
             userId = 1L;
         }
-        imGroupService.removeMembers(id, List.of(memberId), userId);
+        imGroupService.removeMembers(id, java.util.Collections.singletonList(memberId), userId);
         return Result.success("移除成功");
     }
 

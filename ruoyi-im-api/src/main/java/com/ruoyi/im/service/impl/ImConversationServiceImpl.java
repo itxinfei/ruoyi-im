@@ -11,6 +11,7 @@ import com.ruoyi.im.dto.conversation.ImPrivateConversationCreateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
+import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.utils.ImRedisUtil;
@@ -40,6 +41,9 @@ public class ImConversationServiceImpl implements ImConversationService {
 
     @Autowired
     private ImUserMapper imUserMapper;
+
+    @Autowired
+    private ImMessageMapper imMessageMapper;
 
     @Autowired
     private ImRedisUtil imRedisUtil;
@@ -251,6 +255,12 @@ public class ImConversationServiceImpl implements ImConversationService {
 
         // 将未读消息数设为0
         imConversationMemberMapper.updateUnreadCount(conversationId, userId, 0);
+
+        // 获取会话最后一条消息ID作为最后已读消息ID
+        com.ruoyi.im.domain.ImMessage lastMessage = imMessageMapper.selectLastMessageByConversationId(conversationId);
+        if (lastMessage != null) {
+            imConversationMemberMapper.updateLastReadMessageId(conversationId, userId, lastMessage.getId());
+        }
     }
 
     @Override

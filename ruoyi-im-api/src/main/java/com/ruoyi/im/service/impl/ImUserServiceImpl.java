@@ -374,7 +374,7 @@ public class ImUserServiceImpl implements ImUserService {
         for (ImUser user : users) {
             ImUserVO vo = new ImUserVO();
             BeanUtils.copyProperties(user, vo);
-            vo.setOnline(imRedisUtil.isUserOnline(user.getId().toString()));
+            vo.setOnline(imRedisUtil.isOnlineUser(user.getId()));
             voList.add(vo);
         }
 
@@ -393,7 +393,7 @@ public class ImUserServiceImpl implements ImUserService {
         for (ImUser user : users) {
             ImUserVO vo = new ImUserVO();
             BeanUtils.copyProperties(user, vo);
-            vo.setOnline(imRedisUtil.isUserOnline(user.getId().toString()));
+            vo.setOnline(imRedisUtil.isOnlineUser(user.getId()));
             voList.add(vo);
         }
 

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImBackupMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImBackup" id="BaseResultMap">
+        <id column="id" property="id" />
+        <result column="file_name" property="fileName" />
+        <result column="description" property="description" />
+        <result column="file_path" property="filePath" />
+        <result column="file_size" property="fileSize" />
+        <result column="backup_type" property="backupType" />
+        <result column="status" property="status" />
+        <result column="creator_id" property="creatorId" />
+        <result column="creator_name" property="creatorName" />
+        <result column="error_message" property="errorMessage" />
+        <result column="create_time" property="createTime" />
+        <result column="complete_time" property="completeTime" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, file_name, description, file_path, file_size, backup_type, status,
+        creator_id, creator_name, error_message, create_time, complete_time
+    </sql>
+
+    <select id="selectAllOrderByCreateTime" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM im_backup
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByStatus" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM im_backup
+        WHERE status = #{status}
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByBackupType" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM im_backup
+        WHERE backup_type = #{backupType}
+        ORDER BY create_time DESC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE im_backup
+        SET status = #{status},
+            error_message = #{errorMessage}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateCompleteInfo">
+        UPDATE im_backup
+        SET status = 'completed',
+            file_path = #{filePath},
+            file_size = #{fileSize},
+            complete_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>
