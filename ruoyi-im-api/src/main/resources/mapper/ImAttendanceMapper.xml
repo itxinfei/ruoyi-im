@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImAttendanceMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImAttendance" id="ImAttendanceResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="attendanceDate" column="attendance_date"/>
+        <result property="checkInTime" column="check_in_time"/>
+        <result property="checkOutTime" column="check_out_time"/>
+        <result property="checkInStatus" column="check_in_status"/>
+        <result property="checkOutStatus" column="check_out_status"/>
+        <result property="workMinutes" column="work_minutes"/>
+        <result property="attendanceType" column="attendance_type"/>
+        <result property="remark" column="remark"/>
+        <result property="checkInLocation" column="check_in_location"/>
+        <result property="checkOutLocation" column="check_out_location"/>
+        <result property="deviceInfo" column="device_info"/>
+        <result property="approveStatus" column="approve_status"/>
+        <result property="approverId" column="approver_id"/>
+        <result property="approveTime" column="approve_time"/>
+        <result property="approveComment" column="approve_comment"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImAttendanceVo">
+        select id, user_id, attendance_date, check_in_time, check_out_time,
+               check_in_status, check_out_status, work_minutes, attendance_type,
+               remark, check_in_location, check_out_location, device_info,
+               approve_status, approver_id, approve_time, approve_comment,
+               create_time, update_time
+        from im_attendance
+    </sql>
+
+    <select id="selectImAttendanceById" parameterType="Long" resultMap="ImAttendanceResult">
+        <include refid="selectImAttendanceVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectByUserIdAndDate" resultMap="ImAttendanceResult">
+        <include refid="selectImAttendanceVo"/>
+        where user_id = #{userId}
+        and attendance_date = #{attendanceDate}
+    </select>
+
+    <select id="selectTodayAttendance" resultMap="ImAttendanceResult">
+        <include refid="selectImAttendanceVo"/>
+        where user_id = #{userId}
+        and attendance_date = #{today}
+    </select>
+
+    <select id="selectByUserIdAndDateRange" resultMap="ImAttendanceResult">
+        <include refid="selectImAttendanceVo"/>
+        where user_id = #{userId}
+        and attendance_date between #{startDate} and #{endDate}
+        order by attendance_date desc
+    </select>
+
+    <select id="selectImAttendanceList" parameterType="com.ruoyi.im.domain.ImAttendance" resultMap="ImAttendanceResult">
+        <include refid="selectImAttendanceVo"/>
+        <where>
+            <if test="userId != null">and user_id = #{userId}</if>
+            <if test="attendanceDate != null">and attendance_date = #{attendanceDate}</if>
+            <if test="attendanceType != null and attendanceType != ''">and attendance_type = #{attendanceType}</if>
+            <if test="approveStatus != null and approveStatus != ''">and approve_status = #{approveStatus}</if>
+        </where>
+        order by attendance_date desc
+    </select>
+
+    <select id="statisticsByUserIdAndDateRange" resultType="java.util.Map">
+        select
+            count(*) as totalDays,
+            sum(case when check_in_time is not null and check_out_time is not null then 1 else 0 end) as attendanceDays,
+            sum(case when check_in_status = 'LATE' then 1 else 0 end) as lateCount,
+            sum(case when check_out_status = 'EARLY' then 1 else 0 end) as earlyCount,
+            sum(case when check_in_time is null or check_out_time is null then 1 else 0 end) as absentCount,
+            sum(work_minutes) as totalWorkMinutes
+        from im_attendance
+        where user_id = #{userId}
+        and attendance_date between #{startDate} and #{endDate}
+    </select>
+
+    <insert id="insertImAttendance" parameterType="com.ruoyi.im.domain.ImAttendance" useGeneratedKeys="true" keyProperty="id">
+        insert into im_attendance
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="attendanceDate != null">attendance_date,</if>
+            <if test="checkInTime != null">check_in_time,</if>
+            <if test="checkOutTime != null">check_out_time,</if>
+            <if test="checkInStatus != null and checkInStatus != ''">check_in_status,</if>
+            <if test="checkOutStatus != null and checkOutStatus != ''">check_out_status,</if>
+            <if test="workMinutes != null">work_minutes,</if>
+            <if test="attendanceType != null and attendanceType != ''">attendance_type,</if>
+            <if test="remark != null">remark,</if>
+            <if test="checkInLocation != null">check_in_location,</if>
+            <if test="checkOutLocation != null">check_out_location,</if>
+            <if test="deviceInfo != null">device_info,</if>
+            <if test="approveStatus != null">approve_status,</if>
+            <if test="approverId != null">approver_id,</if>
+            <if test="approveTime != null">approve_time,</if>
+            <if test="approveComment != null">approve_comment,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="attendanceDate != null">#{attendanceDate},</if>
+            <if test="checkInTime != null">#{checkInTime},</if>
+            <if test="checkOutTime != null">#{checkOutTime},</if>
+            <if test="checkInStatus != null and checkInStatus != ''">#{checkInStatus},</if>
+            <if test="checkOutStatus != null and checkOutStatus != ''">#{checkOutStatus},</if>
+            <if test="workMinutes != null">#{workMinutes},</if>
+            <if test="attendanceType != null and attendanceType != ''">#{attendanceType},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="checkInLocation != null">#{checkInLocation},</if>
+            <if test="checkOutLocation != null">#{checkOutLocation},</if>
+            <if test="deviceInfo != null">#{deviceInfo},</if>
+            <if test="approveStatus != null">#{approveStatus},</if>
+            <if test="approverId != null">#{approverId},</if>
+            <if test="approveTime != null">#{approveTime},</if>
+            <if test="approveComment != null">#{approveComment},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImAttendance" parameterType="com.ruoyi.im.domain.ImAttendance">
+        update im_attendance
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="checkInTime != null">check_in_time = #{checkInTime},</if>
+            <if test="checkOutTime != null">check_out_time = #{checkOutTime},</if>
+            <if test="checkInStatus != null and checkInStatus != ''">check_in_status = #{checkInStatus},</if>
+            <if test="checkOutStatus != null and checkOutStatus != ''">check_out_status = #{checkOutStatus},</if>
+            <if test="workMinutes != null">work_minutes = #{workMinutes},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="checkInLocation != null">check_in_location = #{checkInLocation},</if>
+            <if test="checkOutLocation != null">check_out_location = #{checkOutLocation},</if>
+            <if test="deviceInfo != null">device_info = #{deviceInfo},</if>
+            <if test="approveStatus != null">approve_status = #{approveStatus},</if>
+            <if test="approverId != null">approver_id = #{approverId},</if>
+            <if test="approveTime != null">approve_time = #{approveTime},</if>
+            <if test="approveComment != null">approve_comment = #{approveComment},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImAttendanceById" parameterType="Long">
+        delete from im_attendance where id = #{id}
+    </delete>
+
+</mapper>

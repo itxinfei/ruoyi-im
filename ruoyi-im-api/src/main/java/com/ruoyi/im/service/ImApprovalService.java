@@ -75,6 +75,24 @@ public interface ImApprovalService {
     void cancelApproval(Long approvalId, Long applicantId);
 
     /**
+     * 转交审批
+     *
+     * @param approvalId 审批ID
+     * @param toUserId 转交给的用户ID
+     * @param fromUserId 当前用户ID
+     */
+    void transferApproval(Long approvalId, Long toUserId, Long fromUserId);
+
+    /**
+     * 委托审批
+     *
+     * @param approvalId 审批ID
+     * @param toUserId 委托给的用户ID
+     * @param fromUserId 当前用户ID
+     */
+    void delegateApproval(Long approvalId, Long toUserId, Long fromUserId);
+
+    /**
      * 获取审批模板列表
      *
      * @return 模板列表

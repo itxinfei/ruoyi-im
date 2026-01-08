@@ -10,6 +10,9 @@ import java.util.List;
  */
 public class ImMentionInfo {
 
+    /** 会话ID（用于权限验证和获取群成员） */
+    private Long conversationId;
+
     /** 被@的用户ID列表 */
     private List<Long> userIds;
 
@@ -18,6 +21,14 @@ public class ImMentionInfo {
 
     /** @所有人类型：ALL所有人（群主/管理员权限） */
     private String mentionAllType;
+
+    public Long getConversationId() {
+        return conversationId;
+    }
+
+    public void setConversationId(Long conversationId) {
+        this.conversationId = conversationId;
+    }
 
     public List<Long> getUserIds() {
         return userIds;

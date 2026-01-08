@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImGroupAnnouncementMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImGroupAnnouncement" id="ImGroupAnnouncementResult">
+        <id property="id" column="id"/>
+        <result property="groupId" column="group_id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="content" column="content"/>
+        <result property="type" column="type"/>
+        <result property="attachmentUrl" column="attachment_url"/>
+        <result property="isPinned" column="is_pinned"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="expireTime" column="expire_time"/>
+    </resultMap>
+
+    <sql id="selectImGroupAnnouncementVo">
+        select id, group_id, sender_id, content, type, attachment_url, is_pinned, status, create_time, update_time, expire_time
+        from im_group_announcement
+    </sql>
+
+    <select id="selectByGroupId" resultMap="ImGroupAnnouncementResult">
+        <include refid="selectImGroupAnnouncementVo"/>
+        where group_id = #{groupId}
+        and status = 1
+        order by is_pinned desc, create_time desc
+    </select>
+
+    <select id="selectValidByGroupId" resultMap="ImGroupAnnouncementResult">
+        <include refid="selectImGroupAnnouncementVo"/>
+        where group_id = #{groupId}
+        and status = 1
+        and (expire_time is null or expire_time &gt; now())
+        order by is_pinned desc, create_time desc
+    </select>
+
+    <select id="selectPinnedByGroupId" resultMap="ImGroupAnnouncementResult">
+        <include refid="selectImGroupAnnouncementVo"/>
+        where group_id = #{groupId}
+        and is_pinned = 1
+        and status = 1
+        and (expire_time is null or expire_time &gt; now())
+        order by create_time desc
+    </select>
+
+    <select id="selectLatestByGroupId" resultMap="ImGroupAnnouncementResult">
+        <include refid="selectImGroupAnnouncementVo"/>
+        where group_id = #{groupId}
+        and status = 1
+        and (expire_time is null or expire_time &gt; now())
+        order by create_time desc
+        limit 1
+    </select>
+
+    <select id="selectExpiredAnnouncements" resultMap="ImGroupAnnouncementResult">
+        <include refid="selectImGroupAnnouncementVo"/>
+        where status = 1
+        and expire_time is not null
+        and expire_time &lt; #{expireTime}
+    </select>
+
+</mapper>

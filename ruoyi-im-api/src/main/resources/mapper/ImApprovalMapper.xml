@@ -8,16 +8,18 @@
         <result property="title" column="title"/>
         <result property="applicantId" column="applicant_id"/>
         <result property="status" column="status"/>
+        <result property="currentNodeId" column="current_node_id"/>
         <result property="relatedId" column="related_id"/>
         <result property="relatedType" column="related_type"/>
         <result property="comment" column="comment"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
+        <result property="completedTime" column="completed_time"/>
         <result property="applicantName" column="applicant_name"/>
     </resultMap>
 
     <sql id="selectImApprovalVo">
-        select id, template_id, title, applicant_id, status, related_id, related_type, comment, create_time, update_time
+        select id, template_id, title, applicant_id, status, current_node_id, related_id, related_type, comment, create_time, update_time, completed_time
         from im_approval
     </sql>
 
@@ -60,6 +62,16 @@
         order by a.create_time desc
     </select>
 
+    <select id="selectProcessedApprovalByApproverId" parameterType="Long" resultMap="ImApprovalResult">
+        select distinct a.id, a.template_id, a.title, a.applicant_id, a.status, a.create_time,
+               u.nickname as applicant_name
+        from im_approval a
+        inner join im_approval_record r on a.id = r.approval_id
+        left join im_user u on a.applicant_id = u.id
+        where r.approver_id = #{approverId}
+        order by r.action_time desc
+    </select>
+
     <insert id="insertImApproval" parameterType="com.ruoyi.im.domain.ImApproval" useGeneratedKeys="true" keyProperty="id">
         insert into im_approval
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -90,7 +102,9 @@
         update im_approval
         <trim prefix="SET" suffixOverrides=",">
             <if test="status != null">status = #{status},</if>
+            <if test="currentNodeId != null">current_node_id = #{currentNodeId},</if>
             <if test="comment != null">comment = #{comment},</if>
+            <if test="completedTime != null">completed_time = #{completedTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>
         where id = #{id}

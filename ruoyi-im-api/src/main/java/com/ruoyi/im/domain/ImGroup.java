@@ -74,6 +74,11 @@ public class ImGroup implements Serializable {
     private String type;
 
     /**
+     * 全员禁言：0=否，1=是
+     */
+    private Integer allMuted;
+
+    /**
      * 创建时间，群组创建的时间
      */
     private LocalDateTime createTime;

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImGroupFileMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImGroupFile" id="ImGroupFileResult">
+        <id property="id" column="id"/>
+        <result property="groupId" column="group_id"/>
+        <result property="fileId" column="file_id"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileType" column="file_type"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="category" column="category"/>
+        <result property="permission" column="permission"/>
+        <result property="uploaderId" column="uploader_id"/>
+        <result property="uploaderName" column="uploader_name"/>
+        <result property="downloadCount" column="download_count"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="fileUrl" column="file_url"/>
+        <result property="thumbnailUrl" column="thumbnail_url"/>
+    </resultMap>
+
+    <sql id="selectImGroupFileVo">
+        SELECT gf.id, gf.group_id, gf.file_id, gf.file_name, gf.file_type, gf.file_size,
+               gf.category, gf.permission, gf.uploader_id, gf.uploader_name,
+               gf.download_count, gf.status, gf.create_time, gf.update_time,
+               fa.file_url, fa.thumbnail_url
+        FROM im_group_file gf
+        LEFT JOIN im_file_asset fa ON gf.file_id = fa.id
+    </sql>
+
+    <select id="selectFilePage" resultMap="ImGroupFileResult">
+        <include refid="selectImGroupFileVo"/>
+        <where>
+            gf.status = 1
+            <if test="req.groupId != null">
+                AND gf.group_id = #{req.groupId}
+            </if>
+            <if test="req.category != null and req.category != ''">
+                AND gf.category = #{req.category}
+            </if>
+            <if test="req.fileType != null and req.fileType != ''">
+                AND gf.file_type = #{req.fileType}
+            </if>
+            <if test="req.uploaderId != null">
+                AND gf.uploader_id = #{req.uploaderId}
+            </if>
+            <if test="req.keyword != null and req.keyword != ''">
+                AND gf.file_name LIKE CONCAT('%', #{req.keyword}, '%')
+            </if>
+        </where>
+        ORDER BY gf.category ASC, gf.create_time DESC
+    </select>
+
+    <select id="selectStatisticsByGroupId" resultType="com.ruoyi.im.vo.group.ImGroupFileStatisticsVO">
+        SELECT
+            COUNT(*) as total_count,
+            COALESCE(SUM(file_size), 0) as total_size,
+            SUM(CASE WHEN file_type = 'image' THEN 1 ELSE 0 END) as image_count,
+            SUM(CASE WHEN file_type = 'video' THEN 1 ELSE 0 END) as video_count,
+            SUM(CASE WHEN file_type = 'audio' THEN 1 ELSE 0 END) as audio_count,
+            SUM(CASE WHEN file_type = 'document' THEN 1 ELSE 0 END) as document_count,
+            SUM(CASE WHEN file_type = 'other' THEN 1 ELSE 0 END) as other_count
+        FROM im_group_file
+        WHERE group_id = #{groupId} AND status = 1
+    </select>
+
+    <select id="selectCategoriesByGroupId" resultType="string">
+        SELECT DISTINCT category
+        FROM im_group_file
+        WHERE group_id = #{groupId} AND status = 1
+        ORDER BY category ASC
+    </select>
+
+    <update id="incrementDownloadCount">
+        UPDATE im_group_file
+        SET download_count = download_count + 1
+        WHERE id = #{fileId}
+    </update>
+
+</mapper>

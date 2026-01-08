@@ -176,6 +176,48 @@ public class ImApprovalController {
     }
 
     /**
+     * 转交审批
+     * 将当前审批转交给其他用户处理
+     *
+     * @param id 审批ID
+     * @param toUserId 转交给的用户ID
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 操作结果
+     */
+    @Operation(summary = "转交审批", description = "将当前审批转交给其他用户处理")
+    @PostMapping("/{id}/transfer")
+    public Result<Void> transfer(@PathVariable Long id,
+                                 @RequestParam Long toUserId,
+                                 @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L; // 开发环境默认用户
+        }
+        approvalService.transferApproval(id, toUserId, userId);
+        return Result.success("已转交");
+    }
+
+    /**
+     * 委托审批
+     * 将当前审批委托给其他用户协助处理（两人均可审批）
+     *
+     * @param id 审批ID
+     * @param toUserId 委托给的用户ID
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 操作结果
+     */
+    @Operation(summary = "委托审批", description = "将当前审批委托给其他用户协助处理")
+    @PostMapping("/{id}/delegate")
+    public Result<Void> delegate(@PathVariable Long id,
+                                @RequestParam Long toUserId,
+                                @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L; // 开发环境默认用户
+        }
+        approvalService.delegateApproval(id, toUserId, userId);
+        return Result.success("已委托");
+    }
+
+    /**
      * 获取审批模板列表
      * 获取所有审批模板
      *

@@ -44,6 +44,14 @@ public interface ImApprovalMapper {
     List<ImApproval> selectApprovalByApplicantId(Long applicantId);
 
     /**
+     * 查询用户已处理的审批列表
+     *
+     * @param approverId 审批人ID
+     * @return 审批实例集合
+     */
+    List<ImApproval> selectProcessedApprovalByApproverId(Long approverId);
+
+    /**
      * 新增审批实例
      *
      * @param imApproval 审批实例

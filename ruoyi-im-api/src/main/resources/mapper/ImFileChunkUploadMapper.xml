@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImFileChunkUploadMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImFileChunkUpload" id="ImFileChunkUploadResult">
+        <id property="id" column="id"/>
+        <result property="uploadId" column="upload_id"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="fileMd5" column="file_md5"/>
+        <result property="chunkSize" column="chunk_size"/>
+        <result property="totalChunks" column="total_chunks"/>
+        <result property="uploadedChunks" column="uploaded_chunks"/>
+        <result property="status" column="status"/>
+        <result property="userId" column="user_id"/>
+        <result property="filePath" column="file_path"/>
+        <result property="fileUrl" column="file_url"/>
+        <result property="errorMessage" column="error_message"/>
+        <result property="expireTime" column="expire_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImFileChunkUploadVo">
+        select id, upload_id, file_name, file_size, file_md5, chunk_size, total_chunks,
+               uploaded_chunks, status, user_id, file_path, file_url, error_message,
+               expire_time, create_time, update_time
+        from im_file_chunk_upload
+    </sql>
+
+    <select id="selectByUploadId" resultMap="ImFileChunkUploadResult">
+        <include refid="selectImFileChunkUploadVo"/>
+        where upload_id = #{uploadId}
+    </select>
+
+    <select id="selectUploadingByUserId" resultMap="ImFileChunkUploadResult">
+        <include refid="selectImFileChunkUploadVo"/>
+        where user_id = #{userId}
+        and status in ('UPLOADING', 'PAUSED')
+        order by create_time desc
+    </select>
+
+    <select id="selectCompletedByMd5" resultMap="ImFileChunkUploadResult">
+        <include refid="selectImFileChunkUploadVo"/>
+        where file_md5 = #{fileMd5}
+        and status = 'COMPLETED'
+        and file_path is not null
+        order by create_time desc
+        limit 1
+    </select>
+
+    <update id="updateUploadedChunks">
+        update im_file_chunk_upload
+        set uploaded_chunks = #{uploadedChunks},
+            update_time = now()
+        where upload_id = #{uploadId}
+    </update>
+
+    <update id="updateStatus">
+        update im_file_chunk_upload
+        set status = #{status},
+            update_time = now()
+        <if test="filePath != null and filePath != ''">
+            , file_path = #{filePath}
+        </if>
+        <if test="fileUrl != null and fileUrl != ''">
+            , file_url = #{fileUrl}
+        </if>
+        where upload_id = #{uploadId}
+    </update>
+
+    <delete id="deleteExpired">
+        delete from im_file_chunk_upload
+        where status in ('UPLOADING', 'PAUSED', 'CANCELLED')
+        and expire_time &lt; #{expireTime}
+    </delete>
+
+</mapper>

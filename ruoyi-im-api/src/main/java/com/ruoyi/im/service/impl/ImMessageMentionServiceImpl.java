@@ -1,7 +1,12 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.domain.ImConversation;
+import com.ruoyi.im.domain.ImGroupMember;
 import com.ruoyi.im.domain.ImMessageMention;
 import com.ruoyi.im.dto.mention.ImMentionInfo;
+import com.ruoyi.im.exception.BusinessException;
+import com.ruoyi.im.mapper.ImConversationMapper;
+import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.mapper.ImMessageMentionMapper;
 import com.ruoyi.im.service.ImMessageMentionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +30,12 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
     @Autowired
     private ImMessageMentionMapper mentionMapper;
 
+    @Autowired
+    private ImConversationMapper conversationMapper;
+
+    @Autowired
+    private ImGroupMemberMapper groupMemberMapper;
+
     @Override
     @Transactional
     public void createMentions(Long messageId, ImMentionInfo mentionInfo, Long senderId) {
@@ -34,18 +45,38 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
 
         // 处理@所有人的情况
         if (Boolean.TRUE.equals(mentionInfo.getMentionAll())) {
-            // TODO: 获取会话中所有成员ID，这里简化处理
-            // 需要通过conversationId获取所有成员
-            // 当前只创建一条@所有人的记录作为标记
-            ImMessageMention mention = new ImMessageMention();
-            mention.setMessageId(messageId);
-            mention.setMentionedUserId(-1L); // -1表示@所有人
-            mention.setMentionedBy(senderId);
-            mention.setMentionType(mentionInfo.getMentionAllType() != null ? mentionInfo.getMentionAllType() : "ALL");
-            mention.setIsRead(0);
-            mention.setCreateTime(LocalDateTime.now());
+            // 验证权限：只有群主和管理员可以使用@所有人
+            if (mentionInfo.getConversationId() != null) {
+                validateMentionAllPermission(mentionInfo.getConversationId(), senderId);
+            }
 
-            mentionMapper.insert(mention);
+            // 获取群组所有成员并创建提及记录
+            List<Long> allMemberIds = getAllGroupMemberIds(mentionInfo.getConversationId());
+            if (allMemberIds != null && !allMemberIds.isEmpty()) {
+                for (Long memberId : allMemberIds) {
+                    // 不@发送者自己
+                    if (!memberId.equals(senderId)) {
+                        ImMessageMention mention = new ImMessageMention();
+                        mention.setMessageId(messageId);
+                        mention.setMentionedUserId(memberId);
+                        mention.setMentionedBy(senderId);
+                        mention.setMentionType("ALL");
+                        mention.setIsRead(0);
+                        mention.setCreateTime(LocalDateTime.now());
+                        mentionMapper.insert(mention);
+                    }
+                }
+            } else {
+                // 如果无法获取群成员列表，创建一条@所有人的记录作为标记
+                ImMessageMention mention = new ImMessageMention();
+                mention.setMessageId(messageId);
+                mention.setMentionedUserId(-1L); // -1表示@所有人
+                mention.setMentionedBy(senderId);
+                mention.setMentionType("ALL");
+                mention.setIsRead(0);
+                mention.setCreateTime(LocalDateTime.now());
+                mentionMapper.insert(mention);
+            }
         }
 
         // 处理@特定用户的情况
@@ -65,6 +96,55 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
                 }
             }
         }
+    }
+
+    /**
+     * 验证用户是否有权限使用@所有人
+     * 只有群主和管理员可以使用@所有人
+     *
+     * @param conversationId 会话ID
+     * @param senderId 发送者ID
+     */
+    private void validateMentionAllPermission(Long conversationId, Long senderId) {
+        ImConversation conversation = conversationMapper.selectById(conversationId);
+        if (conversation == null) {
+            return; // 会话不存在，不验证
+        }
+
+        // 只对群聊进行权限验证
+        if ("GROUP".equals(conversation.getType())) {
+            Long groupId = conversation.getTargetId();
+            ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, senderId);
+
+            if (member == null) {
+                throw new BusinessException("您不是该群组成员");
+            }
+
+            String role = member.getRole();
+            if (!"OWNER".equals(role) && !"ADMIN".equals(role)) {
+                throw new BusinessException("只有群主和管理员可以使用@所有人");
+            }
+        }
+    }
+
+    /**
+     * 获取群组所有成员ID
+     *
+     * @param conversationId 会话ID
+     * @return 成员ID列表
+     */
+    private List<Long> getAllGroupMemberIds(Long conversationId) {
+        ImConversation conversation = conversationMapper.selectById(conversationId);
+        if (conversation == null || !"GROUP".equals(conversation.getType())) {
+            return null;
+        }
+
+        Long groupId = conversation.getTargetId();
+        List<ImGroupMember> members = groupMemberMapper.selectImGroupMemberListByGroupId(groupId);
+
+        return members.stream()
+                .map(ImGroupMember::getUserId)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     @Override

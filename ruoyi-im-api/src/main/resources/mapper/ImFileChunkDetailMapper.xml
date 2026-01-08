@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImFileChunkDetailMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImFileChunkDetail" id="ImFileChunkDetailResult">
+        <id property="id" column="id"/>
+        <result property="uploadId" column="upload_id"/>
+        <result property="chunkNumber" column="chunk_number"/>
+        <result property="chunkSize" column="chunk_size"/>
+        <result property="chunkMd5" column="chunk_md5"/>
+        <result property="chunkPath" column="chunk_path"/>
+        <result property="status" column="status"/>
+        <result property="retryCount" column="retry_count"/>
+        <result property="errorMessage" column="error_message"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImFileChunkDetailVo">
+        select id, upload_id, chunk_number, chunk_size, chunk_md5, chunk_path,
+               status, retry_count, error_message, create_time, update_time
+        from im_file_chunk_detail
+    </sql>
+
+    <select id="selectByUploadId" resultMap="ImFileChunkDetailResult">
+        <include refid="selectImFileChunkDetailVo"/>
+        where upload_id = #{uploadId}
+        order by chunk_number
+    </select>
+
+    <select id="selectCompletedByUploadId" resultMap="ImFileChunkDetailResult">
+        <include refid="selectImFileChunkDetailVo"/>
+        where upload_id = #{uploadId}
+        and status = 'COMPLETED'
+        order by chunk_number
+    </select>
+
+    <select id="selectByUploadIdAndChunkNumber" resultMap="ImFileChunkDetailResult">
+        <include refid="selectImFileChunkDetailVo"/>
+        where upload_id = #{uploadId}
+        and chunk_number = #{chunkNumber}
+    </select>
+
+    <insert id="batchInsert">
+        insert into im_file_chunk_detail (upload_id, chunk_number, chunk_size, chunk_md5, status, create_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.uploadId}, #{item.chunkNumber}, #{item.chunkSize}, #{item.chunkMd5}, 'PENDING', now())
+        </foreach>
+    </insert>
+
+    <update id="updateChunkStatus">
+        update im_file_chunk_detail
+        set status = #{status},
+            update_time = now()
+        <if test="chunkPath != null and chunkPath != ''">
+            , chunk_path = #{chunkPath}
+        </if>
+        where upload_id = #{uploadId}
+        and chunk_number = #{chunkNumber}
+    </update>
+
+    <delete id="deleteByUploadId">
+        delete from im_file_chunk_detail
+        where upload_id = #{uploadId}
+    </delete>
+
+</mapper>

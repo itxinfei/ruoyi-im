@@ -91,6 +91,8 @@ public class ImMessageServiceImpl implements ImMessageService {
             mentionInfo = messageMentionService.parseMentions(request.getContent());
         }
         if (mentionInfo != null && (mentionInfo.getUserIds() != null || Boolean.TRUE.equals(mentionInfo.getMentionAll()))) {
+            // 设置会话ID用于权限验证
+            mentionInfo.setConversationId(conversationId);
             messageMentionService.createMentions(message.getId(), mentionInfo, userId);
         }
 

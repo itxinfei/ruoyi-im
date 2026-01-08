@@ -28,6 +28,22 @@ public interface ImApprovalNodeMapper {
     List<ImApprovalNode> selectNodesByApprovalId(Long approvalId);
 
     /**
+     * 根据审批ID查询待处理节点列表
+     *
+     * @param approvalId 审批ID
+     * @return 待处理节点集合
+     */
+    List<ImApprovalNode> selectPendingNodesByApprovalId(Long approvalId);
+
+    /**
+     * 根据审批ID查询第一个节点
+     *
+     * @param approvalId 审批ID
+     * @return 第一个节点
+     */
+    ImApprovalNode selectFirstNodeByApprovalId(Long approvalId);
+
+    /**
      * 查询审批节点列表
      *
      * @param imApprovalNode 审批节点

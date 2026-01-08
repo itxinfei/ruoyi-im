@@ -31,6 +31,20 @@
         order by sort_order
     </select>
 
+    <select id="selectPendingNodesByApprovalId" parameterType="Long" resultMap="ImApprovalNodeResult">
+        <include refid="selectImApprovalNodeVo"/>
+        where approval_id = #{approvalId}
+        and status = 'PENDING'
+        order by sort_order
+    </select>
+
+    <select id="selectFirstNodeByApprovalId" parameterType="Long" resultMap="ImApprovalNodeResult">
+        <include refid="selectImApprovalNodeVo"/>
+        where approval_id = #{approvalId}
+        order by sort_order
+        limit 1
+    </select>
+
     <select id="selectImApprovalNodeList" parameterType="com.ruoyi.im.domain.ImApprovalNode" resultMap="ImApprovalNodeResult">
         <include refid="selectImApprovalNodeVo"/>
         <where>
@@ -73,9 +87,18 @@
         </trim>
     </insert>
 
+    <insert id="batchInsertNodes" parameterType="java.util.List">
+        insert into im_approval_node (approval_id, node_name, node_type, approver_ids, approve_type, sort_order, status)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.approvalId}, #{item.nodeName}, #{item.nodeType}, #{item.approverIds}, #{item.approveType}, #{item.sortOrder}, #{item.status})
+        </foreach>
+    </insert>
+
     <update id="updateImApprovalNode" parameterType="com.ruoyi.im.domain.ImApprovalNode">
         update im_approval_node
         <trim prefix="SET" suffixOverrides=",">
+            <if test="approverIds != null">approver_ids = #{approverIds},</if>
             <if test="status != null">status = #{status},</if>
             <if test="processTime != null">process_time = #{processTime},</if>
             <if test="processorId != null">processor_id = #{processorId},</if>
