@@ -53,7 +53,15 @@
       "mcp__filesystem__directory_tree",
       "Bash(mvn:*)",
       "Bash(npm install)",
-      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" compile -DskipTests -q)"
+      "Bash(\"D:/devops/apache-maven-3.9.1/bin/mvn\" compile -DskipTests -q)",
+      "mcp__filesystem__list_directory",
+      "mcp__filesystem__create_directory",
+      "mcp__filesystem__read_text_file",
+      "mcp__filesystem__list_allowed_directories",
+      "Bash(for:*)",
+      "Bash(do echo \"=== $comp ===\")",
+      "Bash(do echo:*)",
+      "Bash(git restore:*)"
     ]
   }
 }

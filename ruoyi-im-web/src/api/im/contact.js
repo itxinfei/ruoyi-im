@@ -1,55 +1,90 @@
+/**
+ * 联系人模块API
+ * @module api/im/contact
+ */
 import request from '@/utils/request'
 
-// 获取联系人列表
-export function listContact(query) {
+/**
+ * 获取联系人列表
+ * @param {Object} [params] - 查询参数
+ * @param {number} [params.pageSize=20] - 每页数量
+ * @param {number} [params.pageNum=1] - 当前页码
+ * @param {string} [params.keyword] - 搜索关键词
+ * @param {string} [params.groupId] - 分组ID
+ * @returns {Promise}
+ */
+export function listContact(params) {
   return request({
     url: '/api/im/contact/list',
     method: 'get',
-    params: query,
+    params: {
+      pageSize: params?.pageSize || 20,
+      pageNum: params?.pageNum || 1,
+      keyword: params?.keyword,
+      groupId: params?.groupId,
+    },
   })
 }
 
-// 添加联系人（发送好友申请）
+/**
+ * 获取联系人详情
+ * @param {string} friendId - 好友关系ID
+ * @returns {Promise}
+ */
+export function getContact(friendId) {
+  return request({
+    url: `/api/im/contact/${friendId}`,
+    method: 'get',
+  })
+}
+
+/**
+ * 添加联系人（发送好友申请）
+ * @param {Object} data - 申请数据
+ * @param {string} data.userId - 目标用户ID
+ * @param {string} [data.reason] - 申请理由
+ * @returns {Promise}
+ */
 export function addContact(data) {
   return request({
     url: '/api/im/contact/request/send',
     method: 'post',
-    data: data,
+    data,
   })
 }
 
-// 删除联系人 - 需要提供好友关系ID而不是用户ID
+/**
+ * 删除联系人
+ * @param {string} friendId - 好友关系ID
+ * @returns {Promise}
+ */
 export function deleteContact(friendId) {
   return request({
-    url: '/api/im/contact/' + friendId,
+    url: `/api/im/contact/${friendId}`,
     method: 'delete',
   })
 }
 
-// 获取联系人详情 - 需要提供好友关系ID而不是用户ID
-export function getContactInfo(friendId) {
-  return request({
-    url: '/api/im/contact/' + friendId,
-    method: 'get',
-  })
-}
-
-// 更新联系人备注 - 需要使用好友关系ID作为路径参数
+/**
+ * 更新联系人备注
+ * @param {string} friendId - 好友关系ID
+ * @param {Object} data - 更新数据
+ * @param {string} data.remark - 备注名称
+ * @returns {Promise}
+ */
 export function updateContactRemark(friendId, data) {
   return request({
     url: `/api/im/contact/${friendId}`,
     method: 'put',
-    data: data,
+    data,
   })
 }
 
-// 获取联系人在线状态 - 后端没有此API，需要通过WebSocket获取或从用户信息中获取
-export function getContactStatus(userIds) {
-  // 现在在线状态主要通过WebSocket维护和获取
-  return Promise.resolve({ data: [] })
-}
-
-// 搜索联系人
+/**
+ * 搜索联系人
+ * @param {string} keyword - 搜索关键词
+ * @returns {Promise}
+ */
 export function searchContacts(keyword) {
   return request({
     url: '/api/im/contact/search',
@@ -58,15 +93,21 @@ export function searchContacts(keyword) {
   })
 }
 
-// 获取收到的好友申请列表
-export function getFriendRequests() {
+/**
+ * 获取收到的好友申请列表
+ * @returns {Promise}
+ */
+export function getReceivedFriendRequests() {
   return request({
     url: '/api/im/contact/request/received',
     method: 'get',
   })
 }
 
-// 获取发送的好友申请列表
+/**
+ * 获取发送的好友申请列表
+ * @returns {Promise}
+ */
 export function getSentFriendRequests() {
   return request({
     url: '/api/im/contact/request/sent',
@@ -74,18 +115,24 @@ export function getSentFriendRequests() {
   })
 }
 
-// 处理好友申请
+/**
+ * 处理好友申请
+ * @param {string} requestId - 申请ID
+ * @param {boolean} approved - 是否同意
+ * @returns {Promise}
+ */
 export function handleFriendRequest(requestId, approved) {
   return request({
     url: `/api/im/contact/request/${requestId}/handle`,
     method: 'post',
-    params: {
-      approved: approved,
-    },
+    params: { approved },
   })
 }
 
-// 获取好友分组列表 - 后端使用分组好友列表API
+/**
+ * 获取好友分组列表
+ * @returns {Promise}
+ */
 export function getFriendGroups() {
   return request({
     url: '/api/im/contact/grouped',
@@ -93,80 +140,81 @@ export function getFriendGroups() {
   })
 }
 
-// 创建好友分组
+/**
+ * 创建好友分组
+ * @param {Object} data - 分组数据
+ * @param {string} data.name - 分组名称
+ * @returns {Promise}
+ */
 export function createFriendGroup(data) {
   return request({
     url: '/api/im/contact/group',
     method: 'post',
-    data: data,
+    data,
   })
 }
 
-// 更新好友分组
+/**
+ * 更新好友分组
+ * @param {string} groupId - 分组ID
+ * @param {Object} data - 更新数据
+ * @returns {Promise}
+ */
 export function updateFriendGroup(groupId, data) {
   return request({
-    url: '/api/im/contact/group/' + groupId,
+    url: `/api/im/contact/group/${groupId}`,
     method: 'put',
-    data: data,
+    data,
   })
 }
 
-// 删除好友分组
+/**
+ * 删除好友分组
+ * @param {string} groupId - 分组ID
+ * @returns {Promise}
+ */
 export function deleteFriendGroup(groupId) {
   return request({
-    url: '/api/im/contact/group/' + groupId,
+    url: `/api/im/contact/group/${groupId}`,
     method: 'delete',
   })
 }
 
-// 移动好友到分组
+/**
+ * 移动好友到分组
+ * @param {Object} data - 移动数据
+ * @param {string[]} data.friendIds - 好友关系ID数组
+ * @param {string} data.groupId - 目标分组ID
+ * @returns {Promise}
+ */
 export function moveFriendToGroup(data) {
   return request({
     url: '/api/im/contact/group/move',
     method: 'put',
-    data: data,
+    data,
   })
 }
 
-// 获取系统通知 - 后端没有此API，需要使用通知API
-export function getSystemNotifications(query) {
-  // 系统通知应该通过通知API获取
-  return request({
-    url: '/api/im/notification/list',
-    method: 'get',
-    params: query,
-  })
-}
+// ========== 别名 - 向后兼容 ==========
 
-// 标记通知已读 - 后端没有此API，需要使用通知API
-export function markNotificationRead(notificationIds) {
-  // 标记通知已读应该通过通知API处理
-  if (Array.isArray(notificationIds) && notificationIds.length > 0) {
-    // 假设使用第一个ID作为示例
-    return request({
-      url: `/api/im/notification/${notificationIds[0]}/read`,
-      method: 'put',
-    })
-  } else {
-    return request({
-      url: `/api/im/notification/${notificationIds}/read`,
-      method: 'put',
-    })
-  }
-}
+export const getContactInfo = getContact
 
-// 删除通知 - 后端没有此API，需要使用通知API
-export function deleteNotification(notificationId) {
-  return request({
-    url: `/api/im/notification/${notificationId}`,
-    method: 'delete',
-  })
-}
-
-// 获取未读通知数量 - 后端没有此API，需要使用通知API
-export function getUnreadNotificationCount() {
-  return request({
-    url: '/api/im/notification/unread-count',
-    method: 'get',
-  })
+// 默认导出 - 方便批量引入
+export default {
+  listContact,
+  getContact,
+  addContact,
+  deleteContact,
+  updateContactRemark,
+  searchContacts,
+  getReceivedFriendRequests,
+  getSentFriendRequests,
+  handleFriendRequest,
+  getFriendGroups,
+  createFriendGroup,
+  updateFriendGroup,
+  deleteFriendGroup,
+  moveFriendToGroup,
+  // 别名
+  getContactInfo,
 }

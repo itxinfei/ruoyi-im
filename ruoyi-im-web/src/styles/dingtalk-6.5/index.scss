@@ -1,0 +1,1175 @@
+/**
+ * ============================================
+ * 钉钉 6.5 版本像素级复刻样式
+ * DingTalk 6.5 Pixel-Perfect Styles
+ * ============================================
+ * 版本: 1.0.0
+ * 更新日期: 2026-01-08
+ * ============================================
+ */
+
+// ============================================
+// 1. 主题变量定义（钉钉6.5官方色彩）
+// ============================================
+:root {
+  // 主色调 - 钉钉蓝
+  --dt-primary: #1677ff;
+  --dt-primary-light: #4096ff;
+  --dt-primary-lighter: #69b1ff;
+  --dt-primary-dark: #0958d9;
+  --dt-primary-darker: #003eb3;
+
+  // 辅助色
+  --dt-success: #52c41a;
+  --dt-warning: #faad14;
+  --dt-error: #ff4d4f;
+  --dt-info: #1677ff;
+
+  // 中性色 - 文字
+  --dt-text-primary: #262626;
+  --dt-text-regular: #595959;
+  --dt-text-secondary: #8c8c8c;
+  --dt-text-placeholder: #bfbfbf;
+  --dt-text-disabled: #d9d9d9;
+
+  // 中性色 - 背景
+  --dt-bg-page: #f0f2f5;
+  --dt-bg-component: #ffffff;
+  --dt-bg-container: #f5f5f5;
+  --dt-bg-elevated: #ffffff;
+  --dt-bg-spotlight: #ffffff;
+  --dt-bg-layout: #f0f2f5;
+
+  // 中性色 - 边框
+  --dt-border-base: #d9d9d9;
+  --dt-border-light: #e5e7eb;
+  --dt-border-lighter: #f0f0f0;
+  --dt-border-extra-light: #fafafa;
+
+  // 阴影
+  --dt-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px rgba(0, 0, 0, 0.02);
+  --dt-shadow-2: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 8px -2px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.03);
+  --dt-shadow-3: 0 4px 8px rgba(0, 0, 0, 0.04), 0 2px 16px -4px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.04);
+  --dt-shadow-4: 0 8px 16px rgba(0, 0, 0, 0.06), 0 4px 32px -8px rgba(0, 0, 0, 0.06), 0 16px 32px rgba(0, 0, 0, 0.06);
+
+  // 圆角
+  --dt-radius-sm: 4px;
+  --dt-radius-base: 6px;
+  --dt-radius-lg: 8px;
+  --dt-radius-xl: 12px;
+  --dt-radius-xxl: 16px;
+
+  // 字体
+  --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --dt-font-size-xs: 11px;
+  --dt-font-size-sm: 12px;
+  --dt-font-size-base: 13px;
+  --dt-font-size-md: 14px;
+  --dt-font-size-lg: 16px;
+  --dt-font-size-xl: 18px;
+  --dt-font-size-xxl: 20px;
+
+  // 行高
+  --dt-line-height-xs: 1.2;
+  --dt-line-height-sm: 1.4;
+  --dt-line-height-base: 1.5;
+  --dt-line-height-lg: 1.6;
+  --dt-line-height-xl: 1.7;
+
+  // 间距
+  --dt-spacing-xs: 4px;
+  --dt-spacing-sm: 8px;
+  --dt-spacing-md: 12px;
+  --dt-spacing-lg: 16px;
+  --dt-spacing-xl: 20px;
+  --dt-spacing-xxl: 24px;
+
+  // 过渡
+  --dt-transition-fast: 0.1s;
+  --dt-transition-base: 0.2s;
+  --dt-transition-slow: 0.3s;
+
+  // Z-index层级
+  --dt-z-dropdown: 1050;
+  --dt-z-sticky: 1020;
+  --dt-z-fixed: 1030;
+  --dt-z-modal-backdrop: 1040;
+  --dt-z-modal: 1050;
+  --dt-z-popover: 1060;
+  --dt-z-tooltip: 1070;
+}
+
+// ============================================
+// 2. 全局样式重置与基础设置
+// ============================================
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  font-family: var(--dt-font-family);
+  font-size: var(--dt-font-size-base);
+  line-height: var(--dt-line-height-base);
+  color: var(--dt-text-primary);
+  background-color: var(--dt-bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// 滚动条样式（钉钉风格）
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.2);
+  }
+}
+
+// ============================================
+// 3. 布局样式（三栏布局）
+// ============================================
+.dt-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+
+  // 左侧导航栏
+  .dt-layout__sidebar {
+    width: 64px;
+    height: 100%;
+    background: var(--dt-bg-component);
+    border-right: 1px solid var(--dt-border-light);
+    transition: width var(--dt-transition-base);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+
+    &.expanded {
+      width: 192px;
+      align-items: stretch;
+      padding: 12px;
+    }
+  }
+
+  // 中间会话列表
+  .dt-layout__sessions {
+    width: 280px;
+    height: 100%;
+    background: var(--dt-bg-component);
+    border-right: 1px solid var(--dt-border-light);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  // 右侧聊天区域
+  .dt-layout__chat {
+    flex: 1;
+    height: 100%;
+    background: var(--dt-bg-page);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
+
+// ============================================
+// 4. 导航栏样式（左侧）
+// ============================================
+.dt-sidebar {
+  &__logo {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 8px;
+    border-radius: var(--dt-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--dt-primary) 0%, var(--dt-primary-dark) 100%);
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--dt-transition-base);
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: var(--dt-shadow-2);
+    }
+  }
+
+  &__nav {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__item {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--dt-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dt-text-secondary);
+    font-size: 20px;
+    cursor: pointer;
+    transition: all var(--dt-transition-base);
+    position: relative;
+
+    &:hover {
+      background: var(--dt-bg-container);
+      color: var(--dt-text-primary);
+    }
+
+    &.active {
+      background: rgba(22, 119, 255, 0.1);
+      color: var(--dt-primary);
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 24px;
+        background: var(--dt-primary);
+        border-radius: 0 2px 2px 0;
+      }
+    }
+
+    // 未读消息角标
+    .badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      background: var(--dt-error);
+      color: white;
+      font-size: 10px;
+      font-weight: 500;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+  }
+
+  &__bottom {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--dt-border-lighter);
+  }
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all var(--dt-transition-base);
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: var(--dt-shadow-2);
+    }
+  }
+}
+
+// ============================================
+// 5. 会话列表样式（中间）
+// ============================================
+.dt-sessions {
+  &__header {
+    height: 60px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--dt-border-lighter);
+  }
+
+  &__search {
+    flex: 1;
+    height: 32px;
+    background: var(--dt-bg-container);
+    border-radius: var(--dt-radius-base);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+
+    .el-icon {
+      color: var(--dt-text-placeholder);
+      margin-right: 8px;
+    }
+
+    input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: var(--dt-font-size-base);
+      color: var(--dt-text-primary);
+
+      &::placeholder {
+        color: var(--dt-text-placeholder);
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 12px;
+
+    .el-button {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--dt-text-secondary);
+      border-radius: var(--dt-radius-base);
+
+      &:hover {
+        background: var(--dt-bg-container);
+        color: var(--dt-text-primary);
+      }
+    }
+  }
+
+  &__tabs {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    gap: 16px;
+    border-bottom: 1px solid var(--dt-border-lighter);
+  }
+
+  &__tab {
+    padding: 6px 12px;
+    font-size: var(--dt-font-size-md);
+    color: var(--dt-text-secondary);
+    cursor: pointer;
+    border-radius: var(--dt-radius-base);
+    transition: all var(--dt-transition-base);
+
+    &:hover {
+      background: var(--dt-bg-container);
+    }
+
+    &.active {
+      color: var(--dt-text-primary);
+      font-weight: 500;
+    }
+
+    .badge {
+      margin-left: 4px;
+      padding: 2px 6px;
+      background: var(--dt-error);
+      color: white;
+      font-size: 11px;
+      border-radius: 8px;
+    }
+  }
+
+  &__list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color var(--dt-transition-fast);
+
+    &:hover {
+      background: var(--dt-bg-container);
+    }
+
+    &.active {
+      background: rgba(22, 119, 255, 0.08);
+    }
+
+    &.pinned {
+      .dt-sessions__item-avatar::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        width: 14px;
+        height: 14px;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="%231677ff"><path d="M3 3h5v5H3z M10 3h3v3h-3z M3 10h3v3H3z"/></svg>') no-repeat;
+      }
+    }
+  }
+
+  &__item-avatar {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    margin-right: 12px;
+    flex-shrink: 0;
+
+    .el-avatar {
+      width: 100%;
+      height: 100%;
+    }
+
+    // 在线状态
+    .online-status {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid var(--dt-bg-component);
+
+      &.online {
+        background: var(--dt-success);
+      }
+
+      &.offline {
+        background: var(--dt-text-placeholder);
+      }
+
+      &.busy {
+        background: var(--dt-error);
+      }
+    }
+  }
+
+  &__item-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  &__item-name {
+    font-size: var(--dt-font-size-md);
+    font-weight: 500;
+    color: var(--dt-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__item-time {
+    font-size: var(--dt-font-size-xs);
+    color: var(--dt-text-placeholder);
+  }
+
+  &__item-message {
+    display: flex;
+    align-items: center;
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .icon-at {
+      margin-right: 4px;
+      color: var(--dt-warning);
+    }
+
+    .icon-file {
+      margin-right: 4px;
+    }
+  }
+
+  &__item-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    margin-left: 8px;
+  }
+
+  // 未读标记
+  &__unread {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 6px;
+    background: var(--dt-error);
+    color: white;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+
+    &.dot {
+      min-width: 8px;
+      width: 8px;
+      height: 8px;
+      padding: 0;
+      border-radius: 50%;
+    }
+  }
+
+  // 免打扰标记
+  &__muted {
+    color: var(--dt-text-placeholder);
+  }
+}
+
+// ============================================
+// 6. 聊天区域样式（右侧）
+// ============================================
+.dt-chat {
+  &__header {
+    height: 60px;
+    padding: 0 20px;
+    background: var(--dt-bg-component);
+    border-bottom: 1px solid var(--dt-border-lighter);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .name {
+      font-size: var(--dt-font-size-lg);
+      font-weight: 500;
+      color: var(--dt-text-primary);
+    }
+
+    .members {
+      font-size: var(--dt-font-size-sm);
+      color: var(--dt-text-secondary);
+      cursor: pointer;
+
+      &:hover {
+        color: var(--dt-primary);
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .el-button {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--dt-text-secondary);
+      border-radius: var(--dt-radius-base);
+      font-size: 18px;
+
+      &:hover {
+        background: var(--dt-bg-container);
+        color: var(--dt-text-primary);
+      }
+    }
+  }
+
+  // 消息列表区域
+  &__messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  // 时间分隔符
+  &__time-divider {
+    align-self: center;
+    padding: 4px 12px;
+    background: var(--dt-bg-container);
+    border-radius: var(--dt-radius-base);
+    font-size: var(--dt-font-size-xs);
+    color: var(--dt-text-secondary);
+  }
+
+  // 输入区域
+  &__input {
+    min-height: 160px;
+    background: var(--dt-bg-component);
+    border-top: 1px solid var(--dt-border-lighter);
+    flex-shrink: 0;
+  }
+
+  &__toolbar {
+    height: 40px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__tool-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dt-text-secondary);
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: var(--dt-radius-base);
+    transition: all var(--dt-transition-fast);
+
+    &:hover {
+      background: var(--dt-bg-container);
+      color: var(--dt-primary);
+    }
+  }
+
+  &__textarea {
+    flex: 1;
+    padding: 8px 20px;
+    min-height: 80px;
+    max-height: 200px;
+    border: none;
+    outline: none;
+    resize: none;
+    font-size: var(--dt-font-size-md);
+    line-height: 1.6;
+    color: var(--dt-text-primary);
+    font-family: inherit;
+
+    &::placeholder {
+      color: var(--dt-text-placeholder);
+    }
+  }
+
+  &__footer {
+    height: 48px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__tip {
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-placeholder);
+  }
+
+  &__send-btn {
+    padding: 8px 24px;
+    background: var(--dt-primary);
+    color: white;
+    border: none;
+    border-radius: var(--dt-radius-base);
+    font-size: var(--dt-font-size-md);
+    cursor: pointer;
+    transition: all var(--dt-transition-base);
+
+    &:hover {
+      background: var(--dt-primary-dark);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ============================================
+// 7. 消息气泡样式
+// ============================================
+.dt-message {
+  display: flex;
+  gap: 12px;
+
+  &.own {
+    flex-direction: row-reverse;
+  }
+
+  &__avatar {
+    flex-shrink: 0;
+
+    .el-avatar {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    max-width: 60%;
+  }
+
+  &__sender {
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-secondary);
+    margin-bottom: 4px;
+  }
+
+  .own &__sender {
+    display: none;
+  }
+
+  &__bubble {
+    padding: 10px 14px;
+    background: var(--dt-bg-component);
+    border-radius: var(--dt-radius-lg);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    word-break: break-word;
+    white-space: pre-wrap;
+    font-size: var(--dt-font-size-md);
+    line-height: 1.6;
+    color: var(--dt-text-primary);
+
+    .own & {
+      background: var(--dt-primary);
+      color: white;
+    }
+  }
+
+  &__status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    font-size: var(--dt-font-size-xs);
+    color: var(--dt-text-placeholder);
+
+    .own & {
+      justify-content: flex-end;
+    }
+  }
+
+  // 引用消息
+  &__reply {
+    padding: 8px;
+    margin-bottom: 8px;
+    background: var(--dt-bg-container);
+    border-radius: var(--dt-radius-sm);
+    border-left: 2px solid var(--dt-border-light);
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-secondary);
+  }
+}
+
+// ============================================
+// 8. 表情选择器样式
+// ============================================
+.dt-emoji-picker {
+  width: 360px;
+  background: var(--dt-bg-component);
+  border-radius: var(--dt-radius-lg);
+  box-shadow: var(--dt-shadow-3);
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--dt-border-lighter);
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 4px;
+  }
+
+  &__tab {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: var(--dt-radius-base);
+    transition: all var(--dt-transition-fast);
+
+    &:hover {
+      background: var(--dt-bg-container);
+    }
+
+    &.active {
+      background: rgba(22, 119, 255, 0.1);
+    }
+  }
+
+  &__body {
+    height: 240px;
+    padding: 12px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+    align-content: start;
+  }
+
+  &__emoji {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    border-radius: var(--dt-radius-base);
+    transition: all var(--dt-transition-fast);
+
+    &:hover {
+      background: var(--dt-bg-container);
+      transform: scale(1.1);
+    }
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-top: 1px solid var(--dt-border-lighter);
+  }
+
+  &__recent {
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-secondary);
+  }
+}
+
+// ============================================
+// 9. 模态框样式
+// ============================================
+.dt-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--dt-z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &__backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+  }
+
+  &__container {
+    position: relative;
+    background: var(--dt-bg-component);
+    border-radius: var(--dt-radius-xl);
+    box-shadow: var(--dt-shadow-4);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--dt-border-lighter);
+
+    .title {
+      font-size: var(--dt-font-size-lg);
+      font-weight: 500;
+      color: var(--dt-text-primary);
+    }
+
+    .close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: var(--dt-radius-base);
+      color: var(--dt-text-secondary);
+      transition: all var(--dt-transition-fast);
+
+      &:hover {
+        background: var(--dt-bg-container);
+        color: var(--dt-text-primary);
+      }
+    }
+  }
+
+  &__body {
+    padding: 24px;
+    max-height: calc(90vh - 140px);
+    overflow-y: auto;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--dt-border-lighter);
+  }
+}
+
+// ============================================
+// 10. 抽屉样式
+// ============================================
+.dt-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--dt-z-modal);
+  width: 380px;
+  background: var(--dt-bg-component);
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
+  transform: translateX(100%);
+  transition: transform var(--dt-transition-base);
+
+  &.open {
+    transform: translateX(0);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--dt-border-lighter);
+
+    .title {
+      font-size: var(--dt-font-size-lg);
+      font-weight: 500;
+      color: var(--dt-text-primary);
+    }
+  }
+
+  &__body {
+    height: calc(100% - 60px);
+    overflow-y: auto;
+    padding: 16px 20px;
+  }
+
+  &__close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: var(--dt-radius-base);
+    color: var(--dt-text-secondary);
+    transition: all var(--dt-transition-fast);
+
+    &:hover {
+      background: var(--dt-bg-container);
+    }
+  }
+}
+
+// ============================================
+// 11. 通知/Toast样式
+// ============================================
+.dt-toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--dt-z-tooltip);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--dt-bg-component);
+    border-radius: var(--dt-radius-lg);
+    box-shadow: var(--dt-shadow-3);
+    pointer-events: auto;
+    animation: toastSlideIn var(--dt-transition-base) ease-out;
+
+    &.success {
+      .icon {
+        color: var(--dt-success);
+      }
+    }
+
+    &.error {
+      .icon {
+        color: var(--dt-error);
+      }
+    }
+
+    &.warning {
+      .icon {
+        color: var(--dt-warning);
+      }
+    }
+
+    &.info {
+      .icon {
+        color: var(--dt-info);
+      }
+    }
+  }
+
+  &__icon {
+    font-size: 20px;
+  }
+
+  &__content {
+    font-size: var(--dt-font-size-md);
+    color: var(--dt-text-primary);
+  }
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================
+// 12. 暗色主题支持
+// ============================================
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dt-text-primary: #e8e8e8;
+    --dt-text-regular: #b8b8b8;
+    --dt-text-secondary: #8c8c8c;
+    --dt-text-placeholder: #595959;
+    --dt-text-disabled: #434343;
+
+    --dt-bg-page: #141414;
+    --dt-bg-component: #1f1f1f;
+    --dt-bg-container: #262626;
+    --dt-bg-elevated: #262626;
+    --dt-bg-spotlight: #262626;
+    --dt-bg-layout: #141414;
+
+    --dt-border-base: #434343;
+    --dt-border-light: #303030;
+    --dt-border-lighter: #262626;
+    --dt-border-extra-light: #1f1f1f;
+  }
+}
+
+// ============================================
+// 13. 响应式设计
+// ============================================
+@media (max-width: 1440px) {
+  .dt-layout__sessions {
+    width: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dt-layout__sidebar {
+    width: 56px;
+
+    &.expanded {
+      width: 56px;
+    }
+  }
+
+  .dt-layout__sessions {
+    width: 100%;
+    position: absolute;
+    left: 56px;
+    top: 0;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform var(--dt-transition-base);
+
+    &.show {
+      transform: translateX(0);
+    }
+  }
+}
+
+// ============================================
+// 14. 工具类
+// ============================================
+.dt-text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dt-text-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dt-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dt-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

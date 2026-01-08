@@ -11,7 +11,7 @@
  Target Server Version : 50744 (5.7.44-log)
  File Encoding         : 65001
 
- Date: 08/01/2026 14:20:05
+ Date: 08/01/2026 14:48:49
 */
 
 SET NAMES utf8mb4;
@@ -826,6 +826,58 @@ INSERT INTO `im_conversation_member` VALUES (48, 5, 5, NULL, 'MEMBER', 0, 0, 0, 
 INSERT INTO `im_conversation_member` VALUES (50, 3, 6, NULL, 'MEMBER', 0, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
 
 -- ----------------------------
+-- Table structure for im_department
+-- ----------------------------
+DROP TABLE IF EXISTS `im_department`;
+CREATE TABLE `im_department`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '部门ID',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '部门名称',
+  `parent_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '父部门ID，根部门为0',
+  `ancestors` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '祖级列表，逗号分隔，如：0,1,2',
+  `order_num` int(11) NOT NULL DEFAULT 0 COMMENT '显示顺序，数字越小越靠前',
+  `leader_id` bigint(20) NULL DEFAULT NULL COMMENT '负责人用户ID',
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '联系电话',
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
+  `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '部门状态: 0=正常, 1=停用',
+  `del_flag` tinyint(1) NOT NULL DEFAULT 0 COMMENT '删除标志: 0=存在, 1=删除',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '部门描述',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_parent_id`(`parent_id`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'IM部门表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_department
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for im_department_member
+-- ----------------------------
+DROP TABLE IF EXISTS `im_department_member`;
+CREATE TABLE `im_department_member`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '关系ID',
+  `department_id` bigint(20) NOT NULL COMMENT '部门ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `is_primary` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否为主部门: 0=否, 1=是',
+  `position` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '职位名称',
+  `join_time` datetime NULL DEFAULT NULL COMMENT '入职时间',
+  `leave_time` datetime NULL DEFAULT NULL COMMENT '离职时间',
+  `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '状态: 0=在职, 1=离职',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_department_id`(`department_id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_is_primary`(`is_primary`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'IM部门成员关系表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_department_member
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for im_ding_message
 -- ----------------------------
 DROP TABLE IF EXISTS `im_ding_message`;
@@ -1073,6 +1125,33 @@ CREATE TABLE `im_file_chunk_upload`  (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for im_file_share
+-- ----------------------------
+DROP TABLE IF EXISTS `im_file_share`;
+CREATE TABLE `im_file_share`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '分享ID',
+  `file_id` bigint(20) NOT NULL COMMENT '文件ID',
+  `sharer_id` bigint(20) NOT NULL COMMENT '分享者ID',
+  `receiver_ids` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '接收者ID，多个接收者用逗号分隔',
+  `permission` int(11) NOT NULL DEFAULT 1 COMMENT '分享权限: 1=公开, 2=指定人可见, 3=密码保护',
+  `access_password` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '访问密码',
+  `allow_download` tinyint(1) NOT NULL DEFAULT 1 COMMENT '允许下载: 0=否, 1=是',
+  `allow_preview` tinyint(1) NOT NULL DEFAULT 1 COMMENT '允许预览: 0=否, 1=是',
+  `expire_time` datetime NULL DEFAULT NULL COMMENT '过期时间',
+  `access_count` int(11) NOT NULL DEFAULT 0 COMMENT '访问次数',
+  `download_count` int(11) NOT NULL DEFAULT 0 COMMENT '下载次数',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_file_id`(`file_id`) USING BTREE,
+  INDEX `idx_sharer_id`(`sharer_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '文件分享记录表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_file_share
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for im_friend
 -- ----------------------------
 DROP TABLE IF EXISTS `im_friend`;
@@ -1146,6 +1225,7 @@ CREATE TABLE `im_group`  (
   `owner_id` bigint(20) NOT NULL COMMENT '??ID',
   `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
   `max_members` int(11) NOT NULL DEFAULT 500 COMMENT '?????',
+  `all_muted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '全员禁言：0=否，1=是',
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '?????0? 1??',
   `deleted_time` datetime NULL DEFAULT NULL COMMENT '????',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
@@ -1159,16 +1239,41 @@ CREATE TABLE `im_group`  (
 -- ----------------------------
 -- Records of im_group
 -- ----------------------------
-INSERT INTO `im_group` VALUES (1, '技术交流群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG1', 2, '欢迎大家交流技术问题', 500, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (2, '产品讨论群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG2', 3, '产品需求讨论', 200, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (3, '项目开发群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG3', 4, '项目进度同步', 50, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (4, '公司全员群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG4', 2, '公司通知发布', 1000, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (5, '篮球爱好者', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG5', 5, '每周组织篮球活动', 100, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (6, '读书分享会', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG6', 6, '分享读书心得', 200, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (7, '前端开发群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG7', 7, '前端技术交流', 300, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (8, '后端开发群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG8', 8, '后端技术交流', 300, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (9, '设计团队', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG9', 9, 'UI/UX设计讨论', 50, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (10, '测试团队', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCGA', 10, '质量保证交流', 100, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (1, '技术交流群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG1', 2, '欢迎大家交流技术问题', 500, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (2, '产品讨论群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG2', 3, '产品需求讨论', 200, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (3, '项目开发群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG3', 4, '项目进度同步', 50, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (4, '公司全员群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG4', 2, '公司通知发布', 1000, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (5, '篮球爱好者', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG5', 5, '每周组织篮球活动', 100, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (6, '读书分享会', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG6', 6, '分享读书心得', 200, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (7, '前端开发群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG7', 7, '前端技术交流', 300, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (8, '后端开发群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG8', 8, '后端技术交流', 300, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (9, '设计团队', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG9', 9, 'UI/UX设计讨论', 50, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (10, '测试团队', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCGA', 10, '质量保证交流', 100, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+
+-- ----------------------------
+-- Table structure for im_group_announcement
+-- ----------------------------
+DROP TABLE IF EXISTS `im_group_announcement`;
+CREATE TABLE `im_group_announcement`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '公告ID',
+  `group_id` bigint(20) NOT NULL COMMENT '群组ID',
+  `sender_id` bigint(20) NOT NULL COMMENT '发送者ID',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '公告内容',
+  `type` int(11) NOT NULL DEFAULT 1 COMMENT '公告类型: 1=普通公告, 2=系统公告, 3=活动通知',
+  `attachment_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '附件URL（图片、文件等）',
+  `is_pinned` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否置顶: 0=否, 1=是',
+  `status` int(11) NOT NULL DEFAULT 1 COMMENT '状态: 1=正常, 0=已撤回',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `expire_time` datetime NULL DEFAULT NULL COMMENT '过期时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_group_id`(`group_id`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '群组公告表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_group_announcement
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for im_group_blacklist

@@ -1,0 +1,256 @@
+# ============================================
+# 读写分离配置文件
+# 用于提升500人并发的数据库性能
+# ============================================
+
+# 注意：使用此配置前需要先配置MySQL主从复制
+
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+    # ===============================
+    # 动态数据源配置
+    # ===============================
+    dynamic:
+      # 主数据源（写库）
+      primary: master
+      strict: true  # 严格模式，如果没有匹配的数据源会报错
+      datasource:
+        # 主库配置
+        master:
+          url: jdbc:mysql://master-db:3306/im?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=Asia/Shanghai
+          username: root
+          password: master_password
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          druid:
+            initial-size: 20
+            min-idle: 30
+            max-active: 100
+            max-wait: 10000
+
+        # 从库1配置（读库）
+        slave1:
+          url: jdbc:mysql://slave1-db:3306/im?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=Asia/Shanghai
+          username: root
+          password: slave_password
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          druid:
+            initial-size: 30
+            min-idle: 50
+            max-active: 150
+            max-wait: 10000
+
+        # 从库2配置（读库）- 可选
+        slave2:
+          url: jdbc:mysql://slave2-db:3306/im?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=Asia/Shanghai
+          username: root
+          password: slave_password
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          druid:
+            initial-size: 30
+            min-idle: 50
+            max-active: 150
+            max-wait: 10000
+
+    # Druid监控配置
+    druid:
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          slow-sql-millis: 1000
+        wall:
+          enabled: true
+          config:
+            multi-statement-allow: true
+
+# ===============================
+# MyBatis-Plus读写分离配置
+# ===============================
+mybatis-plus:
+  # 读写分离配置
+  slave:
+    # 读库负载均衡策略：round_robin=轮询, random=随机, weighted_random=加权随机
+    load-balance: round_robin
+    # 读库名称前缀
+    name-prefix: slave
+  # 配置
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+    lazy-loading-enabled: true
+
+# ===============================
+# ShardingSphere读写分离配置（可选）
+# 如果使用ShardingSphere，可以使用以下配置
+# ===============================
+spring:
+  shardingsphere:
+    datasource:
+      names: master,slave1,slave2
+      master:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://master-db:3306/im
+        username: root
+        password: master_password
+      slave1:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://slave1-db:3306/im
+        username: root
+        password: slave_password
+      slave2:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://slave2-db:3306/im
+        username: root
+        password: slave_password
+
+    rules:
+      # 读写分离规则
+      readwrite-splitting:
+        data-sources:
+          readwrite-ds:
+            # 写数据源
+            write-data-source-name: master
+            # 读数据源列表
+            read-data-source-names:
+              - slave1
+              - slave2
+            # 负载均衡算法
+            load-balancers:
+              readwrite-ds:
+                type: ROUND_ROBIN
+                props:
+                  default: 0  # 0表示轮询
+
+    props:
+      sql-show: false
+
+# ===============================
+# 缓存配置（减轻数据库压力）
+# ===============================
+spring:
+  redis:
+    # 主库配置（缓存主节点）
+    host: redis-master
+    port: 6379
+    password: redis_password
+    database: 0
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 200
+        max-idle: 50
+        min-idle: 20
+        max-wait: 3000ms
+      # 集群配置（可选）
+      cluster:
+        nodes:
+          - redis-master:6379
+          - redis-slave1:6379
+          - redis-slave2:6379
+        max-redirects: 3
+
+# ===============================
+# 二级缓存配置（MyBatis）
+# ===============================
+mybatis-plus:
+  configuration:
+    cache-enabled: true
+    # 缓存实现类
+    cache-class: com.ruoyi.im.config.MybatisRedisCache
+    # 本地缓存配置
+    local-cache-scope: statement
+    # 缓存过期时间（秒）
+    default-cache-expire-seconds: 3600
+
+# ===============================
+# 事务配置
+# ===============================
+spring:
+  transaction:
+    # 默认事务管理器
+    default-transaction-manager: transactionManager
+    # 事务传播行为
+    default-propagation: REQUIRED
+    # 事务隔离级别
+    default-isolation: READ_COMMITTED
+
+# ===============================
+# HikariCP连接池配置（可选，作为Druid的替代）
+# ===============================
+spring:
+  datasource:
+    hikari:
+      # 连接池配置
+      minimum-idle: 30
+      maximum-pool-size: 150
+      # 连接超时配置
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      # 连接测试
+      connection-test-query: SELECT 1
+      # 性能优化
+      auto-commit: true
+      read-only: false
+      # 注册JMX
+      register-mbeans: true
+
+# ===============================
+# 分库分表配置（可选，用于大数据量场景）
+# ===============================
+spring:
+  shardingsphere:
+    # 分库分表规则
+    rules:
+      sharding:
+        # 自动分表规则
+        auto-tables:
+          # 消息表按时间分表
+          im_message:
+            # 分表策略
+            table-strategy:
+              standard:
+                sharding-column: create_time
+                sharding-algorithm-name: message-time-interval
+        # 分片算法
+        sharding-algorithms:
+          # 消息表时间分片算法
+          message-time-interval:
+            type: INTERVAL
+            props:
+              # 时间间隔类型：MONTH=按月分表
+              datetime-pattern: yyyy-MM-dd HH:mm:ss
+              datetime-lower: 2024-01-01 00:00:00
+              datetime-upper: 2025-12-31 23:59:59
+              sharding-suffix-pattern: yyyyMM
+              interval-amount: 1
+
+# ===============================
+# 监控配置
+# ===============================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      db:
+        enabled: true
+      redis:
+        enabled: true
+      defaults:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+      env: ${spring.profiles.active}

@@ -43,24 +43,8 @@ export function formatShortTime(timestamp) {
   return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
 }
 
-export function formatMessageDate(timestamp) {
-  if (!timestamp) return ''
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diff = now - date
-  const oneDay = 24 * 60 * 60 * 1000
-
-  if (diff < oneDay && date.getDate() === now.getDate()) {
-    return '今天'
-  } else if (diff < oneDay * 2 && date.getDate() === now.getDate() - 1) {
-    return '昨天'
-  } else if (diff < oneDay * 7) {
-    const days = ['日', '一', '二', '三', '四', '五', '六']
-    return `星期${days[date.getDay()]}`
-  } else {
-    return date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
-  }
-}
+// formatMessageDate 已移至 @/utils/message.js
+// 请使用 import { formatMessageDate } from '@/utils/message'
 
 export function formatDuration(seconds) {
   if (!seconds && seconds !== 0) return ''

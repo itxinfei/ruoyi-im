@@ -187,32 +187,50 @@ ruoyi-im-web/
 | `/im/chat` | chat/ChatContainer.vue | 聊天主页 |
 | `/im/contacts` | contacts/index.vue | 联系人管理 |
 | `/im/group` | group/index.vue | 群组管理 |
+| `/im/group/detail` | group/detail.vue | 群组详情 |
+| `/im/group/settings` | group/settings.vue | 群组设置 |
 | `/im/file/list` | file/index.vue | 文件管理 |
 | `/im/settings` | settings/index.vue | 系统设置 |
+| `/im/workbench` | workbench/index.vue | 工作台 |
+| `/im/approval` | approval/index.vue | 审批中心 |
+| `/im/app-center` | app-center/index.vue | 应用中心 |
 
 ## 核心功能
 
 ### 聊天功能
 - 单聊/群聊消息
-- 多媒体消息 (文字、图片、文件、语音)
+- 多媒体消息 (文字、图片、文件、语音、视频)
 - 表情选择器
 - @提及功能
 - 消息搜索
+- 消息编辑 (发送后15分钟内可编辑)
+- 消息撤回
+- 消息转发
 - 位置分享
 - 投票功能
 - 代码片段
+- 消息收藏
 
 ### 联系人管理
-- 联系人列表与搜索
+- 联系人列表与搜索 (A-Z索引)
 - 在线状态显示
 - 好友分组管理
 - 联系人详情
+- 外部联系人管理
+- 星标联系人
 
 ### 群组管理
 - 群组CRUD操作
 - 成员管理
 - 群组设置
 - 群公告
+- 群头像设置
+
+### 工作台
+- 工作日志 (日报/周报/月报)
+- 日程管理
+- 待办事项
+- 审批中心
 
 ### 文件管理
 - 文件上传/下载
@@ -222,6 +240,7 @@ ruoyi-im-web/
 
 ### 系统设置
 - 个人资料
+- 头像上传
 - 主题切换 (浅色/深色)
 - 通知设置
 - 隐私设置
@@ -303,11 +322,30 @@ proxy: {
 |------|------|------|
 | 认证 | `login.js` | 登录、登出、获取用户信息 |
 | 用户 | `system/user.js` | 用户管理、资料更新 |
-| 消息 | `im/message.js` | 消息发送、历史查询 |
-| 会话 | `im/session.js` | 会话列表、会话操作 |
+| 应用 | `im/app.js` | 应用中心接口 |
+| 审批 | `im/approval.js` | 审批流程接口 |
 | 联系人 | `im/contact.js` | 好友管理、分组 |
+| 外部联系人 | `im/external-contact.js` | 外部联系人管理 |
+| 对话 | `im/conversation.js` | 对话列表、操作 |
+| 会话 | `im/session.js` | 会话列表、会话操作 |
 | 群组 | `im/group.js` | 群组CRUD、成员管理 |
 | 文件 | `im/file.js` | 文件上传、下载、管理 |
+| 消息 | `im/message.js` | 消息发送、编辑、撤回、历史查询 |
+| 工作台 | `im/workbench.js` | 工作台数据统计 |
+
+## 后端API接口
+
+### IM接口服务 (端口8080)
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/api/im/message` | POST | 发送消息 |
+| `/api/im/message/{id}/edit` | PUT | 编辑消息 |
+| `/api/im/message/{id}/recall` | PUT | 撤回消息 |
+| `/api/im/conversation/list` | GET | 获取对话列表 |
+| `/api/im/external-contact` | POST | 创建外部联系人 |
+| `/api/im/work-report` | POST | 创建工作日志 |
+| `/api/im/schedule-event` | POST | 创建日程事件 |
 
 ## 状态管理
 
@@ -338,8 +376,22 @@ proxy: {
 
 ### 样式规范
 - 全局变量定义在 `assets/styles/variables.scss`
+- 钉钉样式定义在 `styles/dingtalk-*.scss`
 - 已通过Vite配置自动注入到所有组件
 - 组件内样式使用SCSS
+- 推荐使用钉钉工具类进行快速开发
+
+### 钉钉样式工具类速查
+
+| 类别 | 类名 | 说明 |
+|------|------|------|
+| 布局 | `dd-flex`, `dd-flex-col`, `dd-items-center` | 弹性布局 |
+| 间距 | `dd-m-2`, `dd-p-4`, `dd-mx-auto` | margin/padding |
+| 文字 | `dd-text-primary`, `dd-font-medium` | 文字颜色/大小 |
+| 背景 | `dd-bg-white`, `dd-bg-primary` | 背景颜色 |
+| 圆角 | `dd-rounded-lg`, `dd-rounded-full` | 边框圆角 |
+| 阴影 | `dd-shadow-md`, `dd-shadow-lg` | 盒子阴影 |
+| 动画 | `dd-animate-fade-in`, `dd-animate-slide-in` | 进入动画 |
 
 ## 浏览器支持
 
@@ -347,6 +399,17 @@ proxy: {
 - Firefox >= 78
 - Safari >= 14
 - Edge >= 88
+
+## 更新日志
+
+### v1.5.0 (2024)
+- 新增钉钉6.5.x风格UI设计
+- 新增消息编辑功能 (15分钟内可编辑)
+- 新增外部联系人管理
+- 新增工作日志功能 (日报/周报/月报)
+- 新增日程管理功能
+- 优化会话列表样式
+- 优化消息气泡样式
 
 ## 许可证
 
