@@ -90,6 +90,28 @@ public class ImMessage implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
+    /** 回复的消息ID（支持回复/引用功能） */
+    @TableField("reply_to_message_id")
+    private Long replyToMessageId;
+
+    /** 转发来源消息ID（支持转发功能） */
+    @TableField("forward_from_message_id")
+    private Long forwardFromMessageId;
+
+    /** 是否删除：0否 1是 */
+    @TableField("is_deleted")
+    private Integer isDeleted;
+
+    /** 删除时间 */
+    @TableField("deleted_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime deletedTime;
+
+    /** 更新时间 */
+    @TableField("update_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updateTime;
+
     // ==================== 以下字段为非数据库字段 ====================
 
     /**
@@ -135,36 +157,6 @@ public class ImMessage implements Serializable {
     public void setType(String type) {
         this.type = type;
     }
-
-    /**
-     * 回复的消息ID（非数据库字段）
-     */
-    @TableField(exist = false)
-    private Long replyToMessageId;
-
-    /**
-     * 转发的消息ID（非数据库字段）
-     */
-    @TableField(exist = false)
-    private Long forwardFromMessageId;
-
-    /**
-     * 是否删除（非数据库字段）
-     */
-    @TableField(exist = false)
-    private Integer isDeleted;
-
-    /**
-     * 删除时间（非数据库字段）
-     */
-    @TableField(exist = false)
-    private LocalDateTime deletedTime;
-
-    /**
-     * 更新时间（非数据库字段）
-     */
-    @TableField(exist = false)
-    private LocalDateTime updateTime;
 
     // ==================== Getters and Setters ====================
 

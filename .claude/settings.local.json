@@ -61,7 +61,9 @@
       "Bash(for:*)",
       "Bash(do echo \"=== $comp ===\")",
       "Bash(do echo:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(rg:*)",
+      "Bash(git add:*)"
     ]
   }
 }

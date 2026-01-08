@@ -11,7 +11,7 @@
  Target Server Version : 50744 (5.7.44-log)
  File Encoding         : 65001
 
- Date: 08/01/2026 14:48:49
+ Date: 08/01/2026 16:35:41
 */
 
 SET NAMES utf8mb4;
@@ -1057,7 +1057,7 @@ CREATE TABLE `im_file_asset`  (
   INDEX `idx_uploader_id`(`uploader_id`) USING BTREE,
   INDEX `idx_md5`(`md5`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1003 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1004 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_file_asset
@@ -1065,6 +1065,7 @@ CREATE TABLE `im_file_asset`  (
 INSERT INTO `im_file_asset` VALUES (1000, 'bbb.pdf', '/files/test_document.pdf', 1024000, 'document', 'pdf', NULL, 1, 0, NULL, 'ACTIVE', '2025-12-31 15:08:20');
 INSERT INTO `im_file_asset` VALUES (1001, 'aa.jpg', '/files/example_image.jpg', 512000, 'image', 'jpg', NULL, 2, 0, NULL, 'ACTIVE', '2025-12-31 15:08:20');
 INSERT INTO `im_file_asset` VALUES (1002, 'bbb.xlsx', '/files/project_plan.xlsx', 2048000, 'document', 'xlsx', NULL, 1, 0, NULL, 'ACTIVE', '2025-12-31 15:08:20');
+INSERT INTO `im_file_asset` VALUES (1003, '9bc47dbc-31b2-446b-aa07-e6bae94004db.', '2026/01/08/9bc47dbc-31b2-446b-aa07-e6bae94004db.', 965, 'other', '', NULL, 3, 0, NULL, 'ACTIVE', '2026-01-08 14:52:05');
 
 -- ----------------------------
 -- Table structure for im_file_chunk_detail
@@ -1412,6 +1413,8 @@ CREATE TABLE `im_message`  (
   `sender_id` bigint(20) NOT NULL COMMENT '???ID',
   `message_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????TEXT?? IMAGE?? VIDEO?? AUDIO?? FILE???',
   `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '????',
+  `reply_to_message_id` bigint(20) NULL DEFAULT NULL COMMENT '回复的消息ID',
+  `forward_from_message_id` bigint(20) NULL DEFAULT NULL COMMENT '转发来源消息ID',
   `file_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??URL',
   `file_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '???',
   `file_size` bigint(20) NULL DEFAULT NULL COMMENT '????????',
@@ -1421,6 +1424,8 @@ CREATE TABLE `im_message`  (
   `edited_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '编辑后的内容',
   `edit_count` int(11) NOT NULL DEFAULT 0 COMMENT '编辑次数',
   `edit_time` datetime NULL DEFAULT NULL COMMENT '最后编辑时间',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除（0否 1是）',
+  `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
   `revoked_time` datetime NULL DEFAULT NULL COMMENT '????',
   `revoker_id` bigint(20) NULL DEFAULT NULL COMMENT '???ID',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
@@ -1433,6 +1438,9 @@ CREATE TABLE `im_message`  (
   INDEX `idx_is_revoked`(`is_revoked`) USING BTREE,
   INDEX `idx_conversation_time`(`conversation_id`, `create_time`) USING BTREE,
   INDEX `idx_is_edited`(`is_edited`) USING BTREE,
+  INDEX `idx_reply_to_message_id`(`reply_to_message_id`) USING BTREE,
+  INDEX `idx_forward_from_message_id`(`forward_from_message_id`) USING BTREE,
+  INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
   CONSTRAINT `fk_message_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `im_conversation` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_message_sender` FOREIGN KEY (`sender_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???' ROW_FORMAT = DYNAMIC;
@@ -1440,36 +1448,36 @@ CREATE TABLE `im_message`  (
 -- ----------------------------
 -- Records of im_message
 -- ----------------------------
-INSERT INTO `im_message` VALUES (1, 1, 2, 'TEXT', '你好，最近怎么样？', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 09:00:00', NULL);
-INSERT INTO `im_message` VALUES (2, 1, 3, 'TEXT', '挺好的，谢谢关心！你呢？', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 09:01:00', NULL);
-INSERT INTO `im_message` VALUES (3, 1, 2, 'TEXT', '我也不错，今天天气真好', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 09:02:00', NULL);
-INSERT INTO `im_message` VALUES (4, 2, 2, 'TEXT', '是啊，适合出去走走', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 10:00:00', NULL);
-INSERT INTO `im_message` VALUES (5, 2, 4, 'TEXT', '项目进度怎么样了？', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 10:05:00', NULL);
-INSERT INTO `im_message` VALUES (6, 3, 2, 'TEXT', '@所有人 今天下午3点开会', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 11:00:00', NULL);
-INSERT INTO `im_message` VALUES (7, 3, 5, 'TEXT', '收到，我会准时参加', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 11:01:00', NULL);
-INSERT INTO `im_message` VALUES (8, 4, 2, 'TEXT', '这个技术方案怎么样？', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 12:00:00', NULL);
-INSERT INTO `im_message` VALUES (9, 4, 6, 'TEXT', '文件已经发给你了，请查收', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 12:01:00', NULL);
-INSERT INTO `im_message` VALUES (10, 5, 2, 'TEXT', '会议延期到明天上午', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 13:00:00', NULL);
-INSERT INTO `im_message` VALUES (11, 5, 7, 'TEXT', '看完了，有一些修改意见', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 13:10:00', NULL);
-INSERT INTO `im_message` VALUES (12, 6, 2, 'TEXT', '大家好，欢迎加入技术交流群', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 14:00:00', NULL);
-INSERT INTO `im_message` VALUES (13, 6, 3, 'TEXT', '感谢群主邀请', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 14:01:00', NULL);
-INSERT INTO `im_message` VALUES (14, 6, 4, 'TEXT', '向大家学习', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 14:02:00', NULL);
-INSERT INTO `im_message` VALUES (15, 7, 3, 'TEXT', '产品需求已经更新', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 15:00:00', NULL);
-INSERT INTO `im_message` VALUES (16, 7, 7, 'TEXT', '收到，我会查看', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 15:01:00', NULL);
-INSERT INTO `im_message` VALUES (17, 8, 4, 'TEXT', '项目进度汇报', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 16:00:00', NULL);
-INSERT INTO `im_message` VALUES (18, 8, 9, 'TEXT', '前端开发完成了80%', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 16:10:00', NULL);
-INSERT INTO `im_message` VALUES (19, 9, 2, 'TEXT', '公司通知：本周五下午开会', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 17:00:00', NULL);
-INSERT INTO `im_message` VALUES (20, 9, 3, 'TEXT', '收到', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 17:01:00', NULL);
-INSERT INTO `im_message` VALUES (21, 10, 2, 'TEXT', '吴九，后端接口文档发我', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 09:00:00', NULL);
-INSERT INTO `im_message` VALUES (22, 10, 8, 'TEXT', '已经发送到你邮箱', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 09:05:00', NULL);
-INSERT INTO `im_message` VALUES (23, 11, 2, 'TEXT', '郑十，测试用例写好了吗？', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 10:00:00', NULL);
-INSERT INTO `im_message` VALUES (24, 11, 9, 'TEXT', '写好了，正在执行测试', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 10:01:00', NULL);
-INSERT INTO `im_message` VALUES (25, 12, 5, 'TEXT', '本周篮球活动照常进行', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 11:00:00', NULL);
-INSERT INTO `im_message` VALUES (26, 12, 11, 'TEXT', '我会参加', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 11:01:00', NULL);
-INSERT INTO `im_message` VALUES (27, 13, 2, 'TEXT', '陈一，UI验收通过了吗？', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 12:00:00', NULL);
-INSERT INTO `im_message` VALUES (28, 13, 10, 'TEXT', '通过了，可以开发', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 12:01:00', NULL);
-INSERT INTO `im_message` VALUES (29, 14, 6, 'TEXT', '本周读书分享：《深入理解计算机系统》', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 13:00:00', NULL);
-INSERT INTO `im_message` VALUES (30, 15, 2, 'TEXT', '林二，代码review一下', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 14:00:00', NULL);
+INSERT INTO `im_message` VALUES (1, 1, 2, 'TEXT', '你好，最近怎么样？', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 09:00:00', NULL);
+INSERT INTO `im_message` VALUES (2, 1, 3, 'TEXT', '挺好的，谢谢关心！你呢？', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 09:01:00', NULL);
+INSERT INTO `im_message` VALUES (3, 1, 2, 'TEXT', '我也不错，今天天气真好', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 09:02:00', NULL);
+INSERT INTO `im_message` VALUES (4, 2, 2, 'TEXT', '是啊，适合出去走走', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 10:00:00', NULL);
+INSERT INTO `im_message` VALUES (5, 2, 4, 'TEXT', '项目进度怎么样了？', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 10:05:00', NULL);
+INSERT INTO `im_message` VALUES (6, 3, 2, 'TEXT', '@所有人 今天下午3点开会', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 11:00:00', NULL);
+INSERT INTO `im_message` VALUES (7, 3, 5, 'TEXT', '收到，我会准时参加', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 11:01:00', NULL);
+INSERT INTO `im_message` VALUES (8, 4, 2, 'TEXT', '这个技术方案怎么样？', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 12:00:00', NULL);
+INSERT INTO `im_message` VALUES (9, 4, 6, 'TEXT', '文件已经发给你了，请查收', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 12:01:00', NULL);
+INSERT INTO `im_message` VALUES (10, 5, 2, 'TEXT', '会议延期到明天上午', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 13:00:00', NULL);
+INSERT INTO `im_message` VALUES (11, 5, 7, 'TEXT', '看完了，有一些修改意见', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 13:10:00', NULL);
+INSERT INTO `im_message` VALUES (12, 6, 2, 'TEXT', '大家好，欢迎加入技术交流群', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 14:00:00', NULL);
+INSERT INTO `im_message` VALUES (13, 6, 3, 'TEXT', '感谢群主邀请', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 14:01:00', NULL);
+INSERT INTO `im_message` VALUES (14, 6, 4, 'TEXT', '向大家学习', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 14:02:00', NULL);
+INSERT INTO `im_message` VALUES (15, 7, 3, 'TEXT', '产品需求已经更新', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 15:00:00', NULL);
+INSERT INTO `im_message` VALUES (16, 7, 7, 'TEXT', '收到，我会查看', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 15:01:00', NULL);
+INSERT INTO `im_message` VALUES (17, 8, 4, 'TEXT', '项目进度汇报', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 16:00:00', NULL);
+INSERT INTO `im_message` VALUES (18, 8, 9, 'TEXT', '前端开发完成了80%', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 16:10:00', NULL);
+INSERT INTO `im_message` VALUES (19, 9, 2, 'TEXT', '公司通知：本周五下午开会', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 17:00:00', NULL);
+INSERT INTO `im_message` VALUES (20, 9, 3, 'TEXT', '收到', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 17:01:00', NULL);
+INSERT INTO `im_message` VALUES (21, 10, 2, 'TEXT', '吴九，后端接口文档发我', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 09:00:00', NULL);
+INSERT INTO `im_message` VALUES (22, 10, 8, 'TEXT', '已经发送到你邮箱', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 09:05:00', NULL);
+INSERT INTO `im_message` VALUES (23, 11, 2, 'TEXT', '郑十，测试用例写好了吗？', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 10:00:00', NULL);
+INSERT INTO `im_message` VALUES (24, 11, 9, 'TEXT', '写好了，正在执行测试', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 10:01:00', NULL);
+INSERT INTO `im_message` VALUES (25, 12, 5, 'TEXT', '本周篮球活动照常进行', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 11:00:00', NULL);
+INSERT INTO `im_message` VALUES (26, 12, 11, 'TEXT', '我会参加', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 11:01:00', NULL);
+INSERT INTO `im_message` VALUES (27, 13, 2, 'TEXT', '陈一，UI验收通过了吗？', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 12:00:00', NULL);
+INSERT INTO `im_message` VALUES (28, 13, 10, 'TEXT', '通过了，可以开发', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 12:01:00', NULL);
+INSERT INTO `im_message` VALUES (29, 14, 6, 'TEXT', '本周读书分享：《深入理解计算机系统》', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 13:00:00', NULL);
+INSERT INTO `im_message` VALUES (30, 15, 2, 'TEXT', '林二，代码review一下', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 14:00:00', NULL);
 
 -- ----------------------------
 -- Table structure for im_message_edit_history

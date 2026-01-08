@@ -1,26 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.im.mapper.ImMessageMapper">
-    
+
     <resultMap type="com.ruoyi.im.domain.ImMessage" id="ImMessageResult">
         <id property="id" column="id"/>
         <result property="conversationId" column="conversation_id"/>
         <result property="senderId" column="sender_id"/>
-        <result property="type" column="message_type"/>
+        <result property="messageType" column="message_type"/>
         <result property="content" column="content"/>
-        <result property="isRevoked" column="is_revoked"/>
-        <result property="revokedTime" column="revoked_time"/>
-        <result property="createTime" column="create_time"/>
-        <result property="updateTime" column="update_time"/>
         <result property="replyToMessageId" column="reply_to_message_id"/>
         <result property="forwardFromMessageId" column="forward_from_message_id"/>
+        <result property="fileUrl" column="file_url"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileSize" column="file_size"/>
         <result property="sensitiveLevel" column="sensitive_level"/>
+        <result property="isRevoked" column="is_revoked"/>
+        <result property="revokedTime" column="revoked_time"/>
+        <result property="revokerId" column="revoker_id"/>
+        <result property="isEdited" column="is_edited"/>
+        <result property="editedContent" column="edited_content"/>
+        <result property="editCount" column="edit_count"/>
+        <result property="editTime" column="edit_time"/>
         <result property="isDeleted" column="is_deleted"/>
         <result property="deletedTime" column="deleted_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <sql id="selectImMessageVo">
-        select id, conversation_id, sender_id, message_type, content, is_revoked, revoked_time, create_time, update_time, reply_to_message_id, forward_from_message_id, sensitive_level, is_deleted, deleted_time
+        select id, conversation_id, sender_id, message_type, content,
+               reply_to_message_id, forward_from_message_id,
+               file_url, file_name, file_size,
+               sensitive_level,
+               is_revoked, revoked_time, revoker_id,
+               is_edited, edited_content, edit_count, edit_time,
+               is_deleted, deleted_time,
+               create_time, update_time
         from im_message
     </sql>
 
@@ -28,13 +43,13 @@
         <include refid="selectImMessageVo"/>
         where id = #{id}
     </select>
-    
+
     <select id="selectImMessageList" parameterType="com.ruoyi.im.domain.ImMessage" resultMap="ImMessageResult">
         <include refid="selectImMessageVo"/>
         <where>
             <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
             <if test="senderId != null"> and sender_id = #{senderId} </if>
-            <if test="type != null and type != ''"> and message_type = #{type} </if>
+            <if test="messageType != null and messageType != ''"> and message_type = #{messageType} </if>
         </where>
     </select>
 
@@ -43,32 +58,48 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="conversationId != null">conversation_id,</if>
             <if test="senderId != null">sender_id,</if>
-            <if test="type != null">message_type,</if>
+            <if test="messageType != null">message_type,</if>
             <if test="content != null">content,</if>
-            <if test="isRevoked != null">is_revoked,</if>
-            <if test="revokedTime != null">revoked_time,</if>
-            <if test="createTime != null">create_time,</if>
-            <if test="updateTime != null">update_time,</if>
             <if test="replyToMessageId != null">reply_to_message_id,</if>
             <if test="forwardFromMessageId != null">forward_from_message_id,</if>
+            <if test="fileUrl != null">file_url,</if>
+            <if test="fileName != null">file_name,</if>
+            <if test="fileSize != null">file_size,</if>
             <if test="sensitiveLevel != null">sensitive_level,</if>
+            <if test="isRevoked != null">is_revoked,</if>
+            <if test="revokedTime != null">revoked_time,</if>
+            <if test="revokerId != null">revoker_id,</if>
+            <if test="isEdited != null">is_edited,</if>
+            <if test="editedContent != null">edited_content,</if>
+            <if test="editCount != null">edit_count,</if>
+            <if test="editTime != null">edit_time,</if>
             <if test="isDeleted != null">is_deleted,</if>
             <if test="deletedTime != null">deleted_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="conversationId != null">#{conversationId},</if>
             <if test="senderId != null">#{senderId},</if>
-            <if test="type != null">#{type},</if>
+            <if test="messageType != null">#{messageType},</if>
             <if test="content != null">#{content},</if>
-            <if test="isRevoked != null">#{isRevoked},</if>
-            <if test="revokedTime != null">#{revokedTime},</if>
-            <if test="createTime != null">#{createTime},</if>
-            <if test="updateTime != null">#{updateTime},</if>
             <if test="replyToMessageId != null">#{replyToMessageId},</if>
             <if test="forwardFromMessageId != null">#{forwardFromMessageId},</if>
+            <if test="fileUrl != null">#{fileUrl},</if>
+            <if test="fileName != null">#{fileName},</if>
+            <if test="fileSize != null">#{fileSize},</if>
             <if test="sensitiveLevel != null">#{sensitiveLevel},</if>
+            <if test="isRevoked != null">#{isRevoked},</if>
+            <if test="revokedTime != null">#{revokedTime},</if>
+            <if test="revokerId != null">#{revokerId},</if>
+            <if test="isEdited != null">#{isEdited},</if>
+            <if test="editedContent != null">#{editedContent},</if>
+            <if test="editCount != null">#{editCount},</if>
+            <if test="editTime != null">#{editTime},</if>
             <if test="isDeleted != null">#{isDeleted},</if>
             <if test="deletedTime != null">#{deletedTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
         </trim>
     </insert>
 
@@ -77,13 +108,21 @@
         <trim prefix="SET" suffixOverrides=",">
             <if test="conversationId != null">conversation_id = #{conversationId},</if>
             <if test="senderId != null">sender_id = #{senderId},</if>
-            <if test="type != null and type != ''">message_type = #{type},</if>
+            <if test="messageType != null and messageType != ''">message_type = #{messageType},</if>
             <if test="content != null and content != ''">content = #{content},</if>
-            <if test="isRevoked != null">is_revoked = #{isRevoked},</if>
-            <if test="revokedTime != null">revoked_time = #{revokedTime},</if>
             <if test="replyToMessageId != null">reply_to_message_id = #{replyToMessageId},</if>
             <if test="forwardFromMessageId != null">forward_from_message_id = #{forwardFromMessageId},</if>
+            <if test="fileUrl != null">file_url = #{fileUrl},</if>
+            <if test="fileName != null">file_name = #{fileName},</if>
+            <if test="fileSize != null">file_size = #{fileSize},</if>
             <if test="sensitiveLevel != null">sensitive_level = #{sensitiveLevel},</if>
+            <if test="isRevoked != null">is_revoked = #{isRevoked},</if>
+            <if test="revokedTime != null">revoked_time = #{revokedTime},</if>
+            <if test="revokerId != null">revoker_id = #{revokerId},</if>
+            <if test="isEdited != null">is_edited = #{isEdited},</if>
+            <if test="editedContent != null">edited_content = #{editedContent},</if>
+            <if test="editCount != null">edit_count = #{editCount},</if>
+            <if test="editTime != null">edit_time = #{editTime},</if>
             <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
             <if test="deletedTime != null">deleted_time = #{deletedTime},</if>
         </trim>
@@ -100,47 +139,59 @@
             #{id}
         </foreach>
     </delete>
-    
+
     <select id="selectImMessageByConversationId" parameterType="map" resultMap="ImMessageResult">
-        select id, conversation_id, sender_id, message_type, content, is_revoked, revoked_time, create_time, update_time, reply_to_message_id, forward_from_message_id, sensitive_level, is_deleted, deleted_time
-        from im_message
+        <include refid="selectImMessageVo"/>
         where conversation_id = #{conversationId}
         order by create_time desc
         limit #{limit}
     </select>
-    
+
     <!-- 分页查询会话消息 - 性能优化 -->
     <select id="selectImMessageByConversationIdWithPagination" parameterType="map" resultMap="ImMessageResult">
         <include refid="selectImMessageVo"/>
         <where>
             <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
             <if test="senderId != null"> and sender_id = #{senderId} </if>
-            <if test="type != null and type != ''"> and message_type = #{type} </if>
+            <if test="messageType != null and messageType != ''"> and message_type = #{messageType} </if>
         </where>
         order by create_time desc
         limit #{limit} offset #{offset}
     </select>
-    
+
     <!-- 批量插入消息 - 性能优化 -->
     <insert id="batchInsertImMessage" parameterType="java.util.List">
-        insert into im_message (conversation_id, sender_id, message_type, content, is_revoked, revoked_time, create_time, update_time, reply_to_message_id, forward_from_message_id, sensitive_level, is_deleted, deleted_time)
+        insert into im_message (conversation_id, sender_id, message_type, content,
+                               reply_to_message_id, forward_from_message_id,
+                               file_url, file_name, file_size,
+                               sensitive_level,
+                               is_revoked, revoked_time, revoker_id,
+                               is_edited, edited_content, edit_count, edit_time,
+                               is_deleted, deleted_time,
+                               create_time, update_time)
         values
         <foreach collection="list" item="message" separator=",">
-            (#{message.conversationId}, #{message.senderId}, #{message.type}, #{message.content}, 
-             #{message.isRevoked}, #{message.revokedTime}, #{message.createTime}, #{message.updateTime}, #{message.replyToMessageId}, #{message.forwardFromMessageId}, #{message.sensitiveLevel}, #{message.isDeleted}, #{message.deletedTime})
+            (#{message.conversationId}, #{message.senderId}, #{message.messageType}, #{message.content},
+             #{message.replyToMessageId}, #{message.forwardFromMessageId},
+             #{message.fileUrl}, #{message.fileName}, #{message.fileSize},
+             #{message.sensitiveLevel},
+             #{message.isRevoked}, #{message.revokedTime}, #{message.revokerId},
+             #{message.isEdited}, #{message.editedContent}, #{message.editCount}, #{message.editTime},
+             #{message.isDeleted}, #{message.deletedTime},
+             #{message.createTime}, #{message.updateTime})
         </foreach>
     </insert>
-    
+
     <!-- 批量更新消息状态 - 性能优化 -->
     <update id="batchUpdateMessageStatus">
         update im_message
-        set status = #{status}
+        set is_revoked = #{status}
         where id in
         <foreach collection="messageIds" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
     </update>
-    
+
     <!-- 批量删除消息 - 性能优化 -->
     <delete id="batchDeleteMessages">
         delete from im_message
@@ -149,14 +200,14 @@
             #{id}
         </foreach>
     </delete>
-    
+
     <!-- 统计会话消息数量 - 性能优化 -->
     <select id="countMessagesByConversationId" parameterType="Long" resultType="java.lang.Long">
         select count(*)
         from im_message
         where conversation_id = #{conversationId}
     </select>
-    
+
     <!-- 检查会话是否存在消息 - 性能优化 -->
     <select id="existsByConversationId" parameterType="Long" resultType="java.lang.Boolean">
         select case when count(*) > 0 then true else false end
@@ -186,7 +237,7 @@
             <if test="startTime != null"> and create_time &gt;= #{startTime} </if>
             <if test="endTime != null"> and create_time &lt;= #{endTime} </if>
             <if test="includeRevoked == null or includeRevoked == false"> and is_revoked = 0 </if>
-            and is_deleted = 0
+            <if test="includeDeleted == null or includeDeleted == false"> and is_deleted = 0 </if>
         </where>
         order by create_time desc
         <if test="limit != null">
@@ -216,7 +267,7 @@
             <if test="startTime != null"> and create_time &gt;= #{startTime} </if>
             <if test="endTime != null"> and create_time &lt;= #{endTime} </if>
             <if test="includeRevoked == null or includeRevoked == false"> and is_revoked = 0 </if>
-            and is_deleted = 0
+            <if test="includeDeleted == null or includeDeleted == false"> and is_deleted = 0 </if>
         </where>
     </select>
 
