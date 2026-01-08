@@ -1,0 +1,622 @@
+/* ============ 钉钉6.5.x风格聊天输入框样式 ============ */
+
+.chat-input-container {
+  background: var(--im-bg-white);
+  border-top: 1px solid var(--im-border-color);
+  padding: 12px 16px;
+
+  /* ============ 工具栏 ============ */
+  .input-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 8px;
+
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .toolbar-button {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--im-text-secondary);
+      font-size: 18px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+
+      &:hover {
+        background: var(--im-primary-light);
+        color: var(--im-primary-color);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      &.active {
+        background: var(--im-primary-light);
+        color: var(--im-primary-color);
+      }
+
+      &.recording {
+        background: var(--im-error-color);
+        color: white;
+        animation: recordingPulse 1.5s ease-in-out infinite;
+      }
+
+      /* 涟漪效果 */
+      .button-ripple {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle, rgba(22, 119, 255, 0.3) 0%, transparent 70%);
+        opacity: 0;
+        transform: scale(0);
+        transition: all 0.4s ease;
+        pointer-events: none;
+      }
+
+      &:active .button-ripple {
+        opacity: 1;
+        transform: scale(1.5);
+      }
+
+      /* 录音指示器 */
+      .recording-indicator {
+        position: absolute;
+        bottom: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 4px;
+        background: white;
+        border-radius: 50%;
+        animation: recordingDot 1s ease-in-out infinite;
+      }
+
+      i {
+        position: relative;
+        z-index: 1;
+      }
+    }
+
+    .el-tooltip {
+      display: flex;
+    }
+
+    .upload-item {
+      display: flex;
+
+      :deep(.el-upload) {
+        display: flex;
+      }
+    }
+  }
+
+  /* ============ 输入区域 ============ */
+  .input-content {
+    position: relative;
+    margin-bottom: 12px;
+
+    .chat-textarea {
+      width: 100%;
+      min-height: 80px;
+      max-height: 200px;
+      padding: 10px 12px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--im-text-primary);
+      background: var(--im-bg-white);
+      border: 1px solid var(--im-border-color);
+      border-radius: 8px;
+      resize: none;
+      transition: all 0.2s ease;
+
+      &::placeholder {
+        color: var(--im-text-placeholder);
+      }
+
+      &:hover {
+        border-color: var(--im-border-dark);
+      }
+
+      &:focus {
+        outline: none;
+        border-color: var(--im-primary-color);
+        box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+      }
+
+      &:disabled {
+        background: var(--im-bg-hover);
+        color: var(--im-text-disabled);
+        cursor: not-allowed;
+      }
+
+      &::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 2px;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.2);
+        }
+      }
+    }
+  }
+
+  /* ============ 输入底部栏 ============ */
+  .input-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .input-tips {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--im-text-tertiary);
+
+      .tip-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        background: var(--im-bg-hover);
+        border-radius: 4px;
+
+        kbd {
+          padding: 2px 6px;
+          background: white;
+          border: 1px solid var(--im-border-color);
+          border-radius: 3px;
+          font-family: 'Monaco', 'Menlo', monospace;
+          font-size: 11px;
+        }
+      }
+    }
+
+    .input-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .send-btn {
+        min-width: 80px;
+        height: 36px;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 500;
+        color: white;
+        background: var(--im-primary-color);
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover:not(:disabled) {
+          background: var(--im-primary-hover);
+          box-shadow: 0 2px 8px rgba(22, 119, 255, 0.3);
+          transform: translateY(-1px);
+        }
+
+        &:active:not(:disabled) {
+          transform: translateY(0);
+        }
+
+        &:disabled {
+          background: var(--im-bg-hover);
+          color: var(--im-text-disabled);
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+
+  /* ============ 表情选择器 ============ */
+  .emoji-picker-wrapper {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 8px;
+    background: var(--im-bg-white);
+    border-radius: 12px;
+    box-shadow: var(--im-shadow-xl);
+    border: 1px solid var(--im-border-color);
+    overflow: hidden;
+    z-index: 100;
+
+    .emoji-picker {
+      width: 320px;
+
+      .emoji-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--im-border-color);
+        padding: 0 8px;
+        background: var(--im-bg-hover);
+
+        .emoji-tab {
+          padding: 10px 12px;
+          font-size: 16px;
+          cursor: pointer;
+          border-bottom: 2px solid transparent;
+          transition: all 0.2s ease;
+
+          &:hover {
+            color: var(--im-primary-color);
+          }
+
+          &.active {
+            color: var(--im-primary-color);
+            border-bottom-color: var(--im-primary-color);
+          }
+        }
+      }
+
+      .emoji-content {
+        padding: 12px;
+        height: 200px;
+        overflow-y: auto;
+
+        .emoji-grid {
+          display: grid;
+          grid-template-columns: repeat(8, 1fr);
+          gap: 4px;
+
+          .emoji-item {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+
+            &:hover {
+              background: var(--im-bg-hover);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* ============ @提及选择器 ============ */
+  .mention-selector {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 8px;
+    min-width: 200px;
+    max-width: 300px;
+    max-height: 240px;
+    background: var(--im-bg-white);
+    border-radius: 8px;
+    box-shadow: var(--im-shadow-lg);
+    border: 1px solid var(--im-border-color);
+    overflow: hidden;
+    z-index: 100;
+
+    .mention-list {
+      max-height: 240px;
+      overflow-y: auto;
+
+      .mention-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+
+        &:hover,
+        &.active {
+          background: var(--im-bg-hover);
+        }
+
+        .mention-avatar {
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
+        }
+
+        .mention-name {
+          flex: 1;
+          font-size: 14px;
+          color: var(--im-text-primary);
+        }
+
+        .mention-all-badge {
+          padding: 2px 6px;
+          background: var(--im-primary-light);
+          color: var(--im-primary-color);
+          font-size: 11px;
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+
+  /* ============ 语音录制面板 ============ */
+  .voice-recording-panel {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    margin-bottom: 12px;
+    padding: 16px;
+    background: var(--im-bg-white);
+    border-radius: 12px;
+    box-shadow: var(--im-shadow-lg);
+    border: 1px solid var(--im-border-color);
+    z-index: 100;
+
+    .voice-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+
+      .recording-duration {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--im-text-primary);
+        font-family: 'Monaco', 'Menlo', monospace;
+      }
+
+      .volume-bars {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 40px;
+
+        .volume-bar {
+          width: 4px;
+          background: var(--im-primary-color);
+          border-radius: 2px;
+          transition: height 0.1s ease;
+        }
+      }
+
+      .recording-tip {
+        font-size: 13px;
+        color: var(--im-text-tertiary);
+      }
+    }
+
+    .voice-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+
+      .btn-cancel {
+        padding: 8px 20px;
+        border: 1px solid var(--im-border-color);
+        background: var(--im-bg-white);
+        border-radius: 6px;
+        color: var(--im-text-secondary);
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: var(--im-border-dark);
+          color: var(--im-text-primary);
+        }
+      }
+
+      .btn-stop {
+        padding: 8px 20px;
+        border: none;
+        background: var(--im-error-color);
+        border-radius: 6px;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #ff7875;
+        }
+      }
+    }
+  }
+
+  /* ============ 引用回复预览 ============ */
+  .reply-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    background: var(--im-bg-hover);
+    border-radius: 8px;
+    border-left: 3px solid var(--im-primary-color);
+
+    .reply-info {
+      flex: 1;
+      min-width: 0;
+
+      .reply-label {
+        font-size: 12px;
+        color: var(--im-text-tertiary);
+        margin-bottom: 4px;
+      }
+
+      .reply-content {
+        font-size: 13px;
+        color: var(--im-text-secondary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    .reply-close {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--im-text-tertiary);
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+        color: var(--im-text-secondary);
+      }
+    }
+  }
+
+  /* ============ 文件上传进度 ============ */
+  .upload-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: var(--im-bg-hover);
+    border-radius: 8px;
+
+    .file-info {
+      flex: 1;
+      min-width: 0;
+
+      .file-name {
+        font-size: 13px;
+        color: var(--im-text-primary);
+        margin-bottom: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .file-size {
+        font-size: 11px;
+        color: var(--im-text-tertiary);
+      }
+    }
+
+    .upload-percentage {
+      font-size: 12px;
+      color: var(--im-primary-color);
+      font-weight: 500;
+    }
+
+    .upload-cancel {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--im-text-tertiary);
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+}
+
+/* ============ 动画 ============ */
+@keyframes recordingPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 77, 79, 0);
+  }
+}
+
+@keyframes recordingDot {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ============ 响应式 ============ */
+@media (max-width: 768px) {
+  .chat-input-container {
+    padding: 10px 12px;
+
+    .input-toolbar {
+      margin-bottom: 10px;
+      gap: 2px;
+
+      .toolbar-button {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+      }
+    }
+
+    .input-content .chat-textarea {
+      min-height: 60px;
+      max-height: 150px;
+      font-size: 14px;
+    }
+
+    .input-footer {
+      .input-tips {
+        display: none;
+      }
+
+      .send-btn {
+        min-width: 70px;
+        height: 32px;
+        font-size: 13px;
+      }
+    }
+
+    .emoji-picker-wrapper .emoji-picker {
+      width: 280px;
+
+      .emoji-content .emoji-grid .emoji-item {
+        width: 28px;
+        height: 28px;
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-input-container {
+    padding: 8px 10px;
+
+    .input-toolbar {
+      .toolbar-left .toolbar-button:nth-child(n + 4),
+      .toolbar-right {
+        display: none;
+      }
+    }
+
+    .input-footer .send-btn {
+      min-width: 60px;
+    }
+  }
+}

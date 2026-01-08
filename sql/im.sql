@@ -11,7 +11,7 @@
  Target Server Version : 50744 (5.7.44-log)
  File Encoding         : 65001
 
- Date: 08/01/2026 13:30:58
+ Date: 08/01/2026 14:20:05
 */
 
 SET NAMES utf8mb4;
@@ -737,11 +737,11 @@ CREATE TABLE `im_conversation`  (
 -- ----------------------------
 -- Records of im_conversation
 -- ----------------------------
-INSERT INTO `im_conversation` VALUES (1, 'SINGLE', 3, '李四', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC3', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:29:33');
-INSERT INTO `im_conversation` VALUES (2, 'SINGLE', 4, '王五', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC4', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:29:34');
-INSERT INTO `im_conversation` VALUES (3, 'SINGLE', 5, '赵六', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC5', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:29:34');
-INSERT INTO `im_conversation` VALUES (4, 'SINGLE', 6, '孙七', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC6', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:29:34');
-INSERT INTO `im_conversation` VALUES (5, 'SINGLE', 7, '周八', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC7', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:29:34');
+INSERT INTO `im_conversation` VALUES (1, 'SINGLE', 3, '李四', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC3', 4, '2024-01-01 10:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (2, 'SINGLE', 4, '王五', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC4', 5, '2024-01-01 10:05:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (3, 'SINGLE', 5, '赵六', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC5', 10, '2024-01-01 13:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (4, 'SINGLE', 6, '孙七', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC6', 8, '2024-01-01 12:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (5, 'SINGLE', 7, '周八', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC7', 9, '2024-01-01 12:01:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
 INSERT INTO `im_conversation` VALUES (6, 'GROUP', 1, '技术交流群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG1', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 INSERT INTO `im_conversation` VALUES (7, 'GROUP', 2, '产品讨论群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG2', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 INSERT INTO `im_conversation` VALUES (8, 'GROUP', 3, '项目开发群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG3', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
@@ -782,20 +782,20 @@ CREATE TABLE `im_conversation_member`  (
   INDEX `idx_update_time`(`update_time`) USING BTREE,
   CONSTRAINT `fk_conversation_member_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `im_conversation` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_conversation_member_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 37 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 67 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_conversation_member
 -- ----------------------------
-INSERT INTO `im_conversation_member` VALUES (1, 1, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (2, 1, 3, NULL, 'MEMBER', 0, 0, 0, 2, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (3, 2, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (4, 2, 4, NULL, 'MEMBER', 0, 0, 0, 5, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (5, 3, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (6, 3, 5, NULL, 'MEMBER', 0, 0, 0, 7, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (7, 4, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (8, 4, 6, NULL, 'MEMBER', 0, 0, 0, 9, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (9, 5, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
+INSERT INTO `im_conversation_member` VALUES (1, 1, 2, NULL, 'MEMBER', 1, 0, 0, 2, '2024-01-01 09:01:00', 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:13');
+INSERT INTO `im_conversation_member` VALUES (2, 1, 3, NULL, 'MEMBER', 0, 0, 0, 4, '2024-01-01 10:00:00', 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:13');
+INSERT INTO `im_conversation_member` VALUES (3, 2, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:11');
+INSERT INTO `im_conversation_member` VALUES (4, 2, 4, NULL, 'MEMBER', 0, 0, 0, 5, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation_member` VALUES (5, 3, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:11');
+INSERT INTO `im_conversation_member` VALUES (6, 3, 5, NULL, 'MEMBER', 0, 0, 0, 7, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation_member` VALUES (7, 4, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:11');
+INSERT INTO `im_conversation_member` VALUES (8, 4, 6, NULL, 'MEMBER', 0, 0, 0, 9, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation_member` VALUES (9, 5, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:11');
 INSERT INTO `im_conversation_member` VALUES (10, 5, 7, NULL, 'MEMBER', 0, 0, 0, 11, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
 INSERT INTO `im_conversation_member` VALUES (11, 6, 2, NULL, 'MEMBER', 2, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
 INSERT INTO `im_conversation_member` VALUES (12, 6, 3, NULL, 'MEMBER', 0, 0, 0, 14, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
@@ -818,6 +818,171 @@ INSERT INTO `im_conversation_member` VALUES (28, 9, 7, NULL, 'MEMBER', 0, 0, 0, 
 INSERT INTO `im_conversation_member` VALUES (29, 9, 8, NULL, 'MEMBER', 0, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
 INSERT INTO `im_conversation_member` VALUES (30, 9, 9, NULL, 'MEMBER', 0, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
 INSERT INTO `im_conversation_member` VALUES (31, 9, 10, NULL, 'MEMBER', 0, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
+INSERT INTO `im_conversation_member` VALUES (42, 3, 3, NULL, 'OWNER', 0, 1, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation_member` VALUES (43, 4, 3, NULL, 'ADMIN', 2, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation_member` VALUES (45, 3, 4, NULL, 'MEMBER', 0, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation_member` VALUES (46, 4, 4, NULL, 'MEMBER', 0, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation_member` VALUES (48, 5, 5, NULL, 'MEMBER', 0, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation_member` VALUES (50, 3, 6, NULL, 'MEMBER', 0, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
+
+-- ----------------------------
+-- Table structure for im_ding_message
+-- ----------------------------
+DROP TABLE IF EXISTS `im_ding_message`;
+CREATE TABLE `im_ding_message`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'DING ID',
+  `sender_id` bigint(20) NOT NULL COMMENT '发送者ID',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'DING内容',
+  `ding_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'APP' COMMENT 'DING类型（APP应用 SMS短信 PHONE电话）',
+  `is_urgent` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否紧急（0否 1是）',
+  `schedule_time` datetime NULL DEFAULT NULL COMMENT '定时发送时间（为空则立即发送）',
+  `send_time` datetime NOT NULL COMMENT '实际发送时间',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'DRAFT' COMMENT '状态（DRAFT草稿 SENDING发送中 SENT已发送 CANCELLED已取消 FAILED失败）',
+  `receipt_required` tinyint(1) NOT NULL DEFAULT 1 COMMENT '是否需要回执（0否 1是）',
+  `total_count` int(11) NOT NULL DEFAULT 0 COMMENT '总接收人数',
+  `read_count` int(11) NOT NULL DEFAULT 0 COMMENT '已读人数',
+  `confirmed_count` int(11) NOT NULL DEFAULT 0 COMMENT '已确认人数',
+  `attachment` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '附件URL',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_sender_id`(`sender_id`) USING BTREE,
+  INDEX `idx_send_time`(`send_time`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE,
+  INDEX `idx_schedule_time`(`schedule_time`) USING BTREE,
+  CONSTRAINT `fk_ding_sender` FOREIGN KEY (`sender_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'DING消息表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_ding_message
+-- ----------------------------
+INSERT INTO `im_ding_message` VALUES (1, 2, '【会议提醒】今天下午3点在会议室A召开项目进度会议，请大家准时参加。', 'APP', 1, NULL, '2026-01-08 13:37:26', 'SENT', 1, 3, 2, 1, NULL, '2026-01-08 13:37:26', '2026-01-08 13:37:26');
+INSERT INTO `im_ding_message` VALUES (2, 2, '【工作安排】请各位在本周五前完成月度工作总结。', 'APP', 0, NULL, '2026-01-08 13:37:26', 'SENT', 1, 3, 1, 0, NULL, '2026-01-08 13:37:26', '2026-01-08 13:37:26');
+
+-- ----------------------------
+-- Table structure for im_ding_receipt
+-- ----------------------------
+DROP TABLE IF EXISTS `im_ding_receipt`;
+CREATE TABLE `im_ding_receipt`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '回执ID',
+  `ding_id` bigint(20) NOT NULL COMMENT 'DING ID',
+  `receiver_id` bigint(20) NOT NULL COMMENT '接收者ID',
+  `read_time` datetime NULL DEFAULT NULL COMMENT '阅读时间',
+  `confirmed` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否确认（0未确认 1已确认）',
+  `confirm_time` datetime NULL DEFAULT NULL COMMENT '确认时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_ding_receiver`(`ding_id`, `receiver_id`) USING BTREE,
+  INDEX `idx_receiver_id`(`receiver_id`) USING BTREE,
+  INDEX `idx_read_time`(`read_time`) USING BTREE,
+  CONSTRAINT `fk_receipt_ding` FOREIGN KEY (`ding_id`) REFERENCES `im_ding_message` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_receipt_receiver` FOREIGN KEY (`receiver_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'DING回执表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_ding_receipt
+-- ----------------------------
+INSERT INTO `im_ding_receipt` VALUES (1, 1, 3, '2026-01-08 13:37:26', 1, '2026-01-08 13:37:26', NULL, '2026-01-08 13:37:26', '2026-01-08 13:37:26');
+INSERT INTO `im_ding_receipt` VALUES (2, 1, 4, '2026-01-08 13:37:26', 0, NULL, NULL, '2026-01-08 13:37:26', '2026-01-08 13:37:26');
+INSERT INTO `im_ding_receipt` VALUES (3, 2, 3, '2026-01-08 13:55:51', 0, NULL, NULL, '2026-01-08 13:37:26', '2026-01-08 13:55:54');
+
+-- ----------------------------
+-- Table structure for im_ding_template
+-- ----------------------------
+DROP TABLE IF EXISTS `im_ding_template`;
+CREATE TABLE `im_ding_template`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '模板ID',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '模板名称',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '模板内容',
+  `category` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分类（MEETING会议 WORK工作 NOTICE通知 REMIND提醒）',
+  `is_system` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否系统模板（0否 1是）',
+  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE' COMMENT '状态（ACTIVE启用 DISABLED停用）',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_category`(`category`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'DING模板表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_ding_template
+-- ----------------------------
+INSERT INTO `im_ding_template` VALUES (1, '会议提醒', '【会议提醒】尊敬的{name}，您有一个会议将于{time}在{location}召开，请准时参加。', 'MEETING', 1, 1, 'ACTIVE', '2026-01-08 13:37:26', '2026-01-08 13:37:26');
+INSERT INTO `im_ding_template` VALUES (2, '工作安排', '【工作安排】{content}，请于{deadline}前完成。', 'WORK', 1, 2, 'ACTIVE', '2026-01-08 13:37:26', '2026-01-08 13:37:26');
+INSERT INTO `im_ding_template` VALUES (3, '放假通知', '【放假通知】根据国家法定节假日安排，{startDate}至{endDate}放假，共{days}天。', 'NOTICE', 1, 3, 'ACTIVE', '2026-01-08 13:37:26', '2026-01-08 13:37:26');
+INSERT INTO `im_ding_template` VALUES (4, '紧急通知', '【紧急通知】{content}，请立即处理！', 'REMIND', 1, 4, 'ACTIVE', '2026-01-08 13:37:26', '2026-01-08 13:37:26');
+INSERT INTO `im_ding_template` VALUES (5, '打卡提醒', '【打卡提醒】请记得完成上下班打卡。', 'REMIND', 1, 5, 'ACTIVE', '2026-01-08 13:37:26', '2026-01-08 13:37:26');
+INSERT INTO `im_ding_template` VALUES (6, '任务提醒', '【任务提醒】您有一个任务《{taskName}》将于{deadline}到期，请及时处理。', 'WORK', 1, 6, 'ACTIVE', '2026-01-08 13:37:26', '2026-01-08 13:37:26');
+INSERT INTO `im_ding_template` VALUES (7, '加班通知', '【加班通知】因{reason}，请于{time}到岗加班。', 'WORK', 1, 7, 'ACTIVE', '2026-01-08 13:37:26', '2026-01-08 13:37:26');
+INSERT INTO `im_ding_template` VALUES (8, '生日祝福', '【生日祝福】祝{name}生日快乐！', 'REMIND', 1, 8, 'ACTIVE', '2026-01-08 13:37:26', '2026-01-08 13:37:26');
+
+-- ----------------------------
+-- Table structure for im_external_contact
+-- ----------------------------
+DROP TABLE IF EXISTS `im_external_contact`;
+CREATE TABLE `im_external_contact`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '联系人ID',
+  `user_id` bigint(20) NOT NULL COMMENT '所属用户ID',
+  `group_id` bigint(20) NULL DEFAULT NULL COMMENT '分组ID',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '联系人姓名',
+  `company` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '公司名称',
+  `position` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '职位',
+  `mobile` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '手机号',
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
+  `wechat` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '微信号',
+  `address` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '地址',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
+  `tags` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '标签（多个标签用逗号分隔）',
+  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '头像',
+  `is_starred` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否星标（0否 1是）',
+  `source` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'MANUAL' COMMENT '来源（MANUAL手动 IMPORT导入 SHARE分享）',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_group_id`(`group_id`) USING BTREE,
+  INDEX `idx_mobile`(`mobile`) USING BTREE,
+  INDEX `idx_email`(`email`) USING BTREE,
+  INDEX `idx_is_starred`(`is_starred`) USING BTREE,
+  CONSTRAINT `fk_external_contact_group` FOREIGN KEY (`group_id`) REFERENCES `im_external_contact_group` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
+  CONSTRAINT `fk_external_contact_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '外部联系人表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_external_contact
+-- ----------------------------
+INSERT INTO `im_external_contact` VALUES (1, 2, 1, '张三', 'ABC科技有限公司', '产品经理', '13800138001', 'zhangsan@abc.com', NULL, NULL, NULL, '重要客户', NULL, 1, 'MANUAL', '2026-01-08 14:00:44', '2026-01-08 14:00:44');
+INSERT INTO `im_external_contact` VALUES (2, 2, 1, '李四', 'XYZ集团', '采购总监', '13800138002', 'lisi@xyz.com', NULL, NULL, NULL, '潜在客户', NULL, 0, 'MANUAL', '2026-01-08 14:00:44', '2026-01-08 14:00:44');
+INSERT INTO `im_external_contact` VALUES (3, 2, 2, '王五', '供应商A公司', '销售经理', '13800138003', 'wangwu@supplier.com', NULL, NULL, NULL, '供应商', NULL, 0, 'MANUAL', '2026-01-08 14:00:44', '2026-01-08 14:00:44');
+INSERT INTO `im_external_contact` VALUES (4, 2, 3, '赵六', '战略合作伙伴', 'CEO', '13800138004', 'zhaoliu@partner.com', NULL, NULL, NULL, '合作伙伴,VIP', NULL, 1, 'MANUAL', '2026-01-08 14:00:44', '2026-01-08 14:00:44');
+
+-- ----------------------------
+-- Table structure for im_external_contact_group
+-- ----------------------------
+DROP TABLE IF EXISTS `im_external_contact_group`;
+CREATE TABLE `im_external_contact_group`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '分组ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分组名称',
+  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_sort_order`(`sort_order`) USING BTREE,
+  CONSTRAINT `fk_external_group_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '外部联系人分组表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_external_contact_group
+-- ----------------------------
+INSERT INTO `im_external_contact_group` VALUES (1, 2, '客户', 1, '2026-01-08 14:00:44', '2026-01-08 14:00:44');
+INSERT INTO `im_external_contact_group` VALUES (2, 2, '供应商', 2, '2026-01-08 14:00:44', '2026-01-08 14:00:44');
+INSERT INTO `im_external_contact_group` VALUES (3, 2, '合作伙伴', 3, '2026-01-08 14:00:44', '2026-01-08 14:00:44');
+INSERT INTO `im_external_contact_group` VALUES (4, 3, '客户', 1, '2026-01-08 14:00:44', '2026-01-08 14:00:44');
 
 -- ----------------------------
 -- Table structure for im_file_asset
@@ -1079,6 +1244,7 @@ CREATE TABLE `im_group_member`  (
   `deleted_time` datetime NULL DEFAULT NULL COMMENT '????',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `reply_to_message_id` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_group_user`(`group_id`, `user_id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
@@ -1092,44 +1258,44 @@ CREATE TABLE `im_group_member`  (
 -- ----------------------------
 -- Records of im_group_member
 -- ----------------------------
-INSERT INTO `im_group_member` VALUES (39, 1, 2, '张三', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (40, 1, 3, '李四', 'ADMIN', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (41, 1, 4, '王五', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (42, 1, 5, '赵六', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (43, 1, 6, '孙七', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (44, 2, 3, '李四', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (45, 2, 7, '周八', 'ADMIN', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (46, 2, 8, '吴九', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (47, 3, 4, '王五', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (48, 3, 9, '郑十', 'ADMIN', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (49, 3, 10, '陈一', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (50, 3, 11, '林二', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (51, 4, 2, '张三', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (52, 4, 3, '李四', 'ADMIN', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (53, 4, 4, '王五', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (54, 4, 5, '赵六', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (55, 4, 6, '孙七', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (56, 4, 7, '周八', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (57, 4, 8, '吴九', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (58, 4, 9, '郑十', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (59, 4, 10, '陈一', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (60, 5, 5, '赵六', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (61, 5, 11, '林二', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (62, 5, 12, '黄三', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (63, 6, 6, '孙七', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (64, 6, 13, '刘四', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (65, 7, 7, '周八', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (66, 7, 14, '何五', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (67, 8, 8, '吴九', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (68, 8, 15, '罗六', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (69, 9, 9, '郑十', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (70, 9, 16, '梁七', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (71, 9, 17, '宋八', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (72, 10, 10, '陈一', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (73, 10, 18, '唐九', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (74, 10, 19, '冯十', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (75, 10, 20, '于十一', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group_member` VALUES (76, 10, 21, '董十二', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group_member` VALUES (39, 1, 2, '张三', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (40, 1, 3, '李四', 'ADMIN', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (41, 1, 4, '王五', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (42, 1, 5, '赵六', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (43, 1, 6, '孙七', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (44, 2, 3, '李四', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (45, 2, 7, '周八', 'ADMIN', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (46, 2, 8, '吴九', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (47, 3, 4, '王五', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (48, 3, 9, '郑十', 'ADMIN', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (49, 3, 10, '陈一', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (50, 3, 11, '林二', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (51, 4, 2, '张三', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (52, 4, 3, '李四', 'ADMIN', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (53, 4, 4, '王五', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (54, 4, 5, '赵六', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (55, 4, 6, '孙七', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (56, 4, 7, '周八', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (57, 4, 8, '吴九', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (58, 4, 9, '郑十', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (59, 4, 10, '陈一', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (60, 5, 5, '赵六', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (61, 5, 11, '林二', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (62, 5, 12, '黄三', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (63, 6, 6, '孙七', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (64, 6, 13, '刘四', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (65, 7, 7, '周八', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (66, 7, 14, '何五', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (67, 8, 8, '吴九', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (68, 8, 15, '罗六', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (69, 9, 9, '郑十', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (70, 9, 16, '梁七', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (71, 9, 17, '宋八', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (72, 10, 10, '陈一', 'OWNER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (73, 10, 18, '唐九', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (74, 10, 19, '冯十', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (75, 10, 20, '于十一', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
+INSERT INTO `im_group_member` VALUES (76, 10, 21, '董十二', 'MEMBER', 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34', NULL);
 
 -- ----------------------------
 -- Table structure for im_message
@@ -1146,9 +1312,14 @@ CREATE TABLE `im_message`  (
   `file_size` bigint(20) NULL DEFAULT NULL COMMENT '????????',
   `sensitive_level` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'NORMAL' COMMENT '?????NORMAL?? SENSITIVE?? HIGH?????',
   `is_revoked` tinyint(1) NOT NULL DEFAULT 0 COMMENT '?????0? 1??',
+  `is_edited` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否已编辑（0否 1是）',
+  `edited_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '编辑后的内容',
+  `edit_count` int(11) NOT NULL DEFAULT 0 COMMENT '编辑次数',
+  `edit_time` datetime NULL DEFAULT NULL COMMENT '最后编辑时间',
   `revoked_time` datetime NULL DEFAULT NULL COMMENT '????',
   `revoker_id` bigint(20) NULL DEFAULT NULL COMMENT '???ID',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
+  `update_time` datetime NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_conversation_id`(`conversation_id`) USING BTREE,
   INDEX `idx_sender_id`(`sender_id`) USING BTREE,
@@ -1156,6 +1327,7 @@ CREATE TABLE `im_message`  (
   INDEX `idx_create_time`(`create_time`) USING BTREE,
   INDEX `idx_is_revoked`(`is_revoked`) USING BTREE,
   INDEX `idx_conversation_time`(`conversation_id`, `create_time`) USING BTREE,
+  INDEX `idx_is_edited`(`is_edited`) USING BTREE,
   CONSTRAINT `fk_message_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `im_conversation` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_message_sender` FOREIGN KEY (`sender_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???' ROW_FORMAT = DYNAMIC;
@@ -1163,36 +1335,60 @@ CREATE TABLE `im_message`  (
 -- ----------------------------
 -- Records of im_message
 -- ----------------------------
-INSERT INTO `im_message` VALUES (1, 1, 2, 'TEXT', '你好，最近怎么样？', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 09:00:00');
-INSERT INTO `im_message` VALUES (2, 1, 3, 'TEXT', '挺好的，谢谢关心！你呢？', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 09:01:00');
-INSERT INTO `im_message` VALUES (3, 1, 2, 'TEXT', '我也不错，最近在学习新技术', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 09:02:00');
-INSERT INTO `im_message` VALUES (4, 2, 2, 'TEXT', '王五，那个项目进展如何？', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 10:00:00');
-INSERT INTO `im_message` VALUES (5, 2, 4, 'TEXT', '进展顺利，预计下周完成', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 10:05:00');
-INSERT INTO `im_message` VALUES (6, 3, 2, 'TEXT', '赵六，明天开会吗？', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 11:00:00');
-INSERT INTO `im_message` VALUES (7, 3, 5, 'TEXT', '是的，下午2点', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 11:01:00');
-INSERT INTO `im_message` VALUES (8, 4, 2, 'TEXT', '孙七，文件发给我一下', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 12:00:00');
-INSERT INTO `im_message` VALUES (9, 4, 6, 'TEXT', '好的，稍等', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 12:01:00');
-INSERT INTO `im_message` VALUES (10, 5, 2, 'TEXT', '周八，设计稿看完了吗？', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 13:00:00');
-INSERT INTO `im_message` VALUES (11, 5, 7, 'TEXT', '看完了，有一些修改意见', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 13:10:00');
-INSERT INTO `im_message` VALUES (12, 6, 2, 'TEXT', '大家好，欢迎加入技术交流群', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 14:00:00');
-INSERT INTO `im_message` VALUES (13, 6, 3, 'TEXT', '感谢群主邀请', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 14:01:00');
-INSERT INTO `im_message` VALUES (14, 6, 4, 'TEXT', '向大家学习', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 14:02:00');
-INSERT INTO `im_message` VALUES (15, 7, 3, 'TEXT', '产品需求已经更新', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 15:00:00');
-INSERT INTO `im_message` VALUES (16, 7, 7, 'TEXT', '收到，我会查看', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 15:01:00');
-INSERT INTO `im_message` VALUES (17, 8, 4, 'TEXT', '项目进度汇报', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 16:00:00');
-INSERT INTO `im_message` VALUES (18, 8, 9, 'TEXT', '前端开发完成了80%', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 16:10:00');
-INSERT INTO `im_message` VALUES (19, 9, 2, 'TEXT', '公司通知：本周五下午开会', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 17:00:00');
-INSERT INTO `im_message` VALUES (20, 9, 3, 'TEXT', '收到', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-01 17:01:00');
-INSERT INTO `im_message` VALUES (21, 10, 2, 'TEXT', '吴九，后端接口文档发我', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-02 09:00:00');
-INSERT INTO `im_message` VALUES (22, 10, 8, 'TEXT', '已经发送到你邮箱', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-02 09:05:00');
-INSERT INTO `im_message` VALUES (23, 11, 2, 'TEXT', '郑十，测试用例写好了吗？', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-02 10:00:00');
-INSERT INTO `im_message` VALUES (24, 11, 9, 'TEXT', '写好了，正在执行测试', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-02 10:01:00');
-INSERT INTO `im_message` VALUES (25, 12, 5, 'TEXT', '本周篮球活动照常进行', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-02 11:00:00');
-INSERT INTO `im_message` VALUES (26, 12, 11, 'TEXT', '我会参加', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-02 11:01:00');
-INSERT INTO `im_message` VALUES (27, 13, 2, 'TEXT', '陈一，UI验收通过了吗？', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-02 12:00:00');
-INSERT INTO `im_message` VALUES (28, 13, 10, 'TEXT', '通过了，可以开发', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-02 12:01:00');
-INSERT INTO `im_message` VALUES (29, 14, 6, 'TEXT', '本周读书分享：《深入理解计算机系统》', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-02 13:00:00');
-INSERT INTO `im_message` VALUES (30, 15, 2, 'TEXT', '林二，代码review一下', NULL, NULL, NULL, 'NORMAL', 0, NULL, NULL, '2024-01-02 14:00:00');
+INSERT INTO `im_message` VALUES (1, 1, 2, 'TEXT', '你好，最近怎么样？', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 09:00:00', NULL);
+INSERT INTO `im_message` VALUES (2, 1, 3, 'TEXT', '挺好的，谢谢关心！你呢？', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 09:01:00', NULL);
+INSERT INTO `im_message` VALUES (3, 1, 2, 'TEXT', '我也不错，今天天气真好', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 09:02:00', NULL);
+INSERT INTO `im_message` VALUES (4, 2, 2, 'TEXT', '是啊，适合出去走走', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 10:00:00', NULL);
+INSERT INTO `im_message` VALUES (5, 2, 4, 'TEXT', '项目进度怎么样了？', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 10:05:00', NULL);
+INSERT INTO `im_message` VALUES (6, 3, 2, 'TEXT', '@所有人 今天下午3点开会', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 11:00:00', NULL);
+INSERT INTO `im_message` VALUES (7, 3, 5, 'TEXT', '收到，我会准时参加', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 11:01:00', NULL);
+INSERT INTO `im_message` VALUES (8, 4, 2, 'TEXT', '这个技术方案怎么样？', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 12:00:00', NULL);
+INSERT INTO `im_message` VALUES (9, 4, 6, 'TEXT', '文件已经发给你了，请查收', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 12:01:00', NULL);
+INSERT INTO `im_message` VALUES (10, 5, 2, 'TEXT', '会议延期到明天上午', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 13:00:00', NULL);
+INSERT INTO `im_message` VALUES (11, 5, 7, 'TEXT', '看完了，有一些修改意见', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 13:10:00', NULL);
+INSERT INTO `im_message` VALUES (12, 6, 2, 'TEXT', '大家好，欢迎加入技术交流群', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 14:00:00', NULL);
+INSERT INTO `im_message` VALUES (13, 6, 3, 'TEXT', '感谢群主邀请', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 14:01:00', NULL);
+INSERT INTO `im_message` VALUES (14, 6, 4, 'TEXT', '向大家学习', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 14:02:00', NULL);
+INSERT INTO `im_message` VALUES (15, 7, 3, 'TEXT', '产品需求已经更新', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 15:00:00', NULL);
+INSERT INTO `im_message` VALUES (16, 7, 7, 'TEXT', '收到，我会查看', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 15:01:00', NULL);
+INSERT INTO `im_message` VALUES (17, 8, 4, 'TEXT', '项目进度汇报', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 16:00:00', NULL);
+INSERT INTO `im_message` VALUES (18, 8, 9, 'TEXT', '前端开发完成了80%', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 16:10:00', NULL);
+INSERT INTO `im_message` VALUES (19, 9, 2, 'TEXT', '公司通知：本周五下午开会', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 17:00:00', NULL);
+INSERT INTO `im_message` VALUES (20, 9, 3, 'TEXT', '收到', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 17:01:00', NULL);
+INSERT INTO `im_message` VALUES (21, 10, 2, 'TEXT', '吴九，后端接口文档发我', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 09:00:00', NULL);
+INSERT INTO `im_message` VALUES (22, 10, 8, 'TEXT', '已经发送到你邮箱', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 09:05:00', NULL);
+INSERT INTO `im_message` VALUES (23, 11, 2, 'TEXT', '郑十，测试用例写好了吗？', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 10:00:00', NULL);
+INSERT INTO `im_message` VALUES (24, 11, 9, 'TEXT', '写好了，正在执行测试', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 10:01:00', NULL);
+INSERT INTO `im_message` VALUES (25, 12, 5, 'TEXT', '本周篮球活动照常进行', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 11:00:00', NULL);
+INSERT INTO `im_message` VALUES (26, 12, 11, 'TEXT', '我会参加', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 11:01:00', NULL);
+INSERT INTO `im_message` VALUES (27, 13, 2, 'TEXT', '陈一，UI验收通过了吗？', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 12:00:00', NULL);
+INSERT INTO `im_message` VALUES (28, 13, 10, 'TEXT', '通过了，可以开发', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 12:01:00', NULL);
+INSERT INTO `im_message` VALUES (29, 14, 6, 'TEXT', '本周读书分享：《深入理解计算机系统》', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 13:00:00', NULL);
+INSERT INTO `im_message` VALUES (30, 15, 2, 'TEXT', '林二，代码review一下', NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 14:00:00', NULL);
+
+-- ----------------------------
+-- Table structure for im_message_edit_history
+-- ----------------------------
+DROP TABLE IF EXISTS `im_message_edit_history`;
+CREATE TABLE `im_message_edit_history`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '历史ID',
+  `message_id` bigint(20) NOT NULL COMMENT '消息ID',
+  `old_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '编辑前的内容',
+  `new_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '编辑后的内容',
+  `editor_id` bigint(20) NOT NULL COMMENT '编辑人ID',
+  `edit_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '编辑时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_message_id`(`message_id`) USING BTREE,
+  INDEX `idx_editor_id`(`editor_id`) USING BTREE,
+  INDEX `idx_edit_time`(`edit_time`) USING BTREE,
+  CONSTRAINT `fk_edit_history_editor` FOREIGN KEY (`editor_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_edit_history_message` FOREIGN KEY (`message_id`) REFERENCES `im_message` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息编辑历史表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_message_edit_history
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for im_message_favorite
@@ -1220,6 +1416,8 @@ CREATE TABLE `im_message_favorite`  (
 -- ----------------------------
 -- Records of im_message_favorite
 -- ----------------------------
+INSERT INTO `im_message_favorite` VALUES (1, 2, 1, 1, '重要通知', '工作,通知', '2026-01-08 13:37:19');
+INSERT INTO `im_message_favorite` VALUES (2, 2, 6, 3, '会议提醒', '会议,重要', '2026-01-08 13:37:19');
 
 -- ----------------------------
 -- Table structure for im_message_mention
@@ -1316,6 +1514,95 @@ CREATE TABLE `im_message_read_receipt`  (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for im_schedule_event
+-- ----------------------------
+DROP TABLE IF EXISTS `im_schedule_event`;
+CREATE TABLE `im_schedule_event`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '日程ID',
+  `user_id` bigint(20) NOT NULL COMMENT '创建人ID',
+  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '日程标题',
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '日程描述',
+  `location` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '地点',
+  `start_time` datetime NOT NULL COMMENT '开始时间',
+  `end_time` datetime NOT NULL COMMENT '结束时间',
+  `is_all_day` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否全天（0否 1是）',
+  `recurrence_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '重复类型（NONE无 DAILY每天 WEEKLY每周 MONTHLY每月 CUSTOM自定义）',
+  `recurrence_end_date` date NULL DEFAULT NULL COMMENT '重复结束日期',
+  `recurrence_interval` int(11) NULL DEFAULT NULL COMMENT '重复间隔（每N天/周/月）',
+  `recurrence_days` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '重复的星期几（1-7，逗号分隔）',
+  `color` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '显示颜色',
+  `visibility` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PRIVATE' COMMENT '可见范围（PRIVATE私有 DEPARTMENT部门 PUBLIC公开）',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'SCHEDULED' COMMENT '状态（SCHEDULED已安排 CANCELLED已取消 COMPLETED已完成）',
+  `reminder_minutes` int(11) NULL DEFAULT NULL COMMENT '提醒时间（分钟，事件开始前多少分钟提醒）',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_start_time`(`start_time`) USING BTREE,
+  INDEX `idx_end_time`(`end_time`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE,
+  CONSTRAINT `fk_schedule_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '日程事件表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_schedule_event
+-- ----------------------------
+INSERT INTO `im_schedule_event` VALUES (1, 2, '项目评审会议', '评审本周完成的功能模块', '会议室A', '2026-01-09 13:48:07', '2026-01-09 15:48:07', 0, NULL, NULL, NULL, NULL, NULL, 'PRIVATE', 'SCHEDULED', 15, '2026-01-08 13:48:07', '2026-01-08 13:48:07');
+INSERT INTO `im_schedule_event` VALUES (2, 2, '提交周报', '撰写本周工作总结', NULL, '2026-01-10 13:48:07', '2026-01-10 14:48:07', 0, NULL, NULL, NULL, NULL, NULL, 'PRIVATE', 'SCHEDULED', 30, '2026-01-08 13:48:07', '2026-01-08 13:48:07');
+INSERT INTO `im_schedule_event` VALUES (3, 3, '客户拜访', '拜访重要客户A', '客户公司', '2026-01-11 13:48:07', '2026-01-11 16:48:07', 0, NULL, NULL, NULL, NULL, NULL, 'PRIVATE', 'SCHEDULED', 60, '2026-01-08 13:48:07', '2026-01-08 13:48:07');
+INSERT INTO `im_schedule_event` VALUES (4, 2, '团队周会', '全体成员参加的周例会', '大会议室', '2026-01-13 13:48:07', '2026-01-13 14:48:07', 0, NULL, NULL, NULL, NULL, NULL, 'DEPARTMENT', 'SCHEDULED', 30, '2026-01-08 13:48:07', '2026-01-08 13:48:07');
+
+-- ----------------------------
+-- Table structure for im_schedule_participant
+-- ----------------------------
+DROP TABLE IF EXISTS `im_schedule_participant`;
+CREATE TABLE `im_schedule_participant`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `event_id` bigint(20) NOT NULL COMMENT '日程ID',
+  `user_id` bigint(20) NOT NULL COMMENT '参与人ID',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PENDING' COMMENT '参与状态（PENDING待确认 ACCEPTED已接受 DECLINED已拒绝）',
+  `response_time` datetime NULL DEFAULT NULL COMMENT '回复时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_event_user`(`event_id`, `user_id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  CONSTRAINT `fk_participant_event` FOREIGN KEY (`event_id`) REFERENCES `im_schedule_event` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_participant_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '日程参与人表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_schedule_participant
+-- ----------------------------
+INSERT INTO `im_schedule_participant` VALUES (1, 4, 3, 'ACCEPTED', '2026-01-08 13:48:07', '2026-01-08 13:48:07');
+INSERT INTO `im_schedule_participant` VALUES (2, 4, 4, 'PENDING', NULL, '2026-01-08 13:48:07');
+INSERT INTO `im_schedule_participant` VALUES (3, 4, 5, 'ACCEPTED', '2026-01-08 13:48:07', '2026-01-08 13:48:07');
+
+-- ----------------------------
+-- Table structure for im_schedule_reminder
+-- ----------------------------
+DROP TABLE IF EXISTS `im_schedule_reminder`;
+CREATE TABLE `im_schedule_reminder`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '提醒ID',
+  `event_id` bigint(20) NOT NULL COMMENT '日程ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `reminder_time` datetime NOT NULL COMMENT '提醒时间',
+  `is_sent` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否已发送（0否 1是）',
+  `sent_time` datetime NULL DEFAULT NULL COMMENT '发送时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_event_id`(`event_id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_reminder_time`(`reminder_time`) USING BTREE,
+  INDEX `idx_is_sent`(`is_sent`) USING BTREE,
+  CONSTRAINT `fk_reminder_event` FOREIGN KEY (`event_id`) REFERENCES `im_schedule_event` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_reminder_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '日程提醒记录表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_schedule_reminder
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for im_sensitive_event
 -- ----------------------------
 DROP TABLE IF EXISTS `im_sensitive_event`;
@@ -1346,20 +1633,32 @@ CREATE TABLE `im_sensitive_event`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_sensitive_word`;
 CREATE TABLE `im_sensitive_word`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `word` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???',
-  `level` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'WARN' COMMENT '???WARN?? BLOCK???',
-  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE' COMMENT '???ACTIVE?? DISABLED???',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '敏感词ID',
+  `word` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '敏感词内容',
+  `word_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT 'OTHER' COMMENT '敏感词类型（POLITICAL政治、VULGAR低俗、VIOLENCE暴力、AD广告、OTHER其他）',
+  `level` int(11) NULL DEFAULT 1 COMMENT '敏感级别（1低 2中 3高）',
+  `action` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT 'REPLACE' COMMENT '处理方式（REPLACE替换、REJECT拒绝、WARN警告）',
+  `replacement` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '***' COMMENT '替换内容',
+  `is_enabled` tinyint(1) NULL DEFAULT 1 COMMENT '是否启用',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_word`(`word`) USING BTREE,
-  INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '????' ROW_FORMAT = DYNAMIC;
+  INDEX `idx_word_type`(`word_type`) USING BTREE,
+  INDEX `idx_level`(`level`) USING BTREE,
+  INDEX `idx_enabled`(`is_enabled`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '敏感词表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of im_sensitive_word
 -- ----------------------------
+INSERT INTO `im_sensitive_word` VALUES (1, '笨蛋', 'VULGAR', 1, 'REPLACE', '***', 1, '2026-01-08 14:09:37', '2026-01-08 14:09:37');
+INSERT INTO `im_sensitive_word` VALUES (2, '白痴', 'VULGAR', 1, 'REPLACE', '***', 1, '2026-01-08 14:09:37', '2026-01-08 14:09:37');
+INSERT INTO `im_sensitive_word` VALUES (3, '傻瓜', 'VULGAR', 1, 'REPLACE', '***', 1, '2026-01-08 14:09:37', '2026-01-08 14:09:37');
+INSERT INTO `im_sensitive_word` VALUES (4, '暴力', 'VIOLENCE', 2, 'REPLACE', '***', 1, '2026-01-08 14:09:37', '2026-01-08 14:09:37');
+INSERT INTO `im_sensitive_word` VALUES (5, '赌博', 'VIOLENCE', 3, 'REJECT', '***', 1, '2026-01-08 14:09:37', '2026-01-08 14:09:37');
+INSERT INTO `im_sensitive_word` VALUES (6, '加微信', 'AD', 1, 'REPLACE', '***', 1, '2026-01-08 14:09:37', '2026-01-08 14:09:37');
+INSERT INTO `im_sensitive_word` VALUES (7, '代练', 'AD', 1, 'REPLACE', '***', 1, '2026-01-08 14:09:37', '2026-01-08 14:09:37');
 
 -- ----------------------------
 -- Table structure for im_session_group
@@ -1592,6 +1891,96 @@ CREATE TABLE `im_user_setting`  (
 -- ----------------------------
 -- Records of im_user_setting
 -- ----------------------------
+
+-- ----------------------------
+-- Table structure for im_work_report
+-- ----------------------------
+DROP TABLE IF EXISTS `im_work_report`;
+CREATE TABLE `im_work_report`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+  `user_id` bigint(20) NOT NULL COMMENT '提交人ID',
+  `report_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '日志类型（DAILY日报 WEEKLY周报 MONTHLY月报）',
+  `report_date` date NOT NULL COMMENT '报告日期',
+  `work_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '工作内容',
+  `completion_status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'COMPLETED' COMMENT '完成状态（COMPLETED已完成 IN_PROGRESS进行中 PENDING待处理）',
+  `tomorrow_plan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '明日计划',
+  `issues` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '遇到的问题',
+  `attachments` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '附件（多个附件用逗号分隔）',
+  `work_hours` decimal(4, 2) NULL DEFAULT NULL COMMENT '工作时长（小时）',
+  `visibility` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'DEPARTMENT' COMMENT '可见范围（PRIVATE私有 DEPARTMENT部门 PUBLIC公开）',
+  `submit_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '提交时间',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'SUBMITTED' COMMENT '状态（DRAFT草稿 SUBMITTED已提交 APPROVED已审批 REJECTED已退回）',
+  `approver_id` bigint(20) NULL DEFAULT NULL COMMENT '审批人ID',
+  `approve_time` datetime NULL DEFAULT NULL COMMENT '审批时间',
+  `approve_remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '审批备注',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_report_type`(`report_type`) USING BTREE,
+  INDEX `idx_report_date`(`report_date`) USING BTREE,
+  INDEX `idx_submit_time`(`submit_time`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE,
+  INDEX `fk_work_report_approver`(`approver_id`) USING BTREE,
+  CONSTRAINT `fk_work_report_approver` FOREIGN KEY (`approver_id`) REFERENCES `im_user` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
+  CONSTRAINT `fk_work_report_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '工作日志表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_work_report
+-- ----------------------------
+INSERT INTO `im_work_report` VALUES (1, 2, 'DAILY', '2026-01-08', '1. 完成用户登录模块开发\n2. 修复消息推送bug\n3. 参加产品需求评审会议', 'COMPLETED', '1. 开始开发用户注册模块\n2. 优化消息推送性能', '无', NULL, 8.50, 'DEPARTMENT', '2026-01-08 13:39:26', 'SUBMITTED', NULL, NULL, NULL, '2026-01-08 13:39:26', '2026-01-08 13:39:26');
+INSERT INTO `im_work_report` VALUES (2, 3, 'DAILY', '2026-01-08', '1. 完成前端页面优化\n2. 协助测试工程师进行功能测试', 'COMPLETED', '1. 继续前端优化工作\n2. 修复测试发现的问题', '接口响应偶尔较慢', NULL, 8.00, 'DEPARTMENT', '2026-01-08 13:39:26', 'SUBMITTED', NULL, NULL, NULL, '2026-01-08 13:39:26', '2026-01-08 13:39:26');
+INSERT INTO `im_work_report` VALUES (3, 4, 'WEEKLY', '2026-01-08', '本周工作总结：\n1. 完成IM核心功能开发\n2. 完成数据库设计\n3. 完成接口文档编写', 'COMPLETED', '下周计划：\n1. 开始单元测试编写\n2. 进行代码审查', '无', NULL, 40.00, 'PUBLIC', '2026-01-08 13:39:26', 'SUBMITTED', NULL, NULL, NULL, '2026-01-08 13:39:26', '2026-01-08 13:39:26');
+
+-- ----------------------------
+-- Table structure for im_work_report_comment
+-- ----------------------------
+DROP TABLE IF EXISTS `im_work_report_comment`;
+CREATE TABLE `im_work_report_comment`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '评论ID',
+  `report_id` bigint(20) NOT NULL COMMENT '日志ID',
+  `user_id` bigint(20) NOT NULL COMMENT '评论人ID',
+  `content` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '评论内容',
+  `parent_id` bigint(20) NULL DEFAULT NULL COMMENT '父评论ID（回复）',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '评论时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_report_id`(`report_id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_parent_id`(`parent_id`) USING BTREE,
+  CONSTRAINT `fk_work_comment_report` FOREIGN KEY (`report_id`) REFERENCES `im_work_report` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_work_comment_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '工作日志评论表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_work_report_comment
+-- ----------------------------
+INSERT INTO `im_work_report_comment` VALUES (1, 1, 3, '辛苦了，登录模块完成得不错！', NULL, '2026-01-08 13:39:26');
+INSERT INTO `im_work_report_comment` VALUES (2, 1, 4, '消息推送问题后面可以一起优化', NULL, '2026-01-08 13:39:26');
+INSERT INTO `im_work_report_comment` VALUES (3, 3, 2, '本周工作完成得很扎实，下周加油！', NULL, '2026-01-08 13:39:26');
+
+-- ----------------------------
+-- Table structure for im_work_report_like
+-- ----------------------------
+DROP TABLE IF EXISTS `im_work_report_like`;
+CREATE TABLE `im_work_report_like`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '点赞ID',
+  `report_id` bigint(20) NOT NULL COMMENT '日志ID',
+  `user_id` bigint(20) NOT NULL COMMENT '点赞人ID',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '点赞时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_report_user`(`report_id`, `user_id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  CONSTRAINT `fk_work_like_report` FOREIGN KEY (`report_id`) REFERENCES `im_work_report` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_work_like_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '工作日志点赞表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_work_report_like
+-- ----------------------------
+INSERT INTO `im_work_report_like` VALUES (1, 1, 3, '2026-01-08 13:39:26');
+INSERT INTO `im_work_report_like` VALUES (2, 1, 4, '2026-01-08 13:39:26');
+INSERT INTO `im_work_report_like` VALUES (3, 3, 2, '2026-01-08 13:39:26');
 
 -- ----------------------------
 -- Table structure for sys_config

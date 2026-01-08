@@ -1,0 +1,551 @@
+/* ============ 钉钉6.5.x风格通知/提示样式 ============ */
+
+/* ============ 通知面板 ============ */
+.notification-panel {
+  position: fixed;
+  top: 56px;
+  right: 0;
+  width: 360px;
+  max-height: calc(100vh - 56px);
+  background: var(--im-bg-white);
+  box-shadow: var(--im-shadow-xl);
+  border-left: 1px solid var(--im-border-color);
+  z-index: 1000;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.show {
+    transform: translateX(0);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--im-border-color);
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--im-text-primary);
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 8px;
+
+      .action-btn {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        color: var(--im-text-tertiary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: var(--im-bg-hover);
+          color: var(--im-text-secondary);
+        }
+      }
+    }
+  }
+
+  .panel-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--im-border-color);
+
+    .tab-item {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--im-text-secondary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+
+      &:hover {
+        color: var(--im-text-primary);
+      }
+
+      &.active {
+        color: var(--im-primary-color);
+        border-bottom-color: var(--im-primary-color);
+      }
+
+      .tab-badge {
+        margin-left: 4px;
+        padding: 2px 6px;
+        background: var(--im-error-color);
+        color: white;
+        font-size: 11px;
+        border-radius: 10px;
+      }
+    }
+  }
+
+  .panel-content {
+    height: calc(100% - 120px);
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 2px;
+    }
+  }
+
+  .notification-list {
+    .notification-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--im-border-color);
+      cursor: pointer;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: var(--im-bg-hover);
+      }
+
+      &.unread {
+        background: var(--im-primary-lighter);
+      }
+
+      .notification-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        &.message {
+          background: var(--im-primary-light);
+          color: var(--im-primary-color);
+        }
+
+        &.system {
+          background: #fff7e6;
+          color: #faad14;
+        }
+
+        &.mention {
+          background: #f6ffed;
+          color: #52c41a;
+        }
+
+        &.alert {
+          background: #fff2f0;
+          color: #ff4d4f;
+        }
+      }
+
+      .notification-content {
+        flex: 1;
+        min-width: 0;
+
+        .notification-title {
+          font-size: 14px;
+          color: var(--im-text-primary);
+          margin-bottom: 4px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+
+          &.unread {
+            font-weight: 600;
+          }
+
+          .unread-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--im-error-color);
+          }
+        }
+
+        .notification-desc {
+          font-size: 13px;
+          color: var(--im-text-secondary);
+          margin-bottom: 6px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+        }
+
+        .notification-time {
+          font-size: 11px;
+          color: var(--im-text-tertiary);
+        }
+      }
+
+      .notification-action {
+        color: var(--im-text-tertiary);
+        font-size: 12px;
+      }
+    }
+  }
+
+  .panel-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--im-border-color);
+    text-align: center;
+
+    .clear-all-btn {
+      font-size: 13px;
+      color: var(--im-text-secondary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: var(--im-bg-hover);
+        color: var(--im-primary-color);
+      }
+    }
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 40px 20px;
+    color: var(--im-text-tertiary);
+
+    .empty-icon {
+      font-size: 56px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .empty-text {
+      font-size: 14px;
+    }
+  }
+}
+
+/* ============ Toast 通知 ============ */
+.dd-toast-container {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+
+  .dd-toast {
+    pointer-events: auto;
+    min-width: 280px;
+    max-width: 400px;
+    padding: 12px 16px;
+    background: var(--im-bg-white);
+    border-radius: 8px;
+    box-shadow: var(--im-shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: toastSlideIn 0.3s ease-out;
+
+    &.success {
+      border-left: 3px solid #52c41a;
+
+      .toast-icon {
+        color: #52c41a;
+      }
+    }
+
+    &.warning {
+      border-left: 3px solid #faad14;
+
+      .toast-icon {
+        color: #faad14;
+      }
+    }
+
+    &.error {
+      border-left: 3px solid #ff4d4f;
+
+      .toast-icon {
+        color: #ff4d4f;
+      }
+    }
+
+    &.info {
+      border-left: 3px solid var(--im-primary-color);
+
+      .toast-icon {
+        color: var(--im-primary-color);
+      }
+    }
+
+    .toast-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .toast-content {
+      flex: 1;
+
+      .toast-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--im-text-primary);
+        margin-bottom: 2px;
+      }
+
+      .toast-message {
+        font-size: 13px;
+        color: var(--im-text-secondary);
+      }
+    }
+
+    .toast-close {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--im-text-tertiary);
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: var(--im-bg-hover);
+      }
+    }
+
+    &.hiding {
+      animation: toastSlideOut 0.2s ease-in forwards;
+    }
+  }
+}
+
+/* ============ 通知徽章动画 ============ */
+.notification-badge {
+  position: relative;
+
+  &.pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    animation: badgePulse 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255, 77, 79, 0);
+  }
+}
+
+/* ============ Toast 动画 ============ */
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* ============ Snackbar (底部提示) ============ */
+.dd-snackbar-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+
+  .dd-snackbar {
+    pointer-events: auto;
+    min-width: 300px;
+    max-width: 500px;
+    padding: 14px 20px;
+    background: #323232;
+    color: white;
+    border-radius: 8px;
+    box-shadow: var(--im-shadow-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    animation: snackbarFadeIn 0.3s ease-out;
+
+    .snackbar-message {
+      flex: 1;
+      font-size: 14px;
+    }
+
+    .snackbar-action {
+      padding: 6px 12px;
+      background: transparent;
+      border: none;
+      color: var(--im-primary-color);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    &.hiding {
+      animation: snackbarFadeOut 0.2s ease-in forwards;
+    }
+  }
+}
+
+@keyframes snackbarFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes snackbarFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+/* ============ 消息提示气泡 ============ */
+.message-bubble-tip {
+  position: fixed;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 13px;
+  border-radius: 6px;
+  z-index: 2000;
+  pointer-events: none;
+  animation: tipFadeIn 0.2s ease-out;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.8);
+    border-bottom: none;
+  }
+
+  &[data-position='bottom']::after {
+    top: -6px;
+    bottom: auto;
+    border-top-color: transparent;
+    border-bottom-color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+@keyframes tipFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ============ 响应式 ============ */
+@media (max-width: 768px) {
+  .notification-panel {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .dd-toast-container {
+    right: 10px;
+    left: 10px;
+
+    .dd-toast {
+      min-width: auto;
+    }
+  }
+
+  .dd-snackbar-container {
+    width: calc(100% - 40px);
+
+    .dd-snackbar {
+      min-width: auto;
+    }
+  }
+}
+
+/* ============ 暗色主题 ============ */
+[data-theme='dark'] {
+  .notification-panel {
+    background: #1f1f1f;
+    border-left-color: #303030;
+
+    .panel-header,
+    .panel-tabs,
+    .panel-footer {
+      border-color: #303030;
+    }
+
+    .notification-item.unread {
+      background: rgba(22, 119, 255, 0.1);
+    }
+  }
+
+  .dd-toast {
+    background: #2a2a2a;
+  }
+}

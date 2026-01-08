@@ -24,6 +24,24 @@
 /* 5. 钉钉组件样式 */
 @import './dingtalk-components.scss';
 
+/* 6. 钉钉聊天输入框样式 */
+@import './dingtalk-chat-input.scss';
+
+/* 7. 钉钉表情选择器样式 */
+@import './dingtalk-emoji.scss';
+
+/* 8. 钉钉通讯录样式 */
+@import './dingtalk-contacts.scss';
+
+/* 9. 钉钉通知样式 */
+@import './dingtalk-notification.scss';
+
+/* 10. 钉钉模态框样式 */
+@import './dingtalk-modal.scss';
+
+/* 11. 钉钉工具类样式 */
+@import './dingtalk-utils.scss';
+
 /* ============ 全局样式覆盖 ============ */
 
 /* 确保使用钉钉颜色变量 */

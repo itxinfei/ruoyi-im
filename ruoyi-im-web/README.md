@@ -1,6 +1,6 @@
 # RuoYi IM Web 前端项目
 
-基于 Vue 3 + Vite + Element Plus 构建的即时通讯系统前端。
+基于 Vue 3 + Vite + Element Plus 构建的即时通讯系统前端，采用钉钉6.5.x风格UI设计。
 
 ## 技术栈
 
@@ -13,6 +13,72 @@
 | Vue Router | 4.x | 路由管理 |
 | Axios | - | HTTP客户端 |
 | SCSS | - | CSS预处理器 |
+| WebSocket | - | 实时通信 |
+
+## UI设计风格
+
+本项目采用**钉钉6.5.x风格**设计，包含完整的样式库：
+
+### 颜色系统
+```scss
+--im-primary-color: #1677ff;    // 钉钉蓝
+--im-text-primary: #262626;     // 主要文字
+--im-text-secondary: #595959;   // 次要文字
+--im-bg-base: #f0f2f5;          // 基础背景
+--im-bg-white: #ffffff;         // 白色背景
+--im-border-color: #f0f0f0;     // 边框颜色
+```
+
+### 样式文件结构
+
+```
+ruoyi-im-web/src/styles/
+├── dingtalk-index.scss      # 主入口文件
+├── dingtalk-theme.scss      # 主题变量和混合宏
+├── dingtalk-navigation.scss # 导航侧边栏样式
+├── dingtalk-message.scss    # 消息气泡样式
+├── dingtalk-components.scss # 通用组件样式
+├── dingtalk-chat-input.scss # 聊天输入框样式
+├── dingtalk-emoji.scss      # 表情选择器样式
+├── dingtalk-contacts.scss   # 通讯录样式
+├── dingtalk-notification.scss # 通知/Toast样式
+├── dingtalk-modal.scss      # 模态框/抽屉样式
+├── dingtalk-utils.scss      # 工具类
+└── im-theme.scss            # IM主题变量
+```
+
+### 使用钉钉样式
+
+在 `main.js` 中引入：
+
+```javascript
+import '@/styles/dingtalk-index.scss'
+```
+
+或在组件中按需引入：
+
+```javascript
+import '@/styles/dingtalk-message.scss'
+```
+
+### 工具类示例
+
+```html
+<!-- 布局工具类 -->
+<div class="dd-flex dd-items-center dd-justify-between">
+
+<!-- 间距工具类 -->
+<div class="dd-p-4 dd-m-2">
+
+<!-- 文字工具类 -->
+<span class="dd-text-primary dd-font-medium">
+
+<!-- 背景工具类 -->
+<div class="dd-bg-white dd-rounded-lg dd-shadow-md">
+
+<!-- 动画工具类 -->
+<div class="dd-animate-fade-in">
+```
 
 ## 项目结构
 
