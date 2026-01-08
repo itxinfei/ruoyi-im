@@ -195,6 +195,19 @@ export function moveFriendToGroup(data) {
   })
 }
 
+/**
+ * 获取联系人在线状态
+ * @param {number[]} userIds - 用户ID数组
+ * @returns {Promise}
+ */
+export function getContactStatus(userIds) {
+  return request({
+    url: '/api/im/user/batch',
+    method: 'get',
+    params: { ids: userIds.join(',') },
+  })
+}
+
 // ========== 别名 - 向后兼容 ==========
 
 export const getContactInfo = getContact
@@ -215,6 +228,7 @@ export default {
   updateFriendGroup,
   deleteFriendGroup,
   moveFriendToGroup,
+  getContactStatus,
   // 别名
   getContactInfo,
 }

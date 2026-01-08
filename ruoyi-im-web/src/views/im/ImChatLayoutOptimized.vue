@@ -1650,6 +1650,7 @@ const contactCategory = ref('friends')
 const contactSearch = ref('')
 const selectedContact = ref(null)
 const friends = ref([])
+const groupSessions = ref([]) // 群组会话列表
 const orgTree = ref([])
 const orgMembers = ref([])
 const currentDept = ref(null)

@@ -128,7 +128,8 @@ public class ImGroupServiceImpl implements ImGroupService {
             throw new BusinessException("只有群主可以解散群组");
         }
 
-        group.setStatus("DISMISSED");
+        group.setIsDeleted(1);
+        group.setDeletedTime(LocalDateTime.now());
         group.setUpdateTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
 
@@ -169,7 +170,7 @@ public class ImGroupServiceImpl implements ImGroupService {
 
         for (ImGroupMember member : memberList) {
             ImGroup group = imGroupMapper.selectImGroupById(member.getGroupId());
-            if (group != null && "NORMAL".equals(group.getStatus())) {
+            if (group != null && group.getIsDeleted() == 0) {
                 ImGroupVO vo = new ImGroupVO();
                 BeanUtils.copyProperties(group, vo);
                 vo.setMyRole(member.getRole());

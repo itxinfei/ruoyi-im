@@ -737,21 +737,21 @@ CREATE TABLE `im_conversation`  (
 -- ----------------------------
 -- Records of im_conversation
 -- ----------------------------
-INSERT INTO `im_conversation` VALUES (1, 'SINGLE', 3, '李四', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC3', 4, '2024-01-01 10:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation` VALUES (2, 'SINGLE', 4, '王五', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC4', 5, '2024-01-01 10:05:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation` VALUES (3, 'SINGLE', 5, '赵六', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC5', 10, '2024-01-01 13:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation` VALUES (4, 'SINGLE', 6, '孙七', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC6', 8, '2024-01-01 12:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation` VALUES (5, 'SINGLE', 7, '周八', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC7', 9, '2024-01-01 12:01:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation` VALUES (6, 'GROUP', 1, '技术交流群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG1', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (7, 'GROUP', 2, '产品讨论群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG2', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (8, 'GROUP', 3, '项目开发群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG3', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (9, 'GROUP', 4, '公司全员群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG4', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (10, 'SINGLE', 8, '吴九', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC8', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (11, 'SINGLE', 9, '郑十', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fC9', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (12, 'GROUP', 5, '篮球爱好者', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG5', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (13, 'SINGLE', 10, '陈一', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCA', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (14, 'GROUP', 6, '读书分享会', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG6', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (15, 'SINGLE', 11, '林二', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCB', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (1, 'SINGLE', 3, '李四', '/avatar/2.jpg', 4, '2024-01-01 10:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (2, 'SINGLE', 4, '王五', '/avatar/3.jpg', 5, '2024-01-01 10:05:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (3, 'SINGLE', 5, '赵六', '/avatar/1.jpg', 10, '2024-01-01 13:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (4, 'SINGLE', 6, '孙七', '/avatar/2.jpg', 8, '2024-01-01 12:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (5, 'SINGLE', 7, '周八', '/avatar/3.jpg', 9, '2024-01-01 12:01:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (6, 'GROUP', 1, '技术交流群', '/avatar/group_default.png', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (7, 'GROUP', 2, '产品讨论群', '/avatar/group_default.png', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (8, 'GROUP', 3, '项目开发群', '/avatar/group_default.png', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (9, 'GROUP', 4, '公司全员群', '/avatar/group_default.png', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (10, 'SINGLE', 8, '吴九', '/avatar/1.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (11, 'SINGLE', 9, '郑十', '/avatar/2.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (12, 'GROUP', 5, '篮球爱好者', '/avatar/group_default.png', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (13, 'SINGLE', 10, '陈一', '/avatar/3.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (14, 'GROUP', 6, '读书分享会', '/avatar/group_default.png', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (15, 'SINGLE', 11, '林二', '/avatar/1.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 
 -- ----------------------------
 -- Table structure for im_conversation_member
@@ -1240,16 +1240,16 @@ CREATE TABLE `im_group`  (
 -- ----------------------------
 -- Records of im_group
 -- ----------------------------
-INSERT INTO `im_group` VALUES (1, '技术交流群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG1', 2, '欢迎大家交流技术问题', 500, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (2, '产品讨论群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG2', 3, '产品需求讨论', 200, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (3, '项目开发群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG3', 4, '项目进度同步', 50, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (4, '公司全员群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG4', 2, '公司通知发布', 1000, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (5, '篮球爱好者', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG5', 5, '每周组织篮球活动', 100, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (6, '读书分享会', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG6', 6, '分享读书心得', 200, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (7, '前端开发群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG7', 7, '前端技术交流', 300, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (8, '后端开发群', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG8', 8, '后端技术交流', 300, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (9, '设计团队', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCG9', 9, 'UI/UX设计讨论', 50, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_group` VALUES (10, '测试团队', 'https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83qJZ8fCGA', 10, '质量保证交流', 100, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (1, '技术交流群', '/avatar/group_default.png', 2, '欢迎大家交流技术问题', 500, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (2, '产品讨论群', '/avatar/group_default.png', 3, '产品需求讨论', 200, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (3, '项目开发群', '/avatar/group_default.png', 4, '项目进度同步', 50, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (4, '公司全员群', '/avatar/group_default.png', 2, '公司通知发布', 1000, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (5, '篮球爱好者', '/avatar/group_default.png', 5, '每周组织篮球活动', 100, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (6, '读书分享会', '/avatar/group_default.png', 6, '分享读书心得', 200, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (7, '前端开发群', '/avatar/group_default.png', 7, '前端技术交流', 300, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (8, '后端开发群', '/avatar/group_default.png', 8, '后端技术交流', 300, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (9, '设计团队', '/avatar/group_default.png', 9, 'UI/UX设计讨论', 50, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_group` VALUES (10, '测试团队', '/avatar/group_default.png', 10, '质量保证交流', 100, 0, 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 
 -- ----------------------------
 -- Table structure for im_group_announcement

@@ -65,7 +65,22 @@
       "Bash(rg:*)",
       "Bash(git add:*)",
       "mcp__filesystem__read_multiple_files",
-      "mcp__filesystem__search_files"
+      "mcp__filesystem__search_files",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ6aGFuZ3NhbiIsInVzZXJJZCI6MiwiaWF0IjoxNzY3ODY3NDU3LCJleHAiOjE3Njc5NTM4NTd9.-xzZhV4wYGFvvEfgahr05WAuUo64u6i_fIXb2kmGkd3DAnb-TWA6mDeMkEXHMh1BvXE5Oy2Falt4GfmZf2b1ag\")",
+      "Bash(__NEW_LINE__ echo \"=== 用户信息 ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 好友列表 ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 会话列表 ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 消息列表 ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 群组列表 ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 工作台概览 ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 审批模板 ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 考勤状态 ===\")",
+      "Bash(__NEW_LINE__ curl -s -H \"Authorization: Bearer $TOKEN\" http://localhost:8080/api/im/user/info)",
+      "Bash(__NEW_LINE__ echo \"=== 用户模块 ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 待办列表 ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 组织架构树 ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 应用列表 ===\")",
+      "Bash(__NEW_LINE__ echo \"=== 配置信息 ===\")"
     ]
   }
 }

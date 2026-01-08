@@ -369,12 +369,12 @@ const actions = {
     commit('ADD_PENDING_MESSAGE', { sessionId, tempId, message: tempMessage })
 
     try {
-      // 调用发送消息API
+      // 调用发送消息API - 注意：后端API使用conversationId参数名
       const response = await apiSendMessage({
-        sessionId,
+        conversationId: sessionId, // 映射 sessionId 到 conversationId
         type,
         content: typeof content === 'object' ? JSON.stringify(content) : content,
-        replyTo,
+        replyToMessageId: replyTo, // 映射 replyTo 到 replyToMessageId
         clientMsgId, // 传递clientMsgId用于服务端去重
       })
 
