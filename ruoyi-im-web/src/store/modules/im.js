@@ -326,7 +326,7 @@ const actions = {
 
   // 加载消息
   async loadMessages({ commit }, { sessionId, page = 1, pageSize = 20 }) {
-    const response = await listMessage({ sessionId, page, pageSize })
+    const response = await listMessage({ conversationId: sessionId, page, pageSize })
     const messages = response.rows || response.data || []
 
     if (page === 1) {
