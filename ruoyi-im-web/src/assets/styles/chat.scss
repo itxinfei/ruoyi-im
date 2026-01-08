@@ -1,10 +1,13 @@
 @use './variables.scss' as *;
 
+/* ============ 钉钉6.5.x风格聊天样式 ============ */
+
 .chat-container {
   height: 100%;
   display: flex;
   flex-direction: column;
   will-change: transform;
+  background: var(--im-bg-base);
 
   .chat-main {
     flex: 1;
@@ -15,9 +18,10 @@
 
   .chat-left {
     width: 280px;
-    border-right: 1px solid #e6e6e6;
+    border-right: 1px solid var(--im-border-color);
     display: flex;
     flex-direction: column;
+    background: var(--im-bg-sidebar);
     will-change: scroll-position;
   }
 
@@ -25,53 +29,112 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    background: var(--im-bg-chat);
     will-change: scroll-position;
   }
 }
 
+/* ============ 会话列表 - 钉钉风格 ============ */
 .session-list {
   flex: 1;
   overflow-y: auto;
   contain: layout style paint;
   will-change: scroll-position;
 
+  /* 自定义滚动条 */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 2px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
   .session-item {
-    padding: 12px;
+    padding: 12px 16px;
+    min-height: 72px;
     display: flex;
     align-items: center;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     contain: layout style;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 16px;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: var(--im-border-color);
+      transform: scaleX(0.5);
+    }
 
     &:hover {
-      background-color: #f5f5f5;
-      transform: translateZ(0);
+      background-color: var(--im-session-hover);
+
+      .session-actions {
+        opacity: 1;
+      }
     }
 
     &.active {
-      background-color: #e6f7ff;
+      background-color: var(--im-session-active);
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 40px;
+        background: var(--im-primary-color);
+        border-radius: 0 2px 2px 0;
+      }
+    }
+
+    &.pinned {
+      order: -1;
     }
 
     .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 4px;
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
       margin-right: 12px;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .content {
       flex: 1;
       overflow: hidden;
+      min-width: 0;
 
       .name {
-        font-size: 14px;
-        color: #333;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--im-text-primary);
         margin-bottom: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .message {
-        font-size: 12px;
-        color: #999;
+        font-size: 13px;
+        color: var(--im-text-secondary);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -80,32 +143,57 @@
 
     .time {
       font-size: 12px;
-      color: #999;
+      color: var(--im-text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .session-actions {
+      opacity: 0;
+      transition: opacity 0.2s ease;
     }
   }
 }
 
+/* ============ 消息列表 - 钉钉风格 ============ */
 .message-list {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 16px 20px;
+  background: var(--im-bg-chat);
+
+  /* 滚动条样式 */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.2);
+    }
+  }
 
   .message-item {
     margin-bottom: 20px;
     display: flex;
+    animation: im-message-slide-in 0.3s ease-out;
 
     &.self {
       flex-direction: row-reverse;
 
       .bubble {
-        background-color: #e6f7ff;
+        background: var(--im-bubble-self);
+        color: var(--im-bubble-text-self);
         margin-left: 0;
         margin-right: 12px;
+        box-shadow: 0 1px 2px rgba(22, 119, 255, 0.15);
 
         &::before {
           left: auto;
           right: -6px;
-          border-left-color: #e6f7ff;
+          border-left-color: var(--im-bubble-self);
           border-right: none;
         }
       }
@@ -114,82 +202,224 @@
     .avatar {
       width: 40px;
       height: 40px;
-      border-radius: 4px;
+      border-radius: 8px;
+      flex-shrink: 0;
     }
 
     .content {
       max-width: 60%;
+      min-width: 0;
 
       .name {
         font-size: 12px;
-        color: #999;
-        margin-bottom: 4px;
+        color: var(--im-text-secondary);
+        margin-bottom: 6px;
+        margin-left: 12px;
       }
 
       .bubble {
-        background-color: #f5f5f5;
-        padding: 12px;
-        border-radius: 4px;
+        background: var(--im-bubble-other);
+        color: var(--im-bubble-text-other);
+        padding: 10px 14px;
+        border-radius: 8px;
         position: relative;
         margin-left: 12px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        word-wrap: break-word;
+        word-break: break-word;
+        line-height: 1.6;
 
         &::before {
           content: '';
           position: absolute;
-          top: 12px;
+          top: 14px;
           left: -6px;
           border-top: 6px solid transparent;
           border-bottom: 6px solid transparent;
-          border-right: 6px solid #f5f5f5;
+          border-right: 6px solid var(--im-bubble-other);
+        }
+
+        /* 图片消息 */
+        &.image-bubble {
+          padding: 4px;
+          background: transparent;
+          box-shadow: none;
+
+          &::before {
+            display: none;
+          }
+
+          img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+
+            &:hover {
+              transform: scale(1.02);
+            }
+          }
+        }
+
+        /* 文件消息 */
+        &.file-bubble {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          min-width: 200px;
+
+          .file-icon {
+            font-size: 32px;
+            color: var(--im-primary-color);
+          }
+
+          .file-info {
+            flex: 1;
+
+            .file-name {
+              font-size: 14px;
+              font-weight: 500;
+              margin-bottom: 2px;
+            }
+
+            .file-size {
+              font-size: 12px;
+              opacity: 0.7;
+            }
+          }
+        }
+
+        /* 语音消息 */
+        &.voice-bubble {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          min-width: 80px;
+
+          .voice-icon {
+            cursor: pointer;
+          }
+
+          .voice-duration {
+            font-size: 13px;
+          }
         }
       }
 
       .time {
-        font-size: 12px;
-        color: #999;
-        margin-top: 4px;
+        font-size: 11px;
+        color: var(--im-text-tertiary);
+        margin-top: 6px;
+        margin-left: 12px;
       }
     }
   }
 }
 
+/* ============ 聊天输入区 - 钉钉风格 ============ */
 .chat-input {
-  border-top: 1px solid #e6e6e6;
-  padding: 12px;
+  border-top: 1px solid var(--im-border-color);
+  padding: 12px 16px;
+  background: var(--im-bg-white);
 
   .toolbar {
     display: flex;
     align-items: center;
+    gap: 4px;
     margin-bottom: 12px;
 
     .tool-item {
-      margin-right: 12px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
       cursor: pointer;
-      color: #666;
+      color: var(--im-text-secondary);
+      transition: all 0.2s ease;
+      font-size: 18px;
 
       &:hover {
-        color: #1890ff;
+        color: var(--im-primary-color);
+        background: var(--im-primary-light);
+      }
+
+      &.active {
+        color: var(--im-primary-color);
+        background: var(--im-primary-light);
       }
     }
   }
 
   .input-area {
-    background-color: #fff;
-    border: 1px solid #e6e6e6;
-    border-radius: 4px;
-    padding: 8px;
-    min-height: 100px;
+    background-color: var(--im-bg-white);
+    border: 1px solid var(--im-border-color);
+    border-radius: 8px;
+    padding: 10px 12px;
+    min-height: 80px;
     max-height: 200px;
     overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.6;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus-within {
+      border-color: var(--im-primary-color);
+      box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+      outline: none;
+    }
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 2px;
+    }
   }
 
   .action {
     margin-top: 12px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
+
+    .input-tip {
+      font-size: 12px;
+      color: var(--im-text-tertiary);
+    }
 
     .send-btn {
-      margin-left: 12px;
+      min-width: 80px;
+      height: 36px;
+      padding: 0 20px;
+      background: var(--im-primary-color);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: var(--im-primary-hover);
+        box-shadow: 0 2px 8px rgba(22, 119, 255, 0.3);
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
+
+      &:disabled {
+        background: var(--im-bg-hover);
+        color: var(--im-text-disabled);
+        cursor: not-allowed;
+        box-shadow: none;
+      }
     }
   }
 }

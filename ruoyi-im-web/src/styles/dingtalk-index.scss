@@ -1,0 +1,408 @@
+/**
+ * 钉钉6.5.x风格样式主入口
+ * DingTalk 6.5.x Style Main Entry
+ *
+ * 使用方法：
+ * 1. 在 main.js 中导入：import '@/styles/dingtalk-index.scss'
+ * 2. 或在组件中单独导入需要的样式文件
+ */
+
+/* ============ 导入顺序很重要 ============ */
+
+/* 1. 钉钉主题变量和混合宏 */
+@import './dingtalk-theme.scss';
+
+/* 2. IM主题变量 (覆盖钉钉主题变量以保持兼容) */
+@import './im-theme.scss';
+
+/* 3. 钉钉导航样式 */
+@import './dingtalk-navigation.scss';
+
+/* 4. 钉钉消息样式 */
+@import './dingtalk-message.scss';
+
+/* 5. 钉钉组件样式 */
+@import './dingtalk-components.scss';
+
+/* ============ 全局样式覆盖 ============ */
+
+/* 确保使用钉钉颜色变量 */
+body {
+  background: var(--im-bg-base);
+  color: var(--im-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 链接样式 */
+a {
+  color: var(--im-primary-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--im-primary-hover);
+  }
+
+  &:active {
+    color: var(--im-primary-active);
+  }
+}
+
+/* Element Plus 组件样式覆盖 (钉钉风格) */
+.el-button {
+  &.el-button--primary {
+    background: var(--im-primary-color);
+    border-color: var(--im-primary-color);
+
+    &:hover {
+      background: var(--im-primary-hover);
+      border-color: var(--im-primary-hover);
+    }
+
+    &:active {
+      background: var(--im-primary-active);
+      border-color: var(--im-primary-active);
+    }
+  }
+
+  &.el-button--text {
+    color: var(--im-text-secondary);
+
+    &:hover {
+      color: var(--im-primary-color);
+      background: var(--im-primary-light);
+    }
+  }
+
+  /* 圆形按钮 */
+  &.is-circle {
+    border-radius: 50%;
+
+    &:hover {
+      background: var(--im-bg-hover);
+    }
+  }
+}
+
+/* 输入框样式 */
+.el-input {
+  .el-input__wrapper {
+    border-radius: var(--im-radius-md);
+    transition: all 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 0 0 1px var(--im-border-color) inset;
+    }
+
+    &.is-focus {
+      box-shadow: 0 0 0 1px var(--im-primary-color) inset;
+    }
+  }
+}
+
+.el-textarea {
+  .el-textarea__inner {
+    border-radius: var(--im-radius-md);
+
+    &:focus {
+      border-color: var(--im-primary-color);
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+    }
+  }
+}
+
+/* 徽章样式 */
+.el-badge {
+  .el-badge__content {
+    background: var(--im-error-color);
+    border: none;
+    font-weight: 600;
+  }
+
+  .el-badge__content.is-fixed {
+    transform: translateX(50%);
+  }
+}
+
+/* 头像样式 */
+.el-avatar {
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--im-primary-color) 0%, #0958d9 100%);
+}
+
+/* 下拉菜单样式 */
+.el-dropdown-menu {
+  border-radius: var(--im-radius-lg);
+  box-shadow: var(--im-shadow-lg);
+  border: 1px solid var(--im-border-color);
+
+  .el-dropdown-menu__item {
+    border-radius: var(--im-radius-sm);
+    margin: 4px 8px;
+    color: var(--im-text-primary);
+
+    &:hover {
+      background: var(--im-bg-hover);
+      color: var(--im-primary-color);
+    }
+
+    &.is-divided {
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: -1px;
+        height: 1px;
+        background: var(--im-border-color);
+      }
+    }
+  }
+}
+
+/* 对话框样式 */
+.el-dialog {
+  border-radius: var(--im-radius-xl);
+  box-shadow: var(--im-shadow-xl);
+
+  .el-dialog__header {
+    border-bottom: 1px solid var(--im-border-color);
+    padding: 16px 20px;
+
+    .el-dialog__title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--im-text-primary);
+    }
+  }
+
+  .el-dialog__body {
+    padding: 20px;
+  }
+
+  .el-dialog__footer {
+    border-top: 1px solid var(--im-border-color);
+    padding: 16px 20px;
+  }
+}
+
+/* 弹出层样式 */
+.el-popover {
+  border-radius: var(--im-radius-lg);
+  box-shadow: var(--im-shadow-lg);
+  border: 1px solid var(--im-border-color);
+}
+
+/* 提示框样式 */
+.el-message {
+  border-radius: var(--im-radius-lg);
+  box-shadow: var(--im-shadow-md);
+  padding: 12px 16px;
+
+  &.el-message--success {
+    background: #f6ffed;
+    border-color: #b7eb8f;
+
+    .el-message__content {
+      color: #52c41a;
+    }
+  }
+
+  &.el-message--warning {
+    background: #fffbe6;
+    border-color: #ffe58f;
+
+    .el-message__content {
+      color: #faad14;
+    }
+  }
+
+  &.el-message--error {
+    background: #fff2f0;
+    border-color: #ffccc7;
+
+    .el-message__content {
+      color: #ff4d4f;
+    }
+  }
+
+  &.el-message--info {
+    background: var(--im-primary-lighter);
+    border-color: var(--im-primary-light);
+
+    .el-message__content {
+      color: var(--im-primary-color);
+    }
+  }
+}
+
+/* 标签页样式 */
+.el-tabs {
+  .el-tabs__item {
+    color: var(--im-text-secondary);
+    font-weight: 500;
+
+    &:hover {
+      color: var(--im-primary-color);
+    }
+
+    &.is-active {
+      color: var(--im-primary-color);
+    }
+  }
+
+  .el-tabs__active-bar {
+    background: var(--im-primary-color);
+  }
+
+  .el-tabs__nav-wrap::after {
+    background: var(--im-border-color);
+  }
+}
+
+/* 工具提示样式 */
+.el-tooltip__popper {
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: var(--im-radius-sm);
+  padding: 8px 12px;
+
+  .el-tooltip__inner {
+    color: white;
+    font-size: 13px;
+  }
+}
+
+/* 加载样式 */
+.el-loading-mask {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(2px);
+
+  .el-loading-spinner {
+    .path {
+      stroke: var(--im-primary-color);
+    }
+
+    .el-loading-text {
+      color: var(--im-text-primary);
+      font-size: 14px;
+      margin-top: 12px;
+    }
+  }
+}
+
+/* 空状态样式 */
+.el-empty {
+  .el-empty__image {
+    svg {
+      fill: var(--im-text-disabled);
+    }
+  }
+
+  .el-empty__description {
+    color: var(--im-text-tertiary);
+    font-size: 14px;
+  }
+}
+
+/* 图片预览样式 */
+.el-image-viewer {
+  .el-image-viewer__mask {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  .el-image-viewer__btn {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+/* ============ 暗色主题支持 ============ */
+[data-theme='dark'] {
+  background: var(--im-bg-base);
+  color: var(--im-text-primary);
+
+  /* Element Plus 暗色主题覆盖 */
+  .el-button {
+    &.el-button--primary {
+      background: var(--im-primary-color);
+      border-color: var(--im-primary-color);
+    }
+
+    &.el-button--text {
+      color: var(--im-text-secondary);
+
+      &:hover {
+        color: var(--im-primary-color);
+        background: rgba(22, 119, 255, 0.1);
+      }
+    }
+  }
+
+  .el-input {
+    .el-input__wrapper {
+      background: var(--im-bg-white);
+      box-shadow: 0 0 0 1px var(--im-border-color) inset;
+
+      &:hover {
+        box-shadow: 0 0 0 1px var(--im-border-dark) inset;
+      }
+
+      &.is-focus {
+        box-shadow: 0 0 0 1px var(--im-primary-color) inset;
+      }
+    }
+  }
+
+  .el-dialog {
+    background: var(--im-bg-white);
+
+    .el-dialog__header {
+      border-bottom-color: var(--im-border-color);
+    }
+
+    .el-dialog__footer {
+      border-top-color: var(--im-border-color);
+    }
+  }
+}
+
+/* ============ 打印样式 ============ */
+@media print {
+  .im-side-nav,
+  .nav-sidebar,
+  .session-panel,
+  .input-area,
+  .chat-actions,
+  .message-actions {
+    display: none !important;
+  }
+
+  .message-list {
+    overflow: visible !important;
+  }
+
+  .message-bubble {
+    page-break-inside: avoid;
+  }
+}
+
+/* ============ 减少动画偏好 ============ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
