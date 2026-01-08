@@ -29,29 +29,53 @@ public class ImAuditLog implements Serializable {
     @TableField("user_id")
     private Long userId;
 
-    /** 操作类型（LOGIN登录 LOGOUT登出 SEND_MESSAGE发送消息 DELETE_MESSAGE撤回消息 CREATE_GROUP创建群组 JOIN_GROUP加入群组 LEAVE_GROUP退出群组 ADD_FRIEND添加好友 DELETE_FRIEND删除好友） */
+    /** 操作用户名 */
+    @TableField("user_name")
+    private String userName;
+
+    /** 模块名称 */
+    @TableField("module")
+    private String module;
+
+    /** 操作类型 */
     @TableField("operation_type")
     private String operationType;
 
-    /** 目标类型（USER MESSAGE GROUP CONVERSATION FRIEND） */
-    @TableField("target_type")
-    private String targetType;
+    /** 操作描述 */
+    @TableField("description")
+    private String description;
 
-    /** 目标ID */
-    @TableField("target_id")
-    private Long targetId;
+    /** 请求方法（GET POST PUT DELETE） */
+    @TableField("request_method")
+    private String requestMethod;
 
-    /** 操作结果（SUCCESS成功 FAILED失败） */
-    @TableField("operation_result")
-    private String operationResult;
+    /** 请求URL */
+    @TableField("request_url")
+    private String requestUrl;
+
+    /** 请求参数 */
+    @TableField("request_params")
+    private String requestParams;
+
+    /** 响应数据 */
+    @TableField("response_data")
+    private String responseData;
+
+    /** 操作状态（0失败 1成功） */
+    @TableField("status")
+    private String status;
 
     /** 错误信息 */
-    @TableField("error_message")
-    private String errorMessage;
+    @TableField("error_msg")
+    private String errorMsg;
+
+    /** 执行时长（毫秒） */
+    @TableField("execution_time")
+    private Long executionTime;
 
     /** 客户端IP */
-    @TableField("ip_address")
-    private String ipAddress;
+    @TableField("client_ip")
+    private String clientIp;
 
     /** 用户代理 */
     @TableField("user_agent")
@@ -59,5 +83,6 @@ public class ImAuditLog implements Serializable {
 
     /** 操作时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createTime;
+    @TableField("operation_time")
+    private LocalDateTime operationTime;
 }

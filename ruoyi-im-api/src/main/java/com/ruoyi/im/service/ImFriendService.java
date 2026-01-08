@@ -108,4 +108,41 @@ public interface ImFriendService {
      * @return 用户列表
      */
     List<com.ruoyi.im.vo.user.ImUserVO> searchUsers(String keyword, Long userId);
+
+    /**
+     * 获取用户的所有好友分组名称
+     *
+     * @param userId 用户ID
+     * @return 分组名称列表
+     */
+    List<String> getGroupNames(Long userId);
+
+    /**
+     * 重命名好友分组
+     * 将指定旧分组名称的所有好友更新为新分组名称
+     *
+     * @param userId 用户ID
+     * @param oldName 旧分组名称
+     * @param newName 新分组名称
+     */
+    void renameGroup(Long userId, String oldName, String newName);
+
+    /**
+     * 删除好友分组
+     * 将指定分组名称的所有好友的分组名清空（移至默认分组）
+     *
+     * @param userId 用户ID
+     * @param groupName 分组名称
+     */
+    void deleteGroup(Long userId, String groupName);
+
+    /**
+     * 批量移动好友到分组
+     * 将指定的好友移动到指定分组
+     *
+     * @param userId 用户ID
+     * @param friendIds 好友关系ID列表
+     * @param groupName 目标分组名称，为空则移至默认分组
+     */
+    void moveFriendsToGroup(Long userId, List<Long> friendIds, String groupName);
 }

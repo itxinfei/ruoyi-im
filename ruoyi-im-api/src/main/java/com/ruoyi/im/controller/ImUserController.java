@@ -1,15 +1,21 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
+import com.ruoyi.im.service.ImFriendService;
 import com.ruoyi.im.service.ImUserService;
+import com.ruoyi.im.vo.contact.ImFriendVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户控制器
@@ -24,6 +30,84 @@ public class ImUserController {
 
     @Autowired
     private ImUserService imUserService;
+
+    @Autowired
+    private ImFriendService imFriendService;
+
+    /**
+     * 创建用户
+     * 管理员创建新用户
+     *
+     * @param request 用户创建请求参数
+     * @return 创建结果，包含新用户ID
+     * @apiNote 使用 @Valid 注解进行参数校验；创建成功后返回用户ID
+     * @throws BusinessException 当用户名已存在时抛出业务异常
+     */
+    @PostMapping
+    public Result<Long> create(@Valid @RequestBody ImRegisterRequest request) {
+        Long userId = imUserService.createUser(request);
+        return Result.success("创建成功", userId);
+    }
+
+    /**
+     * 删除用户
+     * 管理员删除指定用户
+     *
+     * @param id 用户ID
+     * @return 删除结果
+     * @apiNote 删除用户会同时删除其好友关系、会话等关联数据
+     * @throws BusinessException 当用户不存在时抛出业务异常
+     */
+    @DeleteMapping("/{id}")
+    public Result<Void> delete(@PathVariable Long id) {
+        imUserService.deleteUser(id);
+        return Result.success("删除成功");
+    }
+
+    /**
+     * 搜索用户
+     * 根据关键词搜索用户（用户名或昵称）
+     *
+     * @param keyword 搜索关键词
+     * @return 用户列表
+     * @apiNote 支持模糊搜索，匹配用户名或昵称
+     */
+    @GetMapping("/search")
+    public Result<List<ImUserVO>> search(@RequestParam String keyword) {
+        List<ImUserVO> list = imUserService.searchUsers(keyword);
+        return Result.success(list);
+    }
+
+    /**
+     * 批量获取用户信息
+     * 根据用户ID列表批量获取用户信息
+     *
+     * @param ids 用户ID列表，逗号分隔
+     * @return 用户列表
+     * @apiNote 用于批量查询用户基本信息，如聊天中的群成员信息
+     */
+    @GetMapping("/batch")
+    public Result<List<ImUserVO>> getBatch(@RequestParam String ids) {
+        List<Long> idList = java.util.Arrays.stream(ids.split(","))
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+        List<ImUserVO> list = imUserService.getUsersByIds(idList);
+        return Result.success(list);
+    }
+
+    /**
+     * 获取用户的好友列表
+     * 查询指定用户的所有好友
+     *
+     * @param id 用户ID
+     * @return 好友列表
+     * @apiNote 返回的好友信息包含好友用户信息，按昵称排序
+     */
+    @GetMapping("/friends/{id}")
+    public Result<List<ImFriendVO>> getUserFriends(@PathVariable Long id) {
+        List<ImFriendVO> list = imFriendService.getFriendList(id);
+        return Result.success(list);
+    }
 
     /**
      * 获取当前用户信息

@@ -1596,7 +1596,7 @@ import {
   listContact,
   addContact,
   searchContacts,
-  getFriendRequests,
+  getReceivedFriendRequests,
   handleFriendRequest as apiHandleFriendRequest,
 } from '@/api/im/contact'
 
@@ -2038,7 +2038,7 @@ const loadFriends = async () => {
 // 加载好友请求
 const loadFriendRequests = async () => {
   try {
-    const res = await getFriendRequests()
+    const res = await getReceivedFriendRequests()
     const dataRows = res.rows || res.data?.rows || res.data || []
     friendRequests.value = Array.isArray(dataRows) ? dataRows : []
   } catch (error) {

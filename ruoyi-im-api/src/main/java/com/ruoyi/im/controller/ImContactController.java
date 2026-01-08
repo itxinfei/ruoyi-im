@@ -240,4 +240,122 @@ public class ImContactController {
         imFriendService.blockFriend(id, blocked, userId);
         return Result.success(blocked ? "已拉黑" : "已解除拉黑");
     }
+
+    /**
+     * 获取所有好友分组名称列表
+     * 查询当前用户使用的所有好友分组
+     *
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 分组名称列表
+     * @apiNote 分组是从好友关系中动态提取的，返回所有使用过的分组名称
+     */
+    @GetMapping("/group/list")
+    public Result<java.util.List<String>> getGroupList(@RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        java.util.List<String> list = imFriendService.getGroupNames(userId);
+        return Result.success(list);
+    }
+
+    /**
+     * 重命名好友分组
+     * 将指定的分组名称重命名为新名称
+     *
+     * @param oldName 旧分组名称（URL编码）
+     * @param request 重命名请求，包含新分组名称
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 操作结果
+     * @apiNote 此操作会更新所有使用该分组的好友关系
+     * @throws BusinessException 当分组不存在时抛出业务异常
+     */
+    @PutMapping("/group/{oldName}")
+    public Result<Void> renameGroup(@PathVariable String oldName,
+                                     @RequestBody GroupRenameRequest request,
+                                     @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        imFriendService.renameGroup(userId, java.net.URLDecoder.decode(oldName, java.nio.charset.StandardCharsets.UTF_8.name()), request.getNewName());
+        return Result.success("重命名成功");
+    }
+
+    /**
+     * 删除好友分组
+     * 删除指定分组，将该分组下的所有好友移至"默认分组"（清空分组名）
+     *
+     * @param groupName 分组名称（URL编码）
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 操作结果
+     * @apiNote 删除分组不会删除好友，只是清空好友的分组信息
+     * @throws BusinessException 当分组不存在时抛出业务异常
+     */
+    @DeleteMapping("/group/{groupName}")
+    public Result<Void> deleteGroup(@PathVariable String groupName,
+                                     @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        imFriendService.deleteGroup(userId, java.net.URLDecoder.decode(groupName, java.nio.charset.StandardCharsets.UTF_8.name()));
+        return Result.success("删除成功");
+    }
+
+    /**
+     * 移动好友到分组
+     * 批量移动好友到指定分组
+     *
+     * @param request 移动请求，包含好友ID列表和目标分组ID（分组名称）
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 操作结果
+     * @apiNote 分组ID实际是分组名称；如果分组名称为空，则移至默认分组
+     * @throws BusinessException 当好友不存在时抛出业务异常
+     */
+    @PutMapping("/group/move")
+    public Result<Void> moveFriendToGroup(@RequestBody MoveToGroupRequest request,
+                                           @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        imFriendService.moveFriendsToGroup(userId, request.getFriendIds(), request.getGroupName());
+        return Result.success("移动成功");
+    }
+
+    /**
+     * 重命名分组请求体
+     */
+    public static class GroupRenameRequest {
+        private String newName;
+
+        public String getNewName() {
+            return newName;
+        }
+
+        public void setNewName(String newName) {
+            this.newName = newName;
+        }
+    }
+
+    /**
+     * 移动到分组请求体
+     */
+    public static class MoveToGroupRequest {
+        private java.util.List<Long> friendIds;
+        private String groupName;
+
+        public java.util.List<Long> getFriendIds() {
+            return friendIds;
+        }
+
+        public void setFriendIds(java.util.List<Long> friendIds) {
+            this.friendIds = friendIds;
+        }
+
+        public String getGroupName() {
+            return groupName;
+        }
+
+        public void setGroupName(String groupName) {
+            this.groupName = groupName;
+        }
+    }
 }

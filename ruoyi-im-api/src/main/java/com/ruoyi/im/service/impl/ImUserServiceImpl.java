@@ -361,4 +361,42 @@ public class ImUserServiceImpl implements ImUserService {
 
         return avatarUrl;
     }
+
+    @Override
+    public List<ImUserVO> searchUsers(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<ImUser> users = imUserMapper.selectImUserByKeyword(keyword.trim());
+        List<ImUserVO> voList = new ArrayList<>();
+
+        for (ImUser user : users) {
+            ImUserVO vo = new ImUserVO();
+            BeanUtils.copyProperties(user, vo);
+            vo.setOnline(imRedisUtil.isUserOnline(user.getId().toString()));
+            voList.add(vo);
+        }
+
+        return voList;
+    }
+
+    @Override
+    public List<ImUserVO> getUsersByIds(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<ImUser> users = imUserMapper.selectImUserListByIds(userIds);
+        List<ImUserVO> voList = new ArrayList<>();
+
+        for (ImUser user : users) {
+            ImUserVO vo = new ImUserVO();
+            BeanUtils.copyProperties(user, vo);
+            vo.setOnline(imRedisUtil.isUserOnline(user.getId().toString()));
+            voList.add(vo);
+        }
+
+        return voList;
+    }
 }

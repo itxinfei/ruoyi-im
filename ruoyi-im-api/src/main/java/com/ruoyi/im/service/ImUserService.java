@@ -144,4 +144,22 @@ public interface ImUserService {
      * @return 头像URL
      */
     String uploadAvatar(Long userId, MultipartFile file);
+
+    /**
+     * 搜索用户
+     * 根据关键词搜索用户（用户名或昵称）
+     *
+     * @param keyword 搜索关键词
+     * @return 用户列表
+     */
+    List<ImUserVO> searchUsers(String keyword);
+
+    /**
+     * 批量获取用户信息
+     * 根据用户ID列表批量获取用户信息
+     *
+     * @param userIds 用户ID列表
+     * @return 用户列表
+     */
+    List<ImUserVO> getUsersByIds(List<Long> userIds);
 }

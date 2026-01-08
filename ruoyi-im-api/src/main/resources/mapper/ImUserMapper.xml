@@ -13,8 +13,7 @@
         <result property="status" column="status"/>
         <result property="gender" column="gender"/>
         <result property="signature" column="signature"/>
-        <result property="lastLoginTime" column="last_login_time"/>
-        <result property="lastLoginIp" column="last_login_ip"/>
+        <result property="lastOnlineTime" column="last_online_time"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
@@ -55,8 +54,7 @@
             <if test="status != null">status,</if>
             <if test="gender != null">gender,</if>
             <if test="signature != null">signature,</if>
-            <if test="lastLoginTime != null">last_login_time,</if>
-            <if test="lastLoginIp != null">last_login_ip,</if>
+            <if test="lastOnlineTime != null">last_online_time,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
         </trim>
@@ -70,8 +68,7 @@
             <if test="status != null">#{status},</if>
             <if test="gender != null">#{gender},</if>
             <if test="signature != null">#{signature},</if>
-            <if test="lastLoginTime != null">#{lastLoginTime},</if>
-            <if test="lastLoginIp != null">#{lastLoginIp},</if>
+            <if test="lastOnlineTime != null">#{lastOnlineTime},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
@@ -116,9 +113,9 @@
     </select>
     
     <select id="selectImUserByEmail" parameterType="String" resultMap="ImUserResult">
-        select id, username, password, nickname, email, 
+        select id, username, password, nickname, email,
                mobile, avatar, status, gender, signature,
-               last_login_time, last_login_ip,
+               last_online_time,
                create_time, update_time
         from im_user
         where email = #{email}
@@ -126,11 +123,11 @@
     
     <!-- 批量插入用户 - 性能优化 -->
     <insert id="batchInsertImUser" parameterType="java.util.List">
-        insert into im_user (username, password, nickname, email, mobile, avatar, status, gender, signature, last_login_time, last_login_ip, create_time, update_time)
+        insert into im_user (username, password, nickname, email, mobile, avatar, status, gender, signature, last_online_time, create_time, update_time)
         values
         <foreach collection="list" item="user" separator=",">
-            (#{user.username}, #{user.password}, #{user.nickname}, #{user.email}, #{user.mobile}, 
-             #{user.avatar}, #{user.status}, #{user.gender}, #{user.signature}, #{user.lastLoginTime}, #{user.lastLoginIp},
+            (#{user.username}, #{user.password}, #{user.nickname}, #{user.email}, #{user.mobile},
+             #{user.avatar}, #{user.status}, #{user.gender}, #{user.signature}, #{user.lastOnlineTime},
              #{user.createTime}, #{user.updateTime})
         </foreach>
     </insert>
@@ -198,7 +195,7 @@
     <!-- 根据关键词搜索用户 -->
     <select id="selectImUserByKeyword" parameterType="String" resultMap="ImUserResult">
         select id, username, password, nickname, email, mobile, avatar, status,
-               gender, signature, last_login_time, last_login_ip, create_time, update_time
+               gender, signature, last_online_time, create_time, update_time
         from im_user
         <where>
             <if test="keyword != null and keyword != ''">

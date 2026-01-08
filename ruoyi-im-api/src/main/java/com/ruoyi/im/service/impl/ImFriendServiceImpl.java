@@ -373,4 +373,86 @@ public class ImFriendServiceImpl implements ImFriendService {
         request.setPeerUserId(peerId);
         imConversationService.createPrivateConversation(userId, request);
     }
+
+    @Override
+    public List<String> getGroupNames(Long userId) {
+        ImFriend query = new ImFriend();
+        query.setUserId(userId);
+        List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
+
+        return friendList.stream()
+                .map(ImFriend::getGroupName)
+                .filter(name -> name != null && !name.isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void renameGroup(Long userId, String oldName, String newName) {
+        if (oldName == null || oldName.isEmpty()) {
+            throw new BusinessException("分组名称不能为空");
+        }
+        if (newName == null || newName.isEmpty()) {
+            throw new BusinessException("新分组名称不能为空");
+        }
+
+        ImFriend query = new ImFriend();
+        query.setUserId(userId);
+        query.setGroupName(oldName);
+        List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
+
+        if (friendList.isEmpty()) {
+            throw new BusinessException("分组不存在");
+        }
+
+        for (ImFriend friend : friendList) {
+            friend.setGroupName(newName);
+            friend.setUpdateTime(LocalDateTime.now());
+            imFriendMapper.updateImFriend(friend);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteGroup(Long userId, String groupName) {
+        if (groupName == null || groupName.isEmpty()) {
+            throw new BusinessException("分组名称不能为空");
+        }
+
+        ImFriend query = new ImFriend();
+        query.setUserId(userId);
+        query.setGroupName(groupName);
+        List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
+
+        for (ImFriend friend : friendList) {
+            friend.setGroupName(null);
+            friend.setUpdateTime(LocalDateTime.now());
+            imFriendMapper.updateImFriend(friend);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void moveFriendsToGroup(Long userId, List<Long> friendIds, String groupName) {
+        if (friendIds == null || friendIds.isEmpty()) {
+            throw new BusinessException("好友ID列表不能为空");
+        }
+
+        for (Long friendId : friendIds) {
+            ImFriend friend = imFriendMapper.selectImFriendById(friendId);
+            if (friend == null) {
+                continue;
+            }
+
+            // 只能修改自己的好友关系
+            if (!friend.getUserId().equals(userId)) {
+                continue;
+            }
+
+            friend.setGroupName(groupName);
+            friend.setUpdateTime(LocalDateTime.now());
+            imFriendMapper.updateImFriend(friend);
+        }
+    }
 }
