@@ -8,39 +8,39 @@
   >
     <el-form :model="settingsForm" label-width="120px">
       <el-divider content-position="left">通知类型开关</el-divider>
-      
+
       <el-form-item label="系统通知">
         <el-switch v-model="settingsForm.systemEnabled" />
         <span class="setting-desc">接收系统相关通知</span>
       </el-form-item>
-      
+
       <el-form-item label="审批通知">
         <el-switch v-model="settingsForm.approvalEnabled" />
         <span class="setting-desc">接收审批流程相关通知</span>
       </el-form-item>
-      
+
       <el-form-item label="消息通知">
         <el-switch v-model="settingsForm.messageEnabled" />
         <span class="setting-desc">接收聊天消息通知</span>
       </el-form-item>
-      
+
       <el-form-item label="DING通知">
         <el-switch v-model="settingsForm.dingEnabled" />
         <span class="setting-desc">接收DING重要通知</span>
       </el-form-item>
-      
+
       <el-divider content-position="left">推送渠道配置</el-divider>
-      
+
       <el-form-item label="桌面通知">
         <el-switch v-model="settingsForm.desktopEnabled" />
         <span class="setting-desc">在桌面显示通知弹窗</span>
       </el-form-item>
-      
+
       <el-form-item label="声音提醒">
         <el-switch v-model="settingsForm.soundEnabled" />
         <span class="setting-desc">接收通知时播放提示音</span>
       </el-form-item>
-      
+
       <el-form-item label="免打扰时段">
         <el-time-picker
           v-model="settingsForm.doNotDisturbStart"
@@ -59,7 +59,7 @@
         />
         <span class="setting-desc">在此时间段内不接收通知</span>
       </el-form-item>
-      
+
       <el-form-item label="免打扰星期">
         <el-checkbox-group v-model="settingsForm.doNotDisturbDays">
           <el-checkbox :label="0">周日</el-checkbox>
@@ -72,10 +72,10 @@
         </el-checkbox-group>
       </el-form-item>
     </el-form>
-    
+
     <template #footer>
       <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" @click="handleSave" :loading="saving">保存</el-button>
+      <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
     </template>
   </el-dialog>
 </template>

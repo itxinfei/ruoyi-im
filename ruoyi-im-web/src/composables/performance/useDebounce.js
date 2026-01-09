@@ -210,7 +210,7 @@ export class DebounceManager {
    * 清除所有防抖函数
    */
   clearAll() {
-    this.debounces.forEach((debounce) => {
+    this.debounces.forEach(debounce => {
       if (debounce.timer) {
         clearTimeout(debounce.timer)
       }

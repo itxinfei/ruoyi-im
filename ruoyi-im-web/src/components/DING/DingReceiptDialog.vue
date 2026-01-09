@@ -39,21 +39,14 @@
     </el-tabs>
 
     <div v-loading="loading" class="receipt-list">
-      <div
-        v-for="item in filteredReceipts"
-        :key="item.userId"
-        class="receipt-item"
-      >
+      <div v-for="item in filteredReceipts" :key="item.userId" class="receipt-item">
         <el-avatar :size="40" :src="item.avatar">
           {{ item.name?.charAt(0) }}
         </el-avatar>
         <div class="receipt-info">
           <div class="receipt-name">{{ item.name }}</div>
           <div class="receipt-status">
-            <el-tag
-              :type="item.isRead ? 'success' : 'danger'"
-              size="small"
-            >
+            <el-tag :type="item.isRead ? 'success' : 'danger'" size="small">
               {{ item.isRead ? '已读' : '未读' }}
             </el-tag>
             <span v-if="item.isRead" class="read-time">
@@ -67,7 +60,7 @@
 
     <template #footer>
       <el-button @click="handleClose">关闭</el-button>
-      <el-button type="primary" @click="handleRemind" :disabled="unreadCount === 0">
+      <el-button type="primary" :disabled="unreadCount === 0" @click="handleRemind">
         提醒未读人员
       </el-button>
     </template>
@@ -143,18 +136,14 @@ const loadReceiptList = async () => {
 
 const handleRemind = async () => {
   try {
-    await ElMessageBox.confirm(
-      `确定要提醒${unreadCount.value}位未读人员吗？`,
-      '提醒确认',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    )
+    await ElMessageBox.confirm(`确定要提醒${unreadCount.value}位未读人员吗？`, '提醒确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
 
     const unreadUsers = receiptList.value.filter(item => !item.isRead).map(item => item.userId)
-    
+
     const response = await fetch(`/api/im/ding/${props.dingId}/remind`, {
       method: 'POST',
       headers: {
@@ -164,7 +153,7 @@ const handleRemind = async () => {
       body: JSON.stringify({ userIds: unreadUsers }),
     })
     const data = await response.json()
-    
+
     if (data.code === 200) {
       ElMessage.success('提醒发送成功')
     } else {

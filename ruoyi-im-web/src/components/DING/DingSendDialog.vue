@@ -6,7 +6,7 @@
     :close-on-click-modal="false"
     @close="handleClose"
   >
-    <el-form :model="dingForm" :rules="formRules" ref="formRef" label-width="100px">
+    <el-form ref="formRef" :model="dingForm" :rules="formRules" label-width="100px">
       <el-form-item label="接收对象" prop="receivers">
         <el-select
           v-model="dingForm.receivers"
@@ -123,7 +123,7 @@
 
     <template #footer>
       <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" @click="handleSend" :loading="sending">
+      <el-button type="primary" :loading="sending" @click="handleSend">
         {{ dingForm.immediate ? '立即发送' : '定时发送' }}
       </el-button>
     </template>

@@ -51,7 +51,7 @@
               </span>
               <span v-if="contact.starred" class="star-icon">★</span>
             </div>
-            <div class="contact-signature" v-if="contact.signature">
+            <div v-if="contact.signature" class="contact-signature">
               {{ contact.signature }}
             </div>
             <div class="contact-status">
@@ -70,10 +70,18 @@
       <template v-if="selectedContact">
         <div class="detail-header">
           <el-avatar :size="80" :src="selectedContact.avatar || '/profile/avatar.png'">
-            {{ (selectedContact.name || selectedContact.nickname || selectedContact.username)?.charAt(0) || '用' }}
+            {{
+              (
+                selectedContact.name ||
+                selectedContact.nickname ||
+                selectedContact.username
+              )?.charAt(0) || '用'
+            }}
           </el-avatar>
           <div class="header-info">
-            <h2>{{ selectedContact.name || selectedContact.nickname || selectedContact.username }}</h2>
+            <h2>
+              {{ selectedContact.name || selectedContact.nickname || selectedContact.username }}
+            </h2>
             <p class="status" :class="{ online: selectedContact.online }">
               {{ selectedContact.online ? '在线' : '离线' }}
             </p>
@@ -95,7 +103,9 @@
             <div class="info-grid">
               <div class="info-item">
                 <span class="label">昵称</span>
-                <span class="value">{{ selectedContact.nickname || selectedContact.name || '-' }}</span>
+                <span class="value">{{
+                  selectedContact.nickname || selectedContact.name || '-'
+                }}</span>
               </div>
               <div class="info-item">
                 <span class="label">用户名</span>
@@ -112,7 +122,7 @@
             </div>
           </div>
 
-          <div class="info-section" v-if="selectedContact.signature">
+          <div v-if="selectedContact.signature" class="info-section">
             <h4>个性签名</h4>
             <p class="signature">{{ selectedContact.signature }}</p>
           </div>

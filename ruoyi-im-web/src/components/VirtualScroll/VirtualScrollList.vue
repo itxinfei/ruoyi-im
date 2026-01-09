@@ -5,18 +5,12 @@
     :style="containerStyle"
     @scroll="handleScroll"
   >
-    <div
-      class="virtual-scroll-phantom"
-      :style="{ height: `${totalHeight}px` }"
-    ></div>
-    <div
-      class="virtual-scroll-content"
-      :style="{ transform: `translateY(${offsetY}px)` }"
-    >
+    <div class="virtual-scroll-phantom" :style="{ height: `${totalHeight}px` }"></div>
+    <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)` }">
       <slot
-        name="item"
         v-for="item in visibleData"
         :key="item[keyProp] || item.index"
+        name="item"
         :item="item"
         :index="item.index"
       ></slot>
@@ -39,48 +33,48 @@ const props = defineProps({
   // 数据源
   data: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   // 每项高度（固定高度模式）
   itemHeight: {
     type: Number,
-    default: 50
+    default: 50,
   },
   // 高度计算函数（动态高度模式）
   itemHeightGetter: {
     type: Function,
-    default: null
+    default: null,
   },
   // 容器高度
   height: {
     type: [String, Number],
-    default: '100%'
+    default: '100%',
   },
   // 缓冲区数量（上下各渲染多少条）
   bufferCount: {
     type: Number,
-    default: 5
+    default: 5,
   },
   // 唯一标识字段名
   keyProp: {
     type: String,
-    default: 'id'
+    default: 'id',
   },
   // 是否加载更多
   hasMore: {
     type: Boolean,
-    default: true
+    default: true,
   },
   // 加载状态
   loading: {
     type: Boolean,
-    default: false
+    default: false,
   },
   // 触底距离（像素）
   threshold: {
     type: Number,
-    default: 100
-  }
+    default: 100,
+  },
 })
 
 const emit = defineEmits(['load-more'])
@@ -104,12 +98,12 @@ const initPositions = () => {
     index,
     height: props.itemHeight,
     top: index * props.itemHeight,
-    bottom: (index + 1) * props.itemHeight
+    bottom: (index + 1) * props.itemHeight,
   }))
 }
 
 // 更新指定项的位置信息
-const updatePositions = (index) => {
+const updatePositions = index => {
   const item = positions.value[index]
   if (!item) return
 
@@ -205,12 +199,12 @@ const visibleData = computed(() => {
 
   return props.data.slice(startIndex, endIndex + 1).map((item, i) => ({
     ...item,
-    index: startIndex + i
+    index: startIndex + i,
   }))
 })
 
 // 处理滚动事件（防抖）
-const handleScroll = useDebounceFn((e) => {
+const handleScroll = useDebounceFn(e => {
   const target = e.target
   scrollTop.value = target.scrollTop
   containerHeight.value = target.clientHeight
@@ -232,12 +226,16 @@ const updateContainerHeight = () => {
 }
 
 // 监听数据变化
-watch(() => props.data, () => {
-  initPositions()
-  nextTick(() => {
-    updateAllPositions()
-  })
-}, { immediate: true })
+watch(
+  () => props.data,
+  () => {
+    initPositions()
+    nextTick(() => {
+      updateAllPositions()
+    })
+  },
+  { immediate: true }
+)
 
 // 监听窗口大小变化
 const handleResize = useDebounceFn(() => {
@@ -268,7 +266,7 @@ defineExpose({
       containerRef.value.scrollTop = containerRef.value.scrollHeight
     }
   },
-  getScrollTop: () => scrollTop.value
+  getScrollTop: () => scrollTop.value,
 })
 </script>
 

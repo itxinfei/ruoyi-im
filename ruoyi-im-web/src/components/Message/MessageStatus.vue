@@ -20,9 +20,7 @@
       <el-icon class="status-icon is-read">
         <CircleCheck />
       </el-icon>
-      <span class="status-text" v-if="showReadCount">
-        {{ readCount }}人已读
-      </span>
+      <span v-if="showReadCount" class="status-text"> {{ readCount }}人已读 </span>
     </template>
 
     <!-- 发送失败状态 -->
@@ -31,12 +29,7 @@
         <CircleClose />
       </el-icon>
       <span class="status-text">发送失败</span>
-      <el-button
-        type="text"
-        size="small"
-        class="retry-btn"
-        @click="$emit('retry')"
-      >
+      <el-button type="text" size="small" class="retry-btn" @click="$emit('retry')">
         重试
       </el-button>
     </template>
@@ -61,23 +54,23 @@ const props = defineProps({
   // 消息状态: sending, sent, read, failed, recalled, edited
   status: {
     type: String,
-    default: 'sent'
+    default: 'sent',
   },
   // 已读人数
   readCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
   // 是否显示已读人数
   showReadCount: {
     type: Boolean,
-    default: true
+    default: true,
   },
   // 总人数（用于计算已读比例）
   totalCount: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 })
 
 defineEmits(['retry'])

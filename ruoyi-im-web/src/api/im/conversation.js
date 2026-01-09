@@ -171,7 +171,7 @@ export const list = listConversation
 export const get = getConversation
 export const create = createConversation
 export const update = updateConversation
-export const del = deleteConversation  // delete 是保留关键字，使用 del
+export const del = deleteConversation // delete 是保留关键字，使用 del
 export const setPinned = setConversationPinned
 export const setMuted = setConversationMuted
 export const search = searchConversation
@@ -187,7 +187,7 @@ export default {
   createConversation,
   updateConversation,
   deleteConversation,
-  del: deleteConversation,  // delete 别名
+  del: deleteConversation, // delete 别名
   setConversationPinned,
   setConversationMuted,
   searchConversation,

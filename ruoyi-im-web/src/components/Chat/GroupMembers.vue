@@ -3,12 +3,7 @@
     <!-- 搜索栏 -->
     <div class="dt-group-members__search">
       <el-icon class="search-icon"><Search /></el-icon>
-      <input
-        v-model="searchKeyword"
-        type="text"
-        placeholder="搜索群成员"
-        @input="handleSearch"
-      />
+      <input v-model="searchKeyword" type="text" placeholder="搜索群成员" @input="handleSearch" />
     </div>
 
     <!-- 成员统计 -->
@@ -46,7 +41,11 @@
           </div>
           <div class="member-desc">{{ owner.signature || '这个人很懒，什么都没留下' }}</div>
         </div>
-        <el-icon v-if="owner.id === currentUserId" class="more-icon" @click.stop="handleShowMenu(owner)">
+        <el-icon
+          v-if="owner.id === currentUserId"
+          class="more-icon"
+          @click.stop="handleShowMenu(owner)"
+        >
           <MoreFilled />
         </el-icon>
       </div>
@@ -104,7 +103,11 @@
             </div>
             <div class="member-desc">{{ member.signature || '这个人很懒，什么都没留下' }}</div>
           </div>
-          <el-icon v-if="canManage(member.id)" class="more-icon" @click.stop="handleShowMenu(member)">
+          <el-icon
+            v-if="canManage(member.id)"
+            class="more-icon"
+            @click.stop="handleShowMenu(member)"
+          >
             <MoreFilled />
           </el-icon>
         </div>
@@ -135,7 +138,9 @@
         <el-dropdown-menu>
           <el-dropdown-item command="profile">查看资料</el-dropdown-item>
           <el-dropdown-item command="chat">私聊</el-dropdown-item>
-          <el-dropdown-item v-if="canManageSelected" command="setAdmin">设为管理员</el-dropdown-item>
+          <el-dropdown-item v-if="canManageSelected" command="setAdmin"
+            >设为管理员</el-dropdown-item
+          >
           <el-dropdown-item v-if="canManageSelected" command="remove">移出群聊</el-dropdown-item>
         </el-dropdown-menu>
       </template>
@@ -151,30 +156,28 @@ import { Search, MoreFilled, Plus, LogOut } from '@element-plus/icons-vue'
 const props = defineProps({
   session: {
     type: Object,
-    default: () => ({})
+    default: () => ({}),
   },
   currentUserId: {
     type: [String, Number],
-    default: null
+    default: null,
   },
   isOwner: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isAdmin: {
     type: Boolean,
-    default: false
+    default: false,
   },
   members: {
     type: Array,
-    default: () => []
-  }
+    default: () => [],
+  },
 })
 
 // Emits
-const emit = defineEmits([
-  'member-click', 'add-member', 'exit-group', 'set-admin', 'remove-member'
-])
+const emit = defineEmits(['member-click', 'add-member', 'exit-group', 'set-admin', 'remove-member'])
 
 // State
 const searchKeyword = ref('')
@@ -184,10 +187,31 @@ const selectedMember = ref(null)
 
 // 模拟成员数据
 const mockMembers = ref([
-  { id: 1, nickname: '张三', avatar: '', role: 'owner', onlineStatus: 'online', signature: '努力工作' },
-  { id: 2, nickname: '李四', avatar: '', role: 'admin', onlineStatus: 'online', signature: '加油加油' },
+  {
+    id: 1,
+    nickname: '张三',
+    avatar: '',
+    role: 'owner',
+    onlineStatus: 'online',
+    signature: '努力工作',
+  },
+  {
+    id: 2,
+    nickname: '李四',
+    avatar: '',
+    role: 'admin',
+    onlineStatus: 'online',
+    signature: '加油加油',
+  },
   { id: 3, nickname: '王五', avatar: '', role: 'member', onlineStatus: 'offline', signature: '' },
-  { id: 4, nickname: '赵六', avatar: '', role: 'member', onlineStatus: 'away', signature: '忙碌中' },
+  {
+    id: 4,
+    nickname: '赵六',
+    avatar: '',
+    role: 'member',
+    onlineStatus: 'away',
+    signature: '忙碌中',
+  },
   { id: 5, nickname: '钱七', avatar: '', role: 'member', onlineStatus: 'online', signature: '' },
 ])
 
@@ -199,9 +223,7 @@ const allMembers = computed(() => {
 const filteredMembers = computed(() => {
   if (!searchKeyword.value) return allMembers.value
   const keyword = searchKeyword.value.toLowerCase()
-  return allMembers.value.filter(m =>
-    m.nickname?.toLowerCase().includes(keyword)
-  )
+  return allMembers.value.filter(m => m.nickname?.toLowerCase().includes(keyword))
 })
 
 const owner = computed(() => {
@@ -230,7 +252,7 @@ const handleSearch = () => {
   // 搜索已通过computed自动处理
 }
 
-const handleMemberClick = (member) => {
+const handleMemberClick = member => {
   emit('member-click', member)
 }
 
@@ -240,7 +262,7 @@ const handleShowMenu = (member, event) => {
   contextMenuRef.value?.handleOpen()
 }
 
-const handleMenuCommand = (command) => {
+const handleMenuCommand = command => {
   if (!selectedMember.value) return
 
   switch (command) {
@@ -259,7 +281,7 @@ const handleMenuCommand = (command) => {
   }
 }
 
-const canManage = (memberId) => {
+const canManage = memberId => {
   if (props.isOwner) return true
   if (props.isAdmin && memberId !== props.currentUserId) return true
   return memberId === props.currentUserId

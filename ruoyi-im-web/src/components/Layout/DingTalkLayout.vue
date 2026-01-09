@@ -51,18 +51,13 @@
       <header class="dt-sessions__header">
         <div class="dt-sessions__search">
           <el-icon><Search /></el-icon>
-          <input
-            v-model="searchKeyword"
-            type="text"
-            placeholder="搜索"
-            @input="handleSearch"
-          />
+          <input v-model="searchKeyword" type="text" placeholder="搜索" @input="handleSearch" />
         </div>
         <div class="dt-sessions__actions">
-          <el-button @click="handleAddChat" title="新建聊天">
+          <el-button title="新建聊天" @click="handleAddChat">
             <el-icon><Plus /></el-icon>
           </el-button>
-          <el-button @click="toggleSidebarExpanded" title="展开/收起">
+          <el-button title="展开/收起" @click="toggleSidebarExpanded">
             <el-icon><Expand v-if="!sidebarExpanded" /><Fold v-else /></el-icon>
           </el-button>
         </div>
@@ -83,7 +78,7 @@
       </div>
 
       <!-- 会话列表 -->
-      <div class="dt-sessions__list" ref="sessionListRef">
+      <div ref="sessionListRef" class="dt-sessions__list">
         <div
           v-for="session in filteredSessions"
           :key="session.id"
@@ -138,7 +133,11 @@
               <Top />
             </el-icon>
             <!-- 未读数 -->
-            <span v-if="session.unread > 0" class="dt-sessions__unread" :class="{ dot: session.unread === 1 }">
+            <span
+              v-if="session.unread > 0"
+              class="dt-sessions__unread"
+              :class="{ dot: session.unread === 1 }"
+            >
               {{ session.unread > 1 ? session.unread : '' }}
             </span>
             <!-- 免打扰 -->
@@ -161,13 +160,13 @@
           </span>
         </div>
         <div class="dt-chat__actions">
-          <el-button @click="handlePhoneCall" title="语音通话">
+          <el-button title="语音通话" @click="handlePhoneCall">
             <el-icon><Phone /></el-icon>
           </el-button>
-          <el-button @click="handleVideoCall" title="视频会议">
+          <el-button title="视频会议" @click="handleVideoCall">
             <el-icon><VideoCamera /></el-icon>
           </el-button>
-          <el-button @click="handleMoreAction" title="更多">
+          <el-button title="更多" @click="handleMoreAction">
             <el-icon><MoreFilled /></el-icon>
           </el-button>
         </div>
@@ -179,9 +178,13 @@
       </div>
 
       <!-- 消息列表 -->
-      <div v-if="activeSession" class="dt-chat__messages" ref="messagesRef">
+      <div v-if="activeSession" ref="messagesRef" class="dt-chat__messages">
         <!-- 时间分隔符 -->
-        <div v-for="(divider, index) in timeDividers" :key="'divider-' + index" class="dt-chat__time-divider">
+        <div
+          v-for="(divider, index) in timeDividers"
+          :key="'divider-' + index"
+          class="dt-chat__time-divider"
+        >
           {{ divider }}
         </div>
 
@@ -245,13 +248,7 @@
         <!-- 底部操作栏 -->
         <div class="dt-chat__footer">
           <span class="dt-chat__tip">按 Enter 发送</span>
-          <button
-            class="dt-chat__send-btn"
-            :disabled="!canSend"
-            @click="handleSend"
-          >
-            发送
-          </button>
+          <button class="dt-chat__send-btn" :disabled="!canSend" @click="handleSend">发送</button>
         </div>
       </div>
 
@@ -259,19 +256,14 @@
       <transition name="slide-up">
         <EmojiPicker
           v-if="showEmojiPicker"
-          v-click-outside="() => showEmojiPicker = false"
+          v-click-outside="() => (showEmojiPicker = false)"
           @select="handleEmojiSelect"
         />
       </transition>
     </main>
 
     <!-- 群组成员抽屉 -->
-    <el-drawer
-      v-model="showMembersDrawer"
-      title="群组成员"
-      direction="rtl"
-      size="380px"
-    >
+    <el-drawer v-model="showMembersDrawer" title="群组成员" direction="rtl" size="380px">
       <GroupMembers :session="activeSession" />
     </el-drawer>
   </div>
@@ -280,9 +272,23 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import {
-  Search, Plus, Expand, Fold, Notification, Document, Picture,
-  Microphone, Top, Bell, Phone, VideoCamera, MoreFilled,
-  ChatDotRound, Folder, Crop, At
+  Search,
+  Plus,
+  Expand,
+  Fold,
+  Notification,
+  Document,
+  Picture,
+  Microphone,
+  Top,
+  Bell,
+  Phone,
+  VideoCamera,
+  MoreFilled,
+  ChatDotRound,
+  Folder,
+  Crop,
+  At,
 } from '@element-plus/icons-vue'
 import MessageBubble from '@/components/Message/MessageBubble.vue'
 import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
@@ -293,22 +299,20 @@ import { formatTime } from '@/utils/format/time.js'
 const props = defineProps({
   currentUser: {
     type: Object,
-    default: () => ({})
+    default: () => ({}),
   },
   sessions: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   messages: {
     type: Array,
-    default: () => []
-  }
+    default: () => [],
+  },
 })
 
 // Emits
-const emit = defineEmits([
-  'session-click', 'send-message', 'message-action', 'nav-change'
-])
+const emit = defineEmits(['session-click', 'send-message', 'message-action', 'nav-change'])
 
 // State
 const sidebarExpanded = ref(false)
@@ -332,7 +336,7 @@ const navItems = ref([
   { key: 'chat', label: '消息', icon: 'ChatDotRound', unread: 5 },
   { key: 'contacts', label: '通讯录', icon: 'User', unread: 0 },
   { key: 'apps', label: '应用', icon: 'Grid', unread: 0 },
-  { key: 'settings', label: '设置', icon: 'Setting', unread: 0 }
+  { key: 'settings', label: '设置', icon: 'Setting', unread: 0 },
 ])
 
 // 会话标签
@@ -340,7 +344,7 @@ const sessionTabs = ref([
   { key: 'all', label: '全部', unread: 0 },
   { key: 'unread', label: '未读', unread: 5 },
   { key: 'pinned', label: '置顶', unread: 0 },
-  { key: 'group', label: '群聊', unread: 0 }
+  { key: 'group', label: '群聊', unread: 0 },
 ])
 
 // 计算属性
@@ -359,9 +363,10 @@ const filteredSessions = computed(() => {
   // 搜索过滤
   if (searchKeyword.value) {
     const keyword = searchKeyword.value.toLowerCase()
-    result = result.filter(s =>
-      s.name?.toLowerCase().includes(keyword) ||
-      s.lastMessage?.text?.toLowerCase().includes(keyword)
+    result = result.filter(
+      s =>
+        s.name?.toLowerCase().includes(keyword) ||
+        s.lastMessage?.text?.toLowerCase().includes(keyword)
     )
   }
 
@@ -401,7 +406,7 @@ const handleLogoClick = () => {
   // 跳转到工作台
 }
 
-const handleNavClick = (item) => {
+const handleNavClick = item => {
   activeNav.value = item.key
   emit('nav-change', item.key)
 }
@@ -422,11 +427,11 @@ const toggleSidebarExpanded = () => {
   sidebarExpanded.value = !sidebarExpanded.value
 }
 
-const handleTabClick = (tab) => {
+const handleTabClick = tab => {
   activeTab.value = tab.key
 }
 
-const handleSessionClick = (session) => {
+const handleSessionClick = session => {
   activeSessionId.value = session.id
   emit('session-click', session)
   nextTick(() => {
@@ -450,7 +455,7 @@ const handleMoreAction = () => {
   // 更多操作
 }
 
-const shouldShowTime = (message) => {
+const shouldShowTime = message => {
   const index = displayMessages.value.findIndex(m => m.id === message.id)
   if (index === 0) return true
   const prevMessage = displayMessages.value[index - 1]
@@ -464,7 +469,7 @@ const handleInput = () => {
   autoResizeTextarea()
 }
 
-const handleKeyDown = (e) => {
+const handleKeyDown = e => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault()
     handleSend()
@@ -477,7 +482,7 @@ const handleSend = () => {
   emit('send-message', {
     sessionId: activeSessionId.value,
     content: messageInput.value.trim(),
-    type: 'text'
+    type: 'text',
   })
 
   messageInput.value = ''
@@ -487,7 +492,7 @@ const handleSend = () => {
   })
 }
 
-const handleEmojiSelect = (emoji) => {
+const handleEmojiSelect = emoji => {
   messageInput.value += emoji
   textareaRef.value?.focus()
 }
@@ -510,39 +515,39 @@ const handleHistorySearch = () => {
 
 const handleMessageClick = () => {}
 
-const handleMessageRetry = (message) => {
+const handleMessageRetry = message => {
   emit('message-action', { type: 'retry', message })
 }
 
-const handleMessageCopy = (message) => {
+const handleMessageCopy = message => {
   emit('message-action', { type: 'copy', message })
 }
 
-const handleMessageRecall = (message) => {
+const handleMessageRecall = message => {
   emit('message-action', { type: 'recall', message })
 }
 
-const handleMessageEdit = (message) => {
+const handleMessageEdit = message => {
   emit('message-action', { type: 'edit', message })
 }
 
-const handleMessageReply = (message) => {
+const handleMessageReply = message => {
   emit('message-action', { type: 'reply', message })
 }
 
-const handleMessageForward = (message) => {
+const handleMessageForward = message => {
   emit('message-action', { type: 'forward', message })
 }
 
-const handleMessageFavorite = (message) => {
+const handleMessageFavorite = message => {
   emit('message-action', { type: 'favorite', message })
 }
 
-const handleMessageSelect = (message) => {
+const handleMessageSelect = message => {
   emit('message-action', { type: 'select', message })
 }
 
-const handleMessageMore = (data) => {
+const handleMessageMore = data => {
   emit('message-action', data)
 }
 
@@ -570,7 +575,7 @@ const isDifferentDay = (date1, date2) => {
   )
 }
 
-const formatDateDivider = (date) => {
+const formatDateDivider = date => {
   const today = new Date()
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)

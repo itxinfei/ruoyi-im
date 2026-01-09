@@ -11,7 +11,7 @@ export function useVirtualList(options = {}) {
     itemHeight = 50,
     containerHeight = 600,
     overscan = 5,
-    keyField = 'id'
+    keyField = 'id',
   } = options
 
   // 容器引用
@@ -31,12 +31,12 @@ export function useVirtualList(options = {}) {
       height: itemHeight,
       top: index * itemHeight,
       bottom: (index + 1) * itemHeight,
-      dHeight: 0 // 动态高度差
+      dHeight: 0, // 动态高度差
     }))
   }
 
   // 更新指定项的位置
-  const updateItemSize = (index) => {
+  const updateItemSize = index => {
     const position = positions.value[index]
     if (!position) return
 
@@ -132,7 +132,7 @@ export function useVirtualList(options = {}) {
     const { start, end } = getVisibleRange(scrollTop.value)
     return data.value.slice(start, end + 1).map((item, i) => ({
       ...item,
-      __index: start + i
+      __index: start + i,
     }))
   })
 
@@ -144,7 +144,7 @@ export function useVirtualList(options = {}) {
   })
 
   // 处理滚动事件
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     const target = e.target
     scrollTop.value = target.scrollTop
     isScrolling.value = true
@@ -159,7 +159,7 @@ export function useVirtualList(options = {}) {
   }
 
   // 滚动到指定索引
-  const scrollToIndex = (index) => {
+  const scrollToIndex = index => {
     const position = positions.value[index]
     if (!position || !containerRef.value) return
 
@@ -187,17 +187,21 @@ export function useVirtualList(options = {}) {
       scrollTop: scrollTop.value,
       isScrolling: isScrolling.value,
       visibleRange: getVisibleRange(scrollTop.value),
-      totalHeight: totalHeight.value
+      totalHeight: totalHeight.value,
     }
   }
 
   // 监听数据变化
-  watch(data, () => {
-    initPositions()
-    nextTick(() => {
-      updateAllSizes()
-    })
-  }, { deep: true, immediate: true })
+  watch(
+    data,
+    () => {
+      initPositions()
+      nextTick(() => {
+        updateAllSizes()
+      })
+    },
+    { deep: true, immediate: true }
+  )
 
   // 组件挂载后初始化
   onMounted(() => {
@@ -234,7 +238,7 @@ export function useVirtualList(options = {}) {
     getScrollInfo,
     getVisibleRange,
     // 内部状态（用于调试）
-    positions
+    positions,
   }
 }
 
@@ -250,7 +254,7 @@ export function useDynamicVirtualList(options = {}) {
     containerHeight = 600,
     overscan = 5,
     keyField = 'id',
-    getItemHeight = null
+    getItemHeight = null,
   } = options
 
   const containerRef = ref(null)
@@ -266,7 +270,7 @@ export function useDynamicVirtualList(options = {}) {
       height: estimatedItemHeight,
       top: index * estimatedItemHeight,
       bottom: (index + 1) * estimatedItemHeight,
-      measured: false // 是否已测量
+      measured: false, // 是否已测量
     }))
   }
 
@@ -358,7 +362,7 @@ export function useDynamicVirtualList(options = {}) {
   const getVisibleRange = (scrollTop = 0) => {
     return {
       start: getStartIndex(scrollTop),
-      end: getEndIndex(scrollTop)
+      end: getEndIndex(scrollTop),
     }
   }
 
@@ -366,7 +370,7 @@ export function useDynamicVirtualList(options = {}) {
     const { start, end } = getVisibleRange(scrollTop.value)
     return data.value.slice(start, end + 1).map((item, i) => ({
       ...item,
-      __index: start + i
+      __index: start + i,
     }))
   })
 
@@ -376,11 +380,11 @@ export function useDynamicVirtualList(options = {}) {
     return position ? position.top : 0
   })
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     scrollTop.value = e.target.scrollTop
   }
 
-  const scrollToIndex = (index) => {
+  const scrollToIndex = index => {
     const position = positions.value[index]
     if (!position || !containerRef.value) return
 
@@ -388,9 +392,13 @@ export function useDynamicVirtualList(options = {}) {
     containerRef.value.scrollTop = scrollTop
   }
 
-  watch(data, () => {
-    initPositions()
-  }, { deep: true, immediate: true })
+  watch(
+    data,
+    () => {
+      initPositions()
+    },
+    { deep: true, immediate: true }
+  )
 
   onMounted(() => {
     initPositions()
@@ -411,7 +419,7 @@ export function useDynamicVirtualList(options = {}) {
     updateItemSize,
     measureVisibleItems,
     getVisibleRange,
-    positions
+    positions,
   }
 }
 
@@ -426,7 +434,7 @@ export function useHorizontalVirtualList(options = {}) {
     itemWidth = 100,
     containerWidth = 800,
     overscan = 3,
-    keyField = 'id'
+    keyField = 'id',
   } = options
 
   const containerRef = ref(null)
@@ -440,7 +448,7 @@ export function useHorizontalVirtualList(options = {}) {
       index,
       width: itemWidth,
       left: index * itemWidth,
-      right: (index + 1) * itemWidth
+      right: (index + 1) * itemWidth,
     }))
   }
 
@@ -497,7 +505,7 @@ export function useHorizontalVirtualList(options = {}) {
     const end = getEndIndex(scrollLeft.value)
     return data.value.slice(start, end + 1).map((item, i) => ({
       ...item,
-      __index: start + i
+      __index: start + i,
     }))
   })
 
@@ -507,13 +515,17 @@ export function useHorizontalVirtualList(options = {}) {
     return position ? position.left : 0
   })
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     scrollLeft.value = e.target.scrollLeft
   }
 
-  watch(data, () => {
-    initPositions()
-  }, { deep: true, immediate: true })
+  watch(
+    data,
+    () => {
+      initPositions()
+    },
+    { deep: true, immediate: true }
+  )
 
   return {
     containerRef,
@@ -522,6 +534,6 @@ export function useHorizontalVirtualList(options = {}) {
     totalWidth,
     offset,
     handleScroll,
-    positions
+    positions,
   }
 }

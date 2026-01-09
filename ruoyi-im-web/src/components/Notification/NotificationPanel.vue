@@ -10,9 +10,7 @@
         <el-button v-if="unreadCount > 0" link type="primary" size="small" @click="markAllRead">
           全部已读
         </el-button>
-        <el-button link type="primary" size="small" @click="showSettings = true">
-          设置
-        </el-button>
+        <el-button link type="primary" size="small" @click="showSettings = true"> 设置 </el-button>
       </div>
     </div>
 
@@ -88,21 +86,32 @@
             <div class="notification-desc">{{ item.content }}</div>
             <div class="notification-time">{{ formatTime(item.createTime) }}</div>
             <div v-if="item.type === 'DING' && item.readReceipt" class="ding-receipt">
-              <el-tag size="small" type="info">已读 {{ item.readCount }}/{{ item.totalCount }}</el-tag>
+              <el-tag size="small" type="info"
+                >已读 {{ item.readCount }}/{{ item.totalCount }}</el-tag
+              >
             </div>
           </div>
           <div class="notification-actions">
-            <el-button v-if="item.type === 'DING' && item.readReceipt" link type="primary" @click.stop="showDingReceipt(item)">
+            <el-button
+              v-if="item.type === 'DING' && item.readReceipt"
+              link
+              type="primary"
+              @click.stop="showDingReceipt(item)"
+            >
               查看回执
             </el-button>
             <el-button link type="danger" :icon="Delete" @click.stop="handleDelete(item)" />
           </div>
         </div>
-        <el-empty v-if="filteredNotifications.length === 0" description="暂无通知" :image-size="60" />
+        <el-empty
+          v-if="filteredNotifications.length === 0"
+          description="暂无通知"
+          :image-size="60"
+        />
       </div>
-      
+
       <div v-if="hasMore" class="load-more">
-        <el-button link type="primary" @click="loadMore" :loading="loadingMore">
+        <el-button link type="primary" :loading="loadingMore" @click="loadMore">
           加载更多
         </el-button>
       </div>
@@ -121,7 +130,15 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Bell, ChatDotRound, Document, Warning, Delete, Search, Filter } from '@element-plus/icons-vue'
+import {
+  Bell,
+  ChatDotRound,
+  Document,
+  Warning,
+  Delete,
+  Search,
+  Filter,
+} from '@element-plus/icons-vue'
 import {
   getNotifications,
   getUnreadCount,
@@ -172,19 +189,18 @@ const filteredNotifications = computed(() => {
     const keyword = searchKeyword.value.toLowerCase()
     result = result.filter(
       item =>
-        item.title?.toLowerCase().includes(keyword) ||
-        item.content?.toLowerCase().includes(keyword)
+        item.title?.toLowerCase().includes(keyword) || item.content?.toLowerCase().includes(keyword)
     )
   }
 
   if (dateFilter.value !== 'all') {
     const now = new Date()
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    
+
     result = result.filter(item => {
       if (!item.createTime) return false
       const itemDate = new Date(item.createTime)
-      
+
       switch (dateFilter.value) {
         case 'today':
           return itemDate >= todayStart

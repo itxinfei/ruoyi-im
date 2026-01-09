@@ -121,7 +121,9 @@
                 <div class="contact-actions">
                   <el-tag v-if="contact.verified" type="success" size="small">已验证</el-tag>
                   <el-tag v-else type="warning" size="small">未验证</el-tag>
-                  <el-button type="danger" link size="small" @click="handleDeleteContact(contact)">删除</el-button>
+                  <el-button type="danger" link size="small" @click="handleDeleteContact(contact)"
+                    >删除</el-button
+                  >
                 </div>
               </div>
             </div>
@@ -520,7 +522,12 @@
 
     <!-- 实名认证对话框 -->
     <el-dialog v-model="showRealNameDialog" title="实名认证" width="500px" destroy-on-close>
-      <el-form ref="realNameFormRef" :model="realNameForm" :rules="realNameRules" label-width="100px">
+      <el-form
+        ref="realNameFormRef"
+        :model="realNameForm"
+        :rules="realNameRules"
+        label-width="100px"
+      >
         <el-form-item label="真实姓名" prop="name">
           <el-input v-model="realNameForm.name" placeholder="请输入真实姓名" />
         </el-form-item>
@@ -775,7 +782,8 @@ const realNameRules = {
   idCard: [
     { required: true, message: '请输入身份证号', trigger: 'blur' },
     {
-      pattern: /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/,
+      pattern:
+        /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/,
       message: '请输入正确的身份证号',
       trigger: 'blur',
     },

@@ -39,7 +39,7 @@ export function getCurrentUserInfo() {
  */
 export function getCurrentUserId() {
   const userInfo = getCurrentUserInfo()
-  return userInfo ? (Number(userInfo.userId) || Number(userInfo.id)) : null
+  return userInfo ? Number(userInfo.userId) || Number(userInfo.id) : null
 }
 
 /**
@@ -48,7 +48,7 @@ export function getCurrentUserId() {
  */
 export function getCurrentUserName() {
   const userInfo = getCurrentUserInfo()
-  return userInfo ? (userInfo.nickName || userInfo.userName || '用户') : '用户'
+  return userInfo ? userInfo.nickName || userInfo.userName || '用户' : '用户'
 }
 
 /**

@@ -64,9 +64,7 @@
                 <div class="file-name">{{ message.fileName }}</div>
                 <div class="file-size">{{ formatFileSize(message.fileSize) }}</div>
               </div>
-              <el-button type="primary" link @click.stop="downloadFile">
-                下载
-              </el-button>
+              <el-button type="primary" link @click.stop="downloadFile"> 下载 </el-button>
             </div>
           </template>
 
@@ -87,12 +85,7 @@
           <!-- 视频消息 -->
           <template v-else-if="message.messageType === 'video'">
             <div class="message-video">
-              <video
-                :src="message.fileUrl"
-                controls
-                preload="metadata"
-                @click.stop
-              ></video>
+              <video :src="message.fileUrl" controls preload="metadata" @click.stop></video>
             </div>
           </template>
 
@@ -218,64 +211,76 @@
 import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
-  Picture, Loading, Document, VideoPlay, VideoPause,
-  Notification, RefreshLeft, Edit, DocumentCopy, ChatDotRound,
-  Share, Star, CircleCheck, MoreFilled
+  Picture,
+  Loading,
+  Document,
+  VideoPlay,
+  VideoPause,
+  Notification,
+  RefreshLeft,
+  Edit,
+  DocumentCopy,
+  ChatDotRound,
+  Share,
+  Star,
+  CircleCheck,
+  MoreFilled,
 } from '@element-plus/icons-vue'
 import MessageStatus from './MessageStatus.vue'
 
 const props = defineProps({
   message: {
     type: Object,
-    required: true
+    required: true,
   },
   isOwn: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isGroup: {
     type: Boolean,
-    default: false
+    default: false,
   },
   currentUser: {
     type: Object,
-    default: null
+    default: null,
   },
   showTime: {
     type: Boolean,
-    default: false
+    default: false,
   },
   showActions: {
     type: Boolean,
-    default: false
+    default: false,
   },
   // 撤回时间限制（分钟）
   recallLimit: {
     type: Number,
-    default: 2
-  }
+    default: 2,
+  },
 })
 
 const emit = defineEmits([
-  'click', 'retry', 'copy', 'recall', 'edit',
-  'reply', 'forward', 'favorite', 'select', 'more'
+  'click',
+  'retry',
+  'copy',
+  'recall',
+  'edit',
+  'reply',
+  'forward',
+  'favorite',
+  'select',
+  'more',
 ])
 
 const isPlaying = ref(false)
 
 const bubbleClass = computed(() => {
-  return [
-    'message-item',
-    { 'is-own': props.isOwn },
-    { 'is-group': props.isGroup }
-  ]
+  return ['message-item', { 'is-own': props.isOwn }, { 'is-group': props.isGroup }]
 })
 
 const bubbleTypeClass = computed(() => {
-  return [
-    { 'is-own': props.isOwn },
-    `type-${props.message.messageType}`
-  ]
+  return [{ 'is-own': props.isOwn }, `type-${props.message.messageType}`]
 })
 
 const currentUserAvatar = computed(() => {
@@ -317,7 +322,7 @@ const canEdit = computed(() => {
   return diff < props.recallLimit * 60 * 1000 && props.message.messageType === 'text'
 })
 
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (!bytes) return ''
   const units = ['B', 'KB', 'MB', 'GB']
   let size = bytes
@@ -329,14 +334,14 @@ const formatFileSize = (bytes) => {
   return `${size.toFixed(1)} ${units[unitIndex]}`
 }
 
-const formatDuration = (seconds) => {
+const formatDuration = seconds => {
   if (!seconds) return '0"'
   const min = Math.floor(seconds / 60)
   const sec = seconds % 60
   return min > 0 ? `${min}'${sec}"` : `${sec}"`
 }
 
-const formatMessageTime = (time) => {
+const formatMessageTime = time => {
   if (!time) return ''
   const date = new Date(time)
   const now = new Date()
@@ -369,11 +374,11 @@ const formatMessageTime = (time) => {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 
-const getReplyText = (replyTo) => {
+const getReplyText = replyTo => {
   if (!replyTo) return ''
   const text = replyTo.content || '[消息]'
   return text.length > 30 ? text.substring(0, 30) + '...' : text
@@ -397,7 +402,7 @@ const playAudio = () => {
   // TODO: 实现音频播放逻辑
 }
 
-const handleContextMenu = (e) => {
+const handleContextMenu = e => {
   emit('click', e)
 }
 
@@ -432,7 +437,7 @@ const selectMessage = () => {
   emit('select', props.message)
 }
 
-const handleMoreCommand = (command) => {
+const handleMoreCommand = command => {
   emit('more', { command, message: props.message })
 }
 </script>
@@ -635,7 +640,8 @@ const handleMoreCommand = (command) => {
 }
 
 @keyframes wave {
-  0%, 100% {
+  0%,
+  100% {
     transform: scaleY(0.5);
   }
   50% {

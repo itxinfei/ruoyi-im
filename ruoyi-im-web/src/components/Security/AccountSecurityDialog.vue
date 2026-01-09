@@ -27,14 +27,10 @@
                 <span>{{ device.os }}</span>
                 <span>{{ device.browser }}</span>
               </div>
-              <div class="device-time">
-                最后登录：{{ formatTime(device.lastLoginTime) }}
-              </div>
+              <div class="device-time">最后登录：{{ formatTime(device.lastLoginTime) }}</div>
             </div>
             <div v-if="!device.isCurrent" class="device-actions">
-              <el-button type="danger" link @click="handleRemoveDevice(device)">
-                移除
-              </el-button>
+              <el-button type="danger" link @click="handleRemoveDevice(device)"> 移除 </el-button>
             </div>
           </div>
           <el-empty v-if="deviceList.length === 0" description="暂无登录设备" :image-size="60" />
@@ -73,7 +69,9 @@
             </div>
             <div class="log-info">
               <div class="log-header">
-                <span class="log-status">{{ log.status === 'success' ? '登录成功' : '登录失败' }}</span>
+                <span class="log-status">{{
+                  log.status === 'success' ? '登录成功' : '登录失败'
+                }}</span>
                 <span class="log-time">{{ formatTime(log.createTime) }}</span>
               </div>
               <div class="log-detail">
@@ -104,9 +102,7 @@
         <div class="two-factor">
           <div v-if="!twoFactorEnabled" class="two-factor-disabled">
             <el-result icon="warning" title="两步验证未开启">
-              <template #sub-title>
-                开启两步验证后，登录时需要输入验证码，提高账号安全性
-              </template>
+              <template #sub-title> 开启两步验证后，登录时需要输入验证码，提高账号安全性 </template>
               <template #extra>
                 <el-button type="primary" @click="handleEnableTwoFactor">立即开启</el-button>
               </template>
@@ -114,16 +110,14 @@
           </div>
           <div v-else class="two-factor-enabled">
             <el-result icon="success" title="两步验证已开启">
-              <template #sub-title>
-                您的账号已开启两步验证保护
-              </template>
+              <template #sub-title> 您的账号已开启两步验证保护 </template>
               <template #extra>
                 <el-button @click="handleDisableTwoFactor">关闭验证</el-button>
               </template>
             </el-result>
-            
+
             <el-divider />
-            
+
             <div class="two-factor-methods">
               <h4>验证方式</h4>
               <div class="method-list">
@@ -142,10 +136,7 @@
                     <div class="method-name">{{ method.name }}</div>
                     <div class="method-desc">{{ method.description }}</div>
                   </div>
-                  <el-switch
-                    v-model="method.enabled"
-                    @change="handleMethodChange(method)"
-                  />
+                  <el-switch v-model="method.enabled" @change="handleMethodChange(method)" />
                 </div>
               </div>
             </div>
@@ -163,14 +154,7 @@
 <script setup>
 import { ref, reactive, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  Monitor,
-  CircleCheck,
-  CircleClose,
-  Iphone,
-  Message,
-  Key,
-} from '@element-plus/icons-vue'
+import { Monitor, CircleCheck, CircleClose, Iphone, Message, Key } from '@element-plus/icons-vue'
 import { getToken } from '@/utils/auth'
 
 const props = defineProps({
@@ -242,16 +226,16 @@ const loadLoginLogs = async () => {
       pageNum: logPageNum.value,
       pageSize: logPageSize.value,
     })
-    
+
     if (logDateRange.value && logDateRange.value.length === 2) {
       params.append('startDate', logDateRange.value[0])
       params.append('endDate', logDateRange.value[1])
     }
-    
+
     if (logType.value) {
       params.append('status', logType.value)
     }
-    
+
     const response = await fetch(`/api/im/user/login-logs?${params}`, {
       headers: {
         Authorization: 'Bearer ' + getToken(),
@@ -312,7 +296,7 @@ const handleRemoveDevice = async device => {
       },
     })
     const data = await response.json()
-    
+
     if (data.code === 200) {
       ElMessage.success('设备已移除')
       loadDevices()
@@ -340,7 +324,7 @@ const handleEnableTwoFactor = async () => {
       }),
     })
     const data = await response.json()
-    
+
     if (data.code === 200) {
       ElMessage.success('两步验证已开启')
       twoFactorEnabled.value = true
@@ -355,15 +339,11 @@ const handleEnableTwoFactor = async () => {
 
 const handleDisableTwoFactor = async () => {
   try {
-    await ElMessageBox.confirm(
-      '关闭两步验证后，您的账号安全性将降低，确定要关闭吗？',
-      '确认关闭',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    )
+    await ElMessageBox.confirm('关闭两步验证后，您的账号安全性将降低，确定要关闭吗？', '确认关闭', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
 
     const response = await fetch('/api/im/user/two-factor/disable', {
       method: 'POST',
@@ -373,7 +353,7 @@ const handleDisableTwoFactor = async () => {
       },
     })
     const data = await response.json()
-    
+
     if (data.code === 200) {
       ElMessage.success('两步验证已关闭')
       twoFactorEnabled.value = false
@@ -402,7 +382,7 @@ const handleMethodChange = async method => {
       }),
     })
     const data = await response.json()
-    
+
     if (data.code !== 200) {
       ElMessage.error(data.msg || '设置失败')
       method.enabled = !method.enabled
