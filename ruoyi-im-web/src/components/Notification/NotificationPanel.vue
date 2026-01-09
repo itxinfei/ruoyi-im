@@ -1,5 +1,5 @@
 <template>
-  <div class="notification-panel">
+  <div v-if="visible" class="notification-panel">
     <div class="panel-header">
       <span class="panel-title">通知</span>
       <div class="header-actions">
@@ -11,6 +11,9 @@
           全部已读
         </el-button>
         <el-button link type="primary" size="small" @click="showSettings = true"> 设置 </el-button>
+        <el-button link type="info" size="small" @click="handleClose">
+          <el-icon><Close /></el-icon>
+        </el-button>
       </div>
     </div>
 
@@ -138,9 +141,10 @@ import {
   Delete,
   Search,
   Filter,
+  Close,
 } from '@element-plus/icons-vue'
 import {
-  getNotifications,
+  listNotifications,
   getUnreadCount,
   markAsRead,
   markAllAsRead,
@@ -154,7 +158,7 @@ const props = defineProps({
   visible: Boolean,
 })
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'update:visible'])
 
 const activeTab = ref('all')
 const loading = ref(false)
@@ -234,7 +238,7 @@ const loadNotifications = async (loadMore = false) => {
   }
 
   try {
-    const response = await getNotifications({
+    const response = await listNotifications({
       type: currentType.value,
       pageNum: currentPage.value,
       pageSize: pageSize.value,
@@ -332,6 +336,12 @@ const loadMore = () => {
 
 const viewAll = () => {
   emit('close')
+  emit('update:visible', false)
+}
+
+const handleClose = () => {
+  emit('close')
+  emit('update:visible', false)
 }
 
 const handleSettingsSaved = () => {
@@ -400,32 +410,38 @@ defineExpose({
   width: 380px;
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e6eb;
   overflow: hidden;
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  z-index: 1000;
 }
 
 .panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e6eb;
+  background: #fff;
 }
 
 .panel-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1d2129;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .notification-tabs {
-  padding: 0 16px;
+  padding: 0 12px;
 
   :deep(.el-tabs__header) {
     margin: 0;
@@ -436,17 +452,26 @@ defineExpose({
   }
 
   :deep(.el-tabs__item) {
-    padding: 0 12px;
+    padding: 0 10px;
     font-size: 13px;
+    height: 36px;
+    line-height: 36px;
+    color: #4e5969;
+
+    &.is-active {
+      color: #165dff;
+      font-weight: 500;
+    }
   }
 }
 
 .search-bar {
   display: flex;
   align-items: center;
-  padding: 8px 16px;
+  padding: 8px 12px;
   gap: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e5e6eb;
+  background: #f7f8fa;
 
   .el-input {
     flex: 1;
@@ -465,23 +490,29 @@ defineExpose({
 .notification-item {
   display: flex;
   align-items: flex-start;
-  padding: 12px 20px;
+  padding: 12px 16px;
   cursor: pointer;
   transition: background 0.2s;
+  border-bottom: 1px solid #f0f0f0;
 
   &:hover {
-    background: #f5f5f5;
+    background: #f5f7fa;
   }
 
   &.unread {
     background: #f0f7ff;
+    border-left: 3px solid #165dff;
+
+    .notification-title {
+      font-weight: 500;
+    }
   }
 }
 
 .notification-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -489,23 +520,23 @@ defineExpose({
   flex-shrink: 0;
 
   &.type-system {
-    background: #fff7e6;
-    color: #faad14;
+    background: #fff7e8;
+    color: #ff7d00;
   }
 
   &.type-approval {
-    background: #e6f7ff;
-    color: #1677ff;
+    background: #e8f3ff;
+    color: #165dff;
   }
 
   &.type-message {
-    background: #f6ffed;
-    color: #52c41a;
+    background: #e8ffea;
+    color: #00b42a;
   }
 
   &.type-ding {
-    background: #fff1f0;
-    color: #ff4d4f;
+    background: #ffece8;
+    color: #f53f3f;
   }
 }
 
@@ -516,26 +547,29 @@ defineExpose({
 
 .notification-title {
   font-size: 14px;
-  font-weight: 500;
-  color: #333;
+  font-weight: 400;
+  color: #1d2129;
   margin-bottom: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.4;
 }
 
 .notification-desc {
-  font-size: 12px;
-  color: #666;
+  font-size: 13px;
+  color: #4e5969;
   margin-bottom: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.4;
 }
 
 .notification-time {
   font-size: 12px;
-  color: #999;
+  color: #86909c;
+  line-height: 1.4;
 }
 
 .ding-receipt {

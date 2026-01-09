@@ -19,6 +19,8 @@ import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.utils.MessageEncryptionUtil;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,8 @@ import java.util.List;
 
 @Service
 public class ImMessageServiceImpl implements ImMessageService {
+
+    private static final Logger log = LoggerFactory.getLogger(ImMessageServiceImpl.class);
 
     @Autowired
     private ImMessageMapper imMessageMapper;
@@ -92,6 +96,14 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setCreateTime(LocalDateTime.now());
 
         imMessageMapper.insertImMessage(message);
+
+        // 更新会话的最后消息ID和时间（确保会话列表正确显示最新消息）
+        ImConversation conversationUpdate = new ImConversation();
+        conversationUpdate.setId(conversationId);
+        conversationUpdate.setLastMessageId(message.getId());
+        conversationUpdate.setLastMessageTime(message.getCreateTime());
+        conversationUpdate.setUpdateTime(LocalDateTime.now());
+        imConversationMapper.updateById(conversationUpdate);
 
         // 增加会话中其他成员的未读消息数
         List<com.ruoyi.im.domain.ImConversationMember> members =
@@ -230,6 +242,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void recallMessage(Long messageId, Long userId) {
         ImMessage message = imMessageMapper.selectImMessageById(messageId);
         if (message == null) {
@@ -250,8 +263,11 @@ public class ImMessageServiceImpl implements ImMessageService {
         }
 
         message.setIsRevoked(1);
-        message.setRevokedTime(now); // 使用revokedTime而不是revokeTime（revokeTime是非数据库字段）
+        message.setRevokedTime(now);
         imMessageMapper.updateImMessage(message);
+
+        // 广播撤回通知给会话中的其他用户
+        broadcastRecallNotification(message.getConversationId(), messageId, userId);
     }
 
     @Override
@@ -510,5 +526,67 @@ public class ImMessageServiceImpl implements ImMessageService {
         // 高亮关键词（使用简单的标记，前端可以进一步处理）
         // 注意：这里只是简单的标记，实际高亮由前端CSS实现
         return snippet;
+    }
+
+    /**
+     * 广播消息撤回通知
+     *
+     * @param conversationId 会话ID
+     * @param messageId      消息ID
+     * @param userId         用户ID
+     */
+    private void broadcastRecallNotification(Long conversationId, Long messageId, Long userId) {
+        try {
+            com.ruoyi.im.websocket.ImWebSocketEndpoint wsEndpoint =
+                new com.ruoyi.im.websocket.ImWebSocketEndpoint();
+
+            java.util.Map<String, Object> recallNotification = new java.util.HashMap<>();
+            recallNotification.put("type", "recall");
+            recallNotification.put("conversationId", conversationId);
+            recallNotification.put("messageId", messageId);
+            recallNotification.put("userId", userId);
+            recallNotification.put("timestamp", java.time.LocalDateTime.now().toString());
+
+            // 获取用户信息
+            if (imUserMapper != null) {
+                com.ruoyi.im.domain.ImUser user = imUserMapper.selectImUserById(userId);
+                if (user != null) {
+                    recallNotification.put("userName", user.getNickname() != null ? user.getNickname() : user.getUsername());
+                }
+            }
+
+            // 获取会话成员
+            List<com.ruoyi.im.domain.ImConversationMember> members =
+                imConversationMemberMapper.selectByConversationId(conversationId);
+
+            if (members != null) {
+                java.util.Map<Long, javax.websocket.Session> onlineUsers =
+                    com.ruoyi.im.websocket.ImWebSocketEndpoint.getOnlineUsers();
+
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                String messageJson = mapper.writeValueAsString(recallNotification);
+
+                // 向会话中的每个在线成员发送撤回通知
+                for (com.ruoyi.im.domain.ImConversationMember member : members) {
+                    // 不发送给撤回者自己
+                    if (member.getUserId().equals(userId)) {
+                        continue;
+                    }
+
+                    javax.websocket.Session targetSession = onlineUsers.get(member.getUserId());
+                    if (targetSession != null && targetSession.isOpen()) {
+                        try {
+                            targetSession.getBasicRemote().sendText(messageJson);
+                            log.info("已发送撤回通知: messageId={}, targetUserId={}", messageId, member.getUserId());
+                        } catch (Exception e) {
+                            log.error("发送撤回通知失败: userId={}", member.getUserId(), e);
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("广播撤回通知失败: messageId={}", messageId, e);
+        }
     }
 }

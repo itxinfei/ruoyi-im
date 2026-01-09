@@ -1,11 +1,15 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.domain.ImConversation;
+import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImGroup;
 import com.ruoyi.im.domain.ImGroupMember;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.group.ImGroupCreateRequest;
 import com.ruoyi.im.dto.group.ImGroupUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
+import com.ruoyi.im.mapper.ImConversationMapper;
+import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
@@ -15,6 +19,7 @@ import com.ruoyi.im.vo.group.ImGroupVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,7 +42,14 @@ public class ImGroupServiceImpl implements ImGroupService {
     @Autowired
     private ImUserMapper imUserMapper;
 
+    @Autowired
+    private ImConversationMapper imConversationMapper;
+
+    @Autowired
+    private ImConversationMemberMapper imConversationMemberMapper;
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long createGroup(ImGroupCreateRequest request, Long userId) {
         ImUser owner = imUserMapper.selectImUserById(userId);
         if (owner == null) {
@@ -58,6 +70,17 @@ public class ImGroupServiceImpl implements ImGroupService {
 
         imGroupMapper.insertImGroup(group);
 
+        // 创建群组对应的会话（确保群组在会话列表中显示）
+        ImConversation conversation = new ImConversation();
+        conversation.setType("GROUP");
+        conversation.setTargetId(group.getId()); // 关联群组ID
+        conversation.setName(group.getName());
+        conversation.setAvatar(group.getAvatar());
+        conversation.setLastMessageId(null);
+        conversation.setCreateTime(LocalDateTime.now());
+        conversation.setUpdateTime(LocalDateTime.now());
+        imConversationMapper.insert(conversation);
+
         ImGroupMember ownerMember = new ImGroupMember();
         ownerMember.setGroupId(group.getId());
         ownerMember.setUserId(userId);
@@ -66,6 +89,9 @@ public class ImGroupServiceImpl implements ImGroupService {
         ownerMember.setCreateTime(LocalDateTime.now());
         ownerMember.setUpdateTime(LocalDateTime.now());
         imGroupMemberMapper.insertImGroupMember(ownerMember);
+
+        // 添加群主到会话成员
+        addConversationMember(conversation.getId(), userId);
 
         if (request.getMemberIds() != null && !request.getMemberIds().isEmpty()) {
             for (Long memberId : request.getMemberIds()) {
@@ -78,6 +104,9 @@ public class ImGroupServiceImpl implements ImGroupService {
                 member.setCreateTime(LocalDateTime.now());
                 member.setUpdateTime(LocalDateTime.now());
                 imGroupMemberMapper.insertImGroupMember(member);
+
+                // 添加成员到会话
+                addConversationMember(conversation.getId(), memberId);
             }
             group.setMemberCount(group.getMemberCount() + request.getMemberIds().size());
             imGroupMapper.updateImGroup(group);
@@ -206,6 +235,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void addMembers(Long groupId, List<Long> userIds, Long operatorId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
@@ -221,6 +251,10 @@ public class ImGroupServiceImpl implements ImGroupService {
             throw new BusinessException("群组成员数量已达上限");
         }
 
+        // 查找群组对应的会话
+        ImConversation conversation = imConversationMapper.selectByTypeAndTarget("GROUP", groupId, null);
+
+        int addedCount = 0;
         for (Long userId : userIds) {
             ImGroupMember existing = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
             if (existing != null) {
@@ -236,9 +270,15 @@ public class ImGroupServiceImpl implements ImGroupService {
             member.setCreateTime(LocalDateTime.now());
             member.setUpdateTime(LocalDateTime.now());
             imGroupMemberMapper.insertImGroupMember(member);
+            addedCount++;
+
+            // 添加成员到会话
+            if (conversation != null) {
+                addConversationMember(conversation.getId(), userId);
+            }
         }
 
-        group.setMemberCount(group.getMemberCount() + userIds.size());
+        group.setMemberCount(group.getMemberCount() + addedCount);
         group.setUpdateTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
     }
@@ -396,5 +436,36 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setOwnerId(newOwnerId);
         group.setUpdateTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
+    }
+
+    /**
+     * 添加成员到会话
+     *
+     * @param conversationId 会话ID
+     * @param userId 用户ID
+     */
+    private void addConversationMember(Long conversationId, Long userId) {
+        // 检查用户是否已经在会话中
+        ImConversationMember existing = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        if (existing != null) {
+            // 用户已存在，恢复状态（如果被删除）
+            if (existing.getIsDeleted() != null && existing.getIsDeleted() == 1) {
+                existing.setIsDeleted(0);
+                existing.setUpdateTime(LocalDateTime.now());
+                imConversationMemberMapper.updateById(existing);
+            }
+            return;
+        }
+
+        ImConversationMember member = new ImConversationMember();
+        member.setConversationId(conversationId);
+        member.setUserId(userId);
+        member.setUnreadCount(0);
+        member.setIsPinned(0);
+        member.setIsMuted(0);
+        member.setIsDeleted(0);
+        member.setCreateTime(LocalDateTime.now());
+        member.setUpdateTime(LocalDateTime.now());
+        imConversationMemberMapper.insertImConversationMember(member);
     }
 }

@@ -73,12 +73,27 @@ const actions = {
               reject('Verification failed, please Login again.')
             }
 
-            // 提取用户信息
-            const { username, nickname, avatar, email, phone } = data
+            // 提取用户信息（包含userId，这是关键！）
+            const { userId, id, username, nickname, avatar, email, phone, roles, permissions } = data
+
+            // 构建完整的用户信息对象
+            const userInfo = {
+              userId: userId || id,
+              id: userId || id,
+              username,
+              nickname: nickname || username,
+              nickName: nickname || username,
+              avatar,
+              email,
+              phone,
+              roles,
+              permissions
+            }
 
             commit('SET_NAME', nickname || username)
             commit('SET_AVATAR', avatar)
-            // 可以根据需要设置其他字段
+            // 关键：保存完整用户信息到localStorage
+            commit('SET_USER_INFO', userInfo)
             resolve(data)
           } else {
             reject(new Error(response.msg || '获取用户信息失败'))

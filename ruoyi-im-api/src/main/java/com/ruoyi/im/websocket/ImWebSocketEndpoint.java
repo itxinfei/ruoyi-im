@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
+import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageService;
@@ -50,6 +51,7 @@ public class ImWebSocketEndpoint {
     private static ImMessageService staticImMessageService;
     private static JwtUtils staticJwtUtils;
     private static ImUserService staticImUserService;
+    private static ImUserMapper staticImUserMapper;
     private static ImRedisUtil staticImRedisUtil;
     private static ImConversationMemberService staticConversationMemberService;
     private static ImConversationService staticConversationService;
@@ -65,6 +67,9 @@ public class ImWebSocketEndpoint {
 
     @Autowired
     private ImUserService imUserService;
+
+    @Autowired
+    private ImUserMapper imUserMapper;
 
     @Autowired
     private ImRedisUtil imRedisUtil;
@@ -97,6 +102,11 @@ public class ImWebSocketEndpoint {
     @Autowired
     public void setImUserService(ImUserService imUserService) {
         staticImUserService = imUserService;
+    }
+
+    @Autowired
+    public void setImUserMapper(ImUserMapper imUserMapper) {
+        staticImUserMapper = imUserMapper;
     }
 
     @Autowired
@@ -150,8 +160,25 @@ public class ImWebSocketEndpoint {
             String queryString = session.getQueryString();
             String tokenValue = extractTokenFromQuery(queryString);
 
-            // 优先从token中解析用户ID（无论是否启用安全验证）
-            if (tokenValue != null && !tokenValue.isEmpty() && staticJwtUtils != null) {
+            // 尝试从查询参数中直接获取userId（开发环境支持）
+            if (queryString != null && queryString.contains("userId=")) {
+                try {
+                    String[] params = queryString.split("&");
+                    for (String param : params) {
+                        if (param.startsWith("userId=")) {
+                            String userIdStr = param.substring(7);
+                            userId = Long.parseLong(userIdStr);
+                            log.info("从查询参数中获取到用户ID: userId={}", userId);
+                            break;
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("从查询参数解析userId失败: {}", e.getMessage());
+                }
+            }
+
+            // 如果没有从查询参数获取到userId，尝试从token中解析
+            if (userId == null && tokenValue != null && !tokenValue.isEmpty() && staticJwtUtils != null) {
                 try {
                     // 生产环境需要验证token，开发环境跳过验证但仍然解析用户ID
                     if (staticSecurityEnabled) {
@@ -174,14 +201,14 @@ public class ImWebSocketEndpoint {
                 }
             }
 
-            // 如果token解析失败或没有token，使用默认用户ID（仅开发环境）
+            // 如果仍然无法获取userId，使用默认用户ID（仅开发环境）
             if (userId == null) {
                 if (!staticSecurityEnabled) {
                     userId = staticDevUserId;
                     if (userId == null) {
                         userId = 1L;
                     }
-                    log.warn("无法从token获取用户ID，使用默认用户ID: userId={}", userId);
+                    log.warn("无法获取用户ID，使用默认用户ID: userId={}", userId);
                 } else {
                     log.warn("WebSocket 连接失败: 无法获取用户ID且安全验证已启用");
                     session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "缺少有效的认证信息"));
@@ -448,8 +475,24 @@ public class ImWebSocketEndpoint {
             String token = (String) messageData.get("token");
             Long userId = null;
 
-            // 优先从token中解析用户ID（无论是否启用安全验证）
-            if (token != null && !token.isEmpty() && staticJwtUtils != null) {
+            // 优先从消息payload中直接获取userId（前端发送的userId）
+            Object userIdObj = messageData.get("userId");
+            if (userIdObj != null) {
+                try {
+                    if (userIdObj instanceof Number) {
+                        userId = ((Number) userIdObj).longValue();
+                        log.info("从认证消息中获取到用户ID: userId={}", userId);
+                    } else if (userIdObj instanceof String) {
+                        userId = Long.parseLong((String) userIdObj);
+                        log.info("从认证消息中获取到用户ID: userId={}", userId);
+                    }
+                } catch (Exception e) {
+                    log.warn("解析消息中的userId失败: {}", e.getMessage());
+                }
+            }
+
+            // 如果消息中没有userId，尝试从token中解析用户ID
+            if (userId == null && token != null && !token.isEmpty() && staticJwtUtils != null) {
                 try {
                     // 生产环境需要验证token，开发环境跳过验证但仍然解析用户ID
                     if (staticSecurityEnabled) {
@@ -468,13 +511,13 @@ public class ImWebSocketEndpoint {
                 }
             }
 
-            // 如果token解析失败，使用默认用户ID（仅开发环境）
+            // 如果仍然无法获取userId，使用默认用户ID（仅开发环境）
             if (userId == null && !staticSecurityEnabled) {
                 userId = staticDevUserId;
                 if (userId == null) {
                     userId = 1L;
                 }
-                log.warn("无法从token获取用户ID，使用默认用户ID: userId={}", userId);
+                log.warn("无法获取用户ID，使用默认用户ID: userId={}", userId);
             }
 
             if (userId != null) {
@@ -634,11 +677,22 @@ public class ImWebSocketEndpoint {
             statusMap.put("conversationId", conversationId);
             statusMap.put("userId", userId);
             statusMap.put("isTyping", isTyping);
+            statusMap.put("timestamp", System.currentTimeMillis());
 
-            ObjectMapper mapper = new ObjectMapper();
-            String messageJson = mapper.writeValueAsString(statusMap);
+            // 获取用户信息
+            if (staticImUserMapper != null) {
+                try {
+                    com.ruoyi.im.domain.ImUser user = staticImUserMapper.selectImUserById(userId);
+                    if (user != null) {
+                        statusMap.put("userName", user.getNickname() != null ? user.getNickname() : user.getUsername());
+                    }
+                } catch (Exception e) {
+                    log.warn("获取用户信息失败: userId={}", userId, e);
+                }
+            }
 
-            broadcastToAllOnline(messageJson);
+            // 只向该会话的其他成员广播，不是所有人
+            broadcastToConversation(conversationId, userId, statusMap);
 
         } catch (Exception e) {
             log.error("广播正在输入状态异常", e);
@@ -681,12 +735,38 @@ public class ImWebSocketEndpoint {
      */
     private void broadcastOnlineStatus(Long userId, boolean online) {
         try {
-            Map<String, Object> statusMap = buildStatusMessage("online", userId, online);
+            // 获取用户详细信息
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("userId", userId);
+            userInfo.put("online", online);
+            userInfo.put("timestamp", System.currentTimeMillis());
+
+            // 尝试获取用户详细信息
+            if (staticImUserMapper != null) {
+                try {
+                    com.ruoyi.im.domain.ImUser user = staticImUserMapper.selectImUserById(userId);
+                    if (user != null) {
+                        userInfo.put("userName", user.getNickname() != null ? user.getNickname() : user.getUsername());
+                        userInfo.put("avatar", user.getAvatar());
+                        userInfo.put("status", user.getStatus());
+                    }
+                } catch (Exception e) {
+                    log.warn("获取用户信息失败: userId={}", userId, e);
+                }
+            }
+
+            Map<String, Object> statusMap = new HashMap<>();
+            statusMap.put("type", online ? "online" : "offline");
+            statusMap.put("userId", userId);
+            statusMap.put("userInfo", userInfo);
+            statusMap.put("timestamp", System.currentTimeMillis());
 
             ObjectMapper mapper = new ObjectMapper();
             String messageJson = mapper.writeValueAsString(statusMap);
 
             broadcastToAllOnline(messageJson);
+
+            log.info("广播在线状态: userId={}, online={}", userId, online);
 
         } catch (Exception e) {
             log.error("广播在线状态异常", e);
@@ -728,6 +808,55 @@ public class ImWebSocketEndpoint {
                     log.error("发送消息失败: sessionId={}", session.getId(), e);
                 }
             }
+        }
+    }
+
+    /**
+     * 广播消息给会话中的其他成员（排除发送者）
+     *
+     * @param conversationId 会话ID
+     * @param excludeUserId  排除的用户ID（通常是发送者）
+     * @param message        消息对象
+     */
+    private void broadcastToConversation(Long conversationId, Long excludeUserId, Object message) {
+        try {
+            // 获取会话成员
+            if (staticConversationMemberMapper == null) {
+                log.warn("conversationMemberMapper 未初始化，无法广播消息");
+                return;
+            }
+
+            List<com.ruoyi.im.domain.ImConversationMember> members =
+                staticConversationMemberMapper.selectByConversationId(conversationId);
+
+            if (members == null || members.isEmpty()) {
+                return;
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            String messageJson = mapper.writeValueAsString(message);
+
+            // 向会话中的每个成员发送消息
+            for (com.ruoyi.im.domain.ImConversationMember member : members) {
+                Long targetUserId = member.getUserId();
+
+                // 不发送给排除的用户（通常是发送者自己）
+                if (targetUserId.equals(excludeUserId)) {
+                    continue;
+                }
+
+                Session targetSession = onlineUsers.get(targetUserId);
+                if (targetSession != null && targetSession.isOpen()) {
+                    try {
+                        targetSession.getBasicRemote().sendText(messageJson);
+                    } catch (IOException e) {
+                        log.error("发送消息给会话成员失败: userId={}", targetUserId, e);
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("广播消息到会话异常: conversationId={}", conversationId, e);
         }
     }
 

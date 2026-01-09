@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { isLoggedIn } from '@/utils/im-user'
 
 import imRoutes from './modules/im'
 
@@ -35,8 +36,19 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  // 开发阶段取消登录验证，允许直接访问所有页面
-  next()
+  // 如果是登录页面，允许直接访问
+  if (to.path === '/login') {
+    next()
+    return
+  }
+  
+  // 检查用户是否已登录
+  if (isLoggedIn()) {
+    next()
+  } else {
+    // 未登录，跳转到登录页面
+    next('/login')
+  }
 })
 
 router.afterEach(to => {

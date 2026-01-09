@@ -1,5 +1,6 @@
 package com.ruoyi.im.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.im.domain.ImMessage;
 import org.apache.ibatis.annotations.Param;
 
@@ -10,7 +11,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
-public interface ImMessageMapper {
+public interface ImMessageMapper extends BaseMapper<ImMessage> {
 
     /**
      * 查询消息

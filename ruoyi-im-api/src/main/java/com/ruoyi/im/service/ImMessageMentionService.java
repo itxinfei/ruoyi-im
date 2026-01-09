@@ -4,6 +4,7 @@ import com.ruoyi.im.domain.ImMessageMention;
 import com.ruoyi.im.dto.mention.ImMentionInfo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 消息@提及服务接口
@@ -61,4 +62,22 @@ public interface ImMessageMentionService {
      * @return @提及信息
      */
     ImMentionInfo parseMentions(String content);
+
+    /**
+     * 获取会话中可以@的用户列表
+     *
+     * @param conversationId 会话ID
+     * @param keyword 搜索关键词
+     * @return 可@的用户列表
+     */
+    List<Map<String, Object>> getMentionableUsers(Long conversationId, String keyword);
+
+    /**
+     * 检查用户是否可以@所有人
+     *
+     * @param conversationId 会话ID
+     * @param userId 用户ID
+     * @return 是否可以@所有人
+     */
+    boolean canMentionAll(Long conversationId, Long userId);
 }

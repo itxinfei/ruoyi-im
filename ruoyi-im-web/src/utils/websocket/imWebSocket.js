@@ -80,18 +80,25 @@ class ImWebSocket {
     this.status = WS_STATUS.CONNECTING
     this.emit('statusChange', this.status)
 
+    // 获取当前用户ID
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+    const userId = userInfo.userId || userInfo.id
+
     // 构建 WebSocket URL
     const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
     const host = import.meta.env.VITE_APP_WS_API || location.host
     this.url = wsUrl || `${protocol}//${host}/ws/im`
 
-    // 添加 token 参数
-    const urlWithToken = `${this.url}?token=${encodeURIComponent(token)}`
+    // 添加 token 和 userId 参数
+    let urlWithParams = `${this.url}?token=${encodeURIComponent(token)}`
+    if (userId) {
+      urlWithParams += `&userId=${userId}`
+    }
 
-    this.log(`正在连接 WebSocket: ${this.url}`)
+    this.log(`正在连接 WebSocket: ${this.url}, userId: ${userId}`)
 
     try {
-      this.ws = new WebSocket(urlWithToken)
+      this.ws = new WebSocket(urlWithParams)
       this.initEvents()
     } catch (error) {
       this.error('创建 WebSocket 失败:', error)

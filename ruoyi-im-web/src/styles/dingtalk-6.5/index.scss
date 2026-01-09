@@ -141,7 +141,7 @@ body {
 }
 
 // ============================================
-// 3. 布局样式（三栏布局）
+// 3. 布局样式（钉钉6.5四栏布局）
 // ============================================
 .dt-layout {
   display: flex;
@@ -149,39 +149,43 @@ body {
   height: 100vh;
   overflow: hidden;
 
-  // 左侧导航栏
-  .dt-layout__sidebar {
-    width: 64px;
+  // 左侧导航栏 (68px图标导航 - 钉钉6.5标准)
+  .dt-sidebar {
+    width: 68px;
     height: 100%;
     background: var(--dt-bg-component);
-    border-right: 1px solid var(--dt-border-light);
+    border-right: 1px solid var(--dt-border-lighter);
     transition: width var(--dt-transition-base);
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 12px 0;
-
-    &.expanded {
-      width: 192px;
-      align-items: stretch;
-      padding: 12px;
-    }
   }
 
-  // 中间会话列表
-  .dt-layout__sessions {
-    width: 280px;
+  // 中间会话列表 (320px - 钉钉6.5标准)
+  .dt-sessions {
+    width: 320px;
     height: 100%;
     background: var(--dt-bg-component);
-    border-right: 1px solid var(--dt-border-light);
+    border-right: 1px solid var(--dt-border-lighter);
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
   }
 
-  // 右侧聊天区域
-  .dt-layout__chat {
+  // 右侧内容区
+  .dt-content {
+    flex: 1;
+    height: 100%;
+    background: var(--dt-bg-page);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  // 右侧聊天区域 (兼容旧class)
+  .dt-chat {
     flex: 1;
     height: 100%;
     background: var(--dt-bg-page);
@@ -309,11 +313,24 @@ body {
 // ============================================
 .dt-sessions {
   &__header {
-    height: 60px;
-    padding: 0 16px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 1px solid var(--dt-border-lighter);
+  }
+
+  &__title {
+    font-size: var(--dt-font-size-lg);
+    font-weight: 500;
+    color: var(--dt-text-primary);
+    padding: 0 4px;
+  }
+
+  &__search-row {
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--dt-border-lighter);
+    gap: 8px;
   }
 
   &__search {
@@ -348,7 +365,6 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: 12px;
 
     .el-button {
       width: 32px;

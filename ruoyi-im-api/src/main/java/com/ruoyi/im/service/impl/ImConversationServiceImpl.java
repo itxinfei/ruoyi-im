@@ -186,8 +186,14 @@ public class ImConversationServiceImpl implements ImConversationService {
             // 如果没找到PRIVATE类型，再查找SINGLE类型（历史数据兼容）
             existingConversation = imConversationMapper.selectByTypeAndTarget("SINGLE", Math.min(userId, request.getPeerUserId()), Math.max(userId, request.getPeerUserId()));
         }
+
+        Long conversationId;
         if (existingConversation != null) {
-            return existingConversation.getId();
+            conversationId = existingConversation.getId();
+            // 确保双方都是会话成员（修复历史数据可能缺失成员记录的问题）
+            ensureConversationMember(conversationId, userId);
+            ensureConversationMember(conversationId, request.getPeerUserId());
+            return conversationId;
         }
 
         // 创建会话
@@ -203,9 +209,9 @@ public class ImConversationServiceImpl implements ImConversationService {
             throw new BusinessException(ImErrorCode.CREATE_CONVERSATION_FAILED, "创建会话失败");
         }
 
-        Long conversationId = conversation.getId();
+        conversationId = conversation.getId();
 
-        // 添加两个用户到会话成员
+        // 添加两个用户到会话成员（确保双向会话记录）
         addMemberToConversation(conversationId, userId);
         addMemberToConversation(conversationId, request.getPeerUserId());
 
@@ -491,5 +497,24 @@ public class ImConversationServiceImpl implements ImConversationService {
             }
         }
         return null;
+    }
+
+    /**
+     * 确保用户是会话成员，如果不存在则添加
+     *
+     * @param conversationId 会话ID
+     * @param userId 用户ID
+     */
+    private void ensureConversationMember(Long conversationId, Long userId) {
+        ImConversationMember existingMember = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        if (existingMember == null) {
+            // 用户不在会话中，添加为成员
+            addMemberToConversation(conversationId, userId);
+        } else if (existingMember.getIsDeleted() != null && existingMember.getIsDeleted() == 1) {
+            // 用户已被标记为删除，恢复成员状态
+            existingMember.setIsDeleted(0);
+            existingMember.setUpdateTime(LocalDateTime.now());
+            imConversationMemberMapper.updateById(existingMember);
+        }
     }
 }

@@ -33,7 +33,7 @@
         <div class="quick-actions">
           <el-tooltip content="通知" placement="bottom">
             <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="badge-item">
-              <el-button :icon="Bell" text />
+              <el-button :icon="Bell" text @click="toggleNotification" />
             </el-badge>
           </el-tooltip>
           <el-tooltip content="设置" placement="bottom">
@@ -59,6 +59,22 @@
               <el-dropdown-item command="settings">
                 <el-icon><Setting /></el-icon>
                 系统设置
+              </el-dropdown-item>
+              <el-dropdown-item command="status">
+                <el-icon><CircleCheck /></el-icon>
+                在线状态
+              </el-dropdown-item>
+              <el-dropdown-item command="theme">
+                <el-icon><Sunny /></el-icon>
+                主题切换
+              </el-dropdown-item>
+              <el-dropdown-item command="help">
+                <el-icon><QuestionFilled /></el-icon>
+                帮助与反馈
+              </el-dropdown-item>
+              <el-dropdown-item command="about">
+                <el-icon><InfoFilled /></el-icon>
+                关于
               </el-dropdown-item>
               <el-dropdown-item divided command="logout">
                 <el-icon><SwitchButton /></el-icon>
@@ -1383,22 +1399,185 @@
       </div>
     </el-dialog>
 
+    <!-- 通知面板 -->
+    <notification-panel v-model:visible="notificationVisible" @close="notificationVisible = false" />
+
     <!-- 主题设置对话框 -->
-    <el-dialog v-model="themeSettingsVisible" title="主题设置" width="400px" :append-to-body="true">
-      <div class="theme-settings">
-        <div class="setting-item">
-          <span class="setting-label">深色模式</span>
-          <el-switch v-model="isDarkMode" @change="toggleDarkMode" />
+    <el-dialog v-model="themeSettingsVisible" title="系统设置" width="600px" :append-to-body="true">
+      <el-tabs v-model="settingsTab" class="settings-tabs">
+        <el-tab-pane label="界面设置" name="interface">
+          <div class="settings-content">
+            <div class="setting-item">
+              <span class="setting-label">深色模式</span>
+              <el-switch v-model="isDarkMode" @change="toggleDarkMode" />
+            </div>
+            <div class="setting-item">
+              <span class="setting-label">消息提示音</span>
+              <el-switch v-model="messageSoundEnabled" />
+            </div>
+            <div class="setting-item">
+              <span class="setting-label">桌面通知</span>
+              <el-switch v-model="desktopNotificationEnabled" @change="toggleDesktopNotification" />
+            </div>
+            <div class="setting-item">
+              <span class="setting-label">字体大小</span>
+              <el-select v-model="fontSize" placeholder="选择字体大小" style="width: 150px">
+                <el-option label="小" value="small" />
+                <el-option label="中" value="medium" />
+                <el-option label="大" value="large" />
+              </el-select>
+            </div>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="隐私设置" name="privacy">
+          <div class="settings-content">
+            <div class="setting-item">
+              <span class="setting-label">显示在线状态</span>
+              <el-switch v-model="showOnlineStatus" />
+            </div>
+            <div class="setting-item">
+              <span class="setting-label">允许陌生人查找</span>
+              <el-switch v-model="allowStrangerFind" />
+            </div>
+            <div class="setting-item">
+              <span class="setting-label">允许陌生人发送消息</span>
+              <el-switch v-model="allowStrangerMessage" />
+            </div>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="账户安全" name="security">
+          <div class="settings-content">
+            <div class="setting-item">
+              <span class="setting-label">两步验证</span>
+              <el-switch v-model="twoFactorAuth" />
+            </div>
+            <div class="setting-item">
+              <span class="setting-label">登录设备管理</span>
+              <el-button link type="primary" @click="showDeviceManagement">查看设备</el-button>
+            </div>
+            <div class="setting-item">
+              <span class="setting-label">修改密码</span>
+              <el-button link type="primary" @click="showChangePassword">修改密码</el-button>
+            </div>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="消息设置" name="message">
+          <div class="settings-content">
+            <div class="setting-item">
+              <span class="setting-label">消息保留时长</span>
+              <el-select v-model="messageRetention" placeholder="选择保留时长" style="width: 150px">
+                <el-option label="30天" :value="30" />
+                <el-option label="90天" :value="90" />
+                <el-option label="180天" :value="180" />
+                <el-option label="永久" :value="0" />
+              </el-select>
+            </div>
+            <div class="setting-item">
+              <span class="setting-label">自动清理已读消息</span>
+              <el-switch v-model="autoCleanReadMessages" />
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+      <template #footer>
+        <el-button @click="themeSettingsVisible = false">关闭</el-button>
+        <el-button type="primary" @click="saveSettings">保存设置</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 个人资料对话框 -->
+    <el-dialog v-model="profileDialogVisible" title="个人资料" width="600px" :append-to-body="true">
+      <div class="profile-dialog">
+        <div class="profile-header">
+          <el-avatar :size="80" :src="currentUser?.avatar">
+            {{ currentUser?.name?.charAt(0) || 'U' }}
+          </el-avatar>
+          <div class="profile-basic">
+            <h3>{{ currentUser?.name || '用户' }}</h3>
+            <p class="user-id">ID: {{ currentUser?.userId || '-' }}</p>
+          </div>
         </div>
-        <div class="setting-item">
-          <span class="setting-label">消息提示音</span>
-          <el-switch v-model="messageSoundEnabled" />
-        </div>
-        <div class="setting-item">
-          <span class="setting-label">桌面通知</span>
-          <el-switch v-model="desktopNotificationEnabled" @change="toggleDesktopNotification" />
+        <el-form :model="profileForm" label-width="100px">
+          <el-form-item label="昵称">
+            <el-input v-model="profileForm.nickname" placeholder="请输入昵称" />
+          </el-form-item>
+          <el-form-item label="个性签名">
+            <el-input v-model="profileForm.signature" type="textarea" :rows="3" placeholder="请输入个性签名" />
+          </el-form-item>
+          <el-form-item label="手机号">
+            <el-input v-model="profileForm.phone" placeholder="请输入手机号" />
+          </el-form-item>
+          <el-form-item label="邮箱">
+            <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <el-button @click="profileDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveProfile">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 在线状态对话框 -->
+    <el-dialog v-model="onlineStatusDialogVisible" title="在线状态" width="400px" :append-to-body="true">
+      <div class="online-status-dialog">
+        <div
+          v-for="status in onlineStatusOptions"
+          :key="status.value"
+          class="status-option"
+          :class="{ active: currentOnlineStatus === status.value }"
+          @click="selectOnlineStatus(status.value)"
+        >
+          <div class="status-icon" :class="status.iconClass">
+            <el-icon><component :is="status.icon" /></el-icon>
+          </div>
+          <div class="status-info">
+            <div class="status-name">{{ status.label }}</div>
+            <div class="status-desc">{{ status.desc }}</div>
+          </div>
+          <el-icon v-if="currentOnlineStatus === status.value" class="status-check">
+            <CircleCheck />
+          </el-icon>
         </div>
       </div>
+      <template #footer>
+        <el-button @click="onlineStatusDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveOnlineStatus">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 主题切换对话框 -->
+    <el-dialog v-model="themeDialogVisible" title="主题切换" width="500px" :append-to-body="true">
+      <div class="theme-dialog">
+        <div class="theme-options">
+          <div
+            v-for="theme in themeOptions"
+            :key="theme.value"
+            class="theme-option"
+            :class="{ active: currentTheme === theme.value }"
+            @click="selectTheme(theme.value)"
+          >
+            <div class="theme-preview" :class="theme.previewClass">
+              <div class="preview-header"></div>
+              <div class="preview-body">
+                <div class="preview-sidebar"></div>
+                <div class="preview-content"></div>
+              </div>
+            </div>
+            <div class="theme-info">
+              <div class="theme-name">{{ theme.label }}</div>
+              <div class="theme-desc">{{ theme.desc }}</div>
+            </div>
+            <el-icon v-if="currentTheme === theme.value" class="theme-check">
+              <CircleCheck />
+            </el-icon>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="themeDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveTheme">确定</el-button>
+      </template>
     </el-dialog>
 
     <!-- 文件分享对话框 -->
@@ -1584,15 +1763,20 @@ import {
   ArrowLeft,
   SwitchButton,
   Folder,
+  Clock,
+  Moon,
+  QuestionFilled,
+  InfoFilled,
+  Sunny,
 } from '@element-plus/icons-vue'
 import { formatTime as formatTimeUtil } from '@/utils/format/time'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { useVoiceRecorder } from '@/utils/audio/useVoiceRecorder'
+import { getCurrentUserInfo } from '@/utils/im-user'
 import { listSession } from '@/api/im/session'
 import { uploadFile, uploadImage } from '@/api/im/file'
 import { sendMessage as apiSendMessage } from '@/api/im/message'
-import {
-  listContact,
+import { listContact,
   addContact,
   searchContacts,
   getReceivedFriendRequests,
@@ -1602,6 +1786,7 @@ import {
   getDepartmentTree,
   getDepartmentMembers,
 } from '@/api/im/organization'
+import NotificationPanel from '@/components/Notification/NotificationPanel.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -2773,11 +2958,10 @@ const downloadSingleFile = file => {
 
 // 当前用户
 const currentUser = computed(() => {
-  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
-  return {
-    name: userInfo.nickName || userInfo.userName || '用户',
-    avatar: userInfo.avatar || null,
-    userId: userInfo.userId,
+  return getCurrentUserInfo() || {
+    name: '用户',
+    avatar: null,
+    userId: null,
   }
 })
 
@@ -3087,6 +3271,10 @@ const openApp = appKey => {
 
 const showSettings = () => {
   themeSettingsVisible.value = true
+}
+
+const toggleNotification = () => {
+  notificationVisible.value = !notificationVisible.value
 }
 
 // ==================== 新增功能变量 ====================
@@ -3617,11 +3805,178 @@ const previewingFile = ref(null)
 
 // 主题设置
 const themeSettingsVisible = ref(false)
+const settingsTab = ref('interface')
 const isDarkMode = ref(localStorage.getItem('darkMode') === 'true')
 const messageSoundEnabled = ref(localStorage.getItem('messageSoundEnabled') !== 'false')
 const desktopNotificationEnabled = ref(
   localStorage.getItem('desktopNotificationEnabled') !== 'false'
 )
+const fontSize = ref(localStorage.getItem('fontSize') || 'medium')
+const showOnlineStatus = ref(localStorage.getItem('showOnlineStatus') !== 'false')
+const allowStrangerFind = ref(localStorage.getItem('allowStrangerFind') !== 'false')
+const allowStrangerMessage = ref(localStorage.getItem('allowStrangerMessage') !== 'false')
+const twoFactorAuth = ref(localStorage.getItem('twoFactorAuth') === 'true')
+const messageRetention = ref(parseInt(localStorage.getItem('messageRetention') || '30'))
+const autoCleanReadMessages = ref(localStorage.getItem('autoCleanReadMessages') === 'true')
+
+// 保存设置
+const saveSettings = () => {
+  localStorage.setItem('darkMode', String(isDarkMode.value))
+  localStorage.setItem('messageSoundEnabled', String(messageSoundEnabled.value))
+  localStorage.setItem('desktopNotificationEnabled', String(desktopNotificationEnabled.value))
+  localStorage.setItem('fontSize', fontSize.value)
+  localStorage.setItem('showOnlineStatus', String(showOnlineStatus.value))
+  localStorage.setItem('allowStrangerFind', String(allowStrangerFind.value))
+  localStorage.setItem('allowStrangerMessage', String(allowStrangerMessage.value))
+  localStorage.setItem('twoFactorAuth', String(twoFactorAuth.value))
+  localStorage.setItem('messageRetention', String(messageRetention.value))
+  localStorage.setItem('autoCleanReadMessages', String(autoCleanReadMessages.value))
+  ElMessage.success('设置保存成功')
+  themeSettingsVisible.value = false
+}
+
+// 显示设备管理
+const showDeviceManagement = () => {
+  ElMessage.info('设备管理功能开发中')
+}
+
+// 显示修改密码
+const showChangePassword = () => {
+  ElMessage.info('修改密码功能开发中')
+}
+
+// 通知面板
+const notificationVisible = ref(false)
+
+// 个人资料对话框
+const profileDialogVisible = ref(false)
+
+// 个人资料表单
+const profileForm = ref({
+  nickname: '',
+  signature: '',
+  phone: '',
+  email: '',
+})
+
+// 在线状态对话框
+const onlineStatusDialogVisible = ref(false)
+const currentOnlineStatus = ref(localStorage.getItem('onlineStatus') || 'online')
+
+// 在线状态选项
+const onlineStatusOptions = [
+  {
+    value: 'online',
+    label: '在线',
+    desc: '我可以接收消息',
+    icon: CircleCheck,
+    iconClass: 'status-online',
+  },
+  {
+    value: 'busy',
+    label: '忙碌',
+    desc: '暂时无法回复',
+    icon: Clock,
+    iconClass: 'status-busy',
+  },
+  {
+    value: 'away',
+    label: '离开',
+    desc: '暂时离开',
+    icon: Moon,
+    iconClass: 'status-away',
+  },
+  {
+    value: 'offline',
+    label: '隐身',
+    desc: '不显示在线状态',
+    icon: Hide,
+    iconClass: 'status-offline',
+  },
+]
+
+// 显示在线状态对话框
+const showOnlineStatusDialog = () => {
+  onlineStatusDialogVisible.value = true
+}
+
+// 选择在线状态
+const selectOnlineStatus = status => {
+  currentOnlineStatus.value = status
+}
+
+// 保存在线状态
+const saveOnlineStatus = () => {
+  localStorage.setItem('onlineStatus', currentOnlineStatus.value)
+  ElMessage.success('在线状态已更新')
+  onlineStatusDialogVisible.value = false
+}
+
+// 主题切换对话框
+const themeDialogVisible = ref(false)
+const currentTheme = ref(localStorage.getItem('theme') || 'light')
+
+// 主题选项
+const themeOptions = [
+  {
+    value: 'light',
+    label: '浅色主题',
+    desc: '清爽明亮的界面风格',
+    previewClass: 'theme-light',
+  },
+  {
+    value: 'dark',
+    label: '深色主题',
+    desc: '护眼的深色界面风格',
+    previewClass: 'theme-dark',
+  },
+  {
+    value: 'auto',
+    label: '自动切换',
+    desc: '根据系统设置自动切换',
+    previewClass: 'theme-auto',
+  },
+]
+
+// 显示主题对话框
+const showThemeDialog = () => {
+  themeDialogVisible.value = true
+}
+
+// 选择主题
+const selectTheme = theme => {
+  currentTheme.value = theme
+}
+
+// 保存主题
+const saveTheme = () => {
+  localStorage.setItem('theme', currentTheme.value)
+  
+  if (currentTheme.value === 'dark') {
+    isDarkMode.value = true
+    document.documentElement.classList.add('dark')
+  } else if (currentTheme.value === 'light') {
+    isDarkMode.value = false
+    document.documentElement.classList.remove('dark')
+  } else {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    isDarkMode.value = prefersDark
+    document.documentElement.classList.toggle('dark', prefersDark)
+  }
+  
+  ElMessage.success('主题已更新')
+  themeDialogVisible.value = false
+}
+
+// 保存个人资料
+const saveProfile = () => {
+  ElMessage.success('个人资料保存成功')
+  profileDialogVisible.value = false
+  // 更新本地存储的用户信息
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+  userInfo.nickName = profileForm.value.nickname
+  localStorage.setItem('userInfo', JSON.stringify(userInfo))
+}
 
 // 输入框引用
 const inputRef = ref(null)
@@ -4080,9 +4435,43 @@ const handleUserCommand = async command => {
       // 用户取消
     }
   } else if (command === 'profile') {
-    ElMessage.info('个人资料')
+    // 初始化个人资料表单
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+    profileForm.value = {
+      nickname: userInfo.nickName || userInfo.userName || '',
+      signature: userInfo.signature || '',
+      phone: userInfo.phone || '',
+      email: userInfo.email || '',
+    }
+    profileDialogVisible.value = true
   } else if (command === 'settings') {
     showSettings()
+  } else if (command === 'status') {
+    // 显示在线状态选择对话框
+    showOnlineStatusDialog()
+  } else if (command === 'theme') {
+    // 显示主题切换对话框
+    showThemeDialog()
+  } else if (command === 'help') {
+    // 打开帮助与反馈页面
+    ElMessageBox.alert(
+      '如需帮助，请联系系统管理员或查看用户手册',
+      '帮助与反馈',
+      {
+        confirmButtonText: '我知道了',
+        type: 'info',
+      }
+    )
+  } else if (command === 'about') {
+    // 显示关于信息
+    ElMessageBox.alert(
+      '企业级即时通讯与协同办公系统 v1.0\n\n基于若依框架构建\n支持私有化部署',
+      '关于',
+      {
+        confirmButtonText: '确定',
+        type: 'info',
+      }
+    )
   }
 }
 
@@ -4559,6 +4948,63 @@ $shadow-lg:
   0 10px 15px -3px rgba(0, 0, 0, 0.1),
   0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
+// 用户下拉菜单样式
+:deep(.el-dropdown-menu) {
+  padding: 8px 0;
+  min-width: 200px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  border: 1px solid #e5e6eb;
+  background-color: #fff;
+}
+
+:deep(.el-dropdown-menu__item) {
+  padding: 12px 18px;
+  font-size: 14px;
+  color: #1d2129;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  border-radius: 0;
+
+  &:hover {
+    background: linear-gradient(90deg, #f0f7ff 0%, #ffffff 100%);
+    color: #165dff;
+  }
+
+  .el-icon {
+    font-size: 18px;
+    color: #4e5969;
+    transition: color 0.3s ease;
+  }
+
+  &:hover .el-icon {
+    color: #165dff;
+    transform: scale(1.1);
+  }
+
+  &.is-disabled {
+    color: #c9cdd4;
+    cursor: not-allowed;
+
+    .el-icon {
+      color: #c9cdd4;
+    }
+
+    &:hover {
+      background: transparent;
+      color: #c9cdd4;
+    }
+  }
+
+  &.el-dropdown-menu__item--divided {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid #e5e6eb;
+  }
+}
+
 // 滚动条样式
 @mixin web-scrollbar {
   &::-webkit-scrollbar {
@@ -4678,20 +5124,21 @@ $shadow-lg:
     .header-right {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
 
       .quick-actions {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 8px;
 
         .el-button {
-          color: $text-secondary;
+          color: #4e5969;
           padding: 8px;
+          border-radius: 4px;
 
           &:hover {
-            color: $primary-color;
-            background: $bg-hover;
+            color: #165dff;
+            background: #f2f3f5;
           }
         }
 
@@ -4706,26 +5153,40 @@ $shadow-lg:
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 6px 12px;
+        padding: 6px 14px;
         border-radius: 20px;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
 
         &:hover {
-          background: $bg-gray;
+          background: #f5f7fa;
+          border-color: #e5e6eb;
         }
 
         .el-avatar {
-          background: linear-gradient(135deg, #1677ff 0%, #69b1ff 100%);
+          background: linear-gradient(135deg, #165dff 0%, #4facfe 100%);
+          border: 2px solid #fff;
+          box-shadow: 0 3px 10px rgba(22, 93, 255, 0.25);
         }
 
         .user-name {
           font-size: 14px;
-          color: $text-primary;
-          max-width: 80px;
+          font-weight: 500;
+          color: #1d2129;
+          max-width: 100px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+        }
+
+        .el-icon {
+          color: #86909c;
+          transition: transform 0.2s;
+        }
+
+        &:hover .el-icon {
+          transform: rotate(180deg);
         }
       }
     }
@@ -7030,6 +7491,32 @@ $shadow-lg:
   }
 }
 
+// 个人资料对话框
+.profile-dialog {
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid $border-base;
+    margin-bottom: 20px;
+
+    .profile-basic {
+      h3 {
+        margin: 0 0 8px 0;
+        font-size: 18px;
+        color: $text-primary;
+      }
+
+      .user-id {
+        margin: 0;
+        font-size: 14px;
+        color: $text-secondary;
+      }
+    }
+  }
+}
+
 // 深色模式
 :deep(.dark) {
   background: #1a1a1a;
@@ -7128,6 +7615,192 @@ $shadow-lg:
 
     .arrow-icon {
       color: #ccc;
+    }
+  }
+}
+
+// 在线状态对话框样式
+.online-status-dialog {
+  .status-option {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 2px solid $border-base;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    &:hover {
+      border-color: $primary-color;
+      background: rgba(22, 119, 255, 0.05);
+    }
+
+    &.active {
+      border-color: $primary-color;
+      background: rgba(22, 119, 255, 0.1);
+    }
+
+    .status-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin-right: 12px;
+
+      &.status-online {
+        background: #52c41a;
+        color: white;
+      }
+
+      &.status-busy {
+        background: #faad14;
+        color: white;
+      }
+
+      &.status-away {
+        background: #1890ff;
+        color: white;
+      }
+
+      &.status-offline {
+        background: #8c8c8c;
+        color: white;
+      }
+    }
+
+    .status-info {
+      flex: 1;
+
+      .status-name {
+        font-size: 16px;
+        font-weight: 500;
+        color: $text-primary;
+        margin-bottom: 4px;
+      }
+
+      .status-desc {
+        font-size: 13px;
+        color: $text-secondary;
+      }
+    }
+
+    .status-check {
+      color: $primary-color;
+      font-size: 20px;
+    }
+  }
+}
+
+// 主题切换对话框样式
+.theme-dialog {
+  .theme-options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .theme-option {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border: 2px solid $border-base;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+
+      &:hover {
+        border-color: $primary-color;
+        background: rgba(22, 119, 255, 0.05);
+      }
+
+      &.active {
+        border-color: $primary-color;
+        background: rgba(22, 119, 255, 0.1);
+      }
+
+      .theme-preview {
+        width: 80px;
+        height: 60px;
+        border-radius: 6px;
+        margin-right: 16px;
+        overflow: hidden;
+        border: 1px solid $border-base;
+
+        .preview-header {
+          height: 12px;
+          background: $primary-color;
+        }
+
+        .preview-body {
+          display: flex;
+          height: calc(100% - 12px);
+
+          .preview-sidebar {
+            width: 20px;
+            background: #f0f0f0;
+          }
+
+          .preview-content {
+            flex: 1;
+            background: #fafafa;
+          }
+        }
+
+        &.theme-dark {
+          .preview-header {
+            background: #1677ff;
+          }
+
+          .preview-body {
+            .preview-sidebar {
+              background: #2a2a2a;
+            }
+
+            .preview-content {
+              background: #1a1a1a;
+            }
+          }
+        }
+
+        &.theme-auto {
+          .preview-header {
+            background: linear-gradient(90deg, #1677ff 50%, #1a1a1a 50%);
+          }
+
+          .preview-body {
+            .preview-sidebar {
+              background: linear-gradient(180deg, #f0f0f0 50%, #2a2a2a 50%);
+            }
+
+            .preview-content {
+              background: linear-gradient(180deg, #fafafa 50%, #1a1a1a 50%);
+            }
+          }
+        }
+      }
+
+      .theme-info {
+        flex: 1;
+
+        .theme-name {
+          font-size: 16px;
+          font-weight: 500;
+          color: $text-primary;
+          margin-bottom: 4px;
+        }
+
+        .theme-desc {
+          font-size: 13px;
+          color: $text-secondary;
+        }
+      }
+
+      .theme-check {
+        color: $primary-color;
+        font-size: 20px;
+      }
     }
   }
 }

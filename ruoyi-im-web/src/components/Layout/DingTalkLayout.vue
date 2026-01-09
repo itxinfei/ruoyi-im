@@ -1,14 +1,22 @@
 <template>
   <div class="dt-layout">
-    <!-- 左侧导航栏 -->
-    <aside class="dt-sidebar" :class="{ expanded: sidebarExpanded }">
-      <!-- Logo -->
-      <div class="dt-sidebar__logo" @click="handleLogoClick">
-        <span v-if="!sidebarExpanded">钉</span>
-        <span v-else>钉钉IM</span>
+    <!-- 左侧导航栏 (68px 图标导航) -->
+    <aside class="dt-sidebar">
+      <!-- Logo区 -->
+      <div class="dt-sidebar__logo">
+        <svg class="ding-logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="8" fill="url(#logoGradient)"/>
+          <path d="M24 12L18 18H14V22L8 28V36H16V32H20V36H28V28L32 24H36V16H28L24 12Z" fill="white"/>
+          <defs>
+            <linearGradient id="logoGradient" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#1890FF"/>
+              <stop offset="1" stop-color="#096DD9"/>
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
 
-      <!-- 导航菜单 -->
+      <!-- 主导航菜单 -->
       <nav class="dt-sidebar__nav">
         <div
           v-for="item in navItems"
@@ -16,31 +24,26 @@
           class="dt-sidebar__item"
           :class="{ active: activeNav === item.key }"
           @click="handleNavClick(item)"
+          :title="item.label"
         >
-          <el-icon :size="20">
+          <el-icon :size="24">
             <component :is="item.icon" />
           </el-icon>
-          <span v-if="sidebarExpanded" class="label">{{ item.label }}</span>
-          <span v-if="item.badge && !sidebarExpanded" class="badge">{{ item.badge }}</span>
           <!-- 未读角标 -->
-          <el-badge
-            v-if="item.unread > 0 && sidebarExpanded"
-            :value="item.unread"
-            :max="99"
-            class="nav-badge"
-          />
+          <span v-if="item.unread > 0" class="dt-sidebar__badge">
+            {{ item.unread > 99 ? '99+' : item.unread }}
+          </span>
         </div>
       </nav>
 
       <!-- 底部用户区 -->
       <div class="dt-sidebar__bottom">
-        <div class="dt-sidebar__avatar" @click="handleProfileClick">
-          <el-avatar :size="40" :src="currentUser.avatar">
+        <div class="dt-sidebar__avatar" @click="handleProfileClick" :title="currentUser.nickname || '用户'">
+          <el-avatar :size="36" :src="currentUser.avatar">
             {{ currentUser.nickname?.charAt(0) || '?' }}
           </el-avatar>
-        </div>
-        <div v-if="sidebarExpanded" class="dt-sidebar__username">
-          {{ currentUser.nickname || '未登录' }}
+          <span v-if="isOnline" class="online-indicator online"></span>
+          <span v-else class="online-indicator offline"></span>
         </div>
       </div>
     </aside>
@@ -49,22 +52,24 @@
     <section class="dt-sessions">
       <!-- 搜索头 -->
       <header class="dt-sessions__header">
-        <div class="dt-sessions__search">
-          <el-icon><Search /></el-icon>
-          <input v-model="searchKeyword" type="text" placeholder="搜索" @input="handleSearch" />
+        <div class="dt-sessions__title">
+          {{ currentNavTitle }}
         </div>
-        <div class="dt-sessions__actions">
-          <el-button title="新建聊天" @click="handleAddChat">
-            <el-icon><Plus /></el-icon>
-          </el-button>
-          <el-button title="展开/收起" @click="toggleSidebarExpanded">
-            <el-icon><Expand v-if="!sidebarExpanded" /><Fold v-else /></el-icon>
-          </el-button>
+        <div class="dt-sessions__search-row">
+          <div class="dt-sessions__search">
+            <el-icon><Search /></el-icon>
+            <input v-model="searchKeyword" type="text" placeholder="搜索" @input="handleSearch" />
+          </div>
+          <div class="dt-sessions__actions">
+            <el-button title="新建聊天" @click="handleAddChat">
+              <el-icon><Plus /></el-icon>
+            </el-button>
+          </div>
         </div>
       </header>
 
-      <!-- 会话标签 -->
-      <div class="dt-sessions__tabs">
+      <!-- 会话标签（仅消息模块显示） -->
+      <div v-if="activeNav === 'message'" class="dt-sessions__tabs">
         <div
           v-for="tab in sessionTabs"
           :key="tab.key"
@@ -73,7 +78,7 @@
           @click="handleTabClick(tab)"
         >
           {{ tab.label }}
-          <span v-if="tab.unread > 0" class="badge">{{ tab.unread }}</span>
+          <span v-if="tab.unread > 0" class="dt-sessions__tab-badge">{{ tab.unread }}</span>
         </div>
       </div>
 
@@ -89,7 +94,7 @@
         >
           <!-- 头像 -->
           <div class="dt-sessions__item-avatar">
-            <el-avatar :size="48" :src="session.avatar">
+            <el-avatar :size="44" :src="session.avatar">
               {{ session.name?.charAt(0) || '?' }}
             </el-avatar>
             <!-- 在线状态 -->
@@ -129,7 +134,7 @@
           <!-- 元信息 -->
           <div class="dt-sessions__item-meta">
             <!-- 置顶标记 -->
-            <el-icon v-if="session.pinned" class="pin-icon" color="#ff6600">
+            <el-icon v-if="session.pinned" class="pin-icon">
               <Top />
             </el-icon>
             <!-- 未读数 -->
@@ -149,117 +154,156 @@
       </div>
     </section>
 
-    <!-- 右侧聊天区域 -->
-    <main class="dt-chat">
-      <!-- 聊天头 -->
-      <header v-if="activeSession" class="dt-chat__header">
-        <div class="dt-chat__title">
-          <span class="name">{{ activeSession.name }}</span>
-          <span v-if="activeSession.isGroup" class="members" @click="showMembersDrawer = true">
-            ({{ activeSession.memberCount || 0 }}人)
-          </span>
-        </div>
-        <div class="dt-chat__actions">
-          <el-button title="语音通话" @click="handlePhoneCall">
-            <el-icon><Phone /></el-icon>
-          </el-button>
-          <el-button title="视频会议" @click="handleVideoCall">
-            <el-icon><VideoCamera /></el-icon>
-          </el-button>
-          <el-button title="更多" @click="handleMoreAction">
-            <el-icon><MoreFilled /></el-icon>
-          </el-button>
-        </div>
-      </header>
+    <!-- 右侧内容区域 -->
+    <main class="dt-content">
+      <!-- 聊天区域 -->
+      <div v-if="activeNav === 'message'" class="dt-chat">
+        <!-- 聊天头 -->
+        <header v-if="activeSession" class="dt-chat__header">
+          <div class="dt-chat__title">
+            <span class="name">{{ activeSession.name }}</span>
+            <span v-if="activeSession.isGroup" class="members" @click="showMembersDrawer = true">
+              ({{ activeSession.memberCount || 0 }}人)
+            </span>
+          </div>
+          <div class="dt-chat__actions">
+            <el-button title="语音通话" @click="handlePhoneCall">
+              <el-icon><Phone /></el-icon>
+            </el-button>
+            <el-button title="视频会议" @click="handleVideoCall">
+              <el-icon><VideoCamera /></el-icon>
+            </el-button>
+            <el-button title="更多" @click="handleMoreAction">
+              <el-icon><MoreFilled /></el-icon>
+            </el-button>
+          </div>
+        </header>
 
-      <!-- 空状态 -->
-      <div v-else class="dt-chat__empty">
-        <el-empty description="选择一个会话开始聊天" />
-      </div>
-
-      <!-- 消息列表 -->
-      <div v-if="activeSession" ref="messagesRef" class="dt-chat__messages">
-        <!-- 时间分隔符 -->
-        <div
-          v-for="(divider, index) in timeDividers"
-          :key="'divider-' + index"
-          class="dt-chat__time-divider"
-        >
-          {{ divider }}
+        <!-- 空状态 -->
+        <div v-else class="dt-chat__empty">
+          <el-empty description="选择一个会话开始聊天" />
         </div>
 
         <!-- 消息列表 -->
-        <DingMessageBubble
-          v-for="message in displayMessages"
-          :key="message.id"
-          :message="message"
-          :is-own="message.senderId === currentUserId"
-          :is-group="activeSession.isGroup"
-          :current-user="currentUser"
-          :show-time="shouldShowTime(message)"
-          :show-actions="hoveredMessageId === message.id"
-          @mouseenter="hoveredMessageId = message.id"
-          @mouseleave="hoveredMessageId = null"
-          @click="handleMessageClick"
-          @retry="handleMessageRetry"
-          @copy="handleMessageCopy"
-          @recall="handleMessageRecall"
-          @edit="handleMessageEdit"
-          @reply="handleMessageReply"
-          @forward="handleMessageForward"
-          @favorite="handleMessageFavorite"
-          @select="handleMessageSelect"
-          @more="handleMessageMore"
-        />
-      </div>
+        <div v-if="activeSession" ref="messagesRef" class="dt-chat__messages">
+          <!-- 时间分隔符 -->
+          <div
+            v-for="(divider, index) in timeDividers"
+            :key="'divider-' + index"
+            class="dt-chat__time-divider"
+          >
+            {{ divider }}
+          </div>
 
-      <!-- 输入区域 -->
-      <div v-if="activeSession" class="dt-chat__input">
-        <!-- 工具栏 -->
-        <div class="dt-chat__toolbar">
-          <div class="dt-chat__tool-btn" @click="showEmojiPicker = !showEmojiPicker">
-            <el-icon><ChatDotRound /></el-icon>
+          <!-- 消息列表 -->
+          <DingMessageBubble
+            v-for="message in displayMessages"
+            :key="message.id"
+            :message="message"
+            :is-own="message.senderId === currentUserId"
+            :is-group="activeSession.isGroup"
+            :current-user="currentUser"
+            :show-time="shouldShowTime(message)"
+            :show-actions="hoveredMessageId === message.id"
+            @mouseenter="hoveredMessageId = message.id"
+            @mouseleave="hoveredMessageId = null"
+            @click="handleMessageClick"
+            @retry="handleMessageRetry"
+            @copy="handleMessageCopy"
+            @recall="handleMessageRecall"
+            @edit="handleMessageEdit"
+            @reply="handleMessageReply"
+            @forward="handleMessageForward"
+            @favorite="handleMessageFavorite"
+            @select="handleMessageSelect"
+            @more="handleMessageMore"
+          />
+        </div>
+
+        <!-- 输入区域 -->
+        <div v-if="activeSession" class="dt-chat__input">
+          <!-- 工具栏 -->
+          <div class="dt-chat__toolbar">
+            <div class="dt-chat__tool-btn" @click="showEmojiPicker = !showEmojiPicker">
+              <el-icon><ChatDotRound /></el-icon>
+            </div>
+            <div class="dt-chat__tool-btn" @click="handleFileUpload">
+              <el-icon><Folder /></el-icon>
+            </div>
+            <div class="dt-chat__tool-btn" @click="handleScreenshot">
+              <el-icon><Crop /></el-icon>
+            </div>
+            <div class="dt-chat__tool-btn" @click="handleAtMention">
+              <el-icon><At /></el-icon>
+            </div>
+            <div class="dt-chat__tool-btn" @click="handleHistorySearch">
+              <el-icon><Search /></el-icon>
+            </div>
+            <!-- 语音录制（内联组件） -->
+            <VoiceRecorder
+              @send="handleVoiceSend"
+            />
           </div>
-          <div class="dt-chat__tool-btn" @click="handleFileUpload">
-            <el-icon><Folder /></el-icon>
-          </div>
-          <div class="dt-chat__tool-btn" @click="handleScreenshot">
-            <el-icon><Crop /></el-icon>
-          </div>
-          <div class="dt-chat__tool-btn" @click="handleAtMention">
-            <el-icon><At /></el-icon>
-          </div>
-          <div class="dt-chat__tool-btn" @click="handleHistorySearch">
-            <el-icon><Search /></el-icon>
+
+          <!-- 输入框 -->
+          <textarea
+            ref="textareaRef"
+            v-model="messageInput"
+            class="dt-chat__textarea"
+            placeholder="输入消息，Enter 发送，Shift + Enter 换行"
+            rows="1"
+            @keydown="handleKeyDown"
+            @input="handleInput"
+          ></textarea>
+
+          <!-- 底部操作栏 -->
+          <div class="dt-chat__footer">
+            <span class="dt-chat__tip">按 Enter 发送</span>
+            <button class="dt-chat__send-btn" :disabled="!canSend" @click="handleSend">发送</button>
           </div>
         </div>
 
-        <!-- 输入框 -->
-        <textarea
-          ref="textareaRef"
-          v-model="messageInput"
-          class="dt-chat__textarea"
-          placeholder="输入消息，Enter 发送，Shift + Enter 换行"
-          rows="1"
-          @keydown="handleKeyDown"
-          @input="handleInput"
-        ></textarea>
-
-        <!-- 底部操作栏 -->
-        <div class="dt-chat__footer">
-          <span class="dt-chat__tip">按 Enter 发送</span>
-          <button class="dt-chat__send-btn" :disabled="!canSend" @click="handleSend">发送</button>
-        </div>
+        <!-- 表情选择器 -->
+        <transition name="slide-up">
+          <EmojiPicker
+            v-if="showEmojiPicker"
+            v-click-outside="() => (showEmojiPicker = false)"
+            @select="handleEmojiSelect"
+          />
+        </transition>
       </div>
 
-      <!-- 表情选择器 -->
-      <transition name="slide-up">
-        <EmojiPicker
-          v-if="showEmojiPicker"
-          v-click-outside="() => (showEmojiPicker = false)"
-          @select="handleEmojiSelect"
+      <!-- 其他导航内容区域 -->
+      <div v-else class="dt-content-placeholder">
+        <!-- 工作台子标签 -->
+        <div v-if="activeNav === 'workbench'" class="workbench-container">
+          <div class="workbench-tabs">
+            <div
+              v-for="tab in workbenchTabs"
+              :key="tab.key"
+              class="workbench-tab"
+              :class="{ active: workbenchTab === tab.key }"
+              @click="workbenchTab = tab.key"
+            >
+              <el-icon><component :is="tab.icon" /></el-icon>
+              <span>{{ tab.label }}</span>
+            </div>
+          </div>
+          <div class="workbench-content">
+            <component :is="getCurrentNavComponent()" :user-id="currentUserId" />
+          </div>
+        </div>
+        <!-- 其他导航内容 -->
+        <component
+          v-else
+          :is="getCurrentNavComponent()"
+          v-bind="getDocumentProps()"
+          @open-document="handleOpenDocument"
+          @document-created="handleDocumentCreated"
+          @back="handleDocumentBack"
+          @save="handleDocumentSave"
         />
-      </transition>
+      </div>
     </main>
 
     <!-- 群组成员抽屉 -->
@@ -271,11 +315,10 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ElMessage } from 'element-plus'
 import {
   Search,
   Plus,
-  Expand,
-  Fold,
   Notification,
   Document,
   Picture,
@@ -289,11 +332,32 @@ import {
   Folder,
   Crop,
   At,
+  ChatDotRound as MessageIcon,
+  SetUp,
+  MessageBox,
+  Calendar,
+  FolderOpen,
+  User,
+  Grid,
+  OfficeBuilding,
+  Check,
+  Money
 } from '@element-plus/icons-vue'
 import DingMessageBubble from '@/components/Message/DingMessageBubble.vue'
 import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
 import GroupMembers from '@/components/Chat/GroupMembers.vue'
+import VoiceRecorder from '@/components/Chat/VoiceRecorder.vue'
 import { formatTime } from '@/utils/format/time.js'
+
+// 工作台组件
+import Attendance from '@/views/im/workbench/Attendance.vue'
+import Schedule from '@/views/im/workbench/Schedule.vue'
+import Report from '@/views/im/workbench/Report.vue'
+import Approval from '@/views/im/workbench/Approval.vue'
+
+// 文档模块组件
+import DocumentList from '@/views/im/document/DocumentList.vue'
+import DocumentEditor from '@/views/im/document/DocumentEditor.vue'
 
 // Props
 const props = defineProps({
@@ -315,8 +379,7 @@ const props = defineProps({
 const emit = defineEmits(['session-click', 'send-message', 'message-action', 'nav-change'])
 
 // State
-const sidebarExpanded = ref(false)
-const activeNav = ref('chat')
+const activeNav = ref('message')
 const searchKeyword = ref('')
 const activeTab = ref('all')
 const activeSessionId = ref(null)
@@ -325,18 +388,39 @@ const messageInput = ref('')
 const hoveredMessageId = ref(null)
 const showEmojiPicker = ref(false)
 const showMembersDrawer = ref(false)
+const isOnline = ref(true)
+const showVoiceRecorder = ref(true)  // 显示语音录制组件（内联模式）
+
+// 工作台子标签
+const workbenchTab = ref('attendance')
+
+// 工作台标签列表
+const workbenchTabs = ref([
+  { key: 'attendance', label: '考勤', icon: OfficeBuilding },
+  { key: 'schedule', label: '日程', icon: Calendar },
+  { key: 'report', label: '报告', icon: Document },
+  { key: 'approval', label: '审批', icon: Check },
+])
+
+// 文档模块状态
+const documentView = ref('list') // 'list' | 'editor'
+const currentDocument = ref(null)
 
 // Refs
 const sessionListRef = ref(null)
 const messagesRef = ref(null)
 const textareaRef = ref(null)
 
-// 导航项
+// 导航项（钉钉6.5完整导航）
 const navItems = ref([
-  { key: 'chat', label: '消息', icon: 'ChatDotRound', unread: 5 },
-  { key: 'contacts', label: '通讯录', icon: 'User', unread: 0 },
-  { key: 'apps', label: '应用', icon: 'Grid', unread: 0 },
-  { key: 'settings', label: '设置', icon: 'Setting', unread: 0 },
+  { key: 'message', label: '消息', icon: MessageIcon, unread: 5 },
+  { key: 'ding', label: 'DING', icon: MessageBox, unread: 2 },
+  { key: 'workbench', label: '工作台', icon: Grid, unread: 0 },
+  { key: 'document', label: '文档', icon: Document, unread: 0 },
+  { key: 'contacts', label: '通讯录', icon: User, unread: 0 },
+  { key: 'mail', label: '邮箱', icon: FolderOpen, unread: 0 },
+  { key: 'apps', label: '应用中心', icon: Grid, unread: 0 },
+  { key: 'settings', label: '设置', icon: SetUp, unread: 0 },
 ])
 
 // 会话标签
@@ -348,6 +432,11 @@ const sessionTabs = ref([
 ])
 
 // 计算属性
+const currentNavTitle = computed(() => {
+  const item = navItems.value.find(n => n.key === activeNav.value)
+  return item ? item.label : ''
+})
+
 const filteredSessions = computed(() => {
   let result = props.sessions
 
@@ -402,17 +491,14 @@ const canSend = computed(() => {
 })
 
 // 方法
-const handleLogoClick = () => {
-  // 跳转到工作台
-}
-
 const handleNavClick = item => {
   activeNav.value = item.key
   emit('nav-change', item.key)
 }
 
 const handleProfileClick = () => {
-  // 显示用户信息
+  activeNav.value = 'settings'
+  emit('nav-change', 'settings')
 }
 
 const handleSearch = () => {
@@ -421,10 +507,6 @@ const handleSearch = () => {
 
 const handleAddChat = () => {
   // 新建聊天
-}
-
-const toggleSidebarExpanded = () => {
-  sidebarExpanded.value = !sidebarExpanded.value
 }
 
 const handleTabClick = tab => {
@@ -453,6 +535,145 @@ const handleVideoCall = () => {
 
 const handleMoreAction = () => {
   // 更多操作
+}
+
+// 文档模块事件处理
+const handleOpenDocument = (doc) => {
+  currentDocument.value = doc
+  documentView.value = 'editor'
+}
+
+const handleDocumentBack = () => {
+  documentView.value = 'list'
+}
+
+const handleDocumentCreated = (doc) => {
+  currentDocument.value = doc
+  documentView.value = 'editor'
+}
+
+const handleDocumentSave = (data) => {
+  // TODO: 保存文档到服务器
+  console.log('Document saved:', data)
+}
+
+const getDocumentProps = () => {
+  if (activeNav.value === 'document') {
+    if (documentView.value === 'editor' && currentDocument.value) {
+      return {
+        documentId: currentDocument.value.id,
+        document: currentDocument.value,
+        userId: currentUserId.value,
+      }
+    }
+    return {
+      userId: currentUserId.value,
+    }
+  }
+  return {}
+}
+
+const getCurrentNavComponent = () => {
+  // 返回当前导航对应的组件
+  if (activeNav.value === 'workbench') {
+    switch (workbenchTab.value) {
+      case 'attendance':
+        return Attendance
+      case 'schedule':
+        return Schedule
+      case 'report':
+        return Report
+      case 'approval':
+        return Approval
+      default:
+        return Attendance
+    }
+  }
+
+  // DING 模块占位
+  if (activeNav.value === 'ding') {
+    return {
+      template: `
+        <div class="ding-placeholder">
+          <el-empty description="DING 消息中心开发中">
+            <template #image>
+              <el-icon :size="80"><MessageBox /></el-icon>
+            </template>
+          </el-empty>
+        </div>
+      `
+    }
+  }
+
+  // 文档模块
+  if (activeNav.value === 'document') {
+    if (documentView.value === 'editor' && currentDocument.value) {
+      return DocumentEditor
+    }
+    return DocumentList
+  }
+
+  // 通讯录模块占位
+  if (activeNav.value === 'contacts') {
+    return {
+      template: `
+        <div class="contacts-placeholder">
+          <el-empty description="通讯录功能开发中">
+            <template #image>
+              <el-icon :size="80"><User /></el-icon>
+            </template>
+          </el-empty>
+        </div>
+      `
+    }
+  }
+
+  // 邮箱模块占位
+  if (activeNav.value === 'mail') {
+    return {
+      template: `
+        <div class="mail-placeholder">
+          <el-empty description="邮箱功能开发中">
+            <template #image>
+              <el-icon :size="80"><FolderOpen /></el-icon>
+            </template>
+          </el-empty>
+        </div>
+      `
+    }
+  }
+
+  // 应用中心占位
+  if (activeNav.value === 'apps') {
+    return {
+      template: `
+        <div class="apps-placeholder">
+          <el-empty description="应用中心开发中">
+            <template #image>
+              <el-icon :size="80"><Grid /></el-icon>
+            </template>
+          </el-empty>
+        </div>
+      `
+    }
+  }
+
+  // 设置模块占位
+  if (activeNav.value === 'settings') {
+    return {
+      template: `
+        <div class="settings-placeholder">
+          <el-empty description="设置功能开发中">
+            <template #image>
+              <el-icon :size="80"><SetUp /></el-icon>
+            </template>
+          </el-empty>
+        </div>
+      `
+    }
+  }
+
+  return null
 }
 
 const shouldShowTime = message => {
@@ -511,6 +732,38 @@ const handleAtMention = () => {
 
 const handleHistorySearch = () => {
   // 历史搜索
+}
+
+// 处理语音发送
+const handleVoiceSend = async (voiceData) => {
+  // 上传语音文件
+  try {
+    const formData = new FormData()
+    formData.append('file', voiceData.blob, `voice_${Date.now()}.${voiceData.type.split('/')[1] || 'webm'}`)
+    formData.append('type', 'voice')
+    formData.append('duration', voiceData.duration)
+
+    // 调用文件上传API
+    // const response = await uploadFile(formData)
+    // const fileUrl = response.data.url
+
+    // 发送语音消息
+    emit('send-message', {
+      sessionId: activeSessionId.value,
+      content: voiceData.url, // 临时使用本地URL
+      type: 'voice',
+      duration: voiceData.duration,
+      fileUrl: voiceData.url
+    })
+  } catch (error) {
+    console.error('语音发送失败:', error)
+    ElMessage.error('语音发送失败')
+  }
+}
+
+const handleVoiceRecord = () => {
+  // 语音录制已通过 VoiceRecorder 组件处理
+  console.log('语音录制功能已集成')
 }
 
 const handleMessageClick = () => {}
@@ -605,4 +858,220 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 @import '@/styles/dingtalk-6.5/index.scss';
+
+// 68px导航栏样式覆盖
+.dt-sidebar {
+  width: 68px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+
+  &__logo {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 12px;
+    cursor: pointer;
+
+    .ding-logo {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+  }
+
+  &__item {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    color: var(--dt-text-secondary);
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.04);
+      color: var(--dt-text-primary);
+    }
+
+    &.active {
+      background: rgba(22, 119, 255, 0.1);
+      color: var(--dt-primary);
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 24px;
+        background: var(--dt-primary);
+        border-radius: 0 2px 2px 0;
+      }
+    }
+  }
+
+  &__badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    background: #ff4d4f;
+    color: white;
+    font-size: 10px;
+    font-weight: 500;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  &__bottom {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 8px;
+    border-top: 1px solid var(--dt-border-lighter);
+  }
+
+  &__avatar {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+
+    .el-avatar {
+      width: 100%;
+      height: 100%;
+    }
+
+    .online-indicator {
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid white;
+
+      &.online {
+        background: #52c41a;
+      }
+
+      &.offline {
+        background: #8c8c8c;
+      }
+    }
+  }
+}
+
+// 320px会话列表
+.dt-sessions {
+  width: 320px;
+}
+
+// 在线状态
+.online-status {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid white;
+
+  &.online {
+    background: #52c41a;
+  }
+
+  &.offline {
+    background: #8c8c8c;
+  }
+
+  &.busy {
+    background: #ff4d4f;
+  }
+}
+
+// 内容占位区
+.dt-content-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--dt-text-secondary);
+}
+
+// 工作台容器
+.workbench-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: #f5f7fa;
+}
+
+.workbench-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 12px 16px;
+  background: white;
+  border-bottom: 1px solid var(--dt-border-light);
+}
+
+.workbench-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--dt-text-secondary);
+  font-size: 14px;
+
+  &:hover {
+    background: var(--dt-fill-light);
+  }
+
+  &.active {
+    background: var(--dt-primary-light-9);
+    color: var(--dt-primary);
+    font-weight: 500;
+  }
+}
+
+.workbench-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+// 过渡动画
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.2s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
 </style>

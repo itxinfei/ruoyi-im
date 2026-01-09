@@ -225,23 +225,38 @@ public class ImFriendServiceImpl implements ImFriendService {
         }
 
         if (approved) {
-            // 同意：创建好友关系
-            ImFriend friend = new ImFriend();
-            friend.setUserId(request.getToUserId());
-            friend.setFriendId(request.getFromUserId());
-            friend.setStatus("NORMAL");
-            friend.setRemark("");
-            friend.setGroupName("默认分组");
-            friend.setCreateTime(LocalDateTime.now());
-            friend.setUpdateTime(LocalDateTime.now());
-            imFriendMapper.insertImFriend(friend);
+            // 同意：创建双向好友关系
+            LocalDateTime now = LocalDateTime.now();
 
-            // 创建私聊会话
+            // 为接收方（当前用户）创建好友记录
+            ImFriend friendForReceiver = new ImFriend();
+            friendForReceiver.setUserId(request.getToUserId());
+            friendForReceiver.setFriendId(request.getFromUserId());
+            friendForReceiver.setStatus("NORMAL");
+            friendForReceiver.setRemark("");
+            friendForReceiver.setGroupName("默认分组");
+            friendForReceiver.setCreateTime(now);
+            friendForReceiver.setUpdateTime(now);
+            imFriendMapper.insertImFriend(friendForReceiver);
+
+            // 为发送方（申请者）创建好友记录
+            ImFriend friendForSender = new ImFriend();
+            friendForSender.setUserId(request.getFromUserId());
+            friendForSender.setFriendId(request.getToUserId());
+            friendForSender.setStatus("NORMAL");
+            friendForSender.setRemark("");
+            friendForSender.setGroupName("默认分组");
+            friendForSender.setCreateTime(now);
+            friendForSender.setUpdateTime(now);
+            imFriendMapper.insertImFriend(friendForSender);
+
+            // 创建双向私聊会话（双方都能看到会话）
             createPrivateSession(request.getToUserId(), request.getFromUserId());
+            createPrivateSession(request.getFromUserId(), request.getToUserId());
 
             // 更新申请状态
             request.setStatus("APPROVED");
-            request.setHandledTime(LocalDateTime.now());
+            request.setHandledTime(now);
             imFriendRequestMapper.updateImFriendRequest(request);
         } else {
             // 拒绝

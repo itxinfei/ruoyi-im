@@ -17,6 +17,7 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImMessageReactionService;
 import com.ruoyi.im.service.ImMessageService;
+import com.ruoyi.im.utils.MessageEncryptionUtil;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import com.ruoyi.im.vo.reaction.ImMessageReactionVO;
@@ -60,6 +61,9 @@ public class ImMessageController {
 
     @Autowired
     private ImConversationMemberMapper conversationMemberMapper;
+
+    @Autowired
+    private MessageEncryptionUtil encryptionUtil;
 
     /**
      * 发送消息
@@ -129,7 +133,9 @@ public class ImMessageController {
             // 前端使用sessionId而不是conversationId
             wsMessage.put("sessionId", message.getConversationId());
             wsMessage.put("id", message.getId());
-            wsMessage.put("content", message.getContent());
+            // 解密消息内容后再发送给前端
+            String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
+            wsMessage.put("content", decryptedContent);
             wsMessage.put("senderId", message.getSenderId());
             wsMessage.put("timestamp", message.getCreateTime() != null ?
                 message.getCreateTime().toString() : String.valueOf(System.currentTimeMillis()));
