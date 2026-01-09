@@ -494,7 +494,7 @@ import {
   User,
   Lock,
   Bell,
-  Shield,
+  ShieldCheck,
   Brush,
   InfoFilled,
   Check,
@@ -516,7 +516,7 @@ const settingsSections = [
   { key: 'profile', name: '个人信息', icon: User },
   { key: 'privacy', name: '隐私设置', icon: Lock },
   { key: 'notifications', name: '通知设置', icon: Bell },
-  { key: 'security', name: '安全设置', icon: Shield },
+  { key: 'security', name: '安全设置', icon: ShieldCheck },
   { key: 'theme', name: '主题设置', icon: Brush },
   { key: 'about', name: '关于', icon: InfoFilled },
 ]

@@ -2056,6 +2056,8 @@ const getFirstLetter = str => {
     庄: 'Z',
     邹: 'Z',
     祖: 'Z',
+    技: 'J',
+    公: 'G',
   }
 
   return pinyinMap[char] || '#'
@@ -2192,13 +2194,26 @@ const loadFriends = async () => {
   try {
     const res = await listContact()
     const dataRows = res.rows || res.data?.rows || res.data || []
-    friends.value = Array.isArray(dataRows)
+    
+    // 转换好友数据
+    const formattedFriends = Array.isArray(dataRows)
       ? dataRows.map(f => ({
           ...f,
           online: f.status === 'ACTIVE',
           name: f.remark || f.friendName || f.name,
         }))
       : []
+    
+    // 去重逻辑：使用Map确保每个好友只出现一次
+    const uniqueFriendsMap = new Map()
+    formattedFriends.forEach(friend => {
+      const key = friend.userId || friend.id || friend.friendId
+      if (key && !uniqueFriendsMap.has(key)) {
+        uniqueFriendsMap.set(key, friend)
+      }
+    })
+    
+    friends.value = Array.from(uniqueFriendsMap.values())
   } catch (error) {
     console.error('加载好友列表失败:', error)
     friends.value = []
