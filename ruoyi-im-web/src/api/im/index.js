@@ -16,6 +16,7 @@ import * as groupMemberApi from './groupMember.js'
 import * as appApi from './app.js'
 import * as approvalApi from './approval.js'
 import * as workbenchApi from './workbench.js'
+import * as organizationApi from './organization.js'
 
 // ========== 统一导出 ==========
 export {
@@ -33,6 +34,7 @@ export {
   appApi,
   approvalApi,
   workbenchApi,
+  organizationApi,
 }
 
 // ========== 默认导出 ==========

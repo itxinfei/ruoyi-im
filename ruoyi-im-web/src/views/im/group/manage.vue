@@ -10,9 +10,9 @@
       <el-table :data="memberList">
         <el-table-column label="成员昵称" align="center" prop="nickName" />
         <el-table-column label="角色" align="center" prop="role">
-          <template #default="scope">
-            <el-tag :type="scope.row.role === '1' ? 'danger' : 'info'">
-              {{ scope.row.role === '1' ? '群主' : '成员' }}
+          <template #default="{ row }">
+            <el-tag :type="row.role === '1' ? 'danger' : 'info'">
+              {{ row.role === '1' ? '群主' : '成员' }}
             </el-tag>
           </template>
         </el-table-column>

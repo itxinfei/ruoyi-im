@@ -1598,6 +1598,10 @@ import {
   getReceivedFriendRequests,
   handleFriendRequest as apiHandleFriendRequest,
 } from '@/api/im/contact'
+import {
+  getDepartmentTree,
+  getDepartmentMembers,
+} from '@/api/im/organization'
 
 const router = useRouter()
 const route = useRoute()
@@ -2048,93 +2052,41 @@ const loadFriendRequests = async () => {
 }
 
 // 初始化组织架构树
-const initOrgTree = () => {
-  orgTree.value = [
-    {
-      id: 1,
-      name: '总公司',
-      userCount: 100,
-      children: [
-        {
-          id: 11,
-          name: '技术部',
-          userCount: 35,
-          children: [
-            { id: 111, name: '前端组', userCount: 12 },
-            { id: 112, name: '后端组', userCount: 15 },
-            { id: 113, name: '测试组', userCount: 8 },
-          ],
-        },
-        {
-          id: 12,
-          name: '产品部',
-          userCount: 20,
-          children: [
-            { id: 121, name: '产品设计', userCount: 8 },
-            { id: 122, name: '用户研究', userCount: 12 },
-          ],
-        },
-        {
-          id: 13,
-          name: '市场部',
-          userCount: 25,
-          children: [
-            { id: 131, name: '销售组', userCount: 15 },
-            { id: 132, name: '推广组', userCount: 10 },
-          ],
-        },
-        {
-          id: 14,
-          name: '人事部',
-          userCount: 10,
-        },
-        {
-          id: 15,
-          name: '财务部',
-          userCount: 10,
-        },
-      ],
-    },
-  ]
+const initOrgTree = async () => {
+  try {
+    const res = await getDepartmentTree()
+    const dataRows = res.data || res.rows || []
+    orgTree.value = Array.isArray(dataRows) ? dataRows : []
+  } catch (error) {
+    console.error('加载组织架构失败:', error)
+    orgTree.value = []
+  }
 }
 
 // 组织架构节点点击
 const handleOrgNodeClick = async data => {
   currentDept.value = data
-  // 模拟获取部门成员
-  if (data.userCount) {
-    orgMembers.value = [
-      {
-        id: `u_${Date.now()}_1`,
-        name: '张三',
-        nickname: '张三',
-        avatar: null,
-        position: '工程师',
-        deptName: data.name,
-        online: true,
-        isFriend: false,
-      },
-      {
-        id: `u_${Date.now()}_2`,
-        name: '李四',
-        nickname: '李四',
-        avatar: null,
-        position: '设计师',
-        deptName: data.name,
-        online: false,
-        isFriend: false,
-      },
-      {
-        id: `u_${Date.now()}_3`,
-        name: '王五',
-        nickname: '王五',
-        avatar: null,
-        position: '产品经理',
-        deptName: data.name,
-        online: true,
-        isFriend: true,
-      },
-    ]
+  // 获取部门成员
+  if (data.id) {
+    try {
+      const res = await getDepartmentMembers(data.id)
+      const dataRows = res.data || res.rows || []
+      orgMembers.value = Array.isArray(dataRows)
+        ? dataRows.map(member => ({
+            id: member.userId,
+            name: member.username,
+            nickname: member.nickname,
+            avatar: member.avatar,
+            position: member.position,
+            deptName: data.name,
+            online: member.online || false,
+            isFriend: member.isFriend || false,
+          }))
+        : []
+    } catch (error) {
+      console.error('加载部门成员失败:', error)
+      orgMembers.value = []
+    }
   } else {
     orgMembers.value = []
   }

@@ -98,8 +98,18 @@ public class ImMessageController {
      */
     private void broadcastMessageToConversation(Long conversationId, Long messageId, Long senderId) {
         try {
+            log.info("=== 开始广播消息 === conversationId={}, messageId={}, senderId={}",
+                conversationId, messageId, senderId);
+
             // 获取会话中的所有成员
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            log.info("查询到会话成员: conversationId={}, memberCount={}",
+                conversationId, members != null ? members.size() : 0);
+
+            if (members == null || members.isEmpty()) {
+                log.warn("会话中没有成员: conversationId={}", conversationId);
+                return;
+            }
 
             // 获取完整消息对象
             ImMessage message = imMessageMapper.selectImMessageById(messageId);
@@ -151,23 +161,32 @@ public class ImMessageController {
 
             // 从 WebSocket 端点获取在线用户集合
             Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            log.info("当前在线用户数: {}, 在线用户IDs: {}", onlineUsers.size(), onlineUsers.keySet());
 
             // 向会话中的每个在线用户发送消息
             for (ImConversationMember member : members) {
                 Long targetUserId = member.getUserId();
+                log.info("检查成员: targetUserId={}, senderId={}", targetUserId, senderId);
+
                 // 不发送给发送者自己
                 if (targetUserId.equals(senderId)) {
+                    log.info("跳过发送者自己: userId={}", targetUserId);
                     continue;
                 }
 
                 javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
+                log.info("目标用户在线状态: userId={}, isOnline={}, sessionOpen={}",
+                    targetUserId, targetSession != null, targetSession != null && targetSession.isOpen());
+
                 if (targetSession != null && targetSession.isOpen()) {
                     try {
                         targetSession.getBasicRemote().sendText(messageJson);
-                        log.debug("消息已通过 REST API WebSocket 广播给用户: userId={}, messageId={}", targetUserId, messageId);
+                        log.info("消息已通过 REST API WebSocket 广播给用户: userId={}, messageId={}", targetUserId, messageId);
                     } catch (Exception e) {
                         log.error("发送消息给用户失败: userId={}", targetUserId, e);
                     }
+                } else {
+                    log.warn("用户不在线或会话已关闭: userId={}", targetUserId);
                 }
             }
 

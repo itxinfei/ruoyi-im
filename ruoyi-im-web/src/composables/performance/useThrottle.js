@@ -178,7 +178,7 @@ export class ThrottleManager {
    */
   register(key, fn, interval = 300) {
     const throttled = useThrottleFn(fn, interval)
-    this.throttles.set(key, { fn: throttled, timer: null }
+    this.throttles.set(key, { fn: throttled, timer: null })
     return throttled
   }
 

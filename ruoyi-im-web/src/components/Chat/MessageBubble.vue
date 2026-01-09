@@ -23,7 +23,7 @@
 
         <!-- 图片消息 -->
         <div v-else-if="message.type === 'image'" class="image-message">
-          <div class=\"image-container\" @click=\"previewImage(message)\">
+          <div class="image-container" @click="previewImage(message)">
             <img
               :src="message.content"
               :alt="message.content"

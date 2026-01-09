@@ -12,6 +12,7 @@ declare module 'vue' {
     ChatInput: typeof import('./components/Chat/ChatInput.vue')['default']
     CodeSnippetDialog: typeof import('./components/Chat/CodeSnippetDialog.vue')['default']
     ContactsList: typeof import('./components/Chat/ContactsList.vue')['default']
+    DingMessageBubble: typeof import('./components/Message/DingMessageBubble.vue')['default']
     DingReceiptDialog: typeof import('./components/DING/DingReceiptDialog.vue')['default']
     DingSendDialog: typeof import('./components/DING/DingSendDialog.vue')['default']
     DingTalkLayout: typeof import('./components/Layout/DingTalkLayout.vue')['default']

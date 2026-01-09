@@ -146,39 +146,47 @@ public class ImWebSocketEndpoint {
         try {
             log.info("WebSocket 连接请求: sessionId={}", session.getId());
 
-            Long userId;
+            Long userId = null;
+            String queryString = session.getQueryString();
+            String tokenValue = extractTokenFromQuery(queryString);
 
-            if (staticSecurityEnabled) {
-                log.debug("生产环境模式：进行token验证");
-                
-                String queryString = session.getQueryString();
-                String tokenValue = extractTokenFromQuery(queryString);
+            // 优先从token中解析用户ID（无论是否启用安全验证）
+            if (tokenValue != null && !tokenValue.isEmpty() && staticJwtUtils != null) {
+                try {
+                    // 生产环境需要验证token，开发环境跳过验证但仍然解析用户ID
+                    if (staticSecurityEnabled) {
+                        log.debug("生产环境模式：进行token验证");
+                        if (!staticJwtUtils.validateToken(tokenValue)) {
+                            log.warn("WebSocket 连接失败: token 无效");
+                            session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "token 无效或已过期"));
+                            return;
+                        }
+                    } else {
+                        log.debug("开发环境模式：跳过token验证，但仍然解析token中的用户ID");
+                    }
 
-                if (tokenValue == null || tokenValue.isEmpty()) {
-                    log.warn("WebSocket 连接失败: 缺少 token");
-                    session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "缺少认证 token"));
+                    userId = staticJwtUtils.getUserIdFromToken(tokenValue);
+                    if (userId != null) {
+                        log.info("从token解析到用户ID: userId={}", userId);
+                    }
+                } catch (Exception e) {
+                    log.warn("从token解析用户ID失败: {}", e.getMessage());
+                }
+            }
+
+            // 如果token解析失败或没有token，使用默认用户ID（仅开发环境）
+            if (userId == null) {
+                if (!staticSecurityEnabled) {
+                    userId = staticDevUserId;
+                    if (userId == null) {
+                        userId = 1L;
+                    }
+                    log.warn("无法从token获取用户ID，使用默认用户ID: userId={}", userId);
+                } else {
+                    log.warn("WebSocket 连接失败: 无法获取用户ID且安全验证已启用");
+                    session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "缺少有效的认证信息"));
                     return;
                 }
-
-                if (!staticJwtUtils.validateToken(tokenValue)) {
-                    log.warn("WebSocket 连接失败: token 无效");
-                    session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "token 无效或已过期"));
-                    return;
-                }
-
-                userId = staticJwtUtils.getUserIdFromToken(tokenValue);
-                if (userId == null) {
-                    log.warn("WebSocket 连接失败: 无法从 token 中解析用户ID");
-                    session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "token 解析失败"));
-                    return;
-                }
-            } else {
-                log.debug("开发环境模式：跳过token验证，使用默认用户ID");
-                userId = staticDevUserId;
-                if (userId == null) {
-                    userId = 1L;
-                }
-                log.info("开发环境：使用默认用户ID连接: userId={}", userId);
             }
 
             // 检查用户是否已存在在线连接，如果存在则关闭旧连接
@@ -440,17 +448,33 @@ public class ImWebSocketEndpoint {
             String token = (String) messageData.get("token");
             Long userId = null;
 
-            if (staticSecurityEnabled) {
-                // 生产环境验证token
-                if (token != null && staticJwtUtils.validateToken(token)) {
-                    userId = staticJwtUtils.getUserIdFromToken(token);
+            // 优先从token中解析用户ID（无论是否启用安全验证）
+            if (token != null && !token.isEmpty() && staticJwtUtils != null) {
+                try {
+                    // 生产环境需要验证token，开发环境跳过验证但仍然解析用户ID
+                    if (staticSecurityEnabled) {
+                        if (staticJwtUtils.validateToken(token)) {
+                            userId = staticJwtUtils.getUserIdFromToken(token);
+                        }
+                    } else {
+                        // 开发环境：跳过验证但仍然解析token中的用户ID
+                        userId = staticJwtUtils.getUserIdFromToken(token);
+                        if (userId != null) {
+                            log.info("开发环境：从token解析到用户ID: userId={}", userId);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("从token解析用户ID失败: {}", e.getMessage());
                 }
-            } else {
-                // 开发环境使用默认用户ID
+            }
+
+            // 如果token解析失败，使用默认用户ID（仅开发环境）
+            if (userId == null && !staticSecurityEnabled) {
                 userId = staticDevUserId;
                 if (userId == null) {
                     userId = 1L;
                 }
+                log.warn("无法从token获取用户ID，使用默认用户ID: userId={}", userId);
             }
 
             if (userId != null) {

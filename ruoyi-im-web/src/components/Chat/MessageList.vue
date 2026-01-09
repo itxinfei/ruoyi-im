@@ -135,7 +135,21 @@ import { debounce, throttle } from '@/utils/common'
 import MessageBubble from './MessageBubble.vue'
 import ImagePreview from './ImagePreview.vue'
 
-export default {\n  emits: ['context-menu','preview-image','download-file','image-load','load-more','resend','reply','forward','recall','delete','copy','scroll-to-bottom'],\n  emits: ['context-menu','preview-image','download-file','image-load','resend','reply','forward','recall','delete','copy'],\n  emits: ['context-menu','preview-image','download-file','image-load','resend','reply','forward','recall','delete','copy'],
+export default {
+  emits: [
+    'context-menu',
+    'preview-image',
+    'download-file',
+    'image-load',
+    'load-more',
+    'resend',
+    'reply',
+    'forward',
+    'recall',
+    'delete',
+    'copy',
+    'scroll-to-bottom'
+  ],
   name: 'MessageList',
   components: {
     MessageBubble,

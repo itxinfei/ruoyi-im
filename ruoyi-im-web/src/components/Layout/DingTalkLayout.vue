@@ -189,7 +189,7 @@
         </div>
 
         <!-- 消息列表 -->
-        <MessageBubble
+        <DingMessageBubble
           v-for="message in displayMessages"
           :key="message.id"
           :message="message"
@@ -290,7 +290,7 @@ import {
   Crop,
   At,
 } from '@element-plus/icons-vue'
-import MessageBubble from '@/components/Message/MessageBubble.vue'
+import DingMessageBubble from '@/components/Message/DingMessageBubble.vue'
 import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
 import GroupMembers from '@/components/Chat/GroupMembers.vue'
 import { formatTime } from '@/utils/format/time.js'
