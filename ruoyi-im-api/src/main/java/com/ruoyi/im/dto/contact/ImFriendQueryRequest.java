@@ -1,6 +1,8 @@
 package com.ruoyi.im.dto.contact;
 
 import com.ruoyi.im.dto.BasePageRequest;
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
@@ -8,6 +10,7 @@ import java.io.Serializable;
  *
  * @author ruoyi
  */
+@Data
 public class ImFriendQueryRequest extends BasePageRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -26,28 +29,4 @@ public class ImFriendQueryRequest extends BasePageRequest implements Serializabl
      * 状态（NORMAL正常 BLOCKED已拉黑）
      */
     private String status;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 }

@@ -290,7 +290,15 @@ export default {
     },
 previewImage(message) {
       this.$emit('preview-image', message)
-    }
+    },
+    
+    // 图片加载完成
+    onImageLoad(event) {
+      this.imageLoaded = true
+      if (event.target) {
+        event.target.style.opacity = '1'
+      }
+      this.$emit('image-load', this.message)
     },
 
     // 复制消息内容
@@ -475,7 +483,7 @@ previewImage(message) {
           transition: opacity 0.3s ease;
         }
 
-        &.image-loaded .message-image {
+        .image-loaded .message-image {
           opacity: 1;
         }
 

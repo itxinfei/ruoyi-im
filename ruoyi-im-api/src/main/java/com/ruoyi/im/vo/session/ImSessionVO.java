@@ -1,6 +1,7 @@
 package com.ruoyi.im.vo.session;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
  * @deprecated 使用 {@link ImConversationMemberVO} 替代
  * @author ruoyi
  */
+@Data
 @Deprecated
 public class ImSessionVO implements Serializable {
 
@@ -55,100 +57,4 @@ public class ImSessionVO implements Serializable {
 
     /** 对方在线状态（仅私聊） */
     private Boolean online;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
-    public Long getPeerId() {
-        return peerId;
-    }
-
-    public void setPeerId(Long peerId) {
-        this.peerId = peerId;
-    }
-
-    public Integer getUnreadCount() {
-        return unreadCount;
-    }
-
-    public void setUnreadCount(Integer unreadCount) {
-        this.unreadCount = unreadCount;
-    }
-
-    public Integer getIsPinned() {
-        return isPinned;
-    }
-
-    public void setIsPinned(Integer isPinned) {
-        this.isPinned = isPinned;
-    }
-
-    public Integer getIsMuted() {
-        return isMuted;
-    }
-
-    public void setIsMuted(Integer isMuted) {
-        this.isMuted = isMuted;
-    }
-
-    public String getLastMessage() {
-        return lastMessage;
-    }
-
-    public void setLastMessage(String lastMessage) {
-        this.lastMessage = lastMessage;
-    }
-
-    public LocalDateTime getLastMessageTime() {
-        return lastMessageTime;
-    }
-
-    public void setLastMessageTime(LocalDateTime lastMessageTime) {
-        this.lastMessageTime = lastMessageTime;
-    }
-
-    public String getLastMessageType() {
-        return lastMessageType;
-    }
-
-    public void setLastMessageType(String lastMessageType) {
-        this.lastMessageType = lastMessageType;
-    }
-
-    public Boolean getOnline() {
-        return online;
-    }
-
-    public void setOnline(Boolean online) {
-        this.online = online;
-    }
 }

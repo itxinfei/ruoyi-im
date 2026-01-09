@@ -1,5 +1,7 @@
 package com.ruoyi.im.dto.group;
 
+import lombok.Data;
+
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 
@@ -8,6 +10,7 @@ import java.io.Serializable;
  *
  * @author ruoyi
  */
+@Data
 public class ImGroupUpdateRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -40,44 +43,4 @@ public class ImGroupUpdateRequest implements Serializable {
      * 成员数量限制
      */
     private Integer memberLimit;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
-    public String getNotice() {
-        return notice;
-    }
-
-    public void setNotice(String notice) {
-        this.notice = notice;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Integer getMemberLimit() {
-        return memberLimit;
-    }
-
-    public void setMemberLimit(Integer memberLimit) {
-        this.memberLimit = memberLimit;
-    }
 }

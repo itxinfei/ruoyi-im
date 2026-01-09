@@ -50,7 +50,13 @@
             <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
             <if test="senderId != null"> and sender_id = #{senderId} </if>
             <if test="messageType != null and messageType != ''"> and message_type = #{messageType} </if>
+            <!-- 如果指定了id（作为lastId），只查询ID小于此值的消息（用于向上翻页） -->
+            <if test="id != null"> and id &lt; #{id} </if>
         </where>
+        order by id desc
+        <if test="params.limit != null">
+            limit #{params.limit}
+        </if>
     </select>
 
     <insert id="insertImMessage" parameterType="com.ruoyi.im.domain.ImMessage" useGeneratedKeys="true" keyProperty="id">

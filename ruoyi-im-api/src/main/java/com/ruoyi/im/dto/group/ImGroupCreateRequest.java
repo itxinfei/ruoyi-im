@@ -1,5 +1,7 @@
 package com.ruoyi.im.dto.group;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
@@ -10,6 +12,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
+@Data
 public class ImGroupCreateRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -47,52 +50,4 @@ public class ImGroupCreateRequest implements Serializable {
      * 初始成员ID列表
      */
     private List<Long> memberIds;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Integer getMemberLimit() {
-        return memberLimit;
-    }
-
-    public void setMemberLimit(Integer memberLimit) {
-        this.memberLimit = memberLimit;
-    }
-
-    public List<Long> getMemberIds() {
-        return memberIds;
-    }
-
-    public void setMemberIds(List<Long> memberIds) {
-        this.memberIds = memberIds;
-    }
 }

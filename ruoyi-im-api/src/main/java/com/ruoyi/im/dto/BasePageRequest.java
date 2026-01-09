@@ -1,5 +1,7 @@
 package com.ruoyi.im.dto;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
@@ -7,6 +9,7 @@ import java.io.Serializable;
  *
  * @author ruoyi
  */
+@Data
 public class BasePageRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -30,36 +33,4 @@ public class BasePageRequest implements Serializable {
      * 排序方向 asc/desc
      */
     private String orderByDirection = "asc";
-
-    public Integer getPageNum() {
-        return pageNum;
-    }
-
-    public void setPageNum(Integer pageNum) {
-        this.pageNum = pageNum;
-    }
-
-    public Integer getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    public String getOrderBy() {
-        return orderBy;
-    }
-
-    public void setOrderBy(String orderBy) {
-        this.orderBy = orderBy;
-    }
-
-    public String getOrderByDirection() {
-        return orderByDirection;
-    }
-
-    public void setOrderByDirection(String orderByDirection) {
-        this.orderByDirection = orderByDirection;
-    }
 }

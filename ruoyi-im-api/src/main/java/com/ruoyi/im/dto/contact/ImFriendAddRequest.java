@@ -1,5 +1,7 @@
 package com.ruoyi.im.dto.contact;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
@@ -9,6 +11,7 @@ import java.io.Serializable;
  *
  * @author ruoyi
  */
+@Data
 public class ImFriendAddRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -29,28 +32,4 @@ public class ImFriendAddRequest implements Serializable {
      */
     @Size(max = 20, message = "分组名称长度不能超过20个字符")
     private String groupName;
-
-    public Long getTargetUserId() {
-        return targetUserId;
-    }
-
-    public void setTargetUserId(Long targetUserId) {
-        this.targetUserId = targetUserId;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
 }

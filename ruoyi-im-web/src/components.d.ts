@@ -7,10 +7,13 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AccountSecurityDialog: typeof import('./components/Security/AccountSecurityDialog.vue')['default']
     AvatarUpload: typeof import('./components/AvatarUpload/index.vue')['default']
     ChatInput: typeof import('./components/Chat/ChatInput.vue')['default']
     CodeSnippetDialog: typeof import('./components/Chat/CodeSnippetDialog.vue')['default']
     ContactsList: typeof import('./components/Chat/ContactsList.vue')['default']
+    DingReceiptDialog: typeof import('./components/DING/DingReceiptDialog.vue')['default']
+    DingSendDialog: typeof import('./components/DING/DingSendDialog.vue')['default']
     DingTalkLayout: typeof import('./components/Layout/DingTalkLayout.vue')['default']
     Editor: typeof import('./components/Editor/index.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
@@ -73,6 +76,7 @@ declare module 'vue' {
     MessageSearchDialog: typeof import('./components/Chat/MessageSearchDialog.vue')['default']
     MessageStatus: typeof import('./components/Message/MessageStatus.vue')['default']
     NotificationPanel: typeof import('./components/Notification/NotificationPanel.vue')['default']
+    NotificationSettings: typeof import('./components/Notification/NotificationSettings.vue')['default']
     NotificationToast: typeof import('./components/Common/NotificationToast.vue')['default']
     Pagination: typeof import('./components/Pagination/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

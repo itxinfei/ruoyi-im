@@ -121,8 +121,26 @@ public class ImMessageServiceImpl implements ImMessageService {
     public List<ImMessageVO> getMessages(Long conversationId, Long userId, Long lastId, Integer limit) {
         List<ImMessageVO> voList = new ArrayList<>();
 
+        // 参数校验和默认值
+        if (limit == null || limit <= 0) {
+            limit = 20;
+        }
+        if (limit > 100) {
+            limit = 100; // 限制最大返回数量
+        }
+
+        // 构建查询条件
         ImMessage query = new ImMessage();
         query.setConversationId(conversationId);
+
+        // 如果指定了lastId，只查询ID小于lastId的消息（用于向上翻页）
+        if (lastId != null && lastId > 0) {
+            query.setId(lastId);
+            // 设置查询条件，需要在Mapper XML中实现 lt 条件
+        }
+
+        // 限制查询数量
+        query.getParams().put("limit", limit);
 
         List<ImMessage> messageList = imMessageMapper.selectImMessageList(query);
 
@@ -184,7 +202,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         String content = encryptionUtil.decryptMessage(originalMessage.getContent());
 
         // 根据消息类型处理内容
-        String messageType = originalMessage.getType();
+        String messageType = originalMessage.getMessageType(); // 修复：使用getMessageType而不是getType
         if ("IMAGE".equalsIgnoreCase(messageType) || "FILE".equalsIgnoreCase(messageType)
                 || "VIDEO".equalsIgnoreCase(messageType) || "VOICE".equalsIgnoreCase(messageType)) {
             quotedMessage.setIsFile(true);

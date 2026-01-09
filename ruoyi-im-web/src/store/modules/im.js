@@ -4,9 +4,12 @@ import {
   recallMessage as apiRecallMessage,
   forwardMessage as apiForwardMessage,
   searchMessages as apiSearchMessages,
+  markMessageRead,
 } from '@/api/im/message'
 import { listSession, updateSession, deleteSession as apiDeleteSession } from '@/api/im/session'
+import { markConversationRead } from '@/api/im/conversation'
 import { ElMessage } from 'element-plus'
+import { getCurrentUserId, getCurrentUserInfo } from '@/utils/im-user'
 
 // 消息列表最大条数限制
 const MAX_MESSAGES_PER_SESSION = 500
@@ -105,11 +108,10 @@ const getters = {
   messagesBySession: state => sessionId => {
     return state.messageList[sessionId] || []
   },
-  // 当前用户ID
-  currentUserId: () => {
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
-    return userInfo.userId || null
-  },
+  // 当前用户ID - 使用统一的工具函数
+  currentUserId: () => getCurrentUserId(),
+  // 当前用户信息
+  currentUser: () => getCurrentUserInfo(),
   // 获取会话列表
   sessionList: state => state.sessions,
   // 当前会话
@@ -317,9 +319,26 @@ const actions = {
   },
 
   // 切换会话
-  async switchSession({ commit, dispatch }, session) {
+  async switchSession({ commit, dispatch, state }, session) {
+    // 标记上一个会话为已读（如果有且不同于当前会话）
+    if (state.currentSession && state.currentSession.id !== session.id) {
+      try {
+        await markConversationRead(state.currentSession.id)
+      } catch (error) {
+        console.error('标记上一个会话已读失败:', error)
+      }
+    }
+
     commit('SET_CURRENT_SESSION', session)
     commit('CLEAR_SESSION_UNREAD', session.id)
+
+    // 标记当前会话为已读
+    try {
+      await markConversationRead(session.id)
+    } catch (error) {
+      console.error('标记当前会话已读失败:', error)
+    }
+
     // 加载该会话的消息
     await dispatch('loadMessages', { sessionId: session.id, page: 1, pageSize: 20 })
   },
@@ -346,7 +365,12 @@ const actions = {
     // 生成唯一的clientMsgId用于去重
     const clientMsgId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const tempId = `temp_${clientMsgId}`
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+    const userInfo = getCurrentUserInfo()
+
+    if (!userInfo || !userInfo.userId) {
+      ElMessage.error('用户未登录，请先登录')
+      return null
+    }
 
     // 创建临时消息
     const tempMessage = {

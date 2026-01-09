@@ -35,16 +35,4 @@ public class ImFileChunkUploadRequest implements Serializable {
     @Schema(description = "分片文件", required = true)
     @NotNull(message = "分片文件不能为空")
     private MultipartFile file;
-
-    /**
-     * 获取实际的文件对象
-     * 用于Spring MVC绑定
-     */
-    public MultipartFile getFile() {
-        return file;
-    }
-
-    public void setFile(MultipartFile file) {
-        this.file = file;
-    }
 }

@@ -1,5 +1,44 @@
 # Bug 修复记录
 
+## 2026-01-09
+
+### 文档更新
+**更新内容：**
+- 修复 `需求与代码差距分析报告.md` 中的重大错误
+- 更新 `项目进度.md`，补充完整的Controller清单（30个）
+- 更新数据库表统计（52张核心业务表）
+- 修正各模块完成度：整体从55%提升到80%
+
+**主要修正：**
+1. **DING消息模块** - 从"0%完成"修正为"90%完成"
+   - 已有完整的数据表：im_ding_message, im_ding_receipt, im_ding_template
+   - 已有完整的Controller：ImDingMessageController（10个API接口）
+
+2. **消息收藏功能** - 从"完全缺失"修正为"已完整实现"
+   - 已有数据表：im_message_favorite
+   - 已有Controller：ImMessageFavoriteController（7个API接口）
+
+3. **日程管理** - 从"完全缺失"修正为"已完整实现"
+   - 已有数据表：im_schedule_event, im_schedule_participant, im_schedule_reminder
+   - 已有Controller：ImScheduleEventController（9个API接口）
+
+4. **工作报告** - 从"完全缺失"修正为"已完整实现"
+   - 已有数据表：im_work_report, im_work_report_comment, im_work_report_like
+   - 已有Controller：ImWorkReportController（13个API接口）
+
+5. **消息编辑** - 从"完全缺失"修正为"已完整实现"
+   - 已有数据表：im_message_edit_history
+
+6. **外部联系人** - 从"需要补充"修正为"已完整实现"
+   - 已有数据表：im_external_contact, im_external_contact_group
+   - 已有Controller：ImExternalContactController
+
+**修改文件：**
+- `docs/项目进度.md`
+- `docs/需求与代码差距分析报告.md`
+
+---
+
 ## 2026-01-08
 
 ### 1. ImFriendMapper.xml 列名不匹配
@@ -238,3 +277,122 @@ mvn clean compile
 ```
 
 然后重启应用服务器。
+
+---
+
+## 优化方案
+
+### 1. 代码优化建议
+
+#### 1.1 用户ID获取方式优化
+**问题：**
+当前代码中大量使用 `@RequestHeader(value = "userId", required = false) Long userId` 并设置默认值：
+```java
+if (userId == null) {
+    userId = 1L;
+}
+```
+
+**建议：**
+1. 统一使用Spring Security或JWT拦截器从Token中解析用户ID
+2. 创建一个 `@CurrentUserId` 注解简化代码
+3. 移除硬编码的默认值（1L、2L等）
+
+#### 1.2 异常处理统一化
+**问题：**
+当前异常处理分散在各个Controller中
+
+**建议：**
+1. 创建全局异常处理器 `@ControllerAdvice`
+2. 统一异常响应格式
+3. 定义业务异常枚举
+
+#### 1.3 日志记录优化
+**建议：**
+1. 使用AOP记录所有API调用日志
+2. 敏感操作（登录、删除、修改权限）增加详细日志
+3. 使用日志级别（DEBUG/INFO/WARN/ERROR）合理分类
+
+### 2. 性能优化建议
+
+#### 2.1 数据库索引优化
+**建议添加的索引：**
+```sql
+-- 消息表查询优化
+CREATE INDEX idx_msg_conversation_time ON im_message(conversation_id, create_time DESC);
+CREATE INDEX idx_msg_sender ON im_message(sender_id);
+
+-- 会话成员未读数查询
+CREATE INDEX idx_conv_member_user_unread ON im_conversation_member(user_id, unread_count);
+
+-- DING消息回执查询
+CREATE INDEX idx_ding_receipt_user ON im_ding_receipt(ding_id, receiver_id);
+```
+
+#### 2.2 Redis缓存应用
+**建议缓存的数据：**
+1. 用户基本信息（User ID -> User Info）
+2. 用户在线状态
+3. 群组成员列表
+4. 系统配置项
+5. 敏感词列表
+
+#### 2.3 分页查询优化
+**建议：**
+1. 使用MyBatis-Plus分页插件统一分页
+2. 大数据量查询使用游标分页而非offset分页
+
+### 3. 安全优化建议
+
+#### 3.1 接口鉴权优化
+**建议：**
+1. 统一使用JWT Token鉴权
+2. 敏感接口添加权限注解验证
+3. 接口限流防刷
+
+#### 3.2 敏感信息加密
+**建议：**
+1. 用户手机号、邮箱加密存储
+2. 聊天记录可选择性加密
+3. 文件上传增加病毒扫描
+
+### 4. 前端优化建议
+
+#### 4.1 状态管理优化
+**建议：**
+1. 使用Pinia替代Vuex（Vue3推荐）
+2. 优化WebSocket消息分发机制
+3. 添加消息队列处理高并发消息
+
+#### 4.2 UI交互优化
+**建议：**
+1. 实现左侧导航栏图标化（68px宽）
+2. 添加消息右键菜单
+3. 完善消息输入框工具栏
+4. 添加语音消息录制组件
+
+### 5. 部署优化建议
+
+#### 5.1 配置外部化
+**建议：**
+1. 使用Nacos或Apollo配置中心
+2. 敏感配置（数据库密码）使用Jasypt加密
+3. 环境隔离（dev/test/prod）
+
+#### 5.2 监控告警
+**建议：**
+1. 集成Prometheus + Grafana监控
+2. 添加健康检查接口 `/actuator/health`
+3. 关键业务指标告警
+
+### 6. 待实现功能清单
+
+| 优先级 | 功能 | 说明 |
+|--------|------|------|
+| P0 | 在线文档 | 集成OnlyOffice或金山文档 |
+| P0 | 语音消息 | 前端录音组件+后端存储 |
+| P1 | 邮箱模块 | IMAP/SMTP集成 |
+| P1 | DING额度 | 企业DING消息额度管理 |
+| P1 | 白板协作 | 在线白板功能 |
+| P2 | 视频会议 | WebRTC集成 |
+| P2 | 机器人对接 | 聊天机器人接入 |

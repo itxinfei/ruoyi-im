@@ -1,6 +1,9 @@
 package com.ruoyi.im.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.domain.ImConversationMember;
+import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImMessageMention;
 import com.ruoyi.im.dto.message.ImMessageForwardRequest;
 import com.ruoyi.im.dto.message.ImMessageRecallRequest;
@@ -9,19 +12,26 @@ import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.dto.message.ImMessageSearchRequest;
 import com.ruoyi.im.dto.message.MessageEditRequest;
 import com.ruoyi.im.dto.reaction.ImMessageReactionAddRequest;
+import com.ruoyi.im.mapper.ImConversationMemberMapper;
+import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImMessageReactionService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import com.ruoyi.im.vo.reaction.ImMessageReactionVO;
+import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 消息控制器
@@ -34,6 +44,8 @@ import java.util.List;
 @RequestMapping("/api/im/message")
 public class ImMessageController {
 
+    private static final Logger log = LoggerFactory.getLogger(ImMessageController.class);
+
     @Autowired
     private ImMessageService imMessageService;
 
@@ -42,6 +54,12 @@ public class ImMessageController {
 
     @Autowired
     private ImMessageMentionService mentionService;
+
+    @Autowired
+    private ImMessageMapper imMessageMapper;
+
+    @Autowired
+    private ImConversationMemberMapper conversationMemberMapper;
 
     /**
      * 发送消息
@@ -59,8 +77,106 @@ public class ImMessageController {
         if (userId == null) {
             userId = 1L;
         }
+
+        // 保存消息到数据库
         Long messageId = imMessageService.sendMessage(request, userId);
+
+        // 通过 WebSocket 广播消息给会话中的其他在线用户
+        if (messageId != null) {
+            broadcastMessageToConversation(request.getConversationId(), messageId, userId);
+        }
+
         return Result.success("发送成功", messageId);
+    }
+
+    /**
+     * 广播消息给会话中的所有在线用户
+     *
+     * @param conversationId 会话ID
+     * @param messageId 消息ID
+     * @param senderId 发送者ID（不发送给自己）
+     */
+    private void broadcastMessageToConversation(Long conversationId, Long messageId, Long senderId) {
+        try {
+            // 获取会话中的所有成员
+            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+
+            // 获取完整消息对象
+            ImMessage message = imMessageMapper.selectImMessageById(messageId);
+            if (message == null) {
+                log.warn("广播消息失败：消息不存在, messageId={}", messageId);
+                return;
+            }
+
+            // 构建前端期望的消息格式
+            // 前端期望: type为消息类型(text/image/file), sessionId为会话ID
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> wsMessage = new HashMap<>();
+
+            // 前端期望type是消息类型 (text, image, file等)，而不是"message"
+            wsMessage.put("type", message.getMessageType() != null ?
+                message.getMessageType().toLowerCase() : "text");
+            // 前端使用sessionId而不是conversationId
+            wsMessage.put("sessionId", message.getConversationId());
+            wsMessage.put("id", message.getId());
+            wsMessage.put("content", message.getContent());
+            wsMessage.put("senderId", message.getSenderId());
+            wsMessage.put("timestamp", message.getCreateTime() != null ?
+                message.getCreateTime().toString() : String.valueOf(System.currentTimeMillis()));
+
+            // 可选字段
+            if (message.getFileUrl() != null) {
+                Map<String, Object> contentData = new HashMap<>();
+                contentData.put("url", message.getFileUrl());
+                contentData.put("name", message.getFileName());
+                contentData.put("size", message.getFileSize());
+                // 如果content为空或非JSON，使用fileUrl作为content
+                if (message.getContent() == null || message.getContent().isEmpty()) {
+                    wsMessage.put("content", message.getFileUrl());
+                }
+            }
+
+            // 回复消息ID
+            if (message.getReplyToMessageId() != null) {
+                wsMessage.put("replyTo", message.getReplyToMessageId());
+            }
+
+            // 撤回状态
+            if (message.getIsRevoked() != null && message.getIsRevoked() == 1) {
+                wsMessage.put("revoked", true);
+                wsMessage.put("content", "[消息已撤回]");
+            }
+
+            String messageJson = mapper.writeValueAsString(wsMessage);
+
+            // 从 WebSocket 端点获取在线用户集合
+            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+
+            // 向会话中的每个在线用户发送消息
+            for (ImConversationMember member : members) {
+                Long targetUserId = member.getUserId();
+                // 不发送给发送者自己
+                if (targetUserId.equals(senderId)) {
+                    continue;
+                }
+
+                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
+                if (targetSession != null && targetSession.isOpen()) {
+                    try {
+                        targetSession.getBasicRemote().sendText(messageJson);
+                        log.debug("消息已通过 REST API WebSocket 广播给用户: userId={}, messageId={}", targetUserId, messageId);
+                    } catch (Exception e) {
+                        log.error("发送消息给用户失败: userId={}", targetUserId, e);
+                    }
+                }
+            }
+
+            log.info("消息已通过 REST API 广播到会话: conversationId={}, messageId={}, memberCount={}",
+                conversationId, messageId, members.size());
+
+        } catch (Exception e) {
+            log.error("广播消息异常: conversationId={}, messageId={}", conversationId, messageId, e);
+        }
     }
 
     /**

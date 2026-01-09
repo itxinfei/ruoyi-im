@@ -1,5 +1,7 @@
 package com.ruoyi.im.dto.user;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
@@ -8,6 +10,7 @@ import java.io.Serializable;
  *
  * @author ruoyi
  */
+@Data
 public class ImLoginRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -22,28 +25,4 @@ public class ImLoginRequest implements Serializable {
 
     /** 客户端类型: web, mobile, pc */
     private String clientType;
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getClientType() {
-        return clientType;
-    }
-
-    public void setClientType(String clientType) {
-        this.clientType = clientType;
-    }
 }

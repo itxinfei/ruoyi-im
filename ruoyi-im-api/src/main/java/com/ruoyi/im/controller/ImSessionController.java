@@ -3,7 +3,9 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.conversation.ImConversationMemberUpdateRequest;
 import com.ruoyi.im.service.ImConversationMemberService;
+import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
+import com.ruoyi.im.vo.conversation.ImConversationVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,41 +26,45 @@ public class ImSessionController {
     @Autowired
     private ImConversationMemberService conversationMemberService;
 
+    @Autowired
+    private ImConversationService conversationService;
+
     /**
      * 获取当前用户会话列表
      * 查询当前用户的所有聊天会话，按最后消息时间倒序排列
      *
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 会话列表，包含单聊和群聊会话
-     * @apiNote 每个会话包含最后一条消息、未读消息数等信息
+     * @apiNote 每个会话包含最后一条消息、未读消息数、会话名称、会话头像等信息
      */
     @GetMapping("/list")
-    public Result<List<ImConversationMemberVO>> getList(
+    public Result<List<ImConversationVO>> getList(
             @RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
             userId = 1L;
         }
-        List<ImConversationMemberVO> list = conversationMemberService.getConversationMemberList(userId);
+        // 使用conversationService获取包含名称和头像的完整会话信息
+        List<ImConversationVO> list = conversationService.getUserConversations(userId);
         return Result.success(list);
     }
 
     /**
-     * 获取会话成员详情
-     * 根据会话ID和用户ID查询会话成员的详细信息
+     * 获取会话详情
+     * 根据会话ID和用户ID查询会话的详细信息
      *
      * @param id 会话ID
      * @param userId 当前登录用户ID，从请求头中获取
-     * @return 会话成员详细信息，包含未读消息数、置顶状态、免打扰状态等
-     * @apiNote 会话成员不存在时抛出业务异常
+     * @return 会话详细信息，包含会话名称、头像、未读消息数、置顶状态等
+     * @apiNote 会话不存在时抛出业务异常
      * @throws BusinessException 当会话ID无效或用户不在会话中时抛出业务异常
      */
     @GetMapping("/{id}")
-    public Result<ImConversationMemberVO> getById(@PathVariable Long id,
+    public Result<ImConversationVO> getById(@PathVariable Long id,
                                                     @RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
             userId = 1L;
         }
-        ImConversationMemberVO vo = conversationMemberService.getConversationMember(id, userId);
+        ImConversationVO vo = conversationService.getConversationById(id, userId);
         return Result.success(vo);
     }
 

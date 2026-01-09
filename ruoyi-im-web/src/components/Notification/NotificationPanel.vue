@@ -4,8 +4,14 @@
       <span class="panel-title">通知</span>
       <div class="header-actions">
         <el-badge :value="unreadCount" :hidden="unreadCount === 0" />
+        <el-button link type="primary" size="small" @click="showDingSend = true">
+          发送DING
+        </el-button>
         <el-button v-if="unreadCount > 0" link type="primary" size="small" @click="markAllRead">
           全部已读
+        </el-button>
+        <el-button link type="primary" size="small" @click="showSettings = true">
+          设置
         </el-button>
       </div>
     </div>
@@ -31,12 +37,42 @@
           <span class="tab-label">消息</span>
         </template>
       </el-tab-pane>
+      <el-tab-pane name="DING">
+        <template #label>
+          <span class="tab-label">DING</span>
+        </template>
+      </el-tab-pane>
     </el-tabs>
+
+    <div class="search-bar">
+      <el-input
+        v-model="searchKeyword"
+        placeholder="搜索通知内容"
+        :prefix-icon="Search"
+        clearable
+        size="small"
+        @input="handleSearch"
+      />
+      <el-dropdown trigger="click" @command="handleDateFilter">
+        <el-button size="small" :icon="Filter">
+          {{ dateFilterText }}
+        </el-button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="all">全部时间</el-dropdown-item>
+            <el-dropdown-item command="today">今天</el-dropdown-item>
+            <el-dropdown-item command="week">最近7天</el-dropdown-item>
+            <el-dropdown-item command="month">最近30天</el-dropdown-item>
+            <el-dropdown-item command="custom">自定义</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
 
     <div v-loading="loading" class="panel-content">
       <div class="notification-list">
         <div
-          v-for="item in notificationList"
+          v-for="item in filteredNotifications"
           :key="item.id"
           class="notification-item"
           :class="{ unread: !item.isRead }"
@@ -51,25 +87,41 @@
             <div class="notification-title">{{ item.title }}</div>
             <div class="notification-desc">{{ item.content }}</div>
             <div class="notification-time">{{ formatTime(item.createTime) }}</div>
+            <div v-if="item.type === 'DING' && item.readReceipt" class="ding-receipt">
+              <el-tag size="small" type="info">已读 {{ item.readCount }}/{{ item.totalCount }}</el-tag>
+            </div>
           </div>
           <div class="notification-actions">
+            <el-button v-if="item.type === 'DING' && item.readReceipt" link type="primary" @click.stop="showDingReceipt(item)">
+              查看回执
+            </el-button>
             <el-button link type="danger" :icon="Delete" @click.stop="handleDelete(item)" />
           </div>
         </div>
-        <el-empty v-if="notificationList.length === 0" description="暂无通知" :image-size="60" />
+        <el-empty v-if="filteredNotifications.length === 0" description="暂无通知" :image-size="60" />
+      </div>
+      
+      <div v-if="hasMore" class="load-more">
+        <el-button link type="primary" @click="loadMore" :loading="loadingMore">
+          加载更多
+        </el-button>
       </div>
     </div>
 
     <div class="panel-footer">
       <el-button link type="primary" @click="viewAll">查看全部</el-button>
     </div>
+
+    <notification-settings v-model:visible="showSettings" @saved="handleSettingsSaved" />
+    <ding-send-dialog v-model:visible="showDingSend" @sent="handleDingSent" />
+    <ding-receipt-dialog v-model:visible="showDingReceiptDialog" :ding-id="currentDingId" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Bell, ChatDotRound, Document, Warning, Delete } from '@element-plus/icons-vue'
+import { Bell, ChatDotRound, Document, Warning, Delete, Search, Filter } from '@element-plus/icons-vue'
 import {
   getNotifications,
   getUnreadCount,
@@ -77,6 +129,9 @@ import {
   markAllAsRead,
   deleteNotification,
 } from '@/api/im/notification'
+import NotificationSettings from './NotificationSettings.vue'
+import DingSendDialog from '../DING/DingSendDialog.vue'
+import DingReceiptDialog from '../DING/DingReceiptDialog.vue'
 
 const props = defineProps({
   visible: Boolean,
@@ -86,25 +141,102 @@ const emit = defineEmits(['close'])
 
 const activeTab = ref('all')
 const loading = ref(false)
+const loadingMore = ref(false)
 const notificationList = ref([])
 const unreadCount = ref(0)
+const searchKeyword = ref('')
+const dateFilter = ref('all')
+const showSettings = ref(false)
+const showDingSend = ref(false)
+const showDingReceiptDialog = ref(false)
+const currentDingId = ref('')
+const currentPage = ref(1)
+const pageSize = ref(20)
+const hasMore = ref(false)
+
+const dateFilterText = computed(() => {
+  const map = {
+    all: '全部时间',
+    today: '今天',
+    week: '最近7天',
+    month: '最近30天',
+    custom: '自定义',
+  }
+  return map[dateFilter.value] || '全部时间'
+})
+
+const filteredNotifications = computed(() => {
+  let result = notificationList.value
+
+  if (searchKeyword.value) {
+    const keyword = searchKeyword.value.toLowerCase()
+    result = result.filter(
+      item =>
+        item.title?.toLowerCase().includes(keyword) ||
+        item.content?.toLowerCase().includes(keyword)
+    )
+  }
+
+  if (dateFilter.value !== 'all') {
+    const now = new Date()
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    
+    result = result.filter(item => {
+      if (!item.createTime) return false
+      const itemDate = new Date(item.createTime)
+      
+      switch (dateFilter.value) {
+        case 'today':
+          return itemDate >= todayStart
+        case 'week':
+          const weekAgo = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000)
+          return itemDate >= weekAgo
+        case 'month':
+          const monthAgo = new Date(todayStart.getTime() - 30 * 24 * 60 * 60 * 1000)
+          return itemDate >= monthAgo
+        default:
+          return true
+      }
+    })
+  }
+
+  return result
+})
 
 const currentType = computed(() => {
   if (activeTab.value === 'all') return ''
   return activeTab.value
 })
 
-const loadNotifications = async () => {
-  loading.value = true
+const loadNotifications = async (loadMore = false) => {
+  if (loadMore) {
+    loadingMore.value = true
+    currentPage.value += 1
+  } else {
+    loading.value = true
+    currentPage.value = 1
+  }
+
   try {
-    const response = await getNotifications(currentType.value)
+    const response = await getNotifications({
+      type: currentType.value,
+      pageNum: currentPage.value,
+      pageSize: pageSize.value,
+    })
     if (response.code === 200) {
-      notificationList.value = response.data || []
+      const newData = response.data?.list || response.data || []
+      if (loadMore) {
+        notificationList.value = [...notificationList.value, ...newData]
+      } else {
+        notificationList.value = newData
+      }
+      hasMore.value = newData.length >= pageSize.value
     }
   } catch (error) {
     console.error('获取通知失败:', error)
   } finally {
     loading.value = false
+    loadingMore.value = false
   }
 }
 
@@ -129,14 +261,12 @@ const handleNotificationClick = async item => {
       console.error('标记已读失败:', error)
     }
   }
-  // 处理通知点击跳转
   if (item.relatedType && item.relatedId) {
     handleNavigation(item.relatedType, item.relatedId)
   }
 }
 
 const handleNavigation = (type, id) => {
-  // TODO: 根据类型跳转到对应页面
   console.log('跳转:', type, id)
 }
 
@@ -166,9 +296,40 @@ const markAllRead = async () => {
   }
 }
 
+const handleSearch = () => {
+  currentPage.value = 1
+  loadNotifications()
+}
+
+const handleDateFilter = command => {
+  dateFilter.value = command
+  if (command === 'custom') {
+    ElMessage.info('自定义日期筛选功能开发中')
+  } else {
+    loadNotifications()
+  }
+}
+
+const loadMore = () => {
+  loadNotifications(true)
+}
+
 const viewAll = () => {
   emit('close')
-  // 跳转到通知页面
+}
+
+const handleSettingsSaved = () => {
+  loadNotifications()
+}
+
+const showDingReceipt = item => {
+  currentDingId.value = item.relatedId
+  showDingReceiptDialog.value = true
+}
+
+const handleDingSent = () => {
+  loadNotifications()
+  loadUnreadCount()
 }
 
 const getTypeIcon = type => {
@@ -176,6 +337,7 @@ const getTypeIcon = type => {
     SYSTEM: Warning,
     APPROVAL: Document,
     MESSAGE: ChatDotRound,
+    DING: Bell,
   }
   return map[type] || Bell
 }
@@ -219,7 +381,7 @@ defineExpose({
 
 <style lang="scss" scoped>
 .notification-panel {
-  width: 360px;
+  width: 380px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
@@ -260,6 +422,18 @@ defineExpose({
   :deep(.el-tabs__item) {
     padding: 0 12px;
     font-size: 13px;
+  }
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  gap: 8px;
+  border-bottom: 1px solid #f0f0f0;
+
+  .el-input {
+    flex: 1;
   }
 }
 
@@ -312,6 +486,11 @@ defineExpose({
     background: #f6ffed;
     color: #52c41a;
   }
+
+  &.type-ding {
+    background: #fff1f0;
+    color: #ff4d4f;
+  }
 }
 
 .notification-content {
@@ -343,6 +522,10 @@ defineExpose({
   color: #999;
 }
 
+.ding-receipt {
+  margin-top: 4px;
+}
+
 .notification-actions {
   flex-shrink: 0;
   margin-left: 8px;
@@ -352,6 +535,12 @@ defineExpose({
 
 .notification-item:hover .notification-actions {
   opacity: 1;
+}
+
+.load-more {
+  padding: 12px;
+  text-align: center;
+  border-top: 1px solid #f0f0f0;
 }
 
 .panel-footer {

@@ -1,5 +1,7 @@
 package com.ruoyi.im.dto.conversation;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
+@Data
 public class ImGroupConversationCreateRequest {
 
     /**
@@ -27,28 +30,4 @@ public class ImGroupConversationCreateRequest {
      */
     @NotNull(message = "群组成员不能为空")
     private List<Long> memberIds;
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    public String getGroupAvatar() {
-        return groupAvatar;
-    }
-
-    public void setGroupAvatar(String groupAvatar) {
-        this.groupAvatar = groupAvatar;
-    }
-
-    public List<Long> getMemberIds() {
-        return memberIds;
-    }
-
-    public void setMemberIds(List<Long> memberIds) {
-        this.memberIds = memberIds;
-    }
 }

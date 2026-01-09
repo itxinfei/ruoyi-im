@@ -1,5 +1,7 @@
 package com.ruoyi.im.dto.reaction;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -8,6 +10,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author ruoyi
  */
+@Data
 public class ImMessageReactionAddRequest {
 
     /** 消息ID */
@@ -20,28 +23,4 @@ public class ImMessageReactionAddRequest {
     /** emoji表情字符（如：👍❤️😂🎉） */
     @NotBlank(message = "表情不能为空")
     private String emoji;
-
-    public Long getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(Long messageId) {
-        this.messageId = messageId;
-    }
-
-    public String getReactionType() {
-        return reactionType;
-    }
-
-    public void setReactionType(String reactionType) {
-        this.reactionType = reactionType;
-    }
-
-    public String getEmoji() {
-        return emoji;
-    }
-
-    public void setEmoji(String emoji) {
-        this.emoji = emoji;
-    }
 }

@@ -320,6 +320,8 @@ public class ShiroConfig
                 filterChainDefinitionMap.put("/im/register", "anon,captchaValidate");
                 filterChainDefinitionMap.put("/im/public/**", "anon");
                 filterChainDefinitionMap.put("/im/websocket/**", "anon"); // WebSocket不需要权限
+                filterChainDefinitionMap.put("/ws/im/**", "anon"); // WebSocket端点
+                filterChainDefinitionMap.put("/api/im/**", "anon"); // IM API接口（开发环境）
                 
                 // 系统权限列表
                 // filterChainDefinitionMap.putAll(SpringUtils.getBean(IMenuService.class).selectPermsAll());

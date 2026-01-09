@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import envConfig from '../../env.config.js'
+import { getCurrentUserId } from '@/utils/im-user'
 
 const pendingRequests = new Map()
 
@@ -44,6 +45,12 @@ service.interceptors.request.use(
     const token = localStorage.getItem('token')
     if (token && config.headers.isToken !== false) {
       config.headers['Authorization'] = 'Bearer ' + token
+    }
+
+    // 添加 userId 请求头（后端 IM API 需要）
+    const userId = getCurrentUserId()
+    if (userId) {
+      config.headers['userId'] = userId.toString()
     }
 
     // 设置默认Content-Type为application/json

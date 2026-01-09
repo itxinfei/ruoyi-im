@@ -1,5 +1,7 @@
 package com.ruoyi.im.dto.conversation;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
+@Data
 public class ImConversationCreateRequest {
 
     /**
@@ -36,44 +39,4 @@ public class ImConversationCreateRequest {
      * 群组成员ID列表（群聊时使用）
      */
     private List<Long> memberIds;
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Long getTargetId() {
-        return targetId;
-    }
-
-    public void setTargetId(Long targetId) {
-        this.targetId = targetId;
-    }
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    public String getGroupAvatar() {
-        return groupAvatar;
-    }
-
-    public void setGroupAvatar(String groupAvatar) {
-        this.groupAvatar = groupAvatar;
-    }
-
-    public List<Long> getMemberIds() {
-        return memberIds;
-    }
-
-    public void setMemberIds(List<Long> memberIds) {
-        this.memberIds = memberIds;
-    }
 }

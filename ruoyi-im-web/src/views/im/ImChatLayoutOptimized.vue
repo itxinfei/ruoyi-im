@@ -611,16 +611,15 @@
               class="index-sidebar"
             >
               <div
-                v-for="letter in indexLetters"
-                :key="letter"
+                v-for="group in searchedGroups"
+                :key="group.letter"
                 class="index-item"
                 :class="{
-                  active: activeLetter === letter,
-                  disabled: !searchedGroups.find(g => g.letter === letter),
+                  active: activeLetter === group.letter,
                 }"
-                @click="scrollToLetter(letter)"
+                @click="scrollToLetter(group.letter)"
               >
-                {{ letter }}
+                {{ group.letter }}
               </div>
             </div>
           </div>

@@ -1,5 +1,7 @@
 package com.ruoyi.im.vo.contact;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -8,6 +10,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
+@Data
 public class ImContactGroupVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -26,28 +29,4 @@ public class ImContactGroupVO implements Serializable {
      * 好友列表
      */
     private List<ImFriendVO> friends;
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    public Integer getCount() {
-        return count;
-    }
-
-    public void setCount(Integer count) {
-        this.count = count;
-    }
-
-    public List<ImFriendVO> getFriends() {
-        return friends;
-    }
-
-    public void setFriends(List<ImFriendVO> friends) {
-        this.friends = friends;
-    }
 }

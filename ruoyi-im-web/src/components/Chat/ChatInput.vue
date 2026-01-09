@@ -759,7 +759,7 @@ onUnmounted(() => {
 
   i {
     font-size: 18px;
-    color: $text-secondary;
+    color: $text-primary;
     transition: color $transition-base $ease-base;
   }
 

@@ -1,5 +1,7 @@
 package com.ruoyi.im.dto.conversation;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -7,6 +9,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author ruoyi
  */
+@Data
 public class ImPrivateConversationCreateRequest {
 
     /**
@@ -14,12 +17,4 @@ public class ImPrivateConversationCreateRequest {
      */
     @NotNull(message = "对方用户ID不能为空")
     private Long peerUserId;
-
-    public Long getPeerUserId() {
-        return peerUserId;
-    }
-
-    public void setPeerUserId(Long peerUserId) {
-        this.peerUserId = peerUserId;
-    }
 }

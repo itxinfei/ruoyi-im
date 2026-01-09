@@ -1,5 +1,7 @@
 package com.ruoyi.im.dto.user;
 
+import lombok.Data;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -12,6 +14,7 @@ import java.io.Serializable;
  *
  * @author ruoyi
  */
+@Data
 public class ImUserUpdateRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -40,52 +43,4 @@ public class ImUserUpdateRequest implements Serializable {
     /** 签名 */
     @Size(max = 200, message = "签名长度不能超过200个字符")
     private String signature;
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getMobile() {
-        return mobile;
-    }
-
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
-    }
-
-    public Integer getGender() {
-        return gender;
-    }
-
-    public void setGender(Integer gender) {
-        this.gender = gender;
-    }
-
-    public String getSignature() {
-        return signature;
-    }
-
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
 }

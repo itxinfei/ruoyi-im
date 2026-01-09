@@ -193,7 +193,7 @@ public class ImConversationController {
         if (userId == null) {
             userId = 1L; // 开发环境默认用户
         }
-        imConversationService.markAsRead(id, userId);
+        imConversationService.markAsRead(userId, id);
         return Result.success("标记已读成功");
     }
 

@@ -1,6 +1,7 @@
 package com.ruoyi.im.vo.message;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
  *
  * @author ruoyi
  */
+@Data
 public class ImMessageVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -62,6 +64,7 @@ public class ImMessageVO implements Serializable {
      * 引用消息内部类
      * 用于展示被回复/引用的原消息信息
      */
+    @Data
     public static class QuotedMessageVO implements Serializable {
 
         private static final long serialVersionUID = 1L;
@@ -84,165 +87,5 @@ public class ImMessageVO implements Serializable {
 
         /** 是否为图片/文件类型 */
         private Boolean isFile;
-
-        public Long getId() {
-            return id;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
-        }
-
-        public String getSenderName() {
-            return senderName;
-        }
-
-        public void setSenderName(String senderName) {
-            this.senderName = senderName;
-        }
-
-        public String getContent() {
-            return content;
-        }
-
-        public void setContent(String content) {
-            this.content = content;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public LocalDateTime getSendTime() {
-            return sendTime;
-        }
-
-        public void setSendTime(LocalDateTime sendTime) {
-            this.sendTime = sendTime;
-        }
-
-        public Boolean getIsFile() {
-            return isFile;
-        }
-
-        public void setIsFile(Boolean isFile) {
-            this.isFile = isFile;
-        }
-    }
-
-    public Long getReplyToMessageId() {
-        return replyToMessageId;
-    }
-
-    public void setReplyToMessageId(Long replyToMessageId) {
-        this.replyToMessageId = replyToMessageId;
-    }
-
-    public QuotedMessageVO getQuotedMessage() {
-        return quotedMessage;
-    }
-
-    public void setQuotedMessage(QuotedMessageVO quotedMessage) {
-        this.quotedMessage = quotedMessage;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getConversationId() {
-        return conversationId;
-    }
-
-    public void setConversationId(Long conversationId) {
-        this.conversationId = conversationId;
-    }
-
-    public Long getSenderId() {
-        return senderId;
-    }
-
-    public void setSenderId(Long senderId) {
-        this.senderId = senderId;
-    }
-
-    public String getSenderName() {
-        return senderName;
-    }
-
-    public void setSenderName(String senderName) {
-        this.senderName = senderName;
-    }
-
-    public String getSenderAvatar() {
-        return senderAvatar;
-    }
-
-    public void setSenderAvatar(String senderAvatar) {
-        this.senderAvatar = senderAvatar;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Integer getIsRevoked() {
-        return isRevoked;
-    }
-
-    public void setIsRevoked(Integer isRevoked) {
-        this.isRevoked = isRevoked;
-    }
-
-    public LocalDateTime getRevokeTime() {
-        return revokeTime;
-    }
-
-    public void setRevokeTime(LocalDateTime revokeTime) {
-        this.revokeTime = revokeTime;
-    }
-
-    public LocalDateTime getSendTime() {
-        return sendTime;
-    }
-
-    public void setSendTime(LocalDateTime sendTime) {
-        this.sendTime = sendTime;
-    }
-
-    public Boolean getIsSelf() {
-        return isSelf;
-    }
-
-    public void setIsSelf(Boolean isSelf) {
-        this.isSelf = isSelf;
     }
 }

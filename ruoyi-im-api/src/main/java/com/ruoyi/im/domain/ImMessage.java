@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ruoyi.im.common.BaseEntity;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -18,7 +20,8 @@ import java.time.LocalDateTime;
  * @author ruoyi
  */
 @TableName("im_message")
-public class ImMessage implements Serializable {
+@Data
+public class ImMessage extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -85,10 +88,7 @@ public class ImMessage implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime editTime;
 
-    /** 创建时间 */
-    @TableField("create_time")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createTime;
+    // createTime 和 updateTime 继承自 BaseEntity
 
     /** 回复的消息ID（支持回复/引用功能） */
     @TableField("reply_to_message_id")
@@ -106,11 +106,6 @@ public class ImMessage implements Serializable {
     @TableField("deleted_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime deletedTime;
-
-    /** 更新时间 */
-    @TableField("update_time")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateTime;
 
     // ==================== 以下字段为非数据库字段 ====================
 
@@ -149,230 +144,4 @@ public class ImMessage implements Serializable {
      */
     @TableField(exist = false)
     private String type;
-
-    public String getType() {
-        return type != null ? type : messageType;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    // ==================== Getters and Setters ====================
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getConversationId() {
-        return conversationId;
-    }
-
-    public void setConversationId(Long conversationId) {
-        this.conversationId = conversationId;
-    }
-
-    public Long getSenderId() {
-        return senderId;
-    }
-
-    public void setSenderId(Long senderId) {
-        this.senderId = senderId;
-    }
-
-    public String getMessageType() {
-        return messageType;
-    }
-
-    public void setMessageType(String messageType) {
-        this.messageType = messageType;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public String getFileUrl() {
-        return fileUrl;
-    }
-
-    public void setFileUrl(String fileUrl) {
-        this.fileUrl = fileUrl;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public Long getFileSize() {
-        return fileSize;
-    }
-
-    public void setFileSize(Long fileSize) {
-        this.fileSize = fileSize;
-    }
-
-    public String getSensitiveLevel() {
-        return sensitiveLevel;
-    }
-
-    public void setSensitiveLevel(String sensitiveLevel) {
-        this.sensitiveLevel = sensitiveLevel;
-    }
-
-    public Integer getIsRevoked() {
-        return isRevoked;
-    }
-
-    public void setIsRevoked(Integer isRevoked) {
-        this.isRevoked = isRevoked;
-    }
-
-    public LocalDateTime getRevokedTime() {
-        return revokedTime;
-    }
-
-    public void setRevokedTime(LocalDateTime revokedTime) {
-        this.revokedTime = revokedTime;
-    }
-
-    public Long getRevokerId() {
-        return revokerId;
-    }
-
-    public void setRevokerId(Long revokerId) {
-        this.revokerId = revokerId;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public Long getReceiverId() {
-        return receiverId;
-    }
-
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
-    }
-
-    public Long getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getSendTime() {
-        return sendTime;
-    }
-
-    public void setSendTime(LocalDateTime sendTime) {
-        this.sendTime = sendTime;
-    }
-
-    public LocalDateTime getRevokeTime() {
-        return revokeTime;
-    }
-
-    public void setRevokeTime(LocalDateTime revokeTime) {
-        this.revokeTime = revokeTime;
-    }
-
-    public Long getReplyToMessageId() {
-        return replyToMessageId;
-    }
-
-    public void setReplyToMessageId(Long replyToMessageId) {
-        this.replyToMessageId = replyToMessageId;
-    }
-
-    public Long getForwardFromMessageId() {
-        return forwardFromMessageId;
-    }
-
-    public void setForwardFromMessageId(Long forwardFromMessageId) {
-        this.forwardFromMessageId = forwardFromMessageId;
-    }
-
-    public Integer getIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(Integer isDeleted) {
-        this.isDeleted = isDeleted;
-    }
-
-    public LocalDateTime getDeletedTime() {
-        return deletedTime;
-    }
-
-    public void setDeletedTime(LocalDateTime deletedTime) {
-        this.deletedTime = deletedTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public Integer getIsEdited() {
-        return isEdited;
-    }
-
-    public void setIsEdited(Integer isEdited) {
-        this.isEdited = isEdited;
-    }
-
-    public String getEditedContent() {
-        return editedContent;
-    }
-
-    public void setEditedContent(String editedContent) {
-        this.editedContent = editedContent;
-    }
-
-    public Integer getEditCount() {
-        return editCount;
-    }
-
-    public void setEditCount(Integer editCount) {
-        this.editCount = editCount;
-    }
-
-    public LocalDateTime getEditTime() {
-        return editTime;
-    }
-
-    public void setEditTime(LocalDateTime editTime) {
-        this.editTime = editTime;
-    }
 }

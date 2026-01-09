@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.im.common.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
  * @author ruoyi
  */
 @TableName("im_conversation_member")
+@Data
 public class ImConversationMember extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -80,130 +82,4 @@ public class ImConversationMember extends BaseEntity implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
-    // ==================== Getters and Setters ====================
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getConversationId() {
-        return conversationId;
-    }
-
-    public void setConversationId(Long conversationId) {
-        this.conversationId = conversationId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public Integer getUnreadCount() {
-        return unreadCount;
-    }
-
-    public void setUnreadCount(Integer unreadCount) {
-        this.unreadCount = unreadCount;
-    }
-
-    public Integer getIsPinned() {
-        return isPinned;
-    }
-
-    public void setIsPinned(Integer isPinned) {
-        this.isPinned = isPinned;
-    }
-
-    public Integer getIsMuted() {
-        return isMuted;
-    }
-
-    public void setIsMuted(Integer isMuted) {
-        this.isMuted = isMuted;
-    }
-
-    public Long getLastReadMessageId() {
-        return lastReadMessageId;
-    }
-
-    public void setLastReadMessageId(Long lastReadMessageId) {
-        this.lastReadMessageId = lastReadMessageId;
-    }
-
-    public LocalDateTime getLastReadTime() {
-        return lastReadTime;
-    }
-
-    public void setLastReadTime(LocalDateTime lastReadTime) {
-        this.lastReadTime = lastReadTime;
-    }
-
-    public Integer getIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(Integer isDeleted) {
-        this.isDeleted = isDeleted;
-    }
-
-    public LocalDateTime getDeletedTime() {
-        return deletedTime;
-    }
-
-    public void setDeletedTime(LocalDateTime deletedTime) {
-        this.deletedTime = deletedTime;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    // 为MyBatis映射兼容性添加的方法
-    public boolean isPinned() {
-        return isPinned != null && isPinned == 1;
-    }
-
-    public boolean isMuted() {
-        return isMuted != null && isMuted == 1;
-    }
-
-    public boolean isDeleted() {
-        return isDeleted != null && isDeleted == 1;
-    }
 }

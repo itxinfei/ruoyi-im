@@ -737,21 +737,21 @@ CREATE TABLE `im_conversation`  (
 -- ----------------------------
 -- Records of im_conversation
 -- ----------------------------
-INSERT INTO `im_conversation` VALUES (1, 'SINGLE', 3, '李四', '/avatar/2.jpg', 4, '2024-01-01 10:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation` VALUES (2, 'SINGLE', 4, '王五', '/avatar/3.jpg', 5, '2024-01-01 10:05:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation` VALUES (3, 'SINGLE', 5, '赵六', '/avatar/1.jpg', 10, '2024-01-01 13:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation` VALUES (4, 'SINGLE', 6, '孙七', '/avatar/2.jpg', 8, '2024-01-01 12:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation` VALUES (5, 'SINGLE', 7, '周八', '/avatar/3.jpg', 9, '2024-01-01 12:01:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (1, 'PRIVATE', 3, '李四', '/avatar/2.jpg', 4, '2024-01-01 10:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (2, 'PRIVATE', 4, '王五', '/avatar/3.jpg', 5, '2024-01-01 10:05:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (3, 'PRIVATE', 5, '赵六', '/avatar/1.jpg', 10, '2024-01-01 13:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (4, 'PRIVATE', 6, '孙七', '/avatar/2.jpg', 8, '2024-01-01 12:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (5, 'PRIVATE', 7, '周八', '/avatar/3.jpg', 9, '2024-01-01 12:01:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
 INSERT INTO `im_conversation` VALUES (6, 'GROUP', 1, '技术交流群', '/avatar/group_default.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 INSERT INTO `im_conversation` VALUES (7, 'GROUP', 2, '产品讨论群', '/avatar/group_default.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 INSERT INTO `im_conversation` VALUES (8, 'GROUP', 3, '项目开发群', '/avatar/group_default.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 INSERT INTO `im_conversation` VALUES (9, 'GROUP', 4, '公司全员群', '/avatar/group_default.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (10, 'SINGLE', 8, '吴九', '/avatar/1.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (11, 'SINGLE', 9, '郑十', '/avatar/2.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (10, 'PRIVATE', 8, '吴九', '/avatar/1.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (11, 'PRIVATE', 9, '郑十', '/avatar/2.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 INSERT INTO `im_conversation` VALUES (12, 'GROUP', 5, '篮球爱好者', '/avatar/group_default.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (13, 'SINGLE', 10, '陈一', '/avatar/3.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (13, 'PRIVATE', 10, '陈一', '/avatar/3.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 INSERT INTO `im_conversation` VALUES (14, 'GROUP', 6, '读书分享会', '/avatar/group_default.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
-INSERT INTO `im_conversation` VALUES (15, 'SINGLE', 11, '林二', '/avatar/1.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
+INSERT INTO `im_conversation` VALUES (15, 'PRIVATE', 11, '林二', '/avatar/1.jpg', NULL, '2026-01-08 12:12:34', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 12:12:34');
 
 -- ----------------------------
 -- Table structure for im_conversation_member

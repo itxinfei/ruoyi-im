@@ -101,11 +101,11 @@ export function groupMessagesByDate(messages) {
 }
 
 export function getLastMessageText(message) {
-  if (!message) return ''
+  if (!message) return '暂无消息'
 
   switch (message.type) {
     case 'text':
-      return message.content || ''
+      return message.content || '暂无消息'
     case 'image':
       return '[图片]'
     case 'file':

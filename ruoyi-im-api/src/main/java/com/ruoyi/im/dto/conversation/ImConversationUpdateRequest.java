@@ -1,10 +1,13 @@
 package com.ruoyi.im.dto.conversation;
 
+import lombok.Data;
+
 /**
  * 会话更新请求参数
  *
  * @author ruoyi
  */
+@Data
 public class ImConversationUpdateRequest {
 
     /**
@@ -26,37 +29,4 @@ public class ImConversationUpdateRequest {
      * 备注
      */
     private String remark;
-
-    // Getters and Setters
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Boolean getIsPinned() {
-        return isPinned;
-    }
-
-    public void setIsPinned(Boolean isPinned) {
-        this.isPinned = isPinned;
-    }
-
-    public Boolean getIsMuted() {
-        return isMuted;
-    }
-
-    public void setIsMuted(Boolean isMuted) {
-        this.isMuted = isMuted;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
 }

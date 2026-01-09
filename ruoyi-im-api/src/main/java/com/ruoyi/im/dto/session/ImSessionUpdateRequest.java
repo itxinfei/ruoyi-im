@@ -1,5 +1,7 @@
 package com.ruoyi.im.dto.session;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
@@ -13,6 +15,7 @@ import java.io.Serializable;
  * @deprecated 使用 {@link ImConversationMemberUpdateRequest} 替代
  * @author ruoyi
  */
+@Data
 @Deprecated
 public class ImSessionUpdateRequest implements Serializable {
 
@@ -27,28 +30,4 @@ public class ImSessionUpdateRequest implements Serializable {
 
     /** 是否免打扰: 0=否, 1=是 */
     private Integer isMuted;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getIsPinned() {
-        return isPinned;
-    }
-
-    public void setIsPinned(Integer isPinned) {
-        this.isPinned = isPinned;
-    }
-
-    public Integer getIsMuted() {
-        return isMuted;
-    }
-
-    public void setIsMuted(Integer isMuted) {
-        this.isMuted = isMuted;
-    }
 }

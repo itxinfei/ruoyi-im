@@ -75,6 +75,94 @@
               </div>
               <el-button type="primary" link @click="showPasswordDialog = true">修改密码</el-button>
             </div>
+            <div class="security-item">
+              <div class="security-info">
+                <h4>登录设备</h4>
+                <p>管理当前登录的设备，移除不信任设备</p>
+              </div>
+              <el-button type="primary" link @click="showSecurityDialog = true">管理设备</el-button>
+            </div>
+            <div class="security-item">
+              <div class="security-info">
+                <h4>登录日志</h4>
+                <p>查看最近登录记录，发现异常登录</p>
+              </div>
+              <el-button type="primary" link @click="showSecurityDialog = true">查看日志</el-button>
+            </div>
+            <div class="security-item">
+              <div class="security-info">
+                <h4>两步验证</h4>
+                <p>开启两步验证，提高账号安全性</p>
+              </div>
+              <el-switch v-model="twoFactorEnabled" @change="handleTwoFactorChange" />
+            </div>
+          </el-card>
+
+          <el-card style="margin-top: 20px">
+            <template #header>
+              <div class="card-header-with-action">
+                <span>联系方式</span>
+                <el-button type="primary" link @click="showContactDialog = true">添加</el-button>
+              </div>
+            </template>
+            <div v-if="contactList.length === 0" class="empty-state">
+              <el-empty description="暂无联系方式" />
+            </div>
+            <div v-else class="contact-list">
+              <div v-for="contact in contactList" :key="contact.id" class="contact-item">
+                <div class="contact-info">
+                  <div class="contact-type">
+                    <el-tag :type="getContactTypeColor(contact.type)" size="small">
+                      {{ getContactTypeName(contact.type) }}
+                    </el-tag>
+                  </div>
+                  <span class="contact-value">{{ contact.value }}</span>
+                </div>
+                <div class="contact-actions">
+                  <el-tag v-if="contact.verified" type="success" size="small">已验证</el-tag>
+                  <el-tag v-else type="warning" size="small">未验证</el-tag>
+                  <el-button type="danger" link size="small" @click="handleDeleteContact(contact)">删除</el-button>
+                </div>
+              </div>
+            </div>
+          </el-card>
+
+          <el-card style="margin-top: 20px">
+            <template #header>
+              <span>身份认证</span>
+            </template>
+            <div class="auth-section">
+              <div class="auth-item">
+                <div class="auth-info">
+                  <h4>实名认证</h4>
+                  <p>完成实名认证，提高账号安全性</p>
+                </div>
+                <el-button
+                  v-if="!authInfo.realNameVerified"
+                  type="primary"
+                  link
+                  @click="showRealNameDialog = true"
+                >
+                  立即认证
+                </el-button>
+                <el-tag v-else type="success">已认证</el-tag>
+              </div>
+              <div class="auth-item">
+                <div class="auth-info">
+                  <h4>企业认证</h4>
+                  <p>完成企业认证，享受企业专属服务</p>
+                </div>
+                <el-button
+                  v-if="!authInfo.enterpriseVerified"
+                  type="primary"
+                  link
+                  @click="showEnterpriseDialog = true"
+                >
+                  立即认证
+                </el-button>
+                <el-tag v-else type="success">已认证</el-tag>
+              </div>
+            </div>
           </el-card>
         </div>
       </el-tab-pane>
@@ -273,6 +361,95 @@
           </el-card>
         </div>
       </el-tab-pane>
+
+      <el-tab-pane label="系统设置" name="system">
+        <div class="setting-section">
+          <el-card>
+            <template #header>
+              <span>消息管理</span>
+            </template>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>消息保留时长</h4>
+                <p>设置聊天消息的保留时间</p>
+              </div>
+              <el-select v-model="systemForm.messageRetention" @change="handleSystemChange">
+                <el-option label="7天" value="7" />
+                <el-option label="30天" value="30" />
+                <el-option label="90天" value="90" />
+                <el-option label="180天" value="180" />
+                <el-option label="永久" value="permanent" />
+              </el-select>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>自动清理</h4>
+                <p>自动清理过期的消息记录</p>
+              </div>
+              <el-switch v-model="systemForm.autoClean" @change="handleSystemChange" />
+            </div>
+          </el-card>
+
+          <el-card style="margin-top: 20px">
+            <template #header>
+              <span>文件存储</span>
+            </template>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>文件存储路径</h4>
+                <p>设置文件下载后的保存位置</p>
+              </div>
+              <el-button type="primary" link @click="handleSelectPath">选择路径</el-button>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>自动下载</h4>
+                <p>自动下载接收的文件</p>
+              </div>
+              <el-switch v-model="systemForm.autoDownload" @change="handleSystemChange" />
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>最大文件大小</h4>
+                <p>设置允许发送的最大文件大小</p>
+              </div>
+              <el-select v-model="systemForm.maxFileSize" @change="handleSystemChange">
+                <el-option label="100MB" value="100" />
+                <el-option label="200MB" value="200" />
+                <el-option label="500MB" value="500" />
+                <el-option label="1GB" value="1024" />
+              </el-select>
+            </div>
+          </el-card>
+
+          <el-card style="margin-top: 20px">
+            <template #header>
+              <span>清理策略</span>
+            </template>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>清理缓存</h4>
+                <p>清理应用缓存数据，释放存储空间</p>
+              </div>
+              <el-button type="primary" link @click="handleClearCache">立即清理</el-button>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>清理临时文件</h4>
+                <p>清理临时文件和下载记录</p>
+              </div>
+              <el-button type="primary" link @click="handleClearTempFiles">立即清理</el-button>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>存储空间</h4>
+                <p>当前已使用 {{ systemForm.usedSpace }} / {{ systemForm.totalSpace }}</p>
+              </div>
+              <el-progress :percentage="systemForm.spacePercentage" :color="getSpaceColor()" />
+            </div>
+          </el-card>
+        </div>
+      </el-tab-pane>
     </el-tabs>
 
     <!-- 修改密码对话框 -->
@@ -315,6 +492,77 @@
         >
       </template>
     </el-dialog>
+
+    <!-- 账户安全对话框 -->
+    <AccountSecurityDialog v-model:visible="showSecurityDialog" />
+
+    <!-- 添加联系方式对话框 -->
+    <el-dialog v-model="showContactDialog" title="添加联系方式" width="500px" destroy-on-close>
+      <el-form ref="contactFormRef" :model="contactForm" :rules="contactRules" label-width="100px">
+        <el-form-item label="联系方式" prop="type">
+          <el-select v-model="contactForm.type" placeholder="请选择联系方式类型">
+            <el-option label="手机号" value="mobile" />
+            <el-option label="邮箱" value="email" />
+            <el-option label="QQ" value="qq" />
+            <el-option label="微信" value="wechat" />
+            <el-option label="其他" value="other" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="联系方式" prop="value">
+          <el-input v-model="contactForm.value" placeholder="请输入联系方式" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showContactDialog = false">取消</el-button>
+        <el-button type="primary" @click="handleAddContact">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 实名认证对话框 -->
+    <el-dialog v-model="showRealNameDialog" title="实名认证" width="500px" destroy-on-close>
+      <el-form ref="realNameFormRef" :model="realNameForm" :rules="realNameRules" label-width="100px">
+        <el-form-item label="真实姓名" prop="name">
+          <el-input v-model="realNameForm.name" placeholder="请输入真实姓名" />
+        </el-form-item>
+        <el-form-item label="身份证号" prop="idCard">
+          <el-input v-model="realNameForm.idCard" placeholder="请输入身份证号" />
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="realNameForm.mobile" placeholder="请输入手机号" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showRealNameDialog = false">取消</el-button>
+        <el-button type="primary" @click="handleSubmitRealName">提交认证</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 企业认证对话框 -->
+    <el-dialog v-model="showEnterpriseDialog" title="企业认证" width="500px" destroy-on-close>
+      <el-form
+        ref="enterpriseFormRef"
+        :model="enterpriseForm"
+        :rules="enterpriseRules"
+        label-width="100px"
+      >
+        <el-form-item label="企业名称" prop="name">
+          <el-input v-model="enterpriseForm.name" placeholder="请输入企业名称" />
+        </el-form-item>
+        <el-form-item label="统一社会信用代码" prop="creditCode">
+          <el-input v-model="enterpriseForm.creditCode" placeholder="请输入统一社会信用代码" />
+        </el-form-item>
+        <el-form-item label="法人姓名" prop="legalPerson">
+          <el-input v-model="enterpriseForm.legalPerson" placeholder="请输入法人姓名" />
+        </el-form-item>
+        <el-form-item label="联系电话" prop="phone">
+          <el-input v-model="enterpriseForm.phone" placeholder="请输入联系电话" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showEnterpriseDialog = false">取消</el-button>
+        <el-button type="primary" @click="handleSubmitEnterprise">提交认证</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -329,6 +577,7 @@ import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Check } from '@element-plus/icons-vue'
 import AvatarUpload from '@/components/AvatarUpload/index.vue'
+import AccountSecurityDialog from '@/components/Security/AccountSecurityDialog.vue'
 import { getCurrentUserInfo, updateProfile, changePassword } from '@/api/im/user'
 
 const router = useRouter()
@@ -346,10 +595,32 @@ const passwordLoading = ref(false)
 /** 表单引用 */
 const profileFormRef = ref(null)
 const passwordFormRef = ref(null)
+const contactFormRef = ref(null)
+const realNameFormRef = ref(null)
+const enterpriseFormRef = ref(null)
 
 /** 对话框显示控制 */
 const showPasswordDialog = ref(false)
 const showBlockDialog = ref(false)
+const showSecurityDialog = ref(false)
+const showContactDialog = ref(false)
+const showRealNameDialog = ref(false)
+const showEnterpriseDialog = ref(false)
+
+/** 两步验证状态 */
+const twoFactorEnabled = ref(false)
+
+/** 联系方式列表 */
+const contactList = ref([
+  { id: 1, type: 'mobile', value: '138****8888', verified: true },
+  { id: 2, type: 'email', value: 'test@example.com', verified: true },
+])
+
+/** 身份认证信息 */
+const authInfo = ref({
+  realNameVerified: false,
+  enterpriseVerified: false,
+})
 
 /** 用户信息 */
 const userInfo = ref({
@@ -466,6 +737,88 @@ const privacyForm = reactive({
   readReceipt: true,
   typingStatus: true,
 })
+
+/** 系统设置表单 */
+const systemForm = reactive({
+  messageRetention: '30',
+  autoClean: true,
+  filePath: '',
+  autoDownload: false,
+  maxFileSize: '200',
+  usedSpace: '256 MB',
+  totalSpace: '1 GB',
+  spacePercentage: 25.6,
+})
+
+/** 联系方式表单 */
+const contactForm = reactive({
+  type: '',
+  value: '',
+})
+
+/** 联系方式验证规则 */
+const contactRules = {
+  type: [{ required: true, message: '请选择联系方式类型', trigger: 'change' }],
+  value: [{ required: true, message: '请输入联系方式', trigger: 'blur' }],
+}
+
+/** 实名认证表单 */
+const realNameForm = reactive({
+  name: '',
+  idCard: '',
+  mobile: '',
+})
+
+/** 实名认证验证规则 */
+const realNameRules = {
+  name: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }],
+  idCard: [
+    { required: true, message: '请输入身份证号', trigger: 'blur' },
+    {
+      pattern: /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/,
+      message: '请输入正确的身份证号',
+      trigger: 'blur',
+    },
+  ],
+  mobile: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    {
+      pattern: /^1[3-9]\d{9}$/,
+      message: '请输入正确的手机号码',
+      trigger: 'blur',
+    },
+  ],
+}
+
+/** 企业认证表单 */
+const enterpriseForm = reactive({
+  name: '',
+  creditCode: '',
+  legalPerson: '',
+  phone: '',
+})
+
+/** 企业认证验证规则 */
+const enterpriseRules = {
+  name: [{ required: true, message: '请输入企业名称', trigger: 'blur' }],
+  creditCode: [
+    { required: true, message: '请输入统一社会信用代码', trigger: 'blur' },
+    {
+      pattern: /^[0-9A-HJ-NPQRTUWXY]{2}\d{6}[0-9A-HJ-NPQRTUWXY]{10}$/,
+      message: '请输入正确的统一社会信用代码',
+      trigger: 'blur',
+    },
+  ],
+  legalPerson: [{ required: true, message: '请输入法人姓名', trigger: 'blur' }],
+  phone: [
+    { required: true, message: '请输入联系电话', trigger: 'blur' },
+    {
+      pattern: /^1[3-9]\d{9}$/,
+      message: '请输入正确的手机号码',
+      trigger: 'blur',
+    },
+  ],
+}
 
 /** 黑名单用户列表 */
 const blockedUsers = ref([])
@@ -590,6 +943,75 @@ const handleFontSizeChange = size => {
 }
 
 /**
+ * 系统设置变化
+ */
+const handleSystemChange = () => {
+  localStorage.setItem('system-settings', JSON.stringify(systemForm))
+  ElMessage.success('设置已保存')
+}
+
+/**
+ * 选择文件存储路径
+ */
+const handleSelectPath = () => {
+  ElMessage.info('请在系统设置中配置文件存储路径')
+}
+
+/**
+ * 清理缓存
+ */
+const handleClearCache = async () => {
+  try {
+    await ElMessageBox.confirm('确定要清理应用缓存吗？此操作不可恢复。', '确认清理', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+
+    ElMessage.loading('正在清理缓存...')
+    setTimeout(() => {
+      systemForm.usedSpace = '128 MB'
+      systemForm.spacePercentage = 12.8
+      ElMessage.success('缓存清理成功')
+    }, 1500)
+  } catch {
+    // 取消操作
+  }
+}
+
+/**
+ * 清理临时文件
+ */
+const handleClearTempFiles = async () => {
+  try {
+    await ElMessageBox.confirm('确定要清理临时文件吗？此操作不可恢复。', '确认清理', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+
+    ElMessage.loading('正在清理临时文件...')
+    setTimeout(() => {
+      systemForm.usedSpace = '64 MB'
+      systemForm.spacePercentage = 6.4
+      ElMessage.success('临时文件清理成功')
+    }, 1500)
+  } catch {
+    // 取消操作
+  }
+}
+
+/**
+ * 获取存储空间颜色
+ */
+const getSpaceColor = () => {
+  const percentage = systemForm.spacePercentage
+  if (percentage < 50) return '#67c23a'
+  if (percentage < 80) return '#e6a23c'
+  return '#f56c6c'
+}
+
+/**
  * 通知设置变化
  */
 const handleNotificationChange = () => {
@@ -609,6 +1031,124 @@ const handleNotificationChange = () => {
 const handlePrivacyChange = () => {
   localStorage.setItem('privacy-settings', JSON.stringify(privacyForm))
   ElMessage.success('设置已保存')
+}
+
+/**
+ * 两步验证开关变化
+ */
+const handleTwoFactorChange = value => {
+  if (value) {
+    showSecurityDialog.value = true
+  } else {
+    ElMessage.warning('请在账户安全对话框中关闭两步验证')
+    twoFactorEnabled.value = true
+  }
+}
+
+/**
+ * 获取联系方式类型名称
+ */
+const getContactTypeName = type => {
+  const typeMap = {
+    mobile: '手机号',
+    email: '邮箱',
+    qq: 'QQ',
+    wechat: '微信',
+    other: '其他',
+  }
+  return typeMap[type] || '其他'
+}
+
+/**
+ * 获取联系方式类型颜色
+ */
+const getContactTypeColor = type => {
+  const colorMap = {
+    mobile: 'primary',
+    email: 'success',
+    qq: 'warning',
+    wechat: 'success',
+    other: 'info',
+  }
+  return colorMap[type] || 'info'
+}
+
+/**
+ * 添加联系方式
+ */
+const handleAddContact = () => {
+  contactFormRef.value.validate(valid => {
+    if (valid) {
+      const newContact = {
+        id: Date.now(),
+        type: contactForm.type,
+        value: contactForm.value,
+        verified: false,
+      }
+      contactList.value.push(newContact)
+      ElMessage.success('联系方式添加成功')
+      showContactDialog.value = false
+      contactForm.type = ''
+      contactForm.value = ''
+    }
+  })
+}
+
+/**
+ * 删除联系方式
+ */
+const handleDeleteContact = async contact => {
+  try {
+    await ElMessageBox.confirm(`确定要删除该联系方式吗？`, '确认删除', {
+      type: 'warning',
+    })
+    const index = contactList.value.findIndex(c => c.id === contact.id)
+    if (index > -1) {
+      contactList.value.splice(index, 1)
+      ElMessage.success('联系方式删除成功')
+    }
+  } catch {
+    // 取消操作
+  }
+}
+
+/**
+ * 提交实名认证
+ */
+const handleSubmitRealName = () => {
+  realNameFormRef.value.validate(valid => {
+    if (valid) {
+      ElMessage.loading('正在提交认证信息...')
+      setTimeout(() => {
+        authInfo.value.realNameVerified = true
+        ElMessage.success('实名认证提交成功，请等待审核')
+        showRealNameDialog.value = false
+        realNameForm.name = ''
+        realNameForm.idCard = ''
+        realNameForm.mobile = ''
+      }, 1500)
+    }
+  })
+}
+
+/**
+ * 提交企业认证
+ */
+const handleSubmitEnterprise = () => {
+  enterpriseFormRef.value.validate(valid => {
+    if (valid) {
+      ElMessage.loading('正在提交认证信息...')
+      setTimeout(() => {
+        authInfo.value.enterpriseVerified = true
+        ElMessage.success('企业认证提交成功，请等待审核')
+        showEnterpriseDialog.value = false
+        enterpriseForm.name = ''
+        enterpriseForm.creditCode = ''
+        enterpriseForm.legalPerson = ''
+        enterpriseForm.phone = ''
+      }, 1500)
+    }
+  })
 }
 
 /**
@@ -877,6 +1417,65 @@ onMounted(() => {
 
 .empty-state {
   padding: 40px 0;
+}
+
+.contact-list {
+  .contact-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #ebeef5;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .contact-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .contact-value {
+        font-size: 14px;
+        color: #606266;
+      }
+    }
+
+    .contact-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+}
+
+.auth-section {
+  .auth-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #ebeef5;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .auth-info {
+      h4 {
+        margin: 0 0 4px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      p {
+        margin: 0;
+        color: #909399;
+        font-size: 12px;
+      }
+    }
+  }
 }
 
 .blocked-list {

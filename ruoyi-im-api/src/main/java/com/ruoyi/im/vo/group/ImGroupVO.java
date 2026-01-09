@@ -1,5 +1,7 @@
 package com.ruoyi.im.vo.group;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -8,6 +10,7 @@ import java.time.LocalDateTime;
  *
  * @author ruoyi
  */
+@Data
 public class ImGroupVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -81,116 +84,4 @@ public class ImGroupVO implements Serializable {
      * 当前用户是否被禁言
      */
     private Boolean isMuted;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Long getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
-    }
-
-    public String getOwnerName() {
-        return ownerName;
-    }
-
-    public void setOwnerName(String ownerName) {
-        this.ownerName = ownerName;
-    }
-
-    public String getNotice() {
-        return notice;
-    }
-
-    public void setNotice(String notice) {
-        this.notice = notice;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Integer getMemberCount() {
-        return memberCount;
-    }
-
-    public void setMemberCount(Integer memberCount) {
-        this.memberCount = memberCount;
-    }
-
-    public Integer getMemberLimit() {
-        return memberLimit;
-    }
-
-    public void setMemberLimit(Integer memberLimit) {
-        this.memberLimit = memberLimit;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public String getMyRole() {
-        return myRole;
-    }
-
-    public void setMyRole(String myRole) {
-        this.myRole = myRole;
-    }
-
-    public Boolean getIsMuted() {
-        return isMuted;
-    }
-
-    public void setIsMuted(Boolean isMuted) {
-        this.isMuted = isMuted;
-    }
 }

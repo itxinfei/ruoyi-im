@@ -1,6 +1,8 @@
 package com.ruoyi.im.dto.message;
 
 import com.ruoyi.im.dto.mention.ImMentionInfo;
+import lombok.Data;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -10,6 +12,7 @@ import java.io.Serializable;
  *
  * @author ruoyi
  */
+@Data
 public class ImMessageSendRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -40,68 +43,4 @@ public class ImMessageSendRequest implements Serializable {
 
     /** @提及信息 */
     private ImMentionInfo mentionInfo;
-
-    public Long getConversationId() {
-        return conversationId;
-    }
-
-    public void setConversationId(Long conversationId) {
-        this.conversationId = conversationId;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Long getReceiverId() {
-        return receiverId;
-    }
-
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
-    }
-
-    public Long getReplyToMessageId() {
-        return replyToMessageId;
-    }
-
-    public void setReplyToMessageId(Long replyToMessageId) {
-        this.replyToMessageId = replyToMessageId;
-    }
-
-    public String getClientMsgId() {
-        return clientMsgId;
-    }
-
-    public void setClientMsgId(String clientMsgId) {
-        this.clientMsgId = clientMsgId;
-    }
-
-    public String getExtra() {
-        return extra;
-    }
-
-    public void setExtra(String extra) {
-        this.extra = extra;
-    }
-
-    public ImMentionInfo getMentionInfo() {
-        return mentionInfo;
-    }
-
-    public void setMentionInfo(ImMentionInfo mentionInfo) {
-        this.mentionInfo = mentionInfo;
-    }
 }

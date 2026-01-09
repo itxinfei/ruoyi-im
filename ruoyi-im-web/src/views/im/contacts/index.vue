@@ -1,28 +1,9 @@
 <template>
   <div class="contacts-container">
-    <!-- 第二栏：联系人分类 -->
-    <div class="category-panel">
-      <div class="category-header">
-        <span class="category-title">联系人</span>
-      </div>
-      <div class="category-list">
-        <div
-          v-for="category in categories"
-          :key="category.key"
-          class="category-item"
-          :class="{ active: activeCategory === category.key }"
-          @click="activeCategory = category.key"
-        >
-          <component :is="category.icon" class="category-icon" />
-          <span class="category-label">{{ category.label }}</span>
-          <span v-if="category.count > 0" class="category-count">{{ category.count }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 第三栏：联系人列表 -->
+    <!-- 第二栏：联系人列表（钉钉风格，移除分类面板） -->
     <div class="contacts-panel">
       <div class="panel-header">
+        <h3 class="panel-title">联系人</h3>
         <el-input
           v-model="searchText"
           placeholder="搜索联系人"
@@ -33,6 +14,21 @@
         />
       </div>
 
+      <!-- 分类标签（水平排列） -->
+      <div class="category-tabs">
+        <div
+          v-for="category in categories"
+          :key="category.key"
+          class="category-tab"
+          :class="{ active: activeCategory === category.key }"
+          @click="activeCategory = category.key"
+        >
+          <component :is="category.icon" class="tab-icon" />
+          <span class="tab-label">{{ category.label }}</span>
+          <span v-if="category.count > 0" class="tab-count">{{ category.count }}</span>
+        </div>
+      </div>
+
       <div class="contacts-list">
         <div
           v-for="contact in currentContacts"
@@ -40,20 +36,27 @@
           class="contact-item"
           :class="{ selected: selectedContact?.id === contact.id }"
           @click="selectContact(contact)"
+          @dblclick="startChat"
         >
           <div class="contact-avatar">
-            <el-avatar :size="40" :src="contact.avatar || '/profile/avatar.png'">
+            <el-avatar :size="48" :src="contact.avatar || '/profile/avatar.png'">
               {{ contact.name?.charAt(0) || contact.nickname?.charAt(0) || '用' }}
             </el-avatar>
             <span v-if="contact.online" class="online-dot"></span>
           </div>
           <div class="contact-info">
-            <div class="contact-name">
-              {{ contact.name || contact.nickname || contact.username }}
-              <i v-if="contact.starred" class="el-icon-star-on star-icon" :size="12"></i>
+            <div class="contact-name-row">
+              <span class="contact-name">
+                {{ contact.name || contact.nickname || contact.username }}
+              </span>
+              <span v-if="contact.starred" class="star-icon">★</span>
+            </div>
+            <div class="contact-signature" v-if="contact.signature">
+              {{ contact.signature }}
             </div>
             <div class="contact-status">
-              {{ contact.online ? '在线' : contact.lastSeen || '离线' }}
+              <span class="status-dot" :class="{ online: contact.online }"></span>
+              <span class="status-text">{{ contact.online ? '在线' : '离线' }}</span>
             </div>
           </div>
         </div>
@@ -62,64 +65,28 @@
       </div>
     </div>
 
-    <!-- 第四栏：联系人详情 -->
-    <div class="detail-panel">
+    <!-- 第三栏：联系人详情 -->
+    <div class="detail-panel" :class="{ empty: !selectedContact }">
       <template v-if="selectedContact">
         <div class="detail-header">
-          <el-avatar :size="72" :src="selectedContact.avatar || '/profile/avatar.png'">
-            {{
-              (
-                selectedContact.name ||
-                selectedContact.nickname ||
-                selectedContact.username
-              )?.charAt(0) || '用'
-            }}
+          <el-avatar :size="80" :src="selectedContact.avatar || '/profile/avatar.png'">
+            {{ (selectedContact.name || selectedContact.nickname || selectedContact.username)?.charAt(0) || '用' }}
           </el-avatar>
           <div class="header-info">
-            <h2>
-              {{ selectedContact.name || selectedContact.nickname || selectedContact.username }}
-            </h2>
+            <h2>{{ selectedContact.name || selectedContact.nickname || selectedContact.username }}</h2>
             <p class="status" :class="{ online: selectedContact.online }">
               {{ selectedContact.online ? '在线' : '离线' }}
             </p>
           </div>
-          <div class="header-actions">
-            <!-- 发现用户模式：显示添加好友按钮 -->
-            <el-button
-              v-if="activeCategory === 'discover'"
-              type="primary"
-              :icon="Plus"
-              @click="sendFriendRequest"
-            >
-              添加好友
-            </el-button>
-            <el-button v-else type="primary" :icon="Comment" @click="startChat">发消息</el-button>
-            <el-dropdown trigger="click" @command="handleAction">
-              <el-button :icon="More" circle />
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="call">
-                    <i class="el-icon-phone"></i> 语音通话
-                  </el-dropdown-item>
-                  <el-dropdown-item command="video">
-                    <i class="el-icon-video-camera"></i> 视频通话
-                  </el-dropdown-item>
-                  <el-dropdown-item divided command="star">
-                    <i
-                      :class="selectedContact.starred ? 'el-icon-star-off' : 'el-icon-star-on'"
-                    ></i>
-                    {{ selectedContact.starred ? '取消星标' : '添加星标' }}
-                  </el-dropdown-item>
-                  <el-dropdown-item command="remark">
-                    <i class="el-icon-edit"></i> 编辑备注
-                  </el-dropdown-item>
-                  <el-dropdown-item divided command="delete">
-                    <i class="el-icon-delete"></i> 删除联系人
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </div>
+        </div>
+
+        <div class="detail-actions">
+          <el-button type="primary" size="large" :icon="ChatDotRound" @click="startChat">
+            发消息
+          </el-button>
+          <el-button size="large" :icon="VideoCamera" @click="handleAction('video')">
+            视频通话
+          </el-button>
         </div>
 
         <div class="detail-content">
@@ -128,13 +95,11 @@
             <div class="info-grid">
               <div class="info-item">
                 <span class="label">昵称</span>
-                <span class="value">{{
-                  selectedContact.nickname || selectedContact.name || '-'
-                }}</span>
+                <span class="value">{{ selectedContact.nickname || selectedContact.name || '-' }}</span>
               </div>
               <div class="info-item">
                 <span class="label">用户名</span>
-                <span class="value">{{ selectedContact.username || '-' }}</span>
+                <span class="value">@{{ selectedContact.username || '-' }}</span>
               </div>
               <div class="info-item">
                 <span class="label">邮箱</span>
@@ -147,32 +112,9 @@
             </div>
           </div>
 
-          <div class="info-section">
+          <div class="info-section" v-if="selectedContact.signature">
             <h4>个性签名</h4>
-            <p class="signature">{{ selectedContact.signature || '这个人很懒，什么都没留下' }}</p>
-          </div>
-
-          <div class="info-section">
-            <h4>快捷操作</h4>
-            <div class="quick-actions">
-              <el-button
-                v-if="activeCategory === 'discover'"
-                type="primary"
-                :icon="Plus"
-                @click="sendFriendRequest"
-              >
-                添加好友
-              </el-button>
-              <el-button
-                v-if="activeCategory !== 'discover'"
-                :icon="ChatDotRound"
-                @click="startChat"
-              >
-                发消息
-              </el-button>
-              <el-button :icon="Phone" @click="handleAction('call')">语音通话</el-button>
-              <el-button :icon="VideoCamera" @click="handleAction('video')">视频通话</el-button>
-            </div>
+            <p class="signature">{{ selectedContact.signature }}</p>
           </div>
         </div>
       </template>
@@ -191,17 +133,11 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
   Comment,
-  More,
   Phone,
   VideoCamera,
-  Star,
-  Edit,
-  Delete,
   ChatDotRound,
   User,
-  StarFilled,
   UserFilled,
-  Plus,
 } from '@element-plus/icons-vue'
 import {
   listContact,
@@ -213,6 +149,7 @@ import {
 } from '@/api/im/contact'
 import { listUser } from '@/api/im/user'
 import { addContact } from '@/api/im/contact'
+import { getCurrentUserId } from '@/utils/im-user'
 
 const router = useRouter()
 
@@ -349,11 +286,7 @@ const loadAllUsers = async () => {
   }
 }
 
-// 获取当前用户ID
-const getCurrentUserId = () => {
-  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
-  return userInfo.userId || userInfo.id || 1
-}
+// 获取当前用户ID - 已从工具函数导入
 
 const handleSearch = async () => {
   if (!searchText.value) {
@@ -599,117 +532,94 @@ onMounted(async () => {
 <style lang="scss" scoped>
 @use '@/assets/styles/variables.scss' as *;
 
+// 钉钉风格联系人页面
 .contacts-container {
   height: 100%;
   display: flex;
   background-color: #f5f5f5;
 }
 
-.category-panel {
-  width: 200px;
-  min-width: 200px;
-  height: 100%;
-  background-color: #fff;
-  border-right: 1px solid $border-light;
-  display: flex;
-  flex-direction: column;
-
-  .category-header {
-    padding: 16px;
-    border-bottom: 1px solid $border-light;
-
-    .category-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: $text-primary;
-    }
-  }
-
-  .category-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px 0;
-
-    .category-item {
-      display: flex;
-      align-items: center;
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: all 0.2s;
-      gap: 12px;
-
-      &:hover {
-        background-color: #f5f7fa;
-      }
-
-      &.active {
-        background-color: #e6f7ff;
-        color: $primary-color;
-        position: relative;
-
-        &::before {
-          content: '';
-          position: absolute;
-          left: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 3px;
-          height: 20px;
-          background-color: $primary-color;
-          border-radius: 0 2px 2px 0;
-        }
-      }
-
-      .category-icon {
-        width: 20px;
-        height: 20px;
-        color: $text-secondary;
-        flex-shrink: 0;
-
-        .active & {
-          color: $primary-color;
-        }
-      }
-
-      .category-label {
-        flex: 1;
-        font-size: 14px;
-        color: $text-primary;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .category-count {
-        font-size: 12px;
-        color: $text-secondary;
-        background-color: #f0f0f0;
-        border-radius: 10px;
-        padding: 2px 8px;
-        min-width: 20px;
-        text-align: center;
-      }
-    }
-  }
-}
-
 .contacts-panel {
   width: 320px;
-  min-width: 320px;
+  min-width: 280px;
   height: 100%;
   background-color: #fff;
-  border-right: 1px solid $border-light;
   display: flex;
   flex-direction: column;
 
   .panel-header {
-    padding: 12px;
+    padding: 16px 16px 12px;
     border-bottom: 1px solid $border-light;
+
+    .panel-title {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      font-weight: 500;
+      color: $text-primary;
+    }
 
     .search-input {
       :deep(.el-input__wrapper) {
         border-radius: 20px;
         background-color: #f5f5f5;
+        border: none;
+        box-shadow: none;
+
+        &.is-focus {
+          background-color: #fff;
+          border: 1px solid $primary-color;
+        }
+      }
+    }
+  }
+
+  // 分类标签（水平滚动）
+  .category-tabs {
+    display: flex;
+    padding: 8px 12px;
+    gap: 4px;
+    overflow-x: auto;
+    border-bottom: 1px solid $border-light;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-tab {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-size: 13px;
+      color: $text-secondary;
+      background-color: transparent;
+
+      &:hover {
+        background-color: #f5f5f5;
+      }
+
+      &.active {
+        background-color: #e6f7ff;
+        color: $primary-color;
+        font-weight: 500;
+      }
+
+      .tab-icon {
+        width: 16px;
+        height: 16px;
+      }
+
+      .tab-count {
+        font-size: 11px;
+        background-color: rgba(24, 144, 255, 0.1);
+        border-radius: 8px;
+        padding: 1px 6px;
+        margin-left: 2px;
       }
     }
   }
@@ -723,7 +633,7 @@ onMounted(async () => {
       align-items: center;
       padding: 12px 16px;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: background-color 0.15s;
 
       &:hover {
         background-color: #f5f7fa;
@@ -740,10 +650,10 @@ onMounted(async () => {
 
         .online-dot {
           position: absolute;
-          bottom: 2px;
-          right: 2px;
-          width: 10px;
-          height: 10px;
+          bottom: 1px;
+          right: 1px;
+          width: 12px;
+          height: 12px;
           background-color: #52c41a;
           border: 2px solid #fff;
           border-radius: 50%;
@@ -754,24 +664,57 @@ onMounted(async () => {
         flex: 1;
         min-width: 0;
 
-        .contact-name {
-          font-size: 14px;
-          font-weight: 500;
-          color: $text-primary;
+        .contact-name-row {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          margin-bottom: 2px;
+
+          .contact-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: $text-primary;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .star-icon {
+            color: #faad14;
+            font-size: 14px;
+            flex-shrink: 0;
+          }
+        }
+
+        .contact-signature {
+          font-size: 12px;
+          color: $text-secondary;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          margin-bottom: 2px;
+        }
+
+        .contact-status {
           display: flex;
           align-items: center;
           gap: 4px;
 
-          .star-icon {
-            color: #faad14;
-            font-size: 12px;
-          }
-        }
+          .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: $text-secondary;
 
-        .contact-status {
-          font-size: 12px;
-          color: $text-secondary;
-          margin-top: 2px;
+            &.online {
+              background-color: #52c41a;
+            }
+          }
+
+          .status-text {
+            font-size: 12px;
+            color: $text-secondary;
+          }
         }
       }
     }
@@ -786,37 +729,57 @@ onMounted(async () => {
   flex-direction: column;
   overflow: hidden;
 
-  .detail-header {
-    padding: 24px;
+  &.empty {
     display: flex;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
+  }
+
+  .detail-header {
+    padding: 32px 24px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
     border-bottom: 1px solid $border-light;
 
     .header-info {
       flex: 1;
 
       h2 {
-        margin: 0 0 4px;
-        font-size: 20px;
+        margin: 0 0 8px;
+        font-size: 24px;
         font-weight: 500;
+        color: $text-primary;
       }
 
       .status {
         margin: 0;
         font-size: 14px;
         color: $text-secondary;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
 
         &.online {
           color: #52c41a;
+
+          &::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background-color: #52c41a;
+            border-radius: 50%;
+          }
         }
       }
     }
+  }
 
-    .header-actions {
-      display: flex;
-      gap: 8px;
-    }
+  .detail-actions {
+    padding: 16px 24px;
+    display: flex;
+    gap: 12px;
+    border-bottom: 1px solid $border-light;
   }
 
   .detail-content {
@@ -836,33 +799,23 @@ onMounted(async () => {
 
       .info-grid {
         display: grid;
-        grid-template-columns: repeat(1, 1fr);
-        gap: 16px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px 24px;
 
         .info-item {
           display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 8px 0;
-          border-bottom: 1px solid #f5f5f5;
-
-          &:last-child {
-            border-bottom: none;
-          }
+          flex-direction: column;
+          gap: 4px;
 
           .label {
-            font-size: 14px;
-            color: #666;
-            width: 80px;
+            font-size: 12px;
+            color: $text-secondary;
           }
 
           .value {
             font-size: 14px;
-            color: #333;
-            text-align: right;
-            flex: 1;
+            color: $text-primary;
             word-wrap: break-word;
-            word-break: break-all;
           }
         }
       }
@@ -873,14 +826,8 @@ onMounted(async () => {
         background-color: #f5f7fa;
         border-radius: 8px;
         font-size: 14px;
-        color: #666;
+        color: $text-secondary;
         line-height: 1.6;
-      }
-
-      .quick-actions {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
       }
     }
   }
@@ -890,6 +837,35 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+}
+
+// 响应式适配
+@media (max-width: 768px) {
+  .contacts-panel {
+    width: 100%;
+    min-width: unset;
+
+    .detail-panel {
+      display: none;
+    }
+  }
+
+  .detail-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+
+    .empty-detail {
+      display: none;
+    }
+
+    &:not(.empty) {
+      display: flex;
+    }
   }
 }
 </style>

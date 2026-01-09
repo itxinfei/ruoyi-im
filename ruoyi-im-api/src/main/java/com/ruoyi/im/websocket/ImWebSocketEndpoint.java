@@ -3,6 +3,7 @@ package com.ruoyi.im.websocket;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImMessage;
+import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageService;
@@ -52,6 +53,7 @@ public class ImWebSocketEndpoint {
     private static ImRedisUtil staticImRedisUtil;
     private static ImConversationMemberService staticConversationMemberService;
     private static ImConversationService staticConversationService;
+    private static ImConversationMemberMapper staticConversationMemberMapper;
     private static boolean staticSecurityEnabled;
     private static Long staticDevUserId;
 
@@ -72,6 +74,9 @@ public class ImWebSocketEndpoint {
 
     @Autowired
     private ImConversationService conversationService;
+
+    @Autowired
+    private ImConversationMemberMapper conversationMemberMapper;
 
     @Value("${app.security.enabled:true}")
     private boolean securityEnabled;
@@ -107,6 +112,18 @@ public class ImWebSocketEndpoint {
     @Autowired
     public void setConversationService(ImConversationService conversationService) {
         staticConversationService = conversationService;
+    }
+
+    @Autowired
+    public void setConversationMemberMapper(ImConversationMemberMapper conversationMemberMapper) {
+        staticConversationMemberMapper = conversationMemberMapper;
+    }
+
+    /**
+     * 获取在线用户集合（供 ImMessageController 使用）
+     */
+    public static Map<Long, Session> getOnlineUsers() {
+        return onlineUsers;
     }
 
     @Value("${app.security.enabled:true}")
@@ -317,15 +334,42 @@ public class ImWebSocketEndpoint {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> messageData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
 
-            Long conversationId = Long.valueOf(messageData.get("sessionId").toString());
-            String messageType = (String) messageData.get("type");
+            // 兼容 conversationId 和 sessionId 两种字段名（优先使用 conversationId）
+            Object idValue = messageData.get("conversationId");
+            if (idValue == null) {
+                idValue = messageData.get("sessionId");
+            }
+            if (idValue == null) {
+                log.warn("WebSocket消息缺少conversationId或sessionId字段");
+                return;
+            }
+            Long conversationId = Long.valueOf(idValue.toString());
+
+            // 兼容 messageType 和 type 两种字段名
+            String messageType = (String) messageData.get("messageType");
+            if (messageType == null) {
+                messageType = (String) messageData.get("type");
+            }
+            if (messageType == null) {
+                messageType = "TEXT";
+            }
+
             String content = (String) messageData.get("content");
+
+            // 获取可选参数
+            String replyToMessageIdStr = messageData.get("replyToMessageId") != null
+                ? messageData.get("replyToMessageId").toString() : null;
+            String clientMsgId = (String) messageData.get("clientMsgId");
 
             // 构建消息发送请求
             com.ruoyi.im.dto.message.ImMessageSendRequest request = new com.ruoyi.im.dto.message.ImMessageSendRequest();
             request.setConversationId(conversationId);
             request.setType(messageType);
             request.setContent(content);
+            if (replyToMessageIdStr != null) {
+                request.setReplyToMessageId(Long.valueOf(replyToMessageIdStr));
+            }
+            request.setClientMsgId(clientMsgId);
 
             // 保存消息到数据库
             Long messageId = staticImMessageService.sendMessage(request, userId);
@@ -362,8 +406,19 @@ public class ImWebSocketEndpoint {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> typingData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
 
-            Long conversationId = Long.valueOf(typingData.get("sessionId").toString());
-            boolean isTyping = (boolean) typingData.get("isTyping");
+            // 兼容 conversationId 和 sessionId 两种字段名
+            Object idValue = typingData.get("conversationId");
+            if (idValue == null) {
+                idValue = typingData.get("sessionId");
+            }
+            if (idValue == null) {
+                log.warn("正在输入状态消息缺少conversationId或sessionId字段");
+                return;
+            }
+            Long conversationId = Long.valueOf(idValue.toString());
+
+            Object isTypingValue = typingData.get("isTyping");
+            boolean isTyping = isTypingValue != null && Boolean.parseBoolean(isTypingValue.toString());
 
             // 广播正在输入状态
             broadcastTypingStatus(conversationId, userId, isTyping);
@@ -464,7 +519,18 @@ public class ImWebSocketEndpoint {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> readData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
 
-            Long conversationId = Long.valueOf(readData.get("sessionId").toString());
+            // 兼容 conversationId 和 sessionId 两种字段名
+            Object idValue = readData.get("conversationId");
+            if (idValue == null) {
+                idValue = readData.get("sessionId");
+            }
+            if (idValue == null) {
+                log.warn("消息已读数据缺少conversationId或sessionId字段");
+                return;
+            }
+            Long conversationId = Long.valueOf(idValue.toString());
+
+            @SuppressWarnings("unchecked")
             List<Long> messageIds = (List<Long>) readData.get("messageIds");
 
             // 更新消息状态为已读
@@ -484,7 +550,7 @@ public class ImWebSocketEndpoint {
 
     /**
      * 广播消息给会话中的所有用户
-     * 根据会话类型（私聊/群聊）获取相关用户并推送消息
+     * 根据会话ID获取会话成员并推送消息
      *
      * @param conversationId 会话ID
      * @param message 消息对象
@@ -498,35 +564,18 @@ public class ImWebSocketEndpoint {
 
             String messageJson = mapper.writeValueAsString(messageMap);
 
-            // 获取会话信息，确定会话类型和参与者
-            com.ruoyi.im.vo.conversation.ImConversationVO conversationVO = staticConversationService.getConversationById(conversationId, message.getSenderId());
-            if (conversationVO == null) {
-                log.warn("会话不存在，无法广播消息: conversationId={}", conversationId);
+            // 直接通过mapper获取会话中的所有成员
+            List<com.ruoyi.im.domain.ImConversationMember> members =
+                staticConversationMemberMapper.selectByConversationId(conversationId);
+
+            if (members == null || members.isEmpty()) {
+                log.warn("会话无成员，无法广播消息: conversationId={}", conversationId);
                 return;
             }
 
-            // 根据会话类型获取目标用户列表
-            List<Long> targetUserIds = new ArrayList<>();
-            if ("private".equals(conversationVO.getType())) {
-                // 私聊会话：获取会话成员列表
-                List<com.ruoyi.im.vo.conversation.ImConversationMemberVO> members = staticConversationMemberService.getConversationMemberList(message.getSenderId());
-                for (com.ruoyi.im.vo.conversation.ImConversationMemberVO member : members) {
-                    if (member.getConversationId().equals(conversationId)) {
-                        targetUserIds.add(member.getUserId());
-                    }
-                }
-            } else if ("group".equals(conversationVO.getType())) {
-                // 群聊会话：获取会话成员列表
-                List<com.ruoyi.im.vo.conversation.ImConversationMemberVO> members = staticConversationMemberService.getConversationMemberList(message.getSenderId());
-                for (com.ruoyi.im.vo.conversation.ImConversationMemberVO member : members) {
-                    if (member.getConversationId().equals(conversationId)) {
-                        targetUserIds.add(member.getUserId());
-                    }
-                }
-            }
-
-            // 向目标用户发送消息
-            for (Long targetUserId : targetUserIds) {
+            // 向会话中的所有在线用户发送消息
+            for (com.ruoyi.im.domain.ImConversationMember member : members) {
+                Long targetUserId = member.getUserId();
                 Session targetSession = onlineUsers.get(targetUserId);
                 if (targetSession != null && targetSession.isOpen()) {
                     try {
@@ -537,6 +586,9 @@ public class ImWebSocketEndpoint {
                     }
                 }
             }
+
+            log.info("消息已广播到会话: conversationId={}, memberCount={}, messageId={}",
+                conversationId, members.size(), message.getId());
 
         } catch (Exception e) {
             log.error("广播消息异常", e);
