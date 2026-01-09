@@ -3,7 +3,7 @@
     <!-- 编辑器头部 -->
     <div class="editor-header">
       <div class="header-left">
-        <el-button :icon="ArrowLeft" @click="handleBack" text>返回</el-button>
+        <el-button :icon="ArrowLeft" text @click="handleBack">返回</el-button>
         <div class="doc-title-wrapper">
           <el-input
             v-if="editingTitle"
@@ -17,12 +17,8 @@
             {{ document.title || '未命名文档' }}
             <el-icon :size="16"><Edit /></el-icon>
           </h2>
-          <span v-if="document.autoSaving" class="saving-indicator">
-            保存中...
-          </span>
-          <span v-else-if="document.saved" class="saved-indicator">
-            已保存
-          </span>
+          <span v-if="document.autoSaving" class="saving-indicator"> 保存中... </span>
+          <span v-else-if="document.saved" class="saved-indicator"> 已保存 </span>
         </div>
       </div>
       <div class="header-center">
@@ -33,11 +29,7 @@
             :content="user.name + (user.cursor ? ' 正在编辑' : '')"
             placement="top"
           >
-            <el-avatar
-              :size="32"
-              :src="user.avatar"
-              :class="{ 'is-editing': user.isEditing }"
-            >
+            <el-avatar :size="32" :src="user.avatar" :class="{ 'is-editing': user.isEditing }">
               {{ user.name?.charAt(0) }}
             </el-avatar>
           </el-tooltip>
@@ -47,9 +39,7 @@
         <el-button :icon="Comment" @click="showComments = !showComments">
           评论 ({{ comments.length }})
         </el-button>
-        <el-button :icon="Clock" @click="showHistory = true">
-          历史版本
-        </el-button>
+        <el-button :icon="Clock" @click="showHistory = true"> 历史版本 </el-button>
         <el-dropdown trigger="click" @command="handleMoreAction">
           <el-button :icon="MoreFilled" circle />
           <template #dropdown>
@@ -84,11 +74,7 @@
           </el-tab-pane>
           <el-tab-pane v-if="showComments" label="评论" name="comments">
             <div class="comments-list">
-              <div
-                v-for="comment in comments"
-                :key="comment.id"
-                class="comment-item"
-              >
+              <div v-for="comment in comments" :key="comment.id" class="comment-item">
                 <div class="comment-header">
                   <el-avatar :size="24" :src="comment.user.avatar">
                     {{ comment.user.name?.charAt(0) }}
@@ -98,11 +84,7 @@
                 </div>
                 <div class="comment-content">{{ comment.content }}</div>
                 <div v-if="comment.replies?.length" class="comment-replies">
-                  <div
-                    v-for="reply in comment.replies"
-                    :key="reply.id"
-                    class="reply-item"
-                  >
+                  <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
                     <span class="reply-user">{{ reply.user.name }}:</span>
                     <span class="reply-content">{{ reply.content }}</span>
                   </div>
@@ -145,7 +127,12 @@
           </div>
           <div class="toolbar-divider"></div>
           <div class="toolbar-group">
-            <el-select v-model="formatType" size="small" style="width: 100px" @change="handleFormatChange">
+            <el-select
+              v-model="formatType"
+              size="small"
+              style="width: 100px"
+              @change="handleFormatChange"
+            >
               <el-option label="正文" value="p" />
               <el-option label="标题1" value="h1" />
               <el-option label="标题2" value="h2" />
@@ -183,12 +170,7 @@
               />
             </el-tooltip>
             <el-tooltip content="删除线" placement="top">
-              <el-button
-                :icon="Delete"
-                text
-                size="small"
-                @click="handleStrikeThrough"
-              />
+              <el-button :icon="Delete" text size="small" @click="handleStrikeThrough" />
             </el-tooltip>
           </div>
           <div class="toolbar-divider"></div>
@@ -237,9 +219,7 @@
           </div>
           <div class="toolbar-spacer"></div>
           <div class="toolbar-group">
-            <el-button :icon="Menu" text size="small" @click="toggleOutline">
-              目录
-            </el-button>
+            <el-button :icon="Menu" text size="small" @click="toggleOutline"> 目录 </el-button>
             <el-button :icon="FullScreen" text size="small" @click="toggleFullScreen">
               全屏
             </el-button>
@@ -282,14 +262,14 @@
 
         <!-- 选中文字时的浮动工具栏 -->
         <transition name="fade">
-          <div v-if="showFloatToolbar && selectionText" class="float-toolbar" :style="floatToolbarStyle">
+          <div
+            v-if="showFloatToolbar && selectionText"
+            class="float-toolbar"
+            :style="floatToolbarStyle"
+          >
             <el-button-group>
-              <el-button :icon="Comment" size="small" @click="handleAddComment">
-                评论
-              </el-button>
-              <el-button size="small" @click="handleHighlight">
-                高亮
-              </el-button>
+              <el-button :icon="Comment" size="small" @click="handleAddComment"> 评论 </el-button>
+              <el-button size="small" @click="handleHighlight"> 高亮 </el-button>
             </el-button-group>
           </div>
         </transition>
@@ -302,7 +282,7 @@
           :style="{
             left: cursor.x + 'px',
             top: cursor.y + 'px',
-            borderColor: cursor.color
+            borderColor: cursor.color,
           }"
         >
           <span class="cursor-label" :style="{ backgroundColor: cursor.color }">
@@ -313,11 +293,7 @@
     </div>
 
     <!-- 历史版本对话框 -->
-    <el-dialog
-      v-model="showHistory"
-      title="历史版本"
-      width="800px"
-    >
+    <el-dialog v-model="showHistory" title="历史版本" width="800px">
       <div class="history-list">
         <div
           v-for="(version, index) in historyVersions"
@@ -331,9 +307,7 @@
             <div class="version-time">{{ formatTime(version.time) }}</div>
           </div>
           <div class="version-actions">
-            <el-button size="small" @click="handlePreviewVersion(version)">
-              预览
-            </el-button>
+            <el-button size="small" @click="handlePreviewVersion(version)"> 预览 </el-button>
             <el-button
               v-if="index > 0"
               size="small"
@@ -351,22 +325,13 @@
     </el-dialog>
 
     <!-- 评论对话框 -->
-    <el-dialog
-      v-model="commentDialogVisible"
-      title="添加评论"
-      width="500px"
-    >
+    <el-dialog v-model="commentDialogVisible" title="添加评论" width="500px">
       <div class="comment-dialog">
         <div class="selected-text">
           <el-icon><Quote /></el-icon>
           "{{ selectedTextForComment }}"
         </div>
-        <el-input
-          v-model="newComment"
-          type="textarea"
-          :rows="4"
-          placeholder="写下你的评论..."
-        />
+        <el-input v-model="newComment" type="textarea" :rows="4" placeholder="写下你的评论..." />
       </div>
       <template #footer>
         <el-button @click="commentDialogVisible = false">取消</el-button>
@@ -375,11 +340,7 @@
     </el-dialog>
 
     <!-- 插入链接对话框 -->
-    <el-dialog
-      v-model="linkDialogVisible"
-      title="插入链接"
-      width="500px"
-    >
+    <el-dialog v-model="linkDialogVisible" title="插入链接" width="500px">
       <el-form label-width="80px">
         <el-form-item label="链接地址">
           <el-input v-model="linkUrl" placeholder="https://" />
@@ -422,7 +383,7 @@ import {
   Calendar,
   Menu,
   FullScreen,
-  Quote
+  Quote,
 } from '@element-plus/icons-vue'
 import { formatRelativeTime } from '@/utils/format/time.js'
 
@@ -496,9 +457,7 @@ const comments = ref([
     user: { id: 2, name: '张三', avatar: '' },
     content: '这里需要补充更多细节',
     time: new Date(Date.now() - 1000 * 60 * 30),
-    replies: [
-      { id: 11, user: { name: '李四' }, content: '好的，我会补充' }
-    ],
+    replies: [{ id: 11, user: { name: '李四' }, content: '好的，我会补充' }],
     canDelete: false,
   },
 ])
@@ -611,12 +570,12 @@ const debouncedUpdateOutline = () => {
   updateOutlineTimer = setTimeout(updateOutline, 500)
 }
 
-const scrollToHeading = (id) => {
+const scrollToHeading = id => {
   // 滚动到指定标题
   ElMessage.info('滚动功能开发中')
 }
 
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   // 快捷键处理
   if (e.ctrlKey || e.metaKey) {
     switch (e.key.toLowerCase()) {
@@ -642,7 +601,7 @@ const handleKeydown = (e) => {
   // Tab键处理
   if (e.key === 'Tab') {
     e.preventDefault()
-    document.execCommand('insertHTML', false, '&nbsp;&nbsp;&nbsp;&nbsp;')
+    document.value.execCommand('insertHTML', false, '&nbsp;&nbsp;&nbsp;&nbsp;')
   }
 }
 
@@ -667,28 +626,30 @@ const handleSelectionChange = () => {
 }
 
 const updateFormatState = () => {
-  isBold.value = document.queryCommandState('bold')
-  isItalic.value = document.queryCommandState('italic')
-  isUnderline.value = document.queryCommandState('underline')
+  isBold.value = document.value.queryCommandState('bold')
+  isItalic.value = document.value.queryCommandState('italic')
+  isUnderline.value = document.value.queryCommandState('underline')
 }
 
 // 工具栏操作
-const handleUndo = () => document.execCommand('undo')
-const handleRedo = () => document.execCommand('redo')
+const handleUndo = () => document.value.execCommand('undo')
+const handleRedo = () => document.value.execCommand('redo')
 
 const handleFormatChange = () => {
-  document.execCommand('formatBlock', false, formatType.value)
+  document.value.execCommand('formatBlock', false, formatType.value)
 }
 
-const handleBold = () => document.execCommand('bold')
-const handleItalic = () => document.execCommand('italic')
-const handleUnderline = () => document.execCommand('underline')
-const handleStrikeThrough = () => document.execCommand('strikeThrough')
+const handleBold = () => document.value.execCommand('bold')
+const handleItalic = () => document.value.execCommand('italic')
+const handleUnderline = () => document.value.execCommand('underline')
+const handleStrikeThrough = () => document.value.execCommand('strikeThrough')
 
-const handleUnorderedList = () => document.execCommand('insertUnorderedList')
-const handleOrderedList = () => document.execCommand('insertOrderedList')
+const handleUnorderedList = () => document.value.execCommand('insertUnorderedList')
+const handleOrderedList = () => document.value.execCommand('insertOrderedList')
 const handleTaskList = () => {
-  document.execCommand('insertHTML', false,
+  document.value.execCommand(
+    'insertHTML',
+    false,
     '<div class="task-list"><input type="checkbox"> <span>待办事项</span></div>'
   )
 }
@@ -707,7 +668,7 @@ const handleConfirmLink = () => {
   }
 
   const html = `<a href="${linkUrl.value}" target="_blank">${linkText.value}</a>`
-  document.execCommand('insertHTML', false, html)
+  document.value.execCommand('insertHTML', false, html)
   linkDialogVisible.value = false
 }
 
@@ -724,12 +685,12 @@ const handleInsertTable = () => {
       <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
     </table>
   `
-  document.execCommand('insertHTML', false, html)
+  document.value.execCommand('insertHTML', false, html)
 }
 
 const handleInsertCode = () => {
   const html = `<pre style="background: #f5f5f5; padding: 12px; border-radius: 4px;"><code>代码内容</code></pre>`
-  document.execCommand('insertHTML', false, html)
+  document.value.execCommand('insertHTML', false, html)
 }
 
 const handleInsertFormula = () => {
@@ -739,19 +700,19 @@ const handleInsertFormula = () => {
 const handleInsertDate = () => {
   const now = new Date()
   const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`
-  document.execCommand('insertText', false, dateStr)
+  document.value.execCommand('insertText', false, dateStr)
 }
 
 const handleInsertDivider = () => {
-  document.execCommand('insertHTML', false, '<hr style="margin: 16px 0;">')
+  document.value.execCommand('insertHTML', false, '<hr style="margin: 16px 0;">')
 }
 
 const handleTextColor = () => {
-  document.execCommand('foreColor', false, textColor.value)
+  document.value.execCommand('foreColor', false, textColor.value)
 }
 
 const handleBgColor = () => {
-  document.execCommand('hiliteColor', false, bgColor.value)
+  document.value.execCommand('hiliteColor', false, bgColor.value)
 }
 
 const toggleOutline = () => {
@@ -762,10 +723,10 @@ const toggleOutline = () => {
 }
 
 const toggleFullScreen = () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen()
+  if (!document.value.fullscreenElement) {
+    document.value.documentElement.requestFullscreen()
   } else {
-    document.exitFullscreen()
+    document.value.exitFullscreen()
   }
 }
 
@@ -795,13 +756,13 @@ const handleSubmitComment = () => {
   commentDialogVisible.value = false
 }
 
-const handleReplyComment = (comment) => {
+const handleReplyComment = comment => {
   currentReplyComment.value = comment
   newComment.value = ''
   commentDialogVisible.value = true
 }
 
-const handleDeleteComment = (comment) => {
+const handleDeleteComment = comment => {
   const index = comments.value.findIndex(c => c.id === comment.id)
   if (index > -1) {
     comments.value.splice(index, 1)
@@ -810,10 +771,10 @@ const handleDeleteComment = (comment) => {
 }
 
 const handleHighlight = () => {
-  document.execCommand('hiliteColor', false, '#fff4e6')
+  document.value.execCommand('hiliteColor', false, '#fff4e6')
 }
 
-const handleMoreAction = (command) => {
+const handleMoreAction = command => {
   switch (command) {
     case 'share':
       ElMessage.info('分享功能开发中')
@@ -835,7 +796,7 @@ const handleExport = () => {
   const content = editorRef.value?.innerHTML || ''
   const blob = new Blob([content], { type: 'text/html' })
   const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
+  const a = document.value.createElement('a')
   a.href = url
   a.download = `${document.value.title}.html`
   a.click()
@@ -843,30 +804,28 @@ const handleExport = () => {
   ElMessage.success('文档已导出')
 }
 
-const handleSelectVersion = (version) => {
+const handleSelectVersion = version => {
   selectedVersionId.value = version.id
 }
 
-const handlePreviewVersion = (version) => {
+const handlePreviewVersion = version => {
   ElMessage.info('预览功能开发中')
 }
 
-const handleRestoreVersion = (version) => {
-  ElMessageBox.confirm(
-    `确定要恢复到 ${formatTime(version.time)} 的版本吗？`,
-    '恢复版本',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
-  ).then(() => {
-    ElMessage.success('版本已恢复')
-    showHistory.value = false
-  }).catch(() => {})
+const handleRestoreVersion = version => {
+  ElMessageBox.confirm(`确定要恢复到 ${formatTime(version.time)} 的版本吗？`, '恢复版本', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      ElMessage.success('版本已恢复')
+      showHistory.value = false
+    })
+    .catch(() => {})
 }
 
-const formatTime = (time) => {
+const formatTime = time => {
   return formatRelativeTime(time)
 }
 
@@ -989,8 +948,13 @@ onUnmounted(() => {
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .header-right {
@@ -1220,7 +1184,8 @@ onUnmounted(() => {
     margin: 8px 0;
   }
 
-  ul, ol {
+  ul,
+  ol {
     padding-left: 24px;
     margin: 8px 0;
   }
@@ -1253,7 +1218,8 @@ onUnmounted(() => {
     width: 100%;
     margin: 16px 0;
 
-    td, th {
+    td,
+    th {
       border: 1px solid var(--el-border-color-light);
       padding: 8px 12px;
       min-width: 60px;
@@ -1276,7 +1242,7 @@ onUnmounted(() => {
   gap: 8px;
   margin: 4px 0;
 
-  input[type="checkbox"] {
+  input[type='checkbox'] {
     cursor: pointer;
   }
 }

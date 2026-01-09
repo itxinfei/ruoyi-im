@@ -75,6 +75,13 @@ export function useImWebSocket() {
   }
 
   /**
+   * 发送在线状态变更
+   */
+  const sendStatusChange = status => {
+    return imWebSocket.sendStatusChange(status)
+  }
+
+  /**
    * 处理状态变化
    */
   const handleStatusChange = status => {
@@ -141,6 +148,7 @@ export function useImWebSocket() {
     disconnect,
     send,
     sendMessage,
+    sendStatusChange,
 
     // 常量
     WS_STATUS,

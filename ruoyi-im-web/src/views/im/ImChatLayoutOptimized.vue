@@ -440,9 +440,6 @@
                       @click="isRecording ? stopVoiceRecord() : startVoiceRecord()"
                     />
                   </el-tooltip>
-                  <el-tooltip content="历史记录 (Ctrl+H)" placement="top">
-                    <el-button :icon="Search" text @click="showMessageSearch" />
-                  </el-tooltip>
                 </div>
                 <el-input
                   ref="inputRef"
@@ -455,7 +452,7 @@
                   @input="handleInputChange"
                 />
                 <div class="input-footer">
-                  <span class="input-tip">Enter 发送 · @提及 · Ctrl+H 搜索</span>
+                  <span class="input-tip">Enter 发送 · @提及</span>
                   <el-button type="primary" size="small" @click="sendMessage">发送</el-button>
                 </div>
               </div>
@@ -1304,39 +1301,6 @@
       </div>
     </div>
 
-    <!-- 消息搜索对话框 -->
-    <el-dialog
-      v-model="messageSearchDialogVisible"
-      title="搜索聊天记录"
-      width="600px"
-      :append-to-body="true"
-    >
-      <el-input
-        v-model="messageSearchKeyword"
-        placeholder="搜索消息内容..."
-        :prefix-icon="Search"
-        clearable
-        class="search-input"
-        @input="searchMessages"
-      />
-      <div class="search-results">
-        <div
-          v-for="result in searchResults"
-          :key="result.id"
-          class="search-result-item"
-          @click="jumpToMessage(result)"
-        >
-          <div class="result-time">{{ formatTime(result.timestamp) }}</div>
-          <div class="result-sender">{{ result.senderName }}</div>
-          <div class="result-content">{{ highlightKeyword(result.content) }}</div>
-        </div>
-        <el-empty
-          v-if="searchResults.length === 0 && messageSearchKeyword"
-          description="没有找到相关消息"
-        />
-      </div>
-    </el-dialog>
-
     <!-- 转发消息对话框 -->
     <el-dialog v-model="forwardDialogVisible" title="转发消息" width="500px" :append-to-body="true">
       <div class="forward-content">
@@ -1400,7 +1364,10 @@
     </el-dialog>
 
     <!-- 通知面板 -->
-    <notification-panel v-model:visible="notificationVisible" @close="notificationVisible = false" />
+    <notification-panel
+      v-model:visible="notificationVisible"
+      @close="notificationVisible = false"
+    />
 
     <!-- 主题设置对话框 -->
     <el-dialog v-model="themeSettingsVisible" title="系统设置" width="600px" :append-to-body="true">
@@ -1502,7 +1469,12 @@
             <el-input v-model="profileForm.nickname" placeholder="请输入昵称" />
           </el-form-item>
           <el-form-item label="个性签名">
-            <el-input v-model="profileForm.signature" type="textarea" :rows="3" placeholder="请输入个性签名" />
+            <el-input
+              v-model="profileForm.signature"
+              type="textarea"
+              :rows="3"
+              placeholder="请输入个性签名"
+            />
           </el-form-item>
           <el-form-item label="手机号">
             <el-input v-model="profileForm.phone" placeholder="请输入手机号" />
@@ -1519,7 +1491,12 @@
     </el-dialog>
 
     <!-- 在线状态对话框 -->
-    <el-dialog v-model="onlineStatusDialogVisible" title="在线状态" width="400px" :append-to-body="true">
+    <el-dialog
+      v-model="onlineStatusDialogVisible"
+      title="在线状态"
+      width="400px"
+      :append-to-body="true"
+    >
       <div class="online-status-dialog">
         <div
           v-for="status in onlineStatusOptions"
@@ -1730,10 +1707,10 @@ import {
   Setting,
   Plus,
   Close,
-  Search,
   More,
   Paperclip,
   Picture,
+  PictureFilled,
   Phone,
   VideoPlay,
   User,
@@ -1776,16 +1753,14 @@ import { getCurrentUserInfo } from '@/utils/im-user'
 import { listSession } from '@/api/im/session'
 import { uploadFile, uploadImage } from '@/api/im/file'
 import { sendMessage as apiSendMessage } from '@/api/im/message'
-import { listContact,
+import {
+  listContact,
   addContact,
   searchContacts,
   getReceivedFriendRequests,
   handleFriendRequest as apiHandleFriendRequest,
 } from '@/api/im/contact'
-import {
-  getDepartmentTree,
-  getDepartmentMembers,
-} from '@/api/im/organization'
+import { getDepartmentTree, getDepartmentMembers } from '@/api/im/organization'
 import NotificationPanel from '@/components/Notification/NotificationPanel.vue'
 
 const router = useRouter()
@@ -1793,7 +1768,13 @@ const route = useRoute()
 const store = useStore()
 
 // WebSocket
-const { isConnected, connect, disconnect, sendMessage: wsSendMessage } = useImWebSocket()
+const {
+  isConnected,
+  connect,
+  disconnect,
+  sendMessage: wsSendMessage,
+  sendStatusChange: wsSendStatusChange,
+} = useImWebSocket()
 
 // 状态
 const isNavCollapsed = ref(false)
@@ -2958,11 +2939,13 @@ const downloadSingleFile = file => {
 
 // 当前用户
 const currentUser = computed(() => {
-  return getCurrentUserInfo() || {
-    name: '用户',
-    avatar: null,
-    userId: null,
-  }
+  return (
+    getCurrentUserInfo() || {
+      name: '用户',
+      avatar: null,
+      userId: null,
+    }
+  )
 })
 
 // 从 store 获取会话列表
@@ -3788,11 +3771,6 @@ const messageMenuVisible = ref(false)
 const messageMenuPosition = ref({ x: 0, y: 0 })
 const selectedMessage = ref(null)
 
-// 消息搜索
-const messageSearchDialogVisible = ref(false)
-const messageSearchKeyword = ref('')
-const searchResults = ref([])
-
 // 转发消息
 const forwardDialogVisible = ref(false)
 const forwardSearchKeyword = ref('')
@@ -3908,6 +3886,12 @@ const selectOnlineStatus = status => {
 // 保存在线状态
 const saveOnlineStatus = () => {
   localStorage.setItem('onlineStatus', currentOnlineStatus.value)
+
+  // 通过WebSocket广播状态变更
+  if (isConnected.value) {
+    wsSendStatusChange(currentOnlineStatus.value)
+  }
+
   ElMessage.success('在线状态已更新')
   onlineStatusDialogVisible.value = false
 }
@@ -3951,7 +3935,7 @@ const selectTheme = theme => {
 // 保存主题
 const saveTheme = () => {
   localStorage.setItem('theme', currentTheme.value)
-  
+
   if (currentTheme.value === 'dark') {
     isDarkMode.value = true
     document.documentElement.classList.add('dark')
@@ -3963,7 +3947,7 @@ const saveTheme = () => {
     isDarkMode.value = prefersDark
     document.documentElement.classList.toggle('dark', prefersDark)
   }
-  
+
   ElMessage.success('主题已更新')
   themeDialogVisible.value = false
 }
@@ -4002,11 +3986,31 @@ const insertEmoji = emoji => {
   })
 }
 
-// 格式化消息内容（处理@提及和换行）
+// 格式化消息内容（处理@提及、换行和JSON解析）
 const formatMessageContent = content => {
   if (!content) return ''
+
+  let actualContent = content
+
+  // 检查是否为JSON字符串并尝试解析
+  try {
+    const parsed = JSON.parse(content)
+    if (typeof parsed === 'object' && parsed !== null) {
+      // 如果是对象，检查是否有content字段
+      if (parsed.content) {
+        actualContent = parsed.content
+      } else {
+        // 否则尝试转换为字符串
+        actualContent = JSON.stringify(parsed)
+      }
+    }
+  } catch (e) {
+    // 如果不是JSON，使用原始内容
+    actualContent = content
+  }
+
   // 转义HTML
-  let formatted = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  let formatted = actualContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   // 处理@提及
   formatted = formatted.replace(/@([^\s]+)/g, '<span class="mention">@$1</span>')
   // 处理换行
@@ -4103,13 +4107,6 @@ const handleInputKeydown = e => {
   // ESC 关闭表情选择器
   if (e.key === 'Escape') {
     showEmojiPicker.value = false
-    return
-  }
-
-  // Ctrl+H 搜索消息
-  if (e.ctrlKey && e.key === 'h') {
-    e.preventDefault()
-    showMessageSearch()
     return
   }
 
@@ -4255,54 +4252,6 @@ const recallMessage = async () => {
   }
 }
 
-// 显示消息搜索
-const showMessageSearch = () => {
-  messageSearchDialogVisible.value = true
-  messageSearchKeyword.value = ''
-  searchResults.value = []
-}
-
-// 搜索消息
-const searchMessages = () => {
-  if (!messageSearchKeyword.value.trim()) {
-    searchResults.value = []
-    return
-  }
-
-  const keyword = messageSearchKeyword.value.toLowerCase()
-  const allMessages = store.state.im.messages || []
-
-  searchResults.value = allMessages
-    .filter(msg => msg.content?.toLowerCase().includes(keyword))
-    .map(msg => ({
-      ...msg,
-      sessionId: currentSessionId.value,
-    }))
-    .slice(0, 50) // 限制结果数量
-}
-
-// 高亮关键词
-const highlightKeyword = content => {
-  if (!messageSearchKeyword.value) return content
-  const keyword = messageSearchKeyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const regex = new RegExp(`(${keyword})`, 'gi')
-  return content.replace(regex, '<span style="background: #ffeb3b;">$1</span>')
-}
-
-// 跳转到消息
-const jumpToMessage = message => {
-  messageSearchDialogVisible.value = false
-  // 滚动到指定消息
-  nextTick(() => {
-    const element = document.querySelector(`[data-message-id="${message.id}"]`)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      element.classList.add('highlight')
-      setTimeout(() => element.classList.remove('highlight'), 2000)
-    }
-  })
-}
-
 // 文件预览相关
 const isImageFile = file => {
   if (!file) return false
@@ -4406,6 +4355,35 @@ if (isDarkMode.value) {
   document.documentElement.classList.add('dark')
 }
 
+// 监听设置页面的主题变更
+const handleThemeChange = (event) => {
+  const { isDark } = event.detail
+  isDarkMode.value = isDark
+}
+
+// 监听系统主题偏好变化
+const handleSystemThemeChange = (e) => {
+  const theme = localStorage.getItem('theme')
+  if (theme === 'auto') {
+    isDarkMode.value = e.matches
+    document.documentElement.classList.toggle('dark', e.matches)
+  }
+}
+
+// 添加事件监听
+onMounted(() => {
+  window.addEventListener('themeChange', handleThemeChange)
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  mediaQuery.addEventListener('change', handleSystemThemeChange)
+})
+
+// 清理事件监听
+onUnmounted(() => {
+  window.removeEventListener('themeChange', handleThemeChange)
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  mediaQuery.removeEventListener('change', handleSystemThemeChange)
+})
+
 // 监听消息播放提示音
 watch(
   () => store.state.im.messages,
@@ -4435,17 +4413,21 @@ const handleUserCommand = async command => {
       // 用户取消
     }
   } else if (command === 'profile') {
-    // 初始化个人资料表单
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
-    profileForm.value = {
-      nickname: userInfo.nickName || userInfo.userName || '',
-      signature: userInfo.signature || '',
-      phone: userInfo.phone || '',
-      email: userInfo.email || '',
+    // 初始化个人资料表单 - 使用getCurrentUserInfo获取完整用户数据
+    const userInfo = getCurrentUserInfo()
+    if (userInfo) {
+      profileForm.value = {
+        nickname: userInfo.nickname || userInfo.nickName || userInfo.userName || '',
+        signature: userInfo.signature || '',
+        phone: userInfo.phonenumber || userInfo.phone || '',
+        email: userInfo.email || '',
+      }
+      currentUser.value = { ...currentUser.value, ...userInfo }
     }
     profileDialogVisible.value = true
   } else if (command === 'settings') {
-    showSettings()
+    // 导航到设置页面
+    router.push('/settings')
   } else if (command === 'status') {
     // 显示在线状态选择对话框
     showOnlineStatusDialog()
@@ -4454,14 +4436,10 @@ const handleUserCommand = async command => {
     showThemeDialog()
   } else if (command === 'help') {
     // 打开帮助与反馈页面
-    ElMessageBox.alert(
-      '如需帮助，请联系系统管理员或查看用户手册',
-      '帮助与反馈',
-      {
-        confirmButtonText: '我知道了',
-        type: 'info',
-      }
-    )
+    ElMessageBox.alert('如需帮助，请联系系统管理员或查看用户手册', '帮助与反馈', {
+      confirmButtonText: '我知道了',
+      type: 'info',
+    })
   } else if (command === 'about') {
     // 显示关于信息
     ElMessageBox.alert(

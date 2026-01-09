@@ -127,7 +127,18 @@ const mutations = {
     state.currentSession = session
   },
   SET_SESSIONS: (state, list) => {
-    state.sessions = list
+    // 会话列表去重：根据id字段去重
+    const uniqueSessions = []
+    const idSet = new Set()
+
+    for (const session of list) {
+      if (session.id && !idSet.has(session.id)) {
+        idSet.add(session.id)
+        uniqueSessions.push(session)
+      }
+    }
+
+    state.sessions = uniqueSessions
   },
   ADD_SESSION: (state, session) => {
     const exists = state.sessions.find(s => s.id === session.id)

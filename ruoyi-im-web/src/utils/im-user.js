@@ -15,14 +15,24 @@ export function getCurrentUserInfo() {
     const userInfoStr = localStorage.getItem(USER_INFO_KEY)
     if (userInfoStr) {
       const userInfo = JSON.parse(userInfoStr)
+      // 优先使用 nickName/nickname，其次使用 userName/username
+      const nickName = userInfo.nickName || userInfo.nickname
+      const userName = userInfo.userName || userInfo.username
+      const displayName = nickName || userName || '用户'
+
       return {
         id: userInfo.id || userInfo.userId,
         userId: userInfo.userId || userInfo.id,
-        userName: userInfo.userName || userInfo.username,
-        nickName: userInfo.nickName || userInfo.nickname,
+        userName: userName,
+        username: userName,
+        nickName: nickName,
+        nickname: nickName, // 支持不同的命名习惯
+        name: displayName, // 统一的显示名称
+        displayName: displayName,
         avatar: userInfo.avatar,
         email: userInfo.email,
         phonenumber: userInfo.phonenumber || userInfo.phone,
+        phone: userInfo.phonenumber || userInfo.phone,
         ...userInfo,
       }
     }

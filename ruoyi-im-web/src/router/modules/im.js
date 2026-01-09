@@ -143,7 +143,7 @@ export default [
       {
         path: 'settings',
         name: 'Settings',
-        component: () => import('@/views/im/settings/index.vue'),
+        component: () => import('@/views/settings/index.vue'),
         meta: {
           title: '设置',
           icon: 'settings',
@@ -152,5 +152,16 @@ export default [
         },
       },
     ],
+  },
+  // 独立的设置页面路由（不在IM布局内）
+  {
+    path: '/settings',
+    name: 'StandaloneSettings',
+    component: () => import('@/views/settings/index.vue'),
+    meta: {
+      title: '设置',
+      icon: 'settings',
+      keepAlive: false,
+    },
   },
 ]

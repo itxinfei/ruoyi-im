@@ -243,7 +243,21 @@ export default {
       default: false,
     },
   },
-  emits: ['resend', 'image-load', 'reply', 'forward', 'recall', 'delete', 'copy', 'preview-image', 'download-file', 'play-voice', 'open-location', 'select-vote', 'context-menu'],
+  emits: [
+    'resend',
+    'image-load',
+    'reply',
+    'forward',
+    'recall',
+    'delete',
+    'copy',
+    'preview-image',
+    'download-file',
+    'play-voice',
+    'open-location',
+    'select-vote',
+    'context-menu',
+  ],
   data() {
     return {
       isPlaying: false,
@@ -288,10 +302,10 @@ export default {
     getLocationMapUrl() {
       return 'https://gw.alipayobjects.com/zos/rmsportal/WJyJcGifizzEbBbDBwQV.png'
     },
-previewImage(message) {
+    previewImage(message) {
       this.$emit('preview-image', message)
     },
-    
+
     // 图片加载完成
     onImageLoad(event) {
       this.imageLoaded = true

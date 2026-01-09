@@ -41,19 +41,19 @@
         </div>
 
         <!-- 消息气泡 -->
-    <message-bubble
-      v-for="message in group"
-      :key="message.id"
-      :message="message"
-      :is-mine="message.senderId === currentUserId"
-      :show-sender="isGroup"
-      @resend="handleResend"
-      @download-file="handleDownload"
-      @show-location="handleShowLocation"
-      @image-load="handleImageLoad"
-      @preview-image="handlePreviewImage"
-      @context-menu="handleContextMenu"
-    />
+        <message-bubble
+          v-for="message in group"
+          :key="message.id"
+          :message="message"
+          :is-mine="message.senderId === currentUserId"
+          :show-sender="isGroup"
+          @resend="handleResend"
+          @download-file="handleDownload"
+          @show-location="handleShowLocation"
+          @image-load="handleImageLoad"
+          @preview-image="handlePreviewImage"
+          @context-menu="handleContextMenu"
+        />
       </div>
     </transition-group>
 
@@ -136,20 +136,6 @@ import MessageBubble from './MessageBubble.vue'
 import ImagePreview from './ImagePreview.vue'
 
 export default {
-  emits: [
-    'context-menu',
-    'preview-image',
-    'download-file',
-    'image-load',
-    'load-more',
-    'resend',
-    'reply',
-    'forward',
-    'recall',
-    'delete',
-    'copy',
-    'scroll-to-bottom'
-  ],
   name: 'MessageList',
   components: {
     MessageBubble,
@@ -165,6 +151,20 @@ export default {
       default: false,
     },
   },
+  emits: [
+    'context-menu',
+    'preview-image',
+    'download-file',
+    'image-load',
+    'load-more',
+    'resend',
+    'reply',
+    'forward',
+    'recall',
+    'delete',
+    'copy',
+    'scroll-to-bottom',
+  ],
   data() {
     return {
       loading: false,

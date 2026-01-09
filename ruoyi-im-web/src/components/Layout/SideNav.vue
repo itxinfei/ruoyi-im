@@ -99,6 +99,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getCurrentUserInfo } from '@/utils/im-user'
 import {
   ChatDotRound,
   User,
@@ -118,10 +119,9 @@ const activeMenu = ref('message')
 const userPanelVisible = ref(false)
 const onlineStatus = ref('online')
 
-// 用户信息
+// 用户信息 - 使用统一的用户信息获取函数
 const userInfo = computed(() => {
-  const info = localStorage.getItem('userInfo')
-  return info ? JSON.parse(info) : {}
+  return getCurrentUserInfo() || {}
 })
 
 // 未读消息数

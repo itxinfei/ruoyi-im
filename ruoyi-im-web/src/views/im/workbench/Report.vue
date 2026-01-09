@@ -13,7 +13,10 @@
         :key="tab.key"
         class="report-tab"
         :class="{ active: activeTab === tab.key }"
-        @click="activeTab = tab.key; fetchReports()"
+        @click="
+          activeTab = tab.key
+          fetchReports()
+        "
       >
         {{ tab.label }}
         <span v-if="tab.count > 0" class="tab-count">{{ tab.count }}</span>
@@ -43,9 +46,15 @@
             <span class="report-author">{{ report.userName }}</span>
             <span class="report-time">{{ formatTime(report.createTime) }}</span>
             <div class="report-stats">
-              <span><el-icon><View /></el-icon> {{ report.viewCount }}</span>
-              <span><el-icon><ChatDotRound /></el-icon> {{ report.commentCount }}</span>
-              <span v-if="report.likeCount > 0"><el-icon><Star /></el-icon> {{ report.likeCount }}</span>
+              <span
+                ><el-icon><View /></el-icon> {{ report.viewCount }}</span
+              >
+              <span
+                ><el-icon><ChatDotRound /></el-icon> {{ report.commentCount }}</span
+              >
+              <span v-if="report.likeCount > 0"
+                ><el-icon><Star /></el-icon> {{ report.likeCount }}</span
+              >
             </div>
           </div>
         </div>
@@ -64,12 +73,7 @@
       width="700px"
       @close="handleDialogClose"
     >
-      <el-form
-        ref="reportFormRef"
-        :model="reportForm"
-        :rules="reportFormRules"
-        label-width="80px"
-      >
+      <el-form ref="reportFormRef" :model="reportForm" :rules="reportFormRules" label-width="80px">
         <el-form-item label="报告类型" prop="type">
           <el-select v-model="reportForm.type" placeholder="选择报告类型">
             <el-option label="日报" value="daily" />
@@ -144,7 +148,7 @@
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="接收人" v-if="reportForm.visibility !== 'private'">
+        <el-form-item v-if="reportForm.visibility !== 'private'" label="接收人">
           <el-select
             v-model="reportForm.recipients"
             multiple
@@ -165,9 +169,7 @@
       <template #footer>
         <el-button @click="showReportDialog = false">取消</el-button>
         <el-button @click="handleSaveDraft">保存草稿</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="submitting">
-          提交报告
-        </el-button>
+        <el-button type="primary" :loading="submitting" @click="handleSubmit"> 提交报告 </el-button>
       </template>
     </el-dialog>
 
@@ -211,7 +213,10 @@
             <h4>问题与风险</h4>
             <div class="content-text">{{ currentReport.issues || '无' }}</div>
           </div>
-          <div v-if="currentReport.attachments && currentReport.attachments.length > 0" class="content-section">
+          <div
+            v-if="currentReport.attachments && currentReport.attachments.length > 0"
+            class="content-section"
+          >
             <h4>附件</h4>
             <div class="attachment-list">
               <div
@@ -247,11 +252,7 @@
         <div class="detail-comments">
           <h4>评论 ({{ comments.length }})</h4>
           <div class="comment-list">
-            <div
-              v-for="comment in comments"
-              :key="comment.id"
-              class="comment-item"
-            >
+            <div v-for="comment in comments" :key="comment.id" class="comment-item">
               <el-avatar :size="32" :src="comment.avatar">
                 {{ comment.userName?.charAt(0) || '?' }}
               </el-avatar>
@@ -267,11 +268,7 @@
 
           <!-- 评论输入 -->
           <div class="comment-input">
-            <el-input
-              v-model="newComment"
-              placeholder="写评论..."
-              @keyup.enter="handleSendComment"
-            >
+            <el-input v-model="newComment" placeholder="写评论..." @keyup.enter="handleSendComment">
               <template #append>
                 <el-button @click="handleSendComment">发送</el-button>
               </template>
@@ -291,14 +288,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import {
-  Edit,
-  View,
-  ChatDotRound,
-  Star,
-  Folder,
-  Document
-} from '@element-plus/icons-vue'
+import { Edit, View, ChatDotRound, Star, Folder, Document } from '@element-plus/icons-vue'
 
 // State
 const activeTab = ref('received')
@@ -417,7 +407,7 @@ const handleCreate = () => {
   showReportDialog.value = true
 }
 
-const handleViewReport = async (report) => {
+const handleViewReport = async report => {
   currentReport.value = report
 
   // 获取评论
@@ -494,7 +484,7 @@ const handleLike = () => {
   // TODO: 调用API点赞/取消点赞
 }
 
-const fetchComments = async (reportId) => {
+const fetchComments = async reportId => {
   try {
     // TODO: 调用API获取评论
     comments.value = [
@@ -541,7 +531,7 @@ const handleSendComment = async () => {
   }
 }
 
-const formatTime = (date) => {
+const formatTime = date => {
   if (!date) return ''
   const now = new Date()
   const diff = now - date
@@ -553,7 +543,7 @@ const formatTime = (date) => {
   return `${Math.floor(minutes / 1440)}天前`
 }
 
-const formatDateTime = (date) => {
+const formatDateTime = date => {
   if (!date) return ''
   const d = new Date(date)
   return `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
@@ -670,17 +660,17 @@ onMounted(() => {
   padding: 2px 8px;
   border-radius: 4px;
 
-  &[type="daily"] {
+  &[type='daily'] {
     background: var(--el-color-primary-light-9);
     color: var(--el-color-primary);
   }
 
-  &[type="weekly"] {
+  &[type='weekly'] {
     background: var(--el-color-success-light-9);
     color: var(--el-color-success);
   }
 
-  &[type="monthly"] {
+  &[type='monthly'] {
     background: var(--el-color-warning-light-9);
     color: var(--el-color-warning);
   }

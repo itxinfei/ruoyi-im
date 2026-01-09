@@ -14,12 +14,8 @@
           class="search-input"
           @input="handleSearch"
         />
-        <el-button type="primary" :icon="Plus" @click="handleCreateDocument">
-          新建文档
-        </el-button>
-        <el-button :icon="Upload" @click="handleImport">
-          导入
-        </el-button>
+        <el-button type="primary" :icon="Plus" @click="handleCreateDocument"> 新建文档 </el-button>
+        <el-button :icon="Upload" @click="handleImport"> 导入 </el-button>
       </div>
     </div>
 
@@ -173,11 +169,7 @@
           <p>回收站为空</p>
         </div>
         <div v-else class="document-list-view">
-          <div
-            v-for="doc in trashedDocuments"
-            :key="doc.id"
-            class="document-list-item"
-          >
+          <div v-for="doc in trashedDocuments" :key="doc.id" class="document-list-item">
             <div class="item-icon">
               <el-icon :size="24"><Document /></el-icon>
             </div>
@@ -235,18 +227,12 @@
       </el-form>
       <template #footer>
         <el-button @click="createDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmitCreate" :loading="creating">
-          创建
-        </el-button>
+        <el-button type="primary" :loading="creating" @click="handleSubmitCreate"> 创建 </el-button>
       </template>
     </el-dialog>
 
     <!-- 分享对话框 -->
-    <el-dialog
-      v-model="shareDialogVisible"
-      title="分享文档"
-      width="500px"
-    >
+    <el-dialog v-model="shareDialogVisible" title="分享文档" width="500px">
       <div v-if="currentShareDoc" class="share-content">
         <el-tabs v-model="shareTab">
           <el-tab-pane label="分享链接" name="link">
@@ -318,11 +304,7 @@
     </el-dialog>
 
     <!-- 重命名对话框 -->
-    <el-dialog
-      v-model="renameDialogVisible"
-      title="重命名"
-      width="400px"
-    >
+    <el-dialog v-model="renameDialogVisible" title="重命名" width="400px">
       <el-input
         v-model="newTitle"
         placeholder="请输入新标题"
@@ -352,7 +334,7 @@ import {
   MoreFilled,
   CopyDocument,
   FolderOpened,
-  Clock
+  Clock,
 } from '@element-plus/icons-vue'
 import { formatRelativeTime } from '@/utils/format/time.js'
 
@@ -463,9 +445,7 @@ const documentList = ref([
     ownerId: props.userId,
     owner: '我',
     starred: false,
-    collaborators: [
-      { id: 2, name: '李四', avatar: '' },
-    ],
+    collaborators: [{ id: 2, name: '李四', avatar: '' }],
     folderId: 'meeting',
   },
   {
@@ -535,9 +515,8 @@ const myDocuments = computed(() => {
   let result = documentList.value.filter(d => d.ownerId === props.userId)
   if (searchKeyword.value) {
     const keyword = searchKeyword.value.toLowerCase()
-    result = result.filter(d =>
-      d.title.toLowerCase().includes(keyword) ||
-      d.preview.toLowerCase().includes(keyword)
+    result = result.filter(
+      d => d.title.toLowerCase().includes(keyword) || d.preview.toLowerCase().includes(keyword)
     )
   }
   return result
@@ -548,19 +527,19 @@ const starredDocuments = computed(() => {
 })
 
 // 方法
-const formatTime = (time) => {
+const formatTime = time => {
   return formatRelativeTime(time)
 }
 
-const getDocIcon = (type) => {
+const getDocIcon = type => {
   return Document
 }
 
-const getPermissionType = (permission) => {
+const getPermissionType = permission => {
   return permission === 'edit' ? 'success' : 'info'
 }
 
-const getPermissionText = (permission) => {
+const getPermissionText = permission => {
   return permission === 'edit' ? '可编辑' : '仅查看'
 }
 
@@ -620,7 +599,7 @@ const handleSubmitCreate = async () => {
   }
 }
 
-const handleOpenDocument = (doc) => {
+const handleOpenDocument = doc => {
   emit('open-document', doc)
 }
 
@@ -652,17 +631,13 @@ const handleCardAction = (command, doc) => {
   }
 }
 
-const handleDelete = async (doc) => {
+const handleDelete = async doc => {
   try {
-    await ElMessageBox.confirm(
-      `确定要将"${doc.title}"移到回收站吗？`,
-      '删除确认',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    )
+    await ElMessageBox.confirm(`确定要将"${doc.title}"移到回收站吗？`, '删除确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
 
     // TODO: 调用API删除文档
     const index = documentList.value.findIndex(d => d.id === doc.id)
@@ -682,7 +657,7 @@ const handleDelete = async (doc) => {
   }
 }
 
-const handleRestore = (doc) => {
+const handleRestore = doc => {
   // 从回收站恢复
   const index = trashedDocuments.value.findIndex(d => d.id === doc.id)
   if (index > -1) {
@@ -695,17 +670,13 @@ const handleRestore = (doc) => {
   ElMessage.success('已恢复文档')
 }
 
-const handleDeleteForever = async (doc) => {
+const handleDeleteForever = async doc => {
   try {
-    await ElMessageBox.confirm(
-      `确定要永久删除"${doc.title}"吗？此操作不可恢复！`,
-      '永久删除',
-      {
-        confirmButtonText: '确定删除',
-        cancelButtonText: '取消',
-        type: 'error',
-      }
-    )
+    await ElMessageBox.confirm(`确定要永久删除"${doc.title}"吗？此操作不可恢复！`, '永久删除', {
+      confirmButtonText: '确定删除',
+      cancelButtonText: '取消',
+      type: 'error',
+    })
 
     const index = trashedDocuments.value.findIndex(d => d.id === doc.id)
     if (index > -1) {

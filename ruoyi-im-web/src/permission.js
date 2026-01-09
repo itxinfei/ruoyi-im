@@ -17,11 +17,21 @@ router.beforeEach(async (to, from, next) => {
     if (!localStorage.getItem('token')) {
       const mockUserInfo = {
         userId: '1',
+        id: '1',
         username: 'testuser',
+        userName: 'testuser',
         nickname: '测试用户',
+        nickName: '测试用户',
+        name: '测试用户',
+        signature: '这是我的个性签名',
+        email: 'test@example.com',
+        phonenumber: '13800138000',
+        phone: '13800138000',
+        gender: 1,
         avatar: '',
         roles: ['admin'],
         permissions: ['*:*:*'],
+        createTime: new Date().toISOString(),
       }
 
       localStorage.setItem('token', 'test-token')

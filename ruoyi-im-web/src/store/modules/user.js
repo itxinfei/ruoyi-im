@@ -73,8 +73,12 @@ const actions = {
               reject('Verification failed, please Login again.')
             }
 
-            // 提取用户信息（包含userId，这是关键！）
-            const { userId, id, username, nickname, avatar, email, phone, roles, permissions } = data
+            // 后端返回结构: {token, userInfo: {id, username, nickname, avatar, ...}}
+            const userInfoData = data.userInfo || data
+
+            // 提取用户信息
+            const { userId, id, username, nickname, avatar, email, phone, roles, permissions } =
+              userInfoData
 
             // 构建完整的用户信息对象
             const userInfo = {
@@ -87,7 +91,7 @@ const actions = {
               email,
               phone,
               roles,
-              permissions
+              permissions,
             }
 
             commit('SET_NAME', nickname || username)

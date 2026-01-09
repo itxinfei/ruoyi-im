@@ -210,7 +210,7 @@ export class ThrottleManager {
    * 清除所有节流函数
    */
   clearAll() {
-    this.throttles.forEach((throttle) => {
+    this.throttles.forEach(throttle => {
       if (throttle.timer) {
         clearTimeout(throttle.timer)
       }

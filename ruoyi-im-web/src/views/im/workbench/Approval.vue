@@ -272,7 +272,7 @@
 
       <template #footer>
         <el-button @click="createDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmitCreate" :loading="submitting">
+        <el-button type="primary" :loading="submitting" @click="handleSubmitCreate">
           提交审批
         </el-button>
       </template>

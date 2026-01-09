@@ -286,6 +286,20 @@ class ImWebSocket {
   }
 
   /**
+   * 发送在线状态变更
+   * @param {string} status 状态：online, busy, away, offline
+   */
+  sendStatusChange(status) {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+    return this.send({
+      type: 'status',
+      status: status,
+      userId: userInfo.userId || userInfo.id,
+      timestamp: Date.now(),
+    })
+  }
+
+  /**
    * 发送待发送消息
    */
   sendPendingMessages() {

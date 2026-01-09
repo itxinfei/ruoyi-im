@@ -41,7 +41,7 @@ router.beforeEach((to, from, next) => {
     next()
     return
   }
-  
+
   // 检查用户是否已登录
   if (isLoggedIn()) {
     next()

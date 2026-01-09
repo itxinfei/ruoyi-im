@@ -5,12 +5,22 @@
       <!-- Logo区 -->
       <div class="dt-sidebar__logo">
         <svg class="ding-logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="48" height="48" rx="8" fill="url(#logoGradient)"/>
-          <path d="M24 12L18 18H14V22L8 28V36H16V32H20V36H28V28L32 24H36V16H28L24 12Z" fill="white"/>
+          <rect width="48" height="48" rx="8" fill="url(#logoGradient)" />
+          <path
+            d="M24 12L18 18H14V22L8 28V36H16V32H20V36H28V28L32 24H36V16H28L24 12Z"
+            fill="white"
+          />
           <defs>
-            <linearGradient id="logoGradient" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stop-color="#1890FF"/>
-              <stop offset="1" stop-color="#096DD9"/>
+            <linearGradient
+              id="logoGradient"
+              x1="0"
+              y1="0"
+              x2="48"
+              y2="48"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop offset="0" stop-color="#1890FF" />
+              <stop offset="1" stop-color="#096DD9" />
             </linearGradient>
           </defs>
         </svg>
@@ -23,8 +33,8 @@
           :key="item.key"
           class="dt-sidebar__item"
           :class="{ active: activeNav === item.key }"
-          @click="handleNavClick(item)"
           :title="item.label"
+          @click="handleNavClick(item)"
         >
           <el-icon :size="24">
             <component :is="item.icon" />
@@ -38,7 +48,11 @@
 
       <!-- 底部用户区 -->
       <div class="dt-sidebar__bottom">
-        <div class="dt-sidebar__avatar" @click="handleProfileClick" :title="currentUser.nickname || '用户'">
+        <div
+          class="dt-sidebar__avatar"
+          :title="currentUser.nickname || '用户'"
+          @click="handleProfileClick"
+        >
           <el-avatar :size="36" :src="currentUser.avatar">
             {{ currentUser.nickname?.charAt(0) || '?' }}
           </el-avatar>
@@ -240,9 +254,7 @@
               <el-icon><Search /></el-icon>
             </div>
             <!-- 语音录制（内联组件） -->
-            <VoiceRecorder
-              @send="handleVoiceSend"
-            />
+            <VoiceRecorder @send="handleVoiceSend" />
           </div>
 
           <!-- 输入框 -->
@@ -295,8 +307,8 @@
         </div>
         <!-- 其他导航内容 -->
         <component
-          v-else
           :is="getCurrentNavComponent()"
+          v-else
           v-bind="getDocumentProps()"
           @open-document="handleOpenDocument"
           @document-created="handleDocumentCreated"
@@ -341,7 +353,7 @@ import {
   Grid,
   OfficeBuilding,
   Check,
-  Money
+  Money,
 } from '@element-plus/icons-vue'
 import DingMessageBubble from '@/components/Message/DingMessageBubble.vue'
 import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
@@ -389,7 +401,7 @@ const hoveredMessageId = ref(null)
 const showEmojiPicker = ref(false)
 const showMembersDrawer = ref(false)
 const isOnline = ref(true)
-const showVoiceRecorder = ref(true)  // 显示语音录制组件（内联模式）
+const showVoiceRecorder = ref(true) // 显示语音录制组件（内联模式）
 
 // 工作台子标签
 const workbenchTab = ref('attendance')
@@ -538,7 +550,7 @@ const handleMoreAction = () => {
 }
 
 // 文档模块事件处理
-const handleOpenDocument = (doc) => {
+const handleOpenDocument = doc => {
   currentDocument.value = doc
   documentView.value = 'editor'
 }
@@ -547,12 +559,12 @@ const handleDocumentBack = () => {
   documentView.value = 'list'
 }
 
-const handleDocumentCreated = (doc) => {
+const handleDocumentCreated = doc => {
   currentDocument.value = doc
   documentView.value = 'editor'
 }
 
-const handleDocumentSave = (data) => {
+const handleDocumentSave = data => {
   // TODO: 保存文档到服务器
   console.log('Document saved:', data)
 }
@@ -601,7 +613,7 @@ const getCurrentNavComponent = () => {
             </template>
           </el-empty>
         </div>
-      `
+      `,
     }
   }
 
@@ -624,7 +636,7 @@ const getCurrentNavComponent = () => {
             </template>
           </el-empty>
         </div>
-      `
+      `,
     }
   }
 
@@ -639,7 +651,7 @@ const getCurrentNavComponent = () => {
             </template>
           </el-empty>
         </div>
-      `
+      `,
     }
   }
 
@@ -654,7 +666,7 @@ const getCurrentNavComponent = () => {
             </template>
           </el-empty>
         </div>
-      `
+      `,
     }
   }
 
@@ -669,7 +681,7 @@ const getCurrentNavComponent = () => {
             </template>
           </el-empty>
         </div>
-      `
+      `,
     }
   }
 
@@ -735,11 +747,15 @@ const handleHistorySearch = () => {
 }
 
 // 处理语音发送
-const handleVoiceSend = async (voiceData) => {
+const handleVoiceSend = async voiceData => {
   // 上传语音文件
   try {
     const formData = new FormData()
-    formData.append('file', voiceData.blob, `voice_${Date.now()}.${voiceData.type.split('/')[1] || 'webm'}`)
+    formData.append(
+      'file',
+      voiceData.blob,
+      `voice_${Date.now()}.${voiceData.type.split('/')[1] || 'webm'}`
+    )
     formData.append('type', 'voice')
     formData.append('duration', voiceData.duration)
 
@@ -753,7 +769,7 @@ const handleVoiceSend = async (voiceData) => {
       content: voiceData.url, // 临时使用本地URL
       type: 'voice',
       duration: voiceData.duration,
-      fileUrl: voiceData.url
+      fileUrl: voiceData.url,
     })
   } catch (error) {
     console.error('语音发送失败:', error)

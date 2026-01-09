@@ -50,9 +50,7 @@
         >
           打卡
         </el-button>
-        <el-button v-else disabled size="large">
-          已打卡
-        </el-button>
+        <el-button v-else disabled size="large"> 已打卡 </el-button>
       </div>
 
       <!-- 下班打卡 -->
@@ -84,12 +82,8 @@
         >
           打卡
         </el-button>
-        <el-button v-else-if="todayRecord?.clockOutTime" disabled size="large">
-          已打卡
-        </el-button>
-        <el-button v-else disabled size="large">
-          请先上班打卡
-        </el-button>
+        <el-button v-else-if="todayRecord?.clockOutTime" disabled size="large"> 已打卡 </el-button>
+        <el-button v-else disabled size="large"> 请先上班打卡 </el-button>
       </div>
     </div>
 
@@ -110,7 +104,7 @@
             'is-half': day.isHalf,
             'is-absent': day.isAbsent,
             'is-leave': day.isLeave,
-            'is-future': day.isFuture
+            'is-future': day.isFuture,
           }"
         >
           <div class="day-name">{{ day.name }}</div>
@@ -155,13 +149,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import {
-  OfficeBuilding,
-  HomeFilled,
-  Location,
-  Clock,
-  Select
-} from '@element-plus/icons-vue'
+import { OfficeBuilding, HomeFilled, Location, Clock, Select } from '@element-plus/icons-vue'
 
 // Props
 const props = defineProps({
@@ -235,7 +223,6 @@ const fetchTodayRecord = async () => {
     // TODO: 调用API获取今日打卡记录
     // const response = await getTodayAttendance()
     // todayRecord.value = response.data
-
     // 模拟数据
     // todayRecord.value = null
   } catch (error) {

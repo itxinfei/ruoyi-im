@@ -107,11 +107,7 @@
     <!-- 列表视图 -->
     <div v-if="currentView === 'list'" class="schedule-list-view">
       <div class="list-sections">
-        <div
-          v-for="section in scheduleSections"
-          :key="section.key"
-          class="list-section"
-        >
+        <div v-for="section in scheduleSections" :key="section.key" class="list-section">
           <div class="section-header">
             <h3>{{ section.title }}</h3>
             <span class="section-count">{{ section.events.length }}</span>
@@ -154,12 +150,7 @@
       width="500px"
       @close="handleDialogClose"
     >
-      <el-form
-        ref="eventFormRef"
-        :model="eventForm"
-        :rules="eventFormRules"
-        label-width="80px"
-      >
+      <el-form ref="eventFormRef" :model="eventForm" :rules="eventFormRules" label-width="80px">
         <el-form-item label="标题" prop="title">
           <el-input
             v-model="eventForm.title"
@@ -191,11 +182,7 @@
         </el-form-item>
 
         <el-form-item label="地点" prop="location">
-          <el-input
-            v-model="eventForm.location"
-            placeholder="请输入地点"
-            clearable
-          >
+          <el-input v-model="eventForm.location" placeholder="请输入地点" clearable>
             <template #prefix>
               <el-icon><Location /></el-icon>
             </template>
@@ -261,7 +248,7 @@
 
       <template #footer>
         <el-button @click="showEventDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleSaveEvent" :loading="saving">
+        <el-button type="primary" :loading="saving" @click="handleSaveEvent">
           {{ isEditMode ? '保存' : '创建' }}
         </el-button>
       </template>
@@ -317,9 +304,7 @@ const viewTabs = [
   { key: 'list', label: '列表', icon: List },
 ]
 
-const eventColors = [
-  '#1890FF', '#52C41A', '#FAAD14', '#F5222D', '#722ED1', '#13C2C2',
-]
+const eventColors = ['#1890FF', '#52C41A', '#FAAD14', '#F5222D', '#722ED1', '#13C2C2']
 
 // 计算属性
 const weekDays = computed(() => {
@@ -375,7 +360,7 @@ const handleAdd = () => {
   showEventDialog.value = true
 }
 
-const handleViewEvent = (event) => {
+const handleViewEvent = event => {
   isEditMode.value = true
   eventForm.value = { ...event }
   showEventDialog.value = true
@@ -421,24 +406,24 @@ const handleSaveEvent = async () => {
   }
 }
 
-const hasEventAt = (hour) => {
+const hasEventAt = hour => {
   return getEventsAt(hour).length > 0
 }
 
-const getEventsAt = (hour) => {
+const getEventsAt = hour => {
   return events.value.filter(event => {
     const eventHour = parseInt(event.startTime.split(':')[0])
     return eventHour === hour
   })
 }
 
-const getEventsForDate = (dateStr) => {
+const getEventsForDate = dateStr => {
   return events.value.filter(event => {
     return event.date && event.date.toDateString() === new Date(dateStr).toDateString()
   })
 }
 
-const formatTime = (date) => {
+const formatTime = date => {
   if (!date) return ''
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
