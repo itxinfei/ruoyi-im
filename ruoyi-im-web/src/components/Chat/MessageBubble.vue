@@ -1,6 +1,15 @@
 <template>
   <transition name="message-slide" appear>
     <div class="message-bubble" :class="messageClasses" @contextmenu.prevent="showContextMenu">
+      <!-- 头像 -->
+      <div class="message-avatar">
+        <img
+          :src="message.senderAvatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'"
+          :alt="message.senderName"
+          class="avatar-image"
+        />
+      </div>
+      
       <!-- 消息头部信息 -->
       <div v-if="showSenderInfo" class="message-header">
         <span class="sender-name">{{ message.senderName }}</span>

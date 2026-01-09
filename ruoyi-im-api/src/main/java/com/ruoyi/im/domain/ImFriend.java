@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 /**
  * 好友关系实体
  *
- * 用于存储IM系统中的好友关系信息，包括用户之间的好友状态、备注、分组等
- * 支持好友的正常、拉黑、删除等状态管理，以及好友分组功能
+ * 用于存储IM系统中的好友关系信息，包括备注、分组、软删除等
+ * 使用is_deleted字段实现软删除功能
  *
  * @author ruoyi
  */
@@ -53,7 +53,7 @@ public class ImFriend implements Serializable {
     private String groupName;
 
     /**
-     * 是否删除：0=否, 1=是
+     * 是否删除：0=否, 1=是（软删除标记）
      */
     @TableField("is_deleted")
     private Integer isDeleted;
@@ -79,25 +79,19 @@ public class ImFriend implements Serializable {
     // ==================== 以下字段为非数据库字段 ====================
 
     /**
-     * 好友状态（非数据库字段）
-     */
-    @TableField(exist = false)
-    private String status;
-
-    /**
-     * 好友名称，非数据库字段，用于显示好友的昵称
+     * 好友名称，非数据库字段，用于显示好友的昵称（关联查询时填充）
      */
     @TableField(exist = false)
     private String friendName;
 
     /**
-     * 好友头像，非数据库字段，用于显示好友的头像URL
+     * 好友头像，非数据库字段，用于显示好友的头像URL（关联查询时填充）
      */
     @TableField(exist = false)
     private String friendAvatar;
 
     /**
-     * 好友在线状态，非数据库字段，用于显示好友是否在线
+     * 好友在线状态，非数据库字段，用于显示好友是否在线（从WebSocket获取）
      */
     @TableField(exist = false)
     private Boolean online;

@@ -1,45 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.im.mapper.ImFriendMapper">
-    
+
     <resultMap type="com.ruoyi.im.domain.ImFriend" id="ImFriendResult">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="friendId" column="friend_id"/>
         <result property="remark" column="remark"/>
         <result property="groupName" column="group_name"/>
-        <result property="status" column="status"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <sql id="selectImFriendVo">
+        select id, user_id, friend_id, remark, group_name, is_deleted, deleted_time, create_time, update_time
+        from im_friend
+    </sql>
+
+    <sql id="selectImFriendVoWithUndeleted">
         select id, user_id, friend_id, remark, group_name, create_time, update_time
         from im_friend
+        where is_deleted = 0
     </sql>
 
     <select id="selectImFriendById" parameterType="Long" resultMap="ImFriendResult">
         <include refid="selectImFriendVo"/>
         where id = #{id}
     </select>
-    
+
     <select id="selectImFriendList" parameterType="com.ruoyi.im.domain.ImFriend" resultMap="ImFriendResult">
         <include refid="selectImFriendVo"/>
         <where>
             <if test="userId != null"> and user_id = #{userId} </if>
             <if test="friendId != null"> and friend_id = #{friendId} </if>
+            and is_deleted = 0
         </where>
     </select>
 
     <select id="selectImFriendListByUserId" parameterType="Long" resultMap="ImFriendResult">
-        <include refid="selectImFriendVo"/>
-        where user_id = #{userId}
+        select id, user_id, friend_id, remark, group_name, create_time, update_time
+        from im_friend
+        where user_id = #{userId} and is_deleted = 0
     </select>
 
     <select id="selectImFriendByUserIdAndFriendId"
             parameterType="map" resultMap="ImFriendResult">
         <include refid="selectImFriendVo"/>
-        where user_id = #{userId} and friend_id = #{friendId}
+        where user_id = #{userId} and friend_id = #{friendId} and is_deleted = 0
     </select>
 
     <insert id="insertImFriend" parameterType="com.ruoyi.im.domain.ImFriend" useGeneratedKeys="true" keyProperty="id">
@@ -74,14 +83,25 @@
         where id = #{id}
     </update>
 
-    <delete id="deleteImFriendById" parameterType="Long">
-        delete from im_friend where id = #{id}
-    </delete>
+    <!-- 软删除：更新is_deleted字段而不是物理删除记录 -->
+    <update id="deleteImFriendById" parameterType="Long">
+        update im_friend set is_deleted = 1, deleted_time = now() where id = #{id}
+    </update>
 
-    <delete id="deleteImFriendByIds" parameterType="Long[]">
-        delete from im_friend where id in
+    <!-- 批量软删除 -->
+    <update id="deleteImFriendByIds" parameterType="Long[]">
+        update im_friend set is_deleted = 1, deleted_time = now() where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
-    </delete>
+    </update>
+
+    <!-- 根据条件软删除 -->
+    <update id="deleteImFriendByCondition" parameterType="com.ruoyi.im.domain.ImFriend">
+        update im_friend set is_deleted = 1, deleted_time = now()
+        <where>
+            <if test="userId != null"> and user_id = #{userId} </if>
+            <if test="friendId != null"> and friend_id = #{friendId} </if>
+        </where>
+    </update>
 </mapper>

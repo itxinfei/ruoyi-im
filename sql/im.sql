@@ -11,7 +11,7 @@
  Target Server Version : 50744 (5.7.44-log)
  File Encoding         : 65001
 
- Date: 08/01/2026 16:35:41
+ Date: 09/01/2026 18:02:45
 */
 
 SET NAMES utf8mb4;
@@ -22,13 +22,13 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `QRTZ_BLOB_TRIGGERS`;
 CREATE TABLE `QRTZ_BLOB_TRIGGERS`  (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers?trigger_name???',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers?trigger_group???',
-  `blob_data` blob NULL COMMENT '?????Trigger??',
+  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度名称',
+  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
+  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
+  `blob_data` blob NULL COMMENT '存放持久化Trigger对象',
   PRIMARY KEY (`sched_name`, `trigger_name`, `trigger_group`) USING BTREE,
   CONSTRAINT `QRTZ_BLOB_TRIGGERS_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `QRTZ_TRIGGERS` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'Blob???????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'Blob类型的触发器表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of QRTZ_BLOB_TRIGGERS
@@ -39,11 +39,11 @@ CREATE TABLE `QRTZ_BLOB_TRIGGERS`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `QRTZ_CALENDARS`;
 CREATE TABLE `QRTZ_CALENDARS`  (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `calendar_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `calendar` blob NOT NULL COMMENT '?????calendar??',
+  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度名称',
+  `calendar_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '日历名称',
+  `calendar` blob NOT NULL COMMENT '存放持久化calendar对象',
   PRIMARY KEY (`sched_name`, `calendar_name`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '日历信息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of QRTZ_CALENDARS
@@ -54,14 +54,14 @@ CREATE TABLE `QRTZ_CALENDARS`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `QRTZ_CRON_TRIGGERS`;
 CREATE TABLE `QRTZ_CRON_TRIGGERS`  (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers?trigger_name???',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers?trigger_group???',
-  `cron_expression` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'cron???',
-  `time_zone_id` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??',
+  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度名称',
+  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
+  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
+  `cron_expression` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'cron表达式',
+  `time_zone_id` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '时区',
   PRIMARY KEY (`sched_name`, `trigger_name`, `trigger_group`) USING BTREE,
   CONSTRAINT `QRTZ_CRON_TRIGGERS_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `QRTZ_TRIGGERS` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'Cron???????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'Cron类型的触发器表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of QRTZ_CRON_TRIGGERS
@@ -72,21 +72,21 @@ CREATE TABLE `QRTZ_CRON_TRIGGERS`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `QRTZ_FIRED_TRIGGERS`;
 CREATE TABLE `QRTZ_FIRED_TRIGGERS`  (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `entry_id` varchar(95) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????id',
-  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers?trigger_name???',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers?trigger_group???',
-  `instance_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '??????',
-  `fired_time` bigint(13) NOT NULL COMMENT '?????',
-  `sched_time` bigint(13) NOT NULL COMMENT '????????',
-  `priority` int(11) NOT NULL COMMENT '???',
-  `state` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '??',
-  `job_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `job_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `is_nonconcurrent` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `requests_recovery` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????????',
+  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度名称',
+  `entry_id` varchar(95) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度器实例id',
+  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
+  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
+  `instance_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度器实例名',
+  `fired_time` bigint(13) NOT NULL COMMENT '触发的时间',
+  `sched_time` bigint(13) NOT NULL COMMENT '定时器制定的时间',
+  `priority` int(11) NOT NULL COMMENT '优先级',
+  `state` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '状态',
+  `job_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '任务名称',
+  `job_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '任务组名',
+  `is_nonconcurrent` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '是否并发',
+  `requests_recovery` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '是否接受恢复执行',
   PRIMARY KEY (`sched_name`, `entry_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '????????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '已触发的触发器表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of QRTZ_FIRED_TRIGGERS
@@ -97,18 +97,18 @@ CREATE TABLE `QRTZ_FIRED_TRIGGERS`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `QRTZ_JOB_DETAILS`;
 CREATE TABLE `QRTZ_JOB_DETAILS`  (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `job_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `job_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `description` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `job_class_name` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???????',
-  `is_durable` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????',
-  `is_nonconcurrent` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `is_update_data` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '??????',
-  `requests_recovery` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????????',
-  `job_data` blob NULL COMMENT '?????job??',
+  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度名称',
+  `job_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '任务名称',
+  `job_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '任务组名',
+  `description` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '相关介绍',
+  `job_class_name` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '执行任务类名称',
+  `is_durable` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '是否持久化',
+  `is_nonconcurrent` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '是否并发',
+  `is_update_data` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '是否更新数据',
+  `requests_recovery` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '是否接受恢复执行',
+  `job_data` blob NULL COMMENT '存放持久化job对象',
   PRIMARY KEY (`sched_name`, `job_name`, `job_group`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '任务详细信息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of QRTZ_JOB_DETAILS
@@ -119,10 +119,10 @@ CREATE TABLE `QRTZ_JOB_DETAILS`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `QRTZ_LOCKS`;
 CREATE TABLE `QRTZ_LOCKS`  (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `lock_name` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????',
+  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度名称',
+  `lock_name` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '悲观锁名称',
   PRIMARY KEY (`sched_name`, `lock_name`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '存储的悲观锁信息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of QRTZ_LOCKS
@@ -133,10 +133,10 @@ CREATE TABLE `QRTZ_LOCKS`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `QRTZ_PAUSED_TRIGGER_GRPS`;
 CREATE TABLE `QRTZ_PAUSED_TRIGGER_GRPS`  (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers?trigger_group???',
+  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度名称',
+  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
   PRIMARY KEY (`sched_name`, `trigger_group`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '暂停的触发器表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of QRTZ_PAUSED_TRIGGER_GRPS
@@ -147,12 +147,12 @@ CREATE TABLE `QRTZ_PAUSED_TRIGGER_GRPS`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `QRTZ_SCHEDULER_STATE`;
 CREATE TABLE `QRTZ_SCHEDULER_STATE`  (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `instance_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `last_checkin_time` bigint(13) NOT NULL COMMENT '??????',
-  `checkin_interval` bigint(13) NOT NULL COMMENT '??????',
+  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度名称',
+  `instance_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '实例名称',
+  `last_checkin_time` bigint(13) NOT NULL COMMENT '上次检查时间',
+  `checkin_interval` bigint(13) NOT NULL COMMENT '检查间隔时间',
   PRIMARY KEY (`sched_name`, `instance_name`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '??????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '调度器状态表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of QRTZ_SCHEDULER_STATE
@@ -163,15 +163,15 @@ CREATE TABLE `QRTZ_SCHEDULER_STATE`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `QRTZ_SIMPLE_TRIGGERS`;
 CREATE TABLE `QRTZ_SIMPLE_TRIGGERS`  (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers?trigger_name???',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers?trigger_group???',
-  `repeat_count` bigint(7) NOT NULL COMMENT '???????',
-  `repeat_interval` bigint(12) NOT NULL COMMENT '???????',
-  `times_triggered` bigint(10) NOT NULL COMMENT '???????',
+  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度名称',
+  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
+  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
+  `repeat_count` bigint(7) NOT NULL COMMENT '重复的次数统计',
+  `repeat_interval` bigint(12) NOT NULL COMMENT '重复的间隔时间',
+  `times_triggered` bigint(10) NOT NULL COMMENT '已经触发的次数',
   PRIMARY KEY (`sched_name`, `trigger_name`, `trigger_group`) USING BTREE,
   CONSTRAINT `QRTZ_SIMPLE_TRIGGERS_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `QRTZ_TRIGGERS` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '简单触发器的信息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of QRTZ_SIMPLE_TRIGGERS
@@ -182,23 +182,23 @@ CREATE TABLE `QRTZ_SIMPLE_TRIGGERS`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `QRTZ_SIMPROP_TRIGGERS`;
 CREATE TABLE `QRTZ_SIMPROP_TRIGGERS`  (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers?trigger_name???',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers?trigger_group???',
-  `str_prop_1` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'String???trigger??????',
-  `str_prop_2` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'String???trigger??????',
-  `str_prop_3` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'String???trigger??????',
-  `int_prop_1` int(11) NULL DEFAULT NULL COMMENT 'int???trigger??????',
-  `int_prop_2` int(11) NULL DEFAULT NULL COMMENT 'int???trigger??????',
-  `long_prop_1` bigint(20) NULL DEFAULT NULL COMMENT 'long???trigger??????',
-  `long_prop_2` bigint(20) NULL DEFAULT NULL COMMENT 'long???trigger??????',
-  `dec_prop_1` decimal(13, 4) NULL DEFAULT NULL COMMENT 'decimal???trigger??????',
-  `dec_prop_2` decimal(13, 4) NULL DEFAULT NULL COMMENT 'decimal???trigger??????',
-  `bool_prop_1` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'Boolean???trigger??????',
-  `bool_prop_2` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'Boolean???trigger??????',
+  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度名称',
+  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
+  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
+  `str_prop_1` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'String类型的trigger的第一个参数',
+  `str_prop_2` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'String类型的trigger的第二个参数',
+  `str_prop_3` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'String类型的trigger的第三个参数',
+  `int_prop_1` int(11) NULL DEFAULT NULL COMMENT 'int类型的trigger的第一个参数',
+  `int_prop_2` int(11) NULL DEFAULT NULL COMMENT 'int类型的trigger的第二个参数',
+  `long_prop_1` bigint(20) NULL DEFAULT NULL COMMENT 'long类型的trigger的第一个参数',
+  `long_prop_2` bigint(20) NULL DEFAULT NULL COMMENT 'long类型的trigger的第二个参数',
+  `dec_prop_1` decimal(13, 4) NULL DEFAULT NULL COMMENT 'decimal类型的trigger的第一个参数',
+  `dec_prop_2` decimal(13, 4) NULL DEFAULT NULL COMMENT 'decimal类型的trigger的第二个参数',
+  `bool_prop_1` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'Boolean类型的trigger的第一个参数',
+  `bool_prop_2` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'Boolean类型的trigger的第二个参数',
   PRIMARY KEY (`sched_name`, `trigger_name`, `trigger_group`) USING BTREE,
   CONSTRAINT `QRTZ_SIMPROP_TRIGGERS_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `QRTZ_TRIGGERS` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '????????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '同步机制的行锁表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of QRTZ_SIMPROP_TRIGGERS
@@ -209,26 +209,26 @@ CREATE TABLE `QRTZ_SIMPROP_TRIGGERS`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `QRTZ_TRIGGERS`;
 CREATE TABLE `QRTZ_TRIGGERS`  (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '??????',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????????',
-  `job_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_job_details?job_name???',
-  `job_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_job_details?job_group???',
-  `description` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `next_fire_time` bigint(13) NULL DEFAULT NULL COMMENT '???????????',
-  `prev_fire_time` bigint(13) NULL DEFAULT NULL COMMENT '???????????-1??????',
-  `priority` int(11) NULL DEFAULT NULL COMMENT '???',
-  `trigger_state` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????',
-  `trigger_type` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '??????',
-  `start_time` bigint(13) NOT NULL COMMENT '????',
-  `end_time` bigint(13) NULL DEFAULT NULL COMMENT '????',
-  `calendar_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '?????',
-  `misfire_instr` smallint(2) NULL DEFAULT NULL COMMENT '???????',
-  `job_data` blob NULL COMMENT '?????job??',
+  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '调度名称',
+  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '触发器的名字',
+  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '触发器所属组的名字',
+  `job_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_job_details表job_name的外键',
+  `job_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'qrtz_job_details表job_group的外键',
+  `description` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '相关介绍',
+  `next_fire_time` bigint(13) NULL DEFAULT NULL COMMENT '上一次触发时间（毫秒）',
+  `prev_fire_time` bigint(13) NULL DEFAULT NULL COMMENT '下一次触发时间（默认为-1表示不触发）',
+  `priority` int(11) NULL DEFAULT NULL COMMENT '优先级',
+  `trigger_state` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '触发器状态',
+  `trigger_type` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '触发器的类型',
+  `start_time` bigint(13) NOT NULL COMMENT '开始时间',
+  `end_time` bigint(13) NULL DEFAULT NULL COMMENT '结束时间',
+  `calendar_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '日程表名称',
+  `misfire_instr` smallint(2) NULL DEFAULT NULL COMMENT '补偿执行的策略',
+  `job_data` blob NULL COMMENT '存放持久化job对象',
   PRIMARY KEY (`sched_name`, `trigger_name`, `trigger_group`) USING BTREE,
   INDEX `sched_name`(`sched_name`, `job_name`, `job_group`) USING BTREE,
   CONSTRAINT `QRTZ_TRIGGERS_ibfk_1` FOREIGN KEY (`sched_name`, `job_name`, `job_group`) REFERENCES `QRTZ_JOB_DETAILS` (`sched_name`, `job_name`, `job_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '????????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '触发器详细信息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of QRTZ_TRIGGERS
@@ -261,7 +261,7 @@ CREATE TABLE `gen_table`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`table_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '代码生成业务表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '代码生成业务表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of gen_table
@@ -295,7 +295,7 @@ CREATE TABLE `gen_table_column`  (
   `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '更新者',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`column_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '代码生成业务表字段' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '代码生成业务表字段' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of gen_table_column
@@ -307,16 +307,16 @@ CREATE TABLE `gen_table_column`  (
 DROP TABLE IF EXISTS `im_app_shortcut`;
 CREATE TABLE `im_app_shortcut`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-  `user_id` bigint(20) NOT NULL COMMENT '??ID',
-  `app_id` bigint(20) NOT NULL COMMENT '??ID',
-  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '??',
-  `is_pinned` tinyint(1) NOT NULL DEFAULT 0 COMMENT '????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `app_id` bigint(20) NOT NULL COMMENT '应用ID',
+  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `is_pinned` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否固定: 0否 1是',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_user_app`(`user_id`, `app_id`) USING BTREE,
   INDEX `idx_user`(`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '应用快捷方式表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_app_shortcut
@@ -327,26 +327,26 @@ CREATE TABLE `im_app_shortcut`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_application`;
 CREATE TABLE `im_application`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `icon` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `category` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???OFFICE??/DATA??/TOOLS??/CUSTOM???',
-  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `app_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???ROUTE??/IFRAME??/LINK????',
-  `app_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `is_system` tinyint(1) NOT NULL DEFAULT 0 COMMENT '??????',
-  `is_visible` tinyint(1) NOT NULL DEFAULT 1 COMMENT '????',
-  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '??',
-  `permissions` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????(JSON)',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '???',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '???',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '应用ID',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '应用名称',
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '应用编码',
+  `icon` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '应用图标',
+  `category` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分类: OFFICE办公 DATA数据 TOOLS工具 CUSTOM自定义',
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '应用描述',
+  `app_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '类型: ROUTE路由 IFRAME内嵌 LINK链接',
+  `app_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '应用地址',
+  `is_system` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否系统应用: 0否 1是',
+  `is_visible` tinyint(1) NOT NULL DEFAULT 1 COMMENT '是否可见: 0否 1是',
+  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `permissions` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '权限(JSON)',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code`(`code`) USING BTREE,
   INDEX `idx_category`(`category`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '应用表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_application
@@ -363,26 +363,26 @@ INSERT INTO `im_application` VALUES (6, '??', 'settings', 'settings', 'TOOLS', '
 -- ----------------------------
 DROP TABLE IF EXISTS `im_approval`;
 CREATE TABLE `im_approval`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `template_id` bigint(20) NOT NULL COMMENT '??ID',
-  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `applicant_id` bigint(20) NOT NULL COMMENT '???ID',
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PENDING' COMMENT '???PENDING???/APPROVED???/REJECTED???/CANCELLED???',
-  `current_node_id` bigint(20) NULL DEFAULT NULL COMMENT '????ID',
-  `form_data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '????(JSON)',
-  `attachments` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????(JSON)',
-  `apply_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `finish_time` datetime NULL DEFAULT NULL COMMENT '????',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '???',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '???',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '申请ID',
+  `template_id` bigint(20) NOT NULL COMMENT '模板ID',
+  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '申请标题',
+  `applicant_id` bigint(20) NOT NULL COMMENT '申请人ID',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PENDING' COMMENT '状态: PENDING待审批 APPROVED已通过 REJECTED已拒绝 CANCELLED已取消',
+  `current_node_id` bigint(20) NULL DEFAULT NULL COMMENT '当前审批节点ID',
+  `form_data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单数据(JSON)',
+  `attachments` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '附件(JSON)',
+  `apply_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '申请时间',
+  `finish_time` datetime NULL DEFAULT NULL COMMENT '完成时间',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_applicant`(`applicant_id`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_template`(`template_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '审批申请表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_approval
@@ -414,14 +414,14 @@ INSERT INTO `im_approval` VALUES (20, 1, '请假申请-董十二', 21, 'APPROVED
 DROP TABLE IF EXISTS `im_approval_form_data`;
 CREATE TABLE `im_approval_form_data`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-  `approval_id` bigint(20) NOT NULL COMMENT '??ID',
-  `field_key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???',
-  `field_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '???',
-  `field_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
+  `approval_id` bigint(20) NOT NULL COMMENT '申请ID',
+  `field_key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '字段键',
+  `field_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '字段值',
+  `field_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '字段类型',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_approval`(`approval_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '审批表单数据表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_approval_form_data
@@ -432,17 +432,17 @@ CREATE TABLE `im_approval_form_data`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_approval_node`;
 CREATE TABLE `im_approval_node`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `template_id` bigint(20) NOT NULL COMMENT '??ID',
-  `node_key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `node_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `node_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????APPROVE??/CC??/CONDITION??/PARALLEL??',
-  `approvers` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '?????(JSON)',
-  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '??',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '节点ID',
+  `template_id` bigint(20) NOT NULL COMMENT '模板ID',
+  `node_key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点键',
+  `node_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点名称',
+  `node_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点类型: APPROVE审批 CC抄送 CONDITION条件 PARALLEL并行',
+  `approvers` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '审批人(JSON)',
+  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_template`(`template_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '审批节点表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_approval_node
@@ -458,18 +458,18 @@ INSERT INTO `im_approval_node` VALUES (5, 3, 'manager', '部门经理审批', 'A
 -- ----------------------------
 DROP TABLE IF EXISTS `im_approval_record`;
 CREATE TABLE `im_approval_record`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `approval_id` bigint(20) NOT NULL COMMENT '??ID',
-  `node_id` bigint(20) NOT NULL COMMENT '??ID',
-  `approver_id` bigint(20) NOT NULL COMMENT '???ID',
-  `action` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???APPROVE??/REJECT??/TRANSFER??/ADD_SIGN??',
-  `comment` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `attachments` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??(JSON)',
-  `action_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+  `approval_id` bigint(20) NOT NULL COMMENT '申请ID',
+  `node_id` bigint(20) NOT NULL COMMENT '节点ID',
+  `approver_id` bigint(20) NOT NULL COMMENT '审批人ID',
+  `action` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '操作: APPROVE同意 REJECT拒绝 TRANSFER转办 ADD_SIGN加签',
+  `comment` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '审批意见',
+  `attachments` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '附件(JSON)',
+  `action_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_approval`(`approval_id`) USING BTREE,
   INDEX `idx_approver`(`approver_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '审批记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_approval_record
@@ -510,26 +510,26 @@ INSERT INTO `im_approval_record` VALUES (30, 4, 3, 3, 'APPROVE', '补充确认',
 -- ----------------------------
 DROP TABLE IF EXISTS `im_approval_template`;
 CREATE TABLE `im_approval_template`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `category` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????/??/??/??',
-  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `form_schema` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????(JSON)',
-  `flow_config` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????(JSON)',
-  `icon` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `is_system` tinyint(1) NOT NULL DEFAULT 0 COMMENT '??????',
-  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE' COMMENT '???ACTIVE??/DISABLED??',
-  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '??',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '???',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '???',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '模板ID',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '模板名称',
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '模板编码',
+  `category` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '类别: 请假/报销/出差/其他',
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '描述',
+  `form_schema` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '表单配置(JSON)',
+  `flow_config` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程配置(JSON)',
+  `icon` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '图标',
+  `is_system` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否系统模板: 0否 1是',
+  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE' COMMENT '状态: ACTIVE有效 DISABLED禁用',
+  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code`(`code`) USING BTREE,
   INDEX `idx_category`(`category`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '审批模板表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_approval_template
@@ -567,7 +567,7 @@ CREATE TABLE `im_attendance`  (
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_attendance_date`(`attendance_date`) USING BTREE,
   INDEX `idx_approve_status`(`approve_status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '考勤打卡表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '考勤记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_attendance
@@ -625,7 +625,7 @@ CREATE TABLE `im_attendance_statistics`  (
   UNIQUE INDEX `uk_user_month`(`user_id`, `statistics_month`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_statistics_month`(`statistics_month`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '考勤统计表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '考勤统计表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_attendance_statistics
@@ -636,20 +636,20 @@ CREATE TABLE `im_attendance_statistics`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_audit_export_request`;
 CREATE TABLE `im_audit_export_request`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '?????ID',
-  `export_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????MESSAGE?? FILE?? USER???',
-  `start_time` datetime NOT NULL COMMENT '????',
-  `end_time` datetime NOT NULL COMMENT '????',
-  `reason` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PENDING' COMMENT '???PENDING??? APPROVED??? REJECTED??? EXPIRED????',
-  `approver_id` bigint(20) NULL DEFAULT NULL COMMENT '?????ID',
-  `approved_time` datetime NULL DEFAULT NULL COMMENT '????',
-  `approval_remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `export_file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??????',
-  `download_count` int(11) NOT NULL DEFAULT 0 COMMENT '????',
-  `expire_time` datetime NULL DEFAULT NULL COMMENT '????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '请求ID',
+  `user_id` bigint(20) NOT NULL COMMENT '申请人ID',
+  `export_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '导出类型: MESSAGE消息 FILE文件 USER用户',
+  `start_time` datetime NOT NULL COMMENT '开始时间',
+  `end_time` datetime NOT NULL COMMENT '结束时间',
+  `reason` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '导出原因',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PENDING' COMMENT '状态: PENDING待审批 APPROVED已批准 REJECTED已拒绝 EXPIRED已过期',
+  `approver_id` bigint(20) NULL DEFAULT NULL COMMENT '审批人ID',
+  `approved_time` datetime NULL DEFAULT NULL COMMENT '审批时间',
+  `approval_remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '审批备注',
+  `export_file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '导出文件路径',
+  `download_count` int(11) NOT NULL DEFAULT 0 COMMENT '下载次数',
+  `expire_time` datetime NULL DEFAULT NULL COMMENT '过期时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_approver_id`(`approver_id`) USING BTREE,
@@ -657,7 +657,7 @@ CREATE TABLE `im_audit_export_request`  (
   INDEX `idx_create_time`(`create_time`) USING BTREE,
   CONSTRAINT `fk_audit_export_request_approver` FOREIGN KEY (`approver_id`) REFERENCES `im_user` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
   CONSTRAINT `fk_audit_export_request_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '审计导出请求表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_audit_export_request
@@ -668,16 +668,16 @@ CREATE TABLE `im_audit_export_request`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_audit_log`;
 CREATE TABLE `im_audit_log`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `user_id` bigint(20) NULL DEFAULT NULL COMMENT '????ID',
-  `operation_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????LOGIN?? LOGOUT?? SEND_MESSAGE???? DELETE_MESSAGE???? CREATE_GROUP???? JOIN_GROUP???? LEAVE_GROUP???? ADD_FRIEND???? DELETE_FRIEND?????',
-  `target_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '?????USER MESSAGE GROUP CONVERSATION FRIEND?',
-  `target_id` bigint(20) NULL DEFAULT NULL COMMENT '??ID',
-  `operation_result` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'SUCCESS' COMMENT '?????SUCCESS?? FAILED???',
-  `error_message` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'IP??',
-  `user_agent` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+  `user_id` bigint(20) NULL DEFAULT NULL COMMENT '操作用户ID',
+  `operation_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '操作类型: LOGIN登录 LOGOUT登出 SEND_MESSAGE发送消息 DELETE_MESSAGE删除消息 CREATE_GROUP创建群组 JOIN_GROUP加入群组 LEAVE_GROUP退出群组 ADD_FRIEND添加好友 DELETE_FRIEND删除好友等',
+  `target_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '目标类型: USER用户 MESSAGE消息 GROUP群组 CONVERSATION会话 FRIEND好友',
+  `target_id` bigint(20) NULL DEFAULT NULL COMMENT '目标ID',
+  `operation_result` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'SUCCESS' COMMENT '操作结果: SUCCESS成功 FAILED失败',
+  `error_message` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '错误信息',
+  `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'IP地址',
+  `user_agent` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '用户代理',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_operation_type`(`operation_type`) USING BTREE,
@@ -685,7 +685,7 @@ CREATE TABLE `im_audit_log`  (
   INDEX `idx_create_time`(`create_time`) USING BTREE,
   INDEX `idx_operation_result`(`operation_result`) USING BTREE,
   CONSTRAINT `fk_audit_log_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1002 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1002 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '审计日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_audit_log
@@ -712,32 +712,60 @@ INSERT INTO `im_audit_log` VALUES (19, 11, 'LOGIN', 'USER', 11, 'SUCCESS', NULL,
 INSERT INTO `im_audit_log` VALUES (20, 11, 'SEND_MESSAGE', 'MESSAGE', 30, 'SUCCESS', NULL, '192.168.1.109', 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)', '2026-01-08 12:12:35');
 
 -- ----------------------------
+-- Table structure for im_backup
+-- ----------------------------
+DROP TABLE IF EXISTS `im_backup`;
+CREATE TABLE `im_backup`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '备份ID',
+  `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '备份文件名',
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备份描述',
+  `file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件路径',
+  `file_size` bigint(20) NOT NULL COMMENT '文件大小',
+  `backup_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '备份类型',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '状态',
+  `creator_id` bigint(20) NULL DEFAULT NULL COMMENT '备份人ID',
+  `creator_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备份人名称',
+  `error_message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '错误信息（失败时记录）',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `complete_time` datetime NULL DEFAULT NULL COMMENT '完成时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE,
+  INDEX `idx_backup_type`(`backup_type`) USING BTREE,
+  INDEX `idx_create_time`(`create_time`) USING BTREE,
+  INDEX `idx_creator_id`(`creator_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '数据备份表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of im_backup
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for im_conversation
 -- ----------------------------
 DROP TABLE IF EXISTS `im_conversation`;
 CREATE TABLE `im_conversation`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????PRIVATE?? GROUP???',
-  `target_id` bigint(20) NULL DEFAULT NULL COMMENT '??ID?????????ID???????ID?',
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `last_message_id` bigint(20) NULL DEFAULT NULL COMMENT '??????ID',
-  `last_message_time` datetime NULL DEFAULT NULL COMMENT '????????',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '?????0? 1??',
-  `deleted_time` datetime NULL DEFAULT NULL COMMENT '????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '会话ID',
+  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '类型: PRIVATE私聊 GROUP群聊',
+  `target_id` bigint(20) NULL DEFAULT NULL COMMENT '目标ID(私聊时为对方用户ID,群聊时为群组ID)',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '会话名称',
+  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '会话头像',
+  `last_message_id` bigint(20) NULL DEFAULT NULL COMMENT '最后一条消息ID',
+  `last_message_time` datetime NULL DEFAULT NULL COMMENT '最后消息时间',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除: 0否 1是',
+  `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_type`(`type`) USING BTREE,
   INDEX `idx_target_id`(`target_id`) USING BTREE,
   INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_conversation
 -- ----------------------------
-INSERT INTO `im_conversation` VALUES (1, 'PRIVATE', 3, '李四', '/avatar/2.jpg', 4, '2024-01-01 10:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation` VALUES (1, 'PRIVATE', 3, '李四', '/avatar/2.jpg', 342, '2026-01-09 17:27:56', 0, NULL, '2026-01-08 12:12:34', '2026-01-09 17:27:56');
 INSERT INTO `im_conversation` VALUES (2, 'PRIVATE', 4, '王五', '/avatar/3.jpg', 5, '2024-01-01 10:05:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
 INSERT INTO `im_conversation` VALUES (3, 'PRIVATE', 5, '赵六', '/avatar/1.jpg', 10, '2024-01-01 13:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
 INSERT INTO `im_conversation` VALUES (4, 'PRIVATE', 6, '孙七', '/avatar/2.jpg', 8, '2024-01-01 12:00:00', 0, NULL, '2026-01-08 12:12:34', '2026-01-08 13:37:12');
@@ -758,20 +786,20 @@ INSERT INTO `im_conversation` VALUES (15, 'PRIVATE', 11, '林二', '/avatar/1.jp
 -- ----------------------------
 DROP TABLE IF EXISTS `im_conversation_member`;
 CREATE TABLE `im_conversation_member`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `conversation_id` bigint(20) NOT NULL COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '??ID',
-  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'MEMBER' COMMENT '???OWNER??? MEMBER?????',
-  `unread_count` int(11) NOT NULL DEFAULT 0 COMMENT '?????',
-  `is_pinned` tinyint(1) NOT NULL DEFAULT 0 COMMENT '?????0? 1??',
-  `is_muted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '??????0? 1??',
-  `last_read_message_id` bigint(20) NULL DEFAULT NULL COMMENT '??????ID',
-  `last_read_time` datetime NULL DEFAULT NULL COMMENT '??????',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '?????0? 1??',
-  `deleted_time` datetime NULL DEFAULT NULL COMMENT '????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '成员ID',
+  `conversation_id` bigint(20) NOT NULL COMMENT '会话ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群昵称',
+  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'MEMBER' COMMENT '角色: OWNER所有者 MEMBER成员',
+  `unread_count` int(11) NOT NULL DEFAULT 0 COMMENT '未读数',
+  `is_pinned` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否置顶: 0否 1是',
+  `is_muted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否免打扰: 0否 1是',
+  `last_read_message_id` bigint(20) NULL DEFAULT NULL COMMENT '最后已读消息ID',
+  `last_read_time` datetime NULL DEFAULT NULL COMMENT '最后已读时间',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除: 0否 1是',
+  `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_conversation_user`(`conversation_id`, `user_id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
@@ -782,48 +810,48 @@ CREATE TABLE `im_conversation_member`  (
   INDEX `idx_update_time`(`update_time`) USING BTREE,
   CONSTRAINT `fk_conversation_member_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `im_conversation` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_conversation_member_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 67 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 68 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话成员表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_conversation_member
 -- ----------------------------
-INSERT INTO `im_conversation_member` VALUES (1, 1, 2, NULL, 'MEMBER', 1, 0, 0, 2, '2024-01-01 09:01:00', 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:13');
-INSERT INTO `im_conversation_member` VALUES (2, 1, 3, NULL, 'MEMBER', 0, 0, 0, 4, '2024-01-01 10:00:00', 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:13');
-INSERT INTO `im_conversation_member` VALUES (3, 2, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:11');
-INSERT INTO `im_conversation_member` VALUES (4, 2, 4, NULL, 'MEMBER', 0, 0, 0, 5, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation_member` VALUES (5, 3, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:11');
-INSERT INTO `im_conversation_member` VALUES (6, 3, 5, NULL, 'MEMBER', 0, 0, 0, 7, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation_member` VALUES (7, 4, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:11');
-INSERT INTO `im_conversation_member` VALUES (8, 4, 6, NULL, 'MEMBER', 0, 0, 0, 9, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation_member` VALUES (9, 5, 2, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 13:37:11');
+INSERT INTO `im_conversation_member` VALUES (1, 1, 2, NULL, 'MEMBER', 0, 0, 0, 342, '2024-01-01 09:01:00', 0, NULL, '2026-01-08 12:28:05', '2026-01-09 17:29:17');
+INSERT INTO `im_conversation_member` VALUES (2, 1, 3, NULL, 'MEMBER', 0, 0, 0, 342, '2024-01-01 10:00:00', 0, NULL, '2026-01-08 12:28:05', '2026-01-09 17:28:50');
+INSERT INTO `im_conversation_member` VALUES (3, 2, 2, NULL, 'MEMBER', 0, 0, 0, 119, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 17:25:50');
+INSERT INTO `im_conversation_member` VALUES (4, 2, 4, NULL, 'MEMBER', 11, 0, 0, 5, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 12:05:14');
+INSERT INTO `im_conversation_member` VALUES (5, 3, 2, NULL, 'MEMBER', 0, 0, 0, 123, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 17:16:55');
+INSERT INTO `im_conversation_member` VALUES (6, 3, 5, NULL, 'MEMBER', 1, 0, 0, 7, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 12:10:16');
+INSERT INTO `im_conversation_member` VALUES (7, 4, 2, NULL, 'MEMBER', 0, 0, 0, 181, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 17:17:28');
+INSERT INTO `im_conversation_member` VALUES (8, 4, 6, NULL, 'MEMBER', 58, 0, 0, 9, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 12:21:05');
+INSERT INTO `im_conversation_member` VALUES (9, 5, 2, NULL, 'MEMBER', 0, 0, 0, 11, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 17:16:51');
 INSERT INTO `im_conversation_member` VALUES (10, 5, 7, NULL, 'MEMBER', 0, 0, 0, 11, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (11, 6, 2, NULL, 'MEMBER', 2, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (12, 6, 3, NULL, 'MEMBER', 0, 0, 0, 14, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
+INSERT INTO `im_conversation_member` VALUES (11, 6, 2, NULL, 'MEMBER', 0, 0, 0, 14, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 17:16:50');
+INSERT INTO `im_conversation_member` VALUES (12, 6, 3, NULL, 'MEMBER', 0, 0, 0, 14, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 17:28:51');
 INSERT INTO `im_conversation_member` VALUES (13, 6, 4, NULL, 'MEMBER', 0, 0, 0, 14, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
 INSERT INTO `im_conversation_member` VALUES (14, 6, 5, NULL, 'MEMBER', 0, 0, 0, 14, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
 INSERT INTO `im_conversation_member` VALUES (15, 6, 6, NULL, 'MEMBER', 0, 0, 0, 14, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (16, 7, 3, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
+INSERT INTO `im_conversation_member` VALUES (16, 7, 3, NULL, 'MEMBER', 0, 0, 0, 16, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 17:30:08');
 INSERT INTO `im_conversation_member` VALUES (17, 7, 7, NULL, 'MEMBER', 0, 0, 0, 16, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
 INSERT INTO `im_conversation_member` VALUES (18, 7, 8, NULL, 'MEMBER', 0, 0, 0, 16, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
 INSERT INTO `im_conversation_member` VALUES (19, 8, 4, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
 INSERT INTO `im_conversation_member` VALUES (20, 8, 9, NULL, 'MEMBER', 0, 0, 0, 18, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
 INSERT INTO `im_conversation_member` VALUES (21, 8, 10, NULL, 'MEMBER', 0, 0, 0, 18, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
 INSERT INTO `im_conversation_member` VALUES (22, 8, 11, NULL, 'MEMBER', 0, 0, 0, 18, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (23, 9, 2, NULL, 'MEMBER', 1, 1, 0, NULL, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (24, 9, 3, NULL, 'MEMBER', 0, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (25, 9, 4, NULL, 'MEMBER', 0, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (26, 9, 5, NULL, 'MEMBER', 0, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (27, 9, 6, NULL, 'MEMBER', 0, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (28, 9, 7, NULL, 'MEMBER', 0, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (29, 9, 8, NULL, 'MEMBER', 0, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (30, 9, 9, NULL, 'MEMBER', 0, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (31, 9, 10, NULL, 'MEMBER', 0, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-08 12:28:05');
-INSERT INTO `im_conversation_member` VALUES (42, 3, 3, NULL, 'OWNER', 0, 1, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation_member` VALUES (43, 4, 3, NULL, 'ADMIN', 2, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation_member` VALUES (45, 3, 4, NULL, 'MEMBER', 0, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation_member` VALUES (46, 4, 4, NULL, 'MEMBER', 0, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation_member` VALUES (23, 9, 2, NULL, 'MEMBER', 0, 1, 0, 72, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 17:16:50');
+INSERT INTO `im_conversation_member` VALUES (24, 9, 3, NULL, 'MEMBER', 0, 0, 0, 72, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 17:30:08');
+INSERT INTO `im_conversation_member` VALUES (25, 9, 4, NULL, 'MEMBER', 7, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 11:49:53');
+INSERT INTO `im_conversation_member` VALUES (26, 9, 5, NULL, 'MEMBER', 7, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 11:49:53');
+INSERT INTO `im_conversation_member` VALUES (27, 9, 6, NULL, 'MEMBER', 7, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 11:49:53');
+INSERT INTO `im_conversation_member` VALUES (28, 9, 7, NULL, 'MEMBER', 7, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 11:49:53');
+INSERT INTO `im_conversation_member` VALUES (29, 9, 8, NULL, 'MEMBER', 7, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 11:49:54');
+INSERT INTO `im_conversation_member` VALUES (30, 9, 9, NULL, 'MEMBER', 7, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 11:49:54');
+INSERT INTO `im_conversation_member` VALUES (31, 9, 10, NULL, 'MEMBER', 7, 0, 0, 20, NULL, 0, NULL, '2026-01-08 12:28:05', '2026-01-09 11:49:54');
+INSERT INTO `im_conversation_member` VALUES (42, 3, 3, NULL, 'OWNER', 0, 1, 0, 123, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-09 17:28:50');
+INSERT INTO `im_conversation_member` VALUES (43, 4, 3, NULL, 'ADMIN', 0, 0, 0, 181, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-09 17:28:51');
+INSERT INTO `im_conversation_member` VALUES (45, 3, 4, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-09 12:10:16');
+INSERT INTO `im_conversation_member` VALUES (46, 4, 4, NULL, 'MEMBER', 58, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-09 12:21:05');
 INSERT INTO `im_conversation_member` VALUES (48, 5, 5, NULL, 'MEMBER', 0, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
-INSERT INTO `im_conversation_member` VALUES (50, 3, 6, NULL, 'MEMBER', 0, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-08 13:37:12');
+INSERT INTO `im_conversation_member` VALUES (50, 3, 6, NULL, 'MEMBER', 1, 0, 0, NULL, NULL, 0, NULL, '2026-01-08 13:36:16', '2026-01-09 12:10:16');
 
 -- ----------------------------
 -- Table structure for im_department
@@ -846,7 +874,7 @@ CREATE TABLE `im_department`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_parent_id`(`parent_id`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'IM部门表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '部门表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_department
@@ -871,7 +899,7 @@ CREATE TABLE `im_department_member`  (
   INDEX `idx_department_id`(`department_id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_is_primary`(`is_primary`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'IM部门成员关系表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '部门成员关系表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_department_member
@@ -903,7 +931,7 @@ CREATE TABLE `im_ding_message`  (
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_schedule_time`(`schedule_time`) USING BTREE,
   CONSTRAINT `fk_ding_sender` FOREIGN KEY (`sender_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'DING消息表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '钉钉消息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_ding_message
@@ -1041,23 +1069,23 @@ INSERT INTO `im_external_contact_group` VALUES (4, 3, '客户', 1, '2026-01-08 1
 -- ----------------------------
 DROP TABLE IF EXISTS `im_file_asset`;
 CREATE TABLE `im_file_asset`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `file_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???',
-  `file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `file_size` bigint(20) NOT NULL COMMENT '????????',
-  `file_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `file_ext` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????',
-  `md5` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??MD5?',
-  `uploader_id` bigint(20) NOT NULL COMMENT '?????ID',
-  `download_count` int(11) NOT NULL DEFAULT 0 COMMENT '????',
-  `download_expire_time` datetime NULL DEFAULT NULL COMMENT '????????',
-  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE' COMMENT '???ACTIVE?? DELETED????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '文件ID',
+  `file_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件名',
+  `file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件路径',
+  `file_size` bigint(20) NOT NULL COMMENT '文件大小(字节)',
+  `file_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件类型',
+  `file_ext` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '文件扩展名',
+  `md5` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '文件MD5值',
+  `uploader_id` bigint(20) NOT NULL COMMENT '上传者ID',
+  `download_count` int(11) NOT NULL DEFAULT 0 COMMENT '下载次数',
+  `download_expire_time` datetime NULL DEFAULT NULL COMMENT '下载过期时间',
+  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE' COMMENT '状态: ACTIVE正常 DELETED已删除',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_uploader_id`(`uploader_id`) USING BTREE,
   INDEX `idx_md5`(`md5`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1004 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1004 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '文件资源表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_file_asset
@@ -1087,7 +1115,7 @@ CREATE TABLE `im_file_chunk_detail`  (
   UNIQUE INDEX `uk_upload_chunk`(`upload_id`, `chunk_number`) USING BTREE,
   INDEX `idx_upload_id`(`upload_id`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '分片文件详情表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '分片文件详情表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_file_chunk_detail
@@ -1119,7 +1147,7 @@ CREATE TABLE `im_file_chunk_upload`  (
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_md5`(`file_md5`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '分片上传记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '分片上传记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_file_chunk_upload
@@ -1157,22 +1185,22 @@ CREATE TABLE `im_file_share`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_friend`;
 CREATE TABLE `im_friend`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '??ID',
-  `friend_id` bigint(20) NOT NULL COMMENT '??ID',
-  `remark` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `group_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '?????0? 1??',
-  `deleted_time` datetime NULL DEFAULT NULL COMMENT '????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '关系ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `friend_id` bigint(20) NOT NULL COMMENT '好友ID',
+  `remark` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注名',
+  `group_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '分组名',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除: 0否 1是',
+  `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_user_friend`(`user_id`, `friend_id`) USING BTREE,
   INDEX `idx_friend_id`(`friend_id`) USING BTREE,
   INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
   CONSTRAINT `fk_friend_friend` FOREIGN KEY (`friend_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_friend_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '好友关系表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_friend
@@ -1182,12 +1210,12 @@ INSERT INTO `im_friend` VALUES (2, 2, 4, '王五', '我的好友', 0, NULL, '202
 INSERT INTO `im_friend` VALUES (3, 2, 5, '赵六', '我的好友', 0, NULL, '2026-01-08 12:28:04', '2026-01-08 12:28:04');
 INSERT INTO `im_friend` VALUES (4, 2, 6, '孙七', '同事', 0, NULL, '2026-01-08 12:28:04', '2026-01-08 12:28:04');
 INSERT INTO `im_friend` VALUES (5, 2, 7, '周八', '同事', 0, NULL, '2026-01-08 12:28:04', '2026-01-08 12:28:04');
-INSERT INTO `im_friend` VALUES (6, 3, 2, '张三', '我的好友', 0, NULL, '2026-01-08 12:28:04', '2026-01-08 12:28:04');
+INSERT INTO `im_friend` VALUES (6, 3, 2, '三1', '我的好友', 0, NULL, '2026-01-08 12:28:04', '2026-01-09 12:20:16');
 INSERT INTO `im_friend` VALUES (7, 3, 4, '王五', '我的好友', 0, NULL, '2026-01-08 12:28:04', '2026-01-08 12:28:04');
 INSERT INTO `im_friend` VALUES (8, 3, 5, '赵六', '我的好友', 0, NULL, '2026-01-08 12:28:04', '2026-01-08 12:28:04');
 INSERT INTO `im_friend` VALUES (9, 3, 8, '吴九', '同事', 0, NULL, '2026-01-08 12:28:04', '2026-01-08 12:28:04');
 INSERT INTO `im_friend` VALUES (10, 4, 2, '张三', '我的好友', 0, NULL, '2026-01-08 12:28:04', '2026-01-08 12:28:04');
-INSERT INTO `im_friend` VALUES (11, 4, 3, '李四', '我的好友', 0, NULL, '2026-01-08 12:28:04', '2026-01-08 12:28:04');
+INSERT INTO `im_friend` VALUES (11, 4, 3, '李四1', '我的好友', 0, NULL, '2026-01-08 12:28:04', '2026-01-09 16:33:23');
 INSERT INTO `im_friend` VALUES (12, 4, 9, '郑十', '同事', 0, NULL, '2026-01-08 12:28:04', '2026-01-08 12:28:04');
 INSERT INTO `im_friend` VALUES (13, 4, 10, '陈一', '同事', 0, NULL, '2026-01-08 12:28:04', '2026-01-08 12:28:04');
 
@@ -1196,20 +1224,20 @@ INSERT INTO `im_friend` VALUES (13, 4, 10, '陈一', '同事', 0, NULL, '2026-01
 -- ----------------------------
 DROP TABLE IF EXISTS `im_friend_request`;
 CREATE TABLE `im_friend_request`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `from_user_id` bigint(20) NOT NULL COMMENT '?????ID',
-  `to_user_id` bigint(20) NOT NULL COMMENT '??????ID',
-  `message` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PENDING' COMMENT '???PENDING??? APPROVED??? REJECTED????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `handled_time` datetime NULL DEFAULT NULL COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '申请ID',
+  `from_user_id` bigint(20) NOT NULL COMMENT '申请人ID',
+  `to_user_id` bigint(20) NOT NULL COMMENT '接收人ID',
+  `message` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '申请消息',
+  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PENDING' COMMENT '状态: PENDING待处理 APPROVED已同意 REJECTED已拒绝',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '申请时间',
+  `handled_time` datetime NULL DEFAULT NULL COMMENT '处理时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_from_user`(`from_user_id`) USING BTREE,
   INDEX `idx_to_user`(`to_user_id`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE,
   CONSTRAINT `fk_friend_request_from_user` FOREIGN KEY (`from_user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `fk_friend_request_to_user` FOREIGN KEY (`to_user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '好友申请表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_friend_request
@@ -1220,22 +1248,22 @@ CREATE TABLE `im_friend_request`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_group`;
 CREATE TABLE `im_group`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `owner_id` bigint(20) NOT NULL COMMENT '??ID',
-  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `max_members` int(11) NOT NULL DEFAULT 500 COMMENT '?????',
-  `all_muted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '全员禁言：0=否，1=是',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '?????0? 1??',
-  `deleted_time` datetime NULL DEFAULT NULL COMMENT '????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '群组ID',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '群名称',
+  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群头像',
+  `owner_id` bigint(20) NOT NULL COMMENT '群主ID',
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群描述',
+  `max_members` int(11) NOT NULL DEFAULT 500 COMMENT '最大成员数',
+  `all_muted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '全员禁言: 0否 1是',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除: 0否 1是',
+  `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_owner_id`(`owner_id`) USING BTREE,
   INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
   CONSTRAINT `fk_group_owner` FOREIGN KEY (`owner_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '群组表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_group
@@ -1281,16 +1309,16 @@ CREATE TABLE `im_group_announcement`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_group_blacklist`;
 CREATE TABLE `im_group_blacklist`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `group_id` bigint(20) NOT NULL COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '???/????ID',
-  `operator_id` bigint(20) NOT NULL COMMENT '???ID',
-  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'MUTE' COMMENT '???MUTE?? BLACKLIST????',
-  `reason` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??',
-  `expire_time` datetime NULL DEFAULT NULL COMMENT '?????NULL?????',
-  `is_active` tinyint(1) NOT NULL DEFAULT 1 COMMENT '?????0? 1??',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+  `group_id` bigint(20) NOT NULL COMMENT '群组ID',
+  `user_id` bigint(20) NOT NULL COMMENT '被禁言/被拉黑用户ID',
+  `operator_id` bigint(20) NOT NULL COMMENT '操作者ID',
+  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'MUTE' COMMENT '类型: MUTE禁言 BLACKLIST拉黑',
+  `reason` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '原因',
+  `expire_time` datetime NULL DEFAULT NULL COMMENT '过期时间(为空则永久)',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1 COMMENT '是否有效: 0否 1是',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_group_user_type`(`group_id`, `user_id`, `type`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
@@ -1300,7 +1328,7 @@ CREATE TABLE `im_group_blacklist`  (
   CONSTRAINT `fk_group_blacklist_group` FOREIGN KEY (`group_id`) REFERENCES `im_group` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_group_blacklist_operator` FOREIGN KEY (`operator_id`) REFERENCES `im_user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `fk_group_blacklist_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????/???' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '群组禁言/黑名单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_group_blacklist
@@ -1329,7 +1357,7 @@ CREATE TABLE `im_group_file`  (
   INDEX `idx_group_id`(`group_id`) USING BTREE,
   INDEX `idx_category`(`category`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '群组文件表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '群组文件表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_group_file
@@ -1340,16 +1368,16 @@ CREATE TABLE `im_group_file`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_group_member`;
 CREATE TABLE `im_group_member`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `group_id` bigint(20) NOT NULL COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '??ID',
-  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '???',
-  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'MEMBER' COMMENT '???OWNER??? MEMBER?????',
-  `is_muted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '?????0? 1??',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '?????0? 1??',
-  `deleted_time` datetime NULL DEFAULT NULL COMMENT '????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '成员ID',
+  `group_id` bigint(20) NOT NULL COMMENT '群组ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '群昵称',
+  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'MEMBER' COMMENT '角色: OWNER群主 ADMIN管理员 MEMBER普通成员',
+  `is_muted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否禁言: 0否 1是',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除: 0否 1是',
+  `deleted_time` datetime NULL DEFAULT NULL COMMENT '退群时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `reply_to_message_id` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_group_user`(`group_id`, `user_id`) USING BTREE,
@@ -1359,7 +1387,7 @@ CREATE TABLE `im_group_member`  (
   INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
   CONSTRAINT `fk_group_member_group` FOREIGN KEY (`group_id`) REFERENCES `im_group` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_group_member_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 77 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 77 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '群成员表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_group_member
@@ -1408,28 +1436,28 @@ INSERT INTO `im_group_member` VALUES (76, 10, 21, '董十二', 'MEMBER', 0, 0, N
 -- ----------------------------
 DROP TABLE IF EXISTS `im_message`;
 CREATE TABLE `im_message`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `conversation_id` bigint(20) NOT NULL COMMENT '??ID',
-  `sender_id` bigint(20) NOT NULL COMMENT '???ID',
-  `message_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????TEXT?? IMAGE?? VIDEO?? AUDIO?? FILE???',
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '消息ID',
+  `conversation_id` bigint(20) NOT NULL COMMENT '会话ID',
+  `sender_id` bigint(20) NOT NULL COMMENT '发送者ID',
+  `message_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '消息类型: TEXT文本 IMAGE图片 VIDEO视频 AUDIO音频 FILE文件',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '消息内容',
   `reply_to_message_id` bigint(20) NULL DEFAULT NULL COMMENT '回复的消息ID',
   `forward_from_message_id` bigint(20) NULL DEFAULT NULL COMMENT '转发来源消息ID',
-  `file_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??URL',
-  `file_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '???',
-  `file_size` bigint(20) NULL DEFAULT NULL COMMENT '????????',
-  `sensitive_level` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'NORMAL' COMMENT '?????NORMAL?? SENSITIVE?? HIGH?????',
-  `is_revoked` tinyint(1) NOT NULL DEFAULT 0 COMMENT '?????0? 1??',
-  `is_edited` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否已编辑（0否 1是）',
+  `file_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '文件URL',
+  `file_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '文件名',
+  `file_size` bigint(20) NULL DEFAULT NULL COMMENT '文件大小(字节)',
+  `sensitive_level` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'NORMAL' COMMENT '敏感级别: NORMAL普通 SENSITIVE敏感 HIGH高级',
+  `is_revoked` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否撤回: 0否 1是',
+  `is_edited` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否已编辑(0否 1是)',
   `edited_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '编辑后的内容',
   `edit_count` int(11) NOT NULL DEFAULT 0 COMMENT '编辑次数',
   `edit_time` datetime NULL DEFAULT NULL COMMENT '最后编辑时间',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除（0否 1是）',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除(0否 1是)',
   `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
-  `revoked_time` datetime NULL DEFAULT NULL COMMENT '????',
-  `revoker_id` bigint(20) NULL DEFAULT NULL COMMENT '???ID',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NULL DEFAULT NULL,
+  `revoked_time` datetime NULL DEFAULT NULL COMMENT '撤回时间',
+  `revoker_id` bigint(20) NULL DEFAULT NULL COMMENT '撤回者ID',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_conversation_id`(`conversation_id`) USING BTREE,
   INDEX `idx_sender_id`(`sender_id`) USING BTREE,
@@ -1443,41 +1471,323 @@ CREATE TABLE `im_message`  (
   INDEX `idx_is_deleted`(`is_deleted`) USING BTREE,
   CONSTRAINT `fk_message_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `im_conversation` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_message_sender` FOREIGN KEY (`sender_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 343 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_message
 -- ----------------------------
-INSERT INTO `im_message` VALUES (1, 1, 2, 'TEXT', '你好，最近怎么样？', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 09:00:00', NULL);
-INSERT INTO `im_message` VALUES (2, 1, 3, 'TEXT', '挺好的，谢谢关心！你呢？', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 09:01:00', NULL);
-INSERT INTO `im_message` VALUES (3, 1, 2, 'TEXT', '我也不错，今天天气真好', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 09:02:00', NULL);
-INSERT INTO `im_message` VALUES (4, 2, 2, 'TEXT', '是啊，适合出去走走', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 10:00:00', NULL);
-INSERT INTO `im_message` VALUES (5, 2, 4, 'TEXT', '项目进度怎么样了？', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 10:05:00', NULL);
-INSERT INTO `im_message` VALUES (6, 3, 2, 'TEXT', '@所有人 今天下午3点开会', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 11:00:00', NULL);
-INSERT INTO `im_message` VALUES (7, 3, 5, 'TEXT', '收到，我会准时参加', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 11:01:00', NULL);
-INSERT INTO `im_message` VALUES (8, 4, 2, 'TEXT', '这个技术方案怎么样？', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 12:00:00', NULL);
-INSERT INTO `im_message` VALUES (9, 4, 6, 'TEXT', '文件已经发给你了，请查收', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 12:01:00', NULL);
-INSERT INTO `im_message` VALUES (10, 5, 2, 'TEXT', '会议延期到明天上午', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 13:00:00', NULL);
-INSERT INTO `im_message` VALUES (11, 5, 7, 'TEXT', '看完了，有一些修改意见', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 13:10:00', NULL);
-INSERT INTO `im_message` VALUES (12, 6, 2, 'TEXT', '大家好，欢迎加入技术交流群', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 14:00:00', NULL);
-INSERT INTO `im_message` VALUES (13, 6, 3, 'TEXT', '感谢群主邀请', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 14:01:00', NULL);
-INSERT INTO `im_message` VALUES (14, 6, 4, 'TEXT', '向大家学习', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 14:02:00', NULL);
-INSERT INTO `im_message` VALUES (15, 7, 3, 'TEXT', '产品需求已经更新', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 15:00:00', NULL);
-INSERT INTO `im_message` VALUES (16, 7, 7, 'TEXT', '收到，我会查看', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 15:01:00', NULL);
-INSERT INTO `im_message` VALUES (17, 8, 4, 'TEXT', '项目进度汇报', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 16:00:00', NULL);
-INSERT INTO `im_message` VALUES (18, 8, 9, 'TEXT', '前端开发完成了80%', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 16:10:00', NULL);
-INSERT INTO `im_message` VALUES (19, 9, 2, 'TEXT', '公司通知：本周五下午开会', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 17:00:00', NULL);
-INSERT INTO `im_message` VALUES (20, 9, 3, 'TEXT', '收到', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-01 17:01:00', NULL);
-INSERT INTO `im_message` VALUES (21, 10, 2, 'TEXT', '吴九，后端接口文档发我', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 09:00:00', NULL);
-INSERT INTO `im_message` VALUES (22, 10, 8, 'TEXT', '已经发送到你邮箱', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 09:05:00', NULL);
-INSERT INTO `im_message` VALUES (23, 11, 2, 'TEXT', '郑十，测试用例写好了吗？', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 10:00:00', NULL);
-INSERT INTO `im_message` VALUES (24, 11, 9, 'TEXT', '写好了，正在执行测试', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 10:01:00', NULL);
-INSERT INTO `im_message` VALUES (25, 12, 5, 'TEXT', '本周篮球活动照常进行', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 11:00:00', NULL);
-INSERT INTO `im_message` VALUES (26, 12, 11, 'TEXT', '我会参加', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 11:01:00', NULL);
-INSERT INTO `im_message` VALUES (27, 13, 2, 'TEXT', '陈一，UI验收通过了吗？', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 12:00:00', NULL);
-INSERT INTO `im_message` VALUES (28, 13, 10, 'TEXT', '通过了，可以开发', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 12:01:00', NULL);
-INSERT INTO `im_message` VALUES (29, 14, 6, 'TEXT', '本周读书分享：《深入理解计算机系统》', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 13:00:00', NULL);
-INSERT INTO `im_message` VALUES (30, 15, 2, 'TEXT', '林二，代码review一下', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2024-01-02 14:00:00', NULL);
+INSERT INTO `im_message` VALUES (31, 9, 3, 'text', '676gcwBkV++AfQu0yk+zmKkrab339uyCCmedvaOwyg==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:47:29', NULL);
+INSERT INTO `im_message` VALUES (32, 9, 3, 'text', 'VWz3pJb8dhHPLi/Gpe9tGWu6iLqABT31q+wNTN4ORtE=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:47:30', NULL);
+INSERT INTO `im_message` VALUES (33, 9, 3, 'text', 'wWb+Ptp+3DT//JymjKtZOh4m4LUf4DhfjFxGqdi+y2lz', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:47:30', NULL);
+INSERT INTO `im_message` VALUES (34, 9, 3, 'text', 'ZXLmw8gMd4BBTNIn1gkSTPfR6ObX44pVvhuAHn4illIlyw==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:47:30', NULL);
+INSERT INTO `im_message` VALUES (35, 9, 3, 'text', 'TYMVo4lhAglx4SKMZP4Slqe/EScE2FEC4jHoigw=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:47:30', NULL);
+INSERT INTO `im_message` VALUES (36, 9, 3, 'text', 'SdtIpe8FgRDOFL85G7IyqBzN2/H1MCTK0R0evp5v', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:47:30', NULL);
+INSERT INTO `im_message` VALUES (37, 1, 2, 'text', 'u58D4bsW1wjVbmt2gi888PUo7ChFxi9SYbfGkJHq', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:42', NULL);
+INSERT INTO `im_message` VALUES (38, 1, 2, 'text', 'Jg8pnLSV0WZToU8jJ1jlPo769FKtEw9SbO7tFEA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:42', NULL);
+INSERT INTO `im_message` VALUES (39, 1, 2, 'text', 'u+mr0waXK+nGdJy2yWySNFTL7LPAObSRtWCXAByo', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:42', NULL);
+INSERT INTO `im_message` VALUES (40, 1, 2, 'text', 'm/3EGbBBPIyXp3yn4puLY1I0IUJE1Xq0t8V1apg=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:43', NULL);
+INSERT INTO `im_message` VALUES (41, 1, 2, 'text', '2iZP8KxpIGdrw7vupIDXLwu/qxKFdJaMmbjA0Jk=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:43', NULL);
+INSERT INTO `im_message` VALUES (42, 1, 2, 'text', 'IfNc7tRoih3W0aX1GQbIZO06rqIbAP4zAGgd6xc=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:43', NULL);
+INSERT INTO `im_message` VALUES (43, 1, 2, 'text', 'vxVnUdmM/lFKO19hI5F9UiNnY+I+q5J7isrjiGY=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:43', NULL);
+INSERT INTO `im_message` VALUES (44, 1, 2, 'text', 'Rdvyv8KFlXbe2yAoqnEvLK4p4xI32OiyGJuJD4w2', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:43', NULL);
+INSERT INTO `im_message` VALUES (45, 1, 2, 'text', '99xBjIRqHtU7pchXRoM1xB/2zKHdx/Vh17LordE=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:44', NULL);
+INSERT INTO `im_message` VALUES (46, 1, 2, 'text', 'mQ9pgexNaj5g26SmWJZ+9brI4KhfXEKGmQ2q+eY=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:44', NULL);
+INSERT INTO `im_message` VALUES (47, 1, 2, 'text', '/n6F/E2SDqa7jv/P1kbADjmOOAV6fuXE/mSiJ3s+', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:44', NULL);
+INSERT INTO `im_message` VALUES (48, 1, 2, 'text', 'dObRe0kRTnPE/KTgrP3ihrM3J3AfWOHbvmyGXo4=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:45', NULL);
+INSERT INTO `im_message` VALUES (49, 1, 2, 'text', 'W/iwPc/VsXBS5ZrI3EYcjqFLNFA7L5uVVQ5WeH3t', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:45', NULL);
+INSERT INTO `im_message` VALUES (50, 1, 2, 'text', 'NW5QibRA3HsxwvpxVxPbk0+p0IQonGjk/B4P9ao=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:45', NULL);
+INSERT INTO `im_message` VALUES (51, 1, 2, 'text', '8Btgze/s8xtAYtiDB8TTHNuumiepKYsEhozIUmxr', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 10:48:45', NULL);
+INSERT INTO `im_message` VALUES (52, 4, 2, 'text', 'Ch5HBeSeslRuuFCxifO4A/ENpyWni6ua58SFyhBUpg==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:16', NULL);
+INSERT INTO `im_message` VALUES (53, 4, 2, 'text', 'Dm3e5pGUqrBqyda5/AEf9SxkkFB9CXV9khnAcXc=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:17', NULL);
+INSERT INTO `im_message` VALUES (54, 4, 2, 'text', 'trXah7Y9sxuFCYnbzmRXiXk3TK+GmYhcUvnkST/y', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:17', NULL);
+INSERT INTO `im_message` VALUES (55, 4, 2, 'text', 'MstalU02MxOJJoMPfUfSsgj3If6k+zJF0zMeO8ET9g==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:18', NULL);
+INSERT INTO `im_message` VALUES (56, 4, 2, 'text', 'iMeWDQ9AE6Jh9M94jjO+1NRAWqATLKu8l/8+Ovo=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:18', NULL);
+INSERT INTO `im_message` VALUES (57, 4, 2, 'text', 'JWi0N9R9gKxdBomiwplCjqvu8aWxnZNnrdkH5QJ8', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:18', NULL);
+INSERT INTO `im_message` VALUES (58, 4, 2, 'text', 'lYe875t+dS1HSYKxYh0GV3mFE3ku+xpMUiIwb+k=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:18', NULL);
+INSERT INTO `im_message` VALUES (59, 4, 2, 'text', 's+T52hFGaozHO/Zzrz6sPQpb5C2Zoon9jbHWIzw=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:46', NULL);
+INSERT INTO `im_message` VALUES (60, 4, 2, 'text', 'lkYAZzey2fEEK/DDtPTW9IukZ/iaymzt6OO6HuO1', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:46', NULL);
+INSERT INTO `im_message` VALUES (61, 4, 2, 'text', 'MrYQsAww2+sMfI97l2mleljnEjx0Hw1I0uAQlX8=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:47', NULL);
+INSERT INTO `im_message` VALUES (62, 4, 2, 'text', '8qCzM05O4Rf+R+TolbO4yq4JzFjxL+vUxz2oUA8=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:47', NULL);
+INSERT INTO `im_message` VALUES (63, 4, 2, 'text', '81Q3mfNuuJ17w3H3QNnafNS5nfTragoSdw9KLi5b', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:47', NULL);
+INSERT INTO `im_message` VALUES (64, 4, 2, 'text', 'RJkKRxYCxwhDtRP9V+8a6s4BcKNzHrpdfNvlx1M=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:47', NULL);
+INSERT INTO `im_message` VALUES (65, 4, 2, 'text', 'HnBFdvxnM+AoilH7i1xqX4BKBeMLdDr12c978Ks=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:48', NULL);
+INSERT INTO `im_message` VALUES (66, 4, 2, 'text', '0YvLU2QGpUVsC+Ootus7KlBbMk1kOdE239qEEgg=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:48', NULL);
+INSERT INTO `im_message` VALUES (67, 4, 2, 'text', '0BJ3GXqn1nMJSeUxJMFoRlCv0aHU4Z479wl20T6b', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:50', NULL);
+INSERT INTO `im_message` VALUES (68, 4, 2, 'text', 'iQv2qETnAnLmGc4nPFEuSf24l5iJVh58svcjfrzVdg==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:51', NULL);
+INSERT INTO `im_message` VALUES (69, 4, 2, 'text', '68CJ5wcdZ52dOcwdkbsSNZ4E8k3D3ORvOSYSVQE82Ls=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:51', NULL);
+INSERT INTO `im_message` VALUES (70, 4, 2, 'text', 'huNDOszDXIcezbSBAj22BMIRrgY/iiI/D9z4AxI=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:02:51', NULL);
+INSERT INTO `im_message` VALUES (71, 1, 3, 'TEXT', 'ILUFNkJeHq+SjhuW4h4DJHRTHft3mSFW70KU6wUe2WqvjUjRIpES6A==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:29:23', NULL);
+INSERT INTO `im_message` VALUES (72, 9, 2, 'text', 'aTFowL3Zn2s110uot33SKKnIyZYG0xnrxCbA423eUQ==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:49:55', NULL);
+INSERT INTO `im_message` VALUES (73, 1, 2, 'text', 'DCAo+BgnsU5VaSVJ3il7VGjFzrb3r7c4yTjdBgTh', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:50:46', NULL);
+INSERT INTO `im_message` VALUES (74, 1, 2, 'text', 'LDfq/s8OSPu+XVS1uLVd94F6A3lO3WS6TsgRf6s=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:50:46', NULL);
+INSERT INTO `im_message` VALUES (75, 1, 2, 'text', 'Z2usapolDTCKiJgEhbDmjAwHyp9rayX4rjV4ncKt', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:50:46', NULL);
+INSERT INTO `im_message` VALUES (76, 1, 2, 'text', '1574sEu4TDlzjFtnI7MQ2LEZoKgWR3a4zSQftkU=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:50:47', NULL);
+INSERT INTO `im_message` VALUES (77, 1, 2, 'text', 'Zapb46m0mJBUCf6IzbYsxJXkfKaIM4+7CWeWB1h5', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:02', NULL);
+INSERT INTO `im_message` VALUES (78, 1, 2, 'text', 'd93cuOT8vqVgms7RfYOR7l+bqfv3Wux8xx8vNx0=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:03', NULL);
+INSERT INTO `im_message` VALUES (79, 1, 2, 'text', 'VPPbjmnXy3WtqyWRTVhaT+YVuagF7u3HHMmpORBq', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:03', NULL);
+INSERT INTO `im_message` VALUES (80, 1, 2, 'text', 'YWU1tz+o/VdbhBelguxpmhmP4TdPwSkKP4QUz3M=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:03', NULL);
+INSERT INTO `im_message` VALUES (81, 1, 2, 'text', 'hgAGyyHgUWn/JV88ChYYrbfSRxJN3ZWXBtEv0po=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:03', NULL);
+INSERT INTO `im_message` VALUES (82, 1, 2, 'text', 'jL+u1eQx+AgJVA3PE7orVR4zQJKpaOtsvqNWdA8=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:04', NULL);
+INSERT INTO `im_message` VALUES (83, 1, 2, 'text', 'RTciJnTuP39v5sVW7H+R+9Cq0OgHKPv4kRzTcEs=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:04', NULL);
+INSERT INTO `im_message` VALUES (84, 1, 2, 'text', 'B/yrCyAb75ZPfQAbY/XRhOgSxoZRj1oJQA3q3tU=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:04', NULL);
+INSERT INTO `im_message` VALUES (85, 1, 2, 'text', 'UYPriLigl2A/diGyNqC/X2QxgC7nTBbPpoIjUto=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:04', NULL);
+INSERT INTO `im_message` VALUES (86, 1, 2, 'text', 'JYmRXY8u7GiCK+OOBgsVMyOnmqsx4+fYsW7gqFQ=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:04', NULL);
+INSERT INTO `im_message` VALUES (87, 1, 2, 'text', 'AN+p8SbHU2ciAR7gK+1+SIlJkE7Yyq259C1T0/k=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:05', NULL);
+INSERT INTO `im_message` VALUES (88, 1, 2, 'text', 'TRWtyFipmZMzml0HIXtkBWA+9zzAJwh5UtazW+Q=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:05', NULL);
+INSERT INTO `im_message` VALUES (89, 1, 2, 'text', 'thZ/41jc50QIQ6l5PSL3U0mFmvf76aQpZJ87GmI=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:05', NULL);
+INSERT INTO `im_message` VALUES (90, 1, 2, 'text', 'J3b0TQDJRLwwIL02iqGk2dGVH/dJtBDX9lCmltQ=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:05', NULL);
+INSERT INTO `im_message` VALUES (91, 1, 2, 'text', 'aa11P/v4rmCt3mRst6SqlJWwmHwGOip3hljY8Ow=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:06', NULL);
+INSERT INTO `im_message` VALUES (92, 1, 2, 'text', 'hhn0+a3GG68eb+t2dJYC48E1mr/3gU5X57zYiuDa', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:06', NULL);
+INSERT INTO `im_message` VALUES (93, 1, 2, 'text', 'WzznF2l4Z0rwY34Uh6c4ZKaXKdoSlcBhpcKAYtI=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:06', NULL);
+INSERT INTO `im_message` VALUES (94, 1, 2, 'text', 'H01vFiGFZlGnUp5Wglfnrf7eZSTGsDCD3l3q3xY=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:06', NULL);
+INSERT INTO `im_message` VALUES (95, 1, 2, 'text', 'aeeKWdDVqrE49fCeR/gsO5mVFS4QWP40GsCxk1EW', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:07', NULL);
+INSERT INTO `im_message` VALUES (96, 1, 2, 'text', 'O4dzlJxER5CmcG5CCILzgqYB36NoKNEUiO7s2N1lGA==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:07', NULL);
+INSERT INTO `im_message` VALUES (97, 1, 2, 'text', 'S5n9XKZQZbjGt4y/dwYJ8RG6A+jCssU7zK2mXjA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:07', NULL);
+INSERT INTO `im_message` VALUES (98, 1, 2, 'text', 'vD1XBNDSiZykABXM42OpV4VnoGezPBM5FNYhTho=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:08', NULL);
+INSERT INTO `im_message` VALUES (99, 1, 2, 'text', 'qKhpGT05J21k1KjX2XybMlOCFJrY+Vkaw1AY7KU=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:08', NULL);
+INSERT INTO `im_message` VALUES (100, 1, 2, 'text', 'CEAROocL+JoTxm0kIhC55aG7Ah8dMH6BeJmq5Z5w', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:09', NULL);
+INSERT INTO `im_message` VALUES (101, 1, 2, 'text', 'Tvlyve4eanH0LIDbwefiG+szWB4mS0yOfFKYcmM=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:10', NULL);
+INSERT INTO `im_message` VALUES (102, 1, 2, 'text', 'i3aCtcYwPPQWb6CUDaTdSyDYoz9H9r3yX0UI40Y4', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:10', NULL);
+INSERT INTO `im_message` VALUES (103, 1, 2, 'text', 'ugz+E2062U8UNF1uI7wYXQzvw9BgBCzMgA60ngc=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:10', NULL);
+INSERT INTO `im_message` VALUES (104, 1, 2, 'text', '3cJvCa+nza/7LJsa0g5qIw/hgZ0SlsKfVYtF1bk=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:10', NULL);
+INSERT INTO `im_message` VALUES (105, 1, 2, 'text', '1nl5zYZPPdOh1tmQkH+d4043LP1QwIZsYtqCdI0=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:10', NULL);
+INSERT INTO `im_message` VALUES (106, 1, 2, 'text', 'jq577EI5GjB/9q6kGr0TMxZjGLDUFtD1/lmvY1Y=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:11', NULL);
+INSERT INTO `im_message` VALUES (107, 1, 2, 'text', 'kAU76d01v2ZYMJlbVbBa30wtw0YnNlWLq+sSgT5a', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 11:51:11', NULL);
+INSERT INTO `im_message` VALUES (108, 1, 2, 'TEXT', 'eHB37N+6G4B8a6uAyDzOkjG5QQfi/fhfEjp0WTL0Q0uIl+a4AFnZAuvgz9wzmKw=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:01:22', NULL);
+INSERT INTO `im_message` VALUES (109, 2, 2, 'text', '4Cwo19PEO4yGu/fLi6ZHbXMfWINsdQC217iW4ovA+2w=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:05:14', NULL);
+INSERT INTO `im_message` VALUES (110, 2, 2, 'text', '57OiO20uuQ/5pr/I70qRARhImkyieFh85Vjidso=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:05:14', NULL);
+INSERT INTO `im_message` VALUES (111, 2, 2, 'text', 'hnXXQXrJZtN6SFKVrDeQQGFn2rIZox53G4gT/V+B', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:05:14', NULL);
+INSERT INTO `im_message` VALUES (112, 2, 2, 'text', 'hAB2BocwHj2DLJhl3rwZAgaSNFUDGeLSb1vh+eU=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:05:14', NULL);
+INSERT INTO `im_message` VALUES (113, 2, 2, 'text', 'oRa9cysbJ38ywzIpB3gAiVkO9aawBWT1pWhk3R8=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:05:15', NULL);
+INSERT INTO `im_message` VALUES (114, 2, 2, 'text', 'l6EKLrfNacgLjMXZ4bLE+TDvpH06dcqWqKTjvZo=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:05:15', NULL);
+INSERT INTO `im_message` VALUES (115, 2, 2, 'text', 'TfnbaMxF2WmBv0G+3hYvUrXZtxX8pjmeootpNWo=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:05:15', NULL);
+INSERT INTO `im_message` VALUES (116, 2, 2, 'text', 'k3OwBVzc+mG73piGQUKVnv0jzQ+kr13pM9z/PlU=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:05:15', NULL);
+INSERT INTO `im_message` VALUES (117, 2, 2, 'text', 'p1naFle/caHjDEm0fCU+qLynQkWJiqKyhzFQ8AU=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:05:15', NULL);
+INSERT INTO `im_message` VALUES (118, 2, 2, 'text', 'S1cFWw2ngdTXroDRfL4cHih0WiFP49uSeXo9vHE=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:05:16', NULL);
+INSERT INTO `im_message` VALUES (119, 2, 2, 'text', '553YQn2SRqlV3Vt8c9bKACYVW9bNbeCBW7RRR3c=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:05:16', NULL);
+INSERT INTO `im_message` VALUES (120, 1, 2, 'TEXT', 'j4/ws9ImTinNGbMc5BjwNfPuv0t1C7LYjYIW35DmUjfXqp4giG++14pxyQi6adf22bpA6YA+RA==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:07:55', NULL);
+INSERT INTO `im_message` VALUES (121, 1, 3, 'text', 'nUz+Pc2mwsmX6bT2jZkV+IW14pOGkv9SzN7X0spuEEE5Dw==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:08:23', NULL);
+INSERT INTO `im_message` VALUES (122, 1, 2, 'TEXT', 'jj296fvBMXT/wmOq0TEMuHUP2AsSSq/oI3DG9Cym4A7AKcON/mk+XA==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:08:32', NULL);
+INSERT INTO `im_message` VALUES (123, 3, 3, 'text', 'R1z9TI9JYn9QUWybeExGVn2d9wN9pWS/AB0oyzq3LI+/a3b+iYPYF7fp4g==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:10:17', NULL);
+INSERT INTO `im_message` VALUES (124, 1, 3, 'text', 'tpx2k2XsAiJb6fwOl4b52py349Gz2VEsIbIWLuCXng==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:18', NULL);
+INSERT INTO `im_message` VALUES (125, 1, 3, 'text', 'D18PTYx6fOpt03vZCRd9uZu4akf0KwCEgPFL014=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:19', NULL);
+INSERT INTO `im_message` VALUES (126, 1, 3, 'text', 'xCFPRN632KanpRDkb1e7mH8+kBrm5enr1YKn+FOc', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:19', NULL);
+INSERT INTO `im_message` VALUES (127, 1, 3, 'text', '598CdOMzxQ8HiAp7Vge27hP66gWkLCF2tDakeks=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:19', NULL);
+INSERT INTO `im_message` VALUES (128, 1, 3, 'text', 'OFxEIyLB//vvK+4rEXk8Dppr4kGuFPJVg3rxpEA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:19', NULL);
+INSERT INTO `im_message` VALUES (129, 1, 3, 'text', 'XBEiuMFq+RPFjhinvV+ZrVHeGwFklgSwaklxb5w=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:19', NULL);
+INSERT INTO `im_message` VALUES (130, 1, 3, 'text', 'gYg6FuxZnBvy8DBsqukoATFhu/baELg6tS3N5cA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:20', NULL);
+INSERT INTO `im_message` VALUES (131, 1, 3, 'text', 'i+9KFIkS4Y+UCT3PAhc8JNL2Y/tSq3M3QNVc6pQ=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:20', NULL);
+INSERT INTO `im_message` VALUES (132, 1, 3, 'text', 'ZEhC0Oht0Toa6H3vRKvFNaI/A0EokgzkidcyCyk=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:20', NULL);
+INSERT INTO `im_message` VALUES (133, 1, 3, 'text', '7unHLkqOLCo238HVyJktKf4WxIQxHX5yOs3w4Dk=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:20', NULL);
+INSERT INTO `im_message` VALUES (134, 1, 3, 'text', 'ValaohIt1vTy4ZdPyj50QLGhYd51QHmdsqPW6iY=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:21', NULL);
+INSERT INTO `im_message` VALUES (135, 1, 3, 'text', '6ri+eiiXWqaF7N7tLobpDqx8tYKZ/TXDsedydcQ=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:21', NULL);
+INSERT INTO `im_message` VALUES (136, 1, 3, 'text', 'K4wS45qPdET+HFAnjsuBosaaZAtqrsWdKvtA5iM=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:21', NULL);
+INSERT INTO `im_message` VALUES (137, 1, 3, 'text', 'dzPGJPPL3+bx4y6MZAPyPecBseoy4UCiouuYBuQ=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:21', NULL);
+INSERT INTO `im_message` VALUES (138, 1, 3, 'text', 'p+gFwKUu5UgbqQNCcwrVvacuM1zHKODz2fMBZP0=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:21', NULL);
+INSERT INTO `im_message` VALUES (139, 1, 3, 'text', 'qfqVfJxkt/muEc5HUvee4eN80xS2JK+pNL6bRuA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:22', NULL);
+INSERT INTO `im_message` VALUES (140, 1, 3, 'text', '8ZzGBdnD+ZOJosegDxZkWHwmuVDZG5Ocea82k2Y=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:22', NULL);
+INSERT INTO `im_message` VALUES (141, 1, 3, 'text', '/pdsthIZtqD9QMwsEaT37ZZezQ0/XzS9Abaxqfs=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:22', NULL);
+INSERT INTO `im_message` VALUES (142, 1, 3, 'text', 'xza343Ks+Y+wqAZsUico0I0NgKidzLDuTmB7QSg=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:16:22', NULL);
+INSERT INTO `im_message` VALUES (143, 4, 3, 'text', 'X14wFDElVM+aYXvdysZE7AO/fKtd/Du4ykhZVHW8wa1odC5p7fcLSHVBliXShb4H5IMEBSSNokwwN4qPq595LEV3f7128mbl/q4KHqbc9iCX+9uYmmEcba7UA/Fcy1cDwo4ecIZ7c1DTUbWzPr3m8jVJFKdxcecggJx2TkGDxTZNPLWQvUCdd5MRkV4gvay/1oJehrqxCTLnLR7FiLXUEZJbuwyCKCL9NJOIEbnI7ojgY/ByGAMBWEQ+OiYL6UweH+CmAA0PtTOMGvq2To8KMxYDyEPKXvBKKqX35bM2Mu5YTB0RAizucfjzz/8L4GEUDODdAL4CL+aF14FKxepY5QNG8Dq6PldDYJO4ofkRQ17y6ZsGkWN8Dg==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:17:56', NULL);
+INSERT INTO `im_message` VALUES (144, 4, 3, 'text', '66GR3jHQN2sGThbGdMLyBEYpYMIvNtuXN0+qdRemnipEJ3H6vjK/YsCS1FNmcjcxm17gO9ktMAjGD9rlKXLsYyKYFpmsDVClCB4cmo/OrRbJuLS6m7vFowclPJLmjOtjSSANkw==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:17:57', NULL);
+INSERT INTO `im_message` VALUES (145, 4, 3, 'text', '2nO69ksckYvBTc5jUTo2PcPPIbtllSCgYEqRrJSL10Gq+IriHIwTimVtK2XclLxges31+jFZSt5Xv+39MhgRgRnaoZgMhXJKnfD/UkOdUQiWDn58LtIwjRSYWOqdmcG8na6fypMj0fIIL71dJ3O2x49+FKWKNBD5ZfziPagBwILnlOg0Sx0lkQ==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:17:58', NULL);
+INSERT INTO `im_message` VALUES (146, 4, 3, 'text', '9qg6lwWK6M/QIT2ElhhrgpZrSRs9DU9UlBy9QJbJ8Wm8W2MYcWGVvsckspMYnuzbf59OZwZO4mcd6m+rUcu7VkL1Hl/9cwcvApmsKvhAKgiYayPbSloswL7sgB/gtuOuzqPj8vPQ0+cA996/MkJcJGGLBA5hwTNsDyydbX5KAF7qqi7MpcetKu4RUZC4MfXu3Kuk6rL+1H+qiuGv3648/AjHijuq2EuNEhToLw==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:17:58', NULL);
+INSERT INTO `im_message` VALUES (147, 4, 3, 'text', 'QPi7v/pOKGcQyrMTIbK1EphQlRUzGvKMpeDdv+ojZIPMUantMJgeEmhvJFNg3nXMgl9+CdbYOZCmOWVPcRfURX7PmVzEfhnnO9QUn90B3UxNRAUBZtVlYIpaVIuGobB5dSGeJ1pTeqgGex89+9mQgQDqZPN+G8BAlQp6+xHA5yHAciEmgJnaZj00LOVOEfxOenKGTYEAZaQG+T84/cthQ1n5FjzKXT1ZTT7E6Tih5qANAjmdxKft9G5+xuOsTyCLxa6kXihH4fOHhJ7peP8t8pkJO+ynzYgCYJ92p9rwU1BAQFRLCromdNzGQ7kUtZ4+tRYWOA==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:17:59', NULL);
+INSERT INTO `im_message` VALUES (148, 4, 3, 'text', '9BBrENjEEuK3x+c43Q0kAC/MHQeh5zUkrVubVhZEyD1+XAzR2DuoxlkcIP9yO8zRdb15ljhoz+L4RhhMCLdFFA==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:17:59', NULL);
+INSERT INTO `im_message` VALUES (149, 4, 3, 'text', 'SX9JWrzw2hbBPN7iLFkshJDIHU9JzxD37PVuqpP8bQq9Iy1TFHMx8qeLmvk+SeemqLPVXH79WOs0w5JvMrL0L/XyDvN9KyDXh+NoUlaUTa3hpWMgb8g5bFfy4guQqzE+mHx8vA==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:17:59', NULL);
+INSERT INTO `im_message` VALUES (150, 4, 3, 'text', 't2/kGzH73lI8AStmjZdwBwSndmeNR0UAPDuzElrAwIIaFvJSDQg3A2m0MfdQj5cvMySxU+YN8P+zYmdvcJrdOw==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:17:59', NULL);
+INSERT INTO `im_message` VALUES (151, 4, 3, 'text', '96em2SbTRlnjgIP6g2TIHJn3lVSz7f6X9zNnNVVG2kCiDmXzWXSBNjftI5r8rpuzgIVmX5RWf9H8cCHJeFvc9g==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:00', NULL);
+INSERT INTO `im_message` VALUES (152, 4, 3, 'text', '5iOysJ6VLJ7+OHzmfz1nL/xDk12EV4ftkUrXi+LbUONy+MhjoM3RX4M2q6P4XgrraeNDH1HQhAy0A72bu07Sig==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:00', NULL);
+INSERT INTO `im_message` VALUES (153, 4, 3, 'text', '5oizcbef22GyFzuIeoX/d0/H//oR+71AHEFGy/u9+53/7U00GRUVJs2YFZmLNpXcEO4lDrOrR/3cfP/stqODOtr8wz3NKz2rkrNHvpX9HmJdR3KBotFXjh+MOpj0ZbfgEEgvNw==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:00', NULL);
+INSERT INTO `im_message` VALUES (154, 4, 3, 'text', 'lKFfgrW3Ht7U3Q45DfqWdcf91yGzri2x0jB4vDd2B0orcS9wgmZPH4rfZVMkA8RxX0YeZqvu047lNVlEw5KHlcOM/tTeEDZRZHa3U8FPSBISRynATX5FEHhNxbBNe6fu943+fYDGzRwjtZsa3+FOpRoWTBKr7uEklPRxSB3E8BQ/4SWTXV8q5w==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:00', NULL);
+INSERT INTO `im_message` VALUES (155, 4, 3, 'text', 'L9EAbZ6OFi5TMrUNHYURzINTvrWNR4aNxYEqMZc=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:19', NULL);
+INSERT INTO `im_message` VALUES (156, 4, 3, 'text', '60gi7CJ4V4WInn+dDyZ57urkd1xqtkpImOJt9mPd', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:19', NULL);
+INSERT INTO `im_message` VALUES (157, 4, 3, 'text', 'pXEn/viSVlcIn0Mc6z766WFRrLgeBezEVdgvJhQk', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:19', NULL);
+INSERT INTO `im_message` VALUES (158, 4, 3, 'text', 'CUOE+dOI+M15QoaegFNV221nF7xdNQ0b4vvvLzA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:20', NULL);
+INSERT INTO `im_message` VALUES (159, 4, 3, 'text', 'GHwqAimceC3zPCTp330ok8Mkh4Grs2OF188d012D', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:20', NULL);
+INSERT INTO `im_message` VALUES (160, 4, 3, 'text', 'dadblVfZDPZU9u+JsWu2Nm/WMqdyrEFwyVCswdI=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:22', NULL);
+INSERT INTO `im_message` VALUES (161, 4, 3, 'text', '41ETOoU4es6RXejC9a2Yus19EGe/TOSdgArk7Ijb', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:22', NULL);
+INSERT INTO `im_message` VALUES (162, 4, 3, 'text', '6U82cbQeVX7wwRvL8ZI3+Pklv4FfL7taH3QO8HkO3g==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:22', NULL);
+INSERT INTO `im_message` VALUES (163, 4, 3, 'text', 'PHLrmZ5tDYppEFmMBrwoiJ2VZqx5Lv0CIMvLCl0=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:23', NULL);
+INSERT INTO `im_message` VALUES (164, 4, 3, 'text', 'mRd1Xz51L5nSY11RW/UpPXseP5AU8k1esJXmvbxA', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:23', NULL);
+INSERT INTO `im_message` VALUES (165, 4, 3, 'text', 'k7M1FRM8ZcGHYiImVY9X/TqZRlEMV5y14ryO9vg=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:23', NULL);
+INSERT INTO `im_message` VALUES (166, 4, 3, 'text', 'WZP+9O4R0nDOmXnnpW9XtEjFgWCzSL7YCta1FU0=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:23', NULL);
+INSERT INTO `im_message` VALUES (167, 4, 3, 'text', 'lSH/IlfgLKkG9dooB0KDHUzgWaNk2qiXVjeLW44=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:18:24', NULL);
+INSERT INTO `im_message` VALUES (168, 4, 2, 'text', '/rydRj2QAEVSMNbTiYf6t0/HBEX/NphbDtiS+fo=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:03', NULL);
+INSERT INTO `im_message` VALUES (169, 4, 2, 'text', '629lohZI5sXuE+YZQGHm5TeKfu+9up+vdyexmpHt', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:04', NULL);
+INSERT INTO `im_message` VALUES (170, 4, 2, 'text', 'zwq0HF3ZuVDlfy6vACXGSDor3K2FCna6qC0KTQHopA==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:04', NULL);
+INSERT INTO `im_message` VALUES (171, 4, 2, 'text', 'rILL0vmGVWQcyZLuiBm5cb6N3Tpd5LiyItD4R2Y=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:04', NULL);
+INSERT INTO `im_message` VALUES (172, 4, 2, 'text', 'cPKcSpMe1HGFs8NAt/CDtY4l2NoPDSqyoz6ZbYc=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:04', NULL);
+INSERT INTO `im_message` VALUES (173, 4, 2, 'text', '2Cbyox6r043sE5AL0+yg6bkJH9HHxD2i0Vs6GuY=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:04', NULL);
+INSERT INTO `im_message` VALUES (174, 4, 2, 'text', '0oRHEnCt8SvazrVii4T96syNV+LWgYewVoSAueA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:05', NULL);
+INSERT INTO `im_message` VALUES (175, 4, 2, 'text', 'OPRxnk9ufHkNMQFJ+iJOkV59IjhcyrXjpgfiXz2H', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:05', NULL);
+INSERT INTO `im_message` VALUES (176, 4, 2, 'text', '0kqjMK7D4vfb3o+jyKZqZbEbkK9YvUKMODtiegg=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:05', NULL);
+INSERT INTO `im_message` VALUES (177, 4, 2, 'text', 'etkwtz8YCG9lJnTh8yaMy2+CWo4iqFCnhxnbgrs=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:05', NULL);
+INSERT INTO `im_message` VALUES (178, 4, 2, 'text', 'iCXMr++IqnY+ViUGB2Q0/CbvUpCXACVTPhUMpTBG', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:06', NULL);
+INSERT INTO `im_message` VALUES (179, 4, 2, 'text', 'vgZ/ilWw1pkbXBJYUMtBng+PqhYOtb0S9l9/+QE=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:06', NULL);
+INSERT INTO `im_message` VALUES (180, 4, 2, 'text', 'trDmGuMLn8MqwGvP8iclZ1zEp4u+IdsUCzIYM5A=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:06', NULL);
+INSERT INTO `im_message` VALUES (181, 4, 2, 'text', 'nTOV5bHZxcs3WxsSfzLgCevsxHE29B7o8dEhfWuA', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:21:06', NULL);
+INSERT INTO `im_message` VALUES (182, 1, 2, 'text', '8UZy+O3LyBAc6ajwxy8ArEa1bU5Nxzvoo+rZ1wQ=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:23', NULL);
+INSERT INTO `im_message` VALUES (183, 1, 2, 'text', 'ZXz6buLKv0sXc+WH8nCNTQi8Io5y8kCUnFMITSc=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:23', NULL);
+INSERT INTO `im_message` VALUES (184, 1, 2, 'text', 'v6QdPL9JE0Mhu/2y8uOMllPr1BZ5N93G2XltrdnC', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:24', NULL);
+INSERT INTO `im_message` VALUES (185, 1, 2, 'text', '2E9Ho/d0e6ZUr/kRFqueyRhr7yIE3Xn/muuT3W8=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:24', NULL);
+INSERT INTO `im_message` VALUES (186, 1, 2, 'text', 'EbBqzRJtbJX4FGgS9RtaOolnzypw17/LOEBQq4g=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:24', NULL);
+INSERT INTO `im_message` VALUES (187, 1, 2, 'text', 'pW2nJ/bPHj4diL4KERM4PYlU7ursitmigNWPoBk=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:37', NULL);
+INSERT INTO `im_message` VALUES (188, 1, 2, 'text', 'Y5MOK6FSyvE5AJ+KwDMC8TDWsriMj8Xax06FQTI=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:37', NULL);
+INSERT INTO `im_message` VALUES (189, 1, 2, 'text', 'fpZdJxl/aqhksHY4QP26ySY2WT+YrVjwXT/IoBbQ', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:37', NULL);
+INSERT INTO `im_message` VALUES (190, 1, 2, 'text', 'DxiTY+TCkCEDPTs0P6nBGpt7C5X3scYCMTfTPlthEQ==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:38', NULL);
+INSERT INTO `im_message` VALUES (191, 1, 2, 'text', 'WGJFUEnRdyrIbgyobdFPUEaPAzjl5PJXlPEboTgBsbaZDA==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:38', NULL);
+INSERT INTO `im_message` VALUES (192, 1, 2, 'text', 'bK145g08HAwCmFOnkywW4qqm2IL/8rbtV/J410v8czA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:38', NULL);
+INSERT INTO `im_message` VALUES (193, 1, 2, 'text', 'RQxoGaUq+M/O5ymlAR9xiz/P8RwboOUl6OKApqIIMBw=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:39', NULL);
+INSERT INTO `im_message` VALUES (194, 1, 2, 'text', '8iUeqqP3e0yflct8GTuQFtApUCmNtdfqb3gysgPXqk24m3+O', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:39', NULL);
+INSERT INTO `im_message` VALUES (195, 1, 2, 'text', 'ElX/xWK0WmHTPvaw3JFAGnIgG5GEDn3a0K8zmUZm', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:39', NULL);
+INSERT INTO `im_message` VALUES (196, 1, 2, 'text', 'RihRcZ78tL2ogBvBICCATS/NB7GfZKZ6LkO3D1er', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:39', NULL);
+INSERT INTO `im_message` VALUES (197, 1, 2, 'text', '9VnnHPg53hTLVT2KkH+jci4Qxes92HwsB52ZDDiLyLA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:40', NULL);
+INSERT INTO `im_message` VALUES (198, 1, 2, 'text', 'LDQKIhOJc/oY/OZTU/T1yNbmt5C6JpSRoRpdt5k3xg==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:40', NULL);
+INSERT INTO `im_message` VALUES (199, 1, 2, 'text', 'LObYL0SEUh0x8A4G9njHcT6FJ/Rd1fJFBYncGn86Faw=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:40', NULL);
+INSERT INTO `im_message` VALUES (200, 1, 2, 'text', 'Cew+G9gwUnaEoe/QaIx09exivpmQ0ylEcX7XK9rWOw==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:40', NULL);
+INSERT INTO `im_message` VALUES (201, 1, 2, 'text', 'JZHZjGKWMPSEJiZxpnyUPSMdzvONbEipdUCAjzcjhA==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:40', NULL);
+INSERT INTO `im_message` VALUES (202, 1, 2, 'text', 'y5Hb4gAAya+g7sdQ+bcJaI9TQsiJuLnbCT7W6wM=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:41', NULL);
+INSERT INTO `im_message` VALUES (203, 1, 2, 'text', 'muwXVMrzQ+QNAaaFrCK5VG11qPAFHlcSgKgnIDL1', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:41', NULL);
+INSERT INTO `im_message` VALUES (204, 1, 2, 'text', 'URnFm5OmpwfQE3rRIyV1RXZpIYGj50lVLDSW6KME', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:41', NULL);
+INSERT INTO `im_message` VALUES (205, 1, 3, 'text', 'r+sAipVR4Wo/rLLeh8pv2TKR1BFqWUtS+g1lhfM=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:45', NULL);
+INSERT INTO `im_message` VALUES (206, 1, 3, 'text', '/1O5SLxw3TQ0po5bMDcZHIvP4h9eNaeamWKXTKPRprq2CIvTJnnApLyHkn1M', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:47', NULL);
+INSERT INTO `im_message` VALUES (207, 1, 3, 'text', 'ayg9qjh7/mZDsnaATZl37/wEWYCgCEmfA2QBzbTw0kBL8Q==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:51', NULL);
+INSERT INTO `im_message` VALUES (208, 1, 3, 'text', 'yzs3tGRQc5NQHDLhBBUfa0aJuz0ygZY2Tk8ZsZA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:35:59', NULL);
+INSERT INTO `im_message` VALUES (209, 1, 3, 'text', 'HTZGXDLjIQuK+yRgNZZLxcsL8R1ex+p4c8XpeaiD', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:00', NULL);
+INSERT INTO `im_message` VALUES (210, 1, 3, 'text', 'qbBjDrWPhaps4ALHbG5BW07sD9LrhNw+d8wojs8=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:00', NULL);
+INSERT INTO `im_message` VALUES (211, 1, 3, 'text', 'LGEig88WtWRs3wMPc/UNPQ5VduWEsge9X6ksDUI=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:00', NULL);
+INSERT INTO `im_message` VALUES (212, 1, 3, 'text', 'CXzm8yC4i3VUABqGxcCyIl5KXGXUrp4X/Nsr4q0=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:00', NULL);
+INSERT INTO `im_message` VALUES (213, 1, 3, 'text', 'ExvISVzsHFTtALFtR2YrgOs/bqmeRjt413ljEao=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:00', NULL);
+INSERT INTO `im_message` VALUES (214, 1, 3, 'text', 'hlzPtS6lCJqZ20sk8uFrofKPFQXI85Oq9anEg9Q=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:00', NULL);
+INSERT INTO `im_message` VALUES (215, 1, 3, 'text', '2uniOFLVnrW9AgkFYm3A5hGxlbxcVjsYHVNUsjo=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:01', NULL);
+INSERT INTO `im_message` VALUES (216, 1, 3, 'text', 'FzN1MjOWypJ0Y1OC7bX+l7Am8GF+S4XJUZjTUbIN', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:01', NULL);
+INSERT INTO `im_message` VALUES (217, 1, 3, 'text', 'E3Nyqe5j6N1Rhh6WcMBKt5o+BIC/2WhFYTQoSutQqw==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:01', NULL);
+INSERT INTO `im_message` VALUES (218, 1, 3, 'text', 'X8WlnfpXGoxUMC4RqFnkMfktiNjDl1oBNM62+mtU4Hwrfw==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:09', NULL);
+INSERT INTO `im_message` VALUES (219, 1, 3, 'text', 'ydmH9dGOazrTfoU0BkWTtR43+0zuRNfOClp1vupC2Xr+z77h', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:11', NULL);
+INSERT INTO `im_message` VALUES (220, 1, 3, 'text', '9wtbResCE+zgz8n3Fznfoxo5am04nFQDaVGCSdPvO2Rc1q9KXQ==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:11', NULL);
+INSERT INTO `im_message` VALUES (221, 1, 3, 'text', '/ZlYl3Doj5QRENh78n958sWKyhxbYOJwuQd8auc=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:12', NULL);
+INSERT INTO `im_message` VALUES (222, 1, 3, 'text', 'pHo/enMA2cRIKnb359hC04oJc5ervPMiRQyEfBNH', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:12', NULL);
+INSERT INTO `im_message` VALUES (223, 1, 3, 'text', '3KBqmrZmryS6fEcvmzubiOA321Vc9JzOxZDH5qo=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:12', NULL);
+INSERT INTO `im_message` VALUES (224, 1, 3, 'text', 'fpjZd7iBvCNJdEmac9xJTHY1Yswm2l2zEs/zFqY=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:13', NULL);
+INSERT INTO `im_message` VALUES (225, 1, 3, 'text', 'jjDwP7U6Jx85SDNlcqafw9Xf4LVN+VRL1dFa++NcBpPjTwiWW0+cvIjDcxs2f3Ym2Mcb/hKaqGXd', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:15', NULL);
+INSERT INTO `im_message` VALUES (226, 1, 3, 'text', 'wAiRKSEY0M0KWNX4R497jzB+kNZaKP38t/F3lPN0XAkGPEIQrCwelbKRTkiERSOoyFaMfecvHGSgPQ==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:15', NULL);
+INSERT INTO `im_message` VALUES (227, 1, 3, 'text', 'WFvfDEDNEwvzzKo96DcHtW8X79Kyfu7bR3Ogd1g=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:15', NULL);
+INSERT INTO `im_message` VALUES (228, 1, 3, 'text', 'wE2+OjCkfm3wLmIT3sxGJ9VYtD+xbGAb8lTf+QlPZmTs', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:16', NULL);
+INSERT INTO `im_message` VALUES (229, 1, 3, 'text', 'C3Gckbt3B2LcAq9BaSiH0AyxgadvrIc681HSqdY=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:16', NULL);
+INSERT INTO `im_message` VALUES (230, 1, 2, 'text', 'O5mAuCNbAW+oy9ybs2G1UEgK4kDqUSr07UBlirc=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:22', NULL);
+INSERT INTO `im_message` VALUES (231, 1, 2, 'text', 'Ay0m/pvuPoWV0NmaDGDL3iR1EDhVc4P2rTPz/pw=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:22', NULL);
+INSERT INTO `im_message` VALUES (232, 1, 2, 'text', '0U3HXuIVk9bv0JbgSygeKr4TcKDBNPgO3m0bBEV2', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:23', NULL);
+INSERT INTO `im_message` VALUES (233, 1, 2, 'text', 'lS+YpIdRawH1GddhI7A+DL2u2zg9zgle5O04giA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:23', NULL);
+INSERT INTO `im_message` VALUES (234, 1, 2, 'text', 'py1+o9GwCTYp4xuOuqsLAVGZLJR5O6hRW/qh5kU=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:23', NULL);
+INSERT INTO `im_message` VALUES (235, 1, 2, 'text', 'vBLrNzRQc3b4jBCcuqRrQTi3tlIuUdrgLkAI9NM=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:23', NULL);
+INSERT INTO `im_message` VALUES (236, 1, 2, 'text', 'DTPfhbT5DCxunGM/1s+td0Bdvqkr5fqNuFuGKpo=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:23', NULL);
+INSERT INTO `im_message` VALUES (237, 1, 2, 'text', 'J0896E+Smpd/Tw7OUIkw11WH1lDz8qUD84Y5k7sy', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:24', NULL);
+INSERT INTO `im_message` VALUES (238, 1, 2, 'text', 'EehD5gjRBK4GUvaEJhliHDlcx5Lqows3s/PPWCg=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:24', NULL);
+INSERT INTO `im_message` VALUES (239, 1, 2, 'text', 'yaFA+oZ4EoFX1G3SO/STz1qM89w724Rt898LqFs+', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:24', NULL);
+INSERT INTO `im_message` VALUES (240, 1, 2, 'text', '42zWgFkGkTFVesLkY2ZX8eL/d9inqSIelAMEH/I=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:24', NULL);
+INSERT INTO `im_message` VALUES (241, 1, 2, 'text', 'Bfmx9++sNgRLc6HatFQ57GHczf8J31pPc1SA5pE=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:36:24', NULL);
+INSERT INTO `im_message` VALUES (242, 1, 2, 'text', 'V//yntPhKGjX0O+Xpfzo/jV8u5LAzPGlRzhLstnTmA==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:38:47', NULL);
+INSERT INTO `im_message` VALUES (243, 1, 2, 'text', 'iIhP3otwbOBNoI2bT0+kLCAeYAMKDXnno4Tilu8=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:38:47', NULL);
+INSERT INTO `im_message` VALUES (244, 1, 2, 'text', 'Q7ukHBLpPqIZ12KBGev3Af8VF1l/RdHYx7839ywA', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:38:48', NULL);
+INSERT INTO `im_message` VALUES (245, 1, 2, 'text', 'CtRxOhHQXJUOiat4ZOORdVwPkpgA35LmKZyheCs=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:38:48', NULL);
+INSERT INTO `im_message` VALUES (246, 1, 2, 'text', '88Pm24pGw23wsORsXk4euvny23XRtmTmjX8geKC5', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:38:48', NULL);
+INSERT INTO `im_message` VALUES (247, 1, 2, 'text', 'B4tk8Rjc0C70kNRcSCTIxIupV/5Ae+UTx4U0r7o=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:38:48', NULL);
+INSERT INTO `im_message` VALUES (248, 1, 2, 'text', 'S5Wzp3N31OPkmID8Dvrwh4ZWutXTUEs+h2dKUYGC', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:38:49', NULL);
+INSERT INTO `im_message` VALUES (249, 1, 2, 'text', 'jFMap+RSqNALAeCRGkQAvdADA1RydFXkXJl2l9c=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:38:49', NULL);
+INSERT INTO `im_message` VALUES (250, 1, 2, 'text', 'CGyexAhDGcfI8RIZjoSo3vBXJ6dazg+4cvbzTZU=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:38:49', NULL);
+INSERT INTO `im_message` VALUES (251, 1, 2, 'text', 'V/6jU59aGV3xHGaAxKLvZm2siVXfMml8iOXhRPA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:38:49', NULL);
+INSERT INTO `im_message` VALUES (252, 1, 2, 'text', '755+Er8EadH6Or1oF6ylt4UsE2dKeqHMymDnVH4=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:38:50', NULL);
+INSERT INTO `im_message` VALUES (253, 1, 3, 'text', 'a0IGUmkt14cam6MCt32f64aCMqAutBSJL5hNLWJicVkBZC3npiqTCmZfLUpXyhvwgHrtIQoCcIl1xyFDL79JoNxVwOsbr1Pn2ZAN', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:38:54', NULL);
+INSERT INTO `im_message` VALUES (254, 1, 2, 'text', 'V8vaZ+pNMnAEdZogjUqczPbguEQi14nfyuGKgNg=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 12:40:41', NULL);
+INSERT INTO `im_message` VALUES (255, 1, 3, 'text', 'p7iSfq3Hvl3HkQ5vYATyc3wR88VO4ip7yjAy0rY=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:56:55', NULL);
+INSERT INTO `im_message` VALUES (256, 1, 3, 'text', 'BvxIsB+yaQ+rL8ZUxabwk7u0IrANPncpT+nnkxoS', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:56:55', NULL);
+INSERT INTO `im_message` VALUES (257, 1, 3, 'text', 'K5pk5Dwt/GiH6RnCxWjJYt9+dICge3SlZTZS7js=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:56:56', NULL);
+INSERT INTO `im_message` VALUES (258, 1, 3, 'text', 'LP1IN+07I8/8BYw9zf09L051x5bidP6OwIG0Kv4=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:57:38', NULL);
+INSERT INTO `im_message` VALUES (259, 1, 3, 'text', '4NAMz5qO4MPnpMFFOpznQfNiV43XUVt75+lFijuE', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:57:38', NULL);
+INSERT INTO `im_message` VALUES (260, 1, 3, 'text', 'FUPS2LlRkJ4yldhVGOpmqQOMT5xG/XQnxhQ3Jb8=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:57:39', NULL);
+INSERT INTO `im_message` VALUES (261, 1, 3, 'text', 'w2GF5WC7yWCHbAIbiLXtg/AGClXfGALD/b51CsSX', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:57:39', NULL);
+INSERT INTO `im_message` VALUES (262, 1, 3, 'text', 'lIPxJWXNAk52wxp057qR2G1cw7zxh7RBXiW4zQltjg==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:57:39', NULL);
+INSERT INTO `im_message` VALUES (263, 1, 3, 'text', 'rTbXRrbYKoDvQTEckEUSu2niuGd+UXMGHmsAVPc=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:57:39', NULL);
+INSERT INTO `im_message` VALUES (264, 1, 3, 'text', 'r9N/we1614i6xFzhPKpaWkuAbRWiSNRw5C/ddf8=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:57:40', NULL);
+INSERT INTO `im_message` VALUES (265, 1, 3, 'text', 'P2O0T1Yd1c66zxzYpnhdiiBs8x1Ya837oy+SVHaJ', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:57:40', NULL);
+INSERT INTO `im_message` VALUES (266, 1, 3, 'text', 'xKgK/ziXSOT+TeKjSu73zmycHiUpd7rPkO+DoFxzBg==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:57:40', NULL);
+INSERT INTO `im_message` VALUES (267, 1, 3, 'text', 'ctjQVc/uTbSLhrJnXX46fHBNg5RZabD/d8orKmyg83/qeA==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:57:42', NULL);
+INSERT INTO `im_message` VALUES (268, 1, 3, 'text', 'CUaA7u2bMcnQy7MKhgBCkSbCObUBivXBEFxk6y01vZ9WQQwlBw==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 15:57:45', NULL);
+INSERT INTO `im_message` VALUES (269, 1, 3, 'text', '3jvNgMqRK3voEdmkzV5IIAdGjlrs1O3mndljQQs=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:12', NULL);
+INSERT INTO `im_message` VALUES (270, 1, 3, 'text', 'ki9xZzq19GoZ2xXsysmKPaUVO9aONvhSz652BWBY', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:13', NULL);
+INSERT INTO `im_message` VALUES (271, 1, 3, 'text', 'UtAH1hHNcCvDsJ6Rr4FQq/pbONGIacFBUv9JSJw=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:13', NULL);
+INSERT INTO `im_message` VALUES (272, 1, 3, 'text', '5FP+g/UTMFQIh6nNHSfOs2+q/unGBxaca+XpImk=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:13', NULL);
+INSERT INTO `im_message` VALUES (273, 1, 3, 'text', 'IZWmtV0tIOoQxhvtgpClOH4wbiqy6mHtCrTzSUE=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:14', NULL);
+INSERT INTO `im_message` VALUES (274, 1, 3, 'text', 'GorvAt6GY030SPopwSEd5A/HoCjDAUpftqkZB0xO', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:14', NULL);
+INSERT INTO `im_message` VALUES (275, 1, 3, 'text', '83EfrPs6ctP8Pw2nPf6FEtUXKQAXTWAJpHyTjWXVBg==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:14', NULL);
+INSERT INTO `im_message` VALUES (276, 1, 3, 'text', 'v05iDuaWDEBa0h6rec1l5am3CQmv+fhw5T50urw=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:14', NULL);
+INSERT INTO `im_message` VALUES (277, 1, 3, 'text', 'kjRMEZ5ODTHpAFbVZz6Os+yNReoUjm73qQbaV46yh7LApQ==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:15', NULL);
+INSERT INTO `im_message` VALUES (278, 1, 3, 'text', 'ZQjZdWC2DQVeOol9UoSmuOvO6Z/Kic8bML6FaJ6QMCT4/A==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:16', NULL);
+INSERT INTO `im_message` VALUES (279, 1, 3, 'text', 'MuLXUedqIFvwgj86gYLTApEXOZxx0jIG+JNQfqU=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:16', NULL);
+INSERT INTO `im_message` VALUES (280, 1, 3, 'text', '1LRd3st6IqvR/OgILRh+PTOuCVYVLnEWNyBGabrC', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:16', NULL);
+INSERT INTO `im_message` VALUES (281, 1, 3, 'text', 'C7irSUL9Qi1Odvx43RQKxJN7OVBRD6eewwwS5qbNHQ==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:17', NULL);
+INSERT INTO `im_message` VALUES (282, 1, 3, 'text', 'oofmByAQYROAUWwDRNwR2dHdwXQ7pKQ/wHfAr5M=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:17', NULL);
+INSERT INTO `im_message` VALUES (283, 1, 3, 'text', 'yteMuRCKrbL5X/Akrpqy3ODTFrwlF44K2IqHTzY=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:17', NULL);
+INSERT INTO `im_message` VALUES (284, 1, 3, 'text', 'ykVcU5VFGxtFcvyXnd9XvHlPwIo3NOWtTtP7rdo=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:17', NULL);
+INSERT INTO `im_message` VALUES (285, 1, 3, 'text', 'QW0wOo8fSOgEgwYLKxjsEInCOJMjbfmmIJTKhLQ=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:18', NULL);
+INSERT INTO `im_message` VALUES (286, 1, 3, 'text', 'IMAjl52ixLkkUPpMGhrPpZEkctoFxjMIpLcRD6LA', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:18', NULL);
+INSERT INTO `im_message` VALUES (287, 1, 3, 'text', 'JKu3E2E3HkJFe2L2V3UTOKhAQoeBaKCnt6J6Ygqo7Q==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:18', NULL);
+INSERT INTO `im_message` VALUES (288, 1, 3, 'text', 'y9crOBNtRm6qr0xXIM498Y90CuQ5ViRBG/Qxgkd7DBQ=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:18', NULL);
+INSERT INTO `im_message` VALUES (289, 1, 3, 'text', '6eawYzKe5RQ5tbKx9ZagKqHKOyQzMKpx29sehBs=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:18', NULL);
+INSERT INTO `im_message` VALUES (290, 1, 3, 'text', '+oCdknNLseVh/zjpi0yW8EXTjlE0Ws+di1QKx3U=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:19', NULL);
+INSERT INTO `im_message` VALUES (291, 1, 3, 'text', 'S+TWr4sU+hCvaAxuHHpozLmw3noi9CMkCXfP3zY=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:19', NULL);
+INSERT INTO `im_message` VALUES (292, 1, 3, 'text', '9acUoTYMiUKNySpevKQK9SFgXRNtYiqUFcsVOGA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:19', NULL);
+INSERT INTO `im_message` VALUES (293, 1, 3, 'text', 'wEsKwnp91uMQtwbBL9ow9lhCJNE0deQmiEXyIPk=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:20', NULL);
+INSERT INTO `im_message` VALUES (294, 1, 3, 'text', 'u6Ud6fmAE1ZlH171s2TvqtZQXb/I5hBGjuHYnoI=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:20', NULL);
+INSERT INTO `im_message` VALUES (295, 1, 3, 'text', 'P4J23zXqk3FCZjLpTBdpJjrUi2xk+UxF6htIYpo=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:21', NULL);
+INSERT INTO `im_message` VALUES (296, 1, 3, 'text', 'Uij9uCI8H9neyvN+m9l4fXRmXqkx/EwElDKLJDiA', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:21', NULL);
+INSERT INTO `im_message` VALUES (297, 1, 3, 'text', '8Cb2eCQWRIc2AVGnhAORq2z4q1I8uXcKyfQsurnqtQ==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:21', NULL);
+INSERT INTO `im_message` VALUES (298, 1, 3, 'text', '8FvR2t3fY9n/D0KHMR79RvdPz/9stg8yAE8/NBk=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:21', NULL);
+INSERT INTO `im_message` VALUES (299, 1, 3, 'text', 'MmcRCW79TAZSjYiFOES48MHduDEKlrQ+UjDx8es=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:21', NULL);
+INSERT INTO `im_message` VALUES (300, 1, 3, 'text', 'fuPjNneEFP0Z27xyeBvy0iSRyydc9w9y0ShTVzM=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:22', NULL);
+INSERT INTO `im_message` VALUES (301, 1, 3, 'text', '4URlX1+sTW9g7ShfRgwWVZ9GC0VukZd+Mc9PDOg=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:22', NULL);
+INSERT INTO `im_message` VALUES (302, 1, 3, 'text', 'eDKf188QFePfRzjJWz8X+DNHR2O2kg1mxnPJAOAl', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:22', NULL);
+INSERT INTO `im_message` VALUES (303, 1, 3, 'text', 'xNKQVmi8OBMUfQNmelfEO+uy0PI5pS+zIQ4405Y=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:22', NULL);
+INSERT INTO `im_message` VALUES (304, 1, 3, 'text', 'v9ivmHmYKYnNfZMxtea0NI0Ele1256R6lZaSv4M=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:23', NULL);
+INSERT INTO `im_message` VALUES (305, 1, 3, 'text', 'BtFgOKBly443cSOWPW93LxbY+cyAn0H0kP/9CI8I', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:23', NULL);
+INSERT INTO `im_message` VALUES (306, 1, 3, 'text', 'zW7kvghpYbvpNXV3XtDgg+Eq950ESVlLtfqkWd4=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:23', NULL);
+INSERT INTO `im_message` VALUES (307, 1, 3, 'text', 'oVa+zbboBvIFrN406kw5s1nKCaR1VjQ6AyLHDrs=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:23', NULL);
+INSERT INTO `im_message` VALUES (308, 1, 3, 'text', 'KFt9nsKs94/OBPk0UlC3sTD13C9fXnWcnDyCKOw=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:23', NULL);
+INSERT INTO `im_message` VALUES (309, 1, 3, 'text', 'b1s0e3tobr43/VpW5Y+rjgmpkEw8XeEmgyJFDik=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:23', NULL);
+INSERT INTO `im_message` VALUES (310, 1, 3, 'text', 'jzRTT7Wvc3BdY6XYraNvewhREZM5dd8kC/PO6nE=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:24', NULL);
+INSERT INTO `im_message` VALUES (311, 1, 3, 'text', 'e8JfVm2izAxafoY6OP+1GlRbEH88QE9n/FbdZdE=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:24', NULL);
+INSERT INTO `im_message` VALUES (312, 1, 3, 'text', '2xuthKdKi8quV2n51KPTZKCKakL3iANK5AuYLoo=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:25', NULL);
+INSERT INTO `im_message` VALUES (313, 1, 3, 'text', 'Sm2NyzfRlEjIoOQdpNO20/yDWQYcVq5ugdYgVxv5', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:25', NULL);
+INSERT INTO `im_message` VALUES (314, 1, 3, 'text', 'R8KriGkcF+8fi02VJ2WQwji8CAAwCHM0XYZQTRA=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:25', NULL);
+INSERT INTO `im_message` VALUES (315, 1, 3, 'text', 'DXXSmxPP0w5xaFW9XIK2nT7lRGFTVrj6CkCDu4A=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:26', NULL);
+INSERT INTO `im_message` VALUES (316, 1, 3, 'text', 'oMa/2NKbnhlMUbdSwh6mWJMOym6mSwzhK3nzbw+T', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:15:26', NULL);
+INSERT INTO `im_message` VALUES (317, 1, 3, 'text', 'wUptzzBz/EhjH5Q3Oed5vBRMp7Cr5vnc+Yt00yPjmQ==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 16:49:50', NULL);
+INSERT INTO `im_message` VALUES (318, 1, 3, 'text', 'VAo/DqUpooDFeaHMp+T9P0bxl8GZjwT8INIU3tR5ug==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:14:01', NULL);
+INSERT INTO `im_message` VALUES (319, 1, 2, 'text', '9uXdXQK+9PxJ7AEKon414/PdXhfAnwEi4j+Ti1Gk', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:16:44', NULL);
+INSERT INTO `im_message` VALUES (320, 1, 2, 'text', '8wieHozat4Y3L7ftYQB26Qe3dxTSDq6NVcy55+Q=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:30', NULL);
+INSERT INTO `im_message` VALUES (321, 1, 2, 'text', 'CeVMSid8IjrE0ZotdPdmjNWMJzYVd2j5YP9DJTM=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:31', NULL);
+INSERT INTO `im_message` VALUES (322, 1, 2, 'text', 'kPquY12Kiz65wlUSf6RPTIgRBSVqn0aTOAwq65c=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:31', NULL);
+INSERT INTO `im_message` VALUES (323, 1, 2, 'text', 'WRi1L6CKbOKnZ+1miuU2YvxOmZ6ilDo5QHeEl+/j', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:32', NULL);
+INSERT INTO `im_message` VALUES (324, 1, 2, 'text', 'hqsiVymO4oFkpI+P3DPidmfugTnV8wAFB7JFgDE=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:32', NULL);
+INSERT INTO `im_message` VALUES (325, 1, 2, 'text', 'M02fUENPsCkQS08zkZdp+/5zPLshGLQtbbpG5qk=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:33', NULL);
+INSERT INTO `im_message` VALUES (326, 1, 2, 'text', 'VpmoYaraBrVm22cRLaviTcNKeHRWhSswVRgIbv1X3Q==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:33', NULL);
+INSERT INTO `im_message` VALUES (327, 1, 2, 'text', 'aQdvSVZmc5GwatNos+0mhmT6QX+KF+qt4ke0IkDxJl0=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:33', NULL);
+INSERT INTO `im_message` VALUES (328, 1, 2, 'text', 'O5nNsIUkRL4WTBgCsFKRs1Yn6rKIaJlwScMtBSY=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:33', NULL);
+INSERT INTO `im_message` VALUES (329, 1, 2, 'text', 'ihEMIeQzcxM6eIP73b751o8T2aUZgQBYWr7prcw=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:33', NULL);
+INSERT INTO `im_message` VALUES (330, 1, 2, 'text', '4eoaYP2d1gu3Vh7WPkIWa+gZ5Kuy9rWSkaM3mVpz', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:33', NULL);
+INSERT INTO `im_message` VALUES (331, 1, 2, 'text', 'Q/LLQkT+lDcLfXkQm3bNk7gdjOJbODWDOqiOW9ys', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:34', NULL);
+INSERT INTO `im_message` VALUES (332, 1, 2, 'text', 'BQ/FlsmOnYqRL+hxuTZfC5vNL7WlXOJYAnpQQ4k=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:34', NULL);
+INSERT INTO `im_message` VALUES (333, 1, 2, 'text', 'JrXfW+Gdx9pqzLHW/1kMchZ1PxgpDVsW6QNHG0E=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:34', NULL);
+INSERT INTO `im_message` VALUES (334, 1, 2, 'text', '8mUFxfxDr5l1oBa+OJjAhAVJ8/Egamkys4lkJ+k=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:34', NULL);
+INSERT INTO `im_message` VALUES (335, 1, 2, 'text', 'q8GIQwEYZVoU47EJwSLFMT2pnseJ4UZx8S7EoFo=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:35', NULL);
+INSERT INTO `im_message` VALUES (336, 1, 2, 'text', 'BEx0W+SLM1fM/ekAHWngtL0Y3+Swiyair/zl1+Y=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:35', NULL);
+INSERT INTO `im_message` VALUES (337, 1, 2, 'text', 'CIDGBTaNlTa0gnahfn/BGCFJ2O1nes/hMfUkeM0=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:35', NULL);
+INSERT INTO `im_message` VALUES (338, 1, 2, 'text', 'oh/hLRZnZRFUv27rT84LT3KqsrcY7eHOBe+OrTw=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:35', NULL);
+INSERT INTO `im_message` VALUES (339, 1, 2, 'text', 'ONOi2vJvrVtnfksKcag/pA9AGD+QGmRSzPkxqBs=', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:35', NULL);
+INSERT INTO `im_message` VALUES (340, 1, 2, 'text', '/dZH8IUwsZHQpQlU5AkGRM0IXaE5gmkRiE085oBZ', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:17:35', NULL);
+INSERT INTO `im_message` VALUES (341, 1, 2, 'text', 'YHSNIyBJeoOGRdg2XV4g1ig12XVs/xtWuP9r7VPY', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:21:27', NULL);
+INSERT INTO `im_message` VALUES (342, 1, 3, 'text', '4CM7fpmKLrrkkdBB34k2JtK35pg7eEIa9z7iH8X8GA==', NULL, NULL, NULL, NULL, NULL, 'NORMAL', 0, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, '2026-01-09 17:27:56', NULL);
 
 -- ----------------------------
 -- Table structure for im_message_edit_history
@@ -1529,8 +1839,6 @@ CREATE TABLE `im_message_favorite`  (
 -- ----------------------------
 -- Records of im_message_favorite
 -- ----------------------------
-INSERT INTO `im_message_favorite` VALUES (1, 2, 1, 1, '重要通知', '工作,通知', '2026-01-08 13:37:19');
-INSERT INTO `im_message_favorite` VALUES (2, 2, 6, 3, '会议提醒', '会议,重要', '2026-01-08 13:37:19');
 
 -- ----------------------------
 -- Table structure for im_message_mention
@@ -1548,7 +1856,7 @@ CREATE TABLE `im_message_mention`  (
   INDEX `idx_message_id`(`message_id`) USING BTREE,
   INDEX `idx_mentioned_user_id`(`mentioned_user_id`) USING BTREE,
   INDEX `idx_mentioned_by`(`mentioned_by`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息@提及记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息@提及记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_message_mention
@@ -1559,12 +1867,12 @@ CREATE TABLE `im_message_mention`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_message_reaction`;
 CREATE TABLE `im_message_reaction`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `message_id` bigint(20) NOT NULL COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '????ID',
-  `reaction_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????LIKE?? DISLIKE? HEART?? LAUGH?? CRY?? SURPRISE???',
-  `emoji` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '回应ID',
+  `message_id` bigint(20) NOT NULL COMMENT '消息ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `reaction_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '回应类型: LIKE点赞 DISLIKE踩 HEART喜欢 LAUGH大笑 CRY哭泣 SURPRISE惊讶',
+  `emoji` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'emoji表情',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_message_user_reaction`(`message_id`, `user_id`, `reaction_type`) USING BTREE,
   INDEX `idx_message_id`(`message_id`) USING BTREE,
@@ -1573,7 +1881,7 @@ CREATE TABLE `im_message_reaction`  (
   INDEX `idx_create_time`(`create_time`) USING BTREE,
   CONSTRAINT `fk_reaction_message` FOREIGN KEY (`message_id`) REFERENCES `im_message` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_reaction_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息表情回应表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_message_reaction
@@ -1584,14 +1892,14 @@ CREATE TABLE `im_message_reaction`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_message_read`;
 CREATE TABLE `im_message_read`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `message_id` bigint(20) NOT NULL COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '????ID',
-  `conversation_id` bigint(20) NOT NULL COMMENT '??ID?????????????',
-  `read_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `read_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'READ' COMMENT '?????READ?? RECEIPT?????',
-  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '?????WEB MOBILE PC?',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '已读ID',
+  `message_id` bigint(20) NOT NULL COMMENT '消息ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `conversation_id` bigint(20) NOT NULL COMMENT '会话ID',
+  `read_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '已读时间',
+  `read_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'READ' COMMENT '已读类型: READ已读 RECEIPT回执',
+  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '设备类型: WEB MOBILE PC',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_message_user`(`message_id`, `user_id`) USING BTREE,
   INDEX `idx_user_read_time`(`user_id`, `read_time`) USING BTREE,
@@ -1599,7 +1907,7 @@ CREATE TABLE `im_message_read`  (
   CONSTRAINT `fk_message_read_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `im_conversation` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_message_read_message` FOREIGN KEY (`message_id`) REFERENCES `im_message` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_message_read_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息已读状态表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_message_read
@@ -1610,17 +1918,17 @@ CREATE TABLE `im_message_read`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_message_read_receipt`;
 CREATE TABLE `im_message_read_receipt`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `message_id` bigint(20) NOT NULL COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '??ID',
-  `read_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '回执ID',
+  `message_id` bigint(20) NOT NULL COMMENT '消息ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `read_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '已读时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_message_user`(`message_id`, `user_id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_read_time`(`read_time`) USING BTREE,
   CONSTRAINT `fk_read_receipt_message` FOREIGN KEY (`message_id`) REFERENCES `im_message` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_read_receipt_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '???????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '消息已读回执表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_message_read_receipt
@@ -1720,13 +2028,13 @@ CREATE TABLE `im_schedule_reminder`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_sensitive_event`;
 CREATE TABLE `im_sensitive_event`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '??ID',
-  `conversation_id` bigint(20) NULL DEFAULT NULL COMMENT '??ID',
-  `message_id` bigint(20) NULL DEFAULT NULL COMMENT '??ID',
-  `detected_word` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???????',
-  `action` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????REJECTED?? MASKED?? WARNED???',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '事件ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `conversation_id` bigint(20) NULL DEFAULT NULL COMMENT '会话ID',
+  `message_id` bigint(20) NULL DEFAULT NULL COMMENT '消息ID',
+  `detected_word` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '检测到的敏感词',
+  `action` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '处理动作: REJECTED拒绝 MASKED屏蔽 WARNED警告',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_conversation_id`(`conversation_id`) USING BTREE,
@@ -1735,7 +2043,7 @@ CREATE TABLE `im_sensitive_event`  (
   CONSTRAINT `fk_sensitive_event_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `im_conversation` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
   CONSTRAINT `fk_sensitive_event_message` FOREIGN KEY (`message_id`) REFERENCES `im_message` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
   CONSTRAINT `fk_sensitive_event_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '敏感事件记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_sensitive_event
@@ -1760,7 +2068,7 @@ CREATE TABLE `im_sensitive_word`  (
   INDEX `idx_word_type`(`word_type`) USING BTREE,
   INDEX `idx_level`(`level`) USING BTREE,
   INDEX `idx_enabled`(`is_enabled`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '敏感词表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '敏感词表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_sensitive_word
@@ -1778,15 +2086,15 @@ INSERT INTO `im_sensitive_word` VALUES (7, '代练', 'AD', 1, 'REPLACE', '***', 
 -- ----------------------------
 DROP TABLE IF EXISTS `im_session_group`;
 CREATE TABLE `im_session_group`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '??ID',
-  `group_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '??',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '分组ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `group_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分组名称',
+  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '排序',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1003 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1003 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话分组表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_session_group
@@ -1800,18 +2108,18 @@ INSERT INTO `im_session_group` VALUES (1002, 1, '??', 0, '2025-12-31 15:08:20', 
 -- ----------------------------
 DROP TABLE IF EXISTS `im_system_config`;
 CREATE TABLE `im_system_config`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `config_key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???',
-  `config_value` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???',
-  `config_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'STRING' COMMENT '?????STRING??? NUMBER?? BOOLEAN???',
-  `description` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE' COMMENT '???ACTIVE?? DISABLED???',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '配置ID',
+  `config_key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '配置键',
+  `config_value` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '配置值',
+  `config_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'STRING' COMMENT '配置类型: STRING字符串 NUMBER数字 BOOLEAN布尔',
+  `description` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '描述',
+  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE' COMMENT '状态: ACTIVE有效 DISABLED禁用',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_config_key`(`config_key`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1006 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1006 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_system_config
@@ -1828,18 +2136,18 @@ INSERT INTO `im_system_config` VALUES (1005, 'websocket.heartbeat.interval', '30
 -- ----------------------------
 DROP TABLE IF EXISTS `im_system_notification`;
 CREATE TABLE `im_system_notification`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `receiver_id` bigint(20) NOT NULL COMMENT '?????ID',
-  `sender_id` bigint(20) NULL DEFAULT NULL COMMENT '?????ID??????NULL?',
-  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????SYSTEM?? APPROVAL?? MESSAGE?? GROUP?? FRIEND???',
-  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '????',
-  `related_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '?????USER MESSAGE GROUP CONVERSATION APPROVAL?',
-  `related_id` bigint(20) NULL DEFAULT NULL COMMENT '??ID',
-  `is_read` tinyint(1) NOT NULL DEFAULT 0 COMMENT '?????0? 1??',
-  `read_time` datetime NULL DEFAULT NULL COMMENT '????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '通知ID',
+  `receiver_id` bigint(20) NOT NULL COMMENT '接收者ID',
+  `sender_id` bigint(20) NULL DEFAULT NULL COMMENT '发送者ID(系统通知为NULL)',
+  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '通知类型: SYSTEM系统 APPROVAL审批 MESSAGE消息 GROUP群组 FRIEND好友',
+  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '标题',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '内容',
+  `related_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '关联类型: USER MESSAGE GROUP CONVERSATION APPROVAL',
+  `related_id` bigint(20) NULL DEFAULT NULL COMMENT '关联ID',
+  `is_read` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否已读: 0否 1是',
+  `read_time` datetime NULL DEFAULT NULL COMMENT '已读时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_receiver_id`(`receiver_id`) USING BTREE,
   INDEX `idx_type`(`type`) USING BTREE,
@@ -1848,7 +2156,7 @@ CREATE TABLE `im_system_notification`  (
   INDEX `fk_system_notification_sender`(`sender_id`) USING BTREE,
   CONSTRAINT `fk_system_notification_receiver` FOREIGN KEY (`receiver_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_system_notification_sender` FOREIGN KEY (`sender_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统通知表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_system_notification
@@ -1859,23 +2167,23 @@ CREATE TABLE `im_system_notification`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_todo_item`;
 CREATE TABLE `im_todo_item`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '??ID',
-  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '????',
-  `priority` tinyint(1) NOT NULL DEFAULT 1 COMMENT '????1? 2? 3??',
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PENDING' COMMENT '???PENDING??? IN_PROGRESS??? COMPLETED??? CANCELLED????',
-  `due_date` date NULL DEFAULT NULL COMMENT '????',
-  `completed_time` datetime NULL DEFAULT NULL COMMENT '????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '待办ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '标题',
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '描述',
+  `priority` tinyint(1) NOT NULL DEFAULT 1 COMMENT '优先级: 1低 2中 3高',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'PENDING' COMMENT '状态: PENDING待办 IN_PROGRESS进行中 COMPLETED已完成 CANCELLED已取消',
+  `due_date` date NULL DEFAULT NULL COMMENT '截止日期',
+  `completed_time` datetime NULL DEFAULT NULL COMMENT '完成时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_priority`(`priority`) USING BTREE,
   INDEX `idx_due_date`(`due_date`) USING BTREE,
   CONSTRAINT `fk_todo_item_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '待办事项表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_todo_item
@@ -1886,32 +2194,32 @@ CREATE TABLE `im_todo_item`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_user`;
 CREATE TABLE `im_user`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???',
-  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???BCrypt???',
-  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '??',
-  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??URL',
-  `gender` tinyint(1) NULL DEFAULT 0 COMMENT '???0?? 1? 2??',
-  `mobile` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '???',
-  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??',
-  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '???0?? 1???',
-  `signature` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `last_online_time` datetime NULL DEFAULT NULL COMMENT '??????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+  `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户名',
+  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码(BCrypt加密)',
+  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '昵称',
+  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '头像URL',
+  `gender` tinyint(1) NULL DEFAULT 0 COMMENT '性别: 0保密 1男 2女',
+  `mobile` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '手机号',
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
+  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '状态: 0禁用 1正常',
+  `signature` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '个性签名',
+  `last_online_time` datetime NULL DEFAULT NULL COMMENT '最后在线时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_username`(`username`) USING BTREE,
   INDEX `idx_mobile`(`mobile`) USING BTREE,
   INDEX `idx_email`(`email`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_last_online_time`(`last_online_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'IM???' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'IM用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_user
 -- ----------------------------
-INSERT INTO `im_user` VALUES (2, 'zhangsan', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '张三', '/avatar/1.jpg', 1, '13800000002', 'zhangsan@example.com', 1, '努力工作，快乐生活', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
-INSERT INTO `im_user` VALUES (3, 'lisi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '李四', '/avatar/2.jpg', 1, '13800000003', 'lisi@example.com', 1, '学无止境', '2026-01-08 12:16:27', '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (2, 'zhangsan', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '张三', '/avatar/1.jpg', 1, '13800000002', 'zhangsan@example.com', 1, '努力工作，快乐生活', '2026-01-09 15:57:31', '2026-01-08 12:12:34', '2026-01-08 12:16:13');
+INSERT INTO `im_user` VALUES (3, 'lisi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '李四', '/avatar/2.jpg', 1, '13800000003', 'lisi@example.com', 1, '学无止境', '2026-01-09 15:57:33', '2026-01-08 12:12:34', '2026-01-08 12:16:13');
 INSERT INTO `im_user` VALUES (4, 'wangwu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '王五', '/avatar/3.jpg', 1, '13800000004', 'wangwu@example.com', 1, '代码改变世界', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
 INSERT INTO `im_user` VALUES (5, 'zhaoliu', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '赵六', '/avatar/1.jpg', 0, '13800000005', 'zhaoliu@example.com', 1, '保持热爱', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
 INSERT INTO `im_user` VALUES (6, 'sunqi', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '孙七', '/avatar/2.jpg', 1, '13800000006', 'sunqi@example.com', 1, '今天也要加油', NULL, '2026-01-08 12:12:34', '2026-01-08 12:16:13');
@@ -1936,17 +2244,17 @@ INSERT INTO `im_user` VALUES (21, 'dongshier', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8
 -- ----------------------------
 DROP TABLE IF EXISTS `im_user_backup`;
 CREATE TABLE `im_user_backup`  (
-  `id` bigint(20) NOT NULL DEFAULT 0 COMMENT '??ID',
-  `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '???',
-  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '??',
-  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??',
-  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??',
-  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '???',
-  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE' COMMENT '???ACTIVE?? OFFLINE???',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????'
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+  `id` bigint(20) NOT NULL DEFAULT 0 COMMENT '原用户ID',
+  `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户名',
+  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码',
+  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '昵称',
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '手机号',
+  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '头像URL',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE' COMMENT '状态: ACTIVE正常 OFFLINE离线',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户备份表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_user_backup
@@ -1957,19 +2265,19 @@ CREATE TABLE `im_user_backup`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_user_device`;
 CREATE TABLE `im_user_device`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '??ID',
-  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '?????PC MOBILE WEB?',
-  `device_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '??????',
-  `device_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `os_version` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '??????',
-  `app_version` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'IP??',
-  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????',
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ONLINE' COMMENT '???ONLINE?? OFFLINE?? AWAY?? BUSY???',
-  `last_active_time` datetime NULL DEFAULT NULL COMMENT '??????',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '设备ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '设备类型: PC/MOBILE/WEB',
+  `device_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '设备唯一标识',
+  `device_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '设备名称',
+  `os_version` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '操作系统版本',
+  `app_version` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '应用版本',
+  `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'IP地址',
+  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '位置',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ONLINE' COMMENT '状态: ONLINE在线 OFFLINE离开',
+  `last_active_time` datetime NULL DEFAULT NULL COMMENT '最后活跃时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_user_device`(`user_id`, `device_id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
@@ -1977,7 +2285,7 @@ CREATE TABLE `im_user_device`  (
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_last_active_time`(`last_active_time`) USING BTREE,
   CONSTRAINT `fk_user_device_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户设备表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_user_device
@@ -1988,18 +2296,18 @@ CREATE TABLE `im_user_device`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `im_user_setting`;
 CREATE TABLE `im_user_setting`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `user_id` bigint(20) NOT NULL COMMENT '??ID',
-  `setting_key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '????',
-  `setting_value` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '????JSON???',
-  `setting_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'NOTIFICATION' COMMENT '?????NOTIFICATION?? PRIVACY?? DISPLAY???',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '????',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '????',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '设置ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `setting_key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '设置键',
+  `setting_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '设置值',
+  `setting_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'NOTIFICATION' COMMENT '设置类型: NOTIFICATION通知 PRIVACY隐私 DISPLAY显示',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_user_setting_key`(`user_id`, `setting_key`) USING BTREE,
   INDEX `idx_setting_type`(`setting_type`) USING BTREE,
   CONSTRAINT `fk_user_setting_user` FOREIGN KEY (`user_id`) REFERENCES `im_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户设置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of im_user_setting
@@ -2111,7 +2419,7 @@ CREATE TABLE `sys_config`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`config_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '参数配置表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '参数配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_config
@@ -2148,7 +2456,7 @@ CREATE TABLE `sys_dept`  (
   `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '更新者',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`dept_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 200 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '部门表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 200 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '部门表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_dept
@@ -2184,7 +2492,7 @@ CREATE TABLE `sys_dict_data`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`dict_code`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '字典数据表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '字典数据表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_dict_data
@@ -2235,7 +2543,7 @@ CREATE TABLE `sys_dict_type`  (
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`dict_id`) USING BTREE,
   UNIQUE INDEX `dict_type`(`dict_type`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '字典类型表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '字典类型表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_dict_type
@@ -2270,7 +2578,7 @@ CREATE TABLE `sys_job`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '备注信息',
   PRIMARY KEY (`job_id`, `job_name`, `job_group`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '定时任务调度表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '定时任务调度表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_job
@@ -2293,7 +2601,7 @@ CREATE TABLE `sys_job_log`  (
   `exception_info` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '异常信息',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`job_log_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '定时任务调度日志表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '定时任务调度日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_job_log
@@ -2316,7 +2624,7 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status`) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 105 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统访问记录' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 106 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -2326,6 +2634,7 @@ INSERT INTO `sys_logininfor` VALUES (101, 'admin', '127.0.0.1', '内网IP', 'Chr
 INSERT INTO `sys_logininfor` VALUES (102, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-01-08 09:21:05');
 INSERT INTO `sys_logininfor` VALUES (103, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '密码输入错误1次', '2026-01-08 11:09:31');
 INSERT INTO `sys_logininfor` VALUES (104, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-01-08 11:09:43');
+INSERT INTO `sys_logininfor` VALUES (105, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '密码输入错误1次', '2026-01-09 10:55:19');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -2349,7 +2658,7 @@ CREATE TABLE `sys_menu`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '备注',
   PRIMARY KEY (`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2083 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '菜单权限表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2083 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
@@ -2489,7 +2798,7 @@ CREATE TABLE `sys_notice`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`notice_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '通知公告表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '通知公告表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_notice
@@ -2521,7 +2830,7 @@ CREATE TABLE `sys_oper_log`  (
   INDEX `idx_sys_oper_log_bt`(`business_type`) USING BTREE,
   INDEX `idx_sys_oper_log_s`(`status`) USING BTREE,
   INDEX `idx_sys_oper_log_ot`(`oper_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 103 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '操作日志记录' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 103 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -2546,7 +2855,7 @@ CREATE TABLE `sys_post`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`post_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '岗位信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '岗位信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_post
@@ -2574,7 +2883,7 @@ CREATE TABLE `sys_role`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`role_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_role
@@ -2590,7 +2899,7 @@ CREATE TABLE `sys_role_dept`  (
   `role_id` bigint(20) NOT NULL COMMENT '角色ID',
   `dept_id` bigint(20) NOT NULL COMMENT '部门ID',
   PRIMARY KEY (`role_id`, `dept_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色和部门关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色和部门关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_role_dept
@@ -2607,7 +2916,7 @@ CREATE TABLE `sys_role_menu`  (
   `role_id` bigint(20) NOT NULL COMMENT '角色ID',
   `menu_id` bigint(20) NOT NULL COMMENT '菜单ID',
   PRIMARY KEY (`role_id`, `menu_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色和菜单关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色和菜单关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_role_menu
@@ -2725,7 +3034,7 @@ CREATE TABLE `sys_user`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user
@@ -2750,7 +3059,7 @@ CREATE TABLE `sys_user_online`  (
   `last_access_time` datetime NULL DEFAULT NULL COMMENT 'session最后访问时间',
   `expire_time` int(5) NULL DEFAULT 0 COMMENT '超时时间，单位为分钟',
   PRIMARY KEY (`sessionId`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '在线用户记录' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '在线用户记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_online
@@ -2764,7 +3073,7 @@ CREATE TABLE `sys_user_post`  (
   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
   `post_id` bigint(20) NOT NULL COMMENT '岗位ID',
   PRIMARY KEY (`user_id`, `post_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户与岗位关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户与岗位关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_post
@@ -2780,7 +3089,7 @@ CREATE TABLE `sys_user_role`  (
   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
   `role_id` bigint(20) NOT NULL COMMENT '角色ID',
   PRIMARY KEY (`user_id`, `role_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户和角色关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户和角色关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_role

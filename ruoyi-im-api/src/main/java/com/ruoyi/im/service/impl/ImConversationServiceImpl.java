@@ -70,6 +70,17 @@ public class ImConversationServiceImpl implements ImConversationService {
                 vo.setIsMuted(member.getIsMuted() != null && member.getIsMuted() == 1);
                 vo.setLastReadMessageId(member.getLastReadMessageId());
 
+                // 查询并设置最后一条消息
+                if (conversation.getLastMessageId() != null) {
+                    com.ruoyi.im.domain.ImMessage lastMessage = imMessageMapper.selectImMessageById(conversation.getLastMessageId());
+                    if (lastMessage != null) {
+                        com.ruoyi.im.vo.message.ImMessageVO messageVO = new com.ruoyi.im.vo.message.ImMessageVO();
+                        BeanUtils.copyProperties(lastMessage, messageVO);
+                        vo.setLastMessage(messageVO);
+                        vo.setLastMessageTime(lastMessage.getCreateTime());
+                    }
+                }
+
                 // 设置会话相关信息
                 // 兼容PRIVATE和SINGLE类型（历史数据可能使用SINGLE）
                 if ("PRIVATE".equalsIgnoreCase(conversation.getType()) || "SINGLE".equalsIgnoreCase(conversation.getType())) {
@@ -125,7 +136,13 @@ public class ImConversationServiceImpl implements ImConversationService {
         }
 
         // 按最后更新时间排序
-        voList.sort((a, b) -> b.getUpdateTime().compareTo(a.getUpdateTime()));
+        voList.sort((a, b) -> {
+            // 优先使用最后消息时间排序
+            if (a.getLastMessageTime() != null && b.getLastMessageTime() != null) {
+                return b.getLastMessageTime().compareTo(a.getLastMessageTime());
+            }
+            return b.getUpdateTime().compareTo(a.getUpdateTime());
+        });
         return voList;
     }
 

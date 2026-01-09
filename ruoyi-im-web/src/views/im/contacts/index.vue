@@ -206,9 +206,9 @@ const loadContacts = async () => {
       const dataRows = res.data?.rows || res.data || res.rows || []
       // 后端返回的是 ImFriendVO，需要映射字段：
       // friendId -> id, friendName -> name, friendAvatar -> avatar
-      contacts.value = Array.isArray(dataRows)
+      const mappedContacts = Array.isArray(dataRows)
         ? dataRows.map(c => ({
-            id: c.friendId, // 使用 friendId 作为 id
+            id: c.friendId, // 使用 friendId 作为 id（好友用户ID）
             name: c.friendName || c.remark || c.username, // 使用 friendName 或 remark 或 username
             nickname: c.friendName || c.remark || c.username, // 使用 friendName 作为 nickname
             username: c.username, // 使用 username
@@ -224,6 +224,16 @@ const loadContacts = async () => {
             _remark: c.remark, // 保存备注
           }))
         : []
+
+      // 去重逻辑：使用Map确保每个好友只出现一次（按friendId去重）
+      const uniqueContactsMap = new Map()
+      mappedContacts.forEach(contact => {
+        if (contact.id && !uniqueContactsMap.has(contact.id)) {
+          uniqueContactsMap.set(contact.id, contact)
+        }
+      })
+
+      contacts.value = Array.from(uniqueContactsMap.values())
     } else {
       contacts.value = []
     }

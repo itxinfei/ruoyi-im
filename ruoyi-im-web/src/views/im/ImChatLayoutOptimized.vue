@@ -168,7 +168,9 @@
                     <span class="session-name">{{ session.name }}</span>
                     <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
                   </div>
-                  <div class="session-preview">{{ session.lastMessage || '暂无消息' }}</div>
+                  <div class="session-preview">
+                    {{ formatSessionPreview(session.lastMessage) || '暂无消息' }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -448,12 +450,15 @@
                   :rows="2"
                   :autosize="{ minRows: 2, maxRows: 6 }"
                   placeholder="输入消息... @提及、Enter发送、Ctrl+Enter换行"
+                  class="chat-input"
                   @keydown="handleInputKeydown"
                   @input="handleInputChange"
                 />
                 <div class="input-footer">
                   <span class="input-tip">Enter 发送 · @提及</span>
-                  <el-button type="primary" size="small" @click="sendMessage">发送</el-button>
+                  <el-button type="primary" size="small" class="send-button" @click="sendMessage"
+                    >发送</el-button
+                  >
                 </div>
               </div>
             </div>
@@ -2194,7 +2199,7 @@ const loadFriends = async () => {
   try {
     const res = await listContact()
     const dataRows = res.rows || res.data?.rows || res.data || []
-    
+
     // 转换好友数据
     const formattedFriends = Array.isArray(dataRows)
       ? dataRows.map(f => ({
@@ -2203,16 +2208,19 @@ const loadFriends = async () => {
           name: f.remark || f.friendName || f.name,
         }))
       : []
-    
+
     // 去重逻辑：使用Map确保每个好友只出现一次
+    // 注意：必须使用 friendId（好友用户ID）作为唯一标识，而不是 id（好友关系ID）
+    // 因为同一好友可能有多条关系记录（如不同分组），但用户ID是唯一的
     const uniqueFriendsMap = new Map()
     formattedFriends.forEach(friend => {
-      const key = friend.userId || friend.id || friend.friendId
+      // 优先使用 friendId（好友用户ID）作为唯一标识
+      const key = friend.friendId || friend.id
       if (key && !uniqueFriendsMap.has(key)) {
         uniqueFriendsMap.set(key, friend)
       }
     })
-    
+
     friends.value = Array.from(uniqueFriendsMap.values())
   } catch (error) {
     console.error('加载好友列表失败:', error)
@@ -4033,6 +4041,51 @@ const formatMessageContent = content => {
   return formatted
 }
 
+// 格式化会话预览文本（用于会话列表）
+const formatSessionPreview = (content) => {
+  if (!content) return ''
+
+  let actualContent = content
+  let messageType = 'text'
+
+  // 检查是否为JSON字符串并尝试解析
+  try {
+    const parsed = JSON.parse(content)
+    if (typeof parsed === 'object' && parsed !== null) {
+      // 如果是对象，检查是否有content字段
+      if (parsed.content) {
+        actualContent = parsed.content
+      }
+      // 获取消息类型
+      if (parsed.type || parsed.messageType) {
+        messageType = parsed.type || parsed.messageType
+      }
+    }
+  } catch (e) {
+    // 如果不是JSON，使用原始内容
+    actualContent = content
+  }
+
+  // 根据消息类型返回预览文本
+  switch (messageType) {
+    case 'image':
+      return '[图片]'
+    case 'video':
+      return '[视频]'
+    case 'audio':
+      return '[语音]'
+    case 'file':
+      return '[文件]'
+    default:
+      // 对于文本消息，截取前50个字符
+      const text = String(actualContent).trim()
+      if (text.length > 50) {
+        return text.substring(0, 50) + '...'
+      }
+      return text
+  }
+}
+
 // 处理输入变化（检测@符号）
 const handleInputChange = value => {
   const textarea = inputRef.value?.$el?.querySelector('textarea')
@@ -4371,13 +4424,13 @@ if (isDarkMode.value) {
 }
 
 // 监听设置页面的主题变更
-const handleThemeChange = (event) => {
+const handleThemeChange = event => {
   const { isDark } = event.detail
   isDarkMode.value = isDark
 }
 
 // 监听系统主题偏好变化
-const handleSystemThemeChange = (e) => {
+const handleSystemThemeChange = e => {
   const theme = localStorage.getItem('theme')
   if (theme === 'auto') {
     isDarkMode.value = e.matches
@@ -4525,16 +4578,44 @@ const loadSessions = async () => {
       name: s.name || s.title,
       avatar: s.avatar,
       type: s.type || 'private', // private, group
-      peerId: s.peerId,
-      groupId: s.groupId,
+      peerId: s.peerId || s.targetId,
+      groupId: s.groupId || s.targetId,
       unreadCount: s.unreadCount || 0,
+      // 后端返回的lastMessage是ImMessageVO对象，包含content和sendTime字段
       lastMessage: s.lastMessage?.content || s.lastMessage,
-      lastMessageTime: s.lastMessage?.timestamp || s.updatedAt,
-      pinned: s.pinned || false,
-      muted: s.muted || false,
+      // 优先使用lastMessage的sendTime，其次使用lastMessageTime，最后使用updateTime
+      lastMessageTime: s.lastMessage?.sendTime || s.lastMessageTime || s.updatedAt || s.updateTime,
+      pinned: s.isPinned || s.pinned || false,
+      muted: s.isMuted || s.muted || false,
     }))
 
-    store.commit('im/SET_SESSIONS', formattedSessions)
+    // 去重逻辑：私聊会话按peerId去重，群聊会话按groupId去重
+    const uniqueSessionsMap = new Map()
+    formattedSessions.forEach(session => {
+      // 生成去重key：私聊使用peerId，群聊使用groupId
+      let key
+      if (session.type === 'private' || session.type === 'PRIVATE') {
+        key = `private_${session.peerId}`
+      } else if (session.type === 'group' || session.type === 'GROUP') {
+        key = `group_${session.groupId}`
+      } else {
+        key = `session_${session.id}`
+      }
+
+      // 如果key已存在，保留更新时间更晚的会话
+      if (uniqueSessionsMap.has(key)) {
+        const existing = uniqueSessionsMap.get(key)
+        const existingTime = new Date(existing.lastMessageTime || 0).getTime()
+        const newTime = new Date(session.lastMessageTime || 0).getTime()
+        if (newTime > existingTime) {
+          uniqueSessionsMap.set(key, session)
+        }
+      } else {
+        uniqueSessionsMap.set(key, session)
+      }
+    })
+
+    store.commit('im/SET_SESSIONS', Array.from(uniqueSessionsMap.values()))
   } catch (error) {
     console.error('加载会话列表失败:', error)
   }
@@ -5391,6 +5472,9 @@ $shadow-lg:
               align-items: center;
               justify-content: space-between;
               border-bottom: 1px solid $border-color;
+              background: #fff;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+              z-index: 10;
 
               .chat-title {
                 display: flex;
@@ -5406,6 +5490,18 @@ $shadow-lg:
                 .title-status {
                   font-size: 12px;
                   color: $success-color;
+                  margin-top: 2px;
+                  display: flex;
+                  align-items: center;
+                  gap: 2px;
+                  &::before {
+                    content: '';
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: $success-color;
+                    display: inline-block;
+                  }
                 }
               }
 
@@ -5418,15 +5514,21 @@ $shadow-lg:
                   --el-button-bg-color: transparent;
                   --el-button-text-color: $text-secondary;
                   --el-button-hover-text-color: $primary-color;
-                  --el-button-hover-bg-color: $bg-hover;
+                  --el-button-hover-bg-color: #f5f7fa;
+                  --el-button-hover-border-color: transparent;
+                  --el-button-radius: 4px;
+                  width: 36px;
+                  height: 36px;
+                  font-size: 18px;
                 }
               }
             }
 
             .message-area {
               flex: 1;
-              padding: 20px;
+              padding: 20px 40px;
               overflow-y: auto;
+              background: #fafafa;
               @include web-scrollbar;
 
               .connection-status {
@@ -5449,7 +5551,9 @@ $shadow-lg:
 
               .message-item {
                 display: flex;
-                margin-bottom: 20px;
+                margin-bottom: 16px;
+                gap: 10px;
+                padding: 0 16px;
 
                 &.isOwn {
                   flex-direction: row-reverse;
@@ -5460,6 +5564,8 @@ $shadow-lg:
                     .message-bubble {
                       background: $primary-color;
                       color: #fff;
+                      border-bottom-right-radius: 4px;
+                      box-shadow: 0 2px 4px rgba(22, 119, 255, 0.2);
                     }
 
                     .message-time {
@@ -5469,22 +5575,30 @@ $shadow-lg:
                 }
 
                 .message-content {
-                  max-width: 60%;
+                  max-width: 68%;
 
                   .sender-name {
                     font-size: 12px;
                     color: $text-tertiary;
-                    margin-bottom: 6px;
+                    margin-bottom: 4px;
+                    margin-left: 6px;
                   }
 
                   .message-bubble {
-                    padding: 10px 14px;
+                    padding: 12px 16px;
                     border-radius: 8px;
-                    background: $bg-gray;
+                    border-bottom-left-radius: 4px;
+                    background: #f5f7fa;
                     color: $text-primary;
                     font-size: 14px;
                     line-height: 1.5;
                     word-break: break-word;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+                    transition: all 0.2s ease;
+
+                    &:hover {
+                      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    }
 
                     &.sending {
                       opacity: 0.7;
@@ -5493,6 +5607,7 @@ $shadow-lg:
                     &.failed {
                       background: #fff1f0;
                       color: $danger-color;
+                      border: 1px solid #ffccc7;
                     }
                   }
 
@@ -5506,6 +5621,12 @@ $shadow-lg:
                       border-radius: 8px;
                       overflow: hidden;
                       background: #f0f0f0;
+                      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+                      transition: all 0.2s ease;
+
+                      &:hover {
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                      }
 
                       &.sending {
                         opacity: 0.7;
@@ -5519,9 +5640,16 @@ $shadow-lg:
                     align-items: center;
                     gap: 12px;
                     padding: 12px 16px;
-                    background: $bg-gray;
+                    background: #f5f7fa;
                     border-radius: 8px;
                     min-width: 200px;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+                    transition: all 0.2s ease;
+
+                    &:hover {
+                      background: #e9ecf0;
+                      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    }
 
                     &.sending {
                       opacity: 0.7;
@@ -5620,8 +5748,9 @@ $shadow-lg:
             }
 
             .input-area {
-              padding: 16px 20px;
+              padding: 12px 40px;
               border-top: 1px solid $border-color;
+              background: #fafafa;
 
               .voice-recording-panel {
                 display: flex;
@@ -5679,12 +5808,14 @@ $shadow-lg:
                 .el-button {
                   --el-button-border-color: transparent;
                   --el-button-bg-color: transparent;
-                  --el-button-text-color: #606266; // 使用更深的颜色，确保图标可见
+                  --el-button-text-color: #606266;
                   padding: 8px;
+                  border-radius: 4px;
 
                   &:hover {
                     --el-button-text-color: $primary-color;
-                    --el-button-hover-bg-color: $bg-hover;
+                    --el-button-hover-bg-color: #f5f7fa;
+                    --el-button-hover-border-color: transparent;
                   }
 
                   &.recording {
@@ -5694,15 +5825,48 @@ $shadow-lg:
                 }
               }
 
+              .chat-input {
+                border-radius: 8px;
+                border: 1px solid #dcdfe6;
+                background: #fff;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+                :deep(textarea) {
+                  border: none;
+                  padding: 12px 16px;
+                  resize: none;
+                  font-size: 14px;
+                  line-height: 1.5;
+                  background: transparent;
+                }
+
+                &:focus {
+                  border-color: $primary-color;
+                  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+                }
+              }
+
               .input-footer {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-top: 8px;
+                margin-top: 12px;
 
                 .input-tip {
                   font-size: 12px;
                   color: $text-tertiary;
+                }
+
+                .send-button {
+                  min-width: 80px;
+                  height: 36px;
+                  border-radius: 4px;
+                  font-size: 14px;
+
+                  &:disabled {
+                    --el-button-text-color: #fff;
+                    --el-button-bg-color: #c0c4cc;
+                  }
                 }
               }
             }
@@ -5731,60 +5895,66 @@ $shadow-lg:
         height: 100%; // 确保高度充满父容器
 
         .contacts-sidebar {
-          width: 200px;
+          width: 220px;
           background: #fff;
           border-right: 1px solid $border-color;
           display: flex;
           flex-direction: column;
-          height: 100%; // 确保高度充满父容器
-          min-height: 0; // 允许flex子元素正确收缩
+          height: 100%;
+          min-height: 0;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
           .section-title {
-            padding: 16px 16px 8px;
-            font-size: 13px;
-            font-weight: 500;
-            color: $text-secondary;
+            padding: 16px 20px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: $text-tertiary;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
           }
 
           .tree-list {
             flex: 1;
             overflow-y: auto;
             @include web-scrollbar;
+          }
 
-            .tree-item {
-              display: flex;
-              align-items: center;
-              gap: 10px;
-              padding: 10px 16px;
-              cursor: pointer;
-              font-size: 14px;
-              color: $text-primary;
-              transition: background 0.2s;
+          .tree-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: $text-primary;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            margin: 0 10px;
 
-              .tree-label {
-                flex: 1;
-              }
+            .tree-label {
+              flex: 1;
+            }
+
+            .tree-count {
+              font-size: 12px;
+              color: $primary-color;
+              background: $primary-color-light;
+              padding: 2px 8px;
+              border-radius: 10px;
+              font-weight: 500;
+            }
+
+            &:hover {
+              background: #f5f7fa;
+            }
+
+            &.active {
+              background: $primary-color;
+              color: #fff;
 
               .tree-count {
-                font-size: 12px;
-                color: $text-tertiary;
-                background: $bg-gray;
-                padding: 2px 8px;
-                border-radius: 10px;
-              }
-
-              &:hover {
-                background: $bg-hover;
-              }
-
-              &.active {
-                background: $bg-hover;
+                background: #fff;
                 color: $primary-color;
-                font-weight: 500;
-              }
-
-              .el-icon {
-                font-size: 16px;
               }
             }
           }
@@ -5800,14 +5970,24 @@ $shadow-lg:
           min-height: 0; // 允许flex子元素正确收缩
 
           .list-header {
-            padding: 12px 16px;
+            padding: 16px;
             border-bottom: 1px solid $border-color;
-            display: flex;
-            gap: 8px;
-            align-items: center;
 
             .search-input {
-              flex: 1;
+              border-radius: 20px;
+              border: 1px solid $border-color;
+              transition: all 0.2s ease;
+              box-shadow: none;
+
+              &:hover {
+                border-color: $primary-color;
+                box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+              }
+
+              &:focus-within {
+                border-color: $primary-color;
+                box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+              }
             }
           }
 
@@ -5823,11 +6003,12 @@ $shadow-lg:
               padding: 12px 16px;
               cursor: pointer;
               border-bottom: 1px solid #f0f0f0;
-              transition: background 0.2s;
+              transition: all 0.2s ease;
               position: relative;
 
               &:hover {
-                background: $bg-hover;
+                background: $primary-color-light;
+                transform: translateX(2px);
               }
 
               .contact-info {
@@ -5836,12 +6017,13 @@ $shadow-lg:
                 min-width: 0;
 
                 .contact-name {
-                  font-size: 14px;
+                  font-size: 15px;
                   font-weight: 500;
                   color: $text-primary;
                   overflow: hidden;
                   text-overflow: ellipsis;
                   white-space: nowrap;
+                  margin-bottom: 2px;
                 }
 
                 .contact-signature {
@@ -5850,16 +6032,17 @@ $shadow-lg:
                   overflow: hidden;
                   text-overflow: ellipsis;
                   white-space: nowrap;
-                  margin-top: 2px;
                 }
               }
 
               .online-dot {
-                width: 8px;
-                height: 8px;
+                width: 10px;
+                height: 10px;
                 background: $success-color;
                 border-radius: 50%;
                 flex-shrink: 0;
+                border: 2px solid #fff;
+                box-shadow: 0 0 0 1px rgba(0, 191, 165, 0.2);
               }
             }
           }
@@ -5872,22 +6055,28 @@ $shadow-lg:
 
             :deep(.el-tree) {
               .el-tree-node__content {
-                height: 36px;
+                height: 40px;
+                padding: 0 16px;
+                transition: all 0.2s ease;
 
                 &:hover {
-                  background: $bg-hover;
+                  background: $primary-color-light;
+                  border-radius: 4px;
                 }
               }
 
               .org-node {
                 display: flex;
                 align-items: center;
-                gap: 6px;
+                gap: 8px;
                 font-size: 14px;
 
                 .user-count {
                   font-size: 12px;
                   color: $text-tertiary;
+                  background: $bg-gray;
+                  padding: 2px 6px;
+                  border-radius: 10px;
                   margin-left: 4px;
                 }
               }
@@ -5974,13 +6163,20 @@ $shadow-lg:
               .contact-item-row {
                 display: flex;
                 align-items: center;
-                padding: 10px 16px;
+                padding: 12px 16px;
                 cursor: pointer;
-                border-bottom: 1px solid #f0f0f0;
-                transition: background 0.15s;
+                transition: background 0.2s ease;
+                border-radius: 4px;
+                margin: 0 8px;
+                margin-bottom: 4px;
 
                 &:hover {
-                  background: $bg-hover;
+                  background: #f5f7fa;
+                }
+
+                &.active {
+                  background: $primary-color-light;
+                  color: $primary-color;
                 }
 
                 .contact-row-info {

@@ -68,9 +68,11 @@ public class ImFriendServiceImpl implements ImFriendService {
         List<ImFriend> existingFriends = imFriendMapper.selectImFriendList(query);
         if (existingFriends != null && !existingFriends.isEmpty()) {
             ImFriend existingFriend = existingFriends.get(0);
-            if ("DELETED".equals(existingFriend.getStatus())) {
+            // 使用isDeleted字段判断是否已删除
+            if (existingFriend.getIsDeleted() != null && existingFriend.getIsDeleted() == 1) {
                 // 恢复已删除的好友关系
-                existingFriend.setStatus("NORMAL");
+                existingFriend.setIsDeleted(0);
+                existingFriend.setDeletedTime(null);
                 existingFriend.setGroupName(request.getGroupName());
                 existingFriend.setUpdateTime(LocalDateTime.now());
                 imFriendMapper.updateImFriend(existingFriend);
@@ -151,8 +153,9 @@ public class ImFriendServiceImpl implements ImFriendService {
             throw new BusinessException("无权限操作");
         }
 
-        // 将状态设为已删除
-        friend.setStatus("DELETED");
+        // 软删除：设置is_deleted标记
+        friend.setIsDeleted(1);
+        friend.setDeletedTime(LocalDateTime.now());
         friend.setUpdateTime(LocalDateTime.now());
         imFriendMapper.updateImFriend(friend);
     }
@@ -165,7 +168,8 @@ public class ImFriendServiceImpl implements ImFriendService {
 
         List<ImFriendVO> voList = new ArrayList<>();
         for (ImFriend friend : friendList) {
-            if ("DELETED".equals(friend.getStatus())) {
+            // SQL已过滤is_deleted=0的记录，这里保留双重检查确保安全
+            if (friend.getIsDeleted() != null && friend.getIsDeleted() == 1) {
                 continue;
             }
             ImFriendVO vo = new ImFriendVO();
@@ -232,7 +236,6 @@ public class ImFriendServiceImpl implements ImFriendService {
             ImFriend friendForReceiver = new ImFriend();
             friendForReceiver.setUserId(request.getToUserId());
             friendForReceiver.setFriendId(request.getFromUserId());
-            friendForReceiver.setStatus("NORMAL");
             friendForReceiver.setRemark("");
             friendForReceiver.setGroupName("默认分组");
             friendForReceiver.setCreateTime(now);
@@ -243,7 +246,6 @@ public class ImFriendServiceImpl implements ImFriendService {
             ImFriend friendForSender = new ImFriend();
             friendForSender.setUserId(request.getFromUserId());
             friendForSender.setFriendId(request.getToUserId());
-            friendForSender.setStatus("NORMAL");
             friendForSender.setRemark("");
             friendForSender.setGroupName("默认分组");
             friendForSender.setCreateTime(now);
@@ -274,7 +276,8 @@ public class ImFriendServiceImpl implements ImFriendService {
 
         Map<String, List<ImFriendVO>> groupMap = new HashMap<>();
         for (ImFriend friend : friendList) {
-            if ("DELETED".equals(friend.getStatus())) {
+            // 使用isDeleted字段判断是否已删除
+            if (friend.getIsDeleted() != null && friend.getIsDeleted() == 1) {
                 continue;
             }
             String groupName = friend.getGroupName();
@@ -321,13 +324,16 @@ public class ImFriendServiceImpl implements ImFriendService {
 
         ImFriendVO vo = new ImFriendVO();
         BeanUtils.copyProperties(friend, vo);
-        vo.setOnline("ONLINE".equals(friend.getStatus()));
 
         // 查询好友用户信息
         ImUser friendUser = imUserMapper.selectImUserById(friend.getFriendId());
         if (friendUser != null) {
             vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
             vo.setFriendAvatar(friendUser.getAvatar());
+            // 根据用户状态判断是否在线
+            vo.setOnline("ACTIVE".equals(friendUser.getStatus()));
+        } else {
+            vo.setOnline(false);
         }
 
         return vo;
@@ -345,8 +351,13 @@ public class ImFriendServiceImpl implements ImFriendService {
             throw new BusinessException("无权限操作");
         }
 
-        // 使用status字段表示拉黑状态
-        friend.setStatus(blocked ? "BLOCKED" : "NORMAL");
+        // 注意：当前数据库表没有单独的拉黑字段，拉黑功能暂时通过删除好友实现
+        // 如需完整的拉黑功能，需要在im_friend表添加is_blocked字段
+        if (blocked) {
+            // 拉黑 = 删除好友
+            friend.setIsDeleted(1);
+            friend.setDeletedTime(LocalDateTime.now());
+        }
         friend.setUpdateTime(LocalDateTime.now());
         imFriendMapper.updateImFriend(friend);
     }
@@ -363,13 +374,12 @@ public class ImFriendServiceImpl implements ImFriendService {
                 continue;
             }
 
-            // 检查是否已经是好友
+            // 检查是否已经是好友（SQL已过滤is_deleted=0）
             ImFriend query = new ImFriend();
             query.setUserId(userId);
             query.setFriendId(user.getId());
             List<ImFriend> existingFriends = imFriendMapper.selectImFriendList(query);
-            boolean isFriend = existingFriends != null && !existingFriends.isEmpty()
-                    && !"DELETED".equals(existingFriends.get(0).getStatus());
+            boolean isFriend = existingFriends != null && !existingFriends.isEmpty();
 
             ImUserVO vo = new ImUserVO();
             BeanUtils.copyProperties(user, vo);

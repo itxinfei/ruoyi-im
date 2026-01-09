@@ -868,7 +868,9 @@ const applyTheme = () => {
   document.documentElement.setAttribute('data-font-size', fontSize.value)
 
   // 发送事件通知其他组件主题已更改
-  window.dispatchEvent(new CustomEvent('themeChange', { detail: { theme: currentTheme.value, isDark: shouldBeDark } }))
+  window.dispatchEvent(
+    new CustomEvent('themeChange', { detail: { theme: currentTheme.value, isDark: shouldBeDark } })
+  )
 }
 
 const showPrivacyPolicy = () => {
