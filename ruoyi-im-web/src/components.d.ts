@@ -88,6 +88,7 @@ declare module 'vue' {
     SessionList: typeof import('./components/Chat/SessionList.vue')['default']
     SideNav: typeof import('./components/Layout/SideNav.vue')['default']
     SvgIcon: typeof import('./components/SvgIcon/index.vue')['default']
+    TestLocalStorage: typeof import('./components/Chat/TestLocalStorage.vue')['default']
     ThemeSwitch: typeof import('./components/ThemeSwitch/index.vue')['default']
     Upload: typeof import('./components/Upload/index.vue')['default']
     UserProfileDialog: typeof import('./components/User/UserProfileDialog.vue')['default']

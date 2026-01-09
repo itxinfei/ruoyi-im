@@ -8,6 +8,7 @@ import {
 } from '@/api/im/message'
 import { listSession, updateSession, deleteSession as apiDeleteSession } from '@/api/im/session'
 import { markConversationRead } from '@/api/im/conversation'
+import { listContact } from '@/api/im/contact'
 import { ElMessage } from 'element-plus'
 import { getCurrentUserId, getCurrentUserInfo } from '@/utils/im-user'
 
@@ -310,7 +311,20 @@ const mutations = {
     }
   },
   SET_CONTACTS: (state, contacts) => {
-    state.contacts = contacts
+    // 联系人去重：根据用户ID去重（优先使用friendId，其次使用id）
+    const uniqueContacts = []
+    const idSet = new Set()
+
+    for (const contact of contacts) {
+      // 使用friendId（好友用户ID）作为唯一标识
+      const contactId = contact.friendId || contact.id || contact.userId
+      if (contactId && !idSet.has(contactId)) {
+        idSet.add(contactId)
+        uniqueContacts.push(contact)
+      }
+    }
+
+    state.contacts = uniqueContacts
   },
   SET_GROUPS: (state, groups) => {
     state.groups = groups
@@ -350,18 +364,20 @@ const actions = {
       console.error('标记当前会话已读失败:', error)
     }
 
-    // 加载该会话的消息
-    await dispatch('loadMessages', { sessionId: session.id, page: 1, pageSize: 20 })
+    // 加载该会话的消息（首次加载，不指定lastId）
+    await dispatch('loadMessages', { sessionId: session.id, pageSize: 20 })
   },
 
   // 加载消息
-  async loadMessages({ commit }, { sessionId, page = 1, pageSize = 20 }) {
-    const response = await listMessage({ conversationId: sessionId, page, pageSize })
+  async loadMessages({ commit, state }, { sessionId, lastId = null, pageSize = 20 }) {
+    const response = await listMessage({ conversationId: sessionId, lastId, pageSize })
     const messages = response.rows || response.data || []
 
-    if (page === 1) {
+    // 如果没有指定lastId，说明是首次加载，清空旧消息
+    if (lastId === null) {
       commit('SET_MESSAGE_LIST', { sessionId, messages })
     } else {
+      // 向上翻页，将新消息添加到列表前面
       commit('PREPEND_MESSAGES', { sessionId, messages })
     }
 
@@ -488,6 +504,12 @@ const actions = {
 
   // 接收新消息
   receiveMessage({ commit, state }, message) {
+    // 确保当前用户的消息也有senderAvatar
+    const userInfo = getCurrentUserInfo()
+    if (userInfo && message.senderId === userInfo.userId && !message.senderAvatar) {
+      message.senderAvatar = userInfo.avatar
+    }
+    
     commit('ADD_MESSAGE', { sessionId: message.sessionId, message })
 
     // 如果不是当前会话，增加未读数
@@ -628,10 +650,60 @@ const actions = {
 
   // 加载联系人列表
   async loadContacts({ commit }) {
-    // TODO: 调用API获取联系人列表
-    // const response = await listContacts()
-    // commit('SET_CONTACTS', response.data)
-    commit('SET_CONTACTS', [])
+    try {
+      const response = await listContact()
+      const contacts = response.rows || response.data || []
+
+      if (!Array.isArray(contacts) || contacts.length === 0) {
+        commit('SET_CONTACTS', [])
+        return []
+      }
+
+      // 后端返回的是 ImFriendVO，需要映射字段
+      const mappedContacts = contacts.map(c => ({
+        id: c.friendId, // 使用 friendId 作为 id（好友用户ID）
+        friendId: c.friendId,
+        name: c.friendName || c.remark || c.name || c.username,
+        nickname: c.friendName || c.remark || c.name || c.username,
+        username: c.username,
+        avatar: c.friendAvatar || c.avatar,
+        email: c.email,
+        phone: c.phone,
+        signature: c.signature,
+        online: c.online || false,
+        groupName: c.groupName,
+        // 保留原始数据
+        _originalId: c.id, // 保存好友关系ID
+        _remark: c.remark,
+      }))
+
+      // 去重：使用friendId作为唯一标识
+      const uniqueMap = new Map()
+      const seenIds = new Set()
+
+      mappedContacts.forEach(contact => {
+        const contactId = contact.friendId || contact.id
+        if (contactId) {
+          if (seenIds.has(contactId)) {
+            console.warn(`[Store] 发现重复联系人ID: ${contactId}`)
+          }
+          seenIds.add(contactId)
+          if (!uniqueMap.has(contactId)) {
+            uniqueMap.set(contactId, contact)
+          }
+        }
+      })
+
+      const uniqueContacts = Array.from(uniqueMap.values())
+      console.log(`[Store] 联系人去重: 原始${mappedContacts.length}条, 去重后${uniqueContacts.length}条`)
+
+      commit('SET_CONTACTS', uniqueContacts)
+      return uniqueContacts
+    } catch (error) {
+      console.error('加载联系人失败:', error)
+      ElMessage.error('加载联系人失败')
+      return []
+    }
   },
 
   // 加载群组列表

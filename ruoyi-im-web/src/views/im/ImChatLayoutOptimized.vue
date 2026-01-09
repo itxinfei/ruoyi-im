@@ -210,10 +210,12 @@
                   class="message-item"
                   :class="{ isOwn: msg.isOwn || msg.senderId === currentUser?.userId }"
                 >
+                  <!-- 对方消息的左侧头像 -->
                   <el-avatar
                     v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)"
                     :size="36"
                     :src="msg.senderAvatar || msg.avatar"
+                    class="message-avatar"
                   >
                     {{ (msg.senderName || msg.sender?.name)?.charAt(0) || 'U' }}
                   </el-avatar>
@@ -311,6 +313,15 @@
                       /></el-icon>
                     </div>
                   </div>
+                  <!-- 自己消息的右侧头像 -->
+                  <el-avatar
+                    v-if="msg.isOwn || msg.senderId === currentUser?.userId"
+                    :size="36"
+                    :src="currentUser?.avatar || msg.senderAvatar || msg.avatar"
+                    class="message-avatar own-avatar"
+                  >
+                    {{ (currentUser?.nickName || currentUser?.userName || '我')?.charAt(0) || '我' }}
+                  </el-avatar>
                 </div>
               </div>
 
@@ -2200,28 +2211,45 @@ const loadFriends = async () => {
     const res = await listContact()
     const dataRows = res.rows || res.data?.rows || res.data || []
 
+    if (!Array.isArray(dataRows) || dataRows.length === 0) {
+      friends.value = []
+      return
+    }
+
     // 转换好友数据
-    const formattedFriends = Array.isArray(dataRows)
-      ? dataRows.map(f => ({
-          ...f,
-          online: f.status === 'ACTIVE',
-          name: f.remark || f.friendName || f.name,
-        }))
-      : []
+    const formattedFriends = dataRows.map(f => ({
+      ...f,
+      online: f.status === 'ACTIVE',
+      name: f.remark || f.friendName || f.name || f.username,
+    }))
 
     // 去重逻辑：使用Map确保每个好友只出现一次
-    // 注意：必须使用 friendId（好友用户ID）作为唯一标识，而不是 id（好友关系ID）
+    // 注意：必须使用 friendId（好友用户ID）作为唯一标识
     // 因为同一好友可能有多条关系记录（如不同分组），但用户ID是唯一的
     const uniqueFriendsMap = new Map()
+    const seenIds = new Set() // 用于检测和调试重复
+
     formattedFriends.forEach(friend => {
       // 优先使用 friendId（好友用户ID）作为唯一标识
-      const key = friend.friendId || friend.id
-      if (key && !uniqueFriendsMap.has(key)) {
-        uniqueFriendsMap.set(key, friend)
+      const friendId = friend.friendId || friend.id
+      if (friendId) {
+        // 调试：检测重复
+        if (seenIds.has(friendId)) {
+          console.warn(`发现重复好友ID: ${friendId}, 名称: ${friend.name}, 分组: ${friend.groupName}`)
+        }
+        seenIds.add(friendId)
+
+        // Map中只保留第一条记录（最早添加的）
+        if (!uniqueFriendsMap.has(friendId)) {
+          uniqueFriendsMap.set(friendId, friend)
+        }
       }
     })
 
-    friends.value = Array.from(uniqueFriendsMap.values())
+    const uniqueFriends = Array.from(uniqueFriendsMap.values())
+    console.log(`好友去重: 原始${formattedFriends.length}条, 去重后${uniqueFriends.length}条`)
+
+    friends.value = uniqueFriends
   } catch (error) {
     console.error('加载好友列表失败:', error)
     friends.value = []
@@ -4992,6 +5020,7 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 @use 'sass:color';
+@import '@/styles/design-tokens.scss';
 
 // Web IM 布局变量
 $nav-width: 180px;
@@ -5400,14 +5429,30 @@ $shadow-lg:
               padding: 12px 16px;
               cursor: pointer;
               border-bottom: 1px solid #f0f0f0;
-              transition: all 0.15s;
+              transition: all var(--dt-duration-base) var(--dt-ease-out);
+              position: relative;
+              border-radius: var(--dt-radius-sm);
+              margin: 0 8px;
 
               &:hover {
-                background: $bg-gray;
+                background: linear-gradient(90deg, var(--dt-color-primary-lighter) 0%, transparent 100%);
+                transform: translateX(2px);
               }
 
               &.active {
-                background: $bg-hover;
+                background: linear-gradient(90deg, var(--dt-color-primary-light) 0%, transparent 100%);
+
+                &::before {
+                  content: '';
+                  position: absolute;
+                  left: 0;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  width: 3px;
+                  height: 60%;
+                  background: var(--dt-color-primary);
+                  border-radius: 0 2px 2px 0;
+                }
               }
 
               .el-badge {
@@ -5562,14 +5607,25 @@ $shadow-lg:
                     align-items: flex-end;
 
                     .message-bubble {
-                      background: $primary-color;
+                      background: linear-gradient(135deg, var(--dt-color-primary) 0%, #4096ff 100%);
                       color: #fff;
-                      border-bottom-right-radius: 4px;
-                      box-shadow: 0 2px 4px rgba(22, 119, 255, 0.2);
-                    }
+                      border-bottom-left-radius: var(--dt-radius-message);
+                      border-bottom-right-radius: var(--dt-radius-message-tail);
+                      box-shadow: var(--dt-shadow-message-sent);
 
-                    .message-time {
-                      text-align: right;
+                      &:hover {
+                        box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
+                      }
+
+                      // 链接样式
+                      a {
+                        color: rgba(255, 255, 255, 0.9);
+                        text-decoration: underline;
+
+                        &:hover {
+                          color: #fff;
+                        }
+                      }
                     }
                   }
                 }
@@ -5585,19 +5641,21 @@ $shadow-lg:
                   }
 
                   .message-bubble {
+                    position: relative;
                     padding: 12px 16px;
-                    border-radius: 8px;
-                    border-bottom-left-radius: 4px;
+                    border-radius: var(--dt-radius-message);
+                    border-bottom-left-radius: var(--dt-radius-message-tail);
                     background: #f5f7fa;
                     color: $text-primary;
                     font-size: 14px;
-                    line-height: 1.5;
+                    line-height: 1.6;
                     word-break: break-word;
-                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-                    transition: all 0.2s ease;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+                    transition: all var(--dt-duration-base) var(--dt-ease-out);
 
                     &:hover {
-                      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                      transform: translateY(-1px);
                     }
 
                     &.sending {
@@ -5608,6 +5666,7 @@ $shadow-lg:
                       background: #fff1f0;
                       color: $danger-color;
                       border: 1px solid #ffccc7;
+                      box-shadow: 0 1px 3px rgba(255, 77, 79, 0.15);
                     }
                   }
 
@@ -5618,14 +5677,16 @@ $shadow-lg:
                     .image-content {
                       width: 200px;
                       height: 200px;
-                      border-radius: 8px;
+                      border-radius: var(--dt-radius-lg);
                       overflow: hidden;
                       background: #f0f0f0;
-                      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-                      transition: all 0.2s ease;
+                      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                      transition: all var(--dt-duration-base) var(--dt-ease-out);
+                      cursor: pointer;
 
                       &:hover {
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+                        transform: scale(1.02);
                       }
 
                       &.sending {
@@ -5640,15 +5701,18 @@ $shadow-lg:
                     align-items: center;
                     gap: 12px;
                     padding: 12px 16px;
-                    background: #f5f7fa;
-                    border-radius: 8px;
+                    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+                    border-radius: var(--dt-radius-lg);
+                    border: 1px solid rgba(0, 0, 0, 0.04);
                     min-width: 200px;
-                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-                    transition: all 0.2s ease;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+                    transition: all var(--dt-duration-base) var(--dt-ease-out);
+                    cursor: pointer;
 
                     &:hover {
-                      background: #e9ecf0;
-                      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                      background: linear-gradient(135deg, #e8ecf1 0%, #dbe0e6 100%);
+                      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                      transform: translateY(-1px);
                     }
 
                     &.sending {
@@ -6003,12 +6067,18 @@ $shadow-lg:
               padding: 12px 16px;
               cursor: pointer;
               border-bottom: 1px solid #f0f0f0;
-              transition: all 0.2s ease;
+              transition: all var(--dt-duration-base) var(--dt-ease-out);
               position: relative;
+              border-radius: var(--dt-radius-sm);
+              margin: 0 8px;
 
               &:hover {
-                background: $primary-color-light;
-                transform: translateX(2px);
+                background: linear-gradient(90deg, var(--dt-color-primary-lighter) 0%, transparent 100%);
+                transform: translateX(3px);
+              }
+
+              &:active {
+                transform: translateX(1px) scale(0.98);
               }
 
               .contact-info {

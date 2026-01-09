@@ -45,7 +45,7 @@
           v-for="message in group"
           :key="message.id"
           :message="message"
-          :is-mine="message.senderId === currentUserId"
+          :is-mine="String(message.senderId) === String(currentUserId)"
           :show-sender="isGroup"
           @resend="handleResend"
           @download-file="handleDownload"

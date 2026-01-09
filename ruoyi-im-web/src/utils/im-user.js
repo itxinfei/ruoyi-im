@@ -29,7 +29,7 @@ export function getCurrentUserInfo() {
         nickname: nickName, // 支持不同的命名习惯
         name: displayName, // 统一的显示名称
         displayName: displayName,
-        avatar: userInfo.avatar,
+        avatar: userInfo.avatar || '',
         email: userInfo.email,
         phonenumber: userInfo.phonenumber || userInfo.phone,
         phone: userInfo.phonenumber || userInfo.phone,

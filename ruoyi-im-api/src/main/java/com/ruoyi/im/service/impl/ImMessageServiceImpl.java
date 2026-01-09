@@ -181,6 +181,9 @@ public class ImMessageServiceImpl implements ImMessageService {
             voList.add(vo);
         }
 
+        // 重要：SQL返回的是按ID降序（最新的在前），需要反转以便前端按时间顺序显示
+        java.util.Collections.reverse(voList);
+
         return voList;
     }
 

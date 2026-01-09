@@ -21,7 +21,7 @@
         <!-- 撤回的消息 -->
         <div v-if="message.status === 'recalled' || message.revoked" class="recalled-message">
           <span>{{
-            isSelf ? '你撤回了一条消息' : `${message.senderName || '对方'}撤回了一条消息`
+            isMine ? '你撤回了一条消息' : `${message.senderName || '对方'}撤回了一条消息`
           }}</span>
         </div>
 
@@ -145,7 +145,7 @@
       </div>
 
       <!-- 消息状态 -->
-      <div v-if="isSelf" class="message-status">
+      <div v-if="isMine" class="message-status">
         <transition name="status-fade" mode="out-in">
           <i
             v-if="message.status === 'sending'"
@@ -189,7 +189,7 @@
         <el-tooltip content="转发" placement="top">
           <i class="el-icon-share action-icon" @click.stop="handleForward"></i>
         </el-tooltip>
-        <el-tooltip v-if="isSelf && canRecall" content="撤回" placement="top">
+        <el-tooltip v-if="isMine && canRecall" content="撤回" placement="top">
           <i class="el-icon-refresh-left action-icon" @click.stop="handleRecall"></i>
         </el-tooltip>
         <el-tooltip content="复制" placement="top">
@@ -215,7 +215,7 @@
           <div class="menu-item" @click="handleCopy">
             <i class="el-icon-copy-document"></i> 复制
           </div>
-          <div v-if="isSelf && canRecall" class="menu-item" @click="handleRecall">
+          <div v-if="isMine && canRecall" class="menu-item" @click="handleRecall">
             <i class="el-icon-refresh-left"></i> 撤回
           </div>
           <div class="menu-divider"></div>
@@ -243,7 +243,7 @@ export default {
       type: Object,
       required: true,
     },
-    isSelf: {
+    isMine: {
       type: Boolean,
       default: false,
     },
@@ -280,8 +280,8 @@ export default {
   computed: {
     messageClasses() {
       return {
-        self: this.isSelf,
-        other: !this.isSelf,
+        self: this.isMine,
+        other: !this.isMine,
         [`message-${this.message.type}`]: true,
         'image-loaded': this.imageLoaded,
       }
@@ -366,10 +366,31 @@ export default {
   max-width: 80%;
   opacity: 0;
   transform: translateY(20px);
+  align-items: flex-end;
+  
+  .message-avatar {
+    width: 36px;
+    height: 36px;
+    margin: 0 $spacing-sm;
+    flex-shrink: 0;
+    
+    .avatar-image {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+}
 
   &.self {
     align-self: flex-end;
     flex-direction: row-reverse;
+    
+    .message-avatar {
+      margin-left: 0;
+      margin-right: $spacing-sm;
+    }
 
     .message-content {
       .text-message {
@@ -438,6 +459,11 @@ export default {
 
   &.other {
     align-self: flex-start;
+    
+    .message-avatar {
+      margin-right: $spacing-sm;
+      margin-left: 0;
+    }
 
     .message-header {
       margin-bottom: $spacing-xs;
