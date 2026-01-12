@@ -92,10 +92,15 @@ const groupedApps = computed(() => {
 
 const loadApps = async () => {
   try {
+    console.log('开始获取应用列表...')
     const response = await getAppsByCategory()
+    console.log('API响应:', response)
     if (response && response.code === 200) {
+      console.log('API返回的数据:', response.data)
       allApps.value = response.data || {}
+      console.log('设置后的allApps:', allApps.value)
     } else {
+      console.log('API返回异常，使用默认应用列表')
       // 如果API返回空数据，使用默认应用列表
       allApps.value = getDefaultApps()
     }
@@ -138,8 +143,10 @@ const handleAppClick = app => {
 }
 
 const handleOpenApp = () => {
+  console.log('handleOpenApp被调用，currentApp:', currentApp.value)
   if (!currentApp.value) return
   const { appType, appUrl, name } = currentApp.value
+  console.log('应用信息:', { appType, appUrl, name })
 
   if (!appUrl) {
     ElMessage.warning(`${name}地址未配置`)
@@ -148,6 +155,7 @@ const handleOpenApp = () => {
 
   if (appType === 'ROUTE') {
     // 内部路由跳转 - 使用 Vue Router
+    console.log('准备跳转到路由:', appUrl)
     router.push(appUrl)
     drawerVisible.value = false
   } else if (appType === 'IFRAME') {
@@ -159,6 +167,7 @@ const handleOpenApp = () => {
     window.open(appUrl, '_blank')
   } else {
     // 默认按路由处理
+    console.log('默认按路由处理，跳转到:', appUrl)
     router.push(appUrl)
     drawerVisible.value = false
   }

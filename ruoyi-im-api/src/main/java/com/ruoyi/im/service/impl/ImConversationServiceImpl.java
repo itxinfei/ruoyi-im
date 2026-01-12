@@ -53,6 +53,9 @@ public class ImConversationServiceImpl implements ImConversationService {
     @Autowired
     private ImGroupMapper imGroupMapper;
 
+    @Autowired
+    private com.ruoyi.im.utils.MessageEncryptionUtil encryptionUtil;
+
     @Override
     public List<ImConversationVO> getUserConversations(Long userId) {
         // 查询用户参与的所有会话
@@ -87,6 +90,10 @@ public class ImConversationServiceImpl implements ImConversationService {
                 if (lastMessage != null) {
                     com.ruoyi.im.vo.message.ImMessageVO messageVO = new com.ruoyi.im.vo.message.ImMessageVO();
                     BeanUtils.copyProperties(lastMessage, messageVO);
+                    // 解密消息内容
+                    if (lastMessage.getContent() != null) {
+                        messageVO.setContent(encryptionUtil.decryptMessage(lastMessage.getContent()));
+                    }
                     vo.setLastMessage(messageVO);
                     vo.setLastMessageTime(lastMessage.getCreateTime());
                 }
