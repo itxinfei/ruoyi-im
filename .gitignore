@@ -56,3 +56,4 @@ Thumbs.db
 
 # 忽略 SQL 脚本目录
 sql/
+ruoyi-im-web/src/nul
