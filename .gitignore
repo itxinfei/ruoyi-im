@@ -27,6 +27,12 @@ Thumbs.db
 # 忽略IDEA相关文件
 **/.idea/
 
+# 忽略Claude相关文件
+**/.claude/
+
+# 忽略Trae相关文件
+**/.trae/
+
 
 # 忽略Eclipse相关文件
 /.settings/
