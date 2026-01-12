@@ -181,28 +181,20 @@
         </transition>
       </div>
 
-      <!-- 发送按钮 -->
+      <!-- 发送按钮区域 -->
       <div class="send-button-wrapper">
         <transition name="send-button">
-          <el-button
-            type="primary"
-            :class="{
-              'send-ready': canSend && !sending,
-              'send-sending': sending,
-            }"
-            :disabled="!canSend"
-            :loading="sending"
+          <button
+            v-if="messageText.trim()"
+            class="send-button"
+            :class="{ 'send-sending': sending }"
+            :disabled="!canSend || sending"
             aria-label="发送消息"
             @click="sendMessage"
           >
-            <template v-if="!sending">
-              <i class="el-icon-s-promotion"></i>
-              <span>发送</span>
-            </template>
-            <template v-else>
-              <span>发送中...</span>
-            </template>
-          </el-button>
+            <i v-if="!sending" class="el-icon-s-promotion"></i>
+            <i v-else class="el-icon-loading"></i>
+          </button>
         </transition>
       </div>
     </div>
@@ -826,6 +818,7 @@ onUnmounted(() => {
 
 .input-area {
   padding: $spacing-md $spacing-lg;
+  padding-bottom: 60px; // 为圆形发送按钮留出空间
   position: relative;
 }
 
@@ -951,47 +944,57 @@ onUnmounted(() => {
 }
 
 .send-button-wrapper {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  pointer-events: none;
 }
 
-:deep(.el-button) {
-  padding: $spacing-sm $spacing-xl;
-  border-radius: $border-radius-base;
-  font-weight: 500;
+.send-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, $primary-color 0%, $primary-color-dark 100%);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba($primary-color, 0.3);
   transition: all $transition-base $ease-out;
+  pointer-events: auto;
 
-  i {
-    margin-right: $spacing-xs;
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba($primary-color, 0.4);
   }
 
-  &.send-ready {
-    background: linear-gradient(135deg, $primary-color 0%, $primary-color-active 100%);
-    border: none;
-    box-shadow: 0 4px 12px rgba($primary-color, 0.3);
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba($primary-color, 0.4);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
-  }
-
-  &.send-sending {
-    background: $success-color;
-    border: none;
+  &:active {
+    transform: scale(0.95);
   }
 
   &:disabled {
-    background: $bg-hover;
-    border-color: $border-dark;
+    background: $border-base;
     color: $text-placeholder;
     cursor: not-allowed;
     transform: none !important;
     box-shadow: none !important;
+  }
+
+  &.send-sending {
+    background: $success-color;
+
+    i {
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  i {
+    font-size: 18px;
   }
 }
 

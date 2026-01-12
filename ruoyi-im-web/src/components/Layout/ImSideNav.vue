@@ -126,6 +126,7 @@ import {
   Grid,
   ArrowLeft,
   ArrowRight,
+  Bell,
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -145,6 +146,9 @@ const userInfo = computed(() => {
 // 未读消息数
 const unreadCount = computed(() => store.getters['im/totalUnreadCount'] || 0)
 
+// 未读DING数量
+const unreadDingCount = computed(() => store.getters['im/unreadDingCount'] || 0)
+
 // 主导航菜单
 const mainMenus = computed(() => [
   {
@@ -156,6 +160,7 @@ const mainMenus = computed(() => [
   },
   { key: 'contacts', icon: User, label: '通讯录', badge: 0, route: '/im/contacts' },
   { key: 'group', icon: Grid, label: '群组', badge: 0, route: '/im/group' },
+  { key: 'ding', icon: Bell, label: 'DING', badge: unreadDingCount.value, route: '/im/ding' },
   { key: 'files', icon: Folder, label: '文件', badge: 0, route: '/im/file' },
 ])
 

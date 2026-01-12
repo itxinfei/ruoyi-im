@@ -124,17 +124,6 @@
         <div v-if="activeModule === 'chat'" class="chat-workspace">
           <!-- 会话列表 -->
           <div class="session-panel">
-            <div class="session-header">
-              <el-input
-                v-model="sessionSearch"
-                placeholder="搜索会话..."
-                :prefix-icon="Search"
-                size="small"
-                clearable
-                class="session-search"
-              />
-              <el-button :icon="Plus" size="small" circle @click="showCreateGroupDialog" />
-            </div>
             <div class="session-list">
               <!-- 空状态提示 -->
               <div v-if="filteredSessions.length === 0" class="empty-sessions">
@@ -4754,12 +4743,7 @@ const groupFiles = ref([
 
 // 过滤后的会话列表
 const filteredSessions = computed(() => {
-  if (!sessionSearch.value) return sessions.value
-  const keyword = sessionSearch.value.toLowerCase()
-  return sessions.value.filter(s => {
-    const name = (s.name || '').toLowerCase()
-    return name.includes(keyword)
-  })
+  return sessions.value
 })
 
 // 过滤后的群组成员
@@ -5404,18 +5388,6 @@ $shadow-lg:
           border-right: 1px solid $border-color;
           display: flex;
           flex-direction: column;
-
-          .session-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid $border-color;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-
-            .session-search {
-              flex: 1;
-            }
-          }
 
           .session-list {
             flex: 1;

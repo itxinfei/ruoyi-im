@@ -70,7 +70,7 @@
 // dropdown
 .el-dropdown-menu {
   a {
-    display: block
+    display: block;
   }
 }
 
@@ -163,7 +163,7 @@
     padding: 15px 20px;
     margin-bottom: 0;
     border-bottom: 1px solid #dcdfe6;
-    
+
     > :first-child {
       font-size: 16px;
       color: #303133;
@@ -173,4 +173,47 @@
   &__body {
     padding: 20px;
   }
+}
+
+// ========== Element Plus 下拉菜单修复 ==========
+
+// 修复下拉菜单滚动条样式
+.el-dropdown-menu {
+  // 确保下拉菜单有正确的最大高度和滚动
+  .el-scrollbar__wrap {
+    max-height: none !important;
+  }
+
+  .el-dropdown-menu__item {
+    display: flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 8px 16px;
+    line-height: 1.5;
+
+    i {
+      margin-right: 8px;
+      font-size: 14px;
+    }
+  }
+}
+
+// 修复下拉菜单列表样式
+.el-dropdown__list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+
+  .el-dropdown-menu__item {
+    list-style: none;
+  }
+}
+
+// 确保下拉弹出层有正确的 z-index
+.el-popper {
+  z-index: 2000 !important;
+}
+
+.el-dropdown-popper {
+  z-index: 2000 !important;
 }

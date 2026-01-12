@@ -494,7 +494,7 @@ import {
   User,
   Lock,
   Bell,
-  ShieldCheck,
+  CircleCheck,
   Brush,
   InfoFilled,
   Check,
@@ -502,6 +502,7 @@ import {
 } from '@element-plus/icons-vue'
 import { getCurrentUserInfo, getCurrentUserId, setUserInfo } from '@/utils/im-user'
 import { updateProfile, changePassword as changePasswordApi, uploadAvatar } from '@/api/im/user'
+import { setTheme as applyGlobalTheme, getTheme } from '@/utils/theme'
 
 // 响应式数据
 const activeSection = ref('profile')
@@ -516,7 +517,7 @@ const settingsSections = [
   { key: 'profile', name: '个人信息', icon: User },
   { key: 'privacy', name: '隐私设置', icon: Lock },
   { key: 'notifications', name: '通知设置', icon: Bell },
-  { key: 'security', name: '安全设置', icon: ShieldCheck },
+  { key: 'security', name: '安全设置', icon: CircleCheck },
   { key: 'theme', name: '主题设置', icon: Brush },
   { key: 'about', name: '关于', icon: InfoFilled },
 ]
@@ -682,8 +683,8 @@ const loadSettings = () => {
   currentBackground.value = localStorage.getItem('chatBackground') || 'default'
   fontSize.value = localStorage.getItem('fontSize') || 'medium'
 
-  // 应用主题
-  applyTheme()
+  // 立即应用主题到页面
+  setTheme(currentTheme.value)
 }
 
 const saveProfile = async () => {
@@ -813,10 +814,62 @@ const logout = () => {
   window.location.href = '/login'
 }
 
-const setTheme = theme => {
+const setTheme = (theme) => {
   currentTheme.value = theme
   localStorage.setItem('theme', theme)
-  applyTheme()
+
+  // 使用统一的主题切换函数
+  const root = document.documentElement
+
+  // 处理 auto 选项
+  let actualTheme = theme
+  if (theme === 'auto') {
+    actualTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  }
+
+  // 调用 theme.js 中的 setTheme 函数
+  if (actualTheme === 'dark') {
+    root.classList.add('dark')
+  } else {
+    root.classList.remove('dark')
+  }
+
+  // 应用 CSS 变量
+  if (actualTheme === 'dark') {
+    root.style.setProperty('--background-color', '#1a1b1f')
+    root.style.setProperty('--text-primary', '#ffffff')
+    root.style.setProperty('--text-regular', '#d0d0d0')
+    root.style.setProperty('--border-color', '#363636')
+    root.style.setProperty('--header-background', '#1d1e23')
+    root.style.setProperty('--sidebar-background', '#1d1e23')
+    root.style.setProperty('--chat-background', '#1a1b1f')
+    root.style.setProperty('--message-background', '#1d1e23')
+    root.style.setProperty('--hover-background', '#2a2a2a')
+  } else {
+    root.style.setProperty('--background-color', '#f5f7fa')
+    root.style.setProperty('--text-primary', '#303133')
+    root.style.setProperty('--text-regular', '#606266')
+    root.style.setProperty('--border-color', '#dcdfe6')
+    root.style.setProperty('--header-background', '#ffffff')
+    root.style.setProperty('--sidebar-background', '#ffffff')
+    root.style.setProperty('--chat-background', '#f5f7fa')
+    root.style.setProperty('--message-background', '#ffffff')
+    root.style.setProperty('--hover-background', '#f5f7fa')
+  }
+
+  root.setAttribute('data-theme', actualTheme)
+
+  // 应用主色调
+  root.style.setProperty('--el-color-primary', currentColor.value)
+  root.style.setProperty('--primary-color', currentColor.value)
+
+  // 应用字体大小
+  document.documentElement.setAttribute('data-font-size', fontSize.value)
+
+  // 发送事件通知其他组件主题已更改
+  window.dispatchEvent(
+    new CustomEvent('themeChange', { detail: { theme: actualTheme, isDark: actualTheme === 'dark' } })
+  )
 }
 
 const setColor = color => {

@@ -216,7 +216,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useStore } from 'vuex'
 import {
   Phone,
@@ -234,6 +234,8 @@ import {
   Refresh,
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import webRTCService from '@/utils/webrtc'
+import signalingService from '@/utils/webrtc-signaling'
 
 const props = defineProps({
   modelValue: {
@@ -244,6 +246,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  incomingCall: {
+    type: Object,
+    default: null,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'end', 'accept', 'reject'])
@@ -251,7 +257,7 @@ const emit = defineEmits(['update:modelValue', 'end', 'accept', 'reject'])
 const store = useStore()
 
 // 状态
-const showDialDialog = ref(props.modelValue && !props.targetUserId)
+const showDialDialog = ref(props.modelValue && !props.targetUserId && !props.incomingCall)
 const selectedUser = ref(props.targetUserId)
 const callType = ref('video')
 const isMinimized = ref(false)
@@ -259,6 +265,7 @@ const isLocalExpanded = ref(false)
 const isMuted = ref(false)
 const isVideoOff = ref(false)
 const showChatPanel = ref(false)
+const facingMode = ref('user') // 摄像头方向
 
 // 媒体流
 const localStream = ref(null)
@@ -274,6 +281,7 @@ const callState = ref({
   status: 'idle', // idle | calling | incoming | connected | ended
   type: 'video',
   remoteUser: null,
+  callId: null,
 })
 
 // 计时
@@ -286,6 +294,9 @@ const callMessages = ref([])
 
 // 联系人列表
 const contacts = computed(() => store.state.im.contacts || [])
+
+// 当前用户
+const currentUser = computed(() => store.state.user || {})
 
 // 是否是移动设备
 const isMobile = computed(() => {
@@ -310,27 +321,183 @@ const callStatusText = computed(() => {
 
 // 视频占位符
 const videoPlaceholder = computed(() => {
-  return '/video-placeholder.mp4' // 可以替换为实际的占位视频
+  return '/video-placeholder.mp4'
 })
+
+// 初始化 WebRTC
+const initWebRTC = () => {
+  // 初始化 PeerConnection
+  webRTCService.initPeerConnection()
+
+  // 监听 ICE 候选
+  webRTCService.onIceCandidate = (candidate) => {
+    const targetId = callState.value.remoteUser?.id
+    if (targetId) {
+      signalingService.sendIceCandidate(candidate, targetId)
+    }
+  }
+
+  // 监听远程流
+  webRTCService.onTrack = (stream) => {
+    remoteStream.value = stream
+    nextTick(() => {
+      if (remoteVideoRef.value) {
+        remoteVideoRef.value.srcObject = stream
+      }
+    })
+  }
+
+  // 监听数据通道消息
+  webRTCService.onDataChannelMessage = (data) => {
+    try {
+      const message = typeof data === 'string' ? JSON.parse(data) : data
+      callMessages.value.push({
+        id: Date.now(),
+        content: message.content || message,
+        isSelf: false,
+        timestamp: message.timestamp || Date.now(),
+      })
+      nextTick(() => {
+        if (chatMessagesRef.value) {
+          chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight
+        }
+      })
+    } catch (e) {
+      console.error('解析数据通道消息失败:', e)
+    }
+  }
+
+  // 监听数据通道打开
+  webRTCService.onDataChannelOpen = () => {
+    console.log('通话聊天数据通道已打开')
+  }
+
+  // 初始化信令服务
+  const ws = store.state.im?.websocket
+  if (ws) {
+    signalingService.init(ws)
+
+    // 监听来电
+    signalingService.on('CallIncoming', handleIncomingCall)
+
+    // 监听对方接听
+    signalingService.on('CallAccepted', handleCallAccepted)
+
+    // 监听对方拒绝
+    signalingService.on('CallRejected', handleCallRejected)
+
+    // 监听通话结束
+    signalingService.on('CallEnded', handleCallEnded)
+
+    // 监听 Offer
+    signalingService.on('Offer', handleOffer)
+
+    // 监听 Answer
+    signalingService.on('Answer', handleAnswer)
+
+    // 监听 ICE 候选
+    signalingService.on('IceCandidate', handleIceCandidate)
+
+    // 监听数据通道消息
+    signalingService.on('DataChannelMessage', (data) => {
+      webRTCService.onDataChannelMessage?.(data)
+    })
+  }
+}
+
+// 处理来电
+const handleIncomingCall = async (payload) => {
+  console.log('收到来电:', payload)
+  callState.value = {
+    status: 'incoming',
+    type: payload.callType || 'video',
+    remoteUser: payload.caller,
+    callId: payload.callId,
+  }
+}
+
+// 处理对方接听
+const handleCallAccepted = async (payload) => {
+  console.log('对方已接听:', payload)
+  callState.value.status = 'connected'
+}
+
+// 处理对方拒绝
+const handleCallRejected = (payload) => {
+  console.log('对方已拒绝:', payload)
+  ElMessage.info('对方拒绝了通话请求')
+  endCall()
+}
+
+// 处理通话结束
+const handleCallEnded = (payload) => {
+  console.log('通话已结束:', payload)
+  ElMessage.info('对方已结束通话')
+  endCall()
+}
+
+// 处理 Offer
+const handleOffer = async (payload) => {
+  console.log('收到 Offer:', payload)
+  await webRTCService.setRemoteDescription(payload)
+
+  // 创建 Answer
+  const answer = await webRTCService.createAnswer({
+    offerToReceiveAudio: true,
+    offerToReceiveVideo: callType.value === 'video',
+  })
+
+  // 发送 Answer
+  signalingService.sendAnswer(answer, callState.value.remoteUser?.id)
+}
+
+// 处理 Answer
+const handleAnswer = async (payload) => {
+  console.log('收到 Answer:', payload)
+  await webRTCService.setRemoteDescription(payload)
+  callState.value.status = 'connected'
+}
+
+// 处理 ICE 候选
+const handleIceCandidate = async (payload) => {
+  console.log('收到 ICE 候选:', payload)
+  await webRTCService.addIceCandidate(payload)
+}
 
 // 初始化本地媒体
 const initLocalMedia = async () => {
   try {
     const constraints = {
-      audio: !isMuted.value,
-      video: callType.value === 'video' ? !isVideoOff.value : false,
+      audio: true,
+      video: callType.value === 'video' ? {
+        facingMode: facingMode.value,
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+      } : false,
     }
 
-    const stream = await navigator.mediaDevices.getUserMedia(constraints)
+    const stream = await webRTCService.getLocalStream(constraints)
     localStream.value = stream
+
+    // 添加到 PeerConnection
+    webRTCService.addLocalStream(stream)
 
     await nextTick()
     if (localVideoRef.value) {
       localVideoRef.value.srcObject = stream
     }
+
+    // 如果是发起方，创建数据通道
+    if (callState.value.status === 'calling') {
+      webRTCService.createDataChannel('chat')
+    } else {
+      // 如果是接收方，监听数据通道
+      webRTCService.listenDataChannel()
+    }
   } catch (error) {
     console.error('获取本地媒体失败:', error)
     ElMessage.error('无法访问摄像头或麦克风')
+    throw error
   }
 }
 
@@ -346,39 +513,90 @@ const startCall = async () => {
     status: 'calling',
     type: callType.value,
     remoteUser: user,
+    callId: `call_${Date.now()}_${currentUser.value.id}_${selectedUser.value}`,
   }
 
   showDialDialog.value = false
 
+  // 初始化 WebRTC
+  initWebRTC()
+
   // 初始化本地媒体
   await initLocalMedia()
 
-  // 启动计时器
-  startCallTimer()
+  // 创建 Offer
+  try {
+    const offer = await webRTCService.createOffer({
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: callType.value === 'video',
+    })
 
-  // TODO: 通过 WebSocket 发送通话邀请
-  ElMessage.success('正在呼叫...')
+    // 发送通话邀请和 Offer
+    signalingService.sendCallInvite({
+      callId: callState.value.callId,
+      callType: callType.value,
+      caller: {
+        id: currentUser.value.id,
+        name: currentUser.value.nickname || currentUser.value.username,
+        avatar: currentUser.value.avatar,
+      },
+      targetId: selectedUser.value,
+      sdp: offer.sdp,
+    })
+
+    // 启动计时器
+    startCallTimer()
+    ElMessage.success('正在呼叫...')
+  } catch (error) {
+    console.error('创建 Offer 失败:', error)
+    ElMessage.error('发起通话失败')
+  }
 }
 
 // 接听来电
 const acceptCall = async () => {
-  callState.value.status = 'connected'
+  // 初始化 WebRTC
+  initWebRTC()
 
+  // 初始化本地媒体
   await initLocalMedia()
 
-  // TODO: 建立 WebRTC 连接
+  // 发送接听确认
+  signalingService.sendCallAccepted(
+    callState.value.callId,
+    callState.value.remoteUser?.id
+  )
+
   ElMessage.success('通话已接通')
 }
 
 // 拒绝来电
 const rejectCall = () => {
-  callState.value = { status: 'idle', type: 'video', remoteUser: null }
+  signalingService.sendCallRejected(
+    callState.value.callId,
+    callState.value.remoteUser?.id,
+    '用户拒绝'
+  )
+
+  callState.value = { status: 'idle', type: 'video', remoteUser: null, callId: null }
   emit('reject')
 }
 
 // 结束通话
 const endCall = () => {
+  // 发送结束通话信号
+  if (callState.value.callId && callState.value.remoteUser) {
+    signalingService.sendCallEnded(
+      callState.value.callId,
+      callState.value.remoteUser.id,
+      '主动结束'
+    )
+  }
+
   stopCallTimer()
+
+  // 关闭 WebRTC
+  webRTCService.close()
 
   // 停止媒体流
   if (localStream.value) {
@@ -387,11 +605,11 @@ const endCall = () => {
   }
 
   if (remoteStream.value) {
-    remoteStream.value.getTracks().forEach(track => track.stop())
+    // 远程流不需要手动停止，由 WebRTC 管理
     remoteStream.value = null
   }
 
-  callState.value = { status: 'idle', type: 'video', remoteUser: null }
+  callState.value = { status: 'idle', type: 'video', remoteUser: null, callId: null }
   callDuration.value = 0
 
   emit('end')
@@ -401,34 +619,41 @@ const endCall = () => {
 // 切换静音
 const toggleMute = async () => {
   isMuted.value = !isMuted.value
-
-  if (localStream.value) {
-    localStream.value.getAudioTracks().forEach(track => {
-      track.enabled = !isMuted.value
-    })
-  }
+  webRTCService.toggleAudio(!isMuted.value)
 }
 
 // 切换视频
 const toggleVideo = async () => {
   isVideoOff.value = !isVideoOff.value
-
-  if (localStream.value) {
-    localStream.value.getVideoTracks().forEach(track => {
-      track.enabled = !isVideoOff.value
-    })
-  }
-
-  if (isVideoOff.value) {
-    // 关闭视频后重新初始化，只获取音频
-    await initLocalMedia()
-  }
+  webRTCService.toggleVideo(!isVideoOff.value)
 }
 
 // 切换摄像头（移动端）
 const switchCamera = async () => {
-  // TODO: 实现前后摄像头切换
-  ElMessage.info('切换摄像头')
+  try {
+    facingMode.value = facingMode.value === 'user' ? 'environment' : 'user'
+
+    const constraints = {
+      video: {
+        facingMode: facingMode.value,
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+      },
+    }
+
+    const newStream = await navigator.mediaDevices.getUserMedia(constraints)
+    await webRTCService.replaceVideoTrack(newStream)
+
+    localStream.value = newStream
+    if (localVideoRef.value) {
+      localVideoRef.value.srcObject = newStream
+    }
+
+    ElMessage.success('摄像头已切换')
+  } catch (error) {
+    console.error('切换摄像头失败:', error)
+    ElMessage.error('切换摄像头失败')
+  }
 }
 
 // 切换最小化
@@ -467,6 +692,7 @@ const sendChatMessage = () => {
   const content = chatInput.value.trim()
   if (!content) return
 
+  // 添加到本地列表
   callMessages.value.push({
     id: Date.now(),
     content,
@@ -482,7 +708,14 @@ const sendChatMessage = () => {
     }
   })
 
-  // TODO: 通过 WebRTC 数据通道发送消息
+  // 通过数据通道发送
+  webRTCService.sendDataChannelMessage({
+    content,
+    timestamp: Date.now(),
+  })
+
+  // 也通过信令通道发送（备用）
+  signalingService.sendDataChannelMessage(content, callState.value.remoteUser?.id)
 }
 
 // 启动通话计时器
@@ -508,16 +741,26 @@ const formatTime = seconds => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 
+// 监听来电
+watch(() => props.incomingCall, (newVal) => {
+  if (newVal) {
+    callState.value = {
+      status: 'incoming',
+      type: newVal.type || 'video',
+      remoteUser: newVal.caller,
+      callId: newVal.callId,
+    }
+  }
+})
+
 // 清理
 onUnmounted(() => {
   stopCallTimer()
+  webRTCService.close()
+  signalingService.cleanup()
 
   if (localStream.value) {
     localStream.value.getTracks().forEach(track => track.stop())
-  }
-
-  if (remoteStream.value) {
-    remoteStream.value.getTracks().forEach(track => track.stop())
   }
 })
 

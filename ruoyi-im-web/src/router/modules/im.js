@@ -141,6 +141,17 @@ export default [
         },
       },
       {
+        path: 'ding',
+        name: 'DingList',
+        component: () => import('@/views/im/ding/index.vue'),
+        meta: {
+          title: 'DING消息',
+          icon: 'ding',
+          keepAlive: true,
+          activeMenu: '/im/ding',
+        },
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('@/views/settings/index.vue'),

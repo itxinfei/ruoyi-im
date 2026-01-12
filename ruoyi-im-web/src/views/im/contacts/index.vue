@@ -4,14 +4,6 @@
     <div class="contacts-panel">
       <div class="panel-header">
         <h3 class="panel-title">联系人</h3>
-        <el-input
-          v-model="searchText"
-          placeholder="搜索联系人"
-          :prefix-icon="Search"
-          clearable
-          class="search-input"
-          @input="handleSearch"
-        />
       </div>
 
       <!-- 分类标签（水平排列） -->
@@ -141,18 +133,17 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Search,
   Comment,
   Phone,
   VideoCamera,
   ChatDotRound,
   User,
   UserFilled,
+  StarFilled,
 } from '@element-plus/icons-vue'
 import {
   listContact,
   deleteContact,
-  searchContacts,
   getContactStatus,
   getFriendGroups,
   updateContactRemark,
@@ -163,7 +154,6 @@ import { getCurrentUserId } from '@/utils/im-user'
 
 const router = useRouter()
 
-const searchText = ref('')
 const activeCategory = ref('discover')
 const selectedContact = ref(null)
 const loading = ref(false)
@@ -308,58 +298,9 @@ const loadAllUsers = async () => {
 
 // 获取当前用户ID - 已从工具函数导入
 
-const handleSearch = async () => {
-  if (!searchText.value) {
-    await loadContacts()
-    return
-  }
-  loading.value = true
-  try {
-    const res = await searchContacts(searchText.value)
-    if (res.code === 200) {
-      const dataRows = res.data?.rows || res.rows || []
-      contacts.value = Array.isArray(dataRows)
-        ? dataRows.map(c => ({
-            ...c,
-            online: c.status === 'ACTIVE' || Math.random() > 0.5,
-            starred: Math.random() > 0.7,
-            lastSeen: '刚刚',
-          }))
-        : []
-    } else {
-      const keyword = searchText.value.toLowerCase()
-      contacts.value = contacts.value.filter(c => {
-        const name = c.name?.toLowerCase() || ''
-        const nickname = c.nickname?.toLowerCase() || ''
-        const username = c.username?.toLowerCase() || ''
-        return name.includes(keyword) || nickname.includes(keyword) || username.includes(keyword)
-      })
-    }
-  } catch (error) {
-    console.error('搜索联系人失败:', error)
-    const keyword = searchText.value.toLowerCase()
-    contacts.value = contacts.value.filter(c => {
-      const name = c.name?.toLowerCase() || ''
-      const nickname = c.nickname?.toLowerCase() || ''
-      const username = c.username?.toLowerCase() || ''
-      return name.includes(keyword) || nickname.includes(keyword) || username.includes(keyword)
-    })
-  } finally {
-    loading.value = false
-  }
-}
-
 const filteredContacts = computed(() => {
   const contactList = Array.isArray(contacts.value) ? contacts.value : []
-
-  if (!searchText.value) return contactList
-  const keyword = searchText.value.toLowerCase()
-  return contactList.filter(c => {
-    const name = c.name?.toLowerCase() || ''
-    const nickname = c.nickname?.toLowerCase() || ''
-    const username = c.username?.toLowerCase() || ''
-    return name.includes(keyword) || nickname.includes(keyword) || username.includes(keyword)
-  })
+  return contactList
 })
 
 const onlineContacts = computed(() => {
@@ -385,25 +326,18 @@ const currentContacts = computed(() => {
   }
 })
 
-// 发现用户列表（搜索）
+// 发现用户列表
 const discoverContacts = computed(() => {
   const userList = Array.isArray(allUsers.value) ? allUsers.value : []
-  if (!searchText.value) return userList
-  const keyword = searchText.value.toLowerCase()
-  return userList.filter(u => {
-    const name = u.name?.toLowerCase() || ''
-    const nickname = u.nickname?.toLowerCase() || ''
-    const username = u.username?.toLowerCase() || ''
-    return name.includes(keyword) || nickname.includes(keyword) || username.includes(keyword)
-  })
+  return userList
 })
 
 // 空状态描述
 const emptyDescription = computed(() => {
   if (activeCategory.value === 'discover') {
-    return searchText.value ? '没有找到相关用户' : '暂无其他用户'
+    return '暂无其他用户'
   }
-  return searchText.value ? '没有找到相关联系人' : '暂无联系人'
+  return '暂无联系人'
 })
 
 const selectContact = contact => {
@@ -576,20 +510,6 @@ onMounted(async () => {
       font-size: 18px;
       font-weight: 500;
       color: $text-primary;
-    }
-
-    .search-input {
-      :deep(.el-input__wrapper) {
-        border-radius: 20px;
-        background-color: #f5f5f5;
-        border: none;
-        box-shadow: none;
-
-        &.is-focus {
-          background-color: #fff;
-          border: 1px solid $primary-color;
-        }
-      }
     }
   }
 
