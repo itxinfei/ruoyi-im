@@ -47,3 +47,6 @@ Thumbs.db
 
 # 如果使用了Node.js, 忽略node_modules
 */node_modules/
+
+# 忽略 SQL 脚本目录
+sql/
