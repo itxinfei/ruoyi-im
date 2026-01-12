@@ -4,6 +4,7 @@ import com.ruoyi.im.security.JwtAuthenticationEntryPoint;
 import com.ruoyi.im.security.JwtAuthenticationTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -21,12 +22,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 /**
  * 安全配置
- * 
+ * <p>
+ * 只在Web应用环境中启用，避免在单元测试环境中加载导致MVC基础设施依赖问题
+ *
  * @author ruoyi
  */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@ConditionalOnWebApplication
 public class SecurityConfig {
 
     @Autowired

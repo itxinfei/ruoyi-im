@@ -20,7 +20,7 @@
     </sql>
 
     <select id="selectAllEnabledWords" resultType="java.lang.String">
-        select word from im_sensitive_word where is_enabled = true
+        select word from im_sensitive_word where is_enabled = 1
     </select>
 
     <select id="selectImSensitiveWordById" parameterType="Long" resultMap="ImSensitiveWordResult">

@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.im.mapper.ImGroupMemberMapper">
-    
+
     <resultMap type="com.ruoyi.im.domain.ImGroupMember" id="ImGroupMemberResult">
         <id property="id" column="id"/>
         <result property="groupId" column="group_id"/>
         <result property="userId" column="user_id"/>
+        <result property="nickname" column="nickname"/>
         <result property="role" column="role"/>
-        <result property="groupNickname" column="group_nickname"/>
-        <result property="muteEndTime" column="mute_end_time"/>
-        <result property="inviterId" column="inviter_id"/>
-        <result property="joinedTime" column="joined_time"/>
+        <result property="isMuted" column="is_muted"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
+        <result property="replyToMessageId" column="reply_to_message_id"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <sql id="selectImGroupMemberVo">
-        select id, group_id, user_id, role, group_nickname, mute_end_time, inviter_id, joined_time, create_time, update_time 
+        select id, group_id, user_id, nickname, role, is_muted, is_deleted, deleted_time, reply_to_message_id, create_time, update_time
         from im_group_member
     </sql>
 
@@ -24,13 +25,14 @@
         <include refid="selectImGroupMemberVo"/>
         where id = #{id}
     </select>
-    
+
     <select id="selectImGroupMemberList" parameterType="com.ruoyi.im.domain.ImGroupMember" resultMap="ImGroupMemberResult">
         <include refid="selectImGroupMemberVo"/>
         <where>
             <if test="groupId != null"> and group_id = #{groupId} </if>
             <if test="userId != null"> and user_id = #{userId} </if>
             <if test="role != null and role != ''"> and role = #{role} </if>
+            <if test="isDeleted != null"> and is_deleted = #{isDeleted} </if>
         </where>
     </select>
 
@@ -39,22 +41,22 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="groupId != null">group_id,</if>
             <if test="userId != null">user_id,</if>
+            <if test="nickname != null">nickname,</if>
             <if test="role != null">role,</if>
-            <if test="groupNickname != null">group_nickname,</if>
-            <if test="muteEndTime != null">mute_end_time,</if>
-            <if test="inviterId != null">inviter_id,</if>
-            <if test="joinedTime != null">joined_time,</if>
+            <if test="isMuted != null">is_muted,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="deletedTime != null">deleted_time,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="groupId != null">#{groupId},</if>
             <if test="userId != null">#{userId},</if>
+            <if test="nickname != null">#{nickname},</if>
             <if test="role != null">#{role},</if>
-            <if test="groupNickname != null">#{groupNickname},</if>
-            <if test="muteEndTime != null">#{muteEndTime},</if>
-            <if test="inviterId != null">#{inviterId},</if>
-            <if test="joinedTime != null">#{joinedTime},</if>
+            <if test="isMuted != null">#{isMuted},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="deletedTime != null">#{deletedTime},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
@@ -65,9 +67,11 @@
         <trim prefix="SET" suffixOverrides=",">
             <if test="groupId != null">group_id = #{groupId},</if>
             <if test="userId != null">user_id = #{userId},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
             <if test="role != null and role != ''">role = #{role},</if>
-            <if test="groupNickname != null and groupNickname != ''">group_nickname = #{groupNickname},</if>
-            <if test="muteEndTime != null">mute_end_time = #{muteEndTime},</if>
+            <if test="isMuted != null">is_muted = #{isMuted},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="deletedTime != null">deleted_time = #{deletedTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>
         where id = #{id}
@@ -83,23 +87,32 @@
             #{id}
         </foreach>
     </delete>
-    
+
     <select id="selectImGroupMemberByGroupIdAndUserId" parameterType="map" resultMap="ImGroupMemberResult">
-        select id, group_id, user_id, role, group_nickname, mute_end_time, inviter_id, joined_time, create_time, update_time
-        from im_group_member
+        <include refid="selectImGroupMemberVo"/>
         where group_id = #{groupId} and user_id = #{userId}
     </select>
-    
+
     <select id="selectImGroupMemberListByGroupId" parameterType="Long" resultMap="ImGroupMemberResult">
-        select id, group_id, user_id, role, group_nickname, mute_end_time, inviter_id, joined_time, create_time, update_time
-        from im_group_member
+        <include refid="selectImGroupMemberVo"/>
         where group_id = #{groupId}
     </select>
-    
+
     <delete id="deleteImGroupMemberByGroupIds" parameterType="Long[]">
         delete from im_group_member where group_id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
     </delete>
+
+    <!-- 软删除：更新is_deleted字段而不是物理删除记录 -->
+    <update id="deleteImGroupMemberSoftById" parameterType="Long">
+        update im_group_member set is_deleted = 1, deleted_time = now() where id = #{id}
+    </update>
+
+    <!-- 根据群组和用户软删除 -->
+    <update id="deleteImGroupMemberSoftByGroupIdAndUserId" parameterType="map">
+        update im_group_member set is_deleted = 1, deleted_time = now()
+        where group_id = #{groupId} and user_id = #{userId}
+    </update>
 </mapper>

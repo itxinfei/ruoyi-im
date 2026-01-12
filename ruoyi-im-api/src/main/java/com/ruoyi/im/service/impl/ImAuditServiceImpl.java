@@ -24,13 +24,12 @@ public class ImAuditServiceImpl implements ImAuditService {
 
     @Override
     public Map<String, Object> getAuditLogList(Integer pageNum, Integer pageSize, Long userId,
-                                                 String module, String operationType, String status,
+                                                 String operationType, String operationResult,
                                                  LocalDateTime startTime, LocalDateTime endTime) {
         ImAuditLog query = new ImAuditLog();
         query.setUserId(userId);
-        query.setModule(module);
         query.setOperationType(operationType);
-        query.setStatus(status);
+        query.setOperationResult(operationResult);
 
         List<ImAuditLog> list = imAuditLogMapper.selectImAuditLogList(query);
         int total = list.size();
@@ -81,8 +80,8 @@ public class ImAuditServiceImpl implements ImAuditService {
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalOperations", allLogs.size());
-        stats.put("successCount", allLogs.stream().filter(log -> "1".equals(log.getStatus())).count());
-        stats.put("failCount", allLogs.stream().filter(log -> "0".equals(log.getStatus())).count());
+        stats.put("successCount", allLogs.stream().filter(log -> "SUCCESS".equals(log.getOperationResult())).count());
+        stats.put("failCount", allLogs.stream().filter(log -> "FAILED".equals(log.getOperationResult())).count());
         stats.put("startTime", startTime);
         stats.put("endTime", endTime);
         return stats;
@@ -95,8 +94,8 @@ public class ImAuditServiceImpl implements ImAuditService {
 
     @Override
     public void saveAuditLog(ImAuditLog auditLog) {
-        if (auditLog.getOperationTime() == null) {
-            auditLog.setOperationTime(LocalDateTime.now());
+        if (auditLog.getCreateTime() == null) {
+            auditLog.setCreateTime(LocalDateTime.now());
         }
         imAuditLogMapper.insertImAuditLog(auditLog);
     }

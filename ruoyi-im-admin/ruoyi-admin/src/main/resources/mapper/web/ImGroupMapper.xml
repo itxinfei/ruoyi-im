@@ -8,6 +8,10 @@
         <result property="avatar" column="avatar"/>
         <result property="description" column="description"/>
         <result property="ownerId" column="owner_id"/>
+        <result property="maxMembers" column="max_members"/>
+        <result property="allMuted" column="all_muted"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
@@ -16,13 +20,18 @@
         <id property="id" column="id"/>
         <result property="groupId" column="group_id"/>
         <result property="userId" column="user_id"/>
+        <result property="nickname" column="nickname"/>
         <result property="role" column="role"/>
-        <result property="inviterId" column="inviter_id"/>
-        <result property="joinTime" column="join_time"/>
+        <result property="isMuted" column="is_muted"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <sql id="selectImGroupVo">
-        select id, name, avatar, description, owner_id, create_time, update_time
+        select id, name, avatar, description, owner_id, max_members, all_muted,
+               is_deleted, deleted_time, create_time, update_time
         from im_group
     </sql>
 
@@ -40,8 +49,8 @@
     </select>
 
     <insert id="insertImGroup" parameterType="com.ruoyi.web.domain.ImGroup" useGeneratedKeys="true" keyProperty="id">
-        insert into im_group (name, avatar, description, owner_id, max_members, create_time, update_time)
-        values (#{name}, #{avatar}, #{description}, #{ownerId}, 500, NOW(), NOW())
+        insert into im_group (name, avatar, description, owner_id, max_members, all_muted, create_time, update_time)
+        values (#{name}, #{avatar}, #{description}, #{ownerId}, 500, 0, NOW(), NOW())
     </insert>
 
     <update id="updateImGroup" parameterType="com.ruoyi.web.domain.ImGroup">
@@ -67,15 +76,29 @@
     </update>
 
     <select id="selectGroupMembersByGroupId" parameterType="Long" resultMap="ImGroupMemberResult">
-        select * from im_group_member where group_id = #{groupId}
+        select id, group_id, user_id, nickname, role, is_muted, is_deleted, deleted_time, create_time, update_time
+        from im_group_member
+        where group_id = #{groupId}
     </select>
 
     <insert id="addGroupMember">
-        insert into im_group_member (group_id, user_id, role, inviter_id, join_time)
-        values (#{groupId}, #{userId}, #{role}, #{inviterId}, NOW())
+        insert into im_group_member (group_id, user_id, role, nickname, is_muted, is_deleted, create_time, update_time)
+        values (#{groupId}, #{userId}, #{role}, #{nickname}, 0, 0, NOW(), NOW())
     </insert>
 
     <update id="dismissGroup" parameterType="Long">
         update im_group set is_deleted = 1, deleted_time = NOW() where id = #{groupId}
+    </update>
+
+    <!-- 移除群成员（软删除） -->
+    <update id="removeGroupMember">
+        update im_group_member set is_deleted = 1, deleted_time = NOW()
+        where group_id = #{groupId} and user_id = #{userId}
+    </update>
+
+    <!-- 更新群成员角色 -->
+    <update id="updateGroupMemberRole">
+        update im_group_member set role = #{role}, update_time = NOW()
+        where group_id = #{groupId} and user_id = #{userId}
     </update>
 </mapper>

@@ -4,19 +4,24 @@
 
     <resultMap type="com.ruoyi.im.domain.ImApprovalNode" id="ImApprovalNodeResult">
         <id property="id" column="id"/>
-        <result property="approvalId" column="approval_id"/>
+        <result property="templateId" column="template_id"/>
+        <result property="nodeKey" column="node_key"/>
         <result property="nodeName" column="node_name"/>
         <result property="nodeType" column="node_type"/>
+        <result property="approvers" column="approvers"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="createTime" column="create_time"/>
+        <!-- 非数据库字段 -->
+        <result property="approvalId" column="approval_id"/>
         <result property="approverIds" column="approver_ids"/>
         <result property="approveType" column="approve_type"/>
-        <result property="sortOrder" column="sort_order"/>
         <result property="status" column="status"/>
         <result property="processTime" column="process_time"/>
         <result property="processorId" column="processor_id"/>
     </resultMap>
 
     <sql id="selectImApprovalNodeVo">
-        select id, approval_id, node_name, node_type, approver_ids, approve_type, sort_order, status, process_time, processor_id
+        select id, template_id, node_key, node_name, node_type, approvers, sort_order, create_time
         from im_approval_node
     </sql>
 
@@ -25,83 +30,58 @@
         where id = #{id}
     </select>
 
-    <select id="selectNodesByApprovalId" parameterType="Long" resultMap="ImApprovalNodeResult">
+    <select id="selectNodesByTemplateId" parameterType="Long" resultMap="ImApprovalNodeResult">
         <include refid="selectImApprovalNodeVo"/>
-        where approval_id = #{approvalId}
+        where template_id = #{templateId}
         order by sort_order
-    </select>
-
-    <select id="selectPendingNodesByApprovalId" parameterType="Long" resultMap="ImApprovalNodeResult">
-        <include refid="selectImApprovalNodeVo"/>
-        where approval_id = #{approvalId}
-        and status = 'PENDING'
-        order by sort_order
-    </select>
-
-    <select id="selectFirstNodeByApprovalId" parameterType="Long" resultMap="ImApprovalNodeResult">
-        <include refid="selectImApprovalNodeVo"/>
-        where approval_id = #{approvalId}
-        order by sort_order
-        limit 1
     </select>
 
     <select id="selectImApprovalNodeList" parameterType="com.ruoyi.im.domain.ImApprovalNode" resultMap="ImApprovalNodeResult">
         <include refid="selectImApprovalNodeVo"/>
         <where>
-            <if test="approvalId != null">and approval_id = #{approvalId}</if>
-            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="templateId != null">and template_id = #{templateId}</if>
+            <if test="nodeType != null and nodeType != ''">and node_type = #{nodeType}</if>
         </where>
         order by sort_order
-    </select>
-
-    <select id="selectPendingNodesByApproverId" parameterType="Long" resultMap="ImApprovalNodeResult">
-        <include refid="selectImApprovalNodeVo"/>
-        where status = 'PENDING'
-        and find_in_set(#{approverId}, approver_ids)
-        order by approval_id, sort_order
     </select>
 
     <insert id="insertImApprovalNode" parameterType="com.ruoyi.im.domain.ImApprovalNode" useGeneratedKeys="true" keyProperty="id">
         insert into im_approval_node
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="approvalId != null">approval_id,</if>
+            <if test="templateId != null">template_id,</if>
+            <if test="nodeKey != null and nodeKey != ''">node_key,</if>
             <if test="nodeName != null and nodeName != ''">node_name,</if>
             <if test="nodeType != null and nodeType != ''">node_type,</if>
-            <if test="approverIds != null and approverIds != ''">approver_ids,</if>
-            <if test="approveType != null and approveType != ''">approve_type,</if>
+            <if test="approvers != null">approvers,</if>
             <if test="sortOrder != null">sort_order,</if>
-            <if test="status != null">status,</if>
-            <if test="processTime != null">process_time,</if>
-            <if test="processorId != null">processor_id,</if>
+            <if test="createTime != null">create_time,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="approvalId != null">#{approvalId},</if>
+            <if test="templateId != null">#{templateId},</if>
+            <if test="nodeKey != null and nodeKey != ''">#{nodeKey},</if>
             <if test="nodeName != null and nodeName != ''">#{nodeName},</if>
             <if test="nodeType != null and nodeType != ''">#{nodeType},</if>
-            <if test="approverIds != null and approverIds != ''">#{approverIds},</if>
-            <if test="approveType != null and approveType != ''">#{approveType},</if>
+            <if test="approvers != null">#{approvers},</if>
             <if test="sortOrder != null">#{sortOrder},</if>
-            <if test="status != null">#{status},</if>
-            <if test="processTime != null">#{processTime},</if>
-            <if test="processorId != null">#{processorId},</if>
+            <if test="createTime != null">#{createTime},</if>
         </trim>
     </insert>
 
     <insert id="batchInsertNodes" parameterType="java.util.List">
-        insert into im_approval_node (approval_id, node_name, node_type, approver_ids, approve_type, sort_order, status)
+        insert into im_approval_node (template_id, node_key, node_name, node_type, approvers, sort_order, create_time)
         values
         <foreach collection="list" item="item" separator=",">
-            (#{item.approvalId}, #{item.nodeName}, #{item.nodeType}, #{item.approverIds}, #{item.approveType}, #{item.sortOrder}, #{item.status})
+            (#{item.templateId}, #{item.nodeKey}, #{item.nodeName}, #{item.nodeType}, #{item.approvers}, #{item.sortOrder}, NOW())
         </foreach>
     </insert>
 
     <update id="updateImApprovalNode" parameterType="com.ruoyi.im.domain.ImApprovalNode">
         update im_approval_node
         <trim prefix="SET" suffixOverrides=",">
-            <if test="approverIds != null">approver_ids = #{approverIds},</if>
-            <if test="status != null">status = #{status},</if>
-            <if test="processTime != null">process_time = #{processTime},</if>
-            <if test="processorId != null">processor_id = #{processorId},</if>
+            <if test="nodeName != null and nodeName != ''">node_name = #{nodeName},</if>
+            <if test="nodeType != null and nodeType != ''">node_type = #{nodeType},</if>
+            <if test="approvers != null">approvers = #{approvers},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
         </trim>
         where id = #{id}
     </update>
@@ -110,7 +90,7 @@
         delete from im_approval_node where id = #{id}
     </delete>
 
-    <delete id="deleteNodesByApprovalId" parameterType="Long">
-        delete from im_approval_node where approval_id = #{approvalId}
+    <delete id="deleteNodesByTemplateId" parameterType="Long">
+        delete from im_approval_node where template_id = #{templateId}
     </delete>
 </mapper>

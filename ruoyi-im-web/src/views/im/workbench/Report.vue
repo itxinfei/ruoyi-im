@@ -13,10 +13,7 @@
         :key="tab.key"
         class="report-tab"
         :class="{ active: activeTab === tab.key }"
-        @click="
-          activeTab = tab.key
-          fetchReports()
-        "
+        @click="switchTab(tab.key)"
       >
         {{ tab.label }}
         <span v-if="tab.count > 0" class="tab-count">{{ tab.count }}</span>
@@ -347,6 +344,11 @@ const reportFormRules = {
 }
 
 // 方法
+const switchTab = key => {
+  activeTab.value = key
+  fetchReports()
+}
+
 const fetchReports = async () => {
   try {
     // 调用API获取报告列表

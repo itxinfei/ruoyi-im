@@ -5,15 +5,14 @@
     <resultMap type="com.ruoyi.im.domain.ImApprovalFormData" id="ImApprovalFormDataResult">
         <id property="id" column="id"/>
         <result property="approvalId" column="approval_id"/>
-        <result property="fieldName" column="field_name"/>
-        <result property="fieldLabel" column="field_label"/>
+        <result property="fieldKey" column="field_key"/>
         <result property="fieldValue" column="field_value"/>
         <result property="fieldType" column="field_type"/>
         <result property="createTime" column="create_time"/>
     </resultMap>
 
     <sql id="selectImApprovalFormDataVo">
-        select id, approval_id, field_name, field_label, field_value, field_type, create_time
+        select id, approval_id, field_key, field_value, field_type, create_time
         from im_approval_form_data
     </sql>
 
@@ -41,16 +40,14 @@
         insert into im_approval_form_data
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="approvalId != null">approval_id,</if>
-            <if test="fieldName != null and fieldName != ''">field_name,</if>
-            <if test="fieldLabel != null">field_label,</if>
+            <if test="fieldKey != null and fieldKey != ''">field_key,</if>
             <if test="fieldValue != null">field_value,</if>
             <if test="fieldType != null">field_type,</if>
             <if test="createTime != null">create_time,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="approvalId != null">#{approvalId},</if>
-            <if test="fieldName != null and fieldName != ''">#{fieldName},</if>
-            <if test="fieldLabel != null">#{fieldLabel},</if>
+            <if test="fieldKey != null and fieldKey != ''">#{fieldKey},</if>
             <if test="fieldValue != null">#{fieldValue},</if>
             <if test="fieldType != null">#{fieldType},</if>
             <if test="createTime != null">#{createTime},</if>

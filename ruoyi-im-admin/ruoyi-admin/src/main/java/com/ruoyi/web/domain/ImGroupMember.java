@@ -5,11 +5,10 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
-
  * 群组成员实体
  *
- * 用于存储IM系统中群组成员的详细信息，包括成员角色、群内昵称、禁言状态等
- * 支持群组成员的权限管理（群主、管理员、普通成员）和成员行为控制（禁言、踢出等）
+ * 对应数据库表 im_group_member
+ * 实际数据库字段：id, group_id, user_id, nickname, role, is_muted, is_deleted, deleted_time, create_time, update_time, reply_to_message_id
  *
  * @author ruoyi
  */
@@ -33,34 +32,37 @@ public class ImGroupMember implements Serializable {
     private Long userId;
 
     /**
+     * 群昵称，用户在该群组中显示的昵称
+     */
+    private String nickname;
+
+    /**
      * 角色（OWNER群主 ADMIN管理员 MEMBER普通成员）
-     * OWNER: 群组创建者，拥有最高权限，可以解散群组、移除成员、设置管理员等
-     * ADMIN: 群组管理员，拥有部分管理权限，可以禁言成员、邀请成员等
-     * MEMBER: 普通成员，只能发送消息和接收消息
+     * OWNER: 群组创建者，拥有最高权限
+     * ADMIN: 群组管理员，拥有部分管理权限
+     * MEMBER: 普通成员
      */
     private String role;
 
     /**
-     * 群内昵称，用户在该群组中显示的昵称，可能与系统昵称不同
+     * 是否禁言: 0否 1是
      */
-    private String groupNickname;
+    private Integer isMuted;
 
     /**
-     * 禁言止时间，成员被禁言的截止时间，超过该时间后自动解除禁言
-     * 如果为null，表示未被禁言
+     * 是否删除（退群）: 0否 1是
      */
-    private LocalDateTime muteEndTime;
+    private Integer isDeleted;
 
     /**
-     * 邀请人用户ID，邀请该用户加入群组的用户ID
-     * 如果为null，表示该用户是群组创建者
+     * 删除（退群）时间
      */
-    private Long inviterId;
+    private LocalDateTime deletedTime;
 
     /**
-     * 加入时间，用户加入群组的时间
+     * 回复消息ID（可能用于回复功能）
      */
-    private LocalDateTime joinedTime;
+    private Integer replyToMessageId;
 
     /**
      * 创建时间，群组成员记录创建的时间
@@ -106,6 +108,14 @@ public class ImGroupMember implements Serializable {
         this.userId = userId;
     }
 
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
     public String getRole() {
         return role;
     }
@@ -114,36 +124,36 @@ public class ImGroupMember implements Serializable {
         this.role = role;
     }
 
-    public String getGroupNickname() {
-        return groupNickname;
+    public Integer getIsMuted() {
+        return isMuted;
     }
 
-    public void setGroupNickname(String groupNickname) {
-        this.groupNickname = groupNickname;
+    public void setIsMuted(Integer isMuted) {
+        this.isMuted = isMuted;
     }
 
-    public LocalDateTime getMuteEndTime() {
-        return muteEndTime;
+    public Integer getIsDeleted() {
+        return isDeleted;
     }
 
-    public void setMuteEndTime(LocalDateTime muteEndTime) {
-        this.muteEndTime = muteEndTime;
+    public void setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
     }
 
-    public Long getInviterId() {
-        return inviterId;
+    public LocalDateTime getDeletedTime() {
+        return deletedTime;
     }
 
-    public void setInviterId(Long inviterId) {
-        this.inviterId = inviterId;
+    public void setDeletedTime(LocalDateTime deletedTime) {
+        this.deletedTime = deletedTime;
     }
 
-    public LocalDateTime getJoinedTime() {
-        return joinedTime;
+    public Integer getReplyToMessageId() {
+        return replyToMessageId;
     }
 
-    public void setJoinedTime(LocalDateTime joinedTime) {
-        this.joinedTime = joinedTime;
+    public void setReplyToMessageId(Integer replyToMessageId) {
+        this.replyToMessageId = replyToMessageId;
     }
 
     public LocalDateTime getCreateTime() {

@@ -26,6 +26,7 @@ public class ImWebSocketConfig {
      * 仅在Web应用环境中创建此Bean
      */
     @Bean
+    @ConditionalOnWebApplication
     public ServerEndpointExporter serverEndpointExporter() {
         return new ServerEndpointExporter();
     }

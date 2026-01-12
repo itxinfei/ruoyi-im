@@ -104,9 +104,9 @@ public class ImGroup implements Serializable {
     private String type;
 
     /**
-     * 全员禁言（非数据库字段）
+     * 全员禁言：0=否, 1=是
      */
-    @TableField(exist = false)
+    @TableField("all_muted")
     private Integer allMuted;
 
     /**

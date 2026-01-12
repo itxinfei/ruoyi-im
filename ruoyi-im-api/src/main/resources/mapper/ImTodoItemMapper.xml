@@ -30,7 +30,7 @@
         <where>
             <if test="userId != null">and user_id = #{userId}</if>
             <if test="status != null and status != ''">and status = #{status}</if>
-            <if test="priority != null and priority != ''">and priority = #{priority}</if>
+            <if test="priority != null">and priority = #{priority}</if>
         </where>
         order by create_time desc
     </select>

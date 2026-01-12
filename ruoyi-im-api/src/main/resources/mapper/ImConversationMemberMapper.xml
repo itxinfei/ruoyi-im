@@ -6,10 +6,13 @@
         <id column="id" property="id" />
         <result column="conversation_id" property="conversationId" />
         <result column="user_id" property="userId" />
+        <result column="nickname" property="nickname" />
+        <result column="role" property="role" />
         <result column="unread_count" property="unreadCount" />
-        <result column="last_read_message_id" property="lastReadMessageId" />
         <result column="is_pinned" property="isPinned" />
         <result column="is_muted" property="isMuted" />
+        <result column="last_read_message_id" property="lastReadMessageId" />
+        <result column="last_read_time" property="lastReadTime" />
         <result column="is_deleted" property="isDeleted" />
         <result column="deleted_time" property="deletedTime" />
         <result column="create_time" property="createTime" />
@@ -17,7 +20,8 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, conversation_id, user_id, unread_count, last_read_message_id, is_pinned, is_muted, is_deleted, deleted_time, create_time, update_time
+        id, conversation_id, user_id, nickname, role, unread_count, is_pinned, is_muted,
+        last_read_message_id, last_read_time, is_deleted, deleted_time, create_time, update_time
     </sql>
 
     <select id="selectByConversationIdAndUserId" resultMap="BaseResultMap">
@@ -59,7 +63,9 @@
 
     <update id="updateLastReadMessageId">
         UPDATE im_conversation_member
-        SET last_read_message_id = #{lastReadMessageId}, update_time = NOW()
+        SET last_read_message_id = #{lastReadMessageId},
+            last_read_time = NOW(),
+            update_time = NOW()
         WHERE conversation_id = #{conversationId} AND user_id = #{userId}
     </update>
 
@@ -77,7 +83,7 @@
 
     <update id="markAsDeleted">
         UPDATE im_conversation_member
-        SET is_deleted = 1, update_time = NOW()
+        SET is_deleted = 1, deleted_time = NOW(), update_time = NOW()
         WHERE conversation_id = #{conversationId} AND user_id = #{userId}
     </update>
 
@@ -87,8 +93,14 @@
     </delete>
 
     <insert id="insertImConversationMember" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO im_conversation_member (conversation_id, user_id, unread_count, is_pinned, is_muted, is_deleted, create_time, update_time)
-        VALUES (#{conversationId}, #{userId}, #{unreadCount}, #{isPinned}, #{isMuted}, #{isDeleted}, #{createTime}, #{updateTime})
+        INSERT INTO im_conversation_member (
+            conversation_id, user_id, nickname, role, unread_count,
+            is_pinned, is_muted, is_deleted, create_time, update_time
+        )
+        VALUES (
+            #{conversationId}, #{userId}, #{nickname}, #{role}, #{unreadCount},
+            #{isPinned}, #{isMuted}, #{isDeleted}, NOW(), NOW()
+        )
     </insert>
 
 </mapper>

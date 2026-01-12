@@ -151,7 +151,7 @@
           type="textarea"
           :rows="inputRows"
           :maxlength="maxLength"
-          placeholder="请输入消息，按Enter发送，Shift+Enter换行"
+          placeholder="输入消息..."
           resize="none"
           class="custom-textarea"
           @keydown="handleKeyDown"
@@ -325,7 +325,7 @@ const emit = defineEmits([
 
 // 响应式数据
 const messageText = ref('')
-const inputRows = ref(3)
+const inputRows = ref(5)
 const maxLength = ref(1000)
 const sending = ref(false)
 const showEmojiPicker = ref(false)
@@ -391,7 +391,7 @@ const handleInput = () => {
     const textarea = textInput.value.$el.querySelector('textarea')
     if (textarea) {
       const lines = messageText.value.split('\n').length
-      const newRows = Math.min(Math.max(lines, 3), 6)
+      const newRows = Math.min(Math.max(lines, 5), 10)
       if (newRows !== inputRows.value) {
         inputRows.value = newRows
       }
@@ -456,7 +456,7 @@ const sendMessage = async () => {
     })
 
     messageText.value = ''
-    inputRows.value = 3
+    inputRows.value = 5
     mentionedMembers.value = []
 
     if (props.replyMessage) {
@@ -817,7 +817,7 @@ onUnmounted(() => {
 }
 
 .input-area {
-  padding: $spacing-md $spacing-lg;
+  padding: $spacing-md 0;
   padding-bottom: 60px; // 为圆形发送按钮留出空间
   position: relative;
 }
@@ -875,25 +875,34 @@ onUnmounted(() => {
 
 .text-input-wrapper {
   position: relative;
-  margin-bottom: $spacing-md;
+  margin-bottom: 0;
 }
 
 .custom-textarea {
   :deep(.el-textarea__inner) {
-    border-radius: $border-radius-base;
-    border: 2px solid $border-base;
+    border-radius: 8px;
+    border: 1px solid #e8e8e8;
     transition: all $transition-base $ease-base;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.6;
-    padding: $spacing-sm $spacing-md;
+    padding: 12px 16px;
+    margin: 0;
+    background-color: #f8f9fa;
+    color: #1f1f1f;
+    resize: none;
 
     &:focus {
-      border-color: $primary-color;
-      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+      border-color: #1890ff;
+      background-color: #fff;
+      box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
     }
 
     &:hover {
-      border-color: $border-dark;
+      border-color: #d9d9d9;
+    }
+
+    &::placeholder {
+      color: #8c8c8c;
     }
   }
 }

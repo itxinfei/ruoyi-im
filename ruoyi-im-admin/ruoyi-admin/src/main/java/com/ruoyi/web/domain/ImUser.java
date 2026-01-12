@@ -42,8 +42,8 @@ public class ImUser extends BaseEntity implements Serializable {
     /** 性别: 0=未知, 1=男, 2=女 */
     private Integer gender;
 
-    /** 状态: ACTIVE=在线, OFFLINE=离线 */
-    private String status;
+    /** 状态: 0=禁用, 1=正常 */
+    private Integer status;
 
     /** 签名，用户个人简介或个性签名 */
     private String signature;
@@ -116,11 +116,11 @@ public class ImUser extends BaseEntity implements Serializable {
         this.gender = gender;
     }
 
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 

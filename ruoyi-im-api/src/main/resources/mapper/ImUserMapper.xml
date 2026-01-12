@@ -38,7 +38,7 @@
             <if test="nickname != null and nickname != ''"> and nickname like concat('%', #{nickname}, '%') </if>
             <if test="email != null and email != ''"> and email = #{email} </if>
             <if test="mobile != null and mobile != ''"> and mobile = #{mobile} </if>
-            <if test="status != null and status != ''"> and status = #{status} </if>
+            <if test="status != null"> and status = #{status} </if>
         </where>
     </select>
 
@@ -83,7 +83,7 @@
             <if test="email != null and email != ''">email = #{email},</if>
             <if test="mobile != null and mobile != ''">mobile = #{mobile},</if>
             <if test="avatar != null and avatar != ''">avatar = #{avatar},</if>
-            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="status != null">status = #{status},</if>
             <if test="gender != null">gender = #{gender},</if>
             <if test="signature != null">signature = #{signature},</if>
             <if test="lastOnlineTime != null">last_online_time = #{lastOnlineTime},</if>
@@ -150,7 +150,7 @@
             <if test="imUser.nickname != null and imUser.nickname != ''"> and nickname like concat('%', #{imUser.nickname}, '%') </if>
             <if test="imUser.email != null and imUser.email != ''"> and email = #{imUser.email} </if>
             <if test="imUser.mobile != null and imUser.mobile != ''"> and mobile = #{imUser.mobile} </if>
-            <if test="imUser.status != null and imUser.status != ''"> and status = #{imUser.status} </if>
+            <if test="imUser.status != null"> and status = #{imUser.status} </if>
         </where>
         order by id desc
         limit #{limit} offset #{offset}

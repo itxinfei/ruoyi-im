@@ -1374,6 +1374,9 @@
       @close="notificationVisible = false"
     />
 
+    <!-- 系统设置对话框 -->
+    <system-settings v-model="systemSettingsVisible" @save="handleSettingsSave" />
+
     <!-- 主题设置对话框 -->
     <el-dialog v-model="themeSettingsVisible" title="系统设置" width="600px" :append-to-body="true">
       <el-tabs v-model="settingsTab" class="settings-tabs">
@@ -1767,6 +1770,7 @@ import {
 } from '@/api/im/contact'
 import { getDepartmentTree, getDepartmentMembers } from '@/api/im/organization'
 import NotificationPanel from '@/components/Notification/NotificationPanel.vue'
+import SystemSettings from '@/views/settings/index.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -3293,7 +3297,7 @@ const openApp = appKey => {
 }
 
 const showSettings = () => {
-  themeSettingsVisible.value = true
+  systemSettingsVisible.value = true
 }
 
 const toggleNotification = () => {
@@ -3821,6 +3825,8 @@ const forwardTargets = ref([])
 const filePreviewDialogVisible = ref(false)
 const previewingFile = ref(null)
 
+const systemSettingsVisible = ref(false)
+
 // 主题设置
 const themeSettingsVisible = ref(false)
 const settingsTab = ref('interface')
@@ -3851,6 +3857,10 @@ const saveSettings = () => {
   localStorage.setItem('autoCleanReadMessages', String(autoCleanReadMessages.value))
   ElMessage.success('设置保存成功')
   themeSettingsVisible.value = false
+}
+
+const handleSettingsSave = () => {
+  ElMessage.success('系统设置已保存')
 }
 
 // 显示设备管理
@@ -4511,8 +4521,8 @@ const handleUserCommand = async command => {
     }
     profileDialogVisible.value = true
   } else if (command === 'settings') {
-    // 导航到设置页面
-    router.push('/settings')
+    // 打开系统设置对话框
+    systemSettingsVisible.value = true
   } else if (command === 'status') {
     // 显示在线状态选择对话框
     showOnlineStatusDialog()
@@ -5004,7 +5014,6 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 @use 'sass:color';
-@import '@/styles/design-tokens.scss';
 
 // Web IM 布局变量
 $nav-width: 180px;
@@ -5543,6 +5552,8 @@ $shadow-lg:
 
             .message-area {
               flex: 1;
+              display: flex;
+              flex-direction: column;
               padding: 20px 40px;
               overflow-y: auto;
               background: #fafafa;
@@ -5569,36 +5580,60 @@ $shadow-lg:
               .message-item {
                 display: flex;
                 margin-bottom: 16px;
-                gap: 10px;
+                gap: 12px;
                 padding: 0 16px;
 
+                /* 发送方消息 - 气泡在左边，头像在右边（整个靠右对齐） */
                 &.isOwn {
-                  flex-direction: row-reverse;
+                  align-self: flex-end;
+                  flex-direction: row;
+
+                  .message-avatar {
+                    margin-left: 12px;
+                    margin-right: 0;
+                  }
 
                   .message-content {
+                    display: flex;
+                    flex-direction: column;
                     align-items: flex-end;
+                  }
 
-                    .message-bubble {
-                      background: linear-gradient(135deg, var(--dt-color-primary) 0%, #4096ff 100%);
-                      color: #fff;
-                      border-bottom-left-radius: var(--dt-radius-message);
-                      border-bottom-right-radius: var(--dt-radius-message-tail);
-                      box-shadow: var(--dt-shadow-message-sent);
+                  .message-bubble {
+                    /* 钉钉风格蓝色 #1890FF */
+                    background: #1890ff !important;
+                    color: #fff !important;
+                    border-radius: 8px;
+                    border-bottom-right-radius: 2px;
+                    border: none;
+                    box-shadow: none;
+
+                    &:hover {
+                      background: #40a9ff !important;
+                    }
+
+                    // 链接样式
+                    a {
+                      color: rgba(255, 255, 255, 0.9);
+                      text-decoration: underline;
 
                       &:hover {
-                        box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
-                      }
-
-                      // 链接样式
-                      a {
-                        color: rgba(255, 255, 255, 0.9);
-                        text-decoration: underline;
-
-                        &:hover {
-                          color: #fff;
-                        }
+                        color: #fff;
                       }
                     }
+                  }
+                }
+
+                /* 接收方消息 - 头像在左边，消息在右边 */
+                &:not(.isOwn) {
+                  align-self: flex-start;
+
+                  .message-avatar {
+                    margin-right: 12px;
+                  }
+
+                  .message-content {
+                    align-items: flex-start;
                   }
                 }
 
@@ -5607,27 +5642,28 @@ $shadow-lg:
 
                   .sender-name {
                     font-size: 12px;
-                    color: $text-tertiary;
+                    color: #8c8c8c;
                     margin-bottom: 4px;
                     margin-left: 6px;
                   }
 
+                  /* 接收方消息气泡 - 白色 */
                   .message-bubble {
                     position: relative;
-                    padding: 12px 16px;
-                    border-radius: var(--dt-radius-message);
-                    border-bottom-left-radius: var(--dt-radius-message-tail);
-                    background: #f5f7fa;
-                    color: $text-primary;
+                    padding: 10px 14px;
+                    border-radius: 8px;
+                    border-bottom-left-radius: 2px;
+                    background: #ffffff;
+                    color: #333333;
                     font-size: 14px;
                     line-height: 1.6;
                     word-break: break-word;
-                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+                    border: 1px solid #e8e8e8;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
                     transition: all var(--dt-duration-base) var(--dt-ease-out);
 
                     &:hover {
-                      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                      transform: translateY(-1px);
+                      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
                     }
 
                     &.sending {
@@ -5636,7 +5672,7 @@ $shadow-lg:
 
                     &.failed {
                       background: #fff1f0;
-                      color: $danger-color;
+                      color: #ff4d4f;
                       border: 1px solid #ffccc7;
                       box-shadow: 0 1px 3px rgba(255, 77, 79, 0.15);
                     }
@@ -5765,6 +5801,10 @@ $shadow-lg:
                         animation: spin 1s linear infinite;
                       }
 
+                      &.sent {
+                        color: $success-color;
+                      }
+
                       &.failed {
                         color: $danger-color;
                         cursor: pointer;
@@ -5773,12 +5813,16 @@ $shadow-lg:
                           color: #d9363e;
                         }
                       }
-
-                      &.sent {
-                        color: $success-color;
-                      }
                     }
                   }
+                }
+              }
+
+              /* 发送方消息时间戳右对齐 */
+              .message-item.isOwn {
+                .message-time {
+                  align-self: flex-end;
+                  flex-direction: row-reverse;
                 }
               }
             }

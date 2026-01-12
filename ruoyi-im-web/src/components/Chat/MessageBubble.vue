@@ -360,19 +360,24 @@ export default {
 
 .message-bubble {
   display: flex;
-  margin-bottom: $spacing-sm;
-  max-width: 80%;
-  opacity: 0;
-  transform: translateY(20px);
+  margin-bottom: 16px;
+  max-width: 70%;
   align-items: flex-start;
   position: relative;
+  animation: messageSlideIn 0.3s ease-out forwards;
 
   .message-avatar {
-    width: 36px;
-    height: 36px;
-    margin: 0 $spacing-sm;
+    width: 40px;
+    height: 40px;
     flex-shrink: 0;
-    order: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
 
     .avatar-image {
       width: 100%;
@@ -386,38 +391,45 @@ export default {
     display: flex;
     flex-direction: column;
     max-width: 100%;
-    order: 2;
   }
 
-  // 接收方消息样式
+  // ==================== 接收方消息样式（对方发送的消息）====================
+  // 头像在左边，消息在右边
   &.other {
-    align-self: flex-start;
+    flex-direction: row;
 
     .message-avatar {
-      margin-right: $spacing-sm;
+      order: 1;
+      margin-right: 12px;
       margin-left: 0;
     }
 
+    .message-wrapper {
+      order: 2;
+      align-items: flex-start;
+    }
+
     .message-header {
-      margin-bottom: 4px;
-      margin-left: 2px;
+      margin-bottom: 6px;
+      margin-left: 0;
 
       .sender-name {
-        font-size: $font-size-xs;
-        color: $text-secondary;
-        font-weight: $font-weight-medium;
+        font-size: 13px;
+        color: #8c8c8c;
+        font-weight: 500;
       }
     }
   }
 
-  // 发送方消息样式
+  // ==================== 发送方消息样式（我发送的消息）====================
+  // 头像在右边，消息在左边
   &.self {
+    flex-direction: row;
     align-self: flex-end;
-    flex-direction: row-reverse;
 
     .message-avatar {
       order: 2;
-      margin-left: $spacing-sm;
+      margin-left: 12px;
       margin-right: 0;
     }
 
@@ -428,37 +440,50 @@ export default {
   }
 }
 
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ==================== 消息内容样式 ====================
+
 .message-content {
   position: relative;
 
-  // 文本消息气泡
+  // 文本消息气泡 - 默认（接收方）
   .text-message {
     position: relative;
-    background-color: $bg-white;
-    padding: 8px 12px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease;
+    background-color: #f5f5f5;
+    padding: 10px 14px;
+    border-radius: 8px;
     display: inline-block;
     max-width: 100%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 
     .text-content {
-      color: $text-primary;
-      line-height: 1.5;
+      color: #1f1f1f;
+      line-height: 1.6;
       white-space: pre-wrap;
       word-wrap: break-word;
-      font-size: $font-size-base;
+      font-size: 15px;
     }
 
     // 接收方小三角（左侧）
     &::before {
       content: '';
       position: absolute;
-      top: 12px;
-      left: -10px;
+      top: 14px;
+      left: -6px;
       width: 0;
       height: 0;
-      border: 5px solid transparent;
-      border-right-color: $bg-white;
+      border: 6px solid transparent;
+      border-right-color: #f5f5f5;
     }
   }
 
@@ -466,11 +491,11 @@ export default {
   .image-message {
     .image-container {
       position: relative;
-      border-radius: 4px 12px 12px 12px;
+      border-radius: 8px;
       overflow: hidden;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 
       &:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -526,22 +551,25 @@ export default {
     .file-container {
       display: flex;
       align-items: center;
-      background: #fff;
-      border-radius: 4px 12px 12px 12px;
-      padding: 10px 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px 14px;
       cursor: pointer;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      min-width: 220px;
+      min-width: 240px;
       transition: all 0.2s ease;
+      border: 1px solid #e8e8e8;
 
       &:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background: #f0f2f5;
+        border-color: #d9d9d9;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       }
 
       .file-icon {
         font-size: 28px;
-        color: $primary-color;
-        margin-right: 10px;
+        color: #1890ff;
+        margin-right: 12px;
       }
 
       .file-info {
@@ -549,24 +577,25 @@ export default {
         min-width: 0;
 
         .file-name {
-          font-size: $font-size-base;
-          color: $text-primary;
+          font-size: 14px;
+          color: #1f1f1f;
           margin-bottom: 2px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          font-weight: 500;
         }
 
         .file-size {
-          font-size: $font-size-xs;
-          color: $text-tertiary;
+          font-size: 12px;
+          color: #8c8c8c;
         }
       }
 
       .file-action {
-        margin-left: 10px;
+        margin-left: 12px;
         font-size: 18px;
-        color: $primary-color;
+        color: #1890ff;
       }
     }
   }
@@ -576,22 +605,23 @@ export default {
     .voice-container {
       display: flex;
       align-items: center;
-      background: #fff;
-      border-radius: 4px 12px 12px 12px;
-      padding: 8px 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 10px 14px;
       cursor: pointer;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      min-width: 140px;
+      min-width: 150px;
       transition: all 0.2s ease;
+      border: 1px solid #e8e8e8;
 
       &:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background: #f0f2f5;
+        border-color: #d9d9d9;
       }
 
       .voice-icon {
         font-size: 20px;
-        color: $primary-color;
-        margin-right: 8px;
+        color: #1890ff;
+        margin-right: 10px;
       }
 
       .voice-wave {
@@ -603,14 +633,14 @@ export default {
         .wave-bar {
           width: 3px;
           height: 8px;
-          background: #e8e8e8;
+          background: #d9d9d9;
           margin-right: 2px;
           border-radius: 2px;
           transition: background 0.3s ease;
 
           &.active {
-            background: $primary-color;
-            animation: wave 1s infinite ease-in-out;
+            background: #1890ff;
+            animation: voiceWave 1s infinite ease-in-out;
 
             &:nth-child(1) { animation-delay: 0s; }
             &:nth-child(2) { animation-delay: 0.1s; }
@@ -622,9 +652,9 @@ export default {
       }
 
       .voice-duration {
-        font-size: $font-size-xs;
-        color: $text-tertiary;
-        margin-left: 8px;
+        font-size: 12px;
+        color: #8c8c8c;
+        margin-left: 10px;
       }
     }
   }
@@ -632,9 +662,9 @@ export default {
   // 视频消息
   .video-message {
     .video-container {
-      border-radius: 4px 12px 12px 12px;
+      border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 
       .message-video {
         max-width: 280px;
@@ -647,13 +677,14 @@ export default {
   // 位置消息
   .location-message {
     .location-container {
-      background: #fff;
-      border-radius: 4px 12px 12px 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
       overflow: hidden;
       cursor: pointer;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
       max-width: 280px;
       transition: all 0.2s ease;
+      border: 1px solid #e8e8e8;
 
       &:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -671,15 +702,15 @@ export default {
         padding: 10px 12px;
 
         .location-name {
-          font-size: $font-size-base;
-          font-weight: $font-weight-medium;
-          color: $text-primary;
+          font-size: 14px;
+          font-weight: 500;
+          color: #1f1f1f;
           margin-bottom: 2px;
         }
 
         .location-address {
-          font-size: $font-size-xs;
-          color: $text-tertiary;
+          font-size: 12px;
+          color: #8c8c8c;
         }
       }
     }
@@ -689,8 +720,8 @@ export default {
   .system-message {
     .system-content {
       text-align: center;
-      font-size: $font-size-xs;
-      color: $text-tertiary;
+      font-size: 12px;
+      color: #8c8c8c;
       padding: 6px 12px;
 
       &::before,
@@ -699,7 +730,7 @@ export default {
         display: inline-block;
         width: 30%;
         height: 1px;
-        background: $border-light;
+        background: #e8e8e8;
         vertical-align: middle;
         margin: 0 8px;
       }
@@ -709,38 +740,39 @@ export default {
   // 引用消息
   .quote-message {
     .quote-container {
-      background: #fff;
-      border-radius: 4px 12px 12px 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
       transition: all 0.2s ease;
+      border: 1px solid #e8e8e8;
 
       &:hover {
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
 
       .quote-content {
-        background: $bg-light;
-        padding: 6px 10px;
-        border-left: 3px solid $primary-color;
+        background: #f0f2f5;
+        padding: 8px 12px;
+        border-left: 3px solid #1890ff;
         margin-bottom: 6px;
 
         .quote-text {
-          font-size: $font-size-sm;
-          color: $text-secondary;
+          font-size: 13px;
+          color: #595959;
           margin-bottom: 2px;
         }
 
         .quote-sender {
-          font-size: $font-size-xs;
-          color: $text-tertiary;
+          font-size: 11px;
+          color: #8c8c8c;
         }
       }
 
       .current-text {
-        padding: 0 10px 8px;
-        font-size: $font-size-base;
-        color: $text-primary;
+        padding: 0 12px 8px;
+        font-size: 15px;
+        color: #1f1f1f;
       }
     }
   }
@@ -748,21 +780,22 @@ export default {
   // 投票消息
   .vote-message {
     .vote-container {
-      background: $bg-white;
-      border-radius: 4px 12px 12px 12px;
-      padding: 10px 12px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
       transition: all 0.2s ease;
+      border: 1px solid #e8e8e8;
 
       &:hover {
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
 
       .vote-title {
-        font-size: $font-size-base;
-        font-weight: $font-weight-medium;
-        color: $text-primary;
-        margin-bottom: 8px;
+        font-size: 15px;
+        font-weight: 500;
+        color: #1f1f1f;
+        margin-bottom: 10px;
       }
 
       .vote-options {
@@ -770,30 +803,31 @@ export default {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 6px 10px;
-          border-radius: $border-radius-sm;
+          padding: 8px 12px;
+          border-radius: 6px;
           margin-bottom: 6px;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.2s ease;
           border: 1px solid transparent;
 
           &:hover {
-            background: $bg-hover;
+            background: #fff;
+            border-color: #d9d9d9;
           }
 
           &.selected {
-            background: $primary-color-lighter;
-            border-color: $primary-color;
+            background: rgba(0, 214, 185, 0.1);
+            border-color: #1890ff;
           }
 
           .option-text {
-            font-size: $font-size-base;
-            color: $text-primary;
+            font-size: 14px;
+            color: #1f1f1f;
           }
 
           .option-votes {
-            font-size: $font-size-sm;
-            color: $text-tertiary;
+            font-size: 12px;
+            color: #8c8c8c;
           }
         }
       }
@@ -803,34 +837,34 @@ export default {
   // 消息状态（气泡内，右下角）
   .message-status-inline {
     position: absolute;
-    right: -18px;
+    right: -20px;
     bottom: 4px;
     display: flex;
     align-items: center;
 
     .status-icon {
-      font-size: 12px;
+      font-size: 14px;
       transition: all 0.3s ease;
 
       &.sending {
-        color: $primary-color;
+        color: #1890ff;
         animation: pulse 1.5s ease-in-out infinite;
       }
 
       &.sent {
-        color: $success-color;
+        color: #52c41a;
       }
 
       &.delivered {
-        color: $success-color;
+        color: #52c41a;
       }
 
       &.read {
-        color: $primary-color;
+        color: #1890ff;
       }
 
       &.failed {
-        color: $error-color;
+        color: #ff4d4f;
         cursor: pointer;
         transition: transform 0.2s ease, color 0.2s ease;
 
@@ -843,13 +877,14 @@ export default {
   }
 }
 
-// 发送方消息特殊样式
+// ==================== 发送方消息特殊样式 ====================
+
 .message-bubble.self {
   .message-content {
-    // 文本消息 - 发送方
+    // 文本消息 - 发送方使用钉钉风格蓝绿色
     .text-message {
-      background-color: $primary-color;
-      border-radius: 12px 4px 12px 12px;
+      background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+      box-shadow: 0 2px 8px rgba(0, 214, 185, 0.2);
 
       .text-content {
         color: #fff;
@@ -858,55 +893,57 @@ export default {
       // 发送方小三角（右侧）
       &::before {
         left: auto;
-        right: -10px;
+        right: -6px;
         border-right-color: transparent;
-        border-left-color: $primary-color;
+        border-left-color: #1890ff;
       }
     }
 
-    // 其他消息类型也调整圆角
-    .image-message .image-container,
+    // 文件、语音等其他消息类型
     .file-message .file-container,
     .voice-message .voice-container,
-    .video-message .video-container,
     .location-message .location-container,
     .quote-message .quote-container,
     .vote-message .vote-container {
-      border-radius: 12px 4px 12px 12px;
+      border-color: rgba(0, 214, 185, 0.3);
     }
 
-    // 消息状态位置调整
+    // 消息状态位置调整（左侧）
     .message-status-inline {
       right: auto;
-      left: -18px;
+      left: -20px;
     }
+  }
+
+  // 时间戳右对齐
+  .message-time-footer {
+    text-align: right;
   }
 }
 
-// 时间戳（气泡下方）
+// ==================== 时间戳样式 ====================
+
 .message-time-footer {
-  font-size: 11px;
-  color: $text-tertiary;
-  margin-top: 4px;
-  padding: 0 2px;
+  font-size: 12px;
+  color: #999;
+  margin-top: 6px;
+  padding: 0 4px;
   white-space: nowrap;
 }
 
-.message-bubble.self .message-time-footer {
-  text-align: right;
-}
+// ==================== 撤回消息样式 ====================
 
-// 撤回消息样式
 .recalled-message {
-  padding: 6px 12px;
-  background-color: $bg-light;
-  border-radius: 4px 12px 12px 12px;
-  color: $text-tertiary;
-  font-size: $font-size-sm;
+  padding: 8px 14px;
+  background-color: #f0f2f5;
+  border-radius: 8px;
+  color: #8c8c8c;
+  font-size: 13px;
   font-style: italic;
 }
 
-// 动画
+// ==================== 动画定义 ====================
+
 .message-slide-enter-active {
   animation: slideIn 0.3s ease-out forwards;
 }
@@ -957,12 +994,13 @@ export default {
   50% { opacity: 0.5; }
 }
 
-@keyframes wave {
+@keyframes voiceWave {
   0%, 100% { height: 8px; }
   50% { height: 16px; }
 }
 
-// 消息操作按钮
+// ==================== 消息操作按钮 ====================
+
 .message-actions {
   position: absolute;
   top: -30px;
@@ -970,9 +1008,9 @@ export default {
   display: flex;
   gap: 4px;
   padding: 4px 8px;
-  background: $bg-white;
-  border-radius: $border-radius-xl;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   opacity: 0;
   visibility: hidden;
   transition: all 0.2s ease;
@@ -985,19 +1023,19 @@ export default {
   .action-icon {
     padding: 4px;
     font-size: 14px;
-    color: $text-secondary;
+    color: #595959;
     cursor: pointer;
-    border-radius: 50%;
+    border-radius: 4px;
     transition: all 0.2s ease;
 
     &:hover {
-      color: $primary-color;
-      background-color: $primary-color-lighter;
+      color: #1890ff;
+      background-color: rgba(0, 214, 185, 0.1);
     }
 
     &.danger:hover {
-      color: $error-color;
-      background-color: #fff1f0;
+      color: #ff4d4f;
+      background-color: rgba(255, 77, 79, 0.1);
     }
   }
 }
@@ -1007,14 +1045,15 @@ export default {
   visibility: visible;
 }
 
-// 右键菜单
+// ==================== 右键菜单 ====================
+
 .context-menu {
   position: fixed;
   z-index: 9999;
   min-width: 120px;
-  background: $bg-white;
-  border-radius: $border-radius-lg;
-  box-shadow: $shadow-lg;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   padding: 4px 0;
   animation: fadeIn 0.15s ease;
 
@@ -1023,20 +1062,20 @@ export default {
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    font-size: $font-size-sm;
-    color: $text-primary;
+    font-size: 14px;
+    color: #1f1f1f;
     cursor: pointer;
     transition: background-color 0.2s;
 
     &:hover {
-      background-color: $bg-hover;
+      background-color: #f0f2f5;
     }
 
     &.danger {
-      color: $error-color;
+      color: #ff4d4f;
 
       &:hover {
-        background-color: #fff1f0;
+        background-color: rgba(255, 77, 79, 0.1);
       }
     }
 
@@ -1047,7 +1086,7 @@ export default {
 
   .menu-divider {
     height: 1px;
-    background-color: $border-light;
+    background-color: #e8e8e8;
     margin: 4px 0;
   }
 }
@@ -1063,7 +1102,8 @@ export default {
   }
 }
 
-// 响应式
+// ==================== 响应式设计 ====================
+
 @media (max-width: 768px) {
   .message-bubble {
     max-width: 85%;
@@ -1080,7 +1120,7 @@ export default {
       }
 
       .file-message .file-container {
-        min-width: 180px;
+        min-width: 200px;
       }
 
       .voice-message .voice-container {

@@ -11,7 +11,10 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 操作审计日志实体
+ * 审计日志实体
+ *
+ * 对应数据库表 im_audit_log
+ * 实际数据库字段：id, user_id, operation_type, target_type, target_id, operation_result, error_message, ip_address, user_agent, create_time
  *
  * @author ruoyi
  */
@@ -29,60 +32,44 @@ public class ImAuditLog implements Serializable {
     @TableField("user_id")
     private Long userId;
 
-    /** 操作用户名 */
-    @TableField("user_name")
-    private String userName;
-
-    /** 模块名称 */
-    @TableField("module")
-    private String module;
-
-    /** 操作类型 */
+    /** 操作类型: LOGIN登录 LOGOUT登出 SEND_MESSAGE发送消息 DELETE_MESSAGE删除消息 CREATE_GROUP创建群组 JOIN_GROUP加入群组 LEAVE_GROUP退出群组 ADD_FRIEND添加好友 DELETE_FRIEND删除好友等 */
     @TableField("operation_type")
     private String operationType;
 
-    /** 操作描述 */
-    @TableField("description")
-    private String description;
+    /** 目标类型: USER用户 MESSAGE消息 GROUP群组 CONVERSATION会话 FRIEND好友 */
+    @TableField("target_type")
+    private String targetType;
 
-    /** 请求方法（GET POST PUT DELETE） */
-    @TableField("request_method")
-    private String requestMethod;
+    /** 目标ID */
+    @TableField("target_id")
+    private Long targetId;
 
-    /** 请求URL */
-    @TableField("request_url")
-    private String requestUrl;
-
-    /** 请求参数 */
-    @TableField("request_params")
-    private String requestParams;
-
-    /** 响应数据 */
-    @TableField("response_data")
-    private String responseData;
-
-    /** 操作状态（0失败 1成功） */
-    @TableField("status")
-    private String status;
+    /** 操作结果: SUCCESS成功 FAILED失败 */
+    @TableField("operation_result")
+    private String operationResult;
 
     /** 错误信息 */
-    @TableField("error_msg")
-    private String errorMsg;
+    @TableField("error_message")
+    private String errorMessage;
 
-    /** 执行时长（毫秒） */
-    @TableField("execution_time")
-    private Long executionTime;
-
-    /** 客户端IP */
-    @TableField("client_ip")
-    private String clientIp;
+    /** IP地址 */
+    @TableField("ip_address")
+    private String ipAddress;
 
     /** 用户代理 */
     @TableField("user_agent")
     private String userAgent;
 
-    /** 操作时间 */
+    /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @TableField("operation_time")
-    private LocalDateTime operationTime;
+    @TableField("create_time")
+    private LocalDateTime createTime;
+
+    // ==================== 以下字段为非数据库字段 ====================
+
+    /**
+     * 操作用户名称（非数据库字段，关联查询时填充）
+     */
+    @TableField(exist = false)
+    private String userName;
 }

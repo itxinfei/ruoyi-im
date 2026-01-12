@@ -34,7 +34,7 @@
         :class="{ active: activeTab === tab.key }"
         @click="activeTab = tab.key"
       >
-        <el-icon><component :is="tab.icon" /></el>
+        <el-icon><component :is="tab.icon" /></el-icon>
         <span>{{ tab.label }}</span>
         <span v-if="tab.count > 0" class="tab-count">{{ tab.count }}</span>
       </div>

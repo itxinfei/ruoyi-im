@@ -1,32 +1,51 @@
 <template>
-  <div class="workbench-container">
-    <!-- 顶部概览卡片 -->
-    <div class="overview-section">
-      <el-row :gutter="16">
-        <el-col v-for="item in overviewStats" :key="item.key" :span="6">
-          <div class="stat-card" :class="item.className">
-            <div class="stat-icon" :style="{ backgroundColor: item.color }">
-              <el-icon :size="24"><component :is="item.icon" /></el-icon>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value">{{ item.value }}</div>
-              <div class="stat-label">{{ item.label }}</div>
-            </div>
-          </div>
-        </el-col>
-      </el-row>
+  <div class="workbench-page">
+    <!-- 工作台头部导航 -->
+    <div class="workbench-nav">
+      <div
+        v-for="tab in workbenchTabs"
+        :key="tab.key"
+        class="nav-item"
+        :class="{ active: activeTab === tab.key }"
+        @click="switchTab(tab.key)"
+      >
+        <el-icon><component :is="tab.icon" /></el-icon>
+        <span class="nav-label">{{ tab.label }}</span>
+        <span v-if="tab.badge > 0" class="nav-badge">{{ tab.badge }}</span>
+      </div>
     </div>
 
-    <!-- 主内容区 -->
-    <el-row :gutter="16" class="content-section">
-      <!-- 左侧：待办事项 -->
-      <el-col :span="14">
-        <div class="content-card">
-          <div class="card-header">
-            <span class="card-title">待办事项</span>
-            <el-button link type="primary" :icon="Plus" @click="showAddTodoDialog"
-              >新建待办</el-button
-            >
+    <!-- 工作台内容区 -->
+    <div class="workbench-body">
+      <!-- 首页概览 -->
+      <div v-show="activeTab === 'overview'" class="tab-content">
+        <!-- 概览卡片 -->
+        <div class="overview-cards">
+          <div
+            v-for="card in overviewCards"
+            :key="card.key"
+            class="overview-card"
+            :class="card.className"
+            @click="handleCardClick(card.key)"
+          >
+            <div class="card-icon" :style="{ background: card.color }">
+              <el-icon :size="28"><component :is="card.icon" /></el-icon>
+            </div>
+            <div class="card-content">
+              <div class="card-value">{{ card.value }}</div>
+              <div class="card-label">{{ card.label }}</div>
+            </div>
+            <div class="card-arrow">
+              <el-icon><ArrowRight /></el-icon>
+            </div>
+          </div>
+        </div>
+
+        <!-- 待办事项 -->
+        <div class="todo-section">
+          <div class="section-header">
+            <h3>待办事项</h3>
+            <el-button link type="primary" :icon="Plus" @click="showAddTodoDialog">新建待办</el-button>
           </div>
           <div class="todo-list">
             <div
@@ -35,47 +54,61 @@
               class="todo-item"
               :class="{ completed: todo.isCompleted }"
             >
-              <div class="todo-checkbox">
-                <el-checkbox :model-value="todo.isCompleted" @change="handleTodoComplete(todo)" />
-              </div>
+              <el-checkbox :model-value="todo.isCompleted" @change="handleTodoComplete(todo)" />
               <div class="todo-content">
                 <div class="todo-title">{{ todo.title }}</div>
                 <div v-if="todo.description" class="todo-desc">{{ todo.description }}</div>
               </div>
-              <div class="todo-actions">
-                <el-tag :type="getPriorityType(todo.priority)" size="small">
-                  {{ getPriorityText(todo.priority) }}
-                </el-tag>
-                <el-button link type="danger" :icon="Delete" @click="handleTodoDelete(todo)" />
-              </div>
+              <el-tag :type="getPriorityType(todo.priority)" size="small">
+                {{ getPriorityText(todo.priority) }}
+              </el-tag>
+              <el-button link type="danger" :icon="Delete" @click="handleTodoDelete(todo)" />
             </div>
-            <el-empty v-if="todoList.length === 0" description="暂无待办事项" :image-size="80" />
+            <el-empty v-if="todoList.length === 0" description="暂无待办事项" :image-size="60" />
           </div>
         </div>
-      </el-col>
 
-      <!-- 右侧：快捷应用 -->
-      <el-col :span="10">
-        <div class="content-card">
-          <div class="card-header">
-            <span class="card-title">快捷应用</span>
+        <!-- 快捷应用 -->
+        <div class="quick-apps-section">
+          <div class="section-header">
+            <h3>快捷应用</h3>
           </div>
-          <div class="app-grid">
+          <div class="quick-apps-grid">
             <div
               v-for="app in quickApps"
-              :key="app.id"
-              class="app-item"
+              :key="app.key"
+              class="quick-app-item"
               @click="handleAppClick(app)"
             >
               <div class="app-icon" :style="{ backgroundColor: app.color }">
-                <span class="app-icon-text">{{ app.name.charAt(0) }}</span>
+                <span class="app-char">{{ app.name.charAt(0) }}</span>
               </div>
-              <div class="app-name">{{ app.name }}</div>
+              <span class="app-name">{{ app.name }}</span>
             </div>
           </div>
         </div>
-      </el-col>
-    </el-row>
+      </div>
+
+      <!-- 考勤打卡 -->
+      <div v-show="activeTab === 'attendance'" class="tab-content">
+        <Attendance />
+      </div>
+
+      <!-- 审批中心 -->
+      <div v-show="activeTab === 'approval'" class="tab-content">
+        <Approval />
+      </div>
+
+      <!-- 日程管理 -->
+      <div v-show="activeTab === 'schedule'" class="tab-content">
+        <Schedule />
+      </div>
+
+      <!-- 工作报告 -->
+      <div v-show="activeTab === 'report'" class="tab-content">
+        <Report />
+      </div>
+    </div>
 
     <!-- 新建待办对话框 -->
     <el-dialog v-model="addTodoVisible" title="新建待办" width="500px">
@@ -108,9 +141,23 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Document, ChatDotRound, Timer, Bell, Plus, Delete } from '@element-plus/icons-vue'
+import {
+  Grid,
+  Timer,
+  Document,
+  Calendar,
+  ChatDotRound,
+  Bell,
+  Plus,
+  Delete,
+  ArrowRight,
+  OfficeBuilding,
+  Ticket,
+  Edit
+} from '@element-plus/icons-vue'
 import {
   getWorkbenchOverview,
   getTodos,
@@ -118,15 +165,40 @@ import {
   completeTodo,
   deleteTodo,
 } from '@/api/im/workbench'
+import Attendance from './Attendance.vue'
+import Approval from './Approval.vue'
+import Schedule from './Schedule.vue'
+import Report from './Report.vue'
 
-const overviewStats = ref([
+const router = useRouter()
+
+// State
+const activeTab = ref('overview')
+const addTodoVisible = ref(false)
+const todoForm = ref({
+  title: '',
+  description: '',
+  priority: 'NORMAL',
+})
+
+// 工作台标签
+const workbenchTabs = ref([
+  { key: 'overview', label: '首页', icon: Grid, badge: 0 },
+  { key: 'attendance', label: '考勤', icon: OfficeBuilding, badge: 0 },
+  { key: 'approval', label: '审批', icon: Document, badge: 5 },
+  { key: 'schedule', label: '日程', icon: Calendar, badge: 0 },
+  { key: 'report', label: '汇报', icon: Edit, badge: 0 },
+])
+
+// 概览卡片
+const overviewCards = ref([
   {
     key: 'todo',
     label: '待办事项',
     value: 0,
     icon: Timer,
     color: '#1677ff',
-    className: 'stat-todo',
+    className: 'card-todo',
   },
   {
     key: 'message',
@@ -134,7 +206,7 @@ const overviewStats = ref([
     value: 0,
     icon: ChatDotRound,
     color: '#52c41a',
-    className: 'stat-message',
+    className: 'card-message',
   },
   {
     key: 'approval',
@@ -142,7 +214,7 @@ const overviewStats = ref([
     value: 0,
     icon: Document,
     color: '#faad14',
-    className: 'stat-approval',
+    className: 'card-approval',
   },
   {
     key: 'notice',
@@ -150,67 +222,64 @@ const overviewStats = ref([
     value: 0,
     icon: Bell,
     color: '#ff4d4f',
-    className: 'stat-notice',
+    className: 'card-notice',
   },
 ])
 
+// 待办列表
 const todoList = ref([])
 
+// 快捷应用
 const quickApps = ref([
-  { id: 1, name: '审批中心', code: 'approval', color: '#1677ff' },
-  { id: 2, name: '应用中心', code: 'app-center', color: '#52c41a' },
-  { id: 3, name: '群组', code: 'group', color: '#faad14' },
-  { id: 4, name: '文件', code: 'file', color: '#722ed1' },
-  { id: 5, name: '联系人', code: 'contacts', color: '#eb2f96' },
-  { id: 6, name: '设置', code: 'settings', color: '#8c8c8c' },
+  { key: 'approval', name: '审批中心', color: '#1677ff', tab: 'approval' },
+  { key: 'attendance', name: '考勤打卡', color: '#52c41a', tab: 'attendance' },
+  { key: 'schedule', name: '日程管理', color: '#faad14', tab: 'schedule' },
+  { key: 'report', name: '工作报告', color: '#722ed1', tab: 'report' },
+  { key: 'contacts', name: '联系人', color: '#eb2f96', route: '/im/contacts' },
+  { key: 'group', name: '群组', color: '#13c2c2', route: '/im/group' },
 ])
 
-const addTodoVisible = ref(false)
-const todoForm = reactive({
-  title: '',
-  description: '',
-  priority: 'NORMAL',
-})
+// 方法
+const switchTab = tab => {
+  activeTab.value = tab
+}
 
-const loadOverview = async () => {
-  try {
-    const response = await getWorkbenchOverview()
-    if (response.code === 200 && response.data) {
-      overviewStats.value[0].value = response.data.todoCount || 0
-      overviewStats.value[1].value = response.data.messageCount || 0
-      overviewStats.value[2].value = response.data.approvalCount || 0
-      overviewStats.value[3].value = response.data.noticeCount || 0
-    }
-  } catch (error) {
-    console.error('获取概览失败:', error)
+const handleCardClick = key => {
+  const tabMap = {
+    todo: 'overview',
+    message: 'overview',
+    approval: 'approval',
+    notice: 'overview',
+  }
+  if (key === 'approval') {
+    switchTab('approval')
   }
 }
 
-const loadTodos = async () => {
-  try {
-    const response = await getTodos()
-    if (response.code === 200) {
-      todoList.value = response.data || []
-    }
-  } catch (error) {
-    console.error('获取待办列表失败:', error)
+const handleAppClick = app => {
+  if (app.tab) {
+    switchTab(app.tab)
+  } else if (app.route) {
+    router.push(app.route)
   }
 }
 
 const showAddTodoDialog = () => {
-  todoForm.title = ''
-  todoForm.description = ''
-  todoForm.priority = 'NORMAL'
+  todoForm.value = {
+    title: '',
+    description: '',
+    priority: 'NORMAL',
+  }
   addTodoVisible.value = true
 }
 
 const handleAddTodo = async () => {
-  if (!todoForm.title) {
+  if (!todoForm.value.title) {
     ElMessage.warning('请输入待办标题')
     return
   }
   try {
-    await createTodo(todoForm)
+    await createTodo(todoForm.value)
     ElMessage.success('创建成功')
     addTodoVisible.value = false
     loadTodos()
@@ -243,11 +312,6 @@ const handleTodoDelete = async todo => {
   }
 }
 
-const handleAppClick = app => {
-  // 跳转到对应页面
-  console.log('点击应用:', app)
-}
-
 const getPriorityType = priority => {
   const map = { HIGH: 'danger', NORMAL: 'info', LOW: 'success' }
   return map[priority] || 'info'
@@ -258,6 +322,34 @@ const getPriorityText = priority => {
   return map[priority] || '普通'
 }
 
+const loadOverview = async () => {
+  try {
+    const response = await getWorkbenchOverview()
+    if (response.code === 200 && response.data) {
+      overviewCards.value[0].value = response.data.todoCount || 0
+      overviewCards.value[1].value = response.data.messageCount || 0
+      overviewCards.value[2].value = response.data.approvalCount || 0
+      overviewCards.value[3].value = response.data.noticeCount || 0
+
+      // 更新审批徽章
+      workbenchTabs.value[2].badge = response.data.approvalCount || 0
+    }
+  } catch (error) {
+    console.error('获取概览失败:', error)
+  }
+}
+
+const loadTodos = async () => {
+  try {
+    const response = await getTodos()
+    if (response.code === 200) {
+      todoList.value = response.data || []
+    }
+  } catch (error) {
+    console.error('获取待办列表失败:', error)
+  }
+}
+
 onMounted(() => {
   loadOverview()
   loadTodos()
@@ -265,99 +357,159 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.workbench-container {
-  padding: 20px;
+.workbench-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   background: #f5f5f5;
-  min-height: calc(100vh - 60px);
 }
 
-.overview-section {
-  margin-bottom: 16px;
+// 工作台导航
+.workbench-nav {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  background: white;
+  border-bottom: 1px solid #e8e8e8;
+  flex-shrink: 0;
 }
 
-.stat-card {
+.nav-item {
   display: flex;
   align-items: center;
-  padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
   cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+  font-size: 14px;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    background: #f5f5f5;
+  }
+
+  &.active {
+    background: #e6f7ff;
+    color: #1677ff;
+    font-weight: 500;
   }
 }
 
-.stat-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  display: flex;
+.nav-badge {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  margin-right: 16px;
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 28px;
-  font-weight: 600;
-  color: #333;
-  line-height: 1.2;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #999;
-  margin-top: 4px;
-}
-
-.content-section {
-  margin-top: 16px;
-}
-
-.content-card {
-  background: #fff;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: #ff4d4f;
+  color: white;
   border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  min-height: 400px;
+  font-size: 11px;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+// 内容区
+.workbench-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.tab-content {
+  min-height: 100%;
+}
+
+// 概览卡片
+.overview-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
   margin-bottom: 16px;
 }
 
-.card-title {
-  font-size: 16px;
+.overview-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: white;
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-value {
+  font-size: 24px;
   font-weight: 600;
-  color: #333;
+  color: #262626;
+  line-height: 1.2;
+}
+
+.card-label {
+  font-size: 13px;
+  color: #8c8c8c;
+  margin-top: 2px;
+}
+
+.card-arrow {
+  color: #d9d9d9;
+}
+
+// 待办事项
+.todo-section {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #262626;
+  }
 }
 
 .todo-list {
-  max-height: 400px;
+  max-height: 300px;
   overflow-y: auto;
 }
 
 .todo-item {
   display: flex;
   align-items: center;
-  padding: 12px;
-  border-radius: 8px;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
   transition: background 0.2s;
-  margin-bottom: 8px;
 
   &:hover {
     background: #f5f5f5;
@@ -372,38 +524,36 @@ onMounted(() => {
   }
 }
 
-.todo-checkbox {
-  margin-right: 12px;
-}
-
 .todo-content {
   flex: 1;
+  min-width: 0;
 }
 
 .todo-title {
   font-size: 14px;
-  color: #333;
+  color: #262626;
 }
 
 .todo-desc {
   font-size: 12px;
-  color: #999;
-  margin-top: 4px;
+  color: #8c8c8c;
+  margin-top: 2px;
 }
 
-.todo-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+// 快捷应用
+.quick-apps-section {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
 }
 
-.app-grid {
+.quick-apps-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 16px;
 }
 
-.app-item {
+.quick-app-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -418,20 +568,45 @@ onMounted(() => {
 }
 
 .app-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 10px;
   margin-bottom: 8px;
-  color: #fff;
-  font-size: 20px;
+  color: white;
+  font-size: 18px;
   font-weight: 600;
 }
 
 .app-name {
   font-size: 13px;
-  color: #666;
+  color: #595959;
+}
+
+@media (max-width: 1200px) {
+  .overview-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quick-apps-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .workbench-nav {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .overview-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-apps-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 </style>

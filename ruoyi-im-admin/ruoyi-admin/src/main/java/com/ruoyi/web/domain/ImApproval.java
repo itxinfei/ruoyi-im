@@ -62,9 +62,24 @@ public class ImApproval extends BaseEntity implements Serializable {
     private String attachments;
 
     /**
+     * 申请时间，审批发起的时间
+     */
+    private LocalDateTime applyTime;
+
+    /**
      * 完成时间，审批流程的完成时间
      */
-    private LocalDateTime completedTime;
+    private LocalDateTime finishTime;
+
+    /**
+     * 备注
+     */
+    private String remark;
+
+    /**
+     * 申请人姓名（非数据库字段，用于查询结果展示）
+     */
+    private String applicantName;
 
     public Long getId() {
         return id;
@@ -130,12 +145,35 @@ public class ImApproval extends BaseEntity implements Serializable {
         this.attachments = attachments;
     }
 
-    public LocalDateTime getCompletedTime() {
-        return completedTime;
+    public LocalDateTime getApplyTime() {
+        return applyTime;
     }
 
-    public void setCompletedTime(LocalDateTime completedTime) {
-        this.completedTime = completedTime;
+    public void setApplyTime(LocalDateTime applyTime) {
+        this.applyTime = applyTime;
     }
 
+    public LocalDateTime getFinishTime() {
+        return finishTime;
+    }
+
+    public void setFinishTime(LocalDateTime finishTime) {
+        this.finishTime = finishTime;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public String getApplicantName() {
+        return applicantName;
+    }
+
+    public void setApplicantName(String applicantName) {
+        this.applicantName = applicantName;
+    }
 }

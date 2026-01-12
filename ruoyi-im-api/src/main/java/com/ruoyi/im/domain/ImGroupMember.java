@@ -71,6 +71,12 @@ public class ImGroupMember implements Serializable {
     private LocalDateTime deletedTime;
 
     /**
+     * 回复消息ID
+     */
+    @TableField("reply_to_message_id")
+    private Integer replyToMessageId;
+
+    /**
      * 创建时间，群组成员记录创建的时间
      */
     private LocalDateTime createTime;

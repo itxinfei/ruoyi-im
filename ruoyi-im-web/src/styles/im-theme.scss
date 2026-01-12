@@ -5,13 +5,13 @@
 
 /* CSS 变量定义 - 钉钉6.5.x风格 */
 :root {
-  /* 主题色 - 钉钉蓝 */
-  --im-primary-color: #1677ff;
-  --im-primary-hover: #4096ff;
-  --im-primary-active: #0958d9;
-  --im-primary-light: #e8f3ff;
+  /* 主题色 - 钉钉蓝 #1890FF */
+  --im-primary-color: #1890ff;
+  --im-primary-hover: #40a9ff;
+  --im-primary-active: #096dd9;
+  --im-primary-light: #e6f7ff;
   --im-primary-lighter: #f0f9ff;
-  --im-primary-bg: #1677ff;
+  --im-primary-bg: #1890ff;
 
   /* 成功/警告/错误色 */
   --im-success-color: #52c41a;
@@ -61,10 +61,10 @@
   --im-transition-slow: 0.5s;
 
   /* 消息气泡颜色 - 钉钉风格 */
-  --im-bubble-self: #1677ff;
+  --im-bubble-self: #1890ff;
   --im-bubble-other: #ffffff;
   --im-bubble-text-self: #ffffff;
-  --im-bubble-text-other: #262626;
+  --im-bubble-text-other: #333333;
   --im-bubble-border: #e8e8e8;
 
   /* 在线状态 - 钉钉风格 */
@@ -114,6 +114,7 @@
 
   --im-bubble-other: #2a2a2a;
   --im-bubble-text-other: #e6e6e6;
+  --im-bubble-self: #1890ff;
 }
 
 /* 全局滚动条样式 */

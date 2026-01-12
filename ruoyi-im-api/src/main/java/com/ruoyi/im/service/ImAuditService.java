@@ -19,15 +19,14 @@ public interface ImAuditService {
      * @param pageNum 页码
      * @param pageSize 每页数量
      * @param userId 用户ID（可选）
-     * @param module 模块名称（可选）
      * @param operationType 操作类型（可选）
-     * @param status 操作状态（可选）
+     * @param operationResult 操作结果（可选）
      * @param startTime 开始时间（可选）
      * @param endTime 结束时间（可选）
      * @return 分页结果
      */
     Map<String, Object> getAuditLogList(Integer pageNum, Integer pageSize, Long userId,
-                                         String module, String operationType, String status,
+                                         String operationType, String operationResult,
                                          LocalDateTime startTime, LocalDateTime endTime);
 
     /**

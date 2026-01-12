@@ -25,30 +25,28 @@ public class ImAuditController {
 
     /**
      * 获取审计日志列表
-     * 分页查询审计日志，支持按用户、模块、操作类型、状态等条件筛选
+     * 分页查询审计日志，支持按用户、操作类型、操作结果等条件筛选
      *
      * @param pageNum 页码
      * @param pageSize 每页数量
      * @param userId 用户ID（可选）
-     * @param module 模块名称（可选）
      * @param operationType 操作类型（可选）
-     * @param status 操作状态（可选）
+     * @param operationResult 操作结果（可选）
      * @param startTime 开始时间（可选）
      * @param endTime 结束时间（可选）
      * @return 分页结果
-     * @apiNote 支持按时间范围、用户、模块等多种条件组合查询
+     * @apiNote 支持按时间范围、用户、操作类型等多种条件组合查询
      */
     @GetMapping("/list")
     public Result<Map<String, Object>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "20") Integer pageSize,
             @RequestParam(required = false) Long userId,
-            @RequestParam(required = false) String module,
             @RequestParam(required = false) String operationType,
-            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String operationResult,
             @RequestParam(required = false) LocalDateTime startTime,
             @RequestParam(required = false) LocalDateTime endTime) {
-        Map<String, Object> result = imAuditService.getAuditLogList(pageNum, pageSize, userId, module, operationType, status, startTime, endTime);
+        Map<String, Object> result = imAuditService.getAuditLogList(pageNum, pageSize, userId, operationType, operationResult, startTime, endTime);
         return Result.success(result);
     }
 

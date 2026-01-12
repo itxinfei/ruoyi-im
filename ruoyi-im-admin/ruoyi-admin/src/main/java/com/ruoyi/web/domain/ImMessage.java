@@ -6,11 +6,13 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
-
  * IM消息实体
  *
- * 用于存储IM系统中的消息信息，包括文本、图片、文件、语音、视频等多种类型的消息
- * 支持消息撤回、回复、转发等功能
+ * 对应数据库表 im_message
+ * 实际数据库字段：id, conversation_id, sender_id, message_type, content, reply_to_message_id,
+ *                forward_from_message_id, file_url, file_name, file_size, sensitive_level,
+ *                is_revoked, revoked_time, revoker_id, is_edited, edited_content, edit_count, edit_time,
+ *                is_deleted, deleted_time, create_time, update_time
  *
  * @author ruoyi
  */
@@ -27,29 +29,54 @@ public class ImMessage implements Serializable {
     /** 发送者用户ID，关联到im_user表 */
     private Long senderId;
 
-    /** 消息类型：TEXT文本 FILE文件 NOTICE通知 RECALL撤回 REPLY回复 FORWARD转发 IMAGE图片 VOICE语音 VIDEO视频 */
-    private String type;
+    /** 消息类型: TEXT文本 IMAGE图片 VIDEO视频 AUDIO音频 FILE文件 */
+    private String messageType;
 
-    /** 消息内容，JSON格式 */
+    /** 消息内容 */
     private String content;
 
     /** 回复的消息ID */
     private Long replyToMessageId;
 
-    /** 转发的消息ID */
+    /** 转发的来源消息ID */
     private Long forwardFromMessageId;
 
-    /** 是否撤回：0否 1是 */
+    /** 文件URL */
+    private String fileUrl;
+
+    /** 文件名 */
+    private String fileName;
+
+    /** 文件大小(字节) */
+    private Long fileSize;
+
+    /** 敏感级别: NORMAL普通 SENSITIVE敏感 HIGH高级 */
+    private String sensitiveLevel;
+
+    /** 是否撤回: 0否 1是 */
     private Integer isRevoked;
 
     /** 撤回时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime revokedTime;
 
-    /** 敏感级别：NONE无 WARN警告 BLOCK拦截 */
-    private String sensitiveLevel;
+    /** 撤回者ID */
+    private Long revokerId;
 
-    /** 是否删除：0否 1是 */
+    /** 是否编辑: 0否 1是 */
+    private Integer isEdited;
+
+    /** 编辑后的内容 */
+    private String editedContent;
+
+    /** 编辑次数 */
+    private Integer editCount;
+
+    /** 编辑时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime editTime;
+
+    /** 是否删除: 0否 1是 */
     private Integer isDeleted;
 
     /** 删除时间 */
@@ -88,12 +115,12 @@ public class ImMessage implements Serializable {
         this.senderId = senderId;
     }
 
-    public String getType() {
-        return type;
+    public String getMessageType() {
+        return messageType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setMessageType(String messageType) {
+        this.messageType = messageType;
     }
 
     public String getContent() {
@@ -120,6 +147,38 @@ public class ImMessage implements Serializable {
         this.forwardFromMessageId = forwardFromMessageId;
     }
 
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public Long getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(Long fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public String getSensitiveLevel() {
+        return sensitiveLevel;
+    }
+
+    public void setSensitiveLevel(String sensitiveLevel) {
+        this.sensitiveLevel = sensitiveLevel;
+    }
+
     public Integer getIsRevoked() {
         return isRevoked;
     }
@@ -136,12 +195,44 @@ public class ImMessage implements Serializable {
         this.revokedTime = revokedTime;
     }
 
-    public String getSensitiveLevel() {
-        return sensitiveLevel;
+    public Long getRevokerId() {
+        return revokerId;
     }
 
-    public void setSensitiveLevel(String sensitiveLevel) {
-        this.sensitiveLevel = sensitiveLevel;
+    public void setRevokerId(Long revokerId) {
+        this.revokerId = revokerId;
+    }
+
+    public Integer getIsEdited() {
+        return isEdited;
+    }
+
+    public void setIsEdited(Integer isEdited) {
+        this.isEdited = isEdited;
+    }
+
+    public String getEditedContent() {
+        return editedContent;
+    }
+
+    public void setEditedContent(String editedContent) {
+        this.editedContent = editedContent;
+    }
+
+    public Integer getEditCount() {
+        return editCount;
+    }
+
+    public void setEditCount(Integer editCount) {
+        this.editCount = editCount;
+    }
+
+    public LocalDateTime getEditTime() {
+        return editTime;
+    }
+
+    public void setEditTime(LocalDateTime editTime) {
+        this.editTime = editTime;
     }
 
     public Integer getIsDeleted() {
@@ -175,6 +266,5 @@ public class ImMessage implements Serializable {
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
     }
-
 
 }
