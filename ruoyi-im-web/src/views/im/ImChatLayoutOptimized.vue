@@ -1826,7 +1826,8 @@ const {
 const contactCategory = ref('friends')
 const contactSearch = ref('')
 const selectedContact = ref(null)
-const friends = ref([])
+// 使用 Vuex store 中的联系人（已包含去重逻辑）
+const friends = computed(() => store.state.im.contacts || [])
 const groupSessions = ref([]) // 群组会话列表
 const orgTree = ref([])
 const orgMembers = ref([])
@@ -2194,53 +2195,17 @@ const searchedGroups = computed(() => {
 
 // 过滤好友列表（保留用于兼容）
 const filteredFriends = computed(() => {
-  return friends.value
+  return friends.value || []
 })
 
-// 加载好友列表
+// 加载好友列表 - 使用 Vuex store 统一管理
+// 后端已在 getFriendList 中去重，Vuex store 也在 SET_CONTACTS 中去重
 const loadFriends = async () => {
   try {
-    const res = await listContact()
-    const dataRows = res.rows || res.data?.rows || res.data || []
-
-    if (!Array.isArray(dataRows) || dataRows.length === 0) {
-      friends.value = []
-      return
-    }
-
-    console.log('[加载好友] 原始数据:', dataRows.length, '条')
-
-    // 转换好友数据
-    const formattedFriends = dataRows.map(f => ({
-      ...f,
-      online: f.status === 'ACTIVE',
-      name: f.remark || f.friendName || f.name || f.username,
-    }))
-
-    // 去重：使用friendId作为唯一标识
-    const uniqueFriendsMap = new Map()
-    const duplicateCount = { before: formattedFriends.length, duplicates: 0 }
-
-    formattedFriends.forEach(friend => {
-      // 使用 friendId 作为唯一标识，如果 friendId 不存在则使用 id
-      const uniqueId = friend.friendId || friend.id
-      if (uniqueId != null && uniqueId !== '') {
-        const friendKey = String(uniqueId)
-        if (!uniqueFriendsMap.has(friendKey)) {
-          uniqueFriendsMap.set(friendKey, friend)
-        } else {
-          duplicateCount.duplicates++
-        }
-      }
-    })
-
-    const result = Array.from(uniqueFriendsMap.values())
-    console.log('[加载好友] 去重后:', result.length, '条', '重复:', duplicateCount.duplicates, '条')
-
-    friends.value = result
+    await store.dispatch('im/loadContacts')
+    console.log('[加载好友] 已通过 Vuex store 加载，去重已在后端和 store 中完成')
   } catch (error) {
     console.error('加载好友列表失败:', error)
-    friends.value = []
   }
 }
 
@@ -2261,7 +2226,20 @@ const initOrgTree = async () => {
   try {
     const res = await getDepartmentTree()
     const dataRows = res.data || res.rows || []
-    orgTree.value = Array.isArray(dataRows) ? dataRows : []
+    // 兼容后端返回结构，确保每个节点有 name、id、children 字段
+    const normalize = nodes => {
+      if (!Array.isArray(nodes)) return []
+      return nodes.map(n => {
+        const child = normalize(n.children || n.childrenTree || [])
+        return {
+          id: n.id,
+          name: n.name || n.deptName || '',
+          userCount: n.userCount || n.count || 0,
+          children: child
+        }
+      })
+    }
+    orgTree.value = normalize(dataRows)
   } catch (error) {
     console.error('加载组织架构失败:', error)
     orgTree.value = []
@@ -4681,6 +4659,11 @@ const loadSessions = async () => {
     })
 
     store.commit('im/SET_SESSIONS', Array.from(uniqueSessionsMap.values()))
+
+    // 同步群组会话到本地 groupSessions，便于"我的群组"列表显示
+    groupSessions.value = Array.from(uniqueSessionsMap.values())
+      .filter(s => s.type === 'group')
+      .map(s => ({ id: s.id, name: s.name, avatar: s.avatar, groupId: s.groupId }))
   } catch (error) {
     console.error('加载会话列表失败:', error)
   }

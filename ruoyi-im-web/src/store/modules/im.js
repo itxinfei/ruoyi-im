@@ -5,6 +5,8 @@ import {
   forwardMessage as apiForwardMessage,
   searchMessages as apiSearchMessages,
   markMessageRead,
+  deleteMessage,
+  batchDeleteMessages,
 } from '@/api/im/message'
 import { listSession, updateSession, deleteSession as apiDeleteSession } from '@/api/im/session'
 import { markConversationRead } from '@/api/im/conversation'
@@ -1072,6 +1074,84 @@ const actions = {
       console.error('删除消息失败:', error)
       ElMessage.error('删除失败')
     }
+  },
+
+  // 处理消息表情反应（WebSocket推送）
+  handleMessageReaction({ commit, state }, payload) {
+    const { messageId, conversationId, userId, emoji, action } = payload
+    const sessionId = conversationId // 兼容sessionId命名
+
+    // 查找并更新消息的反应列表
+    if (state.messageList[sessionId]) {
+      const message = state.messageList[sessionId].find(m => m.id === messageId)
+      if (message) {
+        // 初始化 reactions 数组
+        if (!message.reactions) {
+          message.reactions = []
+        }
+
+        if (action === 'add') {
+          // 添加反应
+          const existingReaction = message.reactions.find(r => r.emoji === emoji)
+          if (existingReaction) {
+            // 如果已有相同表情，检查用户是否已反应
+            if (!existingReaction.users.includes(userId)) {
+              existingReaction.users.push(userId)
+              existingReaction.count++
+            }
+          } else {
+            // 新增反应
+            message.reactions.push({
+              emoji,
+              count: 1,
+              users: [userId],
+            })
+          }
+        } else if (action === 'remove') {
+          // 移除反应
+          const reactionIndex = message.reactions.findIndex(r => r.emoji === emoji)
+          if (reactionIndex !== -1) {
+            const reaction = message.reactions[reactionIndex]
+            reaction.users = reaction.users.filter(id => id !== userId)
+            reaction.count--
+            if (reaction.count <= 0) {
+              message.reactions.splice(reactionIndex, 1)
+            }
+          }
+        }
+
+        // 更新缓存
+        saveMessageCache(state.messageList)
+      }
+    }
+  },
+
+  // 处理已读回执（WebSocket推送）
+  handleReadReceipt({ commit, state }, payload) {
+    const { conversationId, userId, messageIds } = payload
+    const sessionId = conversationId // 兼容sessionId命名
+
+    if (!state.messageList[sessionId]) {
+      return
+    }
+
+    // 更新每条消息的已读状态
+    messageIds.forEach(messageId => {
+      const message = state.messageList[sessionId].find(m => m.id === messageId)
+      if (message) {
+        // 初始化已读用户列表
+        if (!message.readBy) {
+          message.readBy = []
+        }
+        // 添加已读用户（去重）
+        if (!message.readBy.includes(userId)) {
+          message.readBy.push(userId)
+        }
+      }
+    })
+
+    // 更新缓存
+    saveMessageCache(state.messageList)
   },
 }
 

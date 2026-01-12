@@ -144,20 +144,28 @@ public class ImWorkbenchController {
      * @param description 待办描述
      * @param type 待办类型
      * @param relatedId 关联ID
+     * @param priority 优先级（1=低, 2=中, 3=高）
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 创建结果，包含待办ID
      */
-    @Operation(summary = "创建待办", description = "创建新的待办事项")
+    @Operation(summary = "创建待办", description = "创建新的待办事项，支持优先级")
     @PostMapping("/todos")
     public Result<Long> createTodo(@RequestParam String title,
                                    @RequestParam(required = false) String description,
                                    @RequestParam(required = false, defaultValue = "TASK") String type,
                                    @RequestParam(required = false) Long relatedId,
+                                   @RequestParam(required = false) Integer priority,
                                    @RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
             userId = 1L; // 开发环境默认用户
         }
-        Long todoId = todoItemService.createTodo(title, description, type, relatedId, userId);
+        // 如果提供了优先级参数，使用带优先级的方法
+        Long todoId;
+        if (priority != null) {
+            todoId = todoItemService.createTodoWithPriority(title, description, priority, userId);
+        } else {
+            todoId = todoItemService.createTodo(title, description, type, relatedId, userId);
+        }
         return Result.success("创建成功", todoId);
     }
 

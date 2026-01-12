@@ -1,5 +1,7 @@
 package com.ruoyi.im.common;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
@@ -8,6 +10,7 @@ import java.io.Serializable;
  * @param <T> 数据类型
  * @author ruoyi
  */
+@Data
 public class Result<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -130,6 +133,7 @@ public class Result<T> implements Serializable {
      * @param msg 消息
      * @param data 数据
      */
+    @SuppressWarnings("unchecked")
     public static <T> Result<T> error(int code, String msg, java.util.Map<String, String> data) {
         return new Result<>(code, msg, (T) data);
     }
@@ -141,36 +145,4 @@ public class Result<T> implements Serializable {
         return this.code == 200;
     }
 
-    // Getter and Setter
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
 }

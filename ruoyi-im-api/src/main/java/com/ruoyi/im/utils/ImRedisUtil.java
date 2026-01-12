@@ -1,5 +1,7 @@
 package com.ruoyi.im.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -10,20 +12,41 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 /**
  * IM Redis工具类
+ * 提供缓存、在线状态、分布式锁等功能
  *
  * @author ruoyi
  */
 @Component
 public class ImRedisUtil {
 
+    private static final Logger log = LoggerFactory.getLogger(ImRedisUtil.class);
+
     @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     private static final AtomicLong MESSAGE_ID_COUNTER = new AtomicLong(System.currentTimeMillis());
 
+    // ==================== Key 前缀 ====================
+    private static final String KEY_PREFIX = "im:";
+    private static final String USER_PREFIX = "user:";
+    private static final String CONVERSATION_PREFIX = "conversation:";
+    private static final String MESSAGE_PREFIX = "message:";
+    private static final String ONLINE_PREFIX = "online:";
+    private static final String UNREAD_PREFIX = "unread:";
+    private static final String OFFLINE_MSG_PREFIX = "offline:messages:";
+
+    // ==================== 过期时间 ====================
+    private static final long USER_INFO_EXPIRE = 30; // 用户信息缓存30分钟
+    private static final long CONVERSATION_INFO_EXPIRE = 10; // 会话信息缓存10分钟
+    private static final long UNREAD_COUNT_EXPIRE = 5; // 未读数缓存5分钟
+    private static final long OFFLINE_MSG_EXPIRE = 7; // 离线消息保留7天
+    private static final long ONLINE_STATUS_EXPIRE = 30; // 在线状态30分钟
+
+    // ==================== ID生成 ====================
     /**
      * 生成消息ID
      */
@@ -38,6 +61,245 @@ public class ImRedisUtil {
         return MESSAGE_ID_COUNTER.incrementAndGet();
     }
 
+    // ==================== 用户信息缓存 ====================
+    /**
+     * 缓存用户信息
+     */
+    public void cacheUserInfo(Long userId, Object userInfo) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String key = buildKey(USER_PREFIX, "info", String.valueOf(userId));
+        redisTemplate.opsForValue().set(key, userInfo, USER_INFO_EXPIRE, TimeUnit.MINUTES);
+        log.debug("缓存用户信息: userId={}", userId);
+    }
+
+    /**
+     * 获取用户信息
+     */
+    public Object getUserInfo(Long userId) {
+        if (redisTemplate == null) {
+            return null;
+        }
+        String key = buildKey(USER_PREFIX, "info", String.valueOf(userId));
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    /**
+     * 删除用户信息缓存
+     */
+    public void evictUserInfo(Long userId) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String key = buildKey(USER_PREFIX, "info", String.valueOf(userId));
+        redisTemplate.delete(key);
+        log.debug("清除用户信息缓存: userId={}", userId);
+    }
+
+    /**
+     * 获取用户信息，如果不存在则从数据库加载
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getOrLoadUserInfo(Long userId, Class<T> clazz, Supplier<T> loader) {
+        T cached = (T) getUserInfo(userId);
+        if (cached != null) {
+            return cached;
+        }
+        T loaded = loader.get();
+        if (loaded != null) {
+            cacheUserInfo(userId, loaded);
+        }
+        return loaded;
+    }
+
+    // ==================== 会话信息缓存 ====================
+    /**
+     * 缓存会话信息
+     */
+    public void cacheConversationInfo(Long conversationId, Object conversationInfo) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String key = buildKey(CONVERSATION_PREFIX, "info", String.valueOf(conversationId));
+        redisTemplate.opsForValue().set(key, conversationInfo, CONVERSATION_INFO_EXPIRE, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 获取会话信息
+     */
+    public Object getConversationInfo(Long conversationId) {
+        if (redisTemplate == null) {
+            return null;
+        }
+        String key = buildKey(CONVERSATION_PREFIX, "info", String.valueOf(conversationId));
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    /**
+     * 删除会话信息缓存
+     */
+    public void evictConversationInfo(Long conversationId) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String key = buildKey(CONVERSATION_PREFIX, "info", String.valueOf(conversationId));
+        redisTemplate.delete(key);
+    }
+
+    // ==================== 未读数缓存 ====================
+    /**
+     * 缓存用户未读数
+     */
+    public void cacheUnreadCount(Long userId, Long conversationId, Integer count) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        redisTemplate.opsForHash().put(key, conversationId.toString(), count.toString());
+        redisTemplate.expire(key, UNREAD_COUNT_EXPIRE, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 获取用户在指定会话的未读数
+     */
+    public Integer getUnreadCount(Long userId, Long conversationId) {
+        if (redisTemplate == null) {
+            return null;
+        }
+        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        Object count = redisTemplate.opsForHash().get(key, conversationId.toString());
+        return count != null ? Integer.parseInt(count.toString()) : null;
+    }
+
+    /**
+     * 获取用户总未读数
+     */
+    public Integer getTotalUnreadCount(Long userId) {
+        if (redisTemplate == null) {
+            return null;
+        }
+        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        Long total = 0L;
+        for (Object count : redisTemplate.opsForHash().values(key)) {
+            if (count != null) {
+                total += Long.parseLong(count.toString());
+            }
+        }
+        return total.intValue();
+    }
+
+    /**
+     * 增加未读数
+     */
+    public void incrementUnreadCount(Long userId, Long conversationId) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        redisTemplate.opsForHash().increment(key, conversationId.toString(), 1);
+        redisTemplate.expire(key, UNREAD_COUNT_EXPIRE, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 清除会话未读数
+     */
+    public void clearConversationUnread(Long userId, Long conversationId) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        redisTemplate.opsForHash().delete(key, conversationId.toString());
+    }
+
+    /**
+     * 清除用户所有未读数缓存
+     */
+    public void evictAllUnreadCount(Long userId) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        redisTemplate.delete(key);
+    }
+
+    // ==================== 在线状态管理 ====================
+    /**
+     * 添加在线用户 - 由WebSocket端点调用
+     */
+    public void addOnlineUser(Long userId) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String onlineUsersKey = buildKey(ONLINE_PREFIX, "users");
+        redisTemplate.opsForSet().add(onlineUsersKey, userId.toString());
+        redisTemplate.expire(onlineUsersKey, ONLINE_STATUS_EXPIRE, TimeUnit.MINUTES);
+
+        // 同时记录用户上线时间
+        String onlineTimeKey = buildKey(ONLINE_PREFIX, "time", String.valueOf(userId));
+        redisTemplate.opsForValue().set(onlineTimeKey, System.currentTimeMillis(), ONLINE_STATUS_EXPIRE, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 移除在线用户 - 由WebSocket端点调用
+     */
+    public void removeOnlineUser(Long userId) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String onlineUsersKey = buildKey(ONLINE_PREFIX, "users");
+        redisTemplate.opsForSet().remove(onlineUsersKey, userId.toString());
+
+        // 同时删除上线时间记录
+        String onlineTimeKey = buildKey(ONLINE_PREFIX, "time", String.valueOf(userId));
+        redisTemplate.delete(onlineTimeKey);
+    }
+
+    /**
+     * 获取在线用户列表
+     */
+    @SuppressWarnings("unchecked")
+    public Set<String> getOnlineUsers() {
+        if (redisTemplate == null) {
+            return new HashSet<>();
+        }
+        String onlineUsersKey = buildKey(ONLINE_PREFIX, "users");
+        Set<Object> members = redisTemplate.opsForSet().members(onlineUsersKey);
+        Set<String> result = new HashSet<>();
+        if (members != null) {
+            for (Object member : members) {
+                if (member != null) {
+                    result.add(member.toString());
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 检查用户是否在线
+     */
+    public boolean isOnlineUser(Long userId) {
+        if (redisTemplate == null) {
+            return false;
+        }
+        String onlineUsersKey = buildKey(ONLINE_PREFIX, "users");
+        Boolean isMember = redisTemplate.opsForSet().isMember(onlineUsersKey, userId.toString());
+        return isMember != null && isMember;
+    }
+
+    /**
+     * 获取在线用户数量
+     */
+    public Long getOnlineUserCount() {
+        if (redisTemplate == null) {
+            return 0L;
+        }
+        String onlineUsersKey = buildKey(ONLINE_PREFIX, "users");
+        return redisTemplate.opsForSet().size(onlineUsersKey);
+    }
+
+    // ==================== 离线消息 ====================
     /**
      * 缓存离线消息
      */
@@ -45,9 +307,9 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = "im:offline:messages:" + userId;
+        String key = buildKey(OFFLINE_MSG_PREFIX, String.valueOf(userId));
         redisTemplate.opsForZSet().add(key, message, System.currentTimeMillis());
-        redisTemplate.expire(key, 7, TimeUnit.DAYS);
+        redisTemplate.expire(key, OFFLINE_MSG_EXPIRE, TimeUnit.DAYS);
     }
 
     /**
@@ -58,7 +320,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return new ArrayList<>();
         }
-        String key = "im:offline:messages:" + userId;
+        String key = buildKey(OFFLINE_MSG_PREFIX, String.valueOf(userId));
         Set<Object> messageObjects = redisTemplate.opsForZSet().range(key, 0, -1);
 
         List<T> messages = new ArrayList<>();
@@ -83,63 +345,94 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = "im:offline:messages:" + userId;
+        String key = buildKey(OFFLINE_MSG_PREFIX, String.valueOf(userId));
         redisTemplate.delete(key);
     }
 
+    // ==================== 通用缓存方法 ====================
     /**
-     * 添加在线用户 - 由WebSocket端点调用
+     * 设置缓存
      */
-    public void addOnlineUser(Long userId) {
+    public void set(String key, Object value, long timeout, TimeUnit unit) {
         if (redisTemplate == null) {
             return;
         }
-        String onlineUsersKey = "im:online:users";
-        redisTemplate.opsForSet().add(onlineUsersKey, userId.toString());
-        redisTemplate.expire(onlineUsersKey, 30, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(buildSimpleKey(key), value, timeout, unit);
     }
 
     /**
-     * 移除在线用户 - 由WebSocket端点调用
+     * 获取缓存
      */
-    public void removeOnlineUser(Long userId) {
+    public Object get(String key) {
+        if (redisTemplate == null) {
+            return null;
+        }
+        return redisTemplate.opsForValue().get(buildSimpleKey(key));
+    }
+
+    /**
+     * 删除缓存
+     */
+    public void delete(String key) {
         if (redisTemplate == null) {
             return;
         }
-        String onlineUsersKey = "im:online:users";
-        redisTemplate.opsForSet().remove(onlineUsersKey, userId.toString());
+        redisTemplate.delete(buildSimpleKey(key));
     }
 
     /**
-     * 获取在线用户列表
+     * 批量删除缓存
      */
-    @SuppressWarnings("unchecked")
-    public Set<String> getOnlineUsers() {
+    public void deletePattern(String pattern) {
         if (redisTemplate == null) {
-            return new HashSet<>();
+            return;
         }
-        String onlineUsersKey = "im:online:users";
-        Set<Object> members = redisTemplate.opsForSet().members(onlineUsersKey);
-        Set<String> result = new HashSet<>();
-        if (members != null) {
-            for (Object member : members) {
-                if (member != null) {
-                    result.add(member.toString());
-                }
-            }
+        Set<String> keys = redisTemplate.keys(buildSimpleKey(pattern));
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
         }
-        return result;
     }
 
     /**
-     * 检查用户是否在线
+     * 检查缓存是否存在
      */
-    public boolean isOnlineUser(Long userId) {
+    public boolean exists(String key) {
         if (redisTemplate == null) {
             return false;
         }
-        String onlineUsersKey = "im:online:users";
-        Boolean isMember = redisTemplate.opsForSet().isMember(onlineUsersKey, userId.toString());
-        return isMember != null && isMember;
+        return Boolean.TRUE.equals(redisTemplate.hasKey(buildSimpleKey(key)));
+    }
+
+    /**
+     * 设置过期时间
+     */
+    public void expire(String key, long timeout, TimeUnit unit) {
+        if (redisTemplate == null) {
+            return;
+        }
+        redisTemplate.expire(buildSimpleKey(key), timeout, unit);
+    }
+
+    // ==================== 私有方法 ====================
+    /**
+     * 构建简单缓存Key
+     */
+    private String buildSimpleKey(String... parts) {
+        StringBuilder sb = new StringBuilder(KEY_PREFIX);
+        for (String part : parts) {
+            sb.append(part);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 构建缓存Key（带前缀）
+     */
+    private String buildKey(String prefix, String... parts) {
+        StringBuilder sb = new StringBuilder(KEY_PREFIX).append(prefix);
+        for (String part : parts) {
+            sb.append(":").append(part);
+        }
+        return sb.toString();
     }
 }

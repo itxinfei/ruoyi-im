@@ -124,16 +124,17 @@ public class ImMessageController {
                 return;
             }
 
-            // 构建前端期望的消息格式
-            // 前端期望: type为消息类型(text/image/file), sessionId为会话ID
+            // 构建符合API规范的WebSocket消息格式
+            // 规范: 使用conversationId，同时兼容sessionId（向后兼容）
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> wsMessage = new HashMap<>();
 
-            // 前端期望type是消息类型 (text, image, file等)，而不是"message"
+            // 规范要求: type使用消息类型 (text, image, file等)
             wsMessage.put("type", message.getMessageType() != null ?
                 message.getMessageType().toLowerCase() : "text");
-            // 前端使用sessionId而不是conversationId
-            wsMessage.put("sessionId", message.getConversationId());
+            // 规范要求: 使用conversationId，同时保留sessionId做兼容
+            wsMessage.put("conversationId", message.getConversationId());
+            wsMessage.put("sessionId", message.getConversationId()); // 向后兼容
             wsMessage.put("id", message.getId());
             // 解密消息内容后再发送给前端
             String decryptedContent = encryptionUtil.decryptMessage(message.getContent());

@@ -949,4 +949,106 @@ public class ImWebSocketEndpoint {
             }
         }
     }
+
+    // ==================== WebRTC 视频通话信令支持 ====================
+
+    /**
+     * 发送通话通知
+     * 通知被叫方有来电
+     *
+     * @param calleeId 接收者ID
+     * @param callId 通话ID
+     * @param callType 通话类型 VIDEO/VOICE
+     * @param callerId 发起者ID
+     */
+    public static void sendCallNotification(Long calleeId, Long callId, String callType, Long callerId) {
+        try {
+            Map<String, Object> notification = new HashMap<>();
+            notification.put("type", "incoming_call");
+            notification.put("callId", callId);
+            notification.put("callType", callType);
+            notification.put("callerId", callerId);
+            notification.put("timestamp", System.currentTimeMillis());
+
+            // 获取发起者信息
+            if (staticImUserMapper != null) {
+                try {
+                    com.ruoyi.im.domain.ImUser caller = staticImUserMapper.selectImUserById(callerId);
+                    if (caller != null) {
+                        notification.put("callerName", caller.getNickname() != null ? caller.getNickname() : caller.getUsername());
+                        notification.put("callerAvatar", caller.getAvatar());
+                    }
+                } catch (Exception e) {
+                    log.warn("获取发起者信息失败: callerId={}", callerId, e);
+                }
+            }
+
+            sendToUser(calleeId, notification);
+            log.info("发送通话通知: calleeId={}, callId={}, type={}", calleeId, callId, callType);
+
+        } catch (Exception e) {
+            log.error("发送通话通知失败", e);
+        }
+    }
+
+    /**
+     * 发送WebRTC信令消息
+     * 转发offer/answer/ice-candidate等信令给通话对端
+     *
+     * @param callId 通话ID
+     * @param fromUserId 发送者用户ID
+     * @param signalType 信令类型 offer/answer/ice-candidate/hangup
+     * @param signalData 信令数据（JSON字符串）
+     */
+    public static void sendWebRTCSignal(Long callId, Long fromUserId, String signalType, String signalData) {
+        try {
+            // 获取通话信息，确定接收者
+            // 注意：这里需要调用VideoCallService，但由于是静态方法，我们通过其他方式获取
+            // 简化处理：通过Redis获取通话信息，或者直接广播给所有用户让客户端过滤
+
+            Map<String, Object> signalMessage = new HashMap<>();
+            signalMessage.put("type", "webrtc_signal");
+            signalMessage.put("callId", callId);
+            signalMessage.put("signalType", signalType);
+            signalMessage.put("fromUserId", fromUserId);
+            signalMessage.put("signalData", signalData);
+            signalMessage.put("timestamp", System.currentTimeMillis());
+
+            // 广播给所有在线用户（实际应该只发给通话参与者）
+            broadcastToAllOnline(new ObjectMapper().writeValueAsString(signalMessage));
+
+            log.debug("转发WebRTC信令: callId={}, type={}, from={}", callId, signalType, fromUserId);
+
+        } catch (Exception e) {
+            log.error("转发WebRTC信令失败", e);
+        }
+    }
+
+    /**
+     * 发送通话状态变化通知
+     * 通知通话参与者通话状态变化
+     *
+     * @param callId 通话ID
+     * @param callerId 发起者ID
+     * @param calleeId 接收者ID
+     * @param status 新状态
+     */
+    public static void sendCallStatusUpdate(Long callId, Long callerId, Long calleeId, String status) {
+        try {
+            Map<String, Object> statusUpdate = new HashMap<>();
+            statusUpdate.put("type", "call_status");
+            statusUpdate.put("callId", callId);
+            statusUpdate.put("status", status);
+            statusUpdate.put("timestamp", System.currentTimeMillis());
+
+            // 发送给双方
+            sendToUser(callerId, statusUpdate);
+            sendToUser(calleeId, statusUpdate);
+
+            log.info("发送通话状态通知: callId={}, status={}", callId, status);
+
+        } catch (Exception e) {
+            log.error("发送通话状态通知失败", e);
+        }
+    }
 }

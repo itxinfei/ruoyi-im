@@ -24,6 +24,17 @@ public interface ImTodoItemService {
     Long createTodo(String title, String description, String type, Long relatedId, Long userId);
 
     /**
+     * 创建待办事项（带优先级）
+     *
+     * @param title 标题
+     * @param description 描述
+     * @param priority 优先级：1=低, 2=中, 3=高
+     * @param userId 用户ID
+     * @return 待办ID
+     */
+    Long createTodoWithPriority(String title, String description, Integer priority, Long userId);
+
+    /**
      * 获取用户待办列表
      *
      * @param userId 用户ID

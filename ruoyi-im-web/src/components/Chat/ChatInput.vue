@@ -282,7 +282,7 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import EmojiPicker from './EmojiPicker.vue'
 import MentionSelector from './MentionSelector.vue'
@@ -448,6 +448,9 @@ const sendMessage = async () => {
   sending.value = true
 
   try {
+    // 添加到历史记录
+    addToHistory(content)
+
     await emit('send-message', {
       type: 'text',
       content,
@@ -458,6 +461,9 @@ const sendMessage = async () => {
     messageText.value = ''
     inputRows.value = 5
     mentionedMembers.value = []
+
+    // 清除草稿
+    clearDraft()
 
     if (props.replyMessage) {
       emit('cancel-reply')
@@ -666,7 +672,108 @@ const handleMoreCommand = command => {
     case 'code':
       showCodeSnippetDialog.value = true
       break
+    case 'screenshot':
+      handleScreenshot()
+      break
+    case 'transfer':
+      handleTransferFile()
+      break
   }
+}
+
+// 截图功能
+const handleScreenshot = () => {
+  ElMessage.info('截图功能开发中...')
+}
+
+// 文件传输
+const handleTransferFile = () => {
+  // 触发文件上传
+  const uploadInput = document.querySelector('.upload-item input[type="file"]')
+  if (uploadInput) {
+    uploadInput.click()
+  }
+}
+
+// 快捷消息模板
+const quickMessages = [
+  '好的',
+  '收到',
+  '谢谢',
+  '稍等',
+  '马上到',
+  '正在处理',
+  '请稍等',
+  '已确认',
+]
+
+// 插入快捷消息
+const insertQuickMessage = (msg) => {
+  messageText.value = msg
+  nextTick(() => {
+    textInput.value?.focus()
+    sendMessage()
+  })
+}
+
+// 消息历史记录
+const messageHistory = ref([])
+const historyIndex = ref(-1)
+
+// 添加到历史记录
+const addToHistory = (msg) => {
+  messageHistory.value.unshift(msg)
+  if (messageHistory.value.length > 50) {
+    messageHistory.value = messageHistory.value.slice(0, 50)
+  }
+  historyIndex.value = -1
+}
+
+// 查看上一条历史消息
+const navigateHistory = (direction) => {
+  if (messageHistory.value.length === 0) return
+
+  if (direction === 'up') {
+    if (historyIndex.value < messageHistory.value.length - 1) {
+      historyIndex.value++
+      messageText.value = messageHistory.value[historyIndex.value]
+    }
+  } else {
+    if (historyIndex.value > 0) {
+      historyIndex.value--
+      messageText.value = messageHistory.value[historyIndex.value]
+    } else if (historyIndex.value === 0) {
+      historyIndex.value = -1
+      messageText.value = ''
+    }
+  }
+
+  nextTick(() => {
+    textInput.value?.focus()
+  })
+}
+
+// 保存草稿
+const saveDraft = () => {
+  if (messageText.value.trim()) {
+    const draftKey = `im_draft_${props.sessionId}`
+    localStorage.setItem(draftKey, messageText.value)
+  }
+}
+
+// 加载草稿
+const loadDraft = () => {
+  const draftKey = `im_draft_${props.sessionId}`
+  const draft = localStorage.getItem(draftKey)
+  if (draft) {
+    messageText.value = draft
+  }
+}
+
+// 清除草稿
+const clearDraft = () => {
+  const draftKey = `im_draft_${props.sessionId}`
+  localStorage.removeItem(draftKey)
 }
 
 /**
@@ -700,12 +807,67 @@ const cancelReply = () => {
 
 // 组件挂载时的初始化
 onMounted(() => {
-  // 组件挂载后的初始化
+  // 加载草稿
+  loadDraft()
+
+  // 监听页面离开，保存草稿
+  window.addEventListener('beforeunload', saveDraft)
+
+  // 监听快捷键
+  const handleGlobalKeydown = (event) => {
+    // Alt + ↑/↓ 浏览历史消息
+    if (event.altKey && !event.shiftKey && !event.ctrlKey) {
+      const activeElement = document.activeElement
+      if (activeElement === textInput.value?.$el?.querySelector('textarea')) {
+        if (event.key === 'ArrowUp') {
+          event.preventDefault()
+          navigateHistory('up')
+        } else if (event.key === 'ArrowDown') {
+          event.preventDefault()
+          navigateHistory('down')
+        }
+      }
+    }
+
+    // Ctrl/Shift + Enter 发送消息
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+      if (activeElement === textInput.value?.$el?.querySelector('textarea')) {
+        if (!event.shiftKey) {
+          event.preventDefault()
+          sendMessage()
+        }
+      }
+    }
+
+    // Esc 取消回复
+    if (event.key === 'Escape' && props.replyMessage) {
+      cancelReply()
+    }
+  }
+
+  window.addEventListener('keydown', handleGlobalKeydown)
+
+  return () => {
+    window.removeEventListener('beforeunload', saveDraft)
+    window.removeEventListener('keydown', handleGlobalKeydown)
+  }
+})
+
+// 监听消息变化，自动保存草稿
+watch(messageText, () => {
+  saveDraft()
+})
+
+// 监听会话变化
+watch(() => props.sessionId, () => {
+  clearDraft()
+  loadDraft()
 })
 
 // 组件卸载时的清理
 onUnmounted(() => {
   stopRecordingTimer()
+  clearDraft()
 })
 </script>
 

@@ -59,7 +59,11 @@ public class ImMessageServiceImpl implements ImMessageService {
     @Autowired
     private ImMessageEditHistoryMapper editHistoryMapper;
 
+    @Autowired
+    private com.ruoyi.im.utils.ImDistributedLock distributedLock;
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long sendMessage(ImMessageSendRequest request, Long userId) {
         ImUser sender = imUserMapper.selectImUserById(userId);
         if (sender == null) {
@@ -83,12 +87,27 @@ public class ImMessageServiceImpl implements ImMessageService {
             }
         }
 
+        // 使用分布式锁防止并发发送消息导致的数据不一致
+        final Long finalConversationId = conversationId;
+        Long messageId = distributedLock.executeWithLock(
+                com.ruoyi.im.utils.ImDistributedLock.LockKeys.sendMessageKey(finalConversationId),
+                10, // 10秒过期时间足够
+                () -> doSendMessage(request, userId, finalConversationId, sender)
+        );
+
+        return messageId;
+    }
+
+    /**
+     * 实际执行发送消息的逻辑
+     */
+    private Long doSendMessage(ImMessageSendRequest request, Long userId, Long conversationId, ImUser sender) {
         ImMessage message = new ImMessage();
         message.setConversationId(conversationId);
         message.setSenderId(userId);
         message.setReceiverId(request.getReceiverId());
-        message.setMessageType(request.getType()); // 使用messageType而不是type（type是非数据库字段）
-        message.setReplyToMessageId(request.getReplyToMessageId()); // 设置回复消息ID
+        message.setMessageType(request.getType());
+        message.setReplyToMessageId(request.getReplyToMessageId());
 
         String contentToSave = encryptionUtil.encryptMessage(request.getContent());
         message.setContent(contentToSave);
@@ -156,6 +175,46 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         List<ImMessage> messageList = imMessageMapper.selectImMessageList(query);
 
+        // 优化：批量查询发送者信息，避免N+1查询问题
+        java.util.Set<Long> senderIds = new java.util.HashSet<>();
+        java.util.Set<Long> replyToMessageIds = new java.util.HashSet<>();
+        for (ImMessage message : messageList) {
+            senderIds.add(message.getSenderId());
+            if (message.getReplyToMessageId() != null && message.getReplyToMessageId() > 0) {
+                replyToMessageIds.add(message.getReplyToMessageId());
+            }
+        }
+
+        // 批量查询用户信息
+        java.util.Map<Long, ImUser> userMap = new java.util.HashMap<>();
+        if (!senderIds.isEmpty()) {
+            List<ImUser> users = imUserMapper.selectImUserListByIds(new java.util.ArrayList<>(senderIds));
+            for (ImUser user : users) {
+                userMap.put(user.getId(), user);
+            }
+        }
+
+        // 批量查询被回复的消息（用于获取其发送者信息）
+        java.util.Set<Long> replyToSenderIds = new java.util.HashSet<>();
+        java.util.Map<Long, ImMessage> replyToMessageMap = new java.util.HashMap<>();
+        for (Long replyToId : replyToMessageIds) {
+            ImMessage replyToMsg = imMessageMapper.selectImMessageById(replyToId);
+            if (replyToMsg != null) {
+                replyToMessageMap.put(replyToId, replyToMsg);
+                if (replyToMsg.getSenderId() != null) {
+                    replyToSenderIds.add(replyToMsg.getSenderId());
+                }
+            }
+        }
+
+        // 批量查询被回复消息的发送者信息
+        if (!replyToSenderIds.isEmpty()) {
+            List<ImUser> replyUsers = imUserMapper.selectImUserListByIds(new java.util.ArrayList<>(replyToSenderIds));
+            for (ImUser user : replyUsers) {
+                userMap.put(user.getId(), user);
+            }
+        }
+
         for (ImMessage message : messageList) {
             ImMessageVO vo = new ImMessageVO();
             BeanUtils.copyProperties(message, vo);
@@ -163,7 +222,8 @@ public class ImMessageServiceImpl implements ImMessageService {
             String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
             vo.setContent(decryptedContent);
 
-            ImUser sender = imUserMapper.selectImUserById(message.getSenderId());
+            // 从Map中获取发送者信息（避免重复查询）
+            ImUser sender = userMap.get(message.getSenderId());
             if (sender != null) {
                 vo.setSenderName(sender.getNickname());
                 vo.setSenderAvatar(sender.getAvatar());
@@ -174,7 +234,8 @@ public class ImMessageServiceImpl implements ImMessageService {
             // 处理引用消息（回复）
             if (message.getReplyToMessageId() != null && message.getReplyToMessageId() > 0) {
                 vo.setReplyToMessageId(message.getReplyToMessageId());
-                ImMessageVO.QuotedMessageVO quotedMessage = buildQuotedMessage(message.getReplyToMessageId());
+                ImMessageVO.QuotedMessageVO quotedMessage = buildQuotedMessageFromMap(
+                        message.getReplyToMessageId(), replyToMessageMap, userMap);
                 vo.setQuotedMessage(quotedMessage);
             }
 
@@ -188,25 +249,31 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     /**
-     * 构建引用消息VO
-     * 获取被回复消息的简要信息
+     * 构建引用消息VO（从预加载的Map中获取数据）
+     * 优化版本，避免N+1查询问题
      *
      * @param messageId 被回复的消息ID
+     * @param replyToMessageMap 预加载的消息Map
+     * @param userMap 预加载的用户Map
      * @return 引用消息VO
      */
-    private ImMessageVO.QuotedMessageVO buildQuotedMessage(Long messageId) {
-        ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
+    private ImMessageVO.QuotedMessageVO buildQuotedMessageFromMap(
+            Long messageId,
+            java.util.Map<Long, ImMessage> replyToMessageMap,
+            java.util.Map<Long, ImUser> userMap) {
+
+        ImMessage originalMessage = replyToMessageMap.get(messageId);
         if (originalMessage == null) {
             return null;
         }
 
         ImMessageVO.QuotedMessageVO quotedMessage = new ImMessageVO.QuotedMessageVO();
         quotedMessage.setId(originalMessage.getId());
-        quotedMessage.setType(originalMessage.getMessageType()); // 使用getMessageType而不是getType
-        quotedMessage.setSendTime(originalMessage.getCreateTime()); // 使用createTime而不是sendTime
+        quotedMessage.setType(originalMessage.getMessageType());
+        quotedMessage.setSendTime(originalMessage.getCreateTime());
 
-        // 获取发送者信息
-        ImUser sender = imUserMapper.selectImUserById(originalMessage.getSenderId());
+        // 从预加载的Map中获取发送者信息
+        ImUser sender = userMap.get(originalMessage.getSenderId());
         if (sender != null) {
             quotedMessage.setSenderName(sender.getNickname());
         } else {
@@ -217,7 +284,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         String content = encryptionUtil.decryptMessage(originalMessage.getContent());
 
         // 根据消息类型处理内容
-        String messageType = originalMessage.getMessageType(); // 修复：使用getMessageType而不是getType
+        String messageType = originalMessage.getMessageType();
         if ("IMAGE".equalsIgnoreCase(messageType) || "FILE".equalsIgnoreCase(messageType)
                 || "VIDEO".equalsIgnoreCase(messageType) || "VOICE".equalsIgnoreCase(messageType)) {
             quotedMessage.setIsFile(true);
@@ -233,6 +300,61 @@ public class ImMessageServiceImpl implements ImMessageService {
             }
         } else {
             // 文本消息截取前50个字符
+            quotedMessage.setIsFile(false);
+            if (content != null && content.length() > 50) {
+                quotedMessage.setContent(content.substring(0, 50) + "...");
+            } else {
+                quotedMessage.setContent(content);
+            }
+        }
+
+        return quotedMessage;
+    }
+
+    /**
+     * 构建引用消息VO（原始版本，单独查询）
+     * 保留用于向后兼容
+     *
+     * @param messageId 被回复的消息ID
+     * @return 引用消息VO
+     */
+    private ImMessageVO.QuotedMessageVO buildQuotedMessage(Long messageId) {
+        ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
+        if (originalMessage == null) {
+            return null;
+        }
+
+        ImMessageVO.QuotedMessageVO quotedMessage = new ImMessageVO.QuotedMessageVO();
+        quotedMessage.setId(originalMessage.getId());
+        quotedMessage.setType(originalMessage.getMessageType());
+        quotedMessage.setSendTime(originalMessage.getCreateTime());
+
+        // 获取发送者信息
+        ImUser sender = imUserMapper.selectImUserById(originalMessage.getSenderId());
+        if (sender != null) {
+            quotedMessage.setSenderName(sender.getNickname());
+        } else {
+            quotedMessage.setSenderName("未知用户");
+        }
+
+        // 解密并截取消息内容
+        String content = encryptionUtil.decryptMessage(originalMessage.getContent());
+
+        // 根据消息类型处理内容
+        String messageType = originalMessage.getMessageType();
+        if ("IMAGE".equalsIgnoreCase(messageType) || "FILE".equalsIgnoreCase(messageType)
+                || "VIDEO".equalsIgnoreCase(messageType) || "VOICE".equalsIgnoreCase(messageType)) {
+            quotedMessage.setIsFile(true);
+            if ("IMAGE".equalsIgnoreCase(messageType)) {
+                quotedMessage.setContent("[图片]");
+            } else if ("VIDEO".equalsIgnoreCase(messageType)) {
+                quotedMessage.setContent("[视频]");
+            } else if ("VOICE".equalsIgnoreCase(messageType)) {
+                quotedMessage.setContent("[语音]");
+            } else {
+                quotedMessage.setContent("[文件]");
+            }
+        } else {
             quotedMessage.setIsFile(false);
             if (content != null && content.length() > 50) {
                 quotedMessage.setContent(content.substring(0, 50) + "...");
@@ -440,6 +562,19 @@ public class ImMessageServiceImpl implements ImMessageService {
         List<ImMessage> messageList = imMessageMapper.searchMessages(conversationId, keyword, messageType,
                 senderId, startTime, endTime, includeRevoked, exactMatch, offset, pageSize);
 
+        // 优化：批量查询发送者信息，避免N+1查询问题
+        java.util.Map<Long, ImUser> userMap = new java.util.HashMap<>();
+        if (!messageList.isEmpty()) {
+            java.util.Set<Long> senderIds = new java.util.HashSet<>();
+            for (ImMessage message : messageList) {
+                senderIds.add(message.getSenderId());
+            }
+            List<ImUser> users = imUserMapper.selectImUserListByIds(new java.util.ArrayList<>(senderIds));
+            for (ImUser user : users) {
+                userMap.put(user.getId(), user);
+            }
+        }
+
         // 构建结果VO
         ImMessageSearchResultVO resultVO = new ImMessageSearchResultVO();
         resultVO.setTotal(total);
@@ -454,7 +589,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             item.setId(message.getId());
             item.setConversationId(message.getConversationId());
             item.setSenderId(message.getSenderId());
-            item.setType(message.getMessageType()); // 使用getMessageType而不是getType
+            item.setType(message.getMessageType());
             item.setSendTime(message.getCreateTime());
 
             // 解密消息内容
@@ -466,8 +601,8 @@ public class ImMessageServiceImpl implements ImMessageService {
                 item.setHighlightSnippet(generateHighlightSnippet(decryptedContent, keyword, 100));
             }
 
-            // 获取发送者信息
-            ImUser sender = imUserMapper.selectImUserById(message.getSenderId());
+            // 从预加载的Map中获取发送者信息（避免重复查询）
+            ImUser sender = userMap.get(message.getSenderId());
             if (sender != null) {
                 item.setSenderName(sender.getNickname());
                 item.setSenderAvatar(sender.getAvatar());

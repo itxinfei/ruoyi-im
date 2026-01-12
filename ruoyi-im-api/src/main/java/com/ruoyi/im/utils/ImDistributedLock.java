@@ -73,7 +73,7 @@ public class ImDistributedLock {
             // 使用Lua脚本确保只有锁的持有者才能释放锁
             String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
             redisTemplate.execute(new org.springframework.data.redis.core.script.DefaultRedisScript<>(
-                    script, Long.class), lock.getKey(), lock.getValue());
+                    script, Long.class), java.util.Collections.singletonList(lock.getKey()), lock.getValue());
 
             log.debug("释放分布式锁成功: key={}", lock.getKey());
         } catch (Exception e) {

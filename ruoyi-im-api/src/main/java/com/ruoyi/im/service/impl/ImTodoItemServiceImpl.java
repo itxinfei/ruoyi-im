@@ -36,6 +36,20 @@ public class ImTodoItemServiceImpl implements ImTodoItemService {
     }
 
     @Override
+    public Long createTodoWithPriority(String title, String description, Integer priority, Long userId) {
+        ImTodoItem todo = new ImTodoItem();
+        todo.setUserId(userId);
+        todo.setTitle(title);
+        todo.setDescription(description);
+        // 优先级：1=低, 2=中, 3=高
+        todo.setPriority(priority != null && priority >= 1 && priority <= 3 ? priority : 2);
+        todo.setStatus("PENDING");
+        todo.setCreateTime(LocalDateTime.now());
+        todoItemMapper.insertImTodoItem(todo);
+        return todo.getId();
+    }
+
+    @Override
     public List<ImTodoItem> getUserTodos(Long userId) {
         return todoItemMapper.selectTodoItemsByUserId(userId);
     }

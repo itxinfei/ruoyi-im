@@ -20,12 +20,22 @@ export function getTodos() {
   })
 }
 
-// 创建待办
+// 创建待办（后端使用@RequestParam接收）
 export function createTodo(data) {
+  // 优先级映射：HIGH=3, NORMAL=2, LOW=1
+  const priorityMap = { HIGH: 3, NORMAL: 2, LOW: 1 }
+  const priorityValue = data.priority ? priorityMap[data.priority] : 2
+
   return request({
     url: '/api/im/workbench/todos',
     method: 'post',
-    data: data,
+    params: {
+      title: data.title,
+      description: data.description,
+      type: data.type || 'TASK',
+      relatedId: data.relatedId,
+      priority: priorityValue,
+    },
   })
 }
 

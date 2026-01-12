@@ -1,6 +1,18 @@
 <template>
   <transition name="message-slide" appear>
-    <div class="message-bubble" :class="messageClasses" @contextmenu.prevent="showContextMenu">
+    <div
+      class="message-bubble"
+      :class="messageClasses"
+      @contextmenu.prevent="showContextMenu"
+      @click="handleClick"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+    >
+      <!-- 多选复选框 -->
+      <div v-if="isMultiSelectMode" class="message-checkbox" @click.stop="handleToggleSelect">
+        <el-checkbox :model-value="isSelected" @change="handleToggleSelect"></el-checkbox>
+      </div>
+
       <!-- 头像 -->
       <div class="message-avatar">
         <img
@@ -196,7 +208,45 @@
         <el-tooltip content="删除" placement="top">
           <i class="el-icon-delete action-icon danger" @click.stop="handleDelete"></i>
         </el-tooltip>
+        <el-tooltip content="添加表情" placement="top">
+          <i class="el-icon-star-off action-icon" @click.stop="toggleEmojiPicker"></i>
+        </el-tooltip>
       </div>
+
+      <!-- Emoji 反应栏 -->
+      <div v-if="reactions.length > 0" class="message-reactions">
+        <div
+          v-for="(reaction, index) in reactions"
+          :key="index"
+          class="reaction-item"
+          :class="{ active: reaction.hasReacted }"
+          @click.stop="handleReactionClick(reaction)"
+        >
+          <span class="reaction-emoji">{{ reaction.emoji }}</span>
+          <span class="reaction-count">{{ reaction.count }}</span>
+        </div>
+        <div
+          v-if="!showEmojiPicker"
+          class="reaction-add"
+          @click.stop="toggleEmojiPicker"
+        >
+          <i class="el-icon-plus"></i>
+        </div>
+      </div>
+
+      <!-- Emoji 选择器 -->
+      <transition name="emoji-picker-fade">
+        <div v-if="showEmojiPicker" class="emoji-picker-mini">
+          <div
+            v-for="emoji in quickEmojis"
+            :key="emoji"
+            class="emoji-option"
+            @click.stop="handleAddReaction(emoji)"
+          >
+            {{ emoji }}
+          </div>
+        </div>
+      </transition>
 
       <!-- 右键菜单 -->
       <teleport to="body">
@@ -249,6 +299,21 @@ export default {
       type: Boolean,
       default: false,
     },
+    // 多选模式
+    isMultiSelectMode: {
+      type: Boolean,
+      default: false,
+    },
+    // 是否已选中
+    isSelected: {
+      type: Boolean,
+      default: false,
+    },
+    // 消息反应
+    reactions: {
+      type: Array,
+      default: () => [],
+    },
   },
   emits: [
     'resend',
@@ -264,6 +329,9 @@ export default {
     'open-location',
     'select-vote',
     'context-menu',
+    'toggle-select',
+    'add-reaction',
+    'remove-reaction',
   ],
   data() {
     return {
@@ -273,6 +341,9 @@ export default {
       contextMenuVisible: false,
       contextMenuX: 0,
       contextMenuY: 0,
+      showEmojiPicker: false,
+      // 快速 emoji 列表
+      quickEmojis: ['👍', '❤️', '😂', '😮', '😢', '🙏', '🔥', '🎉'],
     }
   },
   computed: {
@@ -282,6 +353,9 @@ export default {
         other: !this.isMine,
         [`message-${this.message.type}`]: true,
         'image-loaded': this.imageLoaded,
+        'multi-select-mode': this.isMultiSelectMode,
+        'is-selected': this.isSelected,
+        'has-reactions': this.reactions.length > 0,
       }
     },
     canRecall() {
@@ -322,6 +396,100 @@ export default {
       this.$emit('image-load', this.message)
     },
 
+    // 显示右键菜单
+    showContextMenu(event) {
+      if (this.message.revoked || this.message.status === 'recalled') {
+        return
+      }
+
+      this.contextMenuX = event.clientX
+      this.contextMenuY = event.clientY
+
+      // 确保菜单不会超出屏幕边界
+      const menuWidth = 150
+      const menuHeight = 200
+      const screenWidth = window.innerWidth
+      const screenHeight = window.innerHeight
+
+      if (this.contextMenuX + menuWidth > screenWidth) {
+        this.contextMenuX = screenWidth - menuWidth - 10
+      }
+      if (this.contextMenuY + menuHeight > screenHeight) {
+        this.contextMenuY = screenHeight - menuHeight - 10
+      }
+
+      this.contextMenuVisible = true
+      this.$emit('context-menu', {
+        message: this.message,
+        x: this.contextMenuX,
+        y: this.contextMenuY,
+      })
+    },
+
+    // 隐藏右键菜单
+    hideContextMenu() {
+      this.contextMenuVisible = false
+    },
+
+    // 处理双击事件 - 快速引用回复
+    handleDoubleClick() {
+      if (this.message.revoked || this.message.status === 'recalled') {
+        return
+      }
+      if (this.message.type === 'text' || this.message.type === 'image') {
+        this.handleReply()
+      }
+    },
+
+    // 回复消息
+    handleReply() {
+      this.hideContextMenu()
+      this.$emit('reply', this.message)
+    },
+
+    // 转发消息
+    handleForward() {
+      this.hideContextMenu()
+      this.$emit('forward', this.message)
+    },
+
+    // 撤回消息
+    handleRecall() {
+      this.hideContextMenu()
+      this.$emit('recall', this.message.id)
+    },
+
+    // 下载文件
+    downloadFile(fileContent) {
+      this.$emit('download-file', fileContent)
+    },
+
+    // 播放语音
+    playVoice(voiceContent) {
+      this.isPlaying = !this.isPlaying
+      this.$emit('play-voice', voiceContent)
+
+      // 模拟播放完成后重置状态
+      if (this.isPlaying && voiceContent.duration) {
+        setTimeout(() => {
+          this.isPlaying = false
+        }, voiceContent.duration * 1000)
+      }
+    },
+
+    // 打开位置
+    openLocation(locationContent) {
+      this.$emit('open-location', locationContent)
+    },
+
+    // 选择投票选项
+    selectVoteOption(index) {
+      this.$emit('select-vote', {
+        messageId: this.message.id,
+        optionIndex: index,
+      })
+    },
+
     // 复制消息内容
     handleCopy() {
       this.hideContextMenu()
@@ -332,24 +500,103 @@ export default {
         content = this.message.content.name
       } else if (this.message.type === 'location') {
         content = `${this.message.content.name} - ${this.message.content.address}`
+      } else if (this.message.type === 'quote') {
+        content = this.message.content.currentText
       }
 
       if (content) {
-        navigator.clipboard
-          .writeText(content)
-          .then(() => {
-            this.$emit('copy', this.message)
-          })
-          .catch(err => {
-            console.error('复制失败:', err)
-          })
+        // 兼容不支持clipboard API的环境
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard
+            .writeText(content)
+            .then(() => {
+              this.$emit('copy', this.message)
+            })
+            .catch(err => {
+              console.error('复制失败:', err)
+              this.fallbackCopy(content)
+            })
+        } else {
+          this.fallbackCopy(content)
+        }
       }
+    },
+
+    // 备选复制方法
+    fallbackCopy(text) {
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      try {
+        document.execCommand('copy')
+        this.$emit('copy', this.message)
+      } catch (err) {
+        console.error('复制失败:', err)
+      }
+      document.body.removeChild(textarea)
     },
 
     // 删除消息
     handleDelete() {
       this.hideContextMenu()
       this.$emit('delete', this.message.id)
+    },
+
+    // 处理鼠标进入
+    handleMouseEnter() {
+      if (!this.isMultiSelectMode) {
+        this.showActions = true
+      }
+    },
+
+    // 处理鼠标离开
+    handleMouseLeave() {
+      this.showActions = false
+      this.showEmojiPicker = false
+    },
+
+    // 处理点击事件
+    handleClick() {
+      if (this.isMultiSelectMode) {
+        this.handleToggleSelect()
+      }
+    },
+
+    // 切换选中状态
+    handleToggleSelect() {
+      this.$emit('toggle-select', this.message.id)
+    },
+
+    // 切换 emoji 选择器
+    toggleEmojiPicker() {
+      this.showEmojiPicker = !this.showEmojiPicker
+    },
+
+    // 添加表情反应
+    handleAddReaction(emoji) {
+      this.showEmojiPicker = false
+      this.$emit('add-reaction', {
+        messageId: this.message.id,
+        emoji,
+      })
+    },
+
+    // 点击表情反应
+    handleReactionClick(reaction) {
+      if (reaction.hasReacted) {
+        this.$emit('remove-reaction', {
+          messageId: this.message.id,
+          emoji: reaction.emoji,
+        })
+      } else {
+        this.$emit('add-reaction', {
+          messageId: this.message.id,
+          emoji: reaction.emoji,
+        })
+      }
     },
   },
 }
@@ -1043,6 +1290,166 @@ export default {
 .message-bubble:hover .message-actions {
   opacity: 1;
   visibility: visible;
+}
+
+// ==================== 多选模式 ====================
+
+.message-bubble.multi-select-mode {
+  padding-left: 40px;
+
+  .message-checkbox {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+
+    :deep(.el-checkbox__inner) {
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+    }
+
+    :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+      background-color: $primary-color;
+      border-color: $primary-color;
+    }
+  }
+
+  &.is-selected {
+    background: rgba($primary-color, 0.05);
+    border-radius: 8px;
+
+    .message-content .text-message {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+    }
+  }
+}
+
+// ==================== Emoji 反应栏 ====================
+
+.message-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+  padding-left: 0;
+
+  .reaction-item {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    background: $bg-hover;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+
+    &:hover {
+      background: $bg-active;
+      transform: scale(1.05);
+    }
+
+    &.active {
+      background: rgba($primary-color, 0.1);
+      border-color: rgba($primary-color, 0.3);
+
+      .reaction-emoji {
+        transform: scale(1.1);
+      }
+    }
+
+    .reaction-emoji {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .reaction-count {
+      font-size: 11px;
+      color: $text-secondary;
+      font-weight: 500;
+    }
+  }
+
+  .reaction-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background: $bg-hover;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    color: $text-tertiary;
+
+    &:hover {
+      background: $bg-active;
+      color: $primary-color;
+      transform: scale(1.1);
+    }
+  }
+}
+
+.message-bubble.self .message-reactions {
+  justify-content: flex-end;
+}
+
+// ==================== Emoji 选择器 ====================
+
+.emoji-picker-mini {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  background: $bg-white;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  margin-bottom: 8px;
+  white-space: nowrap;
+
+  .emoji-option {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+
+    &:hover {
+      background: $bg-hover;
+      transform: scale(1.15);
+    }
+
+    &:active {
+      transform: scale(1);
+    }
+  }
+}
+
+.emoji-picker-fade-enter-active,
+.emoji-picker-fade-leave-active {
+  transition: all 0.2s ease;
+}
+
+.emoji-picker-fade-enter-from,
+.emoji-picker-fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
 }
 
 // ==================== 右键菜单 ====================

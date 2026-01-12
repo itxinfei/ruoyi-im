@@ -51,6 +51,9 @@ public class ImFriendServiceImpl implements ImFriendService {
     @Autowired
     private ImConversationService imConversationService;
 
+    @Autowired
+    private com.ruoyi.im.utils.ImDistributedLock distributedLock;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long sendFriendRequest(ImFriendAddRequest request, Long userId) {
@@ -170,12 +173,34 @@ public class ImFriendServiceImpl implements ImFriendService {
         query.setUserId(userId);
         List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
 
-        List<ImFriendVO> voList = new ArrayList<>();
+        // 使用Map进行去重，同一个friendId只保留一条记录
+        // 如果有重复的friendId，保留ID最小的记录（最早创建的）
+        Map<Long, ImFriend> uniqueFriendMap = new HashMap<>();
         for (ImFriend friend : friendList) {
             // SQL已过滤is_deleted=0的记录，这里保留双重检查确保安全
             if (friend.getIsDeleted() != null && friend.getIsDeleted() == 1) {
                 continue;
             }
+
+            Long friendId = friend.getFriendId();
+            ImFriend existing = uniqueFriendMap.get(friendId);
+            if (existing == null) {
+                uniqueFriendMap.put(friendId, friend);
+            } else {
+                // 如果已存在，保留ID较小的记录（通常是更早创建的）
+                if (friend.getId() < existing.getId()) {
+                    uniqueFriendMap.put(friendId, friend);
+                    log.warn("发现重复好友记录，保留较早的记录: userId={}, friendId={}, 保留ID={}, 跳过ID={}",
+                            userId, friendId, friend.getId(), existing.getId());
+                } else {
+                    log.warn("发现重复好友记录，保留较早的记录: userId={}, friendId={}, 保留ID={}, 跳过ID={}",
+                            userId, friendId, existing.getId(), friend.getId());
+                }
+            }
+        }
+
+        List<ImFriendVO> voList = new ArrayList<>();
+        for (ImFriend friend : uniqueFriendMap.values()) {
             ImFriendVO vo = new ImFriendVO();
             BeanUtils.copyProperties(friend, vo);
 
@@ -233,83 +258,15 @@ public class ImFriendServiceImpl implements ImFriendService {
         }
 
         if (approved) {
-            // 同意：创建双向好友关系
-            LocalDateTime now = LocalDateTime.now();
+            final Long fromUserId = request.getFromUserId();
+            final Long toUserId = request.getToUserId();
 
-            // ========== 为接收方（当前用户）创建好友记录 ==========
-            ImFriend friendForReceiver = new ImFriend();
-            friendForReceiver.setUserId(request.getToUserId());
-            friendForReceiver.setFriendId(request.getFromUserId());
-
-            // 检查是否已存在好友关系（防止重复插入）
-            ImFriend checkReceiver = new ImFriend();
-            checkReceiver.setUserId(request.getToUserId());
-            checkReceiver.setFriendId(request.getFromUserId());
-            List<ImFriend> existingReceiver = imFriendMapper.selectImFriendList(checkReceiver);
-
-            if (existingReceiver != null && !existingReceiver.isEmpty()) {
-                // 已存在，恢复软删除的记录（如果有）
-                ImFriend existing = existingReceiver.get(0);
-                if (existing.getIsDeleted() != null && existing.getIsDeleted() == 1) {
-                    existing.setIsDeleted(0);
-                    existing.setDeletedTime(null);
-                    existing.setGroupName("默认分组");
-                    existing.setUpdateTime(now);
-                    imFriendMapper.updateImFriend(existing);
-                    log.info("恢复已删除的好友关系: userId={}, friendId={}", request.getToUserId(), request.getFromUserId());
-                } else {
-                    log.warn("好友关系已存在，跳过创建: userId={}, friendId={}", request.getToUserId(), request.getFromUserId());
-                }
-            } else {
-                // 不存在，创建新记录
-                friendForReceiver.setRemark("");
-                friendForReceiver.setGroupName("默认分组");
-                friendForReceiver.setCreateTime(now);
-                friendForReceiver.setUpdateTime(now);
-                imFriendMapper.insertImFriend(friendForReceiver);
-            }
-
-            // ========== 为发送方（申请者）创建好友记录 ==========
-            ImFriend friendForSender = new ImFriend();
-            friendForSender.setUserId(request.getFromUserId());
-            friendForSender.setFriendId(request.getToUserId());
-
-            // 检查是否已存在好友关系（防止重复插入）
-            ImFriend checkSender = new ImFriend();
-            checkSender.setUserId(request.getFromUserId());
-            checkSender.setFriendId(request.getToUserId());
-            List<ImFriend> existingSender = imFriendMapper.selectImFriendList(checkSender);
-
-            if (existingSender != null && !existingSender.isEmpty()) {
-                // 已存在，恢复软删除的记录（如果有）
-                ImFriend existing = existingSender.get(0);
-                if (existing.getIsDeleted() != null && existing.getIsDeleted() == 1) {
-                    existing.setIsDeleted(0);
-                    existing.setDeletedTime(null);
-                    existing.setGroupName("默认分组");
-                    existing.setUpdateTime(now);
-                    imFriendMapper.updateImFriend(existing);
-                    log.info("恢复已删除的好友关系: userId={}, friendId={}", request.getFromUserId(), request.getToUserId());
-                } else {
-                    log.warn("好友关系已存在，跳过创建: userId={}, friendId={}", request.getFromUserId(), request.getToUserId());
-                }
-            } else {
-                // 不存在，创建新记录
-                friendForSender.setRemark("");
-                friendForSender.setGroupName("默认分组");
-                friendForSender.setCreateTime(now);
-                friendForSender.setUpdateTime(now);
-                imFriendMapper.insertImFriend(friendForSender);
-            }
-
-            // 创建双向私聊会话（双方都能看到会话）
-            createPrivateSession(request.getToUserId(), request.getFromUserId());
-            createPrivateSession(request.getFromUserId(), request.getToUserId());
-
-            // 更新申请状态
-            request.setStatus("APPROVED");
-            request.setHandledTime(now);
-            imFriendRequestMapper.updateImFriendRequest(request);
+            // 使用分布式锁防止并发创建好友关系导致的数据不一致
+            distributedLock.executeWithLock(
+                    com.ruoyi.im.utils.ImDistributedLock.LockKeys.friendRelationKey(fromUserId, toUserId),
+                    15,
+                    () -> doCreateFriendRelationship(fromUserId, toUserId, request)
+            );
         } else {
             // 拒绝
             request.setStatus("REJECTED");
@@ -318,18 +275,115 @@ public class ImFriendServiceImpl implements ImFriendService {
         }
     }
 
+    /**
+     * 实际执行创建好友关系的逻辑
+     */
+    private Boolean doCreateFriendRelationship(Long fromUserId, Long toUserId, ImFriendRequest friendRequest) {
+        LocalDateTime now = LocalDateTime.now();
+
+        // ========== 为接收方（当前用户）创建好友记录 ==========
+        ImFriend checkReceiver = new ImFriend();
+        checkReceiver.setUserId(toUserId);
+        checkReceiver.setFriendId(fromUserId);
+        List<ImFriend> existingReceiver = imFriendMapper.selectImFriendList(checkReceiver);
+
+        if (existingReceiver != null && !existingReceiver.isEmpty()) {
+            // 已存在，恢复软删除的记录（如果有）
+            ImFriend existing = existingReceiver.get(0);
+            if (existing.getIsDeleted() != null && existing.getIsDeleted() == 1) {
+                existing.setIsDeleted(0);
+                existing.setDeletedTime(null);
+                existing.setGroupName("默认分组");
+                existing.setUpdateTime(now);
+                imFriendMapper.updateImFriend(existing);
+                log.info("恢复已删除的好友关系: userId={}, friendId={}", toUserId, fromUserId);
+            } else {
+                log.warn("好友关系已存在，跳过创建: userId={}, friendId={}", toUserId, fromUserId);
+            }
+        } else {
+            // 不存在，创建新记录
+            ImFriend friendForReceiver = new ImFriend();
+            friendForReceiver.setUserId(toUserId);
+            friendForReceiver.setFriendId(fromUserId);
+            friendForReceiver.setRemark("");
+            friendForReceiver.setGroupName("默认分组");
+            friendForReceiver.setCreateTime(now);
+            friendForReceiver.setUpdateTime(now);
+            imFriendMapper.insertImFriend(friendForReceiver);
+        }
+
+        // ========== 为发送方（申请者）创建好友记录 ==========
+        ImFriend checkSender = new ImFriend();
+        checkSender.setUserId(fromUserId);
+        checkSender.setFriendId(toUserId);
+        List<ImFriend> existingSender = imFriendMapper.selectImFriendList(checkSender);
+
+        if (existingSender != null && !existingSender.isEmpty()) {
+            // 已存在，恢复软删除的记录（如果有）
+            ImFriend existing = existingSender.get(0);
+            if (existing.getIsDeleted() != null && existing.getIsDeleted() == 1) {
+                existing.setIsDeleted(0);
+                existing.setDeletedTime(null);
+                existing.setGroupName("默认分组");
+                existing.setUpdateTime(now);
+                imFriendMapper.updateImFriend(existing);
+                log.info("恢复已删除的好友关系: userId={}, friendId={}", fromUserId, toUserId);
+            } else {
+                log.warn("好友关系已存在，跳过创建: userId={}, friendId={}", fromUserId, toUserId);
+            }
+        } else {
+            // 不存在，创建新记录
+            ImFriend friendForSender = new ImFriend();
+            friendForSender.setUserId(fromUserId);
+            friendForSender.setFriendId(toUserId);
+            friendForSender.setRemark("");
+            friendForSender.setGroupName("默认分组");
+            friendForSender.setCreateTime(now);
+            friendForSender.setUpdateTime(now);
+            imFriendMapper.insertImFriend(friendForSender);
+        }
+
+        // 创建双向私聊会话（双方都能看到会话）
+        createPrivateSession(toUserId, fromUserId);
+        createPrivateSession(fromUserId, toUserId);
+
+        // 更新申请状态
+        friendRequest.setStatus("APPROVED");
+        friendRequest.setHandledTime(now);
+        imFriendRequestMapper.updateImFriendRequest(friendRequest);
+        return true;
+    }
+
     @Override
     public List<ImContactGroupVO> getGroupedFriendList(Long userId) {
         ImFriend query = new ImFriend();
         query.setUserId(userId);
         List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
 
-        Map<String, List<ImFriendVO>> groupMap = new HashMap<>();
+        // 使用Map进行去重，同一个friendId只保留一条记录
+        // 如果有重复的friendId，保留ID最小的记录（最早创建的）
+        Map<Long, ImFriend> uniqueFriendMap = new HashMap<>();
         for (ImFriend friend : friendList) {
             // 使用isDeleted字段判断是否已删除
             if (friend.getIsDeleted() != null && friend.getIsDeleted() == 1) {
                 continue;
             }
+
+            Long friendId = friend.getFriendId();
+            ImFriend existing = uniqueFriendMap.get(friendId);
+            if (existing == null) {
+                uniqueFriendMap.put(friendId, friend);
+            } else {
+                // 如果已存在，保留ID较小的记录（通常是更早创建的）
+                if (friend.getId() < existing.getId()) {
+                    uniqueFriendMap.put(friendId, friend);
+                }
+            }
+        }
+
+        // 按分组组织去重后的好友
+        Map<String, List<ImFriendVO>> groupMap = new HashMap<>();
+        for (ImFriend friend : uniqueFriendMap.values()) {
             String groupName = friend.getGroupName();
             if (groupName == null) {
                 groupName = "默认分组";

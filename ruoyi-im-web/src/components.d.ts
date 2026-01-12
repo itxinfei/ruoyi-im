@@ -79,6 +79,8 @@ declare module 'vue' {
     MessageBubble: typeof import('./components/Chat/MessageBubble.vue')['default']
     MessageForwardDialog: typeof import('./components/Chat/MessageForwardDialog.vue')['default']
     MessageList: typeof import('./components/Chat/MessageList.vue')['default']
+    MessageMultiSelectBar: typeof import('./components/Chat/MessageMultiSelectBar.vue')['default']
+    MessageReplyEditor: typeof import('./components/Chat/MessageReplyEditor.vue')['default']
     MessageSearchDialog: typeof import('./components/Chat/MessageSearchDialog.vue')['default']
     MessageStatus: typeof import('./components/Message/MessageStatus.vue')['default']
     NotificationPanel: typeof import('./components/Notification/NotificationPanel.vue')['default']

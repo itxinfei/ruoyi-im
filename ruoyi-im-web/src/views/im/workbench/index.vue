@@ -313,12 +313,14 @@ const handleTodoDelete = async todo => {
 }
 
 const getPriorityType = priority => {
-  const map = { HIGH: 'danger', NORMAL: 'info', LOW: 'success' }
+  // 后端返回整数：1=低, 2=中, 3=高
+  const map = { 1: 'success', 2: 'info', 3: 'danger' }
   return map[priority] || 'info'
 }
 
 const getPriorityText = priority => {
-  const map = { HIGH: '高', NORMAL: '普通', LOW: '低' }
+  // 后端返回整数：1=低, 2=中, 3=高
+  const map = { 1: '低', 2: '普通', 3: '高' }
   return map[priority] || '普通'
 }
 
@@ -327,7 +329,7 @@ const loadOverview = async () => {
     const response = await getWorkbenchOverview()
     if (response.code === 200 && response.data) {
       overviewCards.value[0].value = response.data.todoCount || 0
-      overviewCards.value[1].value = response.data.messageCount || 0
+      overviewCards.value[1].value = response.data.unreadMessageCount || 0
       overviewCards.value[2].value = response.data.approvalCount || 0
       overviewCards.value[3].value = response.data.noticeCount || 0
 
@@ -343,7 +345,11 @@ const loadTodos = async () => {
   try {
     const response = await getTodos()
     if (response.code === 200) {
-      todoList.value = response.data || []
+      // 后端返回的数据格式转换
+      todoList.value = (response.data || []).map(todo => ({
+        ...todo,
+        isCompleted: todo.status === 'COMPLETED',
+      }))
     }
   } catch (error) {
     console.error('获取待办列表失败:', error)

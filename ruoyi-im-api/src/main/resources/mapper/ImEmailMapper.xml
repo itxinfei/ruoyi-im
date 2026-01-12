@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImEmailMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImEmail" id="ImEmailResult">
+        <id property="id" column="id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="senderName" column="sender_name"/>
+        <result property="senderEmail" column="sender_email"/>
+        <result property="receiverId" column="receiver_id"/>
+        <result property="subject" column="subject"/>
+        <result property="htmlContent" column="html_content"/>
+        <result property="textContent" column="text_content"/>
+        <result property="isRead" column="is_read"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="isStarred" column="is_starred"/>
+        <result property="folder" column="folder"/>
+        <result property="attachmentCount" column="attachment_count"/>
+        <result property="sendTime" column="send_time"/>
+        <result property="receiveTime" column="receive_time"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectImEmailVo">
+        select id, sender_id, sender_name, sender_email, receiver_id, subject,
+               html_content, text_content, is_read, is_deleted, is_starred,
+               folder, attachment_count, send_time, receive_time, create_time
+        from im_email
+    </sql>
+
+    <select id="selectEmailsByUserIdAndFolder" resultMap="ImEmailResult">
+        <include refid="selectImEmailVo"/>
+        where receiver_id = #{userId}
+        and is_deleted = 0
+        <if test="folder != null and folder != ''">
+            and folder = #{folder}
+        </if>
+        order by create_time desc
+    </select>
+
+    <select id="selectEmailById" parameterType="Long" resultMap="ImEmailResult">
+        <include refid="selectImEmailVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="countUnreadByUserId" parameterType="Long" resultType="int">
+        select count(*) from im_email
+        where receiver_id = #{userId}
+        and is_read = 0
+        and is_deleted = 0
+        and folder = 'INBOX'
+    </select>
+
+    <insert id="insertEmail" parameterType="com.ruoyi.im.domain.ImEmail" useGeneratedKeys="true" keyProperty="id">
+        insert into im_email
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="senderId != null">sender_id,</if>
+            <if test="senderName != null">sender_name,</if>
+            <if test="senderEmail != null">sender_email,</if>
+            <if test="receiverId != null">receiver_id,</if>
+            <if test="subject != null">subject,</if>
+            <if test="htmlContent != null">html_content,</if>
+            <if test="textContent != null">text_content,</if>
+            <if test="isRead != null">is_read,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="isStarred != null">is_starred,</if>
+            <if test="folder != null">folder,</if>
+            <if test="attachmentCount != null">attachment_count,</if>
+            <if test="sendTime != null">send_time,</if>
+            <if test="receiveTime != null">receive_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="senderId != null">#{senderId},</if>
+            <if test="senderName != null">#{senderName},</if>
+            <if test="senderEmail != null">#{senderEmail},</if>
+            <if test="receiverId != null">#{receiverId},</if>
+            <if test="subject != null">#{subject},</if>
+            <if test="htmlContent != null">#{htmlContent},</if>
+            <if test="textContent != null">#{textContent},</if>
+            <if test="isRead != null">#{isRead},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="isStarred != null">#{isStarred},</if>
+            <if test="folder != null">#{folder},</if>
+            <if test="attachmentCount != null">#{attachmentCount},</if>
+            <if test="sendTime != null">#{sendTime},</if>
+            <if test="receiveTime != null">#{receiveTime},</if>
+        </trim>
+    </insert>
+
+    <insert id="batchInsertEmails">
+        insert into im_email (sender_id, sender_name, sender_email, receiver_id, subject, html_content, text_content, is_read, is_deleted, is_starred, folder, send_time, receive_time)
+        values
+        <foreach collection="emails" item="email" separator=",">
+            (#{email.senderId}, #{email.senderName}, #{email.senderEmail}, #{email.receiverId}, #{email.subject}, #{email.htmlContent}, #{email.textContent}, #{email.isRead}, #{email.isDeleted}, #{email.isStarred}, #{email.folder}, #{email.sendTime}, #{email.receiveTime})
+        </foreach>
+    </insert>
+
+    <update id="updateEmail" parameterType="com.ruoyi.im.domain.ImEmail">
+        update im_email
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="isRead != null">is_read = #{isRead},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="isStarred != null">is_starred = #{isStarred},</if>
+            <if test="folder != null">folder = #{folder},</if>
+            <if test="subject != null">subject = #{subject},</if>
+            <if test="htmlContent != null">html_content = #{htmlContent},</if>
+            <if test="textContent != null">text_content = #{textContent},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteEmailById" parameterType="Long">
+        delete from im_email where id = #{id}
+    </delete>
+
+</mapper>

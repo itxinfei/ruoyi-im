@@ -42,6 +42,15 @@ export const MSG_TYPE = {
   READ: 'read',
   RECEIVED: 'received',
   RECALL: 'recall',
+
+  // 反应和收藏
+  REACTION: 'reaction',
+  FAVORITE: 'favorite',
+
+  // 视频通话
+  INCOMING_CALL: 'incoming_call',
+  CALL_STATUS: 'call_status',
+  WEBRTC_SIGNAL: 'webrtc_signal',
 }
 
 class ImWebSocket {
@@ -224,6 +233,56 @@ class ImWebSocket {
           }
           break
 
+        case MSG_TYPE.REACTION:
+          // 消息表情反应更新
+          this.emit('messageReaction', message)
+          if (store && store.dispatch) {
+            store.dispatch('im/handleMessageReaction', {
+              messageId: message.messageId,
+              conversationId: message.conversationId,
+              userId: message.userId,
+              emoji: message.emoji,
+              action: message.action, // 'add' or 'remove'
+            })
+          }
+          break
+
+        case MSG_TYPE.FAVORITE:
+          // 消息收藏更新
+          this.emit('messageFavorite', message)
+          break
+
+        case 'typing':
+          // 正在输入状态（后端直接返回 'typing' 类型）
+          this.emit('typing', message)
+          break
+
+        case 'read_receipt':
+          // 已读回执
+          this.emit('readReceipt', message)
+          if (store && store.dispatch) {
+            store.dispatch('im/handleReadReceipt', message)
+          }
+          break
+
+        case MSG_TYPE.INCOMING_CALL:
+        case 'incoming_call':
+          // 来电通知
+          this.emit('incomingCall', message)
+          break
+
+        case MSG_TYPE.CALL_STATUS:
+        case 'call_status':
+          // 通话状态变化
+          this.emit('callStatus', message)
+          break
+
+        case MSG_TYPE.WEBRTC_SIGNAL:
+        case 'webrtc_signal':
+          // WebRTC信令消息
+          this.emit('webrtcSignal', message)
+          break
+
         default:
           this.emit('unknown', message)
       }
@@ -302,6 +361,22 @@ class ImWebSocket {
       status: status,
       userId: userInfo.userId || userInfo.id,
       timestamp: Date.now(),
+    })
+  }
+
+  /**
+   * 发送WebRTC信令
+   * @param {Object} signalData - 信令数据
+   * @param {number} signalData.callId - 通话ID
+   * @param {string} signalData.signalType - 信令类型 offer/answer/ice-candidate
+   * @param {string} signalData.signalData - 信令数据
+   */
+  sendWebRTCSignal(signalData) {
+    return this.send({
+      type: MSG_TYPE.WEBRTC_SIGNAL,
+      callId: signalData.callId,
+      signalType: signalData.signalType,
+      signalData: signalData.signalData,
     })
   }
 
