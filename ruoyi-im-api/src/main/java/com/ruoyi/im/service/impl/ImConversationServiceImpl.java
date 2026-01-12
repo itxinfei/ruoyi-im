@@ -59,81 +59,108 @@ public class ImConversationServiceImpl implements ImConversationService {
         List<ImConversationMember> memberList = imConversationMemberMapper.selectByUserId(userId);
         List<ImConversationVO> voList = new ArrayList<>();
 
+        // 用于私聊会话去重的Map，key为对方用户ID，value为会话VO
+        java.util.Map<Long, ImConversationVO> privateConversationMap = new java.util.HashMap<>();
+
         for (ImConversationMember member : memberList) {
+            // 跳过已删除的成员记录
+            if (member.getIsDeleted() != null && member.getIsDeleted() == 1) {
+                continue;
+            }
+
             // 使用BaseMapper的selectById方法
             ImConversation conversation = imConversationMapper.selectById(member.getConversationId());
-            if (conversation != null) {
-                ImConversationVO vo = new ImConversationVO();
-                BeanUtils.copyProperties(conversation, vo);
-                vo.setUnreadCount(member.getUnreadCount());
-                vo.setIsPinned(member.getIsPinned() != null && member.getIsPinned() == 1);
-                vo.setIsMuted(member.getIsMuted() != null && member.getIsMuted() == 1);
-                vo.setLastReadMessageId(member.getLastReadMessageId());
+            if (conversation == null || (conversation.getIsDeleted() != null && conversation.getIsDeleted() == 1)) {
+                continue;
+            }
 
-                // 查询并设置最后一条消息
-                if (conversation.getLastMessageId() != null) {
-                    com.ruoyi.im.domain.ImMessage lastMessage = imMessageMapper.selectImMessageById(conversation.getLastMessageId());
-                    if (lastMessage != null) {
-                        com.ruoyi.im.vo.message.ImMessageVO messageVO = new com.ruoyi.im.vo.message.ImMessageVO();
-                        BeanUtils.copyProperties(lastMessage, messageVO);
-                        vo.setLastMessage(messageVO);
-                        vo.setLastMessageTime(lastMessage.getCreateTime());
-                    }
+            ImConversationVO vo = new ImConversationVO();
+            BeanUtils.copyProperties(conversation, vo);
+            vo.setUnreadCount(member.getUnreadCount());
+            vo.setIsPinned(member.getIsPinned() != null && member.getIsPinned() == 1);
+            vo.setIsMuted(member.getIsMuted() != null && member.getIsMuted() == 1);
+            vo.setLastReadMessageId(member.getLastReadMessageId());
+
+            // 查询并设置最后一条消息
+            if (conversation.getLastMessageId() != null) {
+                com.ruoyi.im.domain.ImMessage lastMessage = imMessageMapper.selectImMessageById(conversation.getLastMessageId());
+                if (lastMessage != null) {
+                    com.ruoyi.im.vo.message.ImMessageVO messageVO = new com.ruoyi.im.vo.message.ImMessageVO();
+                    BeanUtils.copyProperties(lastMessage, messageVO);
+                    vo.setLastMessage(messageVO);
+                    vo.setLastMessageTime(lastMessage.getCreateTime());
                 }
+            }
 
-                // 设置会话相关信息
-                // 兼容PRIVATE和SINGLE类型（历史数据可能使用SINGLE）
-                if ("PRIVATE".equalsIgnoreCase(conversation.getType()) || "SINGLE".equalsIgnoreCase(conversation.getType())) {
-                    // 私聊会话，获取对方用户信息
-                    Long peerUserId = getPeerUserId(conversation.getId(), userId);
-                    if (peerUserId != null) {
-                        ImUser peerUser = imUserMapper.selectImUserById(peerUserId);
-                        if (peerUser != null) {
-                            String peerName = peerUser.getNickname() != null ? peerUser.getNickname() : peerUser.getUsername();
-                            String peerAvatar = peerUser.getAvatar();
-                            // 设置对方信息
-                            vo.setPeerName(peerName);
-                            vo.setPeerAvatar(peerAvatar);
-                            // 同时设置name和avatar字段（前端兼容）
-                            vo.setName(peerName);
-                            vo.setAvatar(peerAvatar);
-                        }
+            // 设置会话相关信息
+            // 兼容PRIVATE和SINGLE类型（历史数据可能使用SINGLE）
+            if ("PRIVATE".equalsIgnoreCase(conversation.getType()) || "SINGLE".equalsIgnoreCase(conversation.getType())) {
+                // 私聊会话，获取对方用户信息
+                Long peerUserId = getPeerUserId(conversation.getId(), userId);
+                if (peerUserId != null) {
+                    ImUser peerUser = imUserMapper.selectImUserById(peerUserId);
+                    if (peerUser != null) {
+                        String peerName = peerUser.getNickname() != null ? peerUser.getNickname() : peerUser.getUsername();
+                        String peerAvatar = peerUser.getAvatar();
+                        // 设置对方信息
+                        vo.setPeerName(peerName);
+                        vo.setPeerAvatar(peerAvatar);
+                        // 同时设置name和avatar字段（前端兼容）
+                        vo.setName(peerName);
+                        vo.setAvatar(peerAvatar);
                     }
-                } else if ("GROUP".equalsIgnoreCase(conversation.getType())) {
-                    // 群聊会话，从群组表获取信息
-                    ImGroup group = null;
-                    if (conversation.getTargetId() != null) {
-                        group = imGroupMapper.selectImGroupById(conversation.getTargetId());
-                    }
-                    String groupAvatar;
-                    String groupName;
-                    if (group != null) {
-                        groupName = group.getName();
-                        groupAvatar = group.getAvatar();
-                        if (groupAvatar == null || groupAvatar.isEmpty()) {
-                            groupAvatar = "/avatar/group_default.png";
-                        }
+
+                    // 私聊会话去重：同一个对方用户只保留最后消息时间较新的会话
+                    ImConversationVO existing = privateConversationMap.get(peerUserId);
+                    if (existing == null) {
+                        privateConversationMap.put(peerUserId, vo);
                     } else {
-                        groupName = conversation.getName();
-                        if (groupName == null || groupName.isEmpty()) {
-                            groupName = "群聊";
-                        }
-                        groupAvatar = conversation.getAvatar();
-                        if (groupAvatar == null || groupAvatar.isEmpty()) {
-                            groupAvatar = "/avatar/group_default.png";
+                        // 比较最后消息时间，保留较新的
+                        java.time.LocalDateTime existingTime = existing.getLastMessageTime();
+                        java.time.LocalDateTime newTime = vo.getLastMessageTime();
+                        if (newTime != null && (existingTime == null || newTime.isAfter(existingTime))) {
+                            privateConversationMap.put(peerUserId, vo);
                         }
                     }
-                    // 设置群组信息
-                    vo.setPeerName(groupName);
-                    vo.setPeerAvatar(groupAvatar);
-                    // 同时设置name和avatar字段（前端兼容）
-                    vo.setName(groupName);
-                    vo.setAvatar(groupAvatar);
                 }
+            } else if ("GROUP".equalsIgnoreCase(conversation.getType())) {
+                // 群聊会话，从群组表获取信息
+                ImGroup group = null;
+                if (conversation.getTargetId() != null) {
+                    group = imGroupMapper.selectImGroupById(conversation.getTargetId());
+                }
+                String groupAvatar;
+                String groupName;
+                if (group != null) {
+                    groupName = group.getName();
+                    groupAvatar = group.getAvatar();
+                    if (groupAvatar == null || groupAvatar.isEmpty()) {
+                        groupAvatar = "/avatar/group_default.png";
+                    }
+                } else {
+                    groupName = conversation.getName();
+                    if (groupName == null || groupName.isEmpty()) {
+                        groupName = "群聊";
+                    }
+                    groupAvatar = conversation.getAvatar();
+                    if (groupAvatar == null || groupAvatar.isEmpty()) {
+                        groupAvatar = "/avatar/group_default.png";
+                    }
+                }
+                // 设置群组信息
+                vo.setPeerName(groupName);
+                vo.setPeerAvatar(groupAvatar);
+                // 同时设置name和avatar字段（前端兼容）
+                vo.setName(groupName);
+                vo.setAvatar(groupAvatar);
 
+                // 群聊会话直接添加到结果列表
                 voList.add(vo);
             }
         }
+
+        // 将去重后的私聊会话添加到结果列表
+        voList.addAll(privateConversationMap.values());
 
         // 按最后更新时间排序
         voList.sort((a, b) -> {

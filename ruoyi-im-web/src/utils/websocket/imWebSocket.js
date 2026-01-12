@@ -273,15 +273,21 @@ class ImWebSocket {
 
   /**
    * 发送聊天消息
+   * 格式与后端 ImWebSocketEndpoint 期望的格式一致
    */
   sendMessage(message) {
-    return this.send({
-      type: message.type || MSG_TYPE.TEXT,
-      sessionId: message.sessionId,
-      conversationId: message.conversationId,
+    // 统一消息格式，符合后端 WebSocket 端点的期望
+    const payload = {
+      conversationId: message.conversationId || message.sessionId,
+      messageType: (message.type || MSG_TYPE.TEXT).toUpperCase(),
       content: message.content,
       replyToMessageId: message.replyToMessageId,
       clientMsgId: message.clientMsgId,
+    }
+
+    return this.send({
+      type: 'message',  // 后端期望固定的 "message" 类型
+      payload: payload,  // 实际消息数据放在 payload 中
     })
   }
 

@@ -82,10 +82,12 @@ public class ImMessageController {
             userId = 1L;
         }
 
-        // 保存消息到数据库
+        // 注意：REST API只负责保存消息，不进行WebSocket广播
+        // 消息广播统一由WebSocket端点处理，避免重复发送
+        // 前端应该通过WebSocket发送消息以获得实时体验
         Long messageId = imMessageService.sendMessage(request, userId);
 
-        // 通过 WebSocket 广播消息给会话中的其他在线用户
+        // 通知WebSocket端点进行广播（仅用于REST API调用场景）
         if (messageId != null) {
             broadcastMessageToConversation(request.getConversationId(), messageId, userId);
         }

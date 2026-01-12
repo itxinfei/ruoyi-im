@@ -149,13 +149,13 @@
           ref="textInput"
           v-model="messageText"
           type="textarea"
-          :rows="inputRows"
+          :autosize="{ minRows: 4, maxRows: 12 }"
           :maxlength="maxLength"
           placeholder="输入消息..."
           resize="none"
           class="custom-textarea"
           @keydown="handleKeyDown"
-          @input="handleInput"
+        
           @focus="handleFocus"
           @blur="handleBlur"
         />
@@ -816,11 +816,10 @@ onUnmounted(() => {
   display: inline-block;
 }
 
-.input-area {
-  padding: $spacing-md 0;
-  padding-bottom: 60px; // 为圆形发送按钮留出空间
+ .input-area {
+  padding: 0;
   position: relative;
-}
+ }
 
 .reply-preview {
   display: flex;
@@ -881,20 +880,20 @@ onUnmounted(() => {
 .custom-textarea {
   :deep(.el-textarea__inner) {
     border-radius: 8px;
-    border: 1px solid #e8e8e8;
+    border: 1px solid $border-base;
     transition: all $transition-base $ease-base;
     font-size: 15px;
     line-height: 1.6;
     padding: 12px 16px;
     margin: 0;
-    background-color: #f8f9fa;
+    background-color: #fff;
     color: #1f1f1f;
     resize: none;
 
     &:focus {
-      border-color: #1890ff;
+      border-color: $primary-color;
       background-color: #fff;
-      box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
     }
 
     &:hover {
@@ -954,7 +953,7 @@ onUnmounted(() => {
 
 .send-button-wrapper {
   position: absolute;
-  bottom: 12px;
+  bottom: 8px;
   right: 12px;
   display: flex;
   align-items: center;

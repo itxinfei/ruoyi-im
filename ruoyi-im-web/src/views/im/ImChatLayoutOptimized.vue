@@ -237,8 +237,8 @@
                     <!-- 图片消息 -->
                     <div v-else-if="msg.type === 'image'" class="message-image">
                       <el-image
-                        :src="msg.content"
-                        :preview-src-list="[msg.content]"
+                        :src="getImageUrl(msg)"
+                        :preview-src-list="[getImageUrl(msg)]"
                         fit="cover"
                         class="image-content"
                         :class="{ sending: msg.status === 'sending' }"
@@ -255,9 +255,9 @@
                         <el-icon><Document /></el-icon>
                       </div>
                       <div class="file-info">
-                        <div class="file-name">{{ msg.fileName || '文件' }}</div>
+                        <div class="file-name">{{ getFileInfo(msg).name }}</div>
                         <div class="file-size">
-                          {{ msg.fileSize ? formatFileSize(msg.fileSize) : '' }}
+                          {{ getFileInfo(msg).size ? formatFileSize(getFileInfo(msg).size) : '' }}
                         </div>
                       </div>
                       <el-button type="primary" size="small" @click.stop="downloadFile(msg)"
@@ -517,7 +517,7 @@
                 <div class="section-header">{{ group.letter }}</div>
                 <div
                   v-for="contact in group.contacts"
-                  :key="contact.id"
+                  :key="contact.friendId || contact.id"
                   class="contact-item-row"
                   @click="
                     contactCategory === 'friends'
@@ -1781,7 +1781,6 @@ const {
   isConnected,
   connect,
   disconnect,
-  sendMessage: wsSendMessage,
   sendStatusChange: wsSendStatusChange,
 } = useImWebSocket()
 
@@ -2209,6 +2208,8 @@ const loadFriends = async () => {
       return
     }
 
+    console.log('[加载好友] 原始数据:', dataRows.length, '条')
+
     // 转换好友数据
     const formattedFriends = dataRows.map(f => ({
       ...f,
@@ -2216,33 +2217,27 @@ const loadFriends = async () => {
       name: f.remark || f.friendName || f.name || f.username,
     }))
 
-    // 去重逻辑：使用Map确保每个好友只出现一次
-    // 注意：必须使用 friendId（好友用户ID）作为唯一标识
-    // 因为同一好友可能有多条关系记录（如不同分组），但用户ID是唯一的
+    // 去重：使用friendId作为唯一标识
     const uniqueFriendsMap = new Map()
-    const seenIds = new Set() // 用于检测和调试重复
+    const duplicateCount = { before: formattedFriends.length, duplicates: 0 }
 
     formattedFriends.forEach(friend => {
-      // 优先使用 friendId（好友用户ID）作为唯一标识
-      const friendId = friend.friendId || friend.id
-      if (friendId) {
-        // 调试：检测重复
-        if (seenIds.has(friendId)) {
-          console.warn(`发现重复好友ID: ${friendId}, 名称: ${friend.name}, 分组: ${friend.groupName}`)
-        }
-        seenIds.add(friendId)
-
-        // Map中只保留第一条记录（最早添加的）
-        if (!uniqueFriendsMap.has(friendId)) {
-          uniqueFriendsMap.set(friendId, friend)
+      // 使用 friendId 作为唯一标识，如果 friendId 不存在则使用 id
+      const uniqueId = friend.friendId || friend.id
+      if (uniqueId != null && uniqueId !== '') {
+        const friendKey = String(uniqueId)
+        if (!uniqueFriendsMap.has(friendKey)) {
+          uniqueFriendsMap.set(friendKey, friend)
+        } else {
+          duplicateCount.duplicates++
         }
       }
     })
 
-    const uniqueFriends = Array.from(uniqueFriendsMap.values())
-    console.log(`好友去重: 原始${formattedFriends.length}条, 去重后${uniqueFriends.length}条`)
+    const result = Array.from(uniqueFriendsMap.values())
+    console.log('[加载好友] 去重后:', result.length, '条', '重复:', duplicateCount.duplicates, '条')
 
-    friends.value = uniqueFriends
+    friends.value = result
   } catch (error) {
     console.error('加载好友列表失败:', error)
     friends.value = []
@@ -3171,12 +3166,8 @@ const uploadAndSendFile = async (file, type) => {
       fileSize: file.size,
     }
 
+    // 统一通过 store 发送消息（内部使用 WebSocket）
     await store.dispatch('im/sendMessage', messageData)
-
-    // 通过 WebSocket 发送
-    if (isConnected.value) {
-      wsSendMessage(messageData)
-    }
 
     ElMessage.success(type === 'image' ? '图片发送成功' : '文件发送成功')
   } catch (error) {
@@ -3217,12 +3208,8 @@ const sendVoiceMessage = async result => {
       duration: result.duration,
     }
 
+    // 统一通过 store 发送消息（内部使用 WebSocket）
     await store.dispatch('im/sendMessage', messageData)
-
-    // 通过 WebSocket 发送
-    if (isConnected.value) {
-      wsSendMessage(messageData)
-    }
 
     ElMessage.success('语音发送成功')
   } catch (error) {
@@ -4036,35 +4023,23 @@ const insertEmoji = emoji => {
   })
 }
 
-// 格式化消息内容（处理@提及、换行和JSON解析）
+// 格式化消息内容（处理文本、表情、换行）
+// 注意：消息内容的解析和标准化已在store中完成，这里只负责显示格式化
 const formatMessageContent = content => {
   if (!content) return ''
 
-  let actualContent = content
+  // 转换为字符串并转义HTML（防止XSS）
+  let formatted = String(content)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
 
-  // 检查是否为JSON字符串并尝试解析
-  try {
-    const parsed = JSON.parse(content)
-    if (typeof parsed === 'object' && parsed !== null) {
-      // 如果是对象，检查是否有content字段
-      if (parsed.content) {
-        actualContent = parsed.content
-      } else {
-        // 否则尝试转换为字符串
-        actualContent = JSON.stringify(parsed)
-      }
-    }
-  } catch (e) {
-    // 如果不是JSON，使用原始内容
-    actualContent = content
-  }
+  // 处理@提及 - 匹配 @用户名 格式
+  formatted = formatted.replace(/@([a-zA-Z0-9\u4e00-\u9fa5_]+)/g, '<span class="mention">@$1</span>')
 
-  // 转义HTML
-  let formatted = actualContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  // 处理@提及
-  formatted = formatted.replace(/@([^\s]+)/g, '<span class="mention">@$1</span>')
   // 处理换行
   formatted = formatted.replace(/\n/g, '<br>')
+
   return formatted
 }
 
@@ -4076,21 +4051,20 @@ const formatSessionPreview = (content) => {
   let messageType = 'text'
 
   // 检查是否为JSON字符串并尝试解析
-  try {
-    const parsed = JSON.parse(content)
-    if (typeof parsed === 'object' && parsed !== null) {
-      // 如果是对象，检查是否有content字段
-      if (parsed.content) {
-        actualContent = parsed.content
+  if (typeof content === 'string') {
+    try {
+      const parsed = JSON.parse(content)
+      if (typeof parsed === 'object' && parsed !== null) {
+        actualContent = parsed.text || parsed.content || parsed.body || ''
+        messageType = parsed.type || parsed.messageType || 'text'
       }
-      // 获取消息类型
-      if (parsed.type || parsed.messageType) {
-        messageType = parsed.type || parsed.messageType
-      }
+    } catch (e) {
+      // 不是JSON，使用原始内容
+      actualContent = content
     }
-  } catch (e) {
-    // 如果不是JSON，使用原始内容
-    actualContent = content
+  } else if (typeof content === 'object') {
+    actualContent = content.text || content.content || content.body || ''
+    messageType = content.type || content.messageType || 'text'
   }
 
   // 根据消息类型返回预览文本
@@ -4099,17 +4073,89 @@ const formatSessionPreview = (content) => {
       return '[图片]'
     case 'video':
       return '[视频]'
+    case 'voice':
     case 'audio':
       return '[语音]'
     case 'file':
       return '[文件]'
+    case 'location':
+      return '[位置]'
     default:
-      // 对于文本消息，截取前50个字符
+      // 对于文本消息，截取前30个字符
       const text = String(actualContent).trim()
-      if (text.length > 50) {
-        return text.substring(0, 50) + '...'
+      if (text.length > 30) {
+        return text.substring(0, 30) + '...'
       }
-      return text
+      return text || ''
+  }
+}
+
+// 获取图片URL（处理解析后的消息内容）
+const getImageUrl = (message) => {
+  // 优先使用解析后的URL
+  if (message._parsedContent) {
+    if (message._parsedContent.url) return message._parsedContent.url
+    if (message._parsedContent.src) return message._parsedContent.src
+  }
+
+  // 尝试解析content字段（如果content是JSON字符串）
+  if (message.content && typeof message.content === 'string') {
+    const trimmed = message.content.trim()
+    if (trimmed.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(message.content)
+        if (parsed.url) return parsed.url
+        if (parsed.src) return parsed.src
+      } catch (e) {
+        // 解析失败，继续
+      }
+    }
+    // 如果content看起来像URL，直接返回
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('/')) {
+      return trimmed
+    }
+  }
+
+  // 使用消息本身的fileUrl字段
+  if (message.fileUrl) return message.fileUrl
+
+  // 最后尝试使用content
+  return message.content || ''
+}
+
+// 获取文件信息（处理解析后的消息内容）
+const getFileInfo = (message) => {
+  // 优先使用解析后的文件信息
+  if (message._parsedContent && !message._parsedContent.isPlainText) {
+    return {
+      name: message._parsedContent.name || message._parsedContent.fileName || '文件',
+      size: message._parsedContent.size || message._parsedContent.fileSize || 0,
+      url: message._parsedContent.url || message._parsedContent.fileUrl || '',
+    }
+  }
+
+  // 尝试解析content字段（如果content是JSON字符串）
+  if (message.content && typeof message.content === 'string') {
+    const trimmed = message.content.trim()
+    if (trimmed.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(message.content)
+        return {
+          name: parsed.name || parsed.fileName || '文件',
+          size: parsed.size || parsed.fileSize || 0,
+          url: parsed.url || parsed.fileUrl || '',
+        }
+      } catch (e) {
+        // 解析失败，继续
+      }
+    }
+  }
+
+  // 使用消息本身的字段
+  return {
+    name: message.fileName || message.name || '文件',
+    size: message.fileSize || message.size || 0,
+    url: message.fileUrl || message.content || '',
   }
 }
 
@@ -4404,7 +4450,8 @@ const playMessageSound = () => {
   }
 }
 
-// 修改发送消息函数以支持引用回复
+// 发送文本消息
+// 注意：store.dispatch('im/sendMessage') 已经通过 WebSocket 发送，不需要额外调用 wsSendMessage
 const sendMessage = async () => {
   if (!inputMessage.value.trim() || !currentSessionId.value) return
 
@@ -4416,21 +4463,12 @@ const sendMessage = async () => {
 
   // 添加引用回复
   if (replyingMessage.value) {
-    messageData.replyTo = {
-      messageId: replyingMessage.value.id,
-      senderName: replyingMessage.value.senderName,
-      content: replyingMessage.value.content,
-    }
+    messageData.replyTo = replyingMessage.value.id
     replyingMessage.value = null
   }
 
-  // 发送消息
+  // 统一通过 store 发送消息（内部使用 WebSocket）
   await store.dispatch('im/sendMessage', messageData)
-
-  // 通过 WebSocket 发送
-  if (isConnected.value) {
-    wsSendMessage(messageData)
-  }
 
   inputMessage.value = ''
   showEmojiPicker.value = false
@@ -5004,6 +5042,40 @@ const handleFileCommand = async (command, file) => {
 // 组件挂载
 onMounted(() => {
   init()
+
+  // 开发环境：添加全局调试函数
+  if (import.meta.env.DEV) {
+    window.__debug_friends__ = {
+      getFriends: () => friends.value,
+      getFriendCount: () => friends.value.length,
+      getGroupedFriends: () => groupedFriends.value,
+      showDuplicates: () => {
+        const idMap = new Map()
+        const duplicates = []
+        friends.value.forEach(f => {
+          const key = String(f.friendId)
+          if (!idMap.has(key)) {
+            idMap.set(key, [])
+          }
+          idMap.get(key).push(f)
+        })
+        idMap.forEach((list, key) => {
+          if (list.length > 1) {
+            duplicates.push({ friendId: key, count: list.length, items: list })
+          }
+        })
+        return duplicates
+      },
+      showByName: (name) => {
+        return friends.value.filter(f => (f.name || f.nickname).includes(name))
+      }
+    }
+    console.log('🔍 调试工具已安装: window.__debug_friends__')
+    console.log('  - getFriends(): 获取好友列表')
+    console.log('  - getFriendCount(): 获取好友数量')
+    console.log('  - showDuplicates(): 检查重复')
+    console.log('  - showByName("名字"): 搜索好友')
+  }
 })
 
 // 组件卸载

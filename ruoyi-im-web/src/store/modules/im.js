@@ -44,11 +44,35 @@ function saveOfflineMessages(messages) {
 
 /**
  * 从本地存储加载消息缓存
+ * 注意：如果缓存版本不匹配，会清除旧缓存
  */
 function loadMessageCache() {
   try {
     const data = localStorage.getItem(MESSAGE_CACHE_KEY)
-    return data ? JSON.parse(data) : {}
+    const CACHE_VERSION_KEY = 'im_message_cache_version'
+    const CURRENT_VERSION = '2.0' // 缓存版本号
+
+    const cachedVersion = localStorage.getItem(CACHE_VERSION_KEY)
+    if (cachedVersion !== CURRENT_VERSION) {
+      // 版本不匹配，清除旧缓存
+      console.log('[Store] 消息缓存版本不匹配，清除旧缓存')
+      localStorage.removeItem(MESSAGE_CACHE_KEY)
+      localStorage.setItem(CACHE_VERSION_KEY, CURRENT_VERSION)
+      return {}
+    }
+
+    if (!data) return {}
+
+    const cacheData = JSON.parse(data)
+    // 重新标准化所有缓存的消息
+    const normalizedCache = {}
+    for (const sessionId in cacheData) {
+      const messages = cacheData[sessionId]
+      // 重新标准化每条消息
+      normalizedCache[sessionId] = messages.map(msg => normalizeMessage(msg))
+    }
+    console.log(`[Store] 从缓存加载了 ${Object.keys(normalizedCache).length} 个会话的消息`)
+    return normalizedCache
   } catch (e) {
     console.error('加载消息缓存失败:', e)
     return {}
@@ -82,6 +106,138 @@ function generateMessageKey(message) {
     message.id ||
     `${message.senderId}_${message.timestamp}_${message.content?.substring?.(0, 20) || ''}`
   )
+}
+
+/**
+ * 解析消息内容（处理后端返回的JSON格式内容）
+ * @param {string|object} content - 原始内容
+ * @param {string} messageType - 消息类型（用于判断如何解析）
+ * @returns {object} 解析后的消息内容对象
+ */
+function parseMessageContent(content, messageType = 'text') {
+  // 如果是对象，直接返回
+  if (typeof content === 'object' && content !== null) {
+    return content
+  }
+
+  // 如果是字符串
+  if (typeof content === 'string') {
+    // 对于文本消息，如果不是JSON格式，直接返回纯文本
+    if (messageType === 'text' || messageType === 'TEXT') {
+      // 检查是否是JSON格式的字符串
+      const trimmed = content.trim()
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(content)
+          // 如果是对象，返回解析结果
+          if (typeof parsed === 'object' && parsed !== null) {
+            return parsed
+          }
+        } catch (e) {
+          // JSON解析失败，当作纯文本处理
+        }
+      }
+      // 纯文本消息，直接返回
+      return { text: content, isPlainText: true }
+    }
+
+    // 对于文件/图片/语音/视频消息，尝试解析JSON获取文件信息
+    if (['file', 'FILE', 'image', 'IMAGE', 'voice', 'VOICE', 'video', 'VIDEO'].includes(messageType)) {
+      try {
+        const parsed = JSON.parse(content)
+        if (typeof parsed === 'object' && parsed !== null) {
+          return parsed
+        }
+      } catch (e) {
+        // JSON解析失败，可能是纯URL，返回url对象
+        return { url: content, isPlainText: true }
+      }
+    }
+
+    // 其他类型，尝试解析JSON
+    if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(content)
+        if (typeof parsed === 'object' && parsed !== null) {
+          return parsed
+        }
+      } catch (e) {
+        // JSON解析失败，当作纯文本处理
+      }
+    }
+
+    // 默认返回纯文本包装对象
+    return { text: content, isPlainText: true }
+  }
+
+  // 默认返回纯文本
+  return { text: String(content || ''), isPlainText: true }
+}
+
+/**
+ * 标准化消息对象（确保消息格式一致）
+ * @param {object} message - 原始消息对象
+ * @returns {object} 标准化后的消息对象
+ */
+function normalizeMessage(message) {
+  // 获取消息类型（支持 type 和 messageType 两种字段名）
+  const messageType = message.type || message.messageType || 'text'
+
+  // 解析content字段
+  const parsedContent = parseMessageContent(message.content, messageType)
+
+  // 调试日志
+  if (import.meta.env.DEV) {
+    console.log('[Store normalizeMessage]', {
+      originalType: message.type || message.messageType,
+      normalizedType: messageType.toLowerCase(),
+      originalContent: message.content,
+      parsedContent,
+    })
+  }
+
+  // 根据消息类型提取显示内容
+  let displayContent = ''
+
+  if (messageType === 'text' || messageType === 'TEXT') {
+    // 文本消息：提取text字段，如果没有则使用原始content
+    if (parsedContent.isPlainText) {
+      displayContent = parsedContent.text || message.content || ''
+    } else {
+      displayContent = parsedContent.text || parsedContent.content || parsedContent.body || JSON.stringify(parsedContent)
+    }
+  } else if (messageType === 'image' || messageType === 'IMAGE') {
+    // 图片消息：保留content（可能是URL或JSON）
+    displayContent = message.content || ''
+  } else if (messageType === 'file' || messageType === 'FILE') {
+    // 文件消息：保留content（可能是JSON）
+    displayContent = message.content || ''
+  } else if (messageType === 'voice' || messageType === 'VOICE') {
+    // 语音消息
+    displayContent = message.content || ''
+  } else if (messageType === 'video' || messageType === 'VIDEO') {
+    // 视频消息
+    displayContent = message.content || ''
+  } else {
+    // 其他类型，提取文本或使用原始content
+    if (parsedContent.isPlainText) {
+      displayContent = parsedContent.text || message.content || ''
+    } else {
+      displayContent = parsedContent.text || parsedContent.content || message.content || ''
+    }
+  }
+
+  // 返回标准化消息
+  return {
+    ...message,
+    // 统一消息类型字段名（优先使用type，其次messageType），统一转为小写
+    type: (message.type || message.messageType || 'text').toLowerCase(),
+    // 使用处理后的显示内容
+    content: displayContent,
+    // 保留原始数据和解析后的完整对象
+    _rawContent: message.content,
+    _parsedContent: parsedContent,
+  }
 }
 
 const state = {
@@ -128,24 +284,87 @@ const mutations = {
     state.currentSession = session
   },
   SET_SESSIONS: (state, list) => {
-    // 会话列表去重：根据id字段去重
+    // 会话列表去重：首先根据 id 字段去重
     const uniqueSessions = []
     const idSet = new Set()
+    const duplicates = []
 
     for (const session of list) {
       if (session.id && !idSet.has(session.id)) {
         idSet.add(session.id)
         uniqueSessions.push(session)
+      } else if (session.id) {
+        duplicates.push(session)
       }
     }
 
-    state.sessions = uniqueSessions
+    // 如果有重复，打印日志
+    if (duplicates.length > 0) {
+      console.warn('[Vuex] 发现重复会话（按id）:', duplicates.length, '条', duplicates)
+    }
+
+    // 进一步去重：对于私聊会话，根据 targetId/peerId 去重
+    // 同一个私聊对象应该只显示一个会话
+    const finalSessions = []
+    const peerIdMap = new Map()
+
+    for (const session of uniqueSessions) {
+      // 私聊会话需要按对方用户ID去重
+      if (session.type === 'private' || session.type === 'PRIVATE') {
+        const peerId = session.peerId || session.targetId
+        if (peerId && !peerIdMap.has(peerId)) {
+          peerIdMap.set(peerId, session)
+          finalSessions.push(session)
+        } else if (peerId) {
+          console.warn('[Vuex] 发现重复私聊会话（按peerId）', {
+            existing: peerIdMap.get(peerId),
+            duplicate: session,
+          })
+          // 保留最后消息时间较新的会话
+          const existing = peerIdMap.get(peerId)
+          const existingTime = existing.lastMessageTime || existing.updateTime
+          const duplicateTime = session.lastMessageTime || session.updateTime
+          if (duplicateTime > existingTime) {
+            // 替换为较新的会话
+            const index = finalSessions.indexOf(existing)
+            if (index > -1) {
+              finalSessions[index] = session
+            }
+            peerIdMap.set(peerId, session)
+          }
+        }
+      } else {
+        // 群聊会话直接添加
+        finalSessions.push(session)
+      }
+    }
+
+    console.log('[Vuex] SET_SESSIONS: 原始', list.length, '条, id去重后', uniqueSessions.length, '条, 最终', finalSessions.length, '条')
+    state.sessions = finalSessions
   },
   ADD_SESSION: (state, session) => {
-    const exists = state.sessions.find(s => s.id === session.id)
-    if (!exists) {
-      state.sessions.unshift(session)
+    // 首先检查是否已存在相同 id 的会话
+    const existsById = state.sessions.find(s => s.id === session.id)
+    if (existsById) {
+      return // 已存在，不添加
     }
+
+    // 对于私聊会话，还要检查是否已存在相同 peerId 的会话
+    if (session.type === 'private' || session.type === 'PRIVATE') {
+      const peerId = session.peerId || session.targetId
+      if (peerId) {
+        const existsByPeerId = state.sessions.find(s =>
+          (s.type === 'private' || s.type === 'PRIVATE') &&
+          (s.peerId === peerId || s.targetId === peerId)
+        )
+        if (existsByPeerId) {
+          console.warn('[Vuex] ADD_SESSION: 发现相同 peerId 的会话，不添加', { existing: existsByPeerId, new: session })
+          return // 已存在相同私聊对象的会话，不添加
+        }
+      }
+    }
+
+    state.sessions.unshift(session)
   },
   UPDATE_SESSION: (state, { sessionId, updates }) => {
     const index = state.sessions.findIndex(s => s.id === sessionId)
@@ -172,10 +391,12 @@ const mutations = {
     // 添加新消息并记录ID
     const uniqueMessages = []
     for (const msg of messages) {
-      const key = generateMessageKey(msg)
+      // 标准化消息（解析JSON格式的内容）
+      const normalizedMsg = normalizeMessage(msg)
+      const key = generateMessageKey(normalizedMsg)
       if (!state.messageIdSet[sessionId].has(key)) {
         state.messageIdSet[sessionId].add(key)
-        uniqueMessages.push(msg)
+        uniqueMessages.push(normalizedMsg)
       }
     }
     state.messageList[sessionId] = uniqueMessages
@@ -190,8 +411,11 @@ const mutations = {
       state.messageIdSet[sessionId] = new Set()
     }
 
+    // 标准化消息（解析JSON格式的内容）
+    const normalizedMsg = normalizeMessage(message)
+
     // 生成消息唯一标识用于去重
-    const key = generateMessageKey(message)
+    const key = generateMessageKey(normalizedMsg)
 
     // 检查是否已存在（去重）
     if (state.messageIdSet[sessionId].has(key)) {
@@ -200,7 +424,7 @@ const mutations = {
 
     // 添加消息
     state.messageIdSet[sessionId].add(key)
-    state.messageList[sessionId].push(message)
+    state.messageList[sessionId].push(normalizedMsg)
 
     // 超过上限时移除最旧的消息
     if (state.messageList[sessionId].length > MAX_MESSAGES_PER_SESSION) {
@@ -246,10 +470,12 @@ const mutations = {
     // 去重后的消息
     const uniqueMessages = []
     for (const msg of messages) {
-      const key = generateMessageKey(msg)
+      // 标准化消息（解析JSON格式的内容）
+      const normalizedMsg = normalizeMessage(msg)
+      const key = generateMessageKey(normalizedMsg)
       if (!state.messageIdSet[sessionId].has(key)) {
         state.messageIdSet[sessionId].add(key)
-        uniqueMessages.push(msg)
+        uniqueMessages.push(normalizedMsg)
       }
     }
 
@@ -311,20 +537,26 @@ const mutations = {
     }
   },
   SET_CONTACTS: (state, contacts) => {
-    // 联系人去重：根据用户ID去重（优先使用friendId，其次使用id）
-    const uniqueContacts = []
-    const idSet = new Set()
+    // 联系人去重：根据friendId（好友用户ID）去重
+    // 重要：只使用friendId作为唯一标识，不使用id（关系ID）
+    const uniqueContactsMap = new Map()
 
     for (const contact of contacts) {
-      // 使用friendId（好友用户ID）作为唯一标识
-      const contactId = contact.friendId || contact.id || contact.userId
-      if (contactId && !idSet.has(contactId)) {
-        idSet.add(contactId)
-        uniqueContacts.push(contact)
+      // 只使用friendId（好友用户ID）作为唯一标识
+      const friendId = contact.friendId
+
+      if (friendId != null && friendId !== '') {
+        // 转为字符串确保类型一致性
+        const friendKey = String(friendId)
+
+        // 只保留第一次出现的记录
+        if (!uniqueContactsMap.has(friendKey)) {
+          uniqueContactsMap.set(friendKey, contact)
+        }
       }
     }
 
-    state.contacts = uniqueContacts
+    state.contacts = Array.from(uniqueContactsMap.values())
   },
   SET_GROUPS: (state, groups) => {
     state.groups = groups
@@ -388,7 +620,8 @@ const actions = {
   },
 
   // 发送消息
-  async sendMessage({ commit }, { sessionId, type, content, replyTo }) {
+  // 优先使用 WebSocket，WebSocket 未连接时降级到 REST API
+  async sendMessage({ commit, state }, { sessionId, type, content, replyTo }) {
     // 生成唯一的clientMsgId用于去重
     const clientMsgId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const tempId = `temp_${clientMsgId}`
@@ -399,7 +632,7 @@ const actions = {
       return null
     }
 
-    // 创建临时消息
+    // 创建临时消息（乐观UI更新）
     const tempMessage = {
       id: tempId,
       clientMsgId,
@@ -415,18 +648,50 @@ const actions = {
       status: 'sending',
     }
 
-    // 添加到消息列表
+    // 添加到消息列表（立即显示给用户）
     commit('ADD_MESSAGE', { sessionId, message: tempMessage })
     commit('ADD_PENDING_MESSAGE', { sessionId, tempId, message: tempMessage })
 
+    const ws = state.ws
+
+    // 优先使用 WebSocket（实时性更好）
+    if (ws && ws.isConnected) {
+      try {
+        ws.sendMessage({
+          conversationId: sessionId,
+          type,
+          content,
+          replyToMessageId: replyTo,
+          clientMsgId,
+        })
+
+        // 乐观更新：假设消息发送成功
+        commit('UPDATE_MESSAGE', {
+          sessionId,
+          messageId: tempId,
+          updates: { status: 'sent' },
+        })
+
+        commit('REMOVE_PENDING_MESSAGE', { sessionId, tempId })
+        return { id: tempId, clientMsgId }
+      } catch (error) {
+        // WebSocket 发送失败，降级到 REST API
+        commit('UPDATE_MESSAGE', {
+          sessionId,
+          messageId: tempId,
+          updates: { status: 'sending' },
+        })
+      }
+    }
+
+    // WebSocket 未连接或发送失败，降级到 REST API
     try {
-      // 调用发送消息API - 注意：后端API使用conversationId参数名
       const response = await apiSendMessage({
-        conversationId: sessionId, // 映射 sessionId 到 conversationId
+        conversationId: sessionId,
         type,
         content: typeof content === 'object' ? JSON.stringify(content) : content,
-        replyToMessageId: replyTo, // 映射 replyTo 到 replyToMessageId
-        clientMsgId, // 传递clientMsgId用于服务端去重
+        replyToMessageId: replyTo,
+        clientMsgId,
       })
 
       // 更新消息状态
@@ -460,6 +725,7 @@ const actions = {
         updates: { status: 'failed' },
       })
       commit('REMOVE_PENDING_MESSAGE', { sessionId, tempId })
+      ElMessage.error('消息发送失败，请检查网络连接')
       throw error
     }
   },
@@ -677,28 +943,10 @@ const actions = {
         _remark: c.remark,
       }))
 
-      // 去重：使用friendId作为唯一标识
-      const uniqueMap = new Map()
-      const seenIds = new Set()
-
-      mappedContacts.forEach(contact => {
-        const contactId = contact.friendId || contact.id
-        if (contactId) {
-          if (seenIds.has(contactId)) {
-            console.warn(`[Store] 发现重复联系人ID: ${contactId}`)
-          }
-          seenIds.add(contactId)
-          if (!uniqueMap.has(contactId)) {
-            uniqueMap.set(contactId, contact)
-          }
-        }
-      })
-
-      const uniqueContacts = Array.from(uniqueMap.values())
-      console.log(`[Store] 联系人去重: 原始${mappedContacts.length}条, 去重后${uniqueContacts.length}条`)
-
-      commit('SET_CONTACTS', uniqueContacts)
-      return uniqueContacts
+      // 去重逻辑在 SET_CONTACTS mutation 中统一处理
+      console.log(`[Store] 加载联系人: 原始${mappedContacts.length}条`)
+      commit('SET_CONTACTS', mappedContacts)
+      return mappedContacts
     } catch (error) {
       console.error('加载联系人失败:', error)
       ElMessage.error('加载联系人失败')

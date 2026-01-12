@@ -31,18 +31,34 @@
     </select>
 
     <select id="selectImFriendList" parameterType="com.ruoyi.im.domain.ImFriend" resultMap="ImFriendResult">
-        <include refid="selectImFriendVo"/>
+        -- 使用子查询确保每个好友只返回一条记录（取最早的）
+        SELECT f.id, f.user_id, f.friend_id, f.remark, f.group_name, f.is_deleted, f.deleted_time, f.create_time, f.update_time
+        FROM im_friend f
+        INNER JOIN (
+            SELECT user_id, friend_id, MIN(id) as min_id
+            FROM im_friend
+            <where>
+                <if test="userId != null"> user_id = #{userId} AND </if>
+                <if test="friendId != null"> friend_id = #{friendId} AND </if>
+                is_deleted = 0
+            </where>
+            GROUP BY user_id, friend_id
+        ) uniq ON f.user_id = uniq.user_id AND f.friend_id = uniq.friend_id AND f.id = uniq.min_id
         <where>
-            <if test="userId != null"> and user_id = #{userId} </if>
-            <if test="friendId != null"> and friend_id = #{friendId} </if>
-            and is_deleted = 0
+            f.is_deleted = 0
         </where>
     </select>
 
     <select id="selectImFriendListByUserId" parameterType="Long" resultMap="ImFriendResult">
-        select id, user_id, friend_id, remark, group_name, create_time, update_time
-        from im_friend
-        where user_id = #{userId} and is_deleted = 0
+        -- 使用子查询确保每个好友只返回一条记录（取最早的）
+        SELECT f.id, f.user_id, f.friend_id, f.remark, f.group_name, f.create_time, f.update_time
+        FROM im_friend f
+        INNER JOIN (
+            SELECT user_id, friend_id, MIN(id) as min_id
+            FROM im_friend
+            WHERE user_id = #{userId} AND is_deleted = 0
+            GROUP BY user_id, friend_id
+        ) uniq ON f.user_id = uniq.user_id AND f.friend_id = uniq.friend_id AND f.id = uniq.min_id
     </select>
 
     <select id="selectImFriendByUserIdAndFriendId"
