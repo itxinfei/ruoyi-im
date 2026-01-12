@@ -3,6 +3,10 @@ package com.ruoyi.im.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,32 +53,54 @@ public class JwtUtils {
 
     /**
      * 从JWT令牌中获取用户名
+     * 如果token无效或已过期，返回null
      *
      * @param token JWT令牌
-     * @return 用户名
+     * @return 用户名，解析失败时返回null
      */
     public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getSubject();
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secret)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getSubject();
+        } catch (ExpiredJwtException e) {
+            LOGGER.warn("JWT token已过期: {}", e.getMessage());
+            return null;
+        } catch (MalformedJwtException | SignatureException | UnsupportedJwtException e) {
+            LOGGER.warn("JWT token格式错误: {}", e.getMessage());
+            return null;
+        } catch (Exception e) {
+            LOGGER.error("解析JWT token获取用户名失败: {}", e.getMessage());
+            return null;
+        }
     }
 
     /**
      * 从JWT令牌中获取用户ID
+     * 如果token无效或已过期，返回null
      *
      * @param token JWT令牌
-     * @return 用户ID
+     * @return 用户ID，解析失败时返回null
      */
     public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.get("userId", Long.class);
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secret)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.get("userId", Long.class);
+        } catch (ExpiredJwtException e) {
+            LOGGER.warn("JWT token已过期: {}", e.getMessage());
+            return null;
+        } catch (MalformedJwtException | SignatureException | UnsupportedJwtException e) {
+            LOGGER.warn("JWT token格式错误: {}", e.getMessage());
+            return null;
+        } catch (Exception e) {
+            LOGGER.error("解析JWT token获取用户ID失败: {}", e.getMessage());
+            return null;
+        }
     }
 
     /**
@@ -87,6 +113,9 @@ public class JwtUtils {
         try {
             Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            LOGGER.warn("JWT token已过期: {}", e.getMessage());
+            return false;
         } catch (Exception e) {
             LOGGER.error("Invalid JWT token: {}", e.getMessage());
             return false;
@@ -100,11 +129,18 @@ public class JwtUtils {
      * @return true 如果令牌过期，否则 false
      */
     public boolean isTokenExpired(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getExpiration().before(new Date());
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secret)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            // token已过期
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("检查token过期状态失败: {}", e.getMessage());
+            return true; // 解析失败视为已过期
+        }
     }
 }

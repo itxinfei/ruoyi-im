@@ -9,7 +9,7 @@ import {
   batchDeleteMessages,
 } from '@/api/im/message'
 import { listSession, updateSession, deleteSession as apiDeleteSession } from '@/api/im/session'
-import { markConversationRead } from '@/api/im/conversation'
+import { markConversationRead, createPrivateConversation } from '@/api/im/conversation'
 import { listContact } from '@/api/im/contact'
 import { ElMessage } from 'element-plus'
 import { getCurrentUserId, getCurrentUserInfo } from '@/utils/im-user'
@@ -595,7 +595,10 @@ const actions = {
     try {
       await markConversationRead(session.id)
     } catch (error) {
-      console.error('标记当前会话已读失败:', error)
+      // 请求被取消时不记录错误（axios 防止重复请求的机制）
+      if (!error.code || error.code !== 'ERR_CANCELED') {
+        console.error('标记当前会话已读失败:', error)
+      }
     }
 
     // 加载该会话的消息（首次加载，不指定lastId）
@@ -863,23 +866,38 @@ const actions = {
 
   // 切换到联系人私聊
   async switchToContact({ commit, state }, contact) {
-    // 创建或获取与该联系人的私聊会话
+    // 先查找现有的会话
     let session = state.sessions.find(s => s.type === 'private' && s.peerId === contact.id)
 
     if (!session) {
-      session = {
-        id: contact.id,
-        name: contact.nickname || contact.username,
-        avatar: contact.avatar,
-        type: 'private',
-        peerId: contact.id,
-        unreadCount: 0,
-        lastMessage: null,
-        pinned: false,
-        muted: false,
-        online: contact.online,
+      // 调用后端 API 创建或获取私聊会话
+      try {
+        const response = await createPrivateConversation(contact.id)
+        if (response.code === 200 && response.data) {
+          const conversationId = response.data
+          session = {
+            id: conversationId,
+            conversationId: conversationId,
+            name: contact.nickname || contact.name || contact.username,
+            avatar: contact.avatar,
+            type: 'private',
+            peerId: contact.id,
+            unreadCount: 0,
+            lastMessage: null,
+            lastMessageTime: null,
+            pinned: false,
+            muted: false,
+            online: contact.online,
+          }
+          commit('ADD_SESSION', session)
+        } else {
+          throw new Error(response.msg || '创建会话失败')
+        }
+      } catch (error) {
+        console.error('创建私聊会话失败:', error)
+        ElMessage.error('无法创建会话，请稍后重试')
+        return null
       }
-      commit('ADD_SESSION', session)
     }
 
     commit('SET_CURRENT_SESSION', session)
