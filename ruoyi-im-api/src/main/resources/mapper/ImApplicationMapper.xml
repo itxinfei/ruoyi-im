@@ -46,13 +46,13 @@
 
     <select id="selectVisibleApplications" resultMap="ImApplicationResult">
         <include refid="selectImApplicationVo"/>
-        where is_visible = true
+        where is_visible = 1
         order by sort_order, id
     </select>
 
     <select id="selectApplicationsByCategory" parameterType="String" resultMap="ImApplicationResult">
         <include refid="selectImApplicationVo"/>
-        where is_visible = true
+        where is_visible = 1
         <if test="category != null and category != ''">
             and category = #{category}
         </if>

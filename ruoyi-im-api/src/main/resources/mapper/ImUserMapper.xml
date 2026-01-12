@@ -205,6 +205,19 @@
         limit 50
     </select>
 
+    <!-- 根据用户ID列表批量查询用户 - 性能优化 -->
+    <select id="selectImUserListByIds" resultMap="ImUserResult">
+        select id, username, password, nickname, email, 
+               mobile, avatar, status, gender, signature,
+               last_online_time,
+               create_time, update_time 
+        from im_user
+        where id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
     <!-- Count total users -->
     <select id="countImUsers" resultType="java.lang.Integer">
         select count(*) from im_user

@@ -152,6 +152,17 @@ export default [
         },
       },
       {
+        path: 'email',
+        name: 'Email',
+        component: () => import('@/views/im/email/index.vue'),
+        meta: {
+          title: '邮箱',
+          icon: 'email',
+          keepAlive: true,
+          activeMenu: '/im/email',
+        },
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('@/views/settings/index.vue'),

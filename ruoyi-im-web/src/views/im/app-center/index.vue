@@ -72,11 +72,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getAppsByCategory } from '@/api/im/app'
 
+const router = useRouter()
 const activeCategory = ref('all')
-const allApps = ref([])
+const allApps = ref({})
 const drawerVisible = ref(false)
 const currentApp = ref(null)
 
@@ -91,12 +93,38 @@ const groupedApps = computed(() => {
 const loadApps = async () => {
   try {
     const response = await getAppsByCategory()
-    if (response.code === 200) {
+    if (response && response.code === 200) {
       allApps.value = response.data || {}
+    } else {
+      // 如果API返回空数据，使用默认应用列表
+      allApps.value = getDefaultApps()
     }
   } catch (error) {
     console.error('获取应用列表失败:', error)
-    allApps.value = {}
+    // 失败时使用默认应用列表
+    allApps.value = getDefaultApps()
+  }
+}
+
+// 默认应用列表（当API不可用时）
+const getDefaultApps = () => {
+  return {
+    OFFICE: [
+      { id: 1, name: '审批中心', code: 'approval', category: 'OFFICE', appType: 'ROUTE', appUrl: '/im/approval', iconColor: '#1677ff' },
+      { id: 2, name: '工作台', code: 'workbench', category: 'OFFICE', appType: 'ROUTE', appUrl: '/im/workbench', iconColor: '#52c41a' },
+      { id: 3, name: '通讯录', code: 'contacts', category: 'OFFICE', appType: 'ROUTE', appUrl: '/im/contacts', iconColor: '#722ed1' },
+      { id: 4, name: '应用中心', code: 'app-center', category: 'OFFICE', appType: 'ROUTE', appUrl: '/im/app-center', iconColor: '#fa8c16' },
+      { id: 5, name: '文件管理', code: 'files', category: 'OFFICE', appType: 'ROUTE', appUrl: '/im/file', iconColor: '#13c2c2' },
+      { id: 6, name: '邮箱', code: 'email', category: 'OFFICE', appType: 'ROUTE', appUrl: '/im/email', iconColor: '#eb2f96' },
+      { id: 7, name: '考勤打卡', code: 'attendance', category: 'OFFICE', appType: 'ROUTE', appUrl: '/im/workbench?tab=attendance', iconColor: '#fa541c' },
+      { id: 8, name: '日程管理', code: 'schedule', category: 'OFFICE', appType: 'ROUTE', appUrl: '/im/workbench?tab=schedule', iconColor: '#a0d911' },
+      { id: 9, name: '工作报告', code: 'report', category: 'OFFICE', appType: 'ROUTE', appUrl: '/im/workbench?tab=report', iconColor: '#1890ff' },
+      { id: 10, name: 'DING消息', code: 'ding', category: 'OFFICE', appType: 'ROUTE', appUrl: '/im/ding', iconColor: '#f5222d' },
+    ],
+    TOOLS: [
+      { id: 11, name: '群组', code: 'group', category: 'TOOLS', appType: 'ROUTE', appUrl: '/im/group', iconColor: '#52c41a' },
+      { id: 12, name: '设置', code: 'settings', category: 'TOOLS', appType: 'ROUTE', appUrl: '/im/settings', iconColor: '#8c8c8c' },
+    ],
   }
 }
 
@@ -111,19 +139,28 @@ const handleAppClick = app => {
 
 const handleOpenApp = () => {
   if (!currentApp.value) return
-  const { appType, appUrl } = currentApp.value
+  const { appType, appUrl, name } = currentApp.value
 
-  if (appType === 'ROUTE' && appUrl) {
-    // 内部路由跳转
-    window.location.href = appUrl
-  } else if (appType === 'IFRAME' && appUrl) {
-    // 嵌入iframe
-    ElMessage.info('即将在iframe中打开应用')
-  } else if (appType === 'LINK' && appUrl) {
+  if (!appUrl) {
+    ElMessage.warning(`${name}地址未配置`)
+    return
+  }
+
+  if (appType === 'ROUTE') {
+    // 内部路由跳转 - 使用 Vue Router
+    router.push(appUrl)
+    drawerVisible.value = false
+  } else if (appType === 'IFRAME') {
+    // TODO: 嵌入iframe打开应用
+    ElMessage.info(`即将打开${name}`)
+    drawerVisible.value = false
+  } else if (appType === 'LINK') {
     // 外部链接
     window.open(appUrl, '_blank')
   } else {
-    ElMessage.warning('应用地址未配置')
+    // 默认按路由处理
+    router.push(appUrl)
+    drawerVisible.value = false
   }
 }
 

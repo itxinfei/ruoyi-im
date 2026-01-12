@@ -337,6 +337,7 @@ import {
   Clock,
 } from '@element-plus/icons-vue'
 import { formatRelativeTime } from '@/utils/format/time.js'
+import * as documentApi from '@/api/im/document'
 
 // Props
 const props = defineProps({
@@ -350,6 +351,7 @@ const props = defineProps({
 const emit = defineEmits(['open-document', 'document-created'])
 
 // State
+const loading = ref(false)
 const activeTab = ref('all')
 const searchKeyword = ref('')
 const createDialogVisible = ref(false)
@@ -366,7 +368,7 @@ const newTitle = ref('')
 const currentShareDoc = ref(null)
 const currentRenameDoc = ref(null)
 
-const shareLink = ref('https://doc.example.com/share/xxxxx')
+const shareLink = ref('')
 
 // 标签页
 const tabs = ref([
@@ -404,7 +406,7 @@ const folderOptions = ref([
   },
 ])
 
-// 用户列表（模拟数据）
+// 用户列表（模拟数据 - 后续对接用户API）
 const userList = ref([
   { id: 1, name: '张三', avatar: '' },
   { id: 2, name: '李四', avatar: '' },
@@ -412,103 +414,90 @@ const userList = ref([
   { id: 4, name: '赵六', avatar: '' },
 ])
 
-// 模拟文档数据
-const documentList = ref([
-  {
-    id: 1,
-    title: '项目需求文档',
-    type: 'doc',
-    iconType: 'doc',
-    content: '',
-    preview: '本文档描述了项目的核心需求和技术方案...',
-    updateTime: new Date(Date.now() - 1000 * 60 * 30),
-    createTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-    ownerId: props.userId,
-    owner: '我',
-    starred: true,
-    collaborators: [
-      { id: 1, name: '张三', avatar: '' },
-      { id: 2, name: '李四', avatar: '' },
-      { id: 3, name: '王五', avatar: '' },
-    ],
-    folderId: 'work',
-  },
-  {
-    id: 2,
-    title: '会议纪要 - 2024-01-08',
-    type: 'doc',
-    iconType: 'meeting',
-    content: '',
-    preview: '会议时间：2024年1月8日 14:00-15:30 参会人员...',
-    updateTime: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    createTime: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    ownerId: props.userId,
-    owner: '我',
-    starred: false,
-    collaborators: [{ id: 2, name: '李四', avatar: '' }],
-    folderId: 'meeting',
-  },
-  {
-    id: 3,
-    title: '技术方案设计',
-    type: 'doc',
-    iconType: 'tech',
-    content: '',
-    preview: '一、系统架构 二、技术选型 三、数据库设计...',
-    updateTime: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    createTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
-    ownerId: props.userId,
-    owner: '我',
-    starred: false,
-    collaborators: [],
-    folderId: 'work',
-  },
-])
+// 文档数据
+const documentList = ref([])
+const sharedDocuments = ref([])
+const trashedDocuments = ref([])
+const starredDocuments = ref([])
 
-// 共享文档
-const sharedDocuments = ref([
-  {
-    id: 101,
-    title: '产品规划文档',
-    type: 'doc',
-    preview: '2024年产品规划...',
-    updateTime: new Date(Date.now() - 1000 * 60 * 60 * 5),
-    owner: '产品经理',
-    ownerId: 10,
-    permission: 'edit',
-  },
-  {
-    id: 102,
-    title: '运营数据周报',
-    type: 'sheet',
-    preview: '本周数据概览...',
-    updateTime: new Date(Date.now() - 1000 * 60 * 60 * 48),
-    owner: '运营部',
-    ownerId: 11,
-    permission: 'view',
-  },
-  {
-    id: 103,
-    title: '设计规范',
-    type: 'doc',
-    preview: 'UI设计规范说明...',
-    updateTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-    owner: '设计组',
-    ownerId: 12,
-    permission: 'view',
-  },
-])
+// 加载文档列表
+const loadDocuments = async () => {
+  loading.value = true
+  try {
+    const response = await documentApi.getDocumentList()
+    if (response.code === 200) {
+      const data = response.data || []
+      documentList.value = data.map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        type: doc.type || 'doc',
+        iconType: getIconType(doc.type),
+        content: doc.content || '',
+        preview: getPreview(doc.content),
+        updateTime: doc.updateTime ? new Date(doc.updateTime) : new Date(),
+        createTime: doc.createTime ? new Date(doc.createTime) : new Date(),
+        ownerId: doc.creatorId,
+        owner: doc.creatorName || '我',
+        starred: doc.starred || false,
+        collaborators: doc.collaborators || [],
+        folderId: doc.folderId,
+      }))
+      updateTabCounts()
+    }
+  } catch (error) {
+    console.error('加载文档列表失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
 
-// 回收站文档
-const trashedDocuments = ref([
-  {
-    id: 201,
-    title: '旧项目文档',
-    type: 'doc',
-    deleteTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
-    autoDeleteDays: 25,
-  },
-])
+// 加载收藏文档
+const loadStarredDocuments = async () => {
+  try {
+    const response = await documentApi.getStarredDocuments()
+    if (response.code === 200) {
+      starredDocuments.value = (response.data || []).map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        type: doc.type || 'doc',
+        iconType: getIconType(doc.type),
+        preview: getPreview(doc.content),
+        updateTime: doc.updateTime ? new Date(doc.updateTime) : new Date(),
+      }))
+    }
+  } catch (error) {
+    console.error('加载收藏文档失败:', error)
+  }
+}
+
+// 更新标签计数
+const updateTabCounts = () => {
+  tabs.value[0].count = documentList.value.length
+  tabs.value[1].count = documentList.value.filter(d => d.ownerId === props.userId).length
+  tabs.value[2].count = sharedDocuments.value.length
+  tabs.value[3].count = starredDocuments.value.length
+  tabs.value[4].count = trashedDocuments.value.length
+}
+
+// 获取图标类型
+const getIconType = (type) => {
+  const map = {
+    doc: 'doc',
+    DOC: 'doc',
+    sheet: 'sheet',
+    SHEET: 'sheet',
+    mind: 'mind',
+    MIND: 'mind',
+  }
+  return map[type] || 'doc'
+}
+
+// 获取预览文本
+const getPreview = (content) => {
+  if (!content) return ''
+  const plainText = content.replace(/<[^>]*>/g, '').trim()
+  return plainText.substring(0, 50) + (plainText.length > 50 ? '...' : '')
+}
 
 // 计算属性
 const myDocuments = computed(() => {
@@ -565,32 +554,21 @@ const handleSubmitCreate = async () => {
   creating.value = true
 
   try {
-    // TODO: 调用API创建文档
-    // const response = await createDocument(createForm.value)
-
-    // 模拟创建
-    const newDoc = {
-      id: Date.now(),
+    const response = await documentApi.createDocument({
       title: createForm.value.title,
-      type: createForm.value.type,
-      iconType: 'doc',
-      content: '',
-      preview: '暂无内容',
-      updateTime: new Date(),
-      createTime: new Date(),
-      ownerId: props.userId,
-      owner: '我',
-      starred: false,
-      collaborators: [],
+      type: createForm.value.type.toUpperCase(),
       folderId: createForm.value.folderId,
+      content: '',
+    })
+
+    if (response.code === 200) {
+      ElMessage.success('文档创建成功')
+      createDialogVisible.value = false
+      await loadDocuments()
+      emit('document-created', response.data)
+    } else {
+      ElMessage.error(response.msg || '创建失败')
     }
-    documentList.value.unshift(newDoc)
-
-    ElMessage.success('文档创建成功')
-    createDialogVisible.value = false
-
-    emit('document-created', newDoc)
-    emit('open-document', newDoc)
   } catch (error) {
     console.error('创建文档失败:', error)
     ElMessage.error('创建失败，请重试')
@@ -607,7 +585,7 @@ const handleImport = () => {
   ElMessage.info('导入功能开发中')
 }
 
-const handleCardAction = (command, doc) => {
+const handleCardAction = async (command, doc) => {
   switch (command) {
     case 'rename':
       currentRenameDoc.value = doc
@@ -622,8 +600,17 @@ const handleCardAction = (command, doc) => {
       ElMessage.info('移动功能开发中')
       break
     case 'star':
-      doc.starred = !doc.starred
-      ElMessage.success(doc.starred ? '已收藏' : '已取消收藏')
+      try {
+        const api = doc.starred ? documentApi.unstarDocument : documentApi.starDocument
+        const response = await api(doc.id)
+        if (response.code === 200) {
+          doc.starred = !doc.starred
+          updateTabCounts()
+          ElMessage.success(doc.starred ? '已收藏' : '已取消收藏')
+        }
+      } catch (error) {
+        ElMessage.error('操作失败')
+      }
       break
     case 'delete':
       handleDelete(doc)
@@ -639,35 +626,39 @@ const handleDelete = async doc => {
       type: 'warning',
     })
 
-    // TODO: 调用API删除文档
-    const index = documentList.value.findIndex(d => d.id === doc.id)
-    if (index > -1) {
-      documentList.value.splice(index, 1)
-      // 添加到回收站
-      trashedDocuments.value.unshift({
-        ...doc,
-        deleteTime: new Date(),
-        autoDeleteDays: 30,
-      })
+    const response = await documentApi.deleteDocument(doc.id)
+    if (response.code === 200) {
+      const index = documentList.value.findIndex(d => d.id === doc.id)
+      if (index > -1) {
+        documentList.value.splice(index, 1)
+      }
+      updateTabCounts()
+      ElMessage.success('已移到回收站')
     }
-
-    ElMessage.success('已移到回收站')
-  } catch {
-    // 用户取消
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除失败:', error)
+      ElMessage.error('删除失败')
+    }
   }
 }
 
-const handleRestore = doc => {
-  // 从回收站恢复
-  const index = trashedDocuments.value.findIndex(d => d.id === doc.id)
-  if (index > -1) {
-    trashedDocuments.value.splice(index, 1)
-    documentList.value.unshift({
-      ...doc,
-      updateTime: new Date(),
-    })
+const handleRestore = async doc => {
+  try {
+    const response = await documentApi.restoreDocument(doc.id)
+    if (response.code === 200) {
+      const index = trashedDocuments.value.findIndex(d => d.id === doc.id)
+      if (index > -1) {
+        trashedDocuments.value.splice(index, 1)
+      }
+      await loadDocuments()
+      updateTabCounts()
+      ElMessage.success('已恢复文档')
+    }
+  } catch (error) {
+    console.error('恢复失败:', error)
+    ElMessage.error('恢复失败')
   }
-  ElMessage.success('已恢复文档')
 }
 
 const handleDeleteForever = async doc => {
@@ -678,14 +669,20 @@ const handleDeleteForever = async doc => {
       type: 'error',
     })
 
-    const index = trashedDocuments.value.findIndex(d => d.id === doc.id)
-    if (index > -1) {
-      trashedDocuments.value.splice(index, 1)
+    const response = await documentApi.permanentlyDeleteDocument(doc.id)
+    if (response.code === 200) {
+      const index = trashedDocuments.value.findIndex(d => d.id === doc.id)
+      if (index > -1) {
+        trashedDocuments.value.splice(index, 1)
+      }
+      updateTabCounts()
+      ElMessage.success('已永久删除')
     }
-
-    ElMessage.success('已永久删除')
-  } catch {
-    // 用户取消
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除失败:', error)
+      ElMessage.error('删除失败')
+    }
   }
 }
 
@@ -720,7 +717,8 @@ const handleSubmitRename = () => {
 
 // 生命周期
 onMounted(() => {
-  // 加载文档列表
+  loadDocuments()
+  loadStarredDocuments()
 })
 </script>
 
