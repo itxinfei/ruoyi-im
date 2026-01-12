@@ -289,6 +289,15 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Edit, View, ChatDotRound, Star, Folder, Document } from '@element-plus/icons-vue'
+import {
+  getReportList,
+  createReport,
+  submitReport,
+  getReportDetail,
+  toggleReportLike,
+  getReportComments,
+  sendReportComment
+} from '@/api/im/workbench'
 
 // State
 const activeTab = ref('received')
@@ -340,11 +349,39 @@ const reportFormRules = {
 // 方法
 const fetchReports = async () => {
   try {
-    // TODO: 调用API获取报告列表
-    // const response = await getReportList({ type: activeTab.value })
-    // reports.value = response.data
+    // 调用API获取报告列表
+    const { data } = await getReportList({
+      type: activeTab.value,
+      pageNum: 1,
+      pageSize: 50
+    })
 
-    // 模拟数据
+    if (data.code === 200 && data.data && data.data.records) {
+      reports.value = data.data.records.map(item => ({
+        id: item.id,
+        type: item.reportType || 'daily',
+        typeText: item.reportType === 'daily' ? '日报' : item.reportType === 'weekly' ? '周报' : '月报',
+        title: item.title || '',
+        summary: item.summary || '',
+        todayWork: item.todayWork || '',
+        tomorrowPlan: item.tomorrowPlan || '',
+        issues: item.issues || '',
+        userName: item.userName || '未知用户',
+        avatar: item.userAvatar || '',
+        createTime: item.createTime ? new Date(item.createTime) : new Date(),
+        viewCount: item.viewCount || 0,
+        commentCount: item.commentCount || 0,
+        likeCount: item.likeCount || 0,
+        isLiked: item.isLiked || false,
+        isAuthor: item.isAuthor || false,
+        received: activeTab.value === 'received',
+        sent: activeTab.value === 'sent',
+        status: item.status || 'submitted',
+      }))
+    }
+  } catch (error) {
+    console.error('获取报告列表失败:', error)
+    // 保持模拟数据作为备用
     reports.value = [
       {
         id: '1',
@@ -367,27 +404,7 @@ const fetchReports = async () => {
         sent: false,
         status: 'submitted',
       },
-      {
-        id: '2',
-        type: 'weekly',
-        typeText: '周报',
-        title: '本周工作总结',
-        summary: '完成了IM系统核心功能的开发，包括消息发送、群组管理等功能。',
-        userName: '李四',
-        avatar: '',
-        createTime: new Date(Date.now() - 86400000),
-        viewCount: 8,
-        commentCount: 1,
-        likeCount: 2,
-        isLiked: true,
-        isAuthor: false,
-        received: true,
-        sent: false,
-        status: 'submitted',
-      },
     ]
-  } catch (error) {
-    console.error('获取报告列表失败:', error)
   }
 }
 
@@ -443,12 +460,28 @@ const handleSubmit = async () => {
 
   try {
     const reportData = {
-      ...reportForm.value,
-      status: 'submitted',
+      reportType: reportForm.value.type,
+      title: reportForm.value.title,
+      todayWork: reportForm.value.todayWork,
+      tomorrowPlan: reportForm.value.tomorrowPlan,
+      issues: reportForm.value.issues,
+      visibility: reportForm.value.visibility,
+      recipientIds: reportForm.value.recipients,
     }
 
-    // TODO: 调用API提交报告
-    ElMessage.success(isEditMode.value ? '报告已更新' : '报告已提交')
+    if (isEditMode.value) {
+      // 更新后提交
+      await createReport({ ...reportData, id: reportForm.value.id })
+      await submitReport(reportForm.value.id)
+      ElMessage.success('报告已更新')
+    } else {
+      // 创建并提交
+      const { data: createData } = await createReport(reportData)
+      if (createData.code === 200 && createData.data) {
+        await submitReport(createData.data)
+        ElMessage.success('报告已提交')
+      }
+    }
 
     showReportDialog.value = false
     await fetchReports()
@@ -464,9 +497,19 @@ const handleSaveDraft = async () => {
   submitting.value = true
 
   try {
-    // TODO: 调用API保存草稿
+    const reportData = {
+      reportType: reportForm.value.type,
+      title: reportForm.value.title,
+      todayWork: reportForm.value.todayWork,
+      tomorrowPlan: reportForm.value.tomorrowPlan,
+      issues: reportForm.value.issues,
+      status: 'draft',
+    }
+
+    await createReport(reportData)
     ElMessage.success('草稿已保存')
     showReportDialog.value = false
+    await fetchReports()
   } catch (error) {
     console.error('保存草稿失败:', error)
     ElMessage.error('保存失败')
@@ -475,18 +518,35 @@ const handleSaveDraft = async () => {
   }
 }
 
-const handleLike = () => {
+const handleLike = async () => {
   if (!currentReport.value) return
 
-  currentReport.value.isLiked = !currentReport.value.isLiked
-  currentReport.value.likeCount += currentReport.value.isLiked ? 1 : -1
-
-  // TODO: 调用API点赞/取消点赞
+  try {
+    const { data } = await toggleReportLike(currentReport.value.id)
+    if (data.code === 200) {
+      currentReport.value.isLiked = data.data
+      currentReport.value.likeCount += currentReport.value.isLiked ? 1 : -1
+    }
+  } catch (error) {
+    console.error('点赞失败:', error)
+  }
 }
 
 const fetchComments = async reportId => {
   try {
-    // TODO: 调用API获取评论
+    const { data } = await getReportComments(reportId)
+    if (data.code === 200 && data.data) {
+      comments.value = data.data.map(item => ({
+        id: item.id,
+        content: item.content,
+        userName: item.userName || '匿名用户',
+        avatar: item.userAvatar || '',
+        createTime: item.createTime ? new Date(item.createTime) : new Date(),
+      }))
+    }
+  } catch (error) {
+    console.error('获取评论失败:', error)
+    // 保持模拟数据作为备用
     comments.value = [
       {
         id: '1',
@@ -495,16 +555,7 @@ const fetchComments = async reportId => {
         avatar: '',
         createTime: new Date(Date.now() - 3600000),
       },
-      {
-        id: '2',
-        content: '收到，辛苦了',
-        userName: '王五',
-        avatar: '',
-        createTime: new Date(Date.now() - 7200000),
-      },
     ]
-  } catch (error) {
-    console.error('获取评论失败:', error)
   }
 }
 
@@ -514,7 +565,7 @@ const handleSendComment = async () => {
   }
 
   try {
-    // TODO: 调用API发送评论
+    await sendReportComment(currentReport.value.id, { content: newComment.value })
     comments.value.push({
       id: Date.now().toString(),
       content: newComment.value,

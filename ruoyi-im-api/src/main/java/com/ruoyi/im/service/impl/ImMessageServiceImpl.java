@@ -592,4 +592,15 @@ public class ImMessageServiceImpl implements ImMessageService {
             log.error("广播撤回通知失败: messageId={}", messageId, e);
         }
     }
+
+    @Override
+    public int getTodayMessageCount(Long userId) {
+        // 获取今日开始时间
+        LocalDateTime todayStart = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        // 获取今日结束时间
+        LocalDateTime todayEnd = todayStart.plusDays(1);
+
+        // 统计用户今日发送的消息数量
+        return imMessageMapper.countBySenderIdAndTimeRange(userId, todayStart, todayEnd);
+    }
 }

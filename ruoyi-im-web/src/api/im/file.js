@@ -84,6 +84,40 @@ export function getFilePreviewUrl(fileId) {
   })
 }
 
+// 获取文件预览信息（包含预览类型、URL等）
+export function getFilePreviewInfo(fileId) {
+  return request({
+    url: '/api/im/file/preview/info/' + fileId,
+    method: 'get',
+  })
+}
+
+// 生成缩略图
+export function generateThumbnail(fileId, width = 200, height = 200) {
+  return request({
+    url: '/api/im/file/preview/thumbnail/' + fileId,
+    method: 'get',
+    params: { width, height },
+  })
+}
+
+// 获取指定格式的预览URL
+export function getPreviewUrl(fileId, format = 'image') {
+  return request({
+    url: '/api/im/file/preview/url/' + fileId,
+    method: 'get',
+    params: { format },
+  })
+}
+
+// 检查文件类型是否支持预览
+export function checkPreviewSupport(fileType) {
+  return request({
+    url: '/api/im/file/preview/support/' + fileType,
+    method: 'get',
+  })
+}
+
 // 获取文件统计信息
 export function getFileStats() {
   return request({

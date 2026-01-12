@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImDingMessage;
 import com.ruoyi.im.domain.ImDingReceipt;
 import com.ruoyi.im.domain.ImDingTemplate;
@@ -14,22 +15,28 @@ import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImDingMessageService;
 import com.ruoyi.im.vo.ding.DingDetailVO;
 import com.ruoyi.im.vo.ding.DingReceiptVO;
+import com.ruoyi.im.websocket.ImWebSocketEndpoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.websocket.Session;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
 /**
  * DING消息服务实现
+ * 提供DING消息的发送、接收、确认等功能
+ *
+ * @author ruoyi
  */
 @Service
 public class ImDingMessageServiceImpl implements ImDingMessageService {
+
+    private static final Logger log = LoggerFactory.getLogger(ImDingMessageServiceImpl.class);
 
     @Autowired
     private ImDingMessageMapper dingMessageMapper;
@@ -81,7 +88,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
 
         dingMessageMapper.insert(ding);
 
-        // 创建回执记录
+        // 创建回执记录并推送
         for (Long receiverId : request.getReceiverIds()) {
             ImDingReceipt receipt = new ImDingReceipt();
             receipt.setDingId(ding.getId());
@@ -90,8 +97,10 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
             receipt.setCreateTime(now);
             dingReceiptMapper.insert(receipt);
 
-            // 如果立即发送，推送WebSocket通知（通过现有消息推送服务）
-            // TODO: 实现DING消息的WebSocket推送
+            // 如果立即发送，推送WebSocket通知
+            if ("SENT".equals(ding.getStatus())) {
+                sendDingNotification(receiverId, ding, userId);
+            }
         }
 
         return ding.getId();
@@ -280,5 +289,118 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
         request.setReceiptRequired(true);
 
         return sendDing(request, userId);
+    }
+
+    /**
+     * 发送DING消息的WebSocket通知
+     *
+     * @param receiverId 接收者ID
+     * @param ding DING消息
+     * @param senderId 发送者ID
+     */
+    private void sendDingNotification(Long receiverId, ImDingMessage ding, Long senderId) {
+        try {
+            // 获取发送者信息
+            ImUser sender = userMapper.selectImUserById(senderId);
+            String senderName = sender != null ? (sender.getNickname() != null ? sender.getNickname() : sender.getUsername()) : "未知用户";
+            String senderAvatar = sender != null ? sender.getAvatar() : "";
+
+            // 构建WebSocket消息
+            Map<String, Object> dingMessage = new HashMap<>();
+            dingMessage.put("type", "ding");
+            dingMessage.put("action", "new_ding");
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("dingId", ding.getId());
+            payload.put("content", ding.getContent());
+            payload.put("dingType", ding.getDingType());
+            payload.put("isUrgent", ding.getIsUrgent());
+            payload.put("receiptRequired", ding.getReceiptRequired());
+            payload.put("sendTime", ding.getSendTime() != null ? ding.getSendTime().toString() : LocalDateTime.now().toString());
+            payload.put("senderId", senderId);
+            payload.put("senderName", senderName);
+            payload.put("senderAvatar", senderAvatar);
+
+            dingMessage.put("payload", payload);
+            dingMessage.put("timestamp", System.currentTimeMillis());
+
+            // 转换为JSON
+            ObjectMapper mapper = new ObjectMapper();
+            String messageJson = mapper.writeValueAsString(dingMessage);
+
+            // 发送给接收者
+            Map<Long, Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            Session targetSession = onlineUsers.get(receiverId);
+
+            if (targetSession != null && targetSession.isOpen()) {
+                targetSession.getBasicRemote().sendText(messageJson);
+                log.info("DING消息已推送给用户: receiverId={}, dingId={}", receiverId, ding.getId());
+            } else {
+                log.debug("接收者不在线，跳过WebSocket推送: receiverId={}", receiverId);
+            }
+
+        } catch (Exception e) {
+            log.error("发送DING消息WebSocket通知失败: receiverId={}, dingId={}", receiverId, ding.getId(), e);
+        }
+    }
+
+    /**
+     * 广播DING消息已读状态更新
+     *
+     * @param dingId DING消息ID
+     * @param userId 已读用户ID
+     */
+    private void broadcastDingReadStatus(Long dingId, Long userId) {
+        try {
+            Map<String, Object> message = new HashMap<>();
+            message.put("type", "ding");
+            message.put("action", "ding_read");
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("dingId", dingId);
+            payload.put("userId", userId);
+
+            message.put("payload", payload);
+            message.put("timestamp", System.currentTimeMillis());
+
+            ObjectMapper mapper = new ObjectMapper();
+            String messageJson = mapper.writeValueAsString(message);
+
+            // 广播给所有在线用户
+            ImWebSocketEndpoint.broadcastToAllOnline(messageJson);
+
+        } catch (Exception e) {
+            log.error("广播DING已读状态失败: dingId={}, userId={}", dingId, userId, e);
+        }
+    }
+
+    /**
+     * 广播DING消息确认状态更新
+     *
+     * @param dingId DING消息ID
+     * @param userId 确认用户ID
+     */
+    private void broadcastDingConfirmStatus(Long dingId, Long userId) {
+        try {
+            Map<String, Object> message = new HashMap<>();
+            message.put("type", "ding");
+            message.put("action", "ding_confirmed");
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("dingId", dingId);
+            payload.put("userId", userId);
+
+            message.put("payload", payload);
+            message.put("timestamp", System.currentTimeMillis());
+
+            ObjectMapper mapper = new ObjectMapper();
+            String messageJson = mapper.writeValueAsString(message);
+
+            // 广播给所有在线用户
+            ImWebSocketEndpoint.broadcastToAllOnline(messageJson);
+
+        } catch (Exception e) {
+            log.error("广播DING确认状态失败: dingId={}, userId={}", dingId, userId, e);
+        }
     }
 }

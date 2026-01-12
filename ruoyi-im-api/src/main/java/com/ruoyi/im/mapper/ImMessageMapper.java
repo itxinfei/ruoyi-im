@@ -151,4 +151,16 @@ public interface ImMessageMapper extends BaseMapper<ImMessage> {
     String getHighlightContext(@Param("messageId") Long messageId,
                                @Param("keyword") String keyword,
                                @Param("contextLength") Integer contextLength);
+
+    /**
+     * 统计指定发送者在时间范围内的消息数量
+     *
+     * @param senderId 发送者ID
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 消息数量
+     */
+    int countBySenderIdAndTimeRange(@Param("senderId") Long senderId,
+                                     @Param("startTime") java.time.LocalDateTime startTime,
+                                     @Param("endTime") java.time.LocalDateTime endTime);
 }

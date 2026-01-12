@@ -411,6 +411,12 @@ import {
   Stamp,
   DocumentCopy
 } from '@element-plus/icons-vue'
+import {
+  getApprovalList,
+  createApproval,
+  approveApproval,
+  getApprovalDetail
+} from '@/api/im/workbench'
 
 // Props
 const props = defineProps({
@@ -710,12 +716,44 @@ const handleCreate = () => {
 }
 
 const handleSubmitCreate = async () => {
-  // TODO: 表单验证
+  // 表单验证
+  if (!createForm.value.type) {
+    ElMessage.warning('请选择审批类型')
+    return
+  }
+  if (!createForm.value.title) {
+    ElMessage.warning('请输入标题')
+    return
+  }
+  if (!createForm.value.content) {
+    ElMessage.warning('请输入审批内容')
+    return
+  }
+
   submitting.value = true
 
   try {
-    // TODO: 调用API提交审批
-    // await createApproval(createForm.value)
+    // 调用API提交审批
+    const formData = {
+      type: createForm.value.type,
+      title: createForm.value.title,
+      content: createForm.value.content,
+      leaveType: createForm.value.leaveType,
+      startTime: createForm.value.startTime,
+      endTime: createForm.value.endTime,
+      days: createForm.value.days,
+      amount: createForm.value.amount,
+      expenseType: createForm.value.expenseType,
+      approvers: createForm.value.approvers,
+      ccUsers: createForm.value.ccUsers,
+    }
+
+    // 使用默认模板ID创建审批
+    await createApproval({
+      templateId: 1,
+      title: createForm.value.title,
+      formData
+    })
 
     ElMessage.success('审批提交成功')
     createDialogVisible.value = false
@@ -756,13 +794,14 @@ const handleSubmitComment = async () => {
   }
 
   try {
-    // TODO: 调用API提交审批意见
     const action = commentType.value === 'approve' ? '通过' : '驳回'
-    // await submitApprovalComment({
-    //   id: currentItem.value.id,
-    //   action: commentType.value,
-    //   comment: commentText.value
-    // })
+    const apiMethod = commentType.value === 'approve' ? 'approve' : 'reject'
+
+    // 调用API提交审批意见
+    await approveApproval(currentItem.value.id, {
+      action: apiMethod,
+      comment: commentText.value
+    })
 
     ElMessage.success(`审批${action}成功`)
 
@@ -792,20 +831,67 @@ const handleSubmitComment = async () => {
 
 const fetchData = async () => {
   try {
-    // TODO: 调用API获取审批数据
-    // const [pendingRes, myRes, ccRes, statsRes] = await Promise.all([
-    //   getPendingApprovals(),
-    //   getMyApprovals(),
-    //   getCcApprovals(),
-    //   getApprovalStats()
-    // ])
-    // pendingList.value = pendingRes.data
-    // myList.value = myRes.data
-    // ccList.value = ccRes.data
-    // stats.value = statsRes.data
+    // 调用API获取审批数据
+    const [pendingRes, myRes] = await Promise.all([
+      getApprovalList({ type: 'pending' }),
+      getApprovalList({ type: 'my' })
+    ])
+
+    if (pendingRes.data.code === 200) {
+      const pendingData = pendingRes.data.data || []
+      pendingList.value = pendingData.map(item => ({
+        id: item.id,
+        type: item.type || 'leave',
+        title: item.title,
+        applicant: item.applicantName || '申请人',
+        applyTime: formatDateTime(item.createTime),
+        content: item.content || '',
+        urgent: item.urgent || false,
+        status: item.status,
+        canApprove: true,
+        currentNode: item.currentNode,
+        flowSteps: item.flowSteps || []
+      }))
+      tabs.value[0].count = pendingList.value.length
+      stats.value.pending = pendingList.value.length
+    }
+
+    if (myRes.data.code === 200) {
+      const myData = myRes.data.data || []
+      myList.value = myData.map(item => ({
+        id: item.id,
+        type: item.type || 'leave',
+        title: item.title,
+        applicant: '我',
+        applyTime: formatDateTime(item.createTime),
+        content: item.content || '',
+        status: item.status,
+        currentNode: item.currentNode,
+        flowSteps: item.flowSteps || []
+      }))
+      tabs.value[1].count = myList.value.length
+
+      // 统计各状态数量
+      stats.value.processing = myList.value.filter(i => i.status === 'processing').length
+      stats.value.completed = myList.value.filter(i => i.status === 'approved' || i.status === 'completed').length
+      stats.value.rejected = myList.value.filter(i => i.status === 'rejected').length
+    }
   } catch (error) {
     console.error('获取审批数据失败:', error)
+    // 保持模拟数据作为备用
   }
+}
+
+// 格式化日期时间
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}`
 }
 
 // 生命周期

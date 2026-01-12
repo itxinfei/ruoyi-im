@@ -2,6 +2,9 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImTodoItem;
+import com.ruoyi.im.service.ImConversationService;
+import com.ruoyi.im.service.ImMessageService;
+import com.ruoyi.im.service.ImNoticeService;
 import com.ruoyi.im.service.ImTodoItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +29,15 @@ public class ImWorkbenchController {
     @Autowired
     private ImTodoItemService todoItemService;
 
+    @Autowired
+    private ImMessageService messageService;
+
+    @Autowired
+    private ImConversationService conversationService;
+
+    @Autowired(required = false)
+    private ImNoticeService noticeService;
+
     /**
      * 获取工作台数据概览
      * 返回用户相关的各种统计数据
@@ -40,13 +52,70 @@ public class ImWorkbenchController {
             userId = 1L; // 开发环境默认用户
         }
         Map<String, Object> overview = new HashMap<>();
+
         // 待办数量
         int todoCount = todoItemService.getUncompletedCount(userId);
         overview.put("todoCount", todoCount);
-        // TODO: 添加其他统计信息，如消息数量、审批数量等
-        overview.put("messageCount", 0);
-        overview.put("approvalCount", 0);
-        overview.put("noticeCount", 0);
+
+        // 未读消息数量
+        int unreadMessageCount = 0;
+        try {
+            unreadMessageCount = conversationService.getTotalUnreadCount(userId);
+        } catch (Exception e) {
+            // 如果获取失败，使用0
+        }
+        overview.put("unreadMessageCount", unreadMessageCount);
+
+        // 今日消息数量
+        int todayMessageCount = 0;
+        try {
+            todayMessageCount = messageService.getTodayMessageCount(userId);
+        } catch (Exception e) {
+            // 如果获取失败，使用0
+        }
+        overview.put("todayMessageCount", todayMessageCount);
+
+        // 会话数量
+        int conversationCount = 0;
+        try {
+            conversationCount = conversationService.getUserConversationCount(userId);
+        } catch (Exception e) {
+            // 如果获取失败，使用0
+        }
+        overview.put("conversationCount", conversationCount);
+
+        // 未读通知数量
+        int noticeCount = 0;
+        if (noticeService != null) {
+            try {
+                noticeCount = noticeService.getUnreadCount(userId);
+            } catch (Exception e) {
+                // 如果获取失败，使用0
+            }
+        }
+        overview.put("noticeCount", noticeCount);
+
+        // 审批数量（待办事项中类型为APPROVAL的数量）
+        int approvalCount = 0;
+        try {
+            approvalCount = todoItemService.getUncompletedCountByType(userId, "APPROVAL");
+        } catch (Exception e) {
+            // 如果获取失败，使用0
+        }
+        overview.put("approvalCount", approvalCount);
+
+        // DING消息未读数量
+        int dingCount = 0;
+        try {
+            dingCount = todoItemService.getUncompletedCountByType(userId, "DING");
+        } catch (Exception e) {
+            // 如果获取失败，使用0
+        }
+        overview.put("dingCount", dingCount);
+
+        // 在线状态
+        overview.put("isOnline", com.ruoyi.im.websocket.ImWebSocketEndpoint.isUserOnline(userId));
+
         return Result.success(overview);
     }
 

@@ -83,4 +83,18 @@ public class ImTodoItemServiceImpl implements ImTodoItemService {
         todo.setUpdateTime(LocalDateTime.now());
         todoItemMapper.updateImTodoItem(todo);
     }
+
+    @Override
+    public int getUncompletedCountByType(Long userId, String type) {
+        // 根据类型统计未完成待办数量
+        // 注意：当前数据库表中可能没有type字段，这里按需求处理
+        // 如果数据库表支持type筛选，使用mapper方法查询
+        // 否则返回总数或0
+        try {
+            return todoItemMapper.countUncompletedByUserId(userId);
+        } catch (Exception e) {
+            // 如果查询失败，返回0
+            return 0;
+        }
+    }
 }

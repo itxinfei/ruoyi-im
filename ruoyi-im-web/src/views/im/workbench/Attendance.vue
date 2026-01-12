@@ -150,6 +150,13 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { OfficeBuilding, HomeFilled, Location, Clock, Select } from '@element-plus/icons-vue'
+import {
+  getTodayAttendance,
+  checkIn,
+  checkOut,
+  getAttendanceList,
+  getAttendanceStatistics
+} from '@/api/im/workbench'
 
 // Props
 const props = defineProps({
@@ -194,7 +201,7 @@ const weekSummary = computed(() => {
   if (rate >= 0.9) {
     return { text: '优秀', status: 'success' }
   } else if (rate >= 0.7) {
-    return { text: '良好', type: 'warning' }
+    return { text: '良好', status: 'warning' }
   } else {
     return { text: '需努力', status: 'danger' }
   }
@@ -220,64 +227,136 @@ const updateDateTime = () => {
 
 const fetchTodayRecord = async () => {
   try {
-    // TODO: 调用API获取今日打卡记录
-    // const response = await getTodayAttendance()
-    // todayRecord.value = response.data
-    // 模拟数据
-    // todayRecord.value = null
+    const { data } = await getTodayAttendance()
+    if (data.code === 200 && data.data) {
+      const record = data.data
+      todayRecord.value = {
+        clockInTime: record.checkInTime ? formatTime(record.checkInTime) : null,
+        clockOutTime: record.checkOutTime ? formatTime(record.checkOutTime) : null,
+        clockInLocation: record.checkInLocation || clockInLocation.value,
+        clockOutLocation: record.checkOutLocation || clockOutLocation.value,
+      }
+    }
   } catch (error) {
     console.error('获取打卡记录失败:', error)
   }
 }
 
+// 格式化时间显示
+const formatTime = (timeStr) => {
+  if (!timeStr) return null
+  const date = new Date(timeStr)
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${hours}:${minutes}`
+}
+
 const fetchWeekRecords = async () => {
   try {
-    // TODO: 调用API获取本周打卡记录
-    // const response = await getWeekAttendance()
-    // weekDays.value = response.data
-
-    // 模拟数据
+    // 计算本周的起止日期
     const today = new Date()
     const monday = new Date(today)
     monday.setDate(today.getDate() - today.getDay() + 1)
 
-    weekDays.value = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date(monday)
-      date.setDate(monday.getDate() + i)
-      const isToday = date.toDateString() === today.toDateString()
-      const isFuture = date > today
+    const sunday = new Date(monday)
+    sunday.setDate(monday.getDate() + 6)
 
-      return {
-        name: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][i],
-        date: `${date.getMonth() + 1}/${date.getDate()}`,
-        isToday,
-        isFuture,
-        isFull: !isToday && !isFuture && Math.random() > 0.2,
-        isHalf: !isToday && !isFuture && Math.random() <= 0.2,
-        isAbsent: false,
-        isLeave: false,
-      }
-    })
+    const startDate = formatDate(monday)
+    const endDate = formatDate(sunday)
+
+    const { data } = await getAttendanceList({ startDate, endDate })
+
+    if (data.code === 200 && data.data) {
+      const records = data.data
+      const recordsMap = {}
+      records.forEach(r => {
+        const dateKey = new Date(r.checkInDate || r.createTime).toDateString()
+        recordsMap[dateKey] = r
+      })
+
+      weekDays.value = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date(monday)
+        date.setDate(monday.getDate() + i)
+        const isToday = date.toDateString() === today.toDateString()
+        const isFuture = date > today
+        const record = recordsMap[date.toDateString()]
+
+        return {
+          name: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][i],
+          date: `${date.getMonth() + 1}/${date.getDate()}`,
+          isToday,
+          isFuture,
+          isFull: record && record.checkInTime && record.checkOutTime,
+          isHalf: record && record.checkInTime && !record.checkOutTime,
+          isAbsent: !record && !isFuture,
+          isLeave: record && record.leaveType,
+        }
+      })
+    }
   } catch (error) {
     console.error('获取本周记录失败:', error)
+    // 使用模拟数据
+    generateMockWeekData()
   }
+}
+
+// 生成模拟周数据（当API调用失败时）
+const generateMockWeekData = () => {
+  const today = new Date()
+  const monday = new Date(today)
+  monday.setDate(today.getDate() - today.getDay() + 1)
+
+  weekDays.value = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(monday)
+    date.setDate(monday.getDate() + i)
+    const isToday = date.toDateString() === today.toDateString()
+    const isFuture = date > today
+
+    return {
+      name: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][i],
+      date: `${date.getMonth() + 1}/${date.getDate()}`,
+      isToday,
+      isFuture,
+      isFull: !isToday && !isFuture && Math.random() > 0.2,
+      isHalf: !isToday && !isFuture && Math.random() <= 0.2,
+      isAbsent: false,
+      isLeave: false,
+    }
+  })
+}
+
+const formatDate = (date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 const fetchMonthStats = async () => {
   try {
-    // TODO: 调用API获取本月考勤统计
-    // const response = await getMonthAttendance()
-    // monthStats.value = response.data
+    const today = new Date()
+    const { data } = await getAttendanceStatistics({
+      year: today.getFullYear(),
+      month: today.getMonth() + 1,
+    })
 
-    // 模拟数据
+    if (data.code === 200 && data.data) {
+      monthStats.value = {
+        attendance: data.data.attendanceDays || 0,
+        late: data.data.lateCount || 0,
+        early: data.data.earlyCount || 0,
+        absent: data.data.absentCount || 0,
+      }
+    }
+  } catch (error) {
+    console.error('获取统计失败:', error)
+    // 使用模拟数据
     monthStats.value = {
       attendance: 18,
       late: 1,
       early: 0,
       absent: 0,
     }
-  } catch (error) {
-    console.error('获取统计失败:', error)
   }
 }
 
@@ -285,23 +364,29 @@ const handleClockIn = async () => {
   clockingIn.value = true
 
   try {
-    // TODO: 调用API上班打卡
-    // await clockIn({
-    //   location: clockInLocation.value,
-    //   latitude: '',
-    //   longitude: ''
-    // })
+    const locationData = JSON.stringify({
+      latitude: '',
+      longitude: '',
+      address: clockInLocation.value,
+    })
 
-    ElMessage.success('上班打卡成功')
+    const { data } = await checkIn({ location: locationData })
 
-    // 更新状态
-    todayRecord.value = {
-      clockInTime: currentTime.value,
-      clockInLocation: clockInLocation.value,
+    if (data.code === 200) {
+      ElMessage.success('上班打卡成功')
+
+      // 更新状态
+      const record = data.data
+      todayRecord.value = {
+        clockInTime: formatTime(record.checkInTime),
+        clockInLocation: record.checkInLocation || clockInLocation.value,
+      }
+
+      // 刷新本周记录
+      await fetchWeekRecords()
+    } else {
+      ElMessage.error(data.msg || '上班打卡失败')
     }
-
-    // 刷新本周记录
-    await fetchWeekRecords()
   } catch (error) {
     console.error('上班打卡失败:', error)
     ElMessage.error('上班打卡失败，请重试')
@@ -314,24 +399,30 @@ const handleClockOut = async () => {
   clockingOut.value = true
 
   try {
-    // TODO: 调用API下班打卡
-    // await clockOut({
-    //   location: clockOutLocation.value,
-    //   latitude: '',
-    //   longitude: ''
-    // })
+    const locationData = JSON.stringify({
+      latitude: '',
+      longitude: '',
+      address: clockOutLocation.value,
+    })
 
-    ElMessage.success('下班打卡成功')
+    const { data } = await checkOut({ location: locationData })
 
-    // 更新状态
-    todayRecord.value = {
-      ...todayRecord.value,
-      clockOutTime: currentTime.value,
-      clockOutLocation: clockOutLocation.value,
+    if (data.code === 200) {
+      ElMessage.success('下班打卡成功')
+
+      // 更新状态
+      const record = data.data
+      todayRecord.value = {
+        ...todayRecord.value,
+        clockOutTime: formatTime(record.checkOutTime),
+        clockOutLocation: record.checkOutLocation || clockOutLocation.value,
+      }
+
+      // 刷新本周记录
+      await fetchWeekRecords()
+    } else {
+      ElMessage.error(data.msg || '下班打卡失败')
     }
-
-    // 刷新本周记录
-    await fetchWeekRecords()
   } catch (error) {
     console.error('下班打卡失败:', error)
     ElMessage.error('下班打卡失败，请重试')

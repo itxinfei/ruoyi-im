@@ -102,4 +102,12 @@ public interface ImMessageService {
                                            Long senderId, java.time.LocalDateTime startTime,
                                            java.time.LocalDateTime endTime, Integer pageNum, Integer pageSize,
                                            Boolean includeRevoked, Boolean exactMatch, Long userId);
+
+    /**
+     * 获取用户今日发送的消息数量
+     *
+     * @param userId 用户ID
+     * @return 今日消息数量
+     */
+    int getTodayMessageCount(Long userId);
 }

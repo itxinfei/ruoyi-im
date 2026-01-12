@@ -298,4 +298,17 @@
         from im_message
         where id = #{messageId}
     </select>
+
+    <!-- 统计指定发送者在时间范围内的消息数量 -->
+    <select id="countBySenderIdAndTimeRange" resultType="java.lang.Integer">
+        select count(*)
+        from im_message
+        <where>
+            <if test="senderId != null"> and sender_id = #{senderId} </if>
+            <if test="startTime != null"> and create_time &gt;= #{startTime} </if>
+            <if test="endTime != null"> and create_time &lt; #{endTime} </if>
+            and is_revoked = 0
+            and is_deleted = 0
+        </where>
+    </select>
 </mapper>

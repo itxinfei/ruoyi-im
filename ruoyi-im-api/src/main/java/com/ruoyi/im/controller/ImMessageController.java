@@ -374,7 +374,10 @@ public class ImMessageController {
         }
 
         // 通过WebSocket推送反应更新通知
-        // TODO: 广播消息反应更新给会话中的其他用户
+        ImMessage message = imMessageMapper.selectImMessageById(messageId);
+        if (message != null) {
+            broadcastReactionUpdate(message.getConversationId(), messageId, userId, request.getEmoji(), "add");
+        }
 
         return Result.success("反应成功", result);
     }
@@ -398,7 +401,10 @@ public class ImMessageController {
         reactionService.removeReaction(messageId, userId);
 
         // 通过WebSocket推送反应更新通知
-        // TODO: 广播消息反应更新给会话中的其他用户
+        ImMessage message = imMessageMapper.selectImMessageById(messageId);
+        if (message != null) {
+            broadcastReactionUpdate(message.getConversationId(), messageId, userId, null, "remove");
+        }
 
         return Result.success("已取消反应");
     }
@@ -553,5 +559,72 @@ public class ImMessageController {
                 userId
         );
         return Result.success(result);
+    }
+
+    /**
+     * 广播消息反应更新给会话中的其他用户
+     *
+     * @param conversationId 会话ID
+     * @param messageId 消息ID
+     * @param userId 操作用户ID
+     * @param emoji 表情符号
+     * @param action 操作类型 (add/remove)
+     */
+    private void broadcastReactionUpdate(Long conversationId, Long messageId, Long userId, String emoji, String action) {
+        try {
+            log.info("=== 开始广播消息反应更新 === conversationId={}, messageId={}, userId={}, emoji={}, action={}",
+                    conversationId, messageId, userId, emoji, action);
+
+            // 获取会话中的所有成员
+            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            if (members == null || members.isEmpty()) {
+                log.warn("会话中没有成员: conversationId={}", conversationId);
+                return;
+            }
+
+            // 构建WebSocket消息
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> reactionMessage = new HashMap<>();
+            reactionMessage.put("type", "reaction");
+            reactionMessage.put("action", action);
+            reactionMessage.put("conversationId", conversationId);
+            reactionMessage.put("messageId", messageId);
+            reactionMessage.put("userId", userId);
+            if (emoji != null) {
+                reactionMessage.put("emoji", emoji);
+            }
+            reactionMessage.put("timestamp", System.currentTimeMillis());
+
+            String messageJson = mapper.writeValueAsString(reactionMessage);
+
+            // 从 WebSocket 端点获取在线用户集合
+            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+
+            // 向会话中的每个在线用户发送消息（不包括操作者自己）
+            for (ImConversationMember member : members) {
+                Long targetUserId = member.getUserId();
+
+                // 不发送给操作者自己
+                if (targetUserId.equals(userId)) {
+                    continue;
+                }
+
+                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
+                if (targetSession != null && targetSession.isOpen()) {
+                    try {
+                        targetSession.getBasicRemote().sendText(messageJson);
+                        log.info("反应更新已推送给用户: userId={}, messageId={}, action={}", targetUserId, messageId, action);
+                    } catch (Exception e) {
+                        log.error("发送反应更新给用户失败: userId={}", targetUserId, e);
+                    }
+                }
+            }
+
+            log.info("反应更新已广播到会话: conversationId={}, messageId={}, action={}, memberCount={}",
+                    conversationId, messageId, action, members.size());
+
+        } catch (Exception e) {
+            log.error("广播反应更新异常: conversationId={}, messageId={}", conversationId, messageId, e);
+        }
     }
 }

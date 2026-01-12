@@ -64,4 +64,13 @@ public interface ImTodoItemService {
      * @param userId 用户ID
      */
     void updateTodo(Long todoId, String title, String description, Long userId);
+
+    /**
+     * 获取用户指定类型的未完成待办数量
+     *
+     * @param userId 用户ID
+     * @param type 待办类型
+     * @return 数量
+     */
+    int getUncompletedCountByType(Long userId, String type);
 }

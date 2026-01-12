@@ -260,6 +260,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus, Location, User, Calendar, List, Grid } from '@element-plus/icons-vue'
+import { getScheduleList, createSchedule, updateSchedule, deleteSchedule } from '@/api/im/workbench'
 
 // State
 const currentView = ref('day')
@@ -377,24 +378,60 @@ const handleSaveEvent = async () => {
   saving.value = true
 
   try {
+    // 格式化日期和时间
+    const formatDateStr = (date) => {
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    }
+
+    const startDateTime = new Date(eventForm.value.date)
+    const endDateTime = new Date(eventForm.value.date)
+    const [startHour, startMin] = eventForm.value.timeRange[0].split(':')
+    const [endHour, endMin] = eventForm.value.timeRange[1].split(':')
+    startDateTime.setHours(parseInt(startHour), parseInt(startMin), 0)
+    endDateTime.setHours(parseInt(endHour), parseInt(endMin), 0)
+
     const eventData = {
-      ...eventForm.value,
-      startTime: formatTime(eventForm.value.timeRange[0]),
-      endTime: formatTime(eventForm.value.timeRange[1]),
+      title: eventForm.value.title,
+      startTime: startDateTime.toISOString().slice(0, 19).replace('T', ' '),
+      endTime: endDateTime.toISOString().slice(0, 19).replace('T', ' '),
+      location: eventForm.value.location,
+      participants: eventForm.value.participants,
+      reminderMinutes: eventForm.value.reminders[0] || 15,
+      color: eventForm.value.color,
+      description: eventForm.value.remark,
     }
 
     if (isEditMode.value) {
-      // TODO: 调用更新API
+      // 调用更新API
+      await updateSchedule(eventForm.value.id, eventData)
+      ElMessage.success('日程已更新')
+
+      // 更新本地列表
       const index = events.value.findIndex(e => e.id === eventForm.value.id)
       if (index !== -1) {
-        events.value[index] = eventData
+        events.value[index] = {
+          ...events.value[index],
+          ...eventForm.value,
+          startTime: formatTime(eventForm.value.timeRange[0]),
+          endTime: formatTime(eventForm.value.timeRange[1]),
+        }
       }
-      ElMessage.success('日程已更新')
     } else {
-      // TODO: 调用创建API
-      eventData.id = Date.now().toString()
-      events.value.push(eventData)
-      ElMessage.success('日程已创建')
+      // 调用创建API
+      const { data } = await createSchedule(eventData)
+      if (data.code === 200) {
+        ElMessage.success('日程已创建')
+        // 添加到本地列表
+        events.value.push({
+          id: data.data,
+          ...eventForm.value,
+          startTime: formatTime(eventForm.value.timeRange[0]),
+          endTime: formatTime(eventForm.value.timeRange[1]),
+        })
+      }
     }
 
     showEventDialog.value = false
@@ -432,11 +469,36 @@ const formatTime = date => {
 
 const fetchEvents = async () => {
   try {
-    // TODO: 调用API获取日程列表
-    // const response = await getScheduleList({ date: selectedDate.value })
-    // events.value = response.data
+    // 调用API获取日程列表
+    // 计算当月开始和结束时间
+    const year = selectedDate.value.getFullYear()
+    const month = selectedDate.value.getMonth()
+    const startTime = `${year}-${String(month + 1).padStart(2, '0')}-01 00:00:00`
+    const endTime = `${year}-${String(month + 1).padStart(2, '0')}-31 23:59:59`
 
-    // 模拟数据
+    const { data } = await getScheduleList({
+      startTime,
+      endTime,
+      pageNum: 1,
+      pageSize: 100
+    })
+
+    if (data.code === 200 && data.data && data.data.records) {
+      events.value = data.data.records.map(item => ({
+        id: item.id,
+        title: item.title,
+        date: new Date(item.startTime),
+        startTime: item.startTime ? item.startTime.split(' ')[1].slice(0, 5) : '00:00',
+        endTime: item.endTime ? item.endTime.split(' ')[1].slice(0, 5) : '00:00',
+        location: item.location || '',
+        participants: item.participants || [],
+        color: item.color || '#1890FF',
+        remark: item.description || '',
+      }))
+    }
+  } catch (error) {
+    console.error('获取日程失败:', error)
+    // 保持模拟数据作为备用
     events.value = [
       {
         id: '1',
@@ -461,8 +523,6 @@ const fetchEvents = async () => {
         remark: '月度团建活动',
       },
     ]
-  } catch (error) {
-    console.error('获取日程失败:', error)
   }
 }
 

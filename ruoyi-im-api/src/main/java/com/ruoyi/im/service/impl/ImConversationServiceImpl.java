@@ -534,4 +534,17 @@ public class ImConversationServiceImpl implements ImConversationService {
             imConversationMemberMapper.updateById(existingMember);
         }
     }
+
+    @Override
+    public int getUserConversationCount(Long userId) {
+        // 获取用户参与的会话数量（排除已删除的）
+        List<ImConversationMember> members = imConversationMemberMapper.selectByUserId(userId);
+        int count = 0;
+        for (ImConversationMember member : members) {
+            if (member.getIsDeleted() == null || member.getIsDeleted() == 0) {
+                count++;
+            }
+        }
+        return count;
+    }
 }

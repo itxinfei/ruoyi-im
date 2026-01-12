@@ -144,4 +144,12 @@ public interface ImConversationService {
      * @return 会话列表
      */
     List<ImConversationVO> searchConversations(String keyword, Long userId);
+
+    /**
+     * 获取用户会话数量
+     *
+     * @param userId 用户ID
+     * @return 会话数量
+     */
+    int getUserConversationCount(Long userId);
 }
