@@ -87,7 +87,7 @@ declare module 'vue' {
     MessageStatus: typeof import('./components/Message/MessageStatus.vue')['default']
     NotificationPanel: typeof import('./components/Notification/NotificationPanel.vue')['default']
     NotificationSettings: typeof import('./components/Notification/NotificationSettings.vue')['default']
-    OrganizationTree: typeof import('./components/Organization/OrganizationTree.vue')['default']
+    OrganizationTree: typeof import('./components/Contacts/OrganizationTree.vue')['default']
     Pagination: typeof import('./components/Pagination/index.vue')['default']
     ReadReceiptBadge: typeof import('./components/Chat/ReadReceiptBadge.vue')['default']
     ReadReceiptDialog: typeof import('./components/Chat/ReadReceiptDialog.vue')['default']

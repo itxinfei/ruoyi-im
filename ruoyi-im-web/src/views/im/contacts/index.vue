@@ -1,5 +1,13 @@
 <template>
   <div class="contacts-container">
+    <!-- 第一栏：组织架构树 -->
+    <div class="org-tree-panel">
+      <div class="panel-header">
+        <h3 class="panel-title">组织架构</h3>
+      </div>
+      <OrganizationTree @select-member="handleOrgMemberSelect" />
+    </div>
+
     <!-- 第二栏：联系人列表（钉钉风格，移除分类面板） -->
     <div class="contacts-panel">
       <div class="panel-header">
@@ -175,6 +183,7 @@ import {
 import { listUser } from '@/api/im/user'
 import { addContact } from '@/api/im/contact'
 import { getCurrentUserId } from '@/utils/im-user'
+import OrganizationTree from '@/components/Contacts/OrganizationTree.vue'
 
 const router = useRouter()
 
@@ -408,6 +417,27 @@ const selectContact = contact => {
   selectedContact.value = { ...contact }
 }
 
+// 处理组织架构树成员选择
+const handleOrgMemberSelect = member => {
+  // 将组织架构成员转换为联系人格式
+  const contact = {
+    id: member.id,
+    name: member.name || member.nickname || member.username,
+    nickname: member.name || member.nickname || member.username,
+    username: member.username,
+    avatar: member.avatar,
+    email: member.email,
+    phone: member.phone,
+    signature: member.signature,
+    online: member.online || false,
+    position: member.position,
+    deptName: member.deptName,
+    // 从组织架构选择的成员可能不是好友，标记一下
+    _fromOrg: true,
+  }
+  selectContact(contact)
+}
+
 const startChat = () => {
   if (selectedContact.value) {
     router.push(`/im/chat?userId=${selectedContact.value.id}`)
@@ -555,6 +585,29 @@ onMounted(async () => {
   height: 100%;
   display: flex;
   background-color: #f5f5f5;
+}
+
+// 组织架构树面板
+.org-tree-panel {
+  width: 240px;
+  min-width: 200px;
+  height: 100%;
+  background-color: #fff;
+  border-right: 1px solid #e8e8e8;
+  display: flex;
+  flex-direction: column;
+
+  .panel-header {
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid #e8e8e8;
+
+    .panel-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+    }
+  }
 }
 
 .contacts-panel {

@@ -41,31 +41,33 @@
 
         <!-- 设置 -->
         <el-dropdown trigger="click" placement="bottom-end" @command="handleSettingsCommand">
-          <el-tooltip content="设置" placement="bottom">
-            <el-button :icon="Setting" text class="header-action-btn" />
-          </el-tooltip>
+          <div class="header-action-wrapper">
+            <el-tooltip content="设置" placement="bottom">
+              <el-button :icon="Setting" text class="header-action-btn" />
+            </el-tooltip>
+          </div>
           <template #dropdown>
-            <el-dropdown-menu>
+            <el-dropdown-menu class="settings-dropdown">
               <el-dropdown-item command="theme">
-                <el-icon><Sunny /></el-icon>
-                主题切换
+                <el-icon class="menu-icon theme"><Sunny /></el-icon>
+                <span class="menu-text">主题切换</span>
                 <span class="item-shortcut">⌘T</span>
               </el-dropdown-item>
               <el-dropdown-item command="notifications">
-                <el-icon><Bell /></el-icon>
-                消息通知设置
+                <el-icon class="menu-icon"><Bell /></el-icon>
+                <span class="menu-text">消息通知</span>
               </el-dropdown-item>
               <el-dropdown-item command="privacy">
-                <el-icon><Lock /></el-icon>
-                隐私与安全
+                <el-icon class="menu-icon"><Lock /></el-icon>
+                <span class="menu-text">隐私与安全</span>
               </el-dropdown-item>
               <el-dropdown-item divided command="shortcuts">
-                <el-icon><Key /></el-icon>
-                快捷键设置
+                <el-icon class="menu-icon"><Key /></el-icon>
+                <span class="menu-text">快捷键</span>
               </el-dropdown-item>
               <el-dropdown-item command="about">
-                <el-icon><InfoFilled /></el-icon>
-                关于系统
+                <el-icon class="menu-icon"><InfoFilled /></el-icon>
+                <span class="menu-text">关于系统</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -73,26 +75,29 @@
 
         <!-- 帮助 -->
         <el-dropdown trigger="click" placement="bottom-end" @command="handleHelpCommand">
-          <el-tooltip content="帮助" placement="bottom">
-            <el-button :icon="QuestionFilled" text class="header-action-btn" />
-          </el-tooltip>
+          <div class="header-action-wrapper">
+            <el-tooltip content="帮助" placement="bottom">
+              <el-button :icon="QuestionFilled" text class="header-action-btn" />
+            </el-tooltip>
+          </div>
           <template #dropdown>
-            <el-dropdown-menu>
+            <el-dropdown-menu class="help-dropdown">
               <el-dropdown-item command="help">
-                <el-icon><QuestionFilled /></el-icon>
-                使用帮助
+                <el-icon class="menu-icon"><QuestionFilled /></el-icon>
+                <span class="menu-text">使用帮助</span>
               </el-dropdown-item>
               <el-dropdown-item command="shortcuts">
-                <el-icon><Key /></el-icon>
-                快捷键指南
+                <el-icon class="menu-icon"><Key /></el-icon>
+                <span class="menu-text">快捷键指南</span>
               </el-dropdown-item>
               <el-dropdown-item command="feedback">
-                <el-icon><Message /></el-icon>
-                反馈建议
+                <el-icon class="menu-icon"><Message /></el-icon>
+                <span class="menu-text">反馈建议</span>
               </el-dropdown-item>
-              <el-dropdown-item command="update">
-                <el-icon><Refresh /></el-icon>
-                检查更新
+              <el-dropdown-item divided command="update">
+                <el-icon class="menu-icon"><Refresh /></el-icon>
+                <span class="menu-text">检查更新</span>
+                <el-tag size="small" type="success" class="version-tag">v1.0</el-tag>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -128,36 +133,52 @@
                 </div>
               </el-dropdown-item>
               <el-dropdown-item divided command="status">
-                <el-icon><CircleCheck /></el-icon>
-                在线状态
-                <div class="status-selector">
-                  <el-tooltip content="在线" placement="top">
-                    <el-button
-                      :type="currentOnlineStatus === 'online' ? 'primary' : ''"
-                      :icon="CircleCheck"
-                      circle
-                      size="small"
-                      @click.stop="setOnlineStatus('online')"
-                    />
-                  </el-tooltip>
-                  <el-tooltip content="忙碌" placement="top">
-                    <el-button
-                      :type="currentOnlineStatus === 'busy' ? 'danger' : ''"
-                      :icon="Minus"
-                      circle
-                      size="small"
-                      @click.stop="setOnlineStatus('busy')"
-                    />
-                  </el-tooltip>
-                  <el-tooltip content="离线" placement="top">
-                    <el-button
-                      :type="currentOnlineStatus === 'offline' ? 'info' : ''"
-                      :icon="CircleClose"
-                      circle
-                      size="small"
-                      @click.stop="setOnlineStatus('offline')"
-                    />
-                  </el-tooltip>
+                <div class="status-item-wrapper">
+                  <div class="status-item-content">
+                    <el-icon><CircleCheck /></el-icon>
+                    <span>在线状态</span>
+                  </div>
+                  <div class="status-selector">
+                    <el-tooltip content="在线" placement="top">
+                      <span
+                        class="status-btn"
+                        :class="{ active: currentOnlineStatus === 'online' }"
+                        @click.stop="setOnlineStatus('online')"
+                      >
+                        <span class="status-dot online"></span>
+                      </span>
+                    </el-tooltip>
+                    <el-tooltip content="离开" placement="top">
+                      <span
+                        class="status-btn"
+                        :class="{ active: currentOnlineStatus === 'away' }"
+                        @click.stop="setOnlineStatus('away')"
+                      >
+                        <span class="status-dot away"></span>
+                      </span>
+                    </el-tooltip>
+                    <el-tooltip content="忙碌" placement="top">
+                      <span
+                        class="status-btn"
+                        :class="{ active: currentOnlineStatus === 'busy' }"
+                        @click.stop="setOnlineStatus('busy')"
+                      >
+                        <span class="status-dot busy"></span>
+                      </span>
+                    </el-tooltip>
+                    <el-tooltip content="离线" placement="top">
+                      <span
+                        class="status-btn"
+                        :class="{ active: currentOnlineStatus === 'offline' }"
+                        @click.stop="setOnlineStatus('offline')"
+                      >
+                        <span class="status-dot offline"></span>
+                      </span>
+                    </el-tooltip>
+                  </div>
+                  <div class="current-status-text">
+                    {{ getOnlineStatusDisplay(currentOnlineStatus) }}
+                  </div>
                 </div>
               </el-dropdown-item>
               <el-dropdown-item command="settings">
@@ -633,8 +654,8 @@
                   ref="inputRef"
                   v-model="inputMessage"
                   type="textarea"
-                  :rows="2"
-                  :autosize="{ minRows: 2, maxRows: 6 }"
+                  :rows="1"
+                  :autosize="{ minRows: 1, maxRows: 7 }"
                   placeholder="输入消息... @提及、Enter发送、Ctrl+Enter换行"
                   class="chat-input"
                   @keydown="handleInputKeydown"
@@ -5688,8 +5709,19 @@ const setOnlineStatus = status => {
   localStorage.setItem('onlineStatus', status)
   // 同步到服务器
   wsSendStatusChange?.(status)
-  const statusText = { online: '在线', busy: '忙碌', offline: '离线' }
-  ElMessage.success(`已切换为：${statusText[status]}`)
+  ElMessage.success(`已切换为：${getOnlineStatusDisplay(status)}`)
+}
+
+// 获取在线状态显示文本
+const getOnlineStatusDisplay = status => {
+  const statusMap = {
+    online: '在线',
+    away: '离开',
+    busy: '忙碌',
+    offline: '离线',
+    dnd: '免打扰',
+  }
+  return statusMap[status] || '在线'
 }
 
 // 快捷键对话框
@@ -6575,6 +6607,7 @@ $avatar-xl: 64px;
     .dropdown-avatar {
       margin-bottom: 8px;
       border: 2px solid #165dff;
+      box-shadow: 0 2px 8px rgba(22, 93, 255, 0.2);
     }
 
     .user-info-item {
@@ -6597,13 +6630,95 @@ $avatar-xl: 64px;
     display: flex;
     align-items: center;
     gap: 12px;
+    padding: 8px;
+    margin: -8px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background: #f7f8fa;
+    }
+  }
+
+  // 状态项包装器
+  .status-item-wrapper {
+    padding: 4px 0;
+  }
+
+  // 状态项内容
+  .status-item-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
   }
 
   // 状态选择器样式
   .status-selector {
     display: flex;
-    gap: 8px;
-    margin-left: auto;
+    gap: 12px;
+    margin: 12px 0;
+    padding: 8px 12px;
+    background: #f7f8fa;
+    border-radius: 8px;
+  }
+
+  // 状态按钮
+  .status-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+    border: 2px solid transparent;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &.active {
+      border-color: #1677ff;
+      box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.15);
+    }
+  }
+
+  // 状态点
+  .status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+    &.online {
+      background: #52c41a;
+    }
+
+    &.away {
+      background: #faad14;
+    }
+
+    &.busy {
+      background: #ff4d4f;
+    }
+
+    &.offline {
+      background: #d9d9d9;
+    }
+  }
+
+  // 当前状态文本
+  .current-status-text {
+    font-size: 12px;
+    color: #86909c;
+    text-align: center;
+    padding-bottom: 4px;
   }
 
   // 快捷键标签
@@ -6614,6 +6729,42 @@ $avatar-xl: 64px;
     background: #f2f3f5;
     padding: 2px 6px;
     border-radius: 4px;
+  }
+
+  // 头部操作按钮包装器
+  .header-action-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background: #f2f3f5;
+    }
+  }
+
+  // 设置和帮助下拉菜单样式
+  .settings-dropdown,
+  .help-dropdown {
+    .menu-icon {
+      margin-right: 8px;
+      font-size: 16px;
+      color: #606266;
+
+      &.theme {
+        color: #faad14;
+      }
+    }
+
+    .menu-text {
+      flex: 1;
+    }
+
+    .version-tag {
+      margin-left: 8px;
+    }
   }
 }
 
@@ -6753,15 +6904,20 @@ $avatar-xl: 64px;
       }
 
       .header-action-btn {
-        width: 36px;
-        height: 36px;
-        color: $text-regular;
-        border-radius: 8px;
+        padding: 8px;
+        border-radius: 6px;
+        color: $text-secondary;
+        transition: all 0.2s;
 
         &:hover {
           color: $primary-color;
           background: $nav-item-hover;
         }
+
+        &:active {
+          background: darken($nav-item-hover, 5%);
+        }
+      }
       }
 
       .header-user {
@@ -7521,7 +7677,8 @@ $avatar-xl: 64px;
                   font-size: 14px;
                   line-height: 1.5;
                   background: transparent;
-                  min-height: 80px;
+                  min-height: 36px; // 钉钉规范：最小高度36px
+                  max-height: 150px; // 钉钉规范：最大高度150px
                 }
 
                 &:focus-within {

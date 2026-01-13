@@ -5,6 +5,7 @@
       :size="size"
       :src="avatarUrl"
       :style="avatarStyle"
+      @error="handleError"
     >
       {{ defaultText }}
     </el-avatar>
@@ -237,28 +238,39 @@ const borderColors = [
 
   .online-indicator {
     position: absolute;
-    bottom: 2px;
-    right: 2px;
-    width: 12px;
-    height: 12px;
+    bottom: 0;
+    right: 0;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    border: 2px solid #fff;
+    border: 2.5px solid #fff;
     z-index: 2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
 
     &.online {
       background-color: #52c41a;
+      box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
     }
 
     &.away {
       background-color: #faad14;
+      box-shadow: 0 0 0 2px rgba(250, 173, 20, 0.2);
     }
 
     &.busy {
       background-color: #ff4d4f;
+      box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
     }
 
     &.offline {
       background-color: #d9d9d9;
+      box-shadow: 0 0 0 2px rgba(217, 217, 217, 0.2);
+    }
+
+    &.dnd {
+      background-color: #ff4d4f;
+      box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
     }
   }
 }
