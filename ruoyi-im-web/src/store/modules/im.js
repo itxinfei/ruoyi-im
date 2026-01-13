@@ -8,6 +8,7 @@ import {
   deleteMessage,
   batchDeleteMessages,
 } from '@/api/im/message'
+import imWebSocket from '@/utils/websocket/imWebSocket'
 import { listSession, updateSession, deleteSession as apiDeleteSession } from '@/api/im/session'
 import { markConversationRead, createPrivateConversation } from '@/api/im/conversation'
 import { listContact, deleteContact as apiDeleteContact } from '@/api/im/contact'
@@ -709,12 +710,10 @@ const actions = {
     commit('ADD_MESSAGE', { sessionId, message: tempMessage })
     commit('ADD_PENDING_MESSAGE', { sessionId, tempId, message: tempMessage })
 
-    const ws = state.ws
-
     // 优先使用 WebSocket（实时性更好）
-    if (ws && ws.isConnected) {
+    if (imWebSocket && imWebSocket.isConnected()) {
       try {
-        ws.sendMessage({
+        imWebSocket.sendMessage({
           conversationId: sessionId,
           type,
           content,

@@ -1,32 +1,62 @@
 <template>
   <div class="web-im-layout">
-    <!-- 顶部导航栏（钉钉风格简约式） -->
+    <!-- 顶部导航栏（钉钉风格优化版） -->
     <header class="ding-header">
-      <!-- 搜索框 -->
-      <div class="header-search">
-        <el-input
-          v-model="sessionSearch"
-          placeholder="搜索"
-          :prefix-icon="Search"
-          class="ding-search-input"
-          clearable
-        />
+      <!-- 左侧：Logo和搜索 -->
+      <div class="header-left">
+        <div class="header-logo">
+          <el-icon :size="24" color="#1677ff"><ChatDotRound /></el-icon>
+          <span class="logo-text">钉钉</span>
+        </div>
+        <div class="header-divider"></div>
+        <div class="header-search">
+          <el-input
+            v-model="globalSearchKeyword"
+            placeholder="搜索联系人、群聊、消息..."
+            :prefix-icon="Search"
+            class="global-search-input"
+            clearable
+            @keyup.enter="handleGlobalSearch"
+          >
+            <template #suffix>
+              <span class="search-shortcut">⌘K</span>
+            </template>
+          </el-input>
+        </div>
       </div>
 
-      <!-- 右侧操作区 -->
-      <div class="header-actions">
+      <!-- 右侧：操作区 -->
+      <div class="header-right">
+        <!-- 通知按钮 -->
+        <el-badge :value="notificationCount" :hidden="notificationCount === 0" :max="99" class="header-badge">
+          <el-tooltip content="通知" placement="bottom">
+            <el-button :icon="Bell" text class="header-action-btn" @click="showNotifications" />
+          </el-tooltip>
+        </el-badge>
+
+        <!-- 快捷操作 -->
+        <el-tooltip content="发起聊天" placement="bottom">
+          <el-button :icon="Plus" text class="header-action-btn" @click="showStartChatDialog" />
+        </el-tooltip>
+
+        <!-- 帮助 -->
         <el-tooltip content="帮助" placement="bottom">
           <el-button :icon="QuestionFilled" text class="header-action-btn" />
         </el-tooltip>
+
+        <!-- 设置 -->
         <el-tooltip content="设置" placement="bottom">
           <el-button :icon="Setting" text class="header-action-btn" @click="showSettings" />
         </el-tooltip>
+
+        <!-- 用户下拉 -->
         <el-dropdown trigger="click" placement="bottom-end" @command="handleUserCommand">
           <div class="header-user">
-            <el-avatar :size="28" :src="currentUser?.avatar">
+            <el-avatar :size="32" :src="currentUser?.avatar">
               {{ currentUser?.name?.charAt(0) || 'U' }}
             </el-avatar>
             <span class="header-username">{{ currentUser?.name || '用户' }}</span>
+            <el-icon class="dropdown-arrow"><ArrowDown /></el-icon>
           </div>
           <template #dropdown>
             <el-dropdown-menu>
@@ -37,6 +67,10 @@
               <el-dropdown-item command="settings">
                 <el-icon><Setting /></el-icon>
                 系统设置
+              </el-dropdown-item>
+              <el-dropdown-item divided command="status">
+                <el-icon><CircleCheck /></el-icon>
+                在线状态
               </el-dropdown-item>
               <el-dropdown-item divided command="logout">
                 <el-icon><SwitchButton /></el-icon>
@@ -135,21 +169,79 @@
           <!-- 聊天内容 -->
           <div class="chat-panel">
             <div v-if="currentSessionId" class="chat-container">
-              <!-- 聊天头部 -->
+              <!-- 聊天头部（优化版） -->
               <div class="chat-header">
-                <div class="chat-title">
-                  <el-avatar :size="36" :src="currentSession?.avatar">
-                    {{ currentSession?.name?.charAt(0) || 'U' }}
-                  </el-avatar>
-                  <div>
-                    <div class="title-name">{{ currentSession?.name }}</div>
-                    <div class="title-status">在线</div>
+                <!-- 左侧：会话信息 -->
+                <div class="chat-info">
+                  <div class="chat-avatar-group" @click="showChatProfile">
+                    <el-badge :value="currentSession?.unreadCount || 0" :hidden="!(currentSession?.unreadCount > 0)" :max="99">
+                      <el-avatar :size="40" :src="currentSession?.avatar">
+                        {{ currentSession?.name?.charAt(0) || 'U' }}
+                      </el-avatar>
+                    </el-badge>
+                    <el-icon v-if="currentSession?.type === 'GROUP'" class="group-badge"><User /></el-icon>
+                  </div>
+                  <div class="chat-title-info">
+                    <div class="title-row">
+                      <span class="title-name">{{ currentSession?.name }}</span>
+                      <el-tag v-if="currentSession?.type === 'GROUP'" size="small" type="info" class="group-tag">
+                        群聊
+                      </el-tag>
+                    </div>
+                    <div class="title-subtitle">
+                      <span class="status-dot" :class="{ online: isUserOnline }"></span>
+                      <span class="status-text">{{ getOnlineStatusText() }}</span>
+                      <span v-if="currentSession?.type === 'GROUP'" class="member-count">
+                        · {{ currentSession?.memberCount || 0 }}人
+                      </span>
+                    </div>
                   </div>
                 </div>
+
+                <!-- 右侧：操作按钮 -->
                 <div class="chat-actions">
-                  <el-button :icon="Phone" circle size="small" />
-                  <el-button :icon="VideoCamera" circle size="small" />
-                  <el-button :icon="More" circle size="small" />
+                  <el-tooltip content="语音通话" placement="bottom">
+                    <el-button :icon="Phone" class="action-btn" circle @click="startVoiceCall" />
+                  </el-tooltip>
+                  <el-tooltip content="视频通话" placement="bottom">
+                    <el-button :icon="VideoCamera" class="action-btn" circle @click="startVideoCall" />
+                  </el-tooltip>
+                  <el-tooltip content="屏幕共享" placement="bottom">
+                    <el-button :icon="View" class="action-btn" circle @click="startScreenShare" />
+                  </el-tooltip>
+                  <el-divider direction="vertical" />
+                  <el-tooltip content="搜索聊天记录" placement="bottom">
+                    <el-button :icon="Search" class="action-btn" circle @click="searchInChat" />
+                  </el-tooltip>
+                  <el-tooltip content="更多操作" placement="bottom">
+                    <el-dropdown trigger="click" placement="bottom-end">
+                      <el-button :icon="More" class="action-btn" circle />
+                      <template #dropdown>
+                        <el-dropdown-menu>
+                          <el-dropdown-item @click="muteChat">
+                            <el-icon><Bell /></el-icon>
+                            {{ currentSession?.isMuted ? '取消免打扰' : '消息免打扰' }}
+                          </el-dropdown-item>
+                          <el-dropdown-item @click="pinChat">
+                            <el-icon><Star /></el-icon>
+                            {{ currentSession?.isPinned ? '取消置顶' : '置顶聊天' }}
+                          </el-dropdown-item>
+                          <el-dropdown-item divided @click="viewChatMembers" v-if="currentSession?.type === 'GROUP'">
+                            <el-icon><User /></el-icon>
+                            查看成员
+                          </el-dropdown-item>
+                          <el-dropdown-item divided @click="clearChatHistory">
+                            <el-icon><Delete /></el-icon>
+                            清空聊天记录
+                          </el-dropdown-item>
+                          <el-dropdown-item @click="exitGroup" v-if="currentSession?.type === 'GROUP'" class="danger-item">
+                            <el-icon><DeleteFilled /></el-icon>
+                            退出群聊
+                          </el-dropdown-item>
+                        </el-dropdown-menu>
+                      </template>
+                    </el-dropdown>
+                  </el-tooltip>
                 </div>
               </div>
 
@@ -1849,6 +1941,12 @@ import {
   Delete,
   Search,
   DocumentCopy,
+  Promotion,
+  Message,
+  OfficeBuilding,
+  Tickets,
+  Star,
+  DeleteFilled,
 } from '@element-plus/icons-vue'
 import { formatTime as formatTimeUtil } from '@/utils/format/time'
 import { useImWebSocket } from '@/composables/useImWebSocket'
@@ -1890,7 +1988,12 @@ const {
 const isNavCollapsed = ref(false)
 const activeModule = ref('chat')
 const sessionSearch = ref('')
+const globalSearchKeyword = ref('')
 const inputMessage = ref('')
+const notificationCount = ref(0)
+
+// 在线状态
+const isUserOnline = ref(true)
 
 // 消息区域引用
 const messageAreaRef = ref(null)
@@ -3352,6 +3455,10 @@ const navModules = ref([
   { key: 'contacts', label: '联系人', icon: User },
   { key: 'workbench', label: '工作台', icon: Grid },
   { key: 'drive', label: '钉盘', icon: Folder },
+  { key: 'approval', label: '审批', icon: Tickets },
+  { key: 'ding', label: 'DING', icon: Promotion },
+  { key: 'email', label: '邮箱', icon: Message },
+  { key: 'app-center', label: '应用', icon: OfficeBuilding },
 ])
 
 // 部门数据
@@ -3383,6 +3490,10 @@ const getModuleTitle = key => {
     contacts: '联系人',
     workbench: '工作台',
     drive: '钉盘',
+    approval: '审批',
+    ding: 'DING',
+    email: '邮箱',
+    'app-center': '应用中心',
   }
   return titles[key] || ''
 }
@@ -3395,12 +3506,14 @@ const toggleNavCollapse = () => {
 const switchModule = moduleKey => {
   activeModule.value = moduleKey
   // 根据模块类型决定是否进行路由跳转
-  // 联系人和钉盘模块使用独立页面路由
-  const routedModules = ['contacts', 'drive']
+  // 联系人、钉盘、审批、DING、邮箱、应用中心模块使用独立页面路由
+  const routedModules = ['contacts', 'drive', 'approval', 'ding', 'email', 'app-center']
   if (routedModules.includes(moduleKey)) {
     // 钉盘模块跳转到文件管理页面
     if (moduleKey === 'drive') {
       router.push('/im/file')
+    } else if (moduleKey === 'app-center') {
+      router.push('/im/app-center')
     } else {
       router.push(`/im/${moduleKey}`)
     }
@@ -4934,6 +5047,88 @@ const handleUserCommand = async command => {
   }
 }
 
+// 顶部导航栏方法
+const showNotifications = () => {
+  notificationVisible.value = true
+}
+
+const handleGlobalSearch = () => {
+  if (!globalSearchKeyword.value.trim()) {
+    ElMessage.warning('请输入搜索内容')
+    return
+  }
+  ElMessage.info('搜索功能开发中...')
+  // TODO: 实现全局搜索
+}
+
+// 聊天头部方法
+const getOnlineStatusText = () => {
+  if (currentSession.value?.type === 'GROUP') {
+    return '群聊'
+  }
+  return isUserOnline.value ? '在线' : '离线'
+}
+
+const showChatProfile = () => {
+  // TODO: 显示会话详情对话框
+  ElMessage.info('会话详情功能开发中...')
+}
+
+const startScreenShare = () => {
+  ElMessage.info('屏幕共享功能开发中...')
+}
+
+const searchInChat = () => {
+  ElMessage.info('搜索聊天记录功能开发中...')
+}
+
+const muteChat = () => {
+  if (currentSession.value) {
+    currentSession.value.isMuted = !currentSession.value.isMuted
+    ElMessage.success(currentSession.value.isMuted ? '已开启消息免打扰' : '已取消消息免打扰')
+  }
+}
+
+const pinChat = () => {
+  if (currentSession.value) {
+    currentSession.value.isPinned = !currentSession.value.isPinned
+    ElMessage.success(currentSession.value.isPinned ? '已置顶聊天' : '已取消置顶')
+  }
+}
+
+const viewChatMembers = () => {
+  ElMessage.info('查看成员功能开发中...')
+}
+
+const clearChatHistory = async () => {
+  try {
+    await ElMessageBox.confirm('确定要清空聊天记录吗？此操作不可恢复。', '清空聊天记录', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+    // TODO: 调用API清空聊天记录
+    ElMessage.success('聊天记录已清空')
+  } catch {
+    // 用户取消
+  }
+}
+
+const exitGroup = async () => {
+  try {
+    await ElMessageBox.confirm('确定要退出群聊吗？', '退出群聊', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+    // TODO: 调用API退出群聊
+    ElMessage.success('已退出群聊')
+    activeModule.value = 'chat'
+  } catch {
+    // 用户取消
+  }
+}
+
 // 初始化
 const init = async () => {
   // 读取折叠状态
@@ -5626,62 +5821,105 @@ $avatar-xl: 64px;
   background: #fff;
   overflow: hidden;
 
-  // 顶部导航栏（钉钉风格）
+  // 顶部导航栏（钉钉风格优化版）
   .ding-header {
-    height: 48px;
-    min-height: 48px;
+    height: 52px;
+    min-height: 52px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
+    padding: 0 20px;
     background: #fff;
     border-bottom: 1px solid $border-color;
     z-index: 100;
 
-    .header-search {
+    // 左侧区域
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
       flex: 1;
-      max-width: 300px;
 
-      .ding-search-input {
-        :deep(.el-input__wrapper) {
-          border-radius: 6px;
-          background: $bg-gray;
-          border: 1px solid transparent;
-          box-shadow: none;
-          transition: all 0.2s;
+      .header-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
 
-          &:hover {
-            background: #fafafa;
-            border-color: #d9d9d9;
+        .logo-text {
+          font-size: 18px;
+          font-weight: 600;
+          color: $primary-color;
+        }
+      }
+
+      .header-divider {
+        width: 1px;
+        height: 24px;
+        background: $border-color;
+      }
+
+      .header-search {
+        flex: 1;
+        max-width: 400px;
+
+        .global-search-input {
+          :deep(.el-input__wrapper) {
+            border-radius: 8px;
+            background: $bg-gray;
+            border: 1px solid transparent;
+            box-shadow: none;
+            transition: all 0.2s;
+
+            &:hover {
+              background: #fafafa;
+              border-color: #d9d9d9;
+            }
+
+            &.is-focus {
+              background: #fff;
+              border-color: $primary-color;
+              box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+            }
           }
 
-          &.is-focus {
-            background: #fff;
-            border-color: $primary-color;
-            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+          :deep(.el-input__inner) {
+            font-size: 13px;
           }
-        }
 
-        :deep(.el-input__inner) {
-          font-size: 13px;
-        }
+          :deep(.el-input__prefix) {
+            color: $text-tertiary;
+          }
 
-        :deep(.el-input__prefix) {
-          color: $text-tertiary;
+          .search-shortcut {
+            font-size: 11px;
+            color: $text-tertiary;
+            background: rgba(0, 0, 0, 0.04);
+            padding: 2px 6px;
+            border-radius: 4px;
+          }
         }
       }
     }
 
-    .header-actions {
+    // 右侧区域
+    .header-right {
       display: flex;
       align-items: center;
       gap: 4px;
+
+      .header-badge {
+        :deep(.el-badge__content) {
+          background: $danger-color;
+          border: 2px solid #fff;
+        }
+      }
 
       .header-action-btn {
         width: 36px;
         height: 36px;
         color: $text-regular;
-        border-radius: 6px;
+        border-radius: 8px;
 
         &:hover {
           color: $primary-color;
@@ -5693,10 +5931,11 @@ $avatar-xl: 64px;
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 4px 10px 4px 4px;
-        border-radius: 6px;
+        padding: 4px 12px 4px 4px;
+        border-radius: 8px;
         cursor: pointer;
         transition: all 0.2s;
+        margin-left: 8px;
 
         &:hover {
           background: $nav-item-hover;
@@ -5712,6 +5951,16 @@ $avatar-xl: 64px;
           max-width: 80px;
           @include text-ellipsis;
         }
+
+        .dropdown-arrow {
+          font-size: 12px;
+          color: $text-tertiary;
+          transition: transform 0.2s;
+        }
+
+        &:hover .dropdown-arrow {
+          transform: rotate(180deg);
+        }
       }
     }
   }
@@ -5722,7 +5971,7 @@ $avatar-xl: 64px;
     display: flex;
     overflow: hidden;
 
-    // 左侧导航栏（钉钉48px窄模式）
+    // 左侧导航栏（钉钉68px窄模式）
     .nav-sidebar {
       width: $nav-width-narrow;
       background: $bg-nav-narrow;
@@ -5739,6 +5988,8 @@ $avatar-xl: 64px;
         flex-direction: column;
         align-items: center;
         gap: 4px;
+        overflow-y: auto;
+        overflow-x: hidden;
 
         .nav-item {
           width: 40px;
@@ -5929,7 +6180,7 @@ $avatar-xl: 64px;
             overflow: hidden;
 
             .chat-header {
-              height: 52px;
+              height: 60px;
               padding: 0 16px;
               display: flex;
               align-items: center;
@@ -5939,51 +6190,123 @@ $avatar-xl: 64px;
               box-shadow: $shadow-sm;
               z-index: 10;
 
-              .chat-title {
+              // 左侧：会话信息
+              .chat-info {
                 display: flex;
                 align-items: center;
-                gap: 10px;
+                gap: 12px;
 
-                .title-name {
-                  font-size: 15px;
-                  font-weight: 500;
-                  color: $text-secondary;
+                .chat-avatar-group {
+                  position: relative;
+                  cursor: pointer;
+
+                  .group-badge {
+                    position: absolute;
+                    bottom: -2px;
+                    right: -2px;
+                    width: 16px;
+                    height: 16px;
+                    background: $primary-color;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    font-size: 10px;
+                    border: 2px solid #fff;
+                  }
                 }
 
-                .title-status {
-                  font-size: 12px;
-                  color: $success-color;
-                  margin-top: 2px;
+                .chat-title-info {
                   display: flex;
-                  align-items: center;
-                  gap: 4px;
+                  flex-direction: column;
+                  gap: 2px;
 
-                  &::before {
-                    content: '';
-                    width: 6px;
-                    height: 6px;
-                    border-radius: 50%;
-                    background: $success-color;
-                    display: inline-block;
+                  .title-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+
+                    .title-name {
+                      font-size: 15px;
+                      font-weight: 600;
+                      color: $text-primary;
+                    }
+
+                    .group-tag {
+                      height: 18px;
+                      padding: 0 6px;
+                      font-size: 11px;
+                      background: $nav-item-hover;
+                      border: none;
+                    }
+                  }
+
+                  .title-subtitle {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    font-size: 12px;
+                    color: $text-tertiary;
+
+                    .status-dot {
+                      width: 6px;
+                      height: 6px;
+                      border-radius: 50%;
+                      background: $text-tertiary;
+
+                      &.online {
+                        background: $success-color;
+                      }
+                    }
+
+                    .status-text {
+                      line-height: 1;
+                    }
+
+                    .member-count {
+                      color: $text-tertiary;
+                    }
                   }
                 }
               }
 
+              // 右侧：操作按钮
               .chat-actions {
                 display: flex;
-                gap: 4px;
+                align-items: center;
+                gap: 6px;
 
-                .el-button {
+                .action-btn {
                   --el-button-border-color: transparent;
                   --el-button-bg-color: transparent;
                   --el-button-text-color: $text-regular;
-                  width: 32px;
-                  height: 32px;
+                  width: 34px;
+                  height: 34px;
                   padding: 6px;
+                  border-radius: 8px;
 
                   &:hover {
                     --el-button-text-color: $primary-color;
                     --el-button-hover-bg-color: $nav-item-hover;
+                  }
+                }
+
+                .el-divider--vertical {
+                  height: 20px;
+                  margin: 0 4px;
+                }
+
+                :deep(.el-dropdown-menu__item.danger-item) {
+                  color: $danger-color;
+
+                  &:hover {
+                    background: rgba(245, 34, 45, 0.1);
+                    color: $danger-color;
+                  }
+
+                  .el-icon {
+                    color: $danger-color;
                   }
                 }
               }

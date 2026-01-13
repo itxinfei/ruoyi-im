@@ -9,7 +9,7 @@
       <div class="sidebar-header">
         <h3>邮箱</h3>
         <el-button type="primary" size="small" @click="openCompose">
-          <i class="el-icon-edit"></i> 写邮件
+          <el-icon><Edit /></el-icon> 写邮件
         </el-button>
       </div>
 
@@ -20,7 +20,7 @@
       >
         <el-menu-item :index="FOLDER_TYPE.INBOX">
           <div class="menu-item-content">
-            <i class="el-icon-inbox"></i>
+            <el-icon><Message /></el-icon>
             <span>收件箱</span>
             <el-badge v-if="unreadCount > 0" :value="unreadCount" class="badge" />
           </div>
@@ -28,14 +28,14 @@
 
         <el-menu-item :index="FOLDER_TYPE.SENT">
           <div class="menu-item-content">
-            <i class="el-icon-s-promotion"></i>
+            <el-icon><Promotion /></el-icon>
             <span>已发送</span>
           </div>
         </el-menu-item>
 
         <el-menu-item :index="FOLDER_TYPE.DRAFTS">
           <div class="menu-item-content">
-            <i class="el-icon-document"></i>
+            <el-icon><Document /></el-icon>
             <span>草稿箱</span>
             <el-badge v-if="draftCount > 0" :value="draftCount" class="badge" />
           </div>
@@ -43,14 +43,14 @@
 
         <el-menu-item :index="FOLDER_TYPE.SPAM">
           <div class="menu-item-content">
-            <i class="el-icon-warning-outline"></i>
+            <el-icon><Warning /></el-icon>
             <span>垃圾邮件</span>
           </div>
         </el-menu-item>
 
         <el-menu-item :index="FOLDER_TYPE.TRASH">
           <div class="menu-item-content">
-            <i class="el-icon-delete"></i>
+            <el-icon><Delete /></el-icon>
             <span>回收站</span>
           </div>
         </el-menu-item>
@@ -73,11 +73,14 @@
           <el-input
             v-model="searchKeyword"
             placeholder="搜索邮件..."
-            prefix-icon="el-icon-search"
             clearable
             @clear="handleSearch"
             @keyup.enter="handleSearch"
-          />
+          >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+          </el-input>
         </div>
 
         <div class="toolbar-actions">
@@ -89,7 +92,7 @@
 
           <el-dropdown @command="handleBatchAction" trigger="click">
             <el-button size="small" :disabled="selectedEmails.length === 0">
-              批量操作 <i class="el-icon-arrow-down el-icon--right"></i>
+              批量操作 <el-icon class="el-icon--right"><ArrowDown /></el-icon>
             </el-button>
             <template #dropdown>
               <el-dropdown-menu>
@@ -104,7 +107,7 @@
           </el-dropdown>
 
           <el-button size="small" @click="refreshList">
-            <i class="el-icon-refresh"></i> 刷新
+            <el-icon><Refresh /></el-icon> 刷新
           </el-button>
         </div>
       </div>
@@ -112,7 +115,7 @@
       <!-- 邮件列表 -->
       <div class="email-list" v-loading="loading">
         <div v-if="filteredEmails.length === 0" class="empty-state">
-          <i class="el-icon-message"></i>
+          <el-icon :size="64"><Message /></el-icon>
           <p>暂无邮件</p>
         </div>
 
@@ -136,7 +139,7 @@
           />
 
           <div class="email-star" @click.stop="toggleStar(email)">
-            <i :class="email.isStarred ? 'el-icon-star-on' : 'el-icon-star-off'"></i>
+            <el-icon><Star :fill="email.isStarred ? 'currentColor' : 'none'" /></el-icon>
           </div>
 
           <div class="email-sender">{{ email.senderName || email.senderEmail }}</div>
@@ -145,7 +148,7 @@
             <div class="email-subject" :class="{ unread: !email.isRead }">
               {{ email.subject || '(无主题)' }}
               <span v-if="email.attachmentCount > 0" class="attachment-icon">
-                <i class="el-icon-paperclip"></i>
+                <el-icon><Paperclip /></el-icon>
               </span>
             </div>
             <div class="email-preview">{{ getEmailPreview(email) }}</div>
@@ -194,6 +197,20 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  Edit,
+  Message,
+  Promotion,
+  Document,
+  Warning,
+  Delete,
+  Search,
+  Refresh,
+  ArrowDown,
+  Star,
+  ChatDotSquare,
+  Paperclip
+} from '@element-plus/icons-vue'
 import * as emailApi from '@/api/im/email'
 import ComposeDialog from './components/ComposeDialog.vue'
 import EmailDetailDialog from './components/EmailDetailDialog.vue'
@@ -679,7 +696,7 @@ watch(selectedEmails, updateSelectAllState)
     }
   }
 
-  &.starred .email-star i {
+  &.starred .email-star .el-icon {
     color: #fadb14;
   }
 
@@ -690,8 +707,10 @@ watch(selectedEmails, updateSelectAllState)
   .email-star {
     margin-right: 8px;
     color: #d9d9d9;
+    display: flex;
+    align-items: center;
 
-    i {
+    .el-icon {
       font-size: 18px;
       transition: color 0.2s;
     }
@@ -726,6 +745,8 @@ watch(selectedEmails, updateSelectAllState)
       .attachment-icon {
         color: #999;
         font-size: 12px;
+        display: flex;
+        align-items: center;
       }
     }
 

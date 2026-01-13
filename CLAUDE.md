@@ -362,3 +362,131 @@ is_deleted      TINYINT     是否删除 (软删除)
 - 避免使用 `select *`
 - WebSocket 消息使用统一格式
 - 前端使用 Composition API 和 `<script setup>` 语法
+
+## 前端架构详细说明
+
+### 目录结构
+
+```
+ruoyi-im-web/src/
+├── api/                    # API 客户端
+│   └── im/
+│       ├── message.js      # 消息 API (发送、查询、撤回、转发等)
+│       ├── conversation.js # 会话 API
+│       ├── session.js      # 会话 API (兼容层，重定向到 conversation)
+│       ├── contact.js      # 联系人/好友 API
+│       ├── group.js        # 群组 API
+│       ├── file.js         # 文件上传/下载 API
+│       └── ...
+├── views/im/
+│   ├── ImChatLayoutOptimized.vue  # 主聊天界面 (综合布局)
+│   ├── chat/ChatContainer.vue     # 聊天容器组件
+│   ├── contacts/                  # 联系人模块
+│   ├── group/                     # 群组模块
+│   ├── email/                     # 邮箱模块
+│   └── workbench/                 # 工作台模块
+├── store/modules/
+│   └── im.js              # IM 状态管理 (会话、消息、联系人)
+├── composables/
+│   └── useImWebSocket.js  # WebSocket 组合式函数
+├── utils/websocket/
+│   ├── imWebSocket.js     # WebSocket 单例实现
+│   └── WebSocketManager.js # WebSocket 管理器
+└── utils/im-user.js       # 用户信息工具函数
+```
+
+### 核心组件说明
+
+**ImChatLayoutOptimized.vue** - 主聊天界面
+- 钉钉风格的完整 IM 界面
+- 包含：消息、联系人、工作台、邮箱四大模块
+- 支持私聊、群聊、文件发送、语音消息等功能
+
+**ChatContainer.vue** - 聊天容器
+- 轻量级聊天组件
+- 消息列表渲染
+- 输入框和消息发送
+
+### Vuex Store (im.js)
+
+**State**:
+```javascript
+{
+  currentSession: null,      // 当前会话
+  sessions: [],              // 会话列表
+  messageList: {},           // 消息列表 { sessionId: [messages] }
+  unreadCount: 0,            // 未读消息总数
+  onlineStatus: {},          // 在线状态映射
+  pendingMessages: {},       // 待发送消息
+  wsConnected: false,        // WebSocket 连接状态
+  contacts: [],              // 联系人列表
+  groups: [],                // 群组列表
+  files: [],                 // 文件列表
+  messageIdSet: {},          // 消息ID集合（去重）
+}
+```
+
+**主要 Actions**:
+- `loadSessions()` - 加载会话列表
+- `switchSession(session)` - 切换会话
+- `loadMessages({ sessionId, lastId, pageSize })` - 加载消息
+- `sendMessage({ sessionId, type, content })` - 发送消息
+- `receiveMessage(message)` - 接收消息
+- `loadContacts()` - 加载联系人
+- `loadGroups()` - 加载群组
+
+### WebSocket 连接
+
+**连接流程**:
+1. 用户登录后获取 token
+2. 调用 `useImWebSocket().connect(token)`
+3. 建立 WebSocket 连接: `ws://localhost:8080/ws/im?token=xxx`
+4. 发送认证消息
+5. 开始心跳 (30秒间隔)
+
+**消息发送格式**:
+```javascript
+{
+  type: 'message',
+  payload: {
+    conversationId: 123,
+    messageType: 'TEXT',
+    content: '消息内容',
+    clientMsgId: '客户端消息ID'
+  }
+}
+```
+
+**消息接收处理**:
+1. WebSocket 接收消息
+2. 触发 `im/receiveMessage` action
+3. 消息添加到 `messageList`
+4. 更新会话的 `lastMessage`
+
+### 开发注意事项
+
+1. **字段映射**: 前端内部统一使用 `sessionId`，与后端交互时转换为 `conversationId`
+
+2. **消息去重**: 使用 `clientMsgId` 或消息ID生成唯一key，避免重复显示
+
+3. **乐观更新**: 发送消息后立即显示，后端返回后更新状态
+
+4. **降级策略**: WebSocket 断开时自动使用 REST API 发送消息
+
+5. **缓存机制**: 消息列表缓存到 localStorage，每次会话保留最近100条
+
+## 最近修复记录
+
+### 2025-01-13
+- 修复 `store/modules/im.js` 中 `sendMessage` action 使用未定义的 `state.ws` 的问题
+- 改为使用导入的 `imWebSocket` 单例实例
+- 前端构建测试通过 (无错误)
+
+## TODO (待完善功能)
+
+- [ ] 视频通话功能 (WebRTC)
+- [ ] 语音通话功能
+- [ ] 消息加密端到端
+- [ ] 群组@所有人功能完善
+- [ ] 消息搜索功能
+- [ ] 文件预览功能增强
