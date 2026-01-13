@@ -117,16 +117,14 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="profile">
-                <SmartAvatar
-                  :name="currentUser?.name"
-                  :avatar="currentUser?.avatar"
-                  :size="24"
-                  :show-border="false"
-                  class="dropdown-avatar"
-                />
-                <div class="user-info-item">
-                  <span class="user-name">{{ currentUser?.name || '用户' }}</span>
-                  <span class="user-id">ID: {{ currentUser?.userId }}</span>
+                <div class="profile-item">
+                  <el-avatar :size="36" :src="currentUser?.avatar" class="dropdown-avatar">
+                    {{ currentUser?.name?.charAt(0) || 'U' }}
+                  </el-avatar>
+                  <div class="user-info-item">
+                    <span class="user-name">{{ currentUser?.name || '用户' }}</span>
+                    <span class="user-id">ID: {{ currentUser?.userId }}</span>
+                  </div>
                 </div>
               </el-dropdown-item>
               <el-dropdown-item divided command="status">
@@ -3985,14 +3983,10 @@ const selectSession = async session => {
   await store.dispatch('im/switchSession', session)
   // 标记会话为已读（使用新接口）
   if (session.id) {
-    // 获取会话中最后一条消息的ID作为已读标记
-    const messages = messageList.value[session.id] || []
-    const lastMessage = messages[messages.length - 1]
-    const lastReadMessageId = lastMessage?.id || 0
-    
+    // 简化：直接传递0，表示已读所有消息
     markMessageRead({
       conversationId: session.id,
-      lastReadMessageId: lastReadMessageId
+      lastReadMessageId: 0
     }).catch(err => {
       console.warn('标记已读失败:', err)
     })
@@ -6596,6 +6590,13 @@ $avatar-xl: 64px;
         margin-top: 2px;
       }
     }
+  }
+
+  // 下拉菜单中用户信息行的样式
+  .profile-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   // 状态选择器样式
