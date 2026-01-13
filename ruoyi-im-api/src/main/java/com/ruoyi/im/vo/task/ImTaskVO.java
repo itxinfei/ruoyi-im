@@ -46,6 +46,9 @@ public class ImTaskVO implements Serializable {
     @Schema(description = "任务类型（PERSONAL个人 TEAM团队 PROJECT项目）")
     private String taskType;
 
+    @Schema(description = "任务类型显示名称")
+    private String taskTypeDisplay;
+
     @Schema(description = "开始日期")
     private LocalDate startDate;
 

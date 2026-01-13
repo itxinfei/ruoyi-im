@@ -125,6 +125,9 @@ public class ImAnnouncementDetailVO implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
+    @Schema(description = "是否已过期")
+    private Boolean isExpired;
+
     /**
      * 公告附件
      */

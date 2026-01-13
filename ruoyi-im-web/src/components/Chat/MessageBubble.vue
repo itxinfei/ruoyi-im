@@ -17,11 +17,12 @@
       </div>
 
       <!-- 头像 -->
-      <div class="message-avatar">
+      <div class="message-avatar" :class="{ online: isOnline, away: isAway }">
         <img
           :src="message.senderAvatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'"
           :alt="message.senderName"
           class="avatar-image"
+          @error="handleAvatarError"
         />
       </div>
 
@@ -367,6 +368,20 @@ export default {
       const msgTime = new Date(this.message.timestamp || this.message.createTime).getTime()
       return Date.now() - msgTime < RECALL_TIME_LIMIT
     },
+    // 在线状态判断
+    isOnline() {
+      // 检查发送者的在线状态
+      if (this.message.onlineStatus === 'online') return true
+      if (this.message.onlineStatus === 'ONLINE') return true
+      if (this.message.senderOnline === true) return true
+      return false
+    },
+    // 离开状态判断
+    isAway() {
+      if (this.message.onlineStatus === 'away') return true
+      if (this.message.onlineStatus === 'AWAY') return true
+      return false
+    },
   },
   mounted() {
     // 点击其他地方关闭右键菜单
@@ -601,6 +616,11 @@ export default {
         })
       }
     },
+    // 头像加载失败处理
+    handleAvatarError(event) {
+      // 使用默认头像
+      event.target.src = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+    },
   },
 }
 </script>
@@ -623,10 +643,36 @@ export default {
     border-radius: 50%;
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid #fff;
+    position: relative;
+
+    // 头像在线状态指示器
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      background-color: #ccc;
+    }
+
+    // 在线状态
+    &.online::after {
+      background-color: #52c41a;
+    }
+
+    // 离开状态
+    &.away::after {
+      background-color: #faad14;
+    }
 
     &:hover {
       transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .avatar-image {
@@ -634,6 +680,7 @@ export default {
       height: 100%;
       border-radius: 50%;
       object-fit: cover;
+      background-color: #f0f0f0;
     }
   }
 

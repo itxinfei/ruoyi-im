@@ -477,10 +477,64 @@ ruoyi-im-web/src/
 
 ## 最近修复记录
 
-### 2025-01-13
-- 修复 `store/modules/im.js` 中 `sendMessage` action 使用未定义的 `state.ws` 的问题
-- 改为使用导入的 `imWebSocket` 单例实例
-- 前端构建测试通过 (无错误)
+### 2025-01-13 - 架构级性能优化与问题修复
+
+#### 1. 登录性能优化 ⚡
+**问题**: 登录后一次性加载所有数据（会话列表、好友列表、组织架构等），导致页面长时间卡顿
+
+**解决方案**: 实现渐进式加载策略（三阶段加载）
+```
+第一阶段（立即）: WebSocket连接 + 最近会话（20条）
+第二阶段（100ms后）: 完整会话列表 + 好友列表
+第三阶段（500ms后）: 好友请求 + 组织架构 + 离线消息
+```
+
+**修改文件**:
+- `ruoyi-im-web/src/views/im/ImChatLayoutOptimized.vue` - 渐进式初始化逻辑
+- 新增 `loadRecentSessionsOnly()` 快速加载方法
+
+#### 2. WebSocket认证修复 🔧
+**问题**: 李四账号发送消息时报错"发送者不存在"
+
+**根因**: WebSocket连接时无法获取正确的userId，使用了默认值1L
+
+**解决方案**:
+- 移除默认userId逻辑，改用未认证状态标记(-1)
+- 增加用户存在性验证
+- 修复handleAuthMessage方法的userId更新逻辑
+- 修复onClose和onError处理未认证会话
+
+**修改文件**: `ruoyi-im-api/src/main/java/com/ruoyi/im/websocket/ImWebSocketEndpoint.java`
+
+#### 3. 好友关系查询性能优化 🚀
+**问题**: N+1查询问题，每个好友单独查询用户信息（100个好友=100次查询）
+
+**解决方案**: 实现批量查询
+- 新增 `batchGetUsers()` 方法
+- 优先使用批量查询，回退到逐个查询
+- 优化 `getFriendList()` 和 `getGroupedFriendList()`
+
+**修改文件**: `ruoyi-im-api/src/main/java/com/ruoyi/im/service/impl/ImFriendServiceImpl.java`
+
+#### 4. Vuex Store修复
+**问题**: sendMessage action使用未定义的state.ws
+
+**解决方案**: 使用导入的imWebSocket单例实例
+
+**修改文件**: `ruoyi-im-web/src/store/modules/im.js`
+
+### 项目当前状态
+
+**后端 (ruoyi-im-api)**
+- 40+ REST API 控制器完整实现
+- WebSocket 端点: `/ws/im`
+- 支持消息、联系人、群组、文件、DING、审批、考勤、日程等
+
+**前端 (ruoyi-im-web)**
+- 40+ 视图组件完整
+- WebSocket 自动重连、心跳检测
+- 钉钉风格UI界面
+- 构建成功，无错误
 
 ## TODO (待完善功能)
 

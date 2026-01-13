@@ -44,7 +44,7 @@ public class ImMeetingRoom implements Serializable {
     private String location;
 
     @TableField("floor")
-    @Schema(description =楼层")
+    @Schema(description ="楼层")
     private Integer floor;
 
     @TableField("capacity")

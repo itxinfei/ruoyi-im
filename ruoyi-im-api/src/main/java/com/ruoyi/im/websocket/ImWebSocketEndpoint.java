@@ -216,19 +216,15 @@ public class ImWebSocketEndpoint {
                 }
             }
 
-            // 如果仍然无法获取userId，使用默认用户ID（仅开发环境）
+            // 如果仍然无法获取userId，连接暂时挂起，等待客户端发送认证消息
+            // 这种情况下，不立即关闭连接，允许客户端通过auth消息进行认证
             if (userId == null) {
-                if (!staticSecurityEnabled) {
-                    userId = staticDevUserId;
-                    if (userId == null) {
-                        userId = 1L;
-                    }
-                    log.warn("无法获取用户ID，使用默认用户ID: userId={}", userId);
-                } else {
-                    log.warn("WebSocket 连接失败: 无法获取用户ID且安全验证已启用");
-                    session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "缺少有效的认证信息"));
-                    return;
-                }
+                log.warn("WebSocket连接时无法获取用户ID，等待客户端发送认证消息: sessionId={}", session.getId());
+                // 将session标记为未认证状态，使用特殊标记
+                sessionUserMap.put(session, -1L); // -1 表示未认证
+                // 发送需要认证的消息
+                sendMessage(session, buildStatusMessage("auth_required", null, "请发送认证消息"));
+                return;
             }
 
             // 使用同步块确保连接更新的原子性，防止竞态条件
@@ -291,6 +287,21 @@ public class ImWebSocketEndpoint {
             Long userId = sessionUserMap.get(session);
             if (userId == null) {
                 log.warn("收到消息但用户未认证: sessionId={}", session.getId());
+                sendMessage(session, buildStatusMessage("error", null, "请先认证"));
+                return;
+            }
+
+            // 检查是否为未认证状态（-1表示未认证）
+            if (userId == -1L) {
+                // 只允许认证消息通过
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> messageMap = mapper.readValue(message, new TypeReference<Map<String, Object>>() {});
+                String type = (String) messageMap.get("type");
+                if ("auth".equals(type)) {
+                    handleAuthMessage(session, messageMap);
+                } else {
+                    sendMessage(session, buildStatusMessage("error", null, "请先认证"));
+                }
                 return;
             }
 
@@ -304,7 +315,7 @@ public class ImWebSocketEndpoint {
 
             switch (type) {
                 case "auth":
-                    // 处理认证消息
+                    // 处理认证消息（允许重新认证）
                     handleAuthMessage(session, messageMap);
                     break;
                 case "message":
@@ -345,7 +356,7 @@ public class ImWebSocketEndpoint {
             // 使用同步块确保原子性操作
             synchronized (onlineUsers) {
                 userId = sessionUserMap.remove(session);
-                if (userId != null) {
+                if (userId != null && userId != -1L) { // -1 表示未认证，不需要处理在线状态
                     // 检查当前session是否是该用户的活跃连接
                     Session currentSession = onlineUsers.get(userId);
                     // 只有当关闭的session是当前活跃连接时才清理
@@ -359,7 +370,7 @@ public class ImWebSocketEndpoint {
                 }
             }
 
-            if (userId != null) {
+            if (userId != null && userId != -1L) { // -1 表示未认证，不需要广播离线消息
                 // 同步更新Redis中的在线状态
                 if (staticImRedisUtil != null) {
                     staticImRedisUtil.removeOnlineUser(userId);
@@ -369,6 +380,8 @@ public class ImWebSocketEndpoint {
 
                 // 广播用户离线消息
                 broadcastOnlineStatus(userId, false);
+            } else if (userId != null && userId == -1L) {
+                log.info("未认证会话关闭: sessionId={}", session.getId());
             }
         } catch (Exception e) {
             log.error("处理 WebSocket 关闭异常", e);
@@ -387,7 +400,8 @@ public class ImWebSocketEndpoint {
         log.error("WebSocket 异常: sessionId={}", session.getId(), error);
         try {
             Long userId = sessionUserMap.remove(session);
-            if (userId != null) {
+            // 只有当userId不是-1（未认证标记）时，才从onlineUsers中移除
+            if (userId != null && userId != -1L) {
                 onlineUsers.remove(userId);
             }
             session.close();
@@ -513,6 +527,7 @@ public class ImWebSocketEndpoint {
         try {
             String token = (String) messageData.get("token");
             Long userId = null;
+            boolean isNewLogin = false; // 标记是否是新登录（从未认证到认证）
 
             // 优先从消息payload中直接获取userId（前端发送的userId）
             Object userIdObj = messageData.get("userId");
@@ -550,25 +565,56 @@ public class ImWebSocketEndpoint {
                 }
             }
 
-            // 如果仍然无法获取userId，使用默认用户ID（仅开发环境）
-            if (userId == null && !staticSecurityEnabled) {
-                userId = staticDevUserId;
-                if (userId == null) {
-                    userId = 1L;
+            // 验证userId对应的用户是否存在
+            if (userId != null && staticImUserMapper != null) {
+                try {
+                    com.ruoyi.im.domain.ImUser user = staticImUserMapper.selectImUserById(userId);
+                    if (user == null) {
+                        log.error("认证失败：用户不存在，userId={}", userId);
+                        userId = null;
+                    } else {
+                        log.info("用户验证通过: userId={}, username={}", userId, user.getUsername());
+                    }
+                } catch (Exception e) {
+                    log.error("验证用户存在性失败: userId={}", userId, e);
                 }
-                log.warn("无法获取用户ID，使用默认用户ID: userId={}", userId);
             }
 
             if (userId != null) {
                 // 更新会话中的用户映射
                 Long oldUserId = sessionUserMap.get(session);
-                if (oldUserId != null && !oldUserId.equals(userId)) {
+
+                // 检查是否是新登录（从-1未认证状态到认证状态）
+                if (oldUserId != null && oldUserId == -1L) {
+                    isNewLogin = true;
+                    // 移除未认证标记
+                    sessionUserMap.remove(session);
+                } else if (oldUserId != null && !oldUserId.equals(userId)) {
                     // 如果当前会话绑定了其他用户ID，移除旧映射
                     onlineUsers.remove(oldUserId);
                 }
 
-                sessionUserMap.put(session, userId);
-                onlineUsers.put(userId, session);
+                // 使用同步块确保连接更新的原子性，防止竞态条件
+                synchronized (onlineUsers) {
+                    // 检查用户是否已存在在线连接，如果存在则关闭旧连接
+                    Session oldSession = onlineUsers.get(userId);
+                    if (oldSession != null && oldSession.isOpen() && !oldSession.getId().equals(session.getId())) {
+                        log.info("用户已存在连接，关闭旧连接: userId={}, oldSessionId={}, newSessionId={}",
+                                 userId, oldSession.getId(), session.getId());
+                        try {
+                            // 从sessionUserMap中删除旧会话
+                            sessionUserMap.remove(oldSession);
+                            onlineUsers.remove(userId);
+                            oldSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "新连接建立"));
+                        } catch (IOException e) {
+                            log.error("关闭旧连接异常: userId={}", userId, e);
+                        }
+                    }
+
+                    // 保存用户会话
+                    sessionUserMap.put(session, userId);
+                    onlineUsers.put(userId, session);
+                }
 
                 // 同步更新Redis中的在线状态
                 if (staticImRedisUtil != null) {
@@ -583,22 +629,28 @@ public class ImWebSocketEndpoint {
                 response.put("message", "认证成功");
 
                 sendMessage(session, response);
-                
+
                 log.info("用户认证成功: userId={}, sessionId={}", userId, session.getId());
+
+                // 如果是新登录（从未认证到认证），广播用户上线消息并推送离线消息
+                if (isNewLogin) {
+                    broadcastOnlineStatus(userId, true);
+                    pushOfflineMessages(userId);
+                }
             } else {
                 // 发送认证失败消息
                 Map<String, Object> response = new HashMap<>();
                 response.put("type", "auth_response");
                 response.put("success", false);
-                response.put("message", "认证失败");
+                response.put("message", "认证失败：无法获取有效的用户ID");
 
                 sendMessage(session, response);
-                
-                log.warn("用户认证失败: sessionId={}", session.getId());
+
+                log.warn("用户认证失败: sessionId={}, 无法获取有效用户ID", session.getId());
             }
         } catch (Exception e) {
             log.error("处理认证消息异常", e);
-            
+
             // 发送认证失败消息
             try {
                 Map<String, Object> response = new HashMap<>();

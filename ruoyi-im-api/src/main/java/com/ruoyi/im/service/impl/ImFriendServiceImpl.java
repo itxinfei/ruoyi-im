@@ -199,31 +199,76 @@ public class ImFriendServiceImpl implements ImFriendService {
             }
         }
 
+        // 批量查询好友用户信息，避免N+1查询问题
         List<ImFriendVO> voList = new ArrayList<>();
-        for (ImFriend friend : uniqueFriendMap.values()) {
-            ImFriendVO vo = new ImFriendVO();
-            BeanUtils.copyProperties(friend, vo);
+        if (!uniqueFriendMap.isEmpty()) {
+            // 获取所有好友ID
+            List<Long> friendIds = new ArrayList<>(uniqueFriendMap.keySet());
+            // 批量查询用户信息（需要在ImUserMapper中添加selectImUserByIds方法）
+            Map<Long, ImUser> userMap = batchGetUsers(friendIds);
 
-            // 设置在线状态，这里暂时设置为false，实际在线状态需要从WebSocket连接中获取
-            vo.setOnline(false);
+            for (ImFriend friend : uniqueFriendMap.values()) {
+                ImFriendVO vo = new ImFriendVO();
+                BeanUtils.copyProperties(friend, vo);
 
-            // 查询好友用户信息
-            ImUser friendUser = imUserMapper.selectImUserById(friend.getFriendId());
-            if (friendUser != null) {
-                vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
-                vo.setFriendAvatar(friendUser.getAvatar());
-                vo.setUsername(friendUser.getUsername());
-                vo.setEmail(friendUser.getEmail());
-                vo.setPhone(friendUser.getMobile());
-                vo.setSignature(friendUser.getSignature());
+                // 从批量查询结果中获取用户信息
+                ImUser friendUser = userMap.get(friend.getFriendId());
+                if (friendUser != null) {
+                    vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
+                    vo.setFriendAvatar(friendUser.getAvatar());
+                    vo.setUsername(friendUser.getUsername());
+                    vo.setEmail(friendUser.getEmail());
+                    vo.setPhone(friendUser.getMobile());
+                    vo.setSignature(friendUser.getSignature());
 
-                // 如果用户状态是ACTIVE，可以认为是在线的（这只是一个简化判断）
-                vo.setOnline("ACTIVE".equals(friendUser.getStatus()));
+                    // 如果用户状态是ACTIVE，可以认为是在线的（这只是一个简化判断）
+                    vo.setOnline("ACTIVE".equals(friendUser.getStatus()));
+                } else {
+                    vo.setOnline(false);
+                }
+                voList.add(vo);
             }
-            voList.add(vo);
         }
 
         return voList;
+    }
+
+    /**
+     * 批量获取用户信息，避免N+1查询问题
+     * @param userIds 用户ID列表
+     * @return 用户ID -> 用户信息的映射
+     */
+    private Map<Long, ImUser> batchGetUsers(List<Long> userIds) {
+        Map<Long, ImUser> userMap = new HashMap<>();
+        if (userIds == null || userIds.isEmpty()) {
+            return userMap;
+        }
+
+        // 尝试使用批量查询方法（如果ImUserMapper支持）
+        try {
+            // 检查是否有selectImUserByIds方法
+            java.lang.reflect.Method method = imUserMapper.getClass()
+                    .getMethod("selectImUserByIds", List.class);
+            @SuppressWarnings("unchecked")
+            List<ImUser> users = (List<ImUser>) method.invoke(imUserMapper, userIds);
+            if (users != null) {
+                for (ImUser user : users) {
+                    userMap.put(user.getId(), user);
+                }
+            }
+            log.debug("批量查询用户信息: 使用selectImUserByIds方法，查询{}个用户", userIds.size());
+        } catch (Exception e) {
+            // 如果批量查询方法不存在，回退到逐个查询
+            log.warn("批量查询方法不存在，使用逐个查询: {}", e.getMessage());
+            for (Long userId : userIds) {
+                ImUser user = imUserMapper.selectImUserById(userId);
+                if (user != null) {
+                    userMap.put(userId, user);
+                }
+            }
+        }
+
+        return userMap;
     }
 
     @Override
@@ -381,6 +426,13 @@ public class ImFriendServiceImpl implements ImFriendService {
             }
         }
 
+        // 批量查询好友用户信息，避免N+1查询问题
+        Map<Long, ImUser> userMap = new HashMap<>();
+        if (!uniqueFriendMap.isEmpty()) {
+            List<Long> friendIds = new ArrayList<>(uniqueFriendMap.keySet());
+            userMap = batchGetUsers(friendIds);
+        }
+
         // 按分组组织去重后的好友
         Map<String, List<ImFriendVO>> groupMap = new HashMap<>();
         for (ImFriend friend : uniqueFriendMap.values()) {
@@ -394,8 +446,8 @@ public class ImFriendServiceImpl implements ImFriendService {
             ImFriendVO vo = new ImFriendVO();
             BeanUtils.copyProperties(friend, vo);
 
-            // 查询好友用户信息
-            ImUser friendUser = imUserMapper.selectImUserById(friend.getFriendId());
+            // 从批量查询结果中获取用户信息
+            ImUser friendUser = userMap.get(friend.getFriendId());
             if (friendUser != null) {
                 vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
                 vo.setFriendAvatar(friendUser.getAvatar());

@@ -1,6 +1,6 @@
 package com.ruoyi.im.service.impl;
 
-import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 公告管理服务实现
@@ -267,24 +268,24 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         Map<String, Object> stats = new HashMap<>();
 
         // 总发布数
-        int totalPublished = announcementMapper.countByPublisherId(userId);
-        stats.put("totalPublished", totalPublished);
+        Long totalPublished = announcementMapper.countByPublisherId(userId);
+        stats.put("totalPublished", totalPublished != null ? totalPublished : 0);
 
         // 草稿数
-        int draftCount = announcementMapper.selectCount(
+        Long draftCount = announcementMapper.selectCount(
                 new LambdaQueryWrapper<ImAnnouncement>()
                         .eq(ImAnnouncement::getPublisherId, userId)
                         .eq(ImAnnouncement::getStatus, "DRAFT")
         );
-        stats.put("draftCount", draftCount);
+        stats.put("draftCount", draftCount != null ? draftCount : 0);
 
         // 已发布数
-        int publishedCount = announcementMapper.selectCount(
+        Long publishedCount = announcementMapper.selectCount(
                 new LambdaQueryWrapper<ImAnnouncement>()
                         .eq(ImAnnouncement::getPublisherId, userId)
                         .eq(ImAnnouncement::getStatus, "PUBLISHED")
         );
-        stats.put("publishedCount", publishedCount);
+        stats.put("publishedCount", publishedCount != null ? publishedCount : 0);
 
         return stats;
     }

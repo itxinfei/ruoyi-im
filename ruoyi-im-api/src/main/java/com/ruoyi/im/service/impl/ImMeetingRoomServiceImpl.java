@@ -1,6 +1,6 @@
 package com.ruoyi.im.service.impl;
 
-import.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -166,13 +166,13 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         }
 
         // 检查是否有未完成的预订
-        int bookingCount = bookingMapper.selectCount(
+        Long bookingCount = bookingMapper.selectCount(
                 new LambdaQueryWrapper<ImMeetingBooking>()
                         .eq(ImMeetingBooking::getRoomId, roomId)
                         .in(ImMeetingBooking::getStatus, Arrays.asList("PENDING", "CONFIRMED"))
                         .gt(ImMeetingBooking::getEndTime, LocalDateTime.now())
         );
-        if (bookingCount > 0) {
+        if (bookingCount != null && bookingCount > 0) {
             throw new BusinessException("会议室存在未完成的预订，无法删除");
         }
 

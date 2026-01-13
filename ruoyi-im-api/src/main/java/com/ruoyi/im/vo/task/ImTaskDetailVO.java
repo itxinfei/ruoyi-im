@@ -80,6 +80,15 @@ public class ImTaskDetailVO implements Serializable {
     @Schema(description = "是否有子任务")
     private Boolean hasSubtask;
 
+    @Schema(description = "子任务数量")
+    private Integer subtaskCount;
+
+    @Schema(description = "已完成子任务数量")
+    private Integer completedSubtaskCount;
+
+    @Schema(description = "附件数量")
+    private Integer attachmentCount;
+
     @Schema(description = "子任务列表")
     private List<ImTaskVO> subtasks;
 

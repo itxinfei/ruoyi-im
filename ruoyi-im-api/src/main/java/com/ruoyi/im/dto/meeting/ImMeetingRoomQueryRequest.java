@@ -1,6 +1,6 @@
 package com.ruoyi.im.dto.meeting;
 
-import com.ruoyi.im.dto.PageRequest;
+import com.ruoyi.im.common.PageRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

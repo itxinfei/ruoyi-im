@@ -39,38 +39,126 @@
           <el-button :icon="Plus" text class="header-action-btn" @click="showStartChatDialog" />
         </el-tooltip>
 
-        <!-- 帮助 -->
-        <el-tooltip content="帮助" placement="bottom">
-          <el-button :icon="QuestionFilled" text class="header-action-btn" />
-        </el-tooltip>
-
         <!-- 设置 -->
-        <el-tooltip content="设置" placement="bottom">
-          <el-button :icon="Setting" text class="header-action-btn" @click="showSettings" />
-        </el-tooltip>
+        <el-dropdown trigger="click" placement="bottom-end" @command="handleSettingsCommand">
+          <el-tooltip content="设置" placement="bottom">
+            <el-button :icon="Setting" text class="header-action-btn" />
+          </el-tooltip>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="theme">
+                <el-icon><Sunny /></el-icon>
+                主题切换
+                <span class="item-shortcut">⌘T</span>
+              </el-dropdown-item>
+              <el-dropdown-item command="notifications">
+                <el-icon><Bell /></el-icon>
+                消息通知设置
+              </el-dropdown-item>
+              <el-dropdown-item command="privacy">
+                <el-icon><Lock /></el-icon>
+                隐私与安全
+              </el-dropdown-item>
+              <el-dropdown-item divided command="shortcuts">
+                <el-icon><Key /></el-icon>
+                快捷键设置
+              </el-dropdown-item>
+              <el-dropdown-item command="about">
+                <el-icon><InfoFilled /></el-icon>
+                关于系统
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+
+        <!-- 帮助 -->
+        <el-dropdown trigger="click" placement="bottom-end" @command="handleHelpCommand">
+          <el-tooltip content="帮助" placement="bottom">
+            <el-button :icon="QuestionFilled" text class="header-action-btn" />
+          </el-tooltip>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="help">
+                <el-icon><QuestionFilled /></el-icon>
+                使用帮助
+              </el-dropdown-item>
+              <el-dropdown-item command="shortcuts">
+                <el-icon><Key /></el-icon>
+                快捷键指南
+              </el-dropdown-item>
+              <el-dropdown-item command="feedback">
+                <el-icon><Message /></el-icon>
+                反馈建议
+              </el-dropdown-item>
+              <el-dropdown-item command="update">
+                <el-icon><Refresh /></el-icon>
+                检查更新
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
 
         <!-- 用户下拉 -->
         <el-dropdown trigger="click" placement="bottom-end" @command="handleUserCommand">
           <div class="header-user">
-            <el-avatar :size="32" :src="currentUser?.avatar">
+            <el-avatar :size="32" :src="currentUser?.avatar" class="user-avatar">
               {{ currentUser?.name?.charAt(0) || 'U' }}
             </el-avatar>
+            <div class="user-status-indicator" :class="currentOnlineStatus"></div>
             <span class="header-username">{{ currentUser?.name || '用户' }}</span>
             <el-icon class="dropdown-arrow"><ArrowDown /></el-icon>
           </div>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="profile">
-                <el-icon><User /></el-icon>
-                个人资料
-              </el-dropdown-item>
-              <el-dropdown-item command="settings">
-                <el-icon><Setting /></el-icon>
-                系统设置
+                <el-avatar :size="24" :src="currentUser?.avatar" class="dropdown-avatar">
+                  {{ currentUser?.name?.charAt(0) || 'U' }}
+                </el-avatar>
+                <div class="user-info-item">
+                  <span class="user-name">{{ currentUser?.name || '用户' }}</span>
+                  <span class="user-id">ID: {{ currentUser?.userId }}</span>
+                </div>
               </el-dropdown-item>
               <el-dropdown-item divided command="status">
                 <el-icon><CircleCheck /></el-icon>
                 在线状态
+                <div class="status-selector">
+                  <el-tooltip content="在线" placement="top">
+                    <el-button
+                      :type="currentOnlineStatus === 'online' ? 'primary' : ''"
+                      :icon="CircleCheck"
+                      circle
+                      size="small"
+                      @click.stop="setOnlineStatus('online')"
+                    />
+                  </el-tooltip>
+                  <el-tooltip content="忙碌" placement="top">
+                    <el-button
+                      :type="currentOnlineStatus === 'busy' ? 'danger' : ''"
+                      :icon="Minus"
+                      circle
+                      size="small"
+                      @click.stop="setOnlineStatus('busy')"
+                    />
+                  </el-tooltip>
+                  <el-tooltip content="离线" placement="top">
+                    <el-button
+                      :type="currentOnlineStatus === 'offline' ? 'info' : ''"
+                      :icon="CircleClose"
+                      circle
+                      size="small"
+                      @click.stop="setOnlineStatus('offline')"
+                    />
+                  </el-tooltip>
+                </div>
+              </el-dropdown-item>
+              <el-dropdown-item command="settings">
+                <el-icon><Setting /></el-icon>
+                个人设置
+              </el-dropdown-item>
+              <el-dropdown-item command="theme">
+                <el-icon><Sunny /></el-icon>
+                主题设置
               </el-dropdown-item>
               <el-dropdown-item divided command="logout">
                 <el-icon><SwitchButton /></el-icon>
@@ -1709,6 +1797,133 @@
       </template>
     </el-dialog>
 
+    <!-- 快捷键提示对话框 -->
+    <el-dialog v-model="shortcutsDialogVisible" title="快捷键指南" width="500px" :append-to-body="true">
+      <div class="shortcuts-dialog">
+        <div class="shortcut-section">
+          <div class="section-title">消息操作</div>
+          <div class="shortcut-item">
+            <span class="keys"><kbd>Enter</kbd></span>
+            <span class="desc">发送消息</span>
+          </div>
+          <div class="shortcut-item">
+            <span class="keys"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span>
+            <span class="desc">换行</span>
+          </div>
+          <div class="shortcut-item">
+            <span class="keys"><kbd>Ctrl</kbd> + <kbd>K</kbd></span>
+            <span class="desc">全局搜索</span>
+          </div>
+          <div class="shortcut-item">
+            <span class="keys"><kbd>Ctrl</kbd> + <kbd>S</kbd></span>
+            <span class="desc">保存草稿</span>
+          </div>
+        </div>
+        <div class="shortcut-section">
+          <div class="section-title">导航操作</div>
+          <div class="shortcut-item">
+            <span class="keys"><kbd>Ctrl</kbd> + <kbd>1</kbd> ~ <kbd>8</kbd></span>
+            <span class="desc">切换模块</span>
+          </div>
+          <div class="shortcut-item">
+            <span class="keys"><kbd>Ctrl</kbd> + <kbd>Tab</kbd></span>
+            <span class="desc">下一个会话</span>
+          </div>
+          <div class="shortcut-item">
+            <span class="keys"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Tab</kbd></span>
+            <span class="desc">上一个会话</span>
+          </div>
+        </div>
+        <div class="shortcut-section">
+          <div class="section-title">聊天操作</div>
+          <div class="shortcut-item">
+            <span class="keys"><kbd>@</kbd></span>
+            <span class="desc">提及成员</span>
+          </div>
+          <div class="shortcut-item">
+            <span class="keys"><kbd>:</kbd></span>
+            <span class="desc">输入表情</span>
+          </div>
+          <div class="shortcut-item">
+            <span class="keys"><kbd>Esc</kbd></span>
+            <span class="desc">关闭弹窗</span>
+          </div>
+          <div class="shortcut-item">
+            <span class="keys"><kbd>↑</kbd> / <kbd>↓</kbd></span>
+            <span class="desc">选择建议</span>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <el-button type="primary" @click="shortcutsDialogVisible = false">我知道了</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 消息通知设置对话框 -->
+    <el-dialog v-model="notificationSettingsVisible" title="消息通知设置" width="500px" :append-to-body="true">
+      <div class="notification-settings">
+        <div class="setting-group">
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-label">新消息声音</div>
+              <div class="setting-desc">收到消息时播放提示音</div>
+            </div>
+            <el-switch v-model="notificationSettings.sound" />
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-label">桌面通知</div>
+              <div class="setting-desc">在桌面显示消息通知</div>
+            </div>
+            <el-switch v-model="notificationSettings.desktop" />
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-label">消息已读回执</div>
+              <div class="setting-desc">自动发送已读回执</div>
+            </div>
+            <el-switch v-model="notificationSettings.readReceipt" />
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-label">群消息@提醒</div>
+              <div class="setting-desc">仅在@我时通知</div>
+            </div>
+            <el-switch v-model="notificationSettings.mentionOnly" />
+          </div>
+        </div>
+        <div class="setting-group">
+          <div class="group-title">免打扰时段</div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-label">开启免打扰</div>
+              <div class="setting-desc">在指定时段内不收到通知</div>
+            </div>
+            <el-switch v-model="notificationSettings.dndEnabled" />
+          </div>
+          <div v-if="notificationSettings.dndEnabled" class="dnd-time-settings">
+            <el-time-picker
+              v-model="notificationSettings.dndStart"
+              placeholder="开始时间"
+              format="HH:mm"
+              value-format="HH:mm"
+            />
+            <span class="time-separator">至</span>
+            <el-time-picker
+              v-model="notificationSettings.dndEnd"
+              placeholder="结束时间"
+              format="HH:mm"
+              value-format="HH:mm"
+            />
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="notificationSettingsVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveNotificationSettings">保存</el-button>
+      </template>
+    </el-dialog>
+
     <!-- 文件分享对话框 -->
     <el-dialog v-model="shareFileDialogVisible" title="分享文件" width="500px">
       <div v-if="sharingFile" class="share-file-dialog">
@@ -1947,6 +2162,8 @@ import {
   Tickets,
   Star,
   DeleteFilled,
+  Key,
+  Minus,
 } from '@element-plus/icons-vue'
 import { formatTime as formatTimeUtil } from '@/utils/format/time'
 import { useImWebSocket } from '@/composables/useImWebSocket'
@@ -1994,6 +2211,7 @@ const notificationCount = ref(0)
 
 // 在线状态
 const isUserOnline = ref(true)
+const currentOnlineStatus = ref(localStorage.getItem('onlineStatus') || 'online') // online, busy, offline
 
 // 消息区域引用
 const messageAreaRef = ref(null)
@@ -4343,7 +4561,6 @@ const profileForm = ref({
 
 // 在线状态对话框
 const onlineStatusDialogVisible = ref(false)
-const currentOnlineStatus = ref(localStorage.getItem('onlineStatus') || 'online')
 
 // 在线状态选项
 const onlineStatusOptions = [
@@ -5020,22 +5237,27 @@ const handleUserCommand = async command => {
     }
     profileDialogVisible.value = true
   } else if (command === 'settings') {
-    // 打开系统设置对话框
+    // 打开个人设置对话框
     systemSettingsVisible.value = true
   } else if (command === 'status') {
-    // 显示在线状态选择对话框
-    showOnlineStatusDialog()
+    // 显示在线状态选择 - 现在在下拉菜单中直接选择
   } else if (command === 'theme') {
     // 显示主题切换对话框
     showThemeDialog()
-  } else if (command === 'help') {
-    // 打开帮助与反馈页面
-    ElMessageBox.alert('如需帮助，请联系系统管理员或查看用户手册', '帮助与反馈', {
-      confirmButtonText: '我知道了',
-      type: 'info',
-    })
+  }
+}
+
+// 设置下拉菜单处理
+const handleSettingsCommand = command => {
+  if (command === 'theme') {
+    showThemeDialog()
+  } else if (command === 'notifications') {
+    notificationSettingsVisible.value = true
+  } else if (command === 'privacy') {
+    ElMessage.info('隐私与安全设置功能开发中...')
+  } else if (command === 'shortcuts') {
+    showShortcutsDialog()
   } else if (command === 'about') {
-    // 显示关于信息
     ElMessageBox.alert(
       '企业级即时通讯与协同办公系统 v1.0\n\n基于若依框架构建\n支持私有化部署',
       '关于',
@@ -5046,6 +5268,77 @@ const handleUserCommand = async command => {
     )
   }
 }
+
+// 帮助下拉菜单处理
+const handleHelpCommand = command => {
+  if (command === 'help') {
+    ElMessageBox.alert(
+      '1. 发送消息：在输入框中输入内容，按Enter发送\n2. 快捷键：支持Ctrl+Enter换行，Ctrl+K搜索\n3. 表情：点击表情图标选择表情\n4. 文件：点击文件图标发送文件\n5. 截图：支持粘贴截图发送',
+      '使用帮助',
+      {
+        confirmButtonText: '我知道了',
+        type: 'info',
+      }
+    )
+  } else if (command === 'shortcuts') {
+    showShortcutsDialog()
+  } else if (command === 'feedback') {
+    ElMessage.info('反馈建议功能开发中...')
+  } else if (command === 'update') {
+    ElMessage.info('当前已是最新版本')
+  }
+}
+
+// 设置在线状态
+const setOnlineStatus = status => {
+  currentOnlineStatus.value = status
+  isUserOnline.value = status === 'online'
+  localStorage.setItem('onlineStatus', status)
+  // 同步到服务器
+  wsSendStatusChange?.(status)
+  const statusText = { online: '在线', busy: '忙碌', offline: '离线' }
+  ElMessage.success(`已切换为：${statusText[status]}`)
+}
+
+// 快捷键对话框
+const shortcutsDialogVisible = ref(false)
+const showShortcutsDialog = () => {
+  shortcutsDialogVisible.value = true
+}
+
+// 通知设置对话框
+const notificationSettingsVisible = ref(false)
+
+// 通知设置状态
+const notificationSettings = ref({
+  sound: true,
+  desktop: true,
+  readReceipt: true,
+  mentionOnly: false,
+  dndEnabled: false,
+  dndStart: '22:00',
+  dndEnd: '08:00',
+})
+
+// 保存通知设置
+const saveNotificationSettings = () => {
+  localStorage.setItem('notificationSettings', JSON.stringify(notificationSettings.value))
+  ElMessage.success('通知设置已保存')
+  notificationSettingsVisible.value = false
+}
+
+// 初始化通知设置
+onMounted(() => {
+  const saved = localStorage.getItem('notificationSettings')
+  if (saved) {
+    try {
+      notificationSettings.value = JSON.parse(saved)
+    } catch {
+      // 解析失败使用默认值
+    }
+  }
+})
+
 
 // 顶部导航栏方法
 const showNotifications = () => {
@@ -5129,8 +5422,10 @@ const exitGroup = async () => {
   }
 }
 
-// 初始化
+// 初始化 - 优化为渐进式加载，提升登录体验
 const init = async () => {
+  console.log('[IM初始化] 开始初始化，采用渐进式加载策略')
+
   // 读取折叠状态
   const savedCollapsed = localStorage.getItem('navCollapsed')
   if (savedCollapsed !== null) {
@@ -5147,30 +5442,116 @@ const init = async () => {
     activeModule.value = moduleFromPath
   }
 
-  // 连接 WebSocket
+  // ========== 第一阶段：立即加载（核心功能） ==========
+  // 目标：快速建立连接，展示基本界面
+  console.time('[IM初始化] 第一阶段耗时')
+
+  // 连接 WebSocket（不等待，异步执行）
   connect()
 
-  // 加载会话列表
-  try {
-    await loadSessions()
-  } catch (error) {
-    console.error('加载会话列表失败:', error)
-  }
+  // 加载最近会话列表（限制20条，快速展示）
+  loadRecentSessionsOnly().catch(error => {
+    console.error('加载最近会话失败:', error)
+  })
 
-  // 加载联系人数据
-  try {
-    await loadFriends()
-    await loadFriendRequests()
-    initOrgTree()
-  } catch (error) {
-    console.error('加载联系人数据失败:', error)
-  }
+  console.timeEnd('[IM初始化] 第一阶段耗时')
 
-  // 尝试重发离线消息
+  // ========== 第二阶段：延迟加载（重要功能） ==========
+  // 目标：页面渲染完成后，加载完整数据
+  setTimeout(() => {
+    console.time('[IM初始化] 第二阶段耗时')
+
+    // 加载完整会话列表
+    loadSessions().catch(error => {
+      console.error('加载完整会话列表失败:', error)
+    })
+
+    // 加载好友列表
+    loadFriends().catch(error => {
+      console.error('加载好友列表失败:', error)
+    })
+
+    console.timeEnd('[IM初始化] 第二阶段耗时')
+  }, 100) // 延迟100ms，让UI先渲染
+
+  // ========== 第三阶段：后台加载（辅助功能） ==========
+  // 目标：用户不敏感的数据，后台异步加载
+  setTimeout(() => {
+    console.time('[IM初始化] 第三阶段耗时')
+
+    // 加载好友请求
+    loadFriendRequests().catch(error => {
+      console.error('加载好友请求失败:', error)
+    })
+
+    // 初始化组织架构树（仅在联系人模块需要）
+    if (activeModule.value === 'contacts') {
+      initOrgTree().catch(error => {
+        console.error('加载组织架构失败:', error)
+      })
+    }
+
+    // 重发离线消息
+    store.dispatch('im/resendOfflineMessages').catch(error => {
+      console.error('重发离线消息失败:', error)
+    })
+
+    console.timeEnd('[IM初始化] 第三阶段耗时')
+  }, 500) // 延迟500ms，避免阻塞主要功能
+
+  console.log('[IM初始化] 渐进式加载策略已启动')
+}
+
+// 加载最近会话列表（仅加载前20条，用于快速展示）
+const loadRecentSessionsOnly = async () => {
   try {
-    await store.dispatch('im/resendOfflineMessages')
+    const response = await listSession({ pageSize: 20, pageNum: 1 })
+    const sessionList = response.rows || response.data || []
+
+    // 转换会话数据格式
+    const formattedSessions = sessionList.map(s => ({
+      id: s.id || s.conversationId,
+      name: s.name || s.title,
+      avatar: s.avatar,
+      type: s.type || 'private',
+      peerId: s.peerId || s.targetId,
+      groupId: s.groupId || s.targetId,
+      unreadCount: s.unreadCount || 0,
+      lastMessage: s.lastMessage?.content || s.lastMessage,
+      lastMessageTime: s.lastMessage?.sendTime || s.lastMessageTime || s.updatedAt || s.updateTime,
+      pinned: s.isPinned || s.pinned || false,
+      muted: s.isMuted || s.muted || false,
+    }))
+
+    // 去重逻辑
+    const uniqueSessionsMap = new Map()
+    formattedSessions.forEach(session => {
+      let key
+      if (session.type === 'private' || session.type === 'PRIVATE') {
+        key = `private_${session.peerId}`
+      } else if (session.type === 'group' || session.type === 'GROUP') {
+        key = `group_${session.groupId}`
+      } else {
+        key = `session_${session.id}`
+      }
+
+      if (uniqueSessionsMap.has(key)) {
+        const existing = uniqueSessionsMap.get(key)
+        const existingTime = new Date(existing.lastMessageTime || 0).getTime()
+        const newTime = new Date(session.lastMessageTime || 0).getTime()
+        if (newTime > existingTime) {
+          uniqueSessionsMap.set(key, session)
+        }
+      } else {
+        uniqueSessionsMap.set(key, session)
+      }
+    })
+
+    store.commit('im/SET_SESSIONS', Array.from(uniqueSessionsMap.values()))
+    console.log(`[快速加载] 已加载 ${uniqueSessionsMap.size} 个最近会话`)
   } catch (error) {
-    console.error('重发离线消息失败:', error)
+    console.error('加载最近会话失败:', error)
+    throw error
   }
 }
 
@@ -5773,10 +6154,48 @@ $avatar-xl: 64px;
     }
   }
 
-  &.el-dropdown-menu__item--divided {
-    margin-top: 4px;
-    padding-top: 4px;
-    border-top: 1px solid #e5e6eb;
+  // 用户信息项特殊样式
+  &.user-info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+    background: linear-gradient(90deg, #f7f8fa 0%, #ffffff 100%);
+
+    .dropdown-avatar {
+      margin-bottom: 8px;
+      border: 2px solid #165dff;
+    }
+
+    .user-info-item {
+      .user-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1d2129;
+      }
+
+      .user-id {
+        font-size: 12px;
+        color: #86909c;
+        margin-top: 2px;
+      }
+    }
+  }
+
+  // 状态选择器样式
+  .status-selector {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  // 快捷键标签
+  .item-shortcut {
+    margin-left: auto;
+    font-size: 12px;
+    color: #86909c;
+    background: #f2f3f5;
+    padding: 2px 6px;
+    border-radius: 4px;
   }
 }
 
@@ -5936,13 +6355,36 @@ $avatar-xl: 64px;
         cursor: pointer;
         transition: all 0.2s;
         margin-left: 8px;
+        position: relative;
 
         &:hover {
           background: $nav-item-hover;
         }
 
-        .el-avatar {
+        .user-avatar {
           border: 1px solid $border-color;
+        }
+
+        .user-status-indicator {
+          position: absolute;
+          left: 36px;
+          bottom: 2px;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          border: 2px solid #fff;
+
+          &.online {
+            background: #52c41a;
+          }
+
+          &.busy {
+            background: #ff4d4f;
+          }
+
+          &.offline {
+            background: #d9d9d9;
+          }
         }
 
         .header-username {
@@ -5964,6 +6406,7 @@ $avatar-xl: 64px;
       }
     }
   }
+
 
   // 主体区域
   .main-body {
@@ -8937,6 +9380,113 @@ $avatar-xl: 64px;
       .theme-check {
         color: $primary-color;
         font-size: 20px;
+      }
+    }
+  }
+}
+
+// 快捷键提示对话框样式
+.shortcuts-dialog {
+  .shortcut-section {
+    margin-bottom: 24px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: $text-primary;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid $border-color;
+    }
+
+    .shortcut-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+
+      .keys {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+
+        kbd {
+          display: inline-block;
+          padding: 4px 8px;
+          font-size: 12px;
+          font-family: inherit;
+          color: $text-primary;
+          background: $bg-light;
+          border: 1px solid $border-color;
+          border-radius: 4px;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+      }
+
+      .desc {
+        font-size: 13px;
+        color: $text-secondary;
+      }
+    }
+  }
+}
+
+// 消息通知设置对话框样式
+.notification-settings {
+  .setting-group {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid $border-color;
+
+    &:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .group-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: $text-primary;
+      margin-bottom: 16px;
+    }
+
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+
+      .setting-info {
+        .setting-label {
+          font-size: 14px;
+          color: $text-primary;
+          margin-bottom: 4px;
+        }
+
+        .setting-desc {
+          font-size: 12px;
+          color: $text-secondary;
+        }
+      }
+    }
+
+    .dnd-time-settings {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+
+      .time-separator {
+        color: $text-secondary;
+      }
+
+      :deep(.el-time-picker) {
+        width: 140px;
       }
     }
   }
