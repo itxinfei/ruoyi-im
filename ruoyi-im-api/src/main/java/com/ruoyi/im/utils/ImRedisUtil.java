@@ -413,6 +413,52 @@ public class ImRedisUtil {
         redisTemplate.expire(buildSimpleKey(key), timeout, unit);
     }
 
+    // ==================== 消息幂等性 ====================
+    /**
+     * 消息幂等性键前缀
+     */
+    private static final String IDEMPOTENT_MSG_PREFIX = "message:idempotent:";
+    /**
+     * 消息幂等性缓存过期时间（24小时）
+     */
+    private static final long IDEMPOTENT_MSG_EXPIRE = 24;
+
+    /**
+     * 检查并记录客户端消息ID（实现幂等性）
+     * 如果该clientMsgId已存在，返回对应的消息ID
+     * 如果不存在，则记录并返回null
+     *
+     * @param clientMsgId 客户端消息ID
+     * @return 已存在时返回对应的消息ID，不存在返回null
+     */
+    public Long checkAndRecordClientMsgId(String clientMsgId) {
+        if (redisTemplate == null || clientMsgId == null || clientMsgId.isEmpty()) {
+            return null;
+        }
+        String key = buildKey(IDEMPOTENT_MSG_PREFIX, clientMsgId);
+        Object cachedMsgId = redisTemplate.opsForValue().get(key);
+        if (cachedMsgId != null) {
+            log.debug("消息幂等性命中: clientMsgId={}, messageId={}", clientMsgId, cachedMsgId);
+            return Long.parseLong(cachedMsgId.toString());
+        }
+        return null;
+    }
+
+    /**
+     * 记录客户端消息ID与服务器消息ID的映射关系
+     *
+     * @param clientMsgId 客户端消息ID
+     * @param messageId 服务器消息ID
+     */
+    public void recordClientMsgId(String clientMsgId, Long messageId) {
+        if (redisTemplate == null || clientMsgId == null || clientMsgId.isEmpty()) {
+            return;
+        }
+        String key = buildKey(IDEMPOTENT_MSG_PREFIX, clientMsgId);
+        redisTemplate.opsForValue().set(key, messageId.toString(), IDEMPOTENT_MSG_EXPIRE, TimeUnit.HOURS);
+        log.debug("记录客户端消息ID映射: clientMsgId={}, messageId={}", clientMsgId, messageId);
+    }
+
     // ==================== 私有方法 ====================
     /**
      * 构建简单缓存Key

@@ -203,24 +203,121 @@ export function batchDeleteMessages(messageIds) {
   })
 }
 
-// ==================== 消息已读 ====================
+// ==================== 消息已读回执 ====================
 
 /**
- * 标记消息已读
+ * 标记单条消息为已读
+ * @param {Object} data - 已读数据
+ * @param {number|string} data.messageId - 消息ID
+ * @param {number|string} data.conversationId - 会话ID
+ * @returns {Promise<Result<void>>}
+ */
+export function markMessageAsRead(data) {
+  return request({
+    url: `/api/im/message/read/${data.messageId}`,
+    method: 'post',
+    params: {
+      conversationId: Number(data.conversationId),
+    },
+  })
+}
+
+/**
+ * 批量标记消息为已读
  * @param {Object} data - 已读数据
  * @param {number|string} data.conversationId - 会话ID
  * @param {number[]} data.messageIds - 消息ID数组
  * @returns {Promise<Result<void>>}
  */
-export function markMessageRead(data) {
+export function markBatchMessageAsRead(data) {
   return request({
-    url: '/api/im/message/read',
-    method: 'put',
+    url: '/api/im/message/read/batch',
+    method: 'post',
     data: {
       conversationId: Number(data.conversationId),
       messageIds: data.messageIds.map(id => Number(id)),
     },
   })
+}
+
+/**
+ * 标记会话所有消息为已读
+ * @param {Object} data - 已读数据
+ * @param {number|string} data.conversationId - 会话ID
+ * @param {number|string} data.upToMessageId - 标记到此消息ID为止
+ * @returns {Promise<Result<void>>}
+ */
+export function markConversationAsRead(data) {
+  return request({
+    url: `/api/im/message/read/conversation/${data.conversationId}`,
+    method: 'post',
+    params: {
+      upToMessageId: Number(data.upToMessageId),
+    },
+  })
+}
+
+/**
+ * 获取消息已读状态
+ * @param {number|string} messageId - 消息ID
+ * @returns {Promise<Result<ImMessageReadStatusVO>>}
+ */
+export function getMessageReadStatus(messageId) {
+  return request({
+    url: `/api/im/message/read/status/${messageId}`,
+    method: 'get',
+  })
+}
+
+/**
+ * 获取消息已读详情
+ * @param {number|string} messageId - 消息ID
+ * @returns {Promise<Result<ImMessageReadDetailVO>>}
+ */
+export function getMessageReadDetail(messageId) {
+  return request({
+    url: `/api/im/message/read/detail/${messageId}`,
+    method: 'get',
+  })
+}
+
+/**
+ * 获取会话消息已读状态列表
+ * @param {number|string} conversationId - 会话ID
+ * @returns {Promise<Result<ImMessageReadStatusVO[]>>}
+ */
+export function getConversationReadStatus(conversationId) {
+  return request({
+    url: `/api/im/message/read/conversation/${conversationId}`,
+    method: 'get',
+  })
+}
+
+/**
+ * 撤回已读回执
+ * @param {number|string} messageId - 消息ID
+ * @returns {Promise<Result<void>>}
+ */
+export function revokeMessageRead(messageId) {
+  return request({
+    url: `/api/im/message/read/${messageId}`,
+    method: 'delete',
+  })
+}
+
+// ==================== 兼容旧API ====================
+
+/**
+ * @deprecated 使用 markMessageAsRead 或 markBatchMessageAsRead 替代
+ */
+export function markMessageRead(data) {
+  if (data.messageIds && data.messageIds.length === 1) {
+    return markMessageAsRead({
+      messageId: data.messageIds[0],
+      conversationId: data.conversationId,
+    })
+  }
+  return markBatchMessageAsRead(data)
 }
 
 /**
@@ -550,7 +647,14 @@ export default {
   batchDeleteMessages,
 
   // 已读相关
-  markMessageRead,
+  markMessageAsRead,
+  markBatchMessageAsRead,
+  markConversationAsRead,
+  getMessageReadStatus,
+  getMessageReadDetail,
+  getConversationReadStatus,
+  revokeMessageRead,
+  markMessageRead, // 兼容
   getUnreadCount,
   getConversationUnreadCount,
 

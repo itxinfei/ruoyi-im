@@ -70,4 +70,13 @@ public interface ImEmailMapper {
      * @return 影响行数
      */
     int batchInsertEmails(@Param("emails") List<ImEmail> emails);
+
+    /**
+     * 搜索邮件
+     *
+     * @param userId 用户ID
+     * @param keyword 关键词
+     * @return 邮件列表
+     */
+    List<ImEmail> searchEmailsByKeyword(@Param("userId") Long userId, @Param("keyword") String keyword);
 }

@@ -1,54 +1,32 @@
 <template>
   <div class="web-im-layout">
-    <!-- 顶部导航栏 -->
-    <header class="header">
-      <!-- Logo和品牌 -->
-      <div class="header-brand">
-        <div class="logo">
-          <el-icon :size="24" color="#1677ff">
-            <ChatLineSquare />
-          </el-icon>
-        </div>
-        <span class="brand-name">企业IM</span>
-      </div>
-
-      <!-- 中间：搜索框或模块标题 -->
-      <div class="header-center">
+    <!-- 顶部导航栏（钉钉风格简约式） -->
+    <header class="ding-header">
+      <!-- 搜索框 -->
+      <div class="header-search">
         <el-input
-          v-if="activeModule === 'chat'"
           v-model="sessionSearch"
-          placeholder="搜索会话、联系人..."
+          placeholder="搜索"
           :prefix-icon="Search"
-          class="search-input"
+          class="ding-search-input"
           clearable
         />
-        <div v-else class="module-title">
-          {{ getModuleTitle(activeModule) }}
-        </div>
       </div>
 
-      <!-- 右侧：用户操作 -->
-      <div class="header-right">
-        <!-- 快捷操作 -->
-        <div class="quick-actions">
-          <el-tooltip content="通知" placement="bottom">
-            <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="badge-item">
-              <el-button :icon="Bell" text @click="toggleNotification" />
-            </el-badge>
-          </el-tooltip>
-          <el-tooltip content="设置" placement="bottom">
-            <el-button :icon="Setting" text @click="showSettings" />
-          </el-tooltip>
-        </div>
-
-        <!-- 用户信息 -->
+      <!-- 右侧操作区 -->
+      <div class="header-actions">
+        <el-tooltip content="帮助" placement="bottom">
+          <el-button :icon="QuestionFilled" text class="header-action-btn" />
+        </el-tooltip>
+        <el-tooltip content="设置" placement="bottom">
+          <el-button :icon="Setting" text class="header-action-btn" @click="showSettings" />
+        </el-tooltip>
         <el-dropdown trigger="click" placement="bottom-end" @command="handleUserCommand">
-          <div class="user-dropdown">
-            <el-avatar :size="32" :src="currentUser?.avatar">
+          <div class="header-user">
+            <el-avatar :size="28" :src="currentUser?.avatar">
               {{ currentUser?.name?.charAt(0) || 'U' }}
             </el-avatar>
-            <span class="user-name">{{ currentUser?.name || '用户' }}</span>
-            <el-icon :size="12"><ArrowDown /></el-icon>
+            <span class="header-username">{{ currentUser?.name || '用户' }}</span>
           </div>
           <template #dropdown>
             <el-dropdown-menu>
@@ -59,22 +37,6 @@
               <el-dropdown-item command="settings">
                 <el-icon><Setting /></el-icon>
                 系统设置
-              </el-dropdown-item>
-              <el-dropdown-item command="status">
-                <el-icon><CircleCheck /></el-icon>
-                在线状态
-              </el-dropdown-item>
-              <el-dropdown-item command="theme">
-                <el-icon><Sunny /></el-icon>
-                主题切换
-              </el-dropdown-item>
-              <el-dropdown-item command="help">
-                <el-icon><QuestionFilled /></el-icon>
-                帮助与反馈
-              </el-dropdown-item>
-              <el-dropdown-item command="about">
-                <el-icon><InfoFilled /></el-icon>
-                关于
               </el-dropdown-item>
               <el-dropdown-item divided command="logout">
                 <el-icon><SwitchButton /></el-icon>
@@ -88,33 +50,38 @@
 
     <!-- 主体内容区 -->
     <div class="main-body">
-      <!-- 左侧导航栏 -->
-      <aside class="nav-sidebar" :class="{ collapsed: isNavCollapsed }">
+      <!-- 左侧导航栏（钉钉68px图标式） -->
+      <aside class="nav-sidebar">
         <nav class="nav-list">
-          <div
+          <el-tooltip
             v-for="item in navModules"
             :key="item.key"
-            class="nav-item"
-            :class="{ active: activeModule === item.key }"
-            @click="switchModule(item.key)"
+            :content="item.label"
+            placement="right"
+            :show-after="500"
           >
-            <el-icon class="nav-icon">
-              <component :is="item.icon" />
-            </el-icon>
-            <span v-if="!isNavCollapsed" class="nav-label">{{ item.label }}</span>
-            <el-badge
-              v-if="item.key === 'chat' && unreadCount > 0 && !isNavCollapsed"
-              :value="unreadCount"
-              class="nav-badge"
-            />
-          </div>
+            <div
+              class="nav-item"
+              :class="{ active: activeModule === item.key }"
+              @click="switchModule(item.key)"
+            >
+              <el-icon class="nav-icon">
+                <component :is="item.icon" />
+              </el-icon>
+              <!-- 未读红点 -->
+              <span
+                v-if="item.key === 'chat' && unreadCount > 0"
+                class="nav-dot"
+              />
+            </div>
+          </el-tooltip>
         </nav>
 
-        <!-- 折叠按钮 -->
-        <div class="collapse-trigger" @click="toggleNavCollapse">
-          <el-icon>
-            <component :is="isNavCollapsed ? ArrowRight : ArrowLeft" />
-          </el-icon>
+        <!-- 底部用户头像 -->
+        <div class="nav-user" @click="handleUserCommand('profile')">
+          <el-avatar :size="32" :src="currentUser?.avatar">
+            {{ currentUser?.name?.charAt(0) || 'U' }}
+          </el-avatar>
         </div>
       </aside>
 
@@ -883,6 +850,26 @@
               </div>
             </div>
 
+            <div class="section-title" style="margin-top: 20px">文件夹</div>
+            <div class="folder-tree">
+              <el-tree
+                :data="folderTreeData"
+                :props="{ children: 'children', label: 'name' }"
+                node-key="id"
+                :highlight-current="true"
+                :expand-on-click-node="false"
+                @node-click="handleFolderClick"
+              >
+                <template #default="{ node, data }">
+                  <div class="tree-node">
+                    <el-icon><Folder /></el-icon>
+                    <span class="tree-label">{{ node.label }}</span>
+                    <span class="tree-count">({{ data.itemCount || 0 }})</span>
+                  </div>
+                </template>
+              </el-tree>
+            </div>
+
             <div class="section-title" style="margin-top: 20px">存储空间</div>
             <div class="storage-info">
               <el-progress :percentage="storagePercent" :stroke-width="6" />
@@ -893,39 +880,86 @@
           <!-- 钉盘内容 -->
           <div class="drive-content">
             <div class="drive-toolbar">
-              <div class="breadcrumb">
-                <span class="breadcrumb-item" @click="navigateToRoot">根目录</span>
-                <span v-for="(crumb, index) in breadcrumbs" :key="index" class="breadcrumb-item">
-                  / {{ crumb.name }}
-                </span>
+              <div class="toolbar-left">
+                <div class="breadcrumb">
+                  <span class="breadcrumb-item" @click="navigateToRoot">根目录</span>
+                  <span v-for="(crumb, index) in breadcrumbs" :key="index" class="breadcrumb-item">
+                    / {{ crumb.name }}
+                  </span>
+                </div>
               </div>
-              <div class="toolbar-actions">
+              <div class="toolbar-right">
+                <el-input
+                  v-model="driveSearchKeyword"
+                  placeholder="搜索文件..."
+                  :prefix-icon="Search"
+                  size="small"
+                  style="width: 200px; margin-right: 10px"
+                  clearable
+                  @input="handleDriveSearch"
+                />
                 <el-upload
                   :show-file-list="false"
                   :before-upload="handleFileUpload"
                   :multiple="true"
+                  :drag="true"
+                  style="display: inline-block"
                 >
                   <el-button :icon="Upload">上传文件</el-button>
                 </el-upload>
                 <el-button :icon="Folder" @click="createFolder">新建文件夹</el-button>
-                <el-button :icon="Download" :disabled="!selectedFile">下载</el-button>
-                <el-button :icon="Delete" :disabled="!selectedFile" @click="deleteFile"
-                  >删除</el-button
-                >
+                <el-dropdown trigger="click" @command="handleBatchAction">
+                  <el-button :disabled="selectedFiles.length === 0">
+                    批量操作 <el-icon><ArrowDown /></el-icon>
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item command="download" :icon="Download">批量下载</el-dropdown-item>
+                      <el-dropdown-item command="move" :icon="FolderOpened">移动到</el-dropdown-item>
+                      <el-dropdown-item command="delete" :icon="Delete">批量删除</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </div>
+
+            <!-- 批量选择栏 -->
+            <div v-if="selectedFiles.length > 0" class="batch-selection-bar">
+              <span class="selection-info">已选择 {{ selectedFiles.length }} 项</span>
+              <div class="selection-actions">
+                <el-button size="small" @click="clearSelection">取消选择</el-button>
+                <el-button size="small" :icon="Download" @click="batchDownload">下载</el-button>
+                <el-button size="small" :icon="Delete" type="danger" @click="batchDelete">删除</el-button>
               </div>
             </div>
 
             <!-- 文件列表 -->
-            <div class="file-list">
+            <div
+              class="file-list"
+              @dragover.prevent
+              @dragenter="handleDragEnter"
+              @dragleave="handleDragLeave"
+              @drop="handleFileDrop"
+            >
               <!-- 文件夹 -->
               <div
                 v-for="folder in currentFolders"
                 :key="'folder-' + folder.id"
                 class="file-item folder-item"
-                :class="{ selected: selectedFile?.id === folder.id }"
-                @click="selectFile(folder)"
+                :class="{
+                  selected: isSelected(folder),
+                  'batch-selected': isInBatchSelection(folder)
+                }"
+                @click="selectFile(folder, $event)"
                 @dblclick="openFolder(folder)"
               >
+                <el-checkbox
+                  v-if="batchSelectMode || isInBatchSelection(folder)"
+                  :model-value="isInBatchSelection(folder)"
+                  class="file-checkbox"
+                  @change="toggleFileSelection(folder, $event)"
+                  @click.stop
+                />
                 <div class="file-icon folder-icon">
                   <el-icon :size="32"><Folder /></el-icon>
                 </div>
@@ -937,13 +971,24 @@
 
               <!-- 文件 -->
               <div
-                v-for="file in currentFiles"
+                v-for="file in displayFiles"
                 :key="'file-' + file.id"
                 class="file-item"
-                :class="{ selected: selectedFile?.id === file.id }"
-                @click="selectFile(file)"
+                :class="{
+                  selected: isSelected(file),
+                  'batch-selected': isInBatchSelection(file)
+                }"
+                @click="selectFile(file, $event)"
                 @dblclick="openFile(file)"
+                @contextmenu.prevent="showFileContextMenu($event, file)"
               >
+                <el-checkbox
+                  v-if="batchSelectMode || isInBatchSelection(file)"
+                  :model-value="isInBatchSelection(file)"
+                  class="file-checkbox"
+                  @change="toggleFileSelection(file, $event)"
+                  @click.stop
+                />
                 <div class="file-icon" :class="`file-type-${file.type}`">
                   <el-icon :size="32">
                     <component :is="getFileIcon(file.type)" />
@@ -956,6 +1001,7 @@
                   </div>
                 </div>
                 <div class="file-actions">
+                  <el-button :icon="View" size="small" circle @click.stop="previewFile(file)" />
                   <el-button :icon="Share" size="small" circle @click.stop="shareFile(file)" />
                   <el-button
                     :icon="Download"
@@ -966,9 +1012,15 @@
                 </div>
               </div>
 
+              <!-- 拖拽上传提示 -->
+              <div v-if="isDraggingFile" class="drag-upload-overlay">
+                <el-icon :size="60"><UploadFilled /></el-icon>
+                <p>拖拽文件到这里上传</p>
+              </div>
+
               <el-empty
-                v-if="currentFolders.length === 0 && currentFiles.length === 0"
-                description="暂无文件"
+                v-if="currentFolders.length === 0 && displayFiles.length === 0"
+                :description="driveSearchKeyword ? '没有找到相关文件' : '暂无文件'"
               />
             </div>
           </div>
@@ -1671,6 +1723,45 @@
       </template>
     </el-dialog>
 
+    <!-- 文件预览对话框 -->
+    <el-dialog
+      v-model="previewDialogVisible"
+      :title="previewingFile?.name || '文件预览'"
+      width="800px"
+      @close="previewingFile = null"
+    >
+      <div v-if="previewingFile" class="file-preview-dialog">
+        <!-- 图片预览 -->
+        <div v-if="previewingFile.type === 'image'" class="image-preview">
+          <el-image
+            :src="getLocalFilePreviewUrl(previewingFile)"
+            fit="contain"
+            style="width: 100%; max-height: 500px"
+            :preview-src-list="[getLocalFilePreviewUrl(previewingFile)]"
+          />
+        </div>
+        <!-- 其他文件类型显示 -->
+        <div v-else class="file-preview-info">
+          <div class="preview-icon">
+            <el-icon :size="80">
+              <component :is="getFileIcon(previewingFile.type)" />
+            </el-icon>
+          </div>
+          <div class="preview-details">
+            <h3>{{ previewingFile.name }}</h3>
+            <p>大小: {{ formatFileSize(previewingFile.size) }}</p>
+            <p>类型: {{ previewingFile.type }}</p>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="previewDialogVisible = false">关闭</el-button>
+        <el-button type="primary" :icon="Download" @click="downloadSingleFile(previewingFile)">
+          下载
+        </el-button>
+      </template>
+    </el-dialog>
+
     <!-- 发起聊天对话框 -->
     <el-dialog v-model="startChatDialogVisible" title="发起聊天" width="500px">
       <div class="start-chat-dialog">
@@ -1729,6 +1820,7 @@ import {
   Share,
   Download,
   Upload,
+  UploadFilled,
   View,
   Hide,
   Lock,
@@ -1748,18 +1840,28 @@ import {
   ArrowLeft,
   SwitchButton,
   Folder,
+  FolderOpened,
   Clock,
   Moon,
   QuestionFilled,
   InfoFilled,
   Sunny,
+  Delete,
+  Search,
+  DocumentCopy,
 } from '@element-plus/icons-vue'
 import { formatTime as formatTimeUtil } from '@/utils/format/time'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { useVoiceRecorder } from '@/utils/audio/useVoiceRecorder'
 import { getCurrentUserInfo } from '@/utils/im-user'
 import { listSession } from '@/api/im/session'
-import { uploadFile, uploadImage } from '@/api/im/file'
+import {
+  uploadFile,
+  uploadImage,
+  downloadFile as apiDownloadFile,
+  getFilePreviewUrl,
+  getFilePreviewInfo
+} from '@/api/im/file'
 import { sendMessage as apiSendMessage } from '@/api/im/message'
 import {
   listContact,
@@ -2630,6 +2732,16 @@ const selectedFile = ref(null)
 const breadcrumbs = ref([])
 const currentFolderId = ref(null)
 
+// 钉盘搜索和批量选择
+const driveSearchKeyword = ref('')
+const selectedFiles = ref([])
+const batchSelectMode = ref(false)
+const isDraggingFile = ref(false)
+
+// 文件预览对话框
+const previewDialogVisible = ref(false)
+const previewingFile = ref(null)
+
 // 钉盘分类
 const driveCategories = computed(() => [
   { key: 'personal', label: '个人文件', icon: User, count: allFiles.value.length },
@@ -2726,7 +2838,21 @@ const allFolders = ref([
   { id: 'fol1', name: '工作文档', itemCount: 5, parentId: null },
   { id: 'fol2', name: '图片资料', itemCount: 12, parentId: null },
   { id: 'fol3', name: '项目文件', itemCount: 8, parentId: null },
+  { id: 'fol4', name: '子文件夹', itemCount: 3, parentId: 'fol1' },
 ])
+
+// 文件夹树形数据
+const folderTreeData = computed(() => {
+  const buildTree = (parentId = null) => {
+    return allFolders.value
+      .filter(f => f.parentId === parentId)
+      .map(folder => ({
+        ...folder,
+        children: buildTree(folder.id)
+      }))
+  }
+  return buildTree()
+})
 
 // 当前文件夹和文件
 const currentFolders = computed(() => {
@@ -2735,6 +2861,17 @@ const currentFolders = computed(() => {
 
 const currentFiles = computed(() => {
   return allFiles.value.filter(f => f.folderId === currentFolderId.value)
+})
+
+// 显示的文件列表（支持搜索）
+const displayFiles = computed(() => {
+  if (!driveSearchKeyword.value) {
+    return currentFiles.value
+  }
+  const keyword = driveSearchKeyword.value.toLowerCase()
+  return allFiles.value.filter(f =>
+    f.name.toLowerCase().includes(keyword)
+  )
 })
 
 // 获取文件图标
@@ -2758,11 +2895,157 @@ const navigateToRoot = () => {
   currentFolderId.value = null
   breadcrumbs.value = []
   selectedFile.value = null
+  selectedFiles.value = []
 }
 
 // 选择文件/文件夹
-const selectFile = file => {
-  selectedFile.value = file
+const selectFile = (file, event) => {
+  // 如果按住Ctrl或Shift，进入批量选择模式
+  if (event && (event.ctrlKey || event.shiftKey)) {
+    batchSelectMode.value = true
+    toggleFileSelection(file)
+  } else {
+    // 如果不是批量模式，清空之前的选中
+    if (!batchSelectMode.value) {
+      selectedFiles.value = []
+    }
+    selectedFile.value = file
+  }
+}
+
+// 判断文件是否被选中
+const isSelected = file => {
+  return selectedFile.value?.id === file.id
+}
+
+// 判断文件是否在批量选择中
+const isInBatchSelection = file => {
+  return selectedFiles.value.some(f => f.id === file.id)
+}
+
+// 切换文件选择状态
+const toggleFileSelection = file => {
+  const index = selectedFiles.value.findIndex(f => f.id === file.id)
+  if (index > -1) {
+    selectedFiles.value.splice(index, 1)
+  } else {
+    selectedFiles.value.push(file)
+  }
+  if (selectedFiles.value.length === 0) {
+    batchSelectMode.value = false
+  }
+}
+
+// 清除选择
+const clearSelection = () => {
+  selectedFiles.value = []
+  selectedFile.value = null
+  batchSelectMode.value = false
+}
+
+// 搜索处理
+const handleDriveSearch = () => {
+  // 搜索结果通过 displayFiles 计算属性自动更新
+}
+
+// 文件夹树点击处理
+const handleFolderClick = data => {
+  currentFolderId.value = data.id
+  // 构建面包屑路径
+  buildBreadcrumbs(data.id)
+  selectedFile.value = null
+}
+
+// 构建面包屑路径
+const buildBreadcrumbs = folderId => {
+  const path = []
+  let current = allFolders.value.find(f => f.id === folderId)
+  while (current) {
+    path.unshift({ id: current.id, name: current.name })
+    current = allFolders.value.find(f => f.id === current.parentId)
+  }
+  breadcrumbs.value = path
+}
+
+// 批量操作处理
+const handleBatchAction = command => {
+  switch (command) {
+    case 'download':
+      batchDownload()
+      break
+    case 'delete':
+      batchDelete()
+      break
+    case 'move':
+      // TODO: 实现移动功能
+      ElMessage.info('移动功能开发中')
+      break
+  }
+}
+
+// 批量下载
+const batchDownload = () => {
+  ElMessage.info(`开始下载 ${selectedFiles.value.length} 个文件`)
+  // TODO: 实现批量下载
+}
+
+// 批量删除
+const batchDelete = () => {
+  ElMessageBox.confirm(`确定要删除选中的 ${selectedFiles.value.length} 项吗？`, '确认删除', {
+    type: 'warning',
+  })
+    .then(() => {
+      selectedFiles.value.forEach(item => {
+        if (item.id.startsWith('fol')) {
+          const index = allFolders.value.findIndex(f => f.id === item.id)
+          if (index > -1) allFolders.value.splice(index, 1)
+        } else {
+          const index = allFiles.value.findIndex(f => f.id === item.id)
+          if (index > -1) allFiles.value.splice(index, 1)
+        }
+      })
+      clearSelection()
+      ElMessage.success('删除成功')
+    })
+    .catch(() => {})
+}
+
+// 文件预览
+const previewFile = file => {
+  previewingFile.value = file
+  previewDialogVisible.value = true
+}
+
+// 文件右键菜单
+const showFileContextMenu = (event, file) => {
+  // TODO: 实现右键菜单
+  event.preventDefault()
+}
+
+// 拖拽进入处理
+const handleDragEnter = event => {
+  event.preventDefault()
+  isDraggingFile.value = true
+}
+
+// 拖拽离开处理
+const handleDragLeave = event => {
+  event.preventDefault()
+  // 确保是从文件列表区域离开，而不是进入子元素
+  if (event.target.classList.contains('file-list')) {
+    isDraggingFile.value = false
+  }
+}
+
+// 拖拽上传处理
+const handleFileDrop = event => {
+  isDraggingFile.value = false
+  const files = event.dataTransfer?.files
+  if (files && files.length > 0) {
+    Array.from(files).forEach(file => {
+      handleFileUpload(file)
+    })
+  }
 }
 
 // 打开文件夹
@@ -2770,12 +3053,61 @@ const openFolder = folder => {
   currentFolderId.value = folder.id
   breadcrumbs.value.push({ id: folder.id, name: folder.name })
   selectedFile.value = null
+  selectedFiles.value = []
 }
 
 // 打开文件
-const openFile = file => {
-  ElMessage.info(`打开文件: ${file.name}`)
-  // TODO: 实现文件预览
+const openFile = async file => {
+  if (!file) return
+
+  // 如果是图片文件，直接打开预览对话框
+  if (isImageFile(file)) {
+    previewingFile.value = file
+    filePreviewDialogVisible.value = true
+    return
+  }
+
+  // 尝试获取文件预览信息
+  try {
+    const response = await getFilePreviewInfo(file.id)
+    if (response.code === 200 && response.data) {
+      const previewInfo = response.data
+      // 设置预览文件信息
+      previewingFile.value = {
+        ...file,
+        previewUrl: previewInfo.url,
+        previewType: previewInfo.type
+      }
+      filePreviewDialogVisible.value = true
+    } else {
+      // 无法预览，提示下载
+      ElMessageBox.confirm(
+        `'${file.name}' 暂不支持在线预览，是否下载？`,
+        '提示',
+        {
+          confirmButtonText: '下载',
+          cancelButtonText: '取消',
+          type: 'info',
+        }
+      ).then(() => {
+        downloadSingleFile(file)
+      }).catch(() => {})
+    }
+  } catch (error) {
+    console.error('获取文件预览信息失败:', error)
+    // API 调用失败，提示下载
+    ElMessageBox.confirm(
+      `'${file.name}' 暂不支持在线预览，是否下载？`,
+      '提示',
+      {
+        confirmButtonText: '下载',
+        cancelButtonText: '取消',
+        type: 'info',
+      }
+    ).then(() => {
+      downloadSingleFile(file)
+    }).catch(() => {})
+  }
 }
 
 // 上传文件
@@ -2949,9 +3281,42 @@ const deleteFile = () => {
 }
 
 // 下载单个文件
-const downloadSingleFile = file => {
-  ElMessage.info(`下载文件: ${file.name}`)
-  // TODO: 实现文件下载
+const downloadSingleFile = async file => {
+  if (!file) return
+
+  try {
+    ElMessage.info(`开始下载: ${file.name}`)
+
+    // 调用后端API下载文件
+    const response = await apiDownloadFile(file.id)
+
+    // 创建下载链接
+    const blob = new Blob([response])
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = file.name || `file_${file.id}`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    ElMessage.success('下载成功')
+  } catch (error) {
+    console.error('下载文件失败:', error)
+    ElMessage.error(`下载失败: ${error.message || '未知错误'}`)
+
+    // 如果API下载失败，尝试使用文件URL直接下载
+    if (file.url) {
+      const link = document.createElement('a')
+      link.href = file.url
+      link.download = file.name || `file_${file.id}`
+      link.target = '_blank'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+  }
 }
 
 // 当前用户
@@ -3029,10 +3394,10 @@ const toggleNavCollapse = () => {
 
 const switchModule = moduleKey => {
   activeModule.value = moduleKey
-  // 只更新URL用于状态保持，不触发路由导航
-  // 使用replace避免产生历史记录
-  const validRoutes = ['chat', 'contacts', 'drive']
-  if (validRoutes.includes(moduleKey)) {
+  // 根据模块类型决定是否进行路由跳转
+  // 联系人和钉盘模块使用独立页面路由
+  const routedModules = ['contacts', 'drive']
+  if (routedModules.includes(moduleKey)) {
     // 钉盘模块跳转到文件管理页面
     if (moduleKey === 'drive') {
       router.push('/im/file')
@@ -3040,8 +3405,7 @@ const switchModule = moduleKey => {
       router.push(`/im/${moduleKey}`)
     }
   } else {
-    // 工作台是内嵌模块，不更新路由
-    // 只更新浏览器URL状态（可选）
+    // 消息和工作台是内嵌模块，只更新URL状态
     window.history.replaceState(null, '', `/im/${moduleKey}`)
   }
 }
@@ -3256,6 +3620,18 @@ const formatFileSize = bytes => {
 }
 
 const formatTime = formatTimeUtil
+
+// 获取本地文件预览URL
+const getLocalFilePreviewUrl = file => {
+  if (file.url) return file.url
+  // 临时使用占位图，实际应该调用后端API获取预览URL
+  return ''
+}
+
+// 判断是否为图片文件
+const isImageFile = file => {
+  return file.type === 'image' || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(file.type)
+}
 
 const openApp = appKey => {
   ElMessage.info(`打开应用：${appKey}`)
@@ -3788,7 +4164,7 @@ const forwardTargets = ref([])
 
 // 文件预览
 const filePreviewDialogVisible = ref(false)
-const previewingFile = ref(null)
+const previewingFileContent = ref(null)
 
 const systemSettingsVisible = ref(false)
 
@@ -4372,12 +4748,6 @@ const recallMessage = async () => {
 }
 
 // 文件预览相关
-const isImageFile = file => {
-  if (!file) return false
-  const ext = (file.name || '').split('.').pop()?.toLowerCase()
-  return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(ext)
-}
-
 const isPdfFile = file => {
   if (!file) return false
   const ext = (file.name || '').split('.').pop()?.toLowerCase()
@@ -5070,34 +5440,93 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 @use 'sass:color';
 
-// Web IM 布局变量
-$nav-width: 180px;
-$nav-width-collapsed: 56px;
-$header-height: 56px;
-$session-panel-width: 280px;
-$primary-color: #1677ff;
-$primary-color-light: #e8f3ff;
-$success-color: #52c41a;
-$warning-color: #faad14;
-$danger-color: #ff4d4f;
-$bg-gray: #f5f5f5;
-$bg-base: #f0f2f5;
-$bg-light: #fafafa;
-$bg-white: #ffffff;
-$bg-hover: #e6f7ff;
-$border-color: #e8e8e8;
-$border-base: #d9d9d9;
-$text-primary: #262626;
-$text-secondary: #595959;
-$text-tertiary: #8c8c8c;
-$text-light: #bfbfbf;
+// ==================== 钉钉PC客户端 设计规范变量 ====================
+// 布局尺寸（严格按照钉钉PC客户端实际测量）
+$nav-width-narrow: 48px;    // 左侧导航栏宽度（窄模式-仅图标）
+$nav-width-wide: 180px;     // 左侧导航栏宽度（宽模式-图标+文字）
+$nav-width: $nav-width-narrow; // 当前使用窄模式
+$header-height: 48px;       // 顶部导航栏高度
+$session-panel-width: 280px; // 会话列表宽度（固定）
+$chat-panel-min-width: 400px; // 聊天区域最小宽度
+$nav-item-size: 48px;        // 导航项尺寸
+$chat-header-height: 48px;   // 聊天头部高度
+$input-bar-height: 56px;     // 输入栏高度
+$search-bar-height: 36px;    // 搜索栏高度
+$session-item-height: 48px;  // 会话项高度
+
+// 品牌色系（钉钉标准色）
+$primary-color: #1890FF;     // 钉钉蓝（主色）
+$primary-color-hover: #40A9FF;
+$primary-color-active: #096DD9;
+$primary-color-light: #E6F7FF; // 浅蓝（选中背景）
+$primary-disabled: #D9D9D9;
+
+// 中性色系（钉钉规范）
+$text-primary: #000000;      // 主要文字（黑色）
+$text-secondary: #333333;     // 正文内容
+$text-regular: #666666;       // 副标题、次要信息
+$text-tertiary: #8C8C8C;      // 时间戳、提示信息（钉钉灰色）
+$text-disabled: #CCCCCC;      // 禁用状态
+$text-placeholder: #8C8C8C;  // 占位符（钉钉灰色）
+
+$bg-white: #FFFFFF;
+$bg-gray: #F5F7FA;           // 页面整体背景（钉钉浅灰）
+$bg-light: #FAFAFA;          // 卡片、面板背景
+$bg-hover: #F5F7FA;          // 悬停背景（钉钉浅灰）
+$bg-nav-narrow: #F5F7FA;     // 导航栏窄模式背景
+$bg-nav-wide: #FFFFFF;       // 导航栏宽模式背景
+
+$border-color: #E8EAED;      // 分割线、边框（钉钉规范）
+$border-hover: #D9D9D9;      // 边框悬停
+
+// 功能色
+$success-color: #52C41A;
+$warning-color: #FAAD14;
+$danger-color: #FF4D4F;
+$info-color: #1890FF;
+
+// 导航栏颜色
+$nav-bg: #FFFFFF;
+$nav-item-hover: #F5F5F5;
+$nav-item-active: #E6F7FF;
+$nav-item-icon: #666666;
+$nav-item-icon-active: #1890FF;
+
+// 消息气泡颜色（钉钉规范）
+$message-sent-bg: #1890FF;       // 发送方：钉钉蓝
+$message-sent-text: #FFFFFF;     // 发送方文字：白色
+$message-received-bg: #FFFFFF;  // 接收方：白色
+$message-received-text: #000000; // 接收方文字：黑色
+$message-received-border: #E8EAED; // 接收方边框：钉钉灰
+
+// 阴影系统
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
 $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-md:
-  0 4px 6px -1px rgba(0, 0, 0, 0.1),
-  0 2px 4px -1px rgba(0, 0, 0, 0.06);
-$shadow-lg:
-  0 10px 15px -3px rgba(0, 0, 0, 0.1),
-  0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+$shadow-message: 0 1px 2px rgba(0, 0, 0, 0.08);
+
+// 圆角
+$radius-xs: 2px;
+$radius-sm: 4px;
+$radius-base: 6px;
+$radius-lg: 8px;
+$radius-xl: 12px;
+$radius-round: 50%;
+
+// 间距
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 24px;
+
+// 头像尺寸
+$avatar-xs: 24px;
+$avatar-sm: 32px;
+$avatar-base: 40px;
+$avatar-lg: 48px;
+$avatar-xl: 64px;
 
 // 用户下拉菜单样式
 :deep(.el-dropdown-menu) {
@@ -5197,56 +5626,25 @@ $shadow-lg:
   background: #fff;
   overflow: hidden;
 
-  // 顶部导航栏
-  .header {
-    height: $header-height;
-    min-height: $header-height;
+  // 顶部导航栏（钉钉风格）
+  .ding-header {
+    height: 48px;
+    min-height: 48px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0 16px;
     background: #fff;
     border-bottom: 1px solid $border-color;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
     z-index: 100;
 
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 140px;
-
-      .logo {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        background: linear-gradient(135deg, #1677ff 0%, #69b1ff 100%);
-        border-radius: 8px;
-      }
-
-      .brand-name {
-        font-size: 18px;
-        font-weight: 600;
-        color: $text-primary;
-        letter-spacing: 0.5px;
-      }
-    }
-
-    .header-center {
+    .header-search {
       flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      max-width: 500px;
+      max-width: 300px;
 
-      .search-input {
-        width: 100%;
-        max-width: 400px;
-
+      .ding-search-input {
         :deep(.el-input__wrapper) {
-          border-radius: 20px;
+          border-radius: 6px;
           background: $bg-gray;
           border: 1px solid transparent;
           box-shadow: none;
@@ -5260,84 +5658,59 @@ $shadow-lg:
           &.is-focus {
             background: #fff;
             border-color: $primary-color;
-            box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
           }
         }
-      }
 
-      .module-title {
-        font-size: 16px;
-        font-weight: 500;
-        color: $text-primary;
+        :deep(.el-input__inner) {
+          font-size: 13px;
+        }
+
+        :deep(.el-input__prefix) {
+          color: $text-tertiary;
+        }
       }
     }
 
-    .header-right {
+    .header-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 4px;
 
-      .quick-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
+      .header-action-btn {
+        width: 36px;
+        height: 36px;
+        color: $text-regular;
+        border-radius: 6px;
 
-        .el-button {
-          color: #4e5969;
-          padding: 8px;
-          border-radius: 4px;
-
-          &:hover {
-            color: #165dff;
-            background: #f2f3f5;
-          }
-        }
-
-        .badge-item {
-          :deep(.el-badge__content) {
-            transform: translateY(-50%) translateX(50%);
-          }
+        &:hover {
+          color: $primary-color;
+          background: $nav-item-hover;
         }
       }
 
-      .user-dropdown {
+      .header-user {
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 6px 14px;
-        border-radius: 20px;
+        padding: 4px 10px 4px 4px;
+        border-radius: 6px;
         cursor: pointer;
-        transition: all 0.3s ease;
-        border: 1px solid transparent;
+        transition: all 0.2s;
 
         &:hover {
-          background: #f5f7fa;
-          border-color: #e5e6eb;
+          background: $nav-item-hover;
         }
 
         .el-avatar {
-          background: linear-gradient(135deg, #165dff 0%, #4facfe 100%);
-          border: 2px solid #fff;
-          box-shadow: 0 3px 10px rgba(22, 93, 255, 0.25);
+          border: 1px solid $border-color;
         }
 
-        .user-name {
-          font-size: 14px;
-          font-weight: 500;
-          color: #1d2129;
-          max-width: 100px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .el-icon {
-          color: #86909c;
-          transition: transform 0.2s;
-        }
-
-        &:hover .el-icon {
-          transform: rotate(180deg);
+        .header-username {
+          font-size: 13px;
+          color: $text-secondary;
+          max-width: 80px;
+          @include text-ellipsis;
         }
       }
     }
@@ -5349,87 +5722,91 @@ $shadow-lg:
     display: flex;
     overflow: hidden;
 
-    // 左侧导航栏
+    // 左侧导航栏（钉钉48px窄模式）
     .nav-sidebar {
-      width: $nav-width;
-      background: #fff;
+      width: $nav-width-narrow;
+      background: $bg-nav-narrow;
       border-right: 1px solid $border-color;
       display: flex;
       flex-direction: column;
-      transition: width 0.2s ease;
       position: relative;
-
-      &.collapsed {
-        width: $nav-width-collapsed;
-
-        .nav-label,
-        .nav-badge {
-          display: none;
-        }
-
-        .nav-item {
-          justify-content: center;
-          padding: 12px 0;
-        }
-      }
+      z-index: 50;
 
       .nav-list {
         flex: 1;
-        padding: 12px 8px;
+        padding: 12px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
 
         .nav-item {
+          width: 40px;
+          height: 40px;
           display: flex;
           align-items: center;
-          padding: 10px 12px;
-          margin-bottom: 4px;
+          justify-content: center;
           cursor: pointer;
-          color: $text-secondary;
+          color: $nav-item-icon;
           border-radius: 6px;
-          transition: all 0.2s;
+          transition: all 0.2s ease;
           position: relative;
 
           .nav-icon {
             font-size: 20px;
-            margin-right: 10px;
           }
 
-          .nav-label {
-            flex: 1;
-            font-size: 14px;
-          }
-
-          .nav-badge {
-            :deep(.el-badge__content) {
-              transform: translateY(-50%) translateX(0);
-            }
+          // 未读红点
+          .nav-dot {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background: $danger-color;
+            border-radius: 50%;
+            border: 1px solid $bg-nav-narrow;
           }
 
           &:hover {
-            background: $bg-gray;
-            color: $text-primary;
+            background: rgba(0, 0, 0, 0.06);
+            color: $primary-color;
           }
 
           &.active {
-            background: $bg-hover;
-            color: $primary-color;
-            font-weight: 500;
+            background: $primary-color-light;
+            color: $nav-item-icon-active;
+
+            &::after {
+              content: '';
+              position: absolute;
+              left: 0;
+              top: 50%;
+              transform: translateY(-50%);
+              width: 3px;
+              height: 20px;
+              background: $primary-color;
+              border-radius: 0 2px 2px 0;
+            }
           }
         }
       }
 
-      .collapse-trigger {
-        height: 48px;
+      // 底部用户头像
+      .nav-user {
+        padding: 12px 0;
         display: flex;
-        align-items: center;
         justify-content: center;
-        cursor: pointer;
-        color: $text-tertiary;
         border-top: 1px solid $border-color;
-        transition: all 0.2s;
+        cursor: pointer;
+        transition: all 0.2s ease;
 
         &:hover {
-          background: $bg-gray;
-          color: $text-primary;
+          background: rgba(0, 0, 0, 0.06);
+        }
+
+        .el-avatar {
+          border: 1px solid $border-color;
         }
       }
     }
@@ -5462,21 +5839,20 @@ $shadow-lg:
             .session-item {
               display: flex;
               align-items: center;
-              padding: 12px 16px;
-              cursor: pointer;
-              border-bottom: 1px solid #f0f0f0;
-              transition: all var(--dt-duration-base) var(--dt-ease-out);
-              position: relative;
-              border-radius: var(--dt-radius-sm);
+              height: $session-item-height;
+              padding: 8px 12px;
               margin: 0 8px;
+              cursor: pointer;
+              border-radius: 6px;
+              transition: all 0.2s ease;
+              position: relative;
 
               &:hover {
-                background: linear-gradient(90deg, var(--dt-color-primary-lighter) 0%, transparent 100%);
-                transform: translateX(2px);
+                background: $bg-hover;
               }
 
               &.active {
-                background: linear-gradient(90deg, var(--dt-color-primary-light) 0%, transparent 100%);
+                background: $primary-color-light;
 
                 &::before {
                   content: '';
@@ -5485,15 +5861,24 @@ $shadow-lg:
                   top: 50%;
                   transform: translateY(-50%);
                   width: 3px;
-                  height: 60%;
-                  background: var(--dt-color-primary);
+                  height: 24px;
+                  background: $primary-color;
                   border-radius: 0 2px 2px 0;
                 }
               }
 
               .el-badge {
-                margin-right: 12px;
+                margin-right: 10px;
                 flex-shrink: 0;
+
+                :deep(.el-badge__content) {
+                  background: $danger-color;
+                  border: none;
+                  font-size: 11px;
+                  height: 16px;
+                  line-height: 16px;
+                  padding: 0 5px;
+                }
               }
 
               .session-info {
@@ -5504,30 +5889,27 @@ $shadow-lg:
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
-                  margin-bottom: 4px;
+                  margin-bottom: 2px;
 
                   .session-name {
                     font-size: 14px;
                     font-weight: 500;
-                    color: $text-primary;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
+                    color: $text-secondary;
+                    @include text-ellipsis;
                   }
 
                   .session-time {
-                    font-size: 12px;
+                    font-size: 11px;
                     color: $text-tertiary;
                     flex-shrink: 0;
+                    margin-left: 8px;
                   }
                 }
 
                 .session-preview {
                   font-size: 12px;
                   color: $text-tertiary;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  white-space: nowrap;
+                  @include text-ellipsis;
                 }
               }
             }
@@ -5547,25 +5929,25 @@ $shadow-lg:
             overflow: hidden;
 
             .chat-header {
-              height: 60px;
-              padding: 0 20px;
+              height: 52px;
+              padding: 0 16px;
               display: flex;
               align-items: center;
               justify-content: space-between;
               border-bottom: 1px solid $border-color;
               background: #fff;
-              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+              box-shadow: $shadow-sm;
               z-index: 10;
 
               .chat-title {
                 display: flex;
                 align-items: center;
-                gap: 12px;
+                gap: 10px;
 
                 .title-name {
-                  font-size: 16px;
+                  font-size: 15px;
                   font-weight: 500;
-                  color: $text-primary;
+                  color: $text-secondary;
                 }
 
                 .title-status {
@@ -5574,7 +5956,8 @@ $shadow-lg:
                   margin-top: 2px;
                   display: flex;
                   align-items: center;
-                  gap: 2px;
+                  gap: 4px;
+
                   &::before {
                     content: '';
                     width: 6px;
@@ -5588,19 +5971,20 @@ $shadow-lg:
 
               .chat-actions {
                 display: flex;
-                gap: 8px;
+                gap: 4px;
 
                 .el-button {
                   --el-button-border-color: transparent;
                   --el-button-bg-color: transparent;
-                  --el-button-text-color: $text-secondary;
-                  --el-button-hover-text-color: $primary-color;
-                  --el-button-hover-bg-color: #f5f7fa;
-                  --el-button-hover-border-color: transparent;
-                  --el-button-radius: 4px;
-                  width: 36px;
-                  height: 36px;
-                  font-size: 18px;
+                  --el-button-text-color: $text-regular;
+                  width: 32px;
+                  height: 32px;
+                  padding: 6px;
+
+                  &:hover {
+                    --el-button-text-color: $primary-color;
+                    --el-button-hover-bg-color: $nav-item-hover;
+                  }
                 }
               }
             }
@@ -5609,9 +5993,9 @@ $shadow-lg:
               flex: 1;
               display: flex;
               flex-direction: column;
-              padding: 20px 40px;
+              padding: 16px 20px;
               overflow-y: auto;
-              background: #fafafa;
+              background: $bg-gray;
               @include web-scrollbar;
 
               .connection-status {
@@ -5619,12 +6003,12 @@ $shadow-lg:
                 align-items: center;
                 justify-content: center;
                 gap: 8px;
-                padding: 12px;
-                margin-bottom: 16px;
+                padding: 10px 16px;
+                margin-bottom: 12px;
                 background: #fff7e6;
                 border: 1px solid #ffd591;
-                border-radius: 8px;
-                color: #fa8c16;
+                border-radius: $radius-base;
+                color: $warning-color;
                 font-size: 13px;
 
                 .el-icon {
@@ -5655,16 +6039,19 @@ $shadow-lg:
                   }
 
                   .message-bubble {
-                    /* 钉钉风格蓝色 #1890FF */
-                    background: #1890ff !important;
-                    color: #fff !important;
+                    // 钉钉发送方消息气泡
+                    background: $message-sent-bg;
+                    color: $message-sent-text;
                     border-radius: 8px;
                     border-bottom-right-radius: 2px;
                     border: none;
-                    box-shadow: none;
+                    box-shadow: $shadow-message;
+                    padding: 10px 14px;
+                    font-size: 14px;
+                    line-height: 1.6;
 
                     &:hover {
-                      background: #40a9ff !important;
+                      background: $primary-color-hover;
                     }
 
                     // 链接样式
@@ -5693,13 +6080,13 @@ $shadow-lg:
                 }
 
                 .message-content {
-                  max-width: 68%;
+                  max-width: 65%;
 
                   .sender-name {
                     font-size: 12px;
-                    color: #8c8c8c;
+                    color: $text-tertiary;
                     margin-bottom: 4px;
-                    margin-left: 6px;
+                    margin-left: 4px;
                   }
 
                   /* 接收方消息气泡 - 白色 */
@@ -5708,17 +6095,17 @@ $shadow-lg:
                     padding: 10px 14px;
                     border-radius: 8px;
                     border-bottom-left-radius: 2px;
-                    background: #ffffff;
-                    color: #333333;
+                    background: $message-received-bg;
+                    color: $message-received-text;
                     font-size: 14px;
                     line-height: 1.6;
                     word-break: break-word;
-                    border: 1px solid #e8e8e8;
-                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-                    transition: all var(--dt-duration-base) var(--dt-ease-out);
+                    border: 1px solid $message-received-border;
+                    box-shadow: $shadow-message;
+                    transition: all 0.2s ease;
 
                     &:hover {
-                      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
                     }
 
                     &.sending {
@@ -5727,7 +6114,7 @@ $shadow-lg:
 
                     &.failed {
                       background: #fff1f0;
-                      color: #ff4d4f;
+                      color: $danger-color;
                       border: 1px solid #ffccc7;
                       box-shadow: 0 1px 3px rgba(255, 77, 79, 0.15);
                     }
@@ -5883,9 +6270,9 @@ $shadow-lg:
             }
 
             .input-area {
-              padding: 12px 40px;
+              padding: 12px 16px;
               border-top: 1px solid $border-color;
-              background: #fafafa;
+              background: $bg-light;
 
               .voice-recording-panel {
                 display: flex;
@@ -5895,7 +6282,7 @@ $shadow-lg:
                 margin-bottom: 12px;
                 background: #fff7e6;
                 border: 1px solid #ffd591;
-                border-radius: 8px;
+                border-radius: $radius-base;
 
                 .voice-info {
                   display: flex;
@@ -5917,7 +6304,7 @@ $shadow-lg:
                     .volume-bar {
                       width: 4px;
                       min-height: 4px;
-                      background: linear-gradient(to top, $primary-color, #69b1ff);
+                      background: linear-gradient(to top, $primary-color, $primary-color-hover);
                       border-radius: 2px;
                       transition: height 0.1s ease;
                     }
@@ -5938,18 +6325,21 @@ $shadow-lg:
               .input-toolbar {
                 display: flex;
                 gap: 4px;
-                margin-bottom: 12px;
+                margin-bottom: 8px;
+                padding: 0 4px;
 
                 .el-button {
                   --el-button-border-color: transparent;
                   --el-button-bg-color: transparent;
-                  --el-button-text-color: #606266;
-                  padding: 8px;
-                  border-radius: 4px;
+                  --el-button-text-color: $text-regular;
+                  padding: 6px;
+                  border-radius: $radius-sm;
+                  width: 32px;
+                  height: 32px;
 
                   &:hover {
                     --el-button-text-color: $primary-color;
-                    --el-button-hover-bg-color: #f5f7fa;
+                    --el-button-hover-bg-color: $nav-item-hover;
                     --el-button-hover-border-color: transparent;
                   }
 
@@ -5961,23 +6351,24 @@ $shadow-lg:
               }
 
               .chat-input {
-                border-radius: 8px;
-                border: 1px solid #dcdfe6;
+                border-radius: $radius-base;
+                border: 1px solid $border-color;
                 background: #fff;
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+                box-shadow: $shadow-sm;
 
-                :deep(textarea) {
+                :deep(.el-textarea__inner) {
                   border: none;
-                  padding: 12px 16px;
+                  padding: 10px 12px;
                   resize: none;
                   font-size: 14px;
                   line-height: 1.5;
                   background: transparent;
+                  min-height: 80px;
                 }
 
-                &:focus {
+                &:focus-within {
                   border-color: $primary-color;
-                  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+                  box-shadow: 0 0 0 2px $primary-color-light;
                 }
               }
 
@@ -5985,7 +6376,8 @@ $shadow-lg:
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-top: 12px;
+                margin-top: 8px;
+                padding: 0 4px;
 
                 .input-tip {
                   font-size: 12px;
@@ -5994,13 +6386,15 @@ $shadow-lg:
 
                 .send-button {
                   min-width: 80px;
-                  height: 36px;
-                  border-radius: 4px;
+                  height: 32px;
+                  border-radius: $radius-base;
                   font-size: 14px;
+                  padding: 6px 16px;
 
                   &:disabled {
                     --el-button-text-color: #fff;
-                    --el-button-bg-color: #c0c4cc;
+                    --el-button-bg-color: $primary-disabled;
+                    --el-button-border-color: transparent;
                   }
                 }
               }
@@ -6013,7 +6407,7 @@ $shadow-lg:
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: $text-light;
+            color: $text-tertiary;
 
             p {
               margin-top: 16px;
@@ -6027,17 +6421,17 @@ $shadow-lg:
       .contacts-workspace {
         display: flex;
         width: 100%;
-        height: 100%; // 确保高度充满父容器
+        height: 100%;
 
         .contacts-sidebar {
-          width: 220px;
+          width: 240px;
           background: #fff;
           border-right: 1px solid $border-color;
           display: flex;
           flex-direction: column;
           height: 100%;
           min-height: 0;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          box-shadow: $shadow-sm;
 
           .section-title {
             padding: 16px 20px 8px;
@@ -6057,14 +6451,14 @@ $shadow-lg:
           .tree-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 20px;
+            gap: 10px;
+            padding: 10px 16px;
+            margin: 0 8px;
             cursor: pointer;
             font-size: 14px;
-            color: $text-primary;
+            color: $text-secondary;
             transition: all 0.2s ease;
-            border-radius: 4px;
-            margin: 0 10px;
+            border-radius: $radius-sm;
 
             .tree-label {
               flex: 1;
@@ -6080,7 +6474,7 @@ $shadow-lg:
             }
 
             &:hover {
-              background: #f5f7fa;
+              background: $nav-item-hover;
             }
 
             &.active {
@@ -6101,27 +6495,27 @@ $shadow-lg:
           border-right: 1px solid $border-color;
           display: flex;
           flex-direction: column;
-          height: 100%; // 确保高度充满父容器
-          min-height: 0; // 允许flex子元素正确收缩
+          height: 100%;
+          min-height: 0;
 
           .list-header {
-            padding: 16px;
+            padding: 12px 16px;
             border-bottom: 1px solid $border-color;
 
             .search-input {
-              border-radius: 20px;
+              border-radius: $radius-base;
               border: 1px solid $border-color;
               transition: all 0.2s ease;
               box-shadow: none;
 
               &:hover {
                 border-color: $primary-color;
-                box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+                box-shadow: 0 0 0 2px $primary-color-light;
               }
 
               &:focus-within {
                 border-color: $primary-color;
-                box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+                box-shadow: 0 0 0 2px $primary-color-light;
               }
             }
           }
@@ -6135,35 +6529,31 @@ $shadow-lg:
             .contact-item {
               display: flex;
               align-items: center;
-              padding: 12px 16px;
+              padding: 10px 12px;
+              margin: 4px 8px;
               cursor: pointer;
-              border-bottom: 1px solid #f0f0f0;
-              transition: all var(--dt-duration-base) var(--dt-ease-out);
+              border-radius: $radius-sm;
+              transition: all 0.2s ease;
               position: relative;
-              border-radius: var(--dt-radius-sm);
-              margin: 0 8px;
 
               &:hover {
-                background: linear-gradient(90deg, var(--dt-color-primary-lighter) 0%, transparent 100%);
-                transform: translateX(3px);
+                background: $bg-hover;
               }
 
               &:active {
-                transform: translateX(1px) scale(0.98);
+                transform: scale(0.98);
               }
 
               .contact-info {
                 flex: 1;
-                margin-left: 12px;
+                margin-left: 10px;
                 min-width: 0;
 
                 .contact-name {
-                  font-size: 15px;
+                  font-size: 14px;
                   font-weight: 500;
-                  color: $text-primary;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  white-space: nowrap;
+                  color: $text-secondary;
+                  @include text-ellipsis;
                   margin-bottom: 2px;
                 }
 
@@ -6477,7 +6867,7 @@ $shadow-lg:
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: $text-light;
+            color: $text-tertiary;
 
             p {
               margin-top: 16px;
@@ -6493,7 +6883,7 @@ $shadow-lg:
         width: 100%;
 
         .workbench-sidebar {
-          width: 180px;
+          width: 200px;
           background: #fff;
           border-right: 1px solid $border-color;
           display: flex;
@@ -6516,10 +6906,12 @@ $shadow-lg:
               align-items: center;
               gap: 10px;
               padding: 10px 16px;
+              margin: 0 8px;
               cursor: pointer;
               font-size: 14px;
-              color: $text-primary;
-              transition: background 0.2s;
+              color: $text-secondary;
+              transition: all 0.2s;
+              border-radius: $radius-sm;
 
               .category-label {
                 flex: 1;
@@ -6534,11 +6926,11 @@ $shadow-lg:
               }
 
               &:hover {
-                background: $bg-hover;
+                background: $nav-item-hover;
               }
 
               &.active {
-                background: $bg-hover;
+                background: $primary-color-light;
                 color: $primary-color;
                 font-weight: 500;
               }
@@ -6552,36 +6944,38 @@ $shadow-lg:
 
         .workbench-content {
           flex: 1;
-          background: $bg-base;
+          background: $bg-light;
           overflow-y: auto;
           @include web-scrollbar;
 
           .app-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 20px;
-            padding: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+            padding: 20px;
 
             .app-card {
               display: flex;
               flex-direction: column;
               align-items: center;
-              padding: 20px;
+              padding: 16px;
               background: #fff;
-              border-radius: 8px;
+              border-radius: $radius-lg;
               cursor: pointer;
               transition: all 0.2s;
-              box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+              box-shadow: $shadow-sm;
+              border: 1px solid $border-color;
 
               &:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                box-shadow: $shadow-md;
+                border-color: $primary-color;
               }
 
               .app-icon {
                 width: 56px;
                 height: 56px;
-                border-radius: 12px;
+                border-radius: $radius-lg;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -7124,6 +7518,96 @@ $shadow-lg:
               &:hover .file-actions {
                 opacity: 1;
               }
+
+              &.batch-selected {
+                background: #fff7e6;
+                border: 1px solid #ffd591;
+              }
+            }
+
+            // 文件复选框
+            .file-checkbox {
+              position: absolute;
+              top: 8px;
+              left: 8px;
+              z-index: 2;
+            }
+
+            // 批量选择栏
+            .batch-selection-bar {
+              position: sticky;
+              top: 0;
+              z-index: 10;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 12px 16px;
+              background: #e6f7ff;
+              border: 1px solid #91d5ff;
+              border-radius: 8px;
+              margin-bottom: 16px;
+
+              .selection-info {
+                font-size: 14px;
+                color: #1677ff;
+                font-weight: 500;
+              }
+
+              .selection-actions {
+                display: flex;
+                gap: 8px;
+              }
+            }
+
+            // 拖拽上传提示
+            .drag-upload-overlay {
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              background: rgba(22, 119, 255, 0.1);
+              border: 2px dashed #1677ff;
+              border-radius: 8px;
+              color: #1677ff;
+              font-size: 16px;
+              z-index: 100;
+
+              p {
+                margin-top: 12px;
+              }
+            }
+
+            // 文件夹树
+            .folder-tree {
+              flex: 1;
+              overflow-y: auto;
+              padding: 0 8px;
+
+              .el-tree {
+                background: transparent;
+
+                .tree-node {
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  font-size: 14px;
+                  color: $text-primary;
+
+                  .tree-label {
+                    flex: 1;
+                  }
+
+                  .tree-count {
+                    font-size: 12px;
+                    color: $text-tertiary;
+                  }
+                }
+              }
             }
           }
         }
@@ -7240,7 +7724,7 @@ $shadow-lg:
   .avatar-placeholder {
     width: 80px;
     height: 80px;
-    border: 2px dashed $border-base;
+    border: 2px dashed $border-color;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
@@ -7432,7 +7916,7 @@ $shadow-lg:
   justify-content: space-between;
   padding: 8px 16px;
   background: #f0f7ff;
-  border-top: 1px solid $border-base;
+  border-top: 1px solid $border-color;
 
   .reply-info {
     flex: 1;
@@ -7462,16 +7946,16 @@ $shadow-lg:
   bottom: 100%;
   left: 0;
   background: #fff;
-  border: 1px solid $border-base;
+  border: 1px solid $border-color;
   border-radius: 8px;
-  box-shadow: $shadow-lg;
+  box-shadow: $shadow-md;
   width: 320px;
   max-height: 280px;
   z-index: 100;
 
   .emoji-tabs {
     display: flex;
-    border-bottom: 1px solid $border-base;
+    border-bottom: 1px solid $border-color;
     overflow-x: auto;
 
     .emoji-tab {
@@ -7522,9 +8006,9 @@ $shadow-lg:
   bottom: 100%;
   left: 0;
   background: #fff;
-  border: 1px solid $border-base;
+  border: 1px solid $border-color;
   border-radius: 8px;
-  box-shadow: $shadow-lg;
+  box-shadow: $shadow-md;
   width: 240px;
   max-height: 200px;
   overflow-y: auto;
@@ -7584,7 +8068,7 @@ $shadow-lg:
     gap: 8px;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 1px solid $border-base;
+    border-bottom: 1px solid $border-color;
   }
 
   .files-list {
@@ -7640,9 +8124,9 @@ $shadow-lg:
 .message-context-menu {
   position: fixed;
   background: #fff;
-  border: 1px solid $border-base;
+  border: 1px solid $border-color;
   border-radius: 8px;
-  box-shadow: $shadow-lg;
+  box-shadow: $shadow-md;
   padding: 4px 0;
   z-index: 1000;
   min-width: 140px;
@@ -7668,7 +8152,7 @@ $shadow-lg:
 
   .menu-divider {
     height: 1px;
-    background: $border-base;
+    background: $border-color;
     margin: 4px 0;
   }
 }
@@ -7682,7 +8166,7 @@ $shadow-lg:
 
   .search-result-item {
     padding: 12px;
-    border-bottom: 1px solid $border-base;
+    border-bottom: 1px solid $border-color;
     cursor: pointer;
     transition: background 0.15s;
 
@@ -7808,7 +8292,7 @@ $shadow-lg:
     align-items: center;
     justify-content: space-between;
     padding: 16px 0;
-    border-bottom: 1px solid $border-base;
+    border-bottom: 1px solid $border-color;
 
     &:last-child {
       border-bottom: none;
@@ -7828,7 +8312,7 @@ $shadow-lg:
     align-items: center;
     gap: 16px;
     padding: 20px 0;
-    border-bottom: 1px solid $border-base;
+    border-bottom: 1px solid $border-color;
     margin-bottom: 20px;
 
     .profile-basic {
@@ -7956,7 +8440,7 @@ $shadow-lg:
     align-items: center;
     padding: 16px;
     margin-bottom: 12px;
-    border: 2px solid $border-base;
+    border: 2px solid $border-color;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s;
@@ -8035,7 +8519,7 @@ $shadow-lg:
       display: flex;
       align-items: center;
       padding: 16px;
-      border: 2px solid $border-base;
+      border: 2px solid $border-color;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s;
@@ -8056,7 +8540,7 @@ $shadow-lg:
         border-radius: 6px;
         margin-right: 16px;
         overflow: hidden;
-        border: 1px solid $border-base;
+        border: 1px solid $border-color;
 
         .preview-header {
           height: 12px;

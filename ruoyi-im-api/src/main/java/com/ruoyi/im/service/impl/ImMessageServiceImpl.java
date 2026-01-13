@@ -16,6 +16,9 @@ import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImMessageService;
+import com.ruoyi.im.utils.AuditLogUtil;
+import com.ruoyi.im.utils.ImDistributedLock;
+import com.ruoyi.im.utils.ImRedisUtil;
 import com.ruoyi.im.utils.MessageEncryptionUtil;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
@@ -62,9 +65,22 @@ public class ImMessageServiceImpl implements ImMessageService {
     @Autowired
     private com.ruoyi.im.utils.ImDistributedLock distributedLock;
 
+    @Autowired
+    private com.ruoyi.im.utils.ImRedisUtil redisUtil;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long sendMessage(ImMessageSendRequest request, Long userId) {
+        // 幂等性检查：使用clientMsgId防止重复发送
+        String clientMsgId = request.getClientMsgId();
+        if (clientMsgId != null && !clientMsgId.isEmpty()) {
+            Long existingMessageId = redisUtil.checkAndRecordClientMsgId(clientMsgId);
+            if (existingMessageId != null) {
+                log.info("消息已存在，跳过重复发送: clientMsgId={}, messageId={}", clientMsgId, existingMessageId);
+                return existingMessageId;
+            }
+        }
+
         ImUser sender = imUserMapper.selectImUserById(userId);
         if (sender == null) {
             throw new BusinessException("发送者不存在");
@@ -89,10 +105,11 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         // 使用分布式锁防止并发发送消息导致的数据不一致
         final Long finalConversationId = conversationId;
+        final String finalClientMsgId = clientMsgId;
         Long messageId = distributedLock.executeWithLock(
                 com.ruoyi.im.utils.ImDistributedLock.LockKeys.sendMessageKey(finalConversationId),
                 10, // 10秒过期时间足够
-                () -> doSendMessage(request, userId, finalConversationId, sender)
+                () -> doSendMessage(request, userId, finalConversationId, sender, finalClientMsgId)
         );
 
         return messageId;
@@ -101,7 +118,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     /**
      * 实际执行发送消息的逻辑
      */
-    private Long doSendMessage(ImMessageSendRequest request, Long userId, Long conversationId, ImUser sender) {
+    private Long doSendMessage(ImMessageSendRequest request, Long userId, Long conversationId, ImUser sender, String clientMsgId) {
         ImMessage message = new ImMessage();
         message.setConversationId(conversationId);
         message.setSenderId(userId);
@@ -115,6 +132,11 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setCreateTime(LocalDateTime.now());
 
         imMessageMapper.insertImMessage(message);
+
+        // 记录clientMsgId与消息ID的映射（用于幂等性）
+        if (clientMsgId != null && !clientMsgId.isEmpty()) {
+            redisUtil.recordClientMsgId(clientMsgId, message.getId());
+        }
 
         // 更新会话的最后消息ID和时间（确保会话列表正确显示最新消息）
         ImConversation conversationUpdate = new ImConversation();
@@ -144,6 +166,9 @@ public class ImMessageServiceImpl implements ImMessageService {
             mentionInfo.setConversationId(conversationId);
             messageMentionService.createMentions(message.getId(), mentionInfo, userId);
         }
+
+        // 记录消息发送审计日志
+        AuditLogUtil.logSendMessage(userId, message.getId(), conversationId, true);
 
         return message.getId();
     }

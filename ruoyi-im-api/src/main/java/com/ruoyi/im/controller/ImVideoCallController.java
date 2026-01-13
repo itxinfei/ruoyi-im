@@ -193,8 +193,7 @@ public class ImVideoCallController {
         }
 
         try {
-            // 这里可以调用Mapper获取历史记录
-            return Result.success("获取成功");
+            return Result.success(videoCallService.getCallHistory(userId, limit));
         } catch (Exception e) {
             log.error("获取通话历史失败: {}", e.getMessage());
             return Result.fail(e.getMessage());

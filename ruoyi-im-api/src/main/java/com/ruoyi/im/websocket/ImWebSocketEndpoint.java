@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -23,6 +24,7 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * WebSocket 实时通信端点
@@ -47,6 +49,11 @@ public class ImWebSocketEndpoint {
      * 存储会话到用户ID的映射（会话 -> 用户ID）
      */
     private static final Map<Session, Long> sessionUserMap = new ConcurrentHashMap<>();
+
+    /**
+     * Spring ApplicationContext（用于获取Bean）
+     */
+    private static ApplicationContext applicationContext;
 
     private static ImMessageService staticImMessageService;
     private static JwtUtils staticJwtUtils;
@@ -127,6 +134,14 @@ public class ImWebSocketEndpoint {
     @Autowired
     public void setConversationMemberMapper(ImConversationMemberMapper conversationMemberMapper) {
         staticConversationMemberMapper = conversationMemberMapper;
+    }
+
+    /**
+     * 注入ApplicationContext（用于获取其他Bean）
+     */
+    @Autowired
+    public void setApplicationContext(ApplicationContext context) {
+        applicationContext = context;
     }
 
     /**
@@ -216,20 +231,26 @@ public class ImWebSocketEndpoint {
                 }
             }
 
-            // 检查用户是否已存在在线连接，如果存在则关闭旧连接
-            Session oldSession = onlineUsers.get(userId);
-            if (oldSession != null && oldSession.isOpen()) {
-                log.info("用户已存在连接，关闭旧连接: userId={}", userId);
-                try {
-                    oldSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "新连接建立"));
-                } catch (IOException e) {
-                    log.error("关闭旧连接异常", e);
+            // 使用同步块确保连接更新的原子性，防止竞态条件
+            synchronized (onlineUsers) {
+                // 检查用户是否已存在在线连接，如果存在则关闭旧连接
+                Session oldSession = onlineUsers.get(userId);
+                if (oldSession != null && oldSession.isOpen()) {
+                    log.info("用户已存在连接，关闭旧连接: userId={}, oldSessionId={}, newSessionId={}",
+                             userId, oldSession.getId(), session.getId());
+                    try {
+                        // 先从映射中移除，防止并发问题
+                        sessionUserMap.remove(oldSession);
+                        oldSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "新连接建立"));
+                    } catch (IOException e) {
+                        log.error("关闭旧连接异常: userId={}", userId, e);
+                    }
                 }
-            }
 
-            // 保存用户会话
-            onlineUsers.put(userId, session);
-            sessionUserMap.put(session, userId);
+                // 保存用户会话
+                onlineUsers.put(userId, session);
+                sessionUserMap.put(session, userId);
+            }
 
             // 同步更新Redis中的在线状态
             if (staticImRedisUtil != null) {
@@ -243,6 +264,9 @@ public class ImWebSocketEndpoint {
 
             // 发送连接成功消息给客户端
             sendMessage(session, buildStatusMessage("connected", userId, true));
+
+            // 推送离线消息（异步执行，避免阻塞连接建立）
+            pushOfflineMessages(userId);
 
         } catch (Exception e) {
             log.error("WebSocket 连接处理异常", e);
@@ -317,10 +341,25 @@ public class ImWebSocketEndpoint {
     @OnClose
     public void onClose(Session session) {
         try {
-            Long userId = sessionUserMap.remove(session);
+            Long userId = null;
+            // 使用同步块确保原子性操作
+            synchronized (onlineUsers) {
+                userId = sessionUserMap.remove(session);
+                if (userId != null) {
+                    // 检查当前session是否是该用户的活跃连接
+                    Session currentSession = onlineUsers.get(userId);
+                    // 只有当关闭的session是当前活跃连接时才清理
+                    if (currentSession != null && currentSession.getId().equals(session.getId())) {
+                        onlineUsers.remove(userId);
+                    } else if (currentSession == null) {
+                        // 如果没有找到连接，也清理
+                        onlineUsers.remove(userId);
+                    }
+                    // 如果是其他session，说明用户已经在新连接上，不需要清理onlineUsers
+                }
+            }
+
             if (userId != null) {
-                onlineUsers.remove(userId);
-                
                 // 同步更新Redis中的在线状态
                 if (staticImRedisUtil != null) {
                     staticImRedisUtil.removeOnlineUser(userId);
@@ -1049,6 +1088,35 @@ public class ImWebSocketEndpoint {
 
         } catch (Exception e) {
             log.error("发送通话状态通知失败", e);
+        }
+    }
+
+    /**
+     * 推送离线消息
+     * <p>
+     * 用户上线时异步推送离线期间收到的消息
+     * 确保消息不丢失，提升系统可靠性
+     * </p>
+     *
+     * @param userId 用户ID
+     */
+    private void pushOfflineMessages(Long userId) {
+        // 使用Spring ApplicationContext获取离线消息服务Bean
+        if (applicationContext != null) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    Object offlineService = applicationContext.getBean("offlineMessageServiceImpl");
+                    if (offlineService != null) {
+                        // 调用离线消息服务推送消息
+                        java.lang.reflect.Method method = offlineService.getClass()
+                                .getMethod("pushAndClearOfflineMessages", Long.class);
+                        int count = (int) method.invoke(offlineService, userId);
+                        log.info("推送离线消息完成: userId={}, count={}", userId, count);
+                    }
+                } catch (Exception e) {
+                    log.error("推送离线消息失败: userId={}", userId, e);
+                }
+            });
         }
     }
 }

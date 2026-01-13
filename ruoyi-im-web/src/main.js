@@ -14,6 +14,7 @@ import clickFeedback from '@/directives/clickFeedback'
 import hoverScale from '@/directives/hoverScale'
 import './permission'
 import { initTheme as initAppTheme } from '@/utils/theme'
+import globalErrorHandler from '@/utils/globalErrorHandler'
 
 // 初始化主题（确保默认使用亮色主题）
 initAppTheme()
@@ -22,6 +23,7 @@ const app = createApp(App)
 app.use(ElementPlus)
 app.use(router)
 app.use(store)
+app.use(globalErrorHandler)
 
 app.directive('click-feedback', clickFeedback)
 app.directive('hover-scale', hoverScale)

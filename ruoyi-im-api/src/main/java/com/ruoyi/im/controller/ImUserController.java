@@ -9,6 +9,9 @@ import com.ruoyi.im.service.ImFriendService;
 import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.vo.contact.ImFriendVO;
 import com.ruoyi.im.vo.user.ImUserVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +27,7 @@ import java.util.stream.Collectors;
  *
  * @author ruoyi
  */
+@Tag(name = "用户管理", description = "用户信息查询、更新、头像上传、密码修改等接口")
 @RestController
 @RequestMapping("/api/im/user")
 public class ImUserController {
@@ -43,6 +47,7 @@ public class ImUserController {
      * @apiNote 使用 @Valid 注解进行参数校验；创建成功后返回用户ID
      * @throws BusinessException 当用户名已存在时抛出业务异常
      */
+    @Operation(summary = "创建用户", description = "管理员创建新用户账户")
     @PostMapping
     public Result<Long> create(@Valid @RequestBody ImRegisterRequest request) {
         Long userId = imUserService.createUser(request);
@@ -58,6 +63,7 @@ public class ImUserController {
      * @apiNote 删除用户会同时删除其好友关系、会话等关联数据
      * @throws BusinessException 当用户不存在时抛出业务异常
      */
+    @Operation(summary = "删除用户", description = "管理员删除指定用户账户及其关联数据")
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         imUserService.deleteUser(id);
@@ -72,6 +78,7 @@ public class ImUserController {
      * @return 用户列表
      * @apiNote 支持模糊搜索，匹配用户名或昵称
      */
+    @Operation(summary = "搜索用户", description = "根据关键词搜索用户，支持用户名或昵称模糊匹配")
     @GetMapping("/search")
     public Result<List<ImUserVO>> search(@RequestParam String keyword) {
         List<ImUserVO> list = imUserService.searchUsers(keyword);
@@ -86,6 +93,7 @@ public class ImUserController {
      * @return 用户列表
      * @apiNote 用于批量查询用户基本信息，如聊天中的群成员信息
      */
+    @Operation(summary = "批量获取用户信息", description = "根据用户ID列表批量获取用户基本信息")
     @GetMapping("/batch")
     public Result<List<ImUserVO>> getBatch(@RequestParam String ids) {
         List<Long> idList = java.util.Arrays.stream(ids.split(","))
@@ -103,6 +111,7 @@ public class ImUserController {
      * @return 好友列表
      * @apiNote 返回的好友信息包含好友用户信息，按昵称排序
      */
+    @Operation(summary = "获取用户好友列表", description = "查询指定用户的所有好友信息")
     @GetMapping("/friends/{id}")
     public Result<List<ImFriendVO>> getUserFriends(@PathVariable Long id) {
         List<ImFriendVO> list = imFriendService.getFriendList(id);
@@ -118,6 +127,7 @@ public class ImUserController {
      * @apiNote 当前版本从请求头获取userId，后续应从JWT Token中解析
      * @throws BusinessException 当用户不存在时抛出业务异常
      */
+    @Operation(summary = "获取当前用户信息", description = "获取当前登录用户的详细信息")
     @GetMapping("/info")
     public Result<ImUserVO> getUserInfo(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -136,6 +146,7 @@ public class ImUserController {
      * @apiNote 此接口用于查看其他用户资料，不包含敏感信息
      * @throws BusinessException 当用户不存在时抛出业务异常
      */
+    @Operation(summary = "获取指定用户信息", description = "根据用户ID获取用户详细信息")
     @GetMapping("/{id}")
     public Result<ImUserVO> getById(@PathVariable Long id) {
         ImUserVO vo = imUserService.getUserById(id);
@@ -150,6 +161,7 @@ public class ImUserController {
      * @return 用户列表
      * @apiNote 支持按用户名、昵称等条件搜索用户
      */
+    @Operation(summary = "获取用户列表", description = "根据查询条件获取用户列表")
     @GetMapping("/list")
     public Result<java.util.List<ImUserVO>> list(@RequestParam(required = false) String keyword) {
         com.ruoyi.im.dto.BasePageRequest request = new com.ruoyi.im.dto.BasePageRequest();
@@ -166,6 +178,7 @@ public class ImUserController {
      * @param operatorId 操作员ID，从请求头中获取
      * @return 修改结果
      */
+    @Operation(summary = "修改用户状态", description = "修改用户状态（启用/禁用）")
     @PutMapping("/changeStatus")
     public Result<Void> changeStatus(@RequestBody com.ruoyi.im.domain.ImUser user,
                                     @RequestHeader(value = "userId", required = false) Long operatorId) {
@@ -186,6 +199,7 @@ public class ImUserController {
      * @apiNote 使用 @Valid 注解进行参数校验，确保更新数据格式正确
      * @throws BusinessException 当用户不存在时抛出业务异常
      */
+    @Operation(summary = "更新用户信息", description = "更新用户的昵称、头像、个性签名等信息")
     @PutMapping("/{id}")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody ImUserUpdateRequest request) {
         imUserService.updateUser(id, request);
@@ -203,6 +217,7 @@ public class ImUserController {
      * @apiNote 旧密码验证失败时返回失败信息，成功时返回成功信息
      * @throws BusinessException 当用户不存在或旧密码错误时抛出业务异常
      */
+    @Operation(summary = "修改密码", description = "验证旧密码后更新为新密码")
     @PutMapping("/{id}/password")
     public Result<Void> changePassword(
             @PathVariable Long id,
@@ -222,6 +237,7 @@ public class ImUserController {
      * @apiNote 上传成功后自动更新用户头像字段，返回头像访问URL
      * @throws BusinessException 当用户不存在或文件上传失败时抛出业务异常
      */
+    @Operation(summary = "上传用户头像", description = "上传用户头像图片并更新用户头像字段")
     @PostMapping("/avatar")
     public Result<String> uploadAvatar(@RequestParam("avatarfile") MultipartFile file,
                                        @RequestHeader(value = "userId", required = false) Long userId) {

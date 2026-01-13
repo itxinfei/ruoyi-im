@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImTaskMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.im.domain.ImTask">
+        <id column="id" property="id"/>
+        <result column="project_id" property="projectId"/>
+        <result column="task_number" property="taskNumber"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="creator_id" property="creatorId"/>
+        <result column="assignee_id" property="assigneeId"/>
+        <result column="priority" property="priority"/>
+        <result column="status" property="status"/>
+        <result column="task_type" property="taskType"/>
+        <result column="start_date" property="startDate"/>
+        <result column="due_date" property="dueDate"/>
+        <result column="estimated_hours" property="estimatedHours"/>
+        <result column="actual_hours" property="actualHours"/>
+        <result column="completion_percent" property="completionPercent"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="has_subtask" property="hasSubtask"/>
+        <result column="attachments" property="attachments"/>
+        <result column="tags" property="tags"/>
+        <result column="followers" property="followers"/>
+        <result column="remind_time" property="remindTime"/>
+        <result column="remind_type" property="remindType"/>
+        <result column="repeat_type" property="repeatType"/>
+        <result column="completed_time" property="completedTime"/>
+        <result column="department_id" property="departmentId"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectTaskPage" resultMap="BaseResultMap">
+        SELECT t.*,
+               c.nick_name as creator_name,
+               c.avatar as creator_avatar,
+               a.nick_name as assignee_name,
+               a.avatar as assignee_avatar,
+               d.dept_name as department_name
+        FROM im_task t
+        LEFT JOIN sys_user c ON t.creator_id = c.user_id
+        LEFT JOIN sys_user a ON t.assignee_id = a.user_id
+        LEFT JOIN sys_dept d ON t.department_id = d.dept_id
+        <where>
+            <if test="req.keyword != null and req.keyword != ''">
+                AND t.title LIKE CONCAT('%', #{req.keyword}, '%')
+                OR t.description LIKE CONCAT('%', #{req.keyword}, '%')
+            </if>
+            <if test="req.projectId != null">
+                AND t.project_id = #{req.projectId}
+            </if>
+            <if test="req.creatorId != null">
+                AND t.creator_id = #{req.creatorId}
+            </if>
+            <if test="req.assigneeId != null">
+                AND t.assignee_id = #{req.assigneeId}
+            </if>
+            <if test="req.departmentId != null">
+                AND t.department_id = #{req.departmentId}
+            </if>
+            <if test="req.priority != null">
+                AND t.priority = #{req.priority}
+            </if>
+            <if test="req.status != null and req.status != ''">
+                AND t.status = #{req.status}
+            </if>
+            <if test="req.taskType != null and req.taskType != ''">
+                AND t.task_type = #{req.taskType}
+            </if>
+            <if test="req.parentId != null">
+                AND t.parent_id = #{req.parentId}
+            </if>
+            <if test="req.startDateBegin != null">
+                AND t.start_date &gt;= #{req.startDateBegin}
+            </if>
+            <if test="req.startDateEnd != null">
+                AND t.start_date &lt;= #{req.startDateEnd}
+            </if>
+            <if test="req.dueDateBegin != null">
+                AND t.due_date &gt;= #{req.dueDateBegin}
+            </if>
+            <if test="req.dueDateEnd != null">
+                AND t.due_date &lt;= #{req.dueDateEnd}
+            </if>
+            <if test="req.overdueOnly">
+                AND t.due_date &lt; CURDATE()
+                AND t.status != 'COMPLETED'
+                AND t.status != 'CANCELLED'
+            </if>
+            <if test="req.myCreatedOnly">
+                AND t.creator_id = #{req.myCreatedOnly}
+            </if>
+            <if test="req.myAssignedOnly">
+                AND t.assignee_id = #{req.myAssignedOnly}
+            </if>
+        </where>
+        <choose>
+            <when test="req.orderBy == 'dueDate'">
+                ORDER BY t.due_date ${req.orderDirection}
+            </when>
+            <when test="req.orderBy == 'priority'">
+                ORDER BY t.priority ${req.orderDirection}
+            </when>
+            <when test="req.orderBy == 'completionPercent'">
+                ORDER BY t.completion_percent ${req.orderDirection}
+            </when>
+            <otherwise>
+                ORDER BY t.create_time ${req.orderDirection}
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="countOverdueByAssignee" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM im_task
+        WHERE assignee_id = #{userId}
+          AND status != 'COMPLETED'
+          AND status != 'CANCELLED'
+          AND due_date &lt; #{currentDate}
+    </select>
+
+    <select id="selectOverdueTasks" resultMap="BaseResultMap">
+        SELECT t.*,
+               c.nick_name as creator_name,
+               a.nick_name as assignee_name
+        FROM im_task t
+        LEFT JOIN sys_user c ON t.creator_id = c.user_id
+        LEFT JOIN sys_user a ON t.assignee_id = a.user_id
+        WHERE t.due_date &lt; #{currentDate}
+          AND t.status != 'COMPLETED'
+          AND t.status != 'CANCELLED'
+        ORDER BY t.due_date ASC
+    </select>
+
+</mapper>

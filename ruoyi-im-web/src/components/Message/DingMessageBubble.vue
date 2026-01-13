@@ -75,10 +75,13 @@
                 <VideoPlay v-if="!isPlaying" />
                 <VideoPause v-else />
               </el-icon>
-              <span class="audio-duration">{{ formatDuration(message.duration) }}</span>
-              <div class="audio-wave" :class="{ playing: isPlaying }">
-                <span v-for="i in 20" :key="i" :style="{ animationDelay: `${i * 0.05}s` }"></span>
+              <div class="audio-info">
+                <div class="audio-wave" :class="{ playing: isPlaying }">
+                  <span v-for="i in 20" :key="i" :style="{ animationDelay: `${i * 0.05}s` }"></span>
+                </div>
+                <div class="audio-progress" :style="{ width: `${audioProgress}%` }"></div>
               </div>
+              <span class="audio-duration">{{ formatDuration(message.duration) }}</span>
             </div>
           </template>
 
@@ -208,7 +211,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   Picture,
@@ -274,6 +277,97 @@ const emit = defineEmits([
 ])
 
 const isPlaying = ref(false)
+const audioElement = ref(null)
+const audioProgress = ref(0)
+const audioDuration = ref(0)
+
+// 创建音频对象
+const createAudio = () => {
+  if (!props.message.fileUrl) return null
+
+  const audio = new Audio()
+  audio.src = props.message.fileUrl
+
+  // 监听播放事件
+  audio.addEventListener('play', () => {
+    isPlaying.value = true
+  })
+
+  audio.addEventListener('pause', () => {
+    isPlaying.value = false
+  })
+
+  audio.addEventListener('ended', () => {
+    isPlaying.value = false
+    audioProgress.value = 0
+  })
+
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      audioProgress.value = (audio.currentTime / audio.duration) * 100
+    }
+  })
+
+  audio.addEventListener('loadedmetadata', () => {
+    audioDuration.value = audio.duration
+  })
+
+  audio.addEventListener('error', () => {
+    ElMessage.error('音频加载失败')
+    isPlaying.value = false
+  })
+
+  return audio
+}
+
+// 播放/暂停音频
+const playAudio = () => {
+  if (!props.message.fileUrl) {
+    ElMessage.warning('音频文件不存在')
+    return
+  }
+
+  // 如果还没有创建音频对象，创建一个
+  if (!audioElement.value) {
+    audioElement.value = createAudio()
+  }
+
+  const audio = audioElement.value
+  if (!audio) return
+
+  if (isPlaying.value) {
+    audio.pause()
+  } else {
+    audio.play().catch(error => {
+      console.error('音频播放失败:', error)
+      ElMessage.error('音频播放失败')
+    })
+  }
+}
+
+// 清理音频资源
+const cleanupAudio = () => {
+  if (audioElement.value) {
+    audioElement.value.pause()
+    audioElement.value.src = ''
+    audioElement.value = null
+  }
+  isPlaying.value = false
+  audioProgress.value = 0
+}
+
+// 监听消息变化，重新创建音频对象
+watch(
+  () => props.message.fileUrl,
+  () => {
+    cleanupAudio()
+  }
+)
+
+// 组件卸载时清理
+onUnmounted(() => {
+  cleanupAudio()
+})
 
 const bubbleClass = computed(() => {
   return ['message-item', { 'is-own': props.isOwn }, { 'is-group': props.isGroup }]
@@ -608,6 +702,14 @@ const handleMoreCommand = command => {
   .audio-duration {
     font-size: 12px;
     color: var(--el-text-color-secondary);
+    white-space: nowrap;
+  }
+
+  .audio-info {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
   }
 
   .audio-wave {
@@ -630,12 +732,32 @@ const handleMoreCommand = command => {
       &:nth-child(even) {
         height: 16px;
       }
+
+      &.playing span {
+        animation-play-state: running;
+      }
     }
 
     &.playing span {
       animation-play-state: running;
-      background-color: var(--el-color-primary);
     }
+  }
+
+  .audio-progress {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 100%;
+    background-color: rgba(64, 158, 255, 0.3);
+    border-radius: 2px;
+    pointer-events: none;
+    transition: width 0.1s linear;
+  }
+
+  &.playing .audio-wave span {
+    animation-play-state: running;
+    background-color: var(--el-color-primary);
   }
 }
 

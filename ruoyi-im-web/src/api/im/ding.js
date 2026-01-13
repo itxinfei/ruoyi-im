@@ -3,7 +3,7 @@
  */
 import request from '@/utils/request'
 
-const BASE_URL = '/im/ding'
+const BASE_URL = '/api/im/ding'
 
 /**
  * 获取DING消息列表
@@ -117,5 +117,68 @@ export function getDingStatistics() {
   return request({
     url: `${BASE_URL}/statistics`,
     method: 'get',
+  })
+}
+
+/**
+ * 获取接收的DING列表
+ */
+export function getReceivedDings(params) {
+  return request({
+    url: `${BASE_URL}/received`,
+    method: 'get',
+    params,
+  })
+}
+
+/**
+ * 获取发送的DING列表
+ */
+export function getSentDings(params) {
+  return request({
+    url: `${BASE_URL}/sent`,
+    method: 'get',
+    params,
+  })
+}
+
+/**
+ * 获取DING回执列表
+ */
+export function getDingReceipts(dingId) {
+  return request({
+    url: `${BASE_URL}/${dingId}/receipts`,
+    method: 'get',
+  })
+}
+
+/**
+ * 取消定时DING
+ */
+export function cancelDing(dingId) {
+  return request({
+    url: `${BASE_URL}/${dingId}/cancel`,
+    method: 'put',
+  })
+}
+
+/**
+ * 获取DING模板列表
+ */
+export function getDingTemplates() {
+  return request({
+    url: `${BASE_URL}/templates`,
+    method: 'get',
+  })
+}
+
+/**
+ * 使用模板创建DING
+ */
+export function createDingFromTemplate(templateId, data) {
+  return request({
+    url: `${BASE_URL}/template/${templateId}`,
+    method: 'post',
+    data,
   })
 }

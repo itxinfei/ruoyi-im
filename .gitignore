@@ -33,6 +33,9 @@ Thumbs.db
 # 忽略Trae相关文件
 **/.trae/
 
+# 忽略临时文件
+**/tmpclaude*
+
 
 # 忽略Eclipse相关文件
 /.settings/

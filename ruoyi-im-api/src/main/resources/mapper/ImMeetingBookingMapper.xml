@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImMeetingBookingMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.im.domain.ImMeetingBooking">
+        <id column="id" property="id"/>
+        <result column="room_id" property="roomId"/>
+        <result column="booking_user_id" property="bookingUserId"/>
+        <result column="meeting_title" property="meetingTitle"/>
+        <result column="meeting_type" property="meetingType"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="attendee_count" property="attendeeCount"/>
+        <result column="attendees" property="attendees"/>
+        <result column="agenda" property="agenda"/>
+        <result column="resources" property="resources"/>
+        <result column="refreshments" property="refreshments"/>
+        <result column="recording" property="recording"/>
+        <result column="status" property="status"/>
+        <result column="check_in_time" property="checkInTime"/>
+        <result column="check_out_time" property="checkOutTime"/>
+        <result column="reminder_sent" property="reminderSent"/>
+        <result column="feedback" property="feedback"/>
+        <result column="rating" property="rating"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="booking_user_name" property="bookingUserName"/>
+        <result column="booking_user_avatar" property="bookingUserAvatar"/>
+        <result column="room_name" property="roomName"/>
+        <result column="room_location" property="roomLocation"/>
+    </resultMap>
+
+    <select id="selectUserBookings" resultMap="BaseResultMap">
+        SELECT b.*,
+               r.room_name,
+               r.location as room_location,
+               u.nick_name as booking_user_name,
+               u.avatar as booking_user_avatar
+        FROM im_meeting_booking b
+        LEFT JOIN im_meeting_room r ON b.room_id = r.id
+        LEFT JOIN sys_user u ON b.booking_user_id = u.user_id
+        WHERE b.booking_user_id = #{userId}
+          AND b.end_time &gt;= NOW()
+        ORDER BY b.start_time ASC
+    </select>
+
+    <select id="selectRoomBookings" resultMap="BaseResultMap">
+        SELECT b.*
+        FROM im_meeting_booking b
+        WHERE b.room_id = #{roomId}
+          AND b.status IN ('PENDING', 'CONFIRMED', 'COMPLETED')
+          AND b.start_time &gt;= #{startTime}
+          AND b.end_time &lt;= #{endTime}
+        ORDER BY b.start_time ASC
+    </select>
+
+    <select id="selectBookingsInTimeRange" resultMap="BaseResultMap">
+        SELECT b.*
+        FROM im_meeting_booking b
+        WHERE b.status IN ('PENDING', 'CONFIRMED')
+          AND b.start_time &gt;= #{startTime}
+          AND b.start_time &lt;= #{endTime}
+        ORDER BY b.start_time ASC
+    </select>
+
+    <select id="selectPendingReminderBookings" resultMap="BaseResultMap">
+        SELECT b.*
+        FROM im_meeting_booking b
+        WHERE b.status = 'CONFIRMED'
+          AND b.reminder_sent = 0
+          AND b.start_time &gt;= #{reminderTime}
+          AND b.start_time &lt;= DATE_ADD(#{reminderTime}, INTERVAL 15 MINUTE)
+    </select>
+
+    <select id="countByUserId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM im_meeting_booking
+        WHERE booking_user_id = #{userId}
+    </select>
+
+</mapper>

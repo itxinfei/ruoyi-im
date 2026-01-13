@@ -3,6 +3,9 @@
     <div
       class="message-bubble"
       :class="messageClasses"
+      :data-message-id="message.id || message.messageId"
+      :data-conversation-id="message.conversationId || message.sessionId"
+      :data-sender-id="message.senderId || message.userId"
       @contextmenu.prevent="showContextMenu"
       @click="handleClick"
       @mouseenter="handleMouseEnter"

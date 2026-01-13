@@ -6,6 +6,8 @@ import com.ruoyi.im.dto.group.ImGroupUpdateRequest;
 import com.ruoyi.im.service.ImGroupService;
 import com.ruoyi.im.vo.group.ImGroupMemberVO;
 import com.ruoyi.im.vo.group.ImGroupVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +20,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
+@Tag(name = "群组管理", description = "群组创建、信息管理、成员管理、权限管理等接口")
 @RestController
 @RequestMapping("/api/im/group")
 public class ImGroupController {
@@ -35,6 +38,7 @@ public class ImGroupController {
      * @apiNote 使用 @Valid 注解进行参数校验；创建后会自动创建群组会话
      * @throws BusinessException 当参数无效或创建失败时抛出业务异常
      */
+    @Operation(summary = "创建群组", description = "创建新群组，创建者自动成为群主")
     @PostMapping("/create")
     public Result<Long> create(@Valid @RequestBody ImGroupCreateRequest request,
                                 @RequestHeader(value = "userId", required = false) Long userId) {
@@ -55,6 +59,7 @@ public class ImGroupController {
      * @apiNote 只有群组成员才能查看群组详情
      * @throws BusinessException 当群组不存在或用户不是群组成员时抛出业务异常
      */
+    @Operation(summary = "获取群组详情", description = "查询指定群组的详细信息")
     @GetMapping("/{id}")
     public Result<ImGroupVO> getById(@PathVariable Long id,
                                      @RequestHeader(value = "userId", required = false) Long userId) {
@@ -73,6 +78,7 @@ public class ImGroupController {
      * @return 群组列表，按最后活跃时间倒序排列
      * @apiNote 返回的群组信息包含未读消息数、最后消息等
      */
+    @Operation(summary = "获取用户的群组列表", description = "查询当前用户加入的所有群组")
     @GetMapping("/list")
     public Result<List<ImGroupVO>> getUserGroups(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -93,6 +99,7 @@ public class ImGroupController {
      * @apiNote 使用 @Valid 注解进行参数校验；只有群主和管理员有权限更新
      * @throws BusinessException 当群组不存在或无权限更新时抛出业务异常
      */
+    @Operation(summary = "更新群组信息", description = "更新群组的名称、头像、公告、描述等信息")
     @PutMapping("/{id}")
     public Result<Void> update(@PathVariable Long id,
                                @Valid @RequestBody ImGroupUpdateRequest request,
@@ -114,6 +121,7 @@ public class ImGroupController {
      * @apiNote 只有群主有权限解散群组；解散后群组会话也会被删除
      * @throws BusinessException 当群组不存在或无权限解散时抛出业务异常
      */
+    @Operation(summary = "解散群组", description = "解散指定群组，所有成员将被移除")
     @DeleteMapping("/{id}")
     public Result<Void> dismiss(@PathVariable Long id,
                                 @RequestHeader(value = "userId", required = false) Long userId) {
@@ -134,6 +142,7 @@ public class ImGroupController {
      * @apiNote 只有群组成员才能查看成员列表
      * @throws BusinessException 当群组不存在时抛出业务异常
      */
+    @Operation(summary = "获取群组成员列表", description = "查询指定群组的所有成员")
     @GetMapping("/{id}/members")
     public Result<List<ImGroupMemberVO>> getMembers(@PathVariable Long id,
                                                      @RequestHeader(value = "userId", required = false) Long userId) {
@@ -155,6 +164,7 @@ public class ImGroupController {
      * @apiNote 只有群主和管理员有权限添加成员；添加后会发送群组通知消息
      * @throws BusinessException 当群组不存在、无权限添加或超过人数限制时抛出业务异常
      */
+    @Operation(summary = "添加群组成员", description = "批量添加用户到群组")
     @PostMapping("/{id}/members")
     public Result<Void> addMembers(@PathVariable Long id,
                                    @RequestBody List<Long> userIds,
@@ -177,6 +187,7 @@ public class ImGroupController {
      * @apiNote 只有群主和管理员有权限移除成员；群主不能被移除；移除后会发送群组通知消息
      * @throws BusinessException 当群组不存在、无权限移除或移除群主时抛出业务异常
      */
+    @Operation(summary = "移除群组成员", description = "批量移除群组成员")
     @DeleteMapping("/{id}/members")
     public Result<Void> removeMembers(@PathVariable Long id,
                                       @RequestBody List<Long> userIds,
@@ -198,6 +209,7 @@ public class ImGroupController {
      * @apiNote 群主不能退出群组，只能转让群主或解散群组；退出后会发送群组通知消息
      * @throws BusinessException 当群组不存在或群主尝试退出时抛出业务异常
      */
+    @Operation(summary = "退出群组", description = "当前用户退出指定群组")
     @PostMapping("/{id}/quit")
     public Result<Void> quit(@PathVariable Long id,
                             @RequestHeader(value = "userId", required = false) Long userId) {
@@ -220,6 +232,7 @@ public class ImGroupController {
      * @apiNote 只有群主有权限设置管理员；群主不能被取消管理员权限
      * @throws BusinessException 当群组不存在、无权限操作或目标用户不是成员时抛出业务异常
      */
+    @Operation(summary = "设置/取消管理员", description = "设置或取消指定成员的管理员权限")
     @PutMapping("/{id}/admin/{userId}")
     public Result<Void> setAdmin(@PathVariable Long id,
                                  @PathVariable Long targetUserId,
@@ -244,6 +257,7 @@ public class ImGroupController {
      * @apiNote 只有群主和管理员有权限禁言成员；禁言时长为null时表示取消禁言
      * @throws BusinessException 当群组不存在、无权限操作或目标用户不是成员时抛出业务异常
      */
+    @Operation(summary = "禁言/取消禁言成员", description = "对指定成员进行禁言或取消禁言")
     @PutMapping("/{id}/mute/{userId}")
     public Result<Void> muteMember(@PathVariable Long id,
                                    @PathVariable Long targetUserId,
@@ -267,6 +281,7 @@ public class ImGroupController {
      * @apiNote 只有当前群主有权限转让；转让后原群主变为管理员
      * @throws BusinessException 当群组不存在、无权限操作或目标用户不是成员时抛出业务异常
      */
+    @Operation(summary = "转让群主", description = "将群主权限转让给指定成员")
     @PutMapping("/{id}/transfer/{userId}")
     public Result<Void> transferOwner(@PathVariable Long id,
                                       @PathVariable Long newOwnerId,

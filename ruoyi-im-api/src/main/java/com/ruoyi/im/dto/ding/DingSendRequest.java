@@ -34,6 +34,12 @@ public class DingSendRequest {
     @Schema(description = "是否需要回执")
     private Boolean receiptRequired = true;
 
+    @Schema(description = "强提醒间隔（分钟，0表示不重复提醒）")
+    private Integer remindInterval = 0;
+
+    @Schema(description = "最大提醒次数")
+    private Integer maxRemindCount = 3;
+
     @Schema(description = "附件URL")
     private String attachment;
 }

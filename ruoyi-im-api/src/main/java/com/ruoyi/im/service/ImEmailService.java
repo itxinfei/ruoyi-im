@@ -90,4 +90,61 @@ public interface ImEmailService {
      * @return 未读数量
      */
     int getUnreadCount(Long userId);
+
+    /**
+     * 回复邮件
+     *
+     * @param originalEmailId 原始邮件ID
+     * @param content 回复内容
+     * @param senderId 发送者ID
+     * @return 新邮件ID
+     */
+    Long replyEmail(Long originalEmailId, String content, Long senderId);
+
+    /**
+     * 转发邮件
+     *
+     * @param originalEmailId 原始邮件ID
+     * @param toIds 转发接收者ID列表
+     * @param content 附加内容
+     * @param senderId 发送者ID
+     * @return 新邮件ID
+     */
+    Long forwardEmail(Long originalEmailId, List<Long> toIds, String content, Long senderId);
+
+    /**
+     * 移动邮件到指定文件夹
+     *
+     * @param emailId 邮件ID
+     * @param folder 目标文件夹
+     * @param userId 用户ID
+     */
+    void moveToFolder(Long emailId, String folder, Long userId);
+
+    /**
+     * 批量标记已读
+     *
+     * @param emailIds 邮件ID列表
+     * @param userId 用户ID
+     * @return 成功标记的数量
+     */
+    int batchMarkAsRead(List<Long> emailIds, Long userId);
+
+    /**
+     * 批量删除（移至垃圾箱）
+     *
+     * @param emailIds 邮件ID列表
+     * @param userId 用户ID
+     * @return 成功删除的数量
+     */
+    int batchMoveToTrash(List<Long> emailIds, Long userId);
+
+    /**
+     * 搜索邮件
+     *
+     * @param userId 用户ID
+     * @param keyword 关键词
+     * @return 匹配的邮件列表
+     */
+    List<ImEmail> searchEmails(Long userId, String keyword);
 }

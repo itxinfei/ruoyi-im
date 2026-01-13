@@ -1,5 +1,7 @@
 package com.ruoyi.im.service;
 
+import java.util.List;
+
 /**
  * 视频通话服务接口
  *
@@ -65,4 +67,13 @@ public interface ImVideoCallService {
      * @param callId 通话ID
      */
     void timeoutCall(Long callId);
+
+    /**
+     * 获取用户通话历史
+     *
+     * @param userId 用户ID
+     * @param limit 限制数量
+     * @return 通话历史列表
+     */
+    List<?> getCallHistory(Long userId, Integer limit);
 }

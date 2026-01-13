@@ -10,9 +10,43 @@ import {
 } from '@/api/im/message'
 import { listSession, updateSession, deleteSession as apiDeleteSession } from '@/api/im/session'
 import { markConversationRead, createPrivateConversation } from '@/api/im/conversation'
-import { listContact } from '@/api/im/contact'
+import { listContact, deleteContact as apiDeleteContact } from '@/api/im/contact'
+import { listGroup, quitGroup as apiQuitGroup } from '@/api/im/group'
+import { listFile, delFile as apiDelFile } from '@/api/im/file'
 import { ElMessage } from 'element-plus'
 import { getCurrentUserId, getCurrentUserInfo } from '@/utils/im-user'
+
+// ==================== 字段映射工具函数 ====================
+
+/**
+ * 将sessionId转换为conversationId（用于API调用）
+ * 前端内部统一使用sessionId，与后端交互时转换为conversationId
+ *
+ * @param sessionIdOrId 会话ID（可能是sessionId或id字段）
+ * @returns conversationId
+ */
+function toConversationId(sessionIdOrId) {
+  return sessionIdOrId
+}
+
+/**
+ * 将API响应中的conversationId转换为sessionId（用于前端内部）
+ * 统一后端返回的字段名差异
+ *
+ * @param data API响应数据
+ * @returns 转换后的数据
+ */
+function normalizeConversationId(data) {
+  if (!data || typeof data !== 'object') {
+    return data
+  }
+  // 确保有sessionId字段，优先使用conversationId的值
+  if (data.conversationId && !data.sessionId) {
+    data.sessionId = data.conversationId
+  }
+  // 如果两者都存在，保持sessionId的值（前端内部一致性）
+  return data
+}
 
 // 消息列表最大条数限制
 const MAX_MESSAGES_PER_SESSION = 500
@@ -232,6 +266,8 @@ function normalizeMessage(message) {
   // 返回标准化消息
   return {
     ...message,
+    // 统一会话ID字段名：前端内部统一使用sessionId
+    sessionId: message.sessionId || message.conversationId,
     // 统一消息类型字段名（优先使用type，其次messageType），统一转为小写
     type: (message.type || message.messageType || 'text').toLowerCase(),
     // 使用处理后的显示内容
@@ -497,7 +533,23 @@ const mutations = {
     state.unreadCount = count
   },
   SET_ONLINE_STATUS: (state, { userId, status }) => {
+    // 更新在线状态映射表
     state.onlineStatus[userId] = status
+
+    // 同步更新联系人列表中的在线状态
+    const contact = state.contacts.find(c => String(c.friendId) === String(userId) || String(c.id) === String(userId))
+    if (contact) {
+      contact.online = status === 'online'
+    }
+
+    // 同步更新会话列表中的在线状态（私聊会话）
+    const session = state.sessions.find(s =>
+      (s.type === 'private' || s.type === 'PRIVATE') &&
+      (String(s.peerId) === String(userId) || String(s.targetId) === String(userId))
+    )
+    if (session) {
+      session.onlineStatus = status
+    }
   },
   SET_WS_CONNECTED: (state, status) => {
     state.wsConnected = status
@@ -976,37 +1028,71 @@ const actions = {
 
   // 加载群组列表
   async loadGroups({ commit }) {
-    // TODO: 调用API获取群组列表
-    // const response = await listGroups()
-    // commit('SET_GROUPS', response.data)
-    commit('SET_GROUPS', [])
+    try {
+      const response = await listGroup()
+      const groups = response.rows || response.data || []
+      commit('SET_GROUPS', groups)
+      return groups
+    } catch (error) {
+      console.error('加载群组列表失败:', error)
+      commit('SET_GROUPS', [])
+      return []
+    }
   },
 
   // 加载文件列表
   async loadFiles({ commit }) {
-    // TODO: 调用API获取文件列表
-    // const response = await listFiles()
-    // commit('SET_FILES', response.data)
-    commit('SET_FILES', [])
+    try {
+      const response = await listFile()
+      const files = response.rows || response.data || []
+      commit('SET_FILES', files)
+      return files
+    } catch (error) {
+      console.error('加载文件列表失败:', error)
+      commit('SET_FILES', [])
+      return []
+    }
   },
 
   // 删除联系人
-  async deleteContact({ commit }, contactId) {
-    // TODO: 调用API删除联系人
-    ElMessage.success('联系人已删除')
+  async deleteContact({ commit, state }, contactId) {
+    try {
+      await apiDeleteContact(contactId)
+      // 从联系人列表中移除
+      state.contacts = state.contacts.filter(c => c.friendId !== contactId && c.id !== contactId)
+      ElMessage.success('联系人已删除')
+    } catch (error) {
+      console.error('删除联系人失败:', error)
+      ElMessage.error('删除联系人失败')
+      throw error
+    }
   },
 
   // 退出群组
   async leaveGroup({ commit }, groupId) {
-    // TODO: 调用API退出群组
-    commit('REMOVE_SESSION', groupId)
-    ElMessage.success('已退出群组')
+    try {
+      await apiQuitGroup(groupId)
+      commit('REMOVE_SESSION', groupId)
+      ElMessage.success('已退出群组')
+    } catch (error) {
+      console.error('退出群组失败:', error)
+      ElMessage.error('退出群组失败')
+      throw error
+    }
   },
 
   // 删除文件
-  async deleteFile({ commit }, fileId) {
-    // TODO: 调用API删除文件
-    ElMessage.success('文件已删除')
+  async deleteFile({ commit, state }, fileId) {
+    try {
+      await apiDelFile(fileId)
+      // 从文件列表中移除
+      state.files = state.files.filter(f => f.id !== fileId)
+      ElMessage.success('文件已删除')
+    } catch (error) {
+      console.error('删除文件失败:', error)
+      ElMessage.error('删除文件失败')
+      throw error
+    }
   },
 
   // 撤回消息

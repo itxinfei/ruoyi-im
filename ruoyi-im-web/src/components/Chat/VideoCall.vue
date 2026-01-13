@@ -172,12 +172,17 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { sendSignal } from '@/api/im/video-call'
 
 // Props
 const props = defineProps({
   visible: {
     type: Boolean,
     default: false,
+  },
+  callId: {
+    type: [Number, String],
+    default: null,
   },
   callType: {
     type: String,
@@ -414,10 +419,41 @@ const handleIceCandidate = async (candidate) => {
 }
 
 // 发送信令消息
-const sendSignalingMessage = (message) => {
-  // 这里应该通过 WebSocket 发送信令消息
-  console.log('发送信令:', message)
-  // 实际实现需要连接到信令服务器
+const sendSignalingMessage = async (message) => {
+  if (!props.callId) {
+    console.warn('未设置callId，无法发送信令')
+    return
+  }
+
+  try {
+    // 根据 message.type 确定信号类型
+    let signalType = 'offer'
+    if (message.type === 'answer') {
+      signalType = 'answer'
+    } else if (message.type === 'ice-candidate' || message.candidate) {
+      signalType = 'ice-candidate'
+    } else if (message.type === 'hangup') {
+      // 挂断信令通过 endCall API 发送，这里只记录日志
+      console.log('挂断通话:', props.callId)
+      return
+    }
+
+    // 构建信令数据
+    const signalData = message.candidate
+      ? JSON.stringify(message.candidate)
+      : JSON.stringify(message)
+
+    // 通过 API 发送信令
+    await sendSignal({
+      callId: Number(props.callId),
+      signalType,
+      signalData,
+    })
+
+    console.log('信令发送成功:', signalType)
+  } catch (error) {
+    console.error('发送信令失败:', error)
+  }
 }
 
 // 挂断

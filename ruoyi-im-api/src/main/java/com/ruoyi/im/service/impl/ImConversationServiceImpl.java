@@ -18,6 +18,8 @@ import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.utils.ImRedisUtil;
 import com.ruoyi.im.vo.conversation.ImConversationVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,8 @@ import java.util.List;
  */
 @Service
 public class ImConversationServiceImpl implements ImConversationService {
+
+    private static final Logger log = LoggerFactory.getLogger(ImConversationServiceImpl.class);
 
     @Autowired
     private ImConversationMapper imConversationMapper;
@@ -542,11 +546,32 @@ public class ImConversationServiceImpl implements ImConversationService {
      */
     private Long getPeerUserId(Long conversationId, Long currentUserId) {
         List<ImConversationMember> members = imConversationMemberMapper.selectByConversationId(conversationId);
+        if (members == null || members.isEmpty()) {
+            log.warn("会话无成员: conversationId={}", conversationId);
+            return null;
+        }
+
+        // 处理只有一个成员的异常情况
+        if (members.size() == 1) {
+            ImConversationMember onlyMember = members.get(0);
+            // 如果唯一成员是当前用户，说明对方用户还未加入会话
+            if (onlyMember.getUserId().equals(currentUserId)) {
+                log.warn("私聊会话只有当前用户一个成员: conversationId={}, userId={}", conversationId, currentUserId);
+                return null;
+            }
+            // 如果唯一成员不是当前用户，直接返回该成员ID（处理异常数据）
+            log.info("私聊会话只有一个成员，返回该成员作为对方用户: conversationId={}, peerUserId={}", conversationId, onlyMember.getUserId());
+            return onlyMember.getUserId();
+        }
+
+        // 正常情况：遍历成员找到对方用户ID
         for (ImConversationMember member : members) {
             if (!member.getUserId().equals(currentUserId)) {
                 return member.getUserId();
             }
         }
+
+        log.warn("私聊会话中找不到对方用户: conversationId={}, currentUserId={}, memberCount={}", conversationId, currentUserId, members.size());
         return null;
     }
 

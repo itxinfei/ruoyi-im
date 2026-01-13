@@ -172,7 +172,9 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { useStore } from 'vuex'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { addContact, updateContactRemark } from '@/api/im/contact'
 import {
   Male,
   Female,
@@ -184,7 +186,7 @@ import {
   Calendar,
 } from '@element-plus/icons-vue'
 import { getCurrentUserInfo, setUserInfo } from '@/utils/im-user'
-import { updateProfile, uploadAvatar as uploadAvatarApi } from '@/api/im/user'
+import { updateProfile, uploadAvatar as uploadAvatarApi, getUser, getCurrentUser } from '@/api/im/user'
 
 const props = defineProps({
   modelValue: {
@@ -199,6 +201,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'update-success'])
 
+const store = useStore()
 const visible = ref(false)
 const loading = ref(false)
 const saving = ref(false)
@@ -238,12 +241,16 @@ const isOwnProfile = computed(() => {
   return props.userId === currentUserId
 })
 
-// 在线状态
+// 在线状态 - 从Vuex store获取实时在线状态
 const onlineStatus = computed(() => {
   if (userInfo.status === 0) return 'offline'
   if (isOwnProfile.value) return 'online'
-  // TODO: 从WebSocket获取真实在线状态
-  return 'online'
+
+  // 从Vuex store获取该用户的在线状态
+  const userId = props.userId || userInfo.userId || userInfo.id
+  const userOnlineStatus = store.getters['im/onlineStatus']?.[userId]
+
+  return userOnlineStatus || 'offline'
 })
 
 const statusText = computed(() => {
@@ -291,40 +298,64 @@ const loadUserInfo = async () => {
     const targetUserId = props.userId || currentInfo?.userId || currentInfo?.id
 
     if (targetUserId) {
-      // TODO: 从API获取指定用户信息
       if (isOwnProfile.value || !props.userId) {
-        // 加载自己的信息
-        Object.assign(userInfo, {
-          id: currentInfo.userId || currentInfo.id,
-          username: currentInfo.username || currentInfo.userName || '',
-          nickname: currentInfo.nickname || currentInfo.nickName || '',
-          signature: currentInfo.signature || '',
-          email: currentInfo.email || '',
-          phonenumber: currentInfo.phonenumber || currentInfo.phone || '',
-          gender: currentInfo.gender || 0,
-          avatar: currentInfo.avatar || '',
-          createTime: currentInfo.createTime || new Date(),
-          status: currentInfo.status || 1,
-        })
+        // 加载自己的信息 - 调用API获取最新数据
+        const res = await getCurrentUser()
+        if (res.code === 200 && res.data) {
+          const data = res.data
+          Object.assign(userInfo, {
+            id: data.userId || data.id,
+            username: data.username || data.userName || '',
+            nickname: data.nickname || data.nickName || '',
+            signature: data.signature || '',
+            email: data.email || '',
+            phonenumber: data.phonenumber || data.phone || '',
+            gender: data.gender || 0,
+            avatar: data.avatar || '',
+            createTime: data.createTime || new Date(),
+            status: data.status || 1,
+          })
 
-        // 同时初始化编辑表单
-        Object.assign(editForm, {
-          id: userInfo.id,
-          username: userInfo.username,
-          nickname: userInfo.nickname,
-          signature: userInfo.signature,
-          email: userInfo.email,
-          phonenumber: userInfo.phonenumber,
-          gender: userInfo.gender,
-          avatar: userInfo.avatar,
-        })
+          // 同时初始化编辑表单
+          Object.assign(editForm, {
+            id: userInfo.id,
+            username: userInfo.username,
+            nickname: userInfo.nickname,
+            signature: userInfo.signature,
+            email: userInfo.email,
+            phonenumber: userInfo.phonenumber,
+            gender: userInfo.gender,
+            avatar: userInfo.avatar,
+          })
+
+          // 更新本地存储的用户信息
+          setUserInfo(data)
+        }
       } else {
-        // TODO: 加载其他用户信息
-        // 这里需要调用API获取指定用户的信息
+        // 加载其他用户信息 - 调用API获取指定用户数据
+        const res = await getUser(targetUserId)
+        if (res.code === 200 && res.data) {
+          const data = res.data
+          Object.assign(userInfo, {
+            id: data.userId || data.id,
+            username: data.username || data.userName || '',
+            nickname: data.nickname || data.nickName || '',
+            signature: data.signature || '',
+            email: data.email || '',
+            phonenumber: data.phonenumber || data.phone || '',
+            gender: data.gender || 0,
+            avatar: data.avatar || '',
+            createTime: data.createTime || new Date(),
+            status: data.status || 1,
+          })
+        } else {
+          ElMessage.error('获取用户信息失败')
+        }
       }
     }
   } catch (error) {
     console.error('加载用户信息失败:', error)
+    ElMessage.error('加载用户信息失败')
   } finally {
     loading.value = false
   }
@@ -420,9 +451,34 @@ const handleAvatarSuccess = response => {
 }
 
 // 添加好友
-const handleAddFriend = () => {
-  ElMessage.info('添加好友功能开发中...')
-  // TODO: 实现添加好友功能
+const handleAddFriend = async () => {
+  try {
+    await ElMessageBox.prompt('请输入验证消息', '添加好友', {
+      confirmButtonText: '发送',
+      cancelButtonText: '取消',
+      inputPattern: /.+/,
+      inputErrorMessage: '验证消息不能为空',
+    })
+
+    const reason = ElMessageBox.getInputValue()
+
+    const response = await addContact({
+      userId: userInfo.id,
+      reason: reason,
+    })
+
+    if (response.code === 200) {
+      ElMessage.success('好友申请已发送')
+    } else {
+      ElMessage.error(response.msg || '发送失败')
+    }
+  } catch (error) {
+    // 用户取消操作
+    if (error !== 'cancel') {
+      console.error('添加好友失败:', error)
+      ElMessage.error('添加好友失败，请重试')
+    }
+  }
 }
 
 // 发送消息
@@ -432,10 +488,31 @@ const handleSendMessage = () => {
 }
 
 // 保存备注
-const handleSaveRemark = () => {
-  if (remark.value) {
-    ElMessage.success('备注已保存')
-    // TODO: 调用API保存备注
+const handleSaveRemark = async () => {
+  if (!remark.value.trim()) {
+    ElMessage.warning('备注不能为空')
+    return
+  }
+
+  try {
+    // 需要获取好友关系ID（friendId）
+    // 这里假设 userInfo.id 可以作为 friendId，实际可能需要调整
+    const response = await updateContactRemark(userInfo.id, {
+      remark: remark.value.trim(),
+    })
+
+    if (response.code === 200) {
+      ElMessage.success('备注已保存')
+      // 更新本地显示的备注
+      if (userInfo.nickname) {
+        userInfo.nickname = remark.value.trim()
+      }
+    } else {
+      ElMessage.error(response.msg || '保存失败')
+    }
+  } catch (error) {
+    console.error('保存备注失败:', error)
+    ElMessage.error('保存备注失败，请重试')
   }
 }
 

@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImGroupMember;
+import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.mapper.ImConversationMapper;
+import com.ruoyi.im.mapper.ImMessageMapper;
+import com.ruoyi.im.service.IOfflineMessageService;
+import com.ruoyi.im.service.ImGroupMemberService;
 import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.service.ImConversationService;
-import com.ruoyi.im.service.ImGroupMemberService;
 import com.ruoyi.im.service.ImMessagePushService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.utils.ImRedisUtil;
@@ -54,16 +57,97 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
     @Autowired
     private ImRedisUtil imRedisUtil;
 
+    @Autowired
+    private IOfflineMessageService offlineMessageService;
+
+    @Autowired
+    private ImMessageMapper imMessageMapper;
+
     @Override
     public boolean pushToUser(Long userId, Object message) {
         try {
-            ImWebSocketEndpoint.sendToUser(userId, message);
-            log.debug("Pushed message to user: userId={}", userId);
-            return true;
+            // 检查用户是否在线
+            if (ImWebSocketEndpoint.isUserOnline(userId)) {
+                ImWebSocketEndpoint.sendToUser(userId, message);
+                log.debug("推送消息成功: userId={}", userId);
+                return true;
+            } else {
+                // 用户离线，存储为离线消息
+                if (isChatMessage(message)) {
+                    ImMessage msg = convertToMessage(message);
+                    if (msg != null) {
+                        offlineMessageService.storeOfflineMessage(userId, msg);
+                        log.debug("用户离线，存储离线消息: userId={}", userId);
+                    }
+                }
+                return false;
+            }
         } catch (Exception e) {
-            log.error("Failed to push message to user: userId={}", userId, e);
+            log.error("推送消息失败: userId={}", userId, e);
+
+            // 推送失败时也尝试存储为离线消息
+            if (isChatMessage(message)) {
+                ImMessage msg = convertToMessage(message);
+                if (msg != null) {
+                    offlineMessageService.storeOfflineMessage(userId, msg);
+                }
+            }
             return false;
         }
+    }
+
+    /**
+     * 判断是否为聊天消息
+     */
+    private boolean isChatMessage(Object message) {
+        if (message instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) message;
+            Object type = map.get("type");
+            return "message".equals(type);
+        }
+        return false;
+    }
+
+    /**
+     * 将推送消息转换为ImMessage对象
+     */
+    private ImMessage convertToMessage(Object message) {
+        if (!(message instanceof Map)) {
+            return null;
+        }
+        try {
+            Map<?, ?> map = (Map<?, ?>) message;
+            Long messageId = getLongValue(map.get("messageId"));
+            if (messageId != null) {
+                return imMessageMapper.selectImMessageById(messageId);
+            }
+        } catch (Exception e) {
+            log.error("转换消息对象失败", e);
+        }
+        return null;
+    }
+
+    /**
+     * 安全获取Long值
+     */
+    private Long getLongValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Long) {
+            return (Long) value;
+        }
+        if (value instanceof Integer) {
+            return ((Integer) value).longValue();
+        }
+        if (value instanceof String) {
+            try {
+                return Long.parseLong((String) value);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     @Override

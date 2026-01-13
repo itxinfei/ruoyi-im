@@ -207,4 +207,133 @@ public class ImEmailController {
             return Result.fail("获取失败: " + e.getMessage());
         }
     }
+
+    /**
+     * 回复邮件
+     */
+    @Operation(summary = "回复邮件", description = "回复指定邮件")
+    @PostMapping("/{emailId}/reply")
+    public Result<Long> replyEmail(
+            @PathVariable Long emailId,
+            @RequestBody Map<String, String> params,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+
+        try {
+            String content = params.get("content");
+            Long newEmailId = emailService.replyEmail(emailId, content, userId);
+            return Result.success("回复成功", newEmailId);
+        } catch (Exception e) {
+            return Result.fail("回复失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 转发邮件
+     */
+    @Operation(summary = "转发邮件", description = "转发指定邮件")
+    @PostMapping("/{emailId}/forward")
+    public Result<Long> forwardEmail(
+            @PathVariable Long emailId,
+            @RequestBody Map<String, Object> params,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+
+        try {
+            @SuppressWarnings("unchecked")
+            List<Long> toIds = (List<Long>) params.get("toIds");
+            String content = (String) params.get("content");
+
+            Long newEmailId = emailService.forwardEmail(emailId, toIds, content, userId);
+            return Result.success("转发成功", newEmailId);
+        } catch (Exception e) {
+            return Result.fail("转发失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 移动邮件到指定文件夹
+     */
+    @Operation(summary = "移动邮件", description = "移动邮件到指定文件夹")
+    @PutMapping("/{emailId}/move")
+    public Result<Void> moveToFolder(
+            @PathVariable Long emailId,
+            @RequestParam String folder,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+
+        try {
+            emailService.moveToFolder(emailId, folder, userId);
+            return Result.success("移动成功");
+        } catch (Exception e) {
+            return Result.fail("操作失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 批量标记已读
+     */
+    @Operation(summary = "批量标记已读", description = "批量将邮件标记为已读")
+    @PutMapping("/batch/read")
+    public Result<Integer> batchMarkAsRead(
+            @RequestBody Map<String, List<Long>> params,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+
+        try {
+            List<Long> emailIds = params.get("emailIds");
+            int count = emailService.batchMarkAsRead(emailIds, userId);
+            return Result.success("成功标记" + count + "封邮件", count);
+        } catch (Exception e) {
+            return Result.fail("操作失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 批量删除（移至垃圾箱）
+     */
+    @Operation(summary = "批量删除", description = "批量将邮件移至垃圾箱")
+    @PutMapping("/batch/trash")
+    public Result<Integer> batchMoveToTrash(
+            @RequestBody Map<String, List<Long>> params,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+
+        try {
+            List<Long> emailIds = params.get("emailIds");
+            int count = emailService.batchMoveToTrash(emailIds, userId);
+            return Result.success("成功删除" + count + "封邮件", count);
+        } catch (Exception e) {
+            return Result.fail("操作失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 搜索邮件
+     */
+    @Operation(summary = "搜索邮件", description = "根据关键词搜索邮件")
+    @GetMapping("/search")
+    public Result<List<?>> searchEmails(
+            @RequestParam String keyword,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+
+        try {
+            return Result.success(emailService.searchEmails(userId, keyword));
+        } catch (Exception e) {
+            return Result.fail("搜索失败: " + e.getMessage());
+        }
+    }
 }

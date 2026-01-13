@@ -8,15 +8,21 @@ import * as sessionApi from './session.js'
 import * as contactApi from './contact.js'
 import * as groupApi from './group.js'
 import * as userApi from './user.js'
-import * as auditApi from './audit.js'
-import * as backupApi from './backup.js'
-import * as mfaApi from './mfa.js'
 import * as notificationApi from './notification.js'
 import * as groupMemberApi from './groupMember.js'
 import * as appApi from './app.js'
 import * as approvalApi from './approval.js'
 import * as workbenchApi from './workbench.js'
 import * as organizationApi from './organization.js'
+import * as fileApi from './file.js'
+import * as dingApi from './ding.js'
+import * as videoCallApi from './video-call.js'
+import * as documentApi from './document.js'
+import * as emailApi from './email.js'
+import * as mentionApi from './mention.js'
+import * as externalContactApi from './external-contact.js'
+import * as meetingRoomApi from './meeting-room.js'
+import * as scheduleApi from './schedule.js'
 
 // ========== 统一导出 ==========
 export {
@@ -26,15 +32,21 @@ export {
   contactApi,
   groupApi,
   userApi,
-  auditApi,
-  backupApi,
-  mfaApi,
   notificationApi,
   groupMemberApi,
   appApi,
   approvalApi,
   workbenchApi,
   organizationApi,
+  fileApi,
+  dingApi,
+  videoCallApi,
+  documentApi,
+  emailApi,
+  mentionApi,
+  externalContactApi,
+  meetingRoomApi,
+  scheduleApi,
 }
 
 // ========== 默认导出 ==========
@@ -45,14 +57,21 @@ export default {
   contact: contactApi,
   group: groupApi,
   user: userApi,
-  audit: auditApi,
-  backup: backupApi,
-  mfa: mfaApi,
   notification: notificationApi,
   groupMember: groupMemberApi,
   app: appApi,
   approval: approvalApi,
   workbench: workbenchApi,
+  organization: organizationApi,
+  file: fileApi,
+  ding: dingApi,
+  videoCall: videoCallApi,
+  document: documentApi,
+  email: emailApi,
+  mention: mentionApi,
+  externalContact: externalContactApi,
+  meetingRoom: meetingRoomApi,
+  schedule: scheduleApi,
 }
 
 // ========== 常量定义 ==========

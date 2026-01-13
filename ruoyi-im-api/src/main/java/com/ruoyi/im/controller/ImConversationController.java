@@ -5,6 +5,8 @@ import com.ruoyi.im.dto.conversation.ImConversationCreateRequest;
 import com.ruoyi.im.dto.conversation.ImConversationUpdateRequest;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.vo.conversation.ImConversationVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
+@Tag(name = "会话管理", description = "会话创建、管理、未读消息统计、会话置顶、免打扰等功能")
 @RestController
 @RequestMapping("/api/im/conversation")
 public class ImConversationController {
@@ -32,6 +35,7 @@ public class ImConversationController {
      * @return 会话列表，按最后消息时间倒序排列
      * @apiNote 返回的会话信息包含未读消息数、最后消息、会话置顶状态等
      */
+    @Operation(summary = "获取会话列表", description = "查询当前用户的所有会话，包括单聊和群聊")
     @GetMapping("/list")
     public Result<List<ImConversationVO>> getUserConversations(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -50,6 +54,7 @@ public class ImConversationController {
      * @return 会话详细信息
      * @apiNote 会话必须是当前用户的会话
      */
+    @Operation(summary = "获取会话详情", description = "查询指定会话的详细信息")
     @GetMapping("/{id}")
     public Result<ImConversationVO> getConversationById(@PathVariable Long id,
                                                       @RequestHeader(value = "userId", required = false) Long userId) {
@@ -69,6 +74,7 @@ public class ImConversationController {
      * @return 创建结果，包含新会话ID
      * @apiNote 使用 @Valid 注解进行参数校验；会话类型包括PRIVATE(单聊)、GROUP(群聊)
      */
+    @Operation(summary = "创建会话", description = "创建一个新的会话，支持单聊和群聊")
     @PostMapping("/create")
     public Result<Long> createConversation(@Valid @RequestBody ImConversationCreateRequest request,
                                          @RequestHeader(value = "userId", required = false) Long userId) {
@@ -89,6 +95,7 @@ public class ImConversationController {
      * @return 更新结果
      * @apiNote 使用 @Valid 注解进行参数校验；只能更新自己的会话设置
      */
+    @Operation(summary = "更新会话设置", description = "更新会话的置顶、免打扰等设置")
     @PutMapping("/{id}")
     public Result<Void> updateConversation(@PathVariable Long id,
                                          @Valid @RequestBody ImConversationUpdateRequest request,
@@ -109,6 +116,7 @@ public class ImConversationController {
      * @return 删除结果
      * @apiNote 删除后会话不再显示在会话列表中，但历史消息仍保留
      */
+    @Operation(summary = "删除会话", description = "从会话列表中删除指定会话（非物理删除）")
     @DeleteMapping("/{id}")
     public Result<Void> deleteConversation(@PathVariable Long id,
                                          @RequestHeader(value = "userId", required = false) Long userId) {
@@ -128,6 +136,7 @@ public class ImConversationController {
      * @return 操作结果
      * @apiNote 置顶的会话会一直显示在会话列表顶部
      */
+    @Operation(summary = "置顶/取消置顶会话", description = "设置会话置顶状态")
     @PutMapping("/{id}/pinned")
     public Result<Void> setPinned(@PathVariable Long id,
                                 @RequestParam Boolean pinned,
@@ -148,6 +157,7 @@ public class ImConversationController {
      * @return 操作结果
      * @apiNote 设置免打扰后，该会话的消息不会触发通知提醒
      */
+    @Operation(summary = "设置免打扰", description = "设置会话免打扰状态")
     @PutMapping("/{id}/muted")
     public Result<Void> setMuted(@PathVariable Long id,
                                @RequestParam Boolean muted,
@@ -168,6 +178,7 @@ public class ImConversationController {
      * @return 匹配的会话列表
      * @apiNote 搜索会话名称、最近消息内容等
      */
+    @Operation(summary = "搜索会话", description = "根据关键词搜索会话")
     @GetMapping("/search")
     public Result<List<ImConversationVO>> search(@RequestParam String keyword,
                                                @RequestHeader(value = "userId", required = false) Long userId) {
@@ -187,6 +198,7 @@ public class ImConversationController {
      * @return 操作结果
      * @apiNote 标记后该会话的未读消息数将变为0
      */
+    @Operation(summary = "标记会话为已读", description = "将指定会话的所有未读消息标记为已读")
     @PutMapping("/{id}/markAsRead")
     public Result<Void> markAsRead(@PathVariable Long id,
                                  @RequestHeader(value = "userId", required = false) Long userId) {
@@ -205,6 +217,7 @@ public class ImConversationController {
      * @return 未读消息总数
      * @apiNote 用于显示总的未读消息数提醒
      */
+    @Operation(summary = "获取未读消息总数", description = "统计当前用户所有会话的未读消息总数")
     @GetMapping("/unreadCount")
     public Result<Integer> getTotalUnreadCount(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {

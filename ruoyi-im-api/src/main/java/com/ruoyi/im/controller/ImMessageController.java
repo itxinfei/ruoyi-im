@@ -75,6 +75,7 @@ public class ImMessageController {
      * @apiNote 使用 @Valid 注解进行参数校验，消息发送后会通过WebSocket推送给接收方
      * @throws BusinessException 当会话不存在或发送失败时抛出业务异常
      */
+    @Operation(summary = "发送消息", description = "发送文本、图片、文件等类型的消息到指定会话")
     @PostMapping("/send")
     public Result<Long> send(@Valid @RequestBody ImMessageSendRequest request,
                             @RequestHeader(value = "userId", required = false) Long userId) {
@@ -219,6 +220,7 @@ public class ImMessageController {
      * @apiNote 返回的消息会标记是否为当前用户发送的消息（isSelf字段）
      * @throws BusinessException 当会话不存在时抛出业务异常
      */
+    @Operation(summary = "获取会话消息列表", description = "分页查询指定会话的历史消息")
     @GetMapping("/list/{conversationId}")
     public Result<List<ImMessageVO>> getMessages(
             @PathVariable Long conversationId,
@@ -242,6 +244,7 @@ public class ImMessageController {
      * @apiNote 消息撤回有时间限制（如2分钟），超时后无法撤回；撤回后会通过WebSocket通知接收方
      * @throws BusinessException 当消息不存在、无权限撤回或超时时抛出业务异常
      */
+    @Operation(summary = "撤回消息", description = "撤回已发送的消息，有时间限制")
     @DeleteMapping("/{messageId}/recall")
     public Result<Void> recall(@PathVariable Long messageId,
                                @RequestHeader(value = "userId", required = false) Long userId) {
@@ -286,6 +289,7 @@ public class ImMessageController {
      * @apiNote 标记已读后会更新会话的未读消息数，并通过WebSocket推送已读回执给发送方
      * @throws BusinessException 当消息不存在或会话不存在时抛出业务异常
      */
+    @Operation(summary = "标记消息已读", description = "批量标记指定消息为已读状态")
     @PutMapping("/read")
     public Result<Void> markAsRead(@RequestBody java.util.Map<String, Object> data,
                                   @RequestHeader(value = "userId", required = false) Long userId) {

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImMeetingRoomMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.im.domain.ImMeetingRoom">
+        <id column="id" property="id"/>
+        <result column="room_name" property="roomName"/>
+        <result column="room_number" property="roomNumber"/>
+        <result column="department_id" property="departmentId"/>
+        <result column="location" property="location"/>
+        <result column="floor" property="floor"/>
+        <result column="capacity" property="capacity"/>
+        <result column="has_projector" property="hasProjector"/>
+        <result column="has_whiteboard" property="hasWhiteboard"/>
+        <result column="has_video_conf" property="hasVideoConf"/>
+        <result column="has_phone" property="hasPhone"/>
+        <result column="facilities" property="facilities"/>
+        <result column="photos" property="photos"/>
+        <result column="status" property="status"/>
+        <result column="is_bookable" property="isBookable"/>
+        <result column="description" property="description"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="department_name" property="departmentName"/>
+    </resultMap>
+
+    <select id="selectRoomPage" resultMap="BaseResultMap">
+        SELECT r.*,
+               d.dept_name as department_name
+        FROM im_meeting_room r
+        LEFT JOIN sys_dept d ON r.department_id = d.dept_id
+        <where>
+            <if test="req.keyword != null and req.keyword != ''">
+                AND r.room_name LIKE CONCAT('%', #{req.keyword}, '%')
+                OR r.room_number LIKE CONCAT('%', #{req.keyword}, '%')
+                OR r.location LIKE CONCAT('%', #{req.keyword}, '%')
+            </if>
+            <if test="req.departmentId != null">
+                AND r.department_id = #{req.departmentId}
+            </if>
+            <if test="req.minCapacity != null">
+                AND r.capacity &gt;= #{req.minCapacity}
+            </if>
+            <if test="req.floor != null">
+                AND r.floor = #{req.floor}
+            </if>
+            <if test="req.status != null and req.status != ''">
+                AND r.status = #{req.status}
+            </if>
+            <if test="req.hasProjector != null">
+                AND r.has_projector = #{req.hasProjector}
+            </if>
+            <if test="req.hasWhiteboard != null">
+                AND r.has_whiteboard = #{req.hasWhiteboard}
+            </if>
+            <if test="req.hasVideoConf != null">
+                AND r.has_video_conf = #{req.hasVideoConf}
+            </if>
+        </where>
+        <choose>
+            <when test="req.orderBy == 'capacity'">
+                ORDER BY r.capacity ${req.orderDirection}
+            </when>
+            <otherwise>
+                ORDER BY r.create_time ${req.orderDirection}
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectAvailableRooms" resultMap="BaseResultMap">
+        SELECT *
+        FROM im_meeting_room
+        WHERE status = 'AVAILABLE'
+          AND is_bookable = 1
+        ORDER BY capacity ASC, room_name ASC
+    </select>
+
+    <select id="selectByDepartmentId" resultMap="BaseResultMap">
+        SELECT *
+        FROM im_meeting_room
+        WHERE department_id = #{departmentId}
+          AND status = 'AVAILABLE'
+        ORDER BY room_name ASC
+    </select>
+
+    <select id="checkRoomAvailability" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM im_meeting_booking
+        WHERE room_id = #{roomId}
+          AND status IN ('PENDING', 'CONFIRMED')
+          AND (
+                  (start_time &lt;= #{startTime} AND end_time &gt; #{startTime})
+                  OR (start_time &lt; #{endTime} AND end_time &gt;= #{endTime})
+                  OR (start_time &gt;= #{startTime} AND end_time &lt;= #{endTime})
+              )
+    </select>
+
+    <select id="countBookingsByRoomId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM im_meeting_booking
+        WHERE room_id = #{roomId}
+          AND create_time &gt;= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    </select>
+
+</mapper>

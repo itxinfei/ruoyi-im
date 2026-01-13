@@ -90,6 +90,7 @@ import { ref, watch } from 'vue'
 import { Search, Loading } from '@element-plus/icons-vue'
 import { useStore } from 'vuex'
 import dayjs from 'dayjs'
+import { searchMessages } from '@/api/im/message'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -112,22 +113,26 @@ watch(visible, val => { emit('update:modelValue', val) })
 
 async function handleSearch() {
   if (!keyword.value.trim()) return
-  
+
   loading.value = true
   searched.value = true
-  
+
   try {
-    // TODO: 调用搜索API
-    // const res = await store.dispatch('im/searchMessages', {
-    //   sessionId: props.sessionId,
-    //   keyword: keyword.value,
-    //   startDate: dateRange.value?.[0],
-    //   endDate: dateRange.value?.[1],
-    //   type: searchType.value,
-    // })
-    // results.value = res
-    
-    // 模拟数据
+    const res = await searchMessages({
+      conversationId: props.sessionId,
+      keyword: keyword.value.trim(),
+      startTime: dateRange.value?.[0] ? dayjs(dateRange.value[0]).format('YYYY-MM-DD HH:mm:ss') : undefined,
+      endTime: dateRange.value?.[1] ? dayjs(dateRange.value[1]).format('YYYY-MM-DD HH:mm:ss') : undefined,
+      messageType: searchType.value || undefined,
+    })
+
+    if (res.code === 200 && res.data) {
+      results.value = res.data.list || []
+    } else {
+      results.value = []
+    }
+  } catch (error) {
+    console.error('搜索消息失败:', error)
     results.value = []
   } finally {
     loading.value = false

@@ -1,17 +1,19 @@
 package com.ruoyi.im.utils;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
@@ -32,6 +34,17 @@ public class JwtUtils {
     private long expiration;
 
     /**
+     * 获取签名密钥
+     * 将secret字符串转换为SecretKey对象
+     *
+     * @return 签名密钥
+     */
+    private SecretKey getSigningKey() {
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    /**
      * 生成JWT令牌
      *
      * @param username 用户名
@@ -47,7 +60,7 @@ public class JwtUtils {
                 .claim("userId", userId)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, secret)
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -60,8 +73,9 @@ public class JwtUtils {
      */
     public String getUsernameFromToken(String token) {
         try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey(secret)
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
                     .parseClaimsJws(token)
                     .getBody();
             return claims.getSubject();
@@ -86,8 +100,9 @@ public class JwtUtils {
      */
     public Long getUserIdFromToken(String token) {
         try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey(secret)
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
                     .parseClaimsJws(token)
                     .getBody();
             return claims.get("userId", Long.class);
@@ -111,7 +126,10 @@ public class JwtUtils {
      */
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
             LOGGER.warn("JWT token已过期: {}", e.getMessage());
@@ -130,17 +148,17 @@ public class JwtUtils {
      */
     public boolean isTokenExpired(String token) {
         try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey(secret)
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
                     .parseClaimsJws(token)
                     .getBody();
             return claims.getExpiration().before(new Date());
         } catch (ExpiredJwtException e) {
-            // token已过期
             return true;
         } catch (Exception e) {
             LOGGER.error("检查token过期状态失败: {}", e.getMessage());
-            return true; // 解析失败视为已过期
+            return true;
         }
     }
 }

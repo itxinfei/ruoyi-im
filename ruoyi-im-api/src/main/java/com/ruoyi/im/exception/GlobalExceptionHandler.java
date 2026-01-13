@@ -3,6 +3,7 @@ package com.ruoyi.im.exception;
 import com.ruoyi.im.common.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
@@ -12,16 +13,19 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.socket.WebSocketSession;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 全局异常处理器
- * 
+ *
  * 统一处理系统中的各种异常，返回标准化的错误响应
- * 
+ * 支持错误追踪ID，便于日志关联和问题排查
+ *
  * @author ruoyi
  */
 @RestControllerAdvice
@@ -29,26 +33,69 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    /** 错误追踪ID的MDC键名 */
+    private static final String TRACE_ID_KEY = "traceId";
+
+    /**
+     * 生成错误追踪ID
+     * 用于关联日志和错误响应，便于问题追踪
+     *
+     * @return 追踪ID
+     */
+    private String generateTraceId() {
+        String traceId = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        MDC.put(TRACE_ID_KEY, traceId);
+        return traceId;
+    }
+
+    /**
+     * 清除MDC中的追踪ID
+     */
+    private void clearTraceId() {
+        MDC.remove(TRACE_ID_KEY);
+    }
+
+    /**
+     * 构建包含追踪ID的错误响应
+     *
+     * @param code 错误码
+     * @param message 错误消息
+     * @return 包含追踪ID的响应对象
+     */
+    private <T> Result<T> buildErrorResult(int code, String message) {
+        String traceId = MDC.get(TRACE_ID_KEY);
+        if (traceId != null) {
+            return Result.error(code, message + " (追踪ID: " + traceId + ")");
+        }
+        return Result.error(code, message);
+    }
+
     /**
      * 处理业务异常
      *
      * 捕获并处理系统中抛出的业务异常，返回标准化的错误响应
+     * 包含错误追踪ID，便于日志关联和问题排查
      *
      * @param e 业务异常对象，包含错误码和错误信息
      * @param request HTTP请求对象，用于记录请求路径
-     * @return 包含错误码和错误信息的响应对象
+     * @return 包含错误码、错误信息和追踪ID的响应对象
      */
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleBusinessException(BusinessException e, HttpServletRequest request) {
-        log.warn("业务异常: {} - {}", e.getMessage(), request.getRequestURI());
-        
-        // 如果异常包含错误码，则使用错误码
-        if (e.getErrorCode() != null) {
-            return Result.error(e.getCode(), e.getMessage() + " [" + e.getErrorCode() + "]");
+        String traceId = generateTraceId();
+        try {
+            log.warn("业务异常[{}]: {} - URI={}, Code={}, ErrorCode={}",
+                     traceId, e.getMessage(), request.getRequestURI(), e.getCode(), e.getErrorCode());
+
+            // 返回包含追踪ID的错误响应
+            if (e.getErrorCode() != null) {
+                return Result.error(e.getCode(), e.getMessage() + " [追踪ID:" + traceId + "]");
+            }
+            return buildErrorResult(e.getCode(), e.getMessage());
+        } finally {
+            clearTraceId();
         }
-        
-        return Result.error(e.getCode(), e.getMessage());
     }
 
     /**
@@ -138,8 +185,55 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleIllegalArgumentException(IllegalArgumentException e) {
-        log.warn("非法参数: {}", e.getMessage());
-        return Result.error(400, "参数错误: " + e.getMessage());
+        String traceId = generateTraceId();
+        try {
+            log.warn("非法参数[{}]: {}", traceId, e.getMessage());
+            return buildErrorResult(400, "参数错误: " + e.getMessage());
+        } finally {
+            clearTraceId();
+        }
+    }
+
+    /**
+     * 处理空指针异常
+     *
+     * 捕获并处理空指针异常，通常是代码逻辑问题
+     *
+     * @param e 空指针异常对象
+     * @param request HTTP请求对象
+     * @return 包含500错误码的响应对象
+     */
+    @ExceptionHandler(NullPointerException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Result<Void> handleNullPointerException(NullPointerException e, HttpServletRequest request) {
+        String traceId = generateTraceId();
+        try {
+            log.error("空指针异常[{}]: {} - {}", traceId, e.getMessage(), request.getRequestURI(), e);
+            return buildErrorResult(500, "系统内部错误 [追踪ID:" + traceId + "]");
+        } finally {
+            clearTraceId();
+        }
+    }
+
+    /**
+     * 处理数据库异常
+     *
+     * 捕获并处理数据库操作异常
+     *
+     * @param e 数据库异常对象
+     * @param request HTTP请求对象
+     * @return 包含500错误码的响应对象
+     */
+    @ExceptionHandler(org.springframework.dao.DataAccessException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Result<Void> handleDataAccessException(org.springframework.dao.DataAccessException e, HttpServletRequest request) {
+        String traceId = generateTraceId();
+        try {
+            log.error("数据库异常[{}]: {} - {}", traceId, e.getMessage(), request.getRequestURI(), e);
+            return buildErrorResult(500, "数据操作失败，请稍后重试 [追踪ID:" + traceId + "]");
+        } finally {
+            clearTraceId();
+        }
     }
 
     /**
@@ -155,7 +249,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result<Void> handleException(Exception e, HttpServletRequest request) {
-        log.error("系统异常: {} - {}", e.getMessage(), request.getRequestURI(), e);
-        return Result.error(500, "系统内部错误，请联系管理员");
+        String traceId = generateTraceId();
+        try {
+            log.error("系统异常[{}]: {} - {}", traceId, e.getMessage(), request.getRequestURI(), e);
+            return buildErrorResult(500, "系统内部错误 [追踪ID:" + traceId + "]");
+        } finally {
+            clearTraceId();
+        }
     }
 }

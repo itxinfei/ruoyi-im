@@ -53,6 +53,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and folder = 'INBOX'
     </select>
 
+    <select id="searchEmailsByKeyword" resultMap="ImEmailResult">
+        <include refid="selectImEmailVo"/>
+        where (receiver_id = #{userId} or sender_id = #{userId})
+        and is_deleted = 0
+        and (subject like CONCAT('%', #{keyword}, '%')
+             or text_content like CONCAT('%', #{keyword}, '%')
+             or sender_name like CONCAT('%', #{keyword}, '%'))
+        order by create_time desc
+    </select>
+
     <insert id="insertEmail" parameterType="com.ruoyi.im.domain.ImEmail" useGeneratedKeys="true" keyProperty="id">
         insert into im_email
         <trim prefix="(" suffix=")" suffixOverrides=",">

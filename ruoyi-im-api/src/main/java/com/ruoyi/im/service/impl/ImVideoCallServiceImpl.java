@@ -14,8 +14,10 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 视频通话服务实现
@@ -273,5 +275,20 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         info.put("rejectReason", call.getRejectReason());
 
         return info;
+    }
+
+    @Override
+    public List<?> getCallHistory(Long userId, Integer limit) {
+        if (limit == null || limit <= 0) {
+            limit = 20;
+        }
+        if (limit > 100) {
+            limit = 100; // 最多返回100条
+        }
+
+        List<ImVideoCall> calls = videoCallMapper.selectCallsByUserId(userId, limit);
+        return calls.stream()
+                .map(this::formatCallInfo)
+                .collect(Collectors.toList());
     }
 }

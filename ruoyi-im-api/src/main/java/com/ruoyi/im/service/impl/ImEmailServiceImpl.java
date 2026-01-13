@@ -185,6 +185,147 @@ public class ImEmailServiceImpl implements ImEmailService {
         return emailMapper.countUnreadByUserId(userId);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long replyEmail(Long originalEmailId, String content, Long senderId) {
+        // 获取原邮件
+        ImEmail originalEmail = getEmailDetail(originalEmailId, senderId);
+
+        // 回复给原邮件发送者
+        Long replyToId = originalEmail.getSenderId();
+        String replySubject = originalEmail.getSubject();
+        if (!replySubject.startsWith("Re:")) {
+            replySubject = "Re: " + replySubject;
+        }
+
+        // 构建回复内容（包含原邮件引用）
+        String replyContent = buildReplyContent(content, originalEmail);
+
+        return sendEmail(java.util.Collections.singletonList(replyToId), replySubject, replyContent, senderId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long forwardEmail(Long originalEmailId, java.util.List<Long> toIds, String content, Long senderId) {
+        // 获取原邮件
+        ImEmail originalEmail = getEmailDetail(originalEmailId, senderId);
+
+        // 构建转发主题
+        String forwardSubject = originalEmail.getSubject();
+        if (!forwardSubject.startsWith("Fwd:")) {
+            forwardSubject = "Fwd: " + forwardSubject;
+        }
+
+        // 构建转发内容（包含原邮件引用）
+        String forwardContent = buildForwardContent(content, originalEmail);
+
+        return sendEmail(toIds, forwardSubject, forwardContent, senderId);
+    }
+
+    @Override
+    public void moveToFolder(Long emailId, String folder, Long userId) {
+        ImEmail email = emailMapper.selectEmailById(emailId);
+        if (email == null) {
+            throw new BusinessException("邮件不存在");
+        }
+        // 验证权限
+        if (!email.getSenderId().equals(userId) && !email.getReceiverId().equals(userId)) {
+            throw new BusinessException("无权限操作此邮件");
+        }
+
+        email.setFolder(folder);
+        emailMapper.updateEmail(email);
+
+        log.info("移动邮件: emailId={}, folder={}, userId={}", emailId, folder, userId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int batchMarkAsRead(java.util.List<Long> emailIds, Long userId) {
+        if (emailIds == null || emailIds.isEmpty()) {
+            return 0;
+        }
+
+        int successCount = 0;
+        for (Long emailId : emailIds) {
+            try {
+                markAsRead(emailId, userId);
+                successCount++;
+            } catch (Exception e) {
+                log.warn("批量标记已读失败: emailId={}, error={}", emailId, e.getMessage());
+            }
+        }
+
+        log.info("批量标记已读: userId={}, successCount={}", userId, successCount);
+        return successCount;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int batchMoveToTrash(java.util.List<Long> emailIds, Long userId) {
+        if (emailIds == null || emailIds.isEmpty()) {
+            return 0;
+        }
+
+        int successCount = 0;
+        for (Long emailId : emailIds) {
+            try {
+                moveToTrash(emailId, userId);
+                successCount++;
+            } catch (Exception e) {
+                log.warn("批量删除失败: emailId={}, error={}", emailId, e.getMessage());
+            }
+        }
+
+        log.info("批量删除: userId={}, successCount={}", userId, successCount);
+        return successCount;
+    }
+
+    @Override
+    public java.util.List<ImEmail> searchEmails(Long userId, String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+
+        return emailMapper.searchEmailsByKeyword(userId, keyword.trim());
+    }
+
+    /**
+     * 构建回复邮件内容（包含原邮件引用）
+     */
+    private String buildReplyContent(String replyContent, ImEmail originalEmail) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(replyContent);
+        sb.append("<br/><br/>");
+        sb.append("<div style=\"border-left: 2px solid #ccc; padding-left: 10px; color: #666;\">");
+        sb.append("<p>在 ").append(originalEmail.getSendTime()).append("，");
+        sb.append(originalEmail.getSenderName()).append(" 写道：</p>");
+        sb.append("<blockquote>");
+        sb.append(originalEmail.getHtmlContent());
+        sb.append("</blockquote>");
+        sb.append("</div>");
+        return sb.toString();
+    }
+
+    /**
+     * 构建转发邮件内容（包含原邮件引用）
+     */
+    private String buildForwardContent(String forwardContent, ImEmail originalEmail) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(forwardContent);
+        sb.append("<br/><br/>");
+        sb.append("<div style=\"border: 1px solid #ccc; padding: 10px; background-color: #f5f5f5;\">");
+        sb.append("<p>---------- 转发的邮件 ----------</p>");
+        sb.append("<p><strong>发件人：</strong>").append(originalEmail.getSenderName()).append("</p>");
+        sb.append("<p><strong>日期：</strong>").append(originalEmail.getSendTime()).append("</p>");
+        sb.append("<p><strong>主题：</strong>").append(originalEmail.getSubject()).append("</p>");
+        sb.append("<p><strong>收件人：</strong>").append(originalEmail.getReceiverId()).append("</p>");
+        sb.append("<br/>");
+        sb.append(originalEmail.getHtmlContent());
+        sb.append("</div>");
+        return sb.toString();
+    }
+
     /**
      * 去除HTML标签，获取纯文本
      */

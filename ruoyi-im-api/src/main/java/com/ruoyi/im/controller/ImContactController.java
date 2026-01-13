@@ -8,6 +8,8 @@ import com.ruoyi.im.service.ImFriendService;
 import com.ruoyi.im.vo.contact.ImContactGroupVO;
 import com.ruoyi.im.vo.contact.ImFriendVO;
 import com.ruoyi.im.vo.user.ImUserVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +22,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
+@Tag(name = "联系人管理", description = "用户搜索、好友申请、好友管理、分组管理等接口")
 @RestController
 @RequestMapping("/api/im/contact")
 public class ImContactController {
@@ -37,6 +40,7 @@ public class ImContactController {
      * @apiNote 搜索结果会排除当前用户和已经是好友的用户
      * @throws BusinessException 当搜索参数无效时抛出业务异常
      */
+    @Operation(summary = "搜索用户", description = "根据关键词搜索用户，支持用户名、昵称、手机号搜索")
     @GetMapping("/search")
     public Result<List<ImUserVO>> search(@RequestParam String keyword,
                                          @RequestHeader(value = "userId", required = false) Long userId) {
@@ -57,6 +61,7 @@ public class ImContactController {
      * @apiNote 使用 @Valid 注解进行参数校验；对方会收到好友申请通知
      * @throws BusinessException 当用户不存在、已是好友或申请已存在时抛出业务异常
      */
+    @Operation(summary = "发送好友申请", description = "向指定用户发送好友申请")
     @PostMapping("/request/send")
     public Result<Long> sendRequest(@Valid @RequestBody ImFriendAddRequest request,
                                      @RequestHeader(value = "userId", required = false) Long userId) {
@@ -75,6 +80,7 @@ public class ImContactController {
      * @return 好友申请列表
      * @apiNote 只返回待处理状态的申请，已处理的申请不在此列表中
      */
+    @Operation(summary = "获取收到的好友申请", description = "查询当前用户收到的好友申请列表")
     @GetMapping("/request/received")
     public Result<List<ImFriendRequest>> getReceivedRequests(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -92,6 +98,7 @@ public class ImContactController {
      * @return 好友申请列表
      * @apiNote 包含所有状态的申请（待处理、已同意、已拒绝）
      */
+    @Operation(summary = "获取发送的好友申请", description = "查询当前用户发送的好友申请列表")
     @GetMapping("/request/sent")
     public Result<List<ImFriendRequest>> getSentRequests(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -112,6 +119,7 @@ public class ImContactController {
      * @apiNote 同意后会建立好友关系，并创建私聊会话；拒绝后申请状态更新为已拒绝
      * @throws BusinessException 当申请不存在或无权限处理时抛出业务异常
      */
+    @Operation(summary = "处理好友申请", description = "同意或拒绝好友申请")
     @PostMapping("/request/{id}/handle")
     public Result<Void> handleRequest(@PathVariable Long id,
                                       @RequestParam Boolean approved,
@@ -131,6 +139,7 @@ public class ImContactController {
      * @return 好友列表
      * @apiNote 返回的好友信息包含在线状态、最后活跃时间等
      */
+    @Operation(summary = "获取好友列表", description = "查询当前用户的所有好友")
     @GetMapping("/list")
     public Result<List<ImFriendVO>> getFriendList(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -148,6 +157,7 @@ public class ImContactController {
      * @return 分组好友列表，每个分组包含该分组下的好友
      * @apiNote 未分组的好友会放在"默认分组"中
      */
+    @Operation(summary = "获取分组好友列表", description = "查询当前用户的好友，按分组进行组织")
     @GetMapping("/grouped")
     public Result<List<ImContactGroupVO>> getGroupedFriendList(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -167,6 +177,7 @@ public class ImContactController {
      * @apiNote 只能查询自己的好友信息
      * @throws BusinessException 当好友关系不存在时抛出业务异常
      */
+    @Operation(summary = "获取好友详情", description = "查询指定好友的详细信息")
     @GetMapping("/{id}")
     public Result<ImFriendVO> getFriendById(@PathVariable Long id,
                                             @RequestHeader(value = "userId", required = false) Long userId) {
@@ -188,6 +199,7 @@ public class ImContactController {
      * @apiNote 使用 @Valid 注解进行参数校验；只能更新自己的好友信息
      * @throws BusinessException 当好友关系不存在时抛出业务异常
      */
+    @Operation(summary = "更新好友信息", description = "更新好友的备注名、分组等信息")
     @PutMapping("/{id}")
     public Result<Void> updateFriend(@PathVariable Long id,
                                      @Valid @RequestBody ImFriendUpdateRequest request,
@@ -209,6 +221,7 @@ public class ImContactController {
      * @apiNote 删除好友后，对应的私聊会话也会被删除
      * @throws BusinessException 当好友关系不存在时抛出业务异常
      */
+    @Operation(summary = "删除好友", description = "删除指定好友关系")
     @DeleteMapping("/{id}")
     public Result<Void> deleteFriend(@PathVariable Long id,
                                      @RequestHeader(value = "userId", required = false) Long userId) {
@@ -230,6 +243,7 @@ public class ImContactController {
      * @apiNote 拉黑是单向的，拉黑好友后，对方仍可以发送消息，但自己无法接收
      * @throws BusinessException 当好友关系不存在时抛出业务异常
      */
+    @Operation(summary = "拉黑/解除拉黑好友", description = "拉黑好友后无法接收其消息")
     @PutMapping("/{id}/block")
     public Result<Void> blockFriend(@PathVariable Long id,
                                     @RequestParam Boolean blocked,
@@ -249,6 +263,7 @@ public class ImContactController {
      * @return 分组名称列表
      * @apiNote 分组是从好友关系中动态提取的，返回所有使用过的分组名称
      */
+    @Operation(summary = "获取好友分组列表", description = "查询当前用户使用的所有好友分组")
     @GetMapping("/group/list")
     public Result<java.util.List<String>> getGroupList(@RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
@@ -269,6 +284,7 @@ public class ImContactController {
      * @apiNote 此操作会更新所有使用该分组的好友关系
      * @throws BusinessException 当分组不存在时抛出业务异常
      */
+    @Operation(summary = "重命名好友分组", description = "将指定的分组名称重命名为新名称")
     @PutMapping("/group/{oldName}")
     public Result<Void> renameGroup(@PathVariable String oldName,
                                      @RequestBody GroupRenameRequest request,
@@ -296,6 +312,7 @@ public class ImContactController {
      * @apiNote 删除分组不会删除好友，只是清空好友的分组信息
      * @throws BusinessException 当分组不存在时抛出业务异常
      */
+    @Operation(summary = "删除好友分组", description = "删除指定分组，好友移至默认分组")
     @DeleteMapping("/group/{groupName}")
     public Result<Void> deleteGroup(@PathVariable String groupName,
                                      @RequestHeader(value = "userId", required = false) Long userId) {
@@ -322,6 +339,7 @@ public class ImContactController {
      * @apiNote 分组ID实际是分组名称；如果分组名称为空，则移至默认分组
      * @throws BusinessException 当好友不存在时抛出业务异常
      */
+    @Operation(summary = "移动好友到分组", description = "批量移动好友到指定分组")
     @PutMapping("/group/move")
     public Result<Void> moveFriendToGroup(@RequestBody MoveToGroupRequest request,
                                            @RequestHeader(value = "userId", required = false) Long userId) {

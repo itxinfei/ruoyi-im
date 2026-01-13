@@ -85,22 +85,28 @@ import {
   VideoPlay,
   DocumentCopy,
   Folder,
+  Upload,
+  Link,
 } from '@element-plus/icons-vue'
 import { formatFileSize } from '@/utils/format/file'
 import { formatRelativeTime } from '@/utils/format/time'
+import { uploadFile } from '@/api/im/file'
 
 const props = defineProps({
   files: { type: Array, default: () => [] },
   isCollapsed: { type: Boolean, default: false },
+  conversationId: [String, Number],
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits(['select', 'uploaded'])
 
 const store = useStore()
 
 const hoveredFileId = ref(null)
 const activeFileId = ref(null)
 const filesContainer = ref(null)
+const uploading = ref(false)
+const uploadProgress = ref(0)
 
 const filteredFiles = computed(() => {
   return Array.isArray(props.files) ? props.files : []
@@ -114,7 +120,7 @@ const getFileIcon = fileType => {
     audio: DocumentCopy,
     zip: Folder,
     rar: Folder,
-    '7z': ZipFile,
+    '7z': Folder,
     pdf: Document,
     doc: Document,
     docx: Document,
@@ -147,8 +153,46 @@ const handleDownload = file => {
 }
 
 const handleUpload = () => {
-  ElMessage.info('上传文件功能开发中...')
-  // TODO: 实现文件上传逻辑
+  // 创建隐藏的文件输入元素
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '*/*'
+  input.style.display = 'none'
+
+  input.onchange = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    uploading.value = true
+    uploadProgress.value = 0
+
+    try {
+      const res = await uploadFile(file, (progressEvent) => {
+        if (progressEvent.total) {
+          uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        }
+      })
+
+      if (res.code === 200) {
+        ElMessage.success('文件上传成功')
+        emit('uploaded', res.data)
+      } else {
+        ElMessage.error(res.msg || '上传失败')
+      }
+    } catch (error) {
+      console.error('上传文件失败:', error)
+      ElMessage.error('上传失败')
+    } finally {
+      uploading.value = false
+      uploadProgress.value = 0
+    }
+
+    // 清理输入元素
+    document.body.removeChild(input)
+  }
+
+  document.body.appendChild(input)
+  input.click()
 }
 
 const handleFileAction = (command, file) => {
@@ -157,12 +201,48 @@ const handleFileAction = (command, file) => {
       window.open(file.url, '_blank')
       break
     case 'share':
-      ElMessage.info(`分享文件: ${file.name}`)
-      // TODO: 实现分享逻辑
+      handleShare(file)
       break
     case 'delete':
       store.dispatch('im/deleteFile', file.id)
       break
+  }
+}
+
+/**
+ * 分享文件
+ * 复制文件链接到剪贴板
+ */
+const handleShare = async (file) => {
+  try {
+    // 生成分享链接
+    const shareUrl = `${window.location.origin}/files/${file.id}`
+    const shareText = `${file.name}\n${shareUrl}`
+
+    // 复制到剪贴板
+    await navigator.clipboard.writeText(shareText)
+
+    ElMessage.success({
+      message: '文件链接已复制到剪贴板',
+      icon: Link,
+    })
+  } catch (error) {
+    // 降级方案：使用传统方法复制
+    const textArea = document.createElement('textarea')
+    textArea.value = file.url || ''
+    textArea.style.position = 'fixed'
+    textArea.style.opacity = '0'
+    document.body.appendChild(textArea)
+    textArea.select()
+
+    try {
+      document.execCommand('copy')
+      ElMessage.success('文件链接已复制到剪贴板')
+    } catch (e) {
+      ElMessage.error('复制失败，请手动复制链接')
+    }
+
+    document.body.removeChild(textArea)
   }
 }
 </script>
