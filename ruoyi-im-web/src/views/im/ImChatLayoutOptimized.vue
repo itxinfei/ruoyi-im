@@ -447,6 +447,34 @@
                         class="status-icon sent"
                         ><SuccessFilled
                       /></el-icon>
+                      <!-- 消息已读状态 -->
+                      <span
+                        v-if="(msg.isOwn || msg.senderId === currentUser?.userId) && msg.status !== 'sending' && msg.status !== 'failed'"
+                        class="read-receipt"
+                      >
+                        <template v-if="currentSession?.type === 'PRIVATE'">
+                          {{ msg.isRead ? '已读' : '未读' }}
+                        </template>
+                        <template v-else>
+                          {{ msg.readCount || 0 }}{{ msg.memberCount ? `/${msg.memberCount}` : '' }}已读
+                        </template>
+                      </span>
+                    </div>
+                    <!-- 消息反应显示 -->
+                    <div
+                      v-if="getMessageReactions(msg.id).length > 0"
+                      class="message-reactions"
+                      @click.stop="showReactionPickerFor(msg)"
+                    >
+                      <div
+                        v-for="(stat, key) in getReactionStats(msg.id)"
+                        :key="key"
+                        class="reaction-item"
+                        :class="{ active: isReactedByUser(msg.id, key) }"
+                      >
+                        <span class="reaction-emoji">{{ getEmojiByKey(key) }}</span>
+                        <span class="reaction-count">{{ stat }}</span>
+                      </div>
                     </div>
                   </div>
                   <!-- 自己消息的右侧头像 -->
@@ -737,37 +765,80 @@
 
             <!-- 新朋友 -->
             <div v-else-if="contactCategory === 'new'" class="new-friends">
-              <div v-for="request in friendRequests" :key="request.id" class="friend-request-item">
-                <el-avatar :size="48" :src="request.avatar">
-                  {{ (request.name || request.nickname)?.charAt(0) || 'U' }}
-                </el-avatar>
-                <div class="request-info">
-                  <div class="request-name">{{ request.name || request.nickname }}</div>
-                  <div class="request-message">{{ request.message || '请求添加你为好友' }}</div>
-                  <div class="request-time">{{ formatTime(request.timestamp) }}</div>
-                </div>
-                <div class="request-actions">
-                  <el-button
-                    v-if="request.status === 'pending'"
-                    type="primary"
-                    size="small"
-                    @click="handleFriendRequest(request, 'accept')"
-                  >
-                    同意
-                  </el-button>
-                  <el-button
-                    v-if="request.status === 'pending'"
-                    size="small"
-                    @click="handleFriendRequest(request, 'reject')"
-                  >
-                    拒绝
-                  </el-button>
-                  <span v-else class="request-status">
-                    {{ request.status === 'accepted' ? '已添加' : '已拒绝' }}
-                  </span>
+              <!-- 搜索新朋友 -->
+              <div class="new-friends-search">
+                <el-input
+                  v-model="contactSearch"
+                  placeholder="搜索用户名/手机号添加新朋友"
+                  :prefix-icon="Search"
+                  clearable
+                  @input="handleNewFriendsSearch"
+                  @clear="handleNewFriendsSearch('')"
+                >
+                  <template #append>
+                    <el-button :icon="Plus" @click="showAddFriendDialog">添加</el-button>
+                  </template>
+                </el-input>
+              </div>
+
+              <!-- 搜索结果 -->
+              <div v-if="contactSearch && newFriendsSearchResult.length > 0" class="search-results">
+                <div
+                  v-for="user in newFriendsSearchResult"
+                  :key="user.id"
+                  class="search-result-item"
+                  @click="selectContact(user)"
+                >
+                  <el-avatar :size="40" :src="user.avatar">
+                    {{ (user.name || user.nickname)?.charAt(0) || 'U' }}
+                  </el-avatar>
+                  <div class="result-info">
+                    <div class="result-name">{{ user.name || user.nickname }}</div>
+                    <div class="result-detail">{{ user.deptName || user.position || '用户' }}</div>
+                  </div>
+                  <div class="result-action">
+                    <el-button size="small" @click.stop="handleAddFriend(user)">添加</el-button>
+                  </div>
                 </div>
               </div>
-              <el-empty v-if="friendRequests.length === 0" description="暂无新朋友请求" />
+
+              <!-- 好友请求列表 -->
+              <div v-if="!contactSearch || newFriendsSearchResult.length === 0">
+                <div v-if="friendRequests.length > 0" class="friend-requests-section">
+                  <div class="section-title">好友请求</div>
+                  <div v-for="request in friendRequests" :key="request.id" class="friend-request-item">
+                    <el-avatar :size="48" :src="request.avatar">
+                      {{ (request.name || request.nickname)?.charAt(0) || 'U' }}
+                    </el-avatar>
+                    <div class="request-info">
+                      <div class="request-name">{{ request.name || request.nickname }}</div>
+                      <div class="request-message">{{ request.message || '请求添加你为好友' }}</div>
+                      <div class="request-time">{{ formatTime(request.timestamp) }}</div>
+                    </div>
+                    <div class="request-actions">
+                      <el-button
+                        v-if="request.status === 'pending'"
+                        type="primary"
+                        size="small"
+                        @click="handleFriendRequest(request, 'accept')"
+                      >
+                        同意
+                      </el-button>
+                      <el-button
+                        v-if="request.status === 'pending'"
+                        size="small"
+                        @click="handleFriendRequest(request, 'reject')"
+                      >
+                        拒绝
+                      </el-button>
+                      <span v-else class="request-status">
+                        {{ request.status === 'accepted' ? '已添加' : '已拒绝' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <el-empty v-if="friendRequests.length === 0" description="暂无新朋友请求" />
+              </div>
             </div>
 
             <!-- A-Z 索引侧边栏 -->
@@ -1518,6 +1589,11 @@
         <el-icon><DocumentCopy /></el-icon>
         <span>复制</span>
       </div>
+      <!-- 添加表情反应 -->
+      <div class="menu-item" @click="showReactionPicker">
+        <el-icon><ChatDotRound /></el-icon>
+        <span>添加表情反应</span>
+      </div>
       <!-- 撤回：仅自己发送且在2分钟内的消息 -->
       <div v-if="canRecallMessage(selectedMessage)" class="menu-item" @click="recallMessage">
         <el-icon><RefreshLeft /></el-icon>
@@ -1535,6 +1611,25 @@
       <div class="menu-item" @click="selectMessage">
         <el-icon><Check /></el-icon>
         <span>多选</span>
+      </div>
+    </div>
+
+    <!-- 表情反应选择器 -->
+    <div
+      v-if="reactionPickerVisible"
+      class="reaction-picker"
+      :style="{ left: reactionPickerPosition.x + 'px', top: reactionPickerPosition.y + 'px' }"
+    >
+      <div class="reaction-emoji-list">
+        <div
+          v-for="emoji in quickReactions"
+          :key="emoji.key"
+          class="reaction-emoji-item"
+          :class="{ active: isReacted(emoji.key) }"
+          @click="toggleReaction(emoji.key)"
+        >
+          {{ emoji.emoji }}
+        </div>
       </div>
     </div>
 
@@ -2177,15 +2272,23 @@ import {
   getFilePreviewUrl,
   getFilePreviewInfo
 } from '@/api/im/file'
-import { sendMessage as apiSendMessage } from '@/api/im/message'
+import {
+  sendMessage as apiSendMessage,
+  addMessageReaction,
+  removeMessageReaction,
+  getMessageReactions as apiGetMessageReactions,
+  markConversationAsRead,
+} from '@/api/im/message'
 import {
   listContact,
   addContact,
   searchContacts,
   getReceivedFriendRequests,
   handleFriendRequest as apiHandleFriendRequest,
+  searchUsers,
 } from '@/api/im/contact'
 import { getDepartmentTree, getDepartmentMembers } from '@/api/im/organization'
+import { listGroup } from '@/api/im/group'
 import NotificationPanel from '@/components/Notification/NotificationPanel.vue'
 import SystemSettings from '@/views/settings/index.vue'
 
@@ -2251,11 +2354,13 @@ const contactSearch = ref('')
 const selectedContact = ref(null)
 // 使用 Vuex store 中的联系人（已包含去重逻辑）
 const friends = computed(() => store.state.im.contacts || [])
+const groups = ref([]) // 群组列表
 const groupSessions = ref([]) // 群组会话列表
 const orgTree = ref([])
 const orgMembers = ref([])
 const currentDept = ref(null)
 const friendRequests = ref([])
+const newFriendsSearchResult = ref([]) // 新朋友搜索结果
 const activeLetter = ref('') // 当前激活的字母索引
 
 // A-Z 索引字母
@@ -2536,23 +2641,23 @@ const availableLetters = computed(() => {
 
 // 按字母分组的群组列表
 const groupedGroups = computed(() => {
-  const groups = {}
+  const groupMap = {}
   indexLetters.forEach(letter => {
-    groups[letter] = []
+    groupMap[letter] = []
   })
 
-  groupSessions.value.forEach(group => {
+  groups.value.forEach(group => {
     const letter = getFirstLetter(group.name || group.groupName)
-    if (!groups[letter]) groups[letter] = []
-    groups[letter].push(group)
+    if (!groupMap[letter]) groupMap[letter] = []
+    groupMap[letter].push(group)
   })
 
   const result = []
   indexLetters.forEach(letter => {
-    if (groups[letter].length > 0) {
+    if (groupMap[letter].length > 0) {
       result.push({
         letter,
-        contacts: groups[letter].sort((a, b) => {
+        contacts: groupMap[letter].sort((a, b) => {
           const nameA = a.name || a.groupName || ''
           const nameB = b.name || b.groupName || ''
           return nameA.localeCompare(nameB, 'zh-CN')
@@ -2577,14 +2682,14 @@ const contactCategories = computed(() => [
   },
 ])
 
-// 搜索过滤后的分组好友
+// 搜索过滤后的分组联系人
 const searchedGroups = computed(() => {
   if (!contactSearch.value) {
     return contactCategory.value === 'friends' ? groupedFriends.value : groupedGroups.value
   }
 
   const keyword = contactSearch.value.toLowerCase()
-  const sourceList = contactCategory.value === 'friends' ? friends.value : groupSessions.value
+  const sourceList = contactCategory.value === 'friends' ? friends.value : groups.value
 
   const filtered = sourceList.filter(item => {
     const name = (item.name || item.groupName || item.nickname)?.toLowerCase() || ''
@@ -2592,23 +2697,23 @@ const searchedGroups = computed(() => {
   })
 
   // 将搜索结果重新分组
-  const groups = {}
+  const groupMap = {}
   indexLetters.forEach(letter => {
-    groups[letter] = []
+    groupMap[letter] = []
   })
 
   filtered.forEach(item => {
     const letter = getFirstLetter(item.name || item.groupName || item.nickname)
-    if (!groups[letter]) groups[letter] = []
-    groups[letter].push(item)
+    if (!groupMap[letter]) groupMap[letter] = []
+    groupMap[letter].push(item)
   })
 
   const result = []
   indexLetters.forEach(letter => {
-    if (groups[letter].length > 0) {
+    if (groupMap[letter].length > 0) {
       result.push({
         letter,
-        contacts: groups[letter],
+        contacts: groupMap[letter],
       })
     }
   })
@@ -2629,6 +2734,90 @@ const loadFriends = async () => {
     console.log('[加载好友] 已通过 Vuex store 加载，去重已在后端和 store 中完成')
   } catch (error) {
     console.error('加载好友列表失败:', error)
+  }
+}
+
+// 加载群组列表
+const loadGroups = async () => {
+  try {
+    const res = await listGroup({ pageSize: 100 })
+    const dataRows = res.rows || res.data || []
+    groups.value = Array.isArray(dataRows)
+      ? dataRows.map(g => ({
+          id: g.id || g.groupId,
+          name: g.name || g.groupName,
+          avatar: g.avatar || g.groupAvatar,
+          memberCount: g.memberCount || g.userCount || 0,
+          description: g.description,
+          ownerId: g.ownerId || g.creatorId,
+        }))
+      : []
+    console.log(`[加载群组] 已加载 ${groups.value.length} 个群组`)
+  } catch (error) {
+    console.error('加载群组列表失败:', error)
+    groups.value = []
+  }
+}
+
+// 搜索新朋友（根据用户名或手机号搜索用户）
+const searchNewFriends = async (keyword) => {
+  if (!keyword || keyword.trim() === '') {
+    newFriendsSearchResult.value = []
+    return
+  }
+  try {
+    const res = await searchUsers(keyword.trim())
+    const dataRows = res.rows || res.data || []
+    newFriendsSearchResult.value = Array.isArray(dataRows)
+      ? dataRows.map(u => ({
+          id: u.userId || u.id,
+          name: u.username || u.name,
+          nickname: u.nickname,
+          avatar: u.avatar,
+          mobile: u.mobile || u.phone,
+          email: u.email,
+          deptName: u.deptName || u.departmentName,
+          position: u.position,
+        }))
+      : []
+    console.log(`[搜索新朋友] 关键词"${keyword}"找到 ${newFriendsSearchResult.value.length} 个用户`)
+  } catch (error) {
+    console.error('搜索新朋友失败:', error)
+    newFriendsSearchResult.value = []
+  }
+}
+
+// 处理新朋友搜索输入事件
+const handleNewFriendsSearch = (keyword) => {
+  searchNewFriends(keyword)
+}
+
+// 处理添加好友操作
+const handleAddFriend = async (user) => {
+  try {
+    await ElMessageBox.prompt('请输入验证消息', '添加好友', {
+      confirmButtonText: '发送',
+      cancelButtonText: '取消',
+      inputValue: '您好，我想添加您为好友',
+      inputPlaceholder: '请输入验证消息',
+    })
+      .then(async ({ value }) => {
+        const reason = value || '您好，我想添加您为好友'
+        await addContact({
+          userId: user.id,
+          reason,
+        })
+        ElMessage.success('好友申请已发送，等待对方确认')
+        // 清空搜索结果
+        newFriendsSearchResult.value = []
+        contactSearch.value = ''
+      })
+      .catch(() => {
+        // 用户取消
+      })
+  } catch (error) {
+    console.error('添加好友失败:', error)
+    ElMessage.error('添加好友失败: ' + (error.message || '未知错误'))
   }
 }
 
@@ -3744,6 +3933,12 @@ const switchModule = moduleKey => {
 const selectSession = async session => {
   // 切换会话
   await store.dispatch('im/switchSession', session)
+  // 标记会话为已读
+  if (session.id) {
+    markConversationAsRead({ conversationId: session.id }).catch(err => {
+      console.warn('标记已读失败:', err)
+    })
+  }
   // 滚动到底部
   nextTick(() => {
     scrollToBottom()
@@ -4493,6 +4688,19 @@ const forwardSearchKeyword = ref('')
 const selectedForwardTarget = ref(null)
 const forwardTargets = ref([])
 
+// 表情反应
+const reactionPickerVisible = ref(false)
+const reactionPickerPosition = ref({ x: 0, y: 0 })
+const quickReactions = [
+  { key: 'like', emoji: '👍', name: '赞' },
+  { key: 'heart', emoji: '❤️', name: '喜欢' },
+  { key: 'laugh', emoji: '😄', name: '哈哈' },
+  { key: 'surprise', emoji: '😮', name: '惊讶' },
+  { key: 'cry', emoji: '😭', name: '哭泣' },
+  { key: 'angry', emoji: '😡', name: '生气' },
+]
+const messageReactions = ref(new Map()) // 存储每条消息的反应
+
 // 文件预览
 const filePreviewDialogVisible = ref(false)
 const previewingFileContent = ref(null)
@@ -5077,6 +5285,125 @@ const recallMessage = async () => {
   }
 }
 
+// 显示表情反应选择器
+const showReactionPicker = () => {
+  if (!selectedMessage.value) return
+  // 计算位置：显示在消息下方
+  const rect = event?.target?.getBoundingClientRect()
+  if (rect) {
+    reactionPickerPosition.value = {
+      x: rect.left,
+      y: rect.bottom + 5,
+    }
+  }
+  reactionPickerVisible.value = true
+  messageMenuVisible.value = false
+
+  // 点击其他地方关闭
+  const closePicker = () => {
+    reactionPickerVisible.value = false
+    document.removeEventListener('click', closePicker)
+  }
+  setTimeout(() => {
+    document.addEventListener('click', closePicker)
+  }, 100)
+}
+
+// 判断当前用户是否已对消息反应
+const isReacted = (reactionKey) => {
+  if (!selectedMessage.value) return false
+  const reactions = messageReactions.value.get(selectedMessage.value.id) || []
+  return reactions.some(r => r.key === reactionKey && r.userId === currentUser.value?.userId)
+}
+
+// 切换表情反应
+const toggleReaction = async (reactionKey) => {
+  if (!selectedMessage.value) return
+
+  const messageId = selectedMessage.value.id
+  const reactions = messageReactions.value.get(messageId) || []
+  const existingReaction = reactions.find(
+    r => r.key === reactionKey && r.userId === currentUser.value?.userId
+  )
+
+  try {
+    if (existingReaction) {
+      // 取消反应
+      await removeMessageReaction({ messageId, reactionKey })
+      const updated = reactions.filter(r => !(r.key === reactionKey && r.userId === currentUser.value?.userId))
+      messageReactions.value.set(messageId, updated)
+    } else {
+      // 添加反应
+      await addMessageReaction({
+        messageId,
+        reactionType: reactionKey.toUpperCase(),
+      })
+      reactions.push({
+        key: reactionKey,
+        userId: currentUser.value?.userId,
+        userName: currentUser.value?.nickname || currentUser.value?.username,
+      })
+      messageReactions.value.set(messageId, reactions)
+    }
+  } catch (error) {
+    ElMessage.error('操作失败: ' + (error.message || '未知错误'))
+  }
+
+  reactionPickerVisible.value = false
+}
+
+// 获取消息的反应列表
+const getMessageReactions = (messageId) => {
+  return messageReactions.value.get(messageId) || []
+}
+
+// 获取反应统计
+const getReactionStats = (messageId) => {
+  const reactions = getMessageReactions(messageId)
+  const stats = {}
+  reactions.forEach(r => {
+    stats[r.key] = (stats[r.key] || 0) + 1
+  })
+  return stats
+}
+
+// 为指定消息显示表情选择器
+const showReactionPickerFor = (message) => {
+  selectedMessage.value = message
+  // 计算位置：显示在消息反应下方
+  const rect = event?.target?.getBoundingClientRect()
+  if (rect) {
+    reactionPickerPosition.value = {
+      x: rect.left,
+      y: rect.bottom + 5,
+    }
+  }
+  reactionPickerVisible.value = true
+
+  // 点击其他地方关闭
+  const closePicker = () => {
+    reactionPickerVisible.value = false
+    document.removeEventListener('click', closePicker)
+  }
+  setTimeout(() => {
+    document.addEventListener('click', closePicker)
+  }, 100)
+}
+
+// 判断当前用户是否对消息进行了某个反应
+const isReactedByUser = (messageId, reactionKey) => {
+  const reactions = getMessageReactions(messageId)
+  return reactions.some(
+    r => r.key === reactionKey && r.userId === currentUser.value?.userId
+  )
+}
+
+// 根据key获取emoji
+const getEmojiByKey = (key) => {
+  const emoji = quickReactions.find(e => e.key === key)
+  return emoji ? emoji.emoji : ''
+}
+
 // 文件预览相关
 const isPdfFile = file => {
   if (!file) return false
@@ -5469,6 +5796,11 @@ const init = async () => {
     // 加载好友列表
     loadFriends().catch(error => {
       console.error('加载好友列表失败:', error)
+    })
+
+    // 加载群组列表
+    loadGroups().catch(error => {
+      console.error('加载群组列表失败:', error)
     })
 
     console.timeEnd('[IM初始化] 第二阶段耗时')
@@ -6018,17 +6350,17 @@ onUnmounted(() => {
 
 // ==================== 钉钉PC客户端 设计规范变量 ====================
 // 布局尺寸（严格按照钉钉PC客户端实际测量）
-$nav-width-narrow: 48px;    // 左侧导航栏宽度（窄模式-仅图标）
-$nav-width-wide: 180px;     // 左侧导航栏宽度（宽模式-图标+文字）
+$nav-width-narrow: 68px;     // 左侧导航栏宽度（窄模式-仅图标）- 钉钉规范68px
+$nav-width-wide: 180px;      // 左侧导航栏宽度（宽模式-图标+文字）
 $nav-width: $nav-width-narrow; // 当前使用窄模式
-$header-height: 48px;       // 顶部导航栏高度
-$session-panel-width: 280px; // 会话列表宽度（固定）
+$header-height: 48px;        // 顶部导航栏高度
+$session-panel-width: 320px; // 会话列表宽度（固定）- 钉钉规范320px
 $chat-panel-min-width: 400px; // 聊天区域最小宽度
-$nav-item-size: 48px;        // 导航项尺寸
-$chat-header-height: 48px;   // 聊天头部高度
-$input-bar-height: 56px;     // 输入栏高度
-$search-bar-height: 36px;    // 搜索栏高度
-$session-item-height: 48px;  // 会话项高度
+$nav-item-size: 48px;         // 导航项尺寸 - 钉钉规范48×48px
+$chat-header-height: 48px;    // 聊天头部高度
+$input-bar-height: 56px;      // 输入栏高度
+$search-bar-height: 36px;     // 搜索栏高度
+$session-item-height: 64px;   // 会话项高度 - 钉钉规范64px
 
 // 品牌色系（钉钉标准色）
 $primary-color: #1890FF;     // 钉钉蓝（主色）
@@ -6038,12 +6370,12 @@ $primary-color-light: #E6F7FF; // 浅蓝（选中背景）
 $primary-disabled: #D9D9D9;
 
 // 中性色系（钉钉规范）
-$text-primary: #000000;      // 主要文字（黑色）
-$text-secondary: #333333;     // 正文内容
-$text-regular: #666666;       // 副标题、次要信息
-$text-tertiary: #8C8C8C;      // 时间戳、提示信息（钉钉灰色）
+$text-primary: #262626;      // 主要文字 - 钉钉规范标题色
+$text-secondary: #333333;     // 正文内容 - 钉钉规范正文色
+$text-regular: #666666;       // 副标题、次要信息 - 钉钉规范次要文字
+$text-tertiary: #999999;      // 时间戳、提示信息 - 钉钉规范辅助文字
 $text-disabled: #CCCCCC;      // 禁用状态
-$text-placeholder: #8C8C8C;  // 占位符（钉钉灰色）
+$text-placeholder: #999999;   // 占位符 - 钉钉规范辅助文字
 
 $bg-white: #FFFFFF;
 $bg-gray: #F5F7FA;           // 页面整体背景（钉钉浅灰）
@@ -6052,7 +6384,7 @@ $bg-hover: #F5F7FA;          // 悬停背景（钉钉浅灰）
 $bg-nav-narrow: #F5F7FA;     // 导航栏窄模式背景
 $bg-nav-wide: #FFFFFF;       // 导航栏宽模式背景
 
-$border-color: #E8EAED;      // 分割线、边框（钉钉规范）
+$border-color: #E8E8E8;      // 分割线、边框 - 钉钉规范边框色
 $border-hover: #D9D9D9;      // 边框悬停
 
 // 功能色
@@ -6069,11 +6401,11 @@ $nav-item-icon: #666666;
 $nav-item-icon-active: #1890FF;
 
 // 消息气泡颜色（钉钉规范）
-$message-sent-bg: #1890FF;       // 发送方：钉钉蓝
-$message-sent-text: #FFFFFF;     // 发送方文字：白色
-$message-received-bg: #FFFFFF;  // 接收方：白色
-$message-received-text: #000000; // 接收方文字：黑色
-$message-received-border: #E8EAED; // 接收方边框：钉钉灰
+$message-sent-bg: #1890FF;         // 发送方：钉钉蓝
+$message-sent-text: #FFFFFF;       // 发送方文字：白色
+$message-received-bg: #FFFFFF;    // 接收方：白色
+$message-received-text: #333333;  // 接收方文字：钉钉正文色
+$message-received-border: #E8E8E8; // 接收方边框：钉钉规范边框色
 
 // 阴影系统
 $shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
@@ -6096,6 +6428,20 @@ $spacing-sm: 8px;
 $spacing-md: 12px;
 $spacing-lg: 16px;
 $spacing-xl: 24px;
+
+// 动画时长（钉钉规范）
+$transition-instant: 0.1s;   // 按钮点击 - 极快
+$transition-fast: 0.2s;       // 快速切换 - 颜色/阴影变化
+$transition-base: 0.3s;       // 标准过渡 - 展开/收起
+$transition-slow: 0.5s;       // 较慢 - 复杂动画
+
+// 缓动函数（钉钉规范）
+$ease-linear: linear;                           // 线性 - 进度条
+$ease-base: cubic-bezier(0.4, 0, 0.2, 1);       // 标准缓动
+$ease-in: cubic-bezier(0.4, 0, 1, 1);           // 入场缓动
+$ease-out: cubic-bezier(0, 0, 0.2, 1);          // 出场缓动
+$ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);     // 双向缓动
+$ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1); // 弹性缓动 - 消息发送
 
 // 头像尺寸
 $avatar-xs: 24px;
@@ -6242,8 +6588,8 @@ $avatar-xl: 64px;
 
   // 顶部导航栏（钉钉风格优化版）
   .ding-header {
-    height: 52px;
-    min-height: 52px;
+    height: $header-height;
+    min-height: $header-height;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -6435,8 +6781,8 @@ $avatar-xl: 64px;
         overflow-x: hidden;
 
         .nav-item {
-          width: 40px;
-          height: 40px;
+          width: 48px;    // 钉钉规范：导航项尺寸48×48px
+          height: 48px;   // 钉钉规范：导航项尺寸48×48px
           display: flex;
           align-items: center;
           justify-content: center;
@@ -6447,7 +6793,7 @@ $avatar-xl: 64px;
           position: relative;
 
           .nav-icon {
-            font-size: 20px;
+            font-size: 24px;  // 钉钉规范：图标24×24px
           }
 
           // 未读红点
@@ -6538,8 +6884,13 @@ $avatar-xl: 64px;
               margin: 0 8px;
               cursor: pointer;
               border-radius: 6px;
-              transition: all 0.2s ease;
+              transition: all $transition-fast $ease-base;
               position: relative;
+
+              // 新会话滑入动画
+              &.new-session {
+                animation: listSlideIn 0.3s $ease-base;
+              }
 
               &:hover {
                 background: $bg-hover;
@@ -6788,6 +7139,11 @@ $avatar-xl: 64px;
                 gap: 12px;
                 padding: 0 16px;
 
+                // 新消息弹出动画
+                &.new-message {
+                  animation: messagePop 0.3s $ease-bounce;
+                }
+
                 /* 发送方消息 - 气泡在左边，头像在右边（整个靠右对齐） */
                 &.isOwn {
                   align-self: flex-end;
@@ -6846,7 +7202,7 @@ $avatar-xl: 64px;
                 }
 
                 .message-content {
-                  max-width: 65%;
+                  max-width: 60%;  // 钉钉规范：气泡最大宽度60%
 
                   .sender-name {
                     font-size: 12px;
@@ -7156,11 +7512,20 @@ $avatar-xl: 64px;
                   border-radius: $radius-base;
                   font-size: 14px;
                   padding: 6px 16px;
+                  transition: all $transition-instant $ease-base;
+
+                  &:active {
+                    animation: buttonClick 0.1s $ease-base;
+                  }
 
                   &:disabled {
                     --el-button-text-color: #fff;
                     --el-button-bg-color: $primary-disabled;
                     --el-button-border-color: transparent;
+
+                    &:active {
+                      animation: none;
+                    }
                   }
                 }
               }
@@ -7396,6 +7761,12 @@ $avatar-xl: 64px;
             flex: 1;
             overflow-y: auto;
             @include web-scrollbar;
+
+            .new-friends-search {
+              padding: 12px 16px;
+              background: #fff;
+              border-bottom: 1px solid #f0f0f0;
+            }
 
             .friend-request-item {
               display: flex;
@@ -8896,6 +9267,7 @@ $avatar-xl: 64px;
   padding: 4px 0;
   z-index: 1000;
   min-width: 140px;
+  animation: dropdownSlide 0.2s $ease-base;
 
   .menu-item {
     display: flex;
@@ -8920,6 +9292,91 @@ $avatar-xl: 64px;
     height: 1px;
     background: $border-color;
     margin: 4px 0;
+  }
+}
+
+// 表情反应选择器
+.reaction-picker {
+  position: fixed;
+  background: #fff;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  box-shadow: $shadow-md;
+  padding: 8px;
+  z-index: 1001;
+  animation: dropdownSlide 0.2s $ease-base;
+
+  .reaction-emoji-list {
+    display: flex;
+    gap: 4px;
+
+    .reaction-emoji-item {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all $transition-fast $ease-base;
+
+      &:hover {
+        background: $bg-hover;
+        transform: scale(1.1);
+      }
+
+      &.active {
+        background: $primary-color-light;
+        border: 1px solid $primary-color;
+      }
+    }
+  }
+}
+
+// 消息反应显示
+.message-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+
+  .reaction-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: $bg-light;
+    border: 1px solid $border-color;
+    border-radius: 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all $transition-fast $ease-base;
+
+    &:hover {
+      background: $bg-hover;
+      border-color: $primary-color;
+    }
+
+    &.active {
+      background: $primary-color-light;
+      border-color: $primary-color;
+
+      .reaction-emoji {
+        transform: scale(1.1);
+      }
+    }
+
+    .reaction-emoji {
+      font-size: 14px;
+      transition: transform $transition-instant $ease-bounce;
+    }
+
+    .reaction-count {
+      font-size: 12px;
+      color: $text-secondary;
+      font-weight: 500;
+    }
   }
 }
 
@@ -9131,6 +9588,17 @@ $avatar-xl: 64px;
   font-size: 11px;
   color: $text-tertiary;
   margin-top: 4px;
+
+  &.read {
+    color: $success-color;
+  }
+}
+
+// 消息时间中的已读回执
+.read-receipt {
+  font-size: 11px;
+  color: $text-tertiary;
+  margin-left: 8px;
 
   &.read {
     color: $success-color;

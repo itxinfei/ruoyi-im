@@ -82,3 +82,45 @@ export function getActiveTemplates() {
     method: 'get',
   })
 }
+
+// 转交审批
+export function transferApproval(id, toUserId) {
+  return request({
+    url: `/api/im/approval/${id}/transfer`,
+    method: 'post',
+    params: { toUserId },
+  })
+}
+
+// 委托审批
+export function delegateApproval(id, toUserId) {
+  return request({
+    url: `/api/im/approval/${id}/delegate`,
+    method: 'post',
+    params: { toUserId },
+  })
+}
+
+// 获取抄送我的审批列表
+export function getCcApprovals() {
+  return request({
+    url: '/api/im/approval/cc',
+    method: 'get',
+  })
+}
+
+// 标记抄送审批为已读
+export function markCcAsRead(id) {
+  return request({
+    url: `/api/im/approval/${id}/cc/read`,
+    method: 'post',
+  })
+}
+
+// 获取审批记录
+export function getApprovalRecords(id) {
+  return request({
+    url: `/api/im/approval/${id}/records`,
+    method: 'get',
+  })
+}

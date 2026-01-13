@@ -634,4 +634,177 @@ public class ImMessageController {
             log.error("广播反应更新异常: conversationId={}, messageId={}", conversationId, messageId, e);
         }
     }
+
+    // ==================== 消息已读回执功能 ====================
+
+    /**
+     * 标记会话消息已读
+     * 将会话中指定消息之前的所有消息标记为已读
+     *
+     * @param conversationId 会话ID
+     * @param lastReadMessageId 最后已读消息ID（该消息之前的所有消息都标记为已读）
+     * @param userId 当前登录用户ID
+     * @return 操作结果
+     */
+    @Operation(summary = "标记消息已读", description = "将会话中指定消息之前的所有消息标记为已读")
+    @PutMapping("/read")
+    public Result<Void> markMessagesAsRead(
+            @RequestParam Long conversationId,
+            @RequestParam(required = false) Long lastReadMessageId,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+
+        try {
+            log.info("标记消息已读: conversationId={}, lastReadMessageId={}, userId={}",
+                    conversationId, lastReadMessageId, userId);
+
+            // 更新会话成员的最后已读消息ID
+            int updated = conversationMemberMapper.updateLastReadMessageId(conversationId, userId, lastReadMessageId);
+
+            if (updated == 0) {
+                // 如果没有找到记录，可能是还没加入会话，插入新记录
+                ImConversationMember member = new ImConversationMember();
+                member.setConversationId(conversationId);
+                member.setUserId(userId);
+                member.setLastReadMessageId(lastReadMessageId);
+                member.setLastReadTime(java.time.LocalDateTime.now());
+                conversationMemberMapper.insert(member);
+            }
+
+            // 广播已读状态给会话中的其他用户
+            broadcastReadReceipt(conversationId, lastReadMessageId, userId);
+
+            return Result.success("标记已读成功");
+        } catch (Exception e) {
+            log.error("标记消息已读失败: conversationId={}", conversationId, e);
+            return Result.error("标记已读失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取会话未读消息数
+     *
+     * @param conversationId 会话ID
+     * @param userId 当前登录用户ID
+     * @return 未读消息数
+     */
+    @Operation(summary = "获取会话未读消息数", description = "获取指定会话中当前用户的未读消息数量")
+    @GetMapping("/unread/count/{conversationId}")
+    public Result<Integer> getUnreadCount(
+            @PathVariable Long conversationId,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+
+        try {
+            // 获取用户在会话中的信息
+            ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+
+            if (member == null || member.getLastReadMessageId() == null) {
+                // 从未读过的会话，未读数 = 会话总消息数
+                Long totalCount = imMessageMapper.countByConversationId(conversationId);
+                return Result.success(totalCount != null ? totalCount.intValue() : 0);
+            }
+
+            // 查询最后已读消息之后的消息数量
+            Long unreadCount = imMessageMapper.countUnreadMessages(conversationId, member.getLastReadMessageId());
+            return Result.success(unreadCount != null ? unreadCount.intValue() : 0);
+        } catch (Exception e) {
+            log.error("获取未读消息数失败: conversationId={}", conversationId, e);
+            return Result.error("获取未读消息数失败");
+        }
+    }
+
+    /**
+     * 获取会话已读状态
+     *
+     * @param conversationId 会话ID
+     * @param messageId 消息ID
+     * @param userId 当前登录用户ID
+     * @return 已读用户列表
+     */
+    @Operation(summary = "获取消息已读状态", description = "获取指定消息的已读用户列表")
+    @GetMapping("/read/status/{conversationId}/{messageId}")
+    public Result<List<Map<String, Object>>> getReadStatus(
+            @PathVariable Long conversationId,
+            @PathVariable Long messageId,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+
+        try {
+            // 获取会话所有成员
+            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            List<Map<String, Object>> readUsers = new java.util.ArrayList<>();
+
+            for (ImConversationMember member : members) {
+                // 如果成员的最后已读消息ID >= 当前消息ID，则表示已读
+                if (member.getLastReadMessageId() != null &&
+                    member.getLastReadMessageId() >= messageId) {
+                    Map<String, Object> userInfo = new HashMap<>();
+                    userInfo.put("userId", member.getUserId());
+                    userInfo.put("readTime", member.getLastReadTime());
+                    readUsers.add(userInfo);
+                }
+            }
+
+            return Result.success(readUsers);
+        } catch (Exception e) {
+            log.error("获取已读状态失败: conversationId={}, messageId={}", conversationId, messageId, e);
+            return Result.error("获取已读状态失败");
+        }
+    }
+
+    /**
+     * 广播已读回执给会话中的其他用户
+     */
+    private void broadcastReadReceipt(Long conversationId, Long lastReadMessageId, Long userId) {
+        try {
+            // 获取会话中的所有成员
+            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            if (members == null || members.isEmpty()) {
+                return;
+            }
+
+            // 构建WebSocket消息
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> readReceipt = new HashMap<>();
+            readReceipt.put("type", "read");
+            readReceipt.put("conversationId", conversationId);
+            readReceipt.put("lastReadMessageId", lastReadMessageId);
+            readReceipt.put("userId", userId);
+            readReceipt.put("timestamp", System.currentTimeMillis());
+
+            String messageJson = mapper.writeValueAsString(readReceipt);
+
+            // 从 WebSocket 端点获取在线用户集合
+            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+
+            // 向会话中的每个在线用户发送已读回执（不包括操作者自己）
+            for (ImConversationMember member : members) {
+                Long targetUserId = member.getUserId();
+
+                // 不发送给操作者自己
+                if (targetUserId.equals(userId)) {
+                    continue;
+                }
+
+                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
+                if (targetSession != null && targetSession.isOpen()) {
+                    try {
+                        targetSession.getBasicRemote().sendText(messageJson);
+                        log.debug("已读回执已推送给用户: userId={}", targetUserId);
+                    } catch (Exception e) {
+                        log.error("发送已读回执给用户失败: userId={}", targetUserId, e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("广播已读回执异常: conversationId={}", conversationId, e);
+        }
+    }
 }

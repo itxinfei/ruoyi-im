@@ -268,8 +268,8 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         Map<String, Object> stats = new HashMap<>();
 
         // 总发布数
-        Long totalPublished = announcementMapper.countByPublisherId(userId);
-        stats.put("totalPublished", totalPublished != null ? totalPublished : 0);
+        int totalPublished = announcementMapper.countByPublisherId(userId);
+        stats.put("totalPublished", totalPublished);
 
         // 草稿数
         Long draftCount = announcementMapper.selectCount(

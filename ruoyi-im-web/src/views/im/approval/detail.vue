@@ -93,11 +93,79 @@
       <div v-if="detail.approval?.status === 'PENDING' && isApprover" class="action-buttons">
         <el-button type="success" :icon="Select" @click="handleApprove">通过</el-button>
         <el-button type="danger" :icon="Close" @click="handleReject">驳回</el-button>
+        <el-button :icon="Promotion" @click="handleTransfer">转交</el-button>
+        <el-button :icon="Share" @click="handleDelegate">委托</el-button>
       </div>
       <div v-if="detail.approval?.status === 'PENDING' && isApplicant" class="action-buttons">
         <el-button :icon="Close" @click="handleCancel">撤回</el-button>
       </div>
     </div>
+
+    <!-- 转交审批对话框 -->
+    <el-dialog v-model="transferDialogVisible" title="转交审批" width="450px">
+      <el-form label-width="80px">
+        <el-form-item label="转交给">
+          <el-select
+            v-model="transferTargetUserId"
+            filterable
+            placeholder="选择转交对象"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="user in availableUsers"
+              :key="user.userId"
+              :label="user.nickName || user.userName"
+              :value="user.userId"
+            >
+              <span>{{ user.nickName || user.userName }}</span>
+              <span style="float: right; color: var(--el-text-color-secondary); font-size: 13px">
+                {{ user.dept?.deptName || '' }}
+              </span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="transferRemark" type="textarea" :rows="3" placeholder="请输入转交备注（可选）" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="transferDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSubmitTransfer">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 委托审批对话框 -->
+    <el-dialog v-model="delegateDialogVisible" title="委托审批" width="450px">
+      <el-form label-width="80px">
+        <el-form-item label="委托给">
+          <el-select
+            v-model="delegateTargetUserId"
+            filterable
+            placeholder="选择委托对象"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="user in availableUsers"
+              :key="user.userId"
+              :label="user.nickName || user.userName"
+              :value="user.userId"
+            >
+              <span>{{ user.nickName || user.userName }}</span>
+              <span style="float: right; color: var(--el-text-color-secondary); font-size: 13px">
+                {{ user.dept?.deptName || '' }}
+              </span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="delegateRemark" type="textarea" :rows="3" placeholder="请输入委托备注（可选）" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="delegateDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSubmitDelegate">确定</el-button>
+      </template>
+    </el-dialog>
 
     <!-- 审批意见对话框 -->
     <el-dialog v-model="commentDialogVisible" :title="commentTitle" width="500px">
@@ -122,12 +190,16 @@ import {
   CircleClose,
   Warning,
   Loading,
+  Promotion,
+  Share,
 } from '@element-plus/icons-vue'
 import {
   getApprovalDetail,
   approveApproval,
   rejectApproval,
   cancelApproval,
+  transferApproval,
+  delegateApproval,
 } from '@/api/im/approval'
 
 const route = useRoute()
@@ -143,6 +215,16 @@ const detail = ref({
 const commentDialogVisible = ref(false)
 const commentTitle = ref('')
 const commentText = ref('')
+
+// 转交和委托相关
+const transferDialogVisible = ref(false)
+const transferTargetUserId = ref(null)
+const transferRemark = ref('')
+const delegateDialogVisible = ref(false)
+const delegateTargetUserId = ref(null)
+const delegateRemark = ref('')
+// 可转交/委托的用户列表（实际应从API获取）
+const availableUsers = ref([])
 
 const isApprover = computed(() => {
   // TODO: 判断当前用户是否为审批人
@@ -241,6 +323,52 @@ const handleSubmitComment = async () => {
     loadDetail()
   } catch (error) {
     ElMessage.error('操作失败')
+  }
+}
+
+// 打开转交对话框
+const handleTransfer = () => {
+  transferTargetUserId.value = null
+  transferRemark.value = ''
+  transferDialogVisible.value = true
+}
+
+// 提交转交
+const handleSubmitTransfer = async () => {
+  if (!transferTargetUserId.value) {
+    ElMessage.warning('请选择转交对象')
+    return
+  }
+  try {
+    await transferApproval(route.params.id, transferTargetUserId.value)
+    ElMessage.success('已转交')
+    transferDialogVisible.value = false
+    loadDetail()
+  } catch (error) {
+    ElMessage.error('转交失败: ' + (error.message || '未知错误'))
+  }
+}
+
+// 打开委托对话框
+const handleDelegate = () => {
+  delegateTargetUserId.value = null
+  delegateRemark.value = ''
+  delegateDialogVisible.value = true
+}
+
+// 提交委托
+const handleSubmitDelegate = async () => {
+  if (!delegateTargetUserId.value) {
+    ElMessage.warning('请选择委托对象')
+    return
+  }
+  try {
+    await delegateApproval(route.params.id, delegateTargetUserId.value)
+    ElMessage.success('已委托')
+    delegateDialogVisible.value = false
+    loadDetail()
+  } catch (error) {
+    ElMessage.error('委托失败: ' + (error.message || '未知错误'))
   }
 }
 

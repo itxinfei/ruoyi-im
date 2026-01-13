@@ -163,4 +163,22 @@ public interface ImMessageMapper extends BaseMapper<ImMessage> {
     int countBySenderIdAndTimeRange(@Param("senderId") Long senderId,
                                      @Param("startTime") java.time.LocalDateTime startTime,
                                      @Param("endTime") java.time.LocalDateTime endTime);
+
+    /**
+     * 统计会话中未读消息数量
+     *
+     * @param conversationId 会话ID
+     * @param lastReadMessageId 最后已读消息ID，该消息之后的消息都算未读
+     * @return 未读消息数量
+     */
+    Long countUnreadMessages(@Param("conversationId") Long conversationId,
+                              @Param("lastReadMessageId") Long lastReadMessageId);
+
+    /**
+     * 统计会话总消息数
+     *
+     * @param conversationId 会话ID
+     * @return 消息总数
+     */
+    Long countByConversationId(@Param("conversationId") Long conversationId );
 }

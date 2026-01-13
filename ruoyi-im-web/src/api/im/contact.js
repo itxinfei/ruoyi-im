@@ -94,6 +94,19 @@ export function searchContacts(keyword) {
 }
 
 /**
+ * 搜索用户（用于添加新朋友）
+ * @param {string} keyword - 搜索关键词（用户名、手机号、邮箱）
+ * @returns {Promise}
+ */
+export function searchUsers(keyword) {
+  return request({
+    url: '/api/im/user/search',
+    method: 'get',
+    params: { keyword },
+  })
+}
+
+/**
  * 获取收到的好友申请列表
  * @returns {Promise}
  */
@@ -220,6 +233,7 @@ export default {
   deleteContact,
   updateContactRemark,
   searchContacts,
+  searchUsers,
   getReceivedFriendRequests,
   getSentFriendRequests,
   handleFriendRequest,

@@ -630,6 +630,35 @@ const actions = {
     return sessions
   },
 
+  // 标记会话消息已读
+  async markSessionAsRead({ commit, state }, sessionId) {
+    const session = state.sessions.find(s => s.id === sessionId)
+    if (!session) return
+
+    // 获取会话中最后一条消息的ID作为已读标记
+    const messages = state.messageList[sessionId] || []
+    const lastMessage = messages[messages.length - 1]
+    const lastReadMessageId = lastMessage?.id || 0
+
+    try {
+      // 调用API标记已读
+      await markMessageRead({
+        conversationId: sessionId,
+        lastReadMessageId: lastReadMessageId,
+      })
+
+      // 更新会话的未读数为0
+      commit('UPDATE_SESSION', {
+        sessionId,
+        updates: { unreadCount: 0 },
+      })
+
+      console.log(`[Store] 会话已读: sessionId=${sessionId}, lastReadMessageId=${lastReadMessageId}`)
+    } catch (error) {
+      console.error('标记会话已读失败:', error)
+    }
+  },
+
   // 切换会话
   async switchSession({ commit, dispatch, state }, session) {
     // 标记上一个会话为已读（如果有且不同于当前会话）

@@ -305,21 +305,6 @@ export function revokeMessageRead(messageId) {
   })
 }
 
-// ==================== 兼容旧API ====================
-
-/**
- * @deprecated 使用 markMessageAsRead 或 markBatchMessageAsRead 替代
- */
-export function markMessageRead(data) {
-  if (data.messageIds && data.messageIds.length === 1) {
-    return markMessageAsRead({
-      messageId: data.messageIds[0],
-      conversationId: data.conversationId,
-    })
-  }
-  return markBatchMessageAsRead(data)
-}
-
 /**
  * 获取未读消息数量
  * @returns {Promise<Result<number>>}
@@ -598,6 +583,52 @@ export function getMessageTypeStatistics(conversationId) {
   })
 }
 
+// ==================== 消息已读回执 ====================
+
+/**
+ * 标记会话消息已读
+ * 将会话中指定消息之前的所有消息标记为已读
+ * @param {Object} params - 参数
+ * @param {number|string} params.conversationId - 会话ID
+ * @param {number|string} [params.lastReadMessageId] - 最后已读消息ID
+ * @returns {Promise<Result<void>>}
+ */
+export function markMessageRead(params) {
+  return request({
+    url: '/api/im/message/read',
+    method: 'put',
+    params: {
+      conversationId: Number(params.conversationId),
+      lastReadMessageId: params.lastReadMessageId ? Number(params.lastReadMessageId) : undefined,
+    },
+  })
+}
+
+/**
+ * 获取会话未读消息数
+ * @param {number|string} conversationId - 会话ID
+ * @returns {Promise<Result<number>>}
+ */
+export function getConversationUnread(conversationId) {
+  return request({
+    url: `/api/im/message/unread/count/${conversationId}`,
+    method: 'get',
+  })
+}
+
+/**
+ * 获取消息已读状态
+ * @param {number|string} conversationId - 会话ID
+ * @param {number|string} messageId - 消息ID
+ * @returns {Promise<Result<{userId: number, readTime: string}[]>>}
+ */
+export function getReadStatus(conversationId, messageId) {
+  return request({
+    url: `/api/im/message/read/status/${conversationId}/${messageId}`,
+    method: 'get',
+  })
+}
+
 // ==================== 工具函数 ====================
 
 /**
@@ -624,7 +655,7 @@ function normalizeMessageType(type) {
 
 export const getConversationMessages = listMessage
 export const markRead = (conversationId, messageIds) => markMessageRead({ conversationId, messageIds })
-export const getUnread = getUnreadCount
+export const getUnread = getUnreadCount  // 保持不变，获取所有未读总数
 
 // ==================== 默认导出 ====================
 
@@ -655,8 +686,8 @@ export default {
   getConversationReadStatus,
   revokeMessageRead,
   markMessageRead, // 兼容
-  getUnreadCount,
-  getConversationUnreadCount,
+  getUnreadCount,  // 获取所有未读总数
+  getConversationUnread,  // 获取指定会话未读数
 
   // 反应相关
   addMessageReaction,

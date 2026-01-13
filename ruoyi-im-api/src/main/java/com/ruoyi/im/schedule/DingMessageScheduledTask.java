@@ -72,33 +72,12 @@ public class DingMessageScheduledTask {
     /**
      * 处理强提醒功能
      * 每5分钟执行一次，检查需要发送提醒的DING消息
+     * 注：强提醒功能暂未启用（数据库字段未创建），50人内网场景暂不需要此功能
      */
     @Scheduled(cron = "0 */5 * * * ?")
     public void processDingReminders() {
-        try {
-            // 查询需要发送提醒的DING消息
-            // 条件：状态为SENT、需要回执、设置了提醒间隔、未达到最大提醒次数
-            LambdaQueryWrapper<ImDingMessage> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(ImDingMessage::getStatus, "SENT")
-                    .eq(ImDingMessage::getReceiptRequired, 1)
-                    .gt(ImDingMessage::getRemindInterval, 0)
-                    .gt(ImDingMessage::getMaxRemindCount, 0)
-                    .lt(ImDingMessage::getRemindedCount, ImDingMessage::getMaxRemindCount)
-                    .isNotNull(ImDingMessage::getSendTime);
-
-            List<ImDingMessage> dings = dingMessageMapper.selectList(wrapper);
-            LocalDateTime now = LocalDateTime.now();
-
-            for (ImDingMessage ding : dings) {
-                // 计算是否到达提醒时间
-                if (shouldSendReminder(ding, now)) {
-                    sendReminder(ding);
-                }
-            }
-
-        } catch (Exception e) {
-            log.error("处理DING强提醒失败", e);
-        }
+        // 强提醒功能已禁用 - 50人内网场景暂不需要
+        // 如需启用，请先在数据库添加 remind_interval, max_remind_count, reminded_count 字段
     }
 
     /**

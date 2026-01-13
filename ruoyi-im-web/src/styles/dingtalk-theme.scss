@@ -4,47 +4,48 @@
 @use 'sass:color';
 
 // ============ Colors ============
-// 主色系（钉钉6.5.x）
-$primary-color: #1677ff;
-$primary-color-light: #e8f3ff;
+// 主色系（钉钉6.5.x规范）
+$primary-color: #1890FF;
+$primary-color-light: #E6F7FF;
 $primary-color-lighter: #f0f9ff;
-$primary-color-dark: #0f62d9;
+$primary-color-dark: #096DD9;
 
 // 功能色
 $success-color: #52c41a;
 $warning-color: #faad14;
 $error-color: #f5222d;
-$info-color: #1890ff;
+$info-color: #1890FF;
 
-// 中性色
-$text-primary: #262626;
-$text-secondary: #595959;
-$text-tertiary: #8c8c8c;
+// 中性色（钉钉规范）
+$text-primary: #262626;      // 标题色
+$text-secondary: #333333;     // 正文色
+$text-tertiary: #999999;      // 辅助文字/时间戳
 $text-placeholder: #bfbfbf;
-$text-regular: #595959;
+$text-regular: #666666;       // 次要文字
 $text-disabled: #d9d9d9;
 
 $bg-white: #ffffff;
 $bg-light: #fafafa;
 $bg-base: #f0f2f5;
-$bg-hover: #f5f5f5;
+$bg-hover: #f5f7fa;
 $bg-disabled: #f5f5f5;
 $bg-mask: rgba(0, 0, 0, 0.45);
 
 $border-light: #f0f0f0;
-$border-base: #d9d9d9;
-$border-dark: #bfbfbf;
+$border-base: #E8E8E8;       // 钉钉边框色
+$border-dark: #d9d9d9;
 
 // ============ Navigation Rail ============
-$topbar-height: 48px; // 顶部导航栏高度
-$nav-sidebar-width: 64px; // 左侧导航栏宽度（折叠状态）
+// 布局尺寸（钉钉PC客户端规范）
+$topbar-height: 48px;         // 顶部导航栏高度
+$nav-sidebar-width: 68px;     // 左侧导航栏宽度 - 钉钉规范68px
 $nav-sidebar-expanded-width: 192px; // 左侧导航栏宽度（展开状态）
-$nav-item-height: 48px; // 导航项高度
-$nav-icon-size: 20px; // 导航图标尺寸
-$sidebar-width: 240px; // 中间会话列表宽度
-$session-item-height: 64px; // 会话列表项高度
-$session-avatar-size: 40px; // 会话头像尺寸
-$detail-panel-width: 300px; // 详情面板宽度
+$nav-item-height: 48px;       // 导航项高度 - 钉钉规范48×48px
+$nav-icon-size: 24px;         // 导航图标尺寸 - 钉钉规范24×24px
+$sidebar-width: 320px;        // 中间会话列表宽度 - 钉钉规范320px
+$session-item-height: 64px;   // 会话列表项高度 - 钉钉规范64px
+$session-avatar-size: 40px;   // 会话头像尺寸
+$detail-panel-width: 300px;   // 详情面板宽度
 
 // 别名（保持兼容性）
 $nav-rail-width: $nav-sidebar-width;
@@ -471,5 +472,69 @@ body {
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+// 消息发送弹出动画
+@keyframes messagePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  50% {
+    transform: scale(1.02) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// 下拉菜单滑入动画
+@keyframes dropdownSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 按钮点击缩放动画
+@keyframes buttonClick {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// 工具提示淡入动画
+@keyframes tooltipFade {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// 列表项滑入动画
+@keyframes listSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
   }
 }

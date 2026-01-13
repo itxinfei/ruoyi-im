@@ -95,6 +95,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SessionList: typeof import('./components/Chat/SessionList.vue')['default']
     SideNav: typeof import('./components/Layout/SideNav.vue')['default']
+    SmartAvatar: typeof import('./components/SmartAvatar/index.vue')['default']
     SvgIcon: typeof import('./components/SvgIcon/index.vue')['default']
     ThemeSwitch: typeof import('./components/ThemeSwitch/index.vue')['default']
     Upload: typeof import('./components/Upload/index.vue')['default']

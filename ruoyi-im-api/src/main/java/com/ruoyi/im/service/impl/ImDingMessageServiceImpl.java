@@ -68,9 +68,10 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
         ding.setIsUrgent(request.getIsUrgent());
         ding.setScheduleTime(request.getScheduleTime());
         ding.setReceiptRequired(request.getReceiptRequired() ? 1 : 0);
-        ding.setRemindInterval(request.getRemindInterval());
-        ding.setMaxRemindCount(request.getMaxRemindCount());
-        ding.setRemindedCount(0);
+        // 强提醒功能暂未启用（数据库字段未创建）
+        // ding.setRemindInterval(request.getRemindInterval());
+        // ding.setMaxRemindCount(request.getMaxRemindCount());
+        // ding.setRemindedCount(0);
         ding.setAttachment(request.getAttachment());
         ding.setTotalCount(request.getReceiverIds().length);
         ding.setReadCount(0);

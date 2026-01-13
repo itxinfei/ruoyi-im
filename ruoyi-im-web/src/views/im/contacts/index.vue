@@ -6,6 +6,18 @@
         <h3 class="panel-title">联系人</h3>
       </div>
 
+      <!-- 搜索框 -->
+      <div class="search-box">
+        <el-input
+          v-model="searchKeyword"
+          placeholder="搜索姓名、部门、职位"
+          :prefix-icon="Search"
+          clearable
+          size="default"
+          @input="handleSearch"
+        />
+      </div>
+
       <!-- 分类标签（水平排列） -->
       <div class="category-tabs">
         <div
@@ -22,8 +34,14 @@
       </div>
 
       <div class="contacts-list">
+        <!-- 搜索结果提示 -->
+        <div v-if="isSearching" class="search-tips">
+          <span class="tips-text">搜索 "{{ searchKeyword }}"</span>
+          <span class="result-count">找到 {{ displayContacts.length }} 个结果</span>
+        </div>
+        
         <div
-          v-for="contact in currentContacts"
+          v-for="contact in displayContacts"
           :key="contact.id"
           class="contact-item"
           :class="{ selected: selectedContact?.id === contact.id }"
@@ -43,7 +61,12 @@
               </span>
               <span v-if="contact.starred" class="star-icon">★</span>
             </div>
-            <div v-if="contact.signature" class="contact-signature">
+            <!-- 搜索结果显示匹配字段 -->
+            <div v-if="isSearching" class="contact-search-match">
+              <span v-if="contact.deptName" class="match-tag">{{ contact.deptName }}</span>
+              <span v-if="contact.position && contact.position !== contact.deptName" class="match-tag">{{ contact.position }}</span>
+            </div>
+            <div v-else-if="contact.signature" class="contact-signature">
               {{ contact.signature }}
             </div>
             <div class="contact-status">
@@ -53,13 +76,13 @@
           </div>
         </div>
 
-        <el-empty v-if="currentContacts.length === 0" :description="emptyDescription" />
+        <el-empty v-if="displayContacts.length === 0" :description="emptyDescription" />
       </div>
     </div>
 
     <!-- 第三栏：联系人详情 -->
     <div class="detail-panel" :class="{ empty: !selectedContact }">
-      <template v-if="selectedContact">
+      <div v-if="selectedContact" class="detail-content-wrapper">
         <div class="detail-header">
           <el-avatar :size="80" :src="selectedContact.avatar || '/profile/avatar.png'">
             {{
@@ -119,9 +142,9 @@
             <p class="signature">{{ selectedContact.signature }}</p>
           </div>
         </div>
-      </template>
+      </div>
 
-      <div v-else class="empty-detail">
+      <div v-if="!selectedContact" class="empty-detail">
         <el-empty description="选择一个联系人查看详情" />
       </div>
     </div>
@@ -140,6 +163,7 @@ import {
   User,
   UserFilled,
   StarFilled,
+  Search,
 } from '@element-plus/icons-vue'
 import {
   listContact,
@@ -160,6 +184,8 @@ const loading = ref(false)
 const contacts = ref([])
 const friendGroups = ref([])
 const allUsers = ref([])
+const searchKeyword = ref('')
+const searchResult = ref([])
 
 const categories = computed(() => [
   {
@@ -332,6 +358,44 @@ const discoverContacts = computed(() => {
   return userList
 })
 
+// 搜索处理函数
+const handleSearch = () => {
+  if (!searchKeyword.value.trim()) {
+    searchResult.value = []
+    return
+  }
+  
+  const keyword = searchKeyword.value.toLowerCase().trim()
+  
+  // 合并所有联系人数据进行搜索
+  const allContacts = [
+    ...contacts.value,
+    ...allUsers.value.filter(u => !contacts.value.some(c => c.id === u.id))
+  ]
+  
+  // 按姓名、部门、职位搜索
+  searchResult.value = allContacts.filter(contact => {
+    const nameMatch = (contact.name || contact.nickname || contact.username || '').toLowerCase().includes(keyword)
+    const deptMatch = (contact.deptName || contact.department || '').toLowerCase().includes(keyword)
+    const positionMatch = (contact.position || '').toLowerCase().includes(keyword)
+    const phoneMatch = (contact.phone || '').includes(keyword)
+    const emailMatch = (contact.email || '').toLowerCase().includes(keyword)
+    
+    return nameMatch || deptMatch || positionMatch || phoneMatch || emailMatch
+  })
+}
+
+// 搜索模式判断
+const isSearching = computed(() => searchKeyword.value.trim().length > 0)
+
+// 根据搜索状态返回不同的列表
+const displayContacts = computed(() => {
+  if (isSearching.value) {
+    return searchResult.value
+  }
+  return currentContacts.value
+})
+
 // 空状态描述
 const emptyDescription = computed(() => {
   if (activeCategory.value === 'discover') {
@@ -501,7 +565,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
 
-  .panel-header {
+    .panel-header {
     padding: 16px 16px 12px;
     border-bottom: 1px solid $border-light;
 
@@ -510,6 +574,45 @@ onMounted(async () => {
       font-size: 18px;
       font-weight: 500;
       color: $text-primary;
+    }
+  }
+
+  // 搜索框样式
+  .search-box {
+    padding: 12px 16px;
+    border-bottom: 1px solid $border-light;
+
+    :deep(.el-input__wrapper) {
+      border-radius: 6px;
+      background-color: #f5f5f5;
+      box-shadow: none;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+
+      &:hover {
+        background-color: #f0f0f0;
+      }
+
+      &.is-focus {
+        background-color: #fff;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+      }
+    }
+
+    :deep(.el-input__inner) {
+      font-size: 13px;
+      color: $text-primary;
+      height: 32px;
+      line-height: 32px;
+
+      &::placeholder {
+        color: $text-tertiary;
+      }
+    }
+
+    :deep(.el-input__prefix) {
+      color: $text-tertiary;
     }
   }
 
@@ -567,6 +670,45 @@ onMounted(async () => {
   .contacts-list {
     flex: 1;
     overflow-y: auto;
+
+    // 搜索提示区域
+    .search-tips {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background-color: #fafafa;
+      border-bottom: 1px solid $border-light;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+
+      .tips-text {
+        font-size: 13px;
+        color: $text-primary;
+        font-weight: 500;
+      }
+
+      .result-count {
+        font-size: 12px;
+        color: $text-secondary;
+      }
+    }
+
+    // 搜索匹配标签样式
+    .contact-search-match {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 2px;
+
+      .match-tag {
+        font-size: 11px;
+        color: $text-tertiary;
+        background-color: #f0f0f0;
+        padding: 1px 6px;
+        border-radius: 4px;
+      }
+    }
 
     .contact-item {
       display: flex;

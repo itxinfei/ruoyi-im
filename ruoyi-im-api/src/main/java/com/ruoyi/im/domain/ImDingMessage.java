@@ -59,16 +59,17 @@ public class ImDingMessage implements Serializable {
     @TableField("receipt_required")
     private Integer receiptRequired;
 
-    @Schema(description = "强提醒间隔（分钟）")
-    @TableField("remind_interval")
+    // 以下字段暂未在数据库中创建，标记为不存在
+    @Schema(description = "强提醒间隔（分钟）- 暂未启用")
+    @TableField(exist = false)
     private Integer remindInterval;
 
-    @Schema(description = "最大提醒次数")
-    @TableField("max_remind_count")
+    @Schema(description = "最大提醒次数 - 暂未启用")
+    @TableField(exist = false)
     private Integer maxRemindCount;
 
-    @Schema(description = "当前提醒次数")
-    @TableField("reminded_count")
+    @Schema(description = "当前提醒次数 - 暂未启用")
+    @TableField(exist = false)
     private Integer remindedCount;
 
     @Schema(description = "总接收人数")

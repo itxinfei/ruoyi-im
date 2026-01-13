@@ -311,4 +311,21 @@
             and is_deleted = 0
         </where>
     </select>
+
+    <!-- 统计会话中未读消息数量 -->
+    <select id="countUnreadMessages" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM im_message
+        WHERE conversation_id = #{conversationId}
+          AND id > #{lastReadMessageId}
+          AND is_revoked = 0
+          AND is_deleted = 0
+    </select>
+
+    <!-- 统计会话总消息数 -->
+    <select id="countByConversationId" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM im_message
+        WHERE conversation_id = #{conversationId}
+          AND is_revoked = 0
+          AND is_deleted = 0
+    </select>
 </mapper>
