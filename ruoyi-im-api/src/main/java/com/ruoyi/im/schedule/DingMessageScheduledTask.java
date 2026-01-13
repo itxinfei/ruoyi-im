@@ -49,8 +49,24 @@ public class DingMessageScheduledTask {
     public void processScheduledDingMessages() {
         try {
             // 查询状态为DRAFT且定时发送时间已到的DING消息
+            // 注意：只选择数据库中实际存在的字段，避免查询不存在的remind_interval等字段
             LambdaQueryWrapper<ImDingMessage> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(ImDingMessage::getStatus, "DRAFT")
+            wrapper.select(ImDingMessage::getId,
+                        ImDingMessage::getSenderId,
+                        ImDingMessage::getContent,
+                        ImDingMessage::getDingType,
+                        ImDingMessage::getIsUrgent,
+                        ImDingMessage::getScheduleTime,
+                        ImDingMessage::getSendTime,
+                        ImDingMessage::getStatus,
+                        ImDingMessage::getReceiptRequired,
+                        ImDingMessage::getTotalCount,
+                        ImDingMessage::getReadCount,
+                        ImDingMessage::getConfirmedCount,
+                        ImDingMessage::getAttachment,
+                        ImDingMessage::getCreateTime,
+                        ImDingMessage::getUpdateTime)
+                    .eq(ImDingMessage::getStatus, "DRAFT")
                     .isNotNull(ImDingMessage::getScheduleTime)
                     .le(ImDingMessage::getScheduleTime, LocalDateTime.now());
 

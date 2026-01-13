@@ -106,6 +106,15 @@ public class Result<T> implements Serializable {
     }
 
     /**
+     * 错误返回结果（便捷方法，默认500状态码）
+     *
+     * @param msg 消息
+     */
+    public static <T> Result<T> error(String msg) {
+        return new Result<>(500, msg);
+    }
+
+    /**
      * 错误返回结果
      *
      * @param code 状态码

@@ -101,19 +101,29 @@
         <!-- 用户下拉 -->
         <el-dropdown trigger="click" placement="bottom-end" @command="handleUserCommand">
           <div class="header-user">
-            <el-avatar :size="32" :src="currentUser?.avatar" class="user-avatar">
-              {{ currentUser?.name?.charAt(0) || 'U' }}
-            </el-avatar>
-            <div class="user-status-indicator" :class="currentOnlineStatus"></div>
+            <SmartAvatar
+              :name="currentUser?.name"
+              :avatar="currentUser?.avatar"
+              :size="32"
+              :show-border="true"
+              :show-online="true"
+              :online="currentOnlineStatus === 'online'"
+              :online-status="currentOnlineStatus"
+              class="user-avatar"
+            />
             <span class="header-username">{{ currentUser?.name || '用户' }}</span>
             <el-icon class="dropdown-arrow"><ArrowDown /></el-icon>
           </div>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="profile">
-                <el-avatar :size="24" :src="currentUser?.avatar" class="dropdown-avatar">
-                  {{ currentUser?.name?.charAt(0) || 'U' }}
-                </el-avatar>
+                <SmartAvatar
+                  :name="currentUser?.name"
+                  :avatar="currentUser?.avatar"
+                  :size="24"
+                  :show-border="false"
+                  class="dropdown-avatar"
+                />
                 <div class="user-info-item">
                   <span class="user-name">{{ currentUser?.name || '用户' }}</span>
                   <span class="user-id">ID: {{ currentUser?.userId }}</span>
@@ -198,13 +208,6 @@
             </div>
           </el-tooltip>
         </nav>
-
-        <!-- 底部用户头像 -->
-        <div class="nav-user" @click="handleUserCommand('profile')">
-          <el-avatar :size="32" :src="currentUser?.avatar">
-            {{ currentUser?.name?.charAt(0) || 'U' }}
-          </el-avatar>
-        </div>
       </aside>
 
       <!-- 内容工作区 -->
@@ -237,9 +240,13 @@
                 @click="selectSession(session)"
               >
                 <el-badge :value="session.unreadCount" :hidden="session.unreadCount === 0">
-                  <el-avatar :size="40" :src="session.avatar">
-                    {{ session.name?.charAt(0) || 'U' }}
-                  </el-avatar>
+                  <SmartAvatar
+                    :name="session.name"
+                    :avatar="session.avatar"
+                    :size="40"
+                    :show-border="true"
+                    :show-online="false"
+                  />
                 </el-badge>
                 <div class="session-info">
                   <div class="session-top">
@@ -254,21 +261,25 @@
             </div>
           </div>
 
-          <!-- 聊天内容 -->
-          <div class="chat-panel">
-            <div v-if="currentSessionId" class="chat-container">
-              <!-- 聊天头部（优化版） -->
-              <div class="chat-header">
-                <!-- 左侧：会话信息 -->
-                <div class="chat-info">
-                  <div class="chat-avatar-group" @click="showChatProfile">
-                    <el-badge :value="currentSession?.unreadCount || 0" :hidden="!(currentSession?.unreadCount > 0)" :max="99">
-                      <el-avatar :size="40" :src="currentSession?.avatar">
-                        {{ currentSession?.name?.charAt(0) || 'U' }}
-                      </el-avatar>
-                    </el-badge>
-                    <el-icon v-if="currentSession?.type === 'GROUP'" class="group-badge"><User /></el-icon>
-                  </div>
+           <!-- 聊天内容 -->
+           <div class="chat-panel">
+             <div v-if="currentSessionId" class="chat-container">
+               <!-- 聊天头部（优化版） -->
+               <div class="chat-header">
+                 <!-- 左侧：会话信息 -->
+                 <div class="chat-info">
+                   <div class="chat-avatar-group" @click="showChatProfile">
+                     <el-badge :value="currentSession?.unreadCount || 0" :hidden="!(currentSession?.unreadCount > 0)" :max="99">
+                       <SmartAvatar
+                         :name="currentSession?.name"
+                         :avatar="currentSession?.avatar"
+                         :size="40"
+                         :show-border="true"
+                         :show-online="false"
+                       />
+                     </el-badge>
+                     <el-icon v-if="currentSession?.type === 'GROUP'" class="group-badge"><User /></el-icon>
+                   </div>
                   <div class="chat-title-info">
                     <div class="title-row">
                       <span class="title-name">{{ currentSession?.name }}</span>
@@ -347,14 +358,15 @@
                   :class="{ isOwn: msg.isOwn || msg.senderId === currentUser?.userId }"
                 >
                   <!-- 对方消息的左侧头像 -->
-                  <el-avatar
+                  <SmartAvatar
                     v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)"
+                    :name="msg.senderName || msg.sender?.name"
+                    :avatar="msg.senderAvatar || msg.avatar"
                     :size="36"
-                    :src="msg.senderAvatar || msg.avatar"
+                    :show-border="true"
+                    :show-online="false"
                     class="message-avatar"
-                  >
-                    {{ (msg.senderName || msg.sender?.name)?.charAt(0) || 'U' }}
-                  </el-avatar>
+                  />
                   <div class="message-content" @click.right.prevent="showMessageMenu($event, msg)">
                     <div
                       v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)"
@@ -478,14 +490,15 @@
                     </div>
                   </div>
                   <!-- 自己消息的右侧头像 -->
-                  <el-avatar
+                  <SmartAvatar
                     v-if="msg.isOwn || msg.senderId === currentUser?.userId"
+                    :name="currentUser?.nickName || currentUser?.userName || '我'"
+                    :avatar="currentUser?.avatar || msg.senderAvatar || msg.avatar"
                     :size="36"
-                    :src="currentUser?.avatar || msg.senderAvatar || msg.avatar"
+                    :show-border="true"
+                    :show-online="false"
                     class="message-avatar own-avatar"
-                  >
-                    {{ (currentUser?.nickName || currentUser?.userName || '我')?.charAt(0) || '我' }}
-                  </el-avatar>
+                  />
                 </div>
               </div>
 
@@ -2277,7 +2290,7 @@ import {
   addMessageReaction,
   removeMessageReaction,
   getMessageReactions as apiGetMessageReactions,
-  markConversationAsRead,
+  markMessageRead,
 } from '@/api/im/message'
 import {
   listContact,
@@ -3228,6 +3241,43 @@ let clockInterval = null
 onMounted(() => {
   updateTime()
   clockInterval = setInterval(updateTime, 1000)
+
+  // 全局快捷键支持
+  const handleGlobalKeydown = (e) => {
+    // Ctrl+K: 全局搜索
+    if (e.ctrlKey && e.key === 'k') {
+      e.preventDefault()
+      const searchInput = document.querySelector('.global-search-input input')
+      if (searchInput) {
+        searchInput.focus()
+        searchInput.select()
+      }
+      return
+    }
+
+    // Ctrl+N: 发起新聊天
+    if (e.ctrlKey && e.key === 'n') {
+      e.preventDefault()
+      showStartChatDialog()
+      return
+    }
+
+    // Escape: 关闭所有弹窗
+    if (e.key === 'Escape') {
+      if (showEmojiPicker.value) showEmojiPicker.value = false
+      if (forwardDialogVisible.value) forwardDialogVisible.value = false
+      if (profileDialogVisible.value) profileDialogVisible.value = false
+      if (systemSettingsVisible.value) systemSettingsVisible.value = false
+      return
+    }
+  }
+
+  document.addEventListener('keydown', handleGlobalKeydown)
+
+  // 保存清理函数
+  onUnmounted(() => {
+    document.removeEventListener('keydown', handleGlobalKeydown)
+  })
 })
 
 onUnmounted(() => {
@@ -3933,9 +3983,17 @@ const switchModule = moduleKey => {
 const selectSession = async session => {
   // 切换会话
   await store.dispatch('im/switchSession', session)
-  // 标记会话为已读
+  // 标记会话为已读（使用新接口）
   if (session.id) {
-    markConversationAsRead({ conversationId: session.id }).catch(err => {
+    // 获取会话中最后一条消息的ID作为已读标记
+    const messages = messageList.value[session.id] || []
+    const lastMessage = messages[messages.length - 1]
+    const lastReadMessageId = lastMessage?.id || 0
+    
+    markMessageRead({
+      conversationId: session.id,
+      lastReadMessageId: lastReadMessageId
+    }).catch(err => {
       console.warn('标记已读失败:', err)
     })
   }
@@ -4159,8 +4217,21 @@ const isImageFile = file => {
   return file.type === 'image' || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(file.type)
 }
 
+// 打开应用
 const openApp = appKey => {
-  ElMessage.info(`打开应用：${appKey}`)
+  // 已实现面板的应用：切换到对应的工作台分类
+  const panelApps = {
+    approval: 'approval',
+    attendance: 'attendance',
+    calendar: 'schedule',
+  }
+
+  if (panelApps[appKey]) {
+    workbenchCategory.value = panelApps[appKey]
+  } else {
+    // 其他应用暂未实现，显示提示
+    ElMessage.info(`${workbenchApps.value.find(app => app.key === appKey)?.name || appKey}功能开发中`)
+  }
 }
 
 const showSettings = () => {
@@ -6707,32 +6778,6 @@ $avatar-xl: 64px;
           background: $nav-item-hover;
         }
 
-        .user-avatar {
-          border: 1px solid $border-color;
-        }
-
-        .user-status-indicator {
-          position: absolute;
-          left: 36px;
-          bottom: 2px;
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          border: 2px solid #fff;
-
-          &.online {
-            background: #52c41a;
-          }
-
-          &.busy {
-            background: #ff4d4f;
-          }
-
-          &.offline {
-            background: #d9d9d9;
-          }
-        }
-
         .header-username {
           font-size: 13px;
           color: $text-secondary;
@@ -6838,16 +6883,6 @@ $avatar-xl: 64px;
         display: flex;
         justify-content: center;
         border-top: 1px solid $border-color;
-        cursor: pointer;
-        transition: all 0.2s ease;
-
-        &:hover {
-          background: rgba(0, 0, 0, 0.06);
-        }
-
-        .el-avatar {
-          border: 1px solid $border-color;
-        }
       }
     }
 

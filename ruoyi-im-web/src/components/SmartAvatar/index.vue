@@ -5,7 +5,6 @@
       :size="size"
       :src="avatarUrl"
       :style="avatarStyle"
-      @error="handleError"
     >
       {{ defaultText }}
     </el-avatar>

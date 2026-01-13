@@ -15,6 +15,7 @@ import hoverScale from '@/directives/hoverScale'
 import './permission'
 import { initTheme as initAppTheme } from '@/utils/theme'
 import globalErrorHandler from '@/utils/globalErrorHandler'
+import SmartAvatar from '@/components/SmartAvatar/index.vue'
 
 // 初始化主题（确保默认使用亮色主题）
 initAppTheme()
@@ -27,5 +28,8 @@ app.use(globalErrorHandler)
 
 app.directive('click-feedback', clickFeedback)
 app.directive('hover-scale', hoverScale)
+
+// 全局注册智能头像组件
+app.component('SmartAvatar', SmartAvatar)
 
 app.mount('#app')

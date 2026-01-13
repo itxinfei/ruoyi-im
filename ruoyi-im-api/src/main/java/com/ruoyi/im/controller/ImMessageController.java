@@ -643,45 +643,9 @@ public class ImMessageController {
      *
      * @param conversationId 会话ID
      * @param lastReadMessageId 最后已读消息ID（该消息之前的所有消息都标记为已读）
-     * @param userId 当前登录用户ID
-     * @return 操作结果
-     */
-    @Operation(summary = "标记消息已读", description = "将会话中指定消息之前的所有消息标记为已读")
-    @PutMapping("/read")
-    public Result<Void> markMessagesAsRead(
-            @RequestParam Long conversationId,
-            @RequestParam(required = false) Long lastReadMessageId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
-
-        try {
-            log.info("标记消息已读: conversationId={}, lastReadMessageId={}, userId={}",
-                    conversationId, lastReadMessageId, userId);
-
-            // 更新会话成员的最后已读消息ID
-            int updated = conversationMemberMapper.updateLastReadMessageId(conversationId, userId, lastReadMessageId);
-
-            if (updated == 0) {
-                // 如果没有找到记录，可能是还没加入会话，插入新记录
-                ImConversationMember member = new ImConversationMember();
-                member.setConversationId(conversationId);
-                member.setUserId(userId);
-                member.setLastReadMessageId(lastReadMessageId);
-                member.setLastReadTime(java.time.LocalDateTime.now());
-                conversationMemberMapper.insert(member);
-            }
-
-            // 广播已读状态给会话中的其他用户
-            broadcastReadReceipt(conversationId, lastReadMessageId, userId);
-
-            return Result.success("标记已读成功");
-        } catch (Exception e) {
-            log.error("标记消息已读失败: conversationId={}", conversationId, e);
-            return Result.error("标记已读失败: " + e.getMessage());
-        }
-    }
+      * @param userId 当前登录用户ID
+      * @return 操作结果
+      */
 
     /**
      * 获取会话未读消息数
@@ -714,7 +678,7 @@ public class ImMessageController {
             return Result.success(unreadCount != null ? unreadCount.intValue() : 0);
         } catch (Exception e) {
             log.error("获取未读消息数失败: conversationId={}", conversationId, e);
-            return Result.error("获取未读消息数失败");
+            return Result.fail("获取未读消息数失败");
         }
     }
 
@@ -755,7 +719,7 @@ public class ImMessageController {
             return Result.success(readUsers);
         } catch (Exception e) {
             log.error("获取已读状态失败: conversationId={}, messageId={}", conversationId, messageId, e);
-            return Result.error("获取已读状态失败");
+            return Result.fail("获取已读状态失败");
         }
     }
 
