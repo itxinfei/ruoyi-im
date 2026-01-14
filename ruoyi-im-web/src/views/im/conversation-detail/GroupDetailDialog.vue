@@ -1,162 +1,121 @@
 <!--
-  群组详情弹窗组件
+  群组详情弹窗组件 - 钉钉5.6风格
   群聊会话中点击群头像/群名时显示
   @author RuoYi-IM
 -->
 <template>
   <el-dialog
     v-model="dialogVisible"
-    :title="title"
-    width="600px"
-    :before-close="handleClose"
-    class="group-detail-dialog"
+    :show-close="true"
+    :close-on-click-modal="true"
+    width="560px"
+    class="ding-group-detail-dialog"
     destroy-on-close
+    @close="handleClose"
   >
-    <div class="dialog-content" v-loading="loading">
-      <!-- 群组头像和基本信息 -->
-      <div class="group-profile">
-        <el-avatar :size="100" :src="groupInfo?.avatar" class="group-avatar">
-          <img :src="groupInfo?.avatar || defaultAvatar" alt="" />
-        </el-avatar>
-        <h2 class="group-name">{{ groupInfo?.name }}</h2>
-        <p class="group-desc" v-if="groupInfo?.description">{{ groupInfo.description }}</p>
-        <div class="group-meta">
-          <span class="member-count">{{ memberCount }}人</span>
-          <el-tag v-if="isOwner" type="success" size="small">我是群主</el-tag>
-          <el-tag v-else-if="isAdmin" type="warning" size="small">我是管理员</el-tag>
+    <!-- 头部区域 -->
+    <template #header="{ close }">
+      <div class="dialog-header">
+        <span class="header-title">群聊信息</span>
+        <el-icon class="header-close" @click="close">
+          <Close />
+        </el-icon>
+      </div>
+    </template>
+
+    <div class="dialog-body" v-loading="loading">
+      <!-- 群组基本信息卡片 -->
+      <div class="group-card">
+        <div class="group-avatar-wrap">
+          <el-avatar :size="64" :src="groupInfo?.avatar">
+            <img :src="groupInfo?.avatar || defaultAvatar" alt="" />
+          </el-avatar>
+        </div>
+        <div class="group-basic-info">
+          <h3 class="group-name">{{ groupInfo?.name }}</h3>
+          <p class="group-desc" v-if="groupInfo?.description">{{ groupInfo.description }}</p>
+          <div class="group-meta">
+            <span class="member-count">{{ memberCount }}人</span>
+            <el-tag v-if="isOwner" type="success" size="small">我是群主</el-tag>
+            <el-tag v-else-if="isAdmin" type="warning" size="small">我是管理员</el-tag>
+          </div>
         </div>
       </div>
 
-      <!-- 群组操作 -->
-      <div class="group-actions">
-        <el-button type="primary" :icon="Plus" @click="handleInviteMember" v-if="!isOwner">
-          邀请成员
-        </el-button>
-        <el-button :icon="Bell" @click="handleMuteGroup" v-if="!isOwner">
-          {{ isMuted ? '取消免打扰' : '消息免打扰' }}
-        </el-button>
-        <el-button :icon="Edit" @click="handleEditGroup" v-if="isOwner || isAdmin">
-          编辑群信息
-        </el-button>
+      <!-- 快捷操作 -->
+      <div class="quick-actions">
+        <div class="action-item" @click="handleInviteMember">
+          <el-icon><UserFilled /></el-icon>
+          <span>邀请成员</span>
+        </div>
+        <div class="action-item" @click="handleMuteGroup">
+          <el-icon><Bell /></el-icon>
+          <span>{{ isMuted ? '取消免打扰' : '消息免打扰' }}</span>
+        </div>
+        <div class="action-item" @click="handleEditGroup" v-if="isOwner || isAdmin">
+          <el-icon><Edit /></el-icon>
+          <span>编辑群信息</span>
+        </div>
       </div>
 
       <!-- 群成员列表 -->
       <div class="members-section">
         <div class="section-header">
           <span class="section-title">群成员</span>
-          <span class="member-count">{{ memberCount }}人</span>
+          <span class="member-count-badge">{{ memberCount }}</span>
         </div>
 
         <div class="members-list" v-loading="loadingMembers">
           <div
-            v-for="member in memberList"
+            v-for="member in displayMembers"
             :key="member.id"
             class="member-item"
           >
-            <el-avatar :size="40" :src="member.avatar">
+            <el-avatar :size="36" :src="member.avatar">
               {{ member.nickname?.charAt(0) || member.username?.charAt(0) }}
             </el-avatar>
             <div class="member-info">
               <span class="member-name">{{ member.nickname || member.username }}</span>
-              <el-tag v-if="member.role === 'OWNER'" type="success" size="small">群主</el-tag>
-              <el-tag v-else-if="member.role === 'ADMIN'" type="warning" size="small">管理员</el-tag>
+              <span class="member-role" v-if="member.role === 'OWNER'">群主</span>
+              <span class="member-role admin" v-else-if="member.role === 'ADMIN'">管理员</span>
             </div>
-            <el-dropdown
-              trigger="click"
-              placement="bottom-end"
-              v-if="canManageMember(member)"
-              @command="(cmd) => handleMemberCommand(cmd, member)"
-            >
-              <el-button :icon="More" text circle />
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="remove" v-if="canRemoveMember(member)">
-                    <el-icon><RemoveFilled /></el-icon>
-                    移出群聊
-                  </el-dropdown-item>
-                  <el-dropdown-item command="setAdmin" v-if="canSetAdmin(member)">
-                    <el-icon><UserFilled /></el-icon>
-                    设为管理员
-                  </el-dropdown-item>
-                  <el-dropdown-item command="unsetAdmin" v-if="canUnsetAdmin(member)">
-                    <el-icon><User /></el-icon>
-                    取消管理员
-                  </el-dropdown-item>
-                  <el-dropdown-item command="profile" divided>
-                    <el-icon><View /></el-icon>
-                    查看资料
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
           </div>
 
-          <el-empty
-            v-if="!loadingMembers && memberList.length === 0"
-            description="暂无成员"
-            :image-size="60"
-          />
+          <div class="show-more" v-if="memberList.length > displayLimit" @click="showAllMembers = !showAllMembers">
+            <span>{{ showAllMembers ? '收起' : `查看全部${memberCount}人` }}</span>
+            <el-icon><ArrowDown /></el-icon>
+          </div>
         </div>
       </div>
 
-      <!-- 内容统计 -->
-      <div class="stats-section" v-if="conversationId">
-        <div class="stats-title">群文件和媒体</div>
-        <div class="stats-tabs">
-          <div
-            class="stats-tab"
-            :class="{ active: activeTab === 'media' }"
-            @click="activeTab = 'media'"
-          >
-            <el-icon><Picture /></el-icon>
-            <span>媒体</span>
-            <span class="stats-count" v-if="stats.mediaCount">{{ stats.mediaCount }}</span>
-          </div>
-          <div
-            class="stats-tab"
-            :class="{ active: activeTab === 'file' }"
-            @click="activeTab = 'file'"
-          >
-            <el-icon><Folder /></el-icon>
-            <span>文件</span>
-            <span class="stats-count" v-if="stats.fileCount">{{ stats.fileCount }}</span>
-          </div>
+      <!-- 群文件和媒体 -->
+      <div class="content-section" v-if="conversationId && hasContent">
+        <div class="section-header">
+          <span class="section-title">群文件</span>
         </div>
 
-        <div class="stats-content" v-loading="loadingStats">
-          <template v-if="activeTab === 'media' && mediaList.length > 0">
-            <div class="media-grid">
-              <div
-                v-for="item in mediaList"
-                :key="item.id"
-                class="media-item"
-                @click="previewMedia(item)"
-              >
-                <el-image :src="item.url" fit="cover" lazy class="media-image" />
-              </div>
+        <div class="content-stats">
+          <div class="stat-item" @click="showContent('media')" v-if="stats.mediaCount > 0">
+            <div class="stat-icon">
+              <el-icon><Picture /></el-icon>
             </div>
-          </template>
-
-          <template v-if="activeTab === 'file' && fileList.length > 0">
-            <div class="file-list">
-              <div
-                v-for="item in fileList"
-                :key="item.id"
-                class="file-item"
-                @click="downloadFile(item)"
-              >
-                <el-icon class="file-icon"><Document /></el-icon>
-                <span class="file-name">{{ item.name }}</span>
-                <span class="file-size">{{ formatFileSize(item.size) }}</span>
-              </div>
+            <div class="stat-info">
+              <span class="stat-label">图片和视频</span>
+              <span class="stat-count">{{ stats.mediaCount }}</span>
             </div>
-          </template>
+            <el-icon class="stat-arrow"><ArrowRight /></el-icon>
+          </div>
 
-          <el-empty
-            v-if="!loadingStats && getCurrentList().length === 0"
-            description="暂无内容"
-            :image-size="60"
-          />
+          <div class="stat-item" @click="showContent('file')" v-if="stats.fileCount > 0">
+            <div class="stat-icon">
+              <el-icon><Folder /></el-icon>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">文件</span>
+              <span class="stat-count">{{ stats.fileCount }}</span>
+            </div>
+            <el-icon class="stat-arrow"><ArrowRight /></el-icon>
+          </div>
         </div>
       </div>
     </div>
@@ -164,24 +123,53 @@
     <!-- 底部操作按钮 -->
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="handleViewRecords">查看聊天记录</el-button>
-        <el-button @click="handleClearHistory">清空聊天记录</el-button>
-        <el-button
-          type="danger"
-          @click="handleLeaveGroup"
-          v-if="!isOwner"
-        >
-          退出群聊
+        <el-button class="footer-btn danger-btn" @click="handleLeaveOrDismiss">
+          {{ isOwner ? '解散群聊' : '退出群聊' }}
         </el-button>
-        <el-button
-          type="danger"
-          @click="handleDismissGroup"
-          v-if="isOwner"
-        >
-          解散群聊
+        <el-button class="footer-btn" @click="handleClearHistory">
+          清空聊天记录
         </el-button>
       </div>
     </template>
+  </el-dialog>
+
+  <!-- 内容详情弹窗 -->
+  <el-dialog
+    v-model="contentDialogVisible"
+    :title="contentTitle"
+    width="500px"
+    class="ding-content-dialog"
+    append-to-body
+  >
+    <div class="content-list">
+      <!-- 媒体列表 -->
+      <div v-if="contentType === 'media'" class="media-grid">
+        <div
+          v-for="item in mediaList"
+          :key="item.id"
+          class="media-item"
+          @click="previewMedia(item)"
+        >
+          <el-image :src="item.url" fit="cover" lazy />
+        </div>
+      </div>
+
+      <!-- 文件列表 -->
+      <div v-if="contentType === 'file'" class="file-list">
+        <div
+          v-for="item in fileList"
+          :key="item.id"
+          class="file-item"
+          @click="downloadFile(item)"
+        >
+          <el-icon class="file-icon"><Document /></el-icon>
+          <div class="file-info">
+            <span class="file-name">{{ item.name }}</span>
+            <span class="file-size">{{ formatFileSize(item.size) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </el-dialog>
 
   <!-- 图片预览 -->
@@ -196,17 +184,15 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import {
-  Plus,
+  Close,
+  UserFilled,
   Bell,
   Edit,
-  More,
-  User,
-  UserFilled,
-  View,
+  ArrowDown,
   Picture,
   Folder,
+  ArrowRight,
   Document,
-  RemoveFilled,
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
@@ -236,27 +222,33 @@ const groupInfo = ref(null)
 const loading = ref(false)
 const memberList = ref([])
 const loadingMembers = ref(false)
-const activeTab = ref('media')
-const loadingStats = ref(false)
+const showAllMembers = ref(false)
+const displayLimit = 5
+const isMuted = ref(false)
 const stats = ref({ mediaCount: 0, fileCount: 0 })
 const mediaList = ref([])
 const fileList = ref([])
-const isMuted = ref(false)
+
+// 内容详情弹窗
+const contentDialogVisible = ref(false)
+const contentType = ref('')
+const contentTitle = computed(() => {
+  const titles = { media: '图片和视频', file: '文件' }
+  return titles[contentType.value] || ''
+})
+
+// 图片预览
 const previewVisible = ref(false)
 const previewIndex = ref(0)
 const previewUrls = ref([])
 
-// 当前用户ID（从localStorage或store获取）
+// 当前用户ID
 const currentUserId = ref(parseInt(localStorage.getItem('userId') || '1'))
 
 // 默认头像
 const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
 
 // 计算属性
-const title = computed(() => {
-  return groupInfo.value?.name || '群组详情'
-})
-
 const memberCount = computed(() => {
   return groupInfo.value?.memberCount || memberList.value.length || 0
 })
@@ -270,27 +262,16 @@ const isAdmin = computed(() => {
   return myMember?.role === 'ADMIN'
 })
 
-const getCurrentList = () => {
-  return activeTab.value === 'media' ? mediaList.value : fileList.value
-}
+const displayMembers = computed(() => {
+  if (showAllMembers.value) {
+    return memberList.value
+  }
+  return memberList.value.slice(0, displayLimit)
+})
 
-// 权限判断
-const canManageMember = (member) => {
-  if (isOwner.value) return member.userId !== currentUserId.value
-  return false
-}
-
-const canRemoveMember = (member) => {
-  return member.role !== 'OWNER' && member.userId !== currentUserId.value
-}
-
-const canSetAdmin = (member) => {
-  return member.role !== 'OWNER' && member.role !== 'ADMIN'
-}
-
-const canUnsetAdmin = (member) => {
-  return member.role === 'ADMIN'
-}
+const hasContent = computed(() => {
+  return stats.value.mediaCount > 0 || stats.value.fileCount > 0
+})
 
 // 监听 visible 变化
 watch(() => props.visible, (val) => {
@@ -320,12 +301,9 @@ const loadGroupInfo = async () => {
     })
     if (response.code === 200) {
       groupInfo.value = response.data
-    } else {
-      ElMessage.error('获取群组信息失败')
     }
   } catch (error) {
     console.error('获取群组信息失败:', error)
-    ElMessage.error('获取群组信息失败')
   } finally {
     loading.value = false
   }
@@ -359,7 +337,6 @@ const loadMembers = async () => {
 const loadContentStats = async () => {
   if (!props.conversationId) return
 
-  loadingStats.value = true
   try {
     const response = await request({
       url: `/api/im/message/list/${props.conversationId}`,
@@ -399,17 +376,21 @@ const loadContentStats = async () => {
         mediaCount: media.length,
         fileCount: files.length,
       }
-      mediaList.value = media.slice(0, 15)
-      fileList.value = files.slice(0, 15)
+      mediaList.value = media
+      fileList.value = files
     }
   } catch (error) {
     console.error('获取内容统计失败:', error)
-  } finally {
-    loadingStats.value = false
   }
 }
 
-// 群组操作
+// 显示内容详情
+const showContent = (type) => {
+  contentType.value = type
+  contentDialogVisible.value = true
+}
+
+// 操作处理
 const handleInviteMember = () => {
   ElMessage.info('邀请成员功能开发中...')
 }
@@ -423,100 +404,39 @@ const handleEditGroup = () => {
   ElMessage.info('编辑群信息功能开发中...')
 }
 
-// 成员操作
-const handleMemberCommand = (command, member) => {
-  switch (command) {
-    case 'remove':
-      handleRemoveMember(member)
-      break
-    case 'setAdmin':
-      handleSetAdmin(member)
-      break
-    case 'unsetAdmin':
-      handleUnsetAdmin(member)
-      break
-    case 'profile':
-      handleViewMemberProfile(member)
-      break
-  }
-}
+const handleLeaveOrDismiss = async () => {
+  const action = isOwner.value ? '解散群聊' : '退出群聊'
+  const confirmMsg = isOwner.value
+    ? '确定要解散群聊吗？解散后群组将被永久删除，所有成员将被移出。'
+    : '确定要退出群聊吗？退出后将无法接收群消息。'
 
-const handleRemoveMember = async (member) => {
   try {
-    await ElMessageBox.confirm(
-      `确定要将 ${member.nickname || member.username} 移出群聊吗？`,
-      '移出群聊',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    )
-
-    const response = await request({
-      url: `/api/im/group/${props.groupId}/members/${member.userId}`,
-      method: 'delete',
+    await ElMessageBox.confirm(confirmMsg, action, {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: isOwner.value ? 'error' : 'warning',
     })
 
+    let url = isOwner.value
+      ? `/api/im/group/${props.groupId}`
+      : `/api/im/group/${props.groupId}/quit`
+    let method = isOwner.value ? 'delete' : 'post'
+
+    const response = await request({ url, method })
+
     if (response.code === 200) {
-      ElMessage.success('已移出群聊')
-      loadMembers()
+      ElMessage.success(`已${action}`)
+      handleClose()
       emit('refresh')
     } else {
       ElMessage.error(response.msg || '操作失败')
     }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('移出成员失败:', error)
+      console.error(`${action}失败:`, error)
+      ElMessage.error(`${action}失败`)
     }
   }
-}
-
-const handleSetAdmin = async (member) => {
-  try {
-    const response = await request({
-      url: `/api/im/groups/${props.groupId}/members/${member.userId}/role`,
-      method: 'put',
-      data: { role: 'ADMIN' },
-    })
-
-    if (response.code === 200) {
-      ElMessage.success('已设为管理员')
-      loadMembers()
-    } else {
-      ElMessage.error(response.msg || '操作失败')
-    }
-  } catch (error) {
-    console.error('设置管理员失败:', error)
-  }
-}
-
-const handleUnsetAdmin = async (member) => {
-  try {
-    const response = await request({
-      url: `/api/im/groups/${props.groupId}/members/${member.userId}/role`,
-      method: 'put',
-      data: { role: 'MEMBER' },
-    })
-
-    if (response.code === 200) {
-      ElMessage.success('已取消管理员')
-      loadMembers()
-    } else {
-      ElMessage.error(response.msg || '操作失败')
-    }
-  } catch (error) {
-    console.error('取消管理员失败:', error)
-  }
-}
-
-const handleViewMemberProfile = (member) => {
-  ElMessage.info(`查看 ${member.nickname || member.username} 的资料`)
-}
-
-// 底部操作
-const handleViewRecords = () => {
-  ElMessage.info('查看聊天记录功能开发中...')
 }
 
 const handleClearHistory = async () => {
@@ -533,70 +453,6 @@ const handleClearHistory = async () => {
     ElMessage.success('聊天记录已清空')
   } catch {
     // 取消操作
-  }
-}
-
-const handleLeaveGroup = async () => {
-  try {
-    await ElMessageBox.confirm(
-      '确定要退出群聊吗？退出后将无法接收群消息。',
-      '退出群聊',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    )
-
-    const response = await request({
-      url: `/api/im/group/${props.groupId}/quit`,
-      method: 'post',
-    })
-
-    if (response.code === 200) {
-      ElMessage.success('已退出群聊')
-      handleClose()
-      emit('refresh')
-    } else {
-      ElMessage.error(response.msg || '操作失败')
-    }
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('退出群聊失败:', error)
-      ElMessage.error('退出群聊失败')
-    }
-  }
-}
-
-const handleDismissGroup = async () => {
-  try {
-    await ElMessageBox.confirm(
-      '确定要解散群聊吗？解散后群组将被永久删除，所有成员将被移出。',
-      '解散群聊',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'error',
-      }
-    )
-
-    const response = await request({
-      url: `/api/im/group/${props.groupId}`,
-      method: 'delete',
-    })
-
-    if (response.code === 200) {
-      ElMessage.success('群聊已解散')
-      handleClose()
-      emit('refresh')
-    } else {
-      ElMessage.error(response.msg || '操作失败')
-    }
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('解散群聊失败:', error)
-      ElMessage.error('解散群聊失败')
-    }
   }
 }
 
@@ -625,206 +481,283 @@ const formatFileSize = (bytes) => {
 </script>
 
 <style lang="scss" scoped>
-.group-detail-dialog {
-  .el-dialog__body {
+// 钉钉5.6风格弹窗
+.ding-group-detail-dialog {
+  :deep(.el-dialog) {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  :deep(.el-dialog__header) {
     padding: 0;
-    max-height: 60vh;
-    overflow-y: auto;
+    margin: 0;
+  }
+
+  :deep(.el-dialog__body) {
+    padding: 0;
+  }
+
+  :deep(.el-dialog__footer) {
+    padding: 12px 20px;
+    border-top: 1px solid #f0f0f0;
   }
 }
 
-.dialog-content {
-  padding: 20px;
-}
-
-// 群组基本信息
-.group-profile {
+// 头部
+.dialog-header {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 20px 0;
-  text-align: center;
-  border-bottom: 1px solid var(--el-border-color-lighter);
+  justify-content: space-between;
+  height: 50px;
+  padding: 0 20px;
+  border-bottom: 1px solid #f0f0f0;
 
-  .group-avatar {
-    margin-bottom: 16px;
-    border: 3px solid var(--el-border-color-lighter);
-  }
-
-  .group-name {
-    margin: 0 0 8px;
-    font-size: 20px;
+  .header-title {
+    font-size: 16px;
     font-weight: 500;
+    color: #1d1d1f;
   }
 
-  .group-desc {
-    margin: 0 0 16px;
-    font-size: 14px;
-    color: var(--el-text-color-secondary);
-    max-width: 80%;
-  }
+  .header-close {
+    font-size: 20px;
+    color: #858585;
+    cursor: pointer;
 
-  .group-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    .member-count {
-      font-size: 14px;
-      color: var(--el-text-color-secondary);
+    &:hover {
+      color: #1d1d1f;
     }
   }
 }
 
-// 群组操作
-.group-actions {
+// 内容区域
+.dialog-body {
+  padding: 20px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+// 群组卡片
+.group-card {
   display: flex;
-  gap: 8px;
-  margin: 20px 0;
-  justify-content: center;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 12px;
+  margin-bottom: 20px;
+
+  .group-basic-info {
+    flex: 1;
+
+    .group-name {
+      margin: 0 0 4px;
+      font-size: 18px;
+      font-weight: 500;
+      color: #1d1d1f;
+    }
+
+    .group-desc {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #858585;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 300px;
+    }
+
+    .group-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .member-count {
+        font-size: 14px;
+        color: #858585;
+      }
+    }
+  }
+}
+
+// 快捷操作
+.quick-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  .action-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: #f5f5f5;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #e8e8e8;
+    }
+
+    .el-icon {
+      font-size: 20px;
+      color: #0089ff;
+      margin-bottom: 6px;
+    }
+
+    span {
+      font-size: 13px;
+      color: #1d1d1f;
+    }
+  }
 }
 
 // 成员区域
 .members-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid var(--el-border-color-lighter);
+  margin-bottom: 20px;
 
   .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 
     .section-title {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 500;
+      color: #1d1d1f;
     }
 
-    .member-count {
-      font-size: 14px;
-      color: var(--el-text-color-secondary);
+    .member-count-badge {
+      font-size: 13px;
+      color: #858585;
+      background: #f5f5f5;
+      padding: 2px 8px;
+      border-radius: 10px;
     }
   }
 
   .members-list {
-    max-height: 300px;
-    overflow-y: auto;
-  }
-
-  .member-item {
-    display: flex;
-    align-items: center;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    transition: background 0.2s;
-
-    &:hover {
-      background: var(--el-fill-color-light);
-    }
-
-    .member-info {
-      flex: 1;
+    .member-item {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-left: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
 
-      .member-name {
-        font-size: 14px;
-        color: var(--el-text-color-primary);
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .member-info {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 12px;
+
+        .member-name {
+          font-size: 15px;
+          color: #1d1d1f;
+        }
+
+        .member-role {
+          font-size: 12px;
+          color: #52c41a;
+          background: #f0f9ff;
+          padding: 2px 6px;
+          border-radius: 4px;
+
+          &.admin {
+            color: #faad14;
+            background: #fffbe6;
+          }
+        }
+      }
+    }
+
+    .show-more {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 12px;
+      cursor: pointer;
+      color: #0089ff;
+      font-size: 14px;
+
+      .el-icon {
+        transition: transform 0.2s;
       }
     }
   }
 }
 
-// 统计区域
-.stats-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid var(--el-border-color-lighter);
-
-  .stats-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--el-text-color-secondary);
+// 内容区域
+.content-section {
+  .section-header {
     margin-bottom: 12px;
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1d1d1f;
+    }
   }
 
-  .stats-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-
-    .stats-tab {
+  .content-stats {
+    .stat-item {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
+      padding: 12px 16px;
+      background: #f5f5f5;
       border-radius: 8px;
-      background: var(--el-fill-color-light);
+      margin-bottom: 8px;
       cursor: pointer;
-      font-size: 14px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
 
       &:hover {
-        background: var(--el-fill-color);
+        background: #e8e8e8;
       }
 
-      &.active {
-        background: var(--el-color-primary);
-        color: #fff;
+      .stat-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border-radius: 8px;
+        color: #0089ff;
+        font-size: 20px;
       }
-    }
-  }
 
-  .stats-content {
-    min-height: 100px;
-  }
-}
+      .stat-info {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-left: 12px;
 
-// 媒体网格
-.media-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+        .stat-label {
+          font-size: 15px;
+          color: #1d1d1f;
+        }
 
-  .media-item {
-    aspect-ratio: 1;
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-  }
-}
+        .stat-count {
+          font-size: 14px;
+          color: #858585;
+        }
+      }
 
-// 文件列表
-.file-list {
-  .file-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px;
-    border-radius: 6px;
-    cursor: pointer;
-
-    &:hover {
-      background: var(--el-fill-color-light);
-    }
-
-    .file-icon {
-      font-size: 20px;
-      color: var(--el-color-primary);
-    }
-
-    .file-name {
-      flex: 1;
-      font-size: 14px;
-    }
-
-    .file-size {
-      font-size: 12px;
-      color: var(--el-text-color-secondary);
+      .stat-arrow {
+        color: #c8c8c8;
+        font-size: 16px;
+      }
     }
   }
 }
@@ -832,7 +765,93 @@ const formatFileSize = (bytes) => {
 // 底部按钮
 .dialog-footer {
   display: flex;
-  justify-content: space-between;
   gap: 8px;
+
+  .footer-btn {
+    flex: 1;
+    height: 40px;
+    border: none;
+    background: #f5f5f5;
+    color: #1d1d1f;
+    font-size: 14px;
+
+    &:hover {
+      background: #e8e8e8;
+    }
+
+    &.danger-btn {
+      background: #ffeef0;
+      color: #ff4d4f;
+
+      &:hover {
+        background: #ffd6d9;
+      }
+    }
+  }
+}
+
+// 内容详情弹窗
+.ding-content-dialog {
+  :deep(.el-dialog__body) {
+    padding: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+}
+
+.content-list {
+  .media-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+
+    .media-item {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+
+      :deep(.el-image) {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+
+  .file-list {
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+
+      &:hover {
+        background: #f5f5f5;
+      }
+
+      .file-icon {
+        font-size: 32px;
+        color: #0089ff;
+        margin-right: 12px;
+      }
+
+      .file-info {
+        flex: 1;
+
+        .file-name {
+          display: block;
+          font-size: 14px;
+          color: #1d1d1f;
+          margin-bottom: 4px;
+        }
+
+        .file-size {
+          font-size: 12px;
+          color: #858585;
+        }
+      }
+    }
+  }
 }
 </style>
