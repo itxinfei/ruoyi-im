@@ -262,7 +262,7 @@
                   <SmartAvatar
                     :name="session.name"
                     :avatar="session.avatar"
-                    :size="40"
+                    :size="32"
                     :show-border="true"
                     :show-online="false"
                   />
@@ -292,7 +292,7 @@
                        <SmartAvatar
                          :name="currentSession?.name"
                          :avatar="currentSession?.avatar"
-                         :size="40"
+                         :size="36"
                          :show-border="true"
                          :show-online="false"
                        />
@@ -6451,19 +6451,19 @@ $nav-width-narrow: 68px;     // 左侧导航栏宽度（窄模式-仅图标）- 
 $nav-width-wide: 180px;      // 左侧导航栏宽度（宽模式-图标+文字）
 $nav-width: $nav-width-narrow; // 当前使用窄模式
 $header-height: 48px;        // 顶部导航栏高度
-$session-panel-width: 320px; // 会话列表宽度（固定）- 钉钉规范320px
+$session-panel-width: 240px; // 会话列表宽度（固定）- 钉钉规范240px
 $chat-panel-min-width: 400px; // 聊天区域最小宽度
 $nav-item-size: 48px;         // 导航项尺寸 - 钉钉规范48×48px
-$chat-header-height: 48px;    // 聊天头部高度
-$input-bar-height: 56px;      // 输入栏高度
+$chat-header-height: 56px;    // 聊天头部高度 - 钉钉规范56px
+$input-bar-height: 48px;      // 输入栏高度 - 钉钉规范48px
 $search-bar-height: 36px;     // 搜索栏高度
-$session-item-height: 64px;   // 会话项高度 - 钉钉规范64px
+$session-item-height: 56px;   // 会话项高度 - 钉钉规范56px
 
 // 品牌色系（钉钉标准色）
 $primary-color: #1890FF;     // 钉钉蓝（主色）
 $primary-color-hover: #40A9FF;
 $primary-color-active: #096DD9;
-$primary-color-light: #E6F7FF; // 浅蓝（选中背景）
+$primary-color-light: rgba(24, 144, 255, 0.1); // 浅蓝（选中背景）- 钉钉规范10%透明度
 $primary-disabled: #D9D9D9;
 
 // 中性色系（钉钉规范）
@@ -6493,8 +6493,8 @@ $info-color: #1890FF;
 // 导航栏颜色
 $nav-bg: #FFFFFF;
 $nav-item-hover: #F5F5F5;
-$nav-item-active: #E6F7FF;
-$nav-item-icon: #666666;
+$nav-item-active: rgba(24, 144, 255, 0.1); // 导航激活背景 - 钉钉规范
+$nav-item-icon: #8B95A1;    // 导航图标颜色 - 钉钉规范灰色
 $nav-item-icon-active: #1890FF;
 
 // 消息气泡颜色（钉钉规范）
@@ -6771,15 +6771,15 @@ $avatar-xl: 64px;
 // 滚动条样式
 @mixin web-scrollbar {
   &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
   &::-webkit-scrollbar-track {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
     background: #d9d9d9;
-    border-radius: 3px;
+    border-radius: 2px;
     &:hover {
       background: #bfbfbf;
     }
@@ -6910,7 +6910,6 @@ $avatar-xl: 64px;
         transition: all 0.2s;
 
         &:hover {
-          color: $primary-color;
           background: $nav-item-hover;
         }
 
@@ -7011,7 +7010,6 @@ $avatar-xl: 64px;
 
           &:hover {
             background: rgba(0, 0, 0, 0.06);
-            color: $primary-color;
           }
 
           &.active {
@@ -7071,10 +7069,10 @@ $avatar-xl: 64px;
               display: flex;
               align-items: center;
               height: $session-item-height;
-              padding: 8px 12px;
-              margin: 0 8px;
+              padding: 8px 12px 8px 16px;
+              margin: 0;
               cursor: pointer;
-              border-radius: 6px;
+              border-radius: 0;
               transition: all $transition-fast $ease-base;
               position: relative;
 
@@ -7088,19 +7086,7 @@ $avatar-xl: 64px;
               }
 
               &.active {
-                background: $primary-color-light;
-
-                &::before {
-                  content: '';
-                  position: absolute;
-                  left: 0;
-                  top: 50%;
-                  transform: translateY(-50%);
-                  width: 3px;
-                  height: 24px;
-                  background: $primary-color;
-                  border-radius: 0 2px 2px 0;
-                }
+                background: rgba(24, 144, 255, 0.1);
               }
 
               .el-badge {
@@ -7326,8 +7312,8 @@ $avatar-xl: 64px;
 
               .message-item {
                 display: flex;
-                margin-bottom: 16px;
-                gap: 12px;
+                margin-bottom: 12px;
+                gap: 8px;
                 padding: 0 16px;
 
                 // 新消息弹出动画
@@ -7355,8 +7341,8 @@ $avatar-xl: 64px;
                     // 钉钉发送方消息气泡 - 纯色无hover变化
                     background: $message-sent-bg;
                     color: $message-sent-text;
-                    border-radius: 8px;
-                    border-bottom-right-radius: 2px;
+                    border-radius: 12px;
+                    border-bottom-right-radius: 4px;
                     border: none;
                     box-shadow: none;
                     padding: 10px 14px;
@@ -7402,8 +7388,8 @@ $avatar-xl: 64px;
                   .message-bubble {
                     position: relative;
                     padding: 10px 14px;
-                    border-radius: 8px;
-                    border-bottom-left-radius: 2px;
+                    border-radius: 12px;
+                    border-bottom-left-radius: 4px;
                     background: $message-received-bg;
                     color: $message-received-text;
                     font-size: 14px;
