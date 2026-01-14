@@ -114,8 +114,8 @@ defineExpose({ focus, blur })
 .ding-textarea {
   display: block;
   width: 100%;
-  min-height: 200px;
-  max-height: 500px;
+  min-height: 80px;
+  max-height: 300px;
   border: none;
   outline: none;
   background: transparent;

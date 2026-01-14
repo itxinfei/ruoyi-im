@@ -160,7 +160,7 @@ public class ImMessageReadController {
      * @return 操作结果
      */
     @Operation(summary = "标记会话已读", description = "将会话中所有消息标记为已读（PUT接口）")
-    @PutMapping
+    @PutMapping("/conversation")
     public Result<Void> markConversationRead(
             @RequestParam Long conversationId,
             @RequestHeader(value = "userId", required = false) Long userId) {

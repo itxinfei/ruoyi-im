@@ -216,6 +216,9 @@ import {
   DocumentDelete,
   Download,
 } from '@element-plus/icons-vue'
+import * as messageApi from '@/api/im/message'
+import * as contactApi from '@/api/im/contact'
+import * as conversationApi from '@/api/im/conversation'
 
 const props = defineProps({
   visible: {
@@ -323,31 +326,76 @@ const performSearch = async () => {
 // 搜索消息
 const searchMessages = async (keyword) => {
   try {
-    // 从 Vuex store 中搜索消息
-    const messageList = store.state.im.messageList || {}
-    const sessions = store.state.im.sessions || []
-
     const results = []
 
-    sessions.forEach(session => {
-      const messages = messageList[session.sessionId] || []
-      messages.forEach(msg => {
-        if (msg.messageType === 'TEXT' && msg.content?.toLowerCase().includes(keyword.toLowerCase())) {
-          results.push({
-            id: `msg-${msg.id}`,
-            type: 'message',
-            content: msg.content,
-            senderName: msg.senderName || '未知',
-            senderId: msg.senderId,
-            sessionName: session.name,
-            sessionId: session.sessionId,
-            sessionType: session.type,
-            timestamp: msg.sendTime,
-            avatar: msg.senderAvatar,
-          })
-        }
+    // 1. 调用后端API搜索所有历史消息
+    try {
+      const response = await messageApi.searchMessages({
+        keyword,
+        messageType: 'TEXT',
+        pageNum: 1,
+        pageSize: 20,
       })
-    })
+
+      if (response.code === 200 && response.data?.items) {
+        // 获取会话列表用于匹配会话名称
+        const sessions = store.state.im.sessions || []
+        const sessionMap = new Map()
+        sessions.forEach(s => {
+          sessionMap.set(String(s.sessionId), s)
+        })
+
+        response.data.items.forEach(item => {
+          const session = sessionMap.get(String(item.conversationId))
+          results.push({
+            id: `msg-${item.id}`,
+            type: 'message',
+            content: item.content || item.highlightSnippet || '',
+            senderName: item.senderName || '未知',
+            senderId: item.senderId,
+            sessionName: session?.name || '会话',
+            sessionId: item.conversationId,
+            sessionType: session?.type || 'PRIVATE',
+            timestamp: item.sendTime,
+            avatar: item.senderAvatar,
+          })
+        })
+      }
+    } catch (apiError) {
+      console.warn('后端搜索失败，使用本地搜索:', apiError)
+    }
+
+    // 2. 如果后端搜索失败或结果较少，补充本地缓存搜索
+    if (results.length < 10) {
+      const messageList = store.state.im.messageList || {}
+      const sessions = store.state.im.sessions || []
+      const existingIds = new Set(results.map(r => r.id))
+
+      sessions.forEach(session => {
+        const messages = messageList[session.sessionId] || []
+        messages.forEach(msg => {
+          const msgId = `msg-${msg.id}`
+          if (
+            !existingIds.has(msgId) &&
+            (msg.messageType === 'TEXT' || msg.type === 'text') &&
+            msg.content?.toLowerCase().includes(keyword.toLowerCase())
+          ) {
+            results.push({
+              id: msgId,
+              type: 'message',
+              content: msg.content,
+              senderName: msg.senderName || '未知',
+              senderId: msg.senderId,
+              sessionName: session.name,
+              sessionId: session.sessionId,
+              sessionType: session.type,
+              timestamp: msg.sendTime || msg.timestamp,
+              avatar: msg.senderAvatar,
+            })
+          }
+        })
+      })
+    }
 
     return results
   } catch (error) {
@@ -359,34 +407,69 @@ const searchMessages = async (keyword) => {
 // 搜索联系人
 const searchContacts = async (keyword) => {
   try {
-    const contacts = store.state.im.contacts || []
+    const results = []
 
-    return contacts
-      .filter(contact => {
-        const searchFields = [
-          contact.name,
-          contact.nickname,
-          contact.remark,
-          contact.mobile,
-          contact.email,
-        ].filter(Boolean)
+    // 1. 调用后端API搜索联系人
+    try {
+      const response = await contactApi.searchContacts(keyword)
+      if (response.code === 200 && response.data) {
+        const contacts = Array.isArray(response.data) ? response.data : []
+        contacts.forEach(contact => {
+          results.push({
+            id: `contact-${contact.userId}`,
+            type: 'contact',
+            name: contact.name || contact.nickname,
+            userId: contact.userId,
+            avatar: contact.avatar,
+            mobile: contact.mobile,
+            email: contact.email,
+            deptName: contact.deptName,
+            position: contact.position,
+            unread: contact.unreadCount > 0,
+          })
+        })
+      }
+    } catch (apiError) {
+      console.warn('后端搜索联系人失败，使用本地搜索:', apiError)
+    }
 
-        return searchFields.some(
-          field => field.toLowerCase().includes(keyword.toLowerCase())
-        )
+    // 2. 如果后端搜索失败或结果较少，补充本地搜索
+    if (results.length < 5) {
+      const contacts = store.state.im.contacts || []
+      const existingIds = new Set(results.map(r => r.id))
+
+      contacts.forEach(contact => {
+        const contactId = `contact-${contact.userId}`
+        if (!existingIds.has(contactId)) {
+          const searchFields = [
+            contact.name,
+            contact.nickname,
+            contact.remark,
+            contact.mobile,
+            contact.email,
+          ].filter(Boolean)
+
+          if (searchFields.some(
+            field => field.toLowerCase().includes(keyword.toLowerCase())
+          )) {
+            results.push({
+              id: contactId,
+              type: 'contact',
+              name: contact.name || contact.nickname,
+              userId: contact.userId,
+              avatar: contact.avatar,
+              mobile: contact.mobile,
+              email: contact.email,
+              deptName: contact.deptName,
+              position: contact.position,
+              unread: contact.unreadCount > 0,
+            })
+          }
+        }
       })
-      .map(contact => ({
-        id: `contact-${contact.userId}`,
-        type: 'contact',
-        name: contact.name || contact.nickname,
-        userId: contact.userId,
-        avatar: contact.avatar,
-        mobile: contact.mobile,
-        email: contact.email,
-        deptName: contact.deptName,
-        position: contact.position,
-        unread: contact.unreadCount > 0,
-      }))
+    }
+
+    return results
   } catch (error) {
     console.error('搜索联系人失败:', error)
     return []
@@ -396,23 +479,59 @@ const searchContacts = async (keyword) => {
 // 搜索群组
 const searchGroups = async (keyword) => {
   try {
-    const sessions = store.state.im.sessions || []
+    const results = []
 
-    return sessions
-      .filter(session => {
-        if (session.type !== 'GROUP') return false
-        return session.name?.toLowerCase().includes(keyword.toLowerCase())
+    // 1. 调用后端API搜索群组
+    try {
+      const response = await conversationApi.searchConversation(keyword)
+      if (response.code === 200 && response.data) {
+        const conversations = Array.isArray(response.data) ? response.data : []
+        conversations.forEach(conv => {
+          if (conv.type === 'GROUP') {
+            results.push({
+              id: `group-${conv.id}`,
+              type: 'group',
+              groupName: conv.name,
+              sessionId: conv.id,
+              avatar: conv.avatar,
+              memberCount: conv.memberCount || 0,
+              description: conv.description,
+              unread: conv.unreadCount > 0,
+            })
+          }
+        })
+      }
+    } catch (apiError) {
+      console.warn('后端搜索群组失败，使用本地搜索:', apiError)
+    }
+
+    // 2. 如果后端搜索失败或结果较少，补充本地搜索
+    if (results.length < 5) {
+      const sessions = store.state.im.sessions || []
+      const existingIds = new Set(results.map(r => r.id))
+
+      sessions.forEach(session => {
+        const groupId = `group-${session.sessionId}`
+        if (
+          !existingIds.has(groupId) &&
+          session.type === 'GROUP' &&
+          session.name?.toLowerCase().includes(keyword.toLowerCase())
+        ) {
+          results.push({
+            id: groupId,
+            type: 'group',
+            groupName: session.name,
+            sessionId: session.sessionId,
+            avatar: session.avatar,
+            memberCount: session.memberCount || 0,
+            description: session.description,
+            unread: session.unreadCount > 0,
+          })
+        }
       })
-      .map(session => ({
-        id: `group-${session.sessionId}`,
-        type: 'group',
-        groupName: session.name,
-        sessionId: session.sessionId,
-        avatar: session.avatar,
-        memberCount: session.memberCount || 0,
-        description: session.description,
-        unread: session.unreadCount > 0,
-      }))
+    }
+
+    return results
   } catch (error) {
     console.error('搜索群组失败:', error)
     return []

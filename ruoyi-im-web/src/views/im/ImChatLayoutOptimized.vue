@@ -381,6 +381,16 @@
                     :show-online="false"
                     class="message-avatar"
                   />
+                  <!-- 自己消息的右侧头像（放在内容前面，确保右对齐时头像在右边） -->
+                  <SmartAvatar
+                    v-if="msg.isOwn || msg.senderId === currentUser?.userId"
+                    :name="currentUser?.nickName || currentUser?.userName || '我'"
+                    :avatar="currentUser?.avatar || msg.senderAvatar || msg.avatar"
+                    :size="36"
+                    :show-border="true"
+                    :show-online="false"
+                    class="message-avatar own-avatar"
+                  />
                   <div class="message-content" @click.right.prevent="showMessageMenu($event, msg)">
                     <div
                       v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)"
@@ -503,21 +513,19 @@
                       </div>
                     </div>
                   </div>
-                  <!-- 自己消息的右侧头像 -->
-                  <SmartAvatar
-                    v-if="msg.isOwn || msg.senderId === currentUser?.userId"
-                    :name="currentUser?.nickName || currentUser?.userName || '我'"
-                    :avatar="currentUser?.avatar || msg.senderAvatar || msg.avatar"
-                    :size="36"
-                    :show-border="true"
-                    :show-online="false"
-                    class="message-avatar own-avatar"
-                  />
                 </div>
               </div>
 
               <!-- 输入区 -->
-              <div class="input-area">
+              <div ref="inputAreaRef" class="input-area" :style="{ height: inputAreaHeight }">
+                <!-- 拖拽手柄 -->
+                <div
+                  ref="resizeHandleRef"
+                  class="input-area-resize-handle"
+                  @mousedown="startResize"
+                >
+                  <div class="resize-handle-bar"></div>
+                </div>
                 <!-- 隐藏的文件输入 -->
                 <input
                   ref="fileInputRef"
@@ -649,7 +657,7 @@
                   ref="inputRef"
                   v-model="inputMessage"
                   type="textarea"
-                  :rows="10"
+                  :rows="3"
                   placeholder="输入消息... @提及、Enter发送、Ctrl+Enter换行"
                   class="chat-input"
                   @keydown="handleInputKeydown"
@@ -1300,6 +1308,26 @@
               />
             </div>
           </div>
+        </div>
+
+        <!-- 审批模块 -->
+        <div v-else-if="activeModule === 'approval'" class="module-workspace">
+          <router-view />
+        </div>
+
+        <!-- DING消息模块 -->
+        <div v-else-if="activeModule === 'ding'" class="module-workspace">
+          <router-view />
+        </div>
+
+        <!-- 邮箱模块 -->
+        <div v-else-if="activeModule === 'email'" class="module-workspace">
+          <router-view />
+        </div>
+
+        <!-- 应用中心模块 -->
+        <div v-else-if="activeModule === 'app-center'" class="module-workspace">
+          <router-view />
         </div>
       </main>
     </div>
@@ -5067,6 +5095,61 @@ const saveProfile = () => {
 // 输入框引用
 const inputRef = ref(null)
 
+// ==================== 输入区高度调整 ====================
+const inputAreaRef = ref(null)
+const resizeHandleRef = ref(null)
+const inputAreaHeight = ref(localStorage.getItem('inputAreaHeight') || '160px')
+const isResizing = ref(false)
+const resizeStartY = ref(0)
+const resizeStartHeight = ref(0)
+
+// 开始调整大小
+const startResize = (e) => {
+  isResizing.value = true
+  resizeStartY.value = e.clientY
+  resizeStartHeight.value = inputAreaRef.value?.offsetHeight || 160
+
+  document.addEventListener('mousemove', onResize)
+  document.addEventListener('mouseup', stopResize)
+
+  // 防止拖拽时选中文字
+  document.body.style.userSelect = 'none'
+  document.body.style.cursor = 'row-resize'
+}
+
+// 调整大小中
+const onResize = (e) => {
+  if (!isResizing.value) return
+
+  const deltaY = e.clientY - resizeStartY.value
+  // 向上拖动为正（增加高度），向下拖动为负（减少高度）
+  const newHeight = resizeStartHeight.value - deltaY
+
+  // 限制最小和最大高度
+  const minHeight = 80
+  const maxHeight = 500
+  const clampedHeight = Math.max(minHeight, Math.min(maxHeight, newHeight))
+
+  inputAreaHeight.value = `${clampedHeight}px`
+}
+
+// 停止调整大小
+const stopResize = () => {
+  if (!isResizing.value) return
+
+  isResizing.value = false
+
+  // 保存高度到 localStorage
+  localStorage.setItem('inputAreaHeight', inputAreaHeight.value)
+
+  document.removeEventListener('mousemove', onResize)
+  document.removeEventListener('mouseup', stopResize)
+
+  // 恢复默认样式
+  document.body.style.userSelect = ''
+  document.body.style.cursor = ''
+}
+
 // ==================== 新增功能函数 ====================
 
 // 表情相关
@@ -7457,8 +7540,8 @@ $avatar-xl: 64px;
                 display: flex;
                 margin-bottom: 20px;
                 gap: 8px;
-                width: auto;
-                max-width: 70%;
+                width: 100%;
+                max-width: 100%;
                 min-width: 0;
 
                 // 新消息弹出动画
@@ -7469,20 +7552,18 @@ $avatar-xl: 64px;
                 /* 发送方消息 - 头像在右边，气泡在左边（整体靠右） */
                 &.isOwn {
                   align-self: flex-end;
-                  flex-direction: row;
+                  flex-direction: row-reverse;
 
                   .message-avatar {
-                    margin-left: 12px;
-                    margin-right: 0;
+                    margin-left: 0;
+                    margin-right: 12px;
                     flex-shrink: 0;
-                    order: 2;
                   }
 
                   .message-content {
                     display: flex;
                     flex-direction: column;
                     align-items: flex-end;
-                    order: 1;
                   }
 
                   .message-bubble {
@@ -7547,7 +7628,7 @@ $avatar-xl: 64px;
                 }
 
                 .message-content {
-                  max-width: 60%;
+                  max-width: 70%;
                   min-width: 0;
                   overflow: hidden;
 
@@ -7564,8 +7645,10 @@ $avatar-xl: 64px;
                     padding: 10px 14px;
                     font-size: 14px;
                     line-height: 1.6;
-                    word-break: break-word;
-                    overflow-wrap: break-word;
+                    max-width: 100%;
+                    overflow: hidden;
+                    word-break: break-all;
+                    overflow-wrap: anywhere;
                     word-wrap: break-word;
                     white-space: pre-wrap;
                   }
@@ -7722,6 +7805,42 @@ $avatar-xl: 64px;
               padding: 12px 16px;
               border-top: 1px solid #E6E6E6;
               background: #fff;
+              display: flex;
+              flex-direction: column;
+              overflow: hidden;
+
+              // 拖拽手柄
+              .input-area-resize-handle {
+                height: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: row-resize;
+                margin: -12px -16px 8px -16px;
+                padding: 8px 16px;
+                position: relative;
+                transition: background-color 0.2s ease;
+
+                &:hover {
+                  background-color: rgba(0, 0, 0, 0.03);
+
+                  .resize-handle-bar {
+                    background-color: #0089FF;
+                  }
+                }
+
+                &:active {
+                  background-color: rgba(0, 0, 0, 0.05);
+                }
+
+                .resize-handle-bar {
+                  width: 40px;
+                  height: 3px;
+                  background-color: #C8C8C8;
+                  border-radius: 2px;
+                  transition: background-color 0.2s ease;
+                }
+              }
 
               .voice-recording-panel {
                 display: flex;
@@ -7799,20 +7918,30 @@ $avatar-xl: 64px;
               }
 
               .chat-input {
+                flex: 1;
                 border-radius: 4px;
                 border: 1px solid #E6E6E6;
                 background: #fff;
                 box-shadow: none;
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+
+                :deep(.el-textarea) {
+                  display: flex;
+                  flex-direction: column;
+                  height: 100%;
+                }
 
                 :deep(.el-textarea__inner) {
                   border: none !important;
                   padding: 12px !important;
-                  resize: vertical !important;
+                  resize: none !important;
                   font-size: 14px !important;
                   line-height: 1.6 !important;
                   background: transparent !important;
-                  min-height: 120px !important;
-                  max-height: 400px !important;
+                  height: 100% !important;
+                  min-height: 60px !important;
                   box-shadow: none !important;
                 }
 
@@ -9077,6 +9206,19 @@ $avatar-xl: 64px;
             }
           }
         }
+      }
+    }
+
+    // 模块工作区（审批、DING、邮箱、应用中心）
+    .module-workspace {
+      width: 100%;
+      height: 100%;
+      background: #f5f7fa;
+      overflow: hidden;
+
+      > router-view {
+        width: 100%;
+        height: 100%;
       }
     }
   }

@@ -276,3 +276,310 @@ export function copyToClipboard(text) {
 }
 
 // 文件相关函数请使用 @/utils/format/file.js
+
+/**
+ * 防抖函数
+ * 在事件被触发n秒后再执行回调，如果在这n秒内又被触发，则重新计时
+ * @param {Function} func 要防抖的函数
+ * @param {Number} wait 防抖时间（毫秒）
+ * @param {Boolean} immediate 是否立即执行
+ * @returns {Function} 防抖后的函数
+ */
+export function debounce(func, wait = 300, immediate = false) {
+  let timeout
+  return function (...args) {
+    const context = this
+    clearTimeout(timeout)
+    if (immediate) {
+      const callNow = !timeout
+      timeout = setTimeout(() => {
+        timeout = null
+      }, wait)
+      if (callNow) {
+        func.apply(context, args)
+      }
+    } else {
+      timeout = setTimeout(() => {
+        func.apply(context, args)
+      }, wait)
+    }
+  }
+}
+
+/**
+ * 节流函数
+ * 规定在一个单位时间内，只能触发一次函数。如果这个单位时间内触发多次函数，只有一次生效
+ * @param {Function} func 要节流的函数
+ * @param {Number} wait 节流时间（毫秒）
+ * @param {Object} options 配置选项
+ * @param {Boolean} options.leading 是否在开始时执行
+ * @param {Boolean} options.trailing 是否在结束时执行
+ * @returns {Function} 节流后的函数
+ */
+export function throttle(func, wait = 300, options = {}) {
+  let timeout, context, args
+  let previous = 0
+
+  const later = function () {
+    previous = options.leading === false ? 0 : Date.now()
+    timeout = null
+    func.apply(context, args)
+    if (!timeout) {
+      context = args = null
+    }
+  }
+
+  return function (...params) {
+    const now = Date.now()
+    if (!previous && options.leading === false) {
+      previous = now
+    }
+    const remaining = wait - (now - previous)
+    context = this
+    args = params
+
+    if (remaining <= 0 || remaining > wait) {
+      if (timeout) {
+        clearTimeout(timeout)
+        timeout = null
+      }
+      previous = now
+      func.apply(context, args)
+      if (!timeout) {
+        context = args = null
+      }
+    } else if (!timeout && options.trailing !== false) {
+      timeout = setTimeout(later, remaining)
+    }
+  }
+}
+
+/**
+ * 请求动画帧节流（用于滚动等高频事件）
+ * @param {Function} func 要节流的函数
+ * @returns {Function} 节流后的函数
+ */
+export function rafThrottle(func) {
+  let locked = false
+  return function (...args) {
+    if (locked) return
+    locked = true
+    requestAnimationFrame(() => {
+      func.apply(this, args)
+      locked = false
+    })
+  }
+}
+
+/**
+ * 空闲执行函数（在浏览器空闲时执行）
+ * @param {Function} func 要执行的函数
+ * @param {Number} timeout 超时时间（毫秒）
+ * @returns {Function} 包装后的函数
+ */
+export function runIdle(func, timeout = 2000) {
+  return function (...args) {
+    const context = this
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        func.apply(context, args)
+      }, { timeout })
+    } else {
+      // 降级方案：使用setTimeout
+      setTimeout(() => {
+        func.apply(context, args)
+      }, 0)
+    }
+  }
+}
+
+/**
+ * 批处理函数（累积批量执行）
+ * @param {Function} func 要执行的函数
+ * @param {Number} wait 等待时间（毫秒）
+ * @param {Number} batchSize 批量大小
+ * @returns {Object} 包含 add 和 flush 方法的对象
+ */
+export function batchProcessor(func, wait = 100, batchSize = 10) {
+  let items = []
+  let timeout = null
+
+  const flush = () => {
+    if (items.length > 0) {
+      const batch = items.splice(0, batchSize)
+      func(batch)
+      if (items.length > 0) {
+        timeout = setTimeout(flush, 0)
+      }
+    }
+  }
+
+  return {
+    add: (item) => {
+      items.push(item)
+      if (items.length >= batchSize) {
+        flush()
+      } else if (!timeout) {
+        timeout = setTimeout(flush, wait)
+      }
+    },
+    flush: () => {
+      if (timeout) {
+        clearTimeout(timeout)
+        timeout = null
+      }
+      while (items.length > 0) {
+        flush()
+      }
+    },
+  }
+}
+
+/**
+ * 深度克隆对象
+ * @param {*} source 源对象
+ * @returns {*} 克隆后的对象
+ */
+export function deepClone(source) {
+  if (source === null || typeof source !== 'object') {
+    return source
+  }
+
+  if (source instanceof Date) {
+    return new Date(source.getTime())
+  }
+
+  if (source instanceof Array) {
+    return source.map(item => deepClone(item))
+  }
+
+  if (source instanceof Object) {
+    const cloneObj = {}
+    for (const key in source) {
+      if (source.hasOwnProperty(key)) {
+        cloneObj[key] = deepClone(source[key])
+      }
+    }
+    return cloneObj
+  }
+}
+
+/**
+ * 格式化文件大小
+ * @param {Number} bytes 字节数
+ * @returns {String} 格式化后的文件大小
+ */
+export function formatFileSize(bytes) {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i]
+}
+
+/**
+ * 格式化时间显示（聊天消息用）
+ * @param {Number|String|Date} time 时间
+ * @returns {String} 格式化后的时间显示
+ */
+export function formatChatTime(time) {
+  const now = new Date()
+  const date = new Date(time)
+  const diff = now - date
+
+  // 小于1分钟
+  if (diff < 60000) {
+    return '刚刚'
+  }
+
+  // 小于1小时
+  if (diff < 3600000) {
+    return `${Math.floor(diff / 60000)}分钟前`
+  }
+
+  // 今天
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  if (date >= todayStart) {
+    return date.getHours().toString().padStart(2, '0') + ':' +
+           date.getMinutes().toString().padStart(2, '0')
+  }
+
+  // 昨天
+  const yesterdayStart = new Date(todayStart - 86400000)
+  if (date >= yesterdayStart) {
+    return '昨天 ' + date.getHours().toString().padStart(2, '0') + ':' +
+           date.getMinutes().toString().padStart(2, '0')
+  }
+
+  // 本周
+  const weekStart = new Date(todayStart - (now.getDay() || 7) * 86400000)
+  if (date >= weekStart) {
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+    return weekdays[date.getDay()] + ' ' + date.getHours().toString().padStart(2, '0') + ':' +
+           date.getMinutes().toString().padStart(2, '0')
+  }
+
+  // 今年
+  if (date.getFullYear() === now.getFullYear()) {
+    return (date.getMonth() + 1) + '月' + date.getDate() + '日'
+  }
+
+  // 更早
+  return date.getFullYear() + '年' + (date.getMonth() + 1) + '月' + date.getDate() + '日'
+}
+
+/**
+ * 生成唯一ID
+ * @returns {String} 唯一ID
+ */
+export function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = Math.random() * 16 | 0
+    const v = c === 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
+}
+
+/**
+ * 安全的JSON解析
+ * @param {String} json JSON字符串
+ * @param {*} defaultValue 默认值
+ * @returns {*} 解析结果
+ */
+export function safeJSONParse(json, defaultValue = null) {
+  try {
+    return JSON.parse(json)
+  } catch (e) {
+    return defaultValue
+  }
+}
+
+/**
+ * 安全的JSON字符串化
+ * @param {*} obj 要转换的对象
+ * @param {String} defaultValue 默认值
+ * @returns {*} JSON字符串
+ */
+export function safeJSONStringify(obj, defaultValue = '{}') {
+  try {
+    return JSON.stringify(obj)
+  } catch (e) {
+    return defaultValue
+  }
+}
+
+/**
+ * 检查是否为移动设备
+ * @returns {Boolean} 是否为移动设备
+ */
+export function isMobile() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+}
+
+/**
+ * 检查是否为微信浏览器
+ * @returns {Boolean} 是否为微信浏览器
+ */
+export function isWeixin() {
+  return /MicroMessenger/i.test(navigator.userAgent)
+}

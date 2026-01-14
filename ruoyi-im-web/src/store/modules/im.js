@@ -264,6 +264,9 @@ function normalizeMessage(message) {
     }
   }
 
+  // 获取当前用户ID用于判断是否为自己发送的消息
+  const currentUserId = getCurrentUserId()
+
   // 返回标准化消息
   return {
     ...message,
@@ -273,6 +276,8 @@ function normalizeMessage(message) {
     type: (message.type || message.messageType || 'text').toLowerCase(),
     // 使用处理后的显示内容
     content: displayContent,
+    // 判断是否为自己发送的消息
+    isOwn: message.senderId === currentUserId || message.isOwn === true,
     // 保留原始数据和解析后的完整对象
     _rawContent: message.content,
     _parsedContent: parsedContent,
@@ -953,23 +958,34 @@ const actions = {
     if (userInfo && message.senderId === userInfo.userId && !message.senderAvatar) {
       message.senderAvatar = userInfo.avatar
     }
-    
+
     commit('ADD_MESSAGE', { sessionId: message.sessionId, message })
 
-    // 如果不是当前会话，增加未读数
-    if (!state.currentSession || state.currentSession.id !== message.sessionId) {
-      const session = state.sessions.find(s => s.id === message.sessionId)
-      if (session) {
-        commit('UPDATE_SESSION', {
-          sessionId: message.sessionId,
-          updates: {
-            unreadCount: (session.unreadCount || 0) + 1,
-            lastMessage: {
-              content: message.content,
-              timestamp: message.timestamp,
-            },
+    // 更新会话的最后消息（无论是否是当前会话）
+    const session = state.sessions.find(s => s.id === message.sessionId)
+    if (session) {
+      const isCurrentSession = state.currentSession && state.currentSession.id === message.sessionId
+      commit('UPDATE_SESSION', {
+        sessionId: message.sessionId,
+        updates: {
+          // 只有不是当前会话时才增加未读数
+          unreadCount: isCurrentSession ? session.unreadCount || 0 : (session.unreadCount || 0) + 1,
+          // 更新最后消息内容和时间
+          lastMessage: {
+            content: message.content,
+            timestamp: message.timestamp || message.time || Date.now(),
+            sendTime: message.sendTime || message.timestamp || message.time || Date.now(),
           },
-        })
+          lastMessageTime: message.sendTime || message.timestamp || message.time || Date.now(),
+        },
+      })
+      // 如果是当前会话，移到会话列表顶部
+      if (isCurrentSession) {
+        const sessionIndex = state.sessions.findIndex(s => s.id === message.sessionId)
+        if (sessionIndex > 0) {
+          const [updatedSession] = state.sessions.splice(sessionIndex, 1)
+          state.sessions.unshift(updatedSession)
+        }
       }
     }
   },

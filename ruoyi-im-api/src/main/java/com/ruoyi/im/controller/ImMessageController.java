@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -301,6 +302,42 @@ public class ImMessageController {
         @SuppressWarnings("unchecked")
         List<Long> messageIds = (List<Long>) data.get("messageIds");
         imMessageService.markAsRead(conversationId, userId, messageIds);
+        return Result.success("已标记为已读");
+    }
+
+    /**
+     * 标记会话消息已读（兼容前端API）
+     * 将会话中指定消息ID之前的所有消息标记为已读
+     *
+     * @param conversationId 会话ID
+     * @param lastReadMessageId 最后已读消息ID（该消息之前的所有消息都标记为已读）
+     * @param userId 当前登录用户ID
+     * @return 操作结果
+     */
+    @Operation(summary = "标记会话已读", description = "将会话中指定消息之前的所有消息标记为已读")
+    @PutMapping("/read")
+    public Result<Void> markConversationRead(
+            @RequestParam Long conversationId,
+            @RequestParam(required = false) Long lastReadMessageId,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        // 更新会话成员的最后已读消息ID
+        ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        if (member != null) {
+            if (lastReadMessageId != null) {
+                member.setLastReadMessageId(lastReadMessageId);
+            } else {
+                // 获取会话最新消息ID
+                List<ImMessageVO> messages = imMessageService.getMessages(conversationId, userId, null, 1);
+                if (messages != null && !messages.isEmpty()) {
+                    member.setLastReadMessageId(messages.get(0).getId());
+                }
+            }
+            member.setLastReadTime(LocalDateTime.now());
+            conversationMemberMapper.updateById(member);
+        }
         return Result.success("已标记为已读");
     }
 

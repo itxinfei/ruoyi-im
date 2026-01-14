@@ -69,9 +69,8 @@ export function batchDeleteFiles(fileIds) {
 // 下载文件
 export function downloadFile(fileId) {
   return request({
-    url: '/api/im/file/download',
+    url: `/api/im/file/download/${fileId}`,
     method: 'get',
-    params: { fileId },
     responseType: 'blob',
   })
 }
