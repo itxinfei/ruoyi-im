@@ -8911,31 +8911,31 @@ $avatar-xl: 64px;
                 margin-top: 12px;
               }
             }
+          }
 
-            // 文件夹树
-            .folder-tree {
-              flex: 1;
-              overflow-y: auto;
-              padding: 0 8px;
+          // 文件夹树
+          .folder-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 8px;
 
-              .el-tree {
-                background: transparent;
+            .el-tree {
+              background: transparent;
 
-                .tree-node {
-                  display: flex;
-                  align-items: center;
-                  gap: 6px;
-                  font-size: 14px;
-                  color: $text-primary;
+              .tree-node {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 14px;
+                color: $text-primary;
 
-                  .tree-label {
-                    flex: 1;
-                  }
+                .tree-label {
+                  flex: 1;
+                }
 
-                  .tree-count {
-                    font-size: 12px;
-                    color: $text-tertiary;
-                  }
+                .tree-count {
+                  font-size: 12px;
+                  color: $text-tertiary;
                 }
               }
             }
