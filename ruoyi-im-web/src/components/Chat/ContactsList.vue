@@ -223,7 +223,7 @@ const handleContactAction = (command, contact) => {
 
         .contact-name {
           font-size: 14px;
-          font-weight: 600;
+          font-weight: 500;
           color: $text-primary;
           @include text-ellipsis;
           margin-bottom: 4px;

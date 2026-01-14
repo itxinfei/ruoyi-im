@@ -552,25 +552,26 @@ watch(selectedEmails, updateSelectAllState)
 .email-container {
   display: flex;
   height: 100%;
-  background: #f5f5f5;
+  background: #F5F7FA; // 钉钉规范
 }
 
 // 左侧导航栏
 .email-sidebar {
   width: 220px;
   background: #fff;
-  border-right: 1px solid #e8e8e8;
+  border-right: 1px solid #E8E8E8;
   display: flex;
   flex-direction: column;
 
   .sidebar-header {
     padding: 16px;
-    border-bottom: 1px solid #e8e8e8;
+    border-bottom: 1px solid #E8E8E8;
 
     h3 {
       margin: 0 0 12px 0;
-      font-size: 18px;
+      font-size: 20px; // 修改：18px -> 20px（模块标题）
       font-weight: 500;
+      color: #262626;
     }
 
     .el-button {
@@ -583,7 +584,14 @@ watch(selectedEmails, updateSelectAllState)
     border: none;
 
     .el-menu-item {
-      height: 44px;
+      height: 48px; // 修改：44px -> 48px（导航项高度）
+      font-size: 14px;
+      color: #666666;
+
+      &.is-active {
+        color: #1890FF;
+        background-color: #E6F7FF;
+      }
 
       .menu-item-content {
         display: flex;
@@ -600,25 +608,25 @@ watch(selectedEmails, updateSelectAllState)
 
   .storage-info {
     padding: 16px;
-    border-top: 1px solid #e8e8e8;
+    border-top: 1px solid #E8E8E8;
 
     .storage-bar {
       height: 4px;
-      background: #e8e8e8;
+      background: #E8E8E8;
       border-radius: 2px;
       margin-bottom: 8px;
       overflow: hidden;
 
       .storage-used {
         height: 100%;
-        background: linear-gradient(90deg, #0089ff, #00c2ff);
+        background: linear-gradient(90deg, #1890FF, #40A9FF); // 钉钉色系
         border-radius: 2px;
       }
     }
 
     .storage-text {
       font-size: 12px;
-      color: #999;
+      color: #999999; // 辅助文字
     }
   }
 }
@@ -637,10 +645,15 @@ watch(selectedEmails, updateSelectAllState)
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid #E8E8E8;
 
   .search-box {
     width: 300px;
+
+    :deep(.el-input__wrapper) {
+      border-radius: 4px;
+      background-color: #F5F7FA;
+    }
   }
 
   .toolbar-actions {
@@ -661,12 +674,17 @@ watch(selectedEmails, updateSelectAllState)
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: #999;
+    color: #999999; // 辅助文字
 
     i {
       font-size: 64px;
       margin-bottom: 16px;
       opacity: 0.5;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
     }
   }
 }
@@ -676,28 +694,28 @@ watch(selectedEmails, updateSelectAllState)
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #F0F2F5;
   cursor: pointer;
   transition: background 0.2s;
 
   &:hover {
-    background: #f5f9ff;
+    background: #F5F7FA;
   }
 
   &.selected {
-    background: #e6f7ff;
+    background: #E6F7FF;
   }
 
   &.unread {
-    background: #fafbff;
+    background: #FAFBFF;
 
     .email-subject {
-      font-weight: 600;
+      font-weight: 500; // 修改：600 -> 500
     }
   }
 
   &.starred .email-star .el-icon {
-    color: #fadb14;
+    color: #faad14;
   }
 
   .email-checkbox {
@@ -706,7 +724,7 @@ watch(selectedEmails, updateSelectAllState)
 
   .email-star {
     margin-right: 8px;
-    color: #d9d9d9;
+    color: #CCCCCC;
     display: flex;
     align-items: center;
 
@@ -719,7 +737,7 @@ watch(selectedEmails, updateSelectAllState)
   .email-sender {
     width: 140px;
     font-size: 14px;
-    color: #333;
+    color: #333333; // 正文色
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -732,18 +750,18 @@ watch(selectedEmails, updateSelectAllState)
 
     .email-subject {
       font-size: 14px;
-      color: #333;
+      color: #262626; // 标题色
       margin-bottom: 4px;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 8px; // 修改：4px -> 8px
 
       &.unread {
-        font-weight: 600;
+        font-weight: 500;
       }
 
       .attachment-icon {
-        color: #999;
+        color: #999999; // 辅助文字
         font-size: 12px;
         display: flex;
         align-items: center;
@@ -752,7 +770,7 @@ watch(selectedEmails, updateSelectAllState)
 
     .email-preview {
       font-size: 13px;
-      color: #999;
+      color: #999999; // 辅助文字
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -763,14 +781,14 @@ watch(selectedEmails, updateSelectAllState)
     width: 80px;
     text-align: right;
     font-size: 12px;
-    color: #999;
+    color: #999999; // 辅助文字
   }
 }
 
 // 分页
 .email-pagination {
   padding: 12px 16px;
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid #E8E8E8;
   display: flex;
   justify-content: center;
 }

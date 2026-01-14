@@ -605,7 +605,7 @@ export default {
       background-color: $error-color;
       color: white;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 500;
       border-radius: 10px;
       display: flex;
       align-items: center;

@@ -5,7 +5,7 @@
       <!-- 左侧：Logo和搜索 -->
       <div class="header-left">
         <div class="header-logo">
-          <el-icon :size="24" color="#1677ff"><ChatDotRound /></el-icon>
+          <el-icon :size="24" color="#1890FF"><ChatDotRound /></el-icon>
           <span class="logo-text">钉钉</span>
         </div>
         <div class="header-divider"></div>
@@ -1741,6 +1741,9 @@
       @result-click="handleSearchResultClick"
     />
 
+    <!-- 反馈建议对话框 -->
+    <feedback-dialog v-model:visible="feedbackDialogVisible" @success="handleFeedbackSuccess" />
+
     <!-- 系统设置对话框 -->
     <system-settings v-model="systemSettingsVisible" @save="handleSettingsSave" />
 
@@ -2233,6 +2236,16 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- 通话管理器 -->
+    <CallManager
+      ref="callManagerRef"
+      :current-user-id="currentUser?.userId"
+      :current-conversation-id="currentSessionId"
+      @call-started="handleCallStarted"
+      @call-ended="handleCallEnded"
+      @incoming-call="handleIncomingCall"
+    />
   </div>
 </template>
 
@@ -2332,6 +2345,8 @@ import { listGroup } from '@/api/im/group'
 import NotificationPanel from '@/components/Notification/NotificationPanel.vue'
 import SystemSettings from '@/views/settings/index.vue'
 import GlobalSearch from '@/components/Search/GlobalSearch.vue'
+import FeedbackDialog from '@/components/Feedback/FeedbackDialog.vue'
+import CallManager from '@/components/Chat/CallManager.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -2364,6 +2379,9 @@ const messageAreaRef = ref(null)
 const fileInputRef = ref(null)
 const imageInputRef = ref(null)
 const uploading = ref(false)
+
+// 通话管理器引用
+const callManagerRef = ref(null)
 
 // 语音录制
 const {
@@ -2772,7 +2790,7 @@ const filteredFriends = computed(() => {
 const loadFriends = async () => {
   try {
     await store.dispatch('im/loadContacts')
-    console.log('[加载好友] 已通过 Vuex store 加载，去重已在后端和 store 中完成')
+    // console.log('[加载好友] 已通过 Vuex store 加载，去重已在后端和 store 中完成')
   } catch (error) {
     console.error('加载好友列表失败:', error)
   }
@@ -2793,7 +2811,7 @@ const loadGroups = async () => {
           ownerId: g.ownerId || g.creatorId,
         }))
       : []
-    console.log(`[加载群组] 已加载 ${groups.value.length} 个群组`)
+    // console.log(`[加载群组] 已加载 ${groups.value.length} 个群组`)
   } catch (error) {
     console.error('加载群组列表失败:', error)
     groups.value = []
@@ -2963,9 +2981,77 @@ const startChat = async contact => {
   router.push('/im/chat')
 }
 
+// 语音通话
+const startVoiceCall = () => {
+  const session = currentSession.value
+  if (!session) return
+
+  // 获取对方用户ID
+  let targetUserId = null
+  if (session.type === 'PRIVATE') {
+    // 私聊：对方用户ID
+    targetUserId = session.peerUserId || session.targetId
+  } else if (session.type === 'GROUP') {
+    // 群聊暂不支持语音通话
+    ElMessage.warning('群组语音通话功能开发中')
+    return
+  }
+
+  if (!targetUserId) {
+    ElMessage.error('无法获取对方用户信息')
+    return
+  }
+
+  // 调用通话管理器发起语音通话
+  callManagerRef.value?.startVoiceCall(targetUserId, session.id)
+}
+
 // 视频通话
 const startVideoCall = contact => {
-  ElMessage.info(`正在发起视频通话: ${contact.name || contact.nickname}`)
+  const session = currentSession.value
+  if (!session && contact) {
+    // 从联系人发起
+    callManagerRef.value?.startVideoCall(contact.id || contact.userId, null)
+    return
+  }
+
+  if (!session) return
+
+  // 获取对方用户ID
+  let targetUserId = null
+  if (session.type === 'PRIVATE') {
+    targetUserId = session.peerUserId || session.targetId
+  } else if (session.type === 'GROUP') {
+    ElMessage.warning('群组视频通话功能开发中')
+    return
+  }
+
+  if (!targetUserId) {
+    ElMessage.error('无法获取对方用户信息')
+    return
+  }
+
+  // 调用通话管理器发起视频通话
+  callManagerRef.value?.startVideoCall(targetUserId, session.id)
+}
+
+// 通话事件处理
+const handleCallStarted = ({ type, userId, conversationId }) => {
+  // console.log('[通话] 通话开始', { type, userId, conversationId })
+  ElMessage.info(type === 'voice' ? '正在发起语音通话...' : '正在发起视频通话...')
+}
+
+const handleCallEnded = ({ type, reason }) => {
+  // console.log('[通话] 通话结束', { type, reason })
+}
+
+const handleIncomingCall = ({ type, callerId, callerName, callId }) => {
+  // console.log('[通话] 收到来电', { type, callerId, callerName, callId })
+}
+
+// 屏幕共享
+const startScreenShare = () => {
+  ElMessage.info('屏幕共享功能开发中')
 }
 
 // 发送好友请求
@@ -3051,7 +3137,7 @@ const mockApprovals = ref([
     applicant: '张三',
     time: Date.now() - 3600000,
     icon: Document,
-    color: '#1677ff',
+    color: '#1890FF',
   },
   {
     id: 2,
@@ -3118,7 +3204,7 @@ const schedules = ref([
     date: getWeekDays(new Date())[0].date,
     time: '09:00',
     location: '会议室A',
-    color: '#1677ff',
+    color: '#1890FF',
   },
   {
     id: 2,
@@ -3952,7 +4038,7 @@ const departments = ref([
 
 // 工作台应用
 const workbenchApps = ref([
-  { key: 'approval', name: '审批', icon: Document, color: '#1677ff' },
+  { key: 'approval', name: '审批', icon: Document, color: '#1890FF' },
   { key: 'attendance', name: '考勤打卡', icon: Odometer, color: '#52c41a' },
   { key: 'drive', name: '钉盘', icon: Files, color: '#faad14' },
   { key: 'calendar', name: '日程', icon: Calendar, color: '#722ed1' },
@@ -4030,15 +4116,14 @@ const scrollToBottom = () => {
   }
 }
 
-// 监听消息变化，自动滚动到底部
+// 监听消息变化，自动滚动到底部（优化：只监听长度变化）
 watch(
-  messages,
+  () => messages.value?.length,
   () => {
     nextTick(() => {
       scrollToBottom()
     })
-  },
-  { deep: true }
+  }
 )
 
 const handleEnter = e => {
@@ -4800,6 +4885,9 @@ const systemSettingsVisible = ref(false)
 
 // 全局搜索
 const globalSearchVisible = ref(false)
+
+// 反馈建议
+const feedbackDialogVisible = ref(false)
 
 // 主题设置
 const themeSettingsVisible = ref(false)
@@ -5616,19 +5704,19 @@ onUnmounted(() => {
   mediaQuery.removeEventListener('change', handleSystemThemeChange)
 })
 
-// 监听消息播放提示音
+// 监听消息播放提示音（优化：不使用 deep，减少性能开销）
 watch(
-  () => store.state.im.messages,
-  (newMessages, oldMessages) => {
-    if (newMessages.length > (oldMessages?.length || 0)) {
-      const latestMessage = newMessages[newMessages.length - 1]
-      if (!latestMessage.isOwn) {
+  () => store.state.im.messages?.length,
+  (newLength, oldLength) => {
+    if (newLength > oldLength) {
+      const messages = store.state.im.messages
+      const latestMessage = messages[messages.length - 1]
+      if (latestMessage && !latestMessage.isOwn) {
         playMessageSound()
         showDesktopNotification('新消息', `${latestMessage.senderName}: ${latestMessage.content}`)
       }
     }
-  },
-  { deep: true }
+  }
 )
 
 const handleUserCommand = async command => {
@@ -5704,10 +5792,16 @@ const handleHelpCommand = command => {
   } else if (command === 'shortcuts') {
     showShortcutsDialog()
   } else if (command === 'feedback') {
-    ElMessage.info('反馈建议功能开发中...')
+    feedbackDialogVisible.value = true
   } else if (command === 'update') {
     ElMessage.info('当前已是最新版本')
   }
+}
+
+// 反馈提交成功处理
+const handleFeedbackSuccess = (data) => {
+  console.log('反馈提交成功:', data)
+  // 可以在这里添加额外的处理逻辑，比如记录到本地等
 }
 
 // 设置在线状态
@@ -5828,10 +5922,6 @@ const showChatProfile = () => {
   ElMessage.info('会话详情功能开发中...')
 }
 
-const startScreenShare = () => {
-  ElMessage.info('屏幕共享功能开发中...')
-}
-
 const searchInChat = () => {
   ElMessage.info('搜索聊天记录功能开发中...')
 }
@@ -5883,9 +5973,40 @@ const exitGroup = async () => {
   }
 }
 
+// 确保 userInfo 存在（开发测试模式）
+const ensureUserInfo = () => {
+  let userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+
+  // 如果 userInfo 为空，设置默认测试用户
+  if (!userInfo.userId && !userInfo.id) {
+    console.warn('[IM] userInfo 不存在，设置默认测试用户')
+    const mockUserInfo = {
+      userId: 1,
+      id: 1,
+      userIdStr: '1',
+      username: 'testuser',
+      nickname: '测试用户',
+      nickName: '测试用户',
+      avatar: '',
+      email: 'test@example.com',
+      phone: '13800138000',
+    }
+    localStorage.setItem('userInfo', JSON.stringify(mockUserInfo))
+    localStorage.setItem('token', 'test-token')
+    localStorage.setItem('Admin-Token', 'test-token')
+    userInfo = mockUserInfo
+  }
+
+  console.log('[IM] 当前用户:', userInfo.userId || userInfo.id)
+  return userInfo
+}
+
 // 初始化 - 优化为渐进式加载，提升登录体验
 const init = async () => {
-  console.log('[IM初始化] 开始初始化，采用渐进式加载策略')
+  // console.log('[IM初始化] 开始初始化，采用渐进式加载策略')
+
+  // 确保 userInfo 存在（开发测试模式）
+  ensureUserInfo()
 
   // 读取折叠状态
   const savedCollapsed = localStorage.getItem('navCollapsed')
@@ -5965,7 +6086,7 @@ const init = async () => {
     console.timeEnd('[IM初始化] 第三阶段耗时')
   }, 500) // 延迟500ms，避免阻塞主要功能
 
-  console.log('[IM初始化] 渐进式加载策略已启动')
+  // console.log('[IM初始化] 渐进式加载策略已启动')
 }
 
 // 加载最近会话列表（仅加载前20条，用于快速展示）
@@ -6014,7 +6135,7 @@ const loadRecentSessionsOnly = async () => {
     })
 
     store.commit('im/SET_SESSIONS', Array.from(uniqueSessionsMap.values()))
-    console.log(`[快速加载] 已加载 ${uniqueSessionsMap.size} 个最近会话`)
+    // console.log(`[快速加载] 已加载 ${uniqueSessionsMap.size} 个最近会话`)
   } catch (error) {
     console.error('加载最近会话失败:', error)
     throw error
@@ -6650,7 +6771,7 @@ $avatar-xl: 64px;
     .user-info-item {
       .user-name {
         font-size: 16px;
-        font-weight: 600;
+        font-weight: 500;
         color: #1d2129;
       }
 
@@ -6873,7 +6994,7 @@ $avatar-xl: 64px;
 
         .logo-text {
           font-size: 18px;
-          font-weight: 600;
+          font-weight: 500;
           color: $primary-color;
         }
       }
@@ -7237,7 +7358,7 @@ $avatar-xl: 64px;
 
                     .title-name {
                       font-size: 15px;
-                      font-weight: 600;
+                      font-weight: 500;
                       color: $text-primary;
                     }
 
@@ -7773,7 +7894,7 @@ $avatar-xl: 64px;
           .section-title {
             padding: 16px 20px 8px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 500;
             color: $text-tertiary;
             letter-spacing: 0.5px;
             text-transform: uppercase;
@@ -9966,7 +10087,7 @@ $avatar-xl: 64px;
       }
 
       &.status-offline {
-        background: #8c8c8c;
+        background: #999999;
         color: white;
       }
     }
@@ -10116,7 +10237,7 @@ $avatar-xl: 64px;
 
     .section-title {
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 500;
       color: $text-primary;
       margin-bottom: 12px;
       padding-bottom: 8px;
@@ -10170,7 +10291,7 @@ $avatar-xl: 64px;
 
     .group-title {
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 500;
       color: $text-primary;
       margin-bottom: 16px;
     }

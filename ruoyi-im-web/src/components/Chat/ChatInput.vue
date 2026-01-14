@@ -1044,12 +1044,12 @@ onUnmounted(() => {
     border-radius: 8px;
     border: 1px solid $border-base;
     transition: all $transition-base $ease-base;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.6;
     padding: 12px 16px;
     margin: 0;
     background-color: #fff;
-    color: #1f1f1f;
+    color: #333333;
     resize: none;
 
     &:focus {
@@ -1063,7 +1063,7 @@ onUnmounted(() => {
     }
 
     &::placeholder {
-      color: #8c8c8c;
+      color: #999999;
     }
   }
 }
@@ -1268,7 +1268,7 @@ onUnmounted(() => {
 
 .recording-time {
   font-size: 32px;
-  font-weight: bold;
+  font-weight: 500;
   color: $error-color;
   font-family: 'Monaco', 'Consolas', monospace;
 }
@@ -1372,7 +1372,7 @@ onUnmounted(() => {
 
 .upload-progress-percent {
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 500;
   color: $primary-color;
 }
 

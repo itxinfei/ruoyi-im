@@ -336,11 +336,15 @@ class ImWebSocket {
   sendAuth() {
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
     const token = localStorage.getItem('Admin-Token') || localStorage.getItem('token')
+    // 兼容不同字段名：userId 或 id
+    const userId = userInfo.userId || userInfo.id || userInfo.user?.id
+
+    this.log('发送认证消息, userId:', userId)
 
     this.send({
       type: MSG_TYPE.AUTH,
       token: token,
-      userId: userInfo.userId,
+      userId: userId,
       timestamp: Date.now(),
     })
   }

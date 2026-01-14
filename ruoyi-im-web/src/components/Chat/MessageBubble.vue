@@ -724,13 +724,13 @@ export default {
     }
 
     .message-header {
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       margin-left: 0;
 
       .sender-name {
-        font-size: 13px;
-        color: #8c8c8c;
-        font-weight: 500;
+        font-size: 12px;
+        color: #999999;
+        font-weight: 400;
       }
     }
   }
@@ -773,31 +773,31 @@ export default {
   // 文本消息气泡 - 默认（接收方）
   .text-message {
     position: relative;
-    background-color: #f5f5f5;
-    padding: 10px 14px;
+    background-color: #F5F7FA;
+    padding: 8px 12px;
     border-radius: 8px;
     display: inline-block;
     max-width: 100%;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 
     .text-content {
-      color: #1f1f1f;
+      color: #333333;
       line-height: 1.6;
       white-space: pre-wrap;
       word-wrap: break-word;
-      font-size: 15px;
+      font-size: 14px;
     }
 
     // 接收方小三角（左侧）
     &::before {
       content: '';
       position: absolute;
-      top: 14px;
+      top: 12px;
       left: -6px;
       width: 0;
       height: 0;
       border: 6px solid transparent;
-      border-right-color: #f5f5f5;
+      border-right-color: #F5F7FA;
     }
   }
 
@@ -882,7 +882,7 @@ export default {
 
       .file-icon {
         font-size: 28px;
-        color: #1890ff;
+        color: #1890FF;
         margin-right: 12px;
       }
 
@@ -892,8 +892,8 @@ export default {
 
         .file-name {
           font-size: 14px;
-          color: #1f1f1f;
-          margin-bottom: 2px;
+          color: #333333;
+          margin-bottom: 4px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -902,14 +902,14 @@ export default {
 
         .file-size {
           font-size: 12px;
-          color: #8c8c8c;
+          color: #999999;
         }
       }
 
       .file-action {
         margin-left: 12px;
         font-size: 18px;
-        color: #1890ff;
+        color: #1890FF;
       }
     }
   }
@@ -934,8 +934,8 @@ export default {
 
       .voice-icon {
         font-size: 20px;
-        color: #1890ff;
-        margin-right: 10px;
+        color: #1890FF;
+        margin-right: 12px;
       }
 
       .voice-wave {
@@ -953,7 +953,7 @@ export default {
           transition: background 0.3s ease;
 
           &.active {
-            background: #1890ff;
+            background: #1890FF;
             animation: voiceWave 1s infinite ease-in-out;
 
             &:nth-child(1) { animation-delay: 0s; }
@@ -967,8 +967,8 @@ export default {
 
       .voice-duration {
         font-size: 12px;
-        color: #8c8c8c;
-        margin-left: 10px;
+        color: #999999;
+        margin-left: 12px;
       }
     }
   }
@@ -1013,18 +1013,18 @@ export default {
       }
 
       .location-info {
-        padding: 10px 12px;
+        padding: 12px;
 
         .location-name {
           font-size: 14px;
           font-weight: 500;
-          color: #1f1f1f;
-          margin-bottom: 2px;
+          color: #333333;
+          margin-bottom: 4px;
         }
 
         .location-address {
           font-size: 12px;
-          color: #8c8c8c;
+          color: #999999;
         }
       }
     }
@@ -1035,8 +1035,8 @@ export default {
     .system-content {
       text-align: center;
       font-size: 12px;
-      color: #8c8c8c;
-      padding: 6px 12px;
+      color: #999999;
+      padding: 8px 12px;
 
       &::before,
       &::after {
@@ -1068,25 +1068,25 @@ export default {
       .quote-content {
         background: #f0f2f5;
         padding: 8px 12px;
-        border-left: 3px solid #1890ff;
-        margin-bottom: 6px;
+        border-left: 3px solid #1890FF;
+        margin-bottom: 8px;
 
         .quote-text {
           font-size: 13px;
-          color: #595959;
-          margin-bottom: 2px;
+          color: #666666;
+          margin-bottom: 4px;
         }
 
         .quote-sender {
           font-size: 11px;
-          color: #8c8c8c;
+          color: #999999;
         }
       }
 
       .current-text {
         padding: 0 12px 8px;
-        font-size: 15px;
-        color: #1f1f1f;
+        font-size: 14px;
+        color: #333333;
       }
     }
   }
@@ -1106,10 +1106,10 @@ export default {
       }
 
       .vote-title {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 500;
-        color: #1f1f1f;
-        margin-bottom: 10px;
+        color: #333333;
+        margin-bottom: 12px;
       }
 
       .vote-options {
@@ -1118,8 +1118,8 @@ export default {
           align-items: center;
           justify-content: space-between;
           padding: 8px 12px;
-          border-radius: 6px;
-          margin-bottom: 6px;
+          border-radius: 4px;
+          margin-bottom: 8px;
           cursor: pointer;
           transition: all 0.2s ease;
           border: 1px solid transparent;
@@ -1130,18 +1130,18 @@ export default {
           }
 
           &.selected {
-            background: rgba(0, 214, 185, 0.1);
-            border-color: #1890ff;
+            background: rgba(24, 144, 255, 0.1);
+            border-color: #1890FF;
           }
 
           .option-text {
             font-size: 14px;
-            color: #1f1f1f;
+            color: #333333;
           }
 
           .option-votes {
             font-size: 12px;
-            color: #8c8c8c;
+            color: #999999;
           }
         }
       }
@@ -1161,7 +1161,7 @@ export default {
       transition: all 0.3s ease;
 
       &.sending {
-        color: #1890ff;
+        color: #1890FF;
         animation: pulse 1.5s ease-in-out infinite;
       }
 
@@ -1174,7 +1174,7 @@ export default {
       }
 
       &.read {
-        color: #1890ff;
+        color: #1890FF;
       }
 
       &.failed {
@@ -1195,10 +1195,10 @@ export default {
 
 .message-bubble.self {
   .message-content {
-    // 文本消息 - 发送方使用钉钉风格蓝绿色
+    // 文本消息 - 发送方使用钉钉风格蓝色
     .text-message {
-      background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-      box-shadow: 0 2px 8px rgba(0, 214, 185, 0.2);
+      background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
 
       .text-content {
         color: #fff;
@@ -1209,7 +1209,7 @@ export default {
         left: auto;
         right: -6px;
         border-right-color: transparent;
-        border-left-color: #1890ff;
+        border-left-color: #1890FF;
       }
     }
 
@@ -1219,7 +1219,7 @@ export default {
     .location-message .location-container,
     .quote-message .quote-container,
     .vote-message .vote-container {
-      border-color: rgba(0, 214, 185, 0.3);
+      border-color: rgba(24, 144, 255, 0.3);
     }
 
     // 消息状态位置调整（左侧）
@@ -1238,9 +1238,9 @@ export default {
 // ==================== 时间戳样式 ====================
 
 .message-time-footer {
-  font-size: 12px;
-  color: #999;
-  margin-top: 6px;
+  font-size: 11px;
+  color: #999999;
+  margin-top: 8px;
   padding: 0 4px;
   white-space: nowrap;
 }
@@ -1248,11 +1248,11 @@ export default {
 // ==================== 撤回消息样式 ====================
 
 .recalled-message {
-  padding: 8px 14px;
+  padding: 8px 12px;
   background-color: #f0f2f5;
   border-radius: 8px;
-  color: #8c8c8c;
-  font-size: 13px;
+  color: #999999;
+  font-size: 12px;
   font-style: italic;
 }
 
@@ -1337,14 +1337,14 @@ export default {
   .action-icon {
     padding: 4px;
     font-size: 14px;
-    color: #595959;
+    color: #666666;
     cursor: pointer;
     border-radius: 4px;
     transition: all 0.2s ease;
 
     &:hover {
-      color: #1890ff;
-      background-color: rgba(0, 214, 185, 0.1);
+      color: #1890FF;
+      background-color: rgba(24, 144, 255, 0.1);
     }
 
     &.danger:hover {
@@ -1492,7 +1492,7 @@ export default {
     align-items: center;
     justify-content: center;
     font-size: 20px;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
     user-select: none;
@@ -1537,7 +1537,7 @@ export default {
     gap: 8px;
     padding: 8px 16px;
     font-size: 14px;
-    color: #1f1f1f;
+    color: #333333;
     cursor: pointer;
     transition: background-color 0.2s;
 

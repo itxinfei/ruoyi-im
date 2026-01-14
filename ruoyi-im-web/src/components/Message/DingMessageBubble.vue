@@ -582,7 +582,7 @@ const handleMoreCommand = command => {
   transition: all 0.2s ease;
 
   &.is-own {
-    background-color: #1677ff;
+    background-color: #1890FF;
     color: #fff;
 
     .message-text :deep(a) {

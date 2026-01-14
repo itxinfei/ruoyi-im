@@ -240,10 +240,10 @@ const borderColors = [
     position: absolute;
     bottom: 0;
     right: 0;
-    width: 14px;
-    height: 14px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    border: 2.5px solid #fff;
+    border: 2px solid #fff;
     z-index: 2;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;

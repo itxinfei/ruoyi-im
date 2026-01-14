@@ -526,63 +526,63 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  background: $bg-base;
+  padding: 16px; // 修改：20px -> 16px
+  background: #F5F7FA; // 钉钉规范
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid $border-light;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #E8E8E8;
 }
 
 .header-left {
   .page-title {
     margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-    color: $text-primary;
+    font-size: 20px; // 特大标题（主标题）
+    font-weight: 500; // 修改：600 -> 500
+    color: #262626;
   }
 
   .page-subtitle {
     margin-left: 12px;
     font-size: 14px;
-    color: $text-tertiary;
+    color: #999999; // 辅助文字
   }
 }
 
 .ding-tabs {
   display: flex;
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   padding: 0 4px;
 
   .ding-tab {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px; // 修改：6px -> 8px
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 4px; // 修改：6px -> 4px
     cursor: pointer;
     transition: all 0.2s;
-    color: $text-secondary;
+    color: #666666;
     font-size: 14px;
 
     &:hover {
-      background: $bg-hover;
+      background: #F5F7FA;
     }
 
     &.active {
-      background: $primary-color;
+      background: #1890FF; // 钉钉规范
       color: white;
     }
 
     .tab-badge {
       padding: 2px 6px;
-      border-radius: 10px;
+      border-radius: 8px; // 修改：10px -> 8px
       font-size: 12px;
       background: rgba(0, 0, 0, 0.2);
     }
@@ -600,15 +600,16 @@ export default {
   align-items: center;
   justify-content: center;
   height: 300px;
-  color: $text-tertiary;
+  color: #999999; // 辅助文字
 
   .el-icon {
-    margin-bottom: 12px;
+    margin-bottom: 16px; // 修改：12px -> 16px
     opacity: 0.5;
   }
 
   p {
     margin: 0;
+    font-size: 14px;
   }
 }
 
@@ -623,20 +624,20 @@ export default {
   transition: all 0.2s;
 
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); // 修改：0.08（符合规范）
   }
 
   &.urgent {
-    border-left: 3px solid $error-color;
+    border-left: 3px solid #FF4D4F;
   }
 
   &.unread {
-    background: $primary-color-lighter;
+    background: #E6F7FF;
   }
 
   &.is-sender {
     .ding-icon {
-      background: $bg-light;
+      background: #F0F2F5;
     }
   }
 }
@@ -647,9 +648,9 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: $primary-color-light;
+  background: #E6F7FF;
   border-radius: 50%;
-  color: $primary-color;
+  color: #1890FF;
   position: relative;
   flex-shrink: 0;
 
@@ -659,14 +660,14 @@ export default {
     right: -4px;
     width: 16px;
     height: 16px;
-    background: $error-color;
+    background: #FF4D4F;
     color: white;
     border-radius: 50%;
     font-size: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
+    font-weight: 500; // 修改：bold -> 500
   }
 }
 
@@ -679,17 +680,17 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 8px; // 修改：4px -> 8px
 }
 
 .ding-title {
   font-weight: 500;
-  color: $text-primary;
-  font-size: 15px;
+  color: #262626; // 标题色
+  font-size: 16px; // 修改：15px -> 16px（小标题规范）
 }
 
 .ding-text {
-  color: $text-secondary;
+  color: #333333; // 正文色
   font-size: 14px;
   margin-bottom: 8px;
   overflow: hidden;
@@ -700,13 +701,13 @@ export default {
 .ding-meta {
   display: flex;
   gap: 16px;
-  color: $text-tertiary;
+  color: #999999; // 辅助文字
   font-size: 12px;
 
   .meta-item {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px; // 修改：4px -> 8px
   }
 }
 
@@ -724,13 +725,13 @@ export default {
   .ding-detail {
     .detail-content {
       padding: 16px;
-      background: $bg-light;
+      background: #F5F7FA;
       border-radius: 8px;
       margin-bottom: 16px;
     }
 
     .content-text {
-      color: $text-primary;
+      color: #333333; // 正文色
       font-size: 15px;
       line-height: 1.6;
       margin-bottom: 12px;
@@ -747,12 +748,12 @@ export default {
     .attachment-item {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px; // 修改：6px -> 8px
       padding: 8px 12px;
       background: white;
       border-radius: 4px;
       font-size: 13px;
-      color: $text-secondary;
+      color: #666666;
     }
 
     .detail-reminders {
@@ -762,7 +763,7 @@ export default {
 
     .detail-receivers {
       padding: 16px;
-      background: $bg-light;
+      background: #F5F7FA;
       border-radius: 8px;
       margin-bottom: 16px;
     }
@@ -776,7 +777,7 @@ export default {
 
     .header-title {
       font-weight: 500;
-      color: $text-primary;
+      color: #262626;
     }
 
     .receivers-list {
@@ -793,22 +794,22 @@ export default {
 
     .receiver-name {
       font-size: 14px;
-      color: $text-secondary;
+      color: #666666;
     }
 
     .read-icon {
-      color: $success-color;
+      color: #52c41a;
     }
 
     .unread-icon {
-      color: $text-tertiary;
+      color: #999999;
     }
 
     .detail-time {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: $text-tertiary;
+      color: #999999;
       font-size: 13px;
     }
   }

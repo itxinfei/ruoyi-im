@@ -213,7 +213,7 @@ const handleGroupAction = (command, group) => {
           align-items: center;
           justify-content: center;
           font-size: 10px;
-          font-weight: 600;
+          font-weight: 500;
           border: 2px solid $bg-white;
           box-shadow: $shadow-sm;
         }
@@ -230,7 +230,7 @@ const handleGroupAction = (command, group) => {
 
         .group-name {
           font-size: 14px;
-          font-weight: 600;
+          font-weight: 500;
           color: $text-primary;
           @include text-ellipsis;
           margin-bottom: 4px;

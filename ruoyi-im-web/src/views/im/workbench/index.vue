@@ -197,7 +197,7 @@ const overviewCards = ref([
     label: '待办事项',
     value: 0,
     icon: Timer,
-    color: '#1677ff',
+    color: '#1890FF',
     className: 'card-todo',
   },
   {
@@ -231,7 +231,7 @@ const todoList = ref([])
 
 // 快捷应用
 const quickApps = ref([
-  { key: 'approval', name: '审批中心', color: '#1677ff', tab: 'approval' },
+  { key: 'approval', name: '审批中心', color: '#1890FF', tab: 'approval' },
   { key: 'attendance', name: '考勤打卡', color: '#52c41a', tab: 'attendance' },
   { key: 'schedule', name: '日程管理', color: '#faad14', tab: 'schedule' },
   { key: 'report', name: '工作报告', color: '#722ed1', tab: 'report' },
@@ -367,37 +367,37 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #f5f5f5;
+  background: #F5F7FA;
 }
 
 // 工作台导航
 .workbench-nav {
   display: flex;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 12px 16px; // 修改：20px -> 16px（符合4的倍数）
   background: white;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid #E8E8E8;
   flex-shrink: 0;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px; // 修改：6px -> 8px（符合4的倍数）
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 4px; // 修改：6px -> 4px（符合规范）
   cursor: pointer;
-  color: #666;
+  color: #666666; // 修改：#666 -> 规范值
   transition: all 0.2s;
   font-size: 14px;
 
   &:hover {
-    background: #f5f5f5;
+    background: #F5F7FA;
   }
 
   &.active {
-    background: #e6f7ff;
-    color: #1677ff;
+    background: #E6F7FF;
+    color: #1890FF; // 修改：#1677ff -> #1890FF（钉钉规范）
     font-weight: 500;
   }
 }
@@ -409,7 +409,7 @@ onMounted(() => {
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  background: #ff4d4f;
+  background: #FF4D4F;
   color: white;
   border-radius: 8px;
   font-size: 11px;
@@ -456,7 +456,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 8px; // 修改：10px -> 8px（符合规范）
   color: white;
 }
 
@@ -466,19 +466,19 @@ onMounted(() => {
 
 .card-value {
   font-size: 24px;
-  font-weight: 600;
+  font-weight: 500; // 修改：600 -> 500（符合规范）
   color: #262626;
   line-height: 1.2;
 }
 
 .card-label {
-  font-size: 13px;
-  color: #8c8c8c;
-  margin-top: 2px;
+  font-size: 12px; // 修改：13px -> 12px（辅助文字规范）
+  color: #999999; // 修改：#8c8c8c -> #999999（辅助文字规范）
+  margin-top: 4px; // 修改：2px -> 4px（符合4的倍数）
 }
 
 .card-arrow {
-  color: #d9d9d9;
+  color: #CCCCCC;
 }
 
 // 待办事项
@@ -497,7 +497,7 @@ onMounted(() => {
 
   h3 {
     margin: 0;
-    font-size: 15px;
+    font-size: 16px; // 修改：15px -> 16px（小标题规范）
     font-weight: 500;
     color: #262626;
   }
@@ -512,13 +512,13 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 6px;
+  padding: 12px; // 修改：10px -> 12px（符合4的倍数）
+  border-radius: 4px; // 修改：6px -> 4px（符合规范）
+  margin-bottom: 8px; // 修改：6px -> 8px（符合4的倍数）
   transition: background 0.2s;
 
   &:hover {
-    background: #f5f5f5;
+    background: #F5F7FA;
   }
 
   &.completed {
@@ -542,8 +542,8 @@ onMounted(() => {
 
 .todo-desc {
   font-size: 12px;
-  color: #8c8c8c;
-  margin-top: 2px;
+  color: #999999; // 修改：#8c8c8c -> #999999（辅助文字规范）
+  margin-top: 4px; // 修改：2px -> 4px（符合4的倍数）
 }
 
 // 快捷应用
@@ -569,7 +569,7 @@ onMounted(() => {
   transition: all 0.2s;
 
   &:hover {
-    background: #f5f5f5;
+    background: #F5F7FA;
   }
 }
 
@@ -579,16 +579,16 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 8px; // 修改：10px -> 8px（符合规范）
   margin-bottom: 8px;
   color: white;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500; // 修改：600 -> 500（符合规范）
 }
 
 .app-name {
-  font-size: 13px;
-  color: #595959;
+  font-size: 12px; // 修改：13px -> 12px（辅助文字规范）
+  color: #666666; // 修改：#595959 -> #666666（次要文字规范）
 }
 
 @media (max-width: 1200px) {

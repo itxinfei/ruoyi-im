@@ -597,7 +597,7 @@ onMounted(() => {
 .file-container {
   height: 100%;
   display: flex;
-  background-color: #f5f5f5;
+  background-color: #F5F7FA;
 }
 
 // 左侧文件列表面板
@@ -606,13 +606,13 @@ onMounted(() => {
   min-width: $list-panel-width;
   height: 100%;
   background-color: #fff;
-  border-right: 1px solid #e6e6e6;
+  border-right: 1px solid #E8E8E8;
   display: flex;
   flex-direction: column;
 
   .panel-header {
-    padding: 16px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 16px; // 修改：统一边距
+    border-bottom: 1px solid #E8E8E8; // 钉钉规范
     display: flex;
     gap: 8px;
 
@@ -622,8 +622,8 @@ onMounted(() => {
 
       .search-input {
         :deep(.el-input__wrapper) {
-          border-radius: 18px;
-          background-color: #f5f5f5;
+          border-radius: 4px; // 修改：18px -> 4px（符合规范）
+          background-color: #F5F7FA;
           padding-left: 36px;
         }
 
@@ -637,25 +637,25 @@ onMounted(() => {
   .file-tabs {
     display: flex;
     padding: 0 12px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #E8E8E8;
 
     .tab-item {
       padding: 12px 16px;
-      font-size: 14px;
-      color: #666;
+      font-size: 14px; // 正文规范
+      color: #666666; // 次要文字
       cursor: pointer;
       position: relative;
       transition: color 0.2s;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 8px; // 修改：4px -> 8px（符合4的倍数）
 
       &:hover {
-        color: #333;
+        color: #333333;
       }
 
       &.active {
-        color: $primary-color;
+        color: #1890FF; // 钉钉规范
         font-weight: 500;
 
         &::after {
@@ -666,17 +666,17 @@ onMounted(() => {
           transform: translateX(-50%);
           width: 24px;
           height: 2px;
-          background-color: $primary-color;
+          background-color: #1890FF;
           border-radius: 1px;
         }
       }
 
       .tab-count {
-        font-size: 12px;
-        background-color: #f0f0f0;
-        color: #666;
-        border-radius: 10px;
-        padding: 0 6px;
+        font-size: 12px; // 辅助文字
+        background-color: #F0F2F5;
+        color: #666666;
+        border-radius: 8px;
+        padding: 2px 6px; // 修改：0 6px -> 2px 6px
         min-width: 18px;
         height: 18px;
         display: flex;
@@ -699,7 +699,7 @@ onMounted(() => {
       border-left: 3px solid transparent;
 
       &:hover {
-        background-color: #f5f7fa;
+        background-color: #F5F7FA;
 
         .file-actions {
           opacity: 1;
@@ -708,13 +708,13 @@ onMounted(() => {
       }
 
       &.selected {
-        background-color: #e6f7ff;
-        border-left-color: $primary-color;
+        background-color: #E6F7FF;
+        border-left-color: #1890FF;
       }
 
       .file-icon {
         margin-right: 12px;
-        color: $primary-color;
+        color: #1890FF;
       }
 
       .file-info {
@@ -724,7 +724,7 @@ onMounted(() => {
         .file-name {
           font-size: 14px;
           font-weight: 500;
-          color: #333;
+          color: #333333; // 正文色
           margin-bottom: 4px;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -734,12 +734,12 @@ onMounted(() => {
         .file-meta {
           display: flex;
           align-items: center;
-          gap: 4px;
+          gap: 8px; // 修改：4px -> 8px
           font-size: 12px;
-          color: #999;
+          color: #999999; // 辅助文字
 
           .separator {
-            color: #d9d9d9;
+            color: #CCCCCC;
           }
         }
       }
@@ -782,22 +782,22 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 16px;
-    border-bottom: 1px solid #f0f0f0;
-    background-color: #fafafa;
+    border-bottom: 1px solid #E8E8E8;
+    background-color: #FAFAFA;
 
     .file-preview {
       font-size: 24px;
-      color: $primary-color;
+      color: #1890FF;
     }
 
     .header-info {
       flex: 1;
 
       .file-name {
-        margin: 0 0 4px;
-        font-size: 18px;
-        font-weight: 600;
-        color: #333;
+        margin: 0 0 8px; // 修改：4px -> 8px
+        font-size: 20px; // 修改：18px -> 20px（模块标题规范）
+        font-weight: 500; // 修改：600 -> 500
+        color: #262626; // 标题色
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -806,13 +806,13 @@ onMounted(() => {
       .file-meta {
         margin: 0;
         font-size: 14px;
-        color: #666;
+        color: #666666; // 次要文字
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 8px; // 修改：4px -> 8px
 
         .separator {
-          color: #d9d9d9;
+          color: #CCCCCC;
         }
       }
     }
@@ -834,9 +834,9 @@ onMounted(() => {
 
       h4 {
         margin: 0 0 16px;
-        font-size: 14px;
-        font-weight: 600;
-        color: #333;
+        font-size: 16px; // 修改：14px -> 16px（小标题规范）
+        font-weight: 500;
+        color: #262626;
       }
 
       .info-grid {
@@ -849,7 +849,7 @@ onMounted(() => {
           align-items: center;
           justify-content: space-between;
           padding: 8px 0;
-          border-bottom: 1px solid #f5f5f5;
+          border-bottom: 1px solid #F5F7FA;
 
           &:last-child {
             border-bottom: none;
@@ -857,12 +857,12 @@ onMounted(() => {
 
           .label {
             font-size: 14px;
-            color: #666;
+            color: #666666;
           }
 
           .value {
             font-size: 14px;
-            color: #333;
+            color: #262626;
             text-align: right;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -888,10 +888,10 @@ onMounted(() => {
 
     .empty-content {
       text-align: center;
-      color: #999;
+      color: #999999;
 
       .empty-icon {
-        color: #d9d9d9;
+        color: #CCCCCC;
         margin-bottom: 16px;
       }
 
@@ -899,13 +899,13 @@ onMounted(() => {
         margin: 0 0 8px;
         font-size: 16px;
         font-weight: 500;
-        color: #666;
+        color: #666666;
       }
 
       .empty-description {
         margin: 0;
         font-size: 14px;
-        color: #999;
+        color: #999999;
       }
     }
   }
@@ -926,7 +926,7 @@ onMounted(() => {
     width: 100%;
     max-height: 500px;
     overflow: auto;
-    background: #f5f7fa;
+    background: #F5F7FA;
     padding: 16px;
     margin: 0;
     font-family: monospace;
@@ -934,7 +934,7 @@ onMounted(() => {
 
   .no-preview {
     text-align: center;
-    color: #909399;
+    color: #999999;
 
     i {
       font-size: 48px;

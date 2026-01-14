@@ -474,7 +474,7 @@ onUnmounted(() => {
 
       .recording-time {
         font-size: 24px;
-        font-weight: bold;
+        font-weight: 500;
         color: $text-primary;
         font-family: monospace;
       }
@@ -522,7 +522,7 @@ onUnmounted(() => {
 
   .preview-time {
     font-size: 24px;
-    font-weight: bold;
+    font-weight: 500;
     color: $text-primary;
     margin-bottom: 20px;
     font-family: monospace;

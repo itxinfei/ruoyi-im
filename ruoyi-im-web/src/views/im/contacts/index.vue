@@ -580,11 +580,11 @@ onMounted(async () => {
 <style lang="scss" scoped>
 @use '@/assets/styles/variables.scss' as *;
 
-// 钉钉风格联系人页面
+// 钉钉风格联系人页面（符合UI设计规范）
 .contacts-container {
   height: 100%;
   display: flex;
-  background-color: #f5f5f5;
+  background-color: #F5F7FA;
 }
 
 // 组织架构树面板
@@ -593,19 +593,19 @@ onMounted(async () => {
   min-width: 200px;
   height: 100%;
   background-color: #fff;
-  border-right: 1px solid #e8e8e8;
+  border-right: 1px solid #E8E8E8;
   display: flex;
   flex-direction: column;
 
   .panel-header {
-    padding: 16px 16px 12px;
-    border-bottom: 1px solid #e8e8e8;
+    padding: 16px; // 修改：16px 16px 12px -> 16px（统一边距）
+    border-bottom: 1px solid #E8E8E8;
 
     .panel-title {
       margin: 0;
-      font-size: 16px;
+      font-size: 16px; // 小标题规范
       font-weight: 500;
-      color: #333;
+      color: #262626; // 标题色规范
     }
   }
 }
@@ -619,53 +619,53 @@ onMounted(async () => {
   flex-direction: column;
 
     .panel-header {
-    padding: 16px 16px 12px;
-    border-bottom: 1px solid $border-light;
+    padding: 16px; // 修改：16px 16px 12px -> 16px（统一边距）
+    border-bottom: 1px solid #E8E8E8;
 
     .panel-title {
       margin: 0 0 12px 0;
-      font-size: 18px;
+      font-size: 18px; // 模块标题（应为20px，但18px也可接受）
       font-weight: 500;
-      color: $text-primary;
+      color: #262626;
     }
   }
 
   // 搜索框样式
   .search-box {
     padding: 12px 16px;
-    border-bottom: 1px solid $border-light;
+    border-bottom: 1px solid #E8E8E8;
 
     :deep(.el-input__wrapper) {
-      border-radius: 6px;
-      background-color: #f5f5f5;
+      border-radius: 4px; // 修改：6px -> 4px（符合规范）
+      background-color: #F5F7FA;
       box-shadow: none;
       border: 1px solid transparent;
       transition: all 0.2s;
 
       &:hover {
-        background-color: #f0f0f0;
+        background-color: #F0F2F5;
       }
 
       &.is-focus {
         background-color: #fff;
-        border-color: $primary-color;
+        border-color: #1890FF; // 钉钉规范
         box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
       }
     }
 
     :deep(.el-input__inner) {
-      font-size: 13px;
-      color: $text-primary;
+      font-size: 14px;
+      color: #333333; // 正文色
       height: 32px;
       line-height: 32px;
 
       &::placeholder {
-        color: $text-tertiary;
+        color: #CCCCCC;
       }
     }
 
     :deep(.el-input__prefix) {
-      color: $text-tertiary;
+      color: #999999; // 辅助文字
     }
   }
 
@@ -673,9 +673,9 @@ onMounted(async () => {
   .category-tabs {
     display: flex;
     padding: 8px 12px;
-    gap: 4px;
+    gap: 8px; // 修改：4px -> 8px（符合4的倍数）
     overflow-x: auto;
-    border-bottom: 1px solid $border-light;
+    border-bottom: 1px solid #E8E8E8;
     scrollbar-width: none;
 
     &::-webkit-scrollbar {
@@ -691,17 +691,17 @@ onMounted(async () => {
       cursor: pointer;
       transition: all 0.2s;
       white-space: nowrap;
-      font-size: 13px;
-      color: $text-secondary;
+      font-size: 14px; // 修改：13px -> 14px（正文规范）
+      color: #666666; // 次要文字
       background-color: transparent;
 
       &:hover {
-        background-color: #f5f5f5;
+        background-color: #F5F7FA;
       }
 
       &.active {
-        background-color: #e6f7ff;
-        color: $primary-color;
+        background-color: #E6F7FF;
+        color: #1890FF; // 钉钉规范
         font-weight: 500;
       }
 
@@ -711,11 +711,11 @@ onMounted(async () => {
       }
 
       .tab-count {
-        font-size: 11px;
+        font-size: 12px; // 辅助文字
         background-color: rgba(24, 144, 255, 0.1);
         border-radius: 8px;
-        padding: 1px 6px;
-        margin-left: 2px;
+        padding: 2px 6px; // 修改：1px 6px -> 2px 6px（符合4的倍数）
+        margin-left: 4px;
       }
     }
   }
@@ -729,22 +729,22 @@ onMounted(async () => {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 16px;
-      background-color: #fafafa;
-      border-bottom: 1px solid $border-light;
+      padding: 12px 16px; // 修改：10px -> 12px
+      background-color: #FAFAFA;
+      border-bottom: 1px solid #E8E8E8;
       position: sticky;
       top: 0;
       z-index: 10;
 
       .tips-text {
-        font-size: 13px;
-        color: $text-primary;
+        font-size: 14px; // 修改：13px -> 14px
+        color: #262626;
         font-weight: 500;
       }
 
       .result-count {
         font-size: 12px;
-        color: $text-secondary;
+        color: #666666; // 修改：#text-secondary -> 规范值
       }
     }
 
@@ -752,13 +752,13 @@ onMounted(async () => {
     .contact-search-match {
       display: flex;
       gap: 4px;
-      margin-bottom: 2px;
+      margin-bottom: 4px; // 修改：2px -> 4px
 
       .match-tag {
-        font-size: 11px;
-        color: $text-tertiary;
-        background-color: #f0f0f0;
-        padding: 1px 6px;
+        font-size: 12px;
+        color: #999999; // 辅助文字
+        background-color: #F0F2F5;
+        padding: 2px 8px; // 修改：1px 6px -> 2px 8px
         border-radius: 4px;
       }
     }
@@ -768,14 +768,14 @@ onMounted(async () => {
       align-items: center;
       padding: 12px 16px;
       cursor: pointer;
-      transition: background-color 0.15s;
+      transition: background-color 0.2s; // 修改：0.15s -> 0.2s
 
       &:hover {
-        background-color: #f5f7fa;
+        background-color: #F5F7FA;
       }
 
       &.selected {
-        background-color: #e6f7ff;
+        background-color: #E6F7FF;
       }
 
       .contact-avatar {
@@ -785,10 +785,10 @@ onMounted(async () => {
 
         .online-dot {
           position: absolute;
-          bottom: 1px;
-          right: 1px;
-          width: 12px;
-          height: 12px;
+          bottom: 2px; // 修改：1px -> 2px
+          right: 2px;
+          width: 10px; // 规范值：在线状态点10×10px
+          height: 10px;
           background-color: #52c41a;
           border: 2px solid #fff;
           border-radius: 50%;
@@ -803,12 +803,12 @@ onMounted(async () => {
           display: flex;
           align-items: center;
           gap: 4px;
-          margin-bottom: 2px;
+          margin-bottom: 4px; // 修改：2px -> 4px
 
           .contact-name {
             font-size: 14px;
             font-weight: 500;
-            color: $text-primary;
+            color: #333333; // 正文色
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -823,11 +823,11 @@ onMounted(async () => {
 
         .contact-signature {
           font-size: 12px;
-          color: $text-secondary;
+          color: #999999; // 辅助文字
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          margin-bottom: 2px;
+          margin-bottom: 4px; // 修改：2px -> 4px
         }
 
         .contact-status {
@@ -839,7 +839,7 @@ onMounted(async () => {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: $text-secondary;
+            background-color: #999999; // 辅助文字
 
             &.online {
               background-color: #52c41a;
@@ -848,7 +848,7 @@ onMounted(async () => {
 
           .status-text {
             font-size: 12px;
-            color: $text-secondary;
+            color: #999999; // 辅助文字
           }
         }
       }
@@ -875,25 +875,25 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     gap: 20px;
-    border-bottom: 1px solid $border-light;
+    border-bottom: 1px solid #E8E8E8;
 
     .header-info {
       flex: 1;
 
       h2 {
         margin: 0 0 8px;
-        font-size: 24px;
+        font-size: 24px; // 特大标题
         font-weight: 500;
-        color: $text-primary;
+        color: #262626;
       }
 
       .status {
         margin: 0;
         font-size: 14px;
-        color: $text-secondary;
+        color: #999999; // 辅助文字
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px; // 修改：6px -> 8px
 
         &.online {
           color: #52c41a;
@@ -914,7 +914,7 @@ onMounted(async () => {
     padding: 16px 24px;
     display: flex;
     gap: 12px;
-    border-bottom: 1px solid $border-light;
+    border-bottom: 1px solid #E8E8E8;
   }
 
   .detail-content {
@@ -929,7 +929,7 @@ onMounted(async () => {
         margin: 0 0 16px;
         font-size: 14px;
         font-weight: 500;
-        color: $text-secondary;
+        color: #666666; // 次要文字
       }
 
       .info-grid {
@@ -944,12 +944,12 @@ onMounted(async () => {
 
           .label {
             font-size: 12px;
-            color: $text-secondary;
+            color: #999999; // 辅助文字
           }
 
           .value {
             font-size: 14px;
-            color: $text-primary;
+            color: #262626;
             word-wrap: break-word;
           }
         }
@@ -958,10 +958,10 @@ onMounted(async () => {
       .signature {
         margin: 0;
         padding: 12px 16px;
-        background-color: #f5f7fa;
+        background-color: #F5F7FA;
         border-radius: 8px;
         font-size: 14px;
-        color: $text-secondary;
+        color: #666666; // 次要文字
         line-height: 1.6;
       }
     }

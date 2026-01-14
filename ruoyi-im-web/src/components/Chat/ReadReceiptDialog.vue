@@ -237,7 +237,7 @@ export default {
 
       .stat-value {
         font-size: 24px;
-        font-weight: 600;
+        font-weight: 500;
         line-height: 1;
       }
 

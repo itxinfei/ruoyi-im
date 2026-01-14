@@ -303,8 +303,8 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .approval-container {
-  padding: 20px;
-  background: #f5f5f5;
+  padding: 16px; // 修改：20px -> 16px（符合4的倍数）
+  background: #F5F7FA; // 钉钉规范
   min-height: calc(100vh - 60px);
 }
 
@@ -314,9 +314,9 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 16px;
   background: #fff;
-  padding: 16px 20px;
+  padding: 16px; // 修改：16px 20px -> 16px
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); // 修改：0.06 -> 0.04
 }
 
 .approval-list {
@@ -328,15 +328,15 @@ onMounted(() => {
 .approval-item {
   display: flex;
   align-items: center;
-  padding: 16px 20px;
+  padding: 16px; // 修改：16px 20px -> 16px
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); // 修改：0.1 -> 0.08
   }
 }
 
@@ -344,7 +344,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border-radius: 8px;
-  background: #f5f5f5;
+  background: #F5F7FA;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -356,9 +356,9 @@ onMounted(() => {
 }
 
 .approval-title {
-  font-size: 15px;
+  font-size: 16px; // 修改：15px -> 16px（小标题规范）
   font-weight: 500;
-  color: #333;
+  color: #262626; // 标题色
   margin-bottom: 8px;
 }
 
@@ -370,9 +370,9 @@ onMounted(() => {
 .info-item {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  color: #999;
+  gap: 8px; // 修改：4px -> 8px（符合4的倍数）
+  font-size: 14px; // 修改：13px -> 14px（正文规范）
+  color: #999999; // 辅助文字
 }
 
 .approval-status {

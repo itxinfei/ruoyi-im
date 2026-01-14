@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AccountSecurityDialog: typeof import('./components/Security/AccountSecurityDialog.vue')['default']
     AvatarUpload: typeof import('./components/AvatarUpload/index.vue')['default']
+    CallManager: typeof import('./components/Chat/CallManager.vue')['default']
     ChatInput: typeof import('./components/Chat/ChatInput.vue')['default']
     ContactsList: typeof import('./components/Chat/ContactsList.vue')['default']
     DingMessageBubble: typeof import('./components/Message/DingMessageBubble.vue')['default']
@@ -67,6 +68,7 @@ declare module 'vue' {
     ElTree: typeof import('element-plus/es')['ElTree']
     ElUpload: typeof import('element-plus/es')['ElUpload']
     EmojiPicker: typeof import('./components/Chat/EmojiPicker.vue')['default']
+    FeedbackDialog: typeof import('./components/Feedback/FeedbackDialog.vue')['default']
     FilePreview: typeof import('./components/FilePreview/index.vue')['default']
     FilePreviewDialog: typeof import('./components/File/FilePreviewDialog.vue')['default']
     FilesList: typeof import('./components/Chat/FilesList.vue')['default']
@@ -103,6 +105,7 @@ declare module 'vue' {
     UserProfileDialog: typeof import('./components/User/UserProfileDialog.vue')['default']
     VideoCall: typeof import('./components/Chat/VideoCall.vue')['default']
     VirtualScrollList: typeof import('./components/VirtualScroll/VirtualScrollList.vue')['default']
+    VoiceCallFloat: typeof import('./components/Chat/VoiceCallFloat.vue')['default']
     VoiceRecorder: typeof import('./components/Chat/VoiceRecorder.vue')['default']
   }
   export interface ComponentCustomProperties {

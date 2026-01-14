@@ -414,10 +414,14 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .app-container {
-  padding: 20px;
+  padding: 16px; // 修改：20px -> 16px（符合4的倍数）
+  background: #F5F7FA; // 添加背景色
 
   .search-form {
     margin-bottom: 16px;
+    background: #fff;
+    padding: 16px;
+    border-radius: 8px;
   }
 
   .mb8 {
@@ -428,6 +432,36 @@ onMounted(() => {
     margin-top: 16px;
     display: flex;
     justify-content: flex-end;
+    background: #fff;
+    padding: 16px;
+    border-radius: 8px;
+  }
+}
+
+// 表格容器样式优化
+:deep(.el-table) {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+:deep(.el-table__header-wrapper) {
+  background-color: #FAFAFA;
+}
+
+:deep(.el-table th) {
+  background-color: #FAFAFA;
+  color: #262626;
+  font-weight: 500;
+}
+
+:deep(.el-button--primary) {
+  background-color: #1890FF;
+  border-color: #1890FF;
+
+  &:hover {
+    background-color: #40A9FF;
+    border-color: #40A9FF;
   }
 }
 </style>

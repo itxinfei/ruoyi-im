@@ -991,7 +991,7 @@ onMounted(() => {
       }
 
       &.offline {
-        background: #8c8c8c;
+        background: #999999;
       }
     }
   }
@@ -1017,7 +1017,7 @@ onMounted(() => {
   }
 
   &.offline {
-    background: #8c8c8c;
+    background: #999999;
   }
 
   &.busy {

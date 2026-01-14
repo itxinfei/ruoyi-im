@@ -6,12 +6,12 @@
 /* ==================== 颜色系统 ==================== */
 
 :root {
-  /* --- 品牌色 --- */
-  --dt-color-primary: #1677ff;
-  --dt-color-primary-hover: #4096ff;
-  --dt-color-primary-active: #0958d9;
-  --dt-color-primary-light: rgba(22, 119, 255, 0.1);
-  --dt-color-primary-lighter: rgba(22, 119, 255, 0.05);
+  /* --- 品牌色（钉钉6.5.x规范）--- */
+  --dt-color-primary: #1890FF;
+  --dt-color-primary-hover: #40A9FF;
+  --dt-color-primary-active: #096DD9;
+  --dt-color-primary-light: rgba(24, 144, 255, 0.1);
+  --dt-color-primary-lighter: rgba(24, 144, 255, 0.05);
 
   /* --- 功能色 --- */
   --dt-color-success: #52c41a;
@@ -26,29 +26,29 @@
   --dt-color-error-hover: #ff7875;
   --dt-color-error-light: rgba(255, 77, 79, 0.1);
 
-  --dt-color-info: #1677ff;
-  --dt-color-info-light: rgba(22, 119, 255, 0.1);
+  --dt-color-info: #1890FF;
+  --dt-color-info-light: rgba(24, 144, 255, 0.1);
 
-  /* --- 文字色 --- */
-  --dt-color-text-primary: #1f1f1f;
-  --dt-color-text-secondary: #595959;
-  --dt-color-text-tertiary: #8c8c8c;
-  --dt-color-text-quaternary: #bfbfbf;
-  --dt-color-text-placeholder: #d9d9d9;
-  --dt-color-text-disabled: #d9d9d9;
+  /* --- 文字色（钉钉6.5.x规范）--- */
+  --dt-color-text-primary: #262626;      /* 标题色 */
+  --dt-color-text-secondary: #333333;     /* 正文色 */
+  --dt-color-text-tertiary: #666666;      /* 次要文字 */
+  --dt-color-text-quaternary: #999999;    /* 辅助文字/时间戳 */
+  --dt-color-text-placeholder: #CCCCCC;
+  --dt-color-text-disabled: #CCCCCC;
 
-  /* --- 背景色 --- */
+  /* --- 背景色（钉钉6.5.x规范）--- */
   --dt-color-bg-primary: #ffffff;
-  --dt-color-bg-secondary: #f7f8fa;
-  --dt-color-bg-tertiary: #f0f2f5;
-  --dt-color-bg-quaternary: #e8ecef;
+  --dt-color-bg-secondary: #F5F7FA;       /* 页面整体背景 */
+  --dt-color-bg-tertiary: #F0F2F5;
+  --dt-color-bg-quaternary: #E8E8E8;
   --dt-color-bg-elevated: #ffffff;
 
-  /* --- 边框色 --- */
-  --dt-color-border: #e5e7eb;
-  --dt-color-border-light: #f0f0f0;
-  --dt-color-border-lighter: #fafafa;
-  --dt-color-border-dark: #d9d9d9;
+  /* --- 边框色（钉钉6.5.x规范）--- */
+  --dt-color-border: #E8E8E8;             /* 分割线、边框 */
+  --dt-color-border-light: #F0F0F0;
+  --dt-color-border-lighter: #FAFAFA;
+  --dt-color-border-dark: #D9D9D9;
 
   /* --- 遮罩色 --- */
   --dt-color-mask: rgba(0, 0, 0, 0.45);
@@ -63,8 +63,8 @@
   --dt-shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.12);
   --dt-shadow-2xl: 0 20px 40px rgba(0, 0, 0, 0.14);
 
-  /* 消息气泡阴影 */
-  --dt-shadow-message-sent: 0 2px 8px rgba(22, 119, 255, 0.15);
+  /* 消息气泡阴影（钉钉6.5.x规范） */
+  --dt-shadow-message-sent: 0 2px 8px rgba(24, 144, 255, 0.15);
   --dt-shadow-message-received: 0 1px 2px rgba(0, 0, 0, 0.08);
 
   /* ==================== 圆角系统 ==================== */
@@ -96,16 +96,15 @@
   --dt-spacing-10: 40px;
   --dt-spacing-12: 48px;
 
-  /* ==================== 字体系统 ==================== */
+  /* ==================== 字体系统（钉钉6.5.x规范）==================== */
 
   /* 字号 */
-  --dt-font-size-xs: 11px;
-  --dt-font-size-sm: 12px;
-  --dt-font-size-base: 14px;
-  --dt-font-size-lg: 16px;
-  --dt-font-size-xl: 18px;
-  --dt-font-size-2xl: 20px;
-  --dt-font-size-3xl: 24px;
+  --dt-font-size-xs: 11px;                  /* 极小文字 - 版权信息 */
+  --dt-font-size-sm: 12px;                  /* 辅助文字 - 时间戳、提示信息 */
+  --dt-font-size-base: 14px;                /* 正文 - 消息内容、表单标签 */
+  --dt-font-size-lg: 16px;                  /* 小标题 - 次级标题 */
+  --dt-font-size-xl: 20px;                  /* 大标题 - 模块标题、群组名称 */
+  --dt-font-size-2xl: 24px;                 /* 特大标题 - 页面主标题 */
 
   /* 行高 */
   --dt-line-height-tight: 1.25;
@@ -136,13 +135,18 @@
   --dt-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --dt-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-  /* ==================== 布局尺寸 ==================== */
+  /* ==================== 布局尺寸（钉钉6.5.x规范）==================== */
 
-  --dt-header-height: 56px;
-  --dt-sidebar-width: 180px;
+  --dt-header-height: 48px;                  /* 顶部导航栏高度 */
+  --dt-nav-sidebar-width: 68px;              /* 左侧导航栏宽度 */
+  --dt-nav-item-height: 48px;                /* 导航项高度 */
+  --dt-nav-icon-size: 24px;                  /* 导航图标尺寸 */
+  --dt-sidebar-width: 320px;                 /* 中间会话列表宽度 */
   --dt-sidebar-collapsed-width: 56px;
-  --dt-session-panel-width: 280px;
+  --dt-session-panel-width: 320px;           /* 会话面板宽度 */
   --dt-contact-panel-width: 280px;
+  --dt-session-item-height: 64px;            /* 会话列表项高度 */
+  --dt-session-avatar-size: 40px;            /* 会话头像尺寸 */
 
   /* ==================== Z-index层级 ==================== */
 
@@ -158,12 +162,12 @@
 /* ==================== 暗色主题 ==================== */
 
 [data-theme="dark"] {
-  /* --- 品牌色（暗色模式下稍亮一些） --- */
-  --dt-color-primary: #3b82f6;
-  --dt-color-primary-hover: #60a5fa;
-  --dt-color-primary-active: #2563eb;
-  --dt-color-primary-light: rgba(59, 130, 246, 0.15);
-  --dt-color-primary-lighter: rgba(59, 130, 246, 0.08);
+  /* --- 品牌色（暗色模式，钉钉规范）--- */
+  --dt-color-primary: #4096FF;
+  --dt-color-primary-hover: #69b1ff;
+  --dt-color-primary-active: #1677FF;
+  --dt-color-primary-light: rgba(64, 150, 255, 0.15);
+  --dt-color-primary-lighter: rgba(64, 150, 255, 0.08);
 
   /* --- 文字色 --- */
   --dt-color-text-primary: #e6e6e6;
