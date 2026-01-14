@@ -1757,6 +1757,7 @@
     <!-- 全局搜索 -->
     <global-search
       v-model:visible="globalSearchVisible"
+      @close="globalSearchVisible = false"
       @result-click="handleSearchResultClick"
     />
 
@@ -10030,6 +10031,512 @@ $avatar-xl: 64px;
 :deep(.dark) {
   background: #1a1a1a;
   color: #e0e0e0;
+
+  // 主布局
+  .web-im-layout {
+    background: #1a1a1a;
+  }
+
+  // 侧边栏
+  .nav-sidebar {
+    background: #242424;
+    border-right-color: #3a3a3a;
+
+    .nav-section {
+      .section-title {
+        color: #888;
+      }
+
+      .nav-item {
+        color: #ccc;
+
+        &:hover {
+          background: #333;
+        }
+
+        &.active {
+          background: #3b5998;
+          color: #fff;
+        }
+      }
+    }
+
+    .version-info {
+      color: #666;
+    }
+  }
+
+  // 头部
+  .header {
+    background: #242424;
+    border-bottom-color: #3a3a3a;
+
+    .header-left,
+    .header-center,
+    .header-right {
+      color: #e0e0e0;
+    }
+
+    .search-input {
+      background: #333;
+      border-color: #444;
+      color: #e0e0e0;
+
+      .el-input__inner {
+        color: #e0e0e0;
+      }
+
+      .el-input__prefix {
+        color: #888;
+      }
+    }
+
+    .nav-item {
+      color: #ccc;
+
+      &:hover {
+        color: #fff;
+      }
+    }
+
+    .user-dropdown {
+      .user-name {
+        color: #e0e0e0;
+      }
+    }
+  }
+
+  // 会话面板
+  .session-panel {
+    background: #242424;
+    border-right-color: #3a3a3a;
+
+    .session-search {
+      .el-input__wrapper {
+        background: #333;
+        box-shadow: none;
+      }
+
+      .el-input__inner {
+        color: #e0e0e0;
+      }
+    }
+
+    .session-list {
+      .session-item {
+        background: #242424;
+        border-bottom-color: #333;
+
+        &:hover {
+          background: #333;
+        }
+
+        &.active {
+          background: #3b5998;
+
+          .session-name,
+          .session-preview,
+          .session-time {
+            color: #fff;
+          }
+        }
+
+        .session-name {
+          color: #e0e0e0;
+        }
+
+        .session-preview {
+          color: #999;
+        }
+
+        .session-time {
+          color: #888;
+        }
+      }
+    }
+
+    .create-group-btn {
+      background: #3b5998;
+      color: #fff;
+    }
+  }
+
+  // 聊天面板
+  .chat-panel {
+    background: #1a1a1a;
+
+    .chat-header {
+      background: #242424;
+      border-bottom-color: #3a3a3a;
+
+      .chat-title {
+        color: #e0e0e0;
+      }
+    }
+
+    .chat-messages {
+      background: #1a1a1a;
+
+      .message-item {
+        .message-content {
+          .message-bubble {
+            background: #333;
+            color: #e0e0e0;
+
+            &.isOwn {
+              background: #3b5998;
+              color: #fff;
+            }
+          }
+        }
+
+        .message-time {
+          color: #666;
+        }
+      }
+
+      .time-divider {
+        color: #666;
+        background: #242424;
+      }
+
+      .system-message {
+        color: #999;
+      }
+    }
+
+    .chat-input {
+      background: #242424;
+      border-top-color: #3a3a3a;
+
+      .input-toolbar {
+        .toolbar-btn {
+          color: #ccc;
+
+          &:hover {
+            color: #fff;
+          }
+        }
+      }
+
+      .input-area {
+        .el-textarea__inner {
+          background: #333;
+          color: #e0e0e0;
+          border: none;
+        }
+      }
+
+      .send-btn {
+        background: #3b5998;
+        color: #fff;
+      }
+    }
+  }
+
+  // 工作台
+  .workbench-workspace {
+    .workbench-sidebar {
+      background: #242424;
+      border-right-color: #3a3a3a;
+
+      .section-title {
+        color: #888;
+      }
+
+      .workbench-nav-item {
+        color: #ccc;
+
+        &:hover {
+          background: #333;
+        }
+
+        &.active {
+          background: #3b5998;
+          color: #fff;
+        }
+      }
+    }
+
+    .workbench-content {
+      background: #1a1a1a;
+
+      .app-grid {
+        .app-card {
+          background: #242424;
+          border-color: #3a3a3a;
+
+          &:hover {
+            background: #333;
+          }
+
+          .app-name {
+            color: #e0e0e0;
+          }
+        }
+      }
+    }
+  }
+
+  // 通讯录
+  .contacts-workspace {
+    .contacts-sidebar {
+      background: #242424;
+      border-right-color: #3a3a3a;
+
+      .section-title {
+        color: #888;
+      }
+
+      .contacts-nav-item {
+        color: #ccc;
+
+        &:hover {
+          background: #333;
+        }
+
+        &.active {
+          background: #3b5998;
+          color: #fff;
+        }
+      }
+    }
+
+    .contacts-content {
+      background: #1a1a1a;
+
+      .contacts-header {
+        border-bottom-color: #3a3a3a;
+
+        h2 {
+          color: #e0e0e0;
+        }
+      }
+
+      .contact-list {
+        .contact-item {
+          &:hover {
+            background: #333;
+          }
+
+          .contact-name {
+            color: #e0e0e0;
+          }
+
+          .contact-dept {
+            color: #888;
+          }
+        }
+      }
+    }
+  }
+
+  // 钉盘
+  .drive-workspace {
+    .drive-sidebar {
+      background: #242424;
+      border-right-color: #3a3a3a;
+
+      .section-title {
+        color: #888;
+      }
+
+      .drive-nav-item {
+        color: #ccc;
+
+        &:hover {
+          background: #333;
+        }
+
+        &.active {
+          background: #3b5998;
+          color: #fff;
+        }
+      }
+    }
+
+    .drive-content {
+      background: #1a1a1a;
+
+      .drive-toolbar {
+        border-bottom-color: #3a3a3a;
+
+        .breadcrumb {
+          .breadcrumb-item {
+            color: #ccc;
+
+            &:hover {
+              color: #fff;
+            }
+          }
+        }
+      }
+
+      .file-item {
+        &:hover {
+          background: #333;
+        }
+
+        &.selected {
+          background: #3b5998;
+        }
+
+        .file-name {
+          color: #e0e0e0;
+        }
+
+        .file-meta {
+          color: #888;
+        }
+      }
+    }
+  }
+
+  // Element Plus 组件覆盖
+  .el-dialog {
+    background: #242424;
+
+    .el-dialog__header {
+      border-bottom-color: #3a3a3a;
+
+      .el-dialog__title {
+        color: #e0e0e0;
+      }
+    }
+
+    .el-dialog__body {
+      color: #e0e0e0;
+    }
+  }
+
+  .el-input__wrapper {
+    background: #333;
+    box-shadow: none !important;
+  }
+
+  .el-input__inner {
+    color: #e0e0e0;
+  }
+
+  .el-textarea__inner {
+    background: #333;
+    color: #e0e0e0;
+  }
+
+  .el-dropdown-menu {
+    background: #242424;
+    border-color: #3a3a3a;
+  }
+
+  .el-dropdown-menu__item {
+    color: #e0e0e0;
+
+    &:hover {
+      background: #333;
+    }
+  }
+
+  .el-button {
+    background: #333;
+    border-color: #444;
+    color: #e0e0e0;
+
+    &:hover {
+      background: #444;
+      border-color: #555;
+    }
+
+    &.primary {
+      background: #3b5998;
+      border-color: #3b5998;
+    }
+  }
+
+  .el-card {
+    background: #242424;
+    border-color: #3a3a3a;
+  }
+
+  .el-tabs {
+    .el-tabs__item {
+      color: #999;
+
+      &:hover {
+        color: #e0e0e0;
+      }
+
+      &.is-active {
+        color: #3b5998;
+      }
+    }
+
+    .el-tabs__active-bar {
+      background: #3b5998;
+    }
+  }
+
+  .el-tree {
+    background: #242424;
+
+    .el-tree-node__content:hover {
+      background: #333;
+    }
+
+    .el-tree-node.is-current > .el-tree-node__content {
+      background: #3b5998;
+    }
+  }
+
+  .el-progress-bar__outer {
+    background: #333;
+  }
+
+  .el-empty {
+    .el-empty__description p {
+      color: #888;
+    }
+  }
+
+  .el-message-box {
+    background: #242424;
+    border-color: #3a3a3a;
+
+    .el-message-box__header {
+      .el-message-box__title {
+        color: #e0e0e0;
+      }
+    }
+
+    .el-message-box__content {
+      color: #e0e0e0;
+    }
+  }
+
+  .el-notification {
+    background: #242424;
+    border-color: #3a3a3a;
+
+    .el-notification__title {
+      color: #e0e0e0;
+    }
+
+    .el-notification__content {
+      color: #ccc;
+    }
+  }
+
+  .el-drawer {
+    background: #242424;
+
+    .el-drawer__header {
+      border-bottom-color: #3a3a3a;
+      color: #e0e0e0;
+    }
+
+    .el-drawer__body {
+      color: #e0e0e0;
+    }
+  }
 }
 
 // 消息高亮动画
