@@ -317,44 +317,42 @@
                 <!-- 右侧：操作按钮 -->
                 <div class="chat-actions">
                   <el-tooltip content="语音通话" placement="bottom">
-                    <el-button :icon="Phone" class="action-btn" circle @click="startVoiceCall" />
+                    <el-button :icon="Phone" class="action-btn" circle @click="startVoiceCall()" />
                   </el-tooltip>
                   <el-tooltip content="视频通话" placement="bottom">
-                    <el-button :icon="VideoCamera" class="action-btn" circle @click="startVideoCall" />
+                    <el-button :icon="VideoCamera" class="action-btn" circle @click="startVideoCall()" />
                   </el-tooltip>
-                  <el-tooltip content="更多" placement="bottom">
-                    <el-dropdown trigger="click" placement="bottom-end">
-                      <el-button :icon="More" class="action-btn" circle />
-                      <template #dropdown>
-                        <el-dropdown-menu>
-                          <el-dropdown-item @click="searchInChat">
-                            <el-icon><Search /></el-icon>
-                            搜索聊天记录
-                          </el-dropdown-item>
-                          <el-dropdown-item divided @click="muteChat">
-                            <el-icon><Bell /></el-icon>
-                            {{ currentSession?.isMuted ? '取消免打扰' : '消息免打扰' }}
-                          </el-dropdown-item>
-                          <el-dropdown-item @click="pinChat">
-                            <el-icon><Star /></el-icon>
-                            {{ currentSession?.isPinned ? '取消置顶' : '置顶聊天' }}
-                          </el-dropdown-item>
-                          <el-dropdown-item divided @click="viewChatMembers" v-if="currentSession?.type === 'GROUP'">
-                            <el-icon><User /></el-icon>
-                            查看成员
-                          </el-dropdown-item>
-                          <el-dropdown-item divided @click="clearChatHistory">
-                            <el-icon><Delete /></el-icon>
-                            清空聊天记录
-                          </el-dropdown-item>
-                          <el-dropdown-item @click="exitGroup" v-if="currentSession?.type === 'GROUP'" class="danger-item">
-                            <el-icon><DeleteFilled /></el-icon>
-                            退出群聊
-                          </el-dropdown-item>
-                        </el-dropdown-menu>
-                      </template>
-                    </el-dropdown>
-                  </el-tooltip>
+                  <el-dropdown trigger="click" placement="bottom-end">
+                    <el-button :icon="More" class="action-btn" circle />
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item @click="searchInChat">
+                          <el-icon><Search /></el-icon>
+                          搜索聊天记录
+                        </el-dropdown-item>
+                        <el-dropdown-item divided @click="muteChat">
+                          <el-icon><Bell /></el-icon>
+                          {{ currentSession?.isMuted ? '取消免打扰' : '消息免打扰' }}
+                        </el-dropdown-item>
+                        <el-dropdown-item @click="pinChat">
+                          <el-icon><Star /></el-icon>
+                          {{ currentSession?.isPinned ? '取消置顶' : '置顶聊天' }}
+                        </el-dropdown-item>
+                        <el-dropdown-item divided @click="viewChatMembers" v-if="currentSession?.type === 'GROUP'">
+                          <el-icon><User /></el-icon>
+                          查看成员
+                        </el-dropdown-item>
+                        <el-dropdown-item divided @click="clearChatHistory">
+                          <el-icon><Delete /></el-icon>
+                          清空聊天记录
+                        </el-dropdown-item>
+                        <el-dropdown-item @click="exitGroup" v-if="currentSession?.type === 'GROUP'" class="danger-item">
+                          <el-icon><DeleteFilled /></el-icon>
+                          退出群聊
+                        </el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
                 </div>
               </div>
 
@@ -3029,19 +3027,26 @@ const startChat = async contact => {
 }
 
 // 语音通话
-const startVoiceCall = () => {
-  const session = currentSession.value
-  if (!session) return
+const startVoiceCall = (userId = null) => {
+  // 如果直接传入了 userId，使用它；否则从当前会话获取
+  let targetUserId = userId
+  let conversationId = null
 
-  // 获取对方用户ID
-  let targetUserId = null
-  if (session.type === 'PRIVATE') {
-    // 私聊：对方用户ID
-    targetUserId = session.peerUserId || session.targetId
-  } else if (session.type === 'GROUP') {
-    // 群聊暂不支持语音通话
-    ElMessage.warning('群组语音通话功能开发中')
-    return
+  if (!targetUserId) {
+    const session = currentSession.value
+    if (!session) return
+
+    conversationId = session.id
+
+    // 获取对方用户ID
+    if (session.type === 'PRIVATE') {
+      // 私聊：对方用户ID
+      targetUserId = session.peerUserId || session.targetId
+    } else if (session.type === 'GROUP') {
+      // 群聊暂不支持语音通话
+      ElMessage.warning('群组语音通话功能开发中')
+      return
+    }
   }
 
   if (!targetUserId) {
@@ -3050,27 +3055,28 @@ const startVoiceCall = () => {
   }
 
   // 调用通话管理器发起语音通话
-  callManagerRef.value?.startVoiceCall(targetUserId, session.id)
+  callManagerRef.value?.startVoiceCall(targetUserId, conversationId)
 }
 
 // 视频通话
-const startVideoCall = contact => {
-  const session = currentSession.value
-  if (!session && contact) {
-    // 从联系人发起
-    callManagerRef.value?.startVideoCall(contact.id || contact.userId, null)
-    return
-  }
+const startVideoCall = (userId = null) => {
+  // 如果直接传入了 userId，使用它；否则从当前会话获取
+  let targetUserId = userId
+  let conversationId = null
 
-  if (!session) return
+  if (!targetUserId) {
+    const session = currentSession.value
+    if (!session) return
 
-  // 获取对方用户ID
-  let targetUserId = null
-  if (session.type === 'PRIVATE') {
-    targetUserId = session.peerUserId || session.targetId
-  } else if (session.type === 'GROUP') {
-    ElMessage.warning('群组视频通话功能开发中')
-    return
+    conversationId = session.id
+
+    // 获取对方用户ID
+    if (session.type === 'PRIVATE') {
+      targetUserId = session.peerUserId || session.targetId
+    } else if (session.type === 'GROUP') {
+      ElMessage.warning('群组视频通话功能开发中')
+      return
+    }
   }
 
   if (!targetUserId) {
@@ -3079,7 +3085,7 @@ const startVideoCall = contact => {
   }
 
   // 调用通话管理器发起视频通话
-  callManagerRef.value?.startVideoCall(targetUserId, session.id)
+  callManagerRef.value?.startVideoCall(targetUserId, conversationId)
 }
 
 // 通话事件处理
@@ -6046,13 +6052,13 @@ const handleChatFromDrawer = (data) => {
 }
 
 const handleVoiceCallFromDrawer = (data) => {
-  // 从用户详情抽屉点击语音通话
-  startVoiceCall()
+  // 从用户详情弹窗点击语音通话
+  startVoiceCall(data.userId)
 }
 
 const handleVideoCallFromDrawer = (data) => {
-  // 从用户详情抽屉点击视频通话
-  startVideoCall()
+  // 从用户详情弹窗点击视频通话
+  startVideoCall(data.userId)
 }
 
 // 根据用户ID切换会话

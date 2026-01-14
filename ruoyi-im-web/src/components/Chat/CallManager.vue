@@ -41,6 +41,7 @@ import VoiceCallFloat from './VoiceCallFloat.vue'
 import VideoCall from './VideoCall.vue'
 import { useVoiceCall, CALL_STATE, CALL_TYPE } from '@/composables/useVoiceCall.js'
 import imWebSocket from '@/utils/websocket/imWebSocket'
+import * as videoCallApi from '@/api/im/video-call'
 
 // Props
 const props = defineProps({
@@ -107,13 +108,67 @@ const startVideoCall = async (userId, conversationId = null) => {
     return false
   }
 
-  // 这里应该调用视频通话的逻辑
-  // 暂时使用现有的视频通话组件
-  videoCallType.value = 'video'
-  videoRemoteUser.value = { id: userId }
-  videoVisible.value = true
-  emit('call-started', { type: 'video', userId, conversationId })
-  return true
+  try {
+    // 获取用户信息
+    const userInfo = await getUserInfo(userId)
+
+    // 调用后端 API 发起视频通话
+    const response = await videoCallApi.initiateCall({
+      calleeId: userId,
+      conversationId: conversationId,
+      callType: 'VIDEO',
+    })
+
+    if (response.code === 200) {
+      videoCallId.value = response.data
+      videoCallType.value = 'video'
+      videoRemoteUser.value = {
+        id: userId,
+        name: userInfo?.nickname || userInfo?.username || '对方',
+        avatar: userInfo?.avatar || '',
+      }
+      videoCallState.value = 'calling'
+      videoVisible.value = true
+      emit('call-started', { type: 'video', userId, conversationId })
+      return true
+    } else {
+      ElMessage.error(response.msg || '发起视频通话失败')
+      return false
+    }
+  } catch (error) {
+    console.error('[视频通话] 发起失败:', error)
+    // 即使后端调用失败，也显示视频通话界面
+    videoCallType.value = 'video'
+    videoRemoteUser.value = {
+      id: userId,
+      name: '对方',
+      avatar: '',
+    }
+    videoCallState.value = 'calling'
+    videoVisible.value = true
+    emit('call-started', { type: 'video', userId, conversationId })
+    return true
+  }
+}
+
+// 获取用户信息
+const getUserInfo = async (userId) => {
+  try {
+    const response = await fetch(`/api/im/user/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+      },
+    })
+    if (response.ok) {
+      const result = await response.json()
+      if (result.code === 200) {
+        return result.data
+      }
+    }
+  } catch (error) {
+    console.warn('获取用户信息失败:', error)
+  }
+  return null
 }
 
 /**

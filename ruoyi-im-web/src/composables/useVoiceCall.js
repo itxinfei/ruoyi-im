@@ -228,7 +228,14 @@ export function useVoiceCall() {
       }
 
       conversationId.value = convId
-      remoteUser.value = { id: calleeId }
+
+      // 获取用户信息
+      const userInfo = await fetchUserInfo(calleeId)
+      remoteUser.value = {
+        id: calleeId,
+        name: userInfo?.nickname || userInfo?.username || '对方',
+        avatar: userInfo?.avatar || '',
+      }
 
       // 初始化本地音频流
       await initLocalStream()
@@ -277,6 +284,28 @@ export function useVoiceCall() {
       cleanup()
       return false
     }
+  }
+
+  /**
+   * 获取用户信息
+   */
+  const fetchUserInfo = async (userId) => {
+    try {
+      const response = await fetch(`/api/im/user/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        },
+      })
+      if (response.ok) {
+        const result = await response.json()
+        if (result.code === 200) {
+          return result.data
+        }
+      }
+    } catch (error) {
+      console.warn('[语音通话] 获取用户信息失败:', error)
+    }
+    return null
   }
 
   /**

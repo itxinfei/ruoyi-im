@@ -6,7 +6,7 @@
 <template>
   <el-dialog
     v-model="dialogVisible"
-    :show-close="true"
+    :show-close="false"
     :close-on-click-modal="true"
     width="560px"
     class="ding-group-detail-dialog"
