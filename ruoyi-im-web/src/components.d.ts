@@ -71,6 +71,7 @@ declare module 'vue' {
     FilePreviewDialog: typeof import('./components/File/FilePreviewDialog.vue')['default']
     FilesList: typeof import('./components/Chat/FilesList.vue')['default']
     FriendRequestDialog: typeof import('./components/Chat/FriendRequestDialog.vue')['default']
+    GlobalSearch: typeof import('./components/Search/GlobalSearch.vue')['default']
     GroupMembers: typeof import('./components/Chat/GroupMembers.vue')['default']
     GroupsList: typeof import('./components/Chat/GroupsList.vue')['default']
     ImagePreview: typeof import('./components/Chat/ImagePreview.vue')['default']

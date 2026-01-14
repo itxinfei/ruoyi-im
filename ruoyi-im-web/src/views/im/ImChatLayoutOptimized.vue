@@ -16,10 +16,12 @@
             :prefix-icon="Search"
             class="global-search-input"
             clearable
-            @keyup.enter="handleGlobalSearch"
+            readonly
+            @click="showGlobalSearch"
+            @keyup.enter="showGlobalSearch"
           >
             <template #suffix>
-              <span class="search-shortcut">⌘K</span>
+              <span class="search-shortcut"></span>
             </template>
           </el-input>
         </div>
@@ -1733,6 +1735,12 @@
       @close="notificationVisible = false"
     />
 
+    <!-- 全局搜索 -->
+    <global-search
+      v-model:visible="globalSearchVisible"
+      @result-click="handleSearchResultClick"
+    />
+
     <!-- 系统设置对话框 -->
     <system-settings v-model="systemSettingsVisible" @save="handleSettingsSave" />
 
@@ -2323,6 +2331,7 @@ import { getDepartmentTree, getDepartmentMembers } from '@/api/im/organization'
 import { listGroup } from '@/api/im/group'
 import NotificationPanel from '@/components/Notification/NotificationPanel.vue'
 import SystemSettings from '@/views/settings/index.vue'
+import GlobalSearch from '@/components/Search/GlobalSearch.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -3266,11 +3275,7 @@ onMounted(() => {
     // Ctrl+K: 全局搜索
     if (e.ctrlKey && e.key === 'k') {
       e.preventDefault()
-      const searchInput = document.querySelector('.global-search-input input')
-      if (searchInput) {
-        searchInput.focus()
-        searchInput.select()
-      }
+      globalSearchVisible.value = true
       return
     }
 
@@ -4793,6 +4798,9 @@ const previewingFileContent = ref(null)
 
 const systemSettingsVisible = ref(false)
 
+// 全局搜索
+const globalSearchVisible = ref(false)
+
 // 主题设置
 const themeSettingsVisible = ref(false)
 const settingsTab = ref('interface')
@@ -5769,13 +5777,42 @@ const showNotifications = () => {
   notificationVisible.value = true
 }
 
+const showGlobalSearch = () => {
+  globalSearchVisible.value = true
+}
+
 const handleGlobalSearch = () => {
-  if (!globalSearchKeyword.value.trim()) {
-    ElMessage.warning('请输入搜索内容')
-    return
+  globalSearchVisible.value = true
+}
+
+// 搜索结果点击处理
+const handleSearchResultClick = (item) => {
+  console.log('搜索结果点击:', item)
+
+  // 根据类型执行相应操作
+  if (item.type === 'message') {
+    // 切换到对应会话
+    if (item.sessionId) {
+      switchSession(item.sessionId)
+    }
+  } else if (item.type === 'contact') {
+    // 发起私聊
+    startChat({
+      userId: item.userId,
+      userName: item.name,
+      avatar: item.avatar,
+    })
+  } else if (item.type === 'group') {
+    // 切换到群聊
+    if (item.sessionId) {
+      switchSession(item.sessionId)
+    }
+  } else if (item.type === 'file') {
+    // 预览或下载文件
+    if (item.fileUrl) {
+      window.open(item.fileUrl, '_blank')
+    }
   }
-  ElMessage.info('搜索功能开发中...')
-  // TODO: 实现全局搜索
 }
 
 // 聊天头部方法
