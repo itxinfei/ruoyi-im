@@ -6918,7 +6918,6 @@ $avatar-xl: 64px;
           background: color.adjust($nav-item-hover, $lightness: -5%);
         }
       }
-      }
 
       .header-user {
         display: flex;
@@ -7166,7 +7165,7 @@ $avatar-xl: 64px;
             overflow: hidden;
 
             .chat-header {
-              height: 60px;
+              height: $chat-header-height;
               padding: 0 16px;
               display: flex;
               align-items: center;
@@ -7353,20 +7352,16 @@ $avatar-xl: 64px;
                   }
 
                   .message-bubble {
-                    // 钉钉发送方消息气泡
+                    // 钉钉发送方消息气泡 - 纯色无hover变化
                     background: $message-sent-bg;
                     color: $message-sent-text;
                     border-radius: 8px;
                     border-bottom-right-radius: 2px;
                     border: none;
-                    box-shadow: $shadow-message;
+                    box-shadow: none;
                     padding: 10px 14px;
                     font-size: 14px;
                     line-height: 1.6;
-
-                    &:hover {
-                      background: $primary-color-hover;
-                    }
 
                     // 链接样式
                     a {
@@ -7403,7 +7398,7 @@ $avatar-xl: 64px;
                     margin-left: 4px;
                   }
 
-                  /* 接收方消息气泡 - 白色 */
+                  /* 接收方消息气泡 - 白色（钉钉风格） */
                   .message-bubble {
                     position: relative;
                     padding: 10px 14px;
@@ -7415,12 +7410,7 @@ $avatar-xl: 64px;
                     line-height: 1.6;
                     word-break: break-word;
                     border: 1px solid $message-received-border;
-                    box-shadow: $shadow-message;
-                    transition: all 0.2s ease;
-
-                    &:hover {
-                      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-                    }
+                    box-shadow: $shadow-sm;
 
                     &.sending {
                       opacity: 0.7;
@@ -9746,6 +9736,7 @@ $avatar-xl: 64px;
     }
   }
 }
+}
 
 // 深色模式
 :deep(.dark) {
@@ -9767,6 +9758,51 @@ $avatar-xl: 64px;
   }
   50% {
     background: rgba(22, 119, 255, 0.2);
+  }
+}
+
+// 消息弹出动画（钉钉风格）
+@keyframes messagePop {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// 列表项滑入动画
+@keyframes listSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// 脉冲动画
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// 旋转动画（加载状态）
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 
@@ -10152,4 +10188,5 @@ $avatar-xl: 64px;
     }
   }
 }
+
 </style>
