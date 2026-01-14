@@ -279,6 +279,11 @@ function normalizeMessage(message) {
   }
 }
 
+// ACK超时时间（毫秒）- 5秒内必须收到ACK，否则降级到REST API
+const ACK_TIMEOUT = 5000
+// 最大重试次数
+const MAX_RETRY_COUNT = 2
+
 const state = {
   currentSession: null,
   sessions: [],
@@ -297,6 +302,10 @@ const state = {
   groups: [],
   // 文件列表
   files: [],
+  // ACK超时定时器映射 clientMsgId -> timer
+  ackTimeouts: {},
+  // 消息重试计数 clientMsgId -> count
+  messageRetryCount: {},
 }
 
 const getters = {
@@ -639,6 +648,28 @@ const mutations = {
       }
     }
   },
+  // 设置ACK超时定时器
+  SET_ACK_TIMEOUT: (state, { clientMsgId, timer }) => {
+    state.ackTimeouts[clientMsgId] = timer
+  },
+  // 清除ACK超时定时器
+  CLEAR_ACK_TIMEOUT: (state, clientMsgId) => {
+    if (state.ackTimeouts[clientMsgId]) {
+      clearTimeout(state.ackTimeouts[clientMsgId])
+      delete state.ackTimeouts[clientMsgId]
+    }
+  },
+  // 增加重试计数
+  INCREMENT_RETRY_COUNT: (state, clientMsgId) => {
+    if (!state.messageRetryCount[clientMsgId]) {
+      state.messageRetryCount[clientMsgId] = 0
+    }
+    state.messageRetryCount[clientMsgId]++
+  },
+  // 清除重试计数
+  CLEAR_RETRY_COUNT: (state, clientMsgId) => {
+    delete state.messageRetryCount[clientMsgId]
+  },
 }
 
 const actions = {
@@ -727,9 +758,11 @@ const actions = {
   },
 
   // 发送消息
-  // 优先使用 WebSocket，WebSocket 未连接时降级到 REST API
-  // 支持消息发送状态追踪（pending/sending/delivered/failed）
-  async sendMessage({ commit, state }, { sessionId, type, content, replyTo }) {
+  // 可靠性保证：
+  // 1. 优先使用 WebSocket，5秒内未收到ACK则降级到 REST API 重发
+  // 2. 每条消息最多重试 MAX_RETRY_COUNT 次
+  // 3. 使用 clientMsgId 去重，防止重复发送
+  async sendMessage({ commit, state, dispatch }, { sessionId, type, content, replyTo }) {
     // 生成唯一的clientMsgId用于去重和状态追踪
     const clientMsgId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const tempId = `temp_${clientMsgId}`
@@ -762,80 +795,117 @@ const actions = {
     commit('ADD_MESSAGE', { sessionId, message: tempMessage })
     commit('ADD_PENDING_MESSAGE', { sessionId, tempId, message: tempMessage })
 
-    // 优先使用 WebSocket（实时性更好）
-    if (imWebSocket && imWebSocket.isConnected()) {
+    // 封装REST API发送函数（供降级使用）
+    const sendViaRestApi = async () => {
       try {
-        imWebSocket.sendMessage({
+        const response = await apiSendMessage({
           conversationId: sessionId,
           type,
-          content,
+          content: typeof content === 'object' ? JSON.stringify(content) : content,
           replyToMessageId: replyTo,
           clientMsgId,
         })
 
-        // 发送成功后等待ACK确认，不立即更新状态
-        // 状态将在收到ACK时通过 handleMessageAck 更新
-        return { id: tempId, clientMsgId }
-      } catch (error) {
-        // WebSocket 发送失败，降级到 REST API
-        console.warn('[Store] WebSocket 发送失败，降级到 REST API:', error)
+        // 更新消息状态为已送达
         commit('UPDATE_MESSAGE_SEND_STATUS', {
           clientMsgId,
-          status: 'sending',
+          status: 'delivered',
         })
+
+        // 更新消息ID
+        commit('UPDATE_MESSAGE', {
+          sessionId,
+          messageId: tempId,
+          updates: {
+            id: response.data?.id || tempId,
+          },
+        })
+
+        // 更新会话的最后消息
+        commit('UPDATE_SESSION', {
+          sessionId,
+          updates: {
+            lastMessage: {
+              content: typeof content === 'string' ? content : '[消息]',
+              timestamp: Date.now(),
+            },
+          },
+        })
+
+        commit('REMOVE_PENDING_MESSAGE', { sessionId, tempId })
+        commit('CLEAR_RETRY_COUNT', clientMsgId)
+        return response.data
+      } catch (error) {
+        // 检查是否应该重试
+        const retryCount = state.messageRetryCount[clientMsgId] || 0
+        if (retryCount < MAX_RETRY_COUNT) {
+          commit('INCREMENT_RETRY_COUNT', clientMsgId)
+          console.log(`[Store] REST API发送失败，重试 ${retryCount + 1}/${MAX_RETRY_COUNT}:`, error)
+          // 延迟重试
+          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)))
+          return sendViaRestApi()
+        }
+
+        // 达到最大重试次数，标记为失败
+        commit('UPDATE_MESSAGE_SEND_STATUS', {
+          clientMsgId,
+          status: 'failed',
+          errorCode: error.code || 'NETWORK_ERROR',
+          errorMsg: error.message || '网络连接失败',
+        })
+        commit('REMOVE_PENDING_MESSAGE', { sessionId, tempId })
+        commit('CLEAR_RETRY_COUNT', clientMsgId)
+        ElMessage.error('消息发送失败，请检查网络连接')
+        throw error
       }
     }
 
-    // WebSocket 未连接，降级到 REST API
-    try {
-      const response = await apiSendMessage({
-        conversationId: sessionId,
-        type,
-        content: typeof content === 'object' ? JSON.stringify(content) : content,
-        replyToMessageId: replyTo,
-        clientMsgId,
-      })
+    // 封装WebSocket发送函数（带ACK超时）
+    const sendViaWebSocket = () => {
+      return new Promise((resolve, reject) => {
+        if (!imWebSocket || !imWebSocket.isConnected()) {
+          reject(new Error('WebSocket未连接'))
+          return
+        }
 
-      // 更新消息状态为已送达
-      commit('UPDATE_MESSAGE_SEND_STATUS', {
-        clientMsgId,
-        status: 'delivered',
-      })
+        try {
+          imWebSocket.sendMessage({
+            conversationId: sessionId,
+            type,
+            content,
+            replyToMessageId: replyTo,
+            clientMsgId,
+          })
+        } catch (error) {
+          reject(error)
+          return
+        }
 
-      // 更新消息ID
-      commit('UPDATE_MESSAGE', {
-        sessionId,
-        messageId: tempId,
-        updates: {
-          id: response.data?.id || tempId,
-        },
-      })
+        // 设置ACK超时定时器
+        const timeoutTimer = setTimeout(() => {
+          console.warn(`[Store] 消息ACK超时，降级到REST API: ${clientMsgId}`)
+          commit('CLEAR_ACK_TIMEOUT', clientMsgId)
+          // 超时后自动降级到REST API
+          resolve(sendViaRestApi())
+        }, ACK_TIMEOUT)
 
-      // 更新会话的最后消息
-      commit('UPDATE_SESSION', {
-        sessionId,
-        updates: {
-          lastMessage: {
-            content: typeof content === 'string' ? content : '[消息]',
-            timestamp: Date.now(),
-          },
-        },
+        commit('SET_ACK_TIMEOUT', { clientMsgId, timer: timeoutTimer })
       })
-
-      commit('REMOVE_PENDING_MESSAGE', { sessionId, tempId })
-      return response.data
-    } catch (error) {
-      // 更新消息状态为失败
-      commit('UPDATE_MESSAGE_SEND_STATUS', {
-        clientMsgId,
-        status: 'failed',
-        errorCode: error.code || 'NETWORK_ERROR',
-        errorMsg: error.message || '网络连接失败',
-      })
-      commit('REMOVE_PENDING_MESSAGE', { sessionId, tempId })
-      ElMessage.error('消息发送失败，请检查网络连接')
-      throw error
     }
+
+    // 优先使用 WebSocket（实时性更好）
+    if (imWebSocket && imWebSocket.isConnected()) {
+      try {
+        await sendViaWebSocket()
+        return { id: tempId, clientMsgId }
+      } catch (error) {
+        // WebSocket 发送失败，直接使用 REST API
+        console.warn('[Store] WebSocket 发送失败，降级到 REST API:', error)
+      }
+    }
+
+    // WebSocket 未连接或发送失败，使用 REST API
+    return sendViaRestApi()
   },
 
   // 重发消息
@@ -1314,6 +1384,12 @@ const actions = {
   handleMessageAck({ commit, state }, { clientMsgId, messageId }) {
     console.log('[Store] 收到消息ACK:', { clientMsgId, messageId })
 
+    // 清除ACK超时定时器（如果存在）
+    commit('CLEAR_ACK_TIMEOUT', clientMsgId)
+
+    // 清除重试计数
+    commit('CLEAR_RETRY_COUNT', clientMsgId)
+
     // 更新消息ID（从临时ID替换为真实ID）
     for (const sessionId in state.messageList) {
       const messages = state.messageList[sessionId]
@@ -1354,6 +1430,12 @@ const actions = {
   // 处理消息发送错误（WebSocket推送）
   handleMessageError({ commit, state }, { clientMsgId, errorCode, errorMessage }) {
     console.warn('[Store] 收到消息错误:', { clientMsgId, errorCode, errorMessage })
+
+    // 清除ACK超时定时器（如果存在）
+    commit('CLEAR_ACK_TIMEOUT', clientMsgId)
+
+    // 清除重试计数
+    commit('CLEAR_RETRY_COUNT', clientMsgId)
 
     commit('UPDATE_MESSAGE_SEND_STATUS', {
       clientMsgId,
