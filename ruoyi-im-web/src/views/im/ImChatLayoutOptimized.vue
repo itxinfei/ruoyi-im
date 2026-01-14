@@ -6617,11 +6617,11 @@ $input-bar-height: 48px;      // 输入栏高度 - 钉钉规范48px
 $search-bar-height: 36px;     // 搜索栏高度
 $session-item-height: 56px;   // 会话项高度 - 钉钉规范56px
 
-// 品牌色系（钉钉标准色）
-$primary-color: #1890FF;     // 钉钉蓝（主色）
-$primary-color-hover: #40A9FF;
-$primary-color-active: #096DD9;
-$primary-color-light: rgba(24, 144, 255, 0.1); // 浅蓝（选中背景）- 钉钉规范10%透明度
+// 品牌色系（钉钉5.6标准色）
+$primary-color: #0089FF;     // 钉钉蓝（主色）- 5.6版本
+$primary-color-hover: #0077E0;
+$primary-color-active: #0066C2;
+$primary-color-light: rgba(0, 137, 255, 0.1); // 浅蓝（选中背景）- 钉钉规范10%透明度
 $primary-disabled: #D9D9D9;
 
 // 中性色系（钉钉规范）
@@ -6643,20 +6643,20 @@ $border-color: #E8E8E8;      // 分割线、边框 - 钉钉规范边框色
 $border-hover: #D9D9D9;      // 边框悬停
 
 // 功能色
-$success-color: #52C41A;
-$warning-color: #FAAD14;
-$danger-color: #FF4D4F;
-$info-color: #1890FF;
+$success-color: #00C853;  // 钉钉5.6成功绿
+$warning-color: #FF9800;  // 钉钉5.6警告橙
+$danger-color: #F5222D;   // 钉钉5.6危险红
+$info-color: #0089FF;     // 钉钉5.6信息蓝
 
 // 导航栏颜色
 $nav-bg: #FFFFFF;
 $nav-item-hover: #F5F5F5;
-$nav-item-active: rgba(24, 144, 255, 0.1); // 导航激活背景 - 钉钉规范
+$nav-item-active: rgba(0, 137, 255, 0.1); // 导航激活背景 - 钉钉5.6规范
 $nav-item-icon: #8B95A1;    // 导航图标颜色 - 钉钉规范灰色
-$nav-item-icon-active: #1890FF;
+$nav-item-icon-active: #0089FF;
 
-// 消息气泡颜色（钉钉规范）
-$message-sent-bg: #1890FF;         // 发送方：钉钉蓝
+// 消息气泡颜色（钉钉5.6规范）
+$message-sent-bg: #0089FF;         // 发送方：钉钉蓝5.6版本
 $message-sent-text: #FFFFFF;       // 发送方文字：白色
 $message-received-bg: #FFFFFF;    // 接收方：白色
 $message-received-text: #333333;  // 接收方文字：钉钉正文色
@@ -7161,7 +7161,7 @@ $avatar-xl: 64px;
             right: 6px;
             width: 8px;
             height: 8px;
-            background: $danger-color;
+            background: #F5222D;  // 钉钉5.6危险红
             border-radius: 50%;
             border: 1px solid $bg-nav-narrow;
           }
