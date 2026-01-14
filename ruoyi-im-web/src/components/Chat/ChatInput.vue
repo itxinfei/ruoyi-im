@@ -145,32 +145,15 @@
 
       <!-- 文本输入框 -->
       <div class="text-input-wrapper">
-        <el-input
+        <ding-input
           ref="textInput"
           v-model="messageText"
-          type="textarea"
-          :autosize="{ minRows: 4, maxRows: 12 }"
           :maxlength="maxLength"
           placeholder="输入消息..."
-          resize="none"
-          class="custom-textarea"
           @keydown="handleKeyDown"
-        
           @focus="handleFocus"
           @blur="handleBlur"
         />
-
-        <!-- 字数统计 -->
-        <transition name="count-fade">
-          <div
-            v-show="messageText.length > 0"
-            class="char-count"
-            :class="{ 'near-limit': isNearLimit }"
-          >
-            <i class="el-icon-edit"></i>
-            <span>{{ messageText.length }}/{{ maxLength }}</span>
-          </div>
-        </transition>
 
         <!-- 快捷操作提示 -->
         <transition name="hint-fade">
@@ -284,6 +267,7 @@
 <script setup>
 import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import DingInput from './DingInput.vue'
 import EmojiPicker from './EmojiPicker.vue'
 import MentionSelector from './MentionSelector.vue'
 import LocationPicker from './LocationPicker.vue'
@@ -885,7 +869,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 12px 16px;
   border-bottom: 1px solid #F0F0F0;
 }
 
@@ -893,7 +877,7 @@ onUnmounted(() => {
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
 
 .toolbar-button {
@@ -901,8 +885,8 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: none;
   background: transparent;
   border-radius: 4px;
@@ -910,7 +894,7 @@ onUnmounted(() => {
   transition: all 0.2s ease;
 
   i {
-    font-size: 18px;
+    font-size: 20px;
     color: #666666;
     transition: color 0.2s ease;
   }
@@ -973,7 +957,8 @@ onUnmounted(() => {
 .input-area {
   padding: 0;
   position: relative;
- }
+  min-height: 200px;
+}
 
 .reply-preview {
   display: flex;
@@ -1032,57 +1017,6 @@ onUnmounted(() => {
   margin-bottom: 0;
 }
 
-.custom-textarea {
-  :deep(.el-textarea__inner) {
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    font-size: 14px;
-    line-height: 1.6;
-    padding: 4px 0;
-    margin: 0;
-    color: #1A1A1A;
-    resize: none;
-    min-height: 80px;
-    max-height: 200px;
-    box-shadow: none;
-
-    &:focus {
-      background: transparent;
-      box-shadow: none;
-    }
-
-    &::placeholder {
-      color: #B8B8B8;
-    }
-  }
-}
-
-.char-count {
-  position: absolute;
-  bottom: 8px;
-  right: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: #B8B8B8;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-
-  i {
-    font-size: 12px;
-  }
-
-  &.near-limit {
-    color: #F5222D;
-    background: rgba(245, 34, 45, 0.08);
-    font-weight: 500;
-  }
-}
-
 .input-hint {
   position: absolute;
   top: -30px;
@@ -1104,7 +1038,7 @@ onUnmounted(() => {
 
 .send-button-wrapper {
   position: absolute;
-  bottom: 8px;
+  bottom: 12px;
   right: 12px;
   display: flex;
   align-items: center;
@@ -1112,8 +1046,8 @@ onUnmounted(() => {
 }
 
 .send-button {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 4px;
   border: none;
   background: #0089FF;
@@ -1122,7 +1056,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
   box-shadow: 0 2px 6px rgba(0, 137, 255, 0.2);
   transition: all 0.2s ease;
   pointer-events: auto;
@@ -1443,17 +1377,6 @@ onUnmounted(() => {
   transform: translateX(20px);
 }
 
-.count-fade-enter-active,
-.count-fade-leave-active {
-  transition: all 0.3s ease;
-}
-
-.count-fade-enter-from,
-.count-fade-leave-to {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
 .hint-fade-enter-active,
 .hint-fade-leave-active {
   transition: all 0.3s ease;
@@ -1507,11 +1430,11 @@ onUnmounted(() => {
   }
 
   .toolbar-button {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
 
     i {
-      font-size: 16px;
+      font-size: 18px;
     }
   }
 
@@ -1562,18 +1485,6 @@ onUnmounted(() => {
 
  .input-area {
     padding: $spacing-xs $spacing-sm;
-  }
-
-  .custom-textarea {
-    :deep(.el-textarea__inner) {
-      font-size: 13px;
-      padding: $spacing-sm $spacing-sm;
-    }
-  }
-
-  .char-count {
-    font-size: 11px;
-    padding: 3px $spacing-xs;
   }
 
   .input-hint {

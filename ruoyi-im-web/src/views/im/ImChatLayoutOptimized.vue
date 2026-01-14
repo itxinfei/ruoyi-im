@@ -285,7 +285,7 @@
            <!-- 聊天内容 -->
            <div class="chat-panel">
              <div v-if="currentSessionId" class="chat-container">
-               <!-- 聊天头部（优化版） -->
+               <!-- 聊天头部 - 钉钉5.6规范 -->
                <div class="chat-header">
                  <!-- 左侧：会话信息 -->
                  <div class="chat-info">
@@ -294,7 +294,7 @@
                        <SmartAvatar
                          :name="currentSession?.name"
                          :avatar="currentSession?.avatar"
-                         :size="36"
+                         :size="32"
                          :show-border="true"
                          :show-online="false"
                        />
@@ -304,12 +304,8 @@
                   <div class="chat-title-info">
                     <div class="title-row">
                       <span class="title-name">{{ currentSession?.name }}</span>
-                      <el-tag v-if="currentSession?.type === 'GROUP'" size="small" type="info" class="group-tag">
-                        群聊
-                      </el-tag>
                     </div>
                     <div class="title-subtitle">
-                      <span class="status-dot" :class="{ online: isUserOnline }"></span>
                       <span class="status-text">{{ getOnlineStatusText() }}</span>
                       <span v-if="currentSession?.type === 'GROUP'" class="member-count">
                         · {{ currentSession?.memberCount || 0 }}人
@@ -326,19 +322,16 @@
                   <el-tooltip content="视频通话" placement="bottom">
                     <el-button :icon="VideoCamera" class="action-btn" circle @click="startVideoCall" />
                   </el-tooltip>
-                  <el-tooltip content="屏幕共享" placement="bottom">
-                    <el-button :icon="View" class="action-btn" circle @click="startScreenShare" />
-                  </el-tooltip>
-                  <el-divider direction="vertical" />
-                  <el-tooltip content="搜索聊天记录" placement="bottom">
-                    <el-button :icon="Search" class="action-btn" circle @click="searchInChat" />
-                  </el-tooltip>
-                  <el-tooltip content="更多操作" placement="bottom">
+                  <el-tooltip content="更多" placement="bottom">
                     <el-dropdown trigger="click" placement="bottom-end">
                       <el-button :icon="More" class="action-btn" circle />
                       <template #dropdown>
                         <el-dropdown-menu>
-                          <el-dropdown-item @click="muteChat">
+                          <el-dropdown-item @click="searchInChat">
+                            <el-icon><Search /></el-icon>
+                            搜索聊天记录
+                          </el-dropdown-item>
+                          <el-dropdown-item divided @click="muteChat">
                             <el-icon><Bell /></el-icon>
                             {{ currentSession?.isMuted ? '取消免打扰' : '消息免打扰' }}
                           </el-dropdown-item>
@@ -656,15 +649,13 @@
                   ref="inputRef"
                   v-model="inputMessage"
                   type="textarea"
-                  :rows="1"
-                  :autosize="{ minRows: 1, maxRows: 7 }"
+                  :rows="10"
                   placeholder="输入消息... @提及、Enter发送、Ctrl+Enter换行"
                   class="chat-input"
                   @keydown="handleInputKeydown"
                   @input="handleInputChange"
                 />
                 <div class="input-footer">
-                  <span class="input-tip">Enter 发送 · @提及</span>
                   <el-button type="primary" size="small" class="send-button" @click="sendMessage"
                     >发送</el-button
                   >
@@ -5654,11 +5645,13 @@ const sendMessage = async () => {
     replyingMessage.value = null
   }
 
-  // 统一通过 store 发送消息（内部使用 WebSocket）
-  await store.dispatch('im/sendMessage', messageData)
-
+  // 立即清空输入框
+  const messageToSend = inputMessage.value.trim()
   inputMessage.value = ''
   showEmojiPicker.value = false
+
+  // 统一通过 store 发送消息（内部使用 WebSocket）
+  await store.dispatch('im/sendMessage', messageData)
 }
 
 // 获取群组成员（用于@提及）
@@ -6726,8 +6719,8 @@ $avatar-xl: 64px;
   border-radius: 0;
 
   &:hover {
-    background: linear-gradient(90deg, #f0f7ff 0%, #ffffff 100%);
-    color: #165dff;
+    background: rgba(0, 0, 0, 0.04);
+    color: #0089FF;
   }
 
   .el-icon {
@@ -6737,7 +6730,7 @@ $avatar-xl: 64px;
   }
 
   &:hover .el-icon {
-    color: #165dff;
+    color: #0089FF;
     transform: scale(1.1);
   }
 
@@ -6760,11 +6753,11 @@ $avatar-xl: 64px;
     flex-direction: column;
     align-items: flex-start;
     padding: 16px;
-    background: linear-gradient(90deg, #f7f8fa 0%, #ffffff 100%);
+    background: #F5F5F5;
 
     .dropdown-avatar {
       margin-bottom: 8px;
-      border: 2px solid #165dff;
+      border: 2px solid #0089FF;
       box-shadow: 0 2px 8px rgba(22, 93, 255, 0.2);
     }
 
@@ -6841,8 +6834,8 @@ $avatar-xl: 64px;
     }
 
     &.active {
-      border-color: #1677ff;
-      box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.15);
+      border-color: #0089FF;
+      box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.15);
     }
   }
 
@@ -6855,7 +6848,7 @@ $avatar-xl: 64px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 
     &.online {
-      background: #52c41a;
+      background: #00C853;
     }
 
     &.away {
@@ -6863,7 +6856,7 @@ $avatar-xl: 64px;
     }
 
     &.busy {
-      background: #ff4d4f;
+      background: #F5222D;
     }
 
     &.offline {
@@ -7025,7 +7018,7 @@ $avatar-xl: 64px;
             &.is-focus {
               background: #fff;
               border-color: $primary-color;
-              box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+              box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.1);
             }
           }
 
@@ -7146,7 +7139,7 @@ $avatar-xl: 64px;
           justify-content: center;
           cursor: pointer;
           color: $nav-item-icon;
-          border-radius: 6px;
+          border-radius: 4px;
           transition: all 0.2s ease;
           position: relative;
 
@@ -7167,7 +7160,7 @@ $avatar-xl: 64px;
           }
 
           &:hover {
-            background: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 0, 0, 0.04);
           }
 
           &.active {
@@ -7244,7 +7237,7 @@ $avatar-xl: 64px;
               }
 
               &.active {
-                background: rgba(24, 144, 255, 0.1);
+                background: rgba(0, 137, 255, 0.1);
               }
 
               .el-badge {
@@ -7309,21 +7302,20 @@ $avatar-xl: 64px;
             overflow: hidden;
 
             .chat-header {
-              height: $chat-header-height;
+              height: 48px;
               padding: 0 16px;
               display: flex;
               align-items: center;
               justify-content: space-between;
-              border-bottom: 1px solid $border-color;
+              border-bottom: 1px solid #E6E6E6;
               background: #fff;
-              box-shadow: $shadow-sm;
-              z-index: 10;
+              flex-shrink: 0;
 
               // 左侧：会话信息
               .chat-info {
                 display: flex;
                 align-items: center;
-                gap: 12px;
+                gap: 10px;
 
                 .chat-avatar-group {
                   position: relative;
@@ -7333,15 +7325,15 @@ $avatar-xl: 64px;
                     position: absolute;
                     bottom: -2px;
                     right: -2px;
-                    width: 16px;
-                    height: 16px;
-                    background: $primary-color;
+                    width: 14px;
+                    height: 14px;
+                    background: #0089FF;
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     color: #fff;
-                    font-size: 10px;
+                    font-size: 9px;
                     border: 2px solid #fff;
                   }
                 }
@@ -7349,25 +7341,17 @@ $avatar-xl: 64px;
                 .chat-title-info {
                   display: flex;
                   flex-direction: column;
-                  gap: 2px;
+                  gap: 1px;
 
                   .title-row {
                     display: flex;
                     align-items: center;
-                    gap: 6px;
+                    gap: 4px;
 
                     .title-name {
-                      font-size: 15px;
+                      font-size: 14px;
                       font-weight: 500;
-                      color: $text-primary;
-                    }
-
-                    .group-tag {
-                      height: 18px;
-                      padding: 0 6px;
-                      font-size: 11px;
-                      background: $nav-item-hover;
-                      border: none;
+                      color: #1A1A1A;
                     }
                   }
 
@@ -7376,25 +7360,14 @@ $avatar-xl: 64px;
                     align-items: center;
                     gap: 4px;
                     font-size: 12px;
-                    color: $text-tertiary;
-
-                    .status-dot {
-                      width: 6px;
-                      height: 6px;
-                      border-radius: 50%;
-                      background: $text-tertiary;
-
-                      &.online {
-                        background: $success-color;
-                      }
-                    }
+                    color: #858585;
 
                     .status-text {
                       line-height: 1;
                     }
 
                     .member-count {
-                      color: $text-tertiary;
+                      color: #858585;
                     }
                   }
                 }
@@ -7404,38 +7377,33 @@ $avatar-xl: 64px;
               .chat-actions {
                 display: flex;
                 align-items: center;
-                gap: 6px;
+                gap: 4px;
 
                 .action-btn {
                   --el-button-border-color: transparent;
                   --el-button-bg-color: transparent;
-                  --el-button-text-color: $text-regular;
-                  width: 34px;
-                  height: 34px;
-                  padding: 6px;
-                  border-radius: 8px;
+                  --el-button-text-color: #666666;
+                  width: 32px;
+                  height: 32px;
+                  padding: 0;
+                  border-radius: 4px;
 
                   &:hover {
-                    --el-button-text-color: $primary-color;
-                    --el-button-hover-bg-color: $nav-item-hover;
+                    --el-button-text-color: #0089FF;
+                    --el-button-hover-bg-color: rgba(0, 0, 0, 0.04);
                   }
-                }
-
-                .el-divider--vertical {
-                  height: 20px;
-                  margin: 0 4px;
                 }
 
                 :deep(.el-dropdown-menu__item.danger-item) {
-                  color: $danger-color;
+                  color: #F5222D;
 
                   &:hover {
                     background: rgba(245, 34, 45, 0.1);
-                    color: $danger-color;
+                    color: #F5222D;
                   }
 
                   .el-icon {
-                    color: $danger-color;
+                    color: #F5222D;
                   }
                 }
               }
@@ -7445,22 +7413,39 @@ $avatar-xl: 64px;
               flex: 1;
               display: flex;
               flex-direction: column;
-              padding: 16px 20px;
+              padding: 16px;
               overflow-y: auto;
-              background: $bg-gray;
-              @include web-scrollbar;
+              background: #F5F5F5;
+
+              // 自定义滚动条
+              &::-webkit-scrollbar {
+                width: 6px;
+              }
+
+              &::-webkit-scrollbar-track {
+                background: transparent;
+              }
+
+              &::-webkit-scrollbar-thumb {
+                background: #E6E6E6;
+                border-radius: 3px;
+
+                &:hover {
+                  background: #C8C8C8;
+                }
+              }
 
               .connection-status {
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 8px;
-                padding: 10px 16px;
+                padding: 8px 16px;
                 margin-bottom: 12px;
-                background: #fff7e6;
-                border: 1px solid #ffd591;
-                border-radius: $radius-base;
-                color: $warning-color;
+                background: #FFF7E6;
+                border: 1px solid #FFD591;
+                border-radius: 4px;
+                color: #FF9800;
                 font-size: 13px;
 
                 .el-icon {
@@ -7470,16 +7455,18 @@ $avatar-xl: 64px;
 
               .message-item {
                 display: flex;
-                margin-bottom: 12px;
+                margin-bottom: 20px;
                 gap: 8px;
-                padding: 0 16px;
+                width: auto;
+                max-width: 70%;
+                min-width: 0;
 
                 // 新消息弹出动画
                 &.new-message {
                   animation: messagePop 0.3s $ease-bounce;
                 }
 
-                /* 发送方消息 - 气泡在左边，头像在右边（整个靠右对齐） */
+                /* 发送方消息 - 头像在右边，气泡在左边（整体靠右） */
                 &.isOwn {
                   align-self: flex-end;
                   flex-direction: row;
@@ -7487,25 +7474,25 @@ $avatar-xl: 64px;
                   .message-avatar {
                     margin-left: 12px;
                     margin-right: 0;
+                    flex-shrink: 0;
+                    order: 2;
                   }
 
                   .message-content {
                     display: flex;
                     flex-direction: column;
                     align-items: flex-end;
+                    order: 1;
                   }
 
                   .message-bubble {
-                    // 钉钉发送方消息气泡 - 纯色无hover变化
-                    background: $message-sent-bg;
-                    color: $message-sent-text;
+                    // 钉钉发送方消息气泡 - 蓝色
+                    background: #0089FF;
+                    color: #fff;
                     border-radius: 12px;
-                    border-bottom-right-radius: 4px;
+                    border-bottom-right-radius: 2px;
                     border: none;
-                    box-shadow: none;
-                    padding: 10px 14px;
-                    font-size: 14px;
-                    line-height: 1.6;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 
                     // 链接样式
                     a {
@@ -7517,6 +7504,11 @@ $avatar-xl: 64px;
                       }
                     }
                   }
+
+                  // 发送方时间戳右对齐
+                  .message-time {
+                    flex-direction: row-reverse;
+                  }
                 }
 
                 /* 接收方消息 - 头像在左边，消息在右边 */
@@ -7525,36 +7517,21 @@ $avatar-xl: 64px;
 
                   .message-avatar {
                     margin-right: 12px;
+                    flex-shrink: 0;
                   }
 
                   .message-content {
                     align-items: flex-start;
                   }
-                }
-
-                .message-content {
-                  max-width: 60%;  // 钉钉规范：气泡最大宽度60%
-
-                  .sender-name {
-                    font-size: 12px;
-                    color: $text-tertiary;
-                    margin-bottom: 4px;
-                    margin-left: 4px;
-                  }
 
                   /* 接收方消息气泡 - 白色（钉钉风格） */
                   .message-bubble {
-                    position: relative;
-                    padding: 10px 14px;
+                    background: #fff;
+                    color: #1A1A1A;
                     border-radius: 12px;
-                    border-bottom-left-radius: 4px;
-                    background: $message-received-bg;
-                    color: $message-received-text;
-                    font-size: 14px;
-                    line-height: 1.6;
-                    word-break: break-word;
-                    border: 1px solid $message-received-border;
-                    box-shadow: $shadow-sm;
+                    border-bottom-left-radius: 2px;
+                    border: 1px solid #E8E8E8;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 
                     &.sending {
                       opacity: 0.7;
@@ -7562,10 +7539,35 @@ $avatar-xl: 64px;
 
                     &.failed {
                       background: #fff1f0;
-                      color: $danger-color;
+                      color: #F5222D;
                       border: 1px solid #ffccc7;
                       box-shadow: 0 1px 3px rgba(255, 77, 79, 0.15);
                     }
+                  }
+                }
+
+                .message-content {
+                  max-width: 60%;
+                  min-width: 0;
+                  overflow: hidden;
+
+                  .sender-name {
+                    font-size: 12px;
+                    color: #858585;
+                    margin-bottom: 4px;
+                    margin-left: 2px;
+                  }
+
+                  /* 通用消息气泡样式（仅包含公共属性） */
+                  .message-bubble {
+                    position: relative;
+                    padding: 10px 14px;
+                    font-size: 14px;
+                    line-height: 1.6;
+                    word-break: break-word;
+                    overflow-wrap: break-word;
+                    word-wrap: break-word;
+                    white-space: pre-wrap;
                   }
 
                   // 图片消息
@@ -7599,7 +7601,7 @@ $avatar-xl: 64px;
                     align-items: center;
                     gap: 12px;
                     padding: 12px 16px;
-                    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+                    background: #F5F5F5;
                     border-radius: var(--dt-radius-lg);
                     border: 1px solid rgba(0, 0, 0, 0.04);
                     min-width: 200px;
@@ -7608,7 +7610,7 @@ $avatar-xl: 64px;
                     cursor: pointer;
 
                     &:hover {
-                      background: linear-gradient(135deg, #e8ecf1 0%, #dbe0e6 100%);
+                      background: rgba(0, 0, 0, 0.06);
                       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
                       transform: translateY(-1px);
                     }
@@ -7679,12 +7681,12 @@ $avatar-xl: 64px;
                     display: flex;
                     align-items: center;
                     gap: 4px;
-                    font-size: 12px;
-                    color: $text-tertiary;
-                    margin-top: 6px;
+                    font-size: 11px;
+                    color: rgba(0, 0, 0, 0.25);
+                    margin-top: 4px;
 
                     .status-icon {
-                      font-size: 13px;
+                      font-size: 12px;
 
                       &.sending {
                         color: $warning-color;
@@ -7705,22 +7707,21 @@ $avatar-xl: 64px;
                       }
                     }
                   }
-                }
-              }
 
-              /* 发送方消息时间戳右对齐 */
-              .message-item.isOwn {
-                .message-time {
-                  align-self: flex-end;
-                  flex-direction: row-reverse;
+                  // 已读回执样式
+                  .read-receipt {
+                    font-size: 11px;
+                    color: rgba(0, 0, 0, 0.35);
+                    margin-left: 4px;
+                  }
                 }
               }
             }
 
             .input-area {
               padding: 12px 16px;
-              border-top: 1px solid $border-color;
-              background: $bg-light;
+              border-top: 1px solid #E6E6E6;
+              background: #fff;
 
               .voice-recording-panel {
                 display: flex;
@@ -7728,9 +7729,9 @@ $avatar-xl: 64px;
                 justify-content: space-between;
                 padding: 12px 16px;
                 margin-bottom: 12px;
-                background: #fff7e6;
-                border: 1px solid #ffd591;
-                border-radius: $radius-base;
+                background: #FFF7E6;
+                border: 1px solid #FFD591;
+                border-radius: 4px;
 
                 .voice-info {
                   display: flex;
@@ -7740,7 +7741,7 @@ $avatar-xl: 64px;
                   .recording-duration {
                     font-size: 16px;
                     font-weight: 500;
-                    color: $primary-color;
+                    color: #0089FF;
                     min-width: 50px;
                   }
 
@@ -7752,7 +7753,7 @@ $avatar-xl: 64px;
                     .volume-bar {
                       width: 4px;
                       min-height: 4px;
-                      background: linear-gradient(to top, $primary-color, $primary-color-hover);
+                      background: linear-gradient(to top, #0089FF, #0077E0);
                       border-radius: 2px;
                       transition: height 0.1s ease;
                     }
@@ -7760,7 +7761,7 @@ $avatar-xl: 64px;
 
                   .recording-tip {
                     font-size: 13px;
-                    color: $warning-color;
+                    color: #FF9800;
                   }
                 }
 
@@ -7772,87 +7773,83 @@ $avatar-xl: 64px;
 
               .input-toolbar {
                 display: flex;
-                gap: 4px;
+                gap: 8px;
                 margin-bottom: 8px;
-                padding: 0 4px;
 
                 .el-button {
                   --el-button-border-color: transparent;
                   --el-button-bg-color: transparent;
-                  --el-button-text-color: $text-regular;
-                  padding: 6px;
-                  border-radius: $radius-sm;
+                  --el-button-text-color: #666666;
+                  padding: 0;
+                  border-radius: 4px;
                   width: 32px;
                   height: 32px;
 
                   &:hover {
-                    --el-button-text-color: $primary-color;
-                    --el-button-hover-bg-color: $nav-item-hover;
+                    --el-button-text-color: #0089FF;
+                    --el-button-hover-bg-color: rgba(0, 0, 0, 0.04);
                     --el-button-hover-border-color: transparent;
                   }
 
                   &.recording {
-                    --el-button-text-color: $danger-color;
+                    --el-button-text-color: #F5222D;
                     animation: pulse 1.5s infinite;
                   }
                 }
               }
 
               .chat-input {
-                border-radius: $radius-base;
-                border: 1px solid $border-color;
+                border-radius: 4px;
+                border: 1px solid #E6E6E6;
                 background: #fff;
-                box-shadow: $shadow-sm;
+                box-shadow: none;
 
                 :deep(.el-textarea__inner) {
-                  border: none;
-                  padding: 10px 12px;
-                  resize: none;
-                  font-size: 14px;
-                  line-height: 1.5;
-                  background: transparent;
-                  min-height: 36px; // 钉钉规范：最小高度36px
-                  max-height: 150px; // 钉钉规范：最大高度150px
+                  border: none !important;
+                  padding: 12px !important;
+                  resize: vertical !important;
+                  font-size: 14px !important;
+                  line-height: 1.6 !important;
+                  background: transparent !important;
+                  min-height: 120px !important;
+                  max-height: 400px !important;
+                  box-shadow: none !important;
                 }
 
                 &:focus-within {
-                  border-color: $primary-color;
-                  box-shadow: 0 0 0 2px $primary-color-light;
+                  border-color: #0089FF;
+                  box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.1);
                 }
               }
 
               .input-footer {
                 display: flex;
-                justify-content: space-between;
+                justify-content: flex-end;
                 align-items: center;
                 margin-top: 8px;
-                padding: 0 4px;
-
-                .input-tip {
-                  font-size: 12px;
-                  color: $text-tertiary;
-                }
 
                 .send-button {
                   min-width: 80px;
                   height: 32px;
-                  border-radius: $radius-base;
+                  border-radius: 4px;
                   font-size: 14px;
                   padding: 6px 16px;
-                  transition: all $transition-instant $ease-base;
+                  background: #0089FF;
+                  border-color: #0089FF;
+
+                  &:hover {
+                    background: #0077E0;
+                    border-color: #0077E0;
+                  }
 
                   &:active {
-                    animation: buttonClick 0.1s $ease-base;
+                    background: #0066C2;
+                    border-color: #0066C2;
                   }
 
                   &:disabled {
-                    --el-button-text-color: #fff;
-                    --el-button-bg-color: $primary-disabled;
-                    --el-button-border-color: transparent;
-
-                    &:active {
-                      animation: none;
-                    }
+                    background: #E6E6E6;
+                    border-color: #E6E6E6;
                   }
                 }
               }
@@ -7865,7 +7862,12 @@ $avatar-xl: 64px;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: $text-tertiary;
+            color: #B8B8B8;
+            background: #F5F5F5;
+
+            .el-icon {
+              color: #E6E6E6;
+            }
 
             p {
               margin-top: 16px;
@@ -8543,7 +8545,7 @@ $avatar-xl: 64px;
             padding: 24px;
 
             .attendance-card {
-              background: linear-gradient(135deg, #1677ff 0%, #69b1ff 100%);
+              background: #0089FF;
               border-radius: 12px;
               padding: 32px;
               text-align: center;
@@ -8622,7 +8624,7 @@ $avatar-xl: 64px;
 
                     &.normal {
                       background: #f6ffed;
-                      color: #52c41a;
+                      color: #00C853;
                     }
 
                     &.late {
@@ -8931,11 +8933,11 @@ $avatar-xl: 64px;
                 }
 
                 &.file-type-word {
-                  color: #1677ff;
+                  color: #0089FF;
                 }
 
                 &.file-type-excel {
-                  color: #52c41a;
+                  color: #00C853;
                 }
 
                 &.file-type-ppt {
@@ -9013,7 +9015,7 @@ $avatar-xl: 64px;
 
               .selection-info {
                 font-size: 14px;
-                color: #1677ff;
+                color: #0089FF;
                 font-weight: 500;
               }
 
@@ -9034,10 +9036,10 @@ $avatar-xl: 64px;
               flex-direction: column;
               align-items: center;
               justify-content: center;
-              background: rgba(22, 119, 255, 0.1);
-              border: 2px dashed #1677ff;
+              background: rgba(0, 137, 255, 0.1);
+              border: 2px dashed #0089FF;
               border-radius: 8px;
-              color: #1677ff;
+              color: #0089FF;
               font-size: 16px;
               z-index: 100;
 
@@ -9901,7 +9903,7 @@ $avatar-xl: 64px;
     background: transparent;
   }
   50% {
-    background: rgba(22, 119, 255, 0.2);
+    background: rgba(0, 137, 255, 0.2);
   }
 }
 
@@ -9953,7 +9955,7 @@ $avatar-xl: 64px;
 // 按钮激活状态
 :deep(.el-button.active) {
   color: $primary-color !important;
-  background: rgba(22, 119, 255, 0.1) !important;
+  background: rgba(0, 137, 255, 0.1) !important;
 }
 
 // 消息已读回执样式
@@ -10054,12 +10056,12 @@ $avatar-xl: 64px;
 
     &:hover {
       border-color: $primary-color;
-      background: rgba(22, 119, 255, 0.05);
+      background: rgba(0, 137, 255, 0.05);
     }
 
     &.active {
       border-color: $primary-color;
-      background: rgba(22, 119, 255, 0.1);
+      background: rgba(0, 137, 255, 0.1);
     }
 
     .status-icon {
@@ -10072,7 +10074,7 @@ $avatar-xl: 64px;
       margin-right: 12px;
 
       &.status-online {
-        background: #52c41a;
+        background: #00C853;
         color: white;
       }
 
@@ -10082,7 +10084,7 @@ $avatar-xl: 64px;
       }
 
       &.status-away {
-        background: #1890ff;
+        background: #0089FF;
         color: white;
       }
 
@@ -10133,12 +10135,12 @@ $avatar-xl: 64px;
 
       &:hover {
         border-color: $primary-color;
-        background: rgba(22, 119, 255, 0.05);
+        background: rgba(0, 137, 255, 0.05);
       }
 
       &.active {
         border-color: $primary-color;
-        background: rgba(22, 119, 255, 0.1);
+        background: rgba(0, 137, 255, 0.1);
       }
 
       .theme-preview {
@@ -10171,7 +10173,7 @@ $avatar-xl: 64px;
 
         &.theme-dark {
           .preview-header {
-            background: #1677ff;
+            background: #0089FF;
           }
 
           .preview-body {
@@ -10187,7 +10189,7 @@ $avatar-xl: 64px;
 
         &.theme-auto {
           .preview-header {
-            background: linear-gradient(90deg, #1677ff 50%, #1a1a1a 50%);
+            background: linear-gradient(90deg, #0089FF 50%, #1a1a1a 50%);
           }
 
           .preview-body {

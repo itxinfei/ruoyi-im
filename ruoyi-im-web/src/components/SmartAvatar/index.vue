@@ -154,7 +154,7 @@ function handleError() {
   .avatar-img {
     display: block;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 50%;
     transition: all 0.2s ease;
 
     &:hover {
@@ -166,6 +166,7 @@ function handleError() {
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
     transition: all 0.2s ease;
   }
 
@@ -175,7 +176,7 @@ function handleError() {
     left: -2px;
     right: -2px;
     bottom: -2px;
-    border-radius: 4px;
+    border-radius: 50%;
     pointer-events: none;
     z-index: 1;
   }

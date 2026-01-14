@@ -290,7 +290,7 @@ public class ImMessageController {
      * @throws BusinessException 当消息不存在或会话不存在时抛出业务异常
      */
     @Operation(summary = "标记消息已读", description = "批量标记指定消息为已读状态")
-    @PutMapping("/read")
+    @PutMapping("/mark-read")
     public Result<Void> markAsRead(@RequestBody java.util.Map<String, Object> data,
                                   @RequestHeader(value = "userId", required = false) Long userId) {
         if (userId == null) {
