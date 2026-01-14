@@ -5,8 +5,8 @@
   "author": "RuoYi",
   "license": "MIT",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "export NODE_OPTIONS=\"--max-old-space-size=4096\" && vite",
+    "build": "export NODE_OPTIONS=\"--max-old-space-size=4096\" && vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/",

@@ -211,11 +211,10 @@ import {
   CircleClose,
   ChatDotRound,
   User,
-  Users,
+  UserFilled,
   Document,
   DocumentDelete,
   Download,
-  ChatBubble,
 } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -243,9 +242,9 @@ const activeFilter = ref('all')
 // 搜索类型筛选
 const searchFilters = ref([
   { key: 'all', label: '全部', icon: Search, count: 0 },
-  { key: 'message', label: '消息', icon: ChatBubble, count: 0 },
+  { key: 'message', label: '消息', icon: ChatDotRound, count: 0 },
   { key: 'contact', label: '联系人', icon: User, count: 0 },
-  { key: 'group', label: '群组', icon: Users, count: 0 },
+  { key: 'group', label: '群组', icon: UserFilled, count: 0 },
   { key: 'file', label: '文件', icon: Document, count: 0 },
 ])
 
@@ -486,9 +485,9 @@ const escapeRegex = (str) => {
 // 获取分类图标
 const getCategoryIcon = (category) => {
   const icons = {
-    message: ChatBubble,
+    message: ChatDotRound,
     contact: User,
-    group: Users,
+    group: UserFilled,
     file: Document,
   }
   return icons[category] || Search

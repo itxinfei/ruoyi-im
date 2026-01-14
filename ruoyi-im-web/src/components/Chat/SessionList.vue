@@ -1,78 +1,86 @@
 <template>
   <div class="session-list">
     <div ref="sessionItemsContainer" class="session-items">
-      <transition-group name="session-list" tag="div" class="session-list-inner">
-        <div
-          v-for="session in filteredSessions"
-          :key="session.id"
-          class="session-item"
-          :class="{
-            active: activeSessionId === session.id,
-            collapsed: isCollapsed,
-            pinned: session.pinned,
-            muted: session.muted,
-          }"
-          @click="onSelect(session)"
-          @mouseenter="handleSessionHover(session.id)"
-          @mouseleave="handleSessionLeave(session.id)"
-        >
-          <div class="session-avatar">
-            <el-badge :is-dot="getPeerOnline(session)" class="status-badge">
-              <el-avatar :src="session.avatar" :size="isCollapsed ? 36 : 40"></el-avatar>
-            </el-badge>
-            <transition name="online-indicator">
-              <div v-if="getPeerOnline(session)" class="online-indicator"></div>
-            </transition>
-          </div>
-          <div class="session-info" :class="{ hidden: isCollapsed }">
-            <div class="session-name-row">
-              <span class="session-name">{{ session.name }}</span>
-              <transition name="pin-icon">
-                <i v-if="session.pinned" class="el-icon-thumb pin-icon"></i>
-              </transition>
-              <transition name="mute-icon">
-                <i v-if="session.muted" class="el-icon-bell mute-icon"></i>
+      <VirtualScrollList
+        :data="sessions"
+        :item-height="64"
+        :height="'100%'"
+        :buffer-count="10"
+        key-prop="id"
+        class="virtual-session-list"
+      >
+        <template #item="{ item: session, index }">
+          <div
+            class="session-item"
+            :class="{
+              active: activeSessionId === session.id,
+              collapsed: isCollapsed,
+              pinned: session.pinned,
+              muted: session.muted,
+            }"
+            :data-index="index"
+            @click="onSelect(session)"
+            @mouseenter="handleSessionHover(session.id)"
+            @mouseleave="handleSessionLeave(session.id)"
+          >
+            <div class="session-avatar">
+              <el-badge :is-dot="getPeerOnline(session)" class="status-badge">
+                <el-avatar :src="session.avatar" :size="isCollapsed ? 36 : 40"></el-avatar>
+              </el-badge>
+              <transition name="online-indicator">
+                <div v-if="getPeerOnline(session)" class="online-indicator"></div>
               </transition>
             </div>
-            <div class="last-message">{{ getLastMessageText(session.lastMessage) }}</div>
+            <div class="session-info" :class="{ hidden: isCollapsed }">
+              <div class="session-name-row">
+                <span class="session-name">{{ session.name }}</span>
+                <transition name="pin-icon">
+                  <i v-if="session.pinned" class="el-icon-thumb pin-icon"></i>
+                </transition>
+                <transition name="mute-icon">
+                  <i v-if="session.muted" class="el-icon-bell mute-icon"></i>
+                </transition>
+              </div>
+              <div class="last-message">{{ getLastMessageText(session.lastMessage) }}</div>
+            </div>
+            <div class="session-meta" :class="{ hidden: isCollapsed }">
+              <div class="timestamp">{{ formatTime(session.lastMessage?.timestamp) }}</div>
+              <transition name="badge-pop">
+                <el-badge
+                  v-if="session.unreadCount > 0"
+                  :value="formatUnreadCount(session.unreadCount)"
+                  class="unread-badge"
+                  type="primary"
+                ></el-badge>
+              </transition>
+            </div>
+            <div class="session-actions" :class="{ hidden: isCollapsed }" @click.stop>
+              <el-dropdown trigger="click" @command="cmd => handleSessionAction(cmd, session.id)">
+                <span class="el-dropdown-link">
+                  <i class="el-icon-more"></i>
+                </span>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="pin">
+                    <i :class="session.pinned ? 'el-icon-bottom' : 'el-icon-top'"></i>
+                    {{ session.pinned ? '取消置顶' : '置顶' }}
+                  </el-dropdown-item>
+                  <el-dropdown-item command="mute">
+                    <i :class="session.muted ? 'el-icon-bell' : 'el-icon-close-notification'"></i>
+                    {{ session.muted ? '取消静音' : '静音' }}
+                  </el-dropdown-item>
+                  <el-dropdown-item command="delete" divided>
+                    <i class="el-icon-delete"></i>
+                    删除会话
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </el-dropdown>
+            </div>
           </div>
-          <div class="session-meta" :class="{ hidden: isCollapsed }">
-            <div class="timestamp">{{ formatTime(session.lastMessage?.timestamp) }}</div>
-            <transition name="badge-pop">
-              <el-badge
-                v-if="session.unreadCount > 0"
-                :value="formatUnreadCount(session.unreadCount)"
-                class="unread-badge"
-                type="primary"
-              ></el-badge>
-            </transition>
-          </div>
-          <div class="session-actions" :class="{ hidden: isCollapsed }" @click.stop>
-            <el-dropdown trigger="click" @command="cmd => handleSessionAction(cmd, session.id)">
-              <span class="el-dropdown-link">
-                <i class="el-icon-more"></i>
-              </span>
-              <el-dropdown-menu>
-                <el-dropdown-item command="pin">
-                  <i :class="session.pinned ? 'el-icon-bottom' : 'el-icon-top'"></i>
-                  {{ session.pinned ? '取消置顶' : '置顶' }}
-                </el-dropdown-item>
-                <el-dropdown-item command="mute">
-                  <i :class="session.muted ? 'el-icon-bell' : 'el-icon-close-notification'"></i>
-                  {{ session.muted ? '取消静音' : '静音' }}
-                </el-dropdown-item>
-                <el-dropdown-item command="delete" divided>
-                  <i class="el-icon-delete"></i>
-                  删除会话
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </div>
-        </div>
-      </transition-group>
+        </template>
+      </VirtualScrollList>
 
       <transition name="empty-state">
-        <div v-if="filteredSessions.length === 0" class="empty-state">
+        <div v-if="sessions.length === 0" class="empty-state">
           <div class="empty-icon">
             <i class="el-icon-chat-line-round"></i>
           </div>
@@ -305,8 +313,8 @@ const deleteSession = sessionId => {
           position: absolute;
           bottom: 2px;
           right: 2px;
-          width: 12px;
-          height: 12px;
+          width: 10px;
+          height: 10px;
           background: $success-color;
           border: 2px solid $bg-white;
           border-radius: $border-radius-round;
@@ -338,11 +346,11 @@ const deleteSession = sessionId => {
           display: flex;
           align-items: center;
           gap: $spacing-xs;
-          margin-bottom: 5px;
+          margin-bottom: 4px;
 
           .session-name {
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 500;
             color: $text-primary;
             @include text-ellipsis;
             line-height: 1.4;
@@ -384,8 +392,8 @@ const deleteSession = sessionId => {
         .timestamp {
           font-size: 11px;
           color: $text-placeholder;
-          margin-bottom: 5px;
-          font-weight: 500;
+          margin-bottom: 4px;
+          font-weight: 400;
           transition: color $transition-base $ease-base;
         }
 
@@ -393,7 +401,7 @@ const deleteSession = sessionId => {
           :deep(.el-badge__content) {
             background: linear-gradient(135deg, $error-color 0%, #ff7875 100%);
             border: none;
-            font-weight: 600;
+            font-weight: 500;
             min-width: 18px;
             height: 18px;
             line-height: 18px;
