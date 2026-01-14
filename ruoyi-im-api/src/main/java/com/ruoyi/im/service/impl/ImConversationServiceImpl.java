@@ -527,6 +527,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         ImConversationMember member = new ImConversationMember();
         member.setConversationId(conversationId);
         member.setUserId(userId);
+        member.setRole("MEMBER"); // 设置默认角色
         member.setUnreadCount(0);
         member.setIsPinned(0);
         member.setIsMuted(0);

@@ -6721,16 +6721,6 @@ $avatar-xl: 64px;
     padding-bottom: 4px;
   }
 
-  // 快捷键标签
-  .item-shortcut {
-    margin-left: auto;
-    font-size: 12px;
-    color: #86909c;
-    background: #f2f3f5;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-
   // 头部操作按钮包装器
   .header-action-wrapper {
     display: flex;
@@ -6765,6 +6755,16 @@ $avatar-xl: 64px;
     .version-tag {
       margin-left: 8px;
     }
+  }
+
+  // 快捷键标签
+  .item-shortcut {
+    margin-left: auto;
+    font-size: 12px;
+    color: #86909c;
+    background: #f2f3f5;
+    padding: 2px 6px;
+    border-radius: 4px;
   }
 }
 
