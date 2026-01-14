@@ -32,7 +32,7 @@
         </div>
         <!-- 当前位置标记 -->
         <div v-if="currentLocation" class="location-marker">
-          <el-icon :size="24" color="#1890FF"><Location /></el-icon>
+          <el-icon :size="24" color="#0089FF"><Location /></el-icon>
         </div>
       </div>
 

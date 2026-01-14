@@ -655,7 +655,7 @@ onMounted(() => {
       }
 
       &.active {
-        color: #1890FF; // 钉钉规范
+        color: #0089FF; // 钉钉规范
         font-weight: 500;
 
         &::after {
@@ -666,7 +666,7 @@ onMounted(() => {
           transform: translateX(-50%);
           width: 24px;
           height: 2px;
-          background-color: #1890FF;
+          background-color: #0089FF;
           border-radius: 1px;
         }
       }
@@ -709,12 +709,12 @@ onMounted(() => {
 
       &.selected {
         background-color: #E6F7FF;
-        border-left-color: #1890FF;
+        border-left-color: #0089FF;
       }
 
       .file-icon {
         margin-right: 12px;
-        color: #1890FF;
+        color: #0089FF;
       }
 
       .file-info {
@@ -787,7 +787,7 @@ onMounted(() => {
 
     .file-preview {
       font-size: 24px;
-      color: #1890FF;
+      color: #0089FF;
     }
 
     .header-info {

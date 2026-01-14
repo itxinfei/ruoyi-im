@@ -153,6 +153,30 @@ public class ImMessageReadController {
     }
 
     /**
+     * 标记会话已读（PUT接口，兼容前端）
+     *
+     * @param conversationId 会话ID
+     * @param userId         用户ID
+     * @return 操作结果
+     */
+    @Operation(summary = "标记会话已读", description = "将会话中所有消息标记为已读（PUT接口）")
+    @PutMapping
+    public Result<Void> markConversationRead(
+            @RequestParam Long conversationId,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        if (userId == null) {
+            userId = 1L;
+        }
+        try {
+            messageReadService.markConversationAsRead(conversationId, null, userId);
+            return Result.success("会话已标记为已读");
+        } catch (Exception e) {
+            log.error("标记会话已读失败: conversationId={}, userId={}", conversationId, userId, e);
+            return Result.error("标记会话已读失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * 撤回已读回执
      *
      * @param messageId 消息ID

@@ -24,12 +24,13 @@
             @mouseleave="handleSessionLeave(session.id)"
           >
             <div class="session-avatar">
-              <el-badge :is-dot="getPeerOnline(session)" class="status-badge">
-                <el-avatar :src="session.avatar" :size="isCollapsed ? 36 : 40"></el-avatar>
-              </el-badge>
-              <transition name="online-indicator">
-                <div v-if="getPeerOnline(session)" class="online-indicator"></div>
-              </transition>
+              <ding-avatar
+                :avatar="session.avatar"
+                :name="session.name"
+                :size="isCollapsed ? 'sm' : 'md'"
+                :show-status="true"
+                :status="getPeerOnline(session) ? 'online' : 'offline'"
+              />
             </div>
             <div class="session-info" :class="{ hidden: isCollapsed }">
               <div class="session-name-row">
@@ -96,6 +97,7 @@ import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 import { formatTime } from '@/utils/format/time'
 import { getLastMessageText } from '@/utils/message'
+import DingAvatar from './DingAvatar.vue'
 
 // Props 定义
 const props = defineProps({
@@ -301,33 +303,10 @@ const deleteSession = sessionId => {
         transition: margin-right $transition-base $ease-base;
         flex-shrink: 0;
 
-        .status-badge {
-          :deep(.el-badge__content) {
-            border: 2px solid $bg-white;
-            box-shadow: $shadow-sm;
-            transition: all $transition-base $ease-base;
-          }
-        }
-
-        .online-indicator {
-          position: absolute;
-          bottom: 2px;
-          right: 2px;
-          width: 10px;
-          height: 10px;
-          background: $success-color;
-          border: 2px solid $bg-white;
-          border-radius: $border-radius-round;
-          box-shadow: 0 2px 4px rgba($success-color, 0.3);
-          animation: online-pulse 2s infinite;
-        }
-
-        :deep(.el-avatar) {
-          transition: all $transition-base $ease-base;
-          border: 2px solid transparent;
+        :deep(.ding-avatar) {
+          transition: transform $transition-base $ease-base;
 
           &:hover {
-            border-color: $primary-color;
             transform: scale(1.05);
           }
         }
@@ -544,15 +523,6 @@ const deleteSession = sessionId => {
   transition: transform 0.3s ease;
 }
 
-.online-indicator-enter-active {
-  transition: all 0.3s ease;
-}
-
-.online-indicator-enter-from {
-  opacity: 0;
-  transform: scale(0);
-}
-
 .pin-icon-enter-active,
 .mute-icon-enter-active {
   transition: all 0.3s ease;
@@ -652,13 +622,9 @@ const deleteSession = sessionId => {
     }
 
     .session-avatar {
-      :deep(.el-avatar) {
+      :deep(.ding-avatar) {
         transition: none;
       }
-    }
-
-    .online-indicator {
-      animation: none;
     }
 
     .pin-icon {
@@ -678,7 +644,6 @@ const deleteSession = sessionId => {
   .session-list-leave-active,
   .search-hint-enter-active,
   .search-hint-leave-active,
-  .online-indicator-enter-active,
   .pin-icon-enter-active,
   .mute-icon-enter-active,
   .badge-pop-enter-active,

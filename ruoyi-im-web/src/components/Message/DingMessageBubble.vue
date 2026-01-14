@@ -560,6 +560,9 @@ const handleMoreCommand = command => {
   display: flex;
   flex-direction: column;
   max-width: 70%;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .message-sender {
@@ -580,9 +583,13 @@ const handleMoreCommand = command => {
   background-color: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 
   &.is-own {
-    background-color: #1890FF;
+    background-color: #0089FF;
     color: #fff;
 
     .message-text :deep(a) {

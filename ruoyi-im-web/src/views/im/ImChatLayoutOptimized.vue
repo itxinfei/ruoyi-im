@@ -5,7 +5,7 @@
       <!-- 左侧：Logo和搜索 -->
       <div class="header-left">
         <div class="header-logo">
-          <el-icon :size="24" color="#1890FF"><ChatDotRound /></el-icon>
+          <el-icon :size="24" color="#0089FF"><ChatDotRound /></el-icon>
           <span class="logo-text">钉钉</span>
         </div>
         <div class="header-divider"></div>
@@ -3137,7 +3137,7 @@ const mockApprovals = ref([
     applicant: '张三',
     time: Date.now() - 3600000,
     icon: Document,
-    color: '#1890FF',
+    color: '#0089FF',
   },
   {
     id: 2,
@@ -3146,7 +3146,7 @@ const mockApprovals = ref([
     applicant: '李四',
     time: Date.now() - 7200000,
     icon: Edit,
-    color: '#52c41a',
+    color: '#00C853',
   },
   {
     id: 3,
@@ -3155,7 +3155,7 @@ const mockApprovals = ref([
     applicant: '王五',
     time: Date.now() - 86400000,
     icon: Files,
-    color: '#faad14',
+    color: '#FF9800',
   },
   {
     id: 4,
@@ -3204,7 +3204,7 @@ const schedules = ref([
     date: getWeekDays(new Date())[0].date,
     time: '09:00',
     location: '会议室A',
-    color: '#1890FF',
+    color: '#0089FF',
   },
   {
     id: 2,
@@ -3212,7 +3212,7 @@ const schedules = ref([
     date: getWeekDays(new Date())[1].date,
     time: '14:00',
     location: '会议室B',
-    color: '#52c41a',
+    color: '#00C853',
   },
   {
     id: 3,
@@ -3220,7 +3220,7 @@ const schedules = ref([
     date: getWeekDays(new Date())[2].date,
     time: '16:00',
     location: '线上',
-    color: '#faad14',
+    color: '#FF9800',
   },
   {
     id: 4,
@@ -4038,16 +4038,16 @@ const departments = ref([
 
 // 工作台应用
 const workbenchApps = ref([
-  { key: 'approval', name: '审批', icon: Document, color: '#1890FF' },
-  { key: 'attendance', name: '考勤打卡', icon: Odometer, color: '#52c41a' },
-  { key: 'drive', name: '钉盘', icon: Files, color: '#faad14' },
+  { key: 'approval', name: '审批', icon: Document, color: '#0089FF' },
+  { key: 'attendance', name: '考勤打卡', icon: Odometer, color: '#00C853' },
+  { key: 'drive', name: '钉盘', icon: Files, color: '#FF9800' },
   { key: 'calendar', name: '日程', icon: Calendar, color: '#722ed1' },
   { key: 'announcement', name: '公告', icon: Notification, color: '#eb2f96' },
   { key: 'meeting', name: '会议', icon: VideoCamera, color: '#13c2c2' },
   { key: 'mail', name: '邮件', icon: Edit, color: '#fa8c16' },
-  { key: 'report', name: '汇报', icon: Document, color: '#1890ff' },
-  { key: 'hr', name: '人事管理', icon: User, color: '#f5222d' },
-  { key: 'finance', name: '财务', icon: Document, color: '#52c41a' },
+  { key: 'report', name: '汇报', icon: Document, color: '#0089FF' },
+  { key: 'hr', name: '人事管理', icon: User, color: '#F5222D' },
+  { key: 'finance', name: '财务', icon: Document, color: '#00C853' },
 ])
 
 // 方法

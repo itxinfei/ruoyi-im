@@ -12,11 +12,13 @@
           @mouseleave="hoveredContactId = null"
         >
           <div class="contact-avatar">
-            <el-badge :is-dot="contact.online" class="status-badge">
-              <el-avatar :src="contact.avatar" :size="isCollapsed ? 36 : 40">
-                {{ contact.nickname?.charAt(0) || 'U' }}
-              </el-avatar>
-            </el-badge>
+            <ding-avatar
+              :avatar="contact.avatar"
+              :name="contact.nickname || contact.username"
+              :size="isCollapsed ? 'sm' : 'md'"
+              :show-status="true"
+              :status="contact.online ? 'online' : 'offline'"
+            />
           </div>
 
           <div class="contact-info" :class="{ hidden: isCollapsed }">
@@ -81,6 +83,7 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Phone, VideoCamera, MoreFilled, User, Delete } from '@element-plus/icons-vue'
+import DingAvatar from './DingAvatar.vue'
 
 const props = defineProps({
   contacts: { type: Array, default: () => [] },
@@ -194,19 +197,10 @@ const handleContactAction = (command, contact) => {
         flex-shrink: 0;
         transition: margin-right $transition-base $ease-base;
 
-        .status-badge {
-          :deep(.el-badge__content) {
-            border: 2px solid $bg-white;
-            box-shadow: $shadow-sm;
-          }
-        }
-
-        :deep(.el-avatar) {
-          border: 2px solid transparent;
-          transition: all $transition-base $ease-base;
+        :deep(.ding-avatar) {
+          transition: transform $transition-base $ease-base;
 
           &:hover {
-            border-color: $primary-color;
             transform: scale(1.05);
           }
         }

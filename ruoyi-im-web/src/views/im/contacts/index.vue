@@ -648,7 +648,7 @@ onMounted(async () => {
 
       &.is-focus {
         background-color: #fff;
-        border-color: #1890FF; // 钉钉规范
+        border-color: #0089FF; // 钉钉规范
         box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
       }
     }
@@ -701,7 +701,7 @@ onMounted(async () => {
 
       &.active {
         background-color: #E6F7FF;
-        color: #1890FF; // 钉钉规范
+        color: #0089FF; // 钉钉规范
         font-weight: 500;
       }
 

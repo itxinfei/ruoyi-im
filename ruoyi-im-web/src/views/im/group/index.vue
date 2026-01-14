@@ -456,8 +456,8 @@ onMounted(() => {
 }
 
 :deep(.el-button--primary) {
-  background-color: #1890FF;
-  border-color: #1890FF;
+  background-color: #0089FF;
+  border-color: #0089FF;
 
   &:hover {
     background-color: #40A9FF;

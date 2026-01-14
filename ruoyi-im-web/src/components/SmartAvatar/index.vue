@@ -1,14 +1,13 @@
 <template>
   <div class="smart-avatar" :class="{ 'is-clickable': clickable }" @click="handleClick">
-    <el-avatar
+    <img
       v-if="hasImage"
-      :size="size"
+      class="avatar-img"
       :src="avatarUrl"
-      :style="avatarStyle"
+      :style="imgStyle"
       @error="handleError"
-    >
-      {{ defaultText }}
-    </el-avatar>
+      alt=""
+    />
     <div
       v-else
       class="avatar-text"
@@ -77,63 +76,47 @@ const hasImage = computed(() => {
 
 const displayText = computed(() => {
   const name = props.nickname || props.name || 'U'
-  const firstChar = name.trim().charAt(0).toUpperCase()
-  return /[A-Z]/.test(firstChar) ? firstChar : 'U'
-})
-
-const defaultText = computed(() => {
-  return displayText.value
+  // 中文名取最后一个字
+  if (/[\u4e00-\u9fa5]/.test(name)) {
+    return name.charAt(name.length - 1)
+  }
+  // 英文名取首字母
+  return name.trim().charAt(0).toUpperCase()
 })
 
 const avatarUrl = computed(() => {
   return props.avatar
 })
 
-const avatarStyle = computed(() => {
-  if (props.showBorder) {
-    return {
-      border: `2px solid ${props.borderColor || getBorderColor()}`
-    }
+const imgStyle = computed(() => {
+  return {
+    width: `${props.size}px`,
+    height: `${props.size}px`,
+    border: props.showBorder ? `2px solid ${props.borderColor || 'rgba(255, 255, 255, 0.3)'}` : 'none'
   }
-  return {}
 })
 
 const textStyle = computed(() => {
-  const bgColor = getBackgroundColor()
-  const borderColor = props.borderColor || getBorderColor()
-  const textColor = '#ffffff'
-  const fontSize = Math.round(props.size * 0.45)
+  const fontSize = Math.round(props.size * 0.4)
 
   return {
     width: `${props.size}px`,
     height: `${props.size}px`,
-    background: `linear-gradient(135deg, ${bgColor[0]} 0%, ${bgColor[1]} 100%)`,
-    color: textColor,
+    background: '#0089FF',
+    color: '#ffffff',
     fontSize: `${fontSize}px`,
     fontWeight: '500',
-    border: props.showBorder ? `2px solid ${borderColor}` : 'none',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+    border: props.showBorder ? `2px solid ${props.borderColor || 'rgba(255, 255, 255, 0.3)'}` : 'none',
+    borderRadius: '4px'
   }
 })
 
 const borderStyle = computed(() => {
-  const borderColor = props.borderColor || getBorderColor()
+  const borderColor = props.borderColor || 'rgba(255, 255, 255, 0.3)'
   return {
     borderColor: borderColor
   }
 })
-
-function getBackgroundColor() {
-  const charCode = displayText.value.charCodeAt(0)
-  const colorIndex = charCode % avatarColors.length
-  return avatarColors[colorIndex]
-}
-
-function getBorderColor() {
-  const charCode = displayText.value.charCodeAt(0)
-  const colorIndex = charCode % borderColors.length
-  return borderColors[colorIndex]
-}
 
 function handleClick() {
   if (props.clickable) {
@@ -145,44 +128,6 @@ function handleError() {
   imageError.value = true
   emit('error')
 }
-
-const avatarColors = [
-  ['#FF6B6B', '#FF8E72'],
-  ['#4ECDC4', '#45B7AA'],
-  ['#667EEA', '#764BA2'],
-  ['#F093FB', '#F5576C'],
-  ['#4FACFE', '#00F2FE'],
-  ['#43E97B', '#38F9D7'],
-  ['#FA709A', '#FEE140'],
-  ['#30CFD0', '#330867'],
-  ['#FF9A9E', '#FECFEF'],
-  ['#A18CD1', '#FBC2EB'],
-  ['#FF758C', '#FF7EB3'],
-  ['#7F7FD5', '#86A8E7'],
-  ['#91EAE4', '#86A8E7'],
-  ['#FDC836', '#F7862A'],
-  ['#E0C3FC', '#8EC5FC'],
-  ['#C1DFC4', '#DEECD6']
-]
-
-const borderColors = [
-  '#FF6B6B',
-  '#4ECDC4',
-  '#667EEA',
-  '#F093FB',
-  '#4FACFE',
-  '#43E97B',
-  '#FA709A',
-  '#30CFD0',
-  '#FF9A9E',
-  '#A18CD1',
-  '#FF758C',
-  '#7F7FD5',
-  '#91EAE4',
-  '#FDC836',
-  '#E0C3FC',
-  '#C1DFC4'
-]
 </script>
 
 <style lang="scss" scoped>
@@ -206,23 +151,22 @@ const borderColors = [
     }
   }
 
+  .avatar-img {
+    display: block;
+    object-fit: cover;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+
   .avatar-text {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    text-transform: uppercase;
-    letter-spacing: 1px;
     transition: all 0.2s ease;
-  }
-
-  :deep(.el-avatar) {
-    border-radius: 50%;
-    transition: all 0.2s ease;
-
-    &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
   }
 
   .avatar-border {
@@ -231,7 +175,7 @@ const borderColors = [
     left: -2px;
     right: -2px;
     bottom: -2px;
-    border-radius: 50%;
+    border-radius: 4px;
     pointer-events: none;
     z-index: 1;
   }
@@ -249,28 +193,28 @@ const borderColors = [
     transition: all 0.3s ease;
 
     &.online {
-      background-color: #52c41a;
-      box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+      background-color: #00C853;
+      box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.2);
     }
 
     &.away {
-      background-color: #faad14;
-      box-shadow: 0 0 0 2px rgba(250, 173, 20, 0.2);
+      background-color: #FF9800;
+      box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2);
     }
 
     &.busy {
-      background-color: #ff4d4f;
-      box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+      background-color: #F5222D;
+      box-shadow: 0 0 0 2px rgba(245, 34, 45, 0.2);
     }
 
     &.offline {
-      background-color: #d9d9d9;
-      box-shadow: 0 0 0 2px rgba(217, 217, 217, 0.2);
+      background-color: #B8B8B8;
+      box-shadow: 0 0 0 2px rgba(184, 184, 184, 0.2);
     }
 
     &.dnd {
-      background-color: #ff4d4f;
-      box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+      background-color: #F5222D;
+      box-shadow: 0 0 0 2px rgba(245, 34, 45, 0.2);
     }
   }
 }

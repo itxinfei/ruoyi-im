@@ -589,7 +589,7 @@ watch(selectedEmails, updateSelectAllState)
       color: #666666;
 
       &.is-active {
-        color: #1890FF;
+        color: #0089FF;
         background-color: #E6F7FF;
       }
 
@@ -619,7 +619,7 @@ watch(selectedEmails, updateSelectAllState)
 
       .storage-used {
         height: 100%;
-        background: linear-gradient(90deg, #1890FF, #40A9FF); // 钉钉色系
+        background: linear-gradient(90deg, #0089FF, #40A9FF); // 钉钉色系
         border-radius: 2px;
       }
     }

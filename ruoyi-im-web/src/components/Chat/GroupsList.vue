@@ -12,9 +12,11 @@
           @mouseleave="hoveredGroupId = null"
         >
           <div class="group-avatar">
-            <el-avatar :src="group.avatar" :size="isCollapsed ? 36 : 40">
-              {{ group.name?.charAt(0) || 'G' }}
-            </el-avatar>
+            <ding-avatar
+              :avatar="group.avatar"
+              :name="group.name || '群组'"
+              :size="isCollapsed ? 'sm' : 'md'"
+            />
             <div class="member-count">{{ group.memberCount || 0 }}</div>
           </div>
 
@@ -74,6 +76,7 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Plus, MoreFilled, InfoFilled, User, SwitchButton } from '@element-plus/icons-vue'
+import DingAvatar from './DingAvatar.vue'
 
 const props = defineProps({
   groups: { type: Array, default: () => [] },
@@ -189,13 +192,10 @@ const handleGroupAction = (command, group) => {
         flex-shrink: 0;
         transition: margin-right $transition-base $ease-base;
 
-        :deep(.el-avatar) {
-          border: 2px solid transparent;
-          transition: all $transition-base $ease-base;
-          background: linear-gradient(135deg, $primary-color 0%, $success-color 100%);
+        :deep(.ding-avatar) {
+          transition: transform $transition-base $ease-base;
 
           &:hover {
-            border-color: $primary-color;
             transform: scale(1.05);
           }
         }
@@ -204,7 +204,7 @@ const handleGroupAction = (command, group) => {
           position: absolute;
           bottom: -2px;
           right: -2px;
-          background: $warning-color;
+          background: #FF9800;
           color: #fff;
           border-radius: 50%;
           width: 20px;
@@ -214,8 +214,8 @@ const handleGroupAction = (command, group) => {
           justify-content: center;
           font-size: 10px;
           font-weight: 500;
-          border: 2px solid $bg-white;
-          box-shadow: $shadow-sm;
+          border: 2px solid #fff;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
       }
 
@@ -332,9 +332,10 @@ const handleGroupAction = (command, group) => {
         padding: $spacing-md $spacing-sm;
 
         .group-avatar {
-          :deep(.el-avatar) {
-            width: 36px !important;
-            height: 36px !important;
+          :deep(.ding-avatar) {
+            width: 32px !important;
+            height: 32px !important;
+            font-size: 14px;
           }
 
           .member-count {

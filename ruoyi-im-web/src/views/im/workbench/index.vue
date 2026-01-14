@@ -197,7 +197,7 @@ const overviewCards = ref([
     label: '待办事项',
     value: 0,
     icon: Timer,
-    color: '#1890FF',
+    color: '#0089FF',
     className: 'card-todo',
   },
   {
@@ -231,7 +231,7 @@ const todoList = ref([])
 
 // 快捷应用
 const quickApps = ref([
-  { key: 'approval', name: '审批中心', color: '#1890FF', tab: 'approval' },
+  { key: 'approval', name: '审批中心', color: '#0089FF', tab: 'approval' },
   { key: 'attendance', name: '考勤打卡', color: '#52c41a', tab: 'attendance' },
   { key: 'schedule', name: '日程管理', color: '#faad14', tab: 'schedule' },
   { key: 'report', name: '工作报告', color: '#722ed1', tab: 'report' },
@@ -397,7 +397,7 @@ onMounted(() => {
 
   &.active {
     background: #E6F7FF;
-    color: #1890FF; // 修改：#1677ff -> #1890FF（钉钉规范）
+    color: #0089FF; // 修改：#1677ff -> #0089FF（钉钉规范）
     font-weight: 500;
   }
 }

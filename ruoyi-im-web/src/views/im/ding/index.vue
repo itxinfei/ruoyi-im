@@ -576,7 +576,7 @@ export default {
     }
 
     &.active {
-      background: #1890FF; // 钉钉规范
+      background: #0089FF; // 钉钉规范
       color: white;
     }
 
@@ -650,7 +650,7 @@ export default {
   justify-content: center;
   background: #E6F7FF;
   border-radius: 50%;
-  color: #1890FF;
+  color: #0089FF;
   position: relative;
   flex-shrink: 0;
 

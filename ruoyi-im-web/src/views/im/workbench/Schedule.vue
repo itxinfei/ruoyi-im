@@ -287,7 +287,7 @@ const eventForm = ref({
   location: '',
   participants: [],
   reminders: [15],
-  color: '#1890FF',
+  color: '#0089FF',
   remark: '',
 })
 
@@ -305,7 +305,7 @@ const viewTabs = [
   { key: 'list', label: '列表', icon: List },
 ]
 
-const eventColors = ['#1890FF', '#52C41A', '#FAAD14', '#F5222D', '#722ED1', '#13C2C2']
+const eventColors = ['#0089FF', '#52C41A', '#FAAD14', '#F5222D', '#722ED1', '#13C2C2']
 
 // 计算属性
 const weekDays = computed(() => {
@@ -355,7 +355,7 @@ const handleAdd = () => {
     location: '',
     participants: [],
     reminders: [15],
-    color: '#1890FF',
+    color: '#0089FF',
     remark: '',
   }
   showEventDialog.value = true
@@ -492,7 +492,7 @@ const fetchEvents = async () => {
         endTime: item.endTime ? item.endTime.split(' ')[1].slice(0, 5) : '00:00',
         location: item.location || '',
         participants: item.participants || [],
-        color: item.color || '#1890FF',
+        color: item.color || '#0089FF',
         remark: item.description || '',
       }))
     }
@@ -508,7 +508,7 @@ const fetchEvents = async () => {
         endTime: '10:30',
         location: '会议室A',
         participants: ['1', '2'],
-        color: '#1890FF',
+        color: '#0089FF',
         remark: '讨论项目进度',
       },
       {

@@ -3,51 +3,51 @@
  * 包含全局变量、动画、滚动条样式等
  */
 
-/* CSS 变量定义 - 钉钉6.5.x风格 */
+/* CSS 变量定义 - 钉钉5.6 PC版风格 */
 :root {
-  /* 主题色 - 钉钉蓝 #1890FF */
-  --im-primary-color: #1890ff;
-  --im-primary-hover: #40a9ff;
-  --im-primary-active: #096dd9;
-  --im-primary-light: #e6f7ff;
-  --im-primary-lighter: #f0f9ff;
-  --im-primary-bg: #1890ff;
+  /* 主题色 - 钉钉蓝5.6 #0089FF */
+  --im-primary-color: #0089FF;
+  --im-primary-hover: #0077E0;
+  --im-primary-active: #0066C2;
+  --im-primary-light: rgba(0, 137, 255, 0.1);
+  --im-primary-lighter: rgba(0, 137, 255, 0.05);
+  --im-primary-bg: #0089FF;
 
   /* 成功/警告/错误色 */
-  --im-success-color: #52c41a;
-  --im-warning-color: #faad14;
-  --im-error-color: #ff4d4f;
-  --im-info-color: #1677ff;
+  --im-success-color: #00C853;
+  --im-warning-color: #FF9800;
+  --im-error-color: #F5222D;
+  --im-info-color: #0089FF;
 
-  /* 文字颜色 - 钉钉风格 */
-  --im-text-primary: #262626;
-  --im-text-secondary: #595959;
-  --im-text-tertiary: #8c8c8c;
-  --im-text-placeholder: #bfbfbf;
-  --im-text-disabled: #d9d9d9;
+  /* 文字颜色 - 钉钉5.6风格 */
+  --im-text-primary: #1A1A1A;
+  --im-text-secondary: #666666;
+  --im-text-tertiary: #858585;
+  --im-text-placeholder: #B8B8B8;
+  --im-text-disabled: #D9D9D9;
 
-  /* 背景色 - 钉钉风格 */
-  --im-bg-base: #f0f2f5;
+  /* 背景色 - 钉钉5.6风格 */
+  --im-bg-base: #F5F5F5;
   --im-bg-white: #ffffff;
-  --im-bg-hover: #f5f5f5;
-  --im-bg-active: #e8f3ff;
-  --im-bg-sidebar: #f5f5f5;
-  --im-bg-chat: #f5f5f5;
+  --im-bg-hover: rgba(0, 0, 0, 0.04);
+  --im-bg-active: rgba(0, 137, 255, 0.1);
+  --im-bg-sidebar: #F5F5F5;
+  --im-bg-chat: #F5F5F5;
   --im-bg-nav: #ffffff;
 
-  /* 边框 - 钉钉风格 */
-  --im-border-color: #f0f0f0;
-  --im-border-light: #fafafa;
-  --im-border-dark: #d9d9d9;
+  /* 边框 - 钉钉5.6风格 */
+  --im-border-color: #E6E6E6;
+  --im-border-light: #F0F0F0;
+  --im-border-dark: #D9D9D9;
 
-  /* 阴影 - 钉钉风格 */
+  /* 阴影 - 钉钉5.6风格 */
   --im-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
   --im-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --im-shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   --im-shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --im-shadow-xl: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
-  /* 圆角 - 钉钉风格 */
+  /* 圆角 - 钉钉5.6风格 */
   --im-radius-xs: 2px;
   --im-radius-sm: 4px;
   --im-radius-md: 6px;
@@ -57,37 +57,37 @@
 
   /* 动画时长 */
   --im-transition-fast: 0.15s;
-  --im-transition-base: 0.3s;
-  --im-transition-slow: 0.5s;
+  --im-transition-base: 0.2s;
+  --im-transition-slow: 0.3s;
 
-  /* 消息气泡颜色 - 钉钉风格 */
-  --im-bubble-self: #1890ff;
+  /* 消息气泡颜色 - 钉钉5.6风格 */
+  --im-bubble-self: #0089FF;
   --im-bubble-other: #ffffff;
   --im-bubble-text-self: #ffffff;
-  --im-bubble-text-other: #333333;
-  --im-bubble-border: #e8e8e8;
+  --im-bubble-text-other: #1A1A1A;
+  --im-bubble-border: #E6E6E6;
 
-  /* 在线状态 - 钉钉风格 */
-  --im-online-color: #52c41a;
-  --im-offline-color: #d9d9d9;
-  --im-busy-color: #ff4d4f;
-  --im-away-color: #faad14;
+  /* 在线状态 - 钉钉5.6风格 */
+  --im-online-color: #52C41A;
+  --im-offline-color: #D9D9D9;
+  --im-busy-color: #F5222D;
+  --im-away-color: #FAAD14;
 
   /* 导航相关 */
-  --im-nav-width: 64px;
+  --im-nav-width: 68px;
   --im-nav-expanded-width: 192px;
   --im-nav-item-height: 48px;
-  --im-sidebar-width: 280px;
+  --im-sidebar-width: 240px;
 
   /* 头部 */
-  --im-header-height: 56px;
+  --im-header-height: 48px;
   --im-header-bg: #ffffff;
-  --im-header-border: #f0f0f0;
+  --im-header-border: #E6E6E6;
 
   /* 会话列表 */
-  --im-session-item-height: 72px;
-  --im-session-hover: #f5f5f5;
-  --im-session-active: #e8f3ff;
+  --im-session-item-height: 64px;
+  --im-session-hover: rgba(0, 0, 0, 0.04);
+  --im-session-active: rgba(0, 137, 255, 0.1);
 }
 
 /* 暗色主题 */

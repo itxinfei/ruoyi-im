@@ -4,17 +4,18 @@
 @use 'sass:color';
 
 // ============ Colors ============
-// 主色系（钉钉6.5.x规范）
-$primary-color: #1890FF;
-$primary-color-light: #E6F7FF;
+// 主色系（钉钉5.6 PC版规范）
+$primary-color: #0089FF;
+$primary-color-light: rgba(0, 137, 255, 0.1);
 $primary-color-lighter: #f0f9ff;
-$primary-color-dark: #096DD9;
+$primary-color-dark: #0077E0;
+$primary-color-active: #0066C2;
 
 // 功能色
-$success-color: #52c41a;
-$warning-color: #faad14;
-$error-color: #f5222d;
-$info-color: #1890FF;
+$success-color: #00C853;
+$warning-color: #FF9800;
+$error-color: #F5222D;
+$info-color: #0089FF;
 
 // 中性色（钉钉规范）
 $text-primary: #262626;      // 标题色
@@ -51,21 +52,21 @@ $detail-panel-width: 300px;   // 详情面板宽度
 $nav-rail-width: $nav-sidebar-width;
 $nav-rail-expanded-width: $nav-sidebar-expanded-width;
 
-// 钉钉6.5.x风格的颜色
+// 钉钉5.6 PC版风格的颜色
 $nav-bg: #FFFFFF; // 左侧导航栏背景（浅色）
 $nav-border: #F0F0F0; // 左侧导航栏边框
-$nav-item-hover: #F5F5F5; // 导航项悬停背景色
-$nav-item-active: #E8F3FF; // 激活导航项背景色
+$nav-item-hover: rgba(0, 0, 0, 0.04); // 导航项悬停背景色
+$nav-item-active: rgba(0, 137, 255, 0.1); // 激活导航项背景色
 $nav-item-text: #333333; // 导航项文本颜色（未选中）
 $nav-item-icon: #8C8C8C; // 导航项图标颜色（未选中）
-$nav-item-text-active: #1677FF; // 导航项文本颜色（选中）
-$nav-item-icon-active: #1677FF; // 导航项图标颜色（选中）
+$nav-item-text-active: #0089FF; // 导航项文本颜色（选中）
+$nav-item-icon-active: #0089FF; // 导航项图标颜色（选中）
 $topbar-bg: #FFFFFF; // 顶部导航栏背景
 $topbar-border: #E6E6E6; // 顶部导航栏边框
 $sidebar-bg: #F5F5F5; // 中间会话列表背景
 $chat-bg: #F5F5F5; // 右侧聊天区域背景
-$active-session-bg: #E8F3FF; // 活跃会话背景
-$primary-hover: #F0F9FF; // 悬停状态背景色
+$active-session-bg: rgba(0, 137, 255, 0.1); // 活跃会话背景
+$primary-hover: rgba(0, 0, 0, 0.04); // 悬停状态背景色
 
 // ============ Spacing ============
 $spacing-xs: 4px;

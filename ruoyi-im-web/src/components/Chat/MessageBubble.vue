@@ -17,14 +17,14 @@
       </div>
 
       <!-- 头像 -->
-      <div class="message-avatar" :class="{ online: isOnline, away: isAway }">
-        <img
-          :src="message.senderAvatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'"
-          :alt="message.senderName"
-          class="avatar-image"
-          @error="handleAvatarError"
-        />
-      </div>
+      <ding-avatar
+        class="message-avatar"
+        :class="{ online: isOnline, away: isAway }"
+        :avatar="message.senderAvatar"
+        :name="message.senderName"
+        size="md"
+        :show-status="false"
+      />
 
       <!-- 消息主体区域 -->
       <div class="message-wrapper">
@@ -287,12 +287,16 @@
 import { formatTime, formatDuration } from '@/utils/format/time'
 import { formatFileSize, getFileTypeIcon } from '@/utils/format/file'
 import { formatText } from '@/utils/format/text'
+import DingAvatar from './DingAvatar.vue'
 
 // 撤回时间限制（2分钟）
 const RECALL_TIME_LIMIT = 2 * 60 * 1000
 
 export default {
   name: 'MessageBubble',
+  components: {
+    DingAvatar,
+  },
   props: {
     message: {
       type: Object,
@@ -654,50 +658,15 @@ export default {
   animation: messageSlideIn 0.3s ease-out forwards;
 
   .message-avatar {
-    width: 40px;
-    height: 40px;
     flex-shrink: 0;
-    border-radius: 50%;
-    overflow: hidden;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: 2px solid #fff;
     position: relative;
 
-    // 头像在线状态指示器
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      border: 2px solid #fff;
-      background-color: #ccc;
-    }
-
-    // 在线状态
-    &.online::after {
-      background-color: #52c41a;
-    }
-
-    // 离开状态
-    &.away::after {
-      background-color: #faad14;
-    }
-
+    // 在线状态（通过DingAvatar组件的status-prop实现，这里可以添加额外的样式）
     &:hover {
       transform: scale(1.05);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .avatar-image {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-      background-color: #f0f0f0;
     }
   }
 
@@ -882,7 +851,7 @@ export default {
 
       .file-icon {
         font-size: 28px;
-        color: #1890FF;
+        color: #0089FF;
         margin-right: 12px;
       }
 
@@ -909,7 +878,7 @@ export default {
       .file-action {
         margin-left: 12px;
         font-size: 18px;
-        color: #1890FF;
+        color: #0089FF;
       }
     }
   }
@@ -934,7 +903,7 @@ export default {
 
       .voice-icon {
         font-size: 20px;
-        color: #1890FF;
+        color: #0089FF;
         margin-right: 12px;
       }
 
@@ -953,7 +922,7 @@ export default {
           transition: background 0.3s ease;
 
           &.active {
-            background: #1890FF;
+            background: #0089FF;
             animation: voiceWave 1s infinite ease-in-out;
 
             &:nth-child(1) { animation-delay: 0s; }
@@ -1068,7 +1037,7 @@ export default {
       .quote-content {
         background: #f0f2f5;
         padding: 8px 12px;
-        border-left: 3px solid #1890FF;
+        border-left: 3px solid #0089FF;
         margin-bottom: 8px;
 
         .quote-text {
@@ -1130,8 +1099,8 @@ export default {
           }
 
           &.selected {
-            background: rgba(24, 144, 255, 0.1);
-            border-color: #1890FF;
+            background: rgba(0, 137, 255, 0.1);
+            border-color: #0089FF;
           }
 
           .option-text {
@@ -1161,20 +1130,20 @@ export default {
       transition: all 0.3s ease;
 
       &.sending {
-        color: #1890FF;
+        color: #0089FF;
         animation: pulse 1.5s ease-in-out infinite;
       }
 
       &.sent {
-        color: #52c41a;
+        color: #00C853;
       }
 
       &.delivered {
-        color: #52c41a;
+        color: #00C853;
       }
 
       &.read {
-        color: #1890FF;
+        color: #0089FF;
       }
 
       &.failed {
@@ -1195,10 +1164,10 @@ export default {
 
 .message-bubble.self {
   .message-content {
-    // 文本消息 - 发送方使用钉钉风格蓝色
+    // 文本消息 - 发送方使用钉钉5.6风格蓝色
     .text-message {
-      background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
-      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+      background: linear-gradient(135deg, #0089FF 0%, #0077E0 100%);
+      box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
 
       .text-content {
         color: #fff;
@@ -1209,7 +1178,7 @@ export default {
         left: auto;
         right: -6px;
         border-right-color: transparent;
-        border-left-color: #1890FF;
+        border-left-color: #0089FF;
       }
     }
 
@@ -1219,7 +1188,7 @@ export default {
     .location-message .location-container,
     .quote-message .quote-container,
     .vote-message .vote-container {
-      border-color: rgba(24, 144, 255, 0.3);
+      border-color: rgba(0, 137, 255, 0.3);
     }
 
     // 消息状态位置调整（左侧）
@@ -1343,8 +1312,8 @@ export default {
     transition: all 0.2s ease;
 
     &:hover {
-      color: #1890FF;
-      background-color: rgba(24, 144, 255, 0.1);
+      color: #0089FF;
+      background-color: rgba(0, 137, 255, 0.1);
     }
 
     &.danger:hover {

@@ -147,7 +147,7 @@ function handleClick(item) {
 function highlightKeyword(text) {
   if (!keyword.value) return text
   const regex = new RegExp(`(${keyword.value})`, 'gi')
-  return text.replace(regex, '<span style="color: #1890FF; background: #e6f7ff;">$1</span>')
+  return text.replace(regex, '<span style="color: #0089FF; background: rgba(0, 137, 255, 0.1);">$1</span>')
 }
 
 function formatTime(timestamp) {

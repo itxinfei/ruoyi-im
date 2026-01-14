@@ -875,26 +875,25 @@ onUnmounted(() => {
 @use '@/styles/dingtalk-theme.scss' as *;
 
 .chat-input-container {
-  border-top: 1px solid $border-base;
+  border-top: 1px solid #E6E6E6;
   background: $bg-white;
   position: relative;
-  transition: all $transition-base $ease-base;
 }
 
+// 钉钉5.6风格工具栏
 .input-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: $spacing-sm $spacing-lg;
-  border-bottom: 1px solid $border-light;
-  background: linear-gradient(to bottom, $bg-white, $bg-light);
+  padding: 8px 12px;
+  border-bottom: 1px solid #F0F0F0;
 }
 
 .toolbar-left,
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: $spacing-sm;
+  gap: 4px;
 }
 
 .toolbar-button {
@@ -902,19 +901,18 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border: none;
   background: transparent;
-  border-radius: $border-radius-base;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all $transition-base $ease-out;
-  overflow: hidden;
+  transition: all 0.2s ease;
 
   i {
     font-size: 18px;
-    color: $text-primary;
-    transition: color $transition-base $ease-base;
+    color: #666666;
+    transition: color 0.2s ease;
   }
 
   .button-ripple {
@@ -928,36 +926,30 @@ onUnmounted(() => {
   }
 
   &:hover {
-    background: $primary-color-light;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba($primary-color, 0.15);
+    background: rgba(0, 0, 0, 0.04);
 
     i {
-      color: $primary-color;
-    }
-
-    .button-ripple {
-      transform: scale(1);
-      opacity: 1;
+      color: #0089FF;
     }
   }
 
   &:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba($primary-color, 0.1);
+    background: rgba(0, 0, 0, 0.08);
   }
 
   &.active {
-    background: $primary-color-light;
+    background: rgba(0, 137, 255, 0.1);
+
     i {
-      color: $primary-color;
+      color: #0089FF;
     }
   }
 
   &.recording {
-    background: rgba($error-color, 0.08);
+    background: rgba(245, 34, 45, 0.08);
+
     i {
-      color: $error-color;
+      color: #F5222D;
       animation: pulse 1s infinite;
     }
   }
@@ -968,8 +960,8 @@ onUnmounted(() => {
     right: 4px;
     width: 8px;
     height: 8px;
-    background: $error-color;
-    border-radius: $border-radius-round;
+    background: #F5222D;
+    border-radius: 50%;
     animation: blink 1s infinite;
   }
 }
@@ -978,7 +970,7 @@ onUnmounted(() => {
   display: inline-block;
 }
 
- .input-area {
+.input-area {
   padding: 0;
   position: relative;
  }
@@ -987,13 +979,12 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, $bg-light 0%, $bg-white 100%);
-  border-left: 3px solid $primary-color;
-  padding: $spacing-sm $spacing-md;
-  margin-bottom: $spacing-sm;
-  border-radius: $border-radius-sm;
-  box-shadow: $shadow-sm;
-  transition: all $transition-base $ease-base;
+  background: #F5F5F5;
+  border-left: 3px solid #0089FF;
+  padding: 8px 12px;
+  margin: 8px 12px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 
   .reply-content {
     flex: 1;
@@ -1002,15 +993,17 @@ onUnmounted(() => {
 
   .reply-sender {
     font-size: 12px;
-    color: $primary-color;
+    color: #0089FF;
     font-weight: 500;
-    margin-bottom: $spacing-xs;
+    margin-bottom: 4px;
   }
 
   .reply-text {
     font-size: 12px;
-    color: $text-secondary;
-    @include text-ellipsis;
+    color: #858585;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .reply-close {
@@ -1022,13 +1015,13 @@ onUnmounted(() => {
     border: none;
     background: transparent;
     cursor: pointer;
-    color: $text-tertiary;
-    border-radius: $border-radius-sm;
+    color: #B8B8B8;
+    border-radius: 4px;
     transition: all 0.2s ease;
 
     &:hover {
-      background: $bg-active;
-      color: $text-secondary;
+      background: rgba(0, 0, 0, 0.06);
+      color: #666666;
       transform: rotate(90deg);
     }
   }
@@ -1041,55 +1034,51 @@ onUnmounted(() => {
 
 .custom-textarea {
   :deep(.el-textarea__inner) {
-    border-radius: 8px;
-    border: 1px solid $border-base;
-    transition: all $transition-base $ease-base;
+    border: none;
+    border-radius: 0;
+    background: transparent;
     font-size: 14px;
     line-height: 1.6;
-    padding: 12px 16px;
+    padding: 4px 0;
     margin: 0;
-    background-color: #fff;
-    color: #333333;
+    color: #1A1A1A;
     resize: none;
+    min-height: 80px;
+    max-height: 200px;
+    box-shadow: none;
 
     &:focus {
-      border-color: $primary-color;
-      background-color: #fff;
-      box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
-    }
-
-    &:hover {
-      border-color: #d9d9d9;
+      background: transparent;
+      box-shadow: none;
     }
 
     &::placeholder {
-      color: #999999;
+      color: #B8B8B8;
     }
   }
 }
 
 .char-count {
   position: absolute;
-  bottom: $spacing-sm;
-  right: $spacing-sm;
+  bottom: 8px;
+  right: 12px;
   display: inline-flex;
   align-items: center;
-  gap: $spacing-xs;
+  gap: 4px;
   font-size: 12px;
-  color: $text-tertiary;
-  background: rgba($bg-white, 0.95);
-  padding: $spacing-xs $spacing-sm;
-  border-radius: $border-radius-base;
-  box-shadow: $shadow-sm;
-  transition: all $transition-base $ease-base;
+  color: #B8B8B8;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 
   i {
     font-size: 12px;
   }
 
   &.near-limit {
-    color: $error-color;
-    background: rgba($error-color, 0.08);
+    color: #F5222D;
+    background: rgba(245, 34, 45, 0.08);
     font-weight: 500;
   }
 }
@@ -1100,13 +1089,13 @@ onUnmounted(() => {
   left: 0;
   display: inline-flex;
   align-items: center;
-  gap: $spacing-xs;
-  padding: $spacing-xs $spacing-md;
-  background: linear-gradient(135deg, $primary-color 0%, $primary-color-active 100%);
+  gap: 4px;
+  padding: 6px 12px;
+  background: #0089FF;
   color: white;
   font-size: 12px;
-  border-radius: $border-radius-sm;
-  box-shadow: 0 4px 12px rgba($primary-color, 0.3);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
 
   i {
     font-size: 14px;
@@ -1123,40 +1112,41 @@ onUnmounted(() => {
 }
 
 .send-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
   border: none;
-  background: linear-gradient(135deg, $primary-color 0%, $primary-color-dark 100%);
+  background: #0089FF;
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  box-shadow: 0 4px 12px rgba($primary-color, 0.3);
-  transition: all $transition-base $ease-out;
+  font-size: 16px;
+  box-shadow: 0 2px 6px rgba(0, 137, 255, 0.2);
+  transition: all 0.2s ease;
   pointer-events: auto;
 
   &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba($primary-color, 0.4);
+    background: #0077E0;
+    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.3);
   }
 
   &:active {
+    background: #0066C2;
     transform: scale(0.95);
   }
 
   &:disabled {
-    background: $border-base;
-    color: $text-placeholder;
+    background: #E6E6E6;
+    color: #B8B8B8;
     cursor: not-allowed;
     transform: none !important;
     box-shadow: none !important;
   }
 
   &.send-sending {
-    background: $success-color;
+    background: #00C853;
 
     i {
       animation: spin 1s linear infinite;
@@ -1164,7 +1154,7 @@ onUnmounted(() => {
   }
 
   i {
-    font-size: 18px;
+    font-size: 16px;
   }
 }
 
@@ -1330,8 +1320,8 @@ onUnmounted(() => {
 
 .upload-progress-icon {
   font-size: 48px;
-  color: $primary-color;
-  margin-bottom: $spacing-lg;
+  color: #0089FF;
+  margin-bottom: 16px;
 
   i {
     animation: spin 1s linear infinite;
@@ -1365,15 +1355,15 @@ onUnmounted(() => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, $primary-color 0%, $primary-color-active 100%);
-  border-radius: $border-radius-sm;
-  transition: width $transition-base $ease-base;
+  background: #0089FF;
+  border-radius: 4px;
+  transition: width 0.2s ease;
 }
 
 .upload-progress-percent {
   font-size: 18px;
   font-weight: 500;
-  color: $primary-color;
+  color: #0089FF;
 }
 
 // 动画定义
@@ -1525,7 +1515,7 @@ onUnmounted(() => {
     }
   }
 
-  .input-area {
+ .input-area {
     padding: $spacing-sm $spacing-md;
   }
 
@@ -1570,7 +1560,7 @@ onUnmounted(() => {
     }
   }
 
-  .input-area {
+ .input-area {
     padding: $spacing-xs $spacing-sm;
   }
 
