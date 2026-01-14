@@ -2266,6 +2266,24 @@
       @call-ended="handleCallEnded"
       @incoming-call="handleIncomingCall"
     />
+
+    <!-- 用户详情弹窗 -->
+    <UserDetailDialog
+      v-model:visible="userDetailVisible"
+      :user-id="detailUserId"
+      :conversation-id="detailConversationId"
+      @chat="handleChatFromDrawer"
+      @voice-call="handleVoiceCallFromDrawer"
+      @video-call="handleVideoCallFromDrawer"
+    />
+
+    <!-- 群组详情弹窗 -->
+    <GroupDetailDialog
+      v-model:visible="groupDetailVisible"
+      :group-id="detailGroupId"
+      :conversation-id="detailConversationId"
+      @refresh="handleRefreshAfterGroupAction"
+    />
   </div>
 </template>
 
@@ -2367,6 +2385,8 @@ import SystemSettings from '@/views/settings/index.vue'
 import GlobalSearch from '@/components/Search/GlobalSearch.vue'
 import FeedbackDialog from '@/components/Feedback/FeedbackDialog.vue'
 import CallManager from '@/components/Chat/CallManager.vue'
+import UserDetailDialog from '@/views/im/conversation-detail/UserDetailDialog.vue'
+import GroupDetailDialog from '@/views/im/conversation-detail/GroupDetailDialog.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -2402,6 +2422,13 @@ const uploading = ref(false)
 
 // 通话管理器引用
 const callManagerRef = ref(null)
+
+// 会话详情抽屉
+const userDetailVisible = ref(false)
+const groupDetailVisible = ref(false)
+const detailUserId = ref(null)
+const detailGroupId = ref(null)
+const detailConversationId = ref(null)
 
 // 语音录制
 const {
@@ -5995,8 +6022,59 @@ const getOnlineStatusText = () => {
 }
 
 const showChatProfile = () => {
-  // TODO: 显示会话详情对话框
-  ElMessage.info('会话详情功能开发中...')
+  if (!currentSession.value) return
+
+  detailConversationId.value = currentSession.value.id
+
+  if (currentSession.value.type === 'GROUP') {
+    // 群聊：显示群组详情
+    detailGroupId.value = currentSession.value.targetId
+    groupDetailVisible.value = true
+  } else {
+    // 单聊：显示用户详情
+    detailUserId.value = currentSession.value.peerUserId || currentSession.value.targetId
+    userDetailVisible.value = true
+  }
+}
+
+// 用户详情抽屉事件处理
+const handleChatFromDrawer = (data) => {
+  // 从用户详情抽屉点击发消息
+  if (data.userId) {
+    switchToSessionByUserId(data.userId)
+  }
+}
+
+const handleVoiceCallFromDrawer = (data) => {
+  // 从用户详情抽屉点击语音通话
+  startVoiceCall()
+}
+
+const handleVideoCallFromDrawer = (data) => {
+  // 从用户详情抽屉点击视频通话
+  startVideoCall()
+}
+
+// 根据用户ID切换会话
+const switchToSessionByUserId = (userId) => {
+  // 查找与该用户的会话
+  const session = sessions.value.find(s =>
+    s.type !== 'GROUP' && (s.peerUserId === userId || s.targetId === userId)
+  )
+  if (session) {
+    currentSessionId.value = session.id
+  } else {
+    // 没有会话则创建新会话
+    ElMessage.info('即将创建新会话...')
+  }
+}
+
+// 群组操作后刷新
+const handleRefreshAfterGroupAction = () => {
+  // 刷新会话列表
+  if (typeof loadSessions === 'function') {
+    loadSessions()
+  }
 }
 
 const searchInChat = () => {
