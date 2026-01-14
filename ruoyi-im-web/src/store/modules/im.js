@@ -619,6 +619,26 @@ const mutations = {
   SET_FILES: (state, files) => {
     state.files = files
   },
+  // 消息发送状态相关 mutations
+  UPDATE_MESSAGE_SEND_STATUS: (state, payload) => {
+    const { clientMsgId, status, errorCode, errorMsg } = payload
+    for (const sessionId in state.messageList) {
+      const messages = state.messageList[sessionId]
+      const message = messages.find(m => m.clientMsgId === clientMsgId)
+      if (message) {
+        message.sendStatus = status
+        message.errorCode = errorCode
+        message.errorMsg = errorMsg
+        if (status === 'delivered') {
+          message.status = 'sent'
+        } else if (status === 'failed') {
+          message.status = 'failed'
+        }
+        saveMessageCache(state.messageList)
+        break
+      }
+    }
+  },
 }
 
 const actions = {
@@ -708,9 +728,10 @@ const actions = {
 
   // 发送消息
   // 优先使用 WebSocket，WebSocket 未连接时降级到 REST API
+  // 支持消息发送状态追踪（pending/sending/delivered/failed）
   async sendMessage({ commit, state }, { sessionId, type, content, replyTo }) {
-    // 生成唯一的clientMsgId用于去重
-    const clientMsgId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    // 生成唯一的clientMsgId用于去重和状态追踪
+    const clientMsgId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const tempId = `temp_${clientMsgId}`
     const userInfo = getCurrentUserInfo()
 
@@ -722,6 +743,7 @@ const actions = {
     // 创建临时消息（乐观UI更新）
     const tempMessage = {
       id: tempId,
+      tempId,
       clientMsgId,
       sessionId,
       type,
@@ -732,7 +754,8 @@ const actions = {
       senderAvatar: userInfo.avatar,
       timestamp: Date.now(),
       time: new Date().toISOString(),
-      status: 'sending',
+      status: 'sending', // 兼容旧字段
+      sendStatus: 'sending', // 新的状态字段
     }
 
     // 添加到消息列表（立即显示给用户）
@@ -750,26 +773,20 @@ const actions = {
           clientMsgId,
         })
 
-        // 乐观更新：假设消息发送成功
-        commit('UPDATE_MESSAGE', {
-          sessionId,
-          messageId: tempId,
-          updates: { status: 'sent' },
-        })
-
-        commit('REMOVE_PENDING_MESSAGE', { sessionId, tempId })
+        // 发送成功后等待ACK确认，不立即更新状态
+        // 状态将在收到ACK时通过 handleMessageAck 更新
         return { id: tempId, clientMsgId }
       } catch (error) {
         // WebSocket 发送失败，降级到 REST API
-        commit('UPDATE_MESSAGE', {
-          sessionId,
-          messageId: tempId,
-          updates: { status: 'sending' },
+        console.warn('[Store] WebSocket 发送失败，降级到 REST API:', error)
+        commit('UPDATE_MESSAGE_SEND_STATUS', {
+          clientMsgId,
+          status: 'sending',
         })
       }
     }
 
-    // WebSocket 未连接或发送失败，降级到 REST API
+    // WebSocket 未连接，降级到 REST API
     try {
       const response = await apiSendMessage({
         conversationId: sessionId,
@@ -779,13 +796,18 @@ const actions = {
         clientMsgId,
       })
 
-      // 更新消息状态
+      // 更新消息状态为已送达
+      commit('UPDATE_MESSAGE_SEND_STATUS', {
+        clientMsgId,
+        status: 'delivered',
+      })
+
+      // 更新消息ID
       commit('UPDATE_MESSAGE', {
         sessionId,
         messageId: tempId,
         updates: {
           id: response.data?.id || tempId,
-          status: 'sent',
         },
       })
 
@@ -804,10 +826,11 @@ const actions = {
       return response.data
     } catch (error) {
       // 更新消息状态为失败
-      commit('UPDATE_MESSAGE', {
-        sessionId,
-        messageId: tempId,
-        updates: { status: 'failed' },
+      commit('UPDATE_MESSAGE_SEND_STATUS', {
+        clientMsgId,
+        status: 'failed',
+        errorCode: error.code || 'NETWORK_ERROR',
+        errorMsg: error.message || '网络连接失败',
       })
       commit('REMOVE_PENDING_MESSAGE', { sessionId, tempId })
       ElMessage.error('消息发送失败，请检查网络连接')
@@ -1284,6 +1307,98 @@ const actions = {
 
     // 更新缓存
     saveMessageCache(state.messageList)
+  },
+
+  // ==================== 消息发送状态相关 actions ====================
+  // 处理消息 ACK 确认（WebSocket推送）
+  handleMessageAck({ commit, state }, { clientMsgId, messageId }) {
+    console.log('[Store] 收到消息ACK:', { clientMsgId, messageId })
+
+    // 更新消息ID（从临时ID替换为真实ID）
+    for (const sessionId in state.messageList) {
+      const messages = state.messageList[sessionId]
+      const message = messages.find(m => m.clientMsgId === clientMsgId)
+      if (message) {
+        // 更新消息ID
+        if (message.id && String(message.id).startsWith('temp_')) {
+          // 更新 ID 集合
+          const idSet = state.messageIdSet[sessionId]
+          if (idSet) {
+            const oldKey = generateMessageKey(message)
+            idSet.delete(oldKey)
+            message.id = messageId
+            const newKey = generateMessageKey(message)
+            idSet.add(newKey)
+          } else {
+            message.id = messageId
+          }
+        }
+
+        // 更新发送状态为已送达
+        commit('UPDATE_MESSAGE_SEND_STATUS', {
+          clientMsgId,
+          status: 'delivered',
+        })
+
+        // 移除待发送状态
+        commit('REMOVE_PENDING_MESSAGE', {
+          sessionId,
+          tempId: message.tempId || clientMsgId,
+        })
+
+        break
+      }
+    }
+  },
+
+  // 处理消息发送错误（WebSocket推送）
+  handleMessageError({ commit, state }, { clientMsgId, errorCode, errorMessage }) {
+    console.warn('[Store] 收到消息错误:', { clientMsgId, errorCode, errorMessage })
+
+    commit('UPDATE_MESSAGE_SEND_STATUS', {
+      clientMsgId,
+      status: 'failed',
+      errorCode,
+      errorMsg: errorMessage,
+    })
+
+    // 显示错误提示
+    ElMessage.error(errorMessage || '消息发送失败')
+  },
+
+  // 重试发送单条消息
+  async retryMessage({ dispatch, state }, message) {
+    console.log('[Store] 重试发送消息:', message)
+
+    // 查找原始消息
+    const sessionId = message.sessionId
+    const messages = state.messageList[sessionId]
+    const originalMessage = messages?.find(m => m.clientMsgId === message.clientMsgId || m.id === message.id)
+
+    if (!originalMessage) {
+      ElMessage.error('消息不存在')
+      return
+    }
+
+    // 重置状态为发送中
+    if (originalMessage.clientMsgId) {
+      dispatch('im/UPDATE_MESSAGE_SEND_STATUS', {
+        clientMsgId: originalMessage.clientMsgId,
+        status: 'sending',
+      })
+    }
+
+    // 重新发送
+    try {
+      await dispatch('sendMessage', {
+        sessionId,
+        type: originalMessage.type,
+        content: originalMessage.content,
+        replyTo: originalMessage.replyTo,
+      })
+    } catch (error) {
+      console.error('重试发送失败:', error)
+    }
   },
 }
 

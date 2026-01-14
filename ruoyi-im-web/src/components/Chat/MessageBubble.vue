@@ -154,33 +154,36 @@
           <!-- 消息状态（气泡内） -->
           <div v-if="isMine && !message.revoked" class="message-status-inline">
             <transition name="status-fade" mode="out-in">
+              <!-- 发送中 -->
               <i
-                v-if="message.status === 'sending'"
+                v-if="currentStatus === 'sending'"
                 key="sending"
                 class="el-icon-loading status-icon sending"
               ></i>
+              <!-- 已送达/已发送 -->
               <i
-                v-else-if="message.status === 'sent'"
-                key="sent"
-                class="el-icon-circle-check status-icon sent"
-              ></i>
-              <i
-                v-else-if="message.status === 'delivered'"
+                v-else-if="currentStatus === 'delivered' || currentStatus === 'sent'"
                 key="delivered"
-                class="el-icon-success status-icon delivered"
+                class="el-icon-circle-check status-icon delivered"
               ></i>
+              <!-- 已读 -->
               <i
-                v-else-if="message.status === 'read'"
+                v-else-if="currentStatus === 'read'"
                 key="read"
                 class="el-icon-view status-icon read"
               ></i>
-              <i
-                v-else-if="message.status === 'failed'"
-                key="failed"
-                class="el-icon-warning status-icon failed"
-                title="点击重发"
-                @click.stop="$emit('resend', message.id)"
-              ></i>
+              <!-- 失败 -->
+              <el-tooltip
+                v-else-if="currentStatus === 'failed'"
+                :content="message.errorMsg || '发送失败，点击重发'"
+                placement="top"
+              >
+                <i
+                  key="failed"
+                  class="el-icon-warning status-icon failed"
+                  @click.stop="handleResend"
+                ></i>
+              </el-tooltip>
             </transition>
           </div>
         </div>
@@ -361,6 +364,15 @@ export default {
         'is-selected': this.isSelected,
         'has-reactions': this.reactions.length > 0,
       }
+    },
+    // 当前消息状态（兼容新旧字段）
+    currentStatus() {
+      // 优先使用新的 sendStatus 字段
+      if (this.message.sendStatus) {
+        return this.message.sendStatus
+      }
+      // 兼容旧的 status 字段
+      return this.message.status || 'sent'
     },
     canRecall() {
       // 检查是否可以撤回（2分钟内）
@@ -620,6 +632,11 @@ export default {
     handleAvatarError(event) {
       // 使用默认头像
       event.target.src = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+    },
+
+    // 重发消息
+    handleResend() {
+      this.$emit('resend', this.message)
     },
   },
 }

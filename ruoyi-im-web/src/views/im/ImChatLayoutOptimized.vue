@@ -6915,7 +6915,7 @@ $avatar-xl: 64px;
         }
 
         &:active {
-          background: darken($nav-item-hover, 5%);
+          background: color.adjust($nav-item-hover, $lightness: -5%);
         }
       }
       }
@@ -8944,7 +8944,7 @@ $avatar-xl: 64px;
       }
     }
   }
-}
+
 
 // 响应式适配
 @media (max-width: 1024px) {

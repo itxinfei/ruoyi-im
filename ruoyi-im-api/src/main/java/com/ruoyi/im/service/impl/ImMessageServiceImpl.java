@@ -117,6 +117,7 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     /**
      * 实际执行发送消息的逻辑
+     * 支持消息发送状态追踪
      */
     private Long doSendMessage(ImMessageSendRequest request, Long userId, Long conversationId, ImUser sender, String clientMsgId) {
         ImMessage message = new ImMessage();
@@ -130,6 +131,12 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setContent(contentToSave);
         message.setIsRevoked(0);
         message.setCreateTime(LocalDateTime.now());
+
+        // 设置发送状态相关字段
+        message.setClientMsgId(clientMsgId);
+        message.setSendStatus("SENDING"); // 初始状态为发送中
+        message.setSendRetryCount(0);
+        message.setDeliveredTime(LocalDateTime.now()); // 暂时设置为当前时间，表示已处理
 
         imMessageMapper.insertImMessage(message);
 

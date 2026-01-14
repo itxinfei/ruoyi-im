@@ -29,6 +29,31 @@ public class ImMessage extends BaseEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    /** 客户端消息ID，用于去重和状态追踪 */
+    @TableField("client_msg_id")
+    private String clientMsgId;
+
+    /** 发送状态：PENDING待发送 SENDING发送中 DELIVERED已送达 FAILED发送失败 */
+    @TableField("send_status")
+    private String sendStatus;
+
+    /** 发送重试次数 */
+    @TableField("send_retry_count")
+    private Integer sendRetryCount;
+
+    /** 发送错误码 */
+    @TableField("send_error_code")
+    private String sendErrorCode;
+
+    /** 发送错误信息 */
+    @TableField("send_error_msg")
+    private String sendErrorMsg;
+
+    /** 送达时间 */
+    @TableField("delivered_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime deliveredTime;
+
     /** 会话ID，关联到im_conversation表 */
     private Long conversationId;
 
@@ -144,4 +169,5 @@ public class ImMessage extends BaseEntity {
      */
     @TableField(exist = false)
     private String type;
+
 }

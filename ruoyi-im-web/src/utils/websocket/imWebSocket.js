@@ -191,6 +191,45 @@ class ImWebSocket {
         return
       }
 
+      // ==================== 新增：消息发送状态相关 ====================
+      // 处理消息 ACK 确认
+      if (message.type === 'message_ack') {
+        this.log('收到消息ACK:', message)
+        this.emit('messageAck', message)
+        if (store && store.dispatch) {
+          store.dispatch('im/handleMessageAck', {
+            clientMsgId: message.clientMsgId,
+            messageId: message.messageId,
+          })
+        }
+        return
+      }
+
+      // 处理消息发送错误
+      if (message.type === 'message_error') {
+        this.log('收到消息错误:', message)
+        this.emit('messageError', message)
+        if (store && store.dispatch) {
+          store.dispatch('im/handleMessageError', {
+            clientMsgId: message.clientMsgId,
+            errorCode: message.errorCode,
+            errorMessage: message.errorMessage,
+          })
+        }
+        return
+      }
+
+      // 处理认证响应
+      if (message.type === 'auth_response') {
+        if (message.success) {
+          this.log('认证成功')
+        } else {
+          this.error('认证失败:', message.message)
+        }
+        return
+      }
+      // =====================================================================
+
       // 处理普通消息
       switch (message.type) {
         case MSG_TYPE.TEXT:

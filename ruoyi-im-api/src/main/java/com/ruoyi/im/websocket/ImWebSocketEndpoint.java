@@ -413,11 +413,15 @@ public class ImWebSocketEndpoint {
     /**
      * 处理聊天消息
      * 保存消息到数据库并推送给会话中的其他用户
+     * 支持ACK响应和错误处理
      *
      * @param userId 发送者用户ID
      * @param payload 消息数据
      */
     private void handleChatMessage(Long userId, Object payload) {
+        Session senderSession = onlineUsers.get(userId);
+        String clientMsgId = null;
+
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> messageData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
@@ -429,6 +433,7 @@ public class ImWebSocketEndpoint {
             }
             if (idValue == null) {
                 log.warn("WebSocket消息缺少conversationId或sessionId字段");
+                sendErrorMessage(senderSession, null, "MISSING_CONVERSATION_ID", "缺少会话ID");
                 return;
             }
             Long conversationId = Long.valueOf(idValue.toString());
@@ -447,7 +452,7 @@ public class ImWebSocketEndpoint {
             // 获取可选参数
             String replyToMessageIdStr = messageData.get("replyToMessageId") != null
                 ? messageData.get("replyToMessageId").toString() : null;
-            String clientMsgId = (String) messageData.get("clientMsgId");
+            clientMsgId = (String) messageData.get("clientMsgId");
 
             // 构建消息发送请求
             com.ruoyi.im.dto.message.ImMessageSendRequest request = new com.ruoyi.im.dto.message.ImMessageSendRequest();
@@ -463,6 +468,9 @@ public class ImWebSocketEndpoint {
             Long messageId = staticImMessageService.sendMessage(request, userId);
 
             if (messageId != null) {
+                // 立即返回ACK确认
+                sendAckMessage(senderSession, clientMsgId, messageId);
+
                 // 获取完整消息对象
                 com.ruoyi.im.domain.ImMessage message = new com.ruoyi.im.domain.ImMessage();
                 message.setId(messageId);
@@ -470,15 +478,75 @@ public class ImWebSocketEndpoint {
                 message.setSenderId(userId);
                 message.setType(messageType);
                 message.setContent(content);
+                message.setClientMsgId(clientMsgId);
 
-                // 广播消息给会话中的所有用户
+                // 广播消息给会话中的所有用户（不包括发送者）
                 broadcastMessageToSession(conversationId, message);
 
                 log.info("消息已发送: messageId={}, conversationId={}, senderId={}", messageId, conversationId, userId);
+            } else {
+                // 消息保存失败
+                sendErrorMessage(senderSession, clientMsgId, "SAVE_FAILED", "消息保存失败");
             }
 
         } catch (Exception e) {
             log.error("处理聊天消息异常", e);
+            // 发送错误响应给客户端
+            sendErrorMessage(senderSession, clientMsgId, "PROCESS_ERROR", e.getMessage());
+        }
+    }
+
+    /**
+     * 发送ACK确认消息
+     * 确认已收到消息并返回消息ID
+     *
+     * @param session WebSocket会话
+     * @param clientMsgId 客户端消息ID
+     * @param messageId 服务器消息ID
+     */
+    private void sendAckMessage(Session session, String clientMsgId, Long messageId) {
+        if (session == null || !session.isOpen()) {
+            return;
+        }
+        try {
+            Map<String, Object> ackMessage = new HashMap<>();
+            ackMessage.put("type", "message_ack");
+            ackMessage.put("clientMsgId", clientMsgId);
+            ackMessage.put("messageId", messageId);
+            ackMessage.put("timestamp", System.currentTimeMillis());
+
+            sendMessage(session, ackMessage);
+            log.debug("发送ACK确认: clientMsgId={}, messageId={}", clientMsgId, messageId);
+        } catch (Exception e) {
+            log.error("发送ACK消息失败", e);
+        }
+    }
+
+    /**
+     * 发送错误消息
+     *
+     * @param session WebSocket会话
+     * @param clientMsgId 客户端消息ID
+     * @param errorCode 错误码
+     * @param errorMessage 错误信息
+     */
+    private void sendErrorMessage(Session session, String clientMsgId, String errorCode, String errorMessage) {
+        if (session == null || !session.isOpen()) {
+            return;
+        }
+        try {
+            Map<String, Object> errorMsg = new HashMap<>();
+            errorMsg.put("type", "message_error");
+            errorMsg.put("clientMsgId", clientMsgId);
+            errorMsg.put("errorCode", errorCode);
+            errorMsg.put("errorMessage", errorMessage);
+            errorMsg.put("timestamp", System.currentTimeMillis());
+
+            sendMessage(session, errorMsg);
+            log.warn("发送错误消息: clientMsgId={}, errorCode={}, errorMessage={}",
+                clientMsgId, errorCode, errorMessage);
+        } catch (Exception e) {
+            log.error("发送错误消息失败", e);
         }
     }
 
