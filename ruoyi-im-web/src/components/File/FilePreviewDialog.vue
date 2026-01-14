@@ -430,7 +430,7 @@ watch(() => props.fileInfo, () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/dingtalk-theme.scss';
+@use '@/styles/dingtalk-theme.scss' as *;
 
 .file-preview-dialog {
   :deep(.el-dialog__header) {

@@ -873,7 +873,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/dingtalk-6.5/index.scss';
+@use '@/styles/dingtalk-6.5/index.scss' as *;
 
 // 68px导航栏样式覆盖
 .dt-sidebar {

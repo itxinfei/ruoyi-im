@@ -1,12 +1,8 @@
-/**
- * WebRTC 统计工具
- * 用于获取和分析 WebRTC 连接质量指标
- * @author RuoYi-IM
- */
+// WebRTC 统计工具
+// 用于获取和分析 WebRTC 连接质量指标
+// @author RuoYi-IM
 
-/**
- * 网络质量等级
- */
+// 网络质量等级
 export const NETWORK_QUALITY = {
   EXCELLENT: 'excellent', // 优秀：4格
   GOOD: 'good',           // 良好：3格
@@ -15,9 +11,7 @@ export const NETWORK_QUALITY = {
   DISCONNECTED: 'disconnected', // 断开：0格
 }
 
-/**
- * 网络质量等级对应的配置
- */
+// 网络质量等级对应的配置
 export const QUALITY_CONFIG = {
   [NETWORK_QUALITY.EXCELLENT]: {
     level: 4,
@@ -51,11 +45,9 @@ export const QUALITY_CONFIG = {
   },
 }
 
-/**
- * 解析 RTCStats 数据
- * @param {RTCStatsReport} stats - WebRTC 统计数据
- * @returns {Object} 解析后的统计数据
- */
+// 解析 RTCStats 数据
+// @param {RTCStatsReport} stats - WebRTC 统计数据
+// @returns {Object} 解析后的统计数据
 export function parseRTCStats(stats) {
   const result = {
     // 连接状态
@@ -169,11 +161,9 @@ export function parseRTCStats(stats) {
   return result
 }
 
-/**
- * 计算网络质量等级
- * @param {Object} stats - 统计数据
- * @returns {string} 网络质量等级
- */
+// 计算网络质量等级
+// @param {Object} stats - 统计数据
+// @returns {string} 网络质量等级
 export function calculateNetworkQuality(stats) {
   const { currentRoundTripTime: delay, packetLossRate: packetLoss, jitter } = stats
 
@@ -210,20 +200,16 @@ export function calculateNetworkQuality(stats) {
   return NETWORK_QUALITY.POOR // 超过阈值也归为较差
 }
 
-/**
- * 获取网络质量配置
- * @param {string} quality - 网络质量等级
- * @returns {Object} 质量配置
- */
+// 获取网络质量配置
+// @param {string} quality - 网络质量等级
+// @returns {Object} 质量配置
 export function getQualityConfig(quality) {
   return QUALITY_CONFIG[quality] || QUALITY_CONFIG[NETWORK_QUALITY.DISCONNECTED]
 }
 
-/**
- * 格式化延迟显示
- * @param {number} ms - 延迟毫秒数
- * @returns {string} 格式化后的字符串
- */
+// 格式化延迟显示
+// @param {number} ms - 延迟毫秒数
+// @returns {string} 格式化后的字符串
 export function formatDelay(ms) {
   if (ms < 1000) {
     return `${Math.round(ms)}ms`
@@ -231,20 +217,16 @@ export function formatDelay(ms) {
   return `${(ms / 1000).toFixed(1)}s`
 }
 
-/**
- * 格式化丢包率显示
- * @param {number} rate - 丢包率百分比
- * @returns {string} 格式化后的字符串
- */
+// 格式化丢包率显示
+// @param {number} rate - 丢包率百分比
+// @returns {string} 格式化后的字符串
 export function formatPacketLoss(rate) {
   return `${rate.toFixed(1)}%`
 }
 
-/**
- * 格式化带宽显示
- * @param {number} bps - 每秒比特数
- * @returns {string} 格式化后的字符串
- */
+// 格式化带宽显示
+// @param {number} bps - 每秒比特数
+// @returns {string} 格式化后的字符串
 export function formatBitrate(bps) {
   if (bps < 1000) {
     return `${bps} bps`
@@ -255,9 +237,7 @@ export function formatBitrate(bps) {
   return `${(bps / 1000000).toFixed(1)} Mbps`
 }
 
-/**
- * WebRTC 统计收集器类
- */
+// WebRTC 统计收集器类
 export class WebRTCStatsCollector {
   constructor(peerConnection) {
     this.peerConnection = peerConnection
@@ -267,10 +247,8 @@ export class WebRTCStatsCollector {
     this.listeners = new Set()
   }
 
-  /**
-   * 开始收集统计数据
-   * @param {number} intervalMs - 收集间隔（毫秒）
-   */
+  // 开始收集统计数据
+  // @param {number} intervalMs - 收集间隔（毫秒）
   async start(intervalMs = 1000) {
     if (this.interval) {
       this.stop()
@@ -285,9 +263,7 @@ export class WebRTCStatsCollector {
     }, intervalMs)
   }
 
-  /**
-   * 收集统计数据
-   */
+  // 收集统计数据
   async collect() {
     if (!this.peerConnection) {
       return
@@ -322,9 +298,7 @@ export class WebRTCStatsCollector {
     }
   }
 
-  /**
-   * 停止收集
-   */
+  // 停止收集
   stop() {
     if (this.interval) {
       clearInterval(this.interval)
@@ -332,26 +306,20 @@ export class WebRTCStatsCollector {
     }
   }
 
-  /**
-   * 添加监听器
-   * @param {Function} listener - 监听函数
-   */
+  // 添加监听器
+  // @param {Function} listener - 监听函数
   addListener(listener) {
     this.listeners.add(listener)
   }
 
-  /**
-   * 移除监听器
-   * @param {Function} listener - 监听函数
-   */
+  // 移除监听器
+  // @param {Function} listener - 监听函数
   removeListener(listener) {
     this.listeners.delete(listener)
   }
 
-  /**
-   * 通知所有监听器
-   * @param {Object} stats - 统计数据
-   */
+  // 通知所有监听器
+  // @param {Object} stats - 统计数据
   notify(stats) {
     this.listeners.forEach(listener => {
       try {
@@ -362,19 +330,15 @@ export class WebRTCStatsCollector {
     })
   }
 
-  /**
-   * 获取最新统计数据
-   * @returns {Object|null} 最新统计数据
-   */
+  // 获取最新统计数据
+  // @returns {Object|null} 最新统计数据
   getLatest() {
     return this.statsHistory[this.statsHistory.length - 1] || null
   }
 
-  /**
-   * 获取平均统计数据
-   * @param {number} durationMs - 统计时长（毫秒）
-   * @returns {Object} 平均统计数据
-   */
+  // 获取平均统计数据
+  // @param {number} durationMs - 统计时长（毫秒）
+  // @returns {Object} 平均统计数据
   getAverage(durationMs = 5000) {
     const now = Date.now()
     const startTime = now - durationMs
@@ -405,16 +369,12 @@ export class WebRTCStatsCollector {
     }
   }
 
-  /**
-   * 清空历史记录
-   */
+  // 清空历史记录
   clear() {
     this.statsHistory = []
   }
 
-  /**
-   * 销毁收集器
-   */
+  // 销毁收集器
   destroy() {
     this.stop()
     this.listeners.clear()

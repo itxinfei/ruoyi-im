@@ -1,19 +1,15 @@
-/**
- * 拖拽逻辑 Composable
- * 支持鼠标和触摸事件，自动吸附到屏幕边缘
- * @author RuoYi-IM
- */
+// 拖拽逻辑 Composable
+// 支持鼠标和触摸事件，自动吸附到屏幕边缘
+// @author RuoYi-IM
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
-/**
- * 使用拖拽功能
- * @param {Object} options - 配置选项
- * @param {Ref<HTMLElement>} options.target - 拖拽目标元素
- * @param {number} options.snapThreshold - 吸附阈值（px），默认 40
- * @param {number} options.padding - 边界内边距（px），默认 0
- * @param {boolean} options.constrainToParent - 是否限制在父元素内，默认 false
- * @returns {Object} 拖拽相关的状态和方法
- */
+// 使用拖拽功能
+// @param {Object} options - 配置选项
+// @param {Ref<HTMLElement>} options.target - 拖拽目标元素
+// @param {number} options.snapThreshold - 吸附阈值（px），默认 40
+// @param {number} options.padding - 边界内边距（px），默认 0
+// @param {boolean} options.constrainToParent - 是否限制在父元素内，默认 false
+// @returns {Object} 拖拽相关的状态和方法
 export function useDraggable(options = {}) {
   const {
     target = ref(null),
@@ -34,18 +30,14 @@ export function useDraggable(options = {}) {
   // 当前拖拽手柄
   let dragHandle = null
 
-  /**
-   * 获取元素尺寸
-   */
+  // 获取元素尺寸
   const getElementSize = () => {
     if (!target.value) return { width: 0, height: 0 }
     const rect = target.value.getBoundingClientRect()
     return { width: rect.width, height: rect.height }
   }
 
-  /**
-   * 计算限制后的位置
-   */
+  // 计算限制后的位置
   const constrainPosition = (x, y) => {
     const { width: elemWidth, height: elemHeight } = getElementSize()
     const { width: viewWidth, height: viewHeight } = viewportSize.value
@@ -73,9 +65,7 @@ export function useDraggable(options = {}) {
     return { x: newX, y: newY }
   }
 
-  /**
-   * 计算吸附位置
-   */
+  // 计算吸附位置
   const snapToEdge = (x, y) => {
     const { width: elemWidth, height: elemHeight } = getElementSize()
     const { width: viewWidth, height: viewHeight } = viewportSize.value
@@ -108,9 +98,7 @@ export function useDraggable(options = {}) {
     return { x: newX, y: newY, snapped }
   }
 
-  /**
-   * 开始拖拽
-   */
+  // 开始拖拽
   const startDrag = (event) => {
     // 检查是否点击了拖拽手柄
     const handle = event.target.closest('[data-drag-handle]')
@@ -144,9 +132,7 @@ export function useDraggable(options = {}) {
     document.addEventListener('touchend', onDragEnd)
   }
 
-  /**
-   * 拖拽移动
-   */
+  // 拖拽移动
   const onDragMove = (event) => {
     if (!isDragging.value) return
     event.preventDefault()
@@ -163,9 +149,7 @@ export function useDraggable(options = {}) {
     position.value = { x: constrained.x, y: constrained.y }
   }
 
-  /**
-   * 结束拖拽
-   */
+  // 结束拖拽
   const onDragEnd = () => {
     if (!isDragging.value) return
 
@@ -189,17 +173,13 @@ export function useDraggable(options = {}) {
     document.removeEventListener('touchend', onDragEnd)
   }
 
-  /**
-   * 设置位置
-   */
+  // 设置位置
   const setPosition = (x, y) => {
     const constrained = constrainPosition(x, y)
     position.value = { x: constrained.x, y: constrained.y }
   }
 
-  /**
-   * 重置到默认位置（右下角）
-   */
+  // 重置到默认位置（右下角）
   const resetPosition = () => {
     const { width: elemWidth, height: elemHeight } = getElementSize()
     const { width: viewWidth, height: viewHeight } = viewportSize.value
@@ -211,9 +191,7 @@ export function useDraggable(options = {}) {
     isSnapped.value = { right: true, bottom: true, left: false, top: false }
   }
 
-  /**
-   * 处理视窗尺寸变化
-   */
+  // 处理视窗尺寸变化
   const handleResize = () => {
     viewportSize.value = {
       width: window.innerWidth,
@@ -228,12 +206,12 @@ export function useDraggable(options = {}) {
   const style = computed(() => ({
     position: 'fixed',
     left: `${position.value.x}px`,
-    top: `${position.y}px`,
+    top: `${position.value.y}px`,
     transform: isDragging.value ? 'scale(1.02)' : 'scale(1)',
     cursor: isDragging.value ? 'grabbing' : 'grab',
     userSelect: isDragging.value ? 'none' : '',
     transition: isDragging.value ? 'none' : 'transform 0.2s ease, left 0.3s cubic-bezier(0.4, 0, 0.2, 1), top 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  })
+  }))
 
   // 生命周期
   onMounted(() => {

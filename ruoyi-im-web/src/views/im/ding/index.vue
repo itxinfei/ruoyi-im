@@ -520,7 +520,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/dingtalk-theme.scss';
+@use '@/styles/dingtalk-theme.scss' as *;
 
 .ding-list-page {
   height: 100%;

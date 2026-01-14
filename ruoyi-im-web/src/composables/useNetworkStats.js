@@ -1,17 +1,13 @@
-/**
- * 网络质量监测 Composable
- * 基于 WebRTC Stats API 实时监测网络连接质量
- * @author RuoYi-IM
- */
+// 网络质量监测 Composable
+// 基于 WebRTC Stats API 实时监测网络连接质量
+// @author RuoYi-IM
 import { ref, computed, onUnmounted } from 'vue'
 import { WebRTCStatsCollector, calculateNetworkQuality, getQualityConfig } from '@/utils/webrtc-stats'
 
-/**
- * 使用网络质量监测
- * @param {Ref<RTCPeerConnection|null>} peerConnection - WebRTC 连接对象
- * @param {Object} options - 配置选项
- * @returns {Object} 网络质量相关的状态和方法
- */
+// 使用网络质量监测
+// @param {Ref<RTCPeerConnection|null>} peerConnection - WebRTC 连接对象
+// @param {Object} options - 配置选项
+// @returns {Object} 网络质量相关的状态和方法
 export function useNetworkStats(peerConnection, options = {}) {
   const {
     updateInterval = 1000, // 更新间隔（毫秒）
@@ -66,9 +62,7 @@ export function useNetworkStats(peerConnection, options = {}) {
     return '很差'
   })
 
-  /**
-   * 开始监测
-   */
+  // 开始监测
   const startMonitoring = () => {
     if (!peerConnection.value) {
       console.warn('PeerConnection 不存在，无法开始监测')
@@ -112,9 +106,7 @@ export function useNetworkStats(peerConnection, options = {}) {
     isMonitoring.value = true
   }
 
-  /**
-   * 停止监测
-   */
+  // 停止监测
   const stopMonitoring = () => {
     if (collector) {
       collector.stop()
@@ -123,9 +115,7 @@ export function useNetworkStats(peerConnection, options = {}) {
     isMonitoring.value = false
   }
 
-  /**
-   * 重置统计数据
-   */
+  // 重置统计数据
   const resetStats = () => {
     connectionStats.value = {
       delay: 0,
@@ -139,11 +129,9 @@ export function useNetworkStats(peerConnection, options = {}) {
     statsHistory.value = []
   }
 
-  /**
-   * 获取平均统计数据
-   * @param {number} durationMs - 统计时长（毫秒）
-   * @returns {Object|null} 平均统计数据
-   */
+  // 获取平均统计数据
+  // @param {number} durationMs - 统计时长（毫秒）
+  // @returns {Object|null} 平均统计数据
   const getAverageStats = (durationMs = 5000) => {
     if (!collector) return null
     return collector.getAverage(durationMs)
@@ -187,12 +175,10 @@ export function useNetworkStats(peerConnection, options = {}) {
   }
 }
 
-/**
- * 使用简化的网络质量指示器
- * 只返回质量等级，不保留历史数据
- * @param {Ref<RTCPeerConnection|null>} peerConnection - WebRTC 连接对象
- * @returns {Object} 网络质量状态
- */
+// 使用简化的网络质量指示器
+// 只返回质量等级，不保留历史数据
+// @param {Ref<RTCPeerConnection|null>} peerConnection - WebRTC 连接对象
+// @returns {Object} 网络质量状态
 export function useNetworkQuality(peerConnection) {
   const quality = ref('disconnected')
   const stats = ref({ delay: 0, packetLoss: 0 })

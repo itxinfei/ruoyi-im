@@ -70,6 +70,7 @@ declare module 'vue' {
     ImagePreview: typeof import('./components/Chat/ImagePreview.vue')['default']
     ImageUpload: typeof import('./components/ImageUpload/index.vue')['default']
     ImSideNav: typeof import('./components/Layout/ImSideNav.vue')['default']
+    IncomingCallModal: typeof import('./components/VideoCall/IncomingCallModal.vue')['default']
     LocalVideoPip: typeof import('./components/VideoCall/LocalVideoPip.vue')['default']
     LocationPicker: typeof import('./components/Chat/LocationPicker.vue')['default']
     MentionSelector: typeof import('./components/Chat/MentionSelector.vue')['default']
