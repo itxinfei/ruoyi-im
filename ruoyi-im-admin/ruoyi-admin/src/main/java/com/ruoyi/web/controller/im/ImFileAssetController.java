@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.file.FileUploadUtils;
@@ -84,10 +85,10 @@ public class ImFileAssetController extends BaseController {
     @RequiresPermissions("im:file:list")
     @PostMapping("/list")
     @ResponseBody
-    public AjaxResult list(ImFileAsset imFileAsset) {
+    public TableDataInfo list(ImFileAsset imFileAsset) {
         startPage();
         List<ImFileAsset> list = imFileAssetService.selectImFileAssetList(imFileAsset);
-        return AjaxResult.success(list);
+        return getDataTable(list);
     }
 
     /**

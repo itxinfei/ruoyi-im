@@ -3,6 +3,7 @@ package com.ruoyi.web.controller.im;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.web.domain.ImSystemNotification;
 import com.ruoyi.web.service.ImSystemNotificationService;
@@ -31,10 +32,10 @@ public class ImNotificationAdminController extends BaseController {
      */
     @RequiresPermissions("im:notification:list")
     @GetMapping("/list")
-    public AjaxResult list(ImSystemNotification notification) {
+    public TableDataInfo list(ImSystemNotification notification) {
         startPage();
         List<ImSystemNotification> list = notificationService.selectNotificationList(notification);
-        return AjaxResult.success(list);
+        return getDataTable(list);
     }
 
     /**

@@ -3,7 +3,7 @@
  * DingTalk 5.6 Desktop Global Styles
  */
 
-@import './variables.scss';
+@use './variables.scss' as *;
 
 /* ==================== 全局重置 ==================== */
 

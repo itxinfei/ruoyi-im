@@ -74,6 +74,16 @@ public class ImConversationController extends BaseController {
     }
 
     /**
+     * 会话统计
+     */
+    @RequiresPermissions("im:conversation:query")
+    @GetMapping("/statistics")
+    @ResponseBody
+    public AjaxResult getStatistics() {
+        return AjaxResult.success(imConversationService.getConversationStatistics());
+    }
+
+    /**
      * 获取会话详细信息
      */
     @RequiresPermissions("im:conversation:query")
@@ -149,15 +159,5 @@ public class ImConversationController extends BaseController {
         List<ImConversation> list = imConversationService.selectImConversationList(imConversation);
         ExcelUtil<ImConversation> util = new ExcelUtil<>(ImConversation.class);
         util.exportExcel(response, list, "会话数据");
-    }
-
-    /**
-     * 会话统计
-     */
-    @RequiresPermissions("im:conversation:query")
-    @GetMapping("/statistics")
-    @ResponseBody
-    public AjaxResult getStatistics() {
-        return AjaxResult.success(imConversationService.getConversationStatistics());
     }
 }

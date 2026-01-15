@@ -1,6 +1,7 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImFriend;
+import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 
 /**
@@ -8,6 +9,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImFriendMapper {
 
     /**
@@ -97,4 +99,19 @@ public interface ImFriendMapper {
      * @return 结果
      */
     public int deleteFriendByUserAndFriend(java.util.Map<String, Object> params);
+
+    /**
+     * 统计好友关系总数
+     */
+    int countTotalFriends();
+
+    /**
+     * 统计今日新增好友数
+     */
+    int countTodayAddedFriends();
+
+    /**
+     * 统计待处理好友申请数
+     */
+    int countPendingRequests();
 }

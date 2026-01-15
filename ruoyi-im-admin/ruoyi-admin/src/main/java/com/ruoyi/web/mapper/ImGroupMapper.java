@@ -58,4 +58,19 @@ public interface ImGroupMapper {
      * 解散群组（删除所有成员）
      */
     int dismissGroup(Long groupId);
+
+    /**
+     * 统计群组总数
+     */
+    int countTotalGroups();
+
+    /**
+     * 统计今日创建群组数
+     */
+    int countTodayCreatedGroups();
+
+    /**
+     * 统计群成员总数
+     */
+    int countTotalGroupMembers();
 }

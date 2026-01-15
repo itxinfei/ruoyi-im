@@ -69,6 +69,16 @@ public class ImFriendController extends BaseController {
     }
 
     /**
+     * 获取好友统计数据
+     */
+    @RequiresPermissions("im:friend:query")
+    @GetMapping("/statistics")
+    @ResponseBody
+    public AjaxResult getStatistics() {
+        return AjaxResult.success(imFriendService.getFriendStatistics());
+    }
+
+    /**
      * 获取好友关系详细信息
      */
     @RequiresPermissions("im:friend:query")

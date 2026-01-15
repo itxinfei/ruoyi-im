@@ -2582,7 +2582,7 @@ import QuoteMessage from '@/components/Message/QuoteMessage.vue'
 import GroupAnnouncement from '@/components/Group/GroupAnnouncement.vue'
 import GroupFiles from '@/components/Group/GroupFiles.vue'
 // 头像组件
-import DtAvatar from '@/components/Chat/DtAvatar.vue'
+import SmartAvatar from '@/components/SmartAvatar/index.vue'
 // 主题切换组件
 import ThemeSwitch from '@/components/ThemeSwitch/index.vue'
 

@@ -6,7 +6,10 @@ import com.ruoyi.web.mapper.ImGroupMapper;
 import com.ruoyi.web.service.ImGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IM群组Service实现（Admin模块专用）
@@ -60,5 +63,14 @@ public class ImGroupServiceImpl implements ImGroupService {
     @Override
     public int dismissGroup(Long groupId) {
         return groupMapper.dismissGroup(groupId);
+    }
+
+    @Override
+    public Map<String, Object> getGroupStatistics() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("total", groupMapper.countTotalGroups());
+        result.put("todayCreated", groupMapper.countTodayCreatedGroups());
+        result.put("totalMembers", groupMapper.countTotalGroupMembers());
+        return result;
     }
 }

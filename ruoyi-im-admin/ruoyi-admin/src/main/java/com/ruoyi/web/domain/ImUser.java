@@ -52,6 +52,9 @@ public class ImUser extends BaseEntity implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastOnlineTime;
 
+    /** 在线状态（非数据库字段，用于前端显示） */
+    private Integer isOnline;
+
     public Long getId() {
         return id;
     }
@@ -138,6 +141,14 @@ public class ImUser extends BaseEntity implements Serializable {
 
     public void setLastOnlineTime(LocalDateTime lastOnlineTime) {
         this.lastOnlineTime = lastOnlineTime;
+    }
+
+    public Integer getIsOnline() {
+        return isOnline;
+    }
+
+    public void setIsOnline(Integer isOnline) {
+        this.isOnline = isOnline;
     }
 
 }

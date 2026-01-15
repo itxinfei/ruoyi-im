@@ -3,6 +3,7 @@ package com.ruoyi.web.controller.im;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.web.domain.ImGroup;
 import com.ruoyi.web.service.ImGroupService;
@@ -63,10 +64,10 @@ public class ImGroupController extends BaseController {
     @RequiresPermissions("im:group:list")
     @PostMapping("/list")
     @ResponseBody
-    public AjaxResult list(ImGroup imGroup) {
+    public TableDataInfo list(ImGroup imGroup) {
         startPage();
         List<ImGroup> list = imGroupService.selectImGroupList(imGroup);
-        return AjaxResult.success(list);
+        return getDataTable(list);
     }
 
     /**
@@ -78,6 +79,16 @@ public class ImGroupController extends BaseController {
     public void export(HttpServletResponse response, ImGroup imGroup) {
         List<ImGroup> list = imGroupService.selectImGroupList(imGroup);
         // 导出逻辑
+    }
+
+    /**
+     * 获取群组统计数据
+     */
+    @RequiresPermissions("im:group:query")
+    @GetMapping("/statistics")
+    @ResponseBody
+    public AjaxResult getStatistics() {
+        return AjaxResult.success(imGroupService.getGroupStatistics());
     }
 
     /**

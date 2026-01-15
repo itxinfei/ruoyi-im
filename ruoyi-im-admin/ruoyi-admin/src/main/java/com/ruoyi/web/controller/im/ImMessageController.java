@@ -3,6 +3,7 @@ package com.ruoyi.web.controller.im;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.web.domain.ImMessage;
 import com.ruoyi.web.service.ImMessageService;
@@ -63,10 +64,10 @@ public class ImMessageController extends BaseController {
     @RequiresPermissions("im:message:list")
     @PostMapping("/list")
     @ResponseBody
-    public AjaxResult list(ImMessage imMessage) {
+    public TableDataInfo list(ImMessage imMessage) {
         startPage();
         List<ImMessage> list = imMessageService.selectImMessageList(imMessage);
-        return AjaxResult.success(list);
+        return getDataTable(list);
     }
 
     /**

@@ -83,4 +83,9 @@ public interface ImFriendService {
      * @return 结果
      */
     int deleteFriendByUserAndFriend(Long userId, Long friendId);
+
+    /**
+     * 获取好友统计数据
+     */
+    Map<String, Object> getFriendStatistics();
 }

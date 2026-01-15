@@ -1,18 +1,22 @@
 <template>
-  <div class="smart-avatar" :class="{ 'is-clickable': clickable }" @click="handleClick">
+  <div class="smart-avatar" :class="{ 'is-clickable': clickable, [`status-${status}`]: showStatus }" @click="handleClick">
     <img
       v-if="hasImage"
       class="avatar-img"
       :src="avatarUrl"
+      :alt="displayName"
       :style="imgStyle"
-      alt=""
       @error="handleError"
     />
-    <div v-else class="avatar-text" :style="textStyle">
-      {{ displayText }}
-    </div>
+    <span v-else class="avatar-text" :style="textStyle">
+      {{ displayName }}
+    </span>
+    
+    <!-- 边框 -->
     <span v-if="showBorder" class="avatar-border" :style="borderStyle"></span>
-    <span v-if="showOnline && online" class="online-indicator" :class="onlineStatus"></span>
+    
+    <!-- 在线状态指示器 -->
+    <div v-if="showStatus" class="status-indicator" :class="status"></div>
   </div>
 </template>
 
@@ -34,31 +38,34 @@ const props = defineProps({
   },
   size: {
     type: Number,
-    default: 40,
+    default: 36,
+    validator: (value) => [24, 32, 36, 40, 48, 64, 80, 100].includes(value)
   },
   showBorder: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   borderColor: {
     type: String,
-    default: '',
+    default: 'rgba(22, 119, 255, 0.3)',
   },
-  showOnline: {
+  showStatus: {
     type: Boolean,
     default: false,
   },
-  online: {
-    type: Boolean,
-    default: false,
-  },
-  onlineStatus: {
+  status: {
     type: String,
-    default: 'online',
+    default: 'offline',
+    validator: (value) => ['online', 'away', 'busy', 'offline', 'hidden'].includes(value)
   },
   clickable: {
     type: Boolean,
     default: false,
+  },
+  shape: {
+    type: String,
+    default: 'circle',
+    validator: (value) => ['circle', 'square'].includes(value)
   },
 })
 
@@ -70,13 +77,11 @@ const hasImage = computed(() => {
   return props.avatar && props.avatar.trim() !== '' && !imageError.value
 })
 
-const displayText = computed(() => {
+const displayName = computed(() => {
   const name = props.nickname || props.name || 'U'
-  // 中文名取最后一个字
   if (/[\u4e00-\u9fa5]/.test(name)) {
     return name.charAt(name.length - 1)
   }
-  // 英文名取首字母
   return name.trim().charAt(0).toUpperCase()
 })
 
@@ -118,56 +123,68 @@ const borderStyle = computed(() => {
   }
 })
 
-function handleClick() {
+const handleClick = () => {
   if (props.clickable) {
     emit('click')
   }
 }
 
-function handleError() {
+const handleError = () => {
   imageError.value = true
   emit('error')
 }
 </script>
 
 <style lang="scss" scoped>
+$avatar-color: #f0f2f5;
+$avatar-text-color: #1677ff;
+$border-color: rgba(22, 119, 255, 0.3);
+
 .smart-avatar {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  background: $avatar-color;
+  border-radius: 50%;
+  overflow: hidden;
   flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+
+  // 方形形状
+  &.shape-square {
+    border-radius: 8px;
+  }
 
   &.is-clickable {
     cursor: pointer;
-    transition: transform 0.2s ease;
+  }
 
-    &:hover {
-      transform: scale(1.05);
-    }
-
-    &:active {
-      transform: scale(0.95);
-    }
+  &:not(.is-clickable):hover {
+    transform: scale(1.05);
   }
 
   .avatar-img {
     display: block;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: 50%;
+    border-radius: inherit;
     transition: all 0.2s ease;
 
     &:hover {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
   }
 
   .avatar-text {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s ease;
+    font-weight: 600;
+    color: $avatar-text-color;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   .avatar-border {
@@ -176,47 +193,56 @@ function handleError() {
     left: -2px;
     right: -2px;
     bottom: -2px;
-    border-radius: 50%;
+    border: 2px solid rgba(22, 119, 255, 0.3);
+    border-radius: inherit;
     pointer-events: none;
     z-index: 1;
   }
 
-  .online-indicator {
+  // 在线状态指示器
+  .status-indicator {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 10px;
-    height: 10px;
+    bottom: -1px;
+    right: -1px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #ffffff;
     border-radius: 50%;
-    border: 2px solid #fff;
-    z-index: 2;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
 
-    &.online {
-      background-color: #00c853;
-      box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.2);
+    &.status-online {
+      background: #52c41a;
+      animation: online-pulse 2s ease-in-out infinite;
     }
 
-    &.away {
-      background-color: #ff9800;
-      box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2);
+    &.status-away {
+      background: #faad14;
     }
 
-    &.busy {
-      background-color: #f5222d;
-      box-shadow: 0 0 0 2px rgba(245, 34, 45, 0.2);
+    &.status-busy {
+      background: #ff4d4f;
     }
 
-    &.offline {
-      background-color: #b8b8b8;
-      box-shadow: 0 0 0 2px rgba(184, 184, 184, 0.2);
+    &.status-offline {
+      background: #bfbfbf;
     }
 
-    &.dnd {
-      background-color: #f5222d;
-      box-shadow: 0 0 0 2px rgba(245, 34, 45, 0.2);
+    &.status-hidden {
+      background: #d9d9d9;
     }
+  }
+}
+
+// 在线状态动画
+@keyframes online-pulse {
+  0%, 100% { 
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);
+  }
+  50% { 
+    opacity: 0.8;
+    box-shadow: 0 0 0 6px rgba(82, 196, 26, 0);
   }
 }
 </style>

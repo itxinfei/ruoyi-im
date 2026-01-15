@@ -123,4 +123,21 @@
         where user_id = #{userId} and friend_id = #{friendId}
     </delete>
 
+    <!-- 统计好友关系总数 -->
+    <select id="countTotalFriends" resultType="java.lang.Integer">
+        select count(*) from im_friend where is_deleted = 0
+    </select>
+
+    <!-- 统计今日新增好友数 -->
+    <select id="countTodayAddedFriends" resultType="java.lang.Integer">
+        select count(*) from im_friend
+        where is_deleted = 0 and DATE(create_time) = CURDATE()
+    </select>
+
+    <!-- 统计待处理好友申请数 -->
+    <select id="countPendingRequests" resultType="java.lang.Integer">
+        select count(*) from im_friend_request
+        where status = 'PENDING'
+    </select>
+
 </mapper>

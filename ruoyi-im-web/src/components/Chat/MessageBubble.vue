@@ -643,7 +643,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/dingtalk-theme.scss' as *;
+@use '@/assets/styles/variables.scss' as *;
 
 .message-bubble {
   display: flex;
@@ -1399,14 +1399,14 @@ export default {
     align-items: center;
     gap: 2px;
     padding: 2px 6px;
-    background: $bg-hover;
+    background: $ding-bg-hover;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
     border: 1px solid transparent;
 
     &:hover {
-      background: $bg-active;
+      background: $ding-bg-active;
       transform: scale(1.05);
     }
 
@@ -1426,7 +1426,7 @@ export default {
 
     .reaction-count {
       font-size: 11px;
-      color: $text-secondary;
+      color: $ding-text-secondary;
       font-weight: 500;
     }
   }
@@ -1437,16 +1437,16 @@ export default {
     justify-content: center;
     width: 22px;
     height: 22px;
-    background: $bg-hover;
+    background: $ding-bg-hover;
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 12px;
-    color: $text-tertiary;
+    color: $ding-text-tertiary;
 
     &:hover {
-      background: $bg-active;
-      color: $primary-color;
+      background: $ding-bg-active;
+      color: $ding-primary;
       transform: scale(1.1);
     }
   }
@@ -1485,7 +1485,7 @@ export default {
     user-select: none;
 
     &:hover {
-      background: $bg-hover;
+      background: $ding-bg-hover;
       transform: scale(1.15);
     }
 

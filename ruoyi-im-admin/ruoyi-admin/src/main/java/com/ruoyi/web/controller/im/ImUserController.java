@@ -3,6 +3,7 @@ package com.ruoyi.web.controller.im;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.service.ImUserService;
@@ -64,10 +65,20 @@ public class ImUserController extends BaseController {
     @RequiresPermissions("im:user:list")
     @PostMapping("/list")
     @ResponseBody
-    public AjaxResult list(ImUser imUser) {
+    public TableDataInfo list(ImUser imUser) {
         startPage();
         List<ImUser> list = imUserService.selectImUserList(imUser);
-        return AjaxResult.success(list);
+        return getDataTable(list);
+    }
+
+    /**
+     * 获取用户统计数据
+     */
+    @RequiresPermissions("im:user:query")
+    @GetMapping("/statistics")
+    @ResponseBody
+    public AjaxResult getStatistics() {
+        return AjaxResult.success(imUserService.getUserStatistics());
     }
 
     /**

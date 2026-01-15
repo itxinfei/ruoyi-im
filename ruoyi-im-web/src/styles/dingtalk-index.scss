@@ -10,37 +10,37 @@
 /* ============ 导入顺序很重要 ============ */
 
 /* 1. 钉钉主题变量和混合宏 */
-@import './dingtalk-theme.scss';
+@use './dingtalk-theme.scss';
 
 /* 2. IM主题变量 (覆盖钉钉主题变量以保持兼容) */
-@import './im-theme.scss';
+@use './im-theme.scss';
 
 /* 3. 钉钉导航样式 */
-@import './dingtalk-navigation.scss';
+@use './dingtalk-navigation.scss';
 
 /* 4. 钉钉消息样式 */
-@import './dingtalk-message.scss';
+@use './dingtalk-message.scss';
 
 /* 5. 钉钉组件样式 */
-@import './dingtalk-components.scss';
+@use './dingtalk-components.scss';
 
 /* 6. 钉钉聊天输入框样式 */
-@import './dingtalk-chat-input.scss';
+@use './dingtalk-chat-input.scss';
 
 /* 7. 钉钉表情选择器样式 */
-@import './dingtalk-emoji.scss';
+@use './dingtalk-emoji.scss';
 
 /* 8. 钉钉通讯录样式 */
-@import './dingtalk-contacts.scss';
+@use './dingtalk-contacts.scss';
 
 /* 9. 钉钉通知样式 */
-@import './dingtalk-notification.scss';
+@use './dingtalk-notification.scss';
 
 /* 10. 钉钉模态框样式 */
-@import './dingtalk-modal.scss';
+@use './dingtalk-modal.scss';
 
 /* 11. 钉钉工具类样式 */
-@import './dingtalk-utils.scss';
+@use './dingtalk-utils.scss';
 
 /* ============ 全局样式覆盖 ============ */
 

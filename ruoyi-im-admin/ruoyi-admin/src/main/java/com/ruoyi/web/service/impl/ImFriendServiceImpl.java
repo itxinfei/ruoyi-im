@@ -77,4 +77,13 @@ public class ImFriendServiceImpl implements ImFriendService {
         params.put("friendId", friendId);
         return imFriendMapper.deleteFriendByUserAndFriend(params);
     }
+
+    @Override
+    public Map<String, Object> getFriendStatistics() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("total", imFriendMapper.countTotalFriends());
+        result.put("todayAdded", imFriendMapper.countTodayAddedFriends());
+        result.put("pendingRequests", imFriendMapper.countPendingRequests());
+        return result;
+    }
 }

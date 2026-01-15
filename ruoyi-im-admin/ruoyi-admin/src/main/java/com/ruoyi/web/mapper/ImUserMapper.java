@@ -72,4 +72,24 @@ public interface ImUserMapper {
      * 搜索用户
      */
     List<ImUser> searchUsers(String keyword);
+
+    /**
+     * 统计用户总数
+     */
+    int countTotalUsers();
+
+    /**
+     * 统计活跃用户数（7天内登录）
+     */
+    int countActiveUsers();
+
+    /**
+     * 统计今日注册用户数
+     */
+    int countTodayRegister();
+
+    /**
+     * 统计禁用用户数
+     */
+    int countDisabledUsers();
 }

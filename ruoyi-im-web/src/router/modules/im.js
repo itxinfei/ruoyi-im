@@ -1,7 +1,7 @@
 export default [
   {
     path: '/im',
-    component: () => import('@/views/im/ImChatLayoutOptimized.vue'),
+    component: () => import('@/views/im/components/ImLayout.vue'),
     meta: {
       title: '即时通讯',
       icon: 'chat',

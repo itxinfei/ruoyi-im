@@ -5,7 +5,10 @@ import com.ruoyi.web.mapper.ImUserMapper;
 import com.ruoyi.web.service.ImUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IM用户Service实现（Admin模块专用）
@@ -69,5 +72,17 @@ public class ImUserServiceImpl implements ImUserService {
     @Override
     public List<ImUser> searchUsers(String keyword) {
         return userMapper.searchUsers(keyword);
+    }
+
+    @Override
+    public Map<String, Object> getUserStatistics() {
+        Map<String, Object> result = new HashMap<>();
+        int total = userMapper.countTotalUsers();
+        int online = userMapper.countOnlineUsers();
+        result.put("totalCount", total);
+        result.put("onlineCount", online);
+        result.put("offlineCount", total - online);
+        result.put("disabledCount", userMapper.countDisabledUsers());
+        return result;
     }
 }
