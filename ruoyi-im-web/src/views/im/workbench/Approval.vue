@@ -20,9 +20,7 @@
           <div class="stat-label">已驳回</div>
         </div>
       </div>
-      <el-button type="primary" :icon="Plus" @click="handleCreate">
-        发起审批
-      </el-button>
+      <el-button type="primary" :icon="Plus" @click="handleCreate"> 发起审批 </el-button>
     </div>
 
     <!-- 审批分类标签 -->
@@ -48,7 +46,12 @@
           <el-icon :size="64"><DocumentChecked /></el-icon>
           <p>暂无待审批事项</p>
         </div>
-        <div v-for="item in pendingList" :key="item.id" class="approval-item" @click="handleView(item)">
+        <div
+          v-for="item in pendingList"
+          :key="item.id"
+          class="approval-item"
+          @click="handleView(item)"
+        >
           <div class="item-icon" :class="item.type">
             <el-icon :size="24"><component :is="getTypeIcon(item.type)" /></el-icon>
           </div>
@@ -220,12 +223,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="发票上传">
-            <el-upload
-              action="#"
-              list-type="picture-card"
-              :auto-upload="false"
-              :limit="5"
-            >
+            <el-upload action="#" list-type="picture-card" :auto-upload="false" :limit="5">
               <el-icon><Plus /></el-icon>
             </el-upload>
           </el-form-item>
@@ -279,11 +277,7 @@
     </el-dialog>
 
     <!-- 审批详情对话框 -->
-    <el-dialog
-      v-model="detailDialogVisible"
-      :title="detailTitle"
-      width="700px"
-    >
+    <el-dialog v-model="detailDialogVisible" :title="detailTitle" width="700px">
       <div v-if="currentItem" class="approval-detail">
         <!-- 基本信息 -->
         <div class="detail-section">
@@ -325,7 +319,7 @@
               :class="{
                 'is-active': step.status === 'active',
                 'is-completed': step.status === 'completed',
-                'is-rejected': step.status === 'rejected'
+                'is-rejected': step.status === 'rejected',
               }"
             >
               <div class="step-icon">
@@ -353,22 +347,14 @@
         >
           通过
         </el-button>
-        <el-button
-          v-if="currentItem?.canApprove"
-          type="danger"
-          @click="handleReject(currentItem)"
-        >
+        <el-button v-if="currentItem?.canApprove" type="danger" @click="handleReject(currentItem)">
           驳回
         </el-button>
       </template>
     </el-dialog>
 
     <!-- 审批意见对话框 -->
-    <el-dialog
-      v-model="commentDialogVisible"
-      :title="commentTitle"
-      width="500px"
-    >
+    <el-dialog v-model="commentDialogVisible" :title="commentTitle" width="500px">
       <el-form label-width="80px">
         <el-form-item label="审批意见">
           <el-input
@@ -382,9 +368,7 @@
 
       <template #footer>
         <el-button @click="commentDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmitComment">
-          确定
-        </el-button>
+        <el-button type="primary" @click="handleSubmitComment"> 确定 </el-button>
       </template>
     </el-dialog>
   </div>
@@ -409,13 +393,13 @@ import {
   Ticket,
   ShoppingBag,
   Stamp,
-  DocumentCopy
+  DocumentCopy,
 } from '@element-plus/icons-vue'
 import {
   getApprovalList,
   createApproval,
   approveApproval,
-  getApprovalDetail
+  getApprovalDetail,
 } from '@/api/im/workbench'
 
 // Props
@@ -513,7 +497,13 @@ const pendingList = ref([
     currentNode: '财务审批',
     flowSteps: [
       { name: '发起申请', user: '王五', status: 'completed', time: '2024-01-08 09:15' },
-      { name: '部门经理审批', user: '张经理', status: 'completed', comment: '同意', time: '2024-01-08 09:30' },
+      {
+        name: '部门经理审批',
+        user: '张经理',
+        status: 'completed',
+        comment: '同意',
+        time: '2024-01-08 09:30',
+      },
       { name: '财务审批', user: '财务部', status: 'active', comment: '', time: '' },
     ],
   },
@@ -563,7 +553,13 @@ const pendingList = ref([
     currentNode: '法务审批',
     flowSteps: [
       { name: '发起申请', user: '周八', status: 'completed', time: '2024-01-07 11:00' },
-      { name: '部门经理审批', user: '张经理', status: 'completed', comment: '同意', time: '2024-01-07 11:30' },
+      {
+        name: '部门经理审批',
+        user: '张经理',
+        status: 'completed',
+        comment: '同意',
+        time: '2024-01-07 11:30',
+      },
       { name: '法务审批', user: '法务部', status: 'active', comment: '', time: '' },
     ],
   },
@@ -581,8 +577,20 @@ const myList = ref([
     currentNode: null,
     flowSteps: [
       { name: '发起申请', user: '我', status: 'completed', time: '2024-01-05 09:00' },
-      { name: '部门经理审批', user: '张经理', status: 'completed', comment: '同意', time: '2024-01-05 09:30' },
-      { name: 'HR备案', user: '人事部', status: 'completed', comment: '已备案', time: '2024-01-05 10:00' },
+      {
+        name: '部门经理审批',
+        user: '张经理',
+        status: 'completed',
+        comment: '同意',
+        time: '2024-01-05 09:30',
+      },
+      {
+        name: 'HR备案',
+        user: '人事部',
+        status: 'completed',
+        comment: '已备案',
+        time: '2024-01-05 10:00',
+      },
     ],
   },
   {
@@ -596,7 +604,13 @@ const myList = ref([
     currentNode: '财务审批',
     flowSteps: [
       { name: '发起申请', user: '我', status: 'completed', time: '2024-01-06 15:20' },
-      { name: '部门经理审批', user: '张经理', status: 'completed', comment: '同意', time: '2024-01-06 15:45' },
+      {
+        name: '部门经理审批',
+        user: '张经理',
+        status: 'completed',
+        comment: '同意',
+        time: '2024-01-06 15:45',
+      },
       { name: '财务审批', user: '财务部', status: 'active', comment: '', time: '' },
     ],
   },
@@ -611,7 +625,13 @@ const myList = ref([
     currentNode: null,
     flowSteps: [
       { name: '发起申请', user: '我', status: 'completed', time: '2024-01-07 10:00' },
-      { name: '部门经理审批', user: '张经理', status: 'rejected', comment: '预算紧张，暂不同意', time: '2024-01-07 14:00' },
+      {
+        name: '部门经理审批',
+        user: '张经理',
+        status: 'rejected',
+        comment: '预算紧张，暂不同意',
+        time: '2024-01-07 14:00',
+      },
     ],
   },
 ])
@@ -646,13 +666,11 @@ const commentTitle = computed(() => {
 })
 
 const commentPlaceholder = computed(() => {
-  return commentType.value === 'approve'
-    ? '请输入审批意见（可选）'
-    : '请输入驳回原因（必填）'
+  return commentType.value === 'approve' ? '请输入审批意见（可选）' : '请输入驳回原因（必填）'
 })
 
 // 方法
-const getTypeIcon = (type) => {
+const getTypeIcon = type => {
   const icons = {
     leave: Ticket,
     expense: Money,
@@ -664,7 +682,7 @@ const getTypeIcon = (type) => {
   return icons[type] || Document
 }
 
-const getTypeName = (type) => {
+const getTypeName = type => {
   const names = {
     leave: '请假申请',
     expense: '报销申请',
@@ -676,7 +694,7 @@ const getTypeName = (type) => {
   return names[type] || '审批申请'
 }
 
-const getStatusType = (status) => {
+const getStatusType = status => {
   const types = {
     pending: 'info',
     processing: 'warning',
@@ -687,7 +705,7 @@ const getStatusType = (status) => {
   return types[status] || 'info'
 }
 
-const getStatusText = (status) => {
+const getStatusText = status => {
   const texts = {
     pending: '待审批',
     processing: '审批中',
@@ -752,7 +770,7 @@ const handleSubmitCreate = async () => {
     await createApproval({
       templateId: 1,
       title: createForm.value.title,
-      formData
+      formData,
     })
 
     ElMessage.success('审批提交成功')
@@ -768,19 +786,19 @@ const handleSubmitCreate = async () => {
   }
 }
 
-const handleView = (item) => {
+const handleView = item => {
   currentItem.value = item
   detailDialogVisible.value = true
 }
 
-const handleApprove = (item) => {
+const handleApprove = item => {
   currentItem.value = item
   commentType.value = 'approve'
   commentText.value = ''
   commentDialogVisible.value = true
 }
 
-const handleReject = (item) => {
+const handleReject = item => {
   currentItem.value = item
   commentType.value = 'reject'
   commentText.value = ''
@@ -800,7 +818,7 @@ const handleSubmitComment = async () => {
     // 调用API提交审批意见
     await approveApproval(currentItem.value.id, {
       action: apiMethod,
-      comment: commentText.value
+      comment: commentText.value,
     })
 
     ElMessage.success(`审批${action}成功`)
@@ -834,7 +852,7 @@ const fetchData = async () => {
     // 调用API获取审批数据
     const [pendingRes, myRes] = await Promise.all([
       getApprovalList({ type: 'pending' }),
-      getApprovalList({ type: 'my' })
+      getApprovalList({ type: 'my' }),
     ])
 
     if (pendingRes.data.code === 200) {
@@ -850,7 +868,7 @@ const fetchData = async () => {
         status: item.status,
         canApprove: true,
         currentNode: item.currentNode,
-        flowSteps: item.flowSteps || []
+        flowSteps: item.flowSteps || [],
       }))
       tabs.value[0].count = pendingList.value.length
       stats.value.pending = pendingList.value.length
@@ -867,13 +885,15 @@ const fetchData = async () => {
         content: item.content || '',
         status: item.status,
         currentNode: item.currentNode,
-        flowSteps: item.flowSteps || []
+        flowSteps: item.flowSteps || [],
       }))
       tabs.value[1].count = myList.value.length
 
       // 统计各状态数量
       stats.value.processing = myList.value.filter(i => i.status === 'processing').length
-      stats.value.completed = myList.value.filter(i => i.status === 'approved' || i.status === 'completed').length
+      stats.value.completed = myList.value.filter(
+        i => i.status === 'approved' || i.status === 'completed'
+      ).length
       stats.value.rejected = myList.value.filter(i => i.status === 'rejected').length
     }
   } catch (error) {
@@ -883,7 +903,7 @@ const fetchData = async () => {
 }
 
 // 格式化日期时间
-const formatDateTime = (dateStr) => {
+const formatDateTime = dateStr => {
   if (!dateStr) return ''
   const date = new Date(dateStr)
   const year = date.getFullYear()

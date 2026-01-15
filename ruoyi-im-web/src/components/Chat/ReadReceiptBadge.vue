@@ -1,5 +1,10 @@
 <template>
-  <div v-if="showReceipt" class="read-receipt-badge" :class="{ clickable: canClick }" @click="handleClick">
+  <div
+    v-if="showReceipt"
+    class="read-receipt-badge"
+    :class="{ clickable: canClick }"
+    @click="handleClick"
+  >
     <!-- 已读图标 -->
     <i class="el-icon-view read-icon"></i>
 

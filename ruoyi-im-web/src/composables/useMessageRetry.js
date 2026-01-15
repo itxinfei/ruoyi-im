@@ -34,7 +34,7 @@ export function useMessageRetry() {
   /**
    * 计算重试延迟时间（指数退避）
    */
-  const calculateDelay = (retryCount) => {
+  const calculateDelay = retryCount => {
     const delay = RETRY_CONFIG.BASE_DELAY * Math.pow(2, retryCount)
     return Math.min(delay, RETRY_CONFIG.MAX_DELAY)
   }
@@ -44,7 +44,8 @@ export function useMessageRetry() {
    */
   const sendMessageWithRetry = async (params, retryCount = 0) => {
     const { sessionId, type, content, replyTo, clientMsgId } = params
-    const currentClientMsgId = clientMsgId || `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const currentClientMsgId =
+      clientMsgId || `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
     try {
       // 调用 API 发送消息
@@ -104,7 +105,7 @@ export function useMessageRetry() {
   /**
    * 手动重试消息
    */
-  const retryMessage = async (message) => {
+  const retryMessage = async message => {
     const params = {
       sessionId: message.sessionId || message.conversationId,
       type: message.type || 'text',
@@ -150,7 +151,7 @@ export function useMessageRetry() {
   /**
    * 清除重试状态
    */
-  const clearRetryState = (clientMsgId) => {
+  const clearRetryState = clientMsgId => {
     retryingMessages.value.delete(clientMsgId)
   }
 
@@ -212,28 +213,28 @@ export function useMessageRetry() {
   /**
    * 获取消息重试状态
    */
-  const getMessageRetryState = (clientMsgId) => {
+  const getMessageRetryState = clientMsgId => {
     return retryingMessages.value.get(clientMsgId)
   }
 
   /**
    * 获取消息失败信息
    */
-  const getMessageFailureInfo = (clientMsgId) => {
+  const getMessageFailureInfo = clientMsgId => {
     return failedMessages.value.get(clientMsgId)
   }
 
   /**
    * 是否正在重试
    */
-  const isRetrying = (clientMsgId) => {
+  const isRetrying = clientMsgId => {
     return retryingMessages.value.has(clientMsgId)
   }
 
   /**
    * 是否失败
    */
-  const isFailed = (clientMsgId) => {
+  const isFailed = clientMsgId => {
     return failedMessages.value.has(clientMsgId)
   }
 

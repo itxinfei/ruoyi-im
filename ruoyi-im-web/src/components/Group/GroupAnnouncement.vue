@@ -43,29 +43,29 @@ import { ElMessage } from 'element-plus'
 const props = defineProps({
   modelValue: {
     type: Boolean,
-    default: false
+    default: false,
   },
   // 公告数据
   announcement: {
     type: Object,
-    default: () => ({})
+    default: () => ({}),
   },
   // 群组ID
   groupId: {
     type: [String, Number],
-    default: ''
-  }
+    default: '',
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'confirm', 'read'])
 
 const visible = computed({
   get: () => props.modelValue,
-  set: val => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val),
 })
 
 // 格式化时间
-const formatTime = (time) => {
+const formatTime = time => {
   if (!time) return ''
   const date = new Date(time)
   const now = new Date()
@@ -84,7 +84,7 @@ const formatTime = (time) => {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 
@@ -103,13 +103,13 @@ const handleClose = () => {
 .group-announcement-dialog {
   :deep(.el-dialog__header) {
     padding: 20px 24px 16px;
-    border-bottom: 1px solid #E5E8EB;
+    border-bottom: 1px solid #e5e8eb;
   }
 
   :deep(.el-dialog__title) {
     font-size: 16px;
     font-weight: 600;
-    color: #171A1A;
+    color: #171a1a;
   }
 
   :deep(.el-dialog__body) {
@@ -118,7 +118,7 @@ const handleClose = () => {
 
   :deep(.el-dialog__footer) {
     padding: 16px 24px;
-    border-top: 1px solid #E5E8EB;
+    border-top: 1px solid #e5e8eb;
   }
 }
 
@@ -126,14 +126,14 @@ const handleClose = () => {
   .announcement-title {
     font-size: 16px;
     font-weight: 600;
-    color: #171A1A;
+    color: #171a1a;
     margin-bottom: 16px;
     line-height: 1.5;
   }
 
   .announcement-text {
     font-size: 14px;
-    color: #5F6468;
+    color: #5f6468;
     line-height: 1.75;
     margin-bottom: 24px;
     white-space: pre-wrap;
@@ -142,7 +142,7 @@ const handleClose = () => {
 
   .announcement-meta {
     padding-top: 16px;
-    border-top: 1px solid #F0F2F5;
+    border-top: 1px solid #f0f2f5;
 
     .meta-item {
       display: flex;
@@ -155,12 +155,12 @@ const handleClose = () => {
       }
 
       .meta-label {
-        color: #858B8F;
+        color: #858b8f;
         min-width: 70px;
       }
 
       .meta-value {
-        color: #5F6468;
+        color: #5f6468;
       }
     }
   }

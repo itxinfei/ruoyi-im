@@ -13,11 +13,7 @@
         </el-button>
       </div>
 
-      <el-menu
-        :default-active="currentFolder"
-        class="folder-menu"
-        @select="handleFolderSelect"
-      >
+      <el-menu :default-active="currentFolder" class="folder-menu" @select="handleFolderSelect">
         <el-menu-item :index="FOLDER_TYPE.INBOX">
           <div class="menu-item-content">
             <el-icon><Message /></el-icon>
@@ -88,9 +84,10 @@
             v-model="selectAll"
             :indeterminate="isIndeterminate"
             @change="handleSelectAll"
-          >全选</el-checkbox>
+            >全选</el-checkbox
+          >
 
-          <el-dropdown @command="handleBatchAction" trigger="click">
+          <el-dropdown trigger="click" @command="handleBatchAction">
             <el-button size="small" :disabled="selectedEmails.length === 0">
               批量操作 <el-icon class="el-icon--right"><ArrowDown /></el-icon>
             </el-button>
@@ -113,7 +110,7 @@
       </div>
 
       <!-- 邮件列表 -->
-      <div class="email-list" v-loading="loading">
+      <div v-loading="loading" class="email-list">
         <div v-if="filteredEmails.length === 0" class="empty-state">
           <el-icon :size="64"><Message /></el-icon>
           <p>暂无邮件</p>
@@ -126,7 +123,7 @@
           :class="{
             unread: !email.isRead,
             selected: selectedEmails.includes(email.id),
-            starred: email.isStarred
+            starred: email.isStarred,
           }"
           @click="openEmail(email)"
           @contextmenu.prevent="showContextMenu($event, email)"
@@ -159,7 +156,7 @@
       </div>
 
       <!-- 分页 -->
-      <div class="email-pagination" v-if="filteredEmails.length > 0">
+      <div v-if="filteredEmails.length > 0" class="email-pagination">
         <el-pagination
           v-model:current-page="currentPage"
           :page-size="pageSize"
@@ -209,7 +206,7 @@ import {
   ArrowDown,
   Star,
   ChatDotSquare,
-  Paperclip
+  Paperclip,
 } from '@element-plus/icons-vue'
 import * as emailApi from '@/api/im/email'
 import ComposeDialog from './components/ComposeDialog.vue'
@@ -250,10 +247,11 @@ const filteredEmails = computed(() => {
     return emails.value
   }
   const keyword = searchKeyword.value.toLowerCase()
-  return emails.value.filter(email =>
-    (email.subject && email.subject.toLowerCase().includes(keyword)) ||
-    (email.senderName && email.senderName.toLowerCase().includes(keyword)) ||
-    (email.senderEmail && email.senderEmail.toLowerCase().includes(keyword))
+  return emails.value.filter(
+    email =>
+      (email.subject && email.subject.toLowerCase().includes(keyword)) ||
+      (email.senderName && email.senderName.toLowerCase().includes(keyword)) ||
+      (email.senderEmail && email.senderEmail.toLowerCase().includes(keyword))
   )
 })
 
@@ -317,7 +315,7 @@ const loadUnreadCount = async () => {
   }
 }
 
-const handleFolderSelect = (folder) => {
+const handleFolderSelect = folder => {
   currentFolder.value = folder
   currentPage.value = 1
   selectedEmails.value = []
@@ -328,12 +326,12 @@ const handleSearch = () => {
   // 搜索已在 computed 中处理
 }
 
-const handlePageChange = (page) => {
+const handlePageChange = page => {
   currentPage.value = page
   // 可以在此实现分页加载
 }
 
-const handleSelectAll = (val) => {
+const handleSelectAll = val => {
   selectedEmails.value = val ? filteredEmails.value.map(e => e.id) : []
   isIndeterminate.value = false
 }
@@ -362,7 +360,7 @@ const openCompose = () => {
   composeVisible.value = true
 }
 
-const openEmail = async (email) => {
+const openEmail = async email => {
   currentEmailId.value = email.id
   detailVisible.value = true
 
@@ -378,7 +376,7 @@ const openEmail = async (email) => {
   }
 }
 
-const toggleStar = async (email) => {
+const toggleStar = async email => {
   try {
     await emailApi.markAsStarred(email.id, !email.isStarred)
     email.isStarred = !email.isStarred
@@ -393,7 +391,7 @@ const refreshList = () => {
   loadUnreadCount()
 }
 
-const handleBatchAction = async (command) => {
+const handleBatchAction = async command => {
   const ids = selectedEmails.value
   if (ids.length === 0) return
 
@@ -426,7 +424,7 @@ const handleBatchAction = async (command) => {
         break
       case 'delete':
         await ElMessageBox.confirm('确定永久删除选中的邮件吗？', '提示', {
-          type: 'warning'
+          type: 'warning',
         })
         await emailApi.batchPermanentlyDelete(ids)
         emails.value = emails.value.filter(e => !ids.includes(e.id))
@@ -449,13 +447,13 @@ const handleEmailSent = () => {
   }
 }
 
-const handleReply = (email) => {
+const handleReply = email => {
   replyToEmail.value = email
   detailVisible.value = false
   composeVisible.value = true
 }
 
-const handleForward = (email) => {
+const handleForward = email => {
   replyToEmail.value = { ...email, isForward: true }
   detailVisible.value = false
   composeVisible.value = true
@@ -466,7 +464,7 @@ const showContextMenu = (event, email) => {
   contextMenu.value?.show(event)
 }
 
-const handleContextMenuSelect = async (command) => {
+const handleContextMenuSelect = async command => {
   const email = contextMenuEmail.value
   if (!email) return
 
@@ -501,7 +499,7 @@ const handleContextMenuSelect = async (command) => {
       break
     case 'delete':
       await ElMessageBox.confirm('确定永久删除此邮件吗？', '提示', {
-        type: 'warning'
+        type: 'warning',
       })
       await emailApi.permanentlyDelete(email.id)
       emails.value = emails.value.filter(e => e.id !== email.id)
@@ -509,14 +507,14 @@ const handleContextMenuSelect = async (command) => {
   }
 }
 
-const getEmailPreview = (email) => {
+const getEmailPreview = email => {
   const text = email.textContent || email.htmlContent || ''
   // 移除 HTML 标签获取纯文本预览
   const plainText = text.replace(/<[^>]*>/g, '').trim()
   return plainText.substring(0, 100) || '(无内容)'
 }
 
-const formatEmailTime = (time) => {
+const formatEmailTime = time => {
   if (!time) return ''
   const date = new Date(time)
   const now = new Date()
@@ -552,20 +550,20 @@ watch(selectedEmails, updateSelectAllState)
 .email-container {
   display: flex;
   height: 100%;
-  background: #F5F7FA; // 钉钉规范
+  background: #f5f7fa; // 钉钉规范
 }
 
 // 左侧导航栏
 .email-sidebar {
   width: 220px;
   background: #fff;
-  border-right: 1px solid #E8E8E8;
+  border-right: 1px solid #e8e8e8;
   display: flex;
   flex-direction: column;
 
   .sidebar-header {
     padding: 16px;
-    border-bottom: 1px solid #E8E8E8;
+    border-bottom: 1px solid #e8e8e8;
 
     h3 {
       margin: 0 0 12px 0;
@@ -589,8 +587,8 @@ watch(selectedEmails, updateSelectAllState)
       color: #666666;
 
       &.is-active {
-        color: #0089FF;
-        background-color: #E6F7FF;
+        color: #0089ff;
+        background-color: #e6f7ff;
       }
 
       .menu-item-content {
@@ -608,18 +606,18 @@ watch(selectedEmails, updateSelectAllState)
 
   .storage-info {
     padding: 16px;
-    border-top: 1px solid #E8E8E8;
+    border-top: 1px solid #e8e8e8;
 
     .storage-bar {
       height: 4px;
-      background: #E8E8E8;
+      background: #e8e8e8;
       border-radius: 2px;
       margin-bottom: 8px;
       overflow: hidden;
 
       .storage-used {
         height: 100%;
-        background: linear-gradient(90deg, #0089FF, #40A9FF); // 钉钉色系
+        background: linear-gradient(90deg, #0089ff, #40a9ff); // 钉钉色系
         border-radius: 2px;
       }
     }
@@ -645,14 +643,14 @@ watch(selectedEmails, updateSelectAllState)
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border-bottom: 1px solid #E8E8E8;
+  border-bottom: 1px solid #e8e8e8;
 
   .search-box {
     width: 300px;
 
     :deep(.el-input__wrapper) {
       border-radius: 4px;
-      background-color: #F5F7FA;
+      background-color: #f5f7fa;
     }
   }
 
@@ -694,20 +692,20 @@ watch(selectedEmails, updateSelectAllState)
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #F0F2F5;
+  border-bottom: 1px solid #f0f2f5;
   cursor: pointer;
   transition: background 0.2s;
 
   &:hover {
-    background: #F5F7FA;
+    background: #f5f7fa;
   }
 
   &.selected {
-    background: #E6F7FF;
+    background: #e6f7ff;
   }
 
   &.unread {
-    background: #FAFBFF;
+    background: #fafbff;
 
     .email-subject {
       font-weight: 500; // 修改：600 -> 500
@@ -724,7 +722,7 @@ watch(selectedEmails, updateSelectAllState)
 
   .email-star {
     margin-right: 8px;
-    color: #CCCCCC;
+    color: #cccccc;
     display: flex;
     align-items: center;
 
@@ -788,7 +786,7 @@ watch(selectedEmails, updateSelectAllState)
 // 分页
 .email-pagination {
   padding: 12px 16px;
-  border-top: 1px solid #E8E8E8;
+  border-top: 1px solid #e8e8e8;
   display: flex;
   justify-content: center;
 }

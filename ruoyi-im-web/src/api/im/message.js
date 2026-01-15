@@ -645,6 +645,7 @@ function normalizeMessageType(type) {
     voice: 'VOICE',
     video: 'VIDEO',
     location: 'LOCATION',
+    oa: 'CARD',
     card: 'CARD',
   }
   const lowerType = (type || '').toLowerCase()
@@ -654,8 +655,9 @@ function normalizeMessageType(type) {
 // ==================== 别名 - 向后兼容 ====================
 
 export const getConversationMessages = listMessage
-export const markRead = (conversationId, messageIds) => markMessageRead({ conversationId, messageIds })
-export const getUnread = getUnreadCount  // 保持不变，获取所有未读总数
+export const markRead = (conversationId, messageIds) =>
+  markMessageRead({ conversationId, messageIds })
+export const getUnread = getUnreadCount // 保持不变，获取所有未读总数
 
 // ==================== 默认导出 ====================
 
@@ -686,8 +688,8 @@ export default {
   getConversationReadStatus,
   revokeMessageRead,
   markMessageRead, // 兼容
-  getUnreadCount,  // 获取所有未读总数
-  getConversationUnread,  // 获取指定会话未读数
+  getUnreadCount, // 获取所有未读总数
+  getConversationUnread, // 获取指定会话未读数
 
   // 反应相关
   addMessageReaction,

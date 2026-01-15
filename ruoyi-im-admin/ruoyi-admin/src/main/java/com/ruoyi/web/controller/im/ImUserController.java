@@ -40,6 +40,25 @@ public class ImUserController extends BaseController {
     private ImUserService imUserService;
 
     /**
+     * 新增用户页面
+     */
+    @RequiresPermissions("im:user:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改用户页面
+     */
+    @RequiresPermissions("im:user:edit")
+    @GetMapping("/edit/{userId}")
+    public String edit(@PathVariable("userId") Long userId, org.springframework.ui.ModelMap mmap) {
+        mmap.put("user", imUserService.selectImUserById(userId));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询IM用户列表
      */
     @RequiresPermissions("im:user:list")

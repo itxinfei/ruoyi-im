@@ -253,4 +253,3 @@ export function sendReportComment(id, data) {
     data,
   })
 }
-

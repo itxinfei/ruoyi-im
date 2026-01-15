@@ -6,14 +6,14 @@ import { ElMessage, ElNotification } from 'element-plus'
 
 // 错误类型枚举
 export const ERROR_TYPE = {
-  NETWORK: 'network',           // 网络错误
-  API: 'api',                   // API错误
-  WEBSOCKET: 'websocket',       // WebSocket错误
-  WEBRTC: 'webrtc',             // WebRTC错误
-  STORAGE: 'storage',           // 本地存储错误
-  VALIDATION: 'validation',     // 验证错误
-  PERMISSION: 'permission',     // 权限错误
-  UNKNOWN: 'unknown',           // 未知错误
+  NETWORK: 'network', // 网络错误
+  API: 'api', // API错误
+  WEBSOCKET: 'websocket', // WebSocket错误
+  WEBRTC: 'webrtc', // WebRTC错误
+  STORAGE: 'storage', // 本地存储错误
+  VALIDATION: 'validation', // 验证错误
+  PERMISSION: 'permission', // 权限错误
+  UNKNOWN: 'unknown', // 未知错误
 }
 
 // 错误级别枚举
@@ -27,35 +27,35 @@ export const ERROR_LEVEL = {
 // 错误码映射
 const ERROR_CODE_MAP = {
   // 网络错误
-  'ERR_NETWORK_001': '网络连接失败，请检查网络设置',
-  'ERR_NETWORK_002': '请求超时，请稍后重试',
-  'ERR_NETWORK_003': '服务器无响应',
+  ERR_NETWORK_001: '网络连接失败，请检查网络设置',
+  ERR_NETWORK_002: '请求超时，请稍后重试',
+  ERR_NETWORK_003: '服务器无响应',
 
   // API错误
-  'ERR_API_001': 'API调用失败',
-  'ERR_API_002': '数据解析失败',
-  'ERR_API_401': '未授权，请重新登录',
-  'ERR_API_403': '无权限访问',
-  'ERR_API_404': '请求的资源不存在',
-  'ERR_API_500': '服务器内部错误',
+  ERR_API_001: 'API调用失败',
+  ERR_API_002: '数据解析失败',
+  ERR_API_401: '未授权，请重新登录',
+  ERR_API_403: '无权限访问',
+  ERR_API_404: '请求的资源不存在',
+  ERR_API_500: '服务器内部错误',
 
   // WebSocket错误
-  'ERR_WS_001': 'WebSocket连接失败',
-  'ERR_WS_002': 'WebSocket断开连接',
-  'ERR_WS_003': '消息发送失败',
+  ERR_WS_001: 'WebSocket连接失败',
+  ERR_WS_002: 'WebSocket断开连接',
+  ERR_WS_003: '消息发送失败',
 
   // WebRTC错误
-  'ERR_WEBRTC_001': '无法访问摄像头或麦克风',
-  'ERR_WEBRTC_002': '视频通话建立失败',
-  'ERR_WEBRTC_003': '屏幕共享失败',
+  ERR_WEBRTC_001: '无法访问摄像头或麦克风',
+  ERR_WEBRTC_002: '视频通话建立失败',
+  ERR_WEBRTC_003: '屏幕共享失败',
 
   // 存储错误
-  'ERR_STORAGE_001': '本地存储已满',
-  'ERR_STORAGE_002': '本地存储访问被拒绝',
+  ERR_STORAGE_001: '本地存储已满',
+  ERR_STORAGE_002: '本地存储访问被拒绝',
 
   // 权限错误
-  'ERR_PERM_001': '缺少必要的权限',
-  'ERR_PERM_002': '权限请求被拒绝',
+  ERR_PERM_001: '缺少必要的权限',
+  ERR_PERM_002: '权限请求被拒绝',
 }
 
 /**
@@ -261,7 +261,11 @@ class ErrorHandler {
     const { type, userMessage, level } = error
 
     // 根据错误类型和级别选择显示方式
-    if (level === ERROR_LEVEL.FATAL || type === ERROR_TYPE.NETWORK || type === ERROR_TYPE.PERMISSION) {
+    if (
+      level === ERROR_LEVEL.FATAL ||
+      type === ERROR_TYPE.NETWORK ||
+      type === ERROR_TYPE.PERMISSION
+    ) {
       ElNotification({
         title: '操作失败',
         message: userMessage,
@@ -335,6 +339,7 @@ export const handleApiError = (error, context) => errorHandler.handleApi(error, 
 export const handleWebSocketError = (error, context) => errorHandler.handleWebSocket(error, context)
 export const handleWebRTCError = (error, context) => errorHandler.handleWebRTC(error, context)
 export const handleStorageError = (error, context) => errorHandler.handleStorage(error, context)
-export const handlePermissionError = (error, context) => errorHandler.handlePermission(error, context)
+export const handlePermissionError = (error, context) =>
+  errorHandler.handlePermission(error, context)
 
 export default errorHandler

@@ -5,8 +5,8 @@
       <el-checkbox
         :model-value="isAllSelected"
         :indeterminate="isIndeterminate"
-        @change="handleSelectAll"
         class="select-all-checkbox"
+        @change="handleSelectAll"
       >
         <span class="select-count">已选 {{ selectedCount }} 条</span>
       </el-checkbox>
@@ -19,8 +19,8 @@
         <el-button
           type="text"
           :disabled="selectedCount === 0"
-          @click="handleForward"
           class="action-btn"
+          @click="handleForward"
         >
           <i class="el-icon-share"></i>
           <span class="btn-text">转发</span>
@@ -32,8 +32,8 @@
         <el-button
           type="text"
           :disabled="selectedCount === 0"
-          @click="handleFavorite"
           class="action-btn"
+          @click="handleFavorite"
         >
           <i class="el-icon-star-off"></i>
           <span class="btn-text">收藏</span>
@@ -46,8 +46,8 @@
           v-if="hasDownloadableContent"
           type="text"
           :disabled="selectedCount === 0"
-          @click="handleDownload"
           class="action-btn"
+          @click="handleDownload"
         >
           <i class="el-icon-download"></i>
           <span class="btn-text">下载</span>
@@ -59,8 +59,8 @@
         <el-button
           type="text"
           :disabled="selectedCount === 0"
-          @click="handleDelete"
           class="action-btn danger"
+          @click="handleDelete"
         >
           <i class="el-icon-delete"></i>
           <span class="btn-text">删除</span>
@@ -68,7 +68,7 @@
       </el-tooltip>
 
       <!-- 取消选择 -->
-      <el-button type="text" @click="handleCancel" class="action-btn cancel-btn">
+      <el-button type="text" class="action-btn cancel-btn" @click="handleCancel">
         <span>取消</span>
       </el-button>
     </div>
@@ -89,10 +89,7 @@
     >
       <el-form :model="favoriteForm" label-width="80px">
         <el-form-item label="收藏标签">
-          <el-input
-            v-model="favoriteForm.tags"
-            placeholder="多个标签用逗号分隔"
-          ></el-input>
+          <el-input v-model="favoriteForm.tags" placeholder="多个标签用逗号分隔"></el-input>
         </el-form-item>
         <el-form-item label="备注">
           <el-input
@@ -132,14 +129,7 @@ const props = defineProps({
 })
 
 // Emits
-const emit = defineEmits([
-  'select-all',
-  'cancel',
-  'forward',
-  'favorite',
-  'delete',
-  'download',
-])
+const emit = defineEmits(['select-all', 'cancel', 'forward', 'favorite', 'delete', 'download'])
 
 // 数据
 const showForwardDialog = ref(false)
@@ -158,13 +148,11 @@ const isIndeterminate = computed(() => {
   return selectedCount.value > 0 && selectedCount.value < props.totalMessages
 })
 const hasDownloadableContent = computed(() => {
-  return props.selectedMessages.some(msg =>
-    ['image', 'file', 'video', 'voice'].includes(msg.type)
-  )
+  return props.selectedMessages.some(msg => ['image', 'file', 'video', 'voice'].includes(msg.type))
 })
 
 // 方法
-const handleSelectAll = (checked) => {
+const handleSelectAll = checked => {
   emit('select-all', checked)
 }
 
@@ -176,7 +164,7 @@ const handleForward = () => {
   showForwardDialog.value = true
 }
 
-const handleForwardConfirm = (data) => {
+const handleForwardConfirm = data => {
   emit('forward', {
     messages: props.selectedMessages,
     ...data,
@@ -221,16 +209,12 @@ const handleDownload = () => {
 }
 
 // 键盘快捷键
-const handleKeyDown = (event) => {
+const handleKeyDown = event => {
   if (!props.visible && selectedCount.value === 0) return
 
   // 阻止在输入框中的快捷键
   const target = event.target
-  if (
-    target.tagName === 'INPUT' ||
-    target.tagName === 'TEXTAREA' ||
-    target.isContentEditable
-  ) {
+  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
     return
   }
 
@@ -255,7 +239,12 @@ const handleKeyDown = (event) => {
       break
     case 'd':
     case 'D':
-      if (!event.ctrlKey && !event.metaKey && selectedCount.value > 0 && hasDownloadableContent.value) {
+      if (
+        !event.ctrlKey &&
+        !event.metaKey &&
+        selectedCount.value > 0 &&
+        hasDownloadableContent.value
+      ) {
         event.preventDefault()
         handleDownload()
       }
@@ -279,7 +268,7 @@ onUnmounted(() => {
 })
 
 // 监听收藏对话框关闭，重置表单
-watch(showFavoriteDialog, (val) => {
+watch(showFavoriteDialog, val => {
   if (!val) {
     favoriteForm.value = { tags: '', remark: '' }
   }

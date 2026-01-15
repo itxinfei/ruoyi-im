@@ -18,7 +18,7 @@ export function submitFeedback(data) {
   return request({
     url: '/im/feedback/submit',
     method: 'post',
-    data: data
+    data: data,
   })
 }
 
@@ -31,7 +31,7 @@ export function getFeedbackList(params) {
   return request({
     url: '/im/feedback/list',
     method: 'get',
-    params: params
+    params: params,
   })
 }
 
@@ -43,7 +43,7 @@ export function getFeedbackList(params) {
 export function getFeedbackDetail(id) {
   return request({
     url: `/im/feedback/${id}`,
-    method: 'get'
+    method: 'get',
   })
 }
 
@@ -58,8 +58,8 @@ export function uploadFeedbackImage(formData) {
     method: 'post',
     data: formData,
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+    },
   })
 }
 
@@ -70,6 +70,6 @@ export function uploadFeedbackImage(formData) {
 export function getFeedbackTypes() {
   return request({
     url: '/im/feedback/types',
-    method: 'get'
+    method: 'get',
   })
 }

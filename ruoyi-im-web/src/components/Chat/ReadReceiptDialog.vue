@@ -38,11 +38,7 @@
           <span>已读用户 ({{ detail.readUsers.length }})</span>
         </div>
         <div class="user-list">
-          <div
-            v-for="user in detail.readUsers"
-            :key="user.userId"
-            class="user-item read"
-          >
+          <div v-for="user in detail.readUsers" :key="user.userId" class="user-item read">
             <el-avatar :src="user.avatar" :size="36">{{ user.userName?.charAt(0) }}</el-avatar>
             <div class="user-info">
               <span class="user-name">{{ user.userName }}</span>
@@ -59,11 +55,7 @@
           <span>未读用户 ({{ detail.unreadUsers.length }})</span>
         </div>
         <div class="user-list">
-          <div
-            v-for="user in detail.unreadUsers"
-            :key="user.userId"
-            class="user-item unread"
-          >
+          <div v-for="user in detail.unreadUsers" :key="user.userId" class="user-item unread">
             <el-avatar :src="user.avatar" :size="36">{{ user.userName?.charAt(0) }}</el-avatar>
             <div class="user-info">
               <span class="user-name">{{ user.userName }}</span>
@@ -122,7 +114,7 @@ export default {
       },
       set(val) {
         this.$emit('update:modelValue', val)
-      }
+      },
     },
     messagePreview() {
       return this.detail.messagePreview || '[消息内容]'

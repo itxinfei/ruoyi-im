@@ -106,6 +106,22 @@ export function getLastMessageText(message) {
   switch (message.type) {
     case 'text':
       return message.content || '暂无消息'
+    case 'oa': {
+      if (message.content && typeof message.content === 'string') {
+        const trimmed = message.content.trim()
+        if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+          try {
+            const parsed = JSON.parse(message.content)
+            if (parsed && typeof parsed === 'object') {
+              return `[OA] ${parsed.title || parsed.subject || ''}`
+            }
+          } catch (e) {
+            return '[OA]'
+          }
+        }
+      }
+      return `[OA] ${message.title || ''}`
+    }
     case 'image':
       return '[图片]'
     case 'file':
@@ -127,19 +143,34 @@ export function getLastMessageText(message) {
   }
 }
 
+export const MESSAGE_TYPE = {
+  TEXT: 'text',
+  IMAGE: 'image',
+  FILE: 'file',
+  VOICE: 'voice',
+  VIDEO: 'video',
+  LINK: 'link',
+  CARD: 'card',
+  OA: 'oa',
+  SYSTEM: 'system',
+  RECALL: 'recall',
+}
+
 export function getMessageTypeLabel(type) {
+  const key = (type || '').toLowerCase()
   const labels = {
-    text: '文本消息',
-    image: '图片消息',
-    file: '文件消息',
-    voice: '语音消息',
-    video: '视频消息',
-    link: '链接消息',
-    card: '名片消息',
-    system: '系统消息',
-    recall: '撤回消息',
+    [MESSAGE_TYPE.TEXT]: '文本消息',
+    [MESSAGE_TYPE.IMAGE]: '图片消息',
+    [MESSAGE_TYPE.FILE]: '文件消息',
+    [MESSAGE_TYPE.VOICE]: '语音消息',
+    [MESSAGE_TYPE.VIDEO]: '视频消息',
+    [MESSAGE_TYPE.LINK]: '链接消息',
+    [MESSAGE_TYPE.CARD]: '名片消息',
+    [MESSAGE_TYPE.OA]: 'OA卡片消息',
+    [MESSAGE_TYPE.SYSTEM]: '系统消息',
+    [MESSAGE_TYPE.RECALL]: '撤回消息',
   }
-  return labels[type] || '未知消息'
+  return labels[key] || '未知消息'
 }
 
 export function canRecallMessage(message, recallTimeout = 2 * 60 * 1000) {
@@ -280,10 +311,39 @@ export function createLinkMessage(url, title, description, thumbnail) {
 export function createCardMessage(userId, name, avatar) {
   return {
     id: generateMessageId(),
-    type: 'card',
+    type: MESSAGE_TYPE.CARD,
     userId,
     name,
     avatar,
+    timestamp: Date.now(),
+    status: 'sending',
+  }
+}
+
+export function createOaApprovalMessage(payload) {
+  const contentObject = {
+    cardType: 'approval',
+    approvalId: payload.approvalId,
+    type: payload.type,
+    typeName: payload.typeName,
+    approvalTypeName: payload.approvalTypeName,
+    title: payload.title,
+    applicant: payload.applicant,
+    applicantName: payload.applicantName,
+    applyTime: payload.applyTime,
+    createTime: payload.createTime,
+    status: payload.status,
+    statusText: payload.statusText,
+    timeRange: payload.timeRange,
+    startTime: payload.startTime,
+    endTime: payload.endTime,
+    amount: payload.amount,
+    formSummary: payload.formSummary,
+  }
+  return {
+    id: generateMessageId(),
+    type: MESSAGE_TYPE.OA,
+    content: JSON.stringify(contentObject),
     timestamp: Date.now(),
     status: 'sending',
   }

@@ -16,12 +16,7 @@
  * @returns {string} 显示名称
  */
 export function getUserDisplayName(options) {
-  const {
-    remark,
-    groupNickname,
-    originalName,
-    conversationType
-  } = options
+  const { remark, groupNickname, originalName, conversationType } = options
 
   // 优先级1：备注（最高优先级）
   if (remark) {
@@ -61,9 +56,10 @@ export function getUserDisplayNameFromStore(store, userId, conversationId) {
   const friend = store.getters['im/friendById']?.(userId)
 
   // 获取群成员关系
-  const groupMember = isGroup && conversationId
-    ? store.getters['im/groupMemberByUser']?.(conversationId, userId)
-    : null
+  const groupMember =
+    isGroup && conversationId
+      ? store.getters['im/groupMemberByUser']?.(conversationId, userId)
+      : null
 
   return getUserDisplayName({
     userId,
@@ -71,7 +67,7 @@ export function getUserDisplayNameFromStore(store, userId, conversationId) {
     conversationType: conversation?.type,
     remark: friend?.remark,
     groupNickname: groupMember?.groupNickname,
-    originalName: user.name || user.nickName || user.userName
+    originalName: user.name || user.nickName || user.userName,
   })
 }
 
@@ -96,7 +92,7 @@ export function getUserDepartment(store, userId) {
   return {
     id: department.id,
     name: department.deptName,
-    path: department.ancestors || []
+    path: department.ancestors || [],
   }
 }
 
@@ -145,5 +141,5 @@ export default {
   getUserDisplayNameFromStore,
   getUserDepartment,
   formatDepartmentPath,
-  getUserDepartmentText
+  getUserDepartmentText,
 }

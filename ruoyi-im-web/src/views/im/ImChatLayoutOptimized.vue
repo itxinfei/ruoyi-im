@@ -30,7 +30,12 @@
       <!-- 右侧：操作区 -->
       <div class="header-right">
         <!-- 通知按钮 -->
-        <el-badge :value="notificationCount" :hidden="notificationCount === 0" :max="99" class="header-badge">
+        <el-badge
+          :value="notificationCount"
+          :hidden="notificationCount === 0"
+          :max="99"
+          class="header-badge"
+        >
           <el-tooltip content="通知" placement="bottom">
             <el-button :icon="Bell" text class="header-action-btn" @click="showNotifications" />
           </el-tooltip>
@@ -205,11 +210,7 @@
     <!-- 主体内容区 -->
     <div class="main-body">
       <!-- 左侧导航栏（钉钉7.6可拖拽宽度，默认68px） -->
-      <aside
-        class="nav-sidebar"
-        :style="{ width: navWidth + 'px' }"
-        @mousedown="startNavResize"
-      >
+      <aside class="nav-sidebar" :style="{ width: navWidth + 'px' }" @mousedown="startNavResize">
         <nav class="nav-list">
           <el-tooltip
             v-for="item in navModules"
@@ -227,10 +228,7 @@
                 <component :is="item.icon" />
               </el-icon>
               <!-- 未读红点 -->
-              <span
-                v-if="item.key === 'chat' && unreadCount > 0"
-                class="nav-dot"
-              />
+              <span v-if="item.key === 'chat' && unreadCount > 0" class="nav-dot" />
             </div>
           </el-tooltip>
         </nav>
@@ -268,13 +266,17 @@
                 class="session-item"
                 :class="{
                   active: currentSessionId === session.id,
-                  pinned: session.isPinned
+                  pinned: session.isPinned,
                 }"
                 @click="selectSession(session)"
               >
                 <div class="session-avatar-wrapper">
                   <!-- 头像容器（支持在线状态指示器） -->
-                  <el-badge :value="session.unreadCount" :hidden="session.unreadCount === 0" :max="99">
+                  <el-badge
+                    :value="session.unreadCount"
+                    :hidden="session.unreadCount === 0"
+                    :max="99"
+                  >
                     <div class="session-avatar">
                       <DtAvatar
                         :name="session.name"
@@ -289,17 +291,14 @@
                         class="online-indicator"
                         :class="{
                           online: session.onlineStatus === 'online',
-                          offline: session.onlineStatus === 'offline'
+                          offline: session.onlineStatus === 'offline',
                         }"
                       ></span>
                     </div>
                   </el-badge>
 
                   <!-- 免打扰图标 -->
-                  <el-icon
-                    v-if="session.isMuted"
-                    class="mute-icon"
-                  >
+                  <el-icon v-if="session.isMuted" class="mute-icon">
                     <Bell />
                   </el-icon>
                 </div>
@@ -317,23 +316,29 @@
             </div>
           </div>
 
-           <!-- 聊天内容 -->
-           <div class="chat-panel">
-             <div v-if="currentSessionId" class="chat-container">
-               <!-- 聊天头部 - 钉钉5.6规范 -->
-               <div class="chat-header">
-                 <!-- 左侧：会话信息 -->
-                 <div class="chat-info">
-                   <div class="chat-avatar-group" @click="showChatProfile">
-                     <el-badge :value="currentSession?.unreadCount || 0" :hidden="!(currentSession?.unreadCount > 0)" :max="99">
-                       <DtAvatar
-                         :name="currentSession?.name"
-                         :avatar="currentSession?.avatar"
-                         :size="32"
-                       />
-                     </el-badge>
-                     <el-icon v-if="currentSession?.type === 'GROUP'" class="group-badge"><User /></el-icon>
-                   </div>
+          <!-- 聊天内容 -->
+          <div class="chat-panel">
+            <div v-if="currentSessionId" class="chat-container">
+              <!-- 聊天头部 - 钉钉5.6规范 -->
+              <div class="chat-header">
+                <!-- 左侧：会话信息 -->
+                <div class="chat-info">
+                  <div class="chat-avatar-group" @click="showChatProfile">
+                    <el-badge
+                      :value="currentSession?.unreadCount || 0"
+                      :hidden="!(currentSession?.unreadCount > 0)"
+                      :max="99"
+                    >
+                      <DtAvatar
+                        :name="currentSession?.name"
+                        :avatar="currentSession?.avatar"
+                        :size="32"
+                      />
+                    </el-badge>
+                    <el-icon v-if="currentSession?.type === 'GROUP'" class="group-badge"
+                      ><User
+                    /></el-icon>
+                  </div>
                   <div class="chat-title-info">
                     <div class="title-row">
                       <span class="title-name">{{ currentSession?.name }}</span>
@@ -353,7 +358,12 @@
                     <el-button :icon="Phone" class="action-btn" circle @click="startVoiceCall()" />
                   </el-tooltip>
                   <el-tooltip content="视频通话" placement="bottom">
-                    <el-button :icon="VideoCamera" class="action-btn" circle @click="startVideoCall()" />
+                    <el-button
+                      :icon="VideoCamera"
+                      class="action-btn"
+                      circle
+                      @click="startVideoCall()"
+                    />
                   </el-tooltip>
                   <el-dropdown trigger="click" placement="bottom-end">
                     <el-button :icon="More" class="action-btn" circle />
@@ -371,15 +381,25 @@
                           <el-icon><Star /></el-icon>
                           {{ currentSession?.isPinned ? '取消置顶' : '置顶聊天' }}
                         </el-dropdown-item>
-                        <el-dropdown-item divided @click="viewChatMembers" v-if="currentSession?.type === 'GROUP'">
+                        <el-dropdown-item
+                          v-if="currentSession?.type === 'GROUP'"
+                          divided
+                          @click="viewChatMembers"
+                        >
                           <el-icon><User /></el-icon>
                           查看成员
                         </el-dropdown-item>
-                        <el-dropdown-item @click="showGroupAnnouncement" v-if="currentSession?.type === 'GROUP'">
+                        <el-dropdown-item
+                          v-if="currentSession?.type === 'GROUP'"
+                          @click="showGroupAnnouncement"
+                        >
                           <el-icon><Bell /></el-icon>
                           群公告
                         </el-dropdown-item>
-                        <el-dropdown-item @click="showGroupFiles" v-if="currentSession?.type === 'GROUP'">
+                        <el-dropdown-item
+                          v-if="currentSession?.type === 'GROUP'"
+                          @click="showGroupFiles"
+                        >
                           <el-icon><Folder /></el-icon>
                           群文件
                         </el-dropdown-item>
@@ -387,7 +407,11 @@
                           <el-icon><Delete /></el-icon>
                           清空聊天记录
                         </el-dropdown-item>
-                        <el-dropdown-item @click="exitGroup" v-if="currentSession?.type === 'GROUP'" class="danger-item">
+                        <el-dropdown-item
+                          v-if="currentSession?.type === 'GROUP'"
+                          class="danger-item"
+                          @click="exitGroup"
+                        >
                           <el-icon><DeleteFilled /></el-icon>
                           退出群聊
                         </el-dropdown-item>
@@ -529,14 +553,19 @@
                       /></el-icon>
                       <!-- 消息已读状态 -->
                       <span
-                        v-if="(msg.isOwn || msg.senderId === currentUser?.userId) && msg.status !== 'sending' && msg.status !== 'failed'"
+                        v-if="
+                          (msg.isOwn || msg.senderId === currentUser?.userId) &&
+                          msg.status !== 'sending' &&
+                          msg.status !== 'failed'
+                        "
                         class="read-receipt"
                       >
                         <template v-if="currentSession?.type === 'PRIVATE'">
                           {{ msg.isRead ? '已读' : '未读' }}
                         </template>
                         <template v-else>
-                          {{ msg.readCount || 0 }}{{ msg.memberCount ? `/${msg.memberCount}` : '' }}已读
+                          {{ msg.readCount || 0
+                          }}{{ msg.memberCount ? `/${msg.memberCount}` : '' }}已读
                         </template>
                       </span>
                     </div>
@@ -883,7 +912,11 @@
               <div v-if="!contactSearch || newFriendsSearchResult.length === 0">
                 <div v-if="friendRequests.length > 0" class="friend-requests-section">
                   <div class="section-title">好友请求</div>
-                  <div v-for="request in friendRequests" :key="request.id" class="friend-request-item">
+                  <div
+                    v-for="request in friendRequests"
+                    :key="request.id"
+                    class="friend-request-item"
+                  >
                     <el-avatar :size="48" :src="request.avatar">
                       {{ (request.name || request.nickname)?.charAt(0) || 'U' }}
                     </el-avatar>
@@ -1242,8 +1275,12 @@
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item command="download" :icon="Download">批量下载</el-dropdown-item>
-                      <el-dropdown-item command="move" :icon="FolderOpened">移动到</el-dropdown-item>
+                      <el-dropdown-item command="download" :icon="Download"
+                        >批量下载</el-dropdown-item
+                      >
+                      <el-dropdown-item command="move" :icon="FolderOpened"
+                        >移动到</el-dropdown-item
+                      >
                       <el-dropdown-item command="delete" :icon="Delete">批量删除</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
@@ -1257,7 +1294,9 @@
               <div class="selection-actions">
                 <el-button size="small" @click="clearSelection">取消选择</el-button>
                 <el-button size="small" :icon="Download" @click="batchDownload">下载</el-button>
-                <el-button size="small" :icon="Delete" type="danger" @click="batchDelete">删除</el-button>
+                <el-button size="small" :icon="Delete" type="danger" @click="batchDelete"
+                  >删除</el-button
+                >
               </div>
             </div>
 
@@ -1276,7 +1315,7 @@
                 class="file-item folder-item"
                 :class="{
                   selected: isSelected(folder),
-                  'batch-selected': isInBatchSelection(folder)
+                  'batch-selected': isInBatchSelection(folder),
                 }"
                 @click="selectFile(folder, $event)"
                 @dblclick="openFolder(folder)"
@@ -1304,7 +1343,7 @@
                 class="file-item"
                 :class="{
                   selected: isSelected(file),
-                  'batch-selected': isInBatchSelection(file)
+                  'batch-selected': isInBatchSelection(file),
                 }"
                 @click="selectFile(file, $event)"
                 @dblclick="openFile(file)"
@@ -2000,7 +2039,12 @@
     </el-dialog>
 
     <!-- 快捷键提示对话框 -->
-    <el-dialog v-model="shortcutsDialogVisible" title="快捷键指南" width="500px" :append-to-body="true">
+    <el-dialog
+      v-model="shortcutsDialogVisible"
+      title="快捷键指南"
+      width="500px"
+      :append-to-body="true"
+    >
       <div class="shortcuts-dialog">
         <div class="shortcut-section">
           <div class="section-title">消息操作</div>
@@ -2062,7 +2106,12 @@
     </el-dialog>
 
     <!-- 消息通知设置对话框 -->
-    <el-dialog v-model="notificationSettingsVisible" title="消息通知设置" width="500px" :append-to-body="true">
+    <el-dialog
+      v-model="notificationSettingsVisible"
+      title="消息通知设置"
+      width="500px"
+      :append-to-body="true"
+    >
       <div class="notification-settings">
         <div class="setting-group">
           <div class="setting-item">
@@ -2420,7 +2469,7 @@ import {
   uploadImage,
   downloadFile as apiDownloadFile,
   getFilePreviewUrl,
-  getFilePreviewInfo
+  getFilePreviewInfo,
 } from '@/api/im/file'
 import {
   sendMessage as apiSendMessage,
@@ -2463,12 +2512,7 @@ const route = useRoute()
 const store = useStore()
 
 // WebSocket
-const {
-  isConnected,
-  connect,
-  disconnect,
-  sendStatusChange: wsSendStatusChange,
-} = useImWebSocket()
+const { isConnected, connect, disconnect, sendStatusChange: wsSendStatusChange } = useImWebSocket()
 
 // 状态
 const isNavCollapsed = ref(false)
@@ -2951,7 +2995,7 @@ const loadGroups = async () => {
 }
 
 // 搜索新朋友（根据用户名或手机号搜索用户）
-const searchNewFriends = async (keyword) => {
+const searchNewFriends = async keyword => {
   if (!keyword || keyword.trim() === '') {
     newFriendsSearchResult.value = []
     return
@@ -2979,12 +3023,12 @@ const searchNewFriends = async (keyword) => {
 }
 
 // 处理新朋友搜索输入事件
-const handleNewFriendsSearch = (keyword) => {
+const handleNewFriendsSearch = keyword => {
   searchNewFriends(keyword)
 }
 
 // 处理添加好友操作
-const handleAddFriend = async (user) => {
+const handleAddFriend = async user => {
   try {
     await ElMessageBox.prompt('请输入验证消息', '添加好友', {
       confirmButtonText: '发送',
@@ -3038,7 +3082,7 @@ const initOrgTree = async () => {
           id: n.id,
           name: n.name || n.deptName || '',
           userCount: n.userCount || n.count || 0,
-          children: child
+          children: child,
         }
       })
     }
@@ -3503,7 +3547,7 @@ onMounted(() => {
   }
 
   // 全局快捷键支持
-  const handleGlobalKeydown = (e) => {
+  const handleGlobalKeydown = e => {
     // Ctrl+K: 全局搜索
     if (e.ctrlKey && e.key === 'k') {
       e.preventDefault()
@@ -3664,7 +3708,7 @@ const folderTreeData = computed(() => {
       .filter(f => f.parentId === parentId)
       .map(folder => ({
         ...folder,
-        children: buildTree(folder.id)
+        children: buildTree(folder.id),
       }))
   }
   return buildTree()
@@ -3685,9 +3729,7 @@ const displayFiles = computed(() => {
     return currentFiles.value
   }
   const keyword = driveSearchKeyword.value.toLowerCase()
-  return allFiles.value.filter(f =>
-    f.name.toLowerCase().includes(keyword)
-  )
+  return allFiles.value.filter(f => f.name.toLowerCase().includes(keyword))
 })
 
 // 获取文件图标
@@ -3892,37 +3934,33 @@ const openFile = async file => {
       previewingFile.value = {
         ...file,
         previewUrl: previewInfo.url,
-        previewType: previewInfo.type
+        previewType: previewInfo.type,
       }
       filePreviewDialogVisible.value = true
     } else {
       // 无法预览，提示下载
-      ElMessageBox.confirm(
-        `'${file.name}' 暂不支持在线预览，是否下载？`,
-        '提示',
-        {
-          confirmButtonText: '下载',
-          cancelButtonText: '取消',
-          type: 'info',
-        }
-      ).then(() => {
-        downloadSingleFile(file)
-      }).catch(() => {})
+      ElMessageBox.confirm(`'${file.name}' 暂不支持在线预览，是否下载？`, '提示', {
+        confirmButtonText: '下载',
+        cancelButtonText: '取消',
+        type: 'info',
+      })
+        .then(() => {
+          downloadSingleFile(file)
+        })
+        .catch(() => {})
     }
   } catch (error) {
     console.error('获取文件预览信息失败:', error)
     // API 调用失败，提示下载
-    ElMessageBox.confirm(
-      `'${file.name}' 暂不支持在线预览，是否下载？`,
-      '提示',
-      {
-        confirmButtonText: '下载',
-        cancelButtonText: '取消',
-        type: 'info',
-      }
-    ).then(() => {
-      downloadSingleFile(file)
-    }).catch(() => {})
+    ElMessageBox.confirm(`'${file.name}' 暂不支持在线预览，是否下载？`, '提示', {
+      confirmButtonText: '下载',
+      cancelButtonText: '取消',
+      type: 'info',
+    })
+      .then(() => {
+        downloadSingleFile(file)
+      })
+      .catch(() => {})
   }
 }
 
@@ -4219,7 +4257,7 @@ const toggleNavCollapse = () => {
 }
 
 // 导航栏拖拽调整宽度（钉钉7.6新功能）
-const startNavResize = (e) => {
+const startNavResize = e => {
   if (e.target.classList.contains('nav-resize-handle')) {
     isResizingNav.value = true
     dragStartX.value = e.clientX
@@ -4231,7 +4269,7 @@ const startNavResize = (e) => {
   }
 }
 
-const onNavResize = (e) => {
+const onNavResize = e => {
   if (!isResizingNav.value) return
   const delta = e.clientX - dragStartX.value
   const newWidth = dragStartWidth.value + delta
@@ -4251,7 +4289,7 @@ const stopNavResize = () => {
 }
 
 // 会话面板拖拽调整宽度（钉钉7.6新功能）
-const startSessionResize = (e) => {
+const startSessionResize = e => {
   isResizingSession.value = true
   dragStartX.value = e.clientX
   dragStartWidth.value = sessionWidth.value
@@ -4261,7 +4299,7 @@ const startSessionResize = (e) => {
   document.body.style.userSelect = 'none'
 }
 
-const onSessionResize = (e) => {
+const onSessionResize = e => {
   if (!isResizingSession.value) return
   const delta = e.clientX - dragStartX.value
   const newWidth = dragStartWidth.value + delta
@@ -4308,7 +4346,7 @@ const selectSession = async session => {
     // 简化：直接传递0，表示已读所有消息
     markMessageRead({
       conversationId: session.id,
-      lastReadMessageId: 0
+      lastReadMessageId: 0,
     }).catch(err => {
       console.warn('标记已读失败:', err)
     })
@@ -4545,7 +4583,9 @@ const openApp = appKey => {
     workbenchCategory.value = panelApps[appKey]
   } else {
     // 其他应用暂未实现，显示提示
-    ElMessage.info(`${workbenchApps.value.find(app => app.key === appKey)?.name || appKey}功能开发中`)
+    ElMessage.info(
+      `${workbenchApps.value.find(app => app.key === appKey)?.name || appKey}功能开发中`
+    )
   }
 }
 
@@ -5295,7 +5335,7 @@ const resizeStartY = ref(0)
 const resizeStartHeight = ref(0)
 
 // 开始调整大小
-const startResize = (e) => {
+const startResize = e => {
   isResizing.value = true
   resizeStartY.value = e.clientY
   resizeStartHeight.value = inputAreaRef.value?.offsetHeight || 160
@@ -5309,7 +5349,7 @@ const startResize = (e) => {
 }
 
 // 调整大小中
-const onResize = (e) => {
+const onResize = e => {
   if (!isResizing.value) return
 
   const deltaY = e.clientY - resizeStartY.value
@@ -5368,13 +5408,13 @@ const formatMessageContent = content => {
   if (!content) return ''
 
   // 转换为字符串并转义HTML（防止XSS）
-  let formatted = String(content)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+  let formatted = String(content).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
   // 处理@提及 - 匹配 @用户名 格式
-  formatted = formatted.replace(/@([a-zA-Z0-9\u4e00-\u9fa5_]+)/g, '<span class="mention">@$1</span>')
+  formatted = formatted.replace(
+    /@([a-zA-Z0-9\u4e00-\u9fa5_]+)/g,
+    '<span class="mention">@$1</span>'
+  )
 
   // 处理换行
   formatted = formatted.replace(/\n/g, '<br>')
@@ -5383,7 +5423,7 @@ const formatMessageContent = content => {
 }
 
 // 格式化会话预览文本（用于会话列表）
-const formatSessionPreview = (content) => {
+const formatSessionPreview = content => {
   if (!content) return ''
 
   let actualContent = content
@@ -5430,7 +5470,7 @@ const formatSessionPreview = (content) => {
 }
 
 // 获取图片URL（处理解析后的消息内容）
-const getImageUrl = (message) => {
+const getImageUrl = message => {
   // 优先使用解析后的URL
   if (message._parsedContent) {
     if (message._parsedContent.url) return message._parsedContent.url
@@ -5450,7 +5490,11 @@ const getImageUrl = (message) => {
       }
     }
     // 如果content看起来像URL，直接返回
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('/')) {
+    if (
+      trimmed.startsWith('http://') ||
+      trimmed.startsWith('https://') ||
+      trimmed.startsWith('/')
+    ) {
       return trimmed
     }
   }
@@ -5463,7 +5507,7 @@ const getImageUrl = (message) => {
 }
 
 // 获取文件信息（处理解析后的消息内容）
-const getFileInfo = (message) => {
+const getFileInfo = message => {
   // 优先使用解析后的文件信息
   if (message._parsedContent && !message._parsedContent.isPlainText) {
     return {
@@ -5757,14 +5801,14 @@ const showReactionPicker = () => {
 }
 
 // 判断当前用户是否已对消息反应
-const isReacted = (reactionKey) => {
+const isReacted = reactionKey => {
   if (!selectedMessage.value) return false
   const reactions = messageReactions.value.get(selectedMessage.value.id) || []
   return reactions.some(r => r.key === reactionKey && r.userId === currentUser.value?.userId)
 }
 
 // 切换表情反应
-const toggleReaction = async (reactionKey) => {
+const toggleReaction = async reactionKey => {
   if (!selectedMessage.value) return
 
   const messageId = selectedMessage.value.id
@@ -5777,7 +5821,9 @@ const toggleReaction = async (reactionKey) => {
     if (existingReaction) {
       // 取消反应
       await removeMessageReaction({ messageId, reactionKey })
-      const updated = reactions.filter(r => !(r.key === reactionKey && r.userId === currentUser.value?.userId))
+      const updated = reactions.filter(
+        r => !(r.key === reactionKey && r.userId === currentUser.value?.userId)
+      )
       messageReactions.value.set(messageId, updated)
     } else {
       // 添加反应
@@ -5800,12 +5846,12 @@ const toggleReaction = async (reactionKey) => {
 }
 
 // 获取消息的反应列表
-const getMessageReactions = (messageId) => {
+const getMessageReactions = messageId => {
   return messageReactions.value.get(messageId) || []
 }
 
 // 获取反应统计
-const getReactionStats = (messageId) => {
+const getReactionStats = messageId => {
   const reactions = getMessageReactions(messageId)
   const stats = {}
   reactions.forEach(r => {
@@ -5815,7 +5861,7 @@ const getReactionStats = (messageId) => {
 }
 
 // 为指定消息显示表情选择器
-const showReactionPickerFor = (message) => {
+const showReactionPickerFor = message => {
   selectedMessage.value = message
   // 计算位置：显示在消息反应下方
   const rect = event?.target?.getBoundingClientRect()
@@ -5840,13 +5886,11 @@ const showReactionPickerFor = (message) => {
 // 判断当前用户是否对消息进行了某个反应
 const isReactedByUser = (messageId, reactionKey) => {
   const reactions = getMessageReactions(messageId)
-  return reactions.some(
-    r => r.key === reactionKey && r.userId === currentUser.value?.userId
-  )
+  return reactions.some(r => r.key === reactionKey && r.userId === currentUser.value?.userId)
 }
 
 // 根据key获取emoji
-const getEmojiByKey = (key) => {
+const getEmojiByKey = key => {
   const emoji = quickReactions.find(e => e.key === key)
   return emoji ? emoji.emoji : ''
 }
@@ -6066,7 +6110,7 @@ const handleHelpCommand = command => {
 }
 
 // 反馈提交成功处理
-const handleFeedbackSuccess = (data) => {
+const handleFeedbackSuccess = data => {
   console.log('反馈提交成功:', data)
   // 可以在这里添加额外的处理逻辑，比如记录到本地等
 }
@@ -6132,7 +6176,6 @@ onMounted(() => {
   }
 })
 
-
 // 顶部导航栏方法
 const showNotifications = () => {
   notificationVisible.value = true
@@ -6147,7 +6190,7 @@ const handleGlobalSearch = () => {
 }
 
 // 搜索结果点击处理
-const handleSearchResultClick = (item) => {
+const handleSearchResultClick = item => {
   console.log('搜索结果点击:', item)
 
   // 根据类型执行相应操作
@@ -6201,28 +6244,28 @@ const showChatProfile = () => {
 }
 
 // 用户详情抽屉事件处理
-const handleChatFromDrawer = (data) => {
+const handleChatFromDrawer = data => {
   // 从用户详情抽屉点击发消息
   if (data.userId) {
     switchToSessionByUserId(data.userId)
   }
 }
 
-const handleVoiceCallFromDrawer = (data) => {
+const handleVoiceCallFromDrawer = data => {
   // 从用户详情弹窗点击语音通话
   startVoiceCall(data.userId)
 }
 
-const handleVideoCallFromDrawer = (data) => {
+const handleVideoCallFromDrawer = data => {
   // 从用户详情弹窗点击视频通话
   startVideoCall(data.userId)
 }
 
 // 根据用户ID切换会话
-const switchToSessionByUserId = (userId) => {
+const switchToSessionByUserId = userId => {
   // 查找与该用户的会话
-  const session = sessions.value.find(s =>
-    s.type !== 'GROUP' && (s.peerUserId === userId || s.targetId === userId)
+  const session = sessions.value.find(
+    s => s.type !== 'GROUP' && (s.peerUserId === userId || s.targetId === userId)
   )
   if (session) {
     currentSessionId.value = session.id
@@ -6286,7 +6329,7 @@ const handleAnnouncementRead = () => {
 }
 
 // 滚动到指定消息
-const scrollToMessage = (messageId) => {
+const scrollToMessage = messageId => {
   const messageElement = document.querySelector(`[data-message-id="${messageId}"]`)
   if (messageElement) {
     messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -6938,9 +6981,9 @@ onMounted(() => {
         })
         return duplicates
       },
-      showByName: (name) => {
+      showByName: name => {
         return friends.value.filter(f => (f.name || f.nickname).includes(name))
-      }
+      },
     }
     console.log('🔍 调试工具已安装: window.__debug_friends__')
     console.log('  - getFriends(): 获取好友列表')
@@ -6959,22 +7002,22 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 @use 'sass:color';
 
- // ==================== 钉钉PC客户端 设计规范变量 ====================
+// ==================== 钉钉PC客户端 设计规范变量 ====================
 // 布局尺寸（严格按照钉钉PC客户端6.5.x实际测量）
-$nav-width-narrow: 60px;     // 左侧导航栏宽度（窄模式-仅图标）- 钉钉6.5.x规范60px
-$nav-width-wide: 180px;      // 左侧导航栏宽度（宽模式-图标+文字）
+$nav-width-narrow: 60px; // 左侧导航栏宽度（窄模式-仅图标）- 钉钉6.5.x规范60px
+$nav-width-wide: 180px; // 左侧导航栏宽度（宽模式-图标+文字）
 $nav-width: $nav-width-narrow; // 当前使用窄模式
-$header-height: 48px;        // 顶部导航栏高度
+$header-height: 48px; // 顶部导航栏高度
 $session-panel-width: 320px; // 会话列表宽度（固定）- 钉钉6.5.x规范320px
 $chat-panel-min-width: 400px; // 聊天区域最小宽度
-$nav-item-size: 48px;         // 导航项尺寸 - 钉钉6.5.x规范48×48px
-$chat-header-height: 56px;    // 聊天头部高度 - 钉钉6.5.x规范56px
-$input-bar-height: 48px;      // 输入栏高度 - 钉钉6.5.x规范48px
-$search-bar-height: 36px;     // 搜索栏高度
-$session-item-height: 64px;   // 会话项高度 - 钉钉6.5.x规范64px
+$nav-item-size: 48px; // 导航项尺寸 - 钉钉6.5.x规范48×48px
+$chat-header-height: 56px; // 聊天头部高度 - 钉钉6.5.x规范56px
+$input-bar-height: 48px; // 输入栏高度 - 钉钉6.5.x规范48px
+$search-bar-height: 36px; // 搜索栏高度
+$session-item-height: 64px; // 会话项高度 - 钉钉6.5.x规范64px
 
 // 品牌色系（钉钉6.5.x标准色）
-$primary-color: #1677ff;     // 钉钉蓝（主色）- 6.5.x版本
+$primary-color: #1677ff; // 钉钉蓝（主色）- 6.5.x版本
 $primary-color-hover: #4096ff;
 $primary-color-active: #0958d9;
 $primary-color-light: rgba(22, 119, 255, 0.1); // 浅蓝（选中背景）- 钉钉6.5.x规范10%透明度
@@ -6982,47 +7025,49 @@ $primary-color-lighter: #e6f7ff;
 $primary-disabled: #d9d9d9;
 
 // 中性色系（钉钉6.5.x规范）
-$text-primary: #262626;      // 主要文字 - 钉钉6.5.x规范标题色
-$text-secondary: #595959;     // 正文内容 - 钉钉6.5.x规范正文色
-$text-regular: #666666;       // 副标题、次要信息 - 钉钉6.5.x规范次要文字
-$text-tertiary: #8c8c8c;      // 时间戳、提示信息 - 钉钉6.5.x规范辅助文字
-$text-disabled: #d9d9d9;      // 禁用状态
-$text-placeholder: #bfbfbf;   // 占位符 - 钉钉6.5.x规范辅助文字
+$text-primary: #262626; // 主要文字 - 钉钉6.5.x规范标题色
+$text-secondary: #595959; // 正文内容 - 钉钉6.5.x规范正文色
+$text-regular: #666666; // 副标题、次要信息 - 钉钉6.5.x规范次要文字
+$text-tertiary: #8c8c8c; // 时间戳、提示信息 - 钉钉6.5.x规范辅助文字
+$text-disabled: #d9d9d9; // 禁用状态
+$text-placeholder: #bfbfbf; // 占位符 - 钉钉6.5.x规范辅助文字
 
-$bg-white: #FFFFFF;
-$bg-gray: #f0f2f5;           // 页面整体背景（钉钉6.5.x浅灰）
-$bg-light: #FAFAFA;          // 卡片、面板背景
-$bg-hover: #f5f7fa;          // 悬停背景（钉钉6.5.x浅灰）
-$bg-nav-narrow: #ffffff;     // 导航栏窄模式背景 - 钉钉6.5.x白色
-$bg-nav-wide: #FFFFFF;       // 导航栏宽模式背景
+$bg-white: #ffffff;
+$bg-gray: #f0f2f5; // 页面整体背景（钉钉6.5.x浅灰）
+$bg-light: #fafafa; // 卡片、面板背景
+$bg-hover: #f5f7fa; // 悬停背景（钉钉6.5.x浅灰）
+$bg-nav-narrow: #ffffff; // 导航栏窄模式背景 - 钉钉6.5.x白色
+$bg-nav-wide: #ffffff; // 导航栏宽模式背景
 
-$border-color: #f0f0f0;      // 分割线、边框 - 钉钉6.5.x规范边框色
-$border-hover: #d9d9d9;      // 边框悬停
+$border-color: #f0f0f0; // 分割线、边框 - 钉钉6.5.x规范边框色
+$border-hover: #d9d9d9; // 边框悬停
 
 // 功能色（钉钉6.5.x规范）
-$success-color: #52c41a;  // 钉钉6.5.x成功绿
-$warning-color: #faad14;  // 钉钉6.5.x警告橙
-$danger-color: #ff4d4f;   // 钉钉6.5.x危险红
-$info-color: #1677ff;     // 钉钉6.5.x信息蓝
+$success-color: #52c41a; // 钉钉6.5.x成功绿
+$warning-color: #faad14; // 钉钉6.5.x警告橙
+$danger-color: #ff4d4f; // 钉钉6.5.x危险红
+$info-color: #1677ff; // 钉钉6.5.x信息蓝
 
 // 导航栏颜色（钉钉6.5.x规范）
-$nav-bg: #FFFFFF;
+$nav-bg: #ffffff;
 $nav-item-hover: rgba(0, 0, 0, 0.04);
 $nav-item-active: rgba(22, 119, 255, 0.1); // 导航激活背景 - 钉钉6.5.x规范
-$nav-item-icon: #8c8c8c;    // 导航图标颜色 - 钉钉6.5.x规范灰色
+$nav-item-icon: #8c8c8c; // 导航图标颜色 - 钉钉6.5.x规范灰色
 $nav-item-icon-active: #1677ff;
 
 // 消息气泡颜色（钉钉5.6规范）
-$message-sent-bg: #0089FF;         // 发送方：钉钉蓝5.6版本
-$message-sent-text: #FFFFFF;       // 发送方文字：白色
-$message-received-bg: #FFFFFF;    // 接收方：白色
-$message-received-text: #333333;  // 接收方文字：钉钉正文色
-$message-received-border: #E8E8E8; // 接收方边框：钉钉规范边框色
+$message-sent-bg: #0089ff; // 发送方：钉钉蓝5.6版本
+$message-sent-text: #ffffff; // 发送方文字：白色
+$message-received-bg: #ffffff; // 接收方：白色
+$message-received-text: #333333; // 接收方文字：钉钉正文色
+$message-received-border: #e8e8e8; // 接收方边框：钉钉规范边框色
 
 // 阴影系统
 $shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
 $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$shadow-base:
+  0 1px 3px 0 rgba(0, 0, 0, 0.1),
+  0 1px 2px 0 rgba(0, 0, 0, 0.06);
 $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
 $shadow-message: 0 1px 2px rgba(0, 0, 0, 0.08);
 
@@ -7042,17 +7087,17 @@ $spacing-lg: 16px;
 $spacing-xl: 24px;
 
 // 动画时长（钉钉规范）
-$transition-instant: 0.1s;   // 按钮点击 - 极快
-$transition-fast: 0.2s;       // 快速切换 - 颜色/阴影变化
-$transition-base: 0.3s;       // 标准过渡 - 展开/收起
-$transition-slow: 0.5s;       // 较慢 - 复杂动画
+$transition-instant: 0.1s; // 按钮点击 - 极快
+$transition-fast: 0.2s; // 快速切换 - 颜色/阴影变化
+$transition-base: 0.3s; // 标准过渡 - 展开/收起
+$transition-slow: 0.5s; // 较慢 - 复杂动画
 
 // 缓动函数（钉钉规范）
-$ease-linear: linear;                           // 线性 - 进度条
-$ease-base: cubic-bezier(0.4, 0, 0.2, 1);       // 标准缓动
-$ease-in: cubic-bezier(0.4, 0, 1, 1);           // 入场缓动
-$ease-out: cubic-bezier(0, 0, 0.2, 1);          // 出场缓动
-$ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);     // 双向缓动
+$ease-linear: linear; // 线性 - 进度条
+$ease-base: cubic-bezier(0.4, 0, 0.2, 1); // 标准缓动
+$ease-in: cubic-bezier(0.4, 0, 1, 1); // 入场缓动
+$ease-out: cubic-bezier(0, 0, 0.2, 1); // 出场缓动
+$ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); // 双向缓动
 $ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1); // 弹性缓动 - 消息发送
 
 // 头像尺寸
@@ -7084,7 +7129,7 @@ $avatar-xl: 64px;
 
   &:hover {
     background: rgba(0, 0, 0, 0.04);
-    color: #0089FF;
+    color: #0089ff;
   }
 
   .el-icon {
@@ -7094,7 +7139,7 @@ $avatar-xl: 64px;
   }
 
   &:hover .el-icon {
-    color: #0089FF;
+    color: #0089ff;
     transform: scale(1.1);
   }
 
@@ -7117,11 +7162,11 @@ $avatar-xl: 64px;
     flex-direction: column;
     align-items: flex-start;
     padding: 16px;
-    background: #F5F5F5;
+    background: #f5f5f5;
 
     .dropdown-avatar {
       margin-bottom: 8px;
-      border: 2px solid #0089FF;
+      border: 2px solid #0089ff;
       box-shadow: 0 2px 8px rgba(22, 93, 255, 0.2);
     }
 
@@ -7198,7 +7243,7 @@ $avatar-xl: 64px;
     }
 
     &.active {
-      border-color: #0089FF;
+      border-color: #0089ff;
       box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.15);
     }
   }
@@ -7212,7 +7257,7 @@ $avatar-xl: 64px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 
     &.online {
-      background: #00C853;
+      background: #00c853;
     }
 
     &.away {
@@ -7220,7 +7265,7 @@ $avatar-xl: 64px;
     }
 
     &.busy {
-      background: #F5222D;
+      background: #f5222d;
     }
 
     &.offline {
@@ -7468,7 +7513,6 @@ $avatar-xl: 64px;
     }
   }
 
-
   // 主体区域
   .main-body {
     flex: 1;
@@ -7496,8 +7540,8 @@ $avatar-xl: 64px;
         overflow-x: hidden;
 
         .nav-item {
-          width: 48px;    // 钉钉6.5.x规范：导航项尺寸48×48px
-          height: 48px;   // 钉钉6.5.x规范：导航项尺寸48×48px
+          width: 48px; // 钉钉6.5.x规范：导航项尺寸48×48px
+          height: 48px; // 钉钉6.5.x规范：导航项尺寸48×48px
           display: flex;
           align-items: center;
           justify-content: center;
@@ -7509,20 +7553,20 @@ $avatar-xl: 64px;
           margin: 4px 6px;
 
           .nav-icon {
-            font-size: 22px;  // 钉钉6.5.x规范：图标22×22px
+            font-size: 22px; // 钉钉6.5.x规范：图标22×22px
             transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
           }
 
           // AI助理图标样式（钉钉7.6.45+新增）
           &.ai-item .nav-icon.ai-icon {
-            color: #722ED1;  // AI助理紫色
+            color: #722ed1; // AI助理紫色
             &:hover {
-              color: #9254DE;
+              color: #9254de;
             }
           }
 
           &.ai-item.active .nav-icon.ai-icon {
-            color: #722ED1;
+            color: #722ed1;
           }
 
           // 未读红点
@@ -7532,7 +7576,7 @@ $avatar-xl: 64px;
             right: 8px;
             width: 10px;
             height: 10px;
-            background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);  // 钉钉6.5.x危险红渐变
+            background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%); // 钉钉6.5.x危险红渐变
             border-radius: 50%;
             border: 2px solid $bg-nav-narrow;
             box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
@@ -7580,7 +7624,7 @@ $avatar-xl: 64px;
             background: rgba(114, 46, 209, 0.1);
 
             &::before {
-              background: linear-gradient(135deg, #722ED1 0%, #9254DE 100%);
+              background: linear-gradient(135deg, #722ed1 0%, #9254de 100%);
             }
           }
         }
@@ -7649,7 +7693,7 @@ $avatar-xl: 64px;
             z-index: 10;
 
             &:hover {
-              background: var(--dt-color-primary, #0089FF);
+              background: var(--dt-color-primary, #0089ff);
             }
           }
 
@@ -7662,13 +7706,14 @@ $avatar-xl: 64px;
             .session-item {
               display: flex;
               align-items: center;
-              height: 64px;  // 钉钉7.6规范：会话项高度64px
-              padding: 10px 12px;  // 钉钉7.6规范：内边距10px 12px
-              gap: 10px;  // 钉钉7.6规范：头像与内容间距10px
+              height: 64px; // 钉钉7.6规范：会话项高度64px
+              padding: 10px 12px; // 钉钉7.6规范：内边距10px 12px
+              gap: 10px; // 钉钉7.6规范：头像与内容间距10px
               margin: 0;
               cursor: pointer;
               border-radius: 0;
-              transition: all var(--dt-transition-fast, 0.15s) var(--dt-ease-out, cubic-bezier(0, 0, 0.2, 1));
+              transition: all var(--dt-transition-fast, 0.15s)
+                var(--dt-ease-out, cubic-bezier(0, 0, 0.2, 1));
               position: relative;
 
               // 置顶标识（钉钉7.6样式）
@@ -7679,7 +7724,7 @@ $avatar-xl: 64px;
                 top: 12px;
                 bottom: 12px;
                 width: 3px;
-                background: var(--dt-color-primary, #0089FF);
+                background: var(--dt-color-primary, #0089ff);
                 border-radius: 0 2px 2px 0;
               }
 
@@ -7708,7 +7753,7 @@ $avatar-xl: 64px;
                   position: relative;
                   width: 40px;
                   height: 40px;
-                  border-radius: 8px;  // 钉钉7.6规范：头像圆角8px
+                  border-radius: 8px; // 钉钉7.6规范：头像圆角8px
 
                   .avatar-inner {
                     width: 100%;
@@ -7722,15 +7767,15 @@ $avatar-xl: 64px;
                     right: -1px;
                     width: 10px;
                     height: 10px;
-                    border: 2px solid var(--dt-color-bg-secondary, #F5F7FA);
+                    border: 2px solid var(--dt-color-bg-secondary, #f5f7fa);
                     border-radius: 50%;
 
                     &.online {
-                      background: var(--dt-color-success, #52C41A);
+                      background: var(--dt-color-success, #52c41a);
                     }
 
                     &.offline {
-                      background: var(--dt-color-text-quaternary, #B3B8BD);
+                      background: var(--dt-color-text-quaternary, #b3b8bd);
                     }
                   }
                 }
@@ -7743,13 +7788,13 @@ $avatar-xl: 64px;
                   width: 14px;
                   height: 14px;
                   font-size: 14px;
-                  color: var(--dt-color-text-tertiary, #858B8F);
-                  background: var(--dt-color-bg-primary, #FFFFFF);
+                  color: var(--dt-color-text-tertiary, #858b8f);
+                  background: var(--dt-color-bg-primary, #ffffff);
                   border-radius: 50%;
                   display: flex;
                   align-items: center;
                   justify-content: center;
-                  border: 1px solid var(--dt-color-border, #E5E8EB);
+                  border: 1px solid var(--dt-color-border, #e5e8eb);
                 }
               }
 
@@ -7759,13 +7804,13 @@ $avatar-xl: 64px;
                 flex-shrink: 0;
 
                 :deep(.el-badge__content) {
-                  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);  // 钉钉7.6渐变红
+                  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%); // 钉钉7.6渐变红
                   border: none;
                   font-size: 11px;
                   height: 18px;
                   line-height: 18px;
                   padding: 0 5px;
-                  border-radius: 9px;  // 钉钉7.6规范：圆角9px
+                  border-radius: 9px; // 钉钉7.6规范：圆角9px
                   font-weight: 600;
                 }
               }
@@ -7823,7 +7868,7 @@ $avatar-xl: 64px;
               display: flex;
               align-items: center;
               justify-content: space-between;
-              border-bottom: 1px solid #E6E6E6;
+              border-bottom: 1px solid #e6e6e6;
               background: #fff;
               flex-shrink: 0;
 
@@ -7843,7 +7888,7 @@ $avatar-xl: 64px;
                     right: -2px;
                     width: 14px;
                     height: 14px;
-                    background: #0089FF;
+                    background: #0089ff;
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
@@ -7867,7 +7912,7 @@ $avatar-xl: 64px;
                     .title-name {
                       font-size: 14px;
                       font-weight: 500;
-                      color: #1A1A1A;
+                      color: #1a1a1a;
                     }
                   }
 
@@ -7905,21 +7950,21 @@ $avatar-xl: 64px;
                   border-radius: 4px;
 
                   &:hover {
-                    --el-button-text-color: #0089FF;
+                    --el-button-text-color: #0089ff;
                     --el-button-hover-bg-color: rgba(0, 0, 0, 0.04);
                   }
                 }
 
                 :deep(.el-dropdown-menu__item.danger-item) {
-                  color: #F5222D;
+                  color: #f5222d;
 
                   &:hover {
                     background: rgba(245, 34, 45, 0.1);
-                    color: #F5222D;
+                    color: #f5222d;
                   }
 
                   .el-icon {
-                    color: #F5222D;
+                    color: #f5222d;
                   }
                 }
               }
@@ -7931,7 +7976,7 @@ $avatar-xl: 64px;
               flex-direction: column;
               padding: 16px;
               overflow-y: auto;
-              background: #F5F5F5;
+              background: #f5f5f5;
 
               // 自定义滚动条
               &::-webkit-scrollbar {
@@ -7943,11 +7988,11 @@ $avatar-xl: 64px;
               }
 
               &::-webkit-scrollbar-thumb {
-                background: #E6E6E6;
+                background: #e6e6e6;
                 border-radius: 3px;
 
                 &:hover {
-                  background: #C8C8C8;
+                  background: #c8c8c8;
                 }
               }
 
@@ -7958,10 +8003,10 @@ $avatar-xl: 64px;
                 gap: 8px;
                 padding: 8px 16px;
                 margin-bottom: 12px;
-                background: #FFF7E6;
-                border: 1px solid #FFD591;
+                background: #fff7e6;
+                border: 1px solid #ffd591;
                 border-radius: 4px;
-                color: #FF9800;
+                color: #ff9800;
                 font-size: 13px;
 
                 .el-icon {
@@ -8001,10 +8046,10 @@ $avatar-xl: 64px;
 
                   .message-bubble {
                     // 钉钉7.6发送方消息气泡 - 蓝色，带右尾巴
-                    background: var(--dt-bubble-sent-bg, #0089FF);
-                    color: var(--dt-bubble-sent-text, #FFFFFF);
+                    background: var(--dt-bubble-sent-bg, #0089ff);
+                    color: var(--dt-bubble-sent-text, #ffffff);
                     border-radius: 12px;
-                    border-bottom-right-radius: 4px;  // 钉钉7.6尾巴圆角
+                    border-bottom-right-radius: 4px; // 钉钉7.6尾巴圆角
                     border: none;
                     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
                     position: relative;
@@ -8019,7 +8064,8 @@ $avatar-xl: 64px;
                       height: 0;
                       border-style: solid;
                       border-width: 6px 0 6px 7px;
-                      border-color: transparent transparent transparent var(--dt-bubble-sent-bg, #0089FF);
+                      border-color: transparent transparent transparent
+                        var(--dt-bubble-sent-bg, #0089ff);
                     }
 
                     // 链接样式
@@ -8054,11 +8100,11 @@ $avatar-xl: 64px;
 
                   /* 接收方消息气泡 - 白色（钉钉7.6风格），带左尾巴 */
                   .message-bubble {
-                    background: var(--dt-bubble-received-bg, #FFFFFF);
-                    color: var(--dt-bubble-received-text, #171A1A);
+                    background: var(--dt-bubble-received-bg, #ffffff);
+                    color: var(--dt-bubble-received-text, #171a1a);
                     border-radius: 12px;
-                    border-bottom-left-radius: 4px;  // 钉钉7.6尾巴圆角
-                    border: 1px solid var(--dt-bubble-received-border, #E5E8EB);
+                    border-bottom-left-radius: 4px; // 钉钉7.6尾巴圆角
+                    border: 1px solid var(--dt-bubble-received-border, #e5e8eb);
                     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
                     position: relative;
 
@@ -8072,7 +8118,8 @@ $avatar-xl: 64px;
                       height: 0;
                       border-style: solid;
                       border-width: 6px 8px 6px 0;
-                      border-color: transparent var(--dt-bubble-received-border, #E5E8EB) transparent transparent;
+                      border-color: transparent var(--dt-bubble-received-border, #e5e8eb)
+                        transparent transparent;
                       filter: drop-shadow(-2px 0 1px rgba(0, 0, 0, 0.05));
                     }
 
@@ -8086,7 +8133,8 @@ $avatar-xl: 64px;
                       height: 0;
                       border-style: solid;
                       border-width: 6px 7px 6px 0;
-                      border-color: transparent var(--dt-bubble-received-bg, #FFFFFF) transparent transparent;
+                      border-color: transparent var(--dt-bubble-received-bg, #ffffff) transparent
+                        transparent;
                     }
 
                     &.sending {
@@ -8095,7 +8143,7 @@ $avatar-xl: 64px;
 
                     &.failed {
                       background: #fff1f0;
-                      color: #F5222D;
+                      color: #f5222d;
                       border: 1px solid #ffccc7;
                       box-shadow: 0 1px 3px rgba(255, 77, 79, 0.15);
                     }
@@ -8159,7 +8207,7 @@ $avatar-xl: 64px;
                     align-items: center;
                     gap: 12px;
                     padding: 12px 16px;
-                    background: #F5F5F5;
+                    background: #f5f5f5;
                     border-radius: var(--dt-radius-lg);
                     border: 1px solid rgba(0, 0, 0, 0.04);
                     min-width: 200px;
@@ -8278,7 +8326,7 @@ $avatar-xl: 64px;
 
             .input-area {
               padding: 12px 16px;
-              border-top: 1px solid #E6E6E6;
+              border-top: 1px solid #e6e6e6;
               background: #fff;
               display: flex;
               flex-direction: column;
@@ -8300,7 +8348,7 @@ $avatar-xl: 64px;
                   background-color: rgba(0, 0, 0, 0.03);
 
                   .resize-handle-bar {
-                    background-color: #0089FF;
+                    background-color: #0089ff;
                   }
                 }
 
@@ -8311,7 +8359,7 @@ $avatar-xl: 64px;
                 .resize-handle-bar {
                   width: 40px;
                   height: 3px;
-                  background-color: #C8C8C8;
+                  background-color: #c8c8c8;
                   border-radius: 2px;
                   transition: background-color 0.2s ease;
                 }
@@ -8323,8 +8371,8 @@ $avatar-xl: 64px;
                 justify-content: space-between;
                 padding: 12px 16px;
                 margin-bottom: 12px;
-                background: #FFF7E6;
-                border: 1px solid #FFD591;
+                background: #fff7e6;
+                border: 1px solid #ffd591;
                 border-radius: 4px;
 
                 .voice-info {
@@ -8335,7 +8383,7 @@ $avatar-xl: 64px;
                   .recording-duration {
                     font-size: 16px;
                     font-weight: 500;
-                    color: #0089FF;
+                    color: #0089ff;
                     min-width: 50px;
                   }
 
@@ -8347,7 +8395,7 @@ $avatar-xl: 64px;
                     .volume-bar {
                       width: 4px;
                       min-height: 4px;
-                      background: linear-gradient(to top, #0089FF, #0077E0);
+                      background: linear-gradient(to top, #0089ff, #0077e0);
                       border-radius: 2px;
                       transition: height 0.1s ease;
                     }
@@ -8355,7 +8403,7 @@ $avatar-xl: 64px;
 
                   .recording-tip {
                     font-size: 13px;
-                    color: #FF9800;
+                    color: #ff9800;
                   }
                 }
 
@@ -8380,13 +8428,13 @@ $avatar-xl: 64px;
                   height: 32px;
 
                   &:hover {
-                    --el-button-text-color: #0089FF;
+                    --el-button-text-color: #0089ff;
                     --el-button-hover-bg-color: rgba(0, 0, 0, 0.04);
                     --el-button-hover-border-color: transparent;
                   }
 
                   &.recording {
-                    --el-button-text-color: #F5222D;
+                    --el-button-text-color: #f5222d;
                     animation: pulse 1.5s infinite;
                   }
                 }
@@ -8395,7 +8443,7 @@ $avatar-xl: 64px;
               .chat-input {
                 flex: 1;
                 border-radius: 4px;
-                border: 1px solid #E6E6E6;
+                border: 1px solid #e6e6e6;
                 background: #fff;
                 box-shadow: none;
                 display: flex;
@@ -8421,7 +8469,7 @@ $avatar-xl: 64px;
                 }
 
                 &:focus-within {
-                  border-color: #0089FF;
+                  border-color: #0089ff;
                   box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.1);
                 }
               }
@@ -8438,22 +8486,22 @@ $avatar-xl: 64px;
                   border-radius: 4px;
                   font-size: 14px;
                   padding: 6px 16px;
-                  background: #0089FF;
-                  border-color: #0089FF;
+                  background: #0089ff;
+                  border-color: #0089ff;
 
                   &:hover {
-                    background: #0077E0;
-                    border-color: #0077E0;
+                    background: #0077e0;
+                    border-color: #0077e0;
                   }
 
                   &:active {
-                    background: #0066C2;
-                    border-color: #0066C2;
+                    background: #0066c2;
+                    border-color: #0066c2;
                   }
 
                   &:disabled {
-                    background: #E6E6E6;
-                    border-color: #E6E6E6;
+                    background: #e6e6e6;
+                    border-color: #e6e6e6;
                   }
                 }
               }
@@ -8466,11 +8514,11 @@ $avatar-xl: 64px;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #B8B8B8;
-            background: #F5F5F5;
+            color: #b8b8b8;
+            background: #f5f5f5;
 
             .el-icon {
-              color: #E6E6E6;
+              color: #e6e6e6;
             }
 
             p {
@@ -9149,7 +9197,7 @@ $avatar-xl: 64px;
             padding: 24px;
 
             .attendance-card {
-              background: #0089FF;
+              background: #0089ff;
               border-radius: 12px;
               padding: 32px;
               text-align: center;
@@ -9228,7 +9276,7 @@ $avatar-xl: 64px;
 
                     &.normal {
                       background: #f6ffed;
-                      color: #00C853;
+                      color: #00c853;
                     }
 
                     &.late {
@@ -9537,11 +9585,11 @@ $avatar-xl: 64px;
                 }
 
                 &.file-type-word {
-                  color: #0089FF;
+                  color: #0089ff;
                 }
 
                 &.file-type-excel {
-                  color: #00C853;
+                  color: #00c853;
                 }
 
                 &.file-type-ppt {
@@ -9619,7 +9667,7 @@ $avatar-xl: 64px;
 
               .selection-info {
                 font-size: 14px;
-                color: #0089FF;
+                color: #0089ff;
                 font-weight: 500;
               }
 
@@ -9641,9 +9689,9 @@ $avatar-xl: 64px;
               align-items: center;
               justify-content: center;
               background: rgba(0, 137, 255, 0.1);
-              border: 2px dashed #0089FF;
+              border: 2px dashed #0089ff;
               border-radius: 8px;
-              color: #0089FF;
+              color: #0089ff;
               font-size: 16px;
               z-index: 100;
 
@@ -9698,124 +9746,124 @@ $avatar-xl: 64px;
     }
   }
 
+  // 响应式适配
+  @media (max-width: 1024px) {
+    .web-im-layout {
+      .ding-header {
+        .header-brand {
+          min-width: auto;
 
-// 响应式适配
-@media (max-width: 1024px) {
-  .web-im-layout {
-    .ding-header {
-      .header-brand {
-        min-width: auto;
-
-        .brand-name {
-          display: none;
-        }
-      }
-    }
-
-    .main-body {
-      .workspace {
-        .chat-workspace {
-          .session-panel {
-            width: 240px;
-          }
-        }
-      }
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .web-im-layout {
-    .ding-header {
-      padding: 0 12px;
-
-      .header-center {
-        .search-input {
-          max-width: 200px;
-        }
-      }
-
-      .header-right {
-        .user-dropdown {
-          .user-name {
+          .brand-name {
             display: none;
           }
         }
       }
-    }
 
-    .main-body {
-      .nav-sidebar {
-        &.collapsed {
-          width: 60px;  // 钉钉6.5.x移动端规范：导航栏宽度60px
+      .main-body {
+        .workspace {
+          .chat-workspace {
+            .session-panel {
+              width: 240px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .web-im-layout {
+      .ding-header {
+        padding: 0 12px;
+
+        .header-center {
+          .search-input {
+            max-width: 200px;
+          }
         }
 
-        .nav-list {
-          .nav-item {
-            width: 44px;   // 移动端缩小导航项尺寸
-            height: 44px;
-
-            .nav-icon {
-              font-size: 20px;  // 移动端缩小图标尺寸
-            }
-
-            .nav-dot {
-              width: 8px;
-              height: 8px;
-              top: 6px;
-              right: 6px;
-            }
-
-            &.active::before {
-              width: 2px;
-              height: 20px;
+        .header-right {
+          .user-dropdown {
+            .user-name {
+              display: none;
             }
           }
         }
       }
 
-      .workspace {
-        .chat-workspace {
-          flex-direction: column;
-
-          .session-panel {
-            width: 100%;
-            height: 40%;
-            border-right: none;
-            border-bottom: 1px solid $border-color;
+      .main-body {
+        .nav-sidebar {
+          &.collapsed {
+            width: 60px; // 钉钉6.5.x移动端规范：导航栏宽度60px
           }
 
-          .chat-panel {
-            height: 60%;
+          .nav-list {
+            .nav-item {
+              width: 44px; // 移动端缩小导航项尺寸
+              height: 44px;
+
+              .nav-icon {
+                font-size: 20px; // 移动端缩小图标尺寸
+              }
+
+              .nav-dot {
+                width: 8px;
+                height: 8px;
+                top: 6px;
+                right: 6px;
+              }
+
+              &.active::before {
+                width: 2px;
+                height: 20px;
+              }
+            }
           }
         }
 
-        .contacts-workspace {
-          .contacts-sidebar {
-            width: 160px;
+        .workspace {
+          .chat-workspace {
+            flex-direction: column;
+
+            .session-panel {
+              width: 100%;
+              height: 40%;
+              border-right: none;
+              border-bottom: 1px solid $border-color;
+            }
+
+            .chat-panel {
+              height: 60%;
+            }
           }
-        }
 
-        .workbench-workspace {
-          .workbench-sidebar {
-            width: 140px;
+          .contacts-workspace {
+            .contacts-sidebar {
+              width: 160px;
+            }
           }
 
-          .app-grid {
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 12px;
-            padding: 16px;
+          .workbench-workspace {
+            .workbench-sidebar {
+              width: 140px;
+            }
 
-            .app-card {
+            .app-grid {
+              grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+              gap: 12px;
               padding: 16px;
 
-              .app-icon {
-                width: 48px;
-                height: 48px;
-              }
+              .app-card {
+                padding: 16px;
 
-              .app-name {
-                font-size: 12px;
+                .app-icon {
+                  width: 48px;
+                  height: 48px;
+                }
+
+                .app-name {
+                  font-size: 12px;
+                }
               }
             }
           }
@@ -9823,595 +9871,369 @@ $avatar-xl: 64px;
       }
     }
   }
-}
 
-// ==================== 群组功能样式 ====================
-.avatar-upload {
-  .avatar-placeholder {
-    width: 80px;
-    height: 80px;
-    border: 2px dashed $border-color;
-    border-radius: 50%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: $text-tertiary;
-    transition: all 0.2s;
-
-    &:hover {
-      border-color: $primary-color;
-      color: $primary-color;
-    }
-
-    span {
-      font-size: 12px;
-      margin-top: 4px;
-    }
-  }
-}
-
-.member-selector {
-  .selected-members {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    min-height: 32px;
-  }
-}
-
-.member-selector-content {
-  .member-search {
-    margin-bottom: 16px;
-  }
-
-  .member-list {
-    max-height: 300px;
-    overflow-y: auto;
-    @include web-scrollbar;
-
-    .member-list-item {
+  // ==================== 群组功能样式 ====================
+  .avatar-upload {
+    .avatar-placeholder {
+      width: 80px;
+      height: 80px;
+      border: 2px dashed $border-color;
+      border-radius: 50%;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      padding: 10px;
-      border-radius: 8px;
+      justify-content: center;
       cursor: pointer;
-      transition: background 0.2s;
+      color: $text-tertiary;
+      transition: all 0.2s;
 
       &:hover {
-        background: $bg-hover;
+        border-color: $primary-color;
+        color: $primary-color;
       }
 
-      .member-info {
-        flex: 1;
-        margin-left: 12px;
-        display: flex;
-        flex-direction: column;
-
-        .member-name {
-          font-size: 14px;
-          font-weight: 500;
-          color: $text-primary;
-        }
-
-        .member-dept {
-          font-size: 12px;
-          color: $text-tertiary;
-        }
-      }
-    }
-  }
-}
-
-.group-manage {
-  .group-info-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid $border-color;
-    margin-bottom: 20px;
-
-    .group-info {
-      flex: 1;
-
-      h3 {
-        margin: 0 0 4px;
-        font-size: 18px;
-        font-weight: 500;
-      }
-
-      p {
-        margin: 0;
-        font-size: 14px;
-        color: $text-secondary;
+      span {
+        font-size: 12px;
+        margin-top: 4px;
       }
     }
   }
 
-  .group-members {
-    .members-toolbar {
+  .member-selector {
+    .selected-members {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 32px;
+    }
+  }
 
-      .member-search-input {
-        width: 200px;
-      }
+  .member-selector-content {
+    .member-search {
+      margin-bottom: 16px;
     }
 
-    .members-list {
-      max-height: 350px;
+    .member-list {
+      max-height: 300px;
       overflow-y: auto;
       @include web-scrollbar;
 
-      .group-member-item {
+      .member-list-item {
         display: flex;
         align-items: center;
-        padding: 12px;
-        border-bottom: 1px solid #f5f5f5;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
 
-        &:last-child {
-          border-bottom: none;
+        &:hover {
+          background: $bg-hover;
         }
 
         .member-info {
           flex: 1;
           margin-left: 12px;
+          display: flex;
+          flex-direction: column;
 
           .member-name {
-            display: flex;
-            align-items: center;
-            gap: 8px;
             font-size: 14px;
             font-weight: 500;
             color: $text-primary;
           }
 
-          .member-role {
+          .member-dept {
             font-size: 12px;
             color: $text-tertiary;
-            margin-top: 4px;
           }
         }
       }
     }
   }
-}
 
-// ==================== 新增功能样式 ====================
+  .group-manage {
+    .group-info-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid $border-color;
+      margin-bottom: 20px;
 
-// 消息引用样式
-.message-quote {
-  background: rgba(0, 0, 0, 0.05);
-  border-left: 3px solid $primary-color;
-  padding: 8px 12px;
-  margin-bottom: 8px;
-  border-radius: 4px;
+      .group-info {
+        flex: 1;
 
-  .quote-title {
-    font-size: 12px;
-    color: $text-secondary;
-    margin-bottom: 4px;
-  }
+        h3 {
+          margin: 0 0 4px;
+          font-size: 18px;
+          font-weight: 500;
+        }
 
-  .quote-content {
-    font-size: 13px;
-    color: $text-tertiary;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 200px;
-  }
-}
-
-// 消息内容中的@提及样式
-:deep(.message-bubble) {
-  .mention {
-    color: $primary-color;
-    font-weight: 500;
-  }
-}
-
-// 回复预览
-.reply-preview {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  background: #f0f7ff;
-  border-top: 1px solid $border-color;
-
-  .reply-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-    .reply-label {
-      font-size: 12px;
-      color: $text-secondary;
+        p {
+          margin: 0;
+          font-size: 14px;
+          color: $text-secondary;
+        }
+      }
     }
 
-    .reply-content {
+    .group-members {
+      .members-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+
+        .member-search-input {
+          width: 200px;
+        }
+      }
+
+      .members-list {
+        max-height: 350px;
+        overflow-y: auto;
+        @include web-scrollbar;
+
+        .group-member-item {
+          display: flex;
+          align-items: center;
+          padding: 12px;
+          border-bottom: 1px solid #f5f5f5;
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          .member-info {
+            flex: 1;
+            margin-left: 12px;
+
+            .member-name {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              font-size: 14px;
+              font-weight: 500;
+              color: $text-primary;
+            }
+
+            .member-role {
+              font-size: 12px;
+              color: $text-tertiary;
+              margin-top: 4px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // ==================== 新增功能样式 ====================
+
+  // 消息引用样式
+  .message-quote {
+    background: rgba(0, 0, 0, 0.05);
+    border-left: 3px solid $primary-color;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+
+    .quote-title {
+      font-size: 12px;
+      color: $text-secondary;
+      margin-bottom: 4px;
+    }
+
+    .quote-content {
       font-size: 13px;
-      color: $text-primary;
+      color: $text-tertiary;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 300px;
-    }
-  }
-}
-
-// 表情选择器
-.emoji-picker {
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  background: #fff;
-  border: 1px solid $border-color;
-  border-radius: 8px;
-  box-shadow: $shadow-md;
-  width: 320px;
-  max-height: 280px;
-  z-index: 100;
-
-  .emoji-tabs {
-    display: flex;
-    border-bottom: 1px solid $border-color;
-    overflow-x: auto;
-
-    .emoji-tab {
-      flex-shrink: 0;
-      padding: 8px 12px;
-      font-size: 18px;
-      cursor: pointer;
-      transition: background 0.2s;
-
-      &:hover {
-        background: $bg-hover;
-      }
-
-      &.active {
-        background: $primary-color-light;
-        color: $primary-color;
-      }
+      max-width: 200px;
     }
   }
 
-  .emoji-list {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 4px;
-    padding: 8px;
-    max-height: 200px;
-    overflow-y: auto;
-    @include web-scrollbar;
-
-    .emoji-item {
-      font-size: 20px;
-      text-align: center;
-      padding: 4px;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.15s;
-
-      &:hover {
-        background: $bg-hover;
-      }
-    }
-  }
-}
-
-// @提及建议
-.mention-suggestions {
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  background: #fff;
-  border: 1px solid $border-color;
-  border-radius: 8px;
-  box-shadow: $shadow-md;
-  width: 240px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 100;
-
-  .mention-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: background 0.15s;
-
-    &:hover {
-      background: $bg-hover;
-    }
-
-    &.mention-all {
-      background: $primary-color-light;
-
-      &:hover {
-        background: color.scale($primary-color-light, $lightness: -5%);
-      }
-
-      .mention-all-avatar {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: $primary-color;
-        color: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .mention-all-badge {
-        margin-left: auto;
-        padding: 2px 6px;
-        background: $primary-color;
-        color: #fff;
-        font-size: 11px;
-        border-radius: 4px;
-      }
-    }
-
-    .mention-name {
-      flex: 1;
-      font-size: 14px;
-    }
-  }
-}
-
-// 群文件面板
-.group-files-panel {
-  .files-toolbar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid $border-color;
-  }
-
-  .files-list {
-    max-height: 400px;
-    overflow-y: auto;
-  }
-
-  .file-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.15s;
-
-    &:hover {
-      background: $bg-hover;
-    }
-
-    .file-icon {
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: $text-secondary;
-    }
-
-    .file-info {
-      flex: 1;
-      min-width: 0;
-
-      .file-name {
-        font-size: 14px;
-        font-weight: 500;
-        color: $text-primary;
-        @include text-ellipsis;
-      }
-
-      .file-meta {
-        display: flex;
-        gap: 12px;
-        margin-top: 4px;
-        font-size: 12px;
-        color: $text-tertiary;
-      }
-    }
-  }
-}
-
-// 消息右键菜单
-.message-context-menu {
-  position: fixed;
-  background: #fff;
-  border: 1px solid $border-color;
-  border-radius: 8px;
-  box-shadow: $shadow-md;
-  padding: 4px 0;
-  z-index: 1000;
-  min-width: 140px;
-  animation: dropdownSlide 0.2s $ease-base;
-
-  .menu-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    font-size: 14px;
-    color: $text-primary;
-    cursor: pointer;
-    transition: background 0.15s;
-
-    &:hover {
-      background: $bg-hover;
-    }
-
-    .el-icon {
-      font-size: 16px;
-    }
-  }
-
-  .menu-divider {
-    height: 1px;
-    background: $border-color;
-    margin: 4px 0;
-  }
-}
-
-// 表情反应选择器
-.reaction-picker {
-  position: fixed;
-  background: #fff;
-  border: 1px solid $border-color;
-  border-radius: 12px;
-  box-shadow: $shadow-md;
-  padding: 8px;
-  z-index: 1001;
-  animation: dropdownSlide 0.2s $ease-base;
-
-  .reaction-emoji-list {
-    display: flex;
-    gap: 4px;
-
-    .reaction-emoji-item {
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all $transition-fast $ease-base;
-
-      &:hover {
-        background: $bg-hover;
-        transform: scale(1.1);
-      }
-
-      &.active {
-        background: $primary-color-light;
-        border: 1px solid $primary-color;
-      }
-    }
-  }
-}
-
-// 消息反应显示
-.message-reactions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
-
-  .reaction-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
-    background: $bg-light;
-    border: 1px solid $border-color;
-    border-radius: 12px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all $transition-fast $ease-base;
-
-    &:hover {
-      background: $bg-hover;
-      border-color: $primary-color;
-    }
-
-    &.active {
-      background: $primary-color-light;
-      border-color: $primary-color;
-
-      .reaction-emoji {
-        transform: scale(1.1);
-      }
-    }
-
-    .reaction-emoji {
-      font-size: 14px;
-      transition: transform $transition-instant $ease-bounce;
-    }
-
-    .reaction-count {
-      font-size: 12px;
-      color: $text-secondary;
+  // 消息内容中的@提及样式
+  :deep(.message-bubble) {
+    .mention {
+      color: $primary-color;
       font-weight: 500;
     }
   }
-}
 
-// 消息搜索结果
-.search-results {
-  max-height: 400px;
-  overflow-y: auto;
-  @include web-scrollbar;
-  margin-top: 16px;
+  // 回复预览
+  .reply-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: #f0f7ff;
+    border-top: 1px solid $border-color;
 
-  .search-result-item {
-    padding: 12px;
-    border-bottom: 1px solid $border-color;
-    cursor: pointer;
-    transition: background 0.15s;
+    .reply-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
 
-    &:hover {
-      background: $bg-hover;
-    }
+      .reply-label {
+        font-size: 12px;
+        color: $text-secondary;
+      }
 
-    .result-time {
-      font-size: 11px;
-      color: $text-tertiary;
-      margin-bottom: 4px;
-    }
-
-    .result-sender {
-      font-size: 13px;
-      color: $text-secondary;
-      margin-bottom: 4px;
-    }
-
-    .result-content {
-      font-size: 14px;
-      color: $text-primary;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      .reply-content {
+        font-size: 13px;
+        color: $text-primary;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 300px;
+      }
     }
   }
-}
 
-// 转发对话框
-.forward-content {
-  .forward-message {
-    padding: 12px;
-    background: $bg-light;
+  // 表情选择器
+  .emoji-picker {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: #fff;
+    border: 1px solid $border-color;
     border-radius: 8px;
-    margin-bottom: 16px;
-    font-size: 14px;
-    color: $text-primary;
+    box-shadow: $shadow-md;
+    width: 320px;
+    max-height: 280px;
+    z-index: 100;
+
+    .emoji-tabs {
+      display: flex;
+      border-bottom: 1px solid $border-color;
+      overflow-x: auto;
+
+      .emoji-tab {
+        flex-shrink: 0;
+        padding: 8px 12px;
+        font-size: 18px;
+        cursor: pointer;
+        transition: background 0.2s;
+
+        &:hover {
+          background: $bg-hover;
+        }
+
+        &.active {
+          background: $primary-color-light;
+          color: $primary-color;
+        }
+      }
+    }
+
+    .emoji-list {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 4px;
+      padding: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      @include web-scrollbar;
+
+      .emoji-item {
+        font-size: 20px;
+        text-align: center;
+        padding: 4px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background 0.15s;
+
+        &:hover {
+          background: $bg-hover;
+        }
+      }
+    }
   }
 
-  .search-input {
-    margin-bottom: 16px;
-  }
-
-  .forward-targets {
-    max-height: 300px;
+  // @提及建议
+  .mention-suggestions {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: #fff;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    box-shadow: $shadow-md;
+    width: 240px;
+    max-height: 200px;
     overflow-y: auto;
-    @include web-scrollbar;
+    z-index: 100;
 
-    .target-item {
+    .mention-item {
       display: flex;
       align-items: center;
-      padding: 10px;
+      gap: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+
+      &:hover {
+        background: $bg-hover;
+      }
+
+      &.mention-all {
+        background: $primary-color-light;
+
+        &:hover {
+          background: color.scale($primary-color-light, $lightness: -5%);
+        }
+
+        .mention-all-avatar {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          background: $primary-color;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .mention-all-badge {
+          margin-left: auto;
+          padding: 2px 6px;
+          background: $primary-color;
+          color: #fff;
+          font-size: 11px;
+          border-radius: 4px;
+        }
+      }
+
+      .mention-name {
+        flex: 1;
+        font-size: 14px;
+      }
+    }
+  }
+
+  // 群文件面板
+  .group-files-panel {
+    .files-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid $border-color;
+    }
+
+    .files-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
       border-radius: 8px;
       cursor: pointer;
       transition: background 0.15s;
@@ -10420,108 +10242,333 @@ $avatar-xl: 64px;
         background: $bg-hover;
       }
 
-      &.selected {
-        background: $primary-color-light;
+      .file-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $text-secondary;
       }
 
-      .target-info {
-        margin-left: 12px;
+      .file-info {
+        flex: 1;
+        min-width: 0;
 
-        .target-name {
+        .file-name {
           font-size: 14px;
           font-weight: 500;
           color: $text-primary;
+          @include text-ellipsis;
         }
 
-        .target-desc {
+        .file-meta {
+          display: flex;
+          gap: 12px;
+          margin-top: 4px;
           font-size: 12px;
           color: $text-tertiary;
         }
       }
     }
   }
-}
 
-// 文件预览
-.file-preview-content {
-  min-height: 300px;
+  // 消息右键菜单
+  .message-context-menu {
+    position: fixed;
+    background: #fff;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    box-shadow: $shadow-md;
+    padding: 4px 0;
+    z-index: 1000;
+    min-width: 140px;
+    animation: dropdownSlide 0.2s $ease-base;
 
-  .preview-image {
-    text-align: center;
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      color: $text-primary;
+      cursor: pointer;
+      transition: background 0.15s;
 
-    :deep(.el-image) {
-      max-height: 500px;
+      &:hover {
+        background: $bg-hover;
+      }
+
+      .el-icon {
+        font-size: 16px;
+      }
+    }
+
+    .menu-divider {
+      height: 1px;
+      background: $border-color;
+      margin: 4px 0;
     }
   }
 
-  .preview-pdf {
-    iframe {
-      width: 100%;
-      height: 500px;
-      border: none;
+  // 表情反应选择器
+  .reaction-picker {
+    position: fixed;
+    background: #fff;
+    border: 1px solid $border-color;
+    border-radius: 12px;
+    box-shadow: $shadow-md;
+    padding: 8px;
+    z-index: 1001;
+    animation: dropdownSlide 0.2s $ease-base;
+
+    .reaction-emoji-list {
+      display: flex;
+      gap: 4px;
+
+      .reaction-emoji-item {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all $transition-fast $ease-base;
+
+        &:hover {
+          background: $bg-hover;
+          transform: scale(1.1);
+        }
+
+        &.active {
+          background: $primary-color-light;
+          border: 1px solid $primary-color;
+        }
+      }
     }
   }
 
-  .preview-file {
+  // 消息反应显示
+  .message-reactions {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
 
-    p {
-      margin: 16px 0;
-      font-size: 16px;
-      color: $text-secondary;
+    .reaction-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      background: $bg-light;
+      border: 1px solid $border-color;
+      border-radius: 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all $transition-fast $ease-base;
+
+      &:hover {
+        background: $bg-hover;
+        border-color: $primary-color;
+      }
+
+      &.active {
+        background: $primary-color-light;
+        border-color: $primary-color;
+
+        .reaction-emoji {
+          transform: scale(1.1);
+        }
+      }
+
+      .reaction-emoji {
+        font-size: 14px;
+        transition: transform $transition-instant $ease-bounce;
+      }
+
+      .reaction-count {
+        font-size: 12px;
+        color: $text-secondary;
+        font-weight: 500;
+      }
     }
   }
-}
 
-// 主题设置
-.theme-settings {
-  .setting-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 0;
-    border-bottom: 1px solid $border-color;
+  // 消息搜索结果
+  .search-results {
+    max-height: 400px;
+    overflow-y: auto;
+    @include web-scrollbar;
+    margin-top: 16px;
 
-    &:last-child {
-      border-bottom: none;
+    .search-result-item {
+      padding: 12px;
+      border-bottom: 1px solid $border-color;
+      cursor: pointer;
+      transition: background 0.15s;
+
+      &:hover {
+        background: $bg-hover;
+      }
+
+      .result-time {
+        font-size: 11px;
+        color: $text-tertiary;
+        margin-bottom: 4px;
+      }
+
+      .result-sender {
+        font-size: 13px;
+        color: $text-secondary;
+        margin-bottom: 4px;
+      }
+
+      .result-content {
+        font-size: 14px;
+        color: $text-primary;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
+  }
 
-    .setting-label {
+  // 转发对话框
+  .forward-content {
+    .forward-message {
+      padding: 12px;
+      background: $bg-light;
+      border-radius: 8px;
+      margin-bottom: 16px;
       font-size: 14px;
       color: $text-primary;
     }
-  }
-}
 
-// 个人资料对话框
-.profile-dialog {
-  .profile-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 20px 0;
-    border-bottom: 1px solid $border-color;
-    margin-bottom: 20px;
+    .search-input {
+      margin-bottom: 16px;
+    }
 
-    .profile-basic {
-      h3 {
-        margin: 0 0 8px 0;
-        font-size: 18px;
-        color: $text-primary;
+    .forward-targets {
+      max-height: 300px;
+      overflow-y: auto;
+      @include web-scrollbar;
+
+      .target-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.15s;
+
+        &:hover {
+          background: $bg-hover;
+        }
+
+        &.selected {
+          background: $primary-color-light;
+        }
+
+        .target-info {
+          margin-left: 12px;
+
+          .target-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: $text-primary;
+          }
+
+          .target-desc {
+            font-size: 12px;
+            color: $text-tertiary;
+          }
+        }
       }
+    }
+  }
 
-      .user-id {
-        margin: 0;
-        font-size: 14px;
+  // 文件预览
+  .file-preview-content {
+    min-height: 300px;
+
+    .preview-image {
+      text-align: center;
+
+      :deep(.el-image) {
+        max-height: 500px;
+      }
+    }
+
+    .preview-pdf {
+      iframe {
+        width: 100%;
+        height: 500px;
+        border: none;
+      }
+    }
+
+    .preview-file {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+
+      p {
+        margin: 16px 0;
+        font-size: 16px;
         color: $text-secondary;
       }
     }
   }
-}
+
+  // 主题设置
+  .theme-settings {
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid $border-color;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .setting-label {
+        font-size: 14px;
+        color: $text-primary;
+      }
+    }
+  }
+
+  // 个人资料对话框
+  .profile-dialog {
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 0;
+      border-bottom: 1px solid $border-color;
+      margin-bottom: 20px;
+
+      .profile-basic {
+        h3 {
+          margin: 0 0 8px 0;
+          font-size: 18px;
+          color: $text-primary;
+        }
+
+        .user-id {
+          margin: 0;
+          font-size: 14px;
+          color: $text-secondary;
+        }
+      }
+    }
+  }
 }
 
 // 深色模式
@@ -11238,7 +11285,7 @@ $avatar-xl: 64px;
       margin-right: 12px;
 
       &.status-online {
-        background: #00C853;
+        background: #00c853;
         color: white;
       }
 
@@ -11248,7 +11295,7 @@ $avatar-xl: 64px;
       }
 
       &.status-away {
-        background: #0089FF;
+        background: #0089ff;
         color: white;
       }
 
@@ -11337,7 +11384,7 @@ $avatar-xl: 64px;
 
         &.theme-dark {
           .preview-header {
-            background: #0089FF;
+            background: #0089ff;
           }
 
           .preview-body {
@@ -11353,7 +11400,7 @@ $avatar-xl: 64px;
 
         &.theme-auto {
           .preview-header {
-            background: linear-gradient(90deg, #0089FF 50%, #1a1a1a 50%);
+            background: linear-gradient(90deg, #0089ff 50%, #1a1a1a 50%);
           }
 
           .preview-body {
@@ -11537,5 +11584,4 @@ $avatar-xl: 64px;
     }
   }
 }
-
 </style>

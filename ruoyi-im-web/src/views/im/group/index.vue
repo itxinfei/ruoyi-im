@@ -415,7 +415,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 .app-container {
   padding: 16px; // 修改：20px -> 16px（符合4的倍数）
-  background: #F5F7FA; // 添加背景色
+  background: #f5f7fa; // 添加背景色
 
   .search-form {
     margin-bottom: 16px;
@@ -446,22 +446,22 @@ onMounted(() => {
 }
 
 :deep(.el-table__header-wrapper) {
-  background-color: #FAFAFA;
+  background-color: #fafafa;
 }
 
 :deep(.el-table th) {
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   color: #262626;
   font-weight: 500;
 }
 
 :deep(.el-button--primary) {
-  background-color: #0089FF;
-  border-color: #0089FF;
+  background-color: #0089ff;
+  border-color: #0089ff;
 
   &:hover {
-    background-color: #40A9FF;
-    border-color: #40A9FF;
+    background-color: #40a9ff;
+    border-color: #40a9ff;
   }
 }
 </style>

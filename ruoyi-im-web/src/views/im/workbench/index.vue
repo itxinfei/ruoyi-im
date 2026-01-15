@@ -45,7 +45,9 @@
         <div class="todo-section">
           <div class="section-header">
             <h3>待办事项</h3>
-            <el-button link type="primary" :icon="Plus" @click="showAddTodoDialog">新建待办</el-button>
+            <el-button link type="primary" :icon="Plus" @click="showAddTodoDialog"
+              >新建待办</el-button
+            >
           </div>
           <div class="todo-list">
             <div
@@ -156,7 +158,7 @@ import {
   ArrowRight,
   OfficeBuilding,
   Ticket,
-  Edit
+  Edit,
 } from '@element-plus/icons-vue'
 import {
   getWorkbenchOverview,
@@ -367,7 +369,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #F5F7FA;
+  background: #f5f7fa;
 }
 
 // 工作台导航
@@ -376,7 +378,7 @@ onMounted(() => {
   gap: 8px;
   padding: 12px 16px; // 修改：20px -> 16px（符合4的倍数）
   background: white;
-  border-bottom: 1px solid #E8E8E8;
+  border-bottom: 1px solid #e8e8e8;
   flex-shrink: 0;
 }
 
@@ -392,12 +394,12 @@ onMounted(() => {
   font-size: 14px;
 
   &:hover {
-    background: #F5F7FA;
+    background: #f5f7fa;
   }
 
   &.active {
-    background: #E6F7FF;
-    color: #0089FF; // 修改：#1677ff -> #0089FF（钉钉规范）
+    background: #e6f7ff;
+    color: #0089ff; // 修改：#1677ff -> #0089FF（钉钉规范）
     font-weight: 500;
   }
 }
@@ -409,7 +411,7 @@ onMounted(() => {
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  background: #FF4D4F;
+  background: #ff4d4f;
   color: white;
   border-radius: 8px;
   font-size: 11px;
@@ -478,7 +480,7 @@ onMounted(() => {
 }
 
 .card-arrow {
-  color: #CCCCCC;
+  color: #cccccc;
 }
 
 // 待办事项
@@ -518,7 +520,7 @@ onMounted(() => {
   transition: background 0.2s;
 
   &:hover {
-    background: #F5F7FA;
+    background: #f5f7fa;
   }
 
   &.completed {
@@ -569,7 +571,7 @@ onMounted(() => {
   transition: all 0.2s;
 
   &:hover {
-    background: #F5F7FA;
+    background: #f5f7fa;
   }
 }
 

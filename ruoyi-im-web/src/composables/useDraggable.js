@@ -11,12 +11,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 // @param {boolean} options.constrainToParent - 是否限制在父元素内，默认 false
 // @returns {Object} 拖拽相关的状态和方法
 export function useDraggable(options = {}) {
-  const {
-    target = ref(null),
-    snapThreshold = 40,
-    padding = 0,
-    constrainToParent = false,
-  } = options
+  const { target = ref(null), snapThreshold = 40, padding = 0, constrainToParent = false } = options
 
   // 状态
   const isDragging = ref(false)
@@ -99,7 +94,7 @@ export function useDraggable(options = {}) {
   }
 
   // 开始拖拽
-  const startDrag = (event) => {
+  const startDrag = event => {
     // 检查是否点击了拖拽手柄
     const handle = event.target.closest('[data-drag-handle]')
     if (!handle && !event.target.hasAttribute?.('data-drag-handle')) {
@@ -133,7 +128,7 @@ export function useDraggable(options = {}) {
   }
 
   // 拖拽移动
-  const onDragMove = (event) => {
+  const onDragMove = event => {
     if (!isDragging.value) return
     event.preventDefault()
 
@@ -210,7 +205,9 @@ export function useDraggable(options = {}) {
     transform: isDragging.value ? 'scale(1.02)' : 'scale(1)',
     cursor: isDragging.value ? 'grabbing' : 'grab',
     userSelect: isDragging.value ? 'none' : '',
-    transition: isDragging.value ? 'none' : 'transform 0.2s ease, left 0.3s cubic-bezier(0.4, 0, 0.2, 1), top 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    transition: isDragging.value
+      ? 'none'
+      : 'transform 0.2s ease, left 0.3s cubic-bezier(0.4, 0, 0.2, 1), top 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   }))
 
   // 生命周期

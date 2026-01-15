@@ -2,12 +2,17 @@
  * 全局错误拦截插件
  * 捕获Vue应用中的未处理错误和Promise拒绝
  */
-import { handleNetworkError, handleApiError, handleWebSocketError, handleWebRTCError } from './errorHandler'
+import {
+  handleNetworkError,
+  handleApiError,
+  handleWebSocketError,
+  handleWebRTCError,
+} from './errorHandler'
 
 /**
  * Vue全局错误处理插件
  */
-export const setupGlobalErrorHandler = (app) => {
+export const setupGlobalErrorHandler = app => {
   // Vue错误处理
   app.config.errorHandler = (err, instance, info) => {
     console.error('Vue Error:', err, info)
@@ -15,7 +20,7 @@ export const setupGlobalErrorHandler = (app) => {
   }
 
   // 全局未捕获的错误
-  window.addEventListener('error', (event) => {
+  window.addEventListener('error', event => {
     if (event.error) {
       const error = event.error
       const context = {
@@ -29,7 +34,10 @@ export const setupGlobalErrorHandler = (app) => {
         handleNetworkError(error, context)
       } else if (error.message?.includes('WebSocket')) {
         handleWebSocketError(error, context)
-      } else if (error.message?.includes('RTCPeerConnection') || error.message?.includes('getUserMedia')) {
+      } else if (
+        error.message?.includes('RTCPeerConnection') ||
+        error.message?.includes('getUserMedia')
+      ) {
         handleWebRTCError(error, context)
       } else {
         handleApiError(error, context)
@@ -38,7 +46,7 @@ export const setupGlobalErrorHandler = (app) => {
   })
 
   // 未处理的Promise拒绝
-  window.addEventListener('unhandledrejection', (event) => {
+  window.addEventListener('unhandledrejection', event => {
     console.error('Unhandled Promise Rejection:', event.reason)
     handleApiError(event.reason || new Error('Promise rejected without reason'), {
       type: 'unhandledrejection',
@@ -46,17 +54,21 @@ export const setupGlobalErrorHandler = (app) => {
   })
 
   // 资源加载错误
-  window.addEventListener('error', (event) => {
-    if (event.target !== window) {
-      // 资源加载失败
-      const target = event.target
-      const src = target.src || target.href
-      console.warn('Resource Load Error:', src)
-    }
-  }, true)
+  window.addEventListener(
+    'error',
+    event => {
+      if (event.target !== window) {
+        // 资源加载失败
+        const target = event.target
+        const src = target.src || target.href
+        console.warn('Resource Load Error:', src)
+      }
+    },
+    true
+  )
 
   // 页面卸载前警告
-  window.addEventListener('beforeunload', (e) => {
+  window.addEventListener('beforeunload', e => {
     // 检查是否有未保存的数据或正在进行的通话
     const hasUnsavedData = checkUnsavedData()
     const hasActiveCall = checkActiveCall()
@@ -117,10 +129,10 @@ export const setupNetworkListener = () => {
  * API请求拦截器配置
  * @param {AxiosInstance} axiosInstance - axios实例
  */
-export const setupApiInterceptors = (axiosInstance) => {
+export const setupApiInterceptors = axiosInstance => {
   // 请求拦截器
   axiosInstance.interceptors.request.use(
-    (config) => {
+    config => {
       // 添加时间戳，防止缓存
       if (config.method === 'get') {
         config.params = {
@@ -130,14 +142,14 @@ export const setupApiInterceptors = (axiosInstance) => {
       }
       return config
     },
-    (error) => {
+    error => {
       return Promise.reject(error)
     }
   )
 
   // 响应拦截器
   axiosInstance.interceptors.response.use(
-    (response) => {
+    response => {
       const { data } = response
 
       // 处理业务错误码
@@ -159,7 +171,7 @@ export const setupApiInterceptors = (axiosInstance) => {
 
       return response
     },
-    (error) => {
+    error => {
       // 处理网络错误
       if (!error.response) {
         // 请求超时或网络断开
@@ -192,7 +204,7 @@ export const setupApiInterceptors = (axiosInstance) => {
 }
 
 export default {
-  install: (app) => {
+  install: app => {
     setupGlobalErrorHandler(app)
     setupNetworkListener()
   },

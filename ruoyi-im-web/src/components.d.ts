@@ -101,6 +101,7 @@ declare module 'vue' {
     NetworkIndicator: typeof import('./components/VideoCall/NetworkIndicator.vue')['default']
     NotificationPanel: typeof import('./components/Notification/NotificationPanel.vue')['default']
     NotificationSettings: typeof import('./components/Notification/NotificationSettings.vue')['default']
+    OaApprovalCard: typeof import('./components/Message/OaApprovalCard.vue')['default']
     OrganizationTree: typeof import('./components/Contacts/OrganizationTree.vue')['default']
     Pagination: typeof import('./components/Pagination/index.vue')['default']
     QuoteMessage: typeof import('./components/Message/QuoteMessage.vue')['default']

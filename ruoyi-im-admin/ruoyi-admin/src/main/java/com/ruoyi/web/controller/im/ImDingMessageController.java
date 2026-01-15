@@ -42,6 +42,25 @@ public class ImDingMessageController extends BaseController {
     }
 
     /**
+     * 新增DING消息页面
+     */
+    @RequiresPermissions("im:ding:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改DING消息页面
+     */
+    @RequiresPermissions("im:ding:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("ding", dingMessageService.selectImDingMessageById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询DING消息列表
      */
     @RequiresPermissions("im:ding:list")

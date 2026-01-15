@@ -37,6 +37,25 @@ public class ImGroupAnnouncementController extends BaseController {
     }
 
     /**
+     * 新增群公告页面
+     */
+    @RequiresPermissions("im:announcement:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改群公告页面
+     */
+    @RequiresPermissions("im:announcement:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("announcement", imGroupAnnouncementService.selectImGroupAnnouncementById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询群公告列表
      */
     @RequiresPermissions("im:announcement:list")

@@ -37,7 +37,7 @@ const visible = ref(false)
 const x = ref(0)
 const y = ref(0)
 
-const show = (event) => {
+const show = event => {
   x.value = event.clientX
   y.value = event.clientY
   visible.value = true
@@ -53,7 +53,7 @@ const hide = () => {
   document.removeEventListener('click', hide)
 }
 
-const handleMenuClick = (event) => {
+const handleMenuClick = event => {
   const command = event.target.dataset.command
   if (command) {
     emit('select', command)

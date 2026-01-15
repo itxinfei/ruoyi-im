@@ -152,11 +152,11 @@ const startVideoCall = async (userId, conversationId = null) => {
 }
 
 // 获取用户信息
-const getUserInfo = async (userId) => {
+const getUserInfo = async userId => {
   try {
     const response = await fetch(`/api/im/user/${userId}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
       },
     })
     if (response.ok) {
@@ -200,14 +200,14 @@ const handleVoiceHangup = async () => {
 /**
  * 语音通话 - 静音切换
  */
-const handleVoiceMute = (muted) => {
+const handleVoiceMute = muted => {
   voiceCall.setMuted(muted)
 }
 
 /**
  * 语音通话 - 扬声器切换
  */
-const handleVoiceSpeaker = (on) => {
+const handleVoiceSpeaker = on => {
   voiceCall.setSpeaker(on)
 }
 
@@ -240,7 +240,7 @@ const handleVideoHangup = () => {
 /**
  * 视频通话 - 状态变化
  */
-const handleVideoStateChange = (state) => {
+const handleVideoStateChange = state => {
   videoCallState.value = state
   if (state === 'ended') {
     emit('call-ended', { type: 'video' })
@@ -250,7 +250,7 @@ const handleVideoStateChange = (state) => {
 /**
  * 处理来电通知（WebSocket）
  */
-const handleIncomingCall = (message) => {
+const handleIncomingCall = message => {
   const { callType, callerId, callerName, callerAvatar, callId, conversationId } = message
 
   if (callType === 'VOICE' || callType === 'voice') {
@@ -275,7 +275,7 @@ const handleIncomingCall = (message) => {
 /**
  * 处理通话状态变化（WebSocket）
  */
-const handleCallStatus = (message) => {
+const handleCallStatus = message => {
   const { status, callType } = message
 
   if (callType === 'VOICE' || callType === 'voice') {
@@ -293,7 +293,7 @@ const handleCallStatus = (message) => {
 /**
  * 处理 WebRTC 信令（WebSocket）
  */
-const handleWebRTCSignal = (message) => {
+const handleWebRTCSignal = message => {
   const { callId } = message
 
   // 根据通话ID判断是语音还是视频

@@ -41,9 +41,11 @@ function generateRequestKey(config) {
 function addPendingRequest(config) {
   const requestKey = generateRequestKey(config)
   if (!pendingRequests.has(requestKey)) {
-    config.cancelToken = config.cancelToken || new axios.CancelToken(cancel => {
-      pendingRequests.set(requestKey, cancel)
-    })
+    config.cancelToken =
+      config.cancelToken ||
+      new axios.CancelToken(cancel => {
+        pendingRequests.set(requestKey, cancel)
+      })
   }
 }
 
@@ -259,7 +261,10 @@ service.interceptors.request.use(
 
     // 开发环境打印请求信息
     if (import.meta.env.DEV && !config.skipLog) {
-      console.log(`[HTTP Request] ${config.method?.toUpperCase()} ${config.url}`, config.params || config.data)
+      console.log(
+        `[HTTP Request] ${config.method?.toUpperCase()} ${config.url}`,
+        config.params || config.data
+      )
     }
 
     return config
@@ -336,7 +341,11 @@ export default service
 
 // 导出常用方法
 export const request = service
-export const setBaseURL = (url) => { service.defaults.baseURL = url }
+export const setBaseURL = url => {
+  service.defaults.baseURL = url
+}
 export const getBaseURL = () => service.defaults.baseURL
-export const setTimeout = (ms) => { service.defaults.timeout = ms }
+export const setTimeout = ms => {
+  service.defaults.timeout = ms
+}
 export const getTimeout = () => service.defaults.timeout

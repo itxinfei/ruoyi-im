@@ -17,7 +17,9 @@
             <Document />
           </el-icon>
           <span class="file-name">{{ fileInfo?.name || '文件预览' }}</span>
-          <el-tag v-if="fileInfo" size="small" type="info">{{ formatFileSize(fileInfo.size) }}</el-tag>
+          <el-tag v-if="fileInfo" size="small" type="info">{{
+            formatFileSize(fileInfo.size)
+          }}</el-tag>
         </div>
         <div class="header-actions">
           <el-button
@@ -29,19 +31,13 @@
             @click="handleDownload"
           />
           <el-button
-            :icon="isFullscreen ? Switch :FullScreen"
+            :icon="isFullscreen ? Switch : FullScreen"
             circle
             size="small"
             :title="isFullscreen ? '退出全屏' : '全屏'"
             @click="toggleFullscreen"
           />
-          <el-button
-            :icon="Close"
-            circle
-            size="small"
-            title="关闭"
-            @click="close"
-          />
+          <el-button :icon="Close" circle size="small" title="关闭" @click="close" />
         </div>
       </div>
     </template>
@@ -60,7 +56,11 @@
     </div>
 
     <!-- 预览内容 -->
-    <div v-else class="preview-content" :class="[`preview-type-${previewType}`, { fullscreen: isFullscreen }]">
+    <div
+      v-else
+      class="preview-content"
+      :class="[`preview-type-${previewType}`, { fullscreen: isFullscreen }]"
+    >
       <!-- 图片预览 -->
       <template v-if="previewType === 'image'">
         <div class="image-preview">
@@ -83,12 +83,7 @@
       <!-- PDF预览 -->
       <template v-else-if="previewType === 'pdf'">
         <div class="pdf-preview">
-          <iframe
-            v-if="previewUrl"
-            :src="previewUrl"
-            class="pdf-iframe"
-            frameborder="0"
-          ></iframe>
+          <iframe v-if="previewUrl" :src="previewUrl" class="pdf-iframe" frameborder="0"></iframe>
           <div v-else class="preview-placeholder">
             <p>PDF预览服务暂不可用</p>
             <el-button type="primary" @click="handleDownload">下载文件</el-button>
@@ -144,12 +139,7 @@
             <el-icon :size="80"><Microphone /></el-icon>
           </div>
           <p class="audio-name">{{ fileInfo?.name }}</p>
-          <audio
-            v-if="previewUrl"
-            :src="previewUrl"
-            controls
-            class="preview-audio"
-          >
+          <audio v-if="previewUrl" :src="previewUrl" controls class="preview-audio">
             您的浏览器不支持音频播放
           </audio>
         </div>
@@ -176,9 +166,13 @@
     <!-- 分页控制 (PDF) -->
     <div v-if="previewType === 'pdf' && !error && !loading" class="preview-footer">
       <div class="page-controls">
-        <el-button :icon="ArrowLeft" :disabled="currentPage <= 1" @click="prevPage">上一页</el-button>
+        <el-button :icon="ArrowLeft" :disabled="currentPage <= 1" @click="prevPage"
+          >上一页</el-button
+        >
         <span class="page-info">第 {{ currentPage }} / {{ totalPages }} 页</span>
-        <el-button :disabled="currentPage >= totalPages" @click="nextPage">下一页<ArrowRight /></el-button>
+        <el-button :disabled="currentPage >= totalPages" @click="nextPage"
+          >下一页<ArrowRight
+        /></el-button>
       </div>
     </div>
   </el-dialog>
@@ -238,8 +232,10 @@ const previewType = computed(() => {
   const mimeType = props.fileInfo.type || ''
 
   // 图片类型
-  if (['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg'].includes(ext) ||
-      mimeType.startsWith('image/')) {
+  if (
+    ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg'].includes(ext) ||
+    mimeType.startsWith('image/')
+  ) {
     return 'image'
   }
 
@@ -249,27 +245,51 @@ const previewType = computed(() => {
   }
 
   // Office文档
-  if (officeTypes.includes(ext) || mimeType.includes('office') ||
-      mimeType.includes('word') || mimeType.includes('excel') ||
-      mimeType.includes('powerpoint') || mimeType.includes('ms-')) {
+  if (
+    officeTypes.includes(ext) ||
+    mimeType.includes('office') ||
+    mimeType.includes('word') ||
+    mimeType.includes('excel') ||
+    mimeType.includes('powerpoint') ||
+    mimeType.includes('ms-')
+  ) {
     return 'office'
   }
 
   // 视频
-  if (['mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv'].includes(ext) ||
-      mimeType.startsWith('video/')) {
+  if (['mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv'].includes(ext) || mimeType.startsWith('video/')) {
     return 'video'
   }
 
   // 音频
-  if (['mp3', 'wav', 'flac', 'aac', 'm4a'].includes(ext) ||
-      mimeType.startsWith('audio/')) {
+  if (['mp3', 'wav', 'flac', 'aac', 'm4a'].includes(ext) || mimeType.startsWith('audio/')) {
     return 'audio'
   }
 
   // 代码文件
-  if (['js', 'ts', 'vue', 'jsx', 'tsx', 'html', 'css', 'scss', 'json',
-       'xml', 'md', 'txt', 'py', 'java', 'c', 'cpp', 'go', 'rs', 'php'].includes(ext)) {
+  if (
+    [
+      'js',
+      'ts',
+      'vue',
+      'jsx',
+      'tsx',
+      'html',
+      'css',
+      'scss',
+      'json',
+      'xml',
+      'md',
+      'txt',
+      'py',
+      'java',
+      'c',
+      'cpp',
+      'go',
+      'rs',
+      'php',
+    ].includes(ext)
+  ) {
     return 'code'
   }
 
@@ -358,17 +378,19 @@ async function loadPreview() {
 function handleDownload() {
   emit('download', props.fileInfo)
   if (props.fileInfo?.id) {
-    downloadFile(props.fileInfo.id).then(blob => {
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = props.fileInfo.name
-      link.click()
-      window.URL.revokeObjectURL(url)
-      ElMessage.success('下载成功')
-    }).catch(() => {
-      ElMessage.error('下载失败')
-    })
+    downloadFile(props.fileInfo.id)
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = props.fileInfo.name
+        link.click()
+        window.URL.revokeObjectURL(url)
+        ElMessage.success('下载成功')
+      })
+      .catch(() => {
+        ElMessage.error('下载失败')
+      })
   }
 }
 
@@ -407,14 +429,17 @@ function handleClose() {
 }
 
 // 监听对话框显示状态
-watch(() => props.modelValue, (val) => {
-  visible.value = val
-  if (val) {
-    loadPreview()
+watch(
+  () => props.modelValue,
+  val => {
+    visible.value = val
+    if (val) {
+      loadPreview()
+    }
   }
-})
+)
 
-watch(visible, (val) => {
+watch(visible, val => {
   if (!val) {
     emit('update:modelValue', false)
     handleClose()
@@ -422,11 +447,15 @@ watch(visible, (val) => {
 })
 
 // 监听文件变化
-watch(() => props.fileInfo, () => {
-  if (visible.value) {
-    loadPreview()
-  }
-}, { deep: true })
+watch(
+  () => props.fileInfo,
+  () => {
+    if (visible.value) {
+      loadPreview()
+    }
+  },
+  { deep: true }
+)
 </script>
 
 <style lang="scss" scoped>

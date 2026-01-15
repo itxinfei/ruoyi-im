@@ -5,14 +5,10 @@
       class="avatar-img"
       :src="avatarUrl"
       :style="imgStyle"
-      @error="handleError"
       alt=""
+      @error="handleError"
     />
-    <div
-      v-else
-      class="avatar-text"
-      :style="textStyle"
-    >
+    <div v-else class="avatar-text" :style="textStyle">
       {{ displayText }}
     </div>
     <span v-if="showBorder" class="avatar-border" :style="borderStyle"></span>
@@ -26,44 +22,44 @@ import { computed, ref } from 'vue'
 const props = defineProps({
   avatar: {
     type: String,
-    default: ''
+    default: '',
   },
   name: {
     type: String,
-    default: ''
+    default: '',
   },
   nickname: {
     type: String,
-    default: ''
+    default: '',
   },
   size: {
     type: Number,
-    default: 40
+    default: 40,
   },
   showBorder: {
     type: Boolean,
-    default: true
+    default: true,
   },
   borderColor: {
     type: String,
-    default: ''
+    default: '',
   },
   showOnline: {
     type: Boolean,
-    default: false
+    default: false,
   },
   online: {
     type: Boolean,
-    default: false
+    default: false,
   },
   onlineStatus: {
     type: String,
-    default: 'online'
+    default: 'online',
   },
   clickable: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const emit = defineEmits(['click', 'error'])
@@ -92,7 +88,9 @@ const imgStyle = computed(() => {
   return {
     width: `${props.size}px`,
     height: `${props.size}px`,
-    border: props.showBorder ? `2px solid ${props.borderColor || 'rgba(255, 255, 255, 0.3)'}` : 'none'
+    border: props.showBorder
+      ? `2px solid ${props.borderColor || 'rgba(255, 255, 255, 0.3)'}`
+      : 'none',
   }
 })
 
@@ -106,15 +104,17 @@ const textStyle = computed(() => {
     color: '#ffffff',
     fontSize: `${fontSize}px`,
     fontWeight: '500',
-    border: props.showBorder ? `2px solid ${props.borderColor || 'rgba(255, 255, 255, 0.3)'}` : 'none',
-    borderRadius: '4px'
+    border: props.showBorder
+      ? `2px solid ${props.borderColor || 'rgba(255, 255, 255, 0.3)'}`
+      : 'none',
+    borderRadius: '4px',
   }
 })
 
 const borderStyle = computed(() => {
   const borderColor = props.borderColor || 'rgba(255, 255, 255, 0.3)'
   return {
-    borderColor: borderColor
+    borderColor: borderColor,
   }
 })
 
@@ -194,27 +194,27 @@ function handleError() {
     transition: all 0.3s ease;
 
     &.online {
-      background-color: #00C853;
+      background-color: #00c853;
       box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.2);
     }
 
     &.away {
-      background-color: #FF9800;
+      background-color: #ff9800;
       box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2);
     }
 
     &.busy {
-      background-color: #F5222D;
+      background-color: #f5222d;
       box-shadow: 0 0 0 2px rgba(245, 34, 45, 0.2);
     }
 
     &.offline {
-      background-color: #B8B8B8;
+      background-color: #b8b8b8;
       box-shadow: 0 0 0 2px rgba(184, 184, 184, 0.2);
     }
 
     &.dnd {
-      background-color: #F5222D;
+      background-color: #f5222d;
       box-shadow: 0 0 0 2px rgba(245, 34, 45, 0.2);
     }
   }

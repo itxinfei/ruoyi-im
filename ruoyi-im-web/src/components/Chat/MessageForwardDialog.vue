@@ -19,11 +19,7 @@
           <span>将要转发 {{ messageCount }} 条消息</span>
         </div>
         <div class="preview-list">
-          <div
-            v-for="(msg, index) in previewMessages"
-            :key="index"
-            class="preview-item"
-          >
+          <div v-for="(msg, index) in previewMessages" :key="index" class="preview-item">
             <div class="preview-type">
               <i :class="getMessageTypeIcon(msg.type || msg.messageType)"></i>
             </div>
@@ -50,11 +46,7 @@
         <el-tabs v-model="activeTab" class="selector-tabs">
           <el-tab-pane label="转发给好友" name="friend">
             <div class="search-box">
-              <el-input
-                v-model="searchKeyword"
-                placeholder="搜索好友"
-                clearable
-              >
+              <el-input v-model="searchKeyword" placeholder="搜索好友" clearable>
                 <template #prefix>
                   <i class="el-icon-search"></i>
                 </template>
@@ -77,11 +69,7 @@
 
           <el-tab-pane label="转发到群聊" name="group">
             <div class="search-box">
-              <el-input
-                v-model="searchKeyword"
-                placeholder="搜索群聊"
-                clearable
-              >
+              <el-input v-model="searchKeyword" placeholder="搜索群聊" clearable>
                 <template #prefix>
                   <i class="el-icon-search"></i>
                 </template>
@@ -97,7 +85,9 @@
               >
                 <img :src="group.avatar || defaultGroupAvatar" class="group-avatar" />
                 <span class="group-name">{{ group.name || group.groupName }}</span>
-                <span v-if="group.memberCount" class="group-member-count">{{ group.memberCount }}人</span>
+                <span v-if="group.memberCount" class="group-member-count"
+                  >{{ group.memberCount }}人</span
+                >
                 <i v-if="isTargetSelected(group.id)" class="el-icon-check selected-icon"></i>
               </div>
             </div>
@@ -199,17 +189,13 @@ const groups = computed(() => {
 const filteredFriends = computed(() => {
   if (!searchKeyword.value) return contacts.value
   const keyword = searchKeyword.value.toLowerCase()
-  return contacts.value.filter(c =>
-    (c.name || c.nickname || '').toLowerCase().includes(keyword)
-  )
+  return contacts.value.filter(c => (c.name || c.nickname || '').toLowerCase().includes(keyword))
 })
 
 const filteredGroups = computed(() => {
   if (!searchKeyword.value) return groups.value
   const keyword = searchKeyword.value.toLowerCase()
-  return groups.value.filter(g =>
-    (g.name || g.groupName || '').toLowerCase().includes(keyword)
-  )
+  return groups.value.filter(g => (g.name || g.groupName || '').toLowerCase().includes(keyword))
 })
 
 // 已选择的目标列表
@@ -218,7 +204,7 @@ const selectedTargetsList = computed(() => {
 })
 
 // 方法
-const getMessageTypeIcon = (type) => {
+const getMessageTypeIcon = type => {
   const icons = {
     text: 'el-icon-chat-dot-round',
     image: 'el-icon-picture',
@@ -230,7 +216,7 @@ const getMessageTypeIcon = (type) => {
   return icons[type] || 'el-icon-chat-dot-round'
 }
 
-const getMessagePreview = (msg) => {
+const getMessagePreview = msg => {
   const type = msg.type || msg.messageType
   const content = msg.content || msg.text || ''
 
@@ -250,11 +236,11 @@ const getMessagePreview = (msg) => {
   return '[消息]'
 }
 
-const isTargetSelected = (id) => {
+const isTargetSelected = id => {
   return selectedTargets.value.some(t => t.id === id)
 }
 
-const toggleSelectTarget = (target) => {
+const toggleSelectTarget = target => {
   const index = selectedTargets.value.findIndex(t => t.id === target.id)
   if (index > -1) {
     selectedTargets.value.splice(index, 1)
@@ -288,9 +274,12 @@ const handleClose = () => {
 }
 
 // 监听 props 变化
-watch(() => props.modelValue, val => {
-  visible.value = val
-})
+watch(
+  () => props.modelValue,
+  val => {
+    visible.value = val
+  }
+)
 
 watch(visible, val => {
   emit('update:modelValue', val)

@@ -42,6 +42,25 @@ public class ImAppAdminController extends BaseController {
     }
 
     /**
+     * 新增应用页面
+     */
+    @RequiresPermissions("im:app:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改应用页面
+     */
+    @RequiresPermissions("im:app:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("application", applicationService.selectImApplicationById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询应用列表
      */
     @RequiresPermissions("im:app:list")

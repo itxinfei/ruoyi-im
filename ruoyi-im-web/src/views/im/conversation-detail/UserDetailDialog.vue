@@ -24,7 +24,7 @@
       </div>
     </template>
 
-    <div class="dt-dialog-body" v-loading="loading">
+    <div v-loading="loading" class="dt-dialog-body">
       <!-- 用户基本信息卡片 -->
       <div class="dt-user-card">
         <div class="dt-user-avatar-wrap">
@@ -35,38 +35,38 @@
         </div>
         <div class="dt-user-basic-info">
           <h3 class="dt-user-name">{{ userInfo?.nickname || userInfo?.username }}</h3>
-          <p class="dt-user-signature" v-if="userInfo?.signature">{{ userInfo.signature }}</p>
+          <p v-if="userInfo?.signature" class="dt-user-signature">{{ userInfo.signature }}</p>
         </div>
       </div>
 
       <!-- 详细信息列表 -->
       <div class="dt-info-section">
-        <div class="dt-info-item" v-if="userInfo?.mobile">
+        <div v-if="userInfo?.mobile" class="dt-info-item">
           <span class="dt-info-label">手机</span>
           <span class="dt-info-value">{{ userInfo.mobile }}</span>
         </div>
-        <div class="dt-info-item" v-if="userInfo?.email">
+        <div v-if="userInfo?.email" class="dt-info-item">
           <span class="dt-info-label">邮箱</span>
           <span class="dt-info-value">{{ userInfo.email }}</span>
         </div>
-        <div class="dt-info-item" v-if="userInfo?.department">
+        <div v-if="userInfo?.department" class="dt-info-item">
           <span class="dt-info-label">部门</span>
           <span class="dt-info-value">{{ userInfo.department }}</span>
         </div>
-        <div class="dt-info-item" v-if="userInfo?.position">
+        <div v-if="userInfo?.position" class="dt-info-item">
           <span class="dt-info-label">职位</span>
           <span class="dt-info-value">{{ userInfo.position }}</span>
         </div>
       </div>
 
       <!-- 聊天内容统计 -->
-      <div class="dt-content-section" v-if="conversationId && hasContent">
+      <div v-if="conversationId && hasContent" class="dt-content-section">
         <div class="dt-section-header">
           <span class="dt-section-title">聊天内容</span>
         </div>
 
         <div class="dt-content-stats">
-          <div class="dt-stat-item" @click="showContent('media')" v-if="stats.mediaCount > 0">
+          <div v-if="stats.mediaCount > 0" class="dt-stat-item" @click="showContent('media')">
             <div class="dt-stat-icon">
               <el-icon><Picture /></el-icon>
             </div>
@@ -77,7 +77,7 @@
             <el-icon class="dt-stat-arrow"><ArrowRight /></el-icon>
           </div>
 
-          <div class="dt-stat-item" @click="showContent('file')" v-if="stats.fileCount > 0">
+          <div v-if="stats.fileCount > 0" class="dt-stat-item" @click="showContent('file')">
             <div class="dt-stat-icon">
               <el-icon><Folder /></el-icon>
             </div>
@@ -88,7 +88,7 @@
             <el-icon class="dt-stat-arrow"><ArrowRight /></el-icon>
           </div>
 
-          <div class="dt-stat-item" @click="showContent('link')" v-if="stats.linkCount > 0">
+          <div v-if="stats.linkCount > 0" class="dt-stat-item" @click="showContent('link')">
             <div class="dt-stat-icon">
               <el-icon><Link /></el-icon>
             </div>
@@ -251,17 +251,20 @@ const hasContent = computed(() => {
 })
 
 // 监听 visible 变化
-watch(() => props.visible, (val) => {
-  dialogVisible.value = val
-  if (val && props.userId) {
-    loadUserInfo()
-    if (props.conversationId) {
-      loadContentStats()
+watch(
+  () => props.visible,
+  val => {
+    dialogVisible.value = val
+    if (val && props.userId) {
+      loadUserInfo()
+      if (props.conversationId) {
+        loadContentStats()
+      }
     }
   }
-})
+)
 
-watch(dialogVisible, (val) => {
+watch(dialogVisible, val => {
   emit('update:visible', val)
 })
 
@@ -353,7 +356,7 @@ const loadContentStats = async () => {
 }
 
 // 显示内容详情
-const showContent = (type) => {
+const showContent = type => {
   contentType.value = type
   contentDialogVisible.value = true
 }
@@ -380,23 +383,23 @@ const handleMore = () => {
   ElMessage.info('更多功能开发中...')
 }
 
-const previewMedia = (item) => {
+const previewMedia = item => {
   const urls = mediaList.value.map(m => m.url)
   previewUrls.value = urls
   previewIndex.value = urls.indexOf(item.url)
   previewVisible.value = true
 }
 
-const downloadFile = (item) => {
+const downloadFile = item => {
   window.open(item.url, '_blank')
 }
 
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (!bytes || bytes === 0) return '0 B'
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
 }
 </script>
 

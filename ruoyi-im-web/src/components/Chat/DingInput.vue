@@ -14,7 +14,11 @@
     ></textarea>
 
     <!-- 字数统计 -->
-    <span v-if="showCount && modelValue.length > 0" class="ding-input-count" :class="{ 'is-near-limit': isNearLimit }">
+    <span
+      v-if="showCount && modelValue.length > 0"
+      class="ding-input-count"
+      :class="{ 'is-near-limit': isNearLimit }"
+    >
       {{ currentLength }}/{{ maxlength }}
     </span>
   </div>
@@ -30,24 +34,24 @@ import { ref, computed } from 'vue'
 const props = defineProps({
   modelValue: {
     type: String,
-    default: ''
+    default: '',
   },
   placeholder: {
     type: String,
-    default: '输入消息...'
+    default: '输入消息...',
   },
   maxlength: {
     type: Number,
-    default: 1000
+    default: 1000,
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   showCount: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'keydown', 'focus', 'blur'])
@@ -63,22 +67,22 @@ const isNearLimit = computed(() => {
 })
 
 // 处理输入事件
-const handleInput = (e) => {
+const handleInput = e => {
   emit('update:modelValue', e.target.value)
 }
 
 // 处理键盘事件
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   emit('keydown', e)
 }
 
 // 处理获得焦点
-const handleFocus = (e) => {
+const handleFocus = e => {
   emit('focus', e)
 }
 
 // 处理失去焦点
-const handleBlur = (e) => {
+const handleBlur = e => {
   emit('blur', e)
 }
 
@@ -123,13 +127,13 @@ defineExpose({ focus, blur })
   margin: 0;
   line-height: 1.8;
   font-size: 14px;
-  color: #1A1A1A;
+  color: #1a1a1a;
   resize: vertical;
   font-family: inherit;
   box-sizing: border-box;
 
   &::placeholder {
-    color: #B8B8B8;
+    color: #b8b8b8;
   }
 
   &:disabled {
@@ -146,17 +150,17 @@ defineExpose({ focus, blur })
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #E6E6E6;
+    background: #e6e6e6;
     border-radius: 3px;
 
     &:hover {
-      background: #C8C8C8;
+      background: #c8c8c8;
     }
   }
 
   // Firefox 滚动条
   scrollbar-width: thin;
-  scrollbar-color: #E6E6E6 transparent;
+  scrollbar-color: #e6e6e6 transparent;
 }
 
 .ding-input-count {
@@ -164,7 +168,7 @@ defineExpose({ focus, blur })
   bottom: 12px;
   left: 12px;
   font-size: 12px;
-  color: #B8B8B8;
+  color: #b8b8b8;
   background: rgba(255, 255, 255, 0.95);
   padding: 4px 8px;
   border-radius: 4px;
@@ -172,7 +176,7 @@ defineExpose({ focus, blur })
   transition: all 0.2s ease;
 
   &.is-near-limit {
-    color: #F5222D;
+    color: #f5222d;
     background: rgba(245, 34, 45, 0.08);
     font-weight: 500;
   }

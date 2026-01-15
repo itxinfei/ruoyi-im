@@ -10,14 +10,14 @@ import * as videoCallApi from '@/api/im/video-call'
 
 // 通话状态
 export const CALL_STATE = {
-  IDLE: 'idle',           // 空闲
-  CALLING: 'calling',     // 呼叫中
-  INCOMING: 'incoming',   // 来电中
+  IDLE: 'idle', // 空闲
+  CALLING: 'calling', // 呼叫中
+  INCOMING: 'incoming', // 来电中
   CONNECTING: 'connecting', // 连接中
   CONNECTED: 'connected', // 已连接
-  ENDED: 'ended',         // 已结束
-  REJECTED: 'rejected',   // 已拒绝
-  TIMEOUT: 'timeout',     // 超时
+  ENDED: 'ended', // 已结束
+  REJECTED: 'rejected', // 已拒绝
+  TIMEOUT: 'timeout', // 超时
 }
 
 // 通话类型
@@ -152,14 +152,14 @@ export function useVoiceCall() {
     }
 
     // 监听远程流
-    peerConnection.value.ontrack = (event) => {
+    peerConnection.value.ontrack = event => {
       if (event.streams && event.streams[0]) {
         remoteStream.value = event.streams[0]
       }
     }
 
     // 监听 ICE 候选
-    peerConnection.value.onicecandidate = (event) => {
+    peerConnection.value.onicecandidate = event => {
       if (event.candidate && callId.value) {
         sendWebRTCSignal('ice-candidate', JSON.stringify(event.candidate))
       }
@@ -201,10 +201,7 @@ export function useVoiceCall() {
   const handleCallDisconnected = () => {
     // 可能是暂时断开，等待几秒确认
     setTimeout(() => {
-      if (
-        peerConnection.value &&
-        peerConnection.value.iceConnectionState === 'disconnected'
-      ) {
+      if (peerConnection.value && peerConnection.value.iceConnectionState === 'disconnected') {
         ElMessage.warning('通话已断开')
         endCall()
       }
@@ -289,11 +286,11 @@ export function useVoiceCall() {
   /**
    * 获取用户信息
    */
-  const fetchUserInfo = async (userId) => {
+  const fetchUserInfo = async userId => {
     try {
       const response = await fetch(`/api/im/user/${userId}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+          Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
         },
       })
       if (response.ok) {
@@ -397,7 +394,7 @@ export function useVoiceCall() {
   /**
    * 处理 WebRTC 信令
    */
-  const handleWebRTCSignal = async (message) => {
+  const handleWebRTCSignal = async message => {
     const { signalType, signalData } = message
 
     try {
@@ -435,9 +432,7 @@ export function useVoiceCall() {
         case 'ice-candidate':
           // 收到 ICE 候选
           if (peerConnection.value) {
-            await peerConnection.value.addIceCandidate(
-              new RTCIceCandidate(JSON.parse(signalData))
-            )
+            await peerConnection.value.addIceCandidate(new RTCIceCandidate(JSON.parse(signalData)))
           }
           break
       }
@@ -449,9 +444,15 @@ export function useVoiceCall() {
   /**
    * 处理来电通知
    */
-  const handleIncomingCall = (message) => {
-    const { callId: id, callType: type, callerId, callerName, callerAvatar, conversationId: convId } =
-      message
+  const handleIncomingCall = message => {
+    const {
+      callId: id,
+      callType: type,
+      callerId,
+      callerName,
+      callerAvatar,
+      conversationId: convId,
+    } = message
 
     // 如果是视频通话，忽略
     if (type === 'VIDEO') {
@@ -489,7 +490,7 @@ export function useVoiceCall() {
   /**
    * 处理通话状态变化
    */
-  const handleCallStatus = (message) => {
+  const handleCallStatus = message => {
     const { status } = message
 
     switch (status) {
@@ -534,7 +535,7 @@ export function useVoiceCall() {
   /**
    * 设置麦克风状态（供外部调用）
    */
-  const setMuted = (muted) => {
+  const setMuted = muted => {
     if (localStream.value) {
       const audioTrack = localStream.value.getAudioTracks()[0]
       if (audioTrack) {
@@ -555,14 +556,14 @@ export function useVoiceCall() {
   /**
    * 设置扬声器状态（供外部调用）
    */
-  const setSpeaker = (on) => {
+  const setSpeaker = on => {
     isSpeakerOn.value = on
   }
 
   /**
    * 选择音频输出设备
    */
-  const selectAudioOutput = async (deviceId) => {
+  const selectAudioOutput = async deviceId => {
     selectedOutputDevice.value = deviceId
     // 注意：setSinkId 需要 HTTPS 环境
     if (typeof remoteStream.value !== 'undefined' && remoteStream.value) {
@@ -624,9 +625,7 @@ export function useVoiceCall() {
 
     // 延迟重置状态
     setTimeout(() => {
-      if (
-        [CALL_STATE.ENDED, CALL_STATE.REJECTED, CALL_STATE.TIMEOUT].includes(callState.value)
-      ) {
+      if ([CALL_STATE.ENDED, CALL_STATE.REJECTED, CALL_STATE.TIMEOUT].includes(callState.value)) {
         callState.value = CALL_STATE.IDLE
       }
     }, 1000)

@@ -41,6 +41,25 @@ public class ImEmailController extends BaseController {
     }
 
     /**
+     * 新增邮件页面
+     */
+    @RequiresPermissions("im:email:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改邮件页面
+     */
+    @RequiresPermissions("im:email:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("email", emailService.selectImEmailById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询邮件列表
      */
     @RequiresPermissions("im:email:list")

@@ -25,7 +25,7 @@ class WebRTCSignalingService {
     this.ws = websocket
 
     // 监听 WebSocket 消息
-    this.ws.addEventListener('message', (event) => {
+    this.ws.addEventListener('message', event => {
       try {
         const data = JSON.parse(event.data)
         this.handleMessage(data)

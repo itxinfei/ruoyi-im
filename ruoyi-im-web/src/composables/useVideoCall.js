@@ -9,14 +9,14 @@ import * as videoCallApi from '@/api/im/video-call'
 
 // 通话状态
 export const CALL_STATE = {
-  IDLE: 'idle',           // 空闲
-  CALLING: 'calling',     // 呼叫中
-  INCOMING: 'incoming',   // 来电中
+  IDLE: 'idle', // 空闲
+  CALLING: 'calling', // 呼叫中
+  INCOMING: 'incoming', // 来电中
   CONNECTING: 'connecting', // 连接中
   CONNECTED: 'connected', // 已连接
-  ENDED: 'ended',         // 已结束
-  REJECTED: 'rejected',   // 已拒绝
-  TIMEOUT: 'timeout',     // 超时
+  ENDED: 'ended', // 已结束
+  REJECTED: 'rejected', // 已拒绝
+  TIMEOUT: 'timeout', // 超时
 }
 
 // 通话类型
@@ -50,7 +50,9 @@ export function useVideoCall() {
 
   // 计算属性
   const isInCall = computed(() =>
-    [CALL_STATE.CALLING, CALL_STATE.INCOMING, CALL_STATE.CONNECTING, CALL_STATE.CONNECTED].includes(callState.value)
+    [CALL_STATE.CALLING, CALL_STATE.INCOMING, CALL_STATE.CONNECTING, CALL_STATE.CONNECTED].includes(
+      callState.value
+    )
   )
 
   const isActiveCall = computed(() => callState.value === CALL_STATE.CONNECTED)
@@ -92,14 +94,14 @@ export function useVideoCall() {
     }
 
     // 监听远程流
-    peerConnection.value.ontrack = (event) => {
+    peerConnection.value.ontrack = event => {
       if (event.streams && event.streams[0]) {
         remoteStream.value = event.streams[0]
       }
     }
 
     // 监听 ICE 候选
-    peerConnection.value.onicecandidate = (event) => {
+    peerConnection.value.onicecandidate = event => {
       if (event.candidate && callId.value) {
         sendWebRTCSignal('ice-candidate', JSON.stringify(event.candidate))
       }
@@ -266,7 +268,7 @@ export function useVideoCall() {
   /**
    * 处理 WebRTC 信令
    */
-  const handleWebRTCSignal = async (message) => {
+  const handleWebRTCSignal = async message => {
     const { signalType, signalData } = message
 
     try {
@@ -275,7 +277,9 @@ export function useVideoCall() {
           if (!peerConnection.value) {
             await createPeerConnection()
           }
-          await peerConnection.value.setRemoteDescription(new RTCSessionDescription(JSON.parse(signalData)))
+          await peerConnection.value.setRemoteDescription(
+            new RTCSessionDescription(JSON.parse(signalData))
+          )
 
           // 创建并发送 Answer
           const answer = await peerConnection.value.createAnswer()
@@ -285,7 +289,9 @@ export function useVideoCall() {
 
         case 'answer':
           if (peerConnection.value) {
-            await peerConnection.value.setRemoteDescription(new RTCSessionDescription(JSON.parse(signalData)))
+            await peerConnection.value.setRemoteDescription(
+              new RTCSessionDescription(JSON.parse(signalData))
+            )
             callState.value = CALL_STATE.CONNECTING
           }
           break
@@ -304,7 +310,7 @@ export function useVideoCall() {
   /**
    * 处理来电通知
    */
-  const handleIncomingCall = (message) => {
+  const handleIncomingCall = message => {
     const { callId: id, callType: type, callerId, conversationId: convId } = message
 
     // 如果正在通话中，自动拒绝
@@ -332,7 +338,7 @@ export function useVideoCall() {
   /**
    * 处理通话状态变化
    */
-  const handleCallStatus = (message) => {
+  const handleCallStatus = message => {
     const { status } = message
 
     switch (status) {

@@ -79,11 +79,7 @@
 
         <!-- 搜索结果列表 -->
         <div v-else-if="searchResults.length > 0" class="results-list">
-          <div
-            v-for="(group, category) in groupedResults"
-            :key="category"
-            class="result-group"
-          >
+          <div v-for="(group, category) in groupedResults" :key="category" class="result-group">
             <div class="group-header">
               <el-icon class="category-icon">
                 <component :is="getCategoryIcon(category)" />
@@ -97,7 +93,7 @@
               class="result-item"
               :class="{
                 selected: selectedIndex === getGlobalIndex(group, category, index),
-                unread: item.unread
+                unread: item.unread,
               }"
               @click="handleResultClick(item)"
               @mouseenter="selectedIndex = getGlobalIndex(group, category, index)"
@@ -324,7 +320,7 @@ const performSearch = async () => {
 }
 
 // 搜索消息
-const searchMessages = async (keyword) => {
+const searchMessages = async keyword => {
   try {
     const results = []
 
@@ -405,7 +401,7 @@ const searchMessages = async (keyword) => {
 }
 
 // 搜索联系人
-const searchContacts = async (keyword) => {
+const searchContacts = async keyword => {
   try {
     const results = []
 
@@ -449,9 +445,7 @@ const searchContacts = async (keyword) => {
             contact.email,
           ].filter(Boolean)
 
-          if (searchFields.some(
-            field => field.toLowerCase().includes(keyword.toLowerCase())
-          )) {
+          if (searchFields.some(field => field.toLowerCase().includes(keyword.toLowerCase()))) {
             results.push({
               id: contactId,
               type: 'contact',
@@ -477,7 +471,7 @@ const searchContacts = async (keyword) => {
 }
 
 // 搜索群组
-const searchGroups = async (keyword) => {
+const searchGroups = async keyword => {
   try {
     const results = []
 
@@ -539,7 +533,7 @@ const searchGroups = async (keyword) => {
 }
 
 // 搜索文件
-const searchFiles = async (keyword) => {
+const searchFiles = async keyword => {
   try {
     const files = store.state.im.files || []
 
@@ -585,7 +579,7 @@ const updateFilterCounts = () => {
 }
 
 // 设置激活筛选
-const setActiveFilter = (filterKey) => {
+const setActiveFilter = filterKey => {
   activeFilter.value = filterKey
   performSearch()
 }
@@ -597,12 +591,12 @@ const highlightKeyword = (text, keyword) => {
   return text.replace(regex, '<span class="highlight">$1</span>')
 }
 
-const escapeRegex = (str) => {
+const escapeRegex = str => {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 // 获取分类图标
-const getCategoryIcon = (category) => {
+const getCategoryIcon = category => {
   const icons = {
     message: ChatDotRound,
     contact: User,
@@ -613,7 +607,7 @@ const getCategoryIcon = (category) => {
 }
 
 // 获取分类名称
-const getCategoryName = (category) => {
+const getCategoryName = category => {
   const names = {
     message: '消息',
     contact: '联系人',
@@ -636,14 +630,14 @@ const getGlobalIndex = (group, category, index) => {
 }
 
 // 获取文件扩展名
-const getFileExtension = (fileName) => {
+const getFileExtension = fileName => {
   if (!fileName) return 'unknown'
   const ext = fileName.split('.').pop()?.toLowerCase()
   return ext || 'unknown'
 }
 
 // 格式化文件大小
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (!bytes) return '未知'
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
@@ -652,7 +646,7 @@ const formatFileSize = (bytes) => {
 }
 
 // 格式化时间
-const formatTime = (timestamp) => {
+const formatTime = timestamp => {
   if (!timestamp) return ''
   const date = new Date(timestamp)
   const now = new Date()
@@ -670,7 +664,7 @@ const formatTime = (timestamp) => {
 }
 
 // 键盘事件处理
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   const total = totalResults.value
 
   switch (e.key) {
@@ -709,7 +703,7 @@ const getFlatResults = () => {
 }
 
 // 处理结果点击
-const handleResultClick = (item) => {
+const handleResultClick = item => {
   emit('resultClick', item)
   handleClose()
 
@@ -733,7 +727,7 @@ const handleResultClick = (item) => {
 }
 
 // 发起聊天
-const handleStartChat = (item) => {
+const handleStartChat = item => {
   if (item.type === 'contact') {
     store.dispatch('im/startChat', { userId: item.userId })
   } else if (item.type === 'group') {
@@ -743,7 +737,7 @@ const handleStartChat = (item) => {
 }
 
 // 下载文件
-const handleDownloadFile = (item) => {
+const handleDownloadFile = item => {
   if (item.fileUrl) {
     const link = document.createElement('a')
     link.href = item.fileUrl
@@ -769,18 +763,21 @@ const handleClose = () => {
 }
 
 // 监听显示状态变化
-watch(() => props.visible, (visible) => {
-  if (visible) {
-    nextTick(() => {
-      searchInputRef.value?.focus()
-    })
-  } else {
-    clearSearch()
+watch(
+  () => props.visible,
+  visible => {
+    if (visible) {
+      nextTick(() => {
+        searchInputRef.value?.focus()
+      })
+    } else {
+      clearSearch()
+    }
   }
-})
+)
 
 // 全局快捷键监听
-const handleGlobalKeydown = (e) => {
+const handleGlobalKeydown = e => {
   // Ctrl+K 打开搜索
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
     e.preventDefault()

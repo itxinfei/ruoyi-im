@@ -159,7 +159,7 @@ const handleUpload = () => {
   input.accept = '*/*'
   input.style.display = 'none'
 
-  input.onchange = async (e) => {
+  input.onchange = async e => {
     const file = e.target.files[0]
     if (!file) return
 
@@ -167,7 +167,7 @@ const handleUpload = () => {
     uploadProgress.value = 0
 
     try {
-      const res = await uploadFile(file, (progressEvent) => {
+      const res = await uploadFile(file, progressEvent => {
         if (progressEvent.total) {
           uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
         }
@@ -213,7 +213,7 @@ const handleFileAction = (command, file) => {
  * 分享文件
  * 复制文件链接到剪贴板
  */
-const handleShare = async (file) => {
+const handleShare = async file => {
   try {
     // 生成分享链接
     const shareUrl = `${window.location.origin}/files/${file.id}`

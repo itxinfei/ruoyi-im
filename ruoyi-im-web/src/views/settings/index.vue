@@ -435,15 +435,15 @@ import { setTheme as applyGlobalTheme, getTheme } from '@/utils/theme'
 const props = defineProps({
   modelValue: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'save'])
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val),
 })
 
 const activeSection = ref('profile')
@@ -463,7 +463,7 @@ const uploadUrl = computed(() => {
 const uploadHeaders = computed(() => {
   const token = localStorage.getItem('Admin-Token')
   return {
-    Authorization: 'Bearer ' + token
+    Authorization: 'Bearer ' + token,
   }
 })
 
@@ -527,7 +527,11 @@ const backgroundOptions = [
   { label: '默认', value: 'default', preview: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
   { label: '简约', value: 'simple', preview: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' },
   { label: '自然', value: 'nature', preview: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' },
-  { label: '星空', value: 'starry', preview: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)' },
+  {
+    label: '星空',
+    value: 'starry',
+    preview: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+  },
 ]
 
 const passwordForm = reactive({
@@ -537,12 +541,10 @@ const passwordForm = reactive({
 })
 
 const passwordRules = {
-  oldPassword: [
-    { required: true, message: '请输入当前密码', trigger: 'blur' }
-  ],
+  oldPassword: [{ required: true, message: '请输入当前密码', trigger: 'blur' }],
   newPassword: [
     { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' }
+    { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' },
   ],
   confirmPassword: [
     { required: true, message: '请再次输入新密码', trigger: 'blur' },
@@ -554,9 +556,9 @@ const passwordRules = {
           callback()
         }
       },
-      trigger: 'blur'
-    }
-  ]
+      trigger: 'blur',
+    },
+  ],
 }
 
 const loadUserInfo = async () => {
@@ -617,11 +619,11 @@ const saveProfile = async () => {
   try {
     saving.value = true
     await updateProfile(profileForm)
-    
+
     const userInfo = getCurrentUserInfo()
     Object.assign(userInfo, profileForm)
     setUserInfo(userInfo)
-    
+
     ElMessage.success('保存成功')
   } catch (error) {
     console.error('保存个人信息失败:', error)
@@ -641,33 +643,33 @@ const saveNotificationSettings = () => {
   ElMessage.success('通知设置已保存')
 }
 
-const setTheme = (theme) => {
+const setTheme = theme => {
   currentTheme.value = theme
   localStorage.setItem('im_theme', theme)
   applyGlobalTheme(theme)
   ElMessage.success('主题已切换')
 }
 
-const setColor = (color) => {
+const setColor = color => {
   currentColor.value = color
   localStorage.setItem('im_theme_color', color)
   document.documentElement.style.setProperty('--el-color-primary', color)
   ElMessage.success('颜色主题已切换')
 }
 
-const setFontSize = (size) => {
+const setFontSize = size => {
   fontSize.value = size
   localStorage.setItem('im_font_size', size)
   ElMessage.success('字体大小已调整')
 }
 
-const setBackground = (bg) => {
+const setBackground = bg => {
   currentBackground.value = bg
   localStorage.setItem('im_background', bg)
   ElMessage.success('聊天背景已切换')
 }
 
-const handleAvatarSuccess = (response) => {
+const handleAvatarSuccess = response => {
   if (response.code === 200) {
     profileForm.avatar = response.url
     avatarUploading.value = false
@@ -678,7 +680,7 @@ const handleAvatarSuccess = (response) => {
   }
 }
 
-const beforeAvatarUpload = (file) => {
+const beforeAvatarUpload = file => {
   const isImage = file.type.startsWith('image/')
   const isLt2M = file.size / 1024 / 1024 < 2
 
@@ -701,7 +703,7 @@ const confirmChangePassword = async () => {
       changingPassword.value = true
       await changePasswordApi({
         oldPassword: passwordForm.oldPassword,
-        newPassword: passwordForm.newPassword
+        newPassword: passwordForm.newPassword,
       })
       ElMessage.success('密码修改成功')
       showChangePassword.value = false
@@ -754,12 +756,15 @@ const handleCancel = () => {
   visible.value = false
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    loadUserInfo()
-    loadSettings()
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      loadUserInfo()
+      loadSettings()
+    }
   }
-})
+)
 
 onMounted(() => {
   if (props.modelValue) {

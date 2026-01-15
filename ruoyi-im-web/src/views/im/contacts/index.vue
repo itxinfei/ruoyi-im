@@ -47,7 +47,7 @@
           <span class="tips-text">搜索 "{{ searchKeyword }}"</span>
           <span class="result-count">找到 {{ displayContacts.length }} 个结果</span>
         </div>
-        
+
         <div
           v-for="contact in displayContacts"
           :key="contact.id"
@@ -72,7 +72,11 @@
             <!-- 搜索结果显示匹配字段 -->
             <div v-if="isSearching" class="contact-search-match">
               <span v-if="contact.deptName" class="match-tag">{{ contact.deptName }}</span>
-              <span v-if="contact.position && contact.position !== contact.deptName" class="match-tag">{{ contact.position }}</span>
+              <span
+                v-if="contact.position && contact.position !== contact.deptName"
+                class="match-tag"
+                >{{ contact.position }}</span
+              >
             </div>
             <div v-else-if="contact.signature" class="contact-signature">
               {{ contact.signature }}
@@ -373,23 +377,25 @@ const handleSearch = () => {
     searchResult.value = []
     return
   }
-  
+
   const keyword = searchKeyword.value.toLowerCase().trim()
-  
+
   // 合并所有联系人数据进行搜索
   const allContacts = [
     ...contacts.value,
-    ...allUsers.value.filter(u => !contacts.value.some(c => c.id === u.id))
+    ...allUsers.value.filter(u => !contacts.value.some(c => c.id === u.id)),
   ]
-  
+
   // 按姓名、部门、职位搜索
   searchResult.value = allContacts.filter(contact => {
-    const nameMatch = (contact.name || contact.nickname || contact.username || '').toLowerCase().includes(keyword)
+    const nameMatch = (contact.name || contact.nickname || contact.username || '')
+      .toLowerCase()
+      .includes(keyword)
     const deptMatch = (contact.deptName || contact.department || '').toLowerCase().includes(keyword)
     const positionMatch = (contact.position || '').toLowerCase().includes(keyword)
     const phoneMatch = (contact.phone || '').includes(keyword)
     const emailMatch = (contact.email || '').toLowerCase().includes(keyword)
-    
+
     return nameMatch || deptMatch || positionMatch || phoneMatch || emailMatch
   })
 }
@@ -584,7 +590,7 @@ onMounted(async () => {
 .contacts-container {
   height: 100%;
   display: flex;
-  background-color: #F5F7FA;
+  background-color: #f5f7fa;
 }
 
 // 组织架构树面板
@@ -593,13 +599,13 @@ onMounted(async () => {
   min-width: 200px;
   height: 100%;
   background-color: #fff;
-  border-right: 1px solid #E8E8E8;
+  border-right: 1px solid #e8e8e8;
   display: flex;
   flex-direction: column;
 
   .panel-header {
     padding: 16px; // 修改：16px 16px 12px -> 16px（统一边距）
-    border-bottom: 1px solid #E8E8E8;
+    border-bottom: 1px solid #e8e8e8;
 
     .panel-title {
       margin: 0;
@@ -618,9 +624,9 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
 
-    .panel-header {
+  .panel-header {
     padding: 16px; // 修改：16px 16px 12px -> 16px（统一边距）
-    border-bottom: 1px solid #E8E8E8;
+    border-bottom: 1px solid #e8e8e8;
 
     .panel-title {
       margin: 0 0 12px 0;
@@ -633,22 +639,22 @@ onMounted(async () => {
   // 搜索框样式
   .search-box {
     padding: 12px 16px;
-    border-bottom: 1px solid #E8E8E8;
+    border-bottom: 1px solid #e8e8e8;
 
     :deep(.el-input__wrapper) {
       border-radius: 4px; // 修改：6px -> 4px（符合规范）
-      background-color: #F5F7FA;
+      background-color: #f5f7fa;
       box-shadow: none;
       border: 1px solid transparent;
       transition: all 0.2s;
 
       &:hover {
-        background-color: #F0F2F5;
+        background-color: #f0f2f5;
       }
 
       &.is-focus {
         background-color: #fff;
-        border-color: #0089FF; // 钉钉规范
+        border-color: #0089ff; // 钉钉规范
         box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
       }
     }
@@ -660,7 +666,7 @@ onMounted(async () => {
       line-height: 32px;
 
       &::placeholder {
-        color: #CCCCCC;
+        color: #cccccc;
       }
     }
 
@@ -675,7 +681,7 @@ onMounted(async () => {
     padding: 8px 12px;
     gap: 8px; // 修改：4px -> 8px（符合4的倍数）
     overflow-x: auto;
-    border-bottom: 1px solid #E8E8E8;
+    border-bottom: 1px solid #e8e8e8;
     scrollbar-width: none;
 
     &::-webkit-scrollbar {
@@ -696,12 +702,12 @@ onMounted(async () => {
       background-color: transparent;
 
       &:hover {
-        background-color: #F5F7FA;
+        background-color: #f5f7fa;
       }
 
       &.active {
-        background-color: #E6F7FF;
-        color: #0089FF; // 钉钉规范
+        background-color: #e6f7ff;
+        color: #0089ff; // 钉钉规范
         font-weight: 500;
       }
 
@@ -730,8 +736,8 @@ onMounted(async () => {
       align-items: center;
       justify-content: space-between;
       padding: 12px 16px; // 修改：10px -> 12px
-      background-color: #FAFAFA;
-      border-bottom: 1px solid #E8E8E8;
+      background-color: #fafafa;
+      border-bottom: 1px solid #e8e8e8;
       position: sticky;
       top: 0;
       z-index: 10;
@@ -757,7 +763,7 @@ onMounted(async () => {
       .match-tag {
         font-size: 12px;
         color: #999999; // 辅助文字
-        background-color: #F0F2F5;
+        background-color: #f0f2f5;
         padding: 2px 8px; // 修改：1px 6px -> 2px 8px
         border-radius: 4px;
       }
@@ -771,11 +777,11 @@ onMounted(async () => {
       transition: background-color 0.2s; // 修改：0.15s -> 0.2s
 
       &:hover {
-        background-color: #F5F7FA;
+        background-color: #f5f7fa;
       }
 
       &.selected {
-        background-color: #E6F7FF;
+        background-color: #e6f7ff;
       }
 
       .contact-avatar {
@@ -875,7 +881,7 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     gap: 20px;
-    border-bottom: 1px solid #E8E8E8;
+    border-bottom: 1px solid #e8e8e8;
 
     .header-info {
       flex: 1;
@@ -914,7 +920,7 @@ onMounted(async () => {
     padding: 16px 24px;
     display: flex;
     gap: 12px;
-    border-bottom: 1px solid #E8E8E8;
+    border-bottom: 1px solid #e8e8e8;
   }
 
   .detail-content {
@@ -958,7 +964,7 @@ onMounted(async () => {
       .signature {
         margin: 0;
         padding: 12px 16px;
-        background-color: #F5F7FA;
+        background-color: #f5f7fa;
         border-radius: 8px;
         font-size: 14px;
         color: #666666; // 次要文字

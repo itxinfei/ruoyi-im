@@ -38,8 +38,8 @@ import { VideoPlay, VideoPause } from '@element-plus/icons-vue'
 const props = defineProps({
   content: {
     type: Object,
-    default: () => ({})
-  }
+    default: () => ({}),
+  },
 })
 
 const emit = defineEmits(['play', 'pause', 'end'])
@@ -56,7 +56,7 @@ const formattedDuration = computed(() => {
   return `${formatTime(seconds)} / ${formatTime(total)}`
 })
 
-const formatTime = (seconds) => {
+const formatTime = seconds => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
@@ -119,13 +119,13 @@ defineExpose({ play, pause })
   max-width: 240px;
   padding: 10px 14px;
   background: #fff;
-  border: 1px solid #E5E8EB;
+  border: 1px solid #e5e8eb;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background: #FAFAFA;
+    background: #fafafa;
   }
 
   &.playing {
@@ -138,7 +138,7 @@ defineExpose({ play, pause })
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: #0089FF;
+    background: #0089ff;
     color: #fff;
     display: flex;
     align-items: center;
@@ -160,25 +160,26 @@ defineExpose({ play, pause })
     .wave-bar {
       width: 2px;
       height: 100%;
-      background: #D9D9D9;
+      background: #d9d9d9;
       border-radius: 1px;
       transition: background 0.2s;
 
       &.active {
-        background: #0089FF;
+        background: #0089ff;
       }
     }
   }
 
   .voice-duration {
     font-size: 12px;
-    color: #858B8F;
+    color: #858b8f;
     flex-shrink: 0;
   }
 }
 
 @keyframes wave {
-  0%, 100% {
+  0%,
+  100% {
     height: 6px;
   }
   50% {

@@ -30,11 +30,7 @@
 
     <div class="files-content">
       <!-- 空状态 -->
-      <el-empty
-        v-if="files.length === 0"
-        description="暂无群文件"
-        :image-size="100"
-      >
+      <el-empty v-if="files.length === 0" description="暂无群文件" :image-size="100">
         <template #image>
           <el-icon :size="80" color="#D9D9D9">
             <FolderOpened />
@@ -68,9 +64,7 @@
 
       <!-- 加载更多 -->
       <div v-if="hasMore" class="load-more">
-        <el-button text @click="loadMore" :loading="loading">
-          加载更多
-        </el-button>
+        <el-button text :loading="loading" @click="loadMore"> 加载更多 </el-button>
       </div>
     </div>
   </el-drawer>
@@ -79,36 +73,43 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Upload, FolderOpened, Document, Picture, VideoCamera, Files } from '@element-plus/icons-vue'
+import {
+  Upload,
+  FolderOpened,
+  Document,
+  Picture,
+  VideoCamera,
+  Files,
+} from '@element-plus/icons-vue'
 import { getToken } from '@/utils/auth'
 
 const props = defineProps({
   modelValue: {
     type: Boolean,
-    default: false
+    default: false,
   },
   // 群组ID
   groupId: {
     type: [String, Number],
-    default: ''
+    default: '',
   },
   // 文件列表
   files: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   // 是否有更多
   hasMore: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'upload', 'download', 'load-more'])
 
 const visible = computed({
   get: () => props.modelValue,
-  set: val => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val),
 })
 
 const uploadRef = ref(null)
@@ -121,13 +122,13 @@ const uploadUrl = computed(() => {
 
 const uploadHeaders = computed(() => {
   return {
-    Authorization: 'Bearer ' + getToken()
+    Authorization: 'Bearer ' + getToken(),
   }
 })
 
 const uploadData = computed(() => {
   return {
-    groupId: props.groupId
+    groupId: props.groupId,
   }
 })
 
@@ -139,7 +140,7 @@ const displayFiles = computed(() => {
 })
 
 // 获取文件类型
-const getFileType = (fileName) => {
+const getFileType = fileName => {
   const ext = fileName.split('.').pop()?.toLowerCase()
   if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) return 'image'
   if (['mp4', 'avi', 'mov', 'wmv', 'flv'].includes(ext)) return 'video'
@@ -153,7 +154,7 @@ const getFileType = (fileName) => {
 }
 
 // 获取文件图标
-const getFileIcon = (type) => {
+const getFileIcon = type => {
   const iconMap = {
     image: Picture,
     video: VideoCamera,
@@ -163,22 +164,22 @@ const getFileIcon = (type) => {
     excel: Document,
     ppt: Document,
     archive: Files,
-    other: Document
+    other: Document,
   }
   return iconMap[type] || Document
 }
 
 // 格式化文件大小
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (!bytes) return '0 B'
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
 }
 
 // 格式化时间
-const formatTime = (time) => {
+const formatTime = time => {
   if (!time) return ''
   const date = new Date(time)
   const now = new Date()
@@ -197,7 +198,7 @@ const formatTime = (time) => {
 }
 
 // 上传前验证
-const beforeUpload = (file) => {
+const beforeUpload = file => {
   const maxSize = 100 * 1024 * 1024 // 100MB
   if (file.size > maxSize) {
     ElMessage.error('文件大小不能超过100MB')
@@ -218,7 +219,7 @@ const handleUploadError = () => {
 }
 
 // 点击文件
-const handleFileClick = (file) => {
+const handleFileClick = file => {
   emit('download', file)
 }
 
@@ -254,7 +255,7 @@ const loadMore = () => {
   .header-title {
     font-size: 16px;
     font-weight: 600;
-    color: #171A1A;
+    color: #171a1a;
   }
 
   .el-button {
@@ -284,7 +285,7 @@ const loadMore = () => {
     transition: background-color 0.2s;
 
     &:hover {
-      background-color: #F5F7FA;
+      background-color: #f5f7fa;
     }
 
     .file-icon {
@@ -339,8 +340,8 @@ const loadMore = () => {
       }
 
       &.file-type-other {
-        background: #F0F2F5;
-        color: #858B8F;
+        background: #f0f2f5;
+        color: #858b8f;
       }
     }
 
@@ -350,7 +351,7 @@ const loadMore = () => {
 
       .file-name {
         font-size: 14px;
-        color: #171A1A;
+        color: #171a1a;
         margin-bottom: 4px;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -359,7 +360,7 @@ const loadMore = () => {
 
       .file-meta {
         font-size: 12px;
-        color: #858B8F;
+        color: #858b8f;
         display: flex;
         gap: 8px;
       }
@@ -367,7 +368,7 @@ const loadMore = () => {
 
     .file-size {
       font-size: 12px;
-      color: #858B8F;
+      color: #858b8f;
       margin-left: 12px;
       flex-shrink: 0;
     }
@@ -377,7 +378,7 @@ const loadMore = () => {
 .load-more {
   padding: 12px;
   text-align: center;
-  border-top: 1px solid #E5E8EB;
+  border-top: 1px solid #e5e8eb;
 
   .el-button {
     width: 100%;

@@ -5,9 +5,9 @@
 // 网络质量等级
 export const NETWORK_QUALITY = {
   EXCELLENT: 'excellent', // 优秀：4格
-  GOOD: 'good',           // 良好：3格
-  FAIR: 'fair',           // 一般：2格
-  POOR: 'poor',           // 较差：1格
+  GOOD: 'good', // 良好：3格
+  FAIR: 'fair', // 一般：2格
+  POOR: 'poor', // 较差：1格
   DISCONNECTED: 'disconnected', // 断开：0格
 }
 
@@ -173,27 +173,35 @@ export function calculateNetworkQuality(stats) {
   }
 
   // 按照最严格的指标判断
-  if (delay <= QUALITY_CONFIG[NETWORK_QUALITY.EXCELLENT].threshold.delay &&
-      packetLoss <= QUALITY_CONFIG[NETWORK_QUALITY.EXCELLENT].threshold.packetLoss &&
-      jitter <= QUALITY_CONFIG[NETWORK_QUALITY.EXCELLENT].threshold.jitter) {
+  if (
+    delay <= QUALITY_CONFIG[NETWORK_QUALITY.EXCELLENT].threshold.delay &&
+    packetLoss <= QUALITY_CONFIG[NETWORK_QUALITY.EXCELLENT].threshold.packetLoss &&
+    jitter <= QUALITY_CONFIG[NETWORK_QUALITY.EXCELLENT].threshold.jitter
+  ) {
     return NETWORK_QUALITY.EXCELLENT
   }
 
-  if (delay <= QUALITY_CONFIG[NETWORK_QUALITY.GOOD].threshold.delay &&
-      packetLoss <= QUALITY_CONFIG[NETWORK_QUALITY.GOOD].threshold.packetLoss &&
-      jitter <= QUALITY_CONFIG[NETWORK_QUALITY.GOOD].threshold.jitter) {
+  if (
+    delay <= QUALITY_CONFIG[NETWORK_QUALITY.GOOD].threshold.delay &&
+    packetLoss <= QUALITY_CONFIG[NETWORK_QUALITY.GOOD].threshold.packetLoss &&
+    jitter <= QUALITY_CONFIG[NETWORK_QUALITY.GOOD].threshold.jitter
+  ) {
     return NETWORK_QUALITY.GOOD
   }
 
-  if (delay <= QUALITY_CONFIG[NETWORK_QUALITY.FAIR].threshold.delay &&
-      packetLoss <= QUALITY_CONFIG[NETWORK_QUALITY.FAIR].threshold.packetLoss &&
-      jitter <= QUALITY_CONFIG[NETWORK_QUALITY.FAIR].threshold.jitter) {
+  if (
+    delay <= QUALITY_CONFIG[NETWORK_QUALITY.FAIR].threshold.delay &&
+    packetLoss <= QUALITY_CONFIG[NETWORK_QUALITY.FAIR].threshold.packetLoss &&
+    jitter <= QUALITY_CONFIG[NETWORK_QUALITY.FAIR].threshold.jitter
+  ) {
     return NETWORK_QUALITY.FAIR
   }
 
-  if (delay <= QUALITY_CONFIG[NETWORK_QUALITY.POOR].threshold.delay &&
-      packetLoss <= QUALITY_CONFIG[NETWORK_QUALITY.POOR].threshold.packetLoss &&
-      jitter <= QUALITY_CONFIG[NETWORK_QUALITY.POOR].threshold.jitter) {
+  if (
+    delay <= QUALITY_CONFIG[NETWORK_QUALITY.POOR].threshold.delay &&
+    packetLoss <= QUALITY_CONFIG[NETWORK_QUALITY.POOR].threshold.packetLoss &&
+    jitter <= QUALITY_CONFIG[NETWORK_QUALITY.POOR].threshold.jitter
+  ) {
     return NETWORK_QUALITY.POOR
   }
 
@@ -350,15 +358,18 @@ export class WebRTCStatsCollector {
     }
 
     // 计算平均值
-    const sum = relevantStats.reduce((acc, s) => ({
-      currentRoundTripTime: acc.currentRoundTripTime + s.currentRoundTripTime,
-      packetLossRate: acc.packetLossRate + s.packetLossRate,
-      jitter: acc.jitter + s.jitter,
-    }), {
-      currentRoundTripTime: 0,
-      packetLossRate: 0,
-      jitter: 0,
-    })
+    const sum = relevantStats.reduce(
+      (acc, s) => ({
+        currentRoundTripTime: acc.currentRoundTripTime + s.currentRoundTripTime,
+        packetLossRate: acc.packetLossRate + s.packetLossRate,
+        jitter: acc.jitter + s.jitter,
+      }),
+      {
+        currentRoundTripTime: 0,
+        packetLossRate: 0,
+        jitter: 0,
+      }
+    )
 
     const count = relevantStats.length
 

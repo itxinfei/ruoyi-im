@@ -39,6 +39,25 @@ public class ImGroupController extends BaseController {
     private ImGroupService imGroupService;
 
     /**
+     * 新增群组页面
+     */
+    @RequiresPermissions("im:group:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改群组页面
+     */
+    @RequiresPermissions("im:group:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("group", imGroupService.selectImGroupById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询IM群组列表
      */
     @RequiresPermissions("im:group:list")

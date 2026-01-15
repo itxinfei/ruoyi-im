@@ -66,7 +66,14 @@ async function getFallbackContentStats(conversationId) {
     })
 
     if (response.code !== 200 || !response.data) {
-      return { mediaCount: 0, fileCount: 0, linkCount: 0, mediaList: [], fileList: [], linkList: [] }
+      return {
+        mediaCount: 0,
+        fileCount: 0,
+        linkCount: 0,
+        mediaList: [],
+        fileList: [],
+        linkList: [],
+      }
     }
 
     const messages = response.data

@@ -30,7 +30,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: val => ['xs', 'sm', 'md', 'lg', 'xl'].includes(val)
+    validator: val => ['xs', 'sm', 'md', 'lg', 'xl'].includes(val),
   },
   // 是否显示状态
   showStatus: Boolean,
@@ -82,7 +82,7 @@ const handleImageError = () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #0089FF;
+  background-color: #0089ff;
   color: #ffffff;
   font-weight: 500;
   overflow: hidden;
@@ -141,19 +141,19 @@ const handleImageError = () => {
     border: 2px solid #ffffff;
 
     &.status-online {
-      background-color: #52C41A;
+      background-color: #52c41a;
     }
 
     &.status-offline {
-      background-color: #D9D9D9;
+      background-color: #d9d9d9;
     }
 
     &.status-busy {
-      background-color: #F5222D;
+      background-color: #f5222d;
     }
 
     &.status-away {
-      background-color: #FAAD14;
+      background-color: #faad14;
     }
   }
 }

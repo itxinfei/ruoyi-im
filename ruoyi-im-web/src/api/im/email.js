@@ -8,11 +8,11 @@ import request from '@/utils/request'
  * 文件夹类型
  */
 export const FOLDER_TYPE = {
-  INBOX: 'INBOX',     // 收件箱
-  SENT: 'SENT',       // 已发送
-  DRAFTS: 'DRAFTS',   // 草稿箱
-  SPAM: 'SPAM',       // 垃圾邮件
-  TRASH: 'TRASH',     // 回收站
+  INBOX: 'INBOX', // 收件箱
+  SENT: 'SENT', // 已发送
+  DRAFTS: 'DRAFTS', // 草稿箱
+  SPAM: 'SPAM', // 垃圾邮件
+  TRASH: 'TRASH', // 回收站
 }
 
 /**

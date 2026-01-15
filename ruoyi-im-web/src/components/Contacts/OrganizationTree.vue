@@ -100,7 +100,7 @@ const loadDepartmentTree = async () => {
 /**
  * 处理节点点击
  */
-const handleNodeClick = async (data) => {
+const handleNodeClick = async data => {
   selectedDepartment.value = data
   await loadDepartmentMembers(data.id)
 }
@@ -108,7 +108,7 @@ const handleNodeClick = async (data) => {
 /**
  * 加载部门成员
  */
-const loadDepartmentMembers = async (departmentId) => {
+const loadDepartmentMembers = async departmentId => {
   try {
     const res = await getDepartmentMembers(departmentId)
     if (res.code === 200 && res.data) {
@@ -123,7 +123,7 @@ const loadDepartmentMembers = async (departmentId) => {
 /**
  * 处理成员点击
  */
-const handleMemberClick = (member) => {
+const handleMemberClick = member => {
   emit('select-member', member)
 }
 
@@ -150,7 +150,7 @@ defineExpose({
 
 <script>
 export default {
-  name: 'OrganizationTree'
+  name: 'OrganizationTree',
 }
 </script>
 

@@ -27,24 +27,20 @@
       :draggable="draggable"
       :allow-drop="allowDrop"
       :allow-drag="allowDrag"
+      class="dept-tree"
       @node-click="handleNodeClick"
       @node-expand="handleNodeExpand"
       @node-collapse="handleNodeCollapse"
       @node-drag-start="handleDragStart"
       @node-drag-end="handleDragEnd"
       @node-drop="handleDrop"
-      class="dept-tree"
     >
       <template #default="{ node, data }">
         <div class="tree-node">
           <!-- 节点图标 -->
           <span class="node-icon">
             <el-icon v-if="data.isDept"><OfficeBuilding /></el-icon>
-            <el-avatar
-              v-else
-              :size="24"
-              :src="data.avatar"
-            >
+            <el-avatar v-else :size="24" :src="data.avatar">
               {{ data.name?.charAt(0) }}
             </el-avatar>
           </span>
@@ -66,7 +62,7 @@
               :class="{
                 online: data.onlineStatus === 'online',
                 busy: data.onlineStatus === 'busy',
-                away: data.onlineStatus === 'away'
+                away: data.onlineStatus === 'away',
               }"
             ></span>
           </span>
@@ -77,31 +73,19 @@
               <el-icon class="action-icon"><MoreFilled /></el-icon>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item
-                    v-if="data.isDept && canAddDept"
-                    command="add-dept"
-                  >
+                  <el-dropdown-item v-if="data.isDept && canAddDept" command="add-dept">
                     <el-icon><Plus /></el-icon>
                     添加子部门
                   </el-dropdown-item>
-                  <el-dropdown-item
-                    v-if="data.isDept && canAddMember"
-                    command="add-member"
-                  >
+                  <el-dropdown-item v-if="data.isDept && canAddMember" command="add-member">
                     <el-icon><UserFilled /></el-icon>
                     添加成员
                   </el-dropdown-item>
-                  <el-dropdown-item
-                    v-if="!data.isDept"
-                    command="send-message"
-                  >
+                  <el-dropdown-item v-if="!data.isDept" command="send-message">
                     <el-icon><ChatDotRound /></el-icon>
                     发送消息
                   </el-dropdown-item>
-                  <el-dropdown-item
-                    v-if="data.isDept && canEdit"
-                    command="edit"
-                  >
+                  <el-dropdown-item v-if="data.isDept && canEdit" command="edit">
                     <el-icon><Edit /></el-icon>
                     编辑
                   </el-dropdown-item>
@@ -416,15 +400,11 @@ function handleAction(command, data) {
 // 删除确认
 async function handleDelete(data) {
   try {
-    await ElMessageBox.confirm(
-      `确定要删除部门"${data.name}"吗？`,
-      '删除确认',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    )
+    await ElMessageBox.confirm(`确定要删除部门"${data.name}"吗？`, '删除确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
     emit('delete', data)
   } catch {
     // 用户取消
@@ -500,7 +480,7 @@ defineExpose({
 })
 
 // 监听搜索文本
-watch(searchText, (val) => {
+watch(searchText, val => {
   treeRef.value?.filter(val)
 })
 

@@ -38,6 +38,25 @@ public class ImFriendController extends BaseController {
     }
 
     /**
+     * 新增好友关系页面
+     */
+    @RequiresPermissions("im:friend:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改好友关系页面
+     */
+    @RequiresPermissions("im:friend:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("friend", imFriendService.selectImFriendById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询好友关系列表
      */
     @RequiresPermissions("im:friend:list")

@@ -204,7 +204,7 @@ const handleGroupAction = (command, group) => {
           position: absolute;
           bottom: -2px;
           right: -2px;
-          background: #FF9800;
+          background: #ff9800;
           color: #fff;
           border-radius: 50%;
           width: 20px;

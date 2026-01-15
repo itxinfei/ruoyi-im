@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>修改群公告</title>
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
+</head>
+<body class="white-bg">
+    <form class="form-horizontal m" id="form-announcement-edit" th:object="${announcement}">
+        <input name="id" th:field="*{id}" type="hidden">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">群组ID：</label>
+            <div class="col-sm-8">
+                <input name="groupId" th:field="*{groupId}" placeholder="请输入群组ID" class="form-control" type="number" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">发送者ID：</label>
+            <div class="col-sm-8">
+                <input name="senderId" th:field="*{senderId}" placeholder="请输入发送者用户ID" class="form-control" type="number" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">公告类型：</label>
+            <div class="col-sm-8">
+                <select name="type" class="form-control" th:field="*{type}">
+                    <option value="1">普通公告</option>
+                    <option value="2">系统公告</option>
+                    <option value="3">活动通知</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">公告内容：</label>
+            <div class="col-sm-8">
+                <textarea name="content" th:field="*{content}" class="form-control" rows="5" placeholder="请输入公告内容" required></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">附件URL：</label>
+            <div class="col-sm-8">
+                <input name="attachmentUrl" th:field="*{attachmentUrl}" placeholder="请输入附件URL" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">是否置顶：</label>
+            <div class="col-sm-8">
+                <select name="isPinned" class="form-control" th:field="*{isPinned}">
+                    <option value="0">否</option>
+                    <option value="1">是</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">状态：</label>
+            <div class="col-sm-8">
+                <select name="status" class="form-control" th:field="*{status}">
+                    <option value="1">正常</option>
+                    <option value="0">已撤回</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">过期时间：</label>
+            <div class="col-sm-8">
+                <input name="expireTime" th:value="${#temporals.format(announcement.expireTime, 'yyyy-MM-dd HH:mm:ss')}" placeholder="请选择过期时间" class="form-control" type="text">
+            </div>
+        </div>
+    </form>
+</body>
+</html>

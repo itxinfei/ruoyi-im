@@ -25,8 +25,8 @@ const props = defineProps({
   // 引用数据
   content: {
     type: Object,
-    default: () => ({})
-  }
+    default: () => ({}),
+  },
 })
 
 const emit = defineEmits(['click-quote'])
@@ -36,13 +36,13 @@ const quoteData = computed(() => {
   if (typeof props.content === 'string') {
     return {
       senderName: '引用',
-      content: props.content
+      content: props.content,
     }
   }
   return {
     senderName: props.content.quoteSenderName || '引用',
     content: props.content.quoteText || '',
-    messageId: props.content.quoteMessageId
+    messageId: props.content.quoteMessageId,
   }
 })
 
@@ -70,19 +70,19 @@ const handleClickQuote = () => {
   .quote-content {
     display: flex;
     padding: 8px 10px;
-    background: #F5F7FA;
-    border: 1px solid #E5E8EB;
+    background: #f5f7fa;
+    border: 1px solid #e5e8eb;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
 
     &:hover {
-      background: #F0F2F5;
+      background: #f0f2f5;
     }
 
     .quote-bar {
       width: 3px;
-      background: #0089FF;
+      background: #0089ff;
       border-radius: 2px;
       margin-right: 8px;
       flex-shrink: 0;
@@ -97,14 +97,14 @@ const handleClickQuote = () => {
 
         .quote-sender {
           font-size: 12px;
-          color: #5F6468;
+          color: #5f6468;
           font-weight: 500;
         }
       }
 
       .quote-text {
         font-size: 13px;
-        color: #858B8F;
+        color: #858b8f;
         line-height: 1.5;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -118,10 +118,10 @@ const handleClickQuote = () => {
   .current-content {
     padding: 10px 14px;
     background: #fff;
-    border: 1px solid #E5E8EB;
+    border: 1px solid #e5e8eb;
     border-radius: 12px;
     font-size: 14px;
-    color: #171A1A;
+    color: #171a1a;
     line-height: 1.6;
     word-break: break-word;
   }
@@ -130,13 +130,13 @@ const handleClickQuote = () => {
 // 接收的消息（白色背景）
 .message-bubble.received .quote-message .current-content {
   background: #fff;
-  border: 1px solid #E5E8EB;
-  color: #171A1A;
+  border: 1px solid #e5e8eb;
+  color: #171a1a;
 }
 
 // 发送的消息（蓝色背景）
 .message-bubble.sent .quote-message .current-content {
-  background: #0089FF;
+  background: #0089ff;
   border: none;
   color: #fff;
 }

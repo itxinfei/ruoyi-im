@@ -381,9 +381,12 @@ export function runIdle(func, timeout = 2000) {
   return function (...args) {
     const context = this
     if ('requestIdleCallback' in window) {
-      requestIdleCallback(() => {
-        func.apply(context, args)
-      }, { timeout })
+      requestIdleCallback(
+        () => {
+          func.apply(context, args)
+        },
+        { timeout }
+      )
     } else {
       // 降级方案：使用setTimeout
       setTimeout(() => {
@@ -415,7 +418,7 @@ export function batchProcessor(func, wait = 100, batchSize = 10) {
   }
 
   return {
-    add: (item) => {
+    add: item => {
       items.push(item)
       if (items.length >= batchSize) {
         flush()
@@ -500,28 +503,40 @@ export function formatChatTime(time) {
   // 今天
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   if (date >= todayStart) {
-    return date.getHours().toString().padStart(2, '0') + ':' +
-           date.getMinutes().toString().padStart(2, '0')
+    return (
+      date.getHours().toString().padStart(2, '0') +
+      ':' +
+      date.getMinutes().toString().padStart(2, '0')
+    )
   }
 
   // 昨天
   const yesterdayStart = new Date(todayStart - 86400000)
   if (date >= yesterdayStart) {
-    return '昨天 ' + date.getHours().toString().padStart(2, '0') + ':' +
-           date.getMinutes().toString().padStart(2, '0')
+    return (
+      '昨天 ' +
+      date.getHours().toString().padStart(2, '0') +
+      ':' +
+      date.getMinutes().toString().padStart(2, '0')
+    )
   }
 
   // 本周
   const weekStart = new Date(todayStart - (now.getDay() || 7) * 86400000)
   if (date >= weekStart) {
     const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-    return weekdays[date.getDay()] + ' ' + date.getHours().toString().padStart(2, '0') + ':' +
-           date.getMinutes().toString().padStart(2, '0')
+    return (
+      weekdays[date.getDay()] +
+      ' ' +
+      date.getHours().toString().padStart(2, '0') +
+      ':' +
+      date.getMinutes().toString().padStart(2, '0')
+    )
   }
 
   // 今年
   if (date.getFullYear() === now.getFullYear()) {
-    return (date.getMonth() + 1) + '月' + date.getDate() + '日'
+    return date.getMonth() + 1 + '月' + date.getDate() + '日'
   }
 
   // 更早
@@ -534,8 +549,8 @@ export function formatChatTime(time) {
  */
 export function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = Math.random() * 16 | 0
-    const v = c === 'x' ? r : (r & 0x3 | 0x8)
+    const r = (Math.random() * 16) | 0
+    const v = c === 'x' ? r : (r & 0x3) | 0x8
     return v.toString(16)
   })
 }

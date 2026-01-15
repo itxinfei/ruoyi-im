@@ -65,10 +65,7 @@
 
         <!-- 联系方式 -->
         <el-form-item label="联系方式" prop="contact">
-          <el-input
-            v-model="formData.contact"
-            placeholder="邮箱或手机号（选填，便于我们联系您）"
-          >
+          <el-input v-model="formData.contact" placeholder="邮箱或手机号（选填，便于我们联系您）">
             <template #prefix>
               <el-icon><Message /></el-icon>
             </template>
@@ -114,11 +111,7 @@
       <div v-if="formData.type === 'bug'" class="quick-issues">
         <div class="section-label">常见问题</div>
         <div class="quick-tags">
-          <el-tag
-            v-for="issue in commonIssues"
-            :key="issue"
-            @click="addCommonIssue(issue)"
-          >
+          <el-tag v-for="issue in commonIssues" :key="issue" @click="addCommonIssue(issue)">
             {{ issue }}
           </el-tag>
         </div>
@@ -182,7 +175,7 @@ import {
   Warning,
   MagicStick,
   ChatLineSquare,
-  QuestionFilled
+  QuestionFilled,
 } from '@element-plus/icons-vue'
 import { submitFeedback, uploadFeedbackImage } from '@/api/im/feedback'
 import { getToken } from '@/utils/auth'
@@ -190,15 +183,15 @@ import { getToken } from '@/utils/auth'
 const props = defineProps({
   visible: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:visible', 'success'])
 
 const dialogVisible = computed({
   get: () => props.visible,
-  set: (val) => emit('update:visible', val)
+  set: val => emit('update:visible', val),
 })
 
 const formRef = ref(null)
@@ -213,7 +206,7 @@ const feedbackTypes = [
   { value: 'bug', label: '问题反馈', icon: Warning },
   { value: 'feature', label: '功能建议', icon: MagicStick },
   { value: 'improvement', label: '体验优化', icon: ChatLineSquare },
-  { value: 'other', label: '其他', icon: QuestionFilled }
+  { value: 'other', label: '其他', icon: QuestionFilled },
 ]
 
 // 常见问题
@@ -225,7 +218,7 @@ const commonIssues = [
   '界面显示异常',
   '功能无法使用',
   '闪退/卡顿',
-  '通知不提醒'
+  '通知不提醒',
 ]
 
 // 表单数据
@@ -236,29 +229,27 @@ const formData = reactive({
   contact: '',
   severity: 2,
   anonymous: false,
-  attachments: []
+  attachments: [],
 })
 
 // 表单验证规则
 const formRules = {
-  type: [
-    { required: true, message: '请选择反馈类型', trigger: 'change' }
-  ],
+  type: [{ required: true, message: '请选择反馈类型', trigger: 'change' }],
   title: [
     { required: true, message: '请输入反馈标题', trigger: 'blur' },
-    { min: 5, max: 50, message: '标题长度在 5 到 50 个字符', trigger: 'blur' }
+    { min: 5, max: 50, message: '标题长度在 5 到 50 个字符', trigger: 'blur' },
   ],
   content: [
     { required: true, message: '请输入详细描述', trigger: 'blur' },
-    { min: 10, max: 500, message: '描述长度在 10 到 500 个字符', trigger: 'blur' }
+    { min: 10, max: 500, message: '描述长度在 10 到 500 个字符', trigger: 'blur' },
   ],
   contact: [
     {
       pattern: /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+|1[3-9]\d{9}$/,
       message: '请输入正确的邮箱或手机号',
-      trigger: 'blur'
-    }
-  ]
+      trigger: 'blur',
+    },
+  ],
 }
 
 // 上传配置
@@ -268,19 +259,19 @@ const uploadUrl = computed(() => {
 
 const uploadHeaders = computed(() => {
   return {
-    Authorization: 'Bearer ' + getToken()
+    Authorization: 'Bearer ' + getToken(),
   }
 })
 
 // 选择反馈类型
-const selectType = (type) => {
+const selectType = type => {
   formData.type = type
   // 切换类型时清除验证
   formRef.value?.clearValidate('type')
 }
 
 // 添加常见问题
-const addCommonIssue = (issue) => {
+const addCommonIssue = issue => {
   if (formData.content) {
     formData.content += '\n\n问题：' + issue
   } else {
@@ -289,7 +280,7 @@ const addCommonIssue = (issue) => {
 }
 
 // 上传前校验
-const beforeUpload = (file) => {
+const beforeUpload = file => {
   const isImage = file.type.startsWith('image/')
   const isLt2M = file.size / 1024 / 1024 < 2
 
@@ -325,7 +316,7 @@ const handleUploadError = () => {
 }
 
 // 移除附件
-const handleRemove = (file) => {
+const handleRemove = file => {
   const index = formData.attachments.indexOf(file.url)
   if (index > -1) {
     formData.attachments.splice(index, 1)
@@ -346,7 +337,7 @@ const handleSubmit = async () => {
       contact: formData.contact,
       anonymous: formData.anonymous,
       attachments: formData.attachments,
-      severity: formData.severity
+      severity: formData.severity,
     }
 
     const response = await submitFeedback(submitData)
@@ -359,7 +350,8 @@ const handleSubmit = async () => {
       ElMessage.error(response.msg || '提交失败')
     }
   } catch (error) {
-    if (error !== false) { // 表单验证失败时为false
+    if (error !== false) {
+      // 表单验证失败时为false
       console.error('提交反馈失败:', error)
       ElMessage.error('提交失败，请重试')
     }
@@ -399,15 +391,18 @@ const resetForm = () => {
 }
 
 // 监听对话框打开
-watch(() => props.visible, (val) => {
-  if (val) {
-    // 从localStorage加载用户联系方式
-    const savedContact = localStorage.getItem('user_feedback_contact')
-    if (savedContact && !formData.contact) {
-      formData.contact = savedContact
+watch(
+  () => props.visible,
+  val => {
+    if (val) {
+      // 从localStorage加载用户联系方式
+      const savedContact = localStorage.getItem('user_feedback_contact')
+      if (savedContact && !formData.contact) {
+        formData.contact = savedContact
+      }
     }
   }
-})
+)
 </script>
 
 <style lang="scss" scoped>

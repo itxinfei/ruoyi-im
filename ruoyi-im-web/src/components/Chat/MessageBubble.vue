@@ -232,11 +232,7 @@
           <span class="reaction-emoji">{{ reaction.emoji }}</span>
           <span class="reaction-count">{{ reaction.count }}</span>
         </div>
-        <div
-          v-if="!showEmojiPicker"
-          class="reaction-add"
-          @click.stop="toggleEmojiPicker"
-        >
+        <div v-if="!showEmojiPicker" class="reaction-add" @click.stop="toggleEmojiPicker">
           <i class="el-icon-plus"></i>
         </div>
       </div>
@@ -660,7 +656,9 @@ export default {
   .message-avatar {
     flex-shrink: 0;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
     position: relative;
 
     // 在线状态（通过DingAvatar组件的status-prop实现，这里可以添加额外的样式）
@@ -742,7 +740,7 @@ export default {
   // 文本消息气泡 - 默认（接收方）
   .text-message {
     position: relative;
-    background-color: #F5F7FA;
+    background-color: #f5f7fa;
     padding: 8px 12px;
     border-radius: 8px;
     display: inline-block;
@@ -766,7 +764,7 @@ export default {
       width: 0;
       height: 0;
       border: 6px solid transparent;
-      border-right-color: #F5F7FA;
+      border-right-color: #f5f7fa;
     }
   }
 
@@ -851,7 +849,7 @@ export default {
 
       .file-icon {
         font-size: 28px;
-        color: #0089FF;
+        color: #0089ff;
         margin-right: 12px;
       }
 
@@ -878,7 +876,7 @@ export default {
       .file-action {
         margin-left: 12px;
         font-size: 18px;
-        color: #0089FF;
+        color: #0089ff;
       }
     }
   }
@@ -903,7 +901,7 @@ export default {
 
       .voice-icon {
         font-size: 20px;
-        color: #0089FF;
+        color: #0089ff;
         margin-right: 12px;
       }
 
@@ -922,14 +920,24 @@ export default {
           transition: background 0.3s ease;
 
           &.active {
-            background: #0089FF;
+            background: #0089ff;
             animation: voiceWave 1s infinite ease-in-out;
 
-            &:nth-child(1) { animation-delay: 0s; }
-            &:nth-child(2) { animation-delay: 0.1s; }
-            &:nth-child(3) { animation-delay: 0.2s; }
-            &:nth-child(4) { animation-delay: 0.3s; }
-            &:nth-child(5) { animation-delay: 0.4s; }
+            &:nth-child(1) {
+              animation-delay: 0s;
+            }
+            &:nth-child(2) {
+              animation-delay: 0.1s;
+            }
+            &:nth-child(3) {
+              animation-delay: 0.2s;
+            }
+            &:nth-child(4) {
+              animation-delay: 0.3s;
+            }
+            &:nth-child(5) {
+              animation-delay: 0.4s;
+            }
           }
         }
       }
@@ -1037,7 +1045,7 @@ export default {
       .quote-content {
         background: #f0f2f5;
         padding: 8px 12px;
-        border-left: 3px solid #0089FF;
+        border-left: 3px solid #0089ff;
         margin-bottom: 8px;
 
         .quote-text {
@@ -1100,7 +1108,7 @@ export default {
 
           &.selected {
             background: rgba(0, 137, 255, 0.1);
-            border-color: #0089FF;
+            border-color: #0089ff;
           }
 
           .option-text {
@@ -1130,26 +1138,28 @@ export default {
       transition: all 0.3s ease;
 
       &.sending {
-        color: #0089FF;
+        color: #0089ff;
         animation: pulse 1.5s ease-in-out infinite;
       }
 
       &.sent {
-        color: #00C853;
+        color: #00c853;
       }
 
       &.delivered {
-        color: #00C853;
+        color: #00c853;
       }
 
       &.read {
-        color: #0089FF;
+        color: #0089ff;
       }
 
       &.failed {
         color: #ff4d4f;
         cursor: pointer;
-        transition: transform 0.2s ease, color 0.2s ease;
+        transition:
+          transform 0.2s ease,
+          color 0.2s ease;
 
         &:hover {
           transform: scale(1.2);
@@ -1166,7 +1176,7 @@ export default {
   .message-content {
     // 文本消息 - 发送方使用钉钉5.6风格蓝色
     .text-message {
-      background: linear-gradient(135deg, #0089FF 0%, #0077E0 100%);
+      background: linear-gradient(135deg, #0089ff 0%, #0077e0 100%);
       box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
 
       .text-content {
@@ -1178,7 +1188,7 @@ export default {
         left: auto;
         right: -6px;
         border-right-color: transparent;
-        border-left-color: #0089FF;
+        border-left-color: #0089ff;
       }
     }
 
@@ -1273,13 +1283,23 @@ export default {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes voiceWave {
-  0%, 100% { height: 8px; }
-  50% { height: 16px; }
+  0%,
+  100% {
+    height: 8px;
+  }
+  50% {
+    height: 16px;
+  }
 }
 
 // ==================== 消息操作按钮 ====================
@@ -1312,7 +1332,7 @@ export default {
     transition: all 0.2s ease;
 
     &:hover {
-      color: #0089FF;
+      color: #0089ff;
       background-color: rgba(0, 137, 255, 0.1);
     }
 

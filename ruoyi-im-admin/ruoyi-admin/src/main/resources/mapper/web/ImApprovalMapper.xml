@@ -19,6 +19,95 @@
         <result property="applicantName" column="applicant_name"/>
     </resultMap>
 
+    <sql id="selectImApprovalVo">
+        select id, template_id, title, applicant_id, status, current_node_id,
+               form_data, attachments, apply_time, finish_time,
+               remark, create_time, update_time
+        from im_approval
+    </sql>
+
+    <select id="selectImApprovalList" parameterType="com.ruoyi.web.domain.ImApproval" resultMap="ImApprovalResult">
+        <include refid="selectImApprovalVo"/>
+        <where>
+            <if test="title != null and title != ''">
+                AND title like concat('%', #{title}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="applicantId != null">
+                AND applicant_id = #{applicantId}
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                AND date_format(apply_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                AND date_format(apply_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+        </where>
+        order by apply_time desc
+    </select>
+
+    <select id="selectImApprovalById" parameterType="Long" resultMap="ImApprovalResult">
+        <include refid="selectImApprovalVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertImApproval" parameterType="com.ruoyi.web.domain.ImApproval" useGeneratedKeys="true" keyProperty="id">
+        insert into im_approval
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="templateId != null">template_id,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="applicantId != null">applicant_id,</if>
+            <if test="status != null">status,</if>
+            <if test="currentNodeId != null">current_node_id,</if>
+            <if test="formData != null">form_data,</if>
+            <if test="attachments != null">attachments,</if>
+            <if test="applyTime != null">apply_time,</if>
+            <if test="finishTime != null">finish_time,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="templateId != null">#{templateId},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="applicantId != null">#{applicantId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="currentNodeId != null">#{currentNodeId},</if>
+            <if test="formData != null">#{formData},</if>
+            <if test="attachments != null">#{attachments},</if>
+            <if test="applyTime != null">#{applyTime},</if>
+            <if test="finishTime != null">#{finishTime},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateImApproval" parameterType="com.ruoyi.web.domain.ImApproval">
+        update im_approval
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="templateId != null">template_id = #{templateId},</if>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="applicantId != null">applicant_id = #{applicantId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="currentNodeId != null">current_node_id = #{currentNodeId},</if>
+            <if test="formData != null">form_data = #{formData},</if>
+            <if test="attachments != null">attachments = #{attachments},</if>
+            <if test="applyTime != null">apply_time = #{applyTime},</if>
+            <if test="finishTime != null">finish_time = #{finishTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImApprovalByIds" parameterType="Long">
+        delete from im_approval where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
     <select id="getApprovalDetail" parameterType="Long" resultType="java.util.Map">
         select a.id, a.template_id, a.title, a.applicant_id, a.status, a.current_node_id,
                a.form_data, a.attachments, a.apply_time, a.finish_time,

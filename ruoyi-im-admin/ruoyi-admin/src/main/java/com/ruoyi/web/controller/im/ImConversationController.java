@@ -43,6 +43,25 @@ public class ImConversationController extends BaseController {
     }
 
     /**
+     * 新增会话页面
+     */
+    @RequiresPermissions("im:conversation:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改会话页面
+     */
+    @RequiresPermissions("im:conversation:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("conversation", imConversationService.selectImConversationById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询会话列表
      */
     @RequiresPermissions("im:conversation:list")

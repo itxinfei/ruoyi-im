@@ -293,7 +293,7 @@ import {
   getReportDetail,
   toggleReportLike,
   getReportComments,
-  sendReportComment
+  sendReportComment,
 } from '@/api/im/workbench'
 
 // State
@@ -355,14 +355,15 @@ const fetchReports = async () => {
     const { data } = await getReportList({
       type: activeTab.value,
       pageNum: 1,
-      pageSize: 50
+      pageSize: 50,
     })
 
     if (data.code === 200 && data.data && data.data.records) {
       reports.value = data.data.records.map(item => ({
         id: item.id,
         type: item.reportType || 'daily',
-        typeText: item.reportType === 'daily' ? '日报' : item.reportType === 'weekly' ? '周报' : '月报',
+        typeText:
+          item.reportType === 'daily' ? '日报' : item.reportType === 'weekly' ? '周报' : '月报',
         title: item.title || '',
         summary: item.summary || '',
         todayWork: item.todayWork || '',

@@ -107,6 +107,11 @@
             </div>
           </template>
 
+          <!-- OA审批卡片消息 -->
+          <template v-else-if="message.messageType === 'oa'">
+            <OaApprovalCard :card="oaCard" />
+          </template>
+
           <!-- 撤回消息 -->
           <template v-else-if="message.isRevoked">
             <div class="message-recalled">
@@ -230,6 +235,7 @@ import {
   MoreFilled,
 } from '@element-plus/icons-vue'
 import MessageStatus from './MessageStatus.vue'
+import OaApprovalCard from './OaApprovalCard.vue'
 
 const props = defineProps({
   message: {
@@ -275,6 +281,41 @@ const emit = defineEmits([
   'select',
   'more',
 ])
+
+const oaCard = computed(() => {
+  const message = props.message || {}
+  let payload = message.oaData || message.cardPayload
+  if (!payload) {
+    const content = message.content
+    if (content && typeof content === 'object') {
+      payload = content
+    } else if (typeof content === 'string') {
+      const trimmed = content.trim()
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(content)
+          if (parsed && typeof parsed === 'object') {
+            payload = parsed
+          }
+        } catch (e) {
+          payload = { text: content }
+        }
+      } else if (content) {
+        payload = { text: content }
+      }
+    }
+  }
+  const base = payload || {}
+  return {
+    ...base,
+    approvalId: base.approvalId || message.approvalId || message.bizId,
+    title: base.title || message.title || '',
+    applicant: base.applicant || base.applicantName || message.applicant,
+    applyTime: base.applyTime || base.createTime || message.createTime,
+    status: base.status || message.status,
+    statusText: base.statusText,
+  }
+})
 
 const isPlaying = ref(false)
 const audioElement = ref(null)
@@ -589,7 +630,7 @@ const handleMoreCommand = command => {
   word-break: break-word;
 
   &.is-own {
-    background-color: #0089FF;
+    background-color: #0089ff;
     color: #fff;
 
     .message-text :deep(a) {

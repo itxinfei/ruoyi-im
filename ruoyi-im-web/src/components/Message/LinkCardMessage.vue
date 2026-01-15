@@ -36,8 +36,8 @@ const props = defineProps({
   // 链接数据
   content: {
     type: [String, Object],
-    default: () => ({})
-  }
+    default: () => ({}),
+  },
 })
 
 const emit = defineEmits(['click'])
@@ -52,7 +52,7 @@ const linkData = reactive({
   description: '',
   image: '',
   favicon: '',
-  siteName: ''
+  siteName: '',
 })
 
 // 初始化链接数据
@@ -70,7 +70,7 @@ onMounted(() => {
 })
 
 // 从URL提取网站名称
-const getSiteName = (url) => {
+const getSiteName = url => {
   try {
     const hostname = new URL(url).hostname
     return hostname.replace('www.', '')
@@ -80,7 +80,7 @@ const getSiteName = (url) => {
 }
 
 // 获取显示的URL
-const getDisplayUrl = (url) => {
+const getDisplayUrl = url => {
   try {
     const urlObj = new URL(url)
     return urlObj.hostname + urlObj.pathname
@@ -90,7 +90,7 @@ const getDisplayUrl = (url) => {
 }
 
 // 获取favicon URL
-const getFaviconUrl = (url) => {
+const getFaviconUrl = url => {
   try {
     const origin = new URL(url).origin
     return `${origin}/favicon.ico`
@@ -110,16 +110,16 @@ const handleClick = () => {
 <style lang="scss" scoped>
 .link-card-message {
   width: 280px;
-  background: #F5F7FA;
-  border: 1px solid #E5E8EB;
+  background: #f5f7fa;
+  border: 1px solid #e5e8eb;
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background: #F0F2F5;
-    border-color: #D9D9D9;
+    background: #f0f2f5;
+    border-color: #d9d9d9;
   }
 
   .link-header {
@@ -144,13 +144,13 @@ const handleClick = () => {
 
       .el-icon {
         font-size: 14px;
-        color: #858B8F;
+        color: #858b8f;
       }
     }
 
     .site-name {
       font-size: 12px;
-      color: #858B8F;
+      color: #858b8f;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -160,7 +160,7 @@ const handleClick = () => {
   .link-image {
     width: 100%;
     aspect-ratio: 16 / 9;
-    background: #E5E8EB;
+    background: #e5e8eb;
     position: relative;
 
     img {
@@ -178,11 +178,11 @@ const handleClick = () => {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #F0F2F5;
+      background: #f0f2f5;
 
       .el-icon {
         font-size: 32px;
-        color: #D9D9D9;
+        color: #d9d9d9;
       }
     }
   }
@@ -193,7 +193,7 @@ const handleClick = () => {
     .link-title {
       font-size: 14px;
       font-weight: 500;
-      color: #171A1A;
+      color: #171a1a;
       line-height: 1.4;
       margin-bottom: 4px;
       overflow: hidden;
@@ -203,7 +203,7 @@ const handleClick = () => {
 
     .link-description {
       font-size: 12px;
-      color: #858B8F;
+      color: #858b8f;
       line-height: 1.5;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -215,7 +215,7 @@ const handleClick = () => {
   .link-url {
     padding: 6px 12px 10px;
     font-size: 11px;
-    color: #0089FF;
+    color: #0089ff;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

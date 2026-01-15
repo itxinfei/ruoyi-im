@@ -43,6 +43,25 @@ public class ImApprovalAdminController extends BaseController {
     }
 
     /**
+     * 新增审批页面
+     */
+    @RequiresPermissions("im:approval:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改审批页面
+     */
+    @RequiresPermissions("im:approval:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, ModelMap mmap) {
+        mmap.put("approval", approvalService.selectImApprovalById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询审批列表
      */
     @RequiresPermissions("im:approval:list")

@@ -151,14 +151,18 @@ export function useReadReceipt(scrollContainer = null, messageListRef = null) {
   /**
    * 添加未读消息ID
    */
-  const addUnreadMessage = (messageId) => {
+  const addUnreadMessage = messageId => {
     unreadMessageIds.value.add(messageId)
   }
 
   /**
    * 延迟标记消息为已读
    */
-  const scheduleMarkAsRead = (messageId, conversationId, delay = READ_RECEIPT_CONFIG.AUTO_READ_DELAY) => {
+  const scheduleMarkAsRead = (
+    messageId,
+    conversationId,
+    delay = READ_RECEIPT_CONFIG.AUTO_READ_DELAY
+  ) => {
     if (!READ_RECEIPT_CONFIG.ENABLE_AUTO_READ) return
 
     // 清除之前的定时器
@@ -197,7 +201,7 @@ export function useReadReceipt(scrollContainer = null, messageListRef = null) {
     }
 
     intersectionObserver = new IntersectionObserver(
-      (entries) => {
+      entries => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const messageId = entry.target.dataset.messageId
@@ -240,7 +244,9 @@ export function useReadReceipt(scrollContainer = null, messageListRef = null) {
     messageList.forEach(message => {
       // 只监听他人发送的未读消息
       if (message.senderId !== userId && !message.readBy?.includes(userId)) {
-        const messageElement = messageListRef.value.querySelector(`[data-message-id="${message.id}"]`)
+        const messageElement = messageListRef.value.querySelector(
+          `[data-message-id="${message.id}"]`
+        )
         if (messageElement) {
           intersectionObserver.observe(messageElement)
         }

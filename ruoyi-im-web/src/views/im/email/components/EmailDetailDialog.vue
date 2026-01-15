@@ -51,13 +51,9 @@
     </div>
 
     <template #footer>
-      <el-button @click="handleReply">
-        <i class="el-icon-back"></i> 回复
-      </el-button>
-      <el-button @click="handleForward">
-        <i class="el-icon-right"></i> 转发
-      </el-button>
-      <el-button @click="handleDelete" type="danger" plain>
+      <el-button @click="handleReply"> <i class="el-icon-back"></i> 回复 </el-button>
+      <el-button @click="handleForward"> <i class="el-icon-right"></i> 转发 </el-button>
+      <el-button type="danger" plain @click="handleDelete">
         <i class="el-icon-delete"></i> 删除
       </el-button>
     </template>
@@ -78,25 +74,29 @@ const emit = defineEmits(['update:visible', 'reply', 'forward'])
 
 const dialogVisible = computed({
   get: () => props.visible,
-  set: (val) => emit('update:visible', val),
+  set: val => emit('update:visible', val),
 })
 
 const email = ref(null)
 const currentUser = ref(JSON.parse(localStorage.getItem('userInfo') || '{}'))
 
-watch(() => props.emailId, (id) => {
-  if (id && props.visible) {
-    loadEmailDetail(id)
-  }
-}, { immediate: true })
+watch(
+  () => props.emailId,
+  id => {
+    if (id && props.visible) {
+      loadEmailDetail(id)
+    }
+  },
+  { immediate: true }
+)
 
-watch(dialogVisible, (val) => {
+watch(dialogVisible, val => {
   if (val && props.emailId) {
     loadEmailDetail(props.emailId)
   }
 })
 
-const loadEmailDetail = async (id) => {
+const loadEmailDetail = async id => {
   try {
     const response = await emailApi.getEmailDetail(id)
     if (response.code === 200) {
@@ -118,7 +118,7 @@ const handleForward = () => {
 const handleDelete = async () => {
   try {
     await ElMessageBox.confirm('确定删除此邮件吗？', '提示', {
-      type: 'warning'
+      type: 'warning',
     })
     await emailApi.moveToTrash(props.emailId)
     ElMessage.success('已移至垃圾箱')
@@ -130,14 +130,14 @@ const handleDelete = async () => {
   }
 }
 
-const formatTime = (time) => {
+const formatTime = time => {
   if (!time) return ''
   return new Date(time).toLocaleString('zh-CN', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 </script>

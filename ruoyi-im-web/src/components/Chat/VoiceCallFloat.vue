@@ -18,7 +18,7 @@
           <span>语音通话</span>
         </div>
         <div class="header-actions">
-          <button class="action-btn minimize-btn" @click.stop="minimize" title="最小化">
+          <button class="action-btn minimize-btn" title="最小化" @click.stop="minimize">
             <el-icon><Minus /></el-icon>
           </button>
         </div>
@@ -51,10 +51,10 @@
         <div class="control-buttons">
           <!-- 来电时显示接听/拒绝 -->
           <template v-if="callState === 'incoming'">
-            <button class="btn-circle btn-reject" @click="handleReject" title="拒绝">
+            <button class="btn-circle btn-reject" title="拒绝" @click="handleReject">
               <el-icon :size="20"><Close /></el-icon>
             </button>
-            <button class="btn-circle btn-accept" @click="handleAccept" title="接听">
+            <button class="btn-circle btn-accept" title="接听" @click="handleAccept">
               <el-icon :size="20"><Check /></el-icon>
             </button>
           </template>
@@ -64,8 +64,8 @@
             <button
               class="btn-control"
               :class="{ 'btn-active': isMuted }"
-              @click="handleToggleMute"
               title="静音/取消静音"
+              @click="handleToggleMute"
             >
               <el-icon :size="20">
                 <component :is="isMuted ? 'MuteNotification' : 'Microphone'" />
@@ -75,15 +75,15 @@
             <button
               class="btn-control"
               :class="{ 'btn-active': isSpeakerOn }"
-              @click="handleToggleSpeaker"
               title="扬声器/听筒"
+              @click="handleToggleSpeaker"
             >
               <el-icon :size="20">
                 <component :is="isSpeakerOn ? 'Bell' : 'Mute'" />
               </el-icon>
               <span class="btn-label">{{ isSpeakerOn ? '扬声器' : '听筒' }}</span>
             </button>
-            <button class="btn-control btn-hangup" @click="handleHangup" title="挂断">
+            <button class="btn-control btn-hangup" title="挂断" @click="handleHangup">
               <el-icon :size="20"><PhoneFilled /></el-icon>
               <span class="btn-label">挂断</span>
             </button>
@@ -199,21 +199,21 @@ const statusText = computed(() => {
 })
 
 // 格式化通话时长
-const formatDuration = (seconds) => {
+const formatDuration = seconds => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 
 // 拖动功能
-const startDrag = (e) => {
+const startDrag = e => {
   dragging.value = true
   dragOffset.value = {
     x: e.clientX - position.value.x,
     y: e.clientY - position.value.y,
   }
 
-  const onMove = (moveEvent) => {
+  const onMove = moveEvent => {
     if (!dragging.value) return
 
     let newX = moveEvent.clientX - dragOffset.value.x
@@ -316,27 +316,33 @@ const handleToggleSpeaker = () => {
 }
 
 // 监听来电状态，播放铃声
-watch(() => props.callState, (newState) => {
-  if (newState === 'incoming' && props.visible) {
-    playRingtone()
-  } else if (newState === 'connected') {
-    stopRingtone()
-    playConnectSound()
-  } else if (newState === 'ended' || newState === 'rejected' || newState === 'timeout') {
-    stopRingtone()
+watch(
+  () => props.callState,
+  newState => {
+    if (newState === 'incoming' && props.visible) {
+      playRingtone()
+    } else if (newState === 'connected') {
+      stopRingtone()
+      playConnectSound()
+    } else if (newState === 'ended' || newState === 'rejected' || newState === 'timeout') {
+      stopRingtone()
+    }
   }
-})
+)
 
 // 监听可见性
-watch(() => props.visible, (visible) => {
-  if (visible) {
-    // 重置位置到默认
-    position.value = { x: window.innerWidth - 300, y: 100 }
-    minimized.value = false
-    isMuted.value = false
-    isSpeakerOn.value = true
+watch(
+  () => props.visible,
+  visible => {
+    if (visible) {
+      // 重置位置到默认
+      position.value = { x: window.innerWidth - 300, y: 100 }
+      minimized.value = false
+      isMuted.value = false
+      isSpeakerOn.value = true
+    }
   }
-})
+)
 
 // 标题闪烁提醒（来电时）
 let titleInterval = null
@@ -357,13 +363,16 @@ const stopTitleFlash = () => {
   }
 }
 
-watch(() => props.callState, (newState) => {
-  if (newState === 'incoming') {
-    startTitleFlash()
-  } else {
-    stopTitleFlash()
+watch(
+  () => props.callState,
+  newState => {
+    if (newState === 'incoming') {
+      startTitleFlash()
+    } else {
+      stopTitleFlash()
+    }
   }
-})
+)
 
 // 页面可见性变化
 const handleVisibilityChange = () => {

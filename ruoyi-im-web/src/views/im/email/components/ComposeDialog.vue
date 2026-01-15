@@ -69,9 +69,7 @@
               :before-upload="handleAttachUpload"
               style="margin-left: 8px"
             >
-              <el-button size="small">
-                <i class="el-icon-paperclip"></i> 添加附件
-              </el-button>
+              <el-button size="small"> <i class="el-icon-paperclip"></i> 添加附件 </el-button>
             </el-upload>
           </div>
 
@@ -112,8 +110,8 @@
 
     <template #footer>
       <el-button @click="handleClose">取消</el-button>
-      <el-button @click="handleSaveDraft" :loading="sending">保存草稿</el-button>
-      <el-button type="primary" @click="handleSend" :loading="sending">
+      <el-button :loading="sending" @click="handleSaveDraft">保存草稿</el-button>
+      <el-button type="primary" :loading="sending" @click="handleSend">
         <i class="el-icon-s-promotion"></i> 发送
       </el-button>
     </template>
@@ -134,7 +132,7 @@ const emit = defineEmits(['update:visible', 'sent'])
 
 const dialogVisible = computed({
   get: () => props.visible,
-  set: (val) => emit('update:visible', val),
+  set: val => emit('update:visible', val),
 })
 
 const formRef = ref(null)
@@ -160,15 +158,19 @@ const rules = {
 // 回复邮件处理
 const replyToEmail = computed(() => props.replyTo)
 
-watch(replyToEmail, (email) => {
-  if (email) {
-    const isReply = !email.isForward
-    form.value.subject = isReply ? `Re: ${email.subject}` : `Fwd: ${email.subject}`
-    form.value.toIds = isReply ? [email.senderId] : []
-  }
-}, { immediate: true })
+watch(
+  replyToEmail,
+  email => {
+    if (email) {
+      const isReply = !email.isForward
+      form.value.subject = isReply ? `Re: ${email.subject}` : `Fwd: ${email.subject}`
+      form.value.toIds = isReply ? [email.senderId] : []
+    }
+  },
+  { immediate: true }
+)
 
-watch(dialogVisible, (val) => {
+watch(dialogVisible, val => {
   if (val) {
     resetForm()
   }
@@ -176,9 +178,15 @@ watch(dialogVisible, (val) => {
 
 const resetForm = () => {
   form.value = {
-    toIds: replyToEmail.value?.isForward ? [] : (replyToEmail.value ? [replyToEmail.value.senderId] : []),
+    toIds: replyToEmail.value?.isForward
+      ? []
+      : replyToEmail.value
+        ? [replyToEmail.value.senderId]
+        : [],
     subject: replyToEmail.value
-      ? (replyToEmail.value.isForward ? `Fwd: ${replyToEmail.value.subject}` : `Re: ${replyToEmail.value.subject}`)
+      ? replyToEmail.value.isForward
+        ? `Fwd: ${replyToEmail.value.subject}`
+        : `Re: ${replyToEmail.value.subject}`
       : '',
     content: '',
   }
@@ -191,7 +199,7 @@ const resetForm = () => {
   })
 }
 
-const searchUsers = async (keyword) => {
+const searchUsers = async keyword => {
   if (!keyword) {
     userOptions.value = []
     return
@@ -216,17 +224,17 @@ const searchUsers = async (keyword) => {
   }
 }
 
-const execCommand = (command) => {
+const execCommand = command => {
   document.execCommand(command, false, null)
   editorRef.value?.focus()
 }
 
-const handleAttachUpload = (file) => {
+const handleAttachUpload = file => {
   attachments.value.push(file)
   return false // 阻止自动上传
 }
 
-const removeAttachment = (index) => {
+const removeAttachment = index => {
   attachments.value.splice(index, 1)
 }
 
@@ -277,12 +285,12 @@ const handleClose = () => {
   dialogVisible.value = false
 }
 
-const formatTime = (time) => {
+const formatTime = time => {
   if (!time) return ''
   return new Date(time).toLocaleString('zh-CN')
 }
 
-const getQuoteText = (email) => {
+const getQuoteText = email => {
   const text = email.textContent || email.htmlContent || ''
   const plainText = text.replace(/<[^>]*>/g, '').trim()
   return plainText.substring(0, 200) + (plainText.length > 200 ? '...' : '')

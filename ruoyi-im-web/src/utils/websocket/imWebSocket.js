@@ -388,8 +388,8 @@ class ImWebSocket {
     }
 
     return this.send({
-      type: 'message',  // 后端期望固定的 "message" 类型
-      payload: payload,  // 实际消息数据放在 payload 中
+      type: 'message', // 后端期望固定的 "message" 类型
+      payload: payload, // 实际消息数据放在 payload 中
     })
   }
 

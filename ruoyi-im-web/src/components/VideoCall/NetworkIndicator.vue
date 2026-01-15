@@ -6,7 +6,7 @@
 <template>
   <div class="network-indicator" :class="[`quality-${quality}`, { 'show-details': showDetails }]">
     <!-- 信号格数图标 -->
-    <div class="signal-bars" v-if="qualityLevel > 0">
+    <div v-if="qualityLevel > 0" class="signal-bars">
       <span
         v-for="i in 4"
         :key="i"
@@ -19,9 +19,7 @@
     </span>
 
     <!-- 延迟显示 -->
-    <span v-if="showDelay && delay > 0" class="delay-text">
-      {{ delay }}ms
-    </span>
+    <span v-if="showDelay && delay > 0" class="delay-text"> {{ delay }}ms </span>
 
     <!-- 详细信息（悬停显示） -->
     <div v-if="showDetails && showDetailInfo" class="detail-info">
@@ -125,10 +123,18 @@ const showDetailInfo = computed(() => props.alwaysShowDetail)
     border-radius: 1px;
     transition: all 0.3s ease;
 
-    &:nth-child(1) { height: 4px; }
-    &:nth-child(2) { height: 8px; }
-    &:nth-child(3) { height: 12px; }
-    &:nth-child(4) { height: 16px; }
+    &:nth-child(1) {
+      height: 4px;
+    }
+    &:nth-child(2) {
+      height: 8px;
+    }
+    &:nth-child(3) {
+      height: 12px;
+    }
+    &:nth-child(4) {
+      height: 16px;
+    }
 
     &.active {
       background: currentColor;
@@ -147,11 +153,21 @@ const showDetailInfo = computed(() => props.alwaysShowDetail)
 }
 
 // 质量颜色
-.network-indicator.quality-excellent { color: #52C41A; }
-.network-indicator.quality-good { color: #1890FF; }
-.network-indicator.quality-fair { color: #FAAD14; }
-.network-indicator.quality-poor { color: #FF4D4F; }
-.network-indicator.quality-disconnected { color: #8C8C8C; }
+.network-indicator.quality-excellent {
+  color: #52c41a;
+}
+.network-indicator.quality-good {
+  color: #1890ff;
+}
+.network-indicator.quality-fair {
+  color: #faad14;
+}
+.network-indicator.quality-poor {
+  color: #ff4d4f;
+}
+.network-indicator.quality-disconnected {
+  color: #8c8c8c;
+}
 
 // 详细信息
 .detail-info {
@@ -185,7 +201,7 @@ const showDetailInfo = computed(() => props.alwaysShowDetail)
       font-feature-settings: 'tnum';
 
       &.poor {
-        color: #FF4D4F;
+        color: #ff4d4f;
       }
     }
   }

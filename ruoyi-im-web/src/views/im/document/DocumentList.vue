@@ -480,7 +480,7 @@ const updateTabCounts = () => {
 }
 
 // 获取图标类型
-const getIconType = (type) => {
+const getIconType = type => {
   const map = {
     doc: 'doc',
     DOC: 'doc',
@@ -493,7 +493,7 @@ const getIconType = (type) => {
 }
 
 // 获取预览文本
-const getPreview = (content) => {
+const getPreview = content => {
   if (!content) return ''
   const plainText = content.replace(/<[^>]*>/g, '').trim()
   return plainText.substring(0, 50) + (plainText.length > 50 ? '...' : '')

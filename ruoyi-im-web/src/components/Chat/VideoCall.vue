@@ -270,13 +270,7 @@ const props = defineProps({
 })
 
 // ============ Emits ============
-const emit = defineEmits([
-  'update:visible',
-  'accept',
-  'reject',
-  'hangup',
-  'state-change',
-])
+const emit = defineEmits(['update:visible', 'accept', 'reject', 'hangup', 'state-change'])
 
 // ============ Refs ============
 const interfaceRef = ref(null)
@@ -331,14 +325,18 @@ const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e5
 
 // ============ 计算属性 ============
 const remoteUserAvatar = computed(() => props.remoteUser?.avatar || defaultAvatar)
-const remoteUserName = computed(() => props.remoteUser?.name || props.remoteUser?.nickname || '对方')
+const remoteUserName = computed(
+  () => props.remoteUser?.name || props.remoteUser?.nickname || '对方'
+)
 const currentUserAvatar = computed(() => props.remoteUser?.myAvatar || defaultAvatar)
-const showInfoBar = computed(() => showControls.value || props.callState === 'calling' || props.callState === 'connecting')
+const showInfoBar = computed(
+  () => showControls.value || props.callState === 'calling' || props.callState === 'connecting'
+)
 const showNetworkIndicator = computed(() => props.callState === 'connected')
 const showEncryptionBadge = computed(() => props.callState === 'connected')
 
 // ============ 工具函数 ============
-const formatDuration = (seconds) => {
+const formatDuration = seconds => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
@@ -352,11 +350,14 @@ const initLocalStream = async () => {
   try {
     const constraints = {
       audio: true,
-      video: props.callType === 'video' ? {
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        facingMode: 'user',
-      } : false,
+      video:
+        props.callType === 'video'
+          ? {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: 'user',
+            }
+          : false,
     }
 
     localStream.value = await navigator.mediaDevices.getUserMedia(constraints)
@@ -393,7 +394,7 @@ const createPeerConnection = () => {
   }
 
   // 监听远程流
-  peerConnection.value.ontrack = (event) => {
+  peerConnection.value.ontrack = event => {
     if (event.streams && event.streams[0]) {
       remoteStream.value = event.streams[0]
       remoteStreamReady.value = true
@@ -408,7 +409,7 @@ const createPeerConnection = () => {
   }
 
   // 监听 ICE 候选
-  peerConnection.value.onicecandidate = (event) => {
+  peerConnection.value.onicecandidate = event => {
     if (event.candidate) {
       sendSignalingMessage({
         type: 'ice-candidate',
@@ -547,7 +548,7 @@ const hangup = () => {
 /**
  * 处理 offer
  */
-const handleOffer = async (offer) => {
+const handleOffer = async offer => {
   try {
     if (!peerConnection.value) {
       await initLocalStream()
@@ -571,7 +572,7 @@ const handleOffer = async (offer) => {
 /**
  * 处理 answer
  */
-const handleAnswer = async (answer) => {
+const handleAnswer = async answer => {
   try {
     if (peerConnection.value) {
       await peerConnection.value.setRemoteDescription(new RTCSessionDescription(answer))
@@ -585,7 +586,7 @@ const handleAnswer = async (answer) => {
 /**
  * 处理 ICE 候选
  */
-const handleIceCandidate = async (candidate) => {
+const handleIceCandidate = async candidate => {
   try {
     if (peerConnection.value) {
       await peerConnection.value.addIceCandidate(new RTCIceCandidate(candidate))
@@ -598,7 +599,7 @@ const handleIceCandidate = async (candidate) => {
 /**
  * 发送信令消息
  */
-const sendSignalingMessage = async (message) => {
+const sendSignalingMessage = async message => {
   if (!props.callId) {
     console.warn('未设置callId，无法发送信令')
     return
@@ -928,29 +929,35 @@ const handleIncomingTimeout = () => {
 }
 
 // ============ 监听 props 变化 ============
-watch(() => props.visible, async (val) => {
-  if (val) {
-    // 显示通话界面
-    if (props.callState === 'calling') {
-      await startCall()
-    } else if (props.callState === 'incoming') {
-      // 来电，等待用户操作
+watch(
+  () => props.visible,
+  async val => {
+    if (val) {
+      // 显示通话界面
+      if (props.callState === 'calling') {
+        await startCall()
+      } else if (props.callState === 'incoming') {
+        // 来电，等待用户操作
+      }
+    } else {
+      // 隐藏通话界面，清理资源
+      hangup()
     }
-  } else {
-    // 隐藏通话界面，清理资源
-    hangup()
   }
-})
+)
 
-watch(() => props.callState, (newState) => {
-  if (newState === 'connected') {
-    startCallTimer()
-    showControls.value = true
-    resetControlsTimer()
-  } else if (newState === 'ended') {
-    stopCallTimer()
+watch(
+  () => props.callState,
+  newState => {
+    if (newState === 'connected') {
+      startCallTimer()
+      showControls.value = true
+      resetControlsTimer()
+    } else if (newState === 'ended') {
+      stopCallTimer()
+    }
   }
-})
+)
 
 // ============ 暴露方法 ============
 defineExpose({
@@ -990,7 +997,7 @@ onUnmounted(() => {
 /**
  * 处理键盘快捷键
  */
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   if (!props.visible) return
 
   switch (e.code) {

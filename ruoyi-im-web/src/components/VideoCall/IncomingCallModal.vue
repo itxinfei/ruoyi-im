@@ -8,8 +8,13 @@
     <div v-if="visible" class="incoming-call-modal" @click="handleBackdropClick">
       <div class="modal-content" @click.stop>
         <!-- 来电动画效果 -->
-        <div class="ripple-container" v-if="showRipple">
-          <div class="ripple" v-for="i in 3" :key="i" :style="{ animationDelay: `${i * 0.5}s` }"></div>
+        <div v-if="showRipple" class="ripple-container">
+          <div
+            v-for="i in 3"
+            :key="i"
+            class="ripple"
+            :style="{ animationDelay: `${i * 0.5}s` }"
+          ></div>
         </div>
 
         <!-- 来电者信息 -->
@@ -29,12 +34,8 @@
           </div>
 
           <h2 class="caller-name">{{ callerName || '对方' }}</h2>
-          <p class="call-type-text">
-            {{ callType === 'video' ? '视频通话' : '语音通话' }}邀请
-          </p>
-          <p v-if="timeout > 0" class="timeout-text">
-            {{ timeout }}秒后自动挂断
-          </p>
+          <p class="call-type-text">{{ callType === 'video' ? '视频通话' : '语音通话' }}邀请</p>
+          <p v-if="timeout > 0" class="timeout-text">{{ timeout }}秒后自动挂断</p>
         </div>
 
         <!-- 操作按钮 -->
@@ -122,7 +123,7 @@ const handleBackdropClick = () => {
 }
 
 // 处理键盘事件
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   if (!props.visible) return
 
   switch (e.code) {
@@ -158,13 +159,16 @@ const stopTimeout = () => {
 }
 
 // 监听显示状态变化
-watch(() => props.visible, (val) => {
-  if (val) {
-    startTimeout()
-  } else {
-    stopTimeout()
+watch(
+  () => props.visible,
+  val => {
+    if (val) {
+      startTimeout()
+    } else {
+      stopTimeout()
+    }
   }
-})
+)
 
 // 组件挂载
 onMounted(() => {
@@ -279,11 +283,11 @@ onUnmounted(() => {
   }
 
   .video-indicator {
-    background: linear-gradient(135deg, #1890FF, #096DD9);
+    background: linear-gradient(135deg, #1890ff, #096dd9);
   }
 
   .voice-indicator {
-    background: linear-gradient(135deg, #52C41A, #389E0D);
+    background: linear-gradient(135deg, #52c41a, #389e0d);
   }
 
   .caller-name {
@@ -301,7 +305,7 @@ onUnmounted(() => {
 
   .timeout-text {
     font-size: 14px;
-    color: #FAAD14;
+    color: #faad14;
     margin: 0;
   }
 }
@@ -346,18 +350,18 @@ onUnmounted(() => {
     }
 
     &.reject {
-      background: linear-gradient(135deg, #FF4D4F, #CF1322);
+      background: linear-gradient(135deg, #ff4d4f, #cf1322);
 
       &:hover {
-        background: linear-gradient(135deg, #FF7875, #FF4D4F);
+        background: linear-gradient(135deg, #ff7875, #ff4d4f);
       }
     }
 
     &.accept {
-      background: linear-gradient(135deg, #52C41A, #389E0D);
+      background: linear-gradient(135deg, #52c41a, #389e0d);
 
       &:hover {
-        background: linear-gradient(135deg, #73D13D, #52C41A);
+        background: linear-gradient(135deg, #73d13d, #52c41a);
       }
     }
   }
@@ -421,7 +425,8 @@ onUnmounted(() => {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 8px 30px rgba(82, 196, 26, 0.3);
   }
   50% {

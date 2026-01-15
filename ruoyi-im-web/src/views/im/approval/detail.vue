@@ -125,7 +125,12 @@
           </el-select>
         </el-form-item>
         <el-form-item label="备注">
-          <el-input v-model="transferRemark" type="textarea" :rows="3" placeholder="请输入转交备注（可选）" />
+          <el-input
+            v-model="transferRemark"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入转交备注（可选）"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -158,7 +163,12 @@
           </el-select>
         </el-form-item>
         <el-form-item label="备注">
-          <el-input v-model="delegateRemark" type="textarea" :rows="3" placeholder="请输入委托备注（可选）" />
+          <el-input
+            v-model="delegateRemark"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入委托备注（可选）"
+          />
         </el-form-item>
       </el-form>
       <template #footer>

@@ -101,8 +101,8 @@
             <input
               type="checkbox"
               :checked="isAllSelected"
-              @change="handleToggleSelectAll"
               class="select-all-checkbox"
+              @change="handleToggleSelectAll"
             />
             <span>已选 {{ selectedMessages.length }} 条消息</span>
           </div>
@@ -184,7 +184,7 @@ const handleCancelReply = () => {
 }
 
 // 快捷回复
-const handleQuickReply = (option) => {
+const handleQuickReply = option => {
   emit('quick-reply', {
     text: option.text,
     replyTo: props.replyMessage,
@@ -217,7 +217,7 @@ const handleClearSelection = () => {
 }
 
 // 键盘快捷键
-const handleKeyDown = (event) => {
+const handleKeyDown = event => {
   if (!props.isVisible || !props.replyMessage) return
 
   // Esc 取消回复

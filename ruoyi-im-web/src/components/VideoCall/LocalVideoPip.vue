@@ -10,7 +10,7 @@
     :class="[
       `size-${currentSize}`,
       `position-${position}`,
-      { 'is-minimized': isMinimized, 'is-dragging': isDragging }
+      { 'is-minimized': isMinimized, 'is-dragging': isDragging },
     ]"
     :style="dragStyle"
     data-drag-handle
@@ -50,11 +50,11 @@
     </div>
 
     <!-- 控制按钮 -->
-    <div class="pip-controls" v-if="!isMinimized && showControls">
-      <button class="pip-btn" @click="toggleSize" title="切换大小">
+    <div v-if="!isMinimized && showControls" class="pip-controls">
+      <button class="pip-btn" title="切换大小" @click="toggleSize">
         <i :class="sizeIcon"></i>
       </button>
-      <button class="pip-btn" @click="toggleMinimize" title="最小化">
+      <button class="pip-btn" title="最小化" @click="toggleMinimize">
         <i class="el-icon-minus"></i>
       </button>
     </div>
@@ -146,35 +146,42 @@ const toggleMinimize = () => {
 }
 
 // 设置视频流
-const setStream = (stream) => {
+const setStream = stream => {
   if (videoRef.value) {
     videoRef.value.srcObject = stream || null
   }
 }
 
 // 拖拽事件处理
-const onMouseDown = (e) => {
+const onMouseDown = e => {
   // 确保点击的是拖拽手柄
   if (e.target.closest('[data-drag-handle]')) {
     // 让 useDraggable 处理
   }
 }
 
-const onTouchStart = (e) => {
+const onTouchStart = e => {
   // 触摸开始
 }
 
 // 监听流变化
-watch(() => props.stream, (newStream) => {
-  setStream(newStream)
-}, { immediate: true })
+watch(
+  () => props.stream,
+  newStream => {
+    setStream(newStream)
+  },
+  { immediate: true }
+)
 
 // 监听静音状态变化
-watch(() => props.isMuted, (muted) => {
-  if (videoRef.value) {
-    videoRef.value.muted = muted
+watch(
+  () => props.isMuted,
+  muted => {
+    if (videoRef.value) {
+      videoRef.value.muted = muted
+    }
   }
-})
+)
 
 // 组件挂载后设置视频
 onMounted(() => {
@@ -202,9 +209,10 @@ defineExpose({
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.15);
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.2s ease;
+  transition:
+    width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.2s ease;
 
   &.is-dragging {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
@@ -265,7 +273,7 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
   cursor: grab;
   z-index: 10;
 

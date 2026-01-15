@@ -304,7 +304,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 .approval-container {
   padding: 16px; // 修改：20px -> 16px（符合4的倍数）
-  background: #F5F7FA; // 钉钉规范
+  background: #f5f7fa; // 钉钉规范
   min-height: calc(100vh - 60px);
 }
 
@@ -344,7 +344,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border-radius: 8px;
-  background: #F5F7FA;
+  background: #f5f7fa;
   display: flex;
   align-items: center;
   justify-content: center;

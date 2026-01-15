@@ -2,7 +2,11 @@
 // 基于 WebRTC Stats API 实时监测网络连接质量
 // @author RuoYi-IM
 import { ref, computed, onUnmounted } from 'vue'
-import { WebRTCStatsCollector, calculateNetworkQuality, getQualityConfig } from '@/utils/webrtc-stats'
+import {
+  WebRTCStatsCollector,
+  calculateNetworkQuality,
+  getQualityConfig,
+} from '@/utils/webrtc-stats'
 
 // 使用网络质量监测
 // @param {Ref<RTCPeerConnection|null>} peerConnection - WebRTC 连接对象
@@ -11,7 +15,7 @@ import { WebRTCStatsCollector, calculateNetworkQuality, getQualityConfig } from 
 export function useNetworkStats(peerConnection, options = {}) {
   const {
     updateInterval = 1000, // 更新间隔（毫秒）
-    autoStart = true,      // 自动开始监测
+    autoStart = true, // 自动开始监测
   } = options
 
   // 状态
@@ -43,9 +47,7 @@ export function useNetworkStats(peerConnection, options = {}) {
   const qualityIcon = computed(() => qualityConfig.value.icon)
 
   // 计算属性 - 是否网络良好
-  const isGoodNetwork = computed(() =>
-    ['excellent', 'good'].includes(networkQuality.value)
-  )
+  const isGoodNetwork = computed(() => ['excellent', 'good'].includes(networkQuality.value))
 
   // 计算属性 - 是否网络较差
   const isPoorNetwork = computed(() =>
@@ -77,7 +79,7 @@ export function useNetworkStats(peerConnection, options = {}) {
     collector = new WebRTCStatsCollector(peerConnection.value)
 
     // 添加监听器
-    collector.addListener((stats) => {
+    collector.addListener(stats => {
       connectionStats.value = {
         delay: stats.currentRoundTripTime,
         packetLoss: stats.packetLossRate,

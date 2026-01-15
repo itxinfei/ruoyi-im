@@ -680,19 +680,10 @@ const handleTransferFile = () => {
 }
 
 // 快捷消息模板
-const quickMessages = [
-  '好的',
-  '收到',
-  '谢谢',
-  '稍等',
-  '马上到',
-  '正在处理',
-  '请稍等',
-  '已确认',
-]
+const quickMessages = ['好的', '收到', '谢谢', '稍等', '马上到', '正在处理', '请稍等', '已确认']
 
 // 插入快捷消息
-const insertQuickMessage = (msg) => {
+const insertQuickMessage = msg => {
   messageText.value = msg
   nextTick(() => {
     textInput.value?.focus()
@@ -705,7 +696,7 @@ const messageHistory = ref([])
 const historyIndex = ref(-1)
 
 // 添加到历史记录
-const addToHistory = (msg) => {
+const addToHistory = msg => {
   messageHistory.value.unshift(msg)
   if (messageHistory.value.length > 50) {
     messageHistory.value = messageHistory.value.slice(0, 50)
@@ -714,7 +705,7 @@ const addToHistory = (msg) => {
 }
 
 // 查看上一条历史消息
-const navigateHistory = (direction) => {
+const navigateHistory = direction => {
   if (messageHistory.value.length === 0) return
 
   if (direction === 'up') {
@@ -798,7 +789,7 @@ onMounted(() => {
   window.addEventListener('beforeunload', saveDraft)
 
   // 监听快捷键
-  const handleGlobalKeydown = (event) => {
+  const handleGlobalKeydown = event => {
     // Alt + ↑/↓ 浏览历史消息
     if (event.altKey && !event.shiftKey && !event.ctrlKey) {
       const activeElement = document.activeElement
@@ -843,10 +834,13 @@ watch(messageText, () => {
 })
 
 // 监听会话变化
-watch(() => props.sessionId, () => {
-  clearDraft()
-  loadDraft()
-})
+watch(
+  () => props.sessionId,
+  () => {
+    clearDraft()
+    loadDraft()
+  }
+)
 
 // 组件卸载时的清理
 onUnmounted(() => {
@@ -859,7 +853,7 @@ onUnmounted(() => {
 @use '@/styles/dingtalk-theme.scss' as *;
 
 .chat-input-container {
-  border-top: 1px solid #E6E6E6;
+  border-top: 1px solid #e6e6e6;
   background: $bg-white;
   position: relative;
 }
@@ -870,7 +864,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #F0F0F0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .toolbar-left,
@@ -913,7 +907,7 @@ onUnmounted(() => {
     background: rgba(0, 0, 0, 0.04);
 
     i {
-      color: #0089FF;
+      color: #0089ff;
     }
   }
 
@@ -925,7 +919,7 @@ onUnmounted(() => {
     background: rgba(0, 137, 255, 0.1);
 
     i {
-      color: #0089FF;
+      color: #0089ff;
     }
   }
 
@@ -933,7 +927,7 @@ onUnmounted(() => {
     background: rgba(245, 34, 45, 0.08);
 
     i {
-      color: #F5222D;
+      color: #f5222d;
       animation: pulse 1s infinite;
     }
   }
@@ -944,7 +938,7 @@ onUnmounted(() => {
     right: 4px;
     width: 8px;
     height: 8px;
-    background: #F5222D;
+    background: #f5222d;
     border-radius: 50%;
     animation: blink 1s infinite;
   }
@@ -964,8 +958,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #F5F5F5;
-  border-left: 3px solid #0089FF;
+  background: #f5f5f5;
+  border-left: 3px solid #0089ff;
   padding: 8px 12px;
   margin: 8px 12px;
   border-radius: 4px;
@@ -978,7 +972,7 @@ onUnmounted(() => {
 
   .reply-sender {
     font-size: 12px;
-    color: #0089FF;
+    color: #0089ff;
     font-weight: 500;
     margin-bottom: 4px;
   }
@@ -1000,7 +994,7 @@ onUnmounted(() => {
     border: none;
     background: transparent;
     cursor: pointer;
-    color: #B8B8B8;
+    color: #b8b8b8;
     border-radius: 4px;
     transition: all 0.2s ease;
 
@@ -1025,7 +1019,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 4px;
   padding: 6px 12px;
-  background: #0089FF;
+  background: #0089ff;
   color: white;
   font-size: 12px;
   border-radius: 4px;
@@ -1050,7 +1044,7 @@ onUnmounted(() => {
   height: 40px;
   border-radius: 4px;
   border: none;
-  background: #0089FF;
+  background: #0089ff;
   color: white;
   cursor: pointer;
   display: flex;
@@ -1062,25 +1056,25 @@ onUnmounted(() => {
   pointer-events: auto;
 
   &:hover {
-    background: #0077E0;
+    background: #0077e0;
     box-shadow: 0 2px 8px rgba(0, 137, 255, 0.3);
   }
 
   &:active {
-    background: #0066C2;
+    background: #0066c2;
     transform: scale(0.95);
   }
 
   &:disabled {
-    background: #E6E6E6;
-    color: #B8B8B8;
+    background: #e6e6e6;
+    color: #b8b8b8;
     cursor: not-allowed;
     transform: none !important;
     box-shadow: none !important;
   }
 
   &.send-sending {
-    background: #00C853;
+    background: #00c853;
 
     i {
       animation: spin 1s linear infinite;
@@ -1254,7 +1248,7 @@ onUnmounted(() => {
 
 .upload-progress-icon {
   font-size: 48px;
-  color: #0089FF;
+  color: #0089ff;
   margin-bottom: 16px;
 
   i {
@@ -1289,7 +1283,7 @@ onUnmounted(() => {
 
 .progress-fill {
   height: 100%;
-  background: #0089FF;
+  background: #0089ff;
   border-radius: 4px;
   transition: width 0.2s ease;
 }
@@ -1297,7 +1291,7 @@ onUnmounted(() => {
 .upload-progress-percent {
   font-size: 18px;
   font-weight: 500;
-  color: #0089FF;
+  color: #0089ff;
 }
 
 // 动画定义
@@ -1438,7 +1432,7 @@ onUnmounted(() => {
     }
   }
 
- .input-area {
+  .input-area {
     padding: $spacing-sm $spacing-md;
   }
 
@@ -1483,7 +1477,7 @@ onUnmounted(() => {
     }
   }
 
- .input-area {
+  .input-area {
     padding: $spacing-xs $spacing-sm;
   }
 

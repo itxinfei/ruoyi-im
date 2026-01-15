@@ -186,7 +186,12 @@ import {
   Calendar,
 } from '@element-plus/icons-vue'
 import { getCurrentUserInfo, setUserInfo } from '@/utils/im-user'
-import { updateProfile, uploadAvatar as uploadAvatarApi, getUser, getCurrentUser } from '@/api/im/user'
+import {
+  updateProfile,
+  uploadAvatar as uploadAvatarApi,
+  getUser,
+  getCurrentUser,
+} from '@/api/im/user'
 
 const props = defineProps({
   modelValue: {

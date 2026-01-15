@@ -60,6 +60,25 @@ public class ImFileAssetController extends BaseController {
     private RuoYiConfig ruoYiConfig;
 
     /**
+     * 新增文件页面
+     */
+    @RequiresPermissions("im:file:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改文件页面
+     */
+    @RequiresPermissions("im:file:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("file", imFileAssetService.selectImFileAssetById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询文件资源列表
      */
     @RequiresPermissions("im:file:list")

@@ -179,7 +179,9 @@ function parseMessageContent(content, messageType = 'text') {
     }
 
     // 对于文件/图片/语音/视频消息，尝试解析JSON获取文件信息
-    if (['file', 'FILE', 'image', 'IMAGE', 'voice', 'VOICE', 'video', 'VIDEO'].includes(messageType)) {
+    if (
+      ['file', 'FILE', 'image', 'IMAGE', 'voice', 'VOICE', 'video', 'VIDEO'].includes(messageType)
+    ) {
       try {
         const parsed = JSON.parse(content)
         if (typeof parsed === 'object' && parsed !== null) {
@@ -241,7 +243,11 @@ function normalizeMessage(message) {
     if (parsedContent.isPlainText) {
       displayContent = parsedContent.text || message.content || ''
     } else {
-      displayContent = parsedContent.text || parsedContent.content || parsedContent.body || JSON.stringify(parsedContent)
+      displayContent =
+        parsedContent.text ||
+        parsedContent.content ||
+        parsedContent.body ||
+        JSON.stringify(parsedContent)
     }
   } else if (messageType === 'image' || messageType === 'IMAGE') {
     // 图片消息：保留content（可能是URL或JSON）
@@ -392,7 +398,15 @@ const mutations = {
       }
     }
 
-    console.log('[Vuex] SET_SESSIONS: 原始', list.length, '条, id去重后', uniqueSessions.length, '条, 最终', finalSessions.length, '条')
+    console.log(
+      '[Vuex] SET_SESSIONS: 原始',
+      list.length,
+      '条, id去重后',
+      uniqueSessions.length,
+      '条, 最终',
+      finalSessions.length,
+      '条'
+    )
     state.sessions = finalSessions
   },
   ADD_SESSION: (state, session) => {
@@ -406,12 +420,16 @@ const mutations = {
     if (session.type === 'private' || session.type === 'PRIVATE') {
       const peerId = session.peerId || session.targetId
       if (peerId) {
-        const existsByPeerId = state.sessions.find(s =>
-          (s.type === 'private' || s.type === 'PRIVATE') &&
-          (s.peerId === peerId || s.targetId === peerId)
+        const existsByPeerId = state.sessions.find(
+          s =>
+            (s.type === 'private' || s.type === 'PRIVATE') &&
+            (s.peerId === peerId || s.targetId === peerId)
         )
         if (existsByPeerId) {
-          console.warn('[Vuex] ADD_SESSION: 发现相同 peerId 的会话，不添加', { existing: existsByPeerId, new: session })
+          console.warn('[Vuex] ADD_SESSION: 发现相同 peerId 的会话，不添加', {
+            existing: existsByPeerId,
+            new: session,
+          })
           return // 已存在相同私聊对象的会话，不添加
         }
       }
@@ -552,15 +570,18 @@ const mutations = {
     state.onlineStatus[userId] = status
 
     // 同步更新联系人列表中的在线状态
-    const contact = state.contacts.find(c => String(c.friendId) === String(userId) || String(c.id) === String(userId))
+    const contact = state.contacts.find(
+      c => String(c.friendId) === String(userId) || String(c.id) === String(userId)
+    )
     if (contact) {
       contact.online = status === 'online'
     }
 
     // 同步更新会话列表中的在线状态（私聊会话）
-    const session = state.sessions.find(s =>
-      (s.type === 'private' || s.type === 'PRIVATE') &&
-      (String(s.peerId) === String(userId) || String(s.targetId) === String(userId))
+    const session = state.sessions.find(
+      s =>
+        (s.type === 'private' || s.type === 'PRIVATE') &&
+        (String(s.peerId) === String(userId) || String(s.targetId) === String(userId))
     )
     if (session) {
       session.onlineStatus = status
@@ -709,7 +730,9 @@ const actions = {
         updates: { unreadCount: 0 },
       })
 
-      console.log(`[Store] 会话已读: sessionId=${sessionId}, lastReadMessageId=${lastReadMessageId}`)
+      console.log(
+        `[Store] 会话已读: sessionId=${sessionId}, lastReadMessageId=${lastReadMessageId}`
+      )
     } catch (error) {
       console.error('标记会话已读失败:', error)
     }
@@ -1471,7 +1494,9 @@ const actions = {
     // 查找原始消息
     const sessionId = message.sessionId
     const messages = state.messageList[sessionId]
-    const originalMessage = messages?.find(m => m.clientMsgId === message.clientMsgId || m.id === message.id)
+    const originalMessage = messages?.find(
+      m => m.clientMsgId === message.clientMsgId || m.id === message.id
+    )
 
     if (!originalMessage) {
       ElMessage.error('消息不存在')

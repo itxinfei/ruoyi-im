@@ -155,7 +155,7 @@ import {
   checkIn,
   checkOut,
   getAttendanceList,
-  getAttendanceStatistics
+  getAttendanceStatistics,
 } from '@/api/im/workbench'
 
 // Props
@@ -243,7 +243,7 @@ const fetchTodayRecord = async () => {
 }
 
 // 格式化时间显示
-const formatTime = (timeStr) => {
+const formatTime = timeStr => {
   if (!timeStr) return null
   const date = new Date(timeStr)
   const hours = String(date.getHours()).padStart(2, '0')
@@ -325,7 +325,7 @@ const generateMockWeekData = () => {
   })
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')

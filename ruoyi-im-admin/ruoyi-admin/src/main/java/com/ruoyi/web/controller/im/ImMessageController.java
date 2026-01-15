@@ -8,6 +8,7 @@ import com.ruoyi.web.domain.ImMessage;
 import com.ruoyi.web.service.ImMessageService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -19,18 +20,49 @@ import java.util.List;
  * @author ruoyi
  * @date 2025-01-07
  */
-@RestController
+@Controller
 @RequestMapping("/im/message")
 public class ImMessageController extends BaseController {
+
+    private String prefix = "im/message";
 
     @Autowired
     private ImMessageService imMessageService;
 
     /**
+     * 消息管理页面
+     */
+    @RequiresPermissions("im:message:view")
+    @GetMapping()
+    public String message() {
+        return prefix + "/message";
+    }
+
+    /**
+     * 新增消息页面
+     */
+    @RequiresPermissions("im:message:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改消息页面
+     */
+    @RequiresPermissions("im:message:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("message", imMessageService.selectImMessageById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询IM消息列表
      */
     @RequiresPermissions("im:message:list")
-    @GetMapping("/list")
+    @PostMapping("/list")
+    @ResponseBody
     public AjaxResult list(ImMessage imMessage) {
         startPage();
         List<ImMessage> list = imMessageService.selectImMessageList(imMessage);

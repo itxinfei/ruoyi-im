@@ -38,7 +38,13 @@
           size="small"
           clearable
         />
-        <el-select v-model="searchType" placeholder="消息类型" size="small" clearable style="width: 120px">
+        <el-select
+          v-model="searchType"
+          placeholder="消息类型"
+          size="small"
+          clearable
+          style="width: 120px"
+        >
           <el-option label="全部" value="" />
           <el-option label="文字" value="text" />
           <el-option label="图片" value="image" />
@@ -72,7 +78,11 @@
               </div>
             </div>
             <div class="result-content">
-              <div v-if="item.type === 'text'" class="text-content" v-html="highlightKeyword(item.content)"></div>
+              <div
+                v-if="item.type === 'text'"
+                class="text-content"
+                v-html="highlightKeyword(item.content)"
+              ></div>
               <div v-else-if="item.type === 'image'" class="image-content">
                 <el-image :src="item.content" fit="cover" style="width: 80px; height: 80px" />
               </div>
@@ -108,8 +118,15 @@ const results = ref([])
 const loading = ref(false)
 const searched = ref(false)
 
-watch(() => props.modelValue, val => { visible.value = val })
-watch(visible, val => { emit('update:modelValue', val) })
+watch(
+  () => props.modelValue,
+  val => {
+    visible.value = val
+  }
+)
+watch(visible, val => {
+  emit('update:modelValue', val)
+})
 
 async function handleSearch() {
   if (!keyword.value.trim()) return
@@ -121,8 +138,12 @@ async function handleSearch() {
     const res = await searchMessages({
       conversationId: props.sessionId,
       keyword: keyword.value.trim(),
-      startTime: dateRange.value?.[0] ? dayjs(dateRange.value[0]).format('YYYY-MM-DD HH:mm:ss') : undefined,
-      endTime: dateRange.value?.[1] ? dayjs(dateRange.value[1]).format('YYYY-MM-DD HH:mm:ss') : undefined,
+      startTime: dateRange.value?.[0]
+        ? dayjs(dateRange.value[0]).format('YYYY-MM-DD HH:mm:ss')
+        : undefined,
+      endTime: dateRange.value?.[1]
+        ? dayjs(dateRange.value[1]).format('YYYY-MM-DD HH:mm:ss')
+        : undefined,
       messageType: searchType.value || undefined,
     })
 
@@ -147,7 +168,10 @@ function handleClick(item) {
 function highlightKeyword(text) {
   if (!keyword.value) return text
   const regex = new RegExp(`(${keyword.value})`, 'gi')
-  return text.replace(regex, '<span style="color: #0089FF; background: rgba(0, 137, 255, 0.1);">$1</span>')
+  return text.replace(
+    regex,
+    '<span style="color: #0089FF; background: rgba(0, 137, 255, 0.1);">$1</span>'
+  )
 }
 
 function formatTime(timestamp) {
@@ -164,18 +188,20 @@ function handleClose() {
 
 <style lang="scss" scoped>
 .search-dialog {
-  .search-input { margin-bottom: 16px; }
-  
+  .search-input {
+    margin-bottom: 16px;
+  }
+
   .search-filters {
     display: flex;
     gap: 12px;
     margin-bottom: 16px;
   }
-  
+
   .search-results {
     max-height: 400px;
     overflow-y: auto;
-    
+
     .loading {
       display: flex;
       align-items: center;
@@ -184,33 +210,47 @@ function handleClose() {
       padding: 40px 0;
       color: #999;
     }
-    
+
     .result-list {
       .result-item {
         padding: 12px;
         border-bottom: 1px solid #f0f0f0;
         cursor: pointer;
         transition: background 0.2s;
-        
-        &:hover { background: #f5f7fa; }
-        
+
+        &:hover {
+          background: #f5f7fa;
+        }
+
         .result-header {
           display: flex;
           align-items: center;
           gap: 8px;
           margin-bottom: 8px;
-          
+
           .result-info {
-            .sender-name { font-size: 14px; color: #333; }
-            .send-time { font-size: 12px; color: #999; }
+            .sender-name {
+              font-size: 14px;
+              color: #333;
+            }
+            .send-time {
+              font-size: 12px;
+              color: #999;
+            }
           }
         }
-        
+
         .result-content {
           padding-left: 40px;
-          
-          .text-content { font-size: 14px; color: #666; }
-          .other-content { font-size: 12px; color: #999; }
+
+          .text-content {
+            font-size: 14px;
+            color: #666;
+          }
+          .other-content {
+            font-size: 12px;
+            color: #999;
+          }
         }
       }
     }

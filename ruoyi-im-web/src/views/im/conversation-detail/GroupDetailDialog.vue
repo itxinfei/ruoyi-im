@@ -23,7 +23,7 @@
       </div>
     </template>
 
-    <div class="dialog-body" v-loading="loading">
+    <div v-loading="loading" class="dialog-body">
       <!-- 群组基本信息卡片 -->
       <div class="group-card">
         <div class="group-avatar-wrap">
@@ -33,7 +33,7 @@
         </div>
         <div class="group-basic-info">
           <h3 class="group-name">{{ groupInfo?.name }}</h3>
-          <p class="group-desc" v-if="groupInfo?.description">{{ groupInfo.description }}</p>
+          <p v-if="groupInfo?.description" class="group-desc">{{ groupInfo.description }}</p>
           <div class="group-meta">
             <span class="member-count">{{ memberCount }}人</span>
             <el-tag v-if="isOwner" type="success" size="small">我是群主</el-tag>
@@ -52,7 +52,7 @@
           <el-icon><Bell /></el-icon>
           <span>{{ isMuted ? '取消免打扰' : '消息免打扰' }}</span>
         </div>
-        <div class="action-item" @click="handleEditGroup" v-if="isOwner || isAdmin">
+        <div v-if="isOwner || isAdmin" class="action-item" @click="handleEditGroup">
           <el-icon><Edit /></el-icon>
           <span>编辑群信息</span>
         </div>
@@ -65,23 +65,23 @@
           <span class="member-count-badge">{{ memberCount }}</span>
         </div>
 
-        <div class="members-list" v-loading="loadingMembers">
-          <div
-            v-for="member in displayMembers"
-            :key="member.id"
-            class="member-item"
-          >
+        <div v-loading="loadingMembers" class="members-list">
+          <div v-for="member in displayMembers" :key="member.id" class="member-item">
             <el-avatar :size="36" :src="member.avatar">
               {{ member.nickname?.charAt(0) || member.username?.charAt(0) }}
             </el-avatar>
             <div class="member-info">
               <span class="member-name">{{ member.nickname || member.username }}</span>
-              <span class="member-role" v-if="member.role === 'OWNER'">群主</span>
-              <span class="member-role admin" v-else-if="member.role === 'ADMIN'">管理员</span>
+              <span v-if="member.role === 'OWNER'" class="member-role">群主</span>
+              <span v-else-if="member.role === 'ADMIN'" class="member-role admin">管理员</span>
             </div>
           </div>
 
-          <div class="show-more" v-if="memberList.length > displayLimit" @click="showAllMembers = !showAllMembers">
+          <div
+            v-if="memberList.length > displayLimit"
+            class="show-more"
+            @click="showAllMembers = !showAllMembers"
+          >
             <span>{{ showAllMembers ? '收起' : `查看全部${memberCount}人` }}</span>
             <el-icon><ArrowDown /></el-icon>
           </div>
@@ -89,13 +89,13 @@
       </div>
 
       <!-- 群文件和媒体 -->
-      <div class="content-section" v-if="conversationId && hasContent">
+      <div v-if="conversationId && hasContent" class="content-section">
         <div class="section-header">
           <span class="section-title">群文件</span>
         </div>
 
         <div class="content-stats">
-          <div class="stat-item" @click="showContent('media')" v-if="stats.mediaCount > 0">
+          <div v-if="stats.mediaCount > 0" class="stat-item" @click="showContent('media')">
             <div class="stat-icon">
               <el-icon><Picture /></el-icon>
             </div>
@@ -106,7 +106,7 @@
             <el-icon class="stat-arrow"><ArrowRight /></el-icon>
           </div>
 
-          <div class="stat-item" @click="showContent('file')" v-if="stats.fileCount > 0">
+          <div v-if="stats.fileCount > 0" class="stat-item" @click="showContent('file')">
             <div class="stat-icon">
               <el-icon><Folder /></el-icon>
             </div>
@@ -126,9 +126,7 @@
         <el-button class="footer-btn danger-btn" @click="handleLeaveOrDismiss">
           {{ isOwner ? '解散群聊' : '退出群聊' }}
         </el-button>
-        <el-button class="footer-btn" @click="handleClearHistory">
-          清空聊天记录
-        </el-button>
+        <el-button class="footer-btn" @click="handleClearHistory"> 清空聊天记录 </el-button>
       </div>
     </template>
   </el-dialog>
@@ -156,12 +154,7 @@
 
       <!-- 文件列表 -->
       <div v-if="contentType === 'file'" class="file-list">
-        <div
-          v-for="item in fileList"
-          :key="item.id"
-          class="file-item"
-          @click="downloadFile(item)"
-        >
+        <div v-for="item in fileList" :key="item.id" class="file-item" @click="downloadFile(item)">
           <el-icon class="file-icon"><Document /></el-icon>
           <div class="file-info">
             <span class="file-name">{{ item.name }}</span>
@@ -274,18 +267,21 @@ const hasContent = computed(() => {
 })
 
 // 监听 visible 变化
-watch(() => props.visible, (val) => {
-  dialogVisible.value = val
-  if (val && props.groupId) {
-    loadGroupInfo()
-    loadMembers()
-    if (props.conversationId) {
-      loadContentStats()
+watch(
+  () => props.visible,
+  val => {
+    dialogVisible.value = val
+    if (val && props.groupId) {
+      loadGroupInfo()
+      loadMembers()
+      if (props.conversationId) {
+        loadContentStats()
+      }
     }
   }
-})
+)
 
-watch(dialogVisible, (val) => {
+watch(dialogVisible, val => {
   emit('update:visible', val)
 })
 
@@ -385,7 +381,7 @@ const loadContentStats = async () => {
 }
 
 // 显示内容详情
-const showContent = (type) => {
+const showContent = type => {
   contentType.value = type
   contentDialogVisible.value = true
 }
@@ -441,15 +437,11 @@ const handleLeaveOrDismiss = async () => {
 
 const handleClearHistory = async () => {
   try {
-    await ElMessageBox.confirm(
-      '确定要清空聊天记录吗？此操作不可恢复。',
-      '清空聊天记录',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    )
+    await ElMessageBox.confirm('确定要清空聊天记录吗？此操作不可恢复。', '清空聊天记录', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
     ElMessage.success('聊天记录已清空')
   } catch {
     // 取消操作
@@ -460,23 +452,23 @@ const handleClose = () => {
   dialogVisible.value = false
 }
 
-const previewMedia = (item) => {
+const previewMedia = item => {
   const urls = mediaList.value.map(m => m.url)
   previewUrls.value = urls
   previewIndex.value = urls.indexOf(item.url)
   previewVisible.value = true
 }
 
-const downloadFile = (item) => {
+const downloadFile = item => {
   window.open(item.url, '_blank')
 }
 
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (!bytes || bytes === 0) return '0 B'
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
 }
 </script>
 

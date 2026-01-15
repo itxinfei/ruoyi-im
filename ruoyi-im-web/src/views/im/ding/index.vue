@@ -7,9 +7,7 @@
         <span class="page-subtitle">重要事务提醒，确保送达</span>
       </div>
       <div class="header-right">
-        <el-button type="primary" :icon="Plus" @click="handleCreate">
-          发送DING
-        </el-button>
+        <el-button type="primary" :icon="Plus" @click="handleCreate"> 发送DING </el-button>
       </div>
     </div>
 
@@ -43,7 +41,7 @@
         :class="{
           urgent: ding.isUrgent,
           unread: !ding.isRead,
-          'is-sender': ding.isSender
+          'is-sender': ding.isSender,
         }"
         @click="handleViewDetail(ding)"
       >
@@ -57,28 +55,11 @@
         <div class="ding-content">
           <div class="ding-header">
             <span class="ding-title">{{ ding.title }}</span>
-            <el-tag
-              v-if="ding.isUrgent"
-              type="danger"
-              size="small"
-              effect="plain"
-            >
-              紧急
-            </el-tag>
-            <el-tag
-              v-if="ding.status === 'DRAFT'"
-              type="info"
-              size="small"
-              effect="plain"
-            >
+            <el-tag v-if="ding.isUrgent" type="danger" size="small" effect="plain"> 紧急 </el-tag>
+            <el-tag v-if="ding.status === 'DRAFT'" type="info" size="small" effect="plain">
               草稿
             </el-tag>
-            <el-tag
-              v-if="ding.status === 'SCHEDULED'"
-              type="warning"
-              size="small"
-              effect="plain"
-            >
+            <el-tag v-if="ding.status === 'SCHEDULED'" type="warning" size="small" effect="plain">
               定时
             </el-tag>
           </div>
@@ -90,11 +71,11 @@
               <el-icon><Clock /></el-icon>
               {{ formatTime(ding.sendTime) }}
             </span>
-            <span class="meta-sender" v-if="!ding.isSender">
+            <span v-if="!ding.isSender" class="meta-sender">
               <el-icon><User /></el-icon>
               {{ ding.senderName }}
             </span>
-            <span class="meta-receipt" v-if="ding.isSender && ding.receiptTotal > 0">
+            <span v-if="ding.isSender && ding.receiptTotal > 0" class="meta-receipt">
               <el-icon><View /></el-icon>
               已读 {{ ding.receiptRead }}/{{ ding.receiptTotal }}
             </span>
@@ -125,10 +106,7 @@
                   <el-icon><View /></el-icon>
                   查看回执
                 </el-dropdown-item>
-                <el-dropdown-item
-                  v-if="ding.isSender"
-                  @click="handleCopy(ding)"
-                >
+                <el-dropdown-item v-if="ding.isSender" @click="handleCopy(ding)">
                   <el-icon><DocumentCopy /></el-icon>
                   转发
                 </el-dropdown-item>
@@ -139,10 +117,7 @@
                   <el-icon><Check /></el-icon>
                   标记已读
                 </el-dropdown-item>
-                <el-dropdown-item
-                  divided
-                  @click="handleDelete(ding)"
-                >
+                <el-dropdown-item divided @click="handleDelete(ding)">
                   <el-icon><Delete /></el-icon>
                   删除
                 </el-dropdown-item>
@@ -155,22 +130,14 @@
 
     <!-- 加载更多 -->
     <div v-if="hasMore && !loading" class="load-more">
-      <el-button text @click="loadMore">
-        加载更多
-      </el-button>
+      <el-button text @click="loadMore"> 加载更多 </el-button>
     </div>
 
     <!-- DING发送对话框 -->
-    <DingSendDialog
-      v-model="showSendDialog"
-      @success="handleSendSuccess"
-    />
+    <DingSendDialog v-model="showSendDialog" @success="handleSendSuccess" />
 
     <!-- DING回执对话框 -->
-    <DingReceiptDialog
-      v-model="showReceiptDialog"
-      :ding-id="currentDingId"
-    />
+    <DingReceiptDialog v-model="showReceiptDialog" :ding-id="currentDingId" />
 
     <!-- DING详情对话框 -->
     <el-dialog
@@ -185,7 +152,10 @@
           <div class="content-text">{{ currentDing.content }}</div>
 
           <!-- 附件 -->
-          <div v-if="currentDing.attachments && currentDing.attachments.length > 0" class="detail-attachments">
+          <div
+            v-if="currentDing.attachments && currentDing.attachments.length > 0"
+            class="detail-attachments"
+          >
             <div v-for="file in currentDing.attachments" :key="file.id" class="attachment-item">
               <el-icon><Document /></el-icon>
               <span>{{ file.name }}</span>
@@ -218,27 +188,15 @@
             </el-tag>
           </div>
           <div class="receivers-list">
-            <div
-              v-for="receiver in currentDing.receivers"
-              :key="receiver.id"
-              class="receiver-item"
-            >
+            <div v-for="receiver in currentDing.receivers" :key="receiver.id" class="receiver-item">
               <el-avatar :size="32" :src="receiver.avatar">
                 {{ receiver.name?.charAt(0) }}
               </el-avatar>
               <span class="receiver-name">{{ receiver.name }}</span>
-              <el-icon
-                v-if="receiver.hasRead"
-                class="read-icon"
-                :size="16"
-              >
+              <el-icon v-if="receiver.hasRead" class="read-icon" :size="16">
                 <CircleCheck />
               </el-icon>
-              <el-icon
-                v-else
-                class="unread-icon"
-                :size="16"
-              >
+              <el-icon v-else class="unread-icon" :size="16">
                 <Clock />
               </el-icon>
             </div>
@@ -269,17 +227,12 @@ import {
   Check,
   MoreFilled,
   Document,
-  CircleCheck
+  CircleCheck,
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import DingSendDialog from '@/components/DING/DingSendDialog.vue'
 import DingReceiptDialog from '@/components/DING/DingReceiptDialog.vue'
-import {
-  getDingList,
-  deleteDing,
-  remindDing,
-  markDingRead
-} from '@/api/im/ding'
+import { getDingList, deleteDing, remindDing, markDingRead } from '@/api/im/ding'
 
 // 标签页
 const activeTab = ref('all')
@@ -368,7 +321,7 @@ const handleSendSuccess = () => {
 }
 
 // 查看详情
-const handleViewDetail = (ding) => {
+const handleViewDetail = ding => {
   currentDingId.value = ding.id
   showDetailDialog.value = true
 
@@ -379,13 +332,13 @@ const handleViewDetail = (ding) => {
 }
 
 // 查看回执
-const handleViewReceipt = (ding) => {
+const handleViewReceipt = ding => {
   currentDingId.value = ding.id
   showReceiptDialog.value = true
 }
 
 // 再次提醒
-const handleRemind = async (ding) => {
+const handleRemind = async ding => {
   try {
     await remindDing(ding.id)
     ElMessage.success('已发送提醒')
@@ -395,19 +348,19 @@ const handleRemind = async (ding) => {
 }
 
 // 编辑
-const handleEdit = (ding) => {
+const handleEdit = ding => {
   // TODO: 实现编辑功能
   ElMessage.info('编辑功能即将上线')
 }
 
 // 转发
-const handleCopy = (ding) => {
+const handleCopy = ding => {
   // TODO: 实现转发功能
   ElMessage.info('转发功能即将上线')
 }
 
 // 标记已读
-const handleMarkRead = async (ding) => {
+const handleMarkRead = async ding => {
   try {
     await markDingRead(ding.id)
     ding.isRead = true
@@ -423,13 +376,9 @@ const handleMarkRead = async (ding) => {
 }
 
 // 删除
-const handleDelete = async (ding) => {
+const handleDelete = async ding => {
   try {
-    await ElMessageBox.confirm(
-      '确定要删除这条DING消息吗？',
-      '删除确认',
-      { type: 'warning' }
-    )
+    await ElMessageBox.confirm('确定要删除这条DING消息吗？', '删除确认', { type: 'warning' })
 
     await deleteDing(ding.id)
 
@@ -449,7 +398,7 @@ const handleDelete = async (ding) => {
 }
 
 // 格式化时间
-const formatTime = (time) => {
+const formatTime = time => {
   if (!time) return ''
 
   const date = new Date(time)
@@ -491,7 +440,7 @@ const formatTime = (time) => {
 }
 
 // 格式化完整日期时间
-const formatDateTime = (time) => {
+const formatDateTime = time => {
   if (!time) return ''
   const date = new Date(time)
   const year = date.getFullYear()
@@ -527,7 +476,7 @@ export default {
   display: flex;
   flex-direction: column;
   padding: 16px; // 修改：20px -> 16px
-  background: #F5F7FA; // 钉钉规范
+  background: #f5f7fa; // 钉钉规范
 }
 
 .page-header {
@@ -536,7 +485,7 @@ export default {
   align-items: center;
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #E8E8E8;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 .header-left {
@@ -572,11 +521,11 @@ export default {
     font-size: 14px;
 
     &:hover {
-      background: #F5F7FA;
+      background: #f5f7fa;
     }
 
     &.active {
-      background: #0089FF; // 钉钉规范
+      background: #0089ff; // 钉钉规范
       color: white;
     }
 
@@ -628,16 +577,16 @@ export default {
   }
 
   &.urgent {
-    border-left: 3px solid #FF4D4F;
+    border-left: 3px solid #ff4d4f;
   }
 
   &.unread {
-    background: #E6F7FF;
+    background: #e6f7ff;
   }
 
   &.is-sender {
     .ding-icon {
-      background: #F0F2F5;
+      background: #f0f2f5;
     }
   }
 }
@@ -648,9 +597,9 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #E6F7FF;
+  background: #e6f7ff;
   border-radius: 50%;
-  color: #0089FF;
+  color: #0089ff;
   position: relative;
   flex-shrink: 0;
 
@@ -660,7 +609,7 @@ export default {
     right: -4px;
     width: 16px;
     height: 16px;
-    background: #FF4D4F;
+    background: #ff4d4f;
     color: white;
     border-radius: 50%;
     font-size: 10px;
@@ -725,7 +674,7 @@ export default {
   .ding-detail {
     .detail-content {
       padding: 16px;
-      background: #F5F7FA;
+      background: #f5f7fa;
       border-radius: 8px;
       margin-bottom: 16px;
     }
@@ -763,7 +712,7 @@ export default {
 
     .detail-receivers {
       padding: 16px;
-      background: #F5F7FA;
+      background: #f5f7fa;
       border-radius: 8px;
       margin-bottom: 16px;
     }

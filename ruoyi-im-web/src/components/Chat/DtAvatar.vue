@@ -1,7 +1,7 @@
 <template>
   <div
     class="dt-avatar"
-    :class="[`dt-avatar-${size}`, { 'clickable': clickable, 'show-status': showStatus }]"
+    :class="[`dt-avatar-${size}`, { clickable: clickable, 'show-status': showStatus }]"
     :style="{ width: finalSize + 'px', height: finalSize + 'px' }"
     @click="handleClick"
   >
@@ -19,11 +19,7 @@
 
     <!-- 群组拼接头像 -->
     <template v-else>
-      <DtGroupAvatar
-        :members="members"
-        :size="size"
-        :default-text="name"
-      />
+      <DtGroupAvatar :members="members" :size="size" :default-text="name" />
     </template>
 
     <!-- 在线状态指示器 -->
@@ -41,29 +37,29 @@ const props = defineProps({
   // 用户名/群名
   name: {
     type: String,
-    default: ''
+    default: '',
   },
   // 头像尺寸：xs/sm/md/lg/xl 或 自定义数字
   size: {
     type: [String, Number],
-    default: 'md'
+    default: 'md',
   },
   // 是否为群组
   isGroup: Boolean,
   // 群组成员（群组拼接头像使用）
   members: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   // 是否显示在线状态
   showStatus: Boolean,
   // 在线状态：online/busy/away/offline
   status: {
     type: String,
-    default: 'offline'
+    default: 'offline',
   },
   // 是否可点击
-  clickable: Boolean
+  clickable: Boolean,
 })
 
 const emit = defineEmits(['click', 'error'])
@@ -76,7 +72,7 @@ const sizeMap = {
   sm: 32,
   md: 40,
   lg: 48,
-  xl: 64
+  xl: 64,
 }
 
 // 最终尺寸
@@ -129,7 +125,7 @@ const handleClick = () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0089FF 0%, #00A0FF 100%);
+  background: linear-gradient(135deg, #0089ff 0%, #00a0ff 100%);
   color: #ffffff;
   font-weight: 500;
   overflow: hidden;
@@ -192,27 +188,28 @@ const handleClick = () => {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 
     &.status-online {
-      background-color: #52C41A;
+      background-color: #52c41a;
       animation: online-pulse 2s infinite;
     }
 
     &.status-offline {
-      background-color: #D9D9D9;
+      background-color: #d9d9d9;
     }
 
     &.status-busy {
-      background-color: #F5222D;
+      background-color: #f5222d;
     }
 
     &.status-away {
-      background-color: #FAAD14;
+      background-color: #faad14;
     }
   }
 }
 
 // 在线状态脉冲动画
 @keyframes online-pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.4);
   }
   50% {

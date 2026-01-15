@@ -179,15 +179,15 @@ class WebSocketManager {
       this.onOpen()
     }
 
-    this.ws.onmessage = (event) => {
+    this.ws.onmessage = event => {
       this.onMessage(event.data)
     }
 
-    this.ws.onerror = (error) => {
+    this.ws.onerror = error => {
       this.onError(error)
     }
 
-    this.ws.onclose = (event) => {
+    this.ws.onclose = event => {
       this.onClose(event)
     }
   }
@@ -265,7 +265,6 @@ class WebSocketManager {
 
       // 转发消息到对应处理器
       this.handleMessage(message)
-
     } catch (error) {
       this.error('解析消息失败:', error, data)
     }
@@ -556,9 +555,7 @@ class WebSocketManager {
    * 是否已连接
    */
   isConnected() {
-    return this.status === WS_STATUS.CONNECTED &&
-      this.ws &&
-      this.ws.readyState === WebSocket.OPEN
+    return this.status === WS_STATUS.CONNECTED && this.ws && this.ws.readyState === WebSocket.OPEN
   }
 
   /**

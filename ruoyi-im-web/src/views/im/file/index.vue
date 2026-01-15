@@ -597,7 +597,7 @@ onMounted(() => {
 .file-container {
   height: 100%;
   display: flex;
-  background-color: #F5F7FA;
+  background-color: #f5f7fa;
 }
 
 // 左侧文件列表面板
@@ -606,13 +606,13 @@ onMounted(() => {
   min-width: $list-panel-width;
   height: 100%;
   background-color: #fff;
-  border-right: 1px solid #E8E8E8;
+  border-right: 1px solid #e8e8e8;
   display: flex;
   flex-direction: column;
 
   .panel-header {
     padding: 16px; // 修改：统一边距
-    border-bottom: 1px solid #E8E8E8; // 钉钉规范
+    border-bottom: 1px solid #e8e8e8; // 钉钉规范
     display: flex;
     gap: 8px;
 
@@ -623,7 +623,7 @@ onMounted(() => {
       .search-input {
         :deep(.el-input__wrapper) {
           border-radius: 4px; // 修改：18px -> 4px（符合规范）
-          background-color: #F5F7FA;
+          background-color: #f5f7fa;
           padding-left: 36px;
         }
 
@@ -637,7 +637,7 @@ onMounted(() => {
   .file-tabs {
     display: flex;
     padding: 0 12px;
-    border-bottom: 1px solid #E8E8E8;
+    border-bottom: 1px solid #e8e8e8;
 
     .tab-item {
       padding: 12px 16px;
@@ -655,7 +655,7 @@ onMounted(() => {
       }
 
       &.active {
-        color: #0089FF; // 钉钉规范
+        color: #0089ff; // 钉钉规范
         font-weight: 500;
 
         &::after {
@@ -666,14 +666,14 @@ onMounted(() => {
           transform: translateX(-50%);
           width: 24px;
           height: 2px;
-          background-color: #0089FF;
+          background-color: #0089ff;
           border-radius: 1px;
         }
       }
 
       .tab-count {
         font-size: 12px; // 辅助文字
-        background-color: #F0F2F5;
+        background-color: #f0f2f5;
         color: #666666;
         border-radius: 8px;
         padding: 2px 6px; // 修改：0 6px -> 2px 6px
@@ -699,7 +699,7 @@ onMounted(() => {
       border-left: 3px solid transparent;
 
       &:hover {
-        background-color: #F5F7FA;
+        background-color: #f5f7fa;
 
         .file-actions {
           opacity: 1;
@@ -708,13 +708,13 @@ onMounted(() => {
       }
 
       &.selected {
-        background-color: #E6F7FF;
-        border-left-color: #0089FF;
+        background-color: #e6f7ff;
+        border-left-color: #0089ff;
       }
 
       .file-icon {
         margin-right: 12px;
-        color: #0089FF;
+        color: #0089ff;
       }
 
       .file-info {
@@ -739,7 +739,7 @@ onMounted(() => {
           color: #999999; // 辅助文字
 
           .separator {
-            color: #CCCCCC;
+            color: #cccccc;
           }
         }
       }
@@ -782,12 +782,12 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 16px;
-    border-bottom: 1px solid #E8E8E8;
-    background-color: #FAFAFA;
+    border-bottom: 1px solid #e8e8e8;
+    background-color: #fafafa;
 
     .file-preview {
       font-size: 24px;
-      color: #0089FF;
+      color: #0089ff;
     }
 
     .header-info {
@@ -812,7 +812,7 @@ onMounted(() => {
         gap: 8px; // 修改：4px -> 8px
 
         .separator {
-          color: #CCCCCC;
+          color: #cccccc;
         }
       }
     }
@@ -849,7 +849,7 @@ onMounted(() => {
           align-items: center;
           justify-content: space-between;
           padding: 8px 0;
-          border-bottom: 1px solid #F5F7FA;
+          border-bottom: 1px solid #f5f7fa;
 
           &:last-child {
             border-bottom: none;
@@ -891,7 +891,7 @@ onMounted(() => {
       color: #999999;
 
       .empty-icon {
-        color: #CCCCCC;
+        color: #cccccc;
         margin-bottom: 16px;
       }
 
@@ -926,7 +926,7 @@ onMounted(() => {
     width: 100%;
     max-height: 500px;
     overflow: auto;
-    background: #F5F7FA;
+    background: #f5f7fa;
     padding: 16px;
     margin: 0;
     font-family: monospace;

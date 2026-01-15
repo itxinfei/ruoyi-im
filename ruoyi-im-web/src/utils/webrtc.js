@@ -43,14 +43,14 @@ class WebRTCService {
     this.peerConnection = new RTCPeerConnection(configuration)
 
     // 监听 ICE 候选
-    this.peerConnection.onicecandidate = (event) => {
+    this.peerConnection.onicecandidate = event => {
       if (event.candidate && this.onIceCandidate) {
         this.onIceCandidate(event.candidate)
       }
     }
 
     // 监听远程媒体流
-    this.peerConnection.ontrack = (event) => {
+    this.peerConnection.ontrack = event => {
       console.log('收到远程流:', event.streams[0])
       this.remoteStream = event.streams[0]
       if (this.onTrack) {
@@ -103,9 +103,7 @@ class WebRTCService {
     if (!this.peerConnection) {
       this.initPeerConnection()
     }
-    await this.peerConnection.setRemoteDescription(
-      new RTCSessionDescription(description)
-    )
+    await this.peerConnection.setRemoteDescription(new RTCSessionDescription(description))
   }
 
   /**
@@ -116,9 +114,7 @@ class WebRTCService {
       return
     }
     try {
-      await this.peerConnection.addIceCandidate(
-        new RTCIceCandidate(candidate)
-      )
+      await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
     } catch (e) {
       console.error('添加ICE候选失败:', e)
     }
@@ -180,7 +176,7 @@ class WebRTCService {
       }
     }
 
-    this.dataChannel.onmessage = (event) => {
+    this.dataChannel.onmessage = event => {
       console.log('收到数据通道消息:', event.data)
       if (this.onDataChannelMessage) {
         this.onDataChannelMessage(event.data)
@@ -198,7 +194,7 @@ class WebRTCService {
       return
     }
 
-    this.peerConnection.ondatachannel = (event) => {
+    this.peerConnection.ondatachannel = event => {
       this.dataChannel = event.channel
 
       this.dataChannel.onopen = () => {
@@ -215,7 +211,7 @@ class WebRTCService {
         }
       }
 
-      this.dataChannel.onmessage = (event) => {
+      this.dataChannel.onmessage = event => {
         console.log('收到数据通道消息:', event.data)
         if (this.onDataChannelMessage) {
           this.onDataChannelMessage(event.data)
@@ -411,7 +407,7 @@ class WebRTCService {
       getDisplayMedia: !!navigator.mediaDevices?.getDisplayMedia,
       enumerateDevices: !!navigator.mediaDevices?.enumerateDevices,
       rtcPeerConnection: !!window.RTCPeerConnection,
-      rtcDataChannel: !!window.RTCDataChannel
+      rtcDataChannel: !!window.RTCDataChannel,
     }
 
     support.allSupported = Object.values(support).every(v => v)

@@ -3,11 +3,7 @@
     <!-- 顶部用户区域 -->
     <div class="nav-header">
       <div class="user-avatar" @click="showUserPanel">
-        <ding-avatar
-          :avatar="userInfo.avatar"
-          :name="userInfo.nickname || '用户'"
-          size="md"
-        />
+        <ding-avatar :avatar="userInfo.avatar" :name="userInfo.nickname || '用户'" size="md" />
         <div class="user-status" :class="onlineStatus"></div>
       </div>
 
@@ -75,11 +71,7 @@
       </template>
       <div class="user-panel">
         <div class="user-info">
-          <ding-avatar
-            :avatar="userInfo.avatar"
-            :name="userInfo.nickname || '用户'"
-            size="xl"
-          />
+          <ding-avatar :avatar="userInfo.avatar" :name="userInfo.nickname || '用户'" size="xl" />
           <div class="info-text">
             <h3>{{ userInfo.nickname || '用户' }}</h3>
             <p>{{ userInfo.username }}</p>
@@ -256,7 +248,7 @@ onMounted(() => {
 .im-side-nav {
   width: $nav-rail-width;
   height: 100%;
-  background: #2D2F33;
+  background: #2d2f33;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -421,7 +413,7 @@ onMounted(() => {
     border: none;
     top: -2px;
     right: 0;
-    background: #F5222D;
+    background: #f5222d;
     font-weight: $font-weight-semibold;
     min-width: 18px;
     height: 18px;
