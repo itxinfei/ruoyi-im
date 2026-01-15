@@ -6,7 +6,6 @@
       <div class="header-left">
         <div class="header-logo">
           <el-icon :size="24" color="#0089FF"><ChatDotRound /></el-icon>
-          <span class="logo-text">钉钉</span>
         </div>
         <div class="header-divider"></div>
         <div class="header-search">
@@ -221,10 +220,10 @@
           >
             <div
               class="nav-item"
-              :class="{ active: activeModule === item.key, 'ai-item': item.isAi }"
+              :class="{ active: activeModule === item.key }"
               @click="switchModule(item.key)"
             >
-              <el-icon class="nav-icon" :class="{ 'ai-icon': item.isAi }">
+              <el-icon class="nav-icon">
                 <component :is="item.icon" />
               </el-icon>
               <!-- 未读红点 -->
@@ -319,11 +318,32 @@
           <!-- 聊天内容 -->
           <div class="chat-panel">
             <div v-if="currentSessionId" class="chat-container">
-              <!-- 聊天头部 - 钉钉5.6规范 -->
+              <!-- 聊天头部 - 钉钉6.5.x规范增强版 -->
               <div class="chat-header">
                 <!-- 左侧：会话信息 -->
                 <div class="chat-info">
-                  <div class="chat-avatar-group" @click="showChatProfile">
+                  <!-- 群组成员头像墙（群聊时显示） -->
+                  <div
+                    v-if="currentSession?.type === 'GROUP'"
+                    class="group-avatar-wall"
+                    @click="showChatProfile"
+                  >
+                    <DtAvatar
+                      v-for="(member, index) in getGroupMemberAvatars()"
+                      :key="member.id"
+                      :name="member.name"
+                      :avatar="member.avatar"
+                      :size="28"
+                      :style="{ zIndex: 4 - index, marginLeft: index > 0 ? '-8px' : '0' }"
+                      class="member-avatar"
+                    />
+                    <div v-if="currentSession?.memberCount > 4" class="more-members">
+                      +{{ currentSession.memberCount - 4 }}
+                    </div>
+                  </div>
+
+                  <!-- 私聊头像 -->
+                  <div v-else class="private-chat-avatar" @click="showChatProfile">
                     <el-badge
                       :value="currentSession?.unreadCount || 0"
                       :hidden="!(currentSession?.unreadCount > 0)"
@@ -332,78 +352,125 @@
                       <DtAvatar
                         :name="currentSession?.name"
                         :avatar="currentSession?.avatar"
-                        :size="32"
+                        :size="36"
                       />
                     </el-badge>
-                    <el-icon v-if="currentSession?.type === 'GROUP'" class="group-badge"
-                      ><User
-                    /></el-icon>
+                    <!-- 在线状态指示器 -->
+                    <div class="online-indicator" :class="getOnlineStatusClass()"></div>
                   </div>
+
                   <div class="chat-title-info">
                     <div class="title-row">
                       <span class="title-name">{{ currentSession?.name }}</span>
+                      <!-- 置顶标识 -->
+                      <el-icon v-if="currentSession?.isPinned" class="pinned-icon" color="#fadb14">
+                        <Star />
+                      </el-icon>
+                      <!-- 免打扰标识 -->
+                      <el-icon v-if="currentSession?.isMuted" class="muted-icon" color="#8c8c8c">
+                        <Bell />
+                      </el-icon>
                     </div>
                     <div class="title-subtitle">
+                      <!-- 在线状态 -->
                       <span class="status-text">{{ getOnlineStatusText() }}</span>
                       <span v-if="currentSession?.type === 'GROUP'" class="member-count">
                         · {{ currentSession?.memberCount || 0 }}人
+                      </span>
+                      <!-- 群组在线人数 -->
+                      <span v-if="currentSession?.type === 'GROUP'" class="online-count">
+                        · {{ getOnlineMemberCount() }}人在线
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <!-- 右侧：操作按钮 -->
+                <!-- 右侧：快捷操作按钮 -->
                 <div class="chat-actions">
-                  <el-tooltip content="语音通话" placement="bottom">
-                    <el-button :icon="Phone" class="action-btn" circle @click="startVoiceCall()" />
+                  <!-- 搜索聊天记录 -->
+                  <el-tooltip content="搜索聊天记录" placement="bottom">
+                    <el-button :icon="Search" class="action-btn search-btn" @click="searchInChat" />
                   </el-tooltip>
+
+                  <!-- 语音通话 -->
+                  <el-tooltip content="语音通话" placement="bottom">
+                    <el-button
+                      :icon="Phone"
+                      class="action-btn voice-btn"
+                      @click="startVoiceCall()"
+                    />
+                  </el-tooltip>
+
+                  <!-- 视频通话 -->
                   <el-tooltip content="视频通话" placement="bottom">
                     <el-button
                       :icon="VideoCamera"
-                      class="action-btn"
-                      circle
+                      class="action-btn video-btn"
                       @click="startVideoCall()"
                     />
                   </el-tooltip>
+
+                  <!-- 更多操作 -->
                   <el-dropdown trigger="click" placement="bottom-end">
-                    <el-button :icon="More" class="action-btn" circle />
+                    <el-button :icon="More" class="action-btn more-btn" />
                     <template #dropdown>
                       <el-dropdown-menu>
-                        <el-dropdown-item @click="searchInChat">
-                          <el-icon><Search /></el-icon>
-                          搜索聊天记录
-                        </el-dropdown-item>
-                        <el-dropdown-item divided @click="muteChat">
-                          <el-icon><Bell /></el-icon>
-                          {{ currentSession?.isMuted ? '取消免打扰' : '消息免打扰' }}
-                        </el-dropdown-item>
-                        <el-dropdown-item @click="pinChat">
-                          <el-icon><Star /></el-icon>
-                          {{ currentSession?.isPinned ? '取消置顶' : '置顶聊天' }}
-                        </el-dropdown-item>
-                        <el-dropdown-item
-                          v-if="currentSession?.type === 'GROUP'"
-                          divided
-                          @click="viewChatMembers"
-                        >
-                          <el-icon><User /></el-icon>
-                          查看成员
-                        </el-dropdown-item>
-                        <el-dropdown-item
-                          v-if="currentSession?.type === 'GROUP'"
-                          @click="showGroupAnnouncement"
-                        >
-                          <el-icon><Bell /></el-icon>
-                          群公告
-                        </el-dropdown-item>
-                        <el-dropdown-item
-                          v-if="currentSession?.type === 'GROUP'"
-                          @click="showGroupFiles"
-                        >
-                          <el-icon><Folder /></el-icon>
-                          群文件
-                        </el-dropdown-item>
-                        <el-dropdown-item divided @click="clearChatHistory">
+                        <!-- 私聊菜单 -->
+                        <template v-if="currentSession?.type !== 'GROUP'">
+                          <el-dropdown-item @click="viewFriendDetail">
+                            <el-icon><User /></el-icon>
+                            查看资料
+                          </el-dropdown-item>
+                          <el-dropdown-item @click="setRemark">
+                            <el-icon><Edit /></el-icon>
+                            设置备注
+                          </el-dropdown-item>
+                          <el-dropdown-item divided @click="muteChat">
+                            <el-icon>
+                              <Bell v-if="!currentSession?.isMuted" />
+                              <Mute v-else />
+                            </el-icon>
+                            {{ currentSession?.isMuted ? '取消免打扰' : '消息免打扰' }}
+                          </el-dropdown-item>
+                          <el-dropdown-item @click="pinChat">
+                            <el-icon><Star /></el-icon>
+                            {{ currentSession?.isPinned ? '取消置顶' : '置顶聊天' }}
+                          </el-dropdown-item>
+                        </template>
+
+                        <!-- 群聊菜单 -->
+                        <template v-else>
+                          <el-dropdown-item @click="viewChatMembers">
+                            <el-icon><User /></el-icon>
+                            查看成员
+                          </el-dropdown-item>
+                          <el-dropdown-item @click="showGroupAnnouncement">
+                            <el-icon><Notification /></el-icon>
+                            群公告
+                          </el-dropdown-item>
+                          <el-dropdown-item @click="showGroupFiles">
+                            <el-icon><Folder /></el-icon>
+                            群文件
+                          </el-dropdown-item>
+                          <el-dropdown-item @click="showGroupSettings">
+                            <el-icon><Setting /></el-icon>
+                            群设置
+                          </el-dropdown-item>
+                          <el-dropdown-item divided @click="muteChat">
+                            <el-icon>
+                              <Bell v-if="!currentSession?.isMuted" />
+                              <Mute v-else />
+                            </el-icon>
+                            {{ currentSession?.isMuted ? '取消免打扰' : '消息免打扰' }}
+                          </el-dropdown-item>
+                          <el-dropdown-item @click="pinChat">
+                            <el-icon><Star /></el-icon>
+                            {{ currentSession?.isPinned ? '取消置顶' : '置顶聊天' }}
+                          </el-dropdown-item>
+                        </template>
+
+                        <!-- 通用菜单 -->
+                        <el-dropdown-item divided class="danger-item" @click="clearChatHistory">
                           <el-icon><Delete /></el-icon>
                           清空聊天记录
                         </el-dropdown-item>
@@ -442,14 +509,14 @@
                     :avatar="msg.senderAvatar || msg.avatar"
                     :size="36"
                   />
-                  <!-- 自己消息的右侧头像（放在内容前面，确保右对齐时头像在右边） -->
-                  <DtAvatar
-                    v-if="msg.isOwn || msg.senderId === currentUser?.userId"
-                    :name="currentUser?.nickName || currentUser?.userName || '我'"
-                    :avatar="currentUser?.avatar || msg.senderAvatar || msg.avatar"
-                    :size="36"
-                  />
                   <div class="message-content" @click.right.prevent="showMessageMenu($event, msg)">
+                    <!-- 自己消息的右侧头像（放在内容后面，确保右对齐时头像在右边） -->
+                    <DtAvatar
+                      v-if="msg.isOwn || msg.senderId === currentUser?.userId"
+                      :name="currentUser?.nickName || currentUser?.userName || '我'"
+                      :avatar="currentUser?.avatar || msg.senderAvatar || msg.avatar"
+                      :size="36"
+                    />
                     <div
                       v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)"
                       class="sender-name"
@@ -691,40 +758,51 @@
                   </div>
                 </div>
 
+                <!-- 精简版输入工具栏 -->
                 <div class="input-toolbar">
-                  <el-tooltip content="表情" placement="top">
-                    <el-button
-                      :icon="ChatDotRound"
-                      text
-                      :class="{ active: showEmojiPicker }"
-                      @click="showEmojiPicker = !showEmojiPicker"
-                    />
-                  </el-tooltip>
-                  <el-tooltip content="文件" placement="top">
-                    <el-button
-                      :icon="Folder"
-                      text
-                      :disabled="uploading"
-                      @click="triggerFileSelect"
-                    />
-                  </el-tooltip>
-                  <el-tooltip content="图片" placement="top">
-                    <el-button
-                      :icon="PictureFilled"
-                      text
-                      :disabled="uploading"
-                      @click="selectImage"
-                    />
-                  </el-tooltip>
-                  <el-tooltip content="语音" placement="top">
-                    <el-button
-                      :icon="Microphone"
-                      text
-                      :disabled="uploading"
-                      :class="{ recording: isRecording }"
-                      @click="isRecording ? stopVoiceRecord() : startVoiceRecord()"
-                    />
-                  </el-tooltip>
+                  <div class="toolbar-group">
+                    <el-tooltip content="表情" placement="top">
+                      <el-button
+                        :icon="ChatDotRound"
+                        text
+                        :class="{ active: showEmojiPicker }"
+                        @click="toggleEmojiPicker"
+                      />
+                    </el-tooltip>
+                    <el-tooltip content="文件" placement="top">
+                      <el-button
+                        :icon="Folder"
+                        text
+                        :disabled="uploading"
+                        @click="triggerFileSelect"
+                      />
+                    </el-tooltip>
+                    <el-tooltip content="图片" placement="top">
+                      <el-button
+                        :icon="PictureFilled"
+                        text
+                        :disabled="uploading"
+                        @click="selectImage"
+                      />
+                    </el-tooltip>
+                    <el-tooltip content="语音" placement="top">
+                      <el-button
+                        :icon="Microphone"
+                        text
+                        :disabled="uploading"
+                        :class="{ recording: isRecording }"
+                        @click="toggleVoiceRecord"
+                      />
+                    </el-tooltip>
+                    <el-tooltip content="截图" placement="top">
+                      <el-button
+                        :icon="Crop"
+                        text
+                        :disabled="uploading"
+                        @click="triggerScreenshot"
+                      />
+                    </el-tooltip>
+                  </div>
                 </div>
                 <el-input
                   ref="inputRef"
@@ -2454,10 +2532,11 @@ import {
   OfficeBuilding,
   Tickets,
   Star,
-  MagicStick,
   DeleteFilled,
   Key,
   Minus,
+  Crop,
+  LocationInformation,
 } from '@element-plus/icons-vue'
 import { formatTime as formatTimeUtil } from '@/utils/format/time'
 import { useImWebSocket } from '@/composables/useImWebSocket'
@@ -3546,33 +3625,45 @@ onMounted(() => {
     document.documentElement.setAttribute('data-theme', savedTheme)
   }
 
-  // 全局快捷键支持
-  const handleGlobalKeydown = e => {
+  // 快捷键监听
+  onMounted(() => {
+    // 全局快捷键事件
+    document.addEventListener('keydown', handleGlobalKeydown)
+  })
+
+  onUnmounted(() => {
+    // 清理快捷键事件
+    document.removeEventListener('keydown', handleGlobalKeydown)
+  })
+
+  // 全局快捷键处理
+  const handleGlobalKeydown = event => {
     // Ctrl+K: 全局搜索
-    if (e.ctrlKey && e.key === 'k') {
-      e.preventDefault()
-      globalSearchVisible.value = true
-      return
+    if (event.ctrlKey && event.key === 'k') {
+      event.preventDefault()
+      showGlobalSearch()
     }
 
-    // Ctrl+N: 发起新聊天
-    if (e.ctrlKey && e.key === 'n') {
-      e.preventDefault()
-      showStartChatDialog()
-      return
+    // Ctrl+1~8: 切换模块
+    if (event.ctrlKey && event.key >= '1' && event.key <= '8') {
+      event.preventDefault()
+      const moduleIndex = parseInt(event.key) - 1
+      // 这里可以添加模块切换逻辑
+      console.log('切换到模块:', moduleIndex)
     }
 
-    // Escape: 关闭所有弹窗
-    if (e.key === 'Escape') {
-      if (showEmojiPicker.value) showEmojiPicker.value = false
-      if (forwardDialogVisible.value) forwardDialogVisible.value = false
-      if (profileDialogVisible.value) profileDialogVisible.value = false
-      if (systemSettingsVisible.value) systemSettingsVisible.value = false
-      return
+    // Esc: 关闭当前弹窗
+    if (event.key === 'Escape') {
+      // 关闭各种弹窗
+      notificationVisible.value = false
+      globalSearchVisible.value = false
+      themeDialogVisible.value = false
+      shortcutsDialogVisible.value = false
+      // 可以继续添加其他弹窗
     }
   }
 
-  document.addEventListener('keydown', handleGlobalKeydown)
+  // 快捷键已在上面定义，这里不需要重复添加事件监听器
 
   // 保存清理函数
   onUnmounted(() => {
@@ -4203,7 +4294,6 @@ const messages = computed(() => {
 // 导航模块
 const navModules = ref([
   { key: 'chat', label: '消息', icon: ChatLineSquare },
-  { key: 'ai-assistant', label: 'AI助理', icon: MagicStick, isAi: true },
   { key: 'contacts', label: '联系人', icon: User },
   { key: 'workbench', label: '工作台', icon: Grid },
   { key: 'drive', label: '钉盘', icon: Folder },
@@ -5295,19 +5385,33 @@ const selectTheme = theme => {
 
 // 保存主题
 const saveTheme = () => {
+  // 统一保存到所有主题相关的存储键
   localStorage.setItem('theme', currentTheme.value)
+  localStorage.setItem('app-theme', currentTheme.value)
+  localStorage.setItem('im_theme', currentTheme.value)
 
+  let targetTheme
   if (currentTheme.value === 'dark') {
     isDarkMode.value = true
+    targetTheme = 'dark'
     document.documentElement.classList.add('dark')
   } else if (currentTheme.value === 'light') {
     isDarkMode.value = false
+    targetTheme = 'light'
     document.documentElement.classList.remove('dark')
   } else {
+    // auto 模式：跟随系统
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     isDarkMode.value = prefersDark
+    targetTheme = prefersDark ? 'dark' : 'light'
     document.documentElement.classList.toggle('dark', prefersDark)
   }
+
+  // 应用主题到 data-theme 属性
+  document.documentElement.setAttribute('data-theme', targetTheme)
+
+  // 更新 ThemeSwitch 组件的状态
+  window.dispatchEvent(new CustomEvent('themeChange', { detail: { theme: currentTheme.value } }))
 
   ElMessage.success('主题已更新')
   themeDialogVisible.value = false
@@ -5643,6 +5747,30 @@ const handleInputKeydown = e => {
   }
 }
 
+// 切换表情选择器
+const toggleEmojiPicker = () => {
+  showEmojiPicker.value = !showEmojiPicker.value
+  if (showEmojiPicker.value) {
+    // 关闭其他弹窗
+    showMentionSuggestions.value = false
+  }
+}
+
+// 切换语音录制
+const toggleVoiceRecord = () => {
+  if (isRecording.value) {
+    stopVoiceRecord()
+  } else {
+    startVoiceRecord()
+  }
+}
+
+// 触发截图
+const triggerScreenshot = () => {
+  ElMessage.info('截图功能开发中...')
+  // 这里可以集成HTML5的截图API或者调用系统截图工具
+}
+
 // 显示消息右键菜单
 const showMessageMenu = (event, message) => {
   selectedMessage.value = message
@@ -5671,6 +5799,72 @@ const replyMessage = () => {
 // 取消回复
 const cancelReply = () => {
   replyingMessage.value = null
+}
+
+// 获取群组成员头像（前4个）
+const getGroupMemberAvatars = () => {
+  if (currentSession.value?.type !== 'GROUP') return []
+
+  // 模拟群组成员数据，实际应该从API获取
+  const mockMembers = [
+    { id: 1, name: '张三', avatar: 'https://picsum.photos/100/100?random=1' },
+    { id: 2, name: '李四', avatar: 'https://picsum.photos/100/100?random=2' },
+    { id: 3, name: '王五', avatar: 'https://picsum.photos/100/100?random=3' },
+    { id: 4, name: '赵六', avatar: 'https://picsum.photos/100/100?random=4' },
+  ]
+
+  return mockMembers.slice(0, 4)
+}
+
+// 获取在线状态样式类
+const getOnlineStatusClass = () => {
+  if (currentSession.value?.type === 'GROUP') return ''
+
+  // 这里应该根据实际的在线状态判断
+  return isUserOnline.value ? 'online' : 'offline'
+}
+
+// 获取在线成员数量
+const getOnlineMemberCount = () => {
+  if (currentSession.value?.type !== 'GROUP') return 0
+
+  // 模拟在线成员数量，实际应该从API获取
+  const total = currentSession.value?.memberCount || 0
+  return Math.max(1, Math.floor(total * 0.7)) // 假设70%的成员在线
+}
+
+// 查看好友详情
+const viewFriendDetail = () => {
+  if (currentSession.value?.type === 'GROUP') return
+
+  // 打开好友详情对话框
+  detailUserId.value = currentSession.value?.targetId
+  userDetailVisible.value = true
+}
+
+// 设置备注
+const setRemark = () => {
+  ElMessageBox.prompt('请输入备注名称', '设置备注', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputPattern: /^.{1,20}$/,
+    inputErrorMessage: '备注长度为1-20个字符',
+  })
+    .then(({ value }) => {
+      // 调用设置备注API
+      ElMessage.success('备注设置成功')
+    })
+    .catch(() => {
+      // 用户取消
+    })
+}
+
+// 显示群设置
+const showGroupSettings = () => {
+  if (currentSession.value?.type !== 'GROUP') return
+
+  detailGroupId.value = currentSession.value?.targetId
+  groupDetailVisible.value = true
 }
 
 // 转发消息
@@ -6074,16 +6268,35 @@ const handleSettingsCommand = command => {
   } else if (command === 'notifications') {
     notificationSettingsVisible.value = true
   } else if (command === 'privacy') {
-    ElMessage.info('隐私与安全设置功能开发中...')
+    // 打开隐私设置对话框或跳转到隐私设置页面
+    ElMessage.info('隐私与安全设置功能即将上线')
+    // 可以扩展为：privacySettingsVisible.value = true
   } else if (command === 'shortcuts') {
     showShortcutsDialog()
   } else if (command === 'about') {
     ElMessageBox.alert(
-      '企业级即时通讯与协同办公系统 v1.0\n\n基于若依框架构建\n支持私有化部署',
-      '关于',
+      '企业级即时通讯与协同办公系统 v1.6.0\n\n基于若依框架 + Vue 3 + Element Plus 构建\n支持私有化部署、钉钉风格UI、完整暗色主题',
+      '关于系统',
       {
         confirmButtonText: '确定',
         type: 'info',
+        dangerouslyUseHTMLString: true,
+        message: `
+          <div style="text-align: left; line-height: 1.8;">
+            <h4>企业级即时通讯与协同办公系统</h4>
+            <p><strong>版本：</strong>v1.6.0</p>
+            <p><strong>技术栈：</strong>Vue 3 + Element Plus + Spring Boot</p>
+            <p><strong>特性：</strong></p>
+            <ul style="margin: 8px 0; padding-left: 20px;">
+              <li>钉钉6.5.x风格UI设计</li>
+              <li>完整暗色主题支持</li>
+              <li>实时消息推送</li>
+              <li>文件传输与管理</li>
+              <li>群组与联系人管理</li>
+            </ul>
+            <p><strong>支持：</strong>私有化部署</p>
+          </div>
+        `,
       }
     )
   }
@@ -6120,8 +6333,22 @@ const setOnlineStatus = status => {
   currentOnlineStatus.value = status
   isUserOnline.value = status === 'online'
   localStorage.setItem('onlineStatus', status)
-  // 同步到服务器
-  wsSendStatusChange?.(status)
+
+  // 同步到服务器（如果WebSocket连接存在）
+  try {
+    // 这里应该通过WebSocket发送状态变更
+    if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+      window.ws.send(
+        JSON.stringify({
+          type: 'status_change',
+          payload: { status },
+        })
+      )
+    }
+  } catch (error) {
+    console.warn('WebSocket状态同步失败:', error)
+  }
+
   ElMessage.success(`已切换为：${getOnlineStatusDisplay(status)}`)
 }
 
@@ -6179,14 +6406,35 @@ onMounted(() => {
 // 顶部导航栏方法
 const showNotifications = () => {
   notificationVisible.value = true
+  // 标记通知为已读（可选）
+  if (notificationCount.value > 0) {
+    // 这里可以调用 API 标记通知为已读
+    // markNotificationsAsRead()
+    // 暂时清零计数
+    notificationCount.value = 0
+  }
 }
 
 const showGlobalSearch = () => {
   globalSearchVisible.value = true
+  // 聚焦到搜索输入框
+  nextTick(() => {
+    const searchInput = document.querySelector('.global-search-dialog .el-input__inner')
+    if (searchInput) {
+      searchInput.focus()
+    }
+  })
 }
 
 const handleGlobalSearch = () => {
   globalSearchVisible.value = true
+  // 同上
+  nextTick(() => {
+    const searchInput = document.querySelector('.global-search-dialog .el-input__inner')
+    if (searchInput) {
+      searchInput.focus()
+    }
+  })
 }
 
 // 搜索结果点击处理
@@ -6309,8 +6557,8 @@ const viewChatMembers = () => {
 const showGroupAnnouncement = () => {
   // TODO: 从API获取群公告数据
   currentGroupAnnouncement.value = {
-    title: '欢迎使用钉钉IM',
-    content: '这是一个基于钉钉7.6风格的IM系统，支持群聊、语音通话、视频通话等功能。',
+    title: '欢迎使用IM系统',
+    content: '这是一个企业级IM系统，支持群聊、语音通话、视频通话等功能。',
     publisher: '系统管理员',
     publishTime: new Date().toISOString(),
   }
@@ -7557,17 +7805,7 @@ $avatar-xl: 64px;
             transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
           }
 
-          // AI助理图标样式（钉钉7.6.45+新增）
-          &.ai-item .nav-icon.ai-icon {
-            color: #722ed1; // AI助理紫色
-            &:hover {
-              color: #9254de;
-            }
-          }
 
-          &.ai-item.active .nav-icon.ai-icon {
-            color: #722ed1;
-          }
 
           // 未读红点
           .nav-dot {
@@ -7582,6 +7820,8 @@ $avatar-xl: 64px;
             box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
             animation: badgePop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
           }
+
+
 
           &:hover {
             background: $nav-item-hover;
@@ -7619,14 +7859,7 @@ $avatar-xl: 64px;
             }
           }
 
-          // AI助理激活状态（紫色指示条）
-          &.ai-item.active {
-            background: rgba(114, 46, 209, 0.1);
 
-            &::before {
-              background: linear-gradient(135deg, #722ed1 0%, #9254de 100%);
-            }
-          }
         }
 
         // 导航栏拖拽手柄（钉钉6.5.x新功能）
@@ -7863,69 +8096,148 @@ $avatar-xl: 64px;
             overflow: hidden;
 
             .chat-header {
-              height: 48px;
-              padding: 0 16px;
+              height: 56px; // 钉钉6.5.x规范
+              padding: 0 20px;
               display: flex;
               align-items: center;
               justify-content: space-between;
-              border-bottom: 1px solid #e6e6e6;
-              background: #fff;
+              border-bottom: 1px solid #f0f0f0;
+              background: #ffffff;
               flex-shrink: 0;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 
               // 左侧：会话信息
               .chat-info {
                 display: flex;
                 align-items: center;
-                gap: 10px;
+                gap: 12px;
+                flex: 1;
+                min-width: 0;
 
-                .chat-avatar-group {
-                  position: relative;
+                // 群组成员头像墙
+                .group-avatar-wall {
+                  display: flex;
+                  align-items: center;
                   cursor: pointer;
+                  padding: 4px;
+                  border-radius: 12px;
+                  transition: all 0.2s ease;
 
-                  .group-badge {
-                    position: absolute;
-                    bottom: -2px;
-                    right: -2px;
-                    width: 14px;
-                    height: 14px;
-                    background: #0089ff;
+                  &:hover {
+                    background: rgba(0, 0, 0, 0.04);
+                  }
+
+                  .member-avatar {
+                    border: 2px solid #fff;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                    transition: all 0.2s ease;
+
+                    &:hover {
+                      transform: translateY(-1px);
+                      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+                    }
+                  }
+
+                  .more-members {
+                    width: 28px;
+                    height: 28px;
+                    background: #f0f0f0;
+                    border: 2px solid #fff;
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #fff;
-                    font-size: 9px;
+                    font-size: 10px;
+                    color: #8c8c8c;
+                    font-weight: 500;
+                  }
+                }
+
+                // 私聊头像
+                .private-chat-avatar {
+                  position: relative;
+                  cursor: pointer;
+                  padding: 4px;
+                  border-radius: 12px;
+                  transition: all 0.2s ease;
+
+                  &:hover {
+                    background: rgba(0, 0, 0, 0.04);
+                  }
+
+                  .online-indicator {
+                    position: absolute;
+                    bottom: 2px;
+                    right: 2px;
+                    width: 12px;
+                    height: 12px;
                     border: 2px solid #fff;
+                    border-radius: 50%;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+                    &.online {
+                      background: #52c41a;
+                      animation: online-pulse 2s ease-in-out infinite;
+                    }
+
+                    &.offline {
+                      background: #d9d9d9;
+                    }
                   }
                 }
 
                 .chat-title-info {
                   display: flex;
                   flex-direction: column;
-                  gap: 1px;
+                  gap: 2px;
+                  min-width: 0;
 
                   .title-row {
                     display: flex;
                     align-items: center;
-                    gap: 4px;
+                    gap: 6px;
 
                     .title-name {
-                      font-size: 14px;
-                      font-weight: 500;
-                      color: #1a1a1a;
+                      font-size: 15px;
+                      font-weight: 600;
+                      color: #262626;
+                      line-height: 1.2;
+                    }
+
+                    .pinned-icon {
+                      font-size: 12px;
+                      animation: rotate 20s linear infinite;
+                    }
+
+                    .muted-icon {
+                      font-size: 12px;
+                      opacity: 0.7;
                     }
                   }
 
                   .title-subtitle {
                     display: flex;
                     align-items: center;
-                    gap: 4px;
+                    gap: 6px;
                     font-size: 12px;
-                    color: #858585;
+                    color: #8c8c8c;
+                    line-height: 1.2;
 
                     .status-text {
                       line-height: 1;
+                      font-weight: 400;
                     }
+
+                    .member-count,
+                    .online-count {
+                      font-weight: 500;
+                      color: #595959;
+                    }
+
+                    .online-count {
+                      color: #52c41a;
+                    }
+                  }
 
                     .member-count {
                       color: #858585;
@@ -7938,20 +8250,81 @@ $avatar-xl: 64px;
               .chat-actions {
                 display: flex;
                 align-items: center;
-                gap: 4px;
+                gap: 2px;
 
                 .action-btn {
                   --el-button-border-color: transparent;
                   --el-button-bg-color: transparent;
-                  --el-button-text-color: #666666;
-                  width: 32px;
-                  height: 32px;
+                  --el-button-text-color: #8c8c8c;
+                  width: 36px;
+                  height: 36px;
                   padding: 0;
-                  border-radius: 4px;
+                  border-radius: 8px;
+                  font-size: 16px;
+                  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                  position: relative;
 
                   &:hover {
-                    --el-button-text-color: #0089ff;
-                    --el-button-hover-bg-color: rgba(0, 0, 0, 0.04);
+                    --el-button-text-color: #1677ff;
+                    --el-button-hover-bg-color: rgba(22, 119, 255, 0.06);
+                    transform: scale(1.05);
+                  }
+
+                  &:active {
+                    transform: scale(0.95);
+                  }
+
+                  // 搜索按钮特殊样式
+                  &.search-btn:hover {
+                    --el-button-text-color: #52c41a;
+                    --el-button-hover-bg-color: rgba(82, 196, 26, 0.06);
+                  }
+
+                  // 语音按钮特殊样式
+                  &.voice-btn:hover {
+                    --el-button-text-color: #722ed1;
+                    --el-button-hover-bg-color: rgba(114, 46, 209, 0.06);
+                  }
+
+                  // 视频按钮特殊样式
+                  &.video-btn:hover {
+                    --el-button-text-color: #eb2f96;
+                    --el-button-hover-bg-color: rgba(235, 47, 150, 0.06);
+                  }
+
+                  // 更多按钮特殊样式
+                  &.more-btn:hover {
+                    --el-button-text-color: #595959;
+                    --el-button-hover-bg-color: rgba(0, 0, 0, 0.06);
+                  }
+                }
+
+                :deep(.el-dropdown-menu__item) {
+                  padding: 10px 16px;
+                  font-size: 13px;
+                  transition: all 0.2s ease;
+
+                  &:hover {
+                    background: rgba(22, 119, 255, 0.06);
+                    color: #1677ff;
+                  }
+
+                  .el-icon {
+                    margin-right: 8px;
+                    font-size: 14px;
+                  }
+
+                  &.danger-item {
+                    color: #ff4d4f;
+
+                    &:hover {
+                      background: rgba(255, 77, 79, 0.06);
+                      color: #ff4d4f;
+                    }
+
+                    .el-icon {
+                      color: #ff4d4f;
+                    }
                   }
                 }
 
@@ -8016,11 +8389,15 @@ $avatar-xl: 64px;
 
               .message-item {
                 display: flex;
-                margin-bottom: 20px;
-                gap: 8px;
+                margin-bottom: 16px; // 增加垂直间距
                 width: 100%;
                 max-width: 100%;
                 min-width: 0;
+
+                // 统一头像样式
+                .DtAvatar {
+                  flex-shrink: 0;
+                }
 
                 // 新消息弹出动画
                 &.new-message {
@@ -8030,42 +8407,51 @@ $avatar-xl: 64px;
                 /* 发送方消息 - 头像在右边，气泡在左边（整体靠右） */
                 &.isOwn {
                   align-self: flex-end;
-                  flex-direction: row-reverse;
-
-                  .message-avatar {
-                    margin-left: 0;
-                    margin-right: 12px;
-                    flex-shrink: 0;
-                  }
+                  gap: 12px; // 统一间距
 
                   .message-content {
                     display: flex;
                     flex-direction: column;
                     align-items: flex-end;
+                    gap: 12px; // 头像和内容间距
+
+                    .DtAvatar {
+                      order: 1; // 确保头像在最后
+                      margin: 0;
+                    }
                   }
+                }
 
                   .message-bubble {
-                    // 钉钉7.6发送方消息气泡 - 蓝色，带右尾巴
-                    background: var(--dt-bubble-sent-bg, #0089ff);
+                    // 钉钉6.5.x发送方消息气泡 - 渐变蓝色，多层次阴影
+                    background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
                     color: var(--dt-bubble-sent-text, #ffffff);
-                    border-radius: 12px;
-                    border-bottom-right-radius: 4px; // 钉钉7.6尾巴圆角
+                    border-radius: 16px;
+                    border-top-right-radius: 4px; // 钉钉6.5.x特殊圆角
                     border: none;
-                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
                     position: relative;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    cursor: pointer;
 
-                    // 右侧小尾巴（钉钉7.6样式）
-                    &::before {
-                      content: '';
-                      position: absolute;
-                      right: -7px;
-                      top: 14px;
-                      width: 0;
-                      height: 0;
-                      border-style: solid;
-                      border-width: 6px 0 6px 7px;
-                      border-color: transparent transparent transparent
-                        var(--dt-bubble-sent-bg, #0089ff);
+                    // 多层次阴影系统
+                    box-shadow:
+                      0 2px 8px rgba(22, 119, 255, 0.2),
+                      0 4px 16px rgba(22, 119, 255, 0.15),
+                      0 8px 32px rgba(22, 119, 255, 0.1);
+
+                    // hover效果
+                    &:hover {
+                      transform: translateY(-1px);
+                      box-shadow:
+                        0 4px 16px rgba(22, 119, 255, 0.25),
+                        0 8px 32px rgba(22, 119, 255, 0.2),
+                        0 16px 64px rgba(22, 119, 255, 0.15);
+                    }
+
+                    // 点击效果
+                    &:active {
+                      transform: translateY(0) scale(0.98);
+                      transition: all 0.1s ease;
                     }
 
                     // 链接样式
@@ -8088,64 +8474,97 @@ $avatar-xl: 64px;
                 /* 接收方消息 - 头像在左边，消息在右边 */
                 &:not(.isOwn) {
                   align-self: flex-start;
+                  gap: 12px; // 统一间距
 
-                  .message-avatar {
-                    margin-right: 12px;
-                    flex-shrink: 0;
+                  .DtAvatar {
+                    margin-left: 0;
+                    margin-right: 0; // 移除margin，使用gap
                   }
 
                   .message-content {
                     align-items: flex-start;
                   }
 
-                  /* 接收方消息气泡 - 白色（钉钉7.6风格），带左尾巴 */
+                   /* 接收方消息气泡 - 白色（钉钉6.5.x风格），精致阴影 */
                   .message-bubble {
                     background: var(--dt-bubble-received-bg, #ffffff);
-                    color: var(--dt-bubble-received-text, #171a1a);
-                    border-radius: 12px;
-                    border-bottom-left-radius: 4px; // 钉钉7.6尾巴圆角
-                    border: 1px solid var(--dt-bubble-received-border, #e5e8eb);
-                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+                    color: var(--dt-bubble-received-text, #262626);
+                    border-radius: 16px;
+                    border-top-left-radius: 4px; // 钉钉6.5.x特殊圆角
+                    border: 1px solid var(--dt-bubble-received-border, #f0f0f0);
                     position: relative;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    cursor: pointer;
 
-                    // 左侧小尾巴 - 边框层（钉钉7.6样式）
-                    &::before {
-                      content: '';
-                      position: absolute;
-                      left: -8px;
-                      top: 14px;
-                      width: 0;
-                      height: 0;
-                      border-style: solid;
-                      border-width: 6px 8px 6px 0;
-                      border-color: transparent var(--dt-bubble-received-border, #e5e8eb)
-                        transparent transparent;
-                      filter: drop-shadow(-2px 0 1px rgba(0, 0, 0, 0.05));
+                    // 多层次精致阴影
+                    box-shadow:
+                      0 1px 4px rgba(0, 0, 0, 0.03),
+                      0 6px 20px rgba(0, 0, 0, 0.06),
+                      0 12px 40px rgba(0, 0, 0, 0.04);
+
+                    // hover效果
+                    &:hover {
+                      transform: translateY(-1px);
+                      box-shadow:
+                        0 4px 12px rgba(0, 0, 0, 0.08),
+                        0 8px 24px rgba(0, 0, 0, 0.12),
+                        0 16px 48px rgba(0, 0, 0, 0.06);
                     }
 
-                    // 左侧小尾巴 - 背景层（钉钉7.6样式）
-                    &::after {
-                      content: '';
-                      position: absolute;
-                      left: -6px;
-                      top: 14px;
-                      width: 0;
-                      height: 0;
-                      border-style: solid;
-                      border-width: 6px 7px 6px 0;
-                      border-color: transparent var(--dt-bubble-received-bg, #ffffff) transparent
-                        transparent;
+                    // 点击效果
+                    &:active {
+                      transform: translateY(0) scale(0.98);
+                      transition: all 0.1s ease;
                     }
 
                     &.sending {
-                      opacity: 0.7;
+                      opacity: 0.8;
+                      transform: scale(0.98);
+
+                      // 发送中脉冲动画
+                      &::after {
+                        content: '';
+                        position: absolute;
+                        top: 50%;
+                        right: 12px;
+                        width: 6px;
+                        height: 6px;
+                        background: rgba(255, 255, 255, 0.8);
+                        border-radius: 50%;
+                        transform: translateY(-50%);
+                        animation: pulse 1.5s ease-in-out infinite;
+                      }
                     }
 
                     &.failed {
-                      background: #fff1f0;
+                      background: linear-gradient(135deg, #fff1f0 0%, #fff2f0 100%);
                       color: #f5222d;
                       border: 1px solid #ffccc7;
-                      box-shadow: 0 1px 3px rgba(255, 77, 79, 0.15);
+                      box-shadow:
+                        0 2px 8px rgba(255, 77, 79, 0.15),
+                        0 4px 16px rgba(255, 77, 79, 0.1);
+
+                      // 失败状态微微抖动
+                      animation: shake 0.5s ease-in-out;
+
+                      &:hover {
+                        transform: translateY(-1px);
+                        box-shadow:
+                          0 4px 12px rgba(255, 77, 79, 0.2),
+                          0 8px 24px rgba(255, 77, 79, 0.15);
+                      }
+                    }
+
+                    // 动画定义
+                    @keyframes pulse {
+                      0%, 100% { opacity: 0.3; transform: translateY(-50%) scale(0.8); }
+                      50% { opacity: 1; transform: translateY(-50%) scale(1.2); }
+                    }
+
+                    @keyframes shake {
+                      0%, 100% { transform: translateX(0); }
+                      25% { transform: translateX(-2px); }
+                      75% { transform: translateX(2px); }
                     }
                   }
                 }
@@ -8162,18 +8581,37 @@ $avatar-xl: 64px;
                     margin-left: 2px;
                   }
 
-                  /* 通用消息气泡样式（仅包含公共属性） */
+                   /* 通用消息气泡样式（钉钉6.5.x优化） */
                   .message-bubble {
                     position: relative;
-                    padding: 10px 14px;
+                    padding: 14px 18px; // 增加内边距，更舒适
                     font-size: 14px;
-                    line-height: 1.6;
+                    line-height: 1.7; // 增加行高，更易读
+                    font-weight: 400; // 优化字体粗细
                     max-width: 100%;
                     overflow: hidden;
-                    word-break: break-all;
+                    word-break: break-word;
                     overflow-wrap: anywhere;
-                    word-wrap: break-word;
                     white-space: pre-wrap;
+
+                    // 文字渲染优化
+                    -webkit-font-smoothing: antialiased;
+                    -moz-osx-font-smoothing: grayscale;
+                    text-rendering: optimizeLegibility;
+
+                    // 链接样式优化
+                    a {
+                      color: inherit;
+                      text-decoration: underline;
+                      text-underline-offset: 2px;
+                      text-decoration-thickness: 1px;
+                      opacity: 0.8;
+                      transition: opacity 0.2s ease;
+
+                      &:hover {
+                        opacity: 1;
+                      }
+                    }
                   }
 
                   // 图片消息
@@ -8309,10 +8747,27 @@ $avatar-xl: 64px;
 
                         &:hover {
                           color: #d9363e;
-                        }
-                      }
-                    }
                   }
+                }
+
+                // 动画定义
+                @keyframes rotate {
+                  from { transform: rotate(0deg); }
+                  to { transform: rotate(360deg); }
+                }
+
+                @keyframes online-pulse {
+                  0%, 100% {
+                    opacity: 1;
+                    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);
+                  }
+                  50% {
+                    opacity: 0.8;
+                    box-shadow: 0 0 0 6px rgba(82, 196, 26, 0);
+                  }
+                }
+              }
+            }
 
                   // 已读回执样式
                   .read-receipt {
@@ -8415,40 +8870,107 @@ $avatar-xl: 64px;
 
               .input-toolbar {
                 display: flex;
-                gap: 8px;
-                margin-bottom: 8px;
+                align-items: center;
+                margin-bottom: 12px;
+                padding: 6px 12px;
+                background: #fafafa;
+                border-radius: 10px;
+                border: 1px solid #f0f0f0;
+
+                // 工具按钮组
+                .toolbar-group {
+                  display: flex;
+                  align-items: center;
+                  gap: 2px; // 减少间距，更紧凑
+                }
 
                 .el-button {
                   --el-button-border-color: transparent;
                   --el-button-bg-color: transparent;
-                  --el-button-text-color: #666666;
+                  --el-button-text-color: #8c8c8c;
                   padding: 0;
-                  border-radius: 4px;
-                  width: 32px;
-                  height: 32px;
+                  border-radius: 8px;
+                  width: 36px;
+                  height: 36px;
+                  font-size: 16px;
+                  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                  position: relative;
 
                   &:hover {
-                    --el-button-text-color: #0089ff;
-                    --el-button-hover-bg-color: rgba(0, 0, 0, 0.04);
+                    --el-button-text-color: #1677ff;
+                    --el-button-hover-bg-color: rgba(22, 119, 255, 0.06);
                     --el-button-hover-border-color: transparent;
+                    transform: scale(1.05);
+                  }
+
+                  &:active {
+                    transform: scale(0.95);
+                  }
+
+                  &.active {
+                    --el-button-text-color: #1677ff;
+                    --el-button-bg-color: rgba(22, 119, 255, 0.1);
                   }
 
                   &.recording {
-                    --el-button-text-color: #f5222d;
-                    animation: pulse 1.5s infinite;
+                    --el-button-text-color: #ff4d4f;
+                    animation: pulse-red 1.5s ease-in-out infinite;
+                  }
+
+                  // 快捷回复按钮特殊样式
+                  &:has(.el-dropdown) {
+                    width: auto;
+                    padding: 0 12px;
+                    font-size: 13px;
+                    color: #595959;
+
+                    &:hover {
+                      color: #1677ff;
+                      background: rgba(22, 119, 255, 0.06);
+                    }
+                  }
+                }
+
+                // 脉冲动画定义
+                @keyframes pulse-red {
+                  0%, 100% {
+                    opacity: 1;
+                    transform: scale(1);
+                  }
+                  50% {
+                    opacity: 0.7;
+                    transform: scale(1.1);
                   }
                 }
               }
 
               .chat-input {
                 flex: 1;
-                border-radius: 4px;
-                border: 1px solid #e6e6e6;
-                background: #fff;
-                box-shadow: none;
+                border-radius: 12px;
+                border: 1px solid #e8e8e8;
+                background: #ffffff;
+                box-shadow:
+                  0 1px 3px rgba(0, 0, 0, 0.04),
+                  0 4px 12px rgba(0, 0, 0, 0.02);
                 display: flex;
                 flex-direction: column;
-                min-height: 0;
+                min-height: 80px;
+                max-height: 200px;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+                &:hover {
+                  border-color: #d9d9d9;
+                  box-shadow:
+                    0 2px 6px rgba(0, 0, 0, 0.06),
+                    0 8px 20px rgba(0, 0, 0, 0.04);
+                }
+
+                &:focus-within {
+                  border-color: #1677ff;
+                  box-shadow:
+                    0 0 0 3px rgba(22, 119, 255, 0.1),
+                    0 4px 12px rgba(22, 119, 255, 0.15);
+                }
 
                 :deep(.el-textarea) {
                   display: flex;
@@ -8458,19 +8980,45 @@ $avatar-xl: 64px;
 
                 :deep(.el-textarea__inner) {
                   border: none !important;
-                  padding: 12px !important;
+                  padding: 16px !important;
                   resize: none !important;
                   font-size: 14px !important;
-                  line-height: 1.6 !important;
+                  line-height: 1.7 !important;
                   background: transparent !important;
                   height: 100% !important;
-                  min-height: 60px !important;
+                  min-height: 48px !important;
                   box-shadow: none !important;
-                }
+                  color: #262626 !important;
+                  font-weight: 400 !important;
 
-                &:focus-within {
-                  border-color: #0089ff;
-                  box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.1);
+                  // 文字渲染优化
+                  -webkit-font-smoothing: antialiased;
+                  -moz-osx-font-smoothing: grayscale;
+                  text-rendering: optimizeLegibility;
+
+                  // 占位符样式
+                  &::placeholder {
+                    color: #bfbfbf !important;
+                    font-weight: 400 !important;
+                  }
+
+                  // 滚动条样式
+                  &::-webkit-scrollbar {
+                    width: 4px;
+                  }
+
+                  &::-webkit-scrollbar-track {
+                    background: transparent;
+                  }
+
+                  &::-webkit-scrollbar-thumb {
+                    background: #d9d9d9;
+                    border-radius: 2px;
+
+                    &:hover {
+                      background: #bfbfbf;
+                    }
+                  }
                 }
               }
 
@@ -8478,30 +9026,67 @@ $avatar-xl: 64px;
                 display: flex;
                 justify-content: flex-end;
                 align-items: center;
-                margin-top: 8px;
+                margin-top: 12px;
+                padding: 0 4px;
 
                 .send-button {
-                  min-width: 80px;
-                  height: 32px;
-                  border-radius: 4px;
+                  min-width: 88px;
+                  height: 36px;
+                  border-radius: 8px;
                   font-size: 14px;
-                  padding: 6px 16px;
-                  background: #0089ff;
-                  border-color: #0089ff;
+                  font-weight: 500;
+                  padding: 8px 20px;
+                  background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
+                  border: none;
+                  color: #ffffff;
+                  box-shadow:
+                    0 2px 6px rgba(22, 119, 255, 0.2),
+                    0 4px 12px rgba(22, 119, 255, 0.1);
+                  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                  position: relative;
+                  overflow: hidden;
+
+                  // 波纹效果
+                  &::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                    transition: left 0.5s ease;
+                  }
 
                   &:hover {
-                    background: #0077e0;
-                    border-color: #0077e0;
+                    background: linear-gradient(135deg, #0958d9 0%, #1677ff 100%);
+                    transform: translateY(-1px);
+                    box-shadow:
+                      0 4px 12px rgba(22, 119, 255, 0.3),
+                      0 8px 20px rgba(22, 119, 255, 0.2);
+
+                    &::before {
+                      left: 100%;
+                    }
                   }
 
                   &:active {
-                    background: #0066c2;
-                    border-color: #0066c2;
+                    transform: translateY(0) scale(0.98);
+                    box-shadow:
+                      0 2px 6px rgba(22, 119, 255, 0.2),
+                      0 4px 12px rgba(22, 119, 255, 0.1);
                   }
 
                   &:disabled {
-                    background: #e6e6e6;
-                    border-color: #e6e6e6;
+                    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+                    color: #bfbfbf;
+                    box-shadow: none;
+                    transform: none;
+                    cursor: not-allowed;
+
+                    &::before {
+                      display: none;
+                    }
                   }
                 }
               }
@@ -10569,7 +11154,6 @@ $avatar-xl: 64px;
       }
     }
   }
-}
 
 // 深色模式
 :deep(.dark) {

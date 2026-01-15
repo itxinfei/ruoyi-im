@@ -200,38 +200,32 @@
 
         <!-- 消息列表 -->
         <div v-if="activeSession" ref="messagesRef" class="dt-chat__messages">
-          <!-- 时间分隔符 -->
-          <div
-            v-for="(divider, index) in timeDividers"
-            :key="'divider-' + index"
-            class="dt-chat__time-divider"
-          >
-            {{ divider }}
-          </div>
-
-          <!-- 消息列表 -->
-          <DingMessageBubble
-            v-for="message in displayMessages"
-            :key="message.id"
-            :message="message"
-            :is-own="message.senderId === currentUserId"
-            :is-group="activeSession.isGroup"
-            :current-user="currentUser"
-            :show-time="shouldShowTime(message)"
-            :show-actions="hoveredMessageId === message.id"
-            @mouseenter="hoveredMessageId = message.id"
-            @mouseleave="hoveredMessageId = null"
-            @click="handleMessageClick"
-            @retry="handleMessageRetry"
-            @copy="handleMessageCopy"
-            @recall="handleMessageRecall"
-            @edit="handleMessageEdit"
-            @reply="handleMessageReply"
-            @forward="handleMessageForward"
-            @favorite="handleMessageFavorite"
-            @select="handleMessageSelect"
-            @more="handleMessageMore"
-          />
+          <template v-for="(message, idx) in displayMessages" :key="message.id">
+            <!-- 居中时间分隔符：仅在需要展示时间时插入，避免影响气泡间距 -->
+            <div v-if="shouldShowTime(message)" class="dt-chat__time-divider">
+              {{ formatTimeLabel(message.createTime) }}
+            </div>
+            <DingMessageBubble
+              :message="message"
+              :is-own="message.senderId === currentUserId"
+              :is-group="activeSession.isGroup"
+              :current-user="currentUser"
+              :show-time="false"
+              :show-actions="hoveredMessageId === message.id"
+              @mouseenter="hoveredMessageId = message.id"
+              @mouseleave="hoveredMessageId = null"
+              @click="handleMessageClick"
+              @retry="handleMessageRetry"
+              @copy="handleMessageCopy"
+              @recall="handleMessageRecall"
+              @edit="handleMessageEdit"
+              @reply="handleMessageReply"
+              @forward="handleMessageForward"
+              @favorite="handleMessageFavorite"
+              @select="handleMessageSelect"
+              @more="handleMessageMore"
+            />
+          </template>
         </div>
 
         <!-- 输入区域 -->
@@ -846,18 +840,39 @@ const isDifferentDay = (date1, date2) => {
 
 const formatDateDivider = date => {
   const today = new Date()
+  const target = new Date(date)
+  const isToday =
+    target.getFullYear() === today.getFullYear() &&
+    target.getMonth() === today.getMonth() &&
+    target.getDate() === today.getDate()
+  if (isToday) {
+    return ''
+  }
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
-
-  if (isDifferentDay(date, today)) {
-    if (isDifferentDay(date, yesterday)) {
-      const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-      return weekdays[date.getDay()]
-    } else {
-      return '昨天'
-    }
+  const isYesterday =
+    target.getFullYear() === yesterday.getFullYear() &&
+    target.getMonth() === yesterday.getMonth() &&
+    target.getDate() === yesterday.getDate()
+  if (isYesterday) {
+    return '昨天'
   }
-  return ''
+  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+  return weekdays[target.getDay()]
+}
+
+const formatTimeLabel = time => {
+  if (!time) {
+    return ''
+  }
+  const date = new Date(time)
+  const divider = formatDateDivider(date)
+  const hour = date.getHours().toString().padStart(2, '0')
+  const minute = date.getMinutes().toString().padStart(2, '0')
+  if (divider) {
+    return `${divider} ${hour}:${minute}`
+  }
+  return `${hour}:${minute}`
 }
 
 // 监听会话变化

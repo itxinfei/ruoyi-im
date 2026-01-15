@@ -680,13 +680,11 @@ export default {
     flex-direction: row;
 
     .message-avatar {
-      order: 1;
       margin-right: 12px;
       margin-left: 0;
     }
 
     .message-wrapper {
-      order: 2;
       align-items: flex-start;
     }
 
@@ -705,17 +703,15 @@ export default {
   // ==================== 发送方消息样式（我发送的消息）====================
   // 头像在右边，消息在左边
   &.self {
-    flex-direction: row;
+    flex-direction: row-reverse;
     align-self: flex-end;
 
     .message-avatar {
-      order: 2;
       margin-left: 12px;
       margin-right: 0;
     }
 
     .message-wrapper {
-      order: 1;
       align-items: flex-end;
     }
   }
@@ -735,6 +731,8 @@ export default {
 // ==================== 消息内容样式 ====================
 
 .message-content {
+  display: flex;
+  flex-direction: column;
   position: relative;
 
   // 文本消息气泡 - 默认（接收方）

@@ -179,7 +179,7 @@
             }
             var $tbody = target.find("tbody");
             // 添加加载loading
-            var $loading = '<tr><td colspan="' + options.columns.length + '"><div style="display: block;text-align: center;">正在努力地加载数据中，请稍候……</div></td></tr>'
+            var $loading = '<tr><td colspan="' + options.columns.length + '"><div style="display: block;text-align: center;">正在加载...</div></td></tr>'
             $tbody.html($loading);
             if (options.url) {
                 $.ajax({

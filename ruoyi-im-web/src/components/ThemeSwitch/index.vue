@@ -17,18 +17,40 @@ const isDark = ref(false)
 
 // 初始化主题
 onMounted(() => {
-  isDark.value = localStorage.getItem('app-theme') === 'dark'
+  // 优先使用 im_theme，其次使用 app-theme，默认 light
+  const savedTheme =
+    localStorage.getItem('im_theme') || localStorage.getItem('app-theme') || 'light'
+  isDark.value = savedTheme === 'dark'
   applyTheme()
 })
 
 const toggleTheme = () => {
   isDark.value = !isDark.value
-  localStorage.setItem('app-theme', isDark.value ? 'dark' : 'light')
+  const theme = isDark.value ? 'dark' : 'light'
+
+  // 同时更新两个主题存储，保持兼容性
+  localStorage.setItem('app-theme', theme)
+  localStorage.setItem('im_theme', theme)
+
   applyTheme()
+
+  // 触发主题变更事件，通知其他组件
+  window.dispatchEvent(new CustomEvent('themeChange', { detail: { theme } }))
 }
 
 const applyTheme = () => {
-  document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
+  const theme = isDark.value ? 'dark' : 'light'
+  document.documentElement.setAttribute('data-theme', theme)
+
+  // 更新 CSS 变量
+  const root = document.documentElement
+  if (isDark.value) {
+    root.style.setProperty('--dt-color-bg-hover', 'rgba(255, 255, 255, 0.08)')
+    root.style.setProperty('--dt-color-text-secondary', '#b0b0b0')
+  } else {
+    root.style.setProperty('--dt-color-bg-hover', 'rgba(0, 0, 0, 0.04)')
+    root.style.setProperty('--dt-color-text-secondary', '#606266')
+  }
 }
 </script>
 

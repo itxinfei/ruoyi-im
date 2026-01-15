@@ -1,54 +1,155 @@
 <template>
   <div class="contact-detail-container">
+    <!-- 顶部导航 -->
     <div class="detail-header">
       <el-button :icon="ArrowLeft" class="back-button" @click="goBack">返回</el-button>
       <h2>联系人详情</h2>
+      <div class="header-actions">
+        <el-tooltip content="更多操作" placement="bottom">
+          <el-button :icon="More" text circle @click="showMoreActions" />
+        </el-tooltip>
+      </div>
     </div>
 
     <div v-if="contact" class="detail-content">
-      <div class="profile-section">
-        <el-avatar :size="100" :src="contact.avatar || '/profile/avatar.png'">
-          {{ (contact.name || contact.nickname || contact.username)?.charAt(0) || '用' }}
-        </el-avatar>
-        <div class="profile-info">
-          <h3>{{ contact.name || contact.nickname || contact.username }}</h3>
-          <p class="status" :class="{ online: contact.online }">
-            {{ contact.online ? '在线' : '离线' }}
-          </p>
+      <!-- 个人资料卡片 -->
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="avatar-section">
+            <el-avatar 
+              :size="80" 
+              :src="contact.avatar || '/profile/avatar.png'"
+              class="profile-avatar"
+            >
+              {{ (contact.name || contact.nickname || contact.username)?.charAt(0) || '用' }}
+            </el-avatar>
+            <!-- 在线状态指示器 -->
+            <div 
+              class="online-indicator"
+              :class="{ online: contact.online }"
+            ></div>
+          </div>
+          <div class="profile-info">
+            <h3 class="profile-name">
+              {{ contact.name || contact.nickname || contact.username }}
+            </h3>
+            <p class="profile-status">
+              <span class="status-text" :class="{ online: contact.online }">
+                {{ contact.online ? '在线' : '离线' }}
+              </span>
+              <span class="status-dot" :class="{ online: contact.online }"></span>
+            </p>
+            <p class="profile-desc">{{ contact.signature || '这个人很懒，什么都没留下~' }}</p>
+          </div>
         </div>
-        <div class="profile-actions">
-          <el-button type="primary" :icon="Comment" @click="startChat">发消息</el-button>
-          <el-button :icon="Phone">语音通话</el-button>
-          <el-button :icon="VideoCamera">视频通话</el-button>
+
+        <!-- 快捷操作 -->
+        <div class="quick-actions">
+          <el-button 
+            type="primary" 
+            :icon="Comment" 
+            class="action-btn primary"
+            @click="startChat"
+          >
+            发消息
+          </el-button>
+          <el-button :icon="Phone" class="action-btn">
+            语音通话
+          </el-button>
+          <el-button :icon="VideoCamera" class="action-btn">
+            视频通话
+          </el-button>
         </div>
       </div>
 
-      <div class="info-section">
-        <h4>详细信息</h4>
-        <div class="info-item">
-          <span class="label">用户名：</span>
-          <span class="value">{{ contact.username }}</span>
+      <!-- 详细信息 -->
+      <div class="info-sections">
+        <!-- 基本信息 -->
+        <div class="info-section">
+          <div class="section-header">
+            <el-icon><User /></el-icon>
+            <h4>基本信息</h4>
+            <el-button 
+              :icon="Edit" 
+              text 
+              size="small"
+              @click="editRemark"
+            >
+              编辑备注
+            </el-button>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">用户名</span>
+              <span class="value">{{ contact.username || '-' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">昵称</span>
+              <span class="value">{{ contact.nickname || '-' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">手机号</span>
+              <span class="value">{{ contact.phoneNumber || '-' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">邮箱</span>
+              <span class="value">{{ contact.email || '-' }}</span>
+            </div>
+            <div class="info-item full-width">
+              <span class="label">备注名称</span>
+              <span class="value">{{ contact.remark || '未设置' }}</span>
+            </div>
+          </div>
         </div>
-        <div class="info-item">
-          <span class="label">昵称：</span>
-          <span class="value">{{ contact.nickname || '-' }}</span>
+
+        <!-- 社交信息 -->
+        <div class="info-section">
+          <div class="section-header">
+            <el-icon><Share /></el-icon>
+            <h4>社交信息</h4>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">添加时间</span>
+              <span class="value">{{ formatDate(contact.createTime) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">来源</span>
+              <span class="value">搜索添加</span>
+            </div>
+            <div class="info-item">
+              <span class="label">共同好友</span>
+              <span class="value">{{ contact.mutualFriends || 0 }}人</span>
+            </div>
+            <div class="info-item">
+              <span class="label">所在群组</span>
+              <span class="value">{{ contact.commonGroups || 0 }}个</span>
+            </div>
+          </div>
         </div>
-        <div class="info-item">
-          <span class="label">手机号：</span>
-          <span class="value">{{ contact.phoneNumber || '-' }}</span>
+
+        <!-- 隐私设置 -->
+        <div class="info-section">
+          <div class="section-header">
+            <el-icon><Lock /></el-icon>
+            <h4>隐私设置</h4>
+          </div>
+          <div class="privacy-options">
+            <div class="privacy-item">
+              <span class="privacy-label">允许查看动态</span>
+              <el-switch v-model="privacySettings.viewPosts" />
+            </div>
+            <div class="privacy-item">
+              <span class="privacy-label">允许查看状态</span>
+              <el-switch v-model="privacySettings.viewStatus" />
+            </div>
+            <div class="privacy-item">
+              <span class="privacy-label">消息免打扰</span>
+              <el-switch v-model="privacySettings.muted" />
+            </div>
+          </div>
         </div>
-        <div class="info-item">
-          <span class="label">邮箱：</span>
-          <span class="value">{{ contact.email || '-' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">备注：</span>
-          <span class="value">{{ contact.remark || '-' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">添加时间：</span>
-          <span class="value">{{ formatDate(contact.createTime) }}</span>
-        </div>
+      </div>
       </div>
 
       <div class="actions-section">
@@ -66,18 +167,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Comment, Phone, VideoCamera, Edit, Star, Delete } from '@element-plus/icons-vue'
+import { ArrowLeft, Comment, Phone, VideoCamera, Edit, Star, Delete, User, Share, Lock, More } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
 
 const contact = ref(null)
 
+// 隐私设置
+const privacySettings = reactive({
+  viewPosts: true,
+  viewStatus: true,
+  muted: false,
+})
+
 const goBack = () => {
   router.back()
+}
+
+// 显示更多操作
+const showMoreActions = () => {
+  ElMessage.info('更多操作功能开发中...')
 }
 
 const startChat = () => {

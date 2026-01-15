@@ -75,5 +75,18 @@
             </div>
         </div>
     </form>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/email";
+        $("#form-email-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-email-add').serialize());
+            }
+        }
+    </script>
 </body>
 </html>

@@ -61,5 +61,18 @@
             </div>
         </div>
     </form>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/ding";
+        $("#form-ding-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-ding-add').serialize());
+            }
+        }
+    </script>
 </body>
 </html>

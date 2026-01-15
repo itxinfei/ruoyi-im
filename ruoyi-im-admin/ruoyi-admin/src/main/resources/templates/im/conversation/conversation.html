@@ -12,10 +12,65 @@
     <link href="/css/animate.css" th:href="@{/css/animate.css}" rel="stylesheet"/>
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
+    <style>
+        .statistics-card {
+            padding: 20px;
+            border-radius: 6px;
+            color: #fff;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        .statistics-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .stat-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-private { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+        .stat-group { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+        .stat-active { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+        .stat-number { font-size: 28px; font-weight: 600; margin-bottom: 5px; }
+        .stat-label { font-size: 13px; opacity: 0.95; }
+        .stat-icon { float: right; font-size: 40px; opacity: 0.3; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div">
         <div class="row">
+            <!-- 统计卡片 -->
+            <div class="col-sm-12" style="margin: 15px 0 8px 0;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-total">
+                            <i class="fa fa-comments stat-icon"></i>
+                            <div class="stat-number" id="totalCount">0</div>
+                            <div class="stat-label">会话总数</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-private">
+                            <i class="fa fa-comment stat-icon"></i>
+                            <div class="stat-number" id="privateCount">0</div>
+                            <div class="stat-label">私聊会话</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-group">
+                            <i class="fa fa-users stat-icon"></i>
+                            <div class="stat-number" id="groupCount">0</div>
+                            <div class="stat-label">群聊会话</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-active">
+                            <i class="fa fa-clock-o stat-icon"></i>
+                            <div class="stat-number" id="activeCount">0</div>
+                            <div class="stat-label">今日活跃</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="conversation-form">
                     <div class="select-list">
@@ -47,7 +102,7 @@
                 </form>
             </div>
 
-            <div class="btn-group-sm" id="toolbar" role="group">
+            <div class="btn-group-sm" id="toolbar" role="group" style="margin-bottom: 10px;">
                 <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:conversation:add">
                     <i class="fa fa-plus"></i> 新增
                 </a>
@@ -71,6 +126,8 @@
         var prefix = ctx + "im/conversation";
 
         $(function() {
+            loadStatistics();
+
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -82,20 +139,33 @@
                 },
                 {
                     field: 'id',
-                    title: '会话ID',
+                    title: 'ID',
                     visible: false
                 },
                 {
                     field: 'type',
                     title: '类型',
                     align: 'center',
+                    width: '80',
                     formatter: function(value, row, index) {
                         if (value === 'PRIVATE') {
                             return '<span class="badge badge-primary">私聊</span>';
                         } else if (value === 'GROUP') {
                             return '<span class="badge badge-success">群聊</span>';
                         }
-                        return value;
+                        return value || '-';
+                    }
+                },
+                {
+                    field: 'avatar',
+                    title: '头像',
+                    width: '50',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        if (value) {
+                            return '<img src="' + value + '" class="img-circle" style="width:32px;height:32px;">';
+                        }
+                        return '<i class="fa fa-comment fa-2x text-gray"></i>';
                     }
                 },
                 {
@@ -106,44 +176,36 @@
                 {
                     field: 'targetId',
                     title: '目标ID',
+                    width: '80',
                     visible: false
-                },
-                {
-                    field: 'avatar',
-                    title: '头像',
-                    formatter: function(value, row, index) {
-                        if (value) {
-                            return '<img src="' + value + '" class="img-circle" style="width:30px;height:30px;">';
-                        }
-                        return '-';
-                    }
                 },
                 {
                     field: 'memberCount',
                     title: '成员数',
                     align: 'center',
-                    formatter: function(value, row, index) {
-                        return value || '-';
-                    }
+                    width: '80'
                 },
                 {
                     field: 'lastMessageTime',
                     title: '最后消息时间',
+                    width: '160',
                     sortable: true
                 },
                 {
                     field: 'createTime',
                     title: '创建时间',
+                    width: '160',
                     sortable: true
                 },
                 {
                     title: '操作',
                     align: 'center',
+                    width: '200',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-info btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="viewMembers(' + row.id + ')"><i class="fa fa-users"></i>成员</a> ');
-                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.editTab(' + row.id + ')"><i class="fa fa-edit"></i>编辑</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(' + row.id + ')"><i class="fa fa-remove"></i>删除</a>');
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewMembers(' + row.id + ')"><i class="fa fa-users"></i>成员</a> ');
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
                 }]
@@ -151,7 +213,17 @@
             $.table.init(options);
         });
 
-        /* 查看会话成员 */
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code == 0) {
+                    $("#totalCount").text(result.data.totalCount || 0);
+                    $("#privateCount").text(result.data.privateCount || 0);
+                    $("#groupCount").text(result.data.groupCount || 0);
+                    $("#activeCount").text(result.data.activeCount || 0);
+                }
+            });
+        }
+
         function viewMembers(conversationId) {
             var url = prefix + "/" + conversationId + "/members";
             $.modal.open("会话成员", url, '800', '500');

@@ -91,5 +91,18 @@
             </div>
         </div>
     </form>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/application";
+        $("#form-application-edit").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/edit", $('#form-application-edit').serialize());
+            }
+        }
+    </script>
 </body>
 </html>

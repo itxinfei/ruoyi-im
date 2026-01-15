@@ -636,12 +636,13 @@ body {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 0;
   }
 
   // 时间分隔符
   &__time-divider {
     align-self: center;
+    margin: 8px 0;
     padding: 4px 12px;
     background: var(--dt-bg-container);
     border-radius: var(--dt-radius-base);

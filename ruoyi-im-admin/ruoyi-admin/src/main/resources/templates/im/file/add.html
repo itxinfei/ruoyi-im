@@ -69,5 +69,18 @@
             </div>
         </div>
     </form>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/file";
+        $("#form-file-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-file-add').serialize());
+            }
+        }
+    </script>
 </body>
 </html>

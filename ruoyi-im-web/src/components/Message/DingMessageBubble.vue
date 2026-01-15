@@ -580,7 +580,8 @@ const handleMoreCommand = command => {
 <style lang="scss" scoped>
 .message-item {
   display: flex;
-  padding: 12px 16px;
+  padding: 6px 12px;
+  margin-bottom: 8px;
   transition: background-color 0.2s ease;
 
   &:hover {
@@ -593,14 +594,14 @@ const handleMoreCommand = command => {
 
   .message-avatar {
     flex-shrink: 0;
-    margin: 0 8px;
+    margin: 0 6px;
   }
 }
 
 .message-content-wrapper {
   display: flex;
   flex-direction: column;
-  max-width: 70%;
+  max-width: 72%;
   min-width: 0;
   flex: 1 1 auto;
   overflow: hidden;
@@ -609,7 +610,7 @@ const handleMoreCommand = command => {
 .message-sender {
   font-size: 12px;
   color: var(--el-text-color-secondary);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   margin-left: 2px;
 }
 
@@ -619,8 +620,8 @@ const handleMoreCommand = command => {
 
 .message-bubble {
   position: relative;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
   background-color: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;

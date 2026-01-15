@@ -37,5 +37,18 @@
             </div>
         </div>
     </form>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/conversation";
+        $("#form-conversation-edit").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/edit", $('#form-conversation-edit').serialize());
+            }
+        }
+    </script>
 </body>
 </html>

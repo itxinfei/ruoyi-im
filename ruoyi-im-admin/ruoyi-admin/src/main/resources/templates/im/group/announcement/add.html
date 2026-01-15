@@ -58,5 +58,18 @@
             </div>
         </div>
     </form>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/group/announcement";
+        $("#form-announcement-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-announcement-add').serialize());
+            }
+        }
+    </script>
 </body>
 </html>

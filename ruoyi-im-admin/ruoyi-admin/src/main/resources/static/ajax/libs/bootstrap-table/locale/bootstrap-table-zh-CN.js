@@ -16,7 +16,7 @@ $.fn.bootstrapTable.locales['zh-CN'] = {
     return '打印';
   },
   formatLoadingMessage: function formatLoadingMessage() {
-    return '正在努力地加载数据中，请稍候';
+    return '';
   },
   formatRecordsPerPage: function formatRecordsPerPage(pageNumber) {
     return "每页显示 ".concat(pageNumber, " 条记录");
