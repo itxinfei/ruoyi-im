@@ -2,6 +2,7 @@ package com.ruoyi.web.service;
 
 import com.ruoyi.web.domain.ImGroupMember;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 群组成员Service接口
@@ -92,4 +93,11 @@ public interface ImGroupMemberService {
      * @return 结果
      */
     int removeMember(Long groupId, Long userId);
+
+    /**
+     * 获取群组成员统计数据
+     *
+     * @return 统计数据
+     */
+    Map<String, Object> getMemberStatistics();
 }

@@ -63,7 +63,7 @@
 
         /* 统计区域布局 */
         .statistics-section {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
         .statistics-section .row {
             margin-left: -8px;
@@ -72,6 +72,7 @@
         .statistics-section .row > div {
             padding-left: 8px;
             padding-right: 8px;
+            margin-bottom: 0;
         }
 
         /* 搜索区域 */
@@ -100,28 +101,28 @@
                 <div class="row">
                     <div class="col-sm-3">
                         <div class="statistics-card stat-total">
-                            <i class="fa fa-comments stat-icon"></i>
+                            <i class="fa fa-comments stat-icon" role="presentation"></i>
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">消息总数</div>
                         </div>
                     </div>
                     <div class="col-sm-3">
                         <div class="statistics-card stat-normal">
-                            <i class="fa fa-comment stat-icon"></i>
+                            <i class="fa fa-comment stat-icon" role="presentation"></i>
                             <div class="stat-number" id="normalCount">0</div>
                             <div class="stat-label">普通消息</div>
                         </div>
                     </div>
                     <div class="col-sm-3">
                         <div class="statistics-card stat-sensitive">
-                            <i class="fa fa-exclamation-triangle stat-icon"></i>
+                            <i class="fa fa-exclamation-triangle stat-icon" role="presentation"></i>
                             <div class="stat-number" id="sensitiveCount">0</div>
                             <div class="stat-label">敏感消息</div>
                         </div>
                     </div>
                     <div class="col-sm-3">
                         <div class="statistics-card stat-high">
-                            <i class="fa fa-ban stat-icon"></i>
+                            <i class="fa fa-ban stat-icon" role="presentation"></i>
                             <div class="stat-number" id="highCount">0</div>
                             <div class="stat-label">高级敏感</div>
                         </div>
@@ -316,7 +317,7 @@
                     formatter: function(value, row, index) {
                         var actions = [];
                         actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewDetail(' + row.id + ')"><i class="fa fa-eye"></i>详情</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="$.operate.remove(\\'' + row.id + '\\')"><i class="fa fa-remove"></i>删除</a>');
+                        actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
                 }]

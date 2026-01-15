@@ -154,13 +154,4 @@ public class ImGroupController extends BaseController {
     public AjaxResult dismiss(@PathVariable("id") Long groupId) {
         return toAjax(imGroupService.dismissGroup(groupId));
     }
-
-    /**
-     * 群组成员管理页面
-     */
-    @GetMapping("/member/{groupId}")
-    public String member(@PathVariable("groupId") Long groupId, org.springframework.ui.ModelMap model) {
-        model.addAttribute("groupId", groupId);
-        return "im/member/member";
-    }
 }

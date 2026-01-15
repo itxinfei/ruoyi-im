@@ -63,7 +63,7 @@
 
         /* 统计区域布局 */
         .statistics-section {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
         .statistics-section .row {
             margin-left: -8px;
@@ -72,6 +72,7 @@
         .statistics-section .row > div {
             padding-left: 8px;
             padding-right: 8px;
+            margin-bottom: 0;
         }
 
         /* 搜索区域 */
@@ -100,28 +101,28 @@
                 <div class="row">
                     <div class="col-sm-3">
                         <div class="statistics-card stat-total">
-                            <i class="fa fa-file stat-icon"></i>
+                            <i class="fa fa-file stat-icon" role="presentation"></i>
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">文件总数</div>
                         </div>
                     </div>
                     <div class="col-sm-3">
                         <div class="statistics-card stat-images">
-                            <i class="fa fa-image stat-icon"></i>
+                            <i class="fa fa-image stat-icon" role="presentation"></i>
                             <div class="stat-number" id="imageCount">0</div>
                             <div class="stat-label">图片文件</div>
                         </div>
                     </div>
                     <div class="col-sm-3">
                         <div class="statistics-card stat-videos">
-                            <i class="fa fa-video-camera stat-icon"></i>
+                            <i class="fa fa-video-camera stat-icon" role="presentation"></i>
                             <div class="stat-number" id="videoCount">0</div>
                             <div class="stat-label">视频文件</div>
                         </div>
                     </div>
                     <div class="col-sm-3">
                         <div class="statistics-card stat-docs">
-                            <i class="fa fa-file-text stat-icon"></i>
+                            <i class="fa fa-file-text stat-icon" role="presentation"></i>
                             <div class="stat-number" id="docCount">0</div>
                             <div class="stat-label">文档文件</div>
                         </div>
@@ -249,7 +250,7 @@
                     width: '120',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="$.operate.remove(\\'' + row.id + '\\')"><i class="fa fa-remove"></i>删除</a>');
+                        actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
                 }]

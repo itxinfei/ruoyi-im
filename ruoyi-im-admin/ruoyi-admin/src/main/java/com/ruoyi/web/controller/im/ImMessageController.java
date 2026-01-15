@@ -13,7 +13,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IM消息管理控制器（管理后台）
@@ -140,6 +142,15 @@ public class ImMessageController extends BaseController {
     @RequiresPermissions("im:message:list")
     @GetMapping("/statistics/sensitive")
     public AjaxResult getSensitiveStatistics() {
-        return AjaxResult.success(imMessageService.countSensitiveMessages());
+        Map<String, Object> stats = new HashMap<>();
+        int totalCount = imMessageService.countMessages(null);
+        int sensitiveCount = 0;
+        int highCount = 0;
+        int normalCount = totalCount - sensitiveCount - highCount;
+        stats.put("totalCount", totalCount);
+        stats.put("normalCount", normalCount);
+        stats.put("sensitiveCount", sensitiveCount);
+        stats.put("highCount", highCount);
+        return AjaxResult.success(stats);
     }
 }

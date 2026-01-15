@@ -77,4 +77,9 @@ public class ImGroupMemberServiceImpl implements ImGroupMemberService {
         params.put("userId", userId);
         return imGroupMemberMapper.removeMember(params);
     }
+
+    @Override
+    public Map<String, Object> getMemberStatistics() {
+        return imGroupMemberMapper.getMemberStatistics();
+    }
 }

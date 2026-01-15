@@ -37,6 +37,16 @@ public class ImGroupMemberController extends BaseController {
     }
 
     /**
+     * 获取群组成员统计数据
+     */
+    @RequiresPermissions("im:group:member:list")
+    @GetMapping("/statistics")
+    @ResponseBody
+    public AjaxResult getStatistics() {
+        return AjaxResult.success(imGroupMemberService.getMemberStatistics());
+    }
+
+    /**
      * 查询群组成员列表
      */
     @RequiresPermissions("im:group:member:list")
