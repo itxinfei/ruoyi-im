@@ -203,8 +203,12 @@
 
     <!-- 主体内容区 -->
     <div class="main-body">
-      <!-- 左侧导航栏（钉钉68px图标式） -->
-      <aside class="nav-sidebar">
+      <!-- 左侧导航栏（钉钉7.6可拖拽宽度，默认68px） -->
+      <aside
+        class="nav-sidebar"
+        :style="{ width: navWidth + 'px' }"
+        @mousedown="startNavResize"
+      >
         <nav class="nav-list">
           <el-tooltip
             v-for="item in navModules"
@@ -215,10 +219,10 @@
           >
             <div
               class="nav-item"
-              :class="{ active: activeModule === item.key }"
+              :class="{ active: activeModule === item.key, 'ai-item': item.isAi }"
               @click="switchModule(item.key)"
             >
-              <el-icon class="nav-icon">
+              <el-icon class="nav-icon" :class="{ 'ai-icon': item.isAi }">
                 <component :is="item.icon" />
               </el-icon>
               <!-- 未读红点 -->
@@ -229,14 +233,18 @@
             </div>
           </el-tooltip>
         </nav>
+        <!-- 拖拽手柄 -->
+        <div class="nav-resize-handle" @mousedown.stop="startNavResize"></div>
       </aside>
 
       <!-- 内容工作区 -->
       <main class="workspace">
         <!-- 消息模块 -->
         <div v-if="activeModule === 'chat'" class="chat-workspace">
-          <!-- 会话列表 -->
-          <div class="session-panel">
+          <!-- 会话列表（钉钉7.6可拖拽宽度，默认320px） -->
+          <div class="session-panel" :style="{ width: sessionWidth + 'px' }">
+            <!-- 拖拽手柄 -->
+            <div class="session-resize-handle" @mousedown.stop="startSessionResize"></div>
             <div class="session-list">
               <!-- 空状态提示 -->
               <div v-if="filteredSessions.length === 0" class="empty-sessions">
@@ -257,18 +265,45 @@
                 v-for="session in filteredSessions"
                 :key="session.id"
                 class="session-item"
-                :class="{ active: currentSessionId === session.id }"
+                :class="{
+                  active: currentSessionId === session.id,
+                  pinned: session.isPinned
+                }"
                 @click="selectSession(session)"
               >
-                <el-badge :value="session.unreadCount" :hidden="session.unreadCount === 0">
-                  <SmartAvatar
-                    :name="session.name"
-                    :avatar="session.avatar"
-                    :size="32"
-                    :show-border="true"
-                    :show-online="false"
-                  />
-                </el-badge>
+                <div class="session-avatar-wrapper">
+                  <!-- 头像容器（支持在线状态指示器） -->
+                  <el-badge :value="session.unreadCount" :hidden="session.unreadCount === 0" :max="99">
+                    <div class="session-avatar">
+                      <SmartAvatar
+                        :name="session.name"
+                        :avatar="session.avatar"
+                        :size="40"  // 钉钉7.6规范：头像尺寸40×40px
+                        :show-border="true"
+                        :show-online="false"
+                        class="avatar-inner"
+                      />
+                      <!-- 在线状态指示器（钉钉7.6样式） -->
+                      <span
+                        v-if="session.type === 'PRIVATE'"
+                        class="online-indicator"
+                        :class="{
+                          online: session.onlineStatus === 'online',
+                          offline: session.onlineStatus === 'offline'
+                        }"
+                      ></span>
+                    </div>
+                  </el-badge>
+
+                  <!-- 免打扰图标 -->
+                  <el-icon
+                    v-if="session.isMuted"
+                    class="mute-icon"
+                  >
+                    <Bell />
+                  </el-icon>
+                </div>
+
                 <div class="session-info">
                   <div class="session-top">
                     <span class="session-name">{{ session.name }}</span>
@@ -2345,6 +2380,7 @@ import {
   OfficeBuilding,
   Tickets,
   Star,
+  MagicStick,
   DeleteFilled,
   Key,
   Minus,
@@ -2401,6 +2437,16 @@ const {
 // 状态
 const isNavCollapsed = ref(false)
 const activeModule = ref('chat')
+
+// 导航栏可拖拽宽度（钉钉7.6新增功能）
+const navWidth = ref(parseInt(localStorage.getItem('navWidth')) || 68)
+const sessionWidth = ref(parseInt(localStorage.getItem('sessionWidth')) || 320)
+const isResizingNav = ref(false)
+const isResizingSession = ref(false)
+
+// 拖拽相关变量
+const dragStartX = ref(0)
+const dragStartWidth = ref(0)
 const sessionSearch = ref('')
 const globalSearchKeyword = ref('')
 const inputMessage = ref('')
@@ -4072,6 +4118,7 @@ const messages = computed(() => {
 // 导航模块
 const navModules = ref([
   { key: 'chat', label: '消息', icon: ChatLineSquare },
+  { key: 'ai-assistant', label: 'AI助理', icon: MagicStick, isAi: true },
   { key: 'contacts', label: '联系人', icon: User },
   { key: 'workbench', label: '工作台', icon: Grid },
   { key: 'drive', label: '钉盘', icon: Folder },
@@ -4107,6 +4154,7 @@ const workbenchApps = ref([
 const getModuleTitle = key => {
   const titles = {
     chat: '消息',
+    'ai-assistant': 'AI助理',
     contacts: '联系人',
     workbench: '工作台',
     drive: '钉盘',
@@ -4121,6 +4169,68 @@ const getModuleTitle = key => {
 const toggleNavCollapse = () => {
   isNavCollapsed.value = !isNavCollapsed.value
   localStorage.setItem('navCollapsed', String(isNavCollapsed.value))
+}
+
+// 导航栏拖拽调整宽度（钉钉7.6新功能）
+const startNavResize = (e) => {
+  if (e.target.classList.contains('nav-resize-handle')) {
+    isResizingNav.value = true
+    dragStartX.value = e.clientX
+    dragStartWidth.value = navWidth.value
+    document.addEventListener('mousemove', onNavResize)
+    document.addEventListener('mouseup', stopNavResize)
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+  }
+}
+
+const onNavResize = (e) => {
+  if (!isResizingNav.value) return
+  const delta = e.clientX - dragStartX.value
+  const newWidth = dragStartWidth.value + delta
+  // 限制宽度范围：56-80px（钉钉7.6规范）
+  if (newWidth >= 56 && newWidth <= 80) {
+    navWidth.value = newWidth
+  }
+}
+
+const stopNavResize = () => {
+  isResizingNav.value = false
+  localStorage.setItem('navWidth', String(navWidth.value))
+  document.removeEventListener('mousemove', onNavResize)
+  document.removeEventListener('mouseup', stopNavResize)
+  document.body.style.cursor = ''
+  document.body.style.userSelect = ''
+}
+
+// 会话面板拖拽调整宽度（钉钉7.6新功能）
+const startSessionResize = (e) => {
+  isResizingSession.value = true
+  dragStartX.value = e.clientX
+  dragStartWidth.value = sessionWidth.value
+  document.addEventListener('mousemove', onSessionResize)
+  document.addEventListener('mouseup', stopSessionResize)
+  document.body.style.cursor = 'col-resize'
+  document.body.style.userSelect = 'none'
+}
+
+const onSessionResize = (e) => {
+  if (!isResizingSession.value) return
+  const delta = e.clientX - dragStartX.value
+  const newWidth = dragStartWidth.value + delta
+  // 限制宽度范围：240-400px（钉钉7.6规范）
+  if (newWidth >= 240 && newWidth <= 400) {
+    sessionWidth.value = newWidth
+  }
+}
+
+const stopSessionResize = () => {
+  isResizingSession.value = false
+  localStorage.setItem('sessionWidth', String(sessionWidth.value))
+  document.removeEventListener('mousemove', onSessionResize)
+  document.removeEventListener('mouseup', stopSessionResize)
+  document.body.style.cursor = ''
+  document.body.style.userSelect = ''
 }
 
 const switchModule = moduleKey => {
@@ -7313,6 +7423,19 @@ $avatar-xl: 64px;
 
           .nav-icon {
             font-size: 24px;  // 钉钉规范：图标24×24px
+            transition: all 0.2s ease;
+          }
+
+          // AI助理图标样式（钉钉7.6.45+新增）
+          &.ai-item .nav-icon.ai-icon {
+            color: #722ED1;  // AI助理紫色
+            &:hover {
+              color: #9254DE;
+            }
+          }
+
+          &.ai-item.active .nav-icon.ai-icon {
+            color: #722ED1;
           }
 
           // 未读红点
@@ -7322,7 +7445,7 @@ $avatar-xl: 64px;
             right: 6px;
             width: 8px;
             height: 8px;
-            background: #F5222D;  // 钉钉5.6危险红
+            background: #F5222D;  // 钉钉危险红
             border-radius: 50%;
             border: 1px solid $bg-nav-narrow;
           }
@@ -7335,7 +7458,8 @@ $avatar-xl: 64px;
             background: $primary-color-light;
             color: $nav-item-icon-active;
 
-            &::after {
+            // 左侧指示条（钉钉7.6样式）
+            &::before {
               content: '';
               position: absolute;
               left: 0;
@@ -7346,6 +7470,32 @@ $avatar-xl: 64px;
               background: $primary-color;
               border-radius: 0 2px 2px 0;
             }
+          }
+
+          // AI助理激活状态（紫色指示条）
+          &.ai-item.active {
+            background: rgba(114, 46, 209, 0.1);
+
+            &::before {
+              background: linear-gradient(135deg, #722ED1 0%, #9254DE 100%);
+            }
+          }
+        }
+
+        // 导航栏拖拽手柄（钉钉7.6新功能）
+        .nav-resize-handle {
+          position: absolute;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          cursor: col-resize;
+          background: transparent;
+          transition: background 0.2s;
+          z-index: 10;
+
+          &:hover {
+            background: var(--dt-color-primary, #0089FF);
           }
         }
       }
@@ -7377,6 +7527,24 @@ $avatar-xl: 64px;
           border-right: 1px solid $border-color;
           display: flex;
           flex-direction: column;
+          position: relative;
+
+          // 会话面板拖拽手柄（钉钉7.6新功能）
+          .session-resize-handle {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            cursor: col-resize;
+            background: transparent;
+            transition: background 0.2s;
+            z-index: 10;
+
+            &:hover {
+              background: var(--dt-color-primary, #0089FF);
+            }
+          }
 
           .session-list {
             flex: 1;
@@ -7387,38 +7555,111 @@ $avatar-xl: 64px;
             .session-item {
               display: flex;
               align-items: center;
-              height: $session-item-height;
-              padding: 8px 12px 8px 16px;
+              height: 64px;  // 钉钉7.6规范：会话项高度64px
+              padding: 10px 12px;  // 钉钉7.6规范：内边距10px 12px
+              gap: 10px;  // 钉钉7.6规范：头像与内容间距10px
               margin: 0;
               cursor: pointer;
               border-radius: 0;
-              transition: all $transition-fast $ease-base;
+              transition: all var(--dt-transition-fast, 0.15s) var(--dt-ease-out, cubic-bezier(0, 0, 0.2, 1));
               position: relative;
+
+              // 置顶标识（钉钉7.6样式）
+              &.pinned::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 12px;
+                bottom: 12px;
+                width: 3px;
+                background: var(--dt-color-primary, #0089FF);
+                border-radius: 0 2px 2px 0;
+              }
 
               // 新会话滑入动画
               &.new-session {
-                animation: listSlideIn 0.3s $ease-base;
+                animation: listSlideIn 0.3s var(--dt-ease-out, cubic-bezier(0, 0, 0.2, 1));
               }
 
               &:hover {
-                background: $bg-hover;
+                background: var(--dt-color-bg-hover, rgba(0, 0, 0, 0.04));
               }
 
               &.active {
-                background: rgba(0, 137, 255, 0.1);
+                background: var(--dt-color-bg-active, rgba(0, 137, 255, 0.1));
               }
 
+              // 头像容器
+              .session-avatar-wrapper {
+                position: relative;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                .session-avatar {
+                  position: relative;
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 8px;  // 钉钉7.6规范：头像圆角8px
+
+                  .avatar-inner {
+                    width: 100%;
+                    height: 100%;
+                  }
+
+                  // 在线状态指示器（钉钉7.6样式）
+                  .online-indicator {
+                    position: absolute;
+                    bottom: -1px;
+                    right: -1px;
+                    width: 10px;
+                    height: 10px;
+                    border: 2px solid var(--dt-color-bg-secondary, #F5F7FA);
+                    border-radius: 50%;
+
+                    &.online {
+                      background: var(--dt-color-success, #52C41A);
+                    }
+
+                    &.offline {
+                      background: var(--dt-color-text-quaternary, #B3B8BD);
+                    }
+                  }
+                }
+
+                // 免打扰图标
+                .mute-icon {
+                  position: absolute;
+                  top: 2px;
+                  right: 2px;
+                  width: 14px;
+                  height: 14px;
+                  font-size: 14px;
+                  color: var(--dt-color-text-tertiary, #858B8F);
+                  background: var(--dt-color-bg-primary, #FFFFFF);
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  border: 1px solid var(--dt-color-border, #E5E8EB);
+                }
+              }
+
+              // 未读数徽章
               .el-badge {
                 margin-right: 10px;
                 flex-shrink: 0;
 
                 :deep(.el-badge__content) {
-                  background: $danger-color;
+                  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);  // 钉钉7.6渐变红
                   border: none;
                   font-size: 11px;
-                  height: 16px;
-                  line-height: 16px;
+                  height: 18px;
+                  line-height: 18px;
                   padding: 0 5px;
+                  border-radius: 9px;  // 钉钉7.6规范：圆角9px
+                  font-weight: 600;
                 }
               }
 
@@ -7652,13 +7893,27 @@ $avatar-xl: 64px;
                   }
 
                   .message-bubble {
-                    // 钉钉发送方消息气泡 - 蓝色
-                    background: #0089FF;
-                    color: #fff;
+                    // 钉钉7.6发送方消息气泡 - 蓝色，带右尾巴
+                    background: var(--dt-bubble-sent-bg, #0089FF);
+                    color: var(--dt-bubble-sent-text, #FFFFFF);
                     border-radius: 12px;
-                    border-bottom-right-radius: 2px;
+                    border-bottom-right-radius: 4px;  // 钉钉7.6尾巴圆角
                     border: none;
                     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+                    position: relative;
+
+                    // 右侧小尾巴（钉钉7.6样式）
+                    &::before {
+                      content: '';
+                      position: absolute;
+                      right: -7px;
+                      top: 14px;
+                      width: 0;
+                      height: 0;
+                      border-style: solid;
+                      border-width: 6px 0 6px 7px;
+                      border-color: transparent transparent transparent var(--dt-bubble-sent-bg, #0089FF);
+                    }
 
                     // 链接样式
                     a {
@@ -7690,14 +7945,42 @@ $avatar-xl: 64px;
                     align-items: flex-start;
                   }
 
-                  /* 接收方消息气泡 - 白色（钉钉风格） */
+                  /* 接收方消息气泡 - 白色（钉钉7.6风格），带左尾巴 */
                   .message-bubble {
-                    background: #fff;
-                    color: #1A1A1A;
+                    background: var(--dt-bubble-received-bg, #FFFFFF);
+                    color: var(--dt-bubble-received-text, #171A1A);
                     border-radius: 12px;
-                    border-bottom-left-radius: 2px;
-                    border: 1px solid #E8E8E8;
+                    border-bottom-left-radius: 4px;  // 钉钉7.6尾巴圆角
+                    border: 1px solid var(--dt-bubble-received-border, #E5E8EB);
                     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+                    position: relative;
+
+                    // 左侧小尾巴 - 边框层（钉钉7.6样式）
+                    &::before {
+                      content: '';
+                      position: absolute;
+                      left: -8px;
+                      top: 14px;
+                      width: 0;
+                      height: 0;
+                      border-style: solid;
+                      border-width: 6px 8px 6px 0;
+                      border-color: transparent var(--dt-bubble-received-border, #E5E8EB) transparent transparent;
+                      filter: drop-shadow(-2px 0 1px rgba(0, 0, 0, 0.05));
+                    }
+
+                    // 左侧小尾巴 - 背景层（钉钉7.6样式）
+                    &::after {
+                      content: '';
+                      position: absolute;
+                      left: -6px;
+                      top: 14px;
+                      width: 0;
+                      height: 0;
+                      border-style: solid;
+                      border-width: 6px 7px 6px 0;
+                      border-color: transparent var(--dt-bubble-received-bg, #FFFFFF) transparent transparent;
+                    }
 
                     &.sending {
                       opacity: 0.7;
@@ -9312,7 +9595,7 @@ $avatar-xl: 64px;
 // 响应式适配
 @media (max-width: 1024px) {
   .web-im-layout {
-    .header {
+    .ding-header {
       .header-brand {
         min-width: auto;
 
@@ -9336,7 +9619,7 @@ $avatar-xl: 64px;
 
 @media (max-width: 768px) {
   .web-im-layout {
-    .header {
+    .ding-header {
       padding: 0 12px;
 
       .header-center {

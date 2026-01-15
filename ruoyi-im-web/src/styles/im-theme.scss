@@ -1,120 +1,227 @@
 /**
  * IM 聊天模块主题样式
- * 包含全局变量、动画、滚动条样式等
+ * 钉钉7.6.x PC版风格 - 2025年最新版本
+ *
+ * 更新内容：
+ * - 参考版本：钉钉PC 7.6.x (2024-2025)
+ * - 新增AI助理入口 (7.6.45+)
+ * - 可拖拽导航栏宽度 (7.6.30+)
+ * - 动态头像和个性化封面 (7.6.40+)
+ * - 更精细的颜色系统
  */
 
-/* CSS 变量定义 - 钉钉5.6 PC版风格 */
+/* CSS 变量定义 - 钉钉7.6.x PC版风格 */
 :root {
-  /* 主题色 - 钉钉蓝5.6 #0089FF */
-  --im-primary-color: #0089FF;
-  --im-primary-hover: #0077E0;
-  --im-primary-active: #0066C2;
-  --im-primary-light: rgba(0, 137, 255, 0.1);
-  --im-primary-lighter: rgba(0, 137, 255, 0.05);
-  --im-primary-bg: #0089FF;
+  /* ============ 品牌色 - 钉钉7.6 ============ */
+  --dt-color-primary: #0089FF;
+  --dt-color-primary-hover: #0077E0;
+  --dt-color-primary-active: #0066C2;
+  --dt-color-primary-light: rgba(0, 137, 255, 0.1);
+  --dt-color-primary-lighter: rgba(0, 137, 255, 0.05);
 
-  /* 成功/警告/错误色 */
-  --im-success-color: #00C853;
-  --im-warning-color: #FF9800;
-  --im-error-color: #F5222D;
-  --im-info-color: #0089FF;
+  /* AI助理主题色 - 新增于7.6.45 */
+  --dt-color-ai-primary: #722ED1;
+  --dt-color-ai-hover: #9254DE;
+  --dt-color-ai-light: rgba(114, 46, 209, 0.1);
 
-  /* 文字颜色 - 钉钉5.6风格 */
-  --im-text-primary: #1A1A1A;
-  --im-text-secondary: #666666;
-  --im-text-tertiary: #858585;
-  --im-text-placeholder: #B8B8B8;
-  --im-text-disabled: #D9D9D9;
+  /* 功能色 */
+  --dt-color-success: #00C853;
+  --dt-color-warning: #FF9800;
+  --dt-color-error: #F5222D;
+  --dt-color-info: #0089FF;
 
-  /* 背景色 - 钉钉5.6风格 */
-  --im-bg-base: #F5F5F5;
-  --im-bg-white: #ffffff;
-  --im-bg-hover: rgba(0, 0, 0, 0.04);
-  --im-bg-active: rgba(0, 137, 255, 0.1);
-  --im-bg-sidebar: #F5F5F5;
-  --im-bg-chat: #F5F5F5;
-  --im-bg-nav: #ffffff;
+  /* ============ 文字颜色 - 钉钉7.6 ============ */
+  --dt-color-text-primary: #171A1A;    /* 标题色/主要文字 */
+  --dt-color-text-secondary: #5F6468;  /* 正文色 */
+  --dt-color-text-tertiary: #858B8F;   /* 辅助文字/时间戳 */
+  --dt-color-text-quaternary: #B3B8BD; /* 占位符文字 */
+  --dt-color-text-disabled: #D9D9D9;
+  --dt-color-text-link: #0089FF;
 
-  /* 边框 - 钉钉5.6风格 */
-  --im-border-color: #E6E6E6;
-  --im-border-light: #F0F0F0;
-  --im-border-dark: #D9D9D9;
+  /* 消息气泡文字颜色 */
+  --dt-color-bubble-text-self: #FFFFFF;
+  --dt-color-bubble-text-other: #171A1A;
 
-  /* 阴影 - 钉钉5.6风格 */
-  --im-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
-  --im-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --im-shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --im-shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --im-shadow-xl: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* ============ 背景色 - 钉钉7.6 ============ */
+  --dt-color-bg-primary: #FFFFFF;       /* 主背景 */
+  --dt-color-bg-secondary: #F5F7FA;     /* 次级背景 */
+  --dt-color-bg-tertiary: #FAFAFA;      /* 三级背景 */
+  --dt-color-bg-hover: rgba(0, 0, 0, 0.04);
+  --dt-color-bg-active: rgba(0, 137, 255, 0.1);
+  --dt-color-bg-disabled: #F5F5F5;
+  --dt-color-bg-mask: rgba(0, 0, 0, 0.45);
 
-  /* 圆角 - 钉钉5.6风格 */
-  --im-radius-xs: 2px;
-  --im-radius-sm: 4px;
-  --im-radius-md: 6px;
-  --im-radius-lg: 8px;
-  --im-radius-xl: 12px;
-  --im-radius-full: 9999px;
+  /* ============ 边框 - 钉钉7.6 ============ */
+  --dt-color-border: #E5E8EB;
+  --dt-color-border-light: #F0F2F5;
+  --dt-color-border-dark: #D9D9D9;
 
-  /* 动画时长 */
-  --im-transition-fast: 0.15s;
-  --im-transition-base: 0.2s;
-  --im-transition-slow: 0.3s;
+  /* 消息气泡边框 */
+  --dt-color-bubble-border: #E5E8EB;
 
-  /* 消息气泡颜色 - 钉钉5.6风格 */
-  --im-bubble-self: #0089FF;
-  --im-bubble-other: #ffffff;
-  --im-bubble-text-self: #ffffff;
-  --im-bubble-text-other: #1A1A1A;
-  --im-bubble-border: #E6E6E6;
+  /* ============ 阴影 - 钉钉7.6 ============ */
+  --dt-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --dt-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --dt-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --dt-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --dt-shadow-xl: 0 10px 25px rgba(0, 0, 0, 0.15);
 
-  /* 在线状态 - 钉钉5.6风格 */
-  --im-online-color: #52C41A;
-  --im-offline-color: #D9D9D9;
-  --im-busy-color: #F5222D;
-  --im-away-color: #FAAD14;
+  /* ============ 圆角 - 钉钉7.6 ============ */
+  --dt-radius-xs: 2px;
+  --dt-radius-sm: 4px;
+  --dt-radius-md: 6px;
+  --dt-radius-lg: 8px;
+  --dt-radius-xl: 12px;
+  --dt-radius-2xl: 16px;
+  --dt-radius-full: 9999px;
 
-  /* 导航相关 */
-  --im-nav-width: 68px;
-  --im-nav-expanded-width: 192px;
-  --im-nav-item-height: 48px;
-  --im-sidebar-width: 240px;
+  /* 消息气泡圆角 - 带尾巴效果 */
+  --dt-radius-bubble: 12px;
+  --dt-radius-bubble-tail: 4px;
+
+  /* ============ 间距系统 - 钉钉7.6 ============ */
+  --dt-spacing-1: 4px;
+  --dt-spacing-2: 8px;
+  --dt-spacing-3: 12px;
+  --dt-spacing-4: 16px;
+  --dt-spacing-5: 20px;
+  --dt-spacing-6: 24px;
+  --dt-spacing-8: 32px;
+  --dt-spacing-10: 40px;
+
+  /* ============ 字体 - 钉钉7.6 ============ */
+  --dt-font-size-xs: 11px;
+  --dt-font-size-sm: 12px;
+  --dt-font-size-base: 14px;
+  --dt-font-size-lg: 16px;
+  --dt-font-size-xl: 18px;
+  --dt-font-size-2xl: 20px;
+
+  --dt-font-weight-normal: 400;
+  --dt-font-weight-medium: 500;
+  --dt-font-weight-semibold: 600;
+  --dt-font-weight-bold: 700;
+
+  --dt-line-height-tight: 1.2;
+  --dt-line-height-base: 1.5;
+  --dt-line-height-relaxed: 1.75;
+
+  /* ============ 布局尺寸 - 钉钉7.6 ============ */
+  /* 导航栏 - 可拖拽 (56-80px, 默认68px) */
+  --dt-nav-width: 68px;
+  --dt-nav-width-min: 56px;
+  --dt-nav-width-max: 80px;
+  --dt-nav-expanded-width: 192px;
+  --dt-nav-item-height: 48px;
+  --dt-nav-indicator-width: 3px;
+  --dt-nav-indicator-height: 20px;
+
+  /* 会话面板 - 可拖拽 (240-400px, 默认320px) */
+  --dt-session-width: 320px;
+  --dt-session-width-min: 240px;
+  --dt-session-width-max: 400px;
+  --dt-session-item-height: 64px;
+  --dt-session-avatar-size: 40px;
 
   /* 头部 */
-  --im-header-height: 48px;
-  --im-header-bg: #ffffff;
-  --im-header-border: #E6E6E6;
+  --dt-header-height: 48px;
 
-  /* 会话列表 */
-  --im-session-item-height: 64px;
-  --im-session-hover: rgba(0, 0, 0, 0.04);
-  --im-session-active: rgba(0, 137, 255, 0.1);
+  /* 聊天区域 */
+  --dt-chat-input-height: 120px;
+  --dt-chat-input-min-height: 80px;
+  --dt-chat-input-max-height: 200px;
+
+  /* 详情面板 */
+  --dt-detail-width: 280px;
+  --dt-detail-width-min: 240px;
+  --dt-detail-width-max: 400px;
+
+  /* ============ 消息气泡 - 钉钉7.6 ============ */
+  --dt-bubble-sent-bg: #0089FF;
+  --dt-bubble-sent-text: #FFFFFF;
+  --dt-bubble-received-bg: #FFFFFF;
+  --dt-bubble-received-text: #171A1A;
+  --dt-bubble-received-border: #E5E8EB;
+  --dt-bubble-padding: 10px 14px;
+  --dt-bubble-max-width: 480px;
+
+  /* ============ 在线状态 - 钉钉7.6 ============ */
+  --dt-status-online: #52C41A;
+  --dt-status-offline: #D9D9D9;
+  --dt-status-busy: #F5222D;
+  --dt-status-away: #FAAD14;
+
+  /* ============ 过渡动画 - 钉钉7.6 ============ */
+  --dt-transition-fast: 0.15s;
+  --dt-transition-base: 0.2s;
+  --dt-transition-slow: 0.3s;
+  --dt-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --dt-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ============ 兼容性别名 (逐步淘汰) ============ */
+  --im-primary-color: var(--dt-color-primary);
+  --im-primary-hover: var(--dt-color-primary-hover);
+  --im-primary-active: var(--dt-color-primary-active);
+  --im-primary-light: var(--dt-color-primary-light);
+  --im-text-primary: var(--dt-color-text-primary);
+  --im-text-secondary: var(--dt-color-text-secondary);
+  --im-bg-base: var(--dt-color-bg-secondary);
+  --im-bg-white: var(--dt-color-bg-primary);
+  --im-border-color: var(--dt-color-border);
+  --im-bubble-self: var(--dt-bubble-sent-bg);
+  --im-bubble-other: var(--dt-bubble-received-bg);
+  --im-nav-width: var(--dt-nav-width);
+  --im-header-height: var(--dt-header-height);
+  --im-session-item-height: var(--dt-session-item-height);
 }
 
-/* 暗色主题 */
+/* 暗色主题 - 钉钉7.6 */
 [data-theme='dark'] {
-  --im-primary-color: #177ddc;
-  --im-primary-hover: #3c9ae8;
-  --im-primary-light: #111b26;
+  /* 品牌色 */
+  --dt-color-primary: #177DDC;
+  --dt-color-primary-hover: #3C9AE8;
+  --dt-color-primary-active: #095CB5;
+  --dt-color-primary-light: rgba(23, 125, 220, 0.15);
 
-  --im-text-primary: #e6e6e6;
-  --im-text-secondary: #a6a6a6;
-  --im-text-placeholder: #666666;
+  /* AI助理主题色 */
+  --dt-color-ai-primary: #9254DE;
+  --dt-color-ai-hover: #B078EB;
 
-  --im-bg-base: #141414;
-  --im-bg-white: #1f1f1f;
-  --im-bg-hover: #2a2a2a;
-  --im-bg-active: #111b26;
+  /* 文字颜色 */
+  --dt-color-text-primary: #E8E8E8;
+  --dt-color-text-secondary: #A6A6A6;
+  --dt-color-text-tertiary: #7A7A7A;
+  --dt-color-text-quaternary: #5A5A5A;
 
-  --im-border-color: #303030;
-  --im-border-light: #262626;
+  /* 背景色 */
+  --dt-color-bg-primary: #1F1F1F;
+  --dt-color-bg-secondary: #141414;
+  --dt-color-bg-tertiary: #2A2A2A;
+  --dt-color-bg-hover: rgba(255, 255, 255, 0.08);
+  --dt-color-bg-active: rgba(23, 125, 220, 0.2);
 
-  --im-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --im-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --im-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
+  /* 边框 */
+  --dt-color-border: #303030;
+  --dt-color-border-light: #262626;
+  --dt-color-bubble-border: #404040;
 
-  --im-bubble-other: #2a2a2a;
-  --im-bubble-text-other: #e6e6e6;
-  --im-bubble-self: #1890ff;
+  /* 消息气泡 */
+  --dt-bubble-sent-bg: #177DDC;
+  --dt-bubble-received-bg: #2A2A2A;
+  --dt-bubble-received-text: #E8E8E8;
+
+  /* 阴影 */
+  --dt-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --dt-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --dt-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
+
+  /* 兼容性别名 */
+  --im-primary-color: var(--dt-color-primary);
+  --im-text-primary: var(--dt-color-text-primary);
+  --im-bg-base: var(--dt-color-bg-secondary);
+  --im-bg-white: var(--dt-color-bg-primary);
+  --im-bubble-other: var(--dt-bubble-received-bg);
+  --im-bubble-text-other: var(--dt-bubble-received-text);
 }
 
 /* 全局滚动条样式 */
@@ -144,6 +251,180 @@
 
   &::-webkit-scrollbar-corner {
     background: transparent;
+  }
+}
+
+/* ============ 消息气泡样式 - 钉钉7.6带尾巴 ============ */
+.dt-message-bubble {
+  position: relative;
+  padding: var(--dt-bubble-padding);
+  max-width: var(--dt-bubble-max-width);
+  font-size: var(--dt-font-size-base);
+  line-height: var(--dt-line-height-base);
+  word-wrap: break-word;
+  word-break: break-word;
+
+  /* 接收的消息气泡（白色，带边框，左边小尾巴） */
+  &.received {
+    background: var(--dt-bubble-received-bg);
+    border: 1px solid var(--dt-bubble-received-border);
+    border-radius: var(--dt-radius-bubble);
+    border-bottom-left-radius: var(--dt-radius-bubble-tail);
+    color: var(--dt-bubble-received-text);
+
+    /* 左侧小尾巴 - 边框层 */
+    &::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 14px;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 6px 8px 6px 0;
+      border-color: transparent var(--dt-bubble-received-border) transparent transparent;
+      filter: drop-shadow(-2px 0 1px rgba(0, 0, 0, 0.05));
+    }
+
+    /* 左侧小尾巴 - 背景层，覆盖边框 */
+    &::after {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 14px;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 6px 7px 6px 0;
+      border-color: transparent var(--dt-bubble-received-bg) transparent transparent;
+    }
+  }
+
+  /* 发送的消息气泡（蓝色，右边小尾巴） */
+  &.sent {
+    background: var(--dt-bubble-sent-bg);
+    border-radius: var(--dt-radius-bubble);
+    border-bottom-right-radius: var(--dt-radius-bubble-tail);
+    color: var(--dt-bubble-sent-text);
+
+    /* 右侧小尾巴 */
+    &::before {
+      content: '';
+      position: absolute;
+      right: -7px;
+      top: 14px;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 6px 0 6px 7px;
+      border-color: transparent transparent transparent var(--dt-bubble-sent-bg);
+    }
+  }
+
+  /* 特殊类型消息（图片、文件等）不加尾巴 */
+  &.image,
+  &.file,
+  &.voice {
+    border-radius: var(--dt-radius-lg);
+    border-bottom-left-radius: var(--dt-radius-lg);
+    border-bottom-right-radius: var(--dt-radius-lg);
+
+    &::before,
+    &::after {
+      display: none;
+    }
+  }
+}
+
+/* 消息容器 - 钉钉7.6布局 */
+.dt-message-container {
+  display: flex;
+  margin-bottom: var(--dt-spacing-4);
+  animation: im-message-slide-in 0.3s ease-out;
+
+  /* 接收消息 - 左对齐 */
+  &.received {
+    flex-direction: row;
+
+    .dt-message-avatar {
+      margin-right: var(--dt-spacing-3);
+    }
+
+    .dt-message-bubble {
+      margin-left: var(--dt-spacing-2);
+    }
+  }
+
+  /* 发送消息 - 右对齐 */
+  &.sent {
+    flex-direction: row-reverse;
+
+    .dt-message-avatar {
+      margin-left: var(--dt-spacing-3);
+    }
+
+    .dt-message-bubble {
+      margin-right: var(--dt-spacing-2);
+    }
+  }
+}
+
+/* 消息头像 */
+.dt-message-avatar {
+  width: var(--dt-session-avatar-size);
+  height: var(--dt-session-avatar-size);
+  border-radius: var(--dt-radius-full);
+  flex-shrink: 0;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* 消息悬浮操作栏 - 钉钉7.6 */
+.dt-message-actions {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  align-items: center;
+  gap: var(--dt-spacing-2);
+  padding: var(--dt-spacing-1) var(--dt-spacing-3);
+  background: var(--dt-color-bg-primary);
+  border: 1px solid var(--dt-color-border);
+  border-radius: var(--dt-radius-full);
+  box-shadow: var(--dt-shadow-md);
+  opacity: 0;
+  transition: opacity var(--dt-transition-base) var(--dt-ease-out);
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--dt-radius-sm);
+    color: var(--dt-color-text-secondary);
+    cursor: pointer;
+    transition: all var(--dt-transition-fast);
+
+    &:hover {
+      background: var(--dt-color-bg-hover);
+      color: var(--dt-color-text-primary);
+    }
+  }
+}
+
+.dt-message-bubble-wrapper {
+  position: relative;
+
+  &:hover .dt-message-actions {
+    display: flex;
+    opacity: 1;
   }
 }
 
