@@ -41,6 +41,9 @@
           <el-button :icon="Plus" text class="header-action-btn" @click="showStartChatDialog" />
         </el-tooltip>
 
+        <!-- 主题切换 -->
+        <ThemeSwitch />
+
         <!-- 设置 -->
         <el-dropdown trigger="click" placement="bottom-end" @command="handleSettingsCommand">
           <div class="header-action-wrapper">
@@ -108,14 +111,12 @@
         <!-- 用户下拉 -->
         <el-dropdown trigger="click" placement="bottom-end" @command="handleUserCommand">
           <div class="header-user">
-            <SmartAvatar
+            <DtAvatar
               :name="currentUser?.name"
               :avatar="currentUser?.avatar"
               :size="32"
-              :show-border="true"
-              :show-online="true"
-              :online="currentOnlineStatus === 'online'"
-              :online-status="currentOnlineStatus"
+              :show-status="true"
+              :status="currentOnlineStatus === 'online' ? 'online' : 'offline'"
               class="user-avatar"
             />
             <span class="header-username">{{ currentUser?.name || '用户' }}</span>
@@ -275,12 +276,11 @@
                   <!-- 头像容器（支持在线状态指示器） -->
                   <el-badge :value="session.unreadCount" :hidden="session.unreadCount === 0" :max="99">
                     <div class="session-avatar">
-                      <SmartAvatar
+                      <DtAvatar
                         :name="session.name"
                         :avatar="session.avatar"
-                        :size="40"  // 钉钉7.6规范：头像尺寸40×40px
-                        :show-border="true"
-                        :show-online="false"
+                        :size="40"
+                        :show-status="false"
                         class="avatar-inner"
                       />
                       <!-- 在线状态指示器（钉钉7.6样式） -->
@@ -326,12 +326,10 @@
                  <div class="chat-info">
                    <div class="chat-avatar-group" @click="showChatProfile">
                      <el-badge :value="currentSession?.unreadCount || 0" :hidden="!(currentSession?.unreadCount > 0)" :max="99">
-                       <SmartAvatar
+                       <DtAvatar
                          :name="currentSession?.name"
                          :avatar="currentSession?.avatar"
                          :size="32"
-                         :show-border="true"
-                         :show-online="false"
                        />
                      </el-badge>
                      <el-icon v-if="currentSession?.type === 'GROUP'" class="group-badge"><User /></el-icon>
@@ -377,6 +375,14 @@
                           <el-icon><User /></el-icon>
                           查看成员
                         </el-dropdown-item>
+                        <el-dropdown-item @click="showGroupAnnouncement" v-if="currentSession?.type === 'GROUP'">
+                          <el-icon><Bell /></el-icon>
+                          群公告
+                        </el-dropdown-item>
+                        <el-dropdown-item @click="showGroupFiles" v-if="currentSession?.type === 'GROUP'">
+                          <el-icon><Folder /></el-icon>
+                          群文件
+                        </el-dropdown-item>
                         <el-dropdown-item divided @click="clearChatHistory">
                           <el-icon><Delete /></el-icon>
                           清空聊天记录
@@ -401,28 +407,23 @@
                 <div
                   v-for="msg in messages"
                   :key="msg.id || msg.clientMsgId"
+                  :data-message-id="msg.id"
                   class="message-item"
                   :class="{ isOwn: msg.isOwn || msg.senderId === currentUser?.userId }"
                 >
                   <!-- 对方消息的左侧头像 -->
-                  <SmartAvatar
+                  <DtAvatar
                     v-if="!msg.isOwn && !(msg.senderId === currentUser?.userId)"
                     :name="msg.senderName || msg.sender?.name"
                     :avatar="msg.senderAvatar || msg.avatar"
                     :size="36"
-                    :show-border="true"
-                    :show-online="false"
-                    class="message-avatar"
                   />
                   <!-- 自己消息的右侧头像（放在内容前面，确保右对齐时头像在右边） -->
-                  <SmartAvatar
+                  <DtAvatar
                     v-if="msg.isOwn || msg.senderId === currentUser?.userId"
                     :name="currentUser?.nickName || currentUser?.userName || '我'"
                     :avatar="currentUser?.avatar || msg.senderAvatar || msg.avatar"
                     :size="36"
-                    :show-border="true"
-                    :show-online="false"
-                    class="message-avatar own-avatar"
                   />
                   <div class="message-content" @click.right.prevent="showMessageMenu($event, msg)">
                     <div
@@ -433,10 +434,13 @@
                     </div>
 
                     <!-- 引用回复内容 -->
-                    <div v-if="msg.replyTo" class="message-quote">
-                      <div class="quote-title">{{ msg.replyTo.senderName }}:</div>
-                      <div class="quote-content">{{ msg.replyTo.content }}</div>
-                    </div>
+                    <QuoteMessage
+                      v-if="msg.replyTo"
+                      :sender-name="msg.replyTo.senderName"
+                      :content="msg.replyTo.content"
+                      :message-id="msg.replyTo.id"
+                      @click-quote="scrollToMessage"
+                    />
 
                     <!-- 文本消息 -->
                     <div
@@ -482,14 +486,21 @@
                     </div>
 
                     <!-- 语音消息 -->
-                    <div
+                    <VoiceMessage
                       v-else-if="msg.type === 'voice'"
-                      class="message-voice"
-                      :class="{ sending: msg.status === 'sending' }"
-                    >
-                      <el-icon class="voice-icon"><Microphone /></el-icon>
-                      <span class="voice-duration">{{ msg.duration || 0 }}''</span>
-                    </div>
+                      :duration="msg.duration || 0"
+                      :url="msg.url"
+                      :is-sending="msg.status === 'sending'"
+                    />
+
+                    <!-- 链接卡片消息 -->
+                    <LinkCardMessage
+                      v-else-if="msg.type === 'link'"
+                      :url="msg.url"
+                      :title="msg.title"
+                      :description="msg.description"
+                      :image="msg.image"
+                    />
 
                     <!-- 其他类型 -->
                     <div
@@ -2317,6 +2328,20 @@
       :conversation-id="detailConversationId"
       @refresh="handleRefreshAfterGroupAction"
     />
+
+    <!-- 群公告弹窗 -->
+    <GroupAnnouncement
+      v-model:visible="groupAnnouncementVisible"
+      :announcement="currentGroupAnnouncement"
+      @read="handleAnnouncementRead"
+    />
+
+    <!-- 群文件抽屉 -->
+    <GroupFiles
+      v-model:visible="groupFilesVisible"
+      :group-id="currentSession?.targetId"
+      :conversation-id="currentSessionId"
+    />
   </div>
 </template>
 
@@ -2421,6 +2446,17 @@ import FeedbackDialog from '@/components/Feedback/FeedbackDialog.vue'
 import CallManager from '@/components/Chat/CallManager.vue'
 import UserDetailDialog from '@/views/im/conversation-detail/UserDetailDialog.vue'
 import GroupDetailDialog from '@/views/im/conversation-detail/GroupDetailDialog.vue'
+// 新增消息组件
+import VoiceMessage from '@/components/Message/VoiceMessage.vue'
+import LinkCardMessage from '@/components/Message/LinkCardMessage.vue'
+import QuoteMessage from '@/components/Message/QuoteMessage.vue'
+// 群组组件
+import GroupAnnouncement from '@/components/Group/GroupAnnouncement.vue'
+import GroupFiles from '@/components/Group/GroupFiles.vue'
+// 头像组件
+import DtAvatar from '@/components/Chat/DtAvatar.vue'
+// 主题切换组件
+import ThemeSwitch from '@/components/ThemeSwitch/index.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -2473,6 +2509,11 @@ const groupDetailVisible = ref(false)
 const detailUserId = ref(null)
 const detailGroupId = ref(null)
 const detailConversationId = ref(null)
+
+// 群公告和群文件
+const groupAnnouncementVisible = ref(false)
+const groupFilesVisible = ref(false)
+const currentGroupAnnouncement = ref(null)
 
 // 语音录制
 const {
@@ -3454,6 +3495,12 @@ let clockInterval = null
 onMounted(() => {
   updateTime()
   clockInterval = setInterval(updateTime, 1000)
+
+  // 初始化主题
+  const savedTheme = localStorage.getItem('app-theme')
+  if (savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme)
+  }
 
   // 全局快捷键支持
   const handleGlobalKeydown = (e) => {
@@ -6215,6 +6262,44 @@ const viewChatMembers = () => {
   ElMessage.info('查看成员功能开发中...')
 }
 
+// 显示群公告
+const showGroupAnnouncement = () => {
+  // TODO: 从API获取群公告数据
+  currentGroupAnnouncement.value = {
+    title: '欢迎使用钉钉IM',
+    content: '这是一个基于钉钉7.6风格的IM系统，支持群聊、语音通话、视频通话等功能。',
+    publisher: '系统管理员',
+    publishTime: new Date().toISOString(),
+  }
+  groupAnnouncementVisible.value = true
+}
+
+// 显示群文件
+const showGroupFiles = () => {
+  groupFilesVisible.value = true
+}
+
+// 处理公告已读
+const handleAnnouncementRead = () => {
+  groupAnnouncementVisible.value = false
+  // TODO: 标记公告为已读
+}
+
+// 滚动到指定消息
+const scrollToMessage = (messageId) => {
+  const messageElement = document.querySelector(`[data-message-id="${messageId}"]`)
+  if (messageElement) {
+    messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    // 高亮消息
+    messageElement.classList.add('highlight-message')
+    setTimeout(() => {
+      messageElement.classList.remove('highlight-message')
+    }, 2000)
+  } else {
+    ElMessage.info('未找到原始消息')
+  }
+}
+
 const clearChatHistory = async () => {
   try {
     await ElMessageBox.confirm('确定要清空聊天记录吗？此操作不可恢复。', '清空聊天记录', {
@@ -6874,57 +6959,58 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 @use 'sass:color';
 
-// ==================== 钉钉PC客户端 设计规范变量 ====================
-// 布局尺寸（严格按照钉钉PC客户端实际测量）
-$nav-width-narrow: 68px;     // 左侧导航栏宽度（窄模式-仅图标）- 钉钉规范68px
+ // ==================== 钉钉PC客户端 设计规范变量 ====================
+// 布局尺寸（严格按照钉钉PC客户端6.5.x实际测量）
+$nav-width-narrow: 60px;     // 左侧导航栏宽度（窄模式-仅图标）- 钉钉6.5.x规范60px
 $nav-width-wide: 180px;      // 左侧导航栏宽度（宽模式-图标+文字）
 $nav-width: $nav-width-narrow; // 当前使用窄模式
 $header-height: 48px;        // 顶部导航栏高度
-$session-panel-width: 240px; // 会话列表宽度（固定）- 钉钉规范240px
+$session-panel-width: 320px; // 会话列表宽度（固定）- 钉钉6.5.x规范320px
 $chat-panel-min-width: 400px; // 聊天区域最小宽度
-$nav-item-size: 48px;         // 导航项尺寸 - 钉钉规范48×48px
-$chat-header-height: 56px;    // 聊天头部高度 - 钉钉规范56px
-$input-bar-height: 48px;      // 输入栏高度 - 钉钉规范48px
+$nav-item-size: 48px;         // 导航项尺寸 - 钉钉6.5.x规范48×48px
+$chat-header-height: 56px;    // 聊天头部高度 - 钉钉6.5.x规范56px
+$input-bar-height: 48px;      // 输入栏高度 - 钉钉6.5.x规范48px
 $search-bar-height: 36px;     // 搜索栏高度
-$session-item-height: 56px;   // 会话项高度 - 钉钉规范56px
+$session-item-height: 64px;   // 会话项高度 - 钉钉6.5.x规范64px
 
-// 品牌色系（钉钉5.6标准色）
-$primary-color: #0089FF;     // 钉钉蓝（主色）- 5.6版本
-$primary-color-hover: #0077E0;
-$primary-color-active: #0066C2;
-$primary-color-light: rgba(0, 137, 255, 0.1); // 浅蓝（选中背景）- 钉钉规范10%透明度
-$primary-disabled: #D9D9D9;
+// 品牌色系（钉钉6.5.x标准色）
+$primary-color: #1677ff;     // 钉钉蓝（主色）- 6.5.x版本
+$primary-color-hover: #4096ff;
+$primary-color-active: #0958d9;
+$primary-color-light: rgba(22, 119, 255, 0.1); // 浅蓝（选中背景）- 钉钉6.5.x规范10%透明度
+$primary-color-lighter: #e6f7ff;
+$primary-disabled: #d9d9d9;
 
-// 中性色系（钉钉规范）
-$text-primary: #262626;      // 主要文字 - 钉钉规范标题色
-$text-secondary: #333333;     // 正文内容 - 钉钉规范正文色
-$text-regular: #666666;       // 副标题、次要信息 - 钉钉规范次要文字
-$text-tertiary: #999999;      // 时间戳、提示信息 - 钉钉规范辅助文字
-$text-disabled: #CCCCCC;      // 禁用状态
-$text-placeholder: #999999;   // 占位符 - 钉钉规范辅助文字
+// 中性色系（钉钉6.5.x规范）
+$text-primary: #262626;      // 主要文字 - 钉钉6.5.x规范标题色
+$text-secondary: #595959;     // 正文内容 - 钉钉6.5.x规范正文色
+$text-regular: #666666;       // 副标题、次要信息 - 钉钉6.5.x规范次要文字
+$text-tertiary: #8c8c8c;      // 时间戳、提示信息 - 钉钉6.5.x规范辅助文字
+$text-disabled: #d9d9d9;      // 禁用状态
+$text-placeholder: #bfbfbf;   // 占位符 - 钉钉6.5.x规范辅助文字
 
 $bg-white: #FFFFFF;
-$bg-gray: #F5F7FA;           // 页面整体背景（钉钉浅灰）
+$bg-gray: #f0f2f5;           // 页面整体背景（钉钉6.5.x浅灰）
 $bg-light: #FAFAFA;          // 卡片、面板背景
-$bg-hover: #F5F7FA;          // 悬停背景（钉钉浅灰）
-$bg-nav-narrow: #F5F7FA;     // 导航栏窄模式背景
+$bg-hover: #f5f7fa;          // 悬停背景（钉钉6.5.x浅灰）
+$bg-nav-narrow: #ffffff;     // 导航栏窄模式背景 - 钉钉6.5.x白色
 $bg-nav-wide: #FFFFFF;       // 导航栏宽模式背景
 
-$border-color: #E8E8E8;      // 分割线、边框 - 钉钉规范边框色
-$border-hover: #D9D9D9;      // 边框悬停
+$border-color: #f0f0f0;      // 分割线、边框 - 钉钉6.5.x规范边框色
+$border-hover: #d9d9d9;      // 边框悬停
 
-// 功能色
-$success-color: #00C853;  // 钉钉5.6成功绿
-$warning-color: #FF9800;  // 钉钉5.6警告橙
-$danger-color: #F5222D;   // 钉钉5.6危险红
-$info-color: #0089FF;     // 钉钉5.6信息蓝
+// 功能色（钉钉6.5.x规范）
+$success-color: #52c41a;  // 钉钉6.5.x成功绿
+$warning-color: #faad14;  // 钉钉6.5.x警告橙
+$danger-color: #ff4d4f;   // 钉钉6.5.x危险红
+$info-color: #1677ff;     // 钉钉6.5.x信息蓝
 
-// 导航栏颜色
+// 导航栏颜色（钉钉6.5.x规范）
 $nav-bg: #FFFFFF;
-$nav-item-hover: #F5F5F5;
-$nav-item-active: rgba(0, 137, 255, 0.1); // 导航激活背景 - 钉钉5.6规范
-$nav-item-icon: #8B95A1;    // 导航图标颜色 - 钉钉规范灰色
-$nav-item-icon-active: #0089FF;
+$nav-item-hover: rgba(0, 0, 0, 0.04);
+$nav-item-active: rgba(22, 119, 255, 0.1); // 导航激活背景 - 钉钉6.5.x规范
+$nav-item-icon: #8c8c8c;    // 导航图标颜色 - 钉钉6.5.x规范灰色
+$nav-item-icon-active: #1677ff;
 
 // 消息气泡颜色（钉钉5.6规范）
 $message-sent-bg: #0089FF;         // 发送方：钉钉蓝5.6版本
@@ -7401,29 +7487,30 @@ $avatar-xl: 64px;
 
       .nav-list {
         flex: 1;
-        padding: 12px 0;
+        padding: 8px 0;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 4px;
+        gap: 0;
         overflow-y: auto;
         overflow-x: hidden;
 
         .nav-item {
-          width: 48px;    // 钉钉规范：导航项尺寸48×48px
-          height: 48px;   // 钉钉规范：导航项尺寸48×48px
+          width: 48px;    // 钉钉6.5.x规范：导航项尺寸48×48px
+          height: 48px;   // 钉钉6.5.x规范：导航项尺寸48×48px
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
           color: $nav-item-icon;
-          border-radius: 4px;
-          transition: all 0.2s ease;
+          border-radius: 6px;
+          transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
           position: relative;
+          margin: 4px 6px;
 
           .nav-icon {
-            font-size: 24px;  // 钉钉规范：图标24×24px
-            transition: all 0.2s ease;
+            font-size: 22px;  // 钉钉6.5.x规范：图标22×22px
+            transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
           }
 
           // AI助理图标样式（钉钉7.6.45+新增）
@@ -7441,24 +7528,40 @@ $avatar-xl: 64px;
           // 未读红点
           .nav-dot {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 8px;
-            height: 8px;
-            background: #F5222D;  // 钉钉危险红
+            top: 8px;
+            right: 8px;
+            width: 10px;
+            height: 10px;
+            background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);  // 钉钉6.5.x危险红渐变
             border-radius: 50%;
-            border: 1px solid $bg-nav-narrow;
+            border: 2px solid $bg-nav-narrow;
+            box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+            animation: badgePop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
           }
 
           &:hover {
-            background: rgba(0, 0, 0, 0.04);
+            background: $nav-item-hover;
+
+            .nav-icon {
+              color: $primary-color;
+              transform: scale(1.05);
+            }
+          }
+
+          &:active {
+            transform: scale(0.95);
+            animation: navClick 0.2s ease;
           }
 
           &.active {
-            background: $primary-color-light;
+            background: $nav-item-active;
             color: $nav-item-icon-active;
 
-            // 左侧指示条（钉钉7.6样式）
+            .nav-icon {
+              color: $nav-item-icon-active;
+            }
+
+            // 左侧指示条（钉钉6.5.x样式）
             &::before {
               content: '';
               position: absolute;
@@ -7466,9 +7569,9 @@ $avatar-xl: 64px;
               top: 50%;
               transform: translateY(-50%);
               width: 3px;
-              height: 20px;
-              background: $primary-color;
-              border-radius: 0 2px 2px 0;
+              height: 24px;
+              background: linear-gradient(180deg, $primary-color 0%, $primary-color-hover 100%);
+              border-radius: 0 3px 3px 0;
             }
           }
 
@@ -7482,7 +7585,7 @@ $avatar-xl: 64px;
           }
         }
 
-        // 导航栏拖拽手柄（钉钉7.6新功能）
+        // 导航栏拖拽手柄（钉钉6.5.x新功能）
         .nav-resize-handle {
           position: absolute;
           right: 0;
@@ -7491,11 +7594,15 @@ $avatar-xl: 64px;
           width: 4px;
           cursor: col-resize;
           background: transparent;
-          transition: background 0.2s;
+          transition: background 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
           z-index: 10;
 
           &:hover {
-            background: var(--dt-color-primary, #0089FF);
+            background: $primary-color;
+          }
+
+          &:active {
+            background: $primary-color-active;
           }
         }
       }
@@ -9640,7 +9747,30 @@ $avatar-xl: 64px;
     .main-body {
       .nav-sidebar {
         &.collapsed {
-          width: 48px;
+          width: 60px;  // 钉钉6.5.x移动端规范：导航栏宽度60px
+        }
+
+        .nav-list {
+          .nav-item {
+            width: 44px;   // 移动端缩小导航项尺寸
+            height: 44px;
+
+            .nav-icon {
+              font-size: 20px;  // 移动端缩小图标尺寸
+            }
+
+            .nav-dot {
+              width: 8px;
+              height: 8px;
+              top: 6px;
+              right: 6px;
+            }
+
+            &.active::before {
+              width: 2px;
+              height: 20px;
+            }
+          }
         }
       }
 
@@ -10958,6 +11088,24 @@ $avatar-xl: 64px;
   }
 }
 
+// 消息高亮动画
+@keyframes highlight-pulse {
+  0% {
+    background-color: rgba(0, 137, 255, 0.2);
+  }
+  50% {
+    background-color: rgba(0, 137, 255, 0.4);
+  }
+  100% {
+    background-color: rgba(0, 137, 255, 0.2);
+  }
+}
+
+.highlight-message {
+  animation: highlight-pulse 1s ease-in-out 3;
+  border-radius: 8px;
+}
+
 // 旋转动画（加载状态）
 @keyframes spin {
   0% {
@@ -11347,6 +11495,45 @@ $avatar-xl: 64px;
       :deep(.el-time-picker) {
         width: 140px;
       }
+    }
+  }
+
+  // ==================== 钉钉6.5.x 特有动画 ====================
+
+  // 导航项点击动画
+  @keyframes navClick {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(0.95);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  // 徽章弹出动画
+  @keyframes badgePop {
+    0% {
+      transform: scale(0);
+    }
+    50% {
+      transform: scale(1.3);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  // 图标hover弹跳动画
+  @keyframes iconBounce {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
     }
   }
 }

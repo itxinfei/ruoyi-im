@@ -3,24 +3,82 @@
 
 @use 'sass:color';
 
-// ============ Colors ============
-// 主色系（钉钉5.6 PC版规范）
-$primary-color: #0089FF;
-$primary-color-light: rgba(0, 137, 255, 0.1);
-$primary-color-lighter: #f0f9ff;
-$primary-color-dark: #0077E0;
-$primary-color-active: #0066C2;
+// ============ CSS Variables (Runtime Theme Support) ============
+:root {
+  // 主色系
+  --dd-primary: #1677ff;
+  --dd-primary-hover: #4096ff;
+  --dd-primary-active: #0958d9;
+  --dd-primary-light: rgba(22, 119, 255, 0.1);
+  --dd-primary-lighter: #e6f7ff;
+
+  // 功能色
+  --dd-success: #52c41a;
+  --dd-warning: #faad14;
+  --dd-error: #ff4d4f;
+  --dd-info: #1677ff;
+
+  // 文字颜色
+  --dd-text-primary: #262626;
+  --dd-text-secondary: #595959;
+  --dd-text-tertiary: #8c8c8c;
+  --dd-text-placeholder: #bfbfbf;
+  --dd-text-disabled: #d9d9d9;
+
+  // 背景色
+  --dd-bg-white: #ffffff;
+  --dd-bg-base: #f0f2f5;
+  --dd-bg-hover: #f5f7fa;
+  --dd-bg-disabled: #f5f5f5;
+  --dd-bg-mask: rgba(0, 0, 0, 0.45);
+
+  // 边框色
+  --dd-border-base: #d9d9d9;
+  --dd-border-dark: #bfbfbf;
+
+  // 圆角
+  --dd-radius-sm: 4px;
+  --dd-radius-base: 6px;
+  --dd-radius-lg: 8px;
+  --dd-radius-xl: 12px;
+
+  // 阴影
+  --dd-shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --dd-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --dd-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+// 暗色主题
+[data-theme='dark'] {
+  --dd-text-primary: #e8e8e8;
+  --dd-text-secondary: #b8b8b8;
+  --dd-text-tertiary: #8c8c8c;
+  --dd-bg-white: #1f1f1f;
+  --dd-bg-base: #141414;
+  --dd-bg-hover: #262626;
+  --dd-border-base: #303030;
+  --dd-border-dark: #404040;
+}
+
+// ============ SCSS Variables (Build Time) ============
+// 主色系（钉钉6.5.x规范）
+$primary-color: #1677ff;        // 钉钉蓝
+$primary-color-light: rgba(22, 119, 255, 0.1);
+$primary-color-lighter: #e6f7ff;
+$primary-color-dark: #0958d9;
+$primary-color-active: #0958d9;
+$primary-hover: #4096ff;
 
 // 功能色
-$success-color: #00C853;
-$warning-color: #FF9800;
-$error-color: #F5222D;
-$info-color: #0089FF;
+$success-color: #52c41a;
+$warning-color: #faad14;
+$error-color: #ff4d4f;
+$info-color: #1677ff;
 
 // 中性色（钉钉规范）
 $text-primary: #262626;      // 标题色
-$text-secondary: #333333;     // 正文色
-$text-tertiary: #999999;      // 辅助文字/时间戳
+$text-secondary: #595959;     // 正文色
+$text-tertiary: #8c8c8c;      // 辅助文字/时间戳
 $text-placeholder: #bfbfbf;
 $text-regular: #666666;       // 次要文字
 $text-disabled: #d9d9d9;
@@ -33,8 +91,8 @@ $bg-disabled: #f5f5f5;
 $bg-mask: rgba(0, 0, 0, 0.45);
 
 $border-light: #f0f0f0;
-$border-base: #E8E8E8;       // 钉钉边框色
-$border-dark: #d9d9d9;
+$border-base: #d9d9d9;       // 钉钉边框色
+$border-dark: #bfbfbf;
 
 // ============ Navigation Rail ============
 // 布局尺寸（钉钉PC客户端规范）
@@ -374,6 +432,94 @@ $z-index-tooltip: 1070;
   }
 }
 
+// ============ DingTalk-specific Interaction Mixins ============
+
+// 消息气泡动画
+@mixin bubble-animation {
+  animation: bubbleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+// 导航点击反馈
+@mixin nav-click-feedback {
+  &:active {
+    animation: navClick 0.2s ease;
+  }
+}
+
+// 徽章弹出动画
+@mixin badge-pop-animation {
+  animation: badgePop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+// 在线状态脉冲
+@mixin online-pulse {
+  animation: onlinePulse 2s ease-in-out infinite;
+}
+
+// 卡片悬停效果
+@mixin card-hover-effect {
+  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  }
+}
+
+// 按钮点击涟漪
+@mixin button-ripple {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 50%;
+    left: 50%;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform 0.5s, opacity 1s;
+  }
+
+  &:active::after {
+    transform: scale(0, 0);
+    opacity: 0.3;
+    transition: 0s;
+  }
+}
+
+// 下拉菜单滑入
+@mixin dropdown-slide-in {
+  animation: dropdownSlideDown 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+// 表情弹跳动画
+@mixin emoji-bounce {
+  &:hover {
+    animation: emojiBounce 0.3s ease;
+  }
+}
+
+// 搜索框聚焦效果
+@mixin search-focus-effect {
+  transition: all 0.2s ease;
+
+  &:focus {
+    animation: searchFocus 0.2s ease;
+  }
+}
+
+// 消息淡入淡出
+@mixin message-fade-in-out {
+  animation: messageFade 3s ease;
+}
+
 // ============ Global Styles ============
 
 * {
@@ -537,5 +683,146 @@ body {
   100% {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+// 钉钉特有的微交互动画
+
+// 消息气泡出现动画
+@keyframes bubbleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  50% {
+    transform: scale(1.02) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// 导航项点击反馈动画
+@keyframes navClick {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// 徽章弹出动画
+@keyframes badgePop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// 在线状态脉冲动画
+@keyframes onlinePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(82, 196, 26, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0);
+  }
+}
+
+// 卡片悬停提升动画
+@keyframes cardHover {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-2px);
+  }
+}
+
+// 按钮点击涟漪效果
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+// 下拉菜单滑入动画
+@keyframes dropdownSlideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 表情动画
+@keyframes emojiBounce {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+// 加载旋转动画（钉钉风格）
+@keyframes spinDing {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// 提示框淡入淡出动画
+@keyframes messageFade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+// 搜索框聚焦动画
+@keyframes searchFocus {
+  0% {
+    box-shadow: 0 0 0 0 rgba(22, 119, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
   }
 }

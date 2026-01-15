@@ -336,6 +336,88 @@ class WebRTCService {
       return null
     }
   }
+
+  /**
+   * 创建模拟视频流（用于测试）
+   * @param {Object} options - 选项
+   * @param {number} options.duration - 测试时长（秒）
+   * @param {boolean} options.withAudio - 是否包含音频
+   * @returns {MediaStream} 模拟媒体流
+   */
+  createMockStream(options = {}) {
+    const { duration = 30, withAudio = false } = options
+
+    // 创建Canvas绘制模拟视频
+    const canvas = document.createElement('canvas')
+    canvas.width = 640
+    canvas.height = 480
+    const ctx = canvas.getContext('2d')
+
+    let frame = 0
+    const drawFrame = () => {
+      // 绘制渐变背景
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
+      gradient.addColorStop(0, '#0089FF')
+      gradient.addColorStop(1, '#00A0FF')
+      ctx.fillStyle = gradient
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      // 绘制文字
+      ctx.fillStyle = '#fff'
+      ctx.font = 'bold 32px Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText('测试视频', canvas.width / 2, canvas.height / 2 - 20)
+
+      ctx.font = '18px Arial'
+      ctx.fillText(`帧: ${frame}`, canvas.width / 2, canvas.height / 2 + 20)
+
+      frame++
+    }
+
+    // 启动动画
+    const interval = setInterval(drawFrame, 33) // 30fps
+
+    // 获取Canvas流
+    const stream = canvas.captureStream(30)
+    this.localStream = stream
+
+    // 添加音频轨道（如果需要）
+    if (withAudio) {
+      const audioContext = new AudioContext()
+      const oscillator = audioContext.createOscillator()
+      const destination = audioContext.createMediaStreamDestination()
+      oscillator.connect(destination)
+      oscillator.start()
+      stream.addTrack(destination.stream.getAudioTracks()[0])
+    }
+
+    // 自动停止
+    setTimeout(() => {
+      clearInterval(interval)
+      stream.getTracks().forEach(track => track.stop())
+    }, duration * 1000)
+
+    return stream
+  }
+
+  /**
+   * 检查浏览器支持
+   * @returns {Object} 支持情况
+   */
+  checkBrowserSupport() {
+    const support = {
+      getUserMedia: !!navigator.mediaDevices?.getUserMedia,
+      getDisplayMedia: !!navigator.mediaDevices?.getDisplayMedia,
+      enumerateDevices: !!navigator.mediaDevices?.enumerateDevices,
+      rtcPeerConnection: !!window.RTCPeerConnection,
+      rtcDataChannel: !!window.RTCDataChannel
+    }
+
+    support.allSupported = Object.values(support).every(v => v)
+
+    return support
+  }
 }
 
 export default new WebRTCService()

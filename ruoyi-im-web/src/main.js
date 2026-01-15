@@ -5,6 +5,10 @@ import 'element-plus/dist/index.css'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+
+// 钉钉6.5.x样式系统 - 必须在其他样式之前引入
+import '@/styles/dingtalk-index.scss'
+
 import '@/assets/styles/index.scss'
 import '@/assets/styles/variables.scss'
 import '@/assets/styles/components/_button.scss'

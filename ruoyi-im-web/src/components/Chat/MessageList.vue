@@ -46,7 +46,7 @@
           :key="message.id"
           :message="message"
           :is-mine="String(message.senderId) === String(currentUserId)"
-          :show-sender="isGroup"
+          :show-sender-info="isGroup"
           @resend="handleResend"
           @download-file="handleDownload"
           @show-location="handleShowLocation"
