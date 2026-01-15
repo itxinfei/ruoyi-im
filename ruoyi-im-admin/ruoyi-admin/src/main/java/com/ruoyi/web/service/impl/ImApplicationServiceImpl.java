@@ -18,6 +18,31 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     private ImApplicationMapper applicationMapper;
 
     @Override
+    public List<ImApplication> selectImApplicationList(ImApplication imApplication) {
+        return applicationMapper.selectImApplicationList(imApplication);
+    }
+
+    @Override
+    public ImApplication selectImApplicationById(Long id) {
+        return applicationMapper.selectImApplicationById(id);
+    }
+
+    @Override
+    public int insertImApplication(ImApplication imApplication) {
+        return applicationMapper.insertImApplication(imApplication);
+    }
+
+    @Override
+    public int updateImApplication(ImApplication imApplication) {
+        return applicationMapper.updateImApplication(imApplication);
+    }
+
+    @Override
+    public int deleteImApplicationByIds(Long[] ids) {
+        return applicationMapper.deleteImApplicationByIds(ids);
+    }
+
+    @Override
     public List<ImApplication> getApplications(String category) {
         return applicationMapper.getApplications(category);
     }
@@ -25,11 +50,6 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     @Override
     public Map<String, List<ImApplication>> getApplicationsByCategory() {
         return applicationMapper.getApplicationsByCategory();
-    }
-
-    @Override
-    public ImApplication getApplicationById(Long id) {
-        return applicationMapper.getApplicationById(id);
     }
 
     @Override
@@ -41,18 +61,23 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         app.setAppType(appType);
         app.setAppUrl(appUrl);
         app.setIcon(icon);
-        applicationMapper.insertApplication(app);
+        applicationMapper.insertImApplication(app);
         return app.getId();
     }
 
     @Override
     public void updateApplication(Long id, String name, String description, String icon) {
-        applicationMapper.updateApplication(id, name, description, icon);
+        ImApplication app = new ImApplication();
+        app.setId(id);
+        app.setName(name);
+        app.setDescription(description);
+        app.setIcon(icon);
+        applicationMapper.updateImApplication(app);
     }
 
     @Override
     public void deleteApplication(Long id) {
-        applicationMapper.deleteApplication(id);
+        applicationMapper.deleteImApplicationByIds(new Long[]{id});
     }
 
     @Override

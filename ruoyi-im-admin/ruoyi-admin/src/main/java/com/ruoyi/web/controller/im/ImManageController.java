@@ -16,30 +16,12 @@ public class ImManageController
     private String prefix = "im";
 
     /**
-     * 用户管理页面
-     */
-    @GetMapping("/user")
-    public String user()
-    {
-        return prefix + "/user/user";
-    }
-
-    /**
      * 消息管理页面
      */
     @GetMapping("/message")
     public String message()
     {
         return prefix + "/message/message";
-    }
-
-    /**
-     * 群组管理页面
-     */
-    @GetMapping("/group")
-    public String group()
-    {
-        return prefix + "/group/group";
     }
 
     /**

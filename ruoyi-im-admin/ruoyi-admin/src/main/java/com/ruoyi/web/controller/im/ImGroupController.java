@@ -8,6 +8,7 @@ import com.ruoyi.web.domain.ImGroup;
 import com.ruoyi.web.service.ImGroupService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -19,9 +20,20 @@ import java.util.List;
  * @author ruoyi
  * @date 2025-01-07
  */
-@RestController
+@Controller
 @RequestMapping("/im/group")
 public class ImGroupController extends BaseController {
+
+    private String prefix = "im/group";
+
+    /**
+     * 群组管理页面
+     */
+    @RequiresPermissions("im:group:view")
+    @GetMapping()
+    public String group() {
+        return prefix + "/group";
+    }
 
     @Autowired
     private ImGroupService imGroupService;
@@ -30,7 +42,8 @@ public class ImGroupController extends BaseController {
      * 查询IM群组列表
      */
     @RequiresPermissions("im:group:list")
-    @GetMapping("/list")
+    @PostMapping("/list")
+    @ResponseBody
     public AjaxResult list(ImGroup imGroup) {
         startPage();
         List<ImGroup> list = imGroupService.selectImGroupList(imGroup);
@@ -53,6 +66,7 @@ public class ImGroupController extends BaseController {
      */
     @RequiresPermissions("im:group:query")
     @GetMapping("/{id}")
+    @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imGroupService.selectImGroupById(id));
     }
@@ -63,6 +77,7 @@ public class ImGroupController extends BaseController {
     @RequiresPermissions("im:group:add")
     @Log(title = "IM群组", businessType = BusinessType.INSERT)
     @PostMapping
+    @ResponseBody
     public AjaxResult add(@RequestBody ImGroup imGroup) {
         return toAjax(imGroupService.insertImGroup(imGroup));
     }
@@ -73,6 +88,7 @@ public class ImGroupController extends BaseController {
     @RequiresPermissions("im:group:edit")
     @Log(title = "IM群组", businessType = BusinessType.UPDATE)
     @PutMapping
+    @ResponseBody
     public AjaxResult edit(@RequestBody ImGroup imGroup) {
         return toAjax(imGroupService.updateImGroup(imGroup));
     }
@@ -83,6 +99,7 @@ public class ImGroupController extends BaseController {
     @RequiresPermissions("im:group:remove")
     @Log(title = "IM群组", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
+    @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(imGroupService.deleteImGroupByIds(ids));
     }
@@ -92,6 +109,7 @@ public class ImGroupController extends BaseController {
      */
     @RequiresPermissions("im:group:query")
     @GetMapping("/{id}/members")
+    @ResponseBody
     public AjaxResult getMembers(@PathVariable("id") Long groupId) {
         return AjaxResult.success(imGroupService.selectGroupMembersByGroupId(groupId));
     }
@@ -102,7 +120,17 @@ public class ImGroupController extends BaseController {
     @RequiresPermissions("im:group:edit")
     @Log(title = "解散群组", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}/dismiss")
+    @ResponseBody
     public AjaxResult dismiss(@PathVariable("id") Long groupId) {
         return toAjax(imGroupService.dismissGroup(groupId));
+    }
+
+    /**
+     * 群组成员管理页面
+     */
+    @GetMapping("/member/{groupId}")
+    public String member(@PathVariable("groupId") Long groupId, org.springframework.ui.ModelMap model) {
+        model.addAttribute("groupId", groupId);
+        return "im/member/member";
     }
 }

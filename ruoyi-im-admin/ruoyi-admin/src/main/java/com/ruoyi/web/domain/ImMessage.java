@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * IM消息实体
@@ -98,6 +100,9 @@ public class ImMessage implements Serializable {
 
     /** 会话名称 */
     private String conversationName;
+
+    /** 请求参数 */
+    private Map<String, Object> params;
 
     public Long getId() {
         return id;
@@ -289,6 +294,17 @@ public class ImMessage implements Serializable {
 
     public void setConversationName(String conversationName) {
         this.conversationName = conversationName;
+    }
+
+    public Map<String, Object> getParams() {
+        if (params == null) {
+            params = new HashMap<>();
+        }
+        return params;
+    }
+
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
     }
 
 }

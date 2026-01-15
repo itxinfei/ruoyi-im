@@ -63,7 +63,7 @@ public class ImFileAssetController extends BaseController {
      * 查询文件资源列表
      */
     @RequiresPermissions("im:file:list")
-    @GetMapping("/list")
+    @PostMapping("/list")
     @ResponseBody
     public AjaxResult list(ImFileAsset imFileAsset) {
         startPage();

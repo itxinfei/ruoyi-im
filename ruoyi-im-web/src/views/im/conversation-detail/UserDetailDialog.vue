@@ -1,7 +1,8 @@
 <!--
-  用户详情弹窗组件 - 钉钉5.6风格
+  用户详情弹窗组件 - 钉钉6.5.x风格
   单聊会话中点击用户头像/名称时显示
   @author RuoYi-IM
+  @updated 2026-01-15 升级至钉钉6.5.x风格
 -->
 <template>
   <el-dialog
@@ -9,95 +10,93 @@
     :show-close="false"
     :close-on-click-modal="true"
     width="560px"
-    class="ding-user-detail-dialog"
+    class="dt-user-detail-dialog"
     destroy-on-close
     @close="handleClose"
   >
     <!-- 头部区域 -->
     <template #header="{ close, titleId, titleClass }">
-      <div class="dialog-header">
-        <div class="header-left">
-          <span class="header-title">详细资料</span>
-        </div>
-        <el-icon class="header-close" @click="close">
+      <div class="dt-dialog-header">
+        <span class="dt-header-title">详细资料</span>
+        <el-icon class="dt-header-close" @click="close">
           <Close />
         </el-icon>
       </div>
     </template>
 
-    <div class="dialog-body" v-loading="loading">
+    <div class="dt-dialog-body" v-loading="loading">
       <!-- 用户基本信息卡片 -->
-      <div class="user-card">
-        <div class="user-avatar-wrap">
-          <el-avatar :size="64" :src="userInfo?.avatar">
+      <div class="dt-user-card">
+        <div class="dt-user-avatar-wrap">
+          <el-avatar :size="72" :src="userInfo?.avatar">
             <img :src="userInfo?.avatar || defaultAvatar" alt="" />
           </el-avatar>
-          <span class="online-dot" :class="{ online: userInfo?.online }"></span>
+          <span class="dt-online-dot" :class="{ online: userInfo?.online }"></span>
         </div>
-        <div class="user-basic-info">
-          <h3 class="user-name">{{ userInfo?.nickname || userInfo?.username }}</h3>
-          <p class="user-signature" v-if="userInfo?.signature">{{ userInfo.signature }}</p>
+        <div class="dt-user-basic-info">
+          <h3 class="dt-user-name">{{ userInfo?.nickname || userInfo?.username }}</h3>
+          <p class="dt-user-signature" v-if="userInfo?.signature">{{ userInfo.signature }}</p>
         </div>
       </div>
 
       <!-- 详细信息列表 -->
-      <div class="info-section">
-        <div class="info-item" v-if="userInfo?.mobile">
-          <span class="info-label">手机</span>
-          <span class="info-value">{{ userInfo.mobile }}</span>
+      <div class="dt-info-section">
+        <div class="dt-info-item" v-if="userInfo?.mobile">
+          <span class="dt-info-label">手机</span>
+          <span class="dt-info-value">{{ userInfo.mobile }}</span>
         </div>
-        <div class="info-item" v-if="userInfo?.email">
-          <span class="info-label">邮箱</span>
-          <span class="info-value">{{ userInfo.email }}</span>
+        <div class="dt-info-item" v-if="userInfo?.email">
+          <span class="dt-info-label">邮箱</span>
+          <span class="dt-info-value">{{ userInfo.email }}</span>
         </div>
-        <div class="info-item" v-if="userInfo?.department">
-          <span class="info-label">部门</span>
-          <span class="info-value">{{ userInfo.department }}</span>
+        <div class="dt-info-item" v-if="userInfo?.department">
+          <span class="dt-info-label">部门</span>
+          <span class="dt-info-value">{{ userInfo.department }}</span>
         </div>
-        <div class="info-item" v-if="userInfo?.position">
-          <span class="info-label">职位</span>
-          <span class="info-value">{{ userInfo.position }}</span>
+        <div class="dt-info-item" v-if="userInfo?.position">
+          <span class="dt-info-label">职位</span>
+          <span class="dt-info-value">{{ userInfo.position }}</span>
         </div>
       </div>
 
       <!-- 聊天内容统计 -->
-      <div class="content-section" v-if="conversationId && hasContent">
-        <div class="section-header">
-          <span class="section-title">聊天内容</span>
+      <div class="dt-content-section" v-if="conversationId && hasContent">
+        <div class="dt-section-header">
+          <span class="dt-section-title">聊天内容</span>
         </div>
 
-        <div class="content-stats">
-          <div class="stat-item" @click="showContent('media')" v-if="stats.mediaCount > 0">
-            <div class="stat-icon">
+        <div class="dt-content-stats">
+          <div class="dt-stat-item" @click="showContent('media')" v-if="stats.mediaCount > 0">
+            <div class="dt-stat-icon">
               <el-icon><Picture /></el-icon>
             </div>
-            <div class="stat-info">
-              <span class="stat-label">图片和视频</span>
-              <span class="stat-count">{{ stats.mediaCount }}</span>
+            <div class="dt-stat-info">
+              <span class="dt-stat-label">图片和视频</span>
+              <span class="dt-stat-count">{{ stats.mediaCount }}</span>
             </div>
-            <el-icon class="stat-arrow"><ArrowRight /></el-icon>
+            <el-icon class="dt-stat-arrow"><ArrowRight /></el-icon>
           </div>
 
-          <div class="stat-item" @click="showContent('file')" v-if="stats.fileCount > 0">
-            <div class="stat-icon">
+          <div class="dt-stat-item" @click="showContent('file')" v-if="stats.fileCount > 0">
+            <div class="dt-stat-icon">
               <el-icon><Folder /></el-icon>
             </div>
-            <div class="stat-info">
-              <span class="stat-label">文件</span>
-              <span class="stat-count">{{ stats.fileCount }}</span>
+            <div class="dt-stat-info">
+              <span class="dt-stat-label">文件</span>
+              <span class="dt-stat-count">{{ stats.fileCount }}</span>
             </div>
-            <el-icon class="stat-arrow"><ArrowRight /></el-icon>
+            <el-icon class="dt-stat-arrow"><ArrowRight /></el-icon>
           </div>
 
-          <div class="stat-item" @click="showContent('link')" v-if="stats.linkCount > 0">
-            <div class="stat-icon">
+          <div class="dt-stat-item" @click="showContent('link')" v-if="stats.linkCount > 0">
+            <div class="dt-stat-icon">
               <el-icon><Link /></el-icon>
             </div>
-            <div class="stat-info">
-              <span class="stat-label">链接</span>
-              <span class="stat-count">{{ stats.linkCount }}</span>
+            <div class="dt-stat-info">
+              <span class="dt-stat-label">链接</span>
+              <span class="dt-stat-count">{{ stats.linkCount }}</span>
             </div>
-            <el-icon class="stat-arrow"><ArrowRight /></el-icon>
+            <el-icon class="dt-stat-arrow"><ArrowRight /></el-icon>
           </div>
         </div>
       </div>
@@ -105,18 +104,18 @@
 
     <!-- 底部操作按钮 -->
     <template #footer>
-      <div class="dialog-footer">
-        <el-button class="footer-btn" @click="handleChat">
+      <div class="dt-dialog-footer">
+        <el-button class="dt-footer-btn" @click="handleChat">
           <el-icon><ChatDotRound /></el-icon>
           发消息
         </el-button>
-        <el-button class="footer-btn" @click="handleVoiceCall">
+        <el-button class="dt-footer-btn" @click="handleVoiceCall">
           <el-icon><Phone /></el-icon>
         </el-button>
-        <el-button class="footer-btn" @click="handleVideoCall">
+        <el-button class="dt-footer-btn" @click="handleVideoCall">
           <el-icon><VideoCamera /></el-icon>
         </el-button>
-        <el-button class="footer-btn more-btn" @click="handleMore">
+        <el-button class="dt-footer-btn dt-more-btn" @click="handleMore">
           <el-icon><MoreFilled /></el-icon>
         </el-button>
       </div>
@@ -128,16 +127,16 @@
     v-model="contentDialogVisible"
     :title="contentTitle"
     width="500px"
-    class="ding-content-dialog"
+    class="dt-content-dialog"
     append-to-body
   >
-    <div class="content-list">
+    <div class="dt-content-list">
       <!-- 媒体列表 -->
-      <div v-if="contentType === 'media'" class="media-grid">
+      <div v-if="contentType === 'media'" class="dt-media-grid">
         <div
           v-for="item in mediaList"
           :key="item.id"
-          class="media-item"
+          class="dt-media-item"
           @click="previewMedia(item)"
         >
           <el-image :src="item.url" fit="cover" lazy />
@@ -145,32 +144,32 @@
       </div>
 
       <!-- 文件列表 -->
-      <div v-if="contentType === 'file'" class="file-list">
+      <div v-if="contentType === 'file'" class="dt-file-list">
         <div
           v-for="item in fileList"
           :key="item.id"
-          class="file-item"
+          class="dt-file-item"
           @click="downloadFile(item)"
         >
-          <el-icon class="file-icon"><Document /></el-icon>
-          <div class="file-info">
-            <span class="file-name">{{ item.name }}</span>
-            <span class="file-size">{{ formatFileSize(item.size) }}</span>
+          <el-icon class="dt-file-icon"><Document /></el-icon>
+          <div class="dt-file-info">
+            <span class="dt-file-name">{{ item.name }}</span>
+            <span class="dt-file-size">{{ formatFileSize(item.size) }}</span>
           </div>
         </div>
       </div>
 
       <!-- 链接列表 -->
-      <div v-if="contentType === 'link'" class="link-list">
+      <div v-if="contentType === 'link'" class="dt-link-list">
         <a
           v-for="item in linkList"
           :key="item.id"
           :href="item.url"
           target="_blank"
-          class="link-item"
+          class="dt-link-item"
         >
           <el-icon><Link /></el-icon>
-          <span class="link-url">{{ item.title || item.url }}</span>
+          <span class="dt-link-url">{{ item.title || item.url }}</span>
         </a>
       </div>
     </div>
@@ -402,11 +401,12 @@ const formatFileSize = (bytes) => {
 </script>
 
 <style lang="scss" scoped>
-// 钉钉5.6风格弹窗
-.ding-user-detail-dialog {
+// 钉钉6.5.x风格弹窗
+.dt-user-detail-dialog {
   :deep(.el-dialog) {
     border-radius: 12px;
     overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   }
 
   :deep(.el-dialog__header) {
@@ -425,63 +425,79 @@ const formatFileSize = (bytes) => {
 }
 
 // 头部
-.dialog-header {
+.dt-dialog-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 50px;
+  height: 52px;
   padding: 0 20px;
   border-bottom: 1px solid #f0f0f0;
+  background: #ffffff;
 
-  .header-left {
-    .header-title {
-      font-size: 16px;
-      font-weight: 500;
-      color: #1d1d1f;
-    }
+  .dt-header-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #262626;
   }
 
-  .header-close {
+  .dt-header-close {
     font-size: 20px;
-    color: #858585;
+    color: #8c8c8c;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: all 0.2s ease;
 
     &:hover {
-      color: #1d1d1f;
+      color: #262626;
+      transform: rotate(90deg);
     }
   }
 }
 
 // 内容区域
-.dialog-body {
-  padding: 20px;
-  max-height: 500px;
+.dt-dialog-body {
+  padding: 24px;
+  max-height: 520px;
   overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #e8e8e8;
+    border-radius: 3px;
+
+    &:hover {
+      background: #d9d9d9;
+    }
+  }
 }
 
 // 用户卡片
-.user-card {
+.dt-user-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px;
-  background: #f5f5f5;
+  gap: 18px;
+  padding: 24px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
   border-radius: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 
-  .user-avatar-wrap {
+  .dt-user-avatar-wrap {
     position: relative;
 
-    .online-dot {
+    .dt-online-dot {
       position: absolute;
-      bottom: 2px;
-      right: 2px;
-      width: 14px;
-      height: 14px;
+      bottom: 3px;
+      right: 3px;
+      width: 16px;
+      height: 16px;
       background: #d9d9d9;
-      border: 2px solid #fff;
+      border: 3px solid #ffffff;
       border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      transition: background 0.3s ease;
 
       &.online {
         background: #52c41a;
@@ -489,140 +505,177 @@ const formatFileSize = (bytes) => {
     }
   }
 
-  .user-basic-info {
+  .dt-user-basic-info {
     flex: 1;
 
-    .user-name {
-      margin: 0 0 4px;
-      font-size: 18px;
-      font-weight: 500;
-      color: #1d1d1f;
+    .dt-user-name {
+      margin: 0 0 6px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #262626;
+      letter-spacing: -0.3px;
     }
 
-    .user-signature {
+    .dt-user-signature {
       margin: 0;
       font-size: 14px;
-      color: #858585;
+      color: #8c8c8c;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 300px;
+      max-width: 320px;
+      line-height: 1.5;
     }
   }
 }
 
 // 详细信息
-.info-section {
-  .info-item {
+.dt-info-section {
+  .dt-info-item {
     display: flex;
-    padding: 14px 0;
+    padding: 16px 0;
     border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s ease;
 
     &:last-child {
       border-bottom: none;
     }
 
-    .info-label {
-      width: 60px;
-      font-size: 14px;
-      color: #858585;
-      flex-shrink: 0;
+    &:hover {
+      background: rgba(0, 0, 0, 0.02);
     }
 
-    .info-value {
+    .dt-info-label {
+      width: 68px;
+      font-size: 14px;
+      color: #8c8c8c;
+      flex-shrink: 0;
+      font-weight: 400;
+    }
+
+    .dt-info-value {
       flex: 1;
       font-size: 14px;
-      color: #1d1d1f;
+      color: #262626;
+      font-weight: 400;
+      line-height: 1.5;
     }
   }
 }
 
 // 内容统计区域
-.content-section {
-  margin-top: 20px;
+.dt-content-section {
+  margin-top: 24px;
 
-  .section-header {
-    margin-bottom: 12px;
+  .dt-section-header {
+    margin-bottom: 16px;
 
-    .section-title {
-      font-size: 14px;
-      font-weight: 500;
-      color: #1d1d1f;
+    .dt-section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #262626;
+      letter-spacing: -0.2px;
     }
   }
 
-  .content-stats {
-    .stat-item {
+  .dt-content-stats {
+    .dt-stat-item {
       display: flex;
       align-items: center;
-      padding: 12px 16px;
-      background: #f5f5f5;
-      border-radius: 8px;
-      margin-bottom: 8px;
+      padding: 14px 18px;
+      background: #fafafa;
+      border-radius: 10px;
+      margin-bottom: 10px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
 
       &:last-child {
         margin-bottom: 0;
       }
 
       &:hover {
-        background: #e8e8e8;
+        background: #f5f5f5;
+        border-color: #e8e8e8;
+        transform: translateX(4px);
       }
 
-      .stat-icon {
-        width: 40px;
-        height: 40px;
+      .dt-stat-icon {
+        width: 44px;
+        height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #fff;
-        border-radius: 8px;
-        color: #0089ff;
-        font-size: 20px;
+        background: #ffffff;
+        border-radius: 10px;
+        color: #1677ff;
+        font-size: 22px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        transition: all 0.2s ease;
       }
 
-      .stat-info {
+      .dt-stat-info {
         flex: 1;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-left: 12px;
+        margin-left: 14px;
 
-        .stat-label {
+        .dt-stat-label {
           font-size: 15px;
-          color: #1d1d1f;
+          color: #262626;
+          font-weight: 400;
         }
 
-        .stat-count {
+        .dt-stat-count {
           font-size: 14px;
-          color: #858585;
+          color: #8c8c8c;
+          font-weight: 500;
         }
       }
 
-      .stat-arrow {
+      .dt-stat-arrow {
         color: #c8c8c8;
-        font-size: 16px;
+        font-size: 18px;
+        transition: all 0.2s ease;
+      }
+
+      &:hover .dt-stat-icon {
+        transform: scale(1.05);
+        box-shadow: 0 4px 10px rgba(22, 119, 255, 0.15);
+      }
+
+      &:hover .dt-stat-arrow {
+        color: #1677ff;
+        transform: translateX(4px);
       }
     }
   }
 }
 
 // 底部按钮
-.dialog-footer {
+.dt-dialog-footer {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 
-  .footer-btn {
+  .dt-footer-btn {
     flex: 1;
-    height: 40px;
+    height: 42px;
     border: none;
-    background: #f5f5f5;
-    color: #1d1d1f;
+    background: #fafafa;
+    color: #262626;
     font-size: 14px;
+    font-weight: 400;
+    border-radius: 8px;
+    transition: all 0.2s ease;
 
     &:hover {
-      background: #e8e8e8;
+      background: #f0f0f0;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
 
     .el-icon {
@@ -630,31 +683,50 @@ const formatFileSize = (bytes) => {
     }
   }
 
-  .more-btn {
-    flex: 0 0 48px;
+  .dt-more-btn {
+    flex: 0 0 52px;
   }
 }
 
 // 内容详情弹窗
-.ding-content-dialog {
+.dt-content-dialog {
   :deep(.el-dialog__body) {
-    padding: 16px;
-    max-height: 400px;
+    padding: 18px;
+    max-height: 420px;
     overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #e8e8e8;
+      border-radius: 3px;
+
+      &:hover {
+        background: #d9d9d9;
+      }
+    }
   }
 }
 
-.content-list {
-  .media-grid {
+.dt-content-list {
+  .dt-media-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 10px;
 
-    .media-item {
+    .dt-media-item {
       aspect-ratio: 1;
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
       cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
 
       :deep(.el-image) {
         width: 100%;
@@ -663,61 +735,79 @@ const formatFileSize = (bytes) => {
     }
   }
 
-  .file-list {
-    .file-item {
+  .dt-file-list {
+    .dt-file-item {
       display: flex;
       align-items: center;
-      padding: 12px;
-      border-radius: 8px;
+      padding: 14px;
+      border-radius: 10px;
       cursor: pointer;
+      transition: all 0.2s ease;
+      background: #fafafa;
+      margin-bottom: 8px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
 
       &:hover {
         background: #f5f5f5;
+        transform: translateX(4px);
       }
 
-      .file-icon {
-        font-size: 32px;
-        color: #0089ff;
-        margin-right: 12px;
+      .dt-file-icon {
+        font-size: 36px;
+        color: #1677ff;
+        margin-right: 14px;
       }
 
-      .file-info {
+      .dt-file-info {
         flex: 1;
 
-        .file-name {
+        .dt-file-name {
           display: block;
           font-size: 14px;
-          color: #1d1d1f;
+          color: #262626;
           margin-bottom: 4px;
+          font-weight: 400;
         }
 
-        .file-size {
+        .dt-file-size {
           font-size: 12px;
-          color: #858585;
+          color: #8c8c8c;
         }
       }
     }
   }
 
-  .link-list {
-    .link-item {
+  .dt-link-list {
+    .dt-link-item {
       display: flex;
       align-items: center;
-      padding: 12px;
-      border-radius: 8px;
+      padding: 14px;
+      border-radius: 10px;
       text-decoration: none;
-      color: #1d1d1f;
+      color: #262626;
+      background: #fafafa;
+      margin-bottom: 8px;
+      transition: all 0.2s ease;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
 
       &:hover {
         background: #f5f5f5;
+        transform: translateX(4px);
       }
 
       .el-icon {
-        color: #0089ff;
-        margin-right: 12px;
+        color: #1677ff;
+        margin-right: 14px;
+        font-size: 18px;
       }
 
-      .link-url {
+      .dt-link-url {
         flex: 1;
         font-size: 14px;
         overflow: hidden;

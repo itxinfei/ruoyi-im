@@ -8,6 +8,7 @@ import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.service.ImUserService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -42,7 +43,7 @@ public class ImUserController extends BaseController {
      * 查询IM用户列表
      */
     @RequiresPermissions("im:user:list")
-    @GetMapping("/list")
+    @PostMapping("/list")
     @ResponseBody
     public AjaxResult list(ImUser imUser) {
         startPage();
@@ -88,6 +89,7 @@ public class ImUserController extends BaseController {
     @RequiresPermissions("im:user:remove")
     @Log(title = "IM用户", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
+    @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(imUserService.deleteImUserByIds(ids));
     }
@@ -109,6 +111,7 @@ public class ImUserController extends BaseController {
     @RequiresPermissions("im:user:edit")
     @Log(title = "重置用户密码", businessType = BusinessType.UPDATE)
     @PutMapping("/{id}/reset-password")
+    @ResponseBody
     public AjaxResult resetPassword(@PathVariable("id") Long id) {
         return toAjax(imUserService.resetPassword(id, "123456"));
     }
@@ -119,6 +122,7 @@ public class ImUserController extends BaseController {
     @RequiresPermissions("im:user:edit")
     @Log(title = "修改用户状态", businessType = BusinessType.UPDATE)
     @PutMapping("/{id}/status")
+    @ResponseBody
     public AjaxResult changeStatus(@PathVariable("id") Long id, @RequestParam String status) {
         return toAjax(imUserService.changeStatus(id, status));
     }
@@ -128,6 +132,7 @@ public class ImUserController extends BaseController {
      */
     @RequiresPermissions("im:user:query")
     @GetMapping("/online-status")
+    @ResponseBody
     public AjaxResult getOnlineStatus() {
         return AjaxResult.success(imUserService.countOnlineUsers());
     }
@@ -137,6 +142,7 @@ public class ImUserController extends BaseController {
      */
     @RequiresPermissions("im:user:list")
     @GetMapping("/search")
+    @ResponseBody
     public AjaxResult searchUsers(@RequestParam String keyword) {
         List<ImUser> list = imUserService.searchUsers(keyword);
         return AjaxResult.success(list);

@@ -18,8 +18,33 @@ public class ImApprovalServiceImpl implements ImApprovalService {
     private ImApprovalMapper approvalMapper;
 
     @Override
+    public List<ImApproval> selectImApprovalList(ImApproval imApproval) {
+        return approvalMapper.selectImApprovalList(imApproval);
+    }
+
+    @Override
     public Map<String, Object> getApprovalDetail(Long id) {
         return approvalMapper.getApprovalDetail(id);
+    }
+
+    @Override
+    public ImApproval selectImApprovalById(Long id) {
+        return approvalMapper.selectImApprovalById(id);
+    }
+
+    @Override
+    public int insertImApproval(ImApproval imApproval) {
+        return approvalMapper.insertImApproval(imApproval);
+    }
+
+    @Override
+    public int updateImApproval(ImApproval imApproval) {
+        return approvalMapper.updateImApproval(imApproval);
+    }
+
+    @Override
+    public int deleteImApprovalByIds(Long[] ids) {
+        return approvalMapper.deleteImApprovalByIds(ids);
     }
 
     @Override
