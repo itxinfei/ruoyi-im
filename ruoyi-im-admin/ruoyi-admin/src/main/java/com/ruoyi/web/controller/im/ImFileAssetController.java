@@ -17,6 +17,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,9 +38,20 @@ import java.util.Map;
  * @author ruoyi
  * @date 2025-01-07
  */
-@RestController
+@Controller
 @RequestMapping("/im/file")
 public class ImFileAssetController extends BaseController {
+
+    private String prefix = "im/file";
+
+    /**
+     * 文件管理页面
+     */
+    @RequiresPermissions("im:file:view")
+    @GetMapping()
+    public String file() {
+        return prefix + "/file";
+    }
 
     @Autowired
     private ImFileAssetService imFileAssetService;
@@ -52,6 +64,7 @@ public class ImFileAssetController extends BaseController {
      */
     @RequiresPermissions("im:file:list")
     @GetMapping("/list")
+    @ResponseBody
     public AjaxResult list(ImFileAsset imFileAsset) {
         startPage();
         List<ImFileAsset> list = imFileAssetService.selectImFileAssetList(imFileAsset);
@@ -74,6 +87,7 @@ public class ImFileAssetController extends BaseController {
      */
     @RequiresPermissions("im:file:query")
     @GetMapping("/{id}")
+    @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imFileAssetService.selectImFileAssetById(id));
     }
@@ -84,6 +98,7 @@ public class ImFileAssetController extends BaseController {
     @RequiresPermissions("im:file:add")
     @Log(title = "文件资源", businessType = BusinessType.INSERT)
     @PostMapping
+    @ResponseBody
     public AjaxResult add(@RequestBody ImFileAsset imFileAsset) {
         return toAjax(imFileAssetService.insertImFileAsset(imFileAsset));
     }
@@ -94,6 +109,7 @@ public class ImFileAssetController extends BaseController {
     @RequiresPermissions("im:file:edit")
     @Log(title = "文件资源", businessType = BusinessType.UPDATE)
     @PutMapping
+    @ResponseBody
     public AjaxResult edit(@RequestBody ImFileAsset imFileAsset) {
         return toAjax(imFileAssetService.updateImFileAsset(imFileAsset));
     }
@@ -104,6 +120,7 @@ public class ImFileAssetController extends BaseController {
     @RequiresPermissions("im:file:remove")
     @Log(title = "文件资源", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
+    @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(imFileAssetService.deleteImFileAssetByIds(ids));
     }
@@ -113,6 +130,7 @@ public class ImFileAssetController extends BaseController {
      */
     @RequiresPermissions("im:file:list")
     @GetMapping("/statistics")
+    @ResponseBody
     public AjaxResult getStatistics() {
         return AjaxResult.success(imFileAssetService.getFileStatistics());
     }
@@ -123,6 +141,7 @@ public class ImFileAssetController extends BaseController {
     @RequiresPermissions("im:file:remove")
     @Log(title = "清理无效文件", businessType = BusinessType.DELETE)
     @DeleteMapping("/clean")
+    @ResponseBody
     public AjaxResult cleanInvalidFiles() {
         int count = imFileAssetService.cleanInvalidFiles();
         return AjaxResult.success("清理完成，共清理" + count + "个文件");
@@ -132,6 +151,7 @@ public class ImFileAssetController extends BaseController {
      * 上传文件
      */
     @PostMapping("/upload")
+    @ResponseBody
     public AjaxResult uploadFile(@RequestParam("file") MultipartFile file,
                                  @RequestParam(required = false) Long userId) {
         try {
@@ -177,6 +197,7 @@ public class ImFileAssetController extends BaseController {
      * 下载文件
      */
     @GetMapping("/download/{id}")
+    @ResponseBody
     public ResponseEntity<Resource> downloadFile(@PathVariable Long id) {
         try {
             ImFileAsset fileAsset = imFileAssetService.selectImFileAssetById(id);
@@ -213,6 +234,7 @@ public class ImFileAssetController extends BaseController {
      * 预览文件
      */
     @GetMapping("/preview/{id}")
+    @ResponseBody
     public ResponseEntity<Resource> previewFile(@PathVariable Long id) {
         try {
             ImFileAsset fileAsset = imFileAssetService.selectImFileAssetById(id);
@@ -249,6 +271,7 @@ public class ImFileAssetController extends BaseController {
      * 获取文件访问URL
      */
     @GetMapping("/url/{id}")
+    @ResponseBody
     public AjaxResult getFileUrl(@PathVariable Long id) {
         ImFileAsset fileAsset = imFileAssetService.selectImFileAssetById(id);
         if (fileAsset == null) {

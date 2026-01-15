@@ -50,13 +50,4 @@ public class ImManageController
     {
         return prefix + "/session/session";
     }
-
-    /**
-     * 文件管理页面
-     */
-    @GetMapping("/file")
-    public String file()
-    {
-        return prefix + "/file/file";
-    }
 }

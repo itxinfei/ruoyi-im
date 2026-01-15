@@ -91,6 +91,14 @@ public class ImMessage implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
+    // ========== 关联查询字段（非数据库字段） ==========
+
+    /** 发送者昵称 */
+    private String senderName;
+
+    /** 会话名称 */
+    private String conversationName;
+
     public Long getId() {
         return id;
     }
@@ -265,6 +273,22 @@ public class ImMessage implements Serializable {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public String getConversationName() {
+        return conversationName;
+    }
+
+    public void setConversationName(String conversationName) {
+        this.conversationName = conversationName;
     }
 
 }

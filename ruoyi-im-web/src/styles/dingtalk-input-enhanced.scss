@@ -1,0 +1,431 @@
+// ============================================================================
+// DingTalk Enhanced Input Toolbar Styles
+// 钉钉6.5.x PC版完整输入框工具栏样式
+// ============================================================================
+//
+// 说明：
+// 1. 工具栏放在输入框上方，左侧或右侧
+// 2. 添加完整的"更多"菜单（截图、收藏、快速回复、@所有人）
+// 3. 显示快捷键提示（Shift+Enter 换行）
+//
+// ============================================================================
+
+@use 'sass:color';
+
+// ============================================================================
+// 输入框容器样式
+// ============================================================================
+.chat-input-area {
+  position: relative;
+  background: var(--dt-bg-white);
+  border-top: 1px solid var(--dt-border-light);
+}
+
+// ============================================================================
+// 输入框工具栏
+// ============================================================================
+.input-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 8px;
+  background: var(--dt-bg-light);
+  border-bottom: 1px solid var(--dt-border-light);
+  
+  // ==================== 左侧工具区域 ====================
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+  }
+  
+  // ==================== 工具按钮样式 ====================
+  .toolbar-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: var(--dt-radius-base);
+    color: var(--dt-text-secondary);
+    cursor: pointer;
+    transition: all dt-transition-fast;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+      background-color: var(--dt-bg-hover);
+      color: var(--dt-primary);
+      transform: translateY(-1px);
+      box-shadow: var(--dt-shadow-xs);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+    
+    &.active {
+      color: var(--dt-primary);
+      background-color: rgba(22, 119, 255, 0.1);
+    }
+    
+    // ==================== 按钮尺寸变体 ====================
+    &.small {
+      width: 28px;
+      height: 28px;
+      
+      .el-icon {
+        font-size: 14px;
+      }
+    }
+    
+    &.large {
+      width: 40px;
+      height: 40px;
+      
+      .el-icon {
+        font-size: 20px;
+      }
+    }
+    
+    // ==================== 按钮图标样式 ====================
+    .el-icon {
+      font-size: 16px;
+      transition: all dt-transition-fast;
+    }
+  }
+  
+  // ==================== 视觉分隔线 ====================
+  .toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background-color: var(--dt-border-light);
+    margin: 0 8px;
+  }
+  
+  // ==================== 快捷键提示 ====================
+  .shortcut-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: var(--dt-radius-sm);
+    background: var(--dt-bg-light);
+    color: var(--dt-text-tertiary);
+    font-size: 12px;
+    transition: opacity dt-transition-fast;
+    
+    .hint-text {
+      font-size: 12px;
+      color: var(--dt-text-secondary);
+    }
+    
+    .hint-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 2px 6px;
+      background: var(--dt-bg-white);
+      border: 1px solid var(--dt-border-base);
+      border-radius: 4px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--dt-text-primary);
+      
+      .kbd-key {
+        font-weight: 700;
+        color: var(--dt-primary);
+      }
+      
+      .kbd-plus {
+        color: var(--dt-text-tertiary);
+        font-weight: 400;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// 更多下拉菜单
+// ============================================================================
+.more-dropdown-menu {
+  min-width: 180px;
+  max-width: 240px;
+  
+  .el-dropdown-menu__item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    
+    &.is-disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    
+    // ==================== 危险操作 ====================
+    &.danger {
+      color: var(--dt-error);
+      
+      .el-icon {
+        color: var(--dt-error);
+      }
+    }
+    
+    // ==================== 菜单图标样式 ====================
+    .menu-icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--dt-bg-light);
+      border-radius: var(--dt-radius-sm);
+      color: var(--dt-text-secondary);
+    }
+    
+    // ==================== 快捷键提示 ====================
+    .shortcut {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--dt-text-tertiary);
+      background: var(--dt-bg-light);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Menlo', monospace;
+    }
+  }
+  
+  // ==================== 分隔线 ====================
+  .el-dropdown-menu__item--divided {
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+}
+
+// ============================================================================
+// 表情选择器
+// ============================================================================
+.emoji-picker {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  background: var(--dt-bg-white);
+  border: 1px solid var(--dt-border-base);
+  border-radius: var(--dt-radius-base);
+  box-shadow: var(--dt-shadow-lg);
+  z-index: var(--dt-z-index-popover);
+  
+  // ==================== 表情标签栏 ====================
+  .emoji-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--dt-border-light);
+    padding: 0 8px;
+    gap: 0;
+  }
+  
+  .emoji-tab {
+    flex: 1;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all dt-transition-fast;
+    color: var(--dt-text-secondary);
+    font-size: 14px;
+    
+    &:hover {
+      color: var(--dt-primary);
+    }
+    
+    &.active {
+      color: var(--dt-primary);
+      border-bottom-color: var(--dt-primary);
+      font-weight: var(--dt-font-weight-medium);
+    }
+  }
+  
+  // ==================== 表情列表 ====================
+  .emoji-list {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+    padding: 12px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  
+  .emoji-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: var(--dt-radius-sm);
+    cursor: pointer;
+    transition: all dt-transition-fast;
+    font-size: 24px;
+    line-height: 1;
+    
+    &:hover {
+      background-color: var(--dt-bg-hover);
+      transform: scale(1.1);
+    }
+    
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+  
+  // ==================== 表情分类标题 ====================
+  .emoji-category-title {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: var(--dt-font-weight-medium);
+    color: var(--dt-text-secondary);
+    border-bottom: 1px solid var(--dt-border-light);
+    background: var(--dt-bg-light);
+  }
+}
+
+// ============================================================================
+// @提及建议
+// ============================================================================
+.mention-suggestions {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: var(--dt-bg-white);
+  border: 1px solid var(--dt-border-base);
+  border-radius: var(--dt-radius-base);
+  box-shadow: var(--dt-shadow-lg);
+  z-index: var(--dt-z-index-popover);
+  max-height: 320px;
+  overflow-y: auto;
+  
+  .mention-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all dt-transition-fast;
+    
+    &:hover {
+      background-color: var(--dt-bg-hover);
+    }
+    
+    &.active {
+      background-color: rgba(22, 119, 255, 0.1);
+    }
+    
+    // ==================== @所有人 ====================
+    &.mention-all {
+      background-color: rgba(22, 119, 255, 0.05);
+      
+      .mention-all-avatar {
+        background: var(--dt-primary);
+        color: var(--dt-bg-white);
+      }
+      
+      .mention-name {
+        font-weight: var(--dt-font-weight-medium);
+      }
+    }
+  }
+  
+  .mention-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--dt-border-light);
+  }
+  
+  .mention-name {
+    font-size: 14px;
+    color: var(--dt-text-primary);
+  }
+  
+  .mention-all-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    background: var(--dt-primary);
+    color: var(--dt-bg-white);
+    border-radius: var(--dt-radius-xs);
+    font-weight: var(--dt-font-weight-medium);
+  }
+}
+
+// ============================================================================
+// 动画定义
+// ============================================================================
+
+// 工具栏按钮弹跳动画
+@keyframes dtToolbarBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+// 表情弹出动画
+@keyframes dtEmojiPopup {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// ============================================================================
+// 响应式优化
+// ============================================================================
+
+// 移动端适配
+@media (max-width: 768px) {
+  .input-toolbar {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  
+  .toolbar-btn {
+    width: 28px;
+    height: 28px;
+    
+    .el-icon {
+      font-size: 14px;
+    }
+  }
+  
+  .shortcut-hint {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+  
+  .emoji-picker {
+    max-height: 240px;
+    
+    .emoji-list {
+      grid-template-columns: repeat(8, 1fr);
+      gap: 3px;
+      padding: 8px;
+      
+      .emoji-item {
+        font-size: 20px;
+        padding: 6px;
+      }
+    }
+  }
+  
+  .mention-suggestions {
+    max-height: 200px;
+  }
+}

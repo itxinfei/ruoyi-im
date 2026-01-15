@@ -1,0 +1,608 @@
+// ============================================================================
+// DingTalk Enhanced Theme Variables
+// 钉钉6.5.x PC版完整主题变量系统
+// ============================================================================
+//
+// 说明：
+// 1. 统一使用 --dt-* 前缀（DingTalk）作为CSS变量
+// 2. 统一使用 $dt-* 前缀作为SCSS变量
+// 3. 完整覆盖钉钉6.5.x规范
+// 4. 支持暗色主题切换
+//
+// 使用方法：
+// - 在组件中使用 CSS 变量：var(--dt-primary)
+// - 在 SCSS 文件中使用 SCSS 变量：$dt-primary
+//
+// ============================================================================
+
+@use 'sass:color';
+
+// ============================================================================
+// CSS Variables (运行时主题支持)
+// ============================================================================
+:root {
+  // ==================== 主色系 ====================
+  --dt-primary: #1677ff;          // 钉钉蓝 - 主色
+  --dt-primary-hover: #4096ff;    // 主色hover
+  --dt-primary-active: #0958d9;    // 主色激活态
+  --dt-primary-light: rgba(22, 119, 255, 0.1);
+  --dt-primary-lighter: #e6f7ff;
+  
+  // ==================== 功能色 ====================
+  --dt-success: #52c41a;           // 成功绿
+  --dt-warning: #faad14;           // 警告橙
+  --dt-error: #ff4d4f;            // 错误红
+  --dt-info: #1677ff;             // 信息蓝
+  
+  // ==================== 文字颜色 ====================
+  --dt-text-primary: #262626;     // 标题色 - 主要文字
+  --dt-text-secondary: #595959;   // 正文色 - 次要文字
+  --dt-text-tertiary: #8c8c8c;    // 辅助文字 - 时间戳、标签等
+  --dt-text-placeholder: #bfbfbf;   // 占位符文字
+  --dt-text-disabled: #d9d9d9;     // 禁用文字
+  
+  // ==================== 背景色 ====================
+  --dt-bg-white: #ffffff;          // 纯白背景
+  --dt-bg-base: #f0f2f5;          // 钉钉规范 - 浅灰背景
+  --dt-bg-hover: #f5f7fa;         // hover状态背景
+  --dt-bg-disabled: #f5f5f5;       // 禁用背景
+  --dt-bg-mask: rgba(0, 0, 0, 0.45);  // 遮罩层
+  
+  // ==================== 边框颜色 ====================
+  --dt-border-light: #f0f0f0;      // 浅色边框
+  --dt-border-base: #d9d9d9;       // 钉钉边框色
+  --dt-border-dark: #bfbfbf;         // 深色边框
+  
+  // ==================== 圆角 ====================
+  --dt-radius-xs: 2px;
+  --dt-radius-sm: 4px;
+  --dt-radius-base: 6px;
+  --dt-radius-lg: 8px;
+  --dt-radius-xl: 12px;
+  --dt-radius-round: 50%;
+  
+  // ==================== 阴影 ====================
+  --dt-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.03),
+                     0 1px 6px -1px rgba(0, 0, 0, 0.02);
+  --dt-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --dt-shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+                     0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --dt-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --dt-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --dt-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  // ==================== 间距 ====================
+  --dt-spacing-xs: 4px;
+  --dt-spacing-sm: 8px;
+  --dt-spacing-md: 12px;
+  --dt-spacing-lg: 16px;
+  --dt-spacing-xl: 24px;
+  --dt-spacing-2xl: 32px;
+  
+  // ==================== 字体 ====================
+  --dt-font-size-xs: 12px;
+  --dt-font-size-sm: 13px;
+  --dt-font-size-base: 14px;
+  --dt-font-size-lg: 16px;
+  --dt-font-size-xl: 18px;
+  --dt-font-size-2xl: 20px;
+  
+  --dt-font-weight-light: 300;
+  --dt-font-weight-normal: 400;
+  --dt-font-weight-medium: 500;
+  --dt-font-weight-semibold: 600;
+  --dt-font-weight-bold: 700;
+  
+  --dt-line-height-tight: 1.2;
+  --dt-line-height-base: 1.5;
+  --dt-line-height-relaxed: 1.75;
+  
+  // ==================== 过渡 ====================
+  --dt-transition-fast: 0.15s;
+  --dt-transition-base: 0.3s;
+  --dt-transition-slow: 0.5s;
+  
+  --dt-ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+  --dt-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --dt-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --dt-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  // ==================== Z-index ====================
+  --dt-z-index-dropdown: 1050;
+  --dt-z-index-sticky: 1020;
+  --dt-z-index-fixed: 1030;
+  --dt-z-index-modal-backdrop: 1040;
+  --dt-z-index-modal: 1050;
+  --dt-z-index-popover: 1060;
+  --dt-z-index-tooltip: 1070;
+  
+  // ==================== 布局尺寸 ====================
+  --dt-topbar-height: 48px;
+  --dt-nav-sidebar-width: 68px;
+  --dt-nav-sidebar-expanded-width: 192px;
+  --dt-nav-item-height: 48px;
+  --dt-nav-icon-size: 24px;
+  --dt-sidebar-width: 320px;
+  --dt-sidebar-expanded-width: 400px;
+  --dt-session-item-height: 64px;
+  --dt-session-avatar-size: 40px;
+  --dt-detail-panel-width: 300px;
+  --dt-header-height-mobile: 56px;
+}
+
+// ============================================================================
+// 暗色主题
+// ============================================================================
+[data-theme='dark'] {
+  --dt-text-primary: #e8e8e8;
+  --dt-text-secondary: #b8b8b8;
+  --dt-text-tertiary: #8c8c8c;
+  --dt-bg-white: #1f1f1f;
+  --dt-bg-base: #141414;
+  --dt-bg-hover: #262626;
+  --dt-border-base: #303030;
+  --dt-border-dark: #404040;
+  
+  --dt-primary: #1677ff;
+  --dt-primary-hover: #4096ff;
+  --dt-primary-active: #0958d9;
+}
+
+// ============================================================================
+// SCSS Variables (构建时使用)
+// ============================================================================
+$dt-primary: #1677ff;
+$dt-primary-hover: #4096ff;
+$dt-primary-active: #0958d9;
+$dt-primary-light: rgba(22, 119, 255, 0.1);
+$dt-primary-lighter: #e6f7ff;
+
+$dt-success: #52c41a;
+$dt-warning: #faad14;
+$dt-error: #ff4d4f;
+$dt-info: #1677ff;
+
+$dt-text-primary: #262626;
+$dt-text-secondary: #595959;
+$dt-text-tertiary: #8c8c8c;
+$dt-text-placeholder: #bfbfbf;
+$dt-text-disabled: #d9d9d9;
+
+$dt-bg-white: #ffffff;
+$dt-bg-light: #fafafa;
+$dt-bg-base: #f0f2f5;
+$dt-bg-hover: #f5f7fa;
+$dt-bg-disabled: #f5f5f5;
+$dt-bg-mask: rgba(0, 0, 0, 0.45);
+
+$dt-border-light: #f0f0f0;
+$dt-border-base: #d9d9d9;
+$dt-border-dark: #bfbfbf;
+
+$dt-radius-xs: 2px;
+$dt-radius-sm: 4px;
+$dt-radius-base: 6px;
+$dt-radius-lg: 8px;
+$dt-radius-xl: 12px;
+$dt-radius-round: 50%;
+
+$dt-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.03),
+                0 1px 6px -1px rgba(0, 0, 0, 0.02);
+$dt-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$dt-shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+                0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$dt-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$dt-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$dt-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+$dt-spacing-xs: 4px;
+$dt-spacing-sm: 8px;
+$dt-spacing-md: 12px;
+$dt-spacing-lg: 16px;
+$dt-spacing-xl: 24px;
+$dt-spacing-2xl: 32px;
+
+$dt-font-size-xs: 12px;
+$dt-font-size-sm: 13px;
+$dt-font-size-base: 14px;
+$dt-font-size-lg: 16px;
+$dt-font-size-xl: 18px;
+$dt-font-size-2xl: 20px;
+
+$dt-font-weight-light: 300;
+$dt-font-weight-normal: 400;
+$dt-font-weight-medium: 500;
+$dt-font-weight-semibold: 600;
+$dt-font-weight-bold: 700;
+
+$dt-line-height-tight: 1.2;
+$dt-line-height-base: 1.5;
+$dt-line-height-relaxed: 1.75;
+
+$dt-transition-fast: 0.15s;
+$dt-transition-base: 0.3s;
+$dt-transition-slow: 0.5s;
+
+$dt-ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+$dt-ease-in: cubic-bezier(0.4, 0, 1, 1);
+$dt-ease-out: cubic-bezier(0, 0, 0.2, 1);
+$dt-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+$dt-z-index-dropdown: 1050;
+$dt-z-index-sticky: 1020;
+$dt-z-index-fixed: 1030;
+$dt-z-index-modal-backdrop: 1040;
+$dt-z-index-modal: 1050;
+$dt-z-index-popover: 1060;
+$dt-z-index-tooltip: 1070;
+
+$dt-topbar-height: 48px;
+$dt-nav-sidebar-width: 68px;
+$dt-nav-sidebar-expanded-width: 192px;
+$dt-nav-item-height: 48px;
+$dt-nav-icon-size: 24px;
+$dt-sidebar-width: 320px;
+$dt-sidebar-expanded-width: 400px;
+$dt-session-item-height: 64px;
+$dt-session-avatar-size: 40px;
+$dt-detail-panel-width: 300px;
+$dt-header-height-mobile: 56px;
+
+// ============================================================================
+// Element Plus 主题覆盖
+// ============================================================================
+//
+// 使用 ::v-deep 确保覆盖生效
+//
+
+// 按钮
+.el-button {
+  // 主要按钮
+  &--primary {
+    background-color: var(--dt-primary) !important;
+    border-color: var(--dt-primary) !important;
+    color: var(--dt-bg-white) !important;
+    
+    &:hover {
+      background-color: var(--dt-primary-hover) !important;
+      border-color: var(--dt-primary-hover) !important;
+    }
+    
+    &:active {
+      background-color: var(--dt-primary-active) !important;
+      border-color: var(--dt-primary-active) !important;
+    }
+  }
+  
+  // 成功按钮
+  &--success {
+    background-color: var(--dt-success) !important;
+    border-color: var(--dt-success) !important;
+    color: var(--dt-bg-white) !important;
+  }
+  
+  // 危险按钮
+  &--danger {
+    background-color: var(--dt-error) !important;
+    border-color: var(--dt-error) !important;
+    color: var(--dt-bg-white) !important;
+  }
+  
+  // 文字按钮
+  &--text {
+    color: var(--dt-primary) !important;
+    
+    &:hover {
+      color: var(--dt-primary-hover) !important;
+    }
+  }
+  
+  // 禁用按钮
+  &.is-disabled {
+    background-color: var(--dt-bg-disabled) !important;
+    border-color: var(--dt-bg-disabled) !important;
+    color: var(--dt-text-disabled) !important;
+  }
+}
+
+// 输入框
+.el-input {
+  background-color: var(--dt-bg-white) !important;
+  border-color: var(--dt-border-base) !important;
+  color: var(--dt-text-primary) !important;
+  
+  &::placeholder {
+    color: var(--dt-text-placeholder) !important;
+  }
+  
+  &:hover {
+    border-color: var(--dt-primary) !important;
+  }
+  
+  &.is-focus {
+    border-color: var(--dt-primary) !important;
+    box-shadow: 0 0 0 0 2px rgba(22, 119, 255, 0.2) !important;
+  }
+  
+  &.is-disabled {
+    background-color: var(--dt-bg-disabled) !important;
+    color: var(--dt-text-disabled) !important;
+  }
+}
+
+// 文本域
+.el-textarea {
+  @extend .el-input;
+  font-size: var(--dt-font-size-base) !important;
+  line-height: var(--dt-line-height-base) !important;
+}
+
+// 徽章
+.el-badge {
+  background-color: var(--dt-error) !important;
+  border: 2px solid var(--dt-bg-white) !important;
+  
+  &.el-fade-enter-active,
+  &.el-fade-leave-active {
+    animation: dt-badge-bounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+@keyframes dt-badge-bounce {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// 头像
+.el-avatar {
+  border: 2px solid var(--dt-border-base) !important;
+  
+  &:hover {
+    border-color: var(--dt-primary) !important;
+  }
+}
+
+// 下拉菜单
+.el-dropdown-menu {
+  background-color: var(--dt-bg-white) !important;
+  border: 1px solid var(--dt-border-base) !important;
+  box-shadow: var(--dt-shadow-base) !important;
+  
+  .el-dropdown-menu__item {
+    color: var(--dt-text-primary) !important;
+    
+    &:hover {
+      background-color: var(--dt-bg-hover) !important;
+      color: var(--dt-primary) !important;
+    }
+    
+    &:focus {
+      background-color: var(--dt-bg-hover) !important;
+      color: var(--dt-primary) !important;
+    }
+  }
+}
+
+// Tooltip
+.el-tooltip__popper {
+  background-color: var(--dt-text-primary) !important;
+  color: var(--dt-bg-white) !important;
+  border: 1px solid var(--dt-border-base) !important;
+}
+
+// 加载动画
+.el-loading-mask {
+  background-color: var(--dt-bg-mask) !important;
+}
+
+.el-loading-spinner {
+  color: var(--dt-primary) !important;
+}
+
+// 空状态
+.el-empty {
+  color: var(--dt-text-secondary) !important;
+}
+
+.el-empty__image svg {
+  fill: var(--dt-text-tertiary) !important;
+}
+
+// 消息提示
+.el-message {
+  box-shadow: var(--dt-shadow-base) !important;
+  
+  &--success {
+    background-color: var(--dt-success) !important;
+  }
+  
+  &--warning {
+    background-color: var(--dt-warning) !important;
+  }
+  
+  &--error {
+    background-color: var(--dt-error) !important;
+  }
+  
+  &--info {
+    background-color: var(--dt-info) !important;
+  }
+}
+
+// 对话框
+.el-dialog {
+  border-radius: var(--dt-radius-lg) !important;
+  box-shadow: var(--dt-shadow-lg) !important;
+}
+
+.el-dialog__header {
+  background-color: var(--dt-bg-white) !important;
+  border-bottom: 1px solid var(--dt-border-base) !important;
+}
+
+.el-dialog__body {
+  color: var(--dt-text-primary) !important;
+}
+
+// 标签
+.el-tag {
+  border-radius: var(--dt-radius-sm) !important;
+  font-weight: var(--dt-font-weight-medium) !important;
+  
+  &.el-tag--primary {
+    background-color: var(--dt-primary) !important;
+    color: var(--dt-bg-white) !important;
+  }
+}
+
+// Tabs
+.el-tabs__active-bar {
+  background-color: var(--dt-primary) !important;
+}
+
+.el-tabs__item {
+  color: var(--dt-text-secondary) !important;
+  
+  &:hover {
+    color: var(--dt-primary) !important;
+  }
+  
+  &.is-active {
+    color: var(--dt-primary) !important;
+    font-weight: var(--dt-font-weight-medium) !important;
+  }
+}
+
+// 分页
+.el-pagination button {
+  background-color: var(--dt-bg-white) !important;
+  border: 1px solid var(--dt-border-base) !important;
+  color: var(--dt-text-primary) !important;
+  
+  &:hover {
+    background-color: var(--dt-bg-hover) !important;
+    color: var(--dt-primary) !important;
+  }
+  
+  &.is-active {
+    background-color: var(--dt-primary) !important;
+    color: var(--dt-bg-white) !important;
+  }
+}
+
+// 开关
+.el-switch {
+  &.is-checked .el-switch__core {
+    background-color: var(--dt-primary) !important;
+    border-color: var(--dt-primary) !important;
+  }
+}
+
+// 复选框
+.el-checkbox {
+  &:hover .el-checkbox__inner {
+    border-color: var(--dt-primary) !important;
+  }
+  
+  &.is-checked .el-checkbox__inner {
+    background-color: var(--dt-primary) !important;
+    border-color: var(--dt-primary) !important;
+  }
+}
+
+// 单选框
+.el-radio {
+  &:hover .el-radio__inner {
+    border-color: var(--dt-primary) !important;
+  }
+  
+  &.is-checked .el-radio__inner {
+    background-color: var(--dt-primary) !important;
+    border-color: var(--dt-primary) !important;
+  }
+}
+
+// 进度条
+.el-progress-bar__inner {
+  background-color: var(--dt-primary) !important;
+}
+
+// 滑块
+.el-slider__runway {
+  background-color: var(--dt-border-base) !important;
+}
+
+.el-slider__bar {
+  background-color: var(--dt-primary) !important;
+}
+
+// 卡片
+.el-card {
+  border: 1px solid var(--dt-border-base) !important;
+  box-shadow: var(--dt-shadow-sm) !important;
+}
+
+.el-card__header {
+  border-bottom: 1px solid var(--dt-border-base) !important;
+  color: var(--dt-text-primary) !important;
+}
+
+.el-card__body {
+  color: var(--dt-text-secondary) !important;
+}
+
+// 表格
+.el-table {
+  color: var(--dt-text-primary) !important;
+  border-color: var(--dt-border-base) !important;
+  
+  th {
+    background-color: var(--dt-bg-light) !important;
+    color: var(--dt-text-primary) !important;
+    font-weight: var(--dt-font-weight-semibold) !important;
+  }
+  
+  td {
+    border-bottom-color: var(--dt-border-light) !important;
+  }
+  
+  tr:hover td {
+    background-color: var(--dt-bg-hover) !important;
+  }
+}
+
+// 抽屉
+.el-drawer {
+  border-radius: var(--dt-radius-base) !important;
+  box-shadow: var(--dt-shadow-lg) !important;
+}
+
+.el-drawer__header {
+  background-color: var(--dt-bg-white) !important;
+  border-bottom: 1px solid var(--dt-border-base) !important;
+  color: var(--dt-text-primary) !important;
+}
+
+// 分割线
+.el-divider {
+  border-color: var(--dt-border-light) !important;
+  
+  &--horizontal {
+    background-color: var(--dt-border-light) !important;
+  }
+}

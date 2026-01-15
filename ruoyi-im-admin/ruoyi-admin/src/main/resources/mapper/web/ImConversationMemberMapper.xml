@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImConversationMemberMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImConversationMember" id="ImConversationMemberResult">
+        <id property="id" column="id"/>
+        <result property="conversationId" column="conversation_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="role" column="role"/>
+        <result property="unreadCount" column="unread_count"/>
+        <result property="isPinned" column="is_pinned"/>
+        <result property="isMuted" column="is_muted"/>
+        <result property="lastReadMessageId" column="last_read_message_id"/>
+        <result property="lastReadTime" column="last_read_time"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <!-- 关联字段 -->
+        <result property="userName" column="user_name"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="userAvatar" column="user_avatar"/>
+        <result property="conversationName" column="conversation_name"/>
+    </resultMap>
+
+    <sql id="selectImConversationMemberVo">
+        select cm.id, cm.conversation_id, cm.user_id, cm.nickname, cm.role,
+               cm.unread_count, cm.is_pinned, cm.is_muted,
+               cm.last_read_message_id, cm.last_read_time,
+               cm.is_deleted, cm.deleted_time, cm.create_time, cm.update_time
+        from im_conversation_member cm
+    </sql>
+
+    <sql id="selectImConversationMemberWithUserVo">
+        select cm.id, cm.conversation_id, cm.user_id, cm.nickname, cm.role,
+               cm.unread_count, cm.is_pinned, cm.is_muted,
+               cm.last_read_message_id, cm.last_read_time,
+               cm.is_deleted, cm.deleted_time, cm.create_time, cm.update_time,
+               u.username as user_name, u.nickname as user_nickname, u.avatar as user_avatar,
+               c.name as conversation_name
+        from im_conversation_member cm
+        left join im_user u on cm.user_id = u.id
+        left join im_conversation c on cm.conversation_id = c.id
+    </sql>
+
+    <select id="selectImConversationMemberById" parameterType="Long" resultMap="ImConversationMemberResult">
+        <include refid="selectImConversationMemberWithUserVo"/>
+        where cm.id = #{id}
+    </select>
+
+    <select id="selectImConversationMemberList" parameterType="com.ruoyi.web.domain.ImConversationMember" resultMap="ImConversationMemberResult">
+        <include refid="selectImConversationMemberWithUserVo"/>
+        <where>
+            cm.is_deleted = 0
+            <if test="conversationId != null">and cm.conversation_id = #{conversationId}</if>
+            <if test="userId != null">and cm.user_id = #{userId}</if>
+            <if test="role != null and role != ''">and cm.role = #{role}</if>
+        </where>
+        order by cm.create_time desc
+    </select>
+
+    <select id="selectMembersByConversationId" parameterType="Long" resultMap="ImConversationMemberResult">
+        <include refid="selectImConversationMemberWithUserVo"/>
+        where cm.conversation_id = #{conversationId} and cm.is_deleted = 0
+        order by cm.role asc, cm.create_time asc
+    </select>
+
+    <select id="countMembersByConversationId" parameterType="Long" resultType="java.lang.Integer">
+        select count(*) from im_conversation_member
+        where conversation_id = #{conversationId} and is_deleted = 0
+    </select>
+
+    <insert id="insertImConversationMember" parameterType="com.ruoyi.web.domain.ImConversationMember" useGeneratedKeys="true" keyProperty="id">
+        insert into im_conversation_member
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="conversationId != null">conversation_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="nickname != null">nickname,</if>
+            <if test="role != null">role,</if>
+            <if test="unreadCount != null">unread_count,</if>
+            <if test="isPinned != null">is_pinned,</if>
+            <if test="isMuted != null">is_muted,</if>
+            <if test="lastReadMessageId != null">last_read_message_id,</if>
+            <if test="lastReadTime != null">last_read_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="conversationId != null">#{conversationId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="nickname != null">#{nickname},</if>
+            <if test="role != null">#{role},</if>
+            <if test="unreadCount != null">#{unreadCount},</if>
+            <if test="isPinned != null">#{isPinned},</if>
+            <if test="isMuted != null">#{isMuted},</if>
+            <if test="lastReadMessageId != null">#{lastReadMessageId},</if>
+            <if test="lastReadTime != null">#{lastReadTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImConversationMember" parameterType="com.ruoyi.web.domain.ImConversationMember">
+        update im_conversation_member
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="role != null and role != ''">role = #{role},</if>
+            <if test="unreadCount != null">unread_count = #{unreadCount},</if>
+            <if test="isPinned != null">is_pinned = #{isPinned},</if>
+            <if test="isMuted != null">is_muted = #{isMuted},</if>
+            <if test="lastReadMessageId != null">last_read_message_id = #{lastReadMessageId},</if>
+            <if test="lastReadTime != null">last_read_time = #{lastReadTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImConversationMemberById" parameterType="Long">
+        update im_conversation_member set is_deleted = 1, deleted_time = now() where id = #{id}
+    </delete>
+
+    <delete id="deleteImConversationMemberByIds" parameterType="Long[]">
+        update im_conversation_member set is_deleted = 1, deleted_time = now() where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteImConversationMemberByConversationId" parameterType="Long">
+        update im_conversation_member set is_deleted = 1, deleted_time = now()
+        where conversation_id = #{conversationId}
+    </delete>
+
+    <delete id="removeMember" parameterType="map">
+        update im_conversation_member set is_deleted = 1, deleted_time = now()
+        where conversation_id = #{conversationId} and user_id = #{userId}
+    </delete>
+
+</mapper>

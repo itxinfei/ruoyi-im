@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImGroupMemberMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImGroupMember" id="ImGroupMemberResult">
+        <id property="id" column="id"/>
+        <result property="groupId" column="group_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="role" column="role"/>
+        <result property="isMuted" column="is_muted"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
+        <result property="replyToMessageId" column="reply_to_message_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <!-- 关联字段 -->
+        <result property="userName" column="user_name"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="userAvatar" column="user_avatar"/>
+        <result property="userMobile" column="user_mobile"/>
+        <result property="groupName" column="group_name"/>
+        <result property="ownerName" column="owner_name"/>
+    </resultMap>
+
+    <sql id="selectImGroupMemberVo">
+        select gm.id, gm.group_id, gm.user_id, gm.nickname, gm.role,
+               gm.is_muted, gm.is_deleted, gm.deleted_time,
+               gm.reply_to_message_id, gm.create_time, gm.update_time
+        from im_group_member gm
+    </sql>
+
+    <sql id="selectImGroupMemberWithUserVo">
+        select gm.id, gm.group_id, gm.user_id, gm.nickname, gm.role,
+               gm.is_muted, gm.is_deleted, gm.deleted_time,
+               gm.reply_to_message_id, gm.create_time, gm.update_time,
+               u.username as user_name, u.nickname as user_nickname,
+               u.avatar as user_avatar, u.mobile as user_mobile,
+               g.name as group_name
+        from im_group_member gm
+        left join im_user u on gm.user_id = u.id
+        left join im_group g on gm.group_id = g.id
+    </sql>
+
+    <select id="selectImGroupMemberById" parameterType="Long" resultMap="ImGroupMemberResult">
+        <include refid="selectImGroupMemberWithUserVo"/>
+        where gm.id = #{id}
+    </select>
+
+    <select id="selectImGroupMemberList" parameterType="com.ruoyi.web.domain.ImGroupMember" resultMap="ImGroupMemberResult">
+        <include refid="selectImGroupMemberWithUserVo"/>
+        <where>
+            gm.is_deleted = 0
+            <if test="groupId != null">and gm.group_id = #{groupId}</if>
+            <if test="userId != null">and gm.user_id = #{userId}</if>
+            <if test="role != null and role != ''">and gm.role = #{role}</if>
+            <if test="isMuted != null">and gm.is_muted = #{isMuted}</if>
+        </where>
+        order by gm.group_id, field(gm.role, 'OWNER', 'ADMIN', 'MEMBER'), gm.create_time asc
+    </select>
+
+    <select id="selectMembersByGroupId" parameterType="Long" resultMap="ImGroupMemberResult">
+        <include refid="selectImGroupMemberWithUserVo"/>
+        where gm.group_id = #{groupId} and gm.is_deleted = 0
+        order by field(gm.role, 'OWNER', 'ADMIN', 'MEMBER'), gm.create_time asc
+    </select>
+
+    <select id="countMembersByGroupId" parameterType="Long" resultType="java.lang.Integer">
+        select count(*) from im_group_member
+        where group_id = #{groupId} and is_deleted = 0
+    </select>
+
+    <select id="selectUserGroups" parameterType="Long" resultMap="ImGroupMemberResult">
+        <include refid="selectImGroupMemberWithUserVo"/>
+        where gm.user_id = #{userId} and gm.is_deleted = 0
+        order by gm.update_time desc
+    </select>
+
+    <select id="selectGroupOwner" parameterType="Long" resultMap="ImGroupMemberResult">
+        <include refid="selectImGroupMemberWithUserVo"/>
+        where gm.group_id = #{groupId} and gm.role = 'OWNER' and gm.is_deleted = 0
+        limit 1
+    </select>
+
+    <select id="checkMemberExists" parameterType="map" resultType="java.lang.Integer">
+        select count(*) from im_group_member
+        where group_id = #{groupId} and user_id = #{userId} and is_deleted = 0
+    </select>
+
+    <insert id="insertImGroupMember" parameterType="com.ruoyi.web.domain.ImGroupMember" useGeneratedKeys="true" keyProperty="id">
+        insert into im_group_member
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="groupId != null">group_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="nickname != null">nickname,</if>
+            <if test="role != null">role,</if>
+            <if test="isMuted != null">is_muted,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="groupId != null">#{groupId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="nickname != null">#{nickname},</if>
+            <if test="role != null">#{role},</if>
+            <if test="isMuted != null">#{isMuted},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImGroupMember" parameterType="com.ruoyi.web.domain.ImGroupMember">
+        update im_group_member
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="role != null and role != ''">role = #{role},</if>
+            <if test="isMuted != null">is_muted = #{isMuted},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateMemberRole" parameterType="map">
+        update im_group_member set role = #{role}, update_time = now()
+        where group_id = #{groupId} and user_id = #{userId}
+    </update>
+
+    <delete id="deleteImGroupMemberById" parameterType="Long">
+        update im_group_member set is_deleted = 1, deleted_time = now() where id = #{id}
+    </delete>
+
+    <delete id="deleteImGroupMemberByIds" parameterType="Long[]">
+        update im_group_member set is_deleted = 1, deleted_time = now() where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="removeMember" parameterType="map">
+        update im_group_member set is_deleted = 1, deleted_time = now()
+        where group_id = #{groupId} and user_id = #{userId}
+    </delete>
+
+    <delete id="deleteMembersByGroupId" parameterType="Long">
+        update im_group_member set is_deleted = 1, deleted_time = now()
+        where group_id = #{groupId}
+    </delete>
+
+</mapper>

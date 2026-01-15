@@ -6,6 +6,7 @@ import com.ruoyi.web.service.ImMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IM消息Service实现（Admin模块专用）
@@ -37,6 +38,16 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     @Override
+    public int insertImMessage(ImMessage imMessage) {
+        return messageMapper.insertImMessage(imMessage);
+    }
+
+    @Override
+    public int updateImMessage(ImMessage imMessage) {
+        return messageMapper.updateImMessage(imMessage);
+    }
+
+    @Override
     public int countMessages(ImMessage imMessage) {
         return messageMapper.countMessages(imMessage);
     }
@@ -59,5 +70,10 @@ public class ImMessageServiceImpl implements ImMessageService {
     @Override
     public int revokeMessage(Long messageId) {
         return messageMapper.revokeMessage(messageId);
+    }
+
+    @Override
+    public Map<String, Object> getMessageStatistics() {
+        return messageMapper.getMessageStatistics();
     }
 }

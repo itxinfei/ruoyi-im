@@ -20,9 +20,20 @@ import java.util.List;
  * @author ruoyi
  * @date 2025-01-07
  */
-@RestController
+@Controller
 @RequestMapping("/im/user")
 public class ImUserController extends BaseController {
+
+    private String prefix = "im/user";
+
+    /**
+     * 用户管理页面
+     */
+    @RequiresPermissions("im:user:view")
+    @GetMapping()
+    public String user() {
+        return prefix + "/user";
+    }
 
     @Autowired
     private ImUserService imUserService;
@@ -32,6 +43,7 @@ public class ImUserController extends BaseController {
      */
     @RequiresPermissions("im:user:list")
     @GetMapping("/list")
+    @ResponseBody
     public AjaxResult list(ImUser imUser) {
         startPage();
         List<ImUser> list = imUserService.selectImUserList(imUser);
@@ -43,6 +55,7 @@ public class ImUserController extends BaseController {
      */
     @RequiresPermissions("im:user:query")
     @GetMapping("/{id}")
+    @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imUserService.selectImUserById(id));
     }
@@ -53,6 +66,7 @@ public class ImUserController extends BaseController {
     @RequiresPermissions("im:user:add")
     @Log(title = "IM用户", businessType = BusinessType.INSERT)
     @PostMapping
+    @ResponseBody
     public AjaxResult add(@Valid @RequestBody ImUser imUser) {
         return toAjax(imUserService.insertImUser(imUser));
     }
@@ -63,6 +77,7 @@ public class ImUserController extends BaseController {
     @RequiresPermissions("im:user:edit")
     @Log(title = "IM用户", businessType = BusinessType.UPDATE)
     @PutMapping
+    @ResponseBody
     public AjaxResult edit(@Valid @RequestBody ImUser imUser) {
         return toAjax(imUserService.updateImUser(imUser));
     }

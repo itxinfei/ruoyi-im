@@ -6,67 +6,162 @@
         <id property="id" column="id"/>
         <result property="conversationId" column="conversation_id"/>
         <result property="senderId" column="sender_id"/>
+        <result property="messageType" column="message_type"/>
         <result property="content" column="content"/>
-        <result property="type" column="message_type"/>
+        <result property="replyToMessageId" column="reply_to_message_id"/>
+        <result property="forwardFromMessageId" column="forward_from_message_id"/>
+        <result property="fileUrl" column="file_url"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="sensitiveLevel" column="sensitive_level"/>
+        <result property="isRevoked" column="is_revoked"/>
+        <result property="revokedTime" column="revoked_time"/>
+        <result property="revokerId" column="revoker_id"/>
+        <result property="isEdited" column="is_edited"/>
+        <result property="editedContent" column="edited_content"/>
+        <result property="editCount" column="edit_count"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
         <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <!-- 关联字段 -->
+        <result property="senderName" column="sender_name"/>
+        <result property="conversationName" column="conversation_name"/>
     </resultMap>
 
     <sql id="selectImMessageVo">
-        select id, conversation_id, sender_id, content, message_type, create_time
-        from im_message
+        select m.id, m.conversation_id, m.sender_id, m.message_type, m.content,
+               m.reply_to_message_id, m.forward_from_message_id, m.file_url, m.file_name, m.file_size,
+               m.sensitive_level, m.is_revoked, m.revoked_time, m.revoker_id,
+               m.is_edited, m.edited_content, m.edit_count, m.edit_time,
+               m.is_deleted, m.deleted_time, m.create_time, m.update_time,
+               u.nickname as sender_name,
+               CASE WHEN c.type = 'PRIVATE' THEN (SELECT nickname FROM im_user WHERE id = c.target_id)
+                    ELSE (SELECT name FROM im_group WHERE id = c.target_id) END as conversation_name
+        from im_message m
+        left join im_user u on m.sender_id = u.id
+        left join im_conversation c on m.conversation_id = c.id
     </sql>
 
     <select id="selectImMessageList" parameterType="com.ruoyi.web.domain.ImMessage" resultMap="ImMessageResult">
         <include refid="selectImMessageVo"/>
         <where>
-            <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
-            <if test="senderId != null"> and sender_id = #{senderId} </if>
+            m.is_deleted = 0
+            <if test="conversationId != null">and m.conversation_id = #{conversationId}</if>
+            <if test="senderId != null">and m.sender_id = #{senderId}</if>
+            <if test="messageType != null and messageType != ''">and m.message_type = #{messageType}</if>
+            <if test="sensitiveLevel != null and sensitiveLevel != ''">and m.sensitive_level = #{sensitiveLevel}</if>
+            <if test="content != null and content != ''">and m.content like concat('%', #{content}, '%')</if>
+            <if test="params.beginTime != null and params.beginTime != ''">and date_format(m.create_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d')</if>
+            <if test="params.endTime != null and params.endTime != ''">and date_format(m.create_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d')</if>
         </where>
-        order by create_time desc
-    </select>
-
-    <select id="selectImMessageListByConversationId" parameterType="Long" resultMap="ImMessageResult">
-        <include refid="selectImMessageVo"/>
-        where conversation_id = #{conversationId}
-        order by create_time desc
-    </select>
-
-    <select id="selectImMessageListByTimeRange" resultMap="ImMessageResult">
-        <include refid="selectImMessageVo"/>
-        where conversation_id = #{conversationId}
-        and create_time between #{startTime} and #{endTime}
-        order by create_time desc
+        order by m.create_time desc
     </select>
 
     <select id="selectImMessageById" parameterType="Long" resultMap="ImMessageResult">
         <include refid="selectImMessageVo"/>
-        where id = #{id}
+        where m.id = #{id}
+    </select>
+
+    <select id="selectImMessageListByConversationId" parameterType="Long" resultMap="ImMessageResult">
+        <include refid="selectImMessageVo"/>
+        where m.conversation_id = #{conversationId} and m.is_deleted = 0
+        order by m.create_time desc
+    </select>
+
+    <select id="selectImMessageListByTimeRange" resultMap="ImMessageResult">
+        <include refid="selectImMessageVo"/>
+        where m.conversation_id = #{conversationId}
+        and m.create_time between #{startTime} and #{endTime}
+        and m.is_deleted = 0
+        order by m.create_time desc
     </select>
 
     <select id="countMessages" parameterType="com.ruoyi.web.domain.ImMessage" resultType="java.lang.Integer">
         select count(*) from im_message
         <where>
-            <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
-            <if test="senderId != null"> and sender_id = #{senderId} </if>
+            is_deleted = 0
+            <if test="conversationId != null">and conversation_id = #{conversationId}</if>
+            <if test="senderId != null">and sender_id = #{senderId}</if>
+            <if test="sensitiveLevel != null and sensitiveLevel != ''">and sensitive_level = #{sensitiveLevel}</if>
         </where>
     </select>
 
     <select id="countSensitiveMessages" resultType="java.lang.Integer">
-        select count(*) from im_message where sensitive_level in ('SENSITIVE', 'HIGH')
+        select count(*) from im_message where is_deleted = 0 and sensitive_level in ('SENSITIVE', 'HIGH')
     </select>
 
+    <insert id="insertImMessage" parameterType="com.ruoyi.web.domain.ImMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into im_message
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="conversationId != null">conversation_id,</if>
+            <if test="senderId != null">sender_id,</if>
+            <if test="messageType != null">message_type,</if>
+            <if test="content != null">content,</if>
+            <if test="replyToMessageId != null">reply_to_message_id,</if>
+            <if test="forwardFromMessageId != null">forward_from_message_id,</if>
+            <if test="fileUrl != null">file_url,</if>
+            <if test="fileName != null">file_name,</if>
+            <if test="fileSize != null">file_size,</if>
+            <if test="sensitiveLevel != null">sensitive_level,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="conversationId != null">#{conversationId},</if>
+            <if test="senderId != null">#{senderId},</if>
+            <if test="messageType != null">#{messageType},</if>
+            <if test="content != null">#{content},</if>
+            <if test="replyToMessageId != null">#{replyToMessageId},</if>
+            <if test="forwardFromMessageId != null">#{forwardFromMessageId},</if>
+            <if test="fileUrl != null">#{fileUrl},</if>
+            <if test="fileName != null">#{fileName},</if>
+            <if test="fileSize != null">#{fileSize},</if>
+            <if test="sensitiveLevel != null">#{sensitiveLevel},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImMessage" parameterType="com.ruoyi.web.domain.ImMessage">
+        update im_message
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="fileUrl != null">file_url = #{fileUrl},</if>
+            <if test="fileName != null">file_name = #{fileName},</if>
+            <if test="sensitiveLevel != null">sensitive_level = #{sensitiveLevel},</if>
+            <if test="isEdited != null">is_edited = #{isEdited},</if>
+            <if test="editedContent != null">edited_content = #{editedContent},</if>
+            <if test="editCount != null">edit_count = #{editCount},</if>
+            <if test="editTime != null">edit_time = #{editTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="revokeMessage" parameterType="Long">
+        update im_message set is_revoked = 1, revoked_time = NOW() where id = #{messageId}
+    </update>
+
     <delete id="deleteImMessageById" parameterType="Long">
-        delete from im_message where id = #{id}
+        update im_message set is_deleted = 1, deleted_time = NOW() where id = #{id}
     </delete>
 
     <delete id="deleteImMessageByIds" parameterType="Long[]">
-        delete from im_message where id in
+        update im_message set is_deleted = 1, deleted_time = NOW() where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
     </delete>
 
-    <update id="revokeMessage" parameterType="Long">
-        update im_message set is_revoked = 1, revoked_time = NOW() where id = #{messageId}
-    </update>
+    <!-- 统计各敏感级别的消息数量 -->
+    <select id="getMessageStatistics" resultType="java.util.Map">
+        select
+            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND (sensitive_level IS NULL OR sensitive_level = 'NORMAL')) as normal_count,
+            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND sensitive_level = 'SENSITIVE') as sensitive_count,
+            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND sensitive_level = 'HIGH') as high_count,
+            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0) as total_count
+        from dual
+    </select>
 </mapper>

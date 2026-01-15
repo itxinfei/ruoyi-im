@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit">
-    <title>消息管理</title>
+    <title>消息审核管理</title>
     <link rel="shortcut icon" href="/favicon.ico">
     <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
     <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
@@ -12,27 +12,84 @@
     <link href="/css/animate.css" th:href="@{/css/animate.css}" rel="stylesheet"/>
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
+    <style>
+        .statistics-card {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #fff;
+        }
+        .stat-normal { background-color: #1ab394; }
+        .stat-sensitive { background-color: #f8ac59; }
+        .stat-high { background-color: #ed5565; }
+        .stat-total { background-color: #23c6c8; }
+        .stat-number { font-size: 24px; font-weight: bold; }
+        .stat-label { font-size: 14px; opacity: 0.9; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div">
         <div class="row">
+            <!-- 统计卡片 -->
+            <div class="col-sm-12">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-total">
+                            <div class="stat-number" id="totalCount">0</div>
+                            <div class="stat-label">消息总数</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-normal">
+                            <div class="stat-number" id="normalCount">0</div>
+                            <div class="stat-label">普通消息</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-sensitive">
+                            <div class="stat-number" id="sensitiveCount">0</div>
+                            <div class="stat-label">敏感消息</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-high">
+                            <div class="stat-number" id="highCount">0</div>
+                            <div class="stat-label">高级敏感</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="message-form">
                     <div class="select-list">
                         <ul class="search-list">
                             <li>
+                                <label>会话ID：</label>
+                                <input type="text" name="conversationId" value=""/>
+                            </li>
+                            <li>
                                 <label>发送者ID：</label>
                                 <input type="text" name="senderId" value=""/>
                             </li>
                             <li>
-                                <label>接收者ID：</label>
-                                <input type="text" name="receiverId" value=""/>
+                                <label>敏感级别：</label>
+                                <select name="sensitiveLevel">
+                                    <option value="">所有</option>
+                                    <option value="NORMAL">普通</option>
+                                    <option value="SENSITIVE">敏感</option>
+                                    <option value="HIGH">高级敏感</option>
+                                </select>
                             </li>
                             <li>
                                 <label>消息类型：</label>
-                                <select name="msgType" th:with="type=${@dict.getType('im_msg_type')}">
+                                <select name="messageType">
                                     <option value="">所有</option>
-                                    <option th:each="dict : ${type}" th:value="${dict.dictValue}" th:text="${dict.dictLabel}"></option>
+                                    <option value="TEXT">文本</option>
+                                    <option value="IMAGE">图片</option>
+                                    <option value="VIDEO">视频</option>
+                                    <option value="AUDIO">音频</option>
+                                    <option value="FILE">文件</option>
                                 </select>
                             </li>
                             <li class="select-time">
@@ -49,91 +106,297 @@
                     </div>
                 </form>
             </div>
-            
+
             <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-info" onclick="showSearchModal()" shiro:hasPermission="im:message:audit:query">
+                    <i class="fa fa-search"></i> 关键词搜索
+                </a>
+                <a class="btn btn-warning single disabled" onclick="markSensitive()" shiro:hasPermission="im:message:audit:edit">
+                    <i class="fa fa-exclamation-triangle"></i> 标记敏感
+                </a>
+                <a class="btn btn-primary single disabled" onclick="unmarkSensitive()" shiro:hasPermission="im:message:audit:edit">
+                    <i class="fa fa-check"></i> 取消标记
+                </a>
                 <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:message:remove">
                     <i class="fa fa-remove"></i> 删除
                 </a>
-                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:message:export">
+                <a class="btn btn-success" onclick="$.table.exportExcel()" shiro:hasPermission="im:message:export">
                     <i class="fa fa-download"></i> 导出
                 </a>
             </div>
-            
+
             <div class="col-sm-12 select-table table-striped">
                 <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
+
+    <!-- 关键词搜索模态框 -->
+    <div class="modal fade" id="searchModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">关键词搜索</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>搜索关键词：</label>
+                        <input type="text" class="form-control" id="searchKeyword" placeholder="输入消息内容关键词">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="doSearch()">搜索</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div th:include="include :: footer"></div>
     <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('im:message:audit:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:message:remove')}]];
+        var auditPrefix = ctx + "im/message/audit";
         var prefix = ctx + "im/message";
 
         $(function() {
+            // 加载统计数据
+            loadStatistics();
+
             var options = {
-                url: prefix + "/list",
+                url: auditPrefix + "/list",
                 removeUrl: prefix + "/remove/{id}",
-                exportUrl: prefix + "/export",
+                exportUrl: auditPrefix + "/export",
                 modalName: "消息",
                 columns: [{
                     checkbox: true
                 },
                 {
-                    field: 'msgId',
+                    field: 'id',
                     title: '消息ID',
-                    visible: true
+                    visible: false
+                },
+                {
+                    field: 'conversationId',
+                    title: '会话ID',
+                    visible: false
                 },
                 {
                     field: 'senderId',
-                    title: '发送者ID'
+                    title: '发送者ID',
+                    width: '80'
                 },
                 {
-                    field: 'receiverId',
-                    title: '接收者ID'
-                },
-                {
-                    field: 'msgType',
-                    title: '消息类型',
+                    field: 'messageType',
+                    title: '类型',
+                    align: 'center',
+                    width: '70',
                     formatter: function(value, row, index) {
-                        return $.table.selectDictLabel('im_msg_type', value);
+                        if (value === 'TEXT') return '<span class="badge badge-primary">文本</span>';
+                        if (value === 'IMAGE') return '<span class="badge badge-info">图片</span>';
+                        if (value === 'VIDEO') return '<span class="badge badge-warning">视频</span>';
+                        if (value === 'AUDIO') return '<span class="badge badge-success">音频</span>';
+                        if (value === 'FILE') return '<span class="badge badge-default">文件</span>';
+                        return value;
                     }
                 },
                 {
                     field: 'content',
                     title: '消息内容',
                     formatter: function(value, row, index) {
-                        // 限制内容显示长度
-                        if (value && value.length > 50) {
-                            return value.substring(0, 50) + '...';
+                        if (row.messageType === 'IMAGE' || row.messageType === 'VIDEO') {
+                            return '<a href="javascript:void(0)" onclick="previewFile(\'' + row.fileUrl + '\')">' + (row.fileName || '查看文件') + '</a>';
                         }
-                        return value;
+                        if (value && value.length > 100) {
+                            return value.substring(0, 100) + '...';
+                        }
+                        return value || '-';
                     }
                 },
                 {
-                    field: 'status',
+                    field: 'sensitiveLevel',
+                    title: '敏感级别',
+                    align: 'center',
+                    width: '90',
+                    formatter: function(value, row, index) {
+                        if (value === 'SENSITIVE') {
+                            return '<span class="badge badge-warning">敏感</span>';
+                        } else if (value === 'HIGH') {
+                            return '<span class="badge badge-danger">高级</span>';
+                        } else if (value === 'NORMAL') {
+                            return '<span class="badge badge-primary">普通</span>';
+                        }
+                        return '-';
+                    }
+                },
+                {
+                    field: 'isRevoked',
                     title: '状态',
                     align: 'center',
+                    width: '70',
                     formatter: function(value, row, index) {
-                        return $.table.selectDictLabel('im_msg_status', value);
+                        if (value == 1) return '<span class="badge badge-default">已撤回</span>';
+                        if (row.isDeleted == 1) return '<span class="badge badge-danger">已删除</span>';
+                        if (row.isEdited == 1) return '<span class="badge badge-info">已编辑</span>';
+                        return '<span class="badge badge-success">正常</span>';
                     }
                 },
                 {
-                    field: 'sendTime',
+                    field: 'createTime',
                     title: '发送时间',
+                    width: '160',
                     sortable: true
                 },
                 {
                     title: '操作',
                     align: 'center',
+                    width: '180',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.msgId + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewDetail(' + row.id + ')"><i class="fa fa-eye"></i>详情</a> ');
+                        if (row.sensitiveLevel !== 'SENSITIVE' && row.sensitiveLevel !== 'HIGH') {
+                            actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="doMarkSensitive(' + row.id + ')"><i class="fa fa-exclamation"></i>标记</a> ');
+                        } else {
+                            actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="doUnmarkSensitive(' + row.id + ')"><i class="fa fa-check"></i>取消</a> ');
+                        }
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
                 }]
             };
             $.table.init(options);
         });
+
+        /* 加载统计数据 */
+        function loadStatistics() {
+            $.get(auditPrefix + "/statistics", function(result) {
+                if (result.code == 0) {
+                    $("#totalCount").text(result.data.totalCount);
+                    $("#normalCount").text(result.data.normalCount);
+                    $("#sensitiveCount").text(result.data.sensitiveCount);
+                    $("#highCount").text(result.data.highCount);
+                }
+            });
+        }
+
+        /* 显示搜索模态框 */
+        function showSearchModal() {
+            $("#searchModal").modal('show');
+        }
+
+        /* 执行关键词搜索 */
+        function doSearch() {
+            var keyword = $("#searchKeyword").val();
+            if (!keyword) {
+                $.modal.alertWarning("请输入搜索关键词");
+                return;
+            }
+            $("#searchModal").modal('hide');
+            $.table.search({
+                'url': auditPrefix + '/search',
+                'query': {'keyword': keyword}
+            });
+        }
+
+        /* 标记为敏感 */
+        function markSensitive() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm("确定要将选中的消息标记为敏感吗？", function() {
+                var rows = $.table.selectFirstRows();
+                for (var i = 0; i < rows.length; i++) {
+                    doMarkSensitive(rows[i].id);
+                }
+                $.table.refresh();
+                loadStatistics();
+            });
+        }
+
+        /* 标记单条为敏感 */
+        function doMarkSensitive(id) {
+            $.ajax({
+                url: auditPrefix + "/mark-sensitive/" + id,
+                type: 'put',
+                success: function() {
+                    $.table.refresh();
+                    loadStatistics();
+                }
+            });
+        }
+
+        /* 取消敏感标记 */
+        function unmarkSensitive() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm("确定要取消选中的消息敏感标记吗？", function() {
+                var rows = $.table.selectFirstRows();
+                for (var i = 0; i < rows.length; i++) {
+                    doUnmarkSensitive(rows[i].id);
+                }
+                $.table.refresh();
+                loadStatistics();
+            });
+        }
+
+        /* 取消单条敏感标记 */
+        function doUnmarkSensitive(id) {
+            $.ajax({
+                url: auditPrefix + "/unmark-sensitive/" + id,
+                type: 'put',
+                success: function() {
+                    $.table.refresh();
+                    loadStatistics();
+                }
+            });
+        }
+
+        /* 查看消息详情 */
+        function viewDetail(id) {
+            $.get(auditPrefix + "/" + id, function(result) {
+                if (result.code == 0) {
+                    var msg = result.data;
+                    var content = '<div style="padding: 10px;">';
+                    content += '<p><strong>消息ID：</strong>' + msg.id + '</p>';
+                    content += '<p><strong>会话ID：</strong>' + msg.conversationId + '</p>';
+                    content += '<p><strong>发送者ID：</strong>' + msg.senderId + '</p>';
+                    content += '<p><strong>消息类型：</strong>' + msg.messageType + '</p>';
+                    content += '<p><strong>敏感级别：</strong>' + (msg.sensitiveLevel || 'NORMAL') + '</p>';
+                    content += '<p><strong>发送时间：</strong>' + msg.createTime + '</p>';
+                    if (msg.messageType === 'TEXT') {
+                        content += '<hr><p><strong>消息内容：</strong></p>';
+                        content += '<p style="white-space: pre-wrap;">' + (msg.content || '') + '</p>';
+                    } else if (msg.fileUrl) {
+                        content += '<hr><p><strong>文件：</strong>' + (msg.fileName || '') + '</p>';
+                        if (msg.messageType === 'IMAGE') {
+                            content += '<img src="' + msg.fileUrl + '" style="max-width:100%;max-height:400px;">';
+                        } else {
+                            content += '<a href="' + msg.fileUrl + '" target="_blank">点击下载</a>';
+                        }
+                    }
+                    if (msg.isEdited == 1) {
+                        content += '<hr><p><strong>编辑历史：</strong>已编辑 ' + msg.editCount + ' 次</p>';
+                        content += '<p>最后编辑时间：' + msg.editTime + '</p>';
+                    }
+                    if (msg.isRevoked == 1) {
+                        content += '<hr><p class="text-muted"><strong>消息已撤回</strong>，撤回时间：' + msg.revokedTime + '</p>';
+                    }
+                    content += '</div>';
+                    $.modal.open("消息详情", content, '600', 'auto');
+                }
+            });
+        }
+
+        /* 预览文件 */
+        function previewFile(url) {
+            window.open(url, '_blank');
+        }
     </script>
 </body>
 </html>

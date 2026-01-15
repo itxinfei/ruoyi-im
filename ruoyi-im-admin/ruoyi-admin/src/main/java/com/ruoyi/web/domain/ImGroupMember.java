@@ -84,6 +84,26 @@ public class ImGroupMember implements Serializable {
      */
     private String userAvatar;
 
+    /**
+     * 用户昵称，非数据库字段
+     */
+    private String userNickname;
+
+    /**
+     * 用户手机号，非数据库字段
+     */
+    private String userMobile;
+
+    /**
+     * 群组名称，非数据库字段
+     */
+    private String groupName;
+
+    /**
+     * 群主昵称，非数据库字段
+     */
+    private String ownerName;
+
     public Long getId() {
         return id;
     }
@@ -186,6 +206,38 @@ public class ImGroupMember implements Serializable {
 
     public void setUserAvatar(String userAvatar) {
         this.userAvatar = userAvatar;
+    }
+
+    public String getUserNickname() {
+        return userNickname;
+    }
+
+    public void setUserNickname(String userNickname) {
+        this.userNickname = userNickname;
+    }
+
+    public String getUserMobile() {
+        return userMobile;
+    }
+
+    public void setUserMobile(String userMobile) {
+        this.userMobile = userMobile;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
     }
 
 }

@@ -1,0 +1,100 @@
+package com.ruoyi.web.mapper;
+
+import com.ruoyi.web.domain.ImFriend;
+import java.util.List;
+
+/**
+ * 好友关系Mapper接口
+ *
+ * @author ruoyi
+ */
+public interface ImFriendMapper {
+
+    /**
+     * 查询好友关系
+     *
+     * @param id 好友关系主键
+     * @return 好友关系
+     */
+    public ImFriend selectImFriendById(Long id);
+
+    /**
+     * 查询好友关系列表
+     *
+     * @param imFriend 好友关系
+     * @return 好友关系集合
+     */
+    public List<ImFriend> selectImFriendList(ImFriend imFriend);
+
+    /**
+     * 根据用户ID查询好友列表
+     *
+     * @param userId 用户ID
+     * @return 好友列表
+     */
+    public List<ImFriend> selectFriendsByUserId(Long userId);
+
+    /**
+     * 查询用户的好友分组列表
+     *
+     * @param userId 用户ID
+     * @return 分组名称列表
+     */
+    public List<String> selectFriendGroups(Long userId);
+
+    /**
+     * 检查好友关系是否存在
+     *
+     * @param params 包含userId和friendId的参数
+     * @return 存在数量
+     */
+    public Integer checkFriendExists(java.util.Map<String, Object> params);
+
+    /**
+     * 根据用户ID和好友ID查询关系
+     *
+     * @param params 包含userId和friendId的参数
+     * @return 好友关系
+     */
+    public ImFriend selectFriendByUserAndFriend(java.util.Map<String, Object> params);
+
+    /**
+     * 新增好友关系
+     *
+     * @param imFriend 好友关系
+     * @return 结果
+     */
+    public int insertImFriend(ImFriend imFriend);
+
+    /**
+     * 修改好友关系
+     *
+     * @param imFriend 好友关系
+     * @return 结果
+     */
+    public int updateImFriend(ImFriend imFriend);
+
+    /**
+     * 删除好友关系
+     *
+     * @param id 好友关系主键
+     * @return 结果
+     */
+    public int deleteImFriendById(Long id);
+
+    /**
+     * 批量删除好友关系
+     *
+     * @param ids 需要删除的数据主键集合
+     * @return 结果
+     */
+    public int deleteImFriendByIds(Long[] ids);
+
+    /**
+     * 删除指定好友关系
+     *
+     * @param params 包含userId和friendId的参数
+     * @return 结果
+     */
+    public int deleteFriendByUserAndFriend(java.util.Map<String, Object> params);
+}

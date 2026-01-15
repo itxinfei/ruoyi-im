@@ -3,6 +3,7 @@ package com.ruoyi.web.mapper;
 import com.ruoyi.web.domain.ImMessage;
 import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IM消息Mapper接口（Admin模块专用）
@@ -34,4 +35,11 @@ public interface ImMessageMapper {
     int countSensitiveMessages();
 
     int revokeMessage(Long messageId);
+
+    /**
+     * 获取消息统计数据
+     *
+     * @return 统计数据
+     */
+    Map<String, Object> getMessageStatistics();
 }
