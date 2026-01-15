@@ -2,6 +2,7 @@ package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImGroupAnnouncement;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 群组公告Mapper接口
@@ -97,4 +98,11 @@ public interface ImGroupAnnouncementMapper {
      * @return 结果
      */
     public int deleteAnnouncementsByGroupId(Long groupId);
+
+    /**
+     * 获取群公告统计数据
+     *
+     * @return 统计数据
+     */
+    public Map<String, Object> getAnnouncementStatistics();
 }

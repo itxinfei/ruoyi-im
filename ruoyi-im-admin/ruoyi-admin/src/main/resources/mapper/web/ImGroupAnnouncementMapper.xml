@@ -134,4 +134,15 @@
         where group_id = #{groupId}
     </delete>
 
+    <!-- 获取群公告统计数据 -->
+    <select id="getAnnouncementStatistics" resultType="java.util.HashMap">
+        select
+            count(*) as totalCount,
+            sum(case when is_pinned = 1 then 1 else 0 end) as pinnedCount,
+            sum(case when type = 'SYSTEM' then 1 else 0 end) as systemCount,
+            sum(case when type = 'ACTIVITY' then 1 else 0 end) as activityCount
+        from im_group_announcement
+        where status = 1
+    </select>
+
 </mapper>

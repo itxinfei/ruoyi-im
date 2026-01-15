@@ -2,6 +2,7 @@ package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImGroupMember;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 群组成员Mapper接口
@@ -121,4 +122,11 @@ public interface ImGroupMemberMapper {
      * @return 结果
      */
     public int deleteMembersByGroupId(Long groupId);
+
+    /**
+     * 获取群组成员统计数据
+     *
+     * @return 统计数据
+     */
+    public Map<String, Object> getMemberStatistics();
 }

@@ -2,6 +2,7 @@ package com.ruoyi.web.service;
 
 import com.ruoyi.web.domain.ImGroupAnnouncement;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 群组公告Service接口
@@ -90,4 +91,11 @@ public interface ImGroupAnnouncementService {
      * @return 结果
      */
     int deleteAnnouncementsByGroupId(Long groupId);
+
+    /**
+     * 获取群公告统计数据
+     *
+     * @return 统计数据
+     */
+    Map<String, Object> getAnnouncementStatistics();
 }

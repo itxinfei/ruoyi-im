@@ -37,6 +37,16 @@ public class ImGroupAnnouncementController extends BaseController {
     }
 
     /**
+     * 获取群公告统计数据
+     */
+    @RequiresPermissions("im:announcement:list")
+    @GetMapping("/statistics")
+    @ResponseBody
+    public AjaxResult getStatistics() {
+        return AjaxResult.success(imGroupAnnouncementService.getAnnouncementStatistics());
+    }
+
+    /**
      * 新增群公告页面
      */
     @RequiresPermissions("im:announcement:add")

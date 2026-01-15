@@ -73,4 +73,9 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     public int deleteAnnouncementsByGroupId(Long groupId) {
         return imGroupAnnouncementMapper.deleteAnnouncementsByGroupId(groupId);
     }
+
+    @Override
+    public Map<String, Object> getAnnouncementStatistics() {
+        return imGroupAnnouncementMapper.getAnnouncementStatistics();
+    }
 }

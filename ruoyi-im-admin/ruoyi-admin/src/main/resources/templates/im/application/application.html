@@ -63,7 +63,8 @@
 
         /* 统计区域布局 */
         .statistics-section {
-            margin-bottom: 12px;
+            margin-top: 6px;
+            margin-bottom: 0;
         }
         .statistics-section .row {
             margin-left: -8px;
@@ -77,7 +78,7 @@
 
         /* 搜索区域 */
         .search-collapse {
-            margin-bottom: 16px;
+            margin-top: 6px;
             border-radius: 4px;
         }
 
@@ -206,7 +207,6 @@
             </div>
         </div>
     </div>
-    <div th:include="include :: footer"></div>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:app:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:app:remove')}]];

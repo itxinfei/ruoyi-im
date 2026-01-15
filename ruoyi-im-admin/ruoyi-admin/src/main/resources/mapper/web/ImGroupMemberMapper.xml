@@ -146,4 +146,15 @@
         where group_id = #{groupId}
     </delete>
 
+    <!-- 获取群组成员统计数据 -->
+    <select id="getMemberStatistics" resultType="java.util.HashMap">
+        select
+            count(*) as totalCount,
+            sum(case when role = 'OWNER' then 1 else 0 end) as ownerCount,
+            sum(case when role = 'ADMIN' then 1 else 0 end) as adminCount,
+            sum(case when is_muted = 1 then 1 else 0 end) as mutedCount
+        from im_group_member
+        where is_deleted = 0
+    </select>
+
 </mapper>
