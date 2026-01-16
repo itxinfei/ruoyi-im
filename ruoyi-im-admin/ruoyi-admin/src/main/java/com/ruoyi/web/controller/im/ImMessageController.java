@@ -91,6 +91,17 @@ public class ImMessageController extends BaseController {
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imMessageService.selectImMessageById(id));
     }
+    
+    /**
+     * 修改IM消息（表单提交方式，用于编辑页面）
+     */
+    @RequiresPermissions("im:message:edit")
+    @Log(title = "IM消息", businessType = BusinessType.UPDATE)
+    @PostMapping("/edit")
+    @ResponseBody
+    public AjaxResult edit(@RequestBody ImMessage imMessage) {
+        return toAjax(imMessageService.updateImMessage(imMessage));
+    }
 
     /**
      * 撤回消息
@@ -135,7 +146,7 @@ public class ImMessageController extends BaseController {
      */
     @RequiresPermissions("im:message:remove")
     @Log(title = "删除IM消息", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @DeleteMapping("/remove/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(imMessageService.deleteImMessageByIds(ids));
     }

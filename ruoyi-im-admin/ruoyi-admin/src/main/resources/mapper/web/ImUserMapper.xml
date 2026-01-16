@@ -42,6 +42,12 @@
             <if test="mobile != null and mobile != ''"> and mobile = #{mobile} </if>
             <if test="status != null"> and status = #{status} </if>
             <if test="gender != null"> and gender = #{gender} </if>
+            <if test="isOnline != null">
+                <choose>
+                    <when test="isOnline == 1"> and last_online_time >= DATE_SUB(NOW(), INTERVAL 5 MINUTE) </when>
+                    <otherwise> and last_online_time &lt; DATE_SUB(NOW(), INTERVAL 5 MINUTE) </otherwise>
+                </choose>
+            </if>
         </where>
         order by create_time desc
     </select>

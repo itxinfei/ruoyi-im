@@ -13,11 +13,11 @@
 <body class="lockscreen">
 <div class="lockscreen-wrapper">
     <div class="lockscreen-time"></div>
-    <div class="lockscreen-name">[[ ${user.loginName} ]] / [[${#strings.defaultString(user.userName, '-')}]]</div>
+    <div class="lockscreen-name">[[${#strings.defaultString(user?.loginName, '-')}]] / [[${#strings.defaultString(user?.userName, '-')}]]</div>
 
     <div class="lockscreen-item">
         <div class="lockscreen-image">
-            <img th:src="(${#strings.isEmpty(user.avatar)}) ? @{/img/profile.jpg} : @{${user.avatar}}" th:onerror="this.src='img/profile.jpg'" class="img-circle" alt="User Image">
+            <img th:src="(${#strings.isEmpty(user?.avatar)}) ? @{/img/profile.jpg} : @{${user?.avatar}}" th:onerror="this.src='img/profile.jpg'" class="img-circle" alt="User Image">
         </div>
         <form class="lockscreen-credentials" method="post" action="#" onsubmit="return false;">
             <div class="input-group">

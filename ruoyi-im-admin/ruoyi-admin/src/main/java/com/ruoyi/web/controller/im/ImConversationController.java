@@ -137,11 +137,22 @@ public class ImConversationController extends BaseController {
     }
 
     /**
-     * 修改会话
+     * 修改会话（API接口方式）
      */
     @RequiresPermissions("im:conversation:edit")
     @Log(title = "会话管理", businessType = BusinessType.UPDATE)
     @PutMapping
+    @ResponseBody
+    public AjaxResult editApi(@RequestBody ImConversation imConversation) {
+        return toAjax(imConversationService.updateImConversation(imConversation));
+    }
+    
+    /**
+     * 修改会话（表单提交方式，用于编辑页面）
+     */
+    @RequiresPermissions("im:conversation:edit")
+    @Log(title = "会话管理", businessType = BusinessType.UPDATE)
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImConversation imConversation) {
         return toAjax(imConversationService.updateImConversation(imConversation));
@@ -152,7 +163,7 @@ public class ImConversationController extends BaseController {
      */
     @RequiresPermissions("im:conversation:remove")
     @Log(title = "会话管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @DeleteMapping("/remove/{ids}")
     @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(imConversationService.deleteImConversationByIds(ids));

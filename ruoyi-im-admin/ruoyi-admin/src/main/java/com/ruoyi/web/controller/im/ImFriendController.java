@@ -130,11 +130,22 @@ public class ImFriendController extends BaseController {
     }
 
     /**
-     * 修改好友关系（备注、分组）
+     * 修改好友关系（API接口方式）
      */
     @RequiresPermissions("im:friend:edit")
     @Log(title = "好友管理", businessType = BusinessType.UPDATE)
     @PutMapping
+    @ResponseBody
+    public AjaxResult editApi(@RequestBody ImFriend imFriend) {
+        return toAjax(imFriendService.updateImFriend(imFriend));
+    }
+    
+    /**
+     * 修改好友关系（表单提交方式，用于编辑页面）
+     */
+    @RequiresPermissions("im:friend:edit")
+    @Log(title = "好友管理", businessType = BusinessType.UPDATE)
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImFriend imFriend) {
         return toAjax(imFriendService.updateImFriend(imFriend));
@@ -145,7 +156,7 @@ public class ImFriendController extends BaseController {
      */
     @RequiresPermissions("im:friend:remove")
     @Log(title = "好友管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @DeleteMapping("/remove/{ids}")
     @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(imFriendService.deleteImFriendByIds(ids));

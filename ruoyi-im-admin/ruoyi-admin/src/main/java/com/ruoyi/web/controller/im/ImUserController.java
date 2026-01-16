@@ -104,13 +104,25 @@ public class ImUserController extends BaseController {
     }
 
     /**
-     * 修改IM用户
+     * 修改IM用户（API接口方式，用于表格行编辑）
      */
     @RequiresPermissions("im:user:edit")
     @Log(title = "IM用户", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PutMapping("/{id}")
     @ResponseBody
-    public AjaxResult edit(@Valid @RequestBody ImUser imUser) {
+    public AjaxResult editApi(@PathVariable("id") Long id, @Valid @RequestBody ImUser imUser) {
+        imUser.setId(id);
+        return toAjax(imUserService.updateImUser(imUser));
+    }
+    
+    /**
+     * 修改IM用户（表单提交方式，用于编辑页面）
+     */
+    @RequiresPermissions("im:user:edit")
+    @Log(title = "IM用户", businessType = BusinessType.UPDATE)
+    @PostMapping("/edit")
+    @ResponseBody
+    public AjaxResult edit(@Valid ImUser imUser) {
         return toAjax(imUserService.updateImUser(imUser));
     }
 
@@ -119,7 +131,7 @@ public class ImUserController extends BaseController {
      */
     @RequiresPermissions("im:user:remove")
     @Log(title = "IM用户", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @DeleteMapping("/remove/{ids}")
     @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(imUserService.deleteImUserByIds(ids));

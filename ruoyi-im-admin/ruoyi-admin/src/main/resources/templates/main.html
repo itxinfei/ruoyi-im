@@ -298,10 +298,9 @@
                         <div style="color: white; font-size: 14px; margin-top: 5px;">
                             <i class="fa fa-clock-o"></i> [[${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm')}]]
                         </div>
-                        <div style="color: white; font-size: 14px; margin-top: 5px;">
-                            <i class="fa fa-user"></i> [[${#strings.defaultString(user.userName, '-')}]]
-                        </div>
-                    </div>
+                                            <div style="color: white; font-size: 14px; margin-top: 5px;">
+                                                <i class="fa fa-user"></i> [[${#strings.defaultString(user?.userName, '-')}]]
+                                            </div>                    </div>
                 </div>
             </div>
         </div>
@@ -458,7 +457,7 @@
                         </tr>
                         <tr>
                             <td style="border: none; font-weight: 600;"><i class="fa fa-user"></i> 当前用户</td>
-                            <td style="border: none;">[[${#strings.defaultString(user.userName, '-')}]]</td>
+                            <td style="border: none;">[[${#strings.defaultString(user?.userName, '-')}]]</td>
                         </tr>
                         <tr>
                             <td style="border: none; font-weight: 600;"><i class="fa fa-clock-o"></i> 登录时间</td>
