@@ -38,6 +38,25 @@ public class ImTodoItemController extends BaseController {
     }
 
     /**
+     * 新增待办事项页面
+     */
+    @RequiresPermissions("im:todoItem:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改待办事项页面
+     */
+    @RequiresPermissions("im:todoItem:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, ModelMap mmap) {
+        mmap.put("todoItem", imTodoItemService.selectImTodoItemById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询待办事项列表
      */
     @RequiresPermissions("im:todoItem:list")

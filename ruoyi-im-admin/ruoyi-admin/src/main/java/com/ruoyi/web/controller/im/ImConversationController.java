@@ -94,10 +94,20 @@ public class ImConversationController extends BaseController {
     }
 
     /**
-     * 获取会话成员列表
+     * 会话成员页面
      */
     @RequiresPermissions("im:conversation:query")
     @GetMapping("/{id}/members")
+    public String members(@PathVariable("id") Long conversationId, org.springframework.ui.Model model) {
+        model.addAttribute("conversationId", conversationId);
+        return prefix + "/members";
+    }
+
+    /**
+     * 获取会话成员列表（JSON接口）
+     */
+    @RequiresPermissions("im:conversation:query")
+    @GetMapping("/{id}/members/data")
     @ResponseBody
     public AjaxResult getMembers(@PathVariable("id") Long conversationId) {
         List<ImConversationMember> members = imConversationMemberService.selectMembersByConversationId(conversationId);

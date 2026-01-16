@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会话成员</title>
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
+    <style>
+        .member-table { margin-top: 10px; }
+        .member-avatar { width: 32px; height: 32px; border-radius: 50%; }
+    </style>
+</head>
+<body class="white-bg">
+    <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i> <span id="conversationInfo"></span>
+                </div>
+                <table id="member-table" data-mobile-responsive="true">
+                    <thead>
+                        <tr>
+                            <th data-field="userId">用户ID</th>
+                            <th data-field="nickname">昵称</th>
+                            <th data-field="role">角色</th>
+                            <th data-field="unreadCount">未读数</th>
+                            <th data-field="isPinned">置顶</th>
+                            <th data-field="isMuted">免打扰</th>
+                            <th data-field="joinTime">加入时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="member-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        var ctx = [[@{/}]];
+        var conversationId = [[${conversationId}]];
+    </script>
+    <script th:src="@{/js/jquery.min.js?v=3.6.3}"></script>
+    <script th:src="@{/js/bootstrap.min.js?v=3.3.7}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js?v=1.22.6}"></script>
+    <script th:inline="javascript">
+        $(function() {
+            loadMembers();
+        });
+
+        function loadMembers() {
+            $.get(ctx + "im/conversation/" + conversationId + "/members/data", function(result) {
+                if (result.code == 0) {
+                    var members = result.data || [];
+                    renderMembers(members);
+                    $("#conversationInfo").text("共 " + members.length + " 位成员");
+                } else {
+                    $("#member-tbody").html("<tr><td colspan='7' class='text-center'>暂无成员</td></tr>");
+                }
+            }).fail(function() {
+                $("#member-tbody").html("<tr><td colspan='7' class='text-center text-danger'>加载失败</td></tr>");
+            });
+        }
+
+        function renderMembers(members) {
+            var html = "";
+            if (members.length == 0) {
+                html = "<tr><td colspan='7' class='text-center'>暂无成员</td></tr>";
+            } else {
+                for (var i = 0; i < members.length; i++) {
+                    var m = members[i];
+                    var roleText = m.role === 'OWNER' ? '群主' : (m.role === 'ADMIN' ? '管理员' : '成员');
+                    var roleBadge = m.role === 'OWNER' ? 'badge-danger' : (m.role === 'ADMIN' ? 'badge-warning' : 'badge-primary');
+                    var pinnedText = m.isPinned == 1 ? '<span class="badge badge-success">是</span>' : '<span class="badge badge-default">否</span>';
+                    var mutedText = m.isMuted == 1 ? '<span class="badge badge-warning">是</span>' : '<span class="badge badge-default">否</span>';
+
+                    html += "<tr>";
+                    html += "<td>" + (m.userId || '-') + "</td>";
+                    html += "<td>" + (m.nickname || m.userName || '-') + "</td>";
+                    html += "<td><span class='badge " + roleBadge + "'>" + roleText + "</span></td>";
+                    html += "<td>" + (m.unreadCount || 0) + "</td>";
+                    html += "<td>" + pinnedText + "</td>";
+                    html += "<td>" + mutedText + "</td>";
+                    html += "<td>" + (m.createTime || '-') + "</td>";
+                    html += "</tr>";
+                }
+            }
+            $("#member-tbody").html(html);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>新增群公告</title>
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
+</head>
+<body class="white-bg">
+    <form class="form-horizontal m" id="form-announcement-add">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">群组ID：</label>
+            <div class="col-sm-8">
+                <input name="groupId" placeholder="请输入群组ID" class="form-control" type="number" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">公告标题：</label>
+            <div class="col-sm-8">
+                <input name="title" placeholder="请输入公告标题" class="form-control" type="text" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">公告内容：</label>
+            <div class="col-sm-8">
+                <textarea name="content" class="form-control" rows="5" placeholder="请输入公告内容" required></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">发布者ID：</label>
+            <div class="col-sm-8">
+                <input name="publisherId" placeholder="请输入发布者用户ID" class="form-control" type="number" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">发布者姓名：</label>
+            <div class="col-sm-8">
+                <input name="publisherName" placeholder="请输入发布者姓名" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">是否置顶：</label>
+            <div class="col-sm-8">
+                <select name="isPinned" class="form-control">
+                    <option value="0">否</option>
+                    <option value="1">是</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">状态：</label>
+            <div class="col-sm-8">
+                <select name="status" class="form-control">
+                    <option value="ACTIVE">激活</option>
+                    <option value="INACTIVE">禁用</option>
+                </select>
+            </div>
+        </div>
+    </form>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/group/announcement";
+        $("#form-announcement-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-announcement-add').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

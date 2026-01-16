@@ -22,7 +22,7 @@ import java.util.List;
  * @author ruoyi
  */
 @Controller
-@RequestMapping("/im/group/member")
+@RequestMapping("/im/member")
 public class ImGroupMemberController extends BaseController {
 
     private String prefix = "im/member";
@@ -62,7 +62,7 @@ public class ImGroupMemberController extends BaseController {
      * 获取群组成员详细信息
      */
     @RequiresPermissions("im:group:member:query")
-    @GetMapping("/info/{id}")
+    @GetMapping("/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imGroupMemberService.selectImGroupMemberById(id));
@@ -76,6 +76,16 @@ public class ImGroupMemberController extends BaseController {
     @ResponseBody
     public AjaxResult getMembersByGroupId(@PathVariable("groupId") Long groupId) {
         return AjaxResult.success(imGroupMemberService.selectMembersByGroupId(groupId));
+    }
+
+    /**
+     * 显示特定群组的成员列表页面
+     */
+    @RequiresPermissions("im:group:member:view")
+    @GetMapping("/group/{groupId}/view")
+    public String viewMembersByGroupId(@PathVariable("groupId") Long groupId, ModelMap mmap) {
+        mmap.put("groupId", groupId);
+        return prefix + "/membersByGroup";
     }
 
     /**

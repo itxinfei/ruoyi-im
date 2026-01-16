@@ -11,6 +11,8 @@
     <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
+    <!-- datetimepicker 日期时间选择器 -->
+    <link th:href="@{/ajax/libs/datapicker/bootstrap-datetimepicker.min.css?v=2.4.4}" rel="stylesheet"/>
     <style>
         /* 统计卡片样式 */
         .statistics-section {
@@ -203,6 +205,8 @@
     <script th:src="@{/ajax/libs/layui/layui.min.js?v=2.8.18}"></script>
     <script th:src="@{/ruoyi/js/common.js?v=4.8.0}"></script>
     <script th:src="@{/ruoyi/js/ry-ui.js?v=4.8.0}"></script>
+    <!-- datetimepicker 日期时间选择器 -->
+    <script th:src="@{/ajax/libs/datapicker/bootstrap-datetimepicker.min.js?v=2.4.4}"></script>
     <script th:inline="javascript">
         var exportFlag = [[${@permission.hasPermi('im:auditLog:export')}]];
         var prefix = ctx + "im/auditLog";
@@ -413,10 +417,11 @@
                         html += '<tr><th>用户代理</th><td>' + (data.userAgent || '-') + '</td></tr>';
                         html += '<tr><th>操作时间</th><td>' + (data.createTime || '-') + '</td></tr>';
                         html += '</table>';
-                        $.modal.open({
+                        top.layer.open({
+                            type: 1,
                             title: '日志详情',
-                            content: html,
-                            btn: ['关闭']
+                            area: ['600px', '450px'],
+                            content: html
                         });
                     } else {
                         $.modal.alertError(result.msg || "查询失败");

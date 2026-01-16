@@ -254,7 +254,7 @@
             viewDetail(rows[0]);
         }
         function viewDetail(id) {
-            $.get(prefix + "/" + id, function(result) {
+            $.get(prefix + "/info/" + id, function(result) {
                 if (result.code == 0) {
                     var data = result.data;
                     var content = '<div style="padding: 20px;">';

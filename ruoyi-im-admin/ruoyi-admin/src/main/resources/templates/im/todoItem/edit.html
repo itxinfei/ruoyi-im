@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>修改待办事项</title>
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
+</head>
+<body class="white-bg">
+    <form class="form-horizontal m" id="form-todoItem-edit" th:object="${todoItem}">
+        <input name="id" th:field="*{id}" type="hidden">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">用户ID：</label>
+            <div class="col-sm-8">
+                <input name="userId" th:field="*{userId}" placeholder="请输入用户ID" class="form-control" type="number" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">待办标题：</label>
+            <div class="col-sm-8">
+                <input name="title" th:field="*{title}" placeholder="请输入待办标题" class="form-control" type="text" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">描述：</label>
+            <div class="col-sm-8">
+                <textarea name="description" th:field="*{description}" class="form-control" rows="3" placeholder="请输入待办描述"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">待办类型：</label>
+            <div class="col-sm-8">
+                <select name="type" class="form-control" th:field="*{type}">
+                    <option value="">请选择类型</option>
+                    <option value="APPROVAL">审批</option>
+                    <option value="MESSAGE">消息</option>
+                    <option value="TASK">任务</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">关联ID：</label>
+            <div class="col-sm-8">
+                <input name="relatedId" th:field="*{relatedId}" placeholder="请输入关联ID" class="form-control" type="number">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">关联类型：</label>
+            <div class="col-sm-8">
+                <input name="relatedType" th:field="*{relatedType}" placeholder="请输入关联类型" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">优先级：</label>
+            <div class="col-sm-8">
+                <select name="priority" class="form-control" th:field="*{priority}">
+                    <option value="">请选择优先级</option>
+                    <option value="HIGH">高</option>
+                    <option value="NORMAL">普通</option>
+                    <option value="LOW">低</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">截止日期：</label>
+            <div class="col-sm-8">
+                <input name="dueDate" th:field="*{dueDate}" placeholder="请输入截止日期" class="form-control" type="datetime-local">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">完成状态：</label>
+            <div class="col-sm-8">
+                <div class="radio-box">
+                    <label><input type="radio" name="isCompleted" value="false" th:field="*{isCompleted}"> 未完成</label>
+                    <label><input type="radio" name="isCompleted" value="true" th:field="*{isCompleted}"> 已完成</label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">完成时间：</label>
+            <div class="col-sm-8">
+                <input name="completedTime" th:field="*{completedTime}" placeholder="请输入完成时间" class="form-control" type="datetime-local">
+            </div>
+        </div>
+    </form>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/todoItem";
+        $("#form-todoItem-edit").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/edit", $('#form-todoItem-edit').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

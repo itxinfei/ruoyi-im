@@ -48,7 +48,7 @@ public class ImFileAssetController extends BaseController {
     /**
      * 文件管理页面
      */
-    @RequiresPermissions("im:file:view")
+    @RequiresPermissions("im:file:list")
     @GetMapping()
     public String file() {
         return prefix + "/file";

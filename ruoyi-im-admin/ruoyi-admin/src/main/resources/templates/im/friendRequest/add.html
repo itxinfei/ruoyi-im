@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>新增好友请求</title>
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
+</head>
+<body class="white-bg">
+    <form class="form-horizontal m" id="form-friendRequest-add">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">发起者ID：</label>
+            <div class="col-sm-8">
+                <input name="fromUserId" placeholder="请输入发起者用户ID" class="form-control" type="number" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">接收者ID：</label>
+            <div class="col-sm-8">
+                <input name="toUserId" placeholder="请输入接收者用户ID" class="form-control" type="number" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">请求类型：</label>
+            <div class="col-sm-8">
+                <select name="requestType" class="form-control" required>
+                    <option value="FRIEND">好友请求</option>
+                    <option value="GROUP">群组邀请</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">验证消息：</label>
+            <div class="col-sm-8">
+                <textarea name="verificationMsg" class="form-control" rows="3" placeholder="请输入验证消息"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">状态：</label>
+            <div class="col-sm-8">
+                <select name="status" class="form-control" required>
+                    <option value="PENDING">待处理</option>
+                    <option value="ACCEPTED">已接受</option>
+                    <option value="REJECTED">已拒绝</option>
+                    <option value="IGNORED">已忽略</option>
+                </select>
+            </div>
+        </div>
+    </form>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/friendRequest";
+        $("#form-friendRequest-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-friendRequest-add').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

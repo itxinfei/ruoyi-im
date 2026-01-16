@@ -256,7 +256,7 @@
         }
 
         function viewMembers(groupId, groupName) {
-            var url = prefix + "/member/" + groupId;
+            var url = ctx + "im/member/group/" + groupId + "/view";
             $.modal.openOptions({
                 title: '群组成员 - ' + groupName,
                 url: url,

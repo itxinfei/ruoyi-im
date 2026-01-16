@@ -38,6 +38,25 @@ public class ImUserDeviceController extends BaseController {
     }
 
     /**
+     * 新增用户设备页面
+     */
+    @RequiresPermissions("im:userDevice:add")
+    @GetMapping("/add")
+    public String add() {
+        return prefix + "/add";
+    }
+
+    /**
+     * 修改用户设备页面
+     */
+    @RequiresPermissions("im:userDevice:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, ModelMap mmap) {
+        mmap.put("userDevice", imUserDeviceService.selectImUserDeviceById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 查询用户设备列表
      */
     @RequiresPermissions("im:userDevice:list")

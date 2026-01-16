@@ -317,22 +317,38 @@
             }
             $.modal.confirm("确定要将选中的消息标记为敏感吗？", function() {
                 var rows = $.table.selectFirstRows();
+                var ids = [];
                 for (var i = 0; i < rows.length; i++) {
-                    doMarkSensitive(rows[i].id);
+                    ids.push(rows[i].id);
                 }
-                $.table.refresh();
-                loadStatistics();
+                // 批量标记敏感
+                markMultiple(ids);
             });
         }
-        function doMarkSensitive(id) {
-            $.ajax({
-                url: prefix + "/" + id + "/revoke",
-                type: 'put',
-                success: function() {
+        function markMultiple(ids) {
+            var completed = 0;
+            var total = ids.length;
+            function markOne() {
+                if (completed >= total) {
+                    $.modal.msgSuccess("标记完成");
                     $.table.refresh();
                     loadStatistics();
+                    return;
                 }
-            });
+                $.ajax({
+                    url: prefix + "/" + ids[completed] + "/mark-sensitive",
+                    type: 'put',
+                    success: function(result) {
+                        completed++;
+                        markOne();
+                    },
+                    error: function() {
+                        completed++;
+                        markOne();
+                    }
+                });
+            }
+            markOne();
         }
         function unmarkSensitive() {
             var rows = $.table.selectFirstColumns();
@@ -341,9 +357,39 @@
                 return;
             }
             $.modal.confirm("确定要取消选中的消息敏感标记吗？", function() {
-                $.table.refresh();
-                loadStatistics();
+                var rows = $.table.selectFirstRows();
+                var ids = [];
+                for (var i = 0; i < rows.length; i++) {
+                    ids.push(rows[i].id);
+                }
+                // 批量取消标记
+                unmarkMultiple(ids);
             });
+        }
+        function unmarkMultiple(ids) {
+            var completed = 0;
+            var total = ids.length;
+            function unmarkOne() {
+                if (completed >= total) {
+                    $.modal.msgSuccess("取消标记完成");
+                    $.table.refresh();
+                    loadStatistics();
+                    return;
+                }
+                $.ajax({
+                    url: prefix + "/" + ids[completed] + "/unmark-sensitive",
+                    type: 'put',
+                    success: function(result) {
+                        completed++;
+                        unmarkOne();
+                    },
+                    error: function() {
+                        completed++;
+                        unmarkOne();
+                    }
+                });
+            }
+            unmarkOne();
         }
         function viewDetail(id) {
             $.get(prefix + "/" + id, function(result) {

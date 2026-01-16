@@ -129,13 +129,24 @@ public class ImGroupAnnouncementController extends BaseController {
     }
 
     /**
-     * 修改群公告
+     * 修改群公告（JSON）
      */
     @RequiresPermissions("im:announcement:edit")
     @Log(title = "群公告管理", businessType = BusinessType.UPDATE)
     @PutMapping
     @ResponseBody
     public AjaxResult edit(@RequestBody ImGroupAnnouncement imGroupAnnouncement) {
+        return toAjax(imGroupAnnouncementService.updateImGroupAnnouncement(imGroupAnnouncement));
+    }
+
+    /**
+     * 修改群公告（表单）
+     */
+    @RequiresPermissions("im:announcement:edit")
+    @Log(title = "群公告管理", businessType = BusinessType.UPDATE)
+    @PostMapping("/edit")
+    @ResponseBody
+    public AjaxResult editSubmit(ImGroupAnnouncement imGroupAnnouncement) {
         return toAjax(imGroupAnnouncementService.updateImGroupAnnouncement(imGroupAnnouncement));
     }
 
@@ -151,7 +162,7 @@ public class ImGroupAnnouncementController extends BaseController {
     }
 
     /**
-     * 删除群公告
+     * 删除群公告（DELETE）
      */
     @RequiresPermissions("im:announcement:remove")
     @Log(title = "群公告管理", businessType = BusinessType.DELETE)
@@ -159,6 +170,17 @@ public class ImGroupAnnouncementController extends BaseController {
     @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(imGroupAnnouncementService.deleteImGroupAnnouncementByIds(ids));
+    }
+
+    /**
+     * 删除群公告（POST - 表单/AJAX）
+     */
+    @RequiresPermissions("im:announcement:remove")
+    @Log(title = "群公告管理", businessType = BusinessType.DELETE)
+    @PostMapping("/remove")
+    @ResponseBody
+    public AjaxResult remove(String ids) {
+        return toAjax(imGroupAnnouncementService.deleteImGroupAnnouncementByIds(Convert.toLongArray(ids)));
     }
 
     /**

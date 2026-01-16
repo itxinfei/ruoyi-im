@@ -35,7 +35,7 @@ public class ImMessageController extends BaseController {
     /**
      * 消息管理页面
      */
-    @RequiresPermissions("im:message:view")
+    @RequiresPermissions("im:message:list")
     @GetMapping()
     public String message() {
         return prefix + "/message";
@@ -100,6 +100,34 @@ public class ImMessageController extends BaseController {
     @PutMapping("/{id}/revoke")
     public AjaxResult revoke(@PathVariable("id") Long messageId) {
         return toAjax(imMessageService.revokeMessage(messageId));
+    }
+
+    /**
+     * 标记消息为敏感
+     */
+    @RequiresPermissions("im:message:edit")
+    @Log(title = "标记敏感消息", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/mark-sensitive")
+    @ResponseBody
+    public AjaxResult markSensitive(@PathVariable("id") Long messageId) {
+        ImMessage message = new ImMessage();
+        message.setId(messageId);
+        message.setSensitiveLevel("SENSITIVE");
+        return toAjax(imMessageService.updateImMessage(message));
+    }
+
+    /**
+     * 取消标记敏感消息
+     */
+    @RequiresPermissions("im:message:edit")
+    @Log(title = "取消标记敏感", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/unmark-sensitive")
+    @ResponseBody
+    public AjaxResult unmarkSensitive(@PathVariable("id") Long messageId) {
+        ImMessage message = new ImMessage();
+        message.setId(messageId);
+        message.setSensitiveLevel("NORMAL");
+        return toAjax(imMessageService.updateImMessage(message));
     }
 
     /**

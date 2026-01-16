@@ -201,6 +201,10 @@
                     align: 'center',
                     formatter: function(value, row, index) {
                         if (value) {
+                            // 判断是否为 Font Awesome 图标类名（包含 fa-）
+                            if (value.indexOf('fa-') !== -1 || value.indexOf('fa ') !== -1) {
+                                return '<i class="' + value + ' fa-2x text-gray"></i>';
+                            }
                             return '<img src="' + value + '" class="app-icon" onerror="this.src=\'/img/profile.jpg\'">';
                         }
                         return '<i class="fa fa-cube fa-2x text-gray"></i>';

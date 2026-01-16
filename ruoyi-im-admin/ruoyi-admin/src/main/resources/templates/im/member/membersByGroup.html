@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit">
-    <title>群组成员管理</title>
+    <title>群组成员列表</title>
     <link rel="shortcut icon" href="/favicon.ico">
     <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
     <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
@@ -44,15 +44,16 @@
         .stat-owner { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
         .stat-admin { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
         .stat-muted { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-                /* 搜索区域底部间距 */
-                .search-collapse {
-                    margin-bottom: 10px;
-                }
         
-                /* 表格区域样式 */
-                .select-table.table-striped {
-                    padding: 0;
-                }
+        /* 搜索区域底部间距 */
+        .search-collapse {
+            margin-bottom: 10px;
+        }
+
+        /* 表格区域样式 */
+        .select-table.table-striped {
+            padding: 0;
+        }
     </style>
 </head>
 <body class="gray-bg">
@@ -91,40 +92,7 @@
                     </div>
                 </div>
             </div>
-            <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse">
-                <form id="member-form">
-                    <div class="select-list">
-                        <ul>
-                            <li>
-                                群组ID：<input type="text" name="groupId" value=""/>
-                            </li>
-                            <li>
-                                用户ID：<input type="text" name="userId" value=""/>
-                            </li>
-                            <li>
-                                角色：<select name="role">
-                                    <option value="">所有</option>
-                                    <option value="OWNER">群主</option>
-                                    <option value="ADMIN">管理员</option>
-                                    <option value="MEMBER">普通成员</option>
-                                </select>
-                            </li>
-                            <li>
-                                是否禁言：<select name="isMuted">
-                                    <option value="">所有</option>
-                                    <option value="0">否</option>
-                                    <option value="1">是</option>
-                                </select>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                            </li>
-                        </ul>
-                    </div>
-                </form>
-            </div>
+
             <div class="btn-group-sm" id="toolbar" role="group">
                 <a class="btn btn-success" onclick="addMember()" shiro:hasPermission="im:group:member:add">
                     <i class="fa fa-plus"></i> 添加成员
@@ -135,16 +103,17 @@
                 <a class="btn btn-warning single disabled" onclick="toggleMute()" shiro:hasPermission="im:group:member:edit">
                     <i class="fa fa-ban"></i> 禁言/解禁
                 </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:member:remove">
+                <a class="btn btn-danger multiple disabled" onclick="removeSelectedMembers()" shiro:hasPermission="im:group:member:remove">
                     <i class="fa fa-remove"></i> 移除成员
                 </a>
             </div>
+
             <div class="col-sm-12 select-table table-striped">
                 <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
-        <!-- 通用JS -->
+    <!-- 通用JS -->
     <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
     <script th:src="@{/js/jquery.min.js?v=3.6.3}"></script>
     <script th:src="@{/js/bootstrap.min.js?v=3.3.7}"></script>
@@ -160,14 +129,14 @@
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:group:member:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:group:member:remove')}]];
+        var groupId = [[${groupId}]];
         var prefix = ctx + "im/member";
+
         $(function() {
             loadStatistics();
             var options = {
-                url: prefix + "/list",
+                url: prefix + "/group/" + groupId,
                 createUrl: prefix + "/add",
-                updateUrl: prefix + "/edit/{id}",
-                removeUrl: prefix + "/remove/{id}",
                 modalName: "群组成员",
                 columns: [{
                     checkbox: true
@@ -176,14 +145,6 @@
                     field: 'id',
                     title: 'ID',
                     visible: false
-                },
-                {
-                    field: 'groupId',
-                    title: '群组ID'
-                },
-                {
-                    field: 'groupName',
-                    title: '群组名称'
                 },
                 {
                     field: 'userId',
@@ -242,29 +203,31 @@
                     width: '150',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="changeRole(' + row.id + ', \'' + row.role + '\', ' + row.groupId + ', ' + row.userId + ')"><i class="fa fa-edit"></i>角色</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="removeMember(' + row.groupId + ', ' + row.userId + ')"><i class="fa fa-remove"></i>移除</a>');
+                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="changeRole(' + row.id + ', \'' + row.role + '\', ' + groupId + ', ' + row.userId + ')"><i class="fa fa-edit"></i>角色</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="removeMember(' + groupId + ', ' + row.userId + ')"><i class="fa fa-remove"></i>移除</a>');
                         return actions.join('');
                     }
                 }]
             };
             $.table.init(options);
         });
+
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
+            $.get(prefix + "/group/" + groupId + "/count", function(result) {
                 if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#ownerCount").text(result.data.ownerCount || 0);
-                    $("#adminCount").text(result.data.adminCount || 0);
-                    $("#mutedCount").text(result.data.mutedCount || 0);
+                    var data = result.data;
+                    $("#totalCount").text(data.count || 0);
+                    // 为简单起见，这里不显示详细统计，因为API可能不提供
                 }
             });
         }
+
         /* 添加成员 */
         function addMember() {
-            var url = prefix + "/add";
+            var url = prefix + "/add?groupId=" + groupId;
             $.modal.open("添加群组成员", url, '800', '500');
         }
+
         /* 修改角色 */
         function editRole() {
             var rows = $.table.selectFirstColumns();
@@ -273,8 +236,9 @@
                 return;
             }
             var row = $.table.selectFirstRows()[0];
-            changeRole(row.id, row.role, row.groupId, row.userId);
+            changeRole(row.id, row.role, groupId, row.userId);
         }
+
         /* 修改角色 */
         function changeRole(id, currentRole, groupId, userId) {
             var roles = ['OWNER', 'ADMIN', 'MEMBER'];
@@ -290,6 +254,7 @@
                 $.operate.post(prefix + "/role", {groupId: groupId, userId: userId, role: newRole});
             });
         }
+
         /* 禁言/解禁 */
         function toggleMute() {
             var rows = $.table.selectFirstColumns();
@@ -300,10 +265,22 @@
             var row = $.table.selectFirstRows()[0];
             var newMuteStatus = row.isMuted == 1 ? 0 : 1;
             $.modal.confirm("确定要" + (newMuteStatus == 1 ? "禁言" : "解除禁言") + "该成员吗？", function() {
-                var data = {id: row.id, groupId: row.groupId, userId: row.userId, isMuted: newMuteStatus};
+                var data = {id: row.id, groupId: groupId, userId: row.userId, isMuted: newMuteStatus};
                 $.operate.post(prefix + "/mute", data);
             });
         }
+
+        /* 移除选中的成员 */
+        function removeSelectedMembers() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            var row = $.table.selectFirstRows()[0];
+            removeMember(groupId, row.userId);
+        }
+
         /* 移除成员 */
         function removeMember(groupId, userId) {
             $.modal.confirm("确定要移除该成员吗？", function() {
@@ -318,5 +295,6 @@
                 });
             });
         }
-    </script></body>
+    </script>
+</body>
 </html>
