@@ -30,4 +30,24 @@ public interface ImSessionMapper {
     List<ImSession> selectUserActiveSessions(Long userId);
 
     int kickOutSession(Long sessionId);
+
+    /**
+     * 查询总会话数
+     */
+    int countTotalSessions();
+
+    /**
+     * 查询私聊会话数
+     */
+    int countPrivateSessions();
+
+    /**
+     * 查询群聊会话数
+     */
+    int countGroupSessions();
+
+    /**
+     * 查询今日活跃会话数
+     */
+    int countTodayActiveSessions();
 }

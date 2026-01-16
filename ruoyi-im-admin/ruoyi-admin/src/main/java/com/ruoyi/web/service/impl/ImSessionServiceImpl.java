@@ -1,11 +1,14 @@
 package com.ruoyi.web.service.impl;
 
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.web.domain.ImSession;
 import com.ruoyi.web.mapper.ImSessionMapper;
 import com.ruoyi.web.service.ImSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IM会话Service实现（Admin模块专用）
@@ -59,5 +62,28 @@ public class ImSessionServiceImpl implements ImSessionService {
     @Override
     public int kickOutSession(Long sessionId) {
         return sessionMapper.kickOutSession(sessionId);
+    }
+
+    @Override
+    public AjaxResult getStatistics() {
+        Map<String, Object> data = new HashMap<>();
+
+        // 总会话数
+        int totalCount = sessionMapper.countTotalSessions();
+        data.put("totalCount", totalCount);
+
+        // 私聊会话数
+        int privateCount = sessionMapper.countPrivateSessions();
+        data.put("privateCount", privateCount);
+
+        // 群聊会话数
+        int groupCount = sessionMapper.countGroupSessions();
+        data.put("groupCount", groupCount);
+
+        // 今日活跃会话数
+        int activeCount = sessionMapper.countTodayActiveSessions();
+        data.put("activeCount", activeCount);
+
+        return AjaxResult.success(data);
     }
 }

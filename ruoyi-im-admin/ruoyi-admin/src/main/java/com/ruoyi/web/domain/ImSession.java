@@ -49,6 +49,9 @@ public class ImSession implements Serializable {
     /** 最后消息内容，用于在会话列表中显示最后一条消息 */
     private String lastMessage;
 
+    /** 最后消息ID */
+    private Long lastMessageId;
+
     /** 最后消息时间，用于会话列表排序 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastMessageTime;
@@ -142,6 +145,14 @@ public class ImSession implements Serializable {
 
     public void setLastMessage(String lastMessage) {
         this.lastMessage = lastMessage;
+    }
+
+    public Long getLastMessageId() {
+        return lastMessageId;
+    }
+
+    public void setLastMessageId(Long lastMessageId) {
+        this.lastMessageId = lastMessageId;
     }
 
     public LocalDateTime getLastMessageTime() {

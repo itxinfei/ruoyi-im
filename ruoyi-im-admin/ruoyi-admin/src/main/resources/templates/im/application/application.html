@@ -63,7 +63,7 @@
 
         /* 统计区域布局 */
         .statistics-section {
-            margin-top: 6px;
+            margin-top: 20px;
             margin-bottom: 0;
         }
         .statistics-section .row {
@@ -78,13 +78,88 @@
 
         /* 搜索区域 */
         .search-collapse {
-            margin-top: 6px;
+            margin-top: 16px;
+            margin-bottom: 0;
+            background: #fff;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .search-collapse .select-list {
+            margin: 0;
+        }
+        .search-collapse .search-list > li {
+            margin-bottom: 8px;
+        }
+        .search-collapse .search-list > li:last-child {
+            margin-bottom: 0;
+        }
+        .search-collapse label {
+            color: #637382;
+            font-weight: 500;
+        }
+        .search-collapse input[type="text"],
+        .search-collapse select {
             border-radius: 4px;
+            border-color: #e2e8f0;
+        }
+        .search-collapse input:focus,
+        .search-collapse select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
         }
 
         /* 工具栏 */
         #toolbar {
-            margin-bottom: 12px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            padding: 12px 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #toolbar .btn {
+            border-radius: 6px;
+            padding: 6px 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        #toolbar .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        #toolbar .btn i {
+            margin-right: 4px;
+        }
+
+        /* 表格容器 */
+        .select-table.table-striped {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .select-table.table-striped .fixed-table-container {
+            border-radius: 4px;
+        }
+        .select-table.table-striped .table {
+            margin-bottom: 0;
+        }
+        .select-table.table-striped .table thead > tr > th {
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            color: #475569;
+            font-weight: 600;
+        }
+        .select-table.table-striped .table tbody > tr > td {
+            border-color: #f1f5f9;
+        }
+        .select-table.table-striped .table tbody > tr:hover > td {
+            background: #f8fafc;
         }
 
         /* 统计卡片背景色 */

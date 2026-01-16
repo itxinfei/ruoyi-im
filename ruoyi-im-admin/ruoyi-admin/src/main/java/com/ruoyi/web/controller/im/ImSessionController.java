@@ -89,4 +89,12 @@ public class ImSessionController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(imSessionService.deleteImSessionByIds(ids));
     }
+
+    /**
+     * 获取会话统计信息
+     */
+    @GetMapping("/statistics")
+    public AjaxResult getStatistics() {
+        return imSessionService.getStatistics();
+    }
 }

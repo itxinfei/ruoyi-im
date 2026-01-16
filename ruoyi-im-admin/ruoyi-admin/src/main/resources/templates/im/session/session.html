@@ -63,7 +63,7 @@
 
         /* 统计区域布局 */
         .statistics-section {
-            margin-top: 6px;
+            margin-top: 20px;
             margin-bottom: 0;
         }
         .statistics-section .row {
@@ -78,13 +78,85 @@
 
         /* 搜索区域 */
         .search-collapse {
-            margin-top: 6px;
+            margin-top: 16px;
+            margin-bottom: 0;
+            background: #fff;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .search-collapse .select-list {
+            margin: 0;
+        }
+        .search-collapse .search-list > li {
+            margin-bottom: 8px;
+        }
+        .search-collapse .search-list > li:last-child {
+            margin-bottom: 0;
+        }
+        .search-collapse label {
+            color: #637382;
+            font-weight: 500;
+        }
+        .search-collapse input[type="text"],
+        .search-collapse select {
             border-radius: 4px;
+            border-color: #e2e8f0;
+        }
+        .search-collapse input:focus,
+        .search-collapse select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
         }
 
-        /* 工具栏 */
-        #toolbar {
-            margin-bottom: 12px;
+        /* 数据卡片容器 */
+        .data-card {
+            margin-top: 16px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .data-card-toolbar {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .data-card-toolbar .btn {
+            border-radius: 6px;
+            padding: 6px 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .data-card-toolbar .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .data-card-toolbar .btn i {
+            margin-right: 4px;
+        }
+        .data-card-table {
+            padding: 0;
+        }
+        .data-card-table .bootstrap-table .fixed-table-container {
+            border-radius: 0;
+        }
+        .data-card-table .table {
+            margin-bottom: 0;
+        }
+        .data-card-table .table thead > tr > th {
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            color: #475569;
+            font-weight: 600;
+        }
+        .data-card-table .table tbody > tr > td {
+            border-color: #f1f5f9;
+        }
+        .data-card-table .table tbody > tr:hover > td {
+            background: #f8fafc;
         }
 
         /* 统计卡片背景色 */
@@ -143,12 +215,12 @@
                                 </select>
                             </li>
                             <li>
-                                <label>目标ID：</label>
-                                <input type="text" name="targetId" value=""/>
+                                <label>会话名称：</label>
+                                <input type="text" name="name" value=""/>
                             </li>
                             <li>
-                                <label>创建者ID：</label>
-                                <input type="text" name="creatorId" value=""/>
+                                <label>目标ID：</label>
+                                <input type="text" name="peerId" value=""/>
                             </li>
                             <li class="select-time">
                                 <label>创建时间： </label>
@@ -165,14 +237,16 @@
                 </form>
             </div>
 
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:session:remove">
-                    <i class="fa fa-remove"></i> 删除
-                </a>
-            </div>
-
-            <div class="col-sm-12 select-table table-striped">
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            <!-- 数据卡片：工具栏 + 表格 -->
+            <div class="col-sm-12 data-card">
+                <div class="data-card-toolbar" id="toolbar">
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:session:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                </div>
+                <div class="data-card-table select-table table-striped">
+                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                </div>
             </div>
         </div>
     </div>
@@ -185,7 +259,7 @@
 
             var options = {
                 url: prefix + "/list",
-                removeUrl: prefix + "/remove/{id}",
+                removeUrl: prefix + "/{ids}",
                 modalName: "会话",
                 columns: [{
                     checkbox: true
@@ -209,12 +283,22 @@
                     }
                 },
                 {
-                    field: 'targetId',
+                    field: 'name',
+                    title: '会话名称'
+                },
+                {
+                    field: 'peerId',
                     title: '目标ID'
                 },
                 {
-                    field: 'creatorId',
-                    title: '创建者ID'
+                    field: 'avatar',
+                    title: '头像',
+                    formatter: function(value, row, index) {
+                        if (value) {
+                            return '<img src="' + value + '" style="width:30px;height:30px;border-radius:50%;"/>';
+                        }
+                        return '-';
+                    }
                 },
                 {
                     field: 'lastMessageId',
