@@ -100,11 +100,11 @@ public class ImUserDeviceController extends BaseController {
     }
 
     /**
-     * 修改用户设备
+     * 修改用户设备（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:userDevice:edit")
     @Log(title = "用户设备管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImUserDevice imUserDevice) {
         return toAjax(imUserDeviceService.updateImUserDevice(imUserDevice));
@@ -140,6 +140,17 @@ public class ImUserDeviceController extends BaseController {
     @DeleteMapping("/{ids}")
     @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
+        return toAjax(imUserDeviceService.deleteImUserDeviceByIds(ids));
+    }
+
+    /**
+     * 删除用户设备（POST方式，兼容前端框架）
+     */
+    @RequiresPermissions("im:userDevice:remove")
+    @Log(title = "用户设备管理", businessType = BusinessType.DELETE)
+    @PostMapping("/remove")
+    @ResponseBody
+    public AjaxResult removePost(Long[] ids) {
         return toAjax(imUserDeviceService.deleteImUserDeviceByIds(ids));
     }
 

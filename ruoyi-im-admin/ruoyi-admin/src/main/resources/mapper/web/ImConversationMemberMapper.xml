@@ -137,4 +137,15 @@
         where conversation_id = #{conversationId} and user_id = #{userId}
     </delete>
 
+    <!-- 会话成员统计 -->
+    <select id="getStatistics" resultType="java.util.Map">
+        select
+            (SELECT COUNT(*) FROM im_conversation_member WHERE is_deleted = 0) as total_member_count,
+            (SELECT COUNT(DISTINCT conversation_id) FROM im_conversation_member WHERE is_deleted = 0) as total_conversation_count,
+            (SELECT COUNT(*) FROM im_conversation_member WHERE is_deleted = 0 AND role = 'OWNER') as owner_count,
+            (SELECT COUNT(*) FROM im_conversation_member WHERE is_deleted = 0 AND role = 'MEMBER') as member_count,
+            (SELECT COUNT(*) FROM im_conversation_member WHERE is_deleted = 0 AND unread_count > 0) as unread_member_count
+        from dual
+    </select>
+
 </mapper>

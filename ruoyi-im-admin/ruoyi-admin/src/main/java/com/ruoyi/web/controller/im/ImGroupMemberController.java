@@ -136,11 +136,11 @@ public class ImGroupMemberController extends BaseController {
     }
 
     /**
-     * 修改群组成员
+     * 修改群组成员（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:group:member:edit")
     @Log(title = "群组成员管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImGroupMember imGroupMember) {
         return toAjax(imGroupMemberService.updateImGroupMember(imGroupMember));

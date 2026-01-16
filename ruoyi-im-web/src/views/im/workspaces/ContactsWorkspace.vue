@@ -89,9 +89,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import { Search, User, UserFilled, Star, Avatar } from '@element-plus/icons-vue'
 import SmartAvatar from '@/components/SmartAvatar/index.vue'
 import { ElMessage } from 'element-plus'
+import { createPrivateConversation } from '@/api/im/conversation'
 
 // Props
 const props = defineProps({
@@ -102,6 +104,7 @@ const props = defineProps({
 })
 
 const store = useStore()
+const router = useRouter()
 
 // 状态
 const loading = ref(false)
@@ -112,19 +115,19 @@ const activeCategory = ref('friends')
 // 计算属性
 const currentUser = computed(() => store.state.user.userInfo)
 
-// 分类列表
+// 分类列表 - 修复：分别从contacts和groups获取数据
 const categories = computed(() => [
   {
     key: 'friends',
     label: '好友',
     icon: User,
-    count: contacts.value.filter(c => c.friendType === 'friend').length
+    count: contacts.value.filter(c => !c.type || c.type !== 'GROUP').length
   },
   {
     key: 'groups',
     label: '群组',
     icon: Avatar,
-    count: contacts.value.filter(c => c.type === 'GROUP').length
+    count: groups.value.length
   },
   {
     key: 'organization',
@@ -143,46 +146,58 @@ const categories = computed(() => [
 // 联系人数据
 const contacts = computed(() => store.state.im.contacts || [])
 
-// 按字母索引的联系人
+// 群组数据
+const groups = computed(() => store.state.im.groups || [])
+
+// 按字母索引的联系人/群组
 const indexedContacts = computed(() => {
   const keyword = searchKeyword.value.toLowerCase()
   const activeKey = activeCategory.value
 
-  let filteredContacts = contacts.value
+  let filteredItems = []
 
   // 按分类过滤
   if (activeKey === 'friends') {
-    filteredContacts = contacts.value.filter(c => c.friendType === 'friend')
+    // 好友：排除群组类型的联系人
+    filteredItems = contacts.value.filter(c => !c.type || c.type !== 'GROUP')
   } else if (activeKey === 'groups') {
-    filteredContacts = contacts.value.filter(c => c.type === 'GROUP')
+    // 群组：使用 groups 数据
+    filteredItems = groups.value.map(g => ({
+      ...g,
+      id: g.id,
+      name: g.name,
+      avatar: g.avatar,
+      online: true, // 群组默认在线
+      isGroup: true,
+    }))
   } else if (activeKey === 'starred') {
-    filteredContacts = contacts.value.filter(c => c.isStarred)
+    filteredItems = contacts.value.filter(c => c.isStarred)
+  } else if (activeKey === 'organization') {
+    filteredItems = contacts.value
   }
-  // organization 显示全部联系人
 
   // 搜索过滤
   if (keyword) {
-    filteredContacts = filteredContacts.filter(contact =>
-      contact.name.toLowerCase().includes(keyword) ||
-      (contact.remark && contact.remark.toLowerCase().includes(keyword))
+    filteredItems = filteredItems.filter(item =>
+      item.name.toLowerCase().includes(keyword) ||
+      (item.remark && item.remark.toLowerCase().includes(keyword))
     )
   }
 
   // 按首字母分组
-  const groups = {}
-  filteredContacts.forEach(contact => {
-    const letter = getFirstLetter(contact.name || '')
-    if (!groups[letter]) {
-      groups[letter] = [letter, []]
+  const letterGroups = {}
+  filteredItems.forEach(item => {
+    const letter = getFirstLetter(item.name || '')
+    if (!letterGroups[letter]) {
+      letterGroups[letter] = []
     }
-    groups[letter][1].push(contact)
+    letterGroups[letter].push(item)
   })
 
   // 转换为数组并排序
-  return Object.values(groups).map(([letter, items]) => ({
-    letter,
-    contacts: items
-  })).sort((a, b) => a.letter.localeCompare(b.letter))
+  return Object.entries(letterGroups)
+    .map(([letter, items]) => ({ letter, contacts: items }))
+    .sort((a, b) => a.letter.localeCompare(b.letter))
 })
 
 // 方法
@@ -200,40 +215,143 @@ const selectCategory = (key) => {
 }
 
 const handleContactClick = (contact) => {
+  // 区分群组和联系人
+  if (contact.isGroup) {
+    // 点击群组 - 处理群聊
+    handleGroupClick(contact)
+  } else {
+    // 点击联系人 - 处理私聊
+    handlePrivateChatClick(contact)
+  }
+}
+
+const handlePrivateChatClick = async (contact) => {
+  // 使用 contact.friendId 作为对方用户ID（contacts数据结构中的好友用户ID）
+  const userId = contact.friendId || contact.id
+
   // 查找或创建与该联系人的会话
   const existingSession = store.state.im.sessions.find(
-    s => s.type === 'PRIVATE' &&
-    s.targetId === contact.id
+    s => (s.type === 'private' || s.type === 'PRIVATE') &&
+    (s.peerId === userId || s.targetId === userId)
+  )
+
+  if (existingSession) {
+    // 切换到已有会话，并切换到聊天模块
+    store.dispatch('im/switchSession', existingSession)
+    // 触发模块切换到聊天
+    switchToChatModule()
+  } else {
+    // 创建新的私聊会话
+    await createPrivateChat(userId, contact)
+  }
+}
+
+const handleGroupClick = async (group) => {
+  // 查找或创建群聊会话
+  const existingSession = store.state.im.sessions.find(
+    s => (s.type === 'group' || s.type === 'GROUP') &&
+    s.id === group.id
   )
 
   if (existingSession) {
     // 切换到已有会话
     store.dispatch('im/switchSession', existingSession)
+    switchToChatModule()
   } else {
-    // 创建新的私聊会话
-    createPrivateChat(contact)
+    // 创建群聊会话
+    await createGroupChat(group)
   }
 }
 
-const createPrivateChat = async (contact) => {
+const createPrivateChat = async (userId, contact) => {
+  loading.value = true
   try {
-    // TODO: 调用API创建会话
-    const session = {
-      id: Date.now(),
-      type: 'PRIVATE',
-      targetId: contact.id,
-      name: contact.name,
-      avatar: contact.avatar,
-      memberCount: 2,
-      unreadCount: 0
+    const response = await createPrivateConversation(userId)
+
+    if (response.code === 200 && response.data) {
+      const conversationId = response.data
+
+      // 创建会话对象
+      const session = {
+        id: conversationId,
+        conversationId: conversationId,
+        type: 'PRIVATE',
+        peerId: userId,
+        targetId: userId,
+        name: contact.name,
+        avatar: contact.avatar,
+        memberCount: 2,
+        unreadCount: 0,
+        lastMessage: null,
+        lastMessageTime: null,
+        pinned: false,
+        muted: false,
+      }
+
+      // 添加到会话列表
+      store.commit('im/ADD_SESSION', session)
+      // 切换到新会话
+      await store.dispatch('im/switchSession', session)
+      // 切换到聊天模块
+      switchToChatModule()
+
+      ElMessage.success(`已创建与 ${contact.name} 的会话`)
+    } else {
+      throw new Error(response.msg || '创建会话失败')
     }
-    store.commit('im/ADD_SESSION', session)
-    store.dispatch('im/switchSession', session)
-    ElMessage.success(`已创建与 ${contact.name} 的会话`)
   } catch (error) {
-    console.error('创建会话失败:', error)
-    ElMessage.error('创建会话失败，请重试')
+    console.error('创建私聊会话失败:', error)
+    ElMessage.error(error.message || '创建会话失败，请重试')
+  } finally {
+    loading.value = false
   }
+}
+
+const createGroupChat = async (group) => {
+  loading.value = true
+  try {
+    // 使用群组ID作为会话ID
+    const session = {
+      id: group.id,
+      conversationId: group.id,
+      type: 'GROUP',
+      targetId: group.id,
+      name: group.name,
+      avatar: group.avatar,
+      memberCount: group.memberCount || 0,
+      unreadCount: 0,
+      lastMessage: null,
+      lastMessageTime: null,
+      pinned: false,
+      muted: false,
+    }
+
+    // 添加到会话列表
+    store.commit('im/ADD_SESSION', session)
+    // 切换到新会话
+    await store.dispatch('im/switchSession', session)
+    // 切换到聊天模块
+    switchToChatModule()
+
+    ElMessage.success(`已进入群聊 ${group.name}`)
+  } catch (error) {
+    console.error('进入群聊失败:', error)
+    ElMessage.error('进入群聊失败，请重试')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 切换到聊天模块
+const switchToChatModule = () => {
+  // 通过事件总线或全局状态通知主布局切换模块
+  // 这里我们假设主布局监听 vuex 的状态变化
+  // 或者直接路由跳转
+  if (router.currentRoute.value.name !== 'ImChat') {
+    router.push({ name: 'ImChat' })
+  }
+  // 触发全局事件，让主布局切换到聊天模块
+  window.dispatchEvent(new CustomEvent('switch-im-module', { detail: 'chat' }))
 }
 
 const showAddContact = () => {
@@ -245,12 +363,15 @@ const loadContacts = async () => {
   error.value = ''
 
   try {
-    // 加载联系人列表
-    await store.dispatch('im/loadContacts')
+    // 并行加载联系人和群组列表
+    await Promise.all([
+      store.dispatch('im/loadContacts'),
+      store.dispatch('im/loadGroups')
+    ])
   } catch (err) {
-    console.error('加载联系人失败:', err)
-    error.value = '加载联系人失败'
-    ElMessage.error('加载联系人失败')
+    console.error('加载数据失败:', err)
+    error.value = '加载数据失败'
+    ElMessage.error('加载数据失败')
   } finally {
     loading.value = false
   }

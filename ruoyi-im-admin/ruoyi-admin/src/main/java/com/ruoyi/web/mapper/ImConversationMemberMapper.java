@@ -90,4 +90,11 @@ public interface ImConversationMemberMapper {
      * @return 结果
      */
     public int removeMember(java.util.Map<String, Object> params);
+
+    /**
+     * 获取会话成员统计信息
+     *
+     * @return 统计结果
+     */
+    public java.util.Map<String, Object> getStatistics();
 }

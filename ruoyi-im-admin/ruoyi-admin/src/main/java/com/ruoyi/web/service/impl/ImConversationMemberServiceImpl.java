@@ -1,5 +1,6 @@
 package com.ruoyi.web.service.impl;
 
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.web.domain.ImConversationMember;
 import com.ruoyi.web.mapper.ImConversationMemberMapper;
 import com.ruoyi.web.service.ImConversationMemberService;
@@ -62,5 +63,11 @@ public class ImConversationMemberServiceImpl implements ImConversationMemberServ
         params.put("conversationId", conversationId);
         params.put("userId", userId);
         return imConversationMemberMapper.removeMember(params);
+    }
+
+    @Override
+    public AjaxResult getStatistics() {
+        Map<String, Object> data = imConversationMemberMapper.getStatistics();
+        return AjaxResult.success(data);
     }
 }

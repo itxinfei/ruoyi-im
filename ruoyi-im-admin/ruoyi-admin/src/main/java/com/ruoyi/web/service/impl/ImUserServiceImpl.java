@@ -68,12 +68,23 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public int resetPassword(Long id, String password) {
-        ImUser user = userMapper.selectImUserById(id);
-        if (user != null) {
-            // 对新密码进行加密
-            String salt = ShiroUtils.randomSalt();
-            String encryptedPassword = passwordService.encryptPassword(user.getUsername(), password, salt);
-            return userMapper.resetPassword(id, encryptedPassword);
+        try {
+            ImUser user = userMapper.selectImUserById(id);
+            if (user != null) {
+                // 对新密码进行加密
+                String salt = ShiroUtils.randomSalt();
+                String encryptedPassword = passwordService.encryptPassword(user.getUsername(), password, salt);
+                // 更新密码
+                user.setPassword(encryptedPassword);
+                // 更新时间
+                user.setUpdateTime(new java.util.Date());
+                return userMapper.updateImUser(user);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 记录错误日志
+            System.err.println("重置密码失败: " + e.getMessage());
+            return 0;
         }
         return 0;
     }

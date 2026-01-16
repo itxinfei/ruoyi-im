@@ -165,12 +165,14 @@
                 v-else-if="currentStatus === 'delivered' || currentStatus === 'sent'"
                 key="delivered"
                 class="el-icon-circle-check status-icon delivered"
+                @click.stop="handleShowReadStatus"
               ></i>
               <!-- 已读 -->
               <i
                 v-else-if="currentStatus === 'read'"
                 key="read"
-                class="el-icon-view status-icon read"
+                class="el-icon-view status-icon read clickable"
+                @click.stop="handleShowReadStatus"
               ></i>
               <!-- 失败 -->
               <el-tooltip
@@ -339,6 +341,7 @@ export default {
     'toggle-select',
     'add-reaction',
     'remove-reaction',
+    'show-read-status',
   ],
   data() {
     return {
@@ -637,6 +640,14 @@ export default {
     // 重发消息
     handleResend() {
       this.$emit('resend', this.message)
+    },
+
+    // 显示已读状态详情
+    handleShowReadStatus() {
+      // 只对已发送的消息显示已读状态
+      if (this.isMine && (this.currentStatus === 'read' || this.currentStatus === 'delivered' || this.currentStatus === 'sent')) {
+        this.$emit('show-read-status', this.message)
+      }
     },
   },
 }
@@ -1146,10 +1157,23 @@ export default {
 
       &.delivered {
         color: #00c853;
+        cursor: pointer;
+
+        &:hover {
+          transform: scale(1.15);
+        }
       }
 
       &.read {
         color: #1677ff;
+
+        &.clickable {
+          cursor: pointer;
+
+          &:hover {
+            transform: scale(1.2);
+          }
+        }
       }
 
       &.failed {

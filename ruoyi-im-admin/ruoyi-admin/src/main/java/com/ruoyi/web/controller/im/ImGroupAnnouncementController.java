@@ -181,8 +181,8 @@ public class ImGroupAnnouncementController extends BaseController {
     @Log(title = "群公告管理", businessType = BusinessType.DELETE)
     @PostMapping("/remove")
     @ResponseBody
-    public AjaxResult remove(String ids) {
-        return toAjax(imGroupAnnouncementService.deleteImGroupAnnouncementByIds(Convert.toLongArray(ids)));
+    public AjaxResult removePOST(@RequestParam("ids") Long[] ids) {
+        return toAjax(imGroupAnnouncementService.deleteImGroupAnnouncementByIds(ids));
     }
 
     /**

@@ -80,11 +80,11 @@ public class ImSensitiveWordController extends BaseController {
     }
 
     /**
-     * 修改敏感词
+     * 修改敏感词（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:sensitiveWord:edit")
     @Log(title = "敏感词管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImSensitiveWord imSensitiveWord) {
         return toAjax(imSensitiveWordService.updateImSensitiveWord(imSensitiveWord));

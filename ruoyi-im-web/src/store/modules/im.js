@@ -1523,6 +1523,125 @@ const actions = {
       console.error('重试发送失败:', error)
     }
   },
+
+  // ==================== 已读状态相关 actions ====================
+
+  /**
+   * 加载消息的已读状态
+   * @param {Object} context - Vuex context
+   * @param {Object} payload - 参数
+   * @param {number|string} payload.messageId - 消息ID
+   */
+  async loadMessageReadStatus({ commit }, { messageId }) {
+    try {
+      const { getMessageReadStatus } = await import('@/api/im/message')
+      const response = await getMessageReadStatus(messageId)
+      if (response.code === 200 && response.data) {
+        return response.data
+      }
+      return null
+    } catch (error) {
+      console.error('[Store] 加载消息已读状态失败:', error)
+      return null
+    }
+  },
+
+  /**
+   * 加载消息的已读详情（包含已读/未读用户列表）
+   * @param {Object} context - Vuex context
+   * @param {Object} payload - 参数
+   * @param {number|string} payload.messageId - 消息ID
+   */
+  async loadMessageReadDetail({ commit }, { messageId }) {
+    try {
+      const { getMessageReadDetail } = await import('@/api/im/message')
+      const response = await getMessageReadDetail(messageId)
+      if (response.code === 200 && response.data) {
+        return response.data
+      }
+      return null
+    } catch (error) {
+      console.error('[Store] 加载消息已读详情失败:', error)
+      throw error
+    }
+  },
+
+  /**
+   * 加载会话中所有消息的已读状态
+   * @param {Object} context - Vuex context
+   * @param {Object} payload - 参数
+   * @param {number|string} payload.conversationId - 会话ID
+   */
+  async loadConversationReadStatus({ commit, state }, { conversationId }) {
+    try {
+      const { getConversationReadStatus } = await import('@/api/im/message')
+      const response = await getConversationReadStatus(conversationId)
+      if (response.code === 200 && response.data) {
+        // 更新消息的已读状态
+        const readStatusMap = {}
+        response.data.forEach(status => {
+          readStatusMap[status.messageId] = status
+        })
+
+        // 遍历会话中的所有消息，更新已读状态
+        const messages = state.messageList[conversationId] || []
+        messages.forEach(message => {
+          const readStatus = readStatusMap[message.id]
+          if (readStatus) {
+            commit('UPDATE_MESSAGE', {
+              sessionId: conversationId,
+              messageId: message.id,
+              updates: {
+                readStatus: readStatus,
+                readCount: readStatus.readCount || 0,
+                unreadCount: readStatus.unreadCount || 0,
+              },
+            })
+          }
+        })
+
+        return response.data
+      }
+      return []
+    } catch (error) {
+      console.error('[Store] 加载会话已读状态失败:', error)
+      return []
+    }
+  },
+
+  /**
+   * 标记消息为已读
+   * @param {Object} context - Vuex context
+   * @param {Object} payload - 参数
+   * @param {number|string} payload.messageId - 消息ID
+   * @param {number|string} payload.conversationId - 会话ID
+   */
+  async markMessageAsRead({ commit }, { messageId, conversationId }) {
+    try {
+      const { markMessageAsRead: apiMarkRead } = await import('@/api/im/message')
+      await apiMarkRead({ messageId, conversationId })
+      console.log('[Store] 消息已标记为已读:', messageId)
+    } catch (error) {
+      console.error('[Store] 标记消息已读失败:', error)
+    }
+  },
+
+  /**
+   * 批量标记消息为已读
+   * @param {Object} context - Vuex context
+   * @param {Object} payload - 参数
+   * @param {number|string} payload.conversationId - 会话ID
+   * @param {number[]} payload.messageIds - 消息ID数组
+   */
+  async markBatchMessagesAsRead({ commit }, { conversationId, messageIds }) {
+    try {
+      const { markBatchMessageAsRead } = await import('@/api/im/message')
+      await markBatchMessageAsRead({ conversationId, messageIds })
+      console.log('[Store] 批量标记消息为已读:', messageIds.length, '条')
+    } catch (error) {
+      console.error('[Store] 批量标记消息已读失败:', error)
+    }
+  },
 }
 
 export default {

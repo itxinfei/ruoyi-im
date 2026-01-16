@@ -81,11 +81,11 @@ public class ImFriendRequestController extends BaseController {
     }
 
     /**
-     * 修改好友申请
+     * 修改好友申请（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:friendRequest:edit")
     @Log(title = "好友申请管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImFriendRequest imFriendRequest) {
         return toAjax(imFriendRequestService.updateImFriendRequest(imFriendRequest));

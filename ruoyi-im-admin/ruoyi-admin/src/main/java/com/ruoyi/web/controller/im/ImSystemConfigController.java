@@ -90,11 +90,11 @@ public class ImSystemConfigController extends BaseController {
     }
 
     /**
-     * 修改系统配置
+     * 修改系统配置（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:systemConfig:edit")
     @Log(title = "系统配置管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImSystemConfig imSystemConfig) {
         return toAjax(imSystemConfigService.updateImSystemConfig(imSystemConfig));
@@ -119,6 +119,17 @@ public class ImSystemConfigController extends BaseController {
     @DeleteMapping("/{ids}")
     @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
+        return toAjax(imSystemConfigService.deleteImSystemConfigByIds(ids));
+    }
+
+    /**
+     * 删除系统配置（POST方式，兼容前端框架）
+     */
+    @RequiresPermissions("im:systemConfig:remove")
+    @Log(title = "系统配置管理", businessType = BusinessType.DELETE)
+    @PostMapping("/remove")
+    @ResponseBody
+    public AjaxResult removePost(Long[] ids) {
         return toAjax(imSystemConfigService.deleteImSystemConfigByIds(ids));
     }
 

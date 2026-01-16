@@ -1,5 +1,6 @@
 package com.ruoyi.web.service;
 
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.web.domain.ImConversationMember;
 import java.util.List;
 
@@ -74,4 +75,11 @@ public interface ImConversationMemberService {
      * @return 结果
      */
     int removeMember(Long conversationId, Long userId);
+
+    /**
+     * 获取会话统计信息
+     *
+     * @return 统计结果
+     */
+    AjaxResult getStatistics();
 }

@@ -1,5 +1,6 @@
 package com.ruoyi.web.domain;
 
+import com.ruoyi.common.core.domain.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serializable;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
  * @author ruoyi
  */
 @Deprecated
-public class ImSession implements Serializable {
+public class ImSession extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -58,14 +59,6 @@ public class ImSession implements Serializable {
 
     /** 最后消息类型，用于显示不同的消息图标 */
     private String lastMessageType;
-
-    /** 创建时间，记录会话创建的时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createTime;
-
-    /** 更新时间，记录会话最后更新的时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateTime;
 
     public Long getId() {
         return id;
@@ -171,19 +164,4 @@ public class ImSession implements Serializable {
         this.lastMessageType = lastMessageType;
     }
 
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
 }

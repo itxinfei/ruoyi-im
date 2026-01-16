@@ -107,11 +107,11 @@ public class ImAppAdminController extends BaseController {
     }
 
     /**
-     * 修改应用
+     * 修改应用（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:app:edit")
     @Log(title = "应用管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImApplication imApplication) {
         return toAjax(applicationService.updateImApplication(imApplication));

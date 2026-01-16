@@ -6,8 +6,8 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.web.domain.ImSession;
-import com.ruoyi.web.service.ImSessionService;
+import com.ruoyi.web.domain.ImConversation;
+import com.ruoyi.web.service.ImConversationService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IM会话Controller
@@ -30,7 +31,7 @@ public class ImSessionController extends BaseController {
     private String prefix = "im/session";
 
     @Autowired
-    private ImSessionService imSessionService;
+    private ImConversationService imConversationService;
 
     /**
      * Session管理页面
@@ -47,9 +48,9 @@ public class ImSessionController extends BaseController {
     @RequiresPermissions("im:session:list")
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(ImSession imSession) {
+    public TableDataInfo list(ImConversation imConversation) {
         startPage();
-        List<ImSession> list = imSessionService.selectImSessionList(imSession);
+        List<ImConversation> list = imConversationService.selectImConversationList(imConversation);
         return getDataTable(list);
     }
 
@@ -59,9 +60,9 @@ public class ImSessionController extends BaseController {
     @RequiresPermissions("im:session:export")
     @Log(title = "IM会话", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response, ImSession imSession) {
-        List<ImSession> list = imSessionService.selectImSessionList(imSession);
-        ExcelUtil<ImSession> util = new ExcelUtil<ImSession>(ImSession.class);
+    public void export(HttpServletResponse response, ImConversation imConversation) {
+        List<ImConversation> list = imConversationService.selectImConversationList(imConversation);
+        ExcelUtil<ImConversation> util = new ExcelUtil<ImConversation>(ImConversation.class);
         util.exportExcel(response, list, "IM会话数据");
     }
 
@@ -72,7 +73,7 @@ public class ImSessionController extends BaseController {
     @GetMapping(value = "/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
-        return AjaxResult.success(imSessionService.selectImSessionById(id));
+        return AjaxResult.success(imConversationService.selectImConversationById(id));
     }
 
     /**
@@ -82,19 +83,19 @@ public class ImSessionController extends BaseController {
     @Log(title = "IM会话", businessType = BusinessType.INSERT)
     @PostMapping
     @ResponseBody
-    public AjaxResult add(@RequestBody ImSession imSession) {
-        return toAjax(imSessionService.insertImSession(imSession));
+    public AjaxResult add(@RequestBody ImConversation imConversation) {
+        return toAjax(imConversationService.insertImConversation(imConversation));
     }
 
     /**
-     * 修改IM会话
+     * 修改IM会话（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:session:edit")
     @Log(title = "IM会话", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImSession imSession) {
-        return toAjax(imSessionService.updateImSession(imSession));
+    public AjaxResult edit(@RequestBody ImConversation imConversation) {
+        return toAjax(imConversationService.updateImConversation(imConversation));
     }
 
     /**
@@ -105,7 +106,18 @@ public class ImSessionController extends BaseController {
     @DeleteMapping("/{ids}")
     @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(imSessionService.deleteImSessionByIds(ids));
+        return toAjax(imConversationService.deleteImConversationByIds(ids));
+    }
+
+    /**
+     * 删除会话（POST方式，兼容前端框架）
+     */
+    @RequiresPermissions("im:session:remove")
+    @Log(title = "IM会话", businessType = BusinessType.DELETE)
+    @PostMapping("/remove")
+    @ResponseBody
+    public AjaxResult removePost(Long[] ids) {
+        return toAjax(imConversationService.deleteImConversationByIds(ids));
     }
 
     /**
@@ -114,6 +126,7 @@ public class ImSessionController extends BaseController {
     @GetMapping("/statistics")
     @ResponseBody
     public AjaxResult getStatistics() {
-        return imSessionService.getStatistics();
+        Map<String, Object> data = imConversationService.getConversationStatistics();
+        return AjaxResult.success(data);
     }
 }

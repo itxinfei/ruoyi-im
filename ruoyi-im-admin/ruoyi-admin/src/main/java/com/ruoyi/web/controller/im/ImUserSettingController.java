@@ -102,11 +102,11 @@ public class ImUserSettingController extends BaseController {
     }
 
     /**
-     * 修改用户设置
+     * 修改用户设置（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:userSetting:edit")
     @Log(title = "用户设置管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImUserSetting imUserSetting) {
         return toAjax(imUserSettingService.updateImUserSetting(imUserSetting));
@@ -133,6 +133,17 @@ public class ImUserSettingController extends BaseController {
     @DeleteMapping("/{ids}")
     @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
+        return toAjax(imUserSettingService.deleteImUserSettingByIds(ids));
+    }
+
+    /**
+     * 删除用户设置（POST方式，兼容前端框架）
+     */
+    @RequiresPermissions("im:userSetting:remove")
+    @Log(title = "用户设置管理", businessType = BusinessType.DELETE)
+    @PostMapping("/remove")
+    @ResponseBody
+    public AjaxResult removePost(Long[] ids) {
         return toAjax(imUserSettingService.deleteImUserSettingByIds(ids));
     }
 

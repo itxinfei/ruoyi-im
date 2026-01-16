@@ -81,11 +81,11 @@ public class ImFileShareController extends BaseController {
     }
 
     /**
-     * 修改文件分享
+     * 修改文件分享（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:fileShare:edit")
     @Log(title = "文件分享管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImFileShare imFileShare) {
         return toAjax(imFileShareService.updateImFileShare(imFileShare));

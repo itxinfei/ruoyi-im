@@ -835,6 +835,8 @@ var table = {
                 }, function (index) {
                     $.modal.close(index);
                     callBack(true);
+                }, function (index) {
+                    $.modal.close(index);
                 });
             },
             // 弹出层指定宽度

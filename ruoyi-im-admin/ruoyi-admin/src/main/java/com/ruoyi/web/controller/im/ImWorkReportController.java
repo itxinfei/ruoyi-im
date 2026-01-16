@@ -81,11 +81,11 @@ public class ImWorkReportController extends BaseController {
     }
 
     /**
-     * 修改工作报告
+     * 修改工作报告（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:workReport:edit")
     @Log(title = "工作报告管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImWorkReport imWorkReport) {
         return toAjax(imWorkReportService.updateImWorkReport(imWorkReport));
@@ -111,6 +111,17 @@ public class ImWorkReportController extends BaseController {
     @DeleteMapping("/{ids}")
     @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
+        return toAjax(imWorkReportService.deleteImWorkReportByIds(ids));
+    }
+
+    /**
+     * 删除工作报告（POST方式，兼容前端框架）
+     */
+    @RequiresPermissions("im:workReport:remove")
+    @Log(title = "工作报告管理", businessType = BusinessType.DELETE)
+    @PostMapping("/remove")
+    @ResponseBody
+    public AjaxResult removePost(Long[] ids) {
         return toAjax(imWorkReportService.deleteImWorkReportByIds(ids));
     }
 

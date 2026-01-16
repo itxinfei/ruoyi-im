@@ -24,10 +24,11 @@
           class="message-item"
           :class="{ isOwn: msg.isOwn || msg.senderId === currentUserId }"
         >
-          <MessageBubble 
+          <MessageBubble
             :message="msg"
             :is-own="msg.isOwn || msg.senderId === currentUserId"
             @right-click="showMessageMenu"
+            @show-read-status="handleShowReadStatus"
           />
         </div>
       </template>
@@ -49,6 +50,13 @@
       </el-icon>
       <p>选择一个会话开始聊天</p>
     </div>
+
+    <!-- 已读回执弹窗 -->
+    <ReadReceiptDialog
+      v-model="readReceiptVisible"
+      :message-id="selectedMessageId"
+      @remind="handleRemindUnreadUsers"
+    />
   </div>
 </template>
 
@@ -60,6 +68,7 @@ import { ChatLineSquare } from '@element-plus/icons-vue'
 import ChatHeader from './ChatHeader.vue'
 import ChatInput from './ChatInput.vue'
 import MessageBubble from '@/components/Chat/MessageBubble.vue'
+import ReadReceiptDialog from '@/components/Chat/ReadReceiptDialog.vue'
 
 const props = defineProps({
   collapsed: {
@@ -140,6 +149,10 @@ const formatTimeDivider = (date) => {
 const messageAreaRef = ref(null)
 const uploading = ref(false)
 
+// 已读回执弹窗
+const readReceiptVisible = ref(false)
+const selectedMessageId = ref(null)
+
 // 搜索聊天记录
 const searchInChat = () => {
   ElMessage.info('搜索功能开发中...')
@@ -164,6 +177,26 @@ const showSessionProfile = () => {
 const showMessageMenu = (event, message) => {
   // 显示消息操作菜单
   event.preventDefault()
+}
+
+// 显示已读状态详情
+const handleShowReadStatus = (message) => {
+  if (!message || !message.id) {
+    ElMessage.warning('无法获取消息信息')
+    return
+  }
+  // 排除临时消息（未发送成功的消息）
+  if (String(message.id).startsWith('temp_')) {
+    ElMessage.info('消息尚未发送完成，请稍后查看')
+    return
+  }
+  selectedMessageId.value = message.id
+  readReceiptVisible.value = true
+}
+
+// 处理提醒未读用户
+const handleRemindUnreadUsers = (data) => {
+  ElMessage.success('已提醒未读用户')
 }
 
 // 发送消息

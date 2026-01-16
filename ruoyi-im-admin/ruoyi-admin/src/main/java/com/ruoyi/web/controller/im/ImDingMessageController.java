@@ -107,11 +107,11 @@ public class ImDingMessageController extends BaseController {
     }
 
     /**
-     * 修改DING消息
+     * 修改DING消息（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:ding:edit")
     @Log(title = "DING消息管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImDingMessage imDingMessage) {
         return toAjax(dingMessageService.updateImDingMessage(imDingMessage));

@@ -106,11 +106,11 @@ public class ImEmailController extends BaseController {
     }
 
     /**
-     * 修改邮件
+     * 修改邮件（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:email:edit")
     @Log(title = "邮件管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImEmail imEmail) {
         return toAjax(emailService.updateImEmail(imEmail));

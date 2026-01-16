@@ -119,11 +119,11 @@ public class ImApprovalAdminController extends BaseController {
     }
 
     /**
-     * 修改审批
+     * 修改审批（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:approval:edit")
     @Log(title = "审批管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImApproval imApproval) {
         return toAjax(approvalService.updateImApproval(imApproval));

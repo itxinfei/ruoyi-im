@@ -6869,12 +6869,64 @@ const showStartChatDialog = () => {
 }
 
 // 发起私聊
-const startPrivateChat = friend => {
+const startPrivateChat = async (friend) => {
   selectedFriendForChat.value = friend
-  // 通过发送消息来触发会话创建（如果不存在）
   startChatDialogVisible.value = false
-  // TODO: 跳转到与该好友的聊天界面
-  ElMessage.success(`开始与 ${friend.name || friend.nickname} 聊天`)
+
+  // 获取用户ID
+  const userId = friend.friendId || friend.id || friend.userId
+
+  // 查找是否已有会话
+  const existingSession = store.state.im.sessions.find(
+    s => (s.type === 'private' || s.type === 'PRIVATE') &&
+    (s.peerId === userId || s.targetId === userId)
+  )
+
+  if (existingSession) {
+    // 切换到已有会话
+    await store.dispatch('im/switchSession', existingSession)
+    // 切换到聊天模块
+    switchModule('chat')
+  } else {
+    // 创建新的私聊会话
+    try {
+      const { createPrivateConversation } = await import('@/api/im/conversation')
+      const response = await createPrivateConversation(userId)
+
+      if (response.code === 200 && response.data) {
+        const conversationId = response.data
+
+        // 创建会话对象
+        const session = {
+          id: conversationId,
+          conversationId: conversationId,
+          type: 'PRIVATE',
+          peerId: userId,
+          targetId: userId,
+          name: friend.name || friend.nickname,
+          avatar: friend.avatar,
+          memberCount: 2,
+          unreadCount: 0,
+          lastMessage: null,
+          lastMessageTime: null,
+          pinned: false,
+          muted: false,
+        }
+
+        // 添加到会话列表
+        store.commit('im/ADD_SESSION', session)
+        // 切换到新会话
+        await store.dispatch('im/switchSession', session)
+        // 切换到聊天模块
+        switchModule('chat')
+
+        ElMessage.success(`已创建与 ${friend.name || friend.nickname} 的会话`)
+      }
+    } catch (error) {
+      console.error('创建会话失败:', error)
+      ElMessage.error('创建会话失败，请重试')
+    }
+  }
 }
 
 const createGroupForm = ref({

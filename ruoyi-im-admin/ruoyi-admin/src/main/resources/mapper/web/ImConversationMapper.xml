@@ -104,9 +104,10 @@
     <!-- 会话统计 -->
     <select id="getConversationStatistics" resultType="java.util.Map">
         select
-            (SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 and type = 'PRIVATE') as private_count,
-            (SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 and type = 'GROUP') as group_count,
-            (SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0) as total_count
+            (SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0) as totalCount,
+            (SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 and type = 'PRIVATE') as privateCount,
+            (SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 and type = 'GROUP') as groupCount,
+            (SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 AND DATE(last_message_time) = CURDATE()) as activeCount
         from dual
     </select>
 

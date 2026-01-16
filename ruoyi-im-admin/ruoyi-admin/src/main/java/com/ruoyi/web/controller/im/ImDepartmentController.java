@@ -92,11 +92,11 @@ public class ImDepartmentController extends BaseController {
     }
 
     /**
-     * 修改部门
+     * 修改部门（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:department:edit")
     @Log(title = "部门管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImDepartment imDepartment) {
         return toAjax(imDepartmentService.updateImDepartment(imDepartment));

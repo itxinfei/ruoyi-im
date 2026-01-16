@@ -91,11 +91,11 @@ public class ImScheduleEventController extends BaseController {
     }
 
     /**
-     * 修改日程事件
+     * 修改日程事件（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:scheduleEvent:edit")
     @Log(title = "日程事件管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImScheduleEvent imScheduleEvent) {
         return toAjax(imScheduleEventService.updateImScheduleEvent(imScheduleEvent));

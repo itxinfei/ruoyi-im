@@ -1,5 +1,6 @@
 package com.ruoyi.web.domain;
 
+import com.ruoyi.common.core.domain.BaseEntity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
  *
  * @author ruoyi
  */
-public class ImConversation implements Serializable {
+public class ImConversation extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -60,16 +61,6 @@ public class ImConversation implements Serializable {
      * 删除时间
      */
     private LocalDateTime deletedTime;
-
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createTime;
-
-    /**
-     * 更新时间
-     */
-    private LocalDateTime updateTime;
 
     // ========== 关联查询字段（非数据库字段） ==========
 
@@ -158,22 +149,6 @@ public class ImConversation implements Serializable {
 
     public void setDeletedTime(LocalDateTime deletedTime) {
         this.deletedTime = deletedTime;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
     }
 
     public Integer getMemberCount() {

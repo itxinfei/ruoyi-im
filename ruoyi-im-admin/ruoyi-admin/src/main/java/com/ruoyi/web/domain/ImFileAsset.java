@@ -1,5 +1,6 @@
 package com.ruoyi.web.domain;
 
+import com.ruoyi.common.core.domain.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
  * @author ruoyi
  */
 @Schema(description = "文件资产")
-public class ImFileAsset implements Serializable {
+public class ImFileAsset extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -66,14 +67,6 @@ public class ImFileAsset implements Serializable {
     @Schema(description = "删除时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime deleteTime;
-
-    @Schema(description = "创建时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createTime;
-
-    @Schema(description = "更新时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateTime;
 
     public Long getId() {
         return id;
@@ -201,22 +194,6 @@ public class ImFileAsset implements Serializable {
 
     public void setDeleteTime(LocalDateTime deleteTime) {
         this.deleteTime = deleteTime;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
     }
 
 }

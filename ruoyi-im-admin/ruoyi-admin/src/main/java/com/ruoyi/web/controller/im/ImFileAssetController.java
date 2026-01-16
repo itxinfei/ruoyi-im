@@ -124,11 +124,11 @@ public class ImFileAssetController extends BaseController {
     }
 
     /**
-     * 修改文件资源
+     * 修改文件资源（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:file:edit")
     @Log(title = "文件资源", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImFileAsset imFileAsset) {
         return toAjax(imFileAssetService.updateImFileAsset(imFileAsset));

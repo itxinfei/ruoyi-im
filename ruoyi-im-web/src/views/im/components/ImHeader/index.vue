@@ -262,6 +262,7 @@ import {
   ChatDotRound
 } from '@element-plus/icons-vue'
 import SmartAvatar from '@/components/SmartAvatar/index.vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { toggleTheme as toggleAppTheme, initTheme as initAppTheme } from '@/utils/theme.js'
 
 const store = useStore()
@@ -366,7 +367,7 @@ const handleUserCommand = (command) => {
       toggleTheme()
       break
     case 'logout':
-      ElMessage.confirm('确定要退出登录吗？', '提示', {
+      ElMessageBox.confirm('确定要退出登录吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',

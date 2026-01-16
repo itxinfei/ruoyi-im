@@ -138,6 +138,17 @@ public class ImUserController extends BaseController {
     }
 
     /**
+     * 删除IM用户（POST方式，兼容前端框架）
+     */
+    @RequiresPermissions("im:user:remove")
+    @Log(title = "IM用户", businessType = BusinessType.DELETE)
+    @PostMapping("/remove")
+    @ResponseBody
+    public AjaxResult removePost(Long[] ids) {
+        return toAjax(imUserService.deleteImUserByIds(ids));
+    }
+
+    /**
      * 导出IM用户列表
      */
     @RequiresPermissions("im:user:export")
@@ -160,7 +171,16 @@ public class ImUserController extends BaseController {
         if (newPassword == null || newPassword.trim().isEmpty()) {
             return AjaxResult.error("密码不能为空");
         }
-        return toAjax(imUserService.resetPassword(id, newPassword));
+        if (newPassword.length() < 6) {
+            return AjaxResult.error("密码长度不能少于6位");
+        }
+        
+        int result = imUserService.resetPassword(id, newPassword);
+        if (result > 0) {
+            return AjaxResult.success("密码重置成功");
+        } else {
+            return AjaxResult.error("密码重置失败，请检查用户是否存在");
+        }
     }
 
     /**

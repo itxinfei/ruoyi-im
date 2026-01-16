@@ -120,11 +120,11 @@ public class ImTodoItemController extends BaseController {
     }
 
     /**
-     * 修改待办事项
+     * 修改待办事项（表单提交方式，用于编辑页面）
      */
     @RequiresPermissions("im:todoItem:edit")
     @Log(title = "待办事项管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     @ResponseBody
     public AjaxResult edit(@RequestBody ImTodoItem imTodoItem) {
         return toAjax(imTodoItemService.updateImTodoItem(imTodoItem));
@@ -171,6 +171,17 @@ public class ImTodoItemController extends BaseController {
     @DeleteMapping("/{ids}")
     @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
+        return toAjax(imTodoItemService.deleteImTodoItemByIds(ids));
+    }
+
+    /**
+     * 删除待办事项（POST方式，兼容前端框架）
+     */
+    @RequiresPermissions("im:todoItem:remove")
+    @Log(title = "待办事项管理", businessType = BusinessType.DELETE)
+    @PostMapping("/remove")
+    @ResponseBody
+    public AjaxResult removePost(Long[] ids) {
         return toAjax(imTodoItemService.deleteImTodoItemByIds(ids));
     }
 

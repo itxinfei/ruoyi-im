@@ -1,5 +1,6 @@
 package com.ruoyi.web.domain;
 
+import com.ruoyi.common.core.domain.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -15,7 +16,7 @@ import java.util.Map;
  * @date 2025-01-15
  */
 @Data
-public class ImEmail implements Serializable {
+public class ImEmail extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

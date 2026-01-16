@@ -1,11 +1,11 @@
 package com.ruoyi.web.domain;
 
+import com.ruoyi.common.core.domain.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * IM消息实体
@@ -18,7 +18,8 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-public class ImMessage implements Serializable {
+@Data
+public class ImMessage extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -85,14 +86,6 @@ public class ImMessage implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime deletedTime;
 
-    /** 创建时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createTime;
-
-    /** 更新时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateTime;
-
     // ========== 关联查询字段（非数据库字段） ==========
 
     /** 发送者昵称 */
@@ -100,211 +93,5 @@ public class ImMessage implements Serializable {
 
     /** 会话名称 */
     private String conversationName;
-
-    /** 请求参数 */
-    private Map<String, Object> params;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getConversationId() {
-        return conversationId;
-    }
-
-    public void setConversationId(Long conversationId) {
-        this.conversationId = conversationId;
-    }
-
-    public Long getSenderId() {
-        return senderId;
-    }
-
-    public void setSenderId(Long senderId) {
-        this.senderId = senderId;
-    }
-
-    public String getMessageType() {
-        return messageType;
-    }
-
-    public void setMessageType(String messageType) {
-        this.messageType = messageType;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Long getReplyToMessageId() {
-        return replyToMessageId;
-    }
-
-    public void setReplyToMessageId(Long replyToMessageId) {
-        this.replyToMessageId = replyToMessageId;
-    }
-
-    public Long getForwardFromMessageId() {
-        return forwardFromMessageId;
-    }
-
-    public void setForwardFromMessageId(Long forwardFromMessageId) {
-        this.forwardFromMessageId = forwardFromMessageId;
-    }
-
-    public String getFileUrl() {
-        return fileUrl;
-    }
-
-    public void setFileUrl(String fileUrl) {
-        this.fileUrl = fileUrl;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public Long getFileSize() {
-        return fileSize;
-    }
-
-    public void setFileSize(Long fileSize) {
-        this.fileSize = fileSize;
-    }
-
-    public String getSensitiveLevel() {
-        return sensitiveLevel;
-    }
-
-    public void setSensitiveLevel(String sensitiveLevel) {
-        this.sensitiveLevel = sensitiveLevel;
-    }
-
-    public Integer getIsRevoked() {
-        return isRevoked;
-    }
-
-    public void setIsRevoked(Integer isRevoked) {
-        this.isRevoked = isRevoked;
-    }
-
-    public LocalDateTime getRevokedTime() {
-        return revokedTime;
-    }
-
-    public void setRevokedTime(LocalDateTime revokedTime) {
-        this.revokedTime = revokedTime;
-    }
-
-    public Long getRevokerId() {
-        return revokerId;
-    }
-
-    public void setRevokerId(Long revokerId) {
-        this.revokerId = revokerId;
-    }
-
-    public Integer getIsEdited() {
-        return isEdited;
-    }
-
-    public void setIsEdited(Integer isEdited) {
-        this.isEdited = isEdited;
-    }
-
-    public String getEditedContent() {
-        return editedContent;
-    }
-
-    public void setEditedContent(String editedContent) {
-        this.editedContent = editedContent;
-    }
-
-    public Integer getEditCount() {
-        return editCount;
-    }
-
-    public void setEditCount(Integer editCount) {
-        this.editCount = editCount;
-    }
-
-    public LocalDateTime getEditTime() {
-        return editTime;
-    }
-
-    public void setEditTime(LocalDateTime editTime) {
-        this.editTime = editTime;
-    }
-
-    public Integer getIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(Integer isDeleted) {
-        this.isDeleted = isDeleted;
-    }
-
-    public LocalDateTime getDeletedTime() {
-        return deletedTime;
-    }
-
-    public void setDeletedTime(LocalDateTime deletedTime) {
-        this.deletedTime = deletedTime;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public String getSenderName() {
-        return senderName;
-    }
-
-    public void setSenderName(String senderName) {
-        this.senderName = senderName;
-    }
-
-    public String getConversationName() {
-        return conversationName;
-    }
-
-    public void setConversationName(String conversationName) {
-        this.conversationName = conversationName;
-    }
-
-    public Map<String, Object> getParams() {
-        if (params == null) {
-            params = new HashMap<>();
-        }
-        return params;
-    }
-
-    public void setParams(Map<String, Object> params) {
-        this.params = params;
-    }
 
 }
