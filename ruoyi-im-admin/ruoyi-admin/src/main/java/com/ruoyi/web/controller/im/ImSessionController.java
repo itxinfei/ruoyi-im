@@ -49,9 +49,19 @@ public class ImSessionController extends BaseController {
     @PostMapping("/list")
     @ResponseBody
     public TableDataInfo list(ImConversation imConversation) {
-        startPage();
-        List<ImConversation> list = imConversationService.selectImConversationList(imConversation);
-        return getDataTable(list);
+        try {
+            startPage();
+            List<ImConversation> list = imConversationService.selectImConversationList(imConversation);
+            return getDataTable(list);
+        } catch (Exception e) {
+            logger.error("查询会话列表失败", e);
+            TableDataInfo tableDataInfo = new TableDataInfo();
+            tableDataInfo.setCode(500);
+            tableDataInfo.setMsg("查询失败: " + e.getMessage());
+            tableDataInfo.setRows(new java.util.ArrayList<>());
+            tableDataInfo.setTotal(0);
+            return tableDataInfo;
+        }
     }
 
     /**
@@ -77,6 +87,16 @@ public class ImSessionController extends BaseController {
     }
 
     /**
+     * 修改IM会话页面
+     */
+    @RequiresPermissions("im:session:edit")
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("session", imConversationService.selectImConversationById(id));
+        return prefix + "/edit";
+    }
+
+    /**
      * 新增IM会话
      */
     @RequiresPermissions("im:session:add")
@@ -94,7 +114,7 @@ public class ImSessionController extends BaseController {
     @Log(title = "IM会话", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImConversation imConversation) {
+    public AjaxResult edit(ImConversation imConversation) {
         return toAjax(imConversationService.updateImConversation(imConversation));
     }
 
@@ -110,17 +130,6 @@ public class ImSessionController extends BaseController {
     }
 
     /**
-     * 删除会话（POST方式，兼容前端框架）
-     */
-    @RequiresPermissions("im:session:remove")
-    @Log(title = "IM会话", businessType = BusinessType.DELETE)
-    @PostMapping("/remove")
-    @ResponseBody
-    public AjaxResult removePost(Long[] ids) {
-        return toAjax(imConversationService.deleteImConversationByIds(ids));
-    }
-
-    /**
      * 获取会话统计信息
      */
     @GetMapping("/statistics")
@@ -128,5 +137,25 @@ public class ImSessionController extends BaseController {
     public AjaxResult getStatistics() {
         Map<String, Object> data = imConversationService.getConversationStatistics();
         return AjaxResult.success(data);
+    }
+
+    /**
+     * 查看会话成员页面
+     */
+    @RequiresPermissions("im:session:list")
+    @GetMapping("/members/{conversationId}")
+    public String members(@PathVariable("conversationId") Long conversationId, org.springframework.ui.ModelMap mmap) {
+        mmap.put("conversationId", conversationId);
+        return prefix + "/members";
+    }
+
+    /**
+     * 查询会话成员列表
+     */
+    @RequiresPermissions("im:session:list")
+    @PostMapping("/members/data")
+    @ResponseBody
+    public AjaxResult getMembersData(@RequestParam Long conversationId, @RequestParam(required = false) Long userId, @RequestParam(required = false) String nickname, @RequestParam(required = false) String role) {
+        return AjaxResult.success(imConversationService.selectMembersByConversationId(conversationId, userId, nickname, role));
     }
 }

@@ -131,6 +131,17 @@ public class ImGroupAnnouncementController extends BaseController {
     }
 
     /**
+     * 新增群公告（表单提交方式）
+     */
+    @RequiresPermissions("im:announcement:add")
+    @Log(title = "群公告管理", businessType = BusinessType.INSERT)
+    @PostMapping("/add")
+    @ResponseBody
+    public AjaxResult addSubmit(ImGroupAnnouncement imGroupAnnouncement) {
+        return toAjax(imGroupAnnouncementService.insertImGroupAnnouncement(imGroupAnnouncement));
+    }
+
+    /**
      * 修改群公告（JSON）
      */
     @RequiresPermissions("im:announcement:edit")
@@ -171,17 +182,6 @@ public class ImGroupAnnouncementController extends BaseController {
     @DeleteMapping("/{ids}")
     @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(imGroupAnnouncementService.deleteImGroupAnnouncementByIds(ids));
-    }
-
-    /**
-     * 删除群公告（POST - 表单/AJAX）
-     */
-    @RequiresPermissions("im:announcement:remove")
-    @Log(title = "群公告管理", businessType = BusinessType.DELETE)
-    @PostMapping("/remove")
-    @ResponseBody
-    public AjaxResult removePOST(@RequestParam("ids") Long[] ids) {
         return toAjax(imGroupAnnouncementService.deleteImGroupAnnouncementByIds(ids));
     }
 

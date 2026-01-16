@@ -1,6 +1,7 @@
 package com.ruoyi.web.service;
 
 import com.ruoyi.web.domain.ImConversation;
+import com.ruoyi.web.domain.ImConversationMember;
 import java.util.List;
 import java.util.Map;
 
@@ -65,4 +66,15 @@ public interface ImConversationService {
      * @return 会话列表
      */
     List<ImConversation> getActiveConversations(Integer limit);
+
+    /**
+     * 查询会话成员列表
+     *
+     * @param conversationId 会话ID
+     * @param userId 用户ID
+     * @param nickname 昵称
+     * @param role 角色
+     * @return 成员列表
+     */
+    List<ImConversationMember> selectMembersByConversationId(Long conversationId, Long userId, String nickname, String role);
 }

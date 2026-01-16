@@ -60,6 +60,16 @@ public interface ImGroupMemberService {
     int insertImGroupMember(ImGroupMember imGroupMember);
 
     /**
+     * 新增群组成员（带日志记录）
+     *
+     * @param imGroupMember 群组成员
+     * @param operatorId 操作者ID
+     * @param operatorName 操作者名称
+     * @return 结果
+     */
+    int insertImGroupMemberWithLog(ImGroupMember imGroupMember, Long operatorId, String operatorName);
+
+    /**
      * 修改群组成员
      *
      * @param imGroupMember 群组成员
@@ -78,6 +88,19 @@ public interface ImGroupMemberService {
     int updateMemberRole(Long groupId, Long userId, String role);
 
     /**
+     * 修改成员角色（带日志记录）
+     *
+     * @param groupId 群组ID
+     * @param userId 用户ID
+     * @param role 角色
+     * @param operatorId 操作者ID
+     * @param operatorName 操作者名称
+     * @param targetUserName 目标用户名称
+     * @return 结果
+     */
+    int updateMemberRoleWithLog(Long groupId, Long userId, String role, Long operatorId, String operatorName, String targetUserName);
+
+    /**
      * 批量删除群组成员
      *
      * @param ids 需要删除的数据主键集合
@@ -93,6 +116,18 @@ public interface ImGroupMemberService {
      * @return 结果
      */
     int removeMember(Long groupId, Long userId);
+
+    /**
+     * 移除成员（带日志记录）
+     *
+     * @param groupId 群组ID
+     * @param userId 用户ID
+     * @param operatorId 操作者ID
+     * @param operatorName 操作者名称
+     * @param targetUserName 目标用户名称
+     * @return 结果
+     */
+    int removeMemberWithLog(Long groupId, Long userId, Long operatorId, String operatorName, String targetUserName);
 
     /**
      * 获取群组成员统计数据

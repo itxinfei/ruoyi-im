@@ -84,10 +84,13 @@
         </template>
       </el-table-column>
       <el-table-column label="创建时间" align="center" prop="createTime" width="180" />
-      <el-table-column label="操作" align="center" width="180">
+      <el-table-column label="操作" align="center" width="230">
         <template #default="scope">
           <el-button link type="primary" :icon="Edit" @click="handleEdit(scope.row)"
             >编辑</el-button
+          >
+          <el-button link type="warning" :icon="Key" @click="handleResetPassword(scope.row)"
+            >重置密码</el-button
           >
           <el-button link type="danger" :icon="Delete" @click="handleDelete(scope.row)"
             >删除</el-button
@@ -147,13 +150,42 @@
         <el-button type="primary" @click="submitForm">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- 重置密码对话框 -->
+    <el-dialog v-model="resetPwdDialogVisible" title="重置密码" width="400px" @close="resetPwdForm">
+      <el-form ref="resetPwdFormRef" :model="resetPwdForm" :rules="resetPwdRules" label-width="80px">
+        <el-form-item label="用户名称">
+          <el-input v-model="resetPwdForm.userName" disabled />
+        </el-form-item>
+        <el-form-item label="新密码" prop="password">
+          <el-input
+            v-model="resetPwdForm.password"
+            type="password"
+            placeholder="请输入新密码"
+            show-password
+          />
+        </el-form-item>
+        <el-form-item label="确认密码" prop="confirmPassword">
+          <el-input
+            v-model="resetPwdForm.confirmPassword"
+            type="password"
+            placeholder="请再次输入新密码"
+            show-password
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="resetPwdDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitResetPassword">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Refresh, Plus, Edit, Delete } from '@element-plus/icons-vue'
+import { Search, Refresh, Plus, Edit, Delete, Key } from '@element-plus/icons-vue'
 import {
   listUser,
   getUser,
@@ -161,7 +193,8 @@ import {
   updateUser,
   delUser,
   changeUserStatus,
-} from '@/api/system/user'
+  resetUserPassword,
+} from '@/api/im/user'
 
 // 响应式状态
 const loading = ref(false)
@@ -197,6 +230,35 @@ const rules = {
   password: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
   email: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }],
   phonenumber: [{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }],
+}
+
+const resetPwdDialogVisible = ref(false)
+const resetPwdFormRef = ref(null)
+const resetPwdForm = reactive({
+  userId: null,
+  userName: '',
+  password: '',
+  confirmPassword: '',
+})
+
+const resetPwdRules = {
+  password: [
+    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' },
+  ],
+  confirmPassword: [
+    { required: true, message: '请再次输入新密码', trigger: 'blur' },
+    {
+      validator: (rule, value, callback) => {
+        if (value !== resetPwdForm.password) {
+          callback(new Error('两次输入的密码不一致'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur',
+    },
+  ],
 }
 
 // 获取用户列表
@@ -314,6 +376,38 @@ const handleStatusChange = async row => {
   } catch (error) {
     row.status = row.status === '0' ? '1' : '0'
     ElMessage.error(`${text}失败`)
+  }
+}
+
+// 重置密码
+const handleResetPassword = row => {
+  resetPwdForm.userId = row.userId
+  resetPwdForm.userName = row.userName
+  resetPwdForm.password = ''
+  resetPwdForm.confirmPassword = ''
+  resetPwdDialogVisible.value = true
+}
+
+// 重置密码表单
+const resetPwdForm = () => {
+  resetPwdForm.userId = null
+  resetPwdForm.userName = ''
+  resetPwdForm.password = ''
+  resetPwdForm.confirmPassword = ''
+  resetPwdFormRef.value?.resetFields()
+}
+
+// 提交重置密码
+const submitResetPassword = async () => {
+  try {
+    await resetPwdFormRef.value.validate()
+    await resetUserPassword(resetPwdForm.userId, resetPwdForm.password)
+    ElMessage.success('密码重置成功')
+    resetPwdDialogVisible.value = false
+  } catch (error) {
+    if (error !== false) {
+      ElMessage.error('密码重置失败')
+    }
   }
 }
 

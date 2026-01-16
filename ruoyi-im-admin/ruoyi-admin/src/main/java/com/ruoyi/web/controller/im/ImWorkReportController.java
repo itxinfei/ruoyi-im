@@ -115,17 +115,6 @@ public class ImWorkReportController extends BaseController {
     }
 
     /**
-     * 删除工作报告（POST方式，兼容前端框架）
-     */
-    @RequiresPermissions("im:workReport:remove")
-    @Log(title = "工作报告管理", businessType = BusinessType.DELETE)
-    @PostMapping("/remove")
-    @ResponseBody
-    public AjaxResult removePost(Long[] ids) {
-        return toAjax(imWorkReportService.deleteImWorkReportByIds(ids));
-    }
-
-    /**
      * 导出工作报告列表
      */
     @RequiresPermissions("im:workReport:export")

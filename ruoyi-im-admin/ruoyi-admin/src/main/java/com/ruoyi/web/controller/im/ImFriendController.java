@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.web.domain.ImFriend;
@@ -156,10 +157,10 @@ public class ImFriendController extends BaseController {
      */
     @RequiresPermissions("im:friend:remove")
     @Log(title = "好友管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/remove/{ids}")
+    @PostMapping("/remove/{ids}")
     @ResponseBody
-    public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(imFriendService.deleteImFriendByIds(ids));
+    public AjaxResult remove(@PathVariable String ids) {
+        return toAjax(imFriendService.deleteImFriendByIds(Convert.toLongArray(ids)));
     }
 
     /**

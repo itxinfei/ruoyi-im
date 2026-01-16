@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <title>群组操作日志</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
+    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
+    <style>
+        /* 搜索区域底部间距 */
+        .search-collapse {
+            margin-bottom: 10px;
+        }
+
+        /* 表格区域样式 */
+        .select-table.table-striped {
+            padding: 0;
+        }
+
+        /* 操作类型徽章样式 */
+        .badge {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row">
+            <!-- 搜索区域 -->
+            <div class="col-sm-12 search-collapse">
+                <form id="log-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                操作类型：<select name="operationType">
+                                    <option value="">所有</option>
+                                    <option value="ADD_MEMBER">添加成员</option>
+                                    <option value="REMOVE_MEMBER">移除成员</option>
+                                    <option value="CHANGE_ROLE">修改角色</option>
+                                    <option value="MUTE_MEMBER">禁言成员</option>
+                                    <option value="UNMUTE_MEMBER">解除禁言</option>
+                                    <option value="DISMISS_GROUP">解散群组</option>
+                                    <option value="CHANGE_OWNER">转让群主</option>
+                                    <option value="UPDATE_INFO">修改群信息</option>
+                                </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
+        </div>
+    </div>
+    <!-- 通用JS -->
+    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
+    <script th:src="@{/js/jquery.min.js?v=3.6.3}"></script>
+    <script th:src="@{/js/bootstrap.min.js?v=3.3.7}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js?v=1.21.0}"></script>
+    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js?v=2.70.0}"></script>
+    <script th:src="@{/ajax/libs/layer/layer.min.js?v=3.7.0}"></script>
+    <script th:src="@{/ajax/libs/layui/layui.min.js?v=2.8.18}"></script>
+    <script th:src="@{/ruoyi/js/common.js?v=4.8.0}"></script>
+    <script th:src="@{/ruoyi/js/ry-ui.js?v=4.8.0}"></script>
+    <script th:inline="javascript">
+        var groupId = [[${groupId}]];
+        var prefix = ctx + "im/group/log";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                queryParams: function(params) {
+                    params.groupId = groupId;
+                    return params;
+                },
+                modalName: "群组操作日志",
+                columns: [{
+                    field: 'id',
+                    title: 'ID',
+                    width: '60'
+                },
+                {
+                    field: 'operatorName',
+                    title: '操作者',
+                    width: '120',
+                    formatter: function(value, row, index) {
+                        return '<span class="text-primary">' + value + '</span>';
+                    }
+                },
+                {
+                    field: 'operationType',
+                    title: '操作类型',
+                    align: 'center',
+                    width: '140',
+                    formatter: function(value, row, index) {
+                        var typeMap = {
+                            'ADD_MEMBER': '<span class="badge badge-success">添加成员</span>',
+                            'REMOVE_MEMBER': '<span class="badge badge-danger">移除成员</span>',
+                            'CHANGE_ROLE': '<span class="badge badge-info">修改角色</span>',
+                            'MUTE_MEMBER': '<span class="badge badge-warning">禁言成员</span>',
+                            'UNMUTE_MEMBER': '<span class="badge badge-primary">解除禁言</span>',
+                            'DISMISS_GROUP': '<span class="badge badge-danger">解散群组</span>',
+                            'CHANGE_OWNER': '<span class="badge badge-warning">转让群主</span>',
+                            'UPDATE_INFO': '<span class="badge badge-info">修改群信息</span>'
+                        };
+                        return typeMap[value] || value;
+                    }
+                },
+                {
+                    field: 'operationDesc',
+                    title: '操作描述',
+                    width: '400',
+                    formatter: function(value, row, index) {
+                        if (row.targetUserName) {
+                            return value + ' <span class="text-muted">（目标：' + row.targetUserName + '）</span>';
+                        }
+                        return value;
+                    }
+                },
+                {
+                    field: 'createTime',
+                    title: '操作时间',
+                    width: '160',
+                    sortable: true
+                }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

@@ -103,6 +103,9 @@
                 <a class="btn btn-warning single disabled" onclick="toggleMute()" shiro:hasPermission="im:group:member:edit">
                     <i class="fa fa-ban"></i> 禁言/解禁
                 </a>
+                <a class="btn btn-info single disabled" onclick="viewMemberLogs()" shiro:hasPermission="im:group:log:view">
+                    <i class="fa fa-list"></i> 操作日志
+                </a>
                 <a class="btn btn-danger multiple disabled" onclick="removeSelectedMembers()" shiro:hasPermission="im:group:member:remove">
                     <i class="fa fa-remove"></i> 移除成员
                 </a>
@@ -295,6 +298,21 @@
                 });
             });
         }
-    </script>
-</body>
+
+        /* 查看成员操作日志 */
+        function viewMemberLogs() {
+            var row = $.table.selectFirstRows()[0];
+            if (!row) {
+                $.modal.alertWarning("请先选择一个成员");
+                return;
+            }
+            var url = ctx + "im/group/log/group/" + groupId + "/view";
+            $.modal.openOptions({
+                title: '群组操作日志',
+                url: url,
+                width: '900px',
+                height: '600px'
+            });
+        }
+    </script></body>
 </html>

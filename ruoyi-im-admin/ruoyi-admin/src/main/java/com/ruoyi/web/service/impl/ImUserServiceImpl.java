@@ -1,11 +1,10 @@
 package com.ruoyi.web.service.impl;
 
-import com.ruoyi.common.utils.ShiroUtils;
-import com.ruoyi.framework.shiro.service.SysPasswordService;
 import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.mapper.ImUserMapper;
 import com.ruoyi.web.service.ImUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -14,6 +13,8 @@ import java.util.Map;
 
 /**
  * IM用户Service实现（Admin模块专用）
+ *
+ * 使用 BCryptPasswordEncoder 加密密码，无需单独存储 salt
  */
 @Service
 public class ImUserServiceImpl implements ImUserService {
@@ -21,8 +22,8 @@ public class ImUserServiceImpl implements ImUserService {
     @Autowired
     private ImUserMapper userMapper;
 
-    @Autowired
-    private SysPasswordService passwordService;
+    /** BCrypt密码编码器 */
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public List<ImUser> selectImUserList(ImUser imUser) {
@@ -36,10 +37,9 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public int insertImUser(ImUser imUser) {
-        // 对密码进行加密
+        // 对密码进行加密（BCrypt）
         if (imUser.getPassword() != null && !imUser.getPassword().isEmpty()) {
-            String salt = ShiroUtils.randomSalt();
-            String encryptedPassword = passwordService.encryptPassword(imUser.getUsername(), imUser.getPassword(), salt);
+            String encryptedPassword = passwordEncoder.encode(imUser.getPassword());
             imUser.setPassword(encryptedPassword);
         }
         return userMapper.insertImUser(imUser);
@@ -47,11 +47,13 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public int updateImUser(ImUser imUser) {
-        // 对密码进行加密
+        // 对密码进行加密（BCrypt）- 仅当密码被修改时
         if (imUser.getPassword() != null && !imUser.getPassword().isEmpty()) {
-            String salt = ShiroUtils.randomSalt();
-            String encryptedPassword = passwordService.encryptPassword(imUser.getUsername(), imUser.getPassword(), salt);
-            imUser.setPassword(encryptedPassword);
+            // 检查密码是否已经是 BCrypt 格式（以 $2a$ 或 $2b$ 开头）
+            if (!imUser.getPassword().startsWith("$2")) {
+                String encryptedPassword = passwordEncoder.encode(imUser.getPassword());
+                imUser.setPassword(encryptedPassword);
+            }
         }
         return userMapper.updateImUser(imUser);
     }
@@ -70,23 +72,21 @@ public class ImUserServiceImpl implements ImUserService {
     public int resetPassword(Long id, String password) {
         try {
             ImUser user = userMapper.selectImUserById(id);
-            if (user != null) {
-                // 对新密码进行加密
-                String salt = ShiroUtils.randomSalt();
-                String encryptedPassword = passwordService.encryptPassword(user.getUsername(), password, salt);
-                // 更新密码
-                user.setPassword(encryptedPassword);
-                // 更新时间
-                user.setUpdateTime(new java.util.Date());
-                return userMapper.updateImUser(user);
+            if (user == null) {
+                return 0;
             }
+
+            // 使用 BCrypt 加密新密码
+            String encryptedPassword = passwordEncoder.encode(password);
+            user.setPassword(encryptedPassword);
+            user.setUpdateTime(new java.util.Date());
+
+            return userMapper.updateImUser(user);
         } catch (Exception e) {
             e.printStackTrace();
-            // 记录错误日志
             System.err.println("重置密码失败: " + e.getMessage());
             return 0;
         }
-        return 0;
     }
 
     @Override

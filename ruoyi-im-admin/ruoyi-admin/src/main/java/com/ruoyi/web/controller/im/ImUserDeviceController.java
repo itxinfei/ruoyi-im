@@ -144,17 +144,6 @@ public class ImUserDeviceController extends BaseController {
     }
 
     /**
-     * 删除用户设备（POST方式，兼容前端框架）
-     */
-    @RequiresPermissions("im:userDevice:remove")
-    @Log(title = "用户设备管理", businessType = BusinessType.DELETE)
-    @PostMapping("/remove")
-    @ResponseBody
-    public AjaxResult removePost(Long[] ids) {
-        return toAjax(imUserDeviceService.deleteImUserDeviceByIds(ids));
-    }
-
-    /**
      * 清理离线设备
      */
     @RequiresPermissions("im:userDevice:remove")

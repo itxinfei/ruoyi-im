@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.web.domain.ImSensitiveWord;
@@ -117,10 +118,10 @@ public class ImSensitiveWordController extends BaseController {
      */
     @RequiresPermissions("im:sensitiveWord:remove")
     @Log(title = "敏感词管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @PostMapping("/remove/{ids}")
     @ResponseBody
-    public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(imSensitiveWordService.deleteImSensitiveWordByIds(ids));
+    public AjaxResult remove(@PathVariable String ids) {
+        return toAjax(imSensitiveWordService.deleteImSensitiveWordByIds(Convert.toLongArray(ids)));
     }
 
     /**

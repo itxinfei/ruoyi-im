@@ -225,12 +225,21 @@
             $.table.init(options);
         });
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#imageCount").text(result.data.imageCount || 0);
-                    $("#videoCount").text(result.data.videoCount || 0);
-                    $("#docCount").text(result.data.docCount || 0);
+            $.ajax({
+                url: prefix + "/statistics",
+                type: 'GET',
+                dataType: 'json',
+                timeout: 10000,
+                success: function(result) {
+                    if (result && result.code == 0) {
+                        $("#totalCount").text(result.data.totalCount || 0);
+                        $("#imageCount").text(result.data.imageCount || 0);
+                        $("#videoCount").text(result.data.videoCount || 0);
+                        $("#docCount").text(result.data.docCount || 0);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("加载统计数据失败:", error);
                 }
             });
         }

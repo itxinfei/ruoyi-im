@@ -315,53 +315,64 @@
                 $.modal.alertWarning("请至少选择一条记录");
                 return;
             }
-            
+
             // 弹出输入新密码的对话框
-            var html = '<div class="form-group">' +
+            var html = '<div style="padding: 20px;">' +
+                       '<div class="form-group">' +
                        '<label>新密码：</label>' +
-                       '<input type="password" class="form-control" id="newPassword" placeholder="请输入新密码">' +
+                       '<input type="password" class="form-control" id="newPassword" placeholder="请输入新密码(至少6位)">' +
                        '</div>' +
                        '<div class="form-group">' +
                        '<label>确认密码：</label>' +
                        '<input type="password" class="form-control" id="confirmPassword" placeholder="请再次输入新密码">' +
+                       '</div>' +
                        '</div>';
-            
-            $.modal.confirm("请输入新密码", html, function() {
-                var newPassword = $("#newPassword").val();
-                var confirmPassword = $("#confirmPassword").val();
-                
-                if (!newPassword) {
-                    $.modal.msgError("请输入新密码");
-                    return false;
-                }
-                
-                if (newPassword != confirmPassword) {
-                    $.modal.msgError("两次输入的密码不一致");
-                    return false;
-                }
-                
-                if (newPassword.length < 6) {
-                    $.modal.msgError("密码长度不能少于6位");
-                    return false;
-                }
-                
-                var completed = 0;
-                var total = rows.length;
-                
-                function resetNext() {
-                    if (completed >= total) {
-                        $.modal.msgSuccess("密码重置完成");
-                        $.table.refresh();
-                        return;
+
+            layer.open({
+                type: 1,
+                title: '重置密码 - 共' + rows.length + '个用户',
+                area: ['400px', '280px'],
+                content: html,
+                btn: ['确认', '取消'],
+                yes: function(index) {
+                    var newPassword = $("#newPassword").val();
+                    var confirmPassword = $("#confirmPassword").val();
+
+                    if (!newPassword) {
+                        $.modal.msgError("请输入新密码");
+                        return false;
                     }
-                    
-                    resetPwdOne(rows[completed], newPassword, function() {
-                        completed++;
-                        resetNext();
-                    });
+
+                    if (newPassword != confirmPassword) {
+                        $.modal.msgError("两次输入的密码不一致");
+                        return false;
+                    }
+
+                    if (newPassword.length < 6) {
+                        $.modal.msgError("密码长度不能少于6位");
+                        return false;
+                    }
+
+                    layer.close(index);
+
+                    var completed = 0;
+                    var total = rows.length;
+
+                    function resetNext() {
+                        if (completed >= total) {
+                            $.modal.msgSuccess("密码重置完成");
+                            $.table.refresh();
+                            return;
+                        }
+
+                        resetPwdOne(rows[completed], newPassword, function() {
+                            completed++;
+                            resetNext();
+                        });
+                    }
+
+                    resetNext();
                 }
-                
-                resetNext();
             });
         }
 
@@ -372,7 +383,7 @@
                 data: JSON.stringify({password: newPassword}),
                 contentType: 'application/json',
                 success: function(result) {
-                    if (result.code == 0) {
+                    if (result.code == 0 || result.code == 200) {
                         if (callback) {
                             callback();
                         } else {
@@ -398,54 +409,65 @@
                 }
             });
         }
-        
+
         function resetSinglePwd(id) {
             // 弹出输入新密码的对话框
-            var html = '<div class="form-group">' +
+            var html = '<div style="padding: 20px;">' +
+                       '<div class="form-group">' +
                        '<label>新密码：</label>' +
-                       '<input type="password" class="form-control" id="singleNewPassword" placeholder="请输入新密码">' +
+                       '<input type="password" class="form-control" id="singleNewPassword" placeholder="请输入新密码(至少6位)">' +
                        '</div>' +
                        '<div class="form-group">' +
                        '<label>确认密码：</label>' +
                        '<input type="password" class="form-control" id="singleConfirmPassword" placeholder="请再次输入新密码">' +
+                       '</div>' +
                        '</div>';
-            
-            $.modal.confirm("重置用户密码", html, function() {
-                var newPassword = $("#singleNewPassword").val();
-                var confirmPassword = $("#singleConfirmPassword").val();
-                
-                if (!newPassword) {
-                    $.modal.msgError("请输入新密码");
-                    return false;
-                }
-                
-                if (newPassword != confirmPassword) {
-                    $.modal.msgError("两次输入的密码不一致");
-                    return false;
-                }
-                
-                if (newPassword.length < 6) {
-                    $.modal.msgError("密码长度不能少于6位");
-                    return false;
-                }
-                
-                $.ajax({
-                    url: prefix + "/" + id + "/reset-password",
-                    type: 'put',
-                    data: JSON.stringify({password: newPassword}),
-                    contentType: 'application/json',
-                    success: function(result) {
-                        if (result.code == 0) {
-                            $.modal.msgSuccess(result.msg || "密码重置成功");
-                            $.table.refresh();
-                        } else {
-                            $.modal.msgError(result.msg || "重置失败");
-                        }
-                    },
-                    error: function() {
-                        $.modal.msgError("重置失败，请稍后重试");
+
+            layer.open({
+                type: 1,
+                title: '重置用户密码',
+                area: ['400px', '280px'],
+                content: html,
+                btn: ['确认', '取消'],
+                yes: function(index) {
+                    var newPassword = $("#singleNewPassword").val();
+                    var confirmPassword = $("#singleConfirmPassword").val();
+
+                    if (!newPassword) {
+                        $.modal.msgError("请输入新密码");
+                        return false;
                     }
-                });
+
+                    if (newPassword != confirmPassword) {
+                        $.modal.msgError("两次输入的密码不一致");
+                        return false;
+                    }
+
+                    if (newPassword.length < 6) {
+                        $.modal.msgError("密码长度不能少于6位");
+                        return false;
+                    }
+
+                    layer.close(index);
+
+                    $.ajax({
+                        url: prefix + "/" + id + "/reset-password",
+                        type: 'put',
+                        data: JSON.stringify({password: newPassword}),
+                        contentType: 'application/json',
+                        success: function(result) {
+                            if (result.code == 0 || result.code == 200) {
+                                $.modal.msgSuccess(result.msg || "密码重置成功");
+                                $.table.refresh();
+                            } else {
+                                $.modal.msgError(result.msg || "重置失败");
+                            }
+                        },
+                        error: function() {
+                            $.modal.msgError("重置失败，请稍后重试");
+                        }
+                    });
+                }
             });
         }
     </script>

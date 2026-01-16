@@ -186,6 +186,20 @@ export function getUsersByIds(userIds) {
   })
 }
 
+/**
+ * 重置用户密码（管理员操作）
+ * @param {string} userId - 用户ID
+ * @param {string} password - 新密码
+ * @returns {Promise}
+ */
+export function resetUserPassword(userId, password) {
+  return request({
+    url: `/api/im/user/${userId}/reset-password`,
+    method: 'put',
+    data: { password },
+  })
+}
+
 // ========== 别名 - 向后兼容 ==========
 
 export const addUser = createUser

@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.web.domain.ImApplication;
@@ -122,10 +123,10 @@ public class ImAppAdminController extends BaseController {
      */
     @RequiresPermissions("im:app:remove")
     @Log(title = "应用管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @PostMapping("/remove/{ids}")
     @ResponseBody
-    public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(applicationService.deleteImApplicationByIds(ids));
+    public AjaxResult remove(@PathVariable String ids) {
+        return toAjax(applicationService.deleteImApplicationByIds(Convert.toLongArray(ids)));
     }
 
     /**

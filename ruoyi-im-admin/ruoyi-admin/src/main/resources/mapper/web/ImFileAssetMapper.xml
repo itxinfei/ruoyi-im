@@ -4,23 +4,32 @@
     
     <resultMap type="com.ruoyi.web.domain.ImFileAsset" id="ImFileAssetResult">
         <id property="id" column="id"/>
+        <result property="fileId" column="file_id"/>
         <result property="fileName" column="file_name"/>
         <result property="fileType" column="file_type"/>
         <result property="fileSize" column="file_size"/>
+        <result property="fileExtension" column="file_ext"/>
         <result property="filePath" column="file_path"/>
+        <result property="fileUrl" column="file_url"/>
+        <result property="mimeType" column="mime_type"/>
         <result property="uploaderId" column="uploader_id"/>
-        <result property="createTime" column="create_time"/>
+        <result property="uploadTime" column="create_time"/>
+        <result property="downloadCount" column="download_count"/>
+        <result property="status" column="status"/>
+        <result property="deleted" column="is_deleted"/>
     </resultMap>
 
     <select id="selectImFileAssetList" parameterType="com.ruoyi.web.domain.ImFileAsset" resultMap="ImFileAssetResult">
-        select id, file_name, file_type, file_size, file_path, uploader_id, create_time
+        select id, file_name, file_type, file_size, file_path, file_ext, uploader_id, download_count, status, create_time
         from im_file_asset
         <where>
+            status = 'ACTIVE'
             <if test="fileName != null and fileName != ''"> and file_name like concat('%', #{fileName}, '%') </if>
             <if test="fileType != null and fileType != ''"> and file_type = #{fileType} </if>
             <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>
         </where>
         order by create_time desc
+        LIMIT 100
     </select>
 
     <select id="selectImFileAssetById" parameterType="Long" resultMap="ImFileAssetResult">
@@ -53,20 +62,18 @@
     </delete>
 
     <select id="countTotalFiles" parameterType="com.ruoyi.web.domain.ImFileAsset" resultType="java.lang.Integer">
-        select count(*) from im_file_asset
-        <where>
-            <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>
-        </where>
+        select count(*) from im_file_asset where status = 'ACTIVE'
+        <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>
     </select>
 
     <select id="countTodayUploads" parameterType="com.ruoyi.web.domain.ImFileAsset" resultType="java.lang.Integer">
         select count(*) from im_file_asset
-        where date(create_time) = curdate()
+        where date(create_time) = curdate() and status = 'ACTIVE'
         <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>
     </select>
 
     <select id="countTotalStorage" resultType="java.lang.Long">
-        select coalesce(sum(file_size), 0) from im_file_asset
+        select IFNULL(sum(file_size), 0) from im_file_asset where status = 'ACTIVE'
     </select>
 
     <delete id="cleanInvalidFiles">
@@ -75,9 +82,15 @@
 
     <select id="getFileStatistics" resultType="java.util.Map">
         select 
-            count(*) as total_files,
-            coalesce(sum(file_size), 0) as total_storage,
-            count(case when date(create_time) = curdate() then 1 end) as today_uploads
+            IFNULL(count(*), 0) as totalCount,
+            IFNULL(sum(case when file_type = 'image' then 1 else 0 end), 0) as imageCount,
+            IFNULL(sum(case when file_type = 'video' then 1 else 0 end), 0) as videoCount,
+            IFNULL(sum(case when file_type = 'document' then 1 else 0 end), 0) as docCount,
+            IFNULL(sum(case when file_type = 'audio' then 1 else 0 end), 0) as audioCount,
+            IFNULL(sum(case when file_type = 'other' then 1 else 0 end), 0) as otherCount,
+            IFNULL(sum(file_size), 0) as totalStorage,
+            IFNULL(count(case when date(create_time) = curdate() then 1 end), 0) as todayUploads
         from im_file_asset
+        where status = 'ACTIVE'
     </select>
 </mapper>

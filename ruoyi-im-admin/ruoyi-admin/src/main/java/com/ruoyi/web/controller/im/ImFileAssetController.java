@@ -5,6 +5,7 @@ import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.file.FileUploadUtils;
@@ -86,9 +87,19 @@ public class ImFileAssetController extends BaseController {
     @PostMapping("/list")
     @ResponseBody
     public TableDataInfo list(ImFileAsset imFileAsset) {
-        startPage();
-        List<ImFileAsset> list = imFileAssetService.selectImFileAssetList(imFileAsset);
-        return getDataTable(list);
+        try {
+            startPage();
+            List<ImFileAsset> list = imFileAssetService.selectImFileAssetList(imFileAsset);
+            return getDataTable(list);
+        } catch (Exception e) {
+            logger.error("查询文件列表失败", e);
+            TableDataInfo tableDataInfo = new TableDataInfo();
+            tableDataInfo.setCode(500);
+            tableDataInfo.setMsg("查询失败: " + e.getMessage());
+            tableDataInfo.setRows(new java.util.ArrayList<>());
+            tableDataInfo.setTotal(0);
+            return tableDataInfo;
+        }
     }
 
     /**
@@ -139,10 +150,10 @@ public class ImFileAssetController extends BaseController {
      */
     @RequiresPermissions("im:file:remove")
     @Log(title = "文件资源", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @PostMapping("/remove/{ids}")
     @ResponseBody
-    public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(imFileAssetService.deleteImFileAssetByIds(ids));
+    public AjaxResult remove(@PathVariable String ids) {
+        return toAjax(imFileAssetService.deleteImFileAssetByIds(Convert.toLongArray(ids)));
     }
 
     /**

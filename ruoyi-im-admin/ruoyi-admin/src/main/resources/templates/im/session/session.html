@@ -187,27 +187,46 @@
                     field: 'avatar',
                     title: '头像',
                     formatter: function(value, row, index) {
-                        if (value) {
-                            return '<img src="' + value + '" style="width:30px;height:30px;border-radius:50%;"/>';
+                        if (value && value.length > 0) {
+                            return '<img src="' + value + '" style="width:30px;height:30px;border-radius:50%;" onerror="this.src=\'/img/profile.jpg\'"/>';
+                        }
+                        return '<img src="/img/profile.jpg" style="width:30px;height:30px;border-radius:50%;"/>';
+                    }
+                },
+                {
+                    field: 'memberCount',
+                    title: '成员数量',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        if (row.type === 'PRIVATE') {
+                            return '<span class="badge badge-info">2人</span>';
+                        } else if (row.type === 'GROUP') {
+                            return '<span class="badge badge-success">' + (value || 0) + '人</span>';
                         }
                         return '-';
                     }
                 },
                 {
-                    field: 'lastMessageId',
-                    title: '最后消息ID'
-                },
-                {
-                    field: 'createTime',
-                    title: '创建时间',
-                    sortable: true
+                    field: 'lastMessageTime',
+                    title: '最后消息时间',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        if (value) {
+                            return value;
+                        }
+                        return '-';
+                    }
                 },
                 {
                     title: '操作',
                     align: 'center',
-                    width: '100',
+                    width: '180',
                     formatter: function(value, row, index) {
                         var actions = [];
+                        if (row.type === 'GROUP') {
+                            actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewMembers(\'' + row.id + '\', \'' + row.name + '\')"><i class="fa fa-users"></i>成员</a>');
+                        }
+                        actions.push('<a class="btn btn-success btn-xs" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>修改</a>');
                         actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
@@ -216,14 +235,29 @@
             $.table.init(options);
         });
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#privateCount").text(result.data.privateCount || 0);
-                    $("#groupCount").text(result.data.groupCount || 0);
-                    $("#activeCount").text(result.data.activeCount || 0);
+            $.ajax({
+                url: prefix + "/statistics",
+                type: 'GET',
+                dataType: 'json',
+                timeout: 10000,
+                success: function(result) {
+                    if (result && result.code == 0) {
+                        $("#totalCount").text(result.data.totalCount || 0);
+                        $("#privateCount").text(result.data.privateCount || 0);
+                        $("#groupCount").text(result.data.groupCount || 0);
+                        $("#activeCount").text(result.data.activeCount || 0);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("加载统计数据失败:", error);
                 }
             });
+        }
+
+        function viewMembers(conversationId, conversationName) {
+            var url = prefix + "/members/" + conversationId;
+            var title = "会话成员 - " + conversationName;
+            $.modal.open(title, url, '800px', '600px');
         }
     </script></body>
 </html>

@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.web.domain.ImDepartment;
@@ -107,16 +108,17 @@ public class ImDepartmentController extends BaseController {
      */
     @RequiresPermissions("im:department:remove")
     @Log(title = "部门管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @PostMapping("/remove/{ids}")
     @ResponseBody
-    public AjaxResult remove(@PathVariable Long[] ids) {
+    public AjaxResult remove(@PathVariable String ids) {
         // 检查是否有子部门
-        for (Long id : ids) {
+        Long[] idArray = Convert.toLongArray(ids);
+        for (Long id : idArray) {
             if (imDepartmentService.checkHasChildren(id) > 0) {
                 return AjaxResult.error("存在子部门，不允许删除");
             }
         }
-        return toAjax(imDepartmentService.deleteImDepartmentByIds(ids));
+        return toAjax(imDepartmentService.deleteImDepartmentByIds(idArray));
     }
 
     /**

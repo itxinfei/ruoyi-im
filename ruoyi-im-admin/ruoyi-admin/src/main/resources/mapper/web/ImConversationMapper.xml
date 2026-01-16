@@ -33,10 +33,10 @@
 
     <select id="selectImConversationList" parameterType="com.ruoyi.web.domain.ImConversation" resultMap="ImConversationResult">
         select c.*,
-               (SELECT COUNT(*) FROM im_conversation_member WHERE conversation_id = c.id AND is_deleted = 0) as member_count,
-               (SELECT SUM(unread_count) FROM im_conversation_member WHERE conversation_id = c.id AND is_deleted = 0) as total_unread_count,
-               CASE WHEN c.type = 'PRIVATE' THEN (SELECT nickname FROM im_user WHERE id = c.target_id)
-                    ELSE (SELECT name FROM im_group WHERE id = c.target_id) END as target_name
+               IFNULL((SELECT COUNT(*) FROM im_conversation_member WHERE conversation_id = c.id AND is_deleted = 0), 0) as member_count,
+               IFNULL((SELECT SUM(unread_count) FROM im_conversation_member WHERE conversation_id = c.id AND is_deleted = 0), 0) as total_unread_count,
+               IFNULL(CASE WHEN c.type = 'PRIVATE' THEN (SELECT nickname FROM im_user WHERE id = c.target_id)
+                    ELSE (SELECT name FROM im_group WHERE id = c.target_id) END, '') as target_name
         from im_conversation c
         <where>
             c.is_deleted = 0
@@ -47,6 +47,7 @@
             <if test="params.endTime != null and params.endTime != ''">and date_format(c.create_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d')</if>
         </where>
         order by c.last_message_time desc
+        LIMIT 100
     </select>
 
     <insert id="insertImConversation" parameterType="com.ruoyi.web.domain.ImConversation" useGeneratedKeys="true" keyProperty="id">
@@ -104,10 +105,10 @@
     <!-- 会话统计 -->
     <select id="getConversationStatistics" resultType="java.util.Map">
         select
-            (SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0) as totalCount,
-            (SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 and type = 'PRIVATE') as privateCount,
-            (SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 and type = 'GROUP') as groupCount,
-            (SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 AND DATE(last_message_time) = CURDATE()) as activeCount
+            IFNULL((SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0), 0) as totalCount,
+            IFNULL((SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 and type = 'PRIVATE'), 0) as privateCount,
+            IFNULL((SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 and type = 'GROUP'), 0) as groupCount,
+            IFNULL((SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 AND DATE(last_message_time) = CURDATE()), 0) as activeCount
         from dual
     </select>
 

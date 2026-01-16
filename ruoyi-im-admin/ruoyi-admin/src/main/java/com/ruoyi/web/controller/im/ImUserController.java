@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.service.ImUserService;
@@ -131,21 +132,10 @@ public class ImUserController extends BaseController {
      */
     @RequiresPermissions("im:user:remove")
     @Log(title = "IM用户", businessType = BusinessType.DELETE)
-    @DeleteMapping("/remove/{ids}")
+    @PostMapping("/remove/{ids}")
     @ResponseBody
-    public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(imUserService.deleteImUserByIds(ids));
-    }
-
-    /**
-     * 删除IM用户（POST方式，兼容前端框架）
-     */
-    @RequiresPermissions("im:user:remove")
-    @Log(title = "IM用户", businessType = BusinessType.DELETE)
-    @PostMapping("/remove")
-    @ResponseBody
-    public AjaxResult removePost(Long[] ids) {
-        return toAjax(imUserService.deleteImUserByIds(ids));
+    public AjaxResult remove(@PathVariable String ids) {
+        return toAjax(imUserService.deleteImUserByIds(Convert.toLongArray(ids)));
     }
 
     /**

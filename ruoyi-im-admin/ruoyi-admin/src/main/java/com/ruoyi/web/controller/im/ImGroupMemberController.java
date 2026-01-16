@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.web.domain.ImGroupMember;
@@ -121,6 +122,22 @@ public class ImGroupMemberController extends BaseController {
     }
 
     /**
+     * 新增群组成员（带日志记录）
+     */
+    @RequiresPermissions("im:group:member:add")
+    @Log(title = "群组成员管理", businessType = BusinessType.INSERT)
+    @PostMapping("/addWithLog")
+    @ResponseBody
+    public AjaxResult addWithLog(@RequestParam Long groupId, @RequestParam Long userId, @RequestParam String nickname, @RequestParam String operatorName) {
+        ImGroupMember member = new ImGroupMember();
+        member.setGroupId(groupId);
+        member.setUserId(userId);
+        member.setNickname(nickname);
+        member.setRole("MEMBER");
+        return toAjax(imGroupMemberService.insertImGroupMemberWithLog(member, userId, operatorName));
+    }
+
+    /**
      * 批量添加群组成员
      */
     @RequiresPermissions("im:group:member:add")
@@ -158,6 +175,17 @@ public class ImGroupMemberController extends BaseController {
     }
 
     /**
+     * 修改成员角色（带日志记录）
+     */
+    @RequiresPermissions("im:group:member:edit")
+    @Log(title = "修改成员角色", businessType = BusinessType.UPDATE)
+    @PostMapping("/roleWithLog")
+    @ResponseBody
+    public AjaxResult updateRoleWithLog(@RequestParam Long groupId, @RequestParam Long userId, @RequestParam String role, @RequestParam Long operatorId, @RequestParam String operatorName, @RequestParam String targetUserName) {
+        return toAjax(imGroupMemberService.updateMemberRoleWithLog(groupId, userId, role, operatorId, operatorName, targetUserName));
+    }
+
+    /**
      * 设置成员禁言状态
      */
     @RequiresPermissions("im:group:member:edit")
@@ -173,10 +201,10 @@ public class ImGroupMemberController extends BaseController {
      */
     @RequiresPermissions("im:group:member:remove")
     @Log(title = "群组成员管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @PostMapping("/remove/{ids}")
     @ResponseBody
-    public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(imGroupMemberService.deleteImGroupMemberByIds(ids));
+    public AjaxResult remove(@PathVariable String ids) {
+        return toAjax(imGroupMemberService.deleteImGroupMemberByIds(Convert.toLongArray(ids)));
     }
 
     /**
@@ -188,6 +216,17 @@ public class ImGroupMemberController extends BaseController {
     @ResponseBody
     public AjaxResult removeMember(@PathVariable Long groupId, @PathVariable Long userId) {
         return toAjax(imGroupMemberService.removeMember(groupId, userId));
+    }
+
+    /**
+     * 移除群组成员（带日志记录）
+     */
+    @RequiresPermissions("im:group:member:remove")
+    @Log(title = "移除群组成员", businessType = BusinessType.DELETE)
+    @PostMapping("/removeWithLog")
+    @ResponseBody
+    public AjaxResult removeMemberWithLog(@RequestParam Long groupId, @RequestParam Long userId, @RequestParam Long operatorId, @RequestParam String operatorName, @RequestParam String targetUserName) {
+        return toAjax(imGroupMemberService.removeMemberWithLog(groupId, userId, operatorId, operatorName, targetUserName));
     }
 
     /**

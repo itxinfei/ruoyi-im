@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.web.domain.ImGroup;
 import com.ruoyi.web.service.ImGroupService;
@@ -56,6 +57,16 @@ public class ImGroupController extends BaseController {
     public String edit(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
         mmap.put("group", imGroupService.selectImGroupById(id));
         return prefix + "/edit";
+    }
+
+    /**
+     * 群组设置页面
+     */
+    @RequiresPermissions("im:group:edit")
+    @GetMapping("/settings/{id}")
+    public String settings(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("group", imGroupService.selectImGroupById(id));
+        return prefix + "/settings";
     }
 
     /**
@@ -128,10 +139,10 @@ public class ImGroupController extends BaseController {
      */
     @RequiresPermissions("im:group:remove")
     @Log(title = "IM群组", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @PostMapping("/remove/{ids}")
     @ResponseBody
-    public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(imGroupService.deleteImGroupByIds(ids));
+    public AjaxResult remove(@PathVariable String ids) {
+        return toAjax(imGroupService.deleteImGroupByIds(Convert.toLongArray(ids)));
     }
 
     /**

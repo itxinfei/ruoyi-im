@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.web.domain.ImMessage;
 import com.ruoyi.web.service.ImMessageService;
@@ -91,7 +92,16 @@ public class ImMessageController extends BaseController {
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imMessageService.selectImMessageById(id));
     }
-    
+
+    /**
+     * 获取消息详情（匹配前端调用 /im/message/{id}）
+     */
+    @RequiresPermissions("im:message:query")
+    @GetMapping("/{id}")
+    public AjaxResult getMessageDetail(@PathVariable("id") Long id) {
+        return AjaxResult.success(imMessageService.selectImMessageById(id));
+    }
+
     /**
      * 修改IM消息（表单提交方式，用于编辑页面）
      */
@@ -146,9 +156,10 @@ public class ImMessageController extends BaseController {
      */
     @RequiresPermissions("im:message:remove")
     @Log(title = "删除IM消息", businessType = BusinessType.DELETE)
-    @DeleteMapping("/remove/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(imMessageService.deleteImMessageByIds(ids));
+    @PostMapping("/remove/{ids}")
+    @ResponseBody
+    public AjaxResult remove(@PathVariable String ids) {
+        return toAjax(imMessageService.deleteImMessageByIds(Convert.toLongArray(ids)));
     }
 
     /**

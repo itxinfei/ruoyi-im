@@ -123,17 +123,6 @@ public class ImSystemConfigController extends BaseController {
     }
 
     /**
-     * 删除系统配置（POST方式，兼容前端框架）
-     */
-    @RequiresPermissions("im:systemConfig:remove")
-    @Log(title = "系统配置管理", businessType = BusinessType.DELETE)
-    @PostMapping("/remove")
-    @ResponseBody
-    public AjaxResult removePost(Long[] ids) {
-        return toAjax(imSystemConfigService.deleteImSystemConfigByIds(ids));
-    }
-
-    /**
      * 导出系统配置列表
      */
     @RequiresPermissions("im:systemConfig:export")

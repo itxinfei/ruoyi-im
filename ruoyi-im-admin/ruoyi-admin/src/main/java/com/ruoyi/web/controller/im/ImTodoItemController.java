@@ -175,17 +175,6 @@ public class ImTodoItemController extends BaseController {
     }
 
     /**
-     * 删除待办事项（POST方式，兼容前端框架）
-     */
-    @RequiresPermissions("im:todoItem:remove")
-    @Log(title = "待办事项管理", businessType = BusinessType.DELETE)
-    @PostMapping("/remove")
-    @ResponseBody
-    public AjaxResult removePost(Long[] ids) {
-        return toAjax(imTodoItemService.deleteImTodoItemByIds(ids));
-    }
-
-    /**
      * 清理已完成待办
      */
     @RequiresPermissions("im:todoItem:remove")
