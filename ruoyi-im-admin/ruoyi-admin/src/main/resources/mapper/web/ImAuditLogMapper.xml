@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImAuditLogMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImAuditLog" id="ImAuditLogResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="nickname" column="nickname"/>
+        <result property="operationType" column="operation_type"/>
+        <result property="targetType" column="target_type"/>
+        <result property="targetId" column="target_id"/>
+        <result property="operationResult" column="operation_result"/>
+        <result property="errorMessage" column="error_message"/>
+        <result property="ipAddress" column="ip_address"/>
+        <result property="userAgent" column="user_agent"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectImAuditLogVo">
+        SELECT l.id, l.user_id, l.operation_type, l.target_type, l.target_id,
+               l.operation_result, l.error_message, l.ip_address, l.user_agent,
+               l.create_time,
+               u.username, u.nickname
+        FROM im_audit_log l
+        LEFT JOIN im_user u ON l.user_id = u.id
+    </sql>
+
+    <select id="selectImAuditLogById" parameterType="Long" resultMap="ImAuditLogResult">
+        <include refid="selectImAuditLogVo"/>
+        WHERE l.id = #{id}
+    </select>
+
+    <select id="selectImAuditLogList" parameterType="com.ruoyi.web.domain.ImAuditLog" resultMap="ImAuditLogResult">
+        <include refid="selectImAuditLogVo"/>
+        <where>
+            <if test="userId != null">and l.user_id = #{userId}</if>
+            <if test="username != null and username != ''">and u.username like concat('%', #{username}, '%')</if>
+            <if test="nickname != null and nickname != ''">and u.nickname like concat('%', #{nickname}, '%')</if>
+            <if test="operationType != null and operationType != ''">and l.operation_type = #{operationType}</if>
+            <if test="targetType != null and targetType != ''">and l.target_type = #{targetType}</if>
+            <if test="targetId != null">and l.target_id = #{targetId}</if>
+            <if test="operationResult != null and operationResult != ''">and l.operation_result = #{operationResult}</if>
+            <if test="ipAddress != null and ipAddress != ''">and l.ip_address like concat('%', #{ipAddress}, '%')</if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                AND date_format(l.create_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                AND date_format(l.create_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d')
+            </if>
+        </where>
+        ORDER BY l.create_time DESC
+    </select>
+
+    <select id="selectAuditLogsByUserId" parameterType="Long" resultMap="ImAuditLogResult">
+        <include refid="selectImAuditLogVo"/>
+        WHERE l.user_id = #{userId}
+        ORDER BY l.create_time DESC
+        LIMIT 100
+    </select>
+
+    <insert id="insertImAuditLog" parameterType="com.ruoyi.web.domain.ImAuditLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO im_audit_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="operationType != null">operation_type,</if>
+            <if test="targetType != null">target_type,</if>
+            <if test="targetId != null">target_id,</if>
+            <if test="operationResult != null">operation_result,</if>
+            <if test="errorMessage != null">error_message,</if>
+            <if test="ipAddress != null">ip_address,</if>
+            <if test="userAgent != null">user_agent,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="operationType != null">#{operationType},</if>
+            <if test="targetType != null">#{targetType},</if>
+            <if test="targetId != null">#{targetId},</if>
+            <if test="operationResult != null">#{operationResult},</if>
+            <if test="errorMessage != null">#{errorMessage},</if>
+            <if test="ipAddress != null">#{ipAddress},</if>
+            <if test="userAgent != null">#{userAgent},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <!-- 获取审计日志统计数据 -->
+    <select id="getAuditLogStatistics" resultType="map">
+        SELECT
+            (SELECT COUNT(*) FROM im_audit_log) AS totalCount,
+            (SELECT COUNT(*) FROM im_audit_log WHERE operation_result = 'SUCCESS') AS successCount,
+            (SELECT COUNT(*) FROM im_audit_log WHERE operation_result = 'FAILED') AS failedCount,
+            (SELECT COUNT(DISTINCT user_id) FROM im_audit_log) AS userCount,
+            (SELECT COUNT(*) FROM im_audit_log WHERE DATE(create_time) = CURDATE()) AS todayCount,
+            (SELECT COUNT(*) FROM im_audit_log WHERE operation_type = 'LOGIN') AS loginCount
+    </select>
+
+    <!-- 按操作类型统计 -->
+    <select id="countByOperationType" resultType="map">
+        SELECT operation_type AS name, COUNT(*) AS count
+        FROM im_audit_log
+        GROUP BY operation_type
+        ORDER BY count DESC
+        LIMIT 10
+    </select>
+
+    <!-- 按用户统计 -->
+    <select id="countByUser" resultType="map">
+        SELECT l.user_id, u.username, u.nickname, COUNT(*) AS count
+        FROM im_audit_log l
+        LEFT JOIN im_user u ON l.user_id = u.id
+        GROUP BY l.user_id, u.username, u.nickname
+        ORDER BY count DESC
+        LIMIT 10
+    </select>
+
+    <!-- 删除旧日志 -->
+    <delete id="deleteOldLogs">
+        DELETE FROM im_audit_log
+        WHERE create_time &lt; DATE_SUB(NOW(), INTERVAL #{days} DAY)
+    </delete>
+
+    <!-- 查询失败日志数量 -->
+    <select id="countFailedLogs" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM im_audit_log
+        WHERE operation_result = 'FAILED'
+        AND create_time &gt;= DATE_SUB(NOW(), INTERVAL #{hours} HOUR)
+    </select>
+
+</mapper>

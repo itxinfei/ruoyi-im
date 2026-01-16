@@ -56,7 +56,7 @@ const props = defineProps({
   },
   navWidth: {
     type: Number,
-    default: 60
+    default: 64  // DingTalk standard 64px
   }
 })
 
@@ -67,7 +67,7 @@ const store = useStore()
 // 响应式状态
 const isResizing = ref(false)
 const startX = ref(0)
-const startWidth = ref(60)
+const startWidth = ref(64)  // DingTalk standard 64px
 
 // 计算属性
 const unreadCount = computed(() => store.state.im.unreadCount)
@@ -265,7 +265,7 @@ const stopNavResize = () => {
 }
 
 .nav-icon {
-  font-size: 22px;
+  font-size: 24px;  // DingTalk standard 24px
   color: #8c8c8c;
   transition: all 0.2s ease;
 }
@@ -347,7 +347,7 @@ const stopNavResize = () => {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .nav-sidebar {
-    min-width: 60px;
+    min-width: 64px;  // DingTalk standard 64px
   }
 
   .nav-item {
@@ -356,7 +356,7 @@ const stopNavResize = () => {
   }
 
   .nav-icon {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .nav-dot {

@@ -7303,50 +7303,26 @@ $nav-item-active: rgba(22, 119, 255, 0.1); // 导航激活背景 - 钉钉6.5.x�
 $nav-item-icon: #8c8c8c; // 导航图标颜色 - 钉钉6.5.x规范灰色
 $nav-item-icon-active: #1677ff;
 
-// 消息气泡颜色（钉钉5.6规范）
-$message-sent-bg: #0089ff; // 发送方：钉钉蓝5.6版本
-$message-sent-text: #ffffff; // 发送方文字：白色
-$message-received-bg: #ffffff; // 接收方：白色
-$message-received-text: #333333; // 接收方文字：钉钉正文色
-$message-received-border: #e8e8e8; // 接收方边框：钉钉规范边框色
+// Message bubble colors (DingTalk 6.5.x standard)
+$message-sent-bg: #1677ff; // Sender: DingTalk blue 6.5.x
+$message-sent-text: #ffffff; // Sender text: white
+$message-received-bg: #ffffff; // Receiver: white
+$message-received-text: #262626; // Receiver text: DingTalk body color
+$message-received-border: #e8e8e8; // Receiver border: DingTalk standard border
 
-// 阴影系统
-$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
-$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-base:
-  0 1px 3px 0 rgba(0, 0, 0, 0.1),
-  0 1px 2px 0 rgba(0, 0, 0, 0.06);
-$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-$shadow-message: 0 1px 2px rgba(0, 0, 0, 0.08);
+// Animation duration (DingTalk standard)
+$transition-instant: 0.1s; // Button click - ultra fast
+$transition-fast: 0.2s; // Quick switch - color/shadow change
+$transition-base: 0.3s; // Standard transition - expand/collapse
+$transition-slow: 0.5s; // Slower - complex animation
 
-// 圆角
-$radius-xs: 2px;
-$radius-sm: 4px;
-$radius-base: 6px;
-$radius-lg: 8px;
-$radius-xl: 12px;
-$radius-round: 50%;
-
-// 间距
-$spacing-xs: 4px;
-$spacing-sm: 8px;
-$spacing-md: 12px;
-$spacing-lg: 16px;
-$spacing-xl: 24px;
-
-// 动画时长（钉钉规范）
-$transition-instant: 0.1s; // 按钮点击 - 极快
-$transition-fast: 0.2s; // 快速切换 - 颜色/阴影变化
-$transition-base: 0.3s; // 标准过渡 - 展开/收起
-$transition-slow: 0.5s; // 较慢 - 复杂动画
-
-// 缓动函数（钉钉规范）
-$ease-linear: linear; // 线性 - 进度条
-$ease-base: cubic-bezier(0.4, 0, 0.2, 1); // 标准缓动
-$ease-in: cubic-bezier(0.4, 0, 1, 1); // 入场缓动
-$ease-out: cubic-bezier(0, 0, 0.2, 1); // 出场缓动
-$ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); // 双向缓动
-$ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1); // 弹性缓动 - 消息发送
+// Easing functions (DingTalk standard)
+$ease-linear: linear; // Linear - progress bar
+$ease-base: cubic-bezier(0.4, 0, 0.2, 1); // Standard easing
+$ease-in: cubic-bezier(0.4, 0, 1, 1); // Entry easing
+$ease-out: cubic-bezier(0, 0, 0.2, 1); // Exit easing
+$ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); // Bidirectional easing
+$ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1); // Bounce - message send
 
 // 头像尺寸
 $avatar-xs: 24px;

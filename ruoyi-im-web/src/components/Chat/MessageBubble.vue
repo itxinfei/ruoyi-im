@@ -738,15 +738,15 @@ export default {
   // 文本消息气泡 - 默认（接收方）
   .text-message {
     position: relative;
-    background-color: #f5f7fa;
-    padding: 8px 12px;
+    background-color: #ffffff;  // DingTalk standard: white background
+    padding: 12px 16px;  // DingTalk standard: 12px 16px
     border-radius: 8px;
     display: inline-block;
     max-width: 100%;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 
     .text-content {
-      color: #333333;
+      color: #262626;  // DingTalk standard: #262626
       line-height: 1.6;
       white-space: pre-wrap;
       word-wrap: break-word;
@@ -762,7 +762,7 @@ export default {
       width: 0;
       height: 0;
       border: 6px solid transparent;
-      border-right-color: #f5f7fa;
+      border-right-color: #ffffff;
     }
   }
 
@@ -847,7 +847,7 @@ export default {
 
       .file-icon {
         font-size: 28px;
-        color: #0089ff;
+        color: #1677ff;
         margin-right: 12px;
       }
 
@@ -874,7 +874,7 @@ export default {
       .file-action {
         margin-left: 12px;
         font-size: 18px;
-        color: #0089ff;
+        color: #1677ff;
       }
     }
   }
@@ -899,7 +899,7 @@ export default {
 
       .voice-icon {
         font-size: 20px;
-        color: #0089ff;
+        color: #1677ff;
         margin-right: 12px;
       }
 
@@ -918,7 +918,7 @@ export default {
           transition: background 0.3s ease;
 
           &.active {
-            background: #0089ff;
+            background: #1677ff;
             animation: voiceWave 1s infinite ease-in-out;
 
             &:nth-child(1) {
@@ -1043,7 +1043,7 @@ export default {
       .quote-content {
         background: #f0f2f5;
         padding: 8px 12px;
-        border-left: 3px solid #0089ff;
+        border-left: 3px solid #1677ff;
         margin-bottom: 8px;
 
         .quote-text {
@@ -1106,7 +1106,7 @@ export default {
 
           &.selected {
             background: rgba(0, 137, 255, 0.1);
-            border-color: #0089ff;
+            border-color: #1677ff;
           }
 
           .option-text {
@@ -1136,7 +1136,7 @@ export default {
       transition: all 0.3s ease;
 
       &.sending {
-        color: #0089ff;
+        color: #1677ff;
         animation: pulse 1.5s ease-in-out infinite;
       }
 
@@ -1149,7 +1149,7 @@ export default {
       }
 
       &.read {
-        color: #0089ff;
+        color: #1677ff;
       }
 
       &.failed {
@@ -1172,10 +1172,10 @@ export default {
 
 .message-bubble.self {
   .message-content {
-    // 文本消息 - 发送方使用钉钉5.6风格蓝色
+    // 文本消息 - 发送方使用钉钉6.5.x风格蓝色
     .text-message {
-      background: linear-gradient(135deg, #0089ff 0%, #0077e0 100%);
-      box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
+      background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+      box-shadow: 0 2px 8px rgba(22, 119, 255, 0.2);
 
       .text-content {
         color: #fff;
@@ -1186,7 +1186,7 @@ export default {
         left: auto;
         right: -6px;
         border-right-color: transparent;
-        border-left-color: #0089ff;
+        border-left-color: #1677ff;
       }
     }
 
@@ -1196,7 +1196,7 @@ export default {
     .location-message .location-container,
     .quote-message .quote-container,
     .vote-message .vote-container {
-      border-color: rgba(0, 137, 255, 0.3);
+      border-color: rgba(22, 119, 255, 0.3);
     }
 
     // 消息状态位置调整（左侧）
@@ -1330,7 +1330,7 @@ export default {
     transition: all 0.2s ease;
 
     &:hover {
-      color: #0089ff;
+      color: #1677ff;
       background-color: rgba(0, 137, 255, 0.1);
     }
 

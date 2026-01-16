@@ -550,7 +550,7 @@ watch(selectedEmails, updateSelectAllState)
 .email-container {
   display: flex;
   height: 100%;
-  background: #f5f7fa; // 钉钉规范
+  background: #f5f7fa; // DingTalk standard
 }
 
 // 左侧导航栏

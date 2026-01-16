@@ -654,7 +654,7 @@ onMounted(async () => {
 
       &.is-focus {
         background-color: #fff;
-        border-color: #0089ff; // 钉钉规范
+        border-color: #0089ff; // DingTalk standard
         box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
       }
     }
@@ -707,7 +707,7 @@ onMounted(async () => {
 
       &.active {
         background-color: #e6f7ff;
-        color: #0089ff; // 钉钉规范
+        color: #0089ff; // DingTalk standard
         font-weight: 500;
       }
 

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImSystemConfigMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImSystemConfig" id="ImSystemConfigResult">
+        <id property="id" column="id"/>
+        <result property="configKey" column="config_key"/>
+        <result property="configValue" column="config_value"/>
+        <result property="configType" column="config_type"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImSystemConfigVo">
+        select id, config_key, config_value, config_type, description, status, create_time, update_time
+        from im_system_config
+    </sql>
+
+    <select id="selectImSystemConfigById" parameterType="Long" resultMap="ImSystemConfigResult">
+        <include refid="selectImSystemConfigVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectImSystemConfigByKey" parameterType="String" resultMap="ImSystemConfigResult">
+        <include refid="selectImSystemConfigVo"/>
+        where config_key = #{configKey}
+    </select>
+
+    <select id="selectImSystemConfigList" parameterType="com.ruoyi.web.domain.ImSystemConfig" resultMap="ImSystemConfigResult">
+        <include refid="selectImSystemConfigVo"/>
+        <where>
+            <if test="configKey != null and configKey != ''">and config_key like concat('%', #{configKey}, '%')</if>
+            <if test="configValue != null and configValue != ''">and config_value like concat('%', #{configValue}, '%')</if>
+            <if test="configType != null and configType != ''">and config_type = #{configType}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by id asc
+    </select>
+
+    <insert id="insertImSystemConfig" parameterType="com.ruoyi.web.domain.ImSystemConfig" useGeneratedKeys="true" keyProperty="id">
+        insert into im_system_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="configKey != null">config_key,</if>
+            <if test="configValue != null">config_value,</if>
+            <if test="configType != null">config_type,</if>
+            <if test="description != null">description,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="configKey != null">#{configKey},</if>
+            <if test="configValue != null">#{configValue},</if>
+            <if test="configType != null">#{configType},</if>
+            <if test="description != null">#{description},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImSystemConfig" parameterType="com.ruoyi.web.domain.ImSystemConfig">
+        update im_system_config
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="configValue != null">config_value = #{configValue},</if>
+            <if test="configType != null">config_type = #{configType},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImSystemConfigById" parameterType="Long">
+        delete from im_system_config where id = #{id}
+    </delete>
+
+    <delete id="deleteImSystemConfigByIds" parameterType="Long[]">
+        delete from im_system_config where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 统计配置总数 -->
+    <select id="countTotalConfigs" resultType="java.lang.Integer">
+        select count(*) from im_system_config
+    </select>
+
+    <!-- 统计有效配置数 -->
+    <select id="countActiveConfigs" resultType="java.lang.Integer">
+        select count(*) from im_system_config where status = 'ACTIVE'
+    </select>
+
+    <!-- 统计禁用配置数 -->
+    <select id="countDisabledConfigs" resultType="java.lang.Integer">
+        select count(*) from im_system_config where status = 'DISABLED'
+    </select>
+
+    <!-- 获取系统配置统计数据 -->
+    <select id="getSystemConfigStatistics" resultType="map">
+        select
+            (select count(*) from im_system_config) as totalCount,
+            (select count(*) from im_system_config where status = 'ACTIVE') as activeCount,
+            (select count(*) from im_system_config where status = 'DISABLED') as disabledCount,
+            (select count(*) from im_system_config where config_type = 'STRING') as stringCount,
+            (select count(*) from im_system_config where config_type = 'NUMBER') as numberCount,
+            (select count(*) from im_system_config where config_type = 'BOOLEAN') as booleanCount
+    </select>
+
+</mapper>

@@ -40,8 +40,10 @@
             <if test="nickname != null and nickname != ''"> and nickname like concat('%', #{nickname}, '%') </if>
             <if test="email != null and email != ''"> and email = #{email} </if>
             <if test="mobile != null and mobile != ''"> and mobile = #{mobile} </if>
-            <if test="status != null and status != ''"> and status = #{status} </if>
+            <if test="status != null"> and status = #{status} </if>
+            <if test="gender != null"> and gender = #{gender} </if>
         </where>
+        order by create_time desc
     </select>
 
     <insert id="insertImUser" parameterType="com.ruoyi.web.domain.ImUser" useGeneratedKeys="true" keyProperty="id">

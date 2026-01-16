@@ -476,7 +476,7 @@ export default {
   display: flex;
   flex-direction: column;
   padding: 16px; // 修改：20px -> 16px
-  background: #f5f7fa; // 钉钉规范
+  background: #f5f7fa; // DingTalk standard
 }
 
 .page-header {
@@ -525,7 +525,7 @@ export default {
     }
 
     &.active {
-      background: #0089ff; // 钉钉规范
+      background: #0089ff; // DingTalk standard
       color: white;
     }
 

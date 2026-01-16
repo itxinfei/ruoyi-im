@@ -13,157 +13,64 @@
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
     <style>
         /* 统计卡片样式 */
+        .statistics-section {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
         .statistics-card {
-            padding: 18px 20px;
-            border-radius: 8px;
+            padding: 15px;
+            border-radius: 4px;
             color: #fff;
-            height: 100%;
-            min-height: 100px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
-        .statistics-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .statistics-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: rgba(255,255,255,0.1);
-            transform: rotate(45deg);
-            pointer-events: none;
-        }
-        .stat-total { background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%); }
-        .stat-active { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-        .stat-muted { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .stat-large { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
         .stat-number {
-            font-size: 26px;
-            font-weight: 600;
-            margin-bottom: 2px;
-            position: relative;
-            z-index: 1;
+            font-size: 24px;
+            font-weight: bold;
         }
         .stat-label {
             font-size: 12px;
             opacity: 0.9;
-            position: relative;
-            z-index: 1;
         }
         .stat-icon {
             position: absolute;
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 42px;
+            font-size: 40px;
             opacity: 0.2;
         }
+        .stat-total { background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%); }
+        .stat-active { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stat-muted { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-large { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
 
-        /* 统计区域布局 */
-        .statistics-section {
-            margin-top: 20px;
-            margin-bottom: 0;
-        }
-        .statistics-section .row {
-            margin-left: -8px;
-            margin-right: -8px;
-        }
-        .statistics-section .row > div {
-            padding-left: 8px;
-            padding-right: 8px;
-            margin-bottom: 0;
-        }
-
-        /* 搜索区域 */
+        /* 搜索区域底部间距 */
         .search-collapse {
-            margin-top: 16px;
-            margin-bottom: 0;
-            background: #fff;
-            padding: 16px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        .search-collapse .select-list {
-            margin: 0;
-        }
-        .search-collapse .search-list > li {
-            margin-bottom: 8px;
-        }
-        .search-collapse .search-list > li:last-child {
-            margin-bottom: 0;
-        }
-        .search-collapse label {
-            color: #637382;
-            font-weight: 500;
-        }
-        .search-collapse input[type="text"],
-        .search-collapse select {
-            border-radius: 4px;
-            border-color: #e2e8f0;
-        }
-        .search-collapse input:focus,
-        .search-collapse select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+            margin-bottom: 10px;
         }
 
-        /* 工具栏 */
-        #toolbar {
-            margin-top: 16px;
-            margin-bottom: 16px;
-            padding: 12px 20px;
+        /* 数据管理区卡片 */
+        .data-management-card {
             background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            border-radius: 6px 6px 0 0;
+            box-shadow: 1px 1px 3px rgba(0,0,0,.2);
+            overflow: hidden;
+            margin-bottom: 0;
         }
-        #toolbar .btn {
-            border-radius: 6px;
-            padding: 6px 16px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        #toolbar .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-        #toolbar .btn i {
-            margin-right: 4px;
+        .data-toolbar {
+            padding: 12px 15px;
+            background: #fafafa;
+            border-bottom: 1px solid #e5e5e5;
         }
 
-        /* 表格容器 */
+        /* 表格区域样式 - 与工具栏卡片连接 */
         .select-table.table-striped {
             background: #fff;
-            border-radius: 8px;
-            padding: 16px 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-        .select-table.table-striped .fixed-table-container {
-            border-radius: 4px;
-        }
-        .select-table.table-striped .table {
-            margin-bottom: 0;
-        }
-        .select-table.table-striped .table thead > tr > th {
-            background: #f8fafc;
-            border-bottom: 2px solid #e2e8f0;
-            color: #475569;
-            font-weight: 600;
-        }
-        .select-table.table-striped .table tbody > tr > td {
-            border-color: #f1f5f9;
-        }
-        .select-table.table-striped .table tbody > tr:hover > td {
-            background: #f8fafc;
+            border-radius: 0 0 6px 6px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,.2);
+            margin-top: -1px;
+            padding: 0;
         }
     </style>
 </head>
@@ -177,48 +84,46 @@
                         <div class="statistics-card stat-total">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">群组总数</div>
-                            <i class="fa fa-users stat-icon" role="presentation"></i>
+                            <i class="fa fa-users stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
                         <div class="statistics-card stat-active">
                             <div class="stat-number" id="activeCount">0</div>
                             <div class="stat-label">活跃群组</div>
-                            <i class="fa fa-comments stat-icon" role="presentation"></i>
+                            <i class="fa fa-comments stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
                         <div class="statistics-card stat-muted">
                             <div class="stat-number" id="mutedCount">0</div>
                             <div class="stat-label">全员禁言</div>
-                            <i class="fa fa-volume-off stat-icon" role="presentation"></i>
+                            <i class="fa fa-volume-off stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
                         <div class="statistics-card stat-large">
                             <div class="stat-number" id="largeCount">0</div>
                             <div class="stat-label">大群(>100)</div>
-                            <i class="fa fa-users stat-icon" role="presentation"></i>
+                            <i class="fa fa-users stat-icon"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="group-form">
                     <div class="select-list">
-                        <ul class="search-list">
+                        <ul>
                             <li>
-                                <label>群组名称：</label>
-                                <input type="text" name="name" value=""/>
+                                群组名称：<input type="text" name="name" value=""/>
                             </li>
                             <li>
-                                <label>群主ID：</label>
-                                <input type="text" name="ownerId" value=""/>
+                                群主ID：<input type="text" name="ownerId" value=""/>
                             </li>
                             <li>
-                                <label>全员禁言：</label>
-                                <select name="allMuted">
+                                全员禁言：<select name="allMuted">
                                     <option value="">所有</option>
                                     <option value="0">否</option>
                                     <option value="1">是</option>
@@ -239,16 +144,21 @@
                 </form>
             </div>
 
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:group:add">
-                    <i class="fa fa-plus"></i> 新增
-                </a>
-                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:group:edit">
-                    <i class="fa fa-edit"></i> 修改
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:remove">
-                    <i class="fa fa-remove"></i> 删除
-                </a>
+            <!-- 数据管理区 -->
+            <div class="col-sm-12 data-management-card">
+                <div class="data-toolbar">
+                    <div class="btn-group-sm" id="toolbar" role="group">
+                        <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:group:add">
+                            <i class="fa fa-plus"></i> 新增
+                        </a>
+                        <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:group:edit">
+                            <i class="fa fa-edit"></i> 修改
+                        </a>
+                        <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:remove">
+                            <i class="fa fa-remove"></i> 删除
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <div class="col-sm-12 select-table table-striped">

@@ -399,7 +399,7 @@ onMounted(() => {
 
   &.active {
     background: #e6f7ff;
-    color: #0089ff; // 修改：#1677ff -> #0089FF（钉钉规范）
+    color: #1677ff; // DingTalk standard blue
     font-weight: 500;
   }
 }

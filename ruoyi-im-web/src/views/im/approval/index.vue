@@ -304,7 +304,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 .approval-container {
   padding: 16px; // 修改：20px -> 16px（符合4的倍数）
-  background: #f5f7fa; // 钉钉规范
+  background: #f5f7fa; // DingTalk standard
   min-height: calc(100vh - 60px);
 }
 

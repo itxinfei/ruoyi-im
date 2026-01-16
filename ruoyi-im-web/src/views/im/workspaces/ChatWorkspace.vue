@@ -27,10 +27,10 @@ const store = useStore()
 
 // 响应式状态
 const collapsed = ref(false)
-const navWidth = ref(60)
+const navWidth = ref(64)  // DingTalk standard 64px
 
 // 会话面板宽度
-const sessionWidth = ref(parseInt(localStorage.getItem('sessionWidth')) || 320)
+const sessionWidth = ref(parseInt(localStorage.getItem('sessionWidth')) || 280)  // DingTalk standard 280px
 
 // 当前会话
 const currentSession = computed(() => store.state.im.currentSession)

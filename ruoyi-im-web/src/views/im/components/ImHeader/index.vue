@@ -359,10 +359,10 @@ const getOnlineStatusDisplay = (status) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 60px;
+  height: 48px;  // DingTalk standard height
   padding: 0 24px;
   background-color: #ffffff;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e6e6e6;  // DingTalk standard border
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 

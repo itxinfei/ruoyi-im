@@ -12,19 +12,25 @@
 
     <!-- 消息区域 -->
     <div ref="messageAreaRef" class="message-area" @contextmenu.prevent>
-      <div
-        v-for="msg in messages"
-        :key="msg.id || msg.clientMsgId"
-        :data-message-id="msg.id"
-        class="message-item"
-        :class="{ isOwn: msg.isOwn || msg.senderId === currentUserId }"
-      >
-        <MessageBubble 
-          :message="msg"
-          :is-own="msg.isOwn || msg.senderId === currentUserId"
-          @right-click="showMessageMenu"
-        />
-      </div>
+      <template v-for="(msg, index) in messagesWithTimeDivider" :key="msg.id || msg.clientMsgId || `divider-${index}`">
+        <!-- 时间分割线 -->
+        <div v-if="msg.isTimeDivider" class="time-divider">
+          <span>{{ msg.timeText }}</span>
+        </div>
+        <!-- 消息气泡 -->
+        <div
+          v-else
+          :data-message-id="msg.id"
+          class="message-item"
+          :class="{ isOwn: msg.isOwn || msg.senderId === currentUserId }"
+        >
+          <MessageBubble 
+            :message="msg"
+            :is-own="msg.isOwn || msg.senderId === currentUserId"
+            @right-click="showMessageMenu"
+          />
+        </div>
+      </template>
     </div>
 
     <!-- 输入区域 -->
@@ -75,6 +81,60 @@ const messages = computed(() => {
   if (!currentSession.value) return []
   return store.state.im.messageList[currentSession.value.id] || []
 })
+
+// 带时间分割线的消息列表
+const messagesWithTimeDivider = computed(() => {
+  const msgs = messages.value
+  if (msgs.length === 0) return []
+  
+  const result = []
+  let lastHour = -1
+  
+  msgs.forEach((msg, index) => {
+    // 添加时间分割线（每小时第一条消息前）
+    const msgTime = new Date(msg.timestamp || msg.sendTime)
+    const currentHour = msgTime.getHours()
+    
+    if (currentHour !== lastHour && index > 0) {
+      lastHour = currentHour
+      result.push({
+        isTimeDivider: true,
+        timeText: formatTimeDivider(msgTime)
+      })
+    }
+    
+    result.push(msg)
+  })
+  
+  return result
+})
+
+// 格式化时间分割线显示
+const formatTimeDivider = (date) => {
+  const now = new Date()
+  const diff = now - date
+  
+  // 小于1小时显示"XX分钟前"
+  if (diff < 3600000) {
+    const minutes = Math.floor(diff / 60000)
+    if (minutes < 1) return '刚刚'
+    return `${minutes}分钟前`
+  }
+  
+  // 小于24小时显示"XX:XX"
+  if (diff < 86400000) {
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+  }
+  
+  // 小于7天显示"星期X"
+  if (diff < 604800000) {
+    const weeks = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+    return weeks[date.getDay()]
+  }
+  
+  // 超过7天显示"月日"
+  return `${date.getMonth() + 1}月${date.getDate()}日`
+}
 
 // 组件引用
 const messageAreaRef = ref(null)
@@ -172,6 +232,22 @@ const scrollToBottom = () => {
     
     &.isOwn {
       flex-direction: row-reverse;
+    }
+  }
+  
+  // 时间分割线样式
+  .time-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 16px 0;
+    
+    span {
+      background: rgba(0, 0, 0, 0.04);
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #8c8c8c;
     }
   }
 }

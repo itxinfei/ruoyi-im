@@ -59,7 +59,7 @@ import SmartAvatar from '@/components/SmartAvatar/index.vue'
 const props = defineProps({
   width: {
     type: Number,
-    default: 320
+    default: 280  // DingTalk standard 280px
   },
   collapsed: {
     type: Boolean,

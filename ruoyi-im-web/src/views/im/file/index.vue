@@ -612,7 +612,7 @@ onMounted(() => {
 
   .panel-header {
     padding: 16px; // 修改：统一边距
-    border-bottom: 1px solid #e8e8e8; // 钉钉规范
+    border-bottom: 1px solid #e8e8e8; // DingTalk standard
     display: flex;
     gap: 8px;
 
@@ -655,7 +655,7 @@ onMounted(() => {
       }
 
       &.active {
-        color: #0089ff; // 钉钉规范
+        color: #0089ff; // DingTalk standard
         font-weight: 500;
 
         &::after {
