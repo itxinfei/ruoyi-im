@@ -268,25 +268,65 @@
                 $.modal.alertWarning("请至少选择一条记录");
                 return;
             }
-            var table = $('#bootstrap-table').bootstrapTable();
-            var row = table.bootstrapTable('getRowByUniqueId', rows[0]);
-            resetOne(row.userId);
+            
+            $.modal.confirm("确定要重置选中的" + rows.length + "个用户的所有设置吗？此操作将恢复默认设置。", function() {
+                var completed = 0;
+                var total = rows.length;
+                var successCount = 0;
+                var errorCount = 0;
+                
+                function resetNext() {
+                    if (completed >= total) {
+                        var msg = "批量重置完成！成功: " + successCount + "，失败: " + errorCount;
+                        if (errorCount === 0) {
+                            $.modal.msgSuccess(msg);
+                        } else {
+                            $.modal.msgWarning(msg);
+                        }
+                        $.table.refresh();
+                        loadStatistics();
+                        return;
+                    }
+                    
+                    var table = $('#bootstrap-table').bootstrapTable();
+                    var row = table.bootstrapTable('getRowByUniqueId', rows[completed]);
+                    resetOne(row.userId, function() {
+                        completed++;
+                        resetNext();
+                    });
+                }
+                
+                resetNext();
+            });
         }
-        function resetOne(userId) {
-            $.modal.confirm("确定要重置该用户的所有设置吗？此操作将恢复默认设置。", function() {
-                $.ajax({
-                    url: prefix + "/reset/" + userId,
-                    type: 'put',
-                    success: function(result) {
-                        if (result.code == 0) {
+        function resetOne(userId, callback) {
+            $.ajax({
+                url: prefix + "/reset/" + userId,
+                type: 'put',
+                success: function(result) {
+                    if (result.code == 0) {
+                        if (callback) {
+                            callback();
+                        } else {
                             $.modal.msgSuccess("重置成功");
                             $.table.refresh();
                             loadStatistics();
+                        }
+                    } else {
+                        if (callback) {
+                            callback();
                         } else {
                             $.modal.alertError(result.msg || "重置失败");
                         }
                     }
-                });
+                },
+                error: function() {
+                    if (callback) {
+                        callback();
+                    } else {
+                        $.modal.alertError("重置失败");
+                    }
+                }
             });
         }
     </script></body>

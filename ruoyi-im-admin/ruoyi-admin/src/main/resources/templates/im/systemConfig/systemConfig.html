@@ -271,18 +271,54 @@
                 $.modal.alertWarning("请至少选择一条记录");
                 return;
             }
-            toggleOne(rows[0]);
+            
+            $.modal.confirm("确定要切换选中的" + rows.length + "个配置的状态吗？", function() {
+                var completed = 0;
+                var total = rows.length;
+                var successCount = 0;
+                var errorCount = 0;
+                
+                function toggleNext() {
+                    if (completed >= total) {
+                        var msg = "批量切换完成！成功: " + successCount + "，失败: " + errorCount;
+                        if (errorCount === 0) {
+                            $.modal.msgSuccess(msg);
+                        } else {
+                            $.modal.msgWarning(msg);
+                        }
+                        $.table.refresh();
+                        loadStatistics();
+                        return;
+                    }
+                    
+                    toggleOne(rows[completed], function() {
+                        completed++;
+                        toggleNext();
+                    });
+                }
+                
+                toggleNext();
+            });
         }
-        function toggleOne(id) {
-            $.modal.confirm("确定要切换该配置的状态吗？", function() {
-                $.ajax({
-                    url: prefix + "/toggle/" + id,
-                    type: 'put',
-                    success: function() {
+        function toggleOne(id, callback) {
+            $.ajax({
+                url: prefix + "/toggle/" + id,
+                type: 'put',
+                success: function() {
+                    if (callback) {
+                        callback();
+                    } else {
                         $.table.refresh();
                         loadStatistics();
                     }
-                });
+                },
+                error: function() {
+                    if (callback) {
+                        callback();
+                    } else {
+                        $.modal.alertError("操作失败");
+                    }
+                }
             });
         }
     </script></body>

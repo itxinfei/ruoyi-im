@@ -1,6 +1,6 @@
 <template>
   <div class="chat-input-container" :class="{ disabled }">
-    <!-- 精简版输入工具栏 -->
+    <!-- 输入工具栏 - 钉钉风格 -->
     <div class="input-toolbar">
       <div class="toolbar-group">
         <el-tooltip content="表情" placement="top">
@@ -11,7 +11,7 @@
             @click="toggleEmojiPicker"
           />
         </el-tooltip>
-        <el-tooltip content="文件" placement="top">
+        <el-tooltip content="上传文件" placement="top">
           <el-button
             :icon="Folder"
             text
@@ -19,7 +19,7 @@
             @click="triggerFileSelect"
           />
         </el-tooltip>
-        <el-tooltip content="图片" placement="top">
+        <el-tooltip content="上传图片" placement="top">
           <el-button
             :icon="PictureFilled"
             text
@@ -27,13 +27,29 @@
             @click="triggerImageSelect"
           />
         </el-tooltip>
-        <el-tooltip content="语音" placement="top">
+        <!-- @成员功能（仅群聊显示） -->
+        <el-tooltip v-if="isGroupChat" content="@成员" placement="top">
           <el-button
-            :icon="Microphone"
+            :icon="AtSign"
             text
             :disabled="uploading"
-            :class="{ recording: isRecording }"
-            @click="toggleVoiceRecord"
+            @click="showAtMemberPicker"
+          />
+        </el-tooltip>
+        <el-tooltip content="语音通话" placement="top">
+          <el-button
+            :icon="Phone"
+            text
+            :disabled="uploading"
+            @click="startVoiceCall"
+          />
+        </el-tooltip>
+        <el-tooltip content="视频通话" placement="top">
+          <el-button
+            :icon="VideoCamera"
+            text
+            :disabled="uploading"
+            @click="startVideoCall"
           />
         </el-tooltip>
         <el-tooltip content="截图" placement="top">
@@ -42,6 +58,13 @@
             text
             :disabled="uploading"
             @click="triggerScreenshot"
+          />
+        </el-tooltip>
+        <el-tooltip content="历史记录" placement="top">
+          <el-button
+            :icon="Clock"
+            text
+            @click="showHistory"
           />
         </el-tooltip>
       </div>
@@ -55,37 +78,46 @@
       @close="showEmojiPicker = false"
     />
 
-    <!-- 输入框 -->
-    <el-input
-      ref="inputRef"
-      v-model="inputMessage"
-      type="textarea"
-      :rows="3"
-      placeholder="输入消息... Enter发送，Shift+Enter换行"
-      class="chat-input"
-      :disabled="disabled"
-      @keydown="handleKeydown"
-      @input="handleInput"
-    />
+    <!-- 输入区域 - 发送按钮在右侧 -->
+    <div class="input-area-wrapper">
+      <el-input
+        ref="inputRef"
+        v-model="inputMessage"
+        type="textarea"
+        :autosize="{ minRows: 1, maxRows: 5 }"
+        placeholder="输入消息... Enter发送，Shift+Enter换行"
+        class="chat-input"
+        :disabled="disabled"
+        @keydown="handleKeydown"
+        @input="handleInput"
+      />
 
-    <!-- 发送按钮 -->
-    <div class="send-footer">
-      <el-button 
-        type="primary" 
-        class="send-button" 
-        :disabled="disabled || !canSend"
-        @click="sendMessage"
-      >
-        发送
-      </el-button>
+      <!-- 发送按钮（在输入框右侧） -->
+      <div class="send-button-wrapper">
+        <el-button
+          type="primary"
+          :disabled="disabled || !canSend"
+          @click="sendMessage"
+        >
+          发送
+        </el-button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, nextTick } from 'vue'
-import { 
-  ChatDotRound, Folder, PictureFilled, Microphone, Crop 
+import { useStore } from 'vuex'
+import {
+  ChatDotRound,
+  Folder,
+  PictureFilled,
+  AtSign,
+  Phone,
+  VideoCamera,
+  Crop,
+  Clock
 } from '@element-plus/icons-vue'
 import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
 
@@ -100,7 +132,9 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['send-message', 'upload-file', 'upload-image'])
+const emit = defineEmits(['send-message', 'upload-file', 'upload-image', 'show-at-members', 'voice-call', 'video-call', 'show-history'])
+
+const store = useStore()
 
 // 输入状态
 const inputMessage = ref('')
@@ -111,6 +145,12 @@ const inputRef = ref(null)
 // 是否可以发送
 const canSend = computed(() => {
   return inputMessage.value.trim().length > 0 && !props.disabled
+})
+
+// 当前会话类型（是否群聊）
+const isGroupChat = computed(() => {
+  const currentSession = store.state.im.currentSession
+  return currentSession?.type === 'GROUP' || currentSession?.conversationType === 'GROUP'
 })
 
 // 切换表情选择器
@@ -136,7 +176,7 @@ const triggerImageSelect = () => {
   emit('upload-image')
 }
 
-// 切换语音录制
+// 切换语音录制（保留备用）
 const toggleVoiceRecord = () => {
   isRecording.value = !isRecording.value
   if (!isRecording.value) {
@@ -144,6 +184,26 @@ const toggleVoiceRecord = () => {
   } else {
     // 开始录制
   }
+}
+
+// 显示@成员选择器
+const showAtMemberPicker = () => {
+  emit('show-at-members')
+}
+
+// 语音通话
+const startVoiceCall = () => {
+  emit('voice-call')
+}
+
+// 视频通话
+const startVideoCall = () => {
+  emit('video-call')
+}
+
+// 显示历史记录
+const showHistory = () => {
+  emit('show-history')
 }
 
 // 触发截图
@@ -224,32 +284,28 @@ defineExpose({
 .input-toolbar {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
-  padding: 6px 12px;
-  background: #fafafa;
-  border-radius: 10px;
-  border: 1px solid #f0f0f0;
+  padding: 8px 16px;
+  border-bottom: 1px solid #f0f0f0;
 
   .toolbar-group {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
 
     .el-button {
       --el-button-border-color: transparent;
       --el-button-bg-color: transparent;
-      --el-button-text-color: #8c8c8c;
-      width: 36px;
-      height: 36px;
+      --el-button-text-color: #666;
+      width: 32px;
+      height: 32px;
       padding: 0;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 4px;
+      font-size: 18px;
+      transition: all 0.2s ease;
 
       &:hover {
         --el-button-text-color: #1677ff;
-        --el-button-hover-bg-color: rgba(22, 119, 255, 0.06);
-        transform: scale(1.05);
+        background: rgba(0, 0, 0, 0.04);
       }
 
       &:active {
@@ -258,7 +314,7 @@ defineExpose({
 
       &.active {
         --el-button-text-color: #1677ff;
-        --el-button-bg-color: rgba(22, 119, 255, 0.1);
+        background: rgba(22, 119, 255, 0.1);
       }
 
       &.recording {
@@ -269,49 +325,24 @@ defineExpose({
   }
 }
 
+// 输入区域 - 横向布局（输入框+发送按钮）
+.input-area-wrapper {
+  display: flex;
+  align-items: flex-end;
+  padding: 8px 16px 12px;
+  gap: 12px;
+}
+
 .chat-input {
   flex: 1;
-  border-radius: 12px;
-  border: 1px solid #e8e8e8;
-  background: #ffffff;
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    0 4px 12px rgba(0, 0, 0, 0.02);
-  display: flex;
-  flex-direction: column;
-  min-height: 80px;
-  max-height: 200px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover {
-    border-color: #d9d9d9;
-    box-shadow: 
-      0 2px 6px rgba(0, 0, 0, 0.06),
-      0 8px 20px rgba(0, 0, 0, 0.04);
-  }
-
-  &:focus-within {
-    border-color: #1677ff;
-    box-shadow: 
-      0 0 0 3px rgba(22, 119, 255, 0.1),
-      0 4px 12px rgba(22, 119, 255, 0.15);
-  }
-
-  :deep(.el-textarea) {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
 
   :deep(.el-textarea__inner) {
     border: none !important;
-    padding: 16px !important;
+    padding: 8px 0 !important;
     resize: none !important;
     font-size: 14px !important;
-    line-height: 1.7 !important;
+    line-height: 1.5 !important;
     background: transparent !important;
-    height: 100% !important;
-    min-height: 48px !important;
     box-shadow: none !important;
     color: #262626 !important;
     font-weight: 400 !important;
@@ -347,48 +378,34 @@ defineExpose({
   }
 }
 
-.send-footer {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-top: 12px;
-  padding: 0 4px;
+// 发送按钮（在输入框右侧）
+.send-button-wrapper {
+  flex-shrink: 0;
+  margin-bottom: 2px;
 
-  .send-button {
-    min-width: 88px;
-    height: 36px;
-    border-radius: 8px;
+  .el-button {
+    min-width: 80px;
+    height: 32px;
+    border-radius: 4px;
     font-size: 14px;
-    font-weight: 500;
-    padding: 8px 20px;
-    background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
+    font-weight: 400;
+    padding: 6px 16px;
+    background: #1677ff;
     border: none;
     color: #ffffff;
-    box-shadow: 
-      0 2px 6px rgba(22, 119, 255, 0.2),
-      0 4px 16px rgba(22, 119, 255, 0.1);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
 
     &:hover:not(:disabled) {
-      background: linear-gradient(135deg, #0958d9 0%, #1677ff 100%);
-      transform: translateY(-1px);
-      box-shadow: 
-        0 4px 12px rgba(22, 119, 255, 0.3),
-        0 8px 20px rgba(22, 119, 255, 0.2);
+      background: #4096ff;
     }
 
     &:active:not(:disabled) {
-      transform: translateY(0) scale(0.98);
-      box-shadow: 
-        0 2px 6px rgba(22, 119, 255, 0.2),
-        0 4px 12px rgba(22, 119, 255, 0.1);
+      background: #0958d9;
     }
 
     &:disabled {
-      background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
-      color: #bfbfbf;
-      box-shadow: none;
-      transform: none;
+      background: #d9d9d9;
+      color: #ffffff;
       cursor: not-allowed;
     }
   }

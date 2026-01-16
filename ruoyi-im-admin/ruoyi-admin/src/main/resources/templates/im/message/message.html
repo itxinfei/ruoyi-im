@@ -328,21 +328,36 @@
         function markMultiple(ids) {
             var completed = 0;
             var total = ids.length;
+            var successCount = 0;
+            var errorCount = 0;
+            
             function markOne() {
                 if (completed >= total) {
-                    $.modal.msgSuccess("标记完成");
+                    var msg = "批量标记完成！成功: " + successCount + "，失败: " + errorCount;
+                    if (errorCount === 0) {
+                        $.modal.msgSuccess(msg);
+                    } else {
+                        $.modal.msgWarning(msg);
+                    }
                     $.table.refresh();
                     loadStatistics();
                     return;
                 }
+                
                 $.ajax({
                     url: prefix + "/" + ids[completed] + "/mark-sensitive",
                     type: 'put',
                     success: function(result) {
+                        if (result && result.code === 0) {
+                            successCount++;
+                        } else {
+                            errorCount++;
+                        }
                         completed++;
                         markOne();
                     },
                     error: function() {
+                        errorCount++;
                         completed++;
                         markOne();
                     }
@@ -369,21 +384,36 @@
         function unmarkMultiple(ids) {
             var completed = 0;
             var total = ids.length;
+            var successCount = 0;
+            var errorCount = 0;
+            
             function unmarkOne() {
                 if (completed >= total) {
-                    $.modal.msgSuccess("取消标记完成");
+                    var msg = "批量取消标记完成！成功: " + successCount + "，失败: " + errorCount;
+                    if (errorCount === 0) {
+                        $.modal.msgSuccess(msg);
+                    } else {
+                        $.modal.msgWarning(msg);
+                    }
                     $.table.refresh();
                     loadStatistics();
                     return;
                 }
+                
                 $.ajax({
                     url: prefix + "/" + ids[completed] + "/unmark-sensitive",
                     type: 'put',
                     success: function(result) {
+                        if (result && result.code === 0) {
+                            successCount++;
+                        } else {
+                            errorCount++;
+                        }
                         completed++;
                         unmarkOne();
                     },
                     error: function() {
+                        errorCount++;
                         completed++;
                         unmarkOne();
                     }

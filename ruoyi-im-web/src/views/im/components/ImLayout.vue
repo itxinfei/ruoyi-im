@@ -33,7 +33,7 @@ const store = useStore()
 
 // 响应式状态
 const activeModule = ref('chat')
-const navWidth = ref(60)
+const navWidth = ref(64)  // DingTalk standard 64px
 
 // 当前工作区组件
 const currentWorkspace = computed(() => {

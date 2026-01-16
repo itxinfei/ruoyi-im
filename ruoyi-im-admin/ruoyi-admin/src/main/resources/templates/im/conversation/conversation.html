@@ -252,7 +252,16 @@
         }
         function viewMembers(conversationId) {
             var url = prefix + "/" + conversationId + "/members";
-            $.modal.open("会话成员", url, '800', '500');
+            $.modal.openOptions({
+                title: "会话成员",
+                url: url,
+                width: '800px',
+                height: '500px',
+                maxmin: true,
+                callback: function() {
+                    $.table.refresh();
+                }
+            });
         }
     </script></body>
 </html>

@@ -10,6 +10,8 @@ import com.ruoyi.web.domain.ImSession;
 import com.ruoyi.web.service.ImSessionService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -21,18 +23,30 @@ import java.util.List;
  * @author ruoyi
  * @date 2024-01-01
  */
-@RestController("adminImSessionController")
+@Controller
 @RequestMapping("/im/session")
 public class ImSessionController extends BaseController {
 
+    private String prefix = "im/session";
+
     @Autowired
     private ImSessionService imSessionService;
+
+    /**
+     * Session管理页面
+     */
+    @RequiresPermissions("im:session:list")
+    @GetMapping()
+    public String session() {
+        return prefix + "/session";
+    }
 
     /**
      * 查询IM会话列表
      */
     @RequiresPermissions("im:session:list")
     @PostMapping("/list")
+    @ResponseBody
     public TableDataInfo list(ImSession imSession) {
         startPage();
         List<ImSession> list = imSessionService.selectImSessionList(imSession);
@@ -56,6 +70,7 @@ public class ImSessionController extends BaseController {
      */
     @RequiresPermissions("im:session:query")
     @GetMapping(value = "/{id}")
+    @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imSessionService.selectImSessionById(id));
     }
@@ -66,6 +81,7 @@ public class ImSessionController extends BaseController {
     @RequiresPermissions("im:session:add")
     @Log(title = "IM会话", businessType = BusinessType.INSERT)
     @PostMapping
+    @ResponseBody
     public AjaxResult add(@RequestBody ImSession imSession) {
         return toAjax(imSessionService.insertImSession(imSession));
     }
@@ -76,6 +92,7 @@ public class ImSessionController extends BaseController {
     @RequiresPermissions("im:session:edit")
     @Log(title = "IM会话", businessType = BusinessType.UPDATE)
     @PutMapping
+    @ResponseBody
     public AjaxResult edit(@RequestBody ImSession imSession) {
         return toAjax(imSessionService.updateImSession(imSession));
     }
@@ -86,6 +103,7 @@ public class ImSessionController extends BaseController {
     @RequiresPermissions("im:session:remove")
     @Log(title = "IM会话", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
+    @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(imSessionService.deleteImSessionByIds(ids));
     }
@@ -94,6 +112,7 @@ public class ImSessionController extends BaseController {
      * 获取会话统计信息
      */
     @GetMapping("/statistics")
+    @ResponseBody
     public AjaxResult getStatistics() {
         return imSessionService.getStatistics();
     }

@@ -280,24 +280,66 @@
                 $.modal.alertWarning("请至少选择一条记录");
                 return;
             }
-            var row = $.table.selectFirstRows()[0];
-            if (row.status !== 'PENDING') {
+            
+            var table = $('#bootstrap-table').bootstrapTable();
+            var selectedRows = table.bootstrapTable('getSelections');
+            var pendingRows = selectedRows.filter(function(row) { 
+                return row.status === 'PENDING'; 
+            });
+            
+            if (pendingRows.length === 0) {
                 $.modal.alertWarning("只能处理待处理的申请");
                 return;
             }
-            handleOne(rows[0], approved);
+            
+            $.modal.confirm("确定要" + (approved ? "同意" : "拒绝") + "选中的" + pendingRows.length + "个好友申请吗？", function() {
+                var completed = 0;
+                var successCount = 0;
+                var errorCount = 0;
+                
+                function handleNext() {
+                    if (completed >= pendingRows.length) {
+                        var msg = "批量处理完成！成功: " + successCount + "，失败: " + errorCount;
+                        if (errorCount === 0) {
+                            $.modal.msgSuccess(msg);
+                        } else {
+                            $.modal.msgWarning(msg);
+                        }
+                        $.table.refresh();
+                        loadStatistics();
+                        return;
+                    }
+                    
+                    handleOne(pendingRows[completed].id, approved, function() {
+                        completed++;
+                        handleNext();
+                    });
+                }
+                
+                handleNext();
+            });
         }
-        function handleOne(id, approved) {
-            $.modal.confirm("确定要" + (approved ? "同意" : "拒绝") + "该好友申请吗？", function() {
-                $.ajax({
-                    url: prefix + "/handle/" + id,
-                    type: 'put',
-                    data: {approved: approved},
-                    success: function() {
+        /* 处理好友请求 */
+        function handleOne(id, approved, callback) {
+            $.ajax({
+                url: prefix + "/handle/" + id,
+                type: 'put',
+                data: {approved: approved},
+                success: function() {
+                    if (callback) {
+                        callback();
+                    } else {
                         $.table.refresh();
                         loadStatistics();
                     }
-                });
+                },
+                error: function() {
+                    if (callback) {
+                        callback();
+                    } else {
+                        $.modal.alertError("操作失败");
+                    }
+                }
             });
         }
     </script></body>

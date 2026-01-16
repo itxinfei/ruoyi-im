@@ -160,8 +160,8 @@ const handleNavResize = (e) => {
   const diff = e.clientX - startX.value
   const newWidth = startWidth.value + diff
 
-  // 限制最小和最大宽度
-  if (newWidth >= 60 && newWidth <= 200) {
+  // 限制最小和最大宽度（DingTalk standard 64px）
+  if (newWidth >= 64 && newWidth <= 200) {
     emit('update:navWidth', newWidth)
   }
 }

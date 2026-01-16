@@ -273,7 +273,11 @@
                 return;
             }
             var row = $.table.selectFirstRows()[0];
-            changeRole(row.id, row.role, row.groupId, row.userId);
+            if (row.id) {
+                changeRole(row.id, row.role, row.groupId, row.userId);
+            } else {
+                $.modal.alertWarning("请选择有效的记录");
+            }
         }
         /* 修改角色 */
         function changeRole(id, currentRole, groupId, userId) {
@@ -298,6 +302,10 @@
                 return;
             }
             var row = $.table.selectFirstRows()[0];
+            if (!row.id) {
+                $.modal.alertWarning("请选择有效的记录");
+                return;
+            }
             var newMuteStatus = row.isMuted == 1 ? 0 : 1;
             $.modal.confirm("确定要" + (newMuteStatus == 1 ? "禁言" : "解除禁言") + "该成员吗？", function() {
                 var data = {id: row.id, groupId: row.groupId, userId: row.userId, isMuted: newMuteStatus};

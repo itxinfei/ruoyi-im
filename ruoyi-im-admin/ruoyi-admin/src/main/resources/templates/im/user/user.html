@@ -315,22 +315,55 @@
                 $.modal.alertWarning("请至少选择一条记录");
                 return;
             }
-            resetPwdOne(rows[0]);
+            
+            $.modal.confirm("确定要重置选中用户的密码吗？", function() {
+                var completed = 0;
+                var total = rows.length;
+                
+                function resetNext() {
+                    if (completed >= total) {
+                        $.modal.msgSuccess("密码重置完成");
+                        $.table.refresh();
+                        return;
+                    }
+                    
+                    resetPwdOne(rows[completed], function() {
+                        completed++;
+                        resetNext();
+                    });
+                }
+                
+                resetNext();
+            });
         }
 
-        function resetPwdOne(id) {
-            $.modal.confirm("确定要重置该用户的密码吗？", function() {
-                $.ajax({
-                    url: prefix + "/" + id + "/reset-password",
-                    type: 'put',
-                    success: function(result) {
-                        if (result.code == 0) {
+        function resetPwdOne(id, callback) {
+            $.ajax({
+                url: prefix + "/" + id + "/reset-password",
+                type: 'put',
+                success: function(result) {
+                    if (result.code == 0) {
+                        if (callback) {
+                            callback();
+                        } else {
                             $.modal.msgSuccess("密码已重置为默认密码：123456");
+                            $.table.refresh();
+                        }
+                    } else {
+                        if (callback) {
+                            callback();
                         } else {
                             $.modal.msgError(result.msg || "重置失败");
                         }
                     }
-                });
+                },
+                error: function() {
+                    if (callback) {
+                        callback();
+                    } else {
+                        $.modal.msgError("重置失败");
+                    }
+                }
             });
         }
     </script>
