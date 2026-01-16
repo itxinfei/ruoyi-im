@@ -83,7 +83,8 @@
 
     <insert id="addGroupMember">
         insert into im_group_member (group_id, user_id, role, nickname, is_muted, is_deleted, create_time, update_time)
-        values (#{groupId}, #{userId}, #{role}, #{nickname}, 0, 0, NOW(), NOW())
+        select #{arg0}, #{arg1}, #{arg2}, COALESCE(u.nickname, u.username), 0, 0, NOW(), NOW()
+        from im_user u where u.id = #{arg1}
     </insert>
 
     <update id="dismissGroup" parameterType="Long">

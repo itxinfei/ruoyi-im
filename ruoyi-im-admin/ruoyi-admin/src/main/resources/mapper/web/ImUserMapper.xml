@@ -112,7 +112,7 @@
     </update>
 
     <update id="changeStatus">
-        update im_user set status = #{status} where id = #{id}
+        update im_user set status = #{arg1} where id = #{arg0}
     </update>
 
     <select id="countOnlineUsers" resultType="java.lang.Integer">

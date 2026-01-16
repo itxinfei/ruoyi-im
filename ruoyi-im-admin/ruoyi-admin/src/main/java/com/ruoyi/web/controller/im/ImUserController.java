@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IM用户管理控制器（管理后台）
@@ -142,8 +143,12 @@ public class ImUserController extends BaseController {
     @Log(title = "重置用户密码", businessType = BusinessType.UPDATE)
     @PutMapping("/{id}/reset-password")
     @ResponseBody
-    public AjaxResult resetPassword(@PathVariable("id") Long id) {
-        return toAjax(imUserService.resetPassword(id, "123456"));
+    public AjaxResult resetPassword(@PathVariable("id") Long id, @RequestBody Map<String, String> params) {
+        String newPassword = params.get("password");
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            return AjaxResult.error("密码不能为空");
+        }
+        return toAjax(imUserService.resetPassword(id, newPassword));
     }
 
     /**

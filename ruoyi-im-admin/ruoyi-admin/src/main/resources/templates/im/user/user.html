@@ -157,7 +157,7 @@
                     <i class="fa fa-edit"></i> 修改
                 </a>
                 <a class="btn btn-info single disabled" onclick="resetPwd()" shiro:hasPermission="im:user:edit">
-                    <i class="fa fa-key"></i> 重置密码
+                    <i class="fa fa-key"></i> 重置
                 </a>
                 <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:user:remove">
                     <i class="fa fa-remove"></i> 删除
@@ -316,7 +316,35 @@
                 return;
             }
             
-            $.modal.confirm("确定要重置选中用户的密码吗？", function() {
+            // 弹出输入新密码的对话框
+            var html = '<div class="form-group">' +
+                       '<label>新密码：</label>' +
+                       '<input type="password" class="form-control" id="newPassword" placeholder="请输入新密码">' +
+                       '</div>' +
+                       '<div class="form-group">' +
+                       '<label>确认密码：</label>' +
+                       '<input type="password" class="form-control" id="confirmPassword" placeholder="请再次输入新密码">' +
+                       '</div>';
+            
+            $.modal.confirm("请输入新密码", html, function() {
+                var newPassword = $("#newPassword").val();
+                var confirmPassword = $("#confirmPassword").val();
+                
+                if (!newPassword) {
+                    $.modal.msgError("请输入新密码");
+                    return false;
+                }
+                
+                if (newPassword != confirmPassword) {
+                    $.modal.msgError("两次输入的密码不一致");
+                    return false;
+                }
+                
+                if (newPassword.length < 6) {
+                    $.modal.msgError("密码长度不能少于6位");
+                    return false;
+                }
+                
                 var completed = 0;
                 var total = rows.length;
                 
@@ -327,7 +355,7 @@
                         return;
                     }
                     
-                    resetPwdOne(rows[completed], function() {
+                    resetPwdOne(rows[completed], newPassword, function() {
                         completed++;
                         resetNext();
                     });
@@ -337,31 +365,35 @@
             });
         }
 
-        function resetPwdOne(id, callback) {
+        function resetPwdOne(id, newPassword, callback) {
             $.ajax({
                 url: prefix + "/" + id + "/reset-password",
                 type: 'put',
+                data: JSON.stringify({password: newPassword}),
+                contentType: 'application/json',
                 success: function(result) {
                     if (result.code == 0) {
                         if (callback) {
                             callback();
                         } else {
-                            $.modal.msgSuccess("密码已重置为默认密码：123456");
+                            $.modal.msgSuccess("密码已重置");
                             $.table.refresh();
                         }
                     } else {
+                        var msg = result.msg || "重置失败";
                         if (callback) {
                             callback();
                         } else {
-                            $.modal.msgError(result.msg || "重置失败");
+                            $.modal.msgError(msg);
                         }
                     }
                 },
                 error: function() {
+                    var msg = "重置失败";
                     if (callback) {
                         callback();
                     } else {
-                        $.modal.msgError("重置失败");
+                        $.modal.msgError(msg);
                     }
                 }
             });

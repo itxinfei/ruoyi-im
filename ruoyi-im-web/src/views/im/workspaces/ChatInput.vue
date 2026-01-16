@@ -30,7 +30,7 @@
         <!-- @成员功能（仅群聊显示） -->
         <el-tooltip v-if="isGroupChat" content="@成员" placement="top">
           <el-button
-            :icon="AtSign"
+            :icon="Promotion"
             text
             :disabled="uploading"
             @click="showAtMemberPicker"
@@ -113,7 +113,7 @@ import {
   ChatDotRound,
   Folder,
   PictureFilled,
-  AtSign,
+  Promotion, // 用于@成员功能
   Phone,
   VideoCamera,
   Crop,

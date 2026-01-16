@@ -150,7 +150,6 @@
           </div>
         </div>
       </div>
-      </div>
 
       <div class="actions-section">
         <h4>操作</h4>

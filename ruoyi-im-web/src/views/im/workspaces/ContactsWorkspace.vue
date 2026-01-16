@@ -89,7 +89,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { Search, User, UserFilled, Users, Star } from '@element-plus/icons-vue'
+import { Search, User, UserFilled, Star, Avatar } from '@element-plus/icons-vue'
 import SmartAvatar from '@/components/SmartAvatar/index.vue'
 import { ElMessage } from 'element-plus'
 
@@ -123,7 +123,7 @@ const categories = computed(() => [
   {
     key: 'groups',
     label: '群组',
-    icon: Users,
+    icon: Avatar,
     count: contacts.value.filter(c => c.type === 'GROUP').length
   },
   {
@@ -263,7 +263,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-@use '@/assets/styles/dingtalk-theme.scss' as *;
+@use '@/styles/dingtalk-theme.scss' as *;
 
 .contacts-workspace {
   display: flex;

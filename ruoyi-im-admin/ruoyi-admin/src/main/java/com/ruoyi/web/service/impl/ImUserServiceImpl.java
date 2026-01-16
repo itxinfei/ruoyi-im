@@ -1,5 +1,7 @@
 package com.ruoyi.web.service.impl;
 
+import com.ruoyi.common.utils.ShiroUtils;
+import com.ruoyi.framework.shiro.service.SysPasswordService;
 import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.mapper.ImUserMapper;
 import com.ruoyi.web.service.ImUserService;
@@ -19,6 +21,9 @@ public class ImUserServiceImpl implements ImUserService {
     @Autowired
     private ImUserMapper userMapper;
 
+    @Autowired
+    private SysPasswordService passwordService;
+
     @Override
     public List<ImUser> selectImUserList(ImUser imUser) {
         return userMapper.selectImUserList(imUser);
@@ -31,11 +36,23 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public int insertImUser(ImUser imUser) {
+        // 对密码进行加密
+        if (imUser.getPassword() != null && !imUser.getPassword().isEmpty()) {
+            String salt = ShiroUtils.randomSalt();
+            String encryptedPassword = passwordService.encryptPassword(imUser.getUsername(), imUser.getPassword(), salt);
+            imUser.setPassword(encryptedPassword);
+        }
         return userMapper.insertImUser(imUser);
     }
 
     @Override
     public int updateImUser(ImUser imUser) {
+        // 对密码进行加密
+        if (imUser.getPassword() != null && !imUser.getPassword().isEmpty()) {
+            String salt = ShiroUtils.randomSalt();
+            String encryptedPassword = passwordService.encryptPassword(imUser.getUsername(), imUser.getPassword(), salt);
+            imUser.setPassword(encryptedPassword);
+        }
         return userMapper.updateImUser(imUser);
     }
 
@@ -51,7 +68,14 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public int resetPassword(Long id, String password) {
-        return userMapper.resetPassword(id, password);
+        ImUser user = userMapper.selectImUserById(id);
+        if (user != null) {
+            // 对新密码进行加密
+            String salt = ShiroUtils.randomSalt();
+            String encryptedPassword = passwordService.encryptPassword(user.getUsername(), password, salt);
+            return userMapper.resetPassword(id, encryptedPassword);
+        }
+        return 0;
     }
 
     @Override

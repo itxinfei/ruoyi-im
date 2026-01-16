@@ -58,6 +58,8 @@
             <if test="lastMessageTime != null">last_message_time,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
+            create_time,
+            update_time
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="type != null">#{type},</if>
@@ -68,6 +70,8 @@
             <if test="lastMessageTime != null">#{lastMessageTime},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
+            NOW(),
+            NOW()
         </trim>
     </insert>
 
@@ -79,6 +83,7 @@
             <if test="lastMessageId != null">last_message_id = #{lastMessageId},</if>
             <if test="lastMessageTime != null">last_message_time = #{lastMessageTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
+            update_time = NOW(),
         </trim>
         where id = #{id}
     </update>
@@ -113,7 +118,7 @@
         from im_conversation c
         where c.is_deleted = 0
         order by c.last_message_time desc
-        limit #{limit}
+        limit #{arg0}
     </select>
 
 </mapper>
