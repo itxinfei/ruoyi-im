@@ -95,7 +95,7 @@ public class ImGroupController extends BaseController {
      * 获取IM群组详细信息
      */
     @RequiresPermissions("im:group:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imGroupService.selectImGroupById(id));

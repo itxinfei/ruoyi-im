@@ -32,7 +32,7 @@ public class ImSessionController extends BaseController {
      * 查询IM会话列表
      */
     @RequiresPermissions("im:session:list")
-    @GetMapping("/list")
+    @PostMapping("/list")
     public TableDataInfo list(ImSession imSession) {
         startPage();
         List<ImSession> list = imSessionService.selectImSessionList(imSession);

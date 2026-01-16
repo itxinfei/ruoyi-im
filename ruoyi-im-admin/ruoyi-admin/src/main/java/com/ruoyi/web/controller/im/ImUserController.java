@@ -31,7 +31,7 @@ public class ImUserController extends BaseController {
     /**
      * 用户管理页面
      */
-    @RequiresPermissions("im:user:view")
+    @RequiresPermissions("im:user:list")
     @GetMapping()
     public String user() {
         return prefix + "/user";
@@ -85,7 +85,7 @@ public class ImUserController extends BaseController {
      * 获取IM用户详细信息
      */
     @RequiresPermissions("im:user:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imUserService.selectImUserById(id));

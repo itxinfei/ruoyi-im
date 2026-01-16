@@ -106,7 +106,7 @@ public class ImFileAssetController extends BaseController {
      * 获取文件资源详细信息
      */
     @RequiresPermissions("im:file:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imFileAssetService.selectImFileAssetById(id));

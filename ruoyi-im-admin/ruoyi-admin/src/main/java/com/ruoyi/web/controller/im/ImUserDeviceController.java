@@ -63,7 +63,7 @@ public class ImUserDeviceController extends BaseController {
      * 获取用户设备详细信息
      */
     @RequiresPermissions("im:userDevice:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imUserDeviceService.selectImUserDeviceById(id));

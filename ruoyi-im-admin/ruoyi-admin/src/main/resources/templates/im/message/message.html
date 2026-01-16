@@ -44,32 +44,12 @@
         .stat-normal { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
         .stat-sensitive { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
         .stat-high { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
-
         /* 搜索区域底部间距 */
         .search-collapse {
             margin-bottom: 10px;
         }
-
-        /* 数据管理区卡片 */
-        .data-management-card {
-            background: #fff;
-            border-radius: 6px 6px 0 0;
-            box-shadow: 1px 1px 3px rgba(0,0,0,.2);
-            overflow: hidden;
-            margin-bottom: 0;
-        }
-        .data-toolbar {
-            padding: 12px 15px;
-            background: #fafafa;
-            border-bottom: 1px solid #e5e5e5;
-        }
-
-        /* 表格区域样式 - 与工具栏卡片连接 */
+        /* 表格区域样式 */
         .select-table.table-striped {
-            background: #fff;
-            border-radius: 0 0 6px 6px;
-            box-shadow: 1px 1px 3px rgba(0,0,0,.2);
-            margin-top: -1px;
             padding: 0;
         }
     </style>
@@ -110,7 +90,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="message-form">
@@ -154,33 +133,25 @@
                     </div>
                 </form>
             </div>
-
-            <!-- 数据管理区 -->
-            <div class="col-sm-12 data-management-card">
-                <div class="data-toolbar">
-                    <div class="btn-group-sm" id="toolbar" role="group">
-                        <a class="btn btn-info" onclick="showSearchModal()">
-                            <i class="fa fa-search"></i> 关键词搜索
-                        </a>
-                        <a class="btn btn-warning single disabled" onclick="markSensitive()">
-                            <i class="fa fa-exclamation-triangle"></i> 标记敏感
-                        </a>
-                        <a class="btn btn-primary single disabled" onclick="unmarkSensitive()">
-                            <i class="fa fa-check"></i> 取消标记
-                        </a>
-                        <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()">
-                            <i class="fa fa-remove"></i> 删除
-                        </a>
-                    </div>
-                </div>
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-info" onclick="showSearchModal()">
+                    <i class="fa fa-search"></i> 关键词搜索
+                </a>
+                <a class="btn btn-warning single disabled" onclick="markSensitive()">
+                    <i class="fa fa-exclamation-triangle"></i> 标记敏感
+                </a>
+                <a class="btn btn-primary single disabled" onclick="unmarkSensitive()">
+                    <i class="fa fa-check"></i> 取消标记
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()">
+                    <i class="fa fa-remove"></i> 删除
+                </a>
             </div>
-
             <div class="col-sm-12 select-table table-striped">
                 <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
-
     <div class="modal fade" id="searchModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -201,13 +172,23 @@
             </div>
         </div>
     </div>
-
+        <!-- 通用JS -->
+    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
+    <script th:src="@{/js/jquery.min.js?v=3.6.3}"></script>
+    <script th:src="@{/js/bootstrap.min.js?v=3.3.7}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js?v=1.21.0}"></script>
+    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js?v=2.70.0}"></script>
+    <script th:src="@{/ajax/libs/layer/layer.min.js?v=3.7.0}"></script>
+    <script th:src="@{/ajax/libs/layui/layui.min.js?v=2.8.18}"></script>
+    <script th:src="@{/ruoyi/js/common.js?v=4.8.0}"></script>
+    <script th:src="@{/ruoyi/js/ry-ui.js?v=4.8.0"></script>
     <script th:inline="javascript">
         var prefix = ctx + "im/message";
-
         $(function() {
             loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 removeUrl: prefix + "/remove/{id}",
@@ -306,7 +287,6 @@
             };
             $.table.init(options);
         });
-
         function loadStatistics() {
             $.get(prefix + "/statistics/sensitive", function(result) {
                 if (result.code == 0) {
@@ -317,11 +297,9 @@
                 }
             });
         }
-
         function showSearchModal() {
             $("#searchModal").modal('show');
         }
-
         function doSearch() {
             var keyword = $("#searchKeyword").val();
             if (!keyword) {
@@ -331,7 +309,6 @@
             $("#searchModal").modal('hide');
             $.table.search({'content': keyword});
         }
-
         function markSensitive() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
@@ -347,7 +324,6 @@
                 loadStatistics();
             });
         }
-
         function doMarkSensitive(id) {
             $.ajax({
                 url: prefix + "/" + id + "/revoke",
@@ -358,7 +334,6 @@
                 }
             });
         }
-
         function unmarkSensitive() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
@@ -370,7 +345,6 @@
                 loadStatistics();
             });
         }
-
         function viewDetail(id) {
             $.get(prefix + "/" + id, function(result) {
                 if (result.code == 0) {
@@ -405,10 +379,8 @@
                 }
             });
         }
-
         function previewFile(url) {
             window.open(url, '_blank');
         }
-    </script>
-</body>
+    </script></body>
 </html>

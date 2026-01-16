@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <title>待办事项管理</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
+    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
+    <style>
+        /* 统计卡片样式 */
+        .statistics-section {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .statistics-card {
+            padding: 15px;
+            border-radius: 4px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        .stat-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 40px;
+            opacity: 0.2;
+        }
+        .stat-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-pending { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-progress { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-overdue { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
+                /* 搜索区域底部间距 */
+                .search-collapse {
+                    margin-bottom: 10px;
+                }
+        
+                /* 表格区域样式 */
+                .select-table.table-striped {
+                    padding: 0;
+                }
+        /* 优先级指示器 */
+        .priority-high { color: #f56c6c; font-weight: bold; }
+        .priority-normal { color: #e6a23c; }
+        .priority-low { color: #909399; }
+    </style>
+</head>
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row">
+            <!-- 统计卡片 -->
+            <div class="col-sm-12 statistics-section">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-total">
+                            <div class="stat-number" id="totalCount">0</div>
+                            <div class="stat-label">待办总数</div>
+                            <i class="fa fa-list stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-pending">
+                            <div class="stat-number" id="pendingCount">0</div>
+                            <div class="stat-label">待处理</div>
+                            <i class="fa fa-clock-o stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-progress">
+                            <div class="stat-number" id="inProgressCount">0</div>
+                            <div class="stat-label">进行中</div>
+                            <i class="fa fa-spinner stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-overdue">
+                            <div class="stat-number" id="overdueCount">0</div>
+                            <div class="stat-label">已逾期</div>
+                            <i class="fa fa-exclamation-triangle stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 搜索区域 -->
+            <div class="col-sm-12 search-collapse">
+                <form id="todoItem-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                用户名：<input type="text" name="username"/>
+                            </li>
+                            <li>
+                                待办标题：<input type="text" name="title"/>
+                            </li>
+                            <li>
+                                优先级：
+                                <select name="priority">
+                                    <option value="">所有</option>
+                                    <option value="1">低</option>
+                                    <option value="2">中</option>
+                                    <option value="3">高</option>
+                                </select>
+                            </li>
+                            <li>
+                                状态：
+                                <select name="status">
+                                    <option value="">所有</option>
+                                    <option value="PENDING">待办</option>
+                                    <option value="IN_PROGRESS">进行中</option>
+                                    <option value="COMPLETED">已完成</option>
+                                    <option value="CANCELLED">已取消</option>
+                                </select>
+                            </li>
+                            <li class="select-time">
+                                <label>截止时间：</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+                        <div class="btn-group-sm" id="toolbar" role="group">
+                            <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:todoItem:add">
+                                <i class="fa fa-plus"></i> 新增
+                            </a>
+                            <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:todoItem:edit">
+                                <i class="fa fa-edit"></i> 修改
+                            </a>
+                            <a class="btn btn-info single disabled" onclick="startItem()" shiro:hasPermission="im:todoItem:edit">
+                                <i class="fa fa-play"></i> 开始
+                            </a>
+                            <a class="btn btn-success single disabled" onclick="completeItem()" shiro:hasPermission="im:todoItem:edit">
+                                <i class="fa fa-check"></i> 完成
+                            </a>
+                            <a class="btn btn-warning single disabled" onclick="cancelItem()" shiro:hasPermission="im:todoItem:edit">
+                                <i class="fa fa-times"></i> 取消
+                            </a>
+                            <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:todoItem:remove">
+                                <i class="fa fa-remove"></i> 删除
+                            </a>
+                            <a class="btn btn-primary" onclick="showCleanModal()" shiro:hasPermission="im:todoItem:remove">
+                                <i class="fa fa-trash"></i> 清理已完成
+                            </a>
+                            <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:todoItem:export">
+                                <i class="fa fa-download"></i> 导出
+                            </a>
+                        </div>
+            
+                        <div class="col-sm-12 select-table table-striped">
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
+        </div>
+    </div>
+    <!-- 清理已完成待办弹窗 -->
+    <div class="modal fade" id="cleanModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">清理已完成待办</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>清理多少天前已完成的待办：</label>
+                        <select class="form-control" id="cleanDays">
+                            <option value="7">7天</option>
+                            <option value="30" selected>30天</option>
+                            <option value="60">60天</option>
+                            <option value="90">90天</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fa fa-warning"></i> 此操作将永久删除符合条件的已完成待办，请谨慎操作！
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="doClean()">确认清理</button>
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- 通用JS -->
+    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
+    <script th:src="@{/js/jquery.min.js?v=3.6.3}"></script>
+    <script th:src="@{/js/bootstrap.min.js?v=3.3.7}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js?v=1.21.0}"></script>
+    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js?v=2.70.0}"></script>
+    <script th:src="@{/ajax/libs/layer/layer.min.js?v=3.7.0}"></script>
+    <script th:src="@{/ajax/libs/layui/layui.min.js?v=2.8.18}"></script>
+    <script th:src="@{/ruoyi/js/common.js?v=4.8.0}"></script>
+    <script th:src="@{/ruoyi/js/ry-ui.js?v=4.8.0}"></script>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('im:todoItem:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('im:todoItem:remove')}]];
+        var prefix = ctx + "im/todoItem";
+        $(function() {
+            loadStatistics();
+            initDatePicker();
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove/{id}",
+                exportUrl: prefix + "/export",
+                modalName: "待办事项",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: 'ID',
+                    visible: false
+                },
+                {
+                    field: 'username',
+                    title: '创建人',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        var name = value || '-';
+                        if (row.nickname) {
+                            return name + ' (' + row.nickname + ')';
+                        }
+                        return name;
+                    }
+                },
+                {
+                    field: 'title',
+                    title: '待办标题',
+                    width: '250',
+                    formatter: function(value, row, index) {
+                        var icon = '';
+                        if (row.priority == 3) icon = '<i class="fa fa-exclamation-circle text-danger"></i> ';
+                        return icon + '<strong>' + (value || '-') + '</strong>';
+                    }
+                },
+                {
+                    field: 'description',
+                    title: '描述',
+                    width: '200',
+                    formatter: function(value, row, index) {
+                        if (!value) return '-';
+                        if (value.length > 30) {
+                            return '<span title="' + value + '">' + value.substring(0, 30) + '...</span>';
+                        }
+                        return value;
+                    }
+                },
+                {
+                    field: 'priority',
+                    title: '优先级',
+                    align: 'center',
+                    width: '80',
+                    formatter: function(value, row, index) {
+                        if (value == 3) return '<span class="priority-high">高</span>';
+                        if (value == 2) return '<span class="priority-normal">中</span>';
+                        return '<span class="priority-low">低</span>';
+                    }
+                },
+                {
+                    field: 'status',
+                    title: '状态',
+                    align: 'center',
+                    width: '100',
+                    formatter: function(value, row, index) {
+                        if (value === 'PENDING') return '<span class="badge badge-warning">待办</span>';
+                        if (value === 'IN_PROGRESS') return '<span class="badge badge-info">进行中</span>';
+                        if (value === 'COMPLETED') return '<span class="badge badge-success">已完成</span>';
+                        if (value === 'CANCELLED') return '<span class="badge badge-default">已取消</span>';
+                        return '<span class="badge badge-default">' + (value || '-') + '</span>';
+                    }
+                },
+                {
+                    field: 'dueDate',
+                    title: '截止日期',
+                    width: '120',
+                    formatter: function(value, row, index) {
+                        if (!value) return '-';
+                        var now = new Date();
+                        var due = new Date(value);
+                        var diff = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
+                        if (diff < 0 && row.status !== 'COMPLETED') {
+                            return '<span class="text-danger"><i class="fa fa-exclamation-triangle"></i> ' + value + '</span>';
+                        } else if (diff <= 2 && row.status !== 'COMPLETED') {
+                            return '<span class="text-warning"><i class="fa fa-clock-o"></i> ' + value + '</span>';
+                        }
+                        return value;
+                    }
+                },
+                {
+                    field: 'completedTime',
+                    title: '完成时间',
+                    width: '160',
+                    formatter: function(value, row, index) {
+                        return value || '-';
+                    }
+                },
+                {
+                    field: 'createTime',
+                    title: '创建时间',
+                    width: '160',
+                    sortable: true
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    width: '200',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
+                        if (row.status === 'PENDING') {
+                            actions.push('<a class="btn btn-info btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="startOne(' + row.id + ')"><i class="fa fa-play"></i>开始</a> ');
+                        }
+                        if (row.status === 'PENDING' || row.status === 'IN_PROGRESS') {
+                            actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="completeOne(' + row.id + ')"><i class="fa fa-check"></i>完成</a> ');
+                            actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="cancelOne(' + row.id + ')"><i class="fa fa-times"></i>取消</a> ');
+                        }
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+        function initDatePicker() {
+            var options = {
+                showYesterday: true,
+                showToday: true,
+                showClear: true,
+                minView: "month"
+            };
+            $("#startTime").datetimepicker(options);
+            $("#endTime").datetimepicker(options);
+        }
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code == 0) {
+                    var data = result.data;
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#pendingCount").text(data.pendingCount || 0);
+                    $("#inProgressCount").text(data.inProgressCount || 0);
+                    $("#overdueCount").text(data.overdueCount || 0);
+                }
+            });
+        }
+        function showCleanModal() {
+            $("#cleanModal").modal('show');
+        }
+        function doClean() {
+            var days = $("#cleanDays").val();
+            $("#cleanModal").modal('hide');
+            $.ajax({
+                url: prefix + "/clean",
+                type: 'post',
+                data: { days: days },
+                success: function(result) {
+                    if (result.code == 0) {
+                        $.modal.msgSuccess(result.msg || "清理完成");
+                        $.table.refresh();
+                        loadStatistics();
+                    } else {
+                        $.modal.alertError(result.msg || "清理失败");
+                    }
+                }
+            });
+        }
+        function startItem() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            startOne(rows[0]);
+        }
+        function startOne(id) {
+            $.modal.confirm("确定要开始该待办吗？", function() {
+                $.ajax({
+                    url: prefix + "/start/" + id,
+                    type: 'put',
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("操作成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    }
+                });
+            });
+        }
+        function completeItem() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            completeOne(rows[0]);
+        }
+        function completeOne(id) {
+            $.modal.confirm("确定要完成该待办吗？", function() {
+                $.ajax({
+                    url: prefix + "/complete/" + id,
+                    type: 'put',
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("操作成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    }
+                });
+            });
+        }
+        function cancelItem() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            cancelOne(rows[0]);
+        }
+        function cancelOne(id) {
+            $.modal.confirm("确定要取消该待办吗？", function() {
+                $.ajax({
+                    url: prefix + "/cancel/" + id,
+                    type: 'put',
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("操作成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    }
+                });
+            });
+        }
+    </script></body>
+</html>

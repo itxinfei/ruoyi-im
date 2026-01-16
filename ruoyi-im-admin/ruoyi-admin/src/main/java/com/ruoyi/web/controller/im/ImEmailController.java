@@ -88,7 +88,7 @@ public class ImEmailController extends BaseController {
      * 获取邮件详细信息
      */
     @RequiresPermissions("im:email:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(emailService.selectImEmailById(id));

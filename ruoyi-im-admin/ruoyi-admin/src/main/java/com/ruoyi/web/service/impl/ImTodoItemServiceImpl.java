@@ -6,6 +6,7 @@ import com.ruoyi.web.service.ImTodoItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IM待办事项Service实现（Admin模块专用）
@@ -16,6 +17,7 @@ public class ImTodoItemServiceImpl implements ImTodoItemService {
     @Autowired
     private ImTodoItemMapper todoItemMapper;
 
+    // ========== 原有方法实现 ==========
     @Override
     public int countTodos(Long userId, Boolean completed) {
         return todoItemMapper.countTodos(userId, completed);
@@ -77,5 +79,72 @@ public class ImTodoItemServiceImpl implements ImTodoItemService {
     @Override
     public List<?> getUnreadNotices(Long userId) {
         return todoItemMapper.getUnreadNotices(userId);
+    }
+
+    // ========== 新增管理后台CRUD方法实现 ==========
+
+    @Override
+    public ImTodoItem selectImTodoItemById(Long id) {
+        return todoItemMapper.selectImTodoItemById(id);
+    }
+
+    @Override
+    public int insertImTodoItem(ImTodoItem imTodoItem) {
+        return todoItemMapper.insertTodo(imTodoItem);
+    }
+
+    @Override
+    public List<ImTodoItem> selectImTodoItemList(ImTodoItem imTodoItem) {
+        return todoItemMapper.selectImTodoItemList(imTodoItem);
+    }
+
+    @Override
+    public int updateImTodoItem(ImTodoItem imTodoItem) {
+        return todoItemMapper.updateImTodoItem(imTodoItem);
+    }
+
+    @Override
+    public int deleteImTodoItemByIds(Long[] ids) {
+        return todoItemMapper.deleteImTodoItemByIds(ids);
+    }
+
+    @Override
+    public int updateItemStatus(Long id, String status) {
+        return todoItemMapper.updateItemStatus(id, status);
+    }
+
+    @Override
+    public int startItem(Long id) {
+        return todoItemMapper.updateItemStatus(id, "IN_PROGRESS");
+    }
+
+    @Override
+    public int completeItem(Long id) {
+        return todoItemMapper.updateItemStatus(id, "COMPLETED");
+    }
+
+    @Override
+    public int cancelItem(Long id) {
+        return todoItemMapper.updateItemStatus(id, "CANCELLED");
+    }
+
+    @Override
+    public Map<String, Object> getTodoStatistics() {
+        return todoItemMapper.getTodoStatistics();
+    }
+
+    @Override
+    public List<ImTodoItem> selectOverdueItems() {
+        return todoItemMapper.selectOverdueItems();
+    }
+
+    @Override
+    public List<ImTodoItem> selectTodayDueItems() {
+        return todoItemMapper.selectTodayDueItems();
+    }
+
+    @Override
+    public int cleanCompletedItems(int days) {
+        return todoItemMapper.cleanCompletedItems(days);
     }
 }

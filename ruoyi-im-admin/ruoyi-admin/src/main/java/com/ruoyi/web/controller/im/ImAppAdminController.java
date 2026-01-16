@@ -89,7 +89,7 @@ public class ImAppAdminController extends BaseController {
      * 获取应用详细信息
      */
     @RequiresPermissions("im:app:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(applicationService.selectImApplicationById(id));

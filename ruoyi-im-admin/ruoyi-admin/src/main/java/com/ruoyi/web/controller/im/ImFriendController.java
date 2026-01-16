@@ -82,7 +82,7 @@ public class ImFriendController extends BaseController {
      * 获取好友关系详细信息
      */
     @RequiresPermissions("im:friend:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imFriendService.selectImFriendById(id));

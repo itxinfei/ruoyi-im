@@ -62,7 +62,7 @@ public class ImSensitiveWordController extends BaseController {
      * 获取敏感词详细信息
      */
     @RequiresPermissions("im:sensitiveWord:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imSensitiveWordService.selectImSensitiveWordById(id));

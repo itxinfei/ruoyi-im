@@ -89,7 +89,7 @@ public class ImDingMessageController extends BaseController {
      * 获取DING消息详细信息
      */
     @RequiresPermissions("im:ding:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(dingMessageService.selectImDingMessageById(id));

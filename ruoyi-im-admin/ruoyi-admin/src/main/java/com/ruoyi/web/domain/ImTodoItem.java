@@ -26,6 +26,12 @@ public class ImTodoItem implements Serializable {
     @Schema(description = "用户ID")
     private Long userId;
 
+    /** 用户名（关联查询，管理后台专用） */
+    private String username;
+
+    /** 昵称（关联查询，管理后台专用） */
+    private String nickname;
+
     @Schema(description = "待办标题")
     private String title;
 
@@ -73,6 +79,22 @@ public class ImTodoItem implements Serializable {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getTitle() {

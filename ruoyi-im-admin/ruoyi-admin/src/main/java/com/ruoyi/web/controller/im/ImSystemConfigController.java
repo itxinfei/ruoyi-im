@@ -62,7 +62,7 @@ public class ImSystemConfigController extends BaseController {
      * 获取系统配置详细信息
      */
     @RequiresPermissions("im:systemConfig:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imSystemConfigService.selectImSystemConfigById(id));

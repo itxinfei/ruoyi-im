@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <title>部门管理</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+    <link href="/ajax/libs/bootstrap-table/extensions/treetable/bootstrap-table-tree.min.css" th:href="@{/ajax/libs/bootstrap-table/extensions/treetable/bootstrap-table-tree.min.css}" rel="stylesheet"/>
+    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
+    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
+    <style>
+        /* 统计卡片样式 */
+        .statistics-section {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .statistics-card {
+            padding: 15px;
+            border-radius: 4px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        .stat-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 40px;
+            opacity: 0.2;
+        }
+        .stat-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-active { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stat-disabled { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
+        .stat-root { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+                /* 搜索区域底部间距 */
+                .search-collapse {
+                    margin-bottom: 10px;
+                }
+        
+                /* 表格区域样式 */
+                .select-table.table-striped {
+                    padding: 0;
+                }
+    </style>
+</head>
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row">
+            <!-- 统计卡片 -->
+            <div class="col-sm-12 statistics-section">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-total">
+                            <div class="stat-number" id="totalCount">0</div>
+                            <div class="stat-label">部门总数</div>
+                            <i class="fa fa-sitemap stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-active">
+                            <div class="stat-number" id="activeCount">0</div>
+                            <div class="stat-label">正常使用</div>
+                            <i class="fa fa-check-circle stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-disabled">
+                            <div class="stat-number" id="disabledCount">0</div>
+                            <div class="stat-label">已停用</div>
+                            <i class="fa fa-times-circle stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-root">
+                            <div class="stat-number" id="rootCount">0</div>
+                            <div class="stat-label">根部门</div>
+                            <i class="fa fa-level-up stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 搜索区域 -->
+            <div class="col-sm-12 search-collapse">
+                <form id="department-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                部门名称：<input type="text" name="name"/>
+                            </li>
+                            <li>
+                                状态：
+                                <select name="status">
+                                    <option value="">所有</option>
+                                    <option value="0">正常</option>
+                                    <option value="1">停用</option>
+                                </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+                        <div class="btn-group-sm" id="toolbar" role="group">
+                            <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:department:add">
+                                <i class="fa fa-plus"></i> 新增
+                            </a>
+                            <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:department:edit">
+                                <i class="fa fa-edit"></i> 修改
+                            </a>
+                            <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:department:remove">
+                                <i class="fa fa-remove"></i> 删除
+                            </a>
+                            <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:department:export">
+                                <i class="fa fa-download"></i> 导出
+                            </a>
+                        </div>
+            
+                        <div class="col-sm-12 select-table table-striped">
+                            <table id="bootstrap-table" data-mobile-responsive="true"
+                                   data-tree-view="true"
+                                   data-tree-show-field="name">
+                            </table>
+                        </div>
+        </div>
+    </div>
+        <!-- 通用JS -->
+    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
+    <script th:src="@{/js/jquery.min.js?v=3.6.3}"></script>
+    <script th:src="@{/js/bootstrap.min.js?v=3.3.7}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js?v=1.21.0}"></script>
+    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js?v=2.70.0}"></script>
+    <script th:src="@{/ajax/libs/layer/layer.min.js?v=3.7.0}"></script>
+    <script th:src="@{/ajax/libs/layui/layui.min.js?v=2.8.18}"></script>
+    <script th:src="@{/ruoyi/js/common.js?v=4.8.0}"></script>
+    <script th:src="@{/ruoyi/js/ry-ui.js?v=4.8.0}"></script>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('im:department:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('im:department:remove')}]];
+        var prefix = ctx + "im/department";
+        $(function() {
+            loadStatistics();
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove/{id}",
+                exportUrl: prefix + "/export",
+                modalName: "部门",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: 'ID',
+                    width: '60'
+                },
+                {
+                    field: 'name',
+                    title: '部门名称',
+                    width: '200'
+                },
+                {
+                    field: 'parentName',
+                    title: '上级部门',
+                    width: '150',
+                    formatter: function(value, row, index) {
+                        return value || '<span class="text-muted">根部门</span>';
+                    }
+                },
+                {
+                    field: 'orderNum',
+                    title: '排序',
+                    align: 'center',
+                    width: '60'
+                },
+                {
+                    field: 'leaderName',
+                    title: '负责人',
+                    width: '120',
+                    formatter: function(value, row, index) {
+                        return value || '-';
+                    }
+                },
+                {
+                    field: 'phone',
+                    title: '联系电话',
+                    width: '130',
+                    formatter: function(value, row, index) {
+                        return '<code>' + (value || '-') + '</code>';
+                    }
+                },
+                {
+                    field: 'email',
+                    title: '邮箱',
+                    width: '180',
+                    formatter: function(value, row, index) {
+                        return value ? '<a href="mailto:' + value + '">' + value + '</a>' : '-';
+                    }
+                },
+                {
+                    field: 'status',
+                    title: '状态',
+                    align: 'center',
+                    width: '80',
+                    formatter: function(value, row, index) {
+                        if (value == 0) return '<span class="badge badge-success">正常</span>';
+                        return '<span class="badge badge-danger">停用</span>';
+                    }
+                },
+                {
+                    field: 'createTime',
+                    title: '创建时间',
+                    width: '160',
+                    sortable: true
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    width: '180',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
+                        actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="addChild(' + row.id + ', \'' + row.name + '\')"><i class="fa fa-plus"></i>新增下级</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="removeOne(' + row.id + ')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code == 0) {
+                    var data = result.data;
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#activeCount").text(data.activeCount || 0);
+                    $("#disabledCount").text(data.disabledCount || 0);
+                    $("#rootCount").text(data.rootCount || 0);
+                }
+            });
+        }
+        function addChild(parentId, parentName) {
+            $.modal.open({
+                title: '新增下级部门',
+                content: '<form id="addChildForm"><div class="form-group">' +
+                         '<label>上级部门</label><input type="text" class="form-control" value="' + parentName + '" disabled/>' +
+                         '<input type="hidden" name="parentId" value="' + parentId + '"/></div>' +
+                         '<div class="form-group"><label>部门名称</label><input type="text" name="name" class="form-control" required/></div>' +
+                         '<div class="form-group"><label>显示顺序</label><input type="number" name="orderNum" class="form-control" value="0"/></div>' +
+                         '<div class="form-group"><label>备注</label><textarea name="remark" class="form-control" rows="3"></textarea></div></form>',
+                btn: ['确定', '取消'],
+                yes: function(index) {
+                    var name = $("#addChildForm input[name='name']").val();
+                    var orderNum = $("#addChildForm input[name='orderNum']").val();
+                    var remark = $("#addChildForm textarea[name='remark']").val();
+                    if (!name) {
+                        $.modal.msgError("请输入部门名称");
+                        return false;
+                    }
+                    $.ajax({
+                        url: prefix,
+                        type: 'post',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            parentId: parentId,
+                            name: name,
+                            orderNum: orderNum,
+                            remark: remark,
+                            status: 0
+                        }),
+                        success: function(result) {
+                            if (result.code == 0) {
+                                $.modal.msgSuccess("新增成功");
+                                $.table.refresh();
+                                loadStatistics();
+                                $.modal.close(index);
+                            } else {
+                                $.modal.msgError(result.msg || "新增失败");
+                            }
+                        }
+                    });
+                    return true;
+                }
+            });
+        }
+        function removeOne(id) {
+            $.modal.confirm("确定要删除该部门吗？删除后不可恢复！", function() {
+                $.ajax({
+                    url: prefix + "/remove/" + id,
+                    type: 'delete',
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("删除成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.msgError(result.msg || "删除失败");
+                        }
+                    }
+                });
+            });
+        }
+    </script></body>
+</html>

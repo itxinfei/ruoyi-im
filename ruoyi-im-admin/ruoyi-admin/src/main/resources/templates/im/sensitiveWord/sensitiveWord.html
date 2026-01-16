@@ -44,34 +44,15 @@
         .stat-enabled { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
         .stat-disabled { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
         .stat-high { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
-
-        /* 搜索区域底部间距 */
-        .search-collapse {
-            margin-bottom: 10px;
-        }
-
-        /* 数据管理区卡片 */
-        .data-management-card {
-            background: #fff;
-            border-radius: 6px 6px 0 0;
-            box-shadow: 1px 1px 3px rgba(0,0,0,.2);
-            overflow: hidden;
-            margin-bottom: 0;
-        }
-        .data-toolbar {
-            padding: 12px 15px;
-            background: #fafafa;
-            border-bottom: 1px solid #e5e5e5;
-        }
-
-        /* 表格区域样式 - 与工具栏卡片连接 */
-        .select-table.table-striped {
-            background: #fff;
-            border-radius: 0 0 6px 6px;
-            box-shadow: 1px 1px 3px rgba(0,0,0,.2);
-            margin-top: -1px;
-            padding: 0;
-        }
+                /* 搜索区域底部间距 */
+                .search-collapse {
+                    margin-bottom: 10px;
+                }
+        
+                /* 表格区域样式 */
+                .select-table.table-striped {
+                    padding: 0;
+                }
     </style>
 </head>
 <body class="gray-bg">
@@ -110,7 +91,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="sensitiveWord-form">
@@ -155,36 +135,29 @@
                     </div>
                 </form>
             </div>
-
-            <!-- 数据管理区 -->
-            <div class="col-sm-12 data-management-card">
-                <div class="data-toolbar">
-                    <div class="btn-group-sm" id="toolbar" role="group">
-                        <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:sensitiveWord:add">
-                            <i class="fa fa-plus"></i> 新增
-                        </a>
-                        <a class="btn btn-info" onclick="showImportModal()" shiro:hasPermission="im:sensitiveWord:import">
-                            <i class="fa fa-upload"></i> 批量导入
-                        </a>
-                        <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:sensitiveWord:edit">
-                            <i class="fa fa-edit"></i> 修改
-                        </a>
-                        <a class="btn btn-warning single disabled" onclick="toggleEnabled()" shiro:hasPermission="im:sensitiveWord:edit">
-                            <i class="fa fa-exchange"></i> 切换状态
-                        </a>
-                        <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:sensitiveWord:remove">
-                            <i class="fa fa-remove"></i> 删除
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-12 select-table table-striped">
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
-            </div>
+                        <div class="btn-group-sm" id="toolbar" role="group">
+                            <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:sensitiveWord:add">
+                                <i class="fa fa-plus"></i> 新增
+                            </a>
+                            <a class="btn btn-info" onclick="showImportModal()" shiro:hasPermission="im:sensitiveWord:import">
+                                <i class="fa fa-upload"></i> 批量导入
+                            </a>
+                            <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:sensitiveWord:edit">
+                                <i class="fa fa-edit"></i> 修改
+                            </a>
+                            <a class="btn btn-warning single disabled" onclick="toggleEnabled()" shiro:hasPermission="im:sensitiveWord:edit">
+                                <i class="fa fa-exchange"></i> 切换状态
+                            </a>
+                            <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:sensitiveWord:remove">
+                                <i class="fa fa-remove"></i> 删除
+                            </a>
+                        </div>
+            
+                        <div class="col-sm-12 select-table table-striped">
+                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                        </div>
         </div>
     </div>
-
     <!-- 批量导入弹窗 -->
     <div class="modal fade" id="importModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -206,15 +179,25 @@
             </div>
         </div>
     </div>
-
+        <!-- 通用JS -->
+    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
+    <script th:src="@{/js/jquery.min.js?v=3.6.3}"></script>
+    <script th:src="@{/js/bootstrap.min.js?v=3.3.7}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js?v=1.22.6}"></script>
+    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js?v=1.21.0}"></script>
+    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js?v=2.70.0}"></script>
+    <script th:src="@{/ajax/libs/layer/layer.min.js?v=3.7.0}"></script>
+    <script th:src="@{/ajax/libs/layui/layui.min.js?v=2.8.18}"></script>
+    <script th:src="@{/ruoyi/js/common.js?v=4.8.0}"></script>
+    <script th:src="@{/ruoyi/js/ry-ui.js?v=4.8.0}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:sensitiveWord:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:sensitiveWord:remove')}]];
         var prefix = ctx + "im/sensitiveWord";
-
         $(function() {
             loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -312,7 +295,6 @@
             };
             $.table.init(options);
         });
-
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code == 0) {
@@ -325,12 +307,10 @@
                 }
             });
         }
-
         function showImportModal() {
             $("#importWords").val('');
             $("#importModal").modal('show');
         }
-
         function doImport() {
             var text = $("#importWords").val();
             if (!text.trim()) {
@@ -358,7 +338,6 @@
                 }
             });
         }
-
         function toggleEnabled() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
@@ -367,7 +346,6 @@
             }
             toggleOne(rows[0]);
         }
-
         function toggleOne(id) {
             $.modal.confirm("确定要切换该敏感词的启用状态吗？", function() {
                 $.ajax({
@@ -380,6 +358,5 @@
                 });
             });
         }
-    </script>
-</body>
+    </script></body>
 </html>

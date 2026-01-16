@@ -61,6 +61,8 @@ public class ResourcesConfig implements WebMvcConfigurer
         registry.addResourceHandler("/fonts/**").addResourceLocations("classpath:/static/fonts/");
         registry.addResourceHandler("/img/**").addResourceLocations("classpath:/static/img/");
         registry.addResourceHandler("/ruoyi/**").addResourceLocations("classpath:/static/ruoyi/");
+        /** 头像图片映射 */
+        registry.addResourceHandler("/avatar/**").addResourceLocations("classpath:/static/avatar/");
     }
 
     /**

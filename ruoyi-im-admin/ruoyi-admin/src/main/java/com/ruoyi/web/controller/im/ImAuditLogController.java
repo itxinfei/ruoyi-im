@@ -84,7 +84,7 @@ public class ImAuditLogController extends BaseController {
      * 获取审计日志详细信息
      */
     @RequiresPermissions("im:auditLog:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imAuditLogService.selectImAuditLogById(id));

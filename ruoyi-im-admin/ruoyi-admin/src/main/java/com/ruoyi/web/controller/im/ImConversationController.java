@@ -87,7 +87,7 @@ public class ImConversationController extends BaseController {
      * 获取会话详细信息
      */
     @RequiresPermissions("im:conversation:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imConversationService.selectImConversationById(id));

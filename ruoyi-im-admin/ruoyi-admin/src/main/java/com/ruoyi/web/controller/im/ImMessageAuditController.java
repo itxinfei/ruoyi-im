@@ -70,7 +70,7 @@ public class ImMessageAuditController extends BaseController {
      * 获取消息详细信息
      */
     @RequiresPermissions("im:message:audit:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imMessageService.selectImMessageById(id));

@@ -90,7 +90,7 @@ public class ImApprovalAdminController extends BaseController {
      * 获取审批详细信息
      */
     @RequiresPermissions("im:approval:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(approvalService.selectImApprovalById(id));

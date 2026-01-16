@@ -87,7 +87,7 @@ public class ImMessageController extends BaseController {
      * 获取IM消息详细信息
      */
     @RequiresPermissions("im:message:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imMessageService.selectImMessageById(id));
     }

@@ -31,7 +31,7 @@ public class ImNotificationAdminController extends BaseController {
      * 获取所有通知列表（管理员可查看所有通知）
      */
     @RequiresPermissions("im:notification:list")
-    @GetMapping("/list")
+    @PostMapping("/list")
     public TableDataInfo list(ImSystemNotification notification) {
         startPage();
         List<ImSystemNotification> list = notificationService.selectNotificationList(notification);
@@ -53,7 +53,7 @@ public class ImNotificationAdminController extends BaseController {
      * 获取通知详细信息
      */
     @RequiresPermissions("im:notification:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         ImSystemNotification notification = notificationService.getNotificationById(id);
         return AjaxResult.success(notification);

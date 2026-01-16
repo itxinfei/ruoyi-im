@@ -81,7 +81,7 @@ public class ImGroupAnnouncementController extends BaseController {
      * 获取群公告详细信息
      */
     @RequiresPermissions("im:announcement:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imGroupAnnouncementService.selectImGroupAnnouncementById(id));

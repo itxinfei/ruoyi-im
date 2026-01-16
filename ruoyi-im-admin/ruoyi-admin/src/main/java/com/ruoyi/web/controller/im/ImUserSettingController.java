@@ -63,7 +63,7 @@ public class ImUserSettingController extends BaseController {
      * 获取用户设置详细信息
      */
     @RequiresPermissions("im:userSetting:query")
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imUserSettingService.selectImUserSettingById(id));
