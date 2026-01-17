@@ -47,14 +47,14 @@ public class ImTodoItem implements Serializable {
     @Schema(description = "关联类型")
     private String relatedType;
 
-    @Schema(description = "优先级（HIGH高/NORMAL普通/LOW低）")
-    private String priority;
+    @Schema(description = "优先级（1低 2中 3高）")
+    private Integer priority;
+
+    @Schema(description = "状态（PENDING待办/IN_PROGRESS进行中/COMPLETED已完成/CANCELLED已取消）")
+    private String status;
 
     @Schema(description = "截止日期")
     private LocalDateTime dueDate;
-
-    @Schema(description = "是否完成")
-    private Boolean isCompleted;
 
     @Schema(description = "完成时间")
     private LocalDateTime completedTime;
@@ -137,12 +137,20 @@ public class ImTodoItem implements Serializable {
         this.relatedType = relatedType;
     }
 
-    public String getPriority() {
+    public Integer getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(Integer priority) {
         this.priority = priority;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public LocalDateTime getDueDate() {

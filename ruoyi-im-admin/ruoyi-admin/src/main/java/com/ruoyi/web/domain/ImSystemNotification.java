@@ -29,6 +29,11 @@ public class ImSystemNotification implements Serializable {
     private Long receiverId;
 
     /**
+     * 发送者ID，发送通知的用户ID，系统通知为NULL
+     */
+    private Long senderId;
+
+    /**
      * 通知类型（SYSTEM系统 APPROVAL审批 MESSAGE消息 REMINDER提醒）
      * SYSTEM: 系统通知，如系统公告、系统升级通知等
      * APPROVAL: 审批通知，如审批待办、审批结果通知等
@@ -88,6 +93,14 @@ public class ImSystemNotification implements Serializable {
 
     public void setReceiverId(Long receiverId) {
         this.receiverId = receiverId;
+    }
+
+    public Long getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(Long senderId) {
+        this.senderId = senderId;
     }
 
     public String getType() {

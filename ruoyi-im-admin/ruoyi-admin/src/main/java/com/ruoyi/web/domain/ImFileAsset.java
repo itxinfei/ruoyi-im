@@ -39,17 +39,9 @@ public class ImFileAsset extends BaseEntity implements Serializable {
     @Schema(description = "文件资产ID")
     private Long id;
 
-    /** 文件ID */
-    @Schema(description = "文件ID")
-    private Long fileId;
-
     /** 文件名 */
     @Schema(description = "文件名")
     private String fileName;
-
-    /** 原始文件名 */
-    @Schema(description = "原始文件名")
-    private String originalName;
 
     /** 文件大小（字节） */
     @Schema(description = "文件大小（字节）")
@@ -66,14 +58,6 @@ public class ImFileAsset extends BaseEntity implements Serializable {
     /** 文件路径 */
     @Schema(description = "文件路径")
     private String filePath;
-
-    /** 文件URL */
-    @Schema(description = "文件URL")
-    private String fileUrl;
-
-    /** MIME类型 */
-    @Schema(description = "MIME类型")
-    private String mimeType;
 
     /** 上传者ID */
     @Schema(description = "上传者ID")
@@ -92,6 +76,11 @@ public class ImFileAsset extends BaseEntity implements Serializable {
     @Schema(description = "下载次数")
     private Integer downloadCount;
 
+    /** 下载过期时间 */
+    @Schema(description = "下载过期时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime downloadExpireTime;
+
     /** 状态（ACTIVE-正常 DELETED-已删除） */
     @Schema(description = "状态")
     private String status;
@@ -104,28 +93,12 @@ public class ImFileAsset extends BaseEntity implements Serializable {
         this.id = id;
     }
 
-    public Long getFileId() {
-        return fileId;
-    }
-
-    public void setFileId(Long fileId) {
-        this.fileId = fileId;
-    }
-
     public String getFileName() {
         return fileName;
     }
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
-    }
-
-    public String getOriginalName() {
-        return originalName;
-    }
-
-    public void setOriginalName(String originalName) {
-        this.originalName = originalName;
     }
 
     public Long getFileSize() {
@@ -152,6 +125,14 @@ public class ImFileAsset extends BaseEntity implements Serializable {
         this.fileExtension = fileExtension;
     }
 
+    public String getMd5() {
+        return md5;
+    }
+
+    public void setMd5(String md5) {
+        this.md5 = md5;
+    }
+
     public String getFilePath() {
         return filePath;
     }
@@ -160,20 +141,12 @@ public class ImFileAsset extends BaseEntity implements Serializable {
         this.filePath = filePath;
     }
 
-    public String getFileUrl() {
-        return fileUrl;
+    public String getMd5() {
+        return md5;
     }
 
-    public void setFileUrl(String fileUrl) {
-        this.fileUrl = fileUrl;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
+    public void setMd5(String md5) {
+        this.md5 = md5;
     }
 
     public Long getUploaderId() {
@@ -206,6 +179,14 @@ public class ImFileAsset extends BaseEntity implements Serializable {
 
     public void setDownloadCount(Integer downloadCount) {
         this.downloadCount = downloadCount;
+    }
+
+    public LocalDateTime getDownloadExpireTime() {
+        return downloadExpireTime;
+    }
+
+    public void setDownloadExpireTime(LocalDateTime downloadExpireTime) {
+        this.downloadExpireTime = downloadExpireTime;
     }
 
     public String getStatus() {

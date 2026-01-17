@@ -10,11 +10,11 @@
         <result property="title" column="title"/>
         <result property="description" column="description"/>
         <result property="priority" column="priority"/>
+        <result property="status" column="status"/>
         <result property="dueDate" column="due_date"/>
         <result property="completedTime" column="completed_time"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
-        <result property="isCompleted" column="status" javaType="java.lang.Boolean"/>
     </resultMap>
 
     <select id="countTodos" resultType="java.lang.Integer">
