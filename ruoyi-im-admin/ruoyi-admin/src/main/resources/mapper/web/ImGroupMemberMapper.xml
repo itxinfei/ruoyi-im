@@ -125,26 +125,26 @@
         where group_id = #{groupId} and user_id = #{userId}
     </update>
 
-    <delete id="deleteImGroupMemberById" parameterType="Long">
+    <update id="deleteImGroupMemberById" parameterType="Long">
         update im_group_member set is_deleted = 1, deleted_time = now() where id = #{id}
-    </delete>
+    </update>
 
-    <delete id="deleteImGroupMemberByIds" parameterType="Long[]">
+    <update id="deleteImGroupMemberByIds" parameterType="Long[]">
         update im_group_member set is_deleted = 1, deleted_time = now() where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
-    </delete>
+    </update>
 
-    <delete id="removeMember" parameterType="map">
+    <update id="removeMember" parameterType="map">
         update im_group_member set is_deleted = 1, deleted_time = now()
         where group_id = #{groupId} and user_id = #{userId}
-    </delete>
+    </update>
 
-    <delete id="deleteMembersByGroupId" parameterType="Long">
+    <update id="deleteMembersByGroupId" parameterType="Long">
         update im_group_member set is_deleted = 1, deleted_time = now()
         where group_id = #{groupId}
-    </delete>
+    </update>
 
     <!-- 获取群组成员统计数据 -->
     <select id="getMemberStatistics" resultType="java.util.HashMap">

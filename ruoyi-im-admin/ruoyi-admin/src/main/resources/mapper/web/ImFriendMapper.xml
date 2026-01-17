@@ -107,21 +107,21 @@
         where id = #{id}
     </update>
 
-    <delete id="deleteImFriendById" parameterType="Long">
+    <update id="deleteImFriendById" parameterType="Long">
         update im_friend set is_deleted = 1, deleted_time = now() where id = #{id}
-    </delete>
+    </update>
 
-    <delete id="deleteImFriendByIds" parameterType="Long[]">
+    <update id="deleteImFriendByIds" parameterType="Long[]">
         update im_friend set is_deleted = 1, deleted_time = now() where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
-    </delete>
+    </update>
 
-    <delete id="deleteFriendByUserAndFriend" parameterType="map">
+    <update id="deleteFriendByUserAndFriend" parameterType="map">
         update im_friend set is_deleted = 1, deleted_time = now()
         where user_id = #{userId} and friend_id = #{friendId}
-    </delete>
+    </update>
 
     <!-- 统计好友关系总数 -->
     <select id="countTotalFriends" resultType="java.lang.Integer">

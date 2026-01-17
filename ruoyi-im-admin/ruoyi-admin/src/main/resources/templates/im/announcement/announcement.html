@@ -53,6 +53,18 @@
                 .select-table.table-striped {
                     padding: 0;
                 }
+
+                /* 操作按钮样式优化 */
+                .btn-xs {
+                    padding: 4px 8px;
+                    font-size: 12px;
+                    line-height: 1.5;
+                    transition: all 0.2s ease;
+                }
+                .btn-xs:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
     </style>
 </head>
 <body class="gray-bg">
@@ -131,7 +143,7 @@
                 </form>
             </div>
             <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:announcement:add">
+                <a class="btn btn-success" onclick="addAnnouncement()" shiro:hasPermission="im:announcement:add">
                     <i class="fa fa-plus"></i> 新增公告
                 </a>
                 <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:announcement:edit">
@@ -167,11 +179,19 @@
         var editFlag = [[${@permission.hasPermi('im:announcement:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:announcement:remove')}]];
         var prefix = ctx + "im/group/announcement";
+        var currentGroupId = [[${param.groupId}]] || null;
+
         $(function() {
             loadStatistics();
+
+            // 如果有 groupId 参数，自动填充搜索框并搜索
+            if (currentGroupId) {
+                $("input[name='groupId']").val(currentGroupId);
+            }
+
             var options = {
                 url: prefix + "/list",
-                createUrl: prefix + "/add",
+                createUrl: prefix + "/add?groupId=" + (currentGroupId || ''),
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove",
                 modalName: "群公告",
@@ -259,17 +279,16 @@
                 {
                     title: '操作',
                     align: 'center',
-                    width: '280',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewContent(' + row.id + ')"><i class="fa fa-eye"></i>查看</a> ');
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewContent(' + row.id + ')" style="cursor: pointer;"><i class="fa fa-eye"></i>查看</a> ');
                         if (row.status == 0) {
-                            actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="publishAnnouncement(' + row.id + ')"><i class="fa fa-paper-plane"></i>发布</a> ');
+                            actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="publishAnnouncement(' + row.id + ')" style="cursor: pointer;"><i class="fa fa-paper-plane"></i>发布</a> ');
                         } else if (row.status == 1) {
-                            actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="recallAnnouncement(' + row.id + ')"><i class="fa fa-undo"></i>撤回</a> ');
+                            actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="recallAnnouncement(' + row.id + ')" style="cursor: pointer;"><i class="fa fa-undo"></i>撤回</a> ');
                         }
-                        actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="editAnnouncement(' + row.id + ')" style="cursor: pointer;"><i class="fa fa-edit"></i>修改</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')" style="cursor: pointer;"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
                 }]
@@ -286,6 +305,15 @@
                 }
             });
         }
+
+        /* 自定义新增函数，支持 groupId 参数 */
+        function addAnnouncement() {
+            var url = prefix + "/add";
+            if (currentGroupId) {
+                url += "?groupId=" + currentGroupId;
+            }
+            $.modal.open("新增群公告", url, '1000', '650');
+        }
         /* 查看公告内容 */
         function viewContent(id) {
             $.get(prefix + "/info/" + id, function(result) {
@@ -296,7 +324,7 @@
                     top.layer.open({
                         type: 1,
                         title: '公告详情',
-                        area: ['600px', '400px'],
+                        area: ['900px', 'auto'],
                         content: html
                     });
                 }
@@ -364,6 +392,15 @@
                     }
                 });
             });
+        }
+
+        /* 编辑公告（带 groupId 参数） */
+        function editAnnouncement(id) {
+            var url = prefix + "/edit/" + id;
+            if (currentGroupId) {
+                url += "?groupId=" + currentGroupId;
+            }
+            $.modal.open("修改群公告", url, '1000', '650');
         }
     </script></body>
 </html>

@@ -164,16 +164,16 @@
         update im_message set is_revoked = 1, revoked_time = NOW() where id = #{messageId}
     </update>
 
-    <delete id="deleteImMessageById" parameterType="Long">
+    <update id="deleteImMessageById" parameterType="Long">
         update im_message set is_deleted = 1, deleted_time = NOW() where id = #{id}
-    </delete>
+    </update>
 
-    <delete id="deleteImMessageByIds" parameterType="Long[]">
+    <update id="deleteImMessageByIds" parameterType="Long[]">
         update im_message set is_deleted = 1, deleted_time = NOW() where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
-    </delete>
+    </update>
 
     <!-- 获取消息统计数据 -->
     <select id="getMessageStatistics" resultType="java.util.Map">

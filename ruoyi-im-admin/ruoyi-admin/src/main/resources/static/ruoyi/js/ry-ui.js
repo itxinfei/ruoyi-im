@@ -853,7 +853,7 @@ var table = {
                     url = "/404.html";
                 }
                 if ($.common.isEmpty(width)) {
-                    width = 800;
+                    width = 1000;
                 }
                 if ($.common.isEmpty(height)) {
                     height = ($(window).height() - 50);
@@ -889,7 +889,7 @@ var table = {
             openOptions: function (options) {
                 var _url = $.common.isEmpty(options.url) ? "/404.html" : options.url; 
                 var _title = $.common.isEmpty(options.title) ? "系统窗口" : options.title; 
-                var _width = $.common.isEmpty(options.width) ? "800" : options.width; 
+                var _width = $.common.isEmpty(options.width) ? "1000" : options.width; 
                 var _height = $.common.isEmpty(options.height) ? ($(window).height() - 50) : options.height;
                 var _btn = ['<i class="fa fa-check"></i> 确认', '<i class="fa fa-close"></i> 关闭'];
                 // 如果是移动端，就使用自适应大小弹窗
@@ -897,6 +897,9 @@ var table = {
                     _width = 'auto';
                     _height = 'auto';
                 }
+                // 处理宽度和高度的单位
+                var widthStr = String(_width).indexOf('px') >= 0 ? _width : _width + 'px';
+                var heightStr = String(_height).indexOf('px') >= 0 ? _height : _height + 'px';
                 if ($.common.isEmpty(options.yes)) {
                     options.yes = function(index, layero) {
                         options.callBack(index, layero);
@@ -919,7 +922,7 @@ var table = {
                     shade: 0.3,
                     title: _title,
                     fix: false,
-                    area: [_width + 'px', _height + 'px'],
+                    area: [widthStr, heightStr],
                     content: _url,
                     closeBtn: $.common.isEmpty(options.closeBtn) ? 1 : options.closeBtn,
                     shadeClose: $.common.isEmpty(options.shadeClose) ? true : options.shadeClose,
@@ -952,7 +955,7 @@ var table = {
                     url = "/404.html";
                 }
                 if ($.common.isEmpty(width)) {
-                    width = 800;
+                    width = 1000;
                 }
                 if ($.common.isEmpty(height)) {
                     height = ($(window).height() - 50);

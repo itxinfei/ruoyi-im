@@ -53,6 +53,18 @@
                 .select-table.table-striped {
                     padding: 0;
                 }
+
+                /* 操作按钮样式优化 */
+                .btn-xs {
+                    padding: 4px 8px;
+                    font-size: 12px;
+                    line-height: 1.5;
+                    transition: all 0.2s ease;
+                }
+                .btn-xs:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
     </style>
 </head>
 <body class="gray-bg">
@@ -239,11 +251,10 @@
                 {
                     title: '操作',
                     align: 'center',
-                    width: '150',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="changeRole(' + row.id + ', \'' + row.role + '\', ' + row.groupId + ', ' + row.userId + ')"><i class="fa fa-edit"></i>角色</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="removeMember(' + row.groupId + ', ' + row.userId + ')"><i class="fa fa-remove"></i>移除</a>');
+                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="changeRole(' + row.id + ', \'' + row.role + '\', ' + row.groupId + ', ' + row.userId + ')" style="cursor: pointer;"><i class="fa fa-edit"></i>角色</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="removeMember(' + row.groupId + ', ' + row.userId + ')" style="cursor: pointer;"><i class="fa fa-remove"></i>移除</a>');
                         return actions.join('');
                     }
                 }]
@@ -263,7 +274,7 @@
         /* 添加成员 */
         function addMember() {
             var url = prefix + "/add";
-            $.modal.open("添加群组成员", url, '800', '500');
+            $.modal.open("添加群组成员", url, '1000', '650');
         }
         /* 修改角色 */
         function editRole() {

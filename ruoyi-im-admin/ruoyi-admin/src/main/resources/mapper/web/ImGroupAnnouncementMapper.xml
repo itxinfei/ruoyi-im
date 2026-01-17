@@ -139,8 +139,8 @@
         select
             count(*) as totalCount,
             sum(case when is_pinned = 1 then 1 else 0 end) as pinnedCount,
-            sum(case when type = 'SYSTEM' then 1 else 0 end) as systemCount,
-            sum(case when type = 'ACTIVITY' then 1 else 0 end) as activityCount
+            sum(case when type = 2 then 1 else 0 end) as systemCount,
+            sum(case when type = 3 then 1 else 0 end) as activityCount
         from im_group_announcement
         where status = 1
     </select>

@@ -11,6 +11,19 @@
     <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+    <style>
+        /* 操作按钮样式优化 */
+        .btn-xs {
+            padding: 4px 8px;
+            font-size: 12px;
+            line-height: 1.5;
+            transition: all 0.2s ease;
+        }
+        .btn-xs:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div">
@@ -136,10 +149,9 @@
                 {
                     title: '操作',
                     align: 'center',
-                    width: '80',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')" style="cursor: pointer;"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
                 }]

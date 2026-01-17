@@ -89,6 +89,7 @@
     <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
     <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
     <script th:src="@{/ruoyi/js/common.js}"></script>
+    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
     <script th:inline="javascript">
         var groupId = [[${groupId}]];
         var prefix = ctx + "im/group/log";
@@ -100,7 +101,7 @@
 
         // 加载群组基本信息
         function loadGroupInfo() {
-            $.get(ctx + "im/group/info/" + groupId, function(result) {
+            $.get(ctx + "im/group/" + groupId, function(result) {
                 if (result.code == 0 && result.data) {
                     var data = result.data;
                     $("#groupId").text(data.id || '-');
@@ -114,7 +115,6 @@
             $('#bootstrap-table').bootstrapTable({
                 url: prefix + "/list",
                 method: 'post',
-                contentType: 'application/json',
                 cache: false,
                 pagination: true,
                 sidePagination: 'server',
@@ -177,13 +177,12 @@
                     return [];
                 },
                 queryParams: function(params) {
-                    var query = {
+                    return {
                         pageNum: params.pageNumber || 1,
                         pageSize: params.pageSize || 20,
                         groupId: groupId,
                         operationType: $("#operationType").val()
                     };
-                    return JSON.stringify(query);
                 }
             });
         }

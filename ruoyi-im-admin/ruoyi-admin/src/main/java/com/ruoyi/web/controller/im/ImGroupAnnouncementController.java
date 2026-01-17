@@ -142,17 +142,6 @@ public class ImGroupAnnouncementController extends BaseController {
     }
 
     /**
-     * 修改群公告（JSON）
-     */
-    @RequiresPermissions("im:announcement:edit")
-    @Log(title = "群公告管理", businessType = BusinessType.UPDATE)
-    @PutMapping
-    @ResponseBody
-    public AjaxResult edit(@RequestBody ImGroupAnnouncement imGroupAnnouncement) {
-        return toAjax(imGroupAnnouncementService.updateImGroupAnnouncement(imGroupAnnouncement));
-    }
-
-    /**
      * 修改群公告（表单）
      */
     @RequiresPermissions("im:announcement:edit")

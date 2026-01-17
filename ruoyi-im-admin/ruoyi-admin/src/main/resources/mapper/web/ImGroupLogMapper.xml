@@ -80,7 +80,7 @@
             <if test="operatorName != null">#{operatorName},</if>
             <if test="operationType != null">#{operationType},</if>
             <if test="operationDesc != null">#{operationDesc},</if>
-            <if test="targetUserId != null">#{targetUserIdId},</if>
+            <if test="targetUserId != null">#{targetUserId},</if>
             <if test="targetUserName != null">#{targetUserName},</if>
             <if test="createTime != null">#{createTime},</if>
         </trim>

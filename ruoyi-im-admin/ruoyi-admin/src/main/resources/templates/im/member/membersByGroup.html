@@ -266,7 +266,7 @@
 
         // 加载群组基本信息
         function loadGroupInfo() {
-            $.get(ctx + "im/group/info/" + groupId, function(result) {
+            $.get(ctx + "im/group/" + groupId, function(result) {
                 if (result.code == 0 && result.data) {
                     var data = result.data;
                     $("#groupId").text(data.id || '-');
@@ -527,7 +527,7 @@
             layer.open({
                 type: 1,
                 title: '成员详情 - ' + nickname,
-                area: ['800px', '600px'],
+                area: ['1000px', '700px'],
                 content: content
             });
         }

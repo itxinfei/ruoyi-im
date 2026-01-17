@@ -184,7 +184,7 @@
         var groupId = [[${group.id}]];
 
         function changeAvatar() {
-            $.modal.open("更换头像", ctx + "common/upload", '600', '400');
+            $.modal.open("更换头像", ctx + "common/upload", '800', '500');
         }
 
         function viewMembers() {
@@ -198,7 +198,7 @@
         }
 
         function manageAnnouncement() {
-            var url = prefix + "/announcement/group/" + groupId;
+            var url = prefix + "/announcement?groupId=" + groupId;
             $.modal.openOptions({
                 title: "群组公告管理",
                 url: url,
