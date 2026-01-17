@@ -149,9 +149,10 @@
 
     <select id="getApplicationStatistics" resultType="java.util.Map">
         select
-            count(*) as total_apps,
-            sum(case when is_visible = 1 then 1 else 0 end) as visible_apps,
-            sum(case when is_visible = 0 then 1 else 0 end) as hidden_apps
+            count(*) as totalApps,
+            sum(case when is_visible = 1 then 1 else 0 end) as visibleApps,
+            sum(case when is_visible = 0 then 1 else 0 end) as hiddenApps,
+            sum(case when is_system = 1 then 1 else 0 end) as systemApps
         from im_application
     </select>
 </mapper>

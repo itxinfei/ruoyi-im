@@ -155,11 +155,11 @@
     </select>
 
     <update id="updateTemplateStatus">
-        update im_approval_template set status = #{status} where id = #{id}
+        update im_approval_template set status = #{isActive} where id = #{id}
     </update>
 
     <update id="processApproval">
-        update im_approval set status = #{action}, remark = #{remark},
+        update im_approval set status = #{action}, remark = #{comment},
             update_time = NOW()
         where id = #{id}
     </update>

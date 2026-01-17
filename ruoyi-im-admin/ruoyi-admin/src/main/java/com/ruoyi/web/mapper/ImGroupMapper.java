@@ -73,4 +73,19 @@ public interface ImGroupMapper {
      * 统计群成员总数
      */
     int countTotalGroupMembers();
+
+    /**
+     * 统计活跃群组数（7天内有消息）
+     */
+    int countActiveGroups();
+
+    /**
+     * 统计全员禁言的群组数
+     */
+    int countMutedGroups();
+
+    /**
+     * 统计大群数（成员>100）
+     */
+    int countLargeGroups();
 }

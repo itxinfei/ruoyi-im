@@ -114,4 +114,19 @@ public interface ImFriendMapper {
      * 统计待处理好友申请数
      */
     int countPendingRequests();
+
+    /**
+     * 查询所有好友分组（去重）
+     *
+     * @return 分组名称列表
+     */
+    List<String> selectDistinctGroups();
+
+    /**
+     * 查询两个用户之间是否存在好友关系
+     *
+     * @param params 包含userId和friendId的参数
+     * @return 好友关系，不存在返回null
+     */
+    ImFriend selectFriendByUsers(java.util.Map<String, Object> params);
 }

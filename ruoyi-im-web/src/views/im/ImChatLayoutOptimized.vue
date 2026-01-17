@@ -317,7 +317,7 @@
 
           <!-- 聊天内容 -->
           <div class="chat-panel">
-            <div v-if="currentSessionId" class="chat-container">
+            <ChatContainer v-if="currentSessionId" />
               <!-- 聊天头部 - 钉钉6.5.x规范增强版 -->
               <div class="chat-header">
                 <!-- 左侧：会话信息 -->
@@ -2572,6 +2572,7 @@ import SystemSettings from '@/views/settings/index.vue'
 import GlobalSearch from '@/components/Search/GlobalSearch.vue'
 import FeedbackDialog from '@/components/Feedback/FeedbackDialog.vue'
 import CallManager from '@/components/Chat/CallManager.vue'
+import ChatContainer from '@/views/im/chat/ChatContainer.vue'
 import UserDetailDialog from '@/views/im/conversation-detail/UserDetailDialog.vue'
 import GroupDetailDialog from '@/views/im/conversation-detail/GroupDetailDialog.vue'
 // 新增消息组件
@@ -7297,6 +7298,8 @@ onMounted(() => {
 onUnmounted(() => {
   // 这里不主动断开 WebSocket，因为其他组件可能也在使用
 })
+
+// 组件导出
 </script>
 
 <style lang="scss" scoped>

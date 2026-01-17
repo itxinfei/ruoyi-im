@@ -11,19 +11,19 @@
         <div class="form-group">
             <label class="col-sm-3 control-label is-required">用户名称：</label>
             <div class="col-sm-8">
-                <input name="username" placeholder="请输入用户名称" class="form-control" type="text" required>
+                <input name="username" placeholder="请输入用户名称" class="form-control" type="text" required autocomplete="off" value="">
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-3 control-label is-required">用户昵称：</label>
             <div class="col-sm-8">
-                <input name="nickname" placeholder="请输入用户昵称" class="form-control" type="text" required>
+                <input name="nickname" placeholder="请输入用户昵称" class="form-control" type="text" required autocomplete="off" value="">
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-3 control-label is-required">密码：</label>
             <div class="col-sm-8">
-                <input name="password" placeholder="请输入密码" class="form-control" type="password" required>
+                <input name="password" placeholder="请输入密码" class="form-control" type="password" required autocomplete="new-password" value="">
             </div>
         </div>
         <div class="form-group">
@@ -71,14 +71,25 @@
         </div>
     </form>
     <div th:include="include :: footer"></div>
+    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
     <script th:inline="javascript">
         var prefix = ctx + "im/user";
+
+        // 页面加载时清空所有表单字段，防止自动填充
+        $(document).ready(function() {
+            $('#form-user-add')[0].reset();
+            // 清除浏览器自动填充的值
+            $('input[type="text"], input[type="password"]').val('');
+        });
+
         $("#form-user-add").validate({
             focusCleanup: true
         });
 
         function submitHandler() {
             if ($.validate.form()) {
+                // 再次清空可能被自动填充的密码
+                $('input[name="password"]').val('');
                 $.operate.save(prefix + "/add", $('#form-user-add').serialize());
             }
         }

@@ -65,12 +65,22 @@ public class ImGroupServiceImpl implements ImGroupService {
         return groupMapper.dismissGroup(groupId);
     }
 
+    /**
+     * 获取群组统计数据
+     *
+     * @return 统计数据，包含totalCount、activeCount、mutedCount、largeCount
+     */
     @Override
     public Map<String, Object> getGroupStatistics() {
         Map<String, Object> result = new HashMap<>();
-        result.put("total", groupMapper.countTotalGroups());
-        result.put("todayCreated", groupMapper.countTodayCreatedGroups());
-        result.put("totalMembers", groupMapper.countTotalGroupMembers());
+        // 群组总数
+        result.put("totalCount", groupMapper.countTotalGroups());
+        // 活跃群组数（7天内有消息）
+        result.put("activeCount", groupMapper.countActiveGroups());
+        // 全员禁言群组数
+        result.put("mutedCount", groupMapper.countMutedGroups());
+        // 大群数（成员>100）
+        result.put("largeCount", groupMapper.countLargeGroups());
         return result;
     }
 }

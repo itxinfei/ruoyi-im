@@ -69,6 +69,15 @@ public interface ImFriendRequestService {
     int handleFriendRequest(Long id, boolean approved);
 
     /**
+     * 处理好友申请并自动建立好友关系
+     *
+     * @param requestId 申请ID
+     * @param approved 是否同意
+     * @return 结果
+     */
+    int handleFriendRequestAndCreateFriend(Long requestId, boolean approved);
+
+    /**
      * 获取好友申请统计数据
      *
      * @return 统计数据

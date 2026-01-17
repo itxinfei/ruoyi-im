@@ -118,4 +118,24 @@
     <select id="countTotalGroupMembers" resultType="java.lang.Integer">
         select count(*) from im_group_member where is_deleted = 0
     </select>
+
+    <!-- 统计活跃群组（7天内有消息的群组） -->
+    <select id="countActiveGroups" resultType="java.lang.Integer">
+        select count(distinct g.id) from im_group g
+        inner join im_conversation c on c.target_id = g.id and c.type = 'GROUP'
+        where g.is_deleted = 0
+        and c.last_message_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    </select>
+
+    <!-- 统计全员禁言的群组 -->
+    <select id="countMutedGroups" resultType="java.lang.Integer">
+        select count(*) from im_group where is_deleted = 0 and all_muted = 1
+    </select>
+
+    <!-- 统计大群（成员数>100） -->
+    <select id="countLargeGroups" resultType="java.lang.Integer">
+        select count(*) from im_group g
+        where g.is_deleted = 0
+        and (select count(*) from im_group_member where group_id = g.id and is_deleted = 0) > 100
+    </select>
 </mapper>

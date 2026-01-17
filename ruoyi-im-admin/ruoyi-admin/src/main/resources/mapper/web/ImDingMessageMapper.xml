@@ -105,10 +105,10 @@
 
     <select id="getDingStatistics" resultType="java.util.Map">
         select
-            (SELECT COUNT(*) FROM im_ding_message) as total_count,
-            (SELECT COUNT(*) FROM im_ding_message WHERE status = 'SENT') as sent_count,
-            (SELECT COUNT(*) FROM im_ding_message WHERE status = 'PENDING') as pending_count,
-            (SELECT COUNT(*) FROM im_ding_message WHERE is_urgent = 1) as urgent_count
+            (SELECT COUNT(*) FROM im_ding_message) as totalCount,
+            (SELECT COUNT(*) FROM im_ding_message WHERE status = 'SENT') as sentCount,
+            (SELECT COUNT(*) FROM im_ding_message WHERE status = 'PENDING') as pendingCount,
+            (SELECT COUNT(*) FROM im_ding_message WHERE is_urgent = 1) as urgentCount
         from dual
     </select>
 

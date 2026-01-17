@@ -192,15 +192,15 @@ public class ImMessageController extends BaseController {
     @RequiresPermissions("im:message:list")
     @GetMapping("/statistics/sensitive")
     public AjaxResult getSensitiveStatistics() {
+        // 调用 Service 获取统计数据
+        Map<String, Object> dbStats = imMessageService.getMessageStatistics();
+
+        // 转换字段名为驼峰格式（前端期望）
         Map<String, Object> stats = new HashMap<>();
-        int totalCount = imMessageService.countMessages(null);
-        int sensitiveCount = 0;
-        int highCount = 0;
-        int normalCount = totalCount - sensitiveCount - highCount;
-        stats.put("totalCount", totalCount);
-        stats.put("normalCount", normalCount);
-        stats.put("sensitiveCount", sensitiveCount);
-        stats.put("highCount", highCount);
+        stats.put("totalCount", dbStats.get("total_count"));
+        stats.put("normalCount", dbStats.get("normal_count"));
+        stats.put("sensitiveCount", dbStats.get("sensitive_count"));
+        stats.put("highCount", dbStats.get("high_count"));
         return AjaxResult.success(stats);
     }
 }

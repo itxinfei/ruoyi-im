@@ -106,10 +106,10 @@
 
     <select id="getEmailStatistics" resultType="java.util.Map">
         select
-            (SELECT COUNT(*) FROM im_email WHERE is_deleted = 0) as total_count,
-            (SELECT COUNT(*) FROM im_email WHERE is_deleted = 0 AND is_read = 0) as unread_count,
-            (SELECT COUNT(*) FROM im_email WHERE is_deleted = 0 AND is_starred = 1) as starred_count,
-            (SELECT COUNT(*) FROM im_email WHERE folder = 'SENT' AND is_deleted = 0) as sent_count
+            (SELECT COUNT(*) FROM im_email WHERE is_deleted = 0) as totalCount,
+            (SELECT COUNT(*) FROM im_email WHERE is_deleted = 0 AND is_read = 0) as unreadCount,
+            (SELECT COUNT(*) FROM im_email WHERE is_deleted = 0 AND is_starred = 1) as starredCount,
+            (SELECT COUNT(*) FROM im_email WHERE folder = 'SENT' AND is_deleted = 0) as sentCount
         from dual
     </select>
 </mapper>

@@ -26,14 +26,7 @@
                     <input name="avatar" th:field="*{avatar}" class="form-control" type="text" placeholder="请输入头像URL">
                 </div>
             </div>
-            
-            <div class="form-group">
-                <label class="col-sm-3 control-label">备注：</label>
-                <div class="col-sm-8">
-                    <textarea name="remark" th:field="*{remark}" class="form-control" rows="3" placeholder="请输入备注"></textarea>
-                </div>
-            </div>
-            
+
             <div class="form-group">
                 <div class="col-sm-offset-3 col-sm-8">
                     <button type="button" class="btn btn-primary" onclick="submitHandler()"><i class="fa fa-check"></i>确 定</button>
@@ -42,6 +35,7 @@
             </div>
         </form>
     </div>
+    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
     <script th:inline="javascript">
         var prefix = ctx + "im/session";
         $("#form-session-edit").validate({

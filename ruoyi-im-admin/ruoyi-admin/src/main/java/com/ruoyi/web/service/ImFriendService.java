@@ -1,6 +1,8 @@
 package com.ruoyi.web.service;
 
 import com.ruoyi.web.domain.ImFriend;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -83,6 +85,15 @@ public interface ImFriendService {
      * @return 结果
      */
     int deleteFriendByUserAndFriend(Long userId, Long friendId);
+
+    /**
+     * 查询两个用户之间是否存在好友关系
+     *
+     * @param userId1 用户1 ID
+     * @param userId2 用户2 ID
+     * @return 好友关系，不存在返回null
+     */
+    ImFriend selectImFriendByUsers(Long userId1, Long userId2);
 
     /**
      * 获取好友统计数据

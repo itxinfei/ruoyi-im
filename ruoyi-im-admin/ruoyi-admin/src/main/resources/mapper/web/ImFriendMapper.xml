@@ -140,4 +140,17 @@
         where status = 'PENDING'
     </select>
 
+    <!-- 查询所有好友分组（去重） -->
+    <select id="selectDistinctGroups" resultType="java.lang.String">
+        select distinct group_name from im_friend
+        where is_deleted = 0 and group_name is not null and group_name != ''
+        order by group_name asc
+    </select>
+
+    <!-- 查询两个用户之间是否存在好友关系 -->
+    <select id="selectFriendByUsers" parameterType="map" resultMap="ImFriendResult">
+        <include refid="selectImFriendWithUserVo"/>
+        where f.user_id = #{userId} and f.friend_id = #{friendId} and f.is_deleted = 0
+    </select>
+
 </mapper>
