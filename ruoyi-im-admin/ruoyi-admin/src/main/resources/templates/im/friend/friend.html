@@ -10,7 +10,7 @@
     <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
     <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
-    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
+    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
     <style>
         /* 统计卡片样式 */
         .statistics-section {
@@ -135,17 +135,17 @@
     </div>
         <!-- 通用JS -->
     <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
-    <script th:src="@{/js/jquery.min.js?v=3.6.3}"></script>
-    <script th:src="@{/js/bootstrap.min.js?v=3.3.7}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js?v=1.22.6}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js?v=1.22.6}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js?v=1.22.6}"></script>
-    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js?v=1.21.0}"></script>
-    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js?v=2.70.0}"></script>
-    <script th:src="@{/ajax/libs/layer/layer.min.js?v=3.7.0}"></script>
-    <script th:src="@{/ajax/libs/layui/layui.min.js?v=2.8.18}"></script>
-    <script th:src="@{/ruoyi/js/common.js?v=4.8.0}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js?v=4.8.0}"></script>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
+    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js}"></script>
+    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
+    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
+    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
+    <script th:src="@{/ajax/libs/layui/layui.min.js}"></script>
+    <script th:src="@{/ruoyi/js/common.js}"></script>
+    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:friend:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:friend:remove')}]];
