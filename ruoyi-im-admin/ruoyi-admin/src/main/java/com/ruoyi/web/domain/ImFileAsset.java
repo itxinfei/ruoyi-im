@@ -231,7 +231,7 @@ public class ImFileAsset extends BaseEntity implements Serializable {
      * @return true-正常，false-已删除
      */
     public boolean isActive() {
-        return STATUS_ACTIVE.equals(this.status) && !Boolean.TRUE.equals(this.deleted);
+        return STATUS_ACTIVE.equals(this.status);
     }
 
     /**

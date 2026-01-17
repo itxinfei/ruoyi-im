@@ -77,7 +77,7 @@ public class ImFileShareController extends BaseController {
     @Log(title = "文件分享管理", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
-    public AjaxResult add(@RequestBody ImFileShare imFileShare) {
+    public AjaxResult add(ImFileShare imFileShare) {
         return toAjax(imFileShareService.insertImFileShare(imFileShare));
     }
 

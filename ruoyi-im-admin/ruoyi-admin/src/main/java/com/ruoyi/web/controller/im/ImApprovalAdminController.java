@@ -115,7 +115,7 @@ public class ImApprovalAdminController extends BaseController {
     @Log(title = "审批管理", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
-    public AjaxResult add(@RequestBody ImApproval imApproval) {
+    public AjaxResult add(ImApproval imApproval) {
         return toAjax(approvalService.insertImApproval(imApproval));
     }
 

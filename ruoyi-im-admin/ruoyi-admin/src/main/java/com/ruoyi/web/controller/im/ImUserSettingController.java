@@ -97,7 +97,7 @@ public class ImUserSettingController extends BaseController {
     @Log(title = "用户设置", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
-    public AjaxResult add(@RequestBody ImUserSetting imUserSetting) {
+    public AjaxResult add(ImUserSetting imUserSetting) {
         return toAjax(imUserSettingService.insertImUserSetting(imUserSetting));
     }
 

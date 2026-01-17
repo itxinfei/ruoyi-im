@@ -87,7 +87,7 @@ public class ImScheduleEventController extends BaseController {
     @Log(title = "日程事件", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
-    public AjaxResult add(@RequestBody ImScheduleEvent imScheduleEvent) {
+    public AjaxResult add(ImScheduleEvent imScheduleEvent) {
         return toAjax(imScheduleEventService.insertImScheduleEvent(imScheduleEvent));
     }
 

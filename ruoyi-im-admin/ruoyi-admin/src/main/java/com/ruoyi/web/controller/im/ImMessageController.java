@@ -95,6 +95,17 @@ public class ImMessageController extends BaseController {
     }
 
     /**
+     * 新增IM消息
+     */
+    @RequiresPermissions("im:message:add")
+    @Log(title = "IM消息", businessType = BusinessType.INSERT)
+    @PostMapping("/add")
+    @ResponseBody
+    public AjaxResult add(ImMessage imMessage) {
+        return toAjax(imMessageService.insertImMessage(imMessage));
+    }
+
+    /**
      * 获取消息详情（匹配前端调用 /im/message/{id}）
      */
     @RequiresPermissions("im:message:query")

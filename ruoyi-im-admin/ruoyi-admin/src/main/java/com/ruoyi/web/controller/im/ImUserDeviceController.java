@@ -95,7 +95,7 @@ public class ImUserDeviceController extends BaseController {
     @Log(title = "用户设备", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
-    public AjaxResult add(@RequestBody ImUserDevice imUserDevice) {
+    public AjaxResult add(ImUserDevice imUserDevice) {
         return toAjax(imUserDeviceService.insertImUserDevice(imUserDevice));
     }
 
