@@ -6,7 +6,8 @@ import com.ruoyi.web.mapper.ImGroupMapper;
 import com.ruoyi.web.mapper.ImMessageMapper;
 import com.ruoyi.web.mapper.ImUserMapper;
 import com.ruoyi.web.service.ImDashboardService;
-import com.ruoyi.web.service.impl.ImDashboardCacheService;
+// 缓存服务已禁用
+// import com.ruoyi.web.service.impl.ImDashboardCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -37,8 +38,9 @@ public class ImDashboardController extends BaseController {
     @Autowired
     private ImDashboardService dashboardService;
 
-    @Autowired
-    private ImDashboardCacheService cacheService;
+    // 缓存服务已禁用
+    // @Autowired
+    // private ImDashboardCacheService cacheService;
 
     // ==================== 原有接口（保持兼容）====================
 
@@ -319,7 +321,7 @@ public class ImDashboardController extends BaseController {
 
     /**
      * 6. 刷新缓存
-     * 清除Dashboard相关缓存，强制重新查询数据库
+     * 清除Dashboard相关缓存，强制重新查询数据库（已禁用缓存功能）
      *
      * @param cacheType 缓存类型：all/trend/distribution/comparison/ranking/realtime/basic（默认all）
      * @return 操作结果
@@ -328,36 +330,37 @@ public class ImDashboardController extends BaseController {
     @ResponseBody
     public AjaxResult refreshCache(@RequestParam(defaultValue = "all") String cacheType) {
         try {
-            switch (cacheType) {
-                case "all":
-                    cacheService.clearAll();
-                    break;
-                case "trend":
-                    cacheService.clearTrendCache();
-                    break;
-                case "distribution":
-                    cacheService.clearDistributionCache();
-                    break;
-                case "comparison":
-                    cacheService.clearComparisonCache();
-                    break;
-                case "ranking":
-                    cacheService.clearRankingCache();
-                    break;
-                case "realtime":
-                    cacheService.clearRealtimeCache();
-                    break;
-                case "basic":
-                    cacheService.clearBasicStats();
-                    break;
-                default:
-                    return AjaxResult.error("不支持的缓存类型: " + cacheType);
-            }
+            // 缓存功能已禁用，直接返回成功
+            // switch (cacheType) {
+            //     case "all":
+            //         cacheService.clearAll();
+            //         break;
+            //     case "trend":
+            //         cacheService.clearTrendCache();
+            //         break;
+            //     case "distribution":
+            //         cacheService.clearDistributionCache();
+            //         break;
+            //     case "comparison":
+            //         cacheService.clearComparisonCache();
+            //         break;
+            //     case "ranking":
+            //         cacheService.clearRankingCache();
+            //         break;
+            //     case "realtime":
+            //         cacheService.clearRealtimeCache();
+            //         break;
+            //     case "basic":
+            //         cacheService.clearBasicStats();
+            //         break;
+            //     default:
+            //         return AjaxResult.error("不支持的缓存类型: " + cacheType);
+            // }
 
-            return AjaxResult.success("缓存刷新成功");
+            return AjaxResult.success("数据已刷新（当前未启用缓存）");
         } catch (Exception e) {
-            logger.error("刷新缓存失败", e);
-            return AjaxResult.error("刷新缓存失败: " + e.getMessage());
+            logger.error("刷新数据失败", e);
+            return AjaxResult.error("刷新数据失败: " + e.getMessage());
         }
     }
 

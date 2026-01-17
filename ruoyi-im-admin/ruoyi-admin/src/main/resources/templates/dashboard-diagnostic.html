@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard 诊断工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Dashboard 诊断工具</h1>
+
+    <!-- 1. 检查jQuery -->
+    <div class="test-section">
+        <div class="test-title">1️⃣ 检查 jQuery</div>
+        <div id="jquery-test" class="test-result info">检测中...</div>
+    </div>
+
+    <!-- 2. 检查ECharts -->
+    <div class="test-section">
+        <div class="test-title">2️⃣ 检查 ECharts</div>
+        <div id="echarts-test" class="test-result info">检测中...</div>
+    </div>
+
+    <!-- 3. 测试基础统计API -->
+    <div class="test-section">
+        <div class="test-title">3️⃣ 测试基础统计API</div>
+        <button onclick="testBasicAPI()">测试 /im/dashboard/basic</button>
+        <div id="basic-api-test" class="test-result info">未测试</div>
+    </div>
+
+    <!-- 4. 测试趋势API -->
+    <div class="test-section">
+        <div class="test-title">4️⃣ 测试趋势API</div>
+        <button onclick="testTrendAPI()">测试 /im/dashboard/trend</button>
+        <div id="trend-api-test" class="test-result info">未测试</div>
+    </div>
+
+    <!-- 5. 显示响应数据 -->
+    <div class="test-section">
+        <div class="test-title">5️⃣ API响应详情</div>
+        <pre id="api-response">点击上方按钮测试API...</pre>
+    </div>
+
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script>
+        // 1. 检查jQuery
+        if (typeof $ !== 'undefined') {
+            $('#jquery-test').removeClass('info').addClass('success').text('✅ jQuery 已加载 (版本: ' + $.fn.jquery + ')');
+        } else {
+            $('#jquery-test').removeClass('info').addClass('error').text('❌ jQuery 未加载');
+        }
+
+        // 2. 检查ECharts
+        if (typeof echarts !== 'undefined') {
+            $('#echarts-test').removeClass('info').addClass('success').text('✅ ECharts 已加载 (版本: ' + echarts.version + ')');
+        } else {
+            $('#echarts-test').removeClass('info').addClass('error').text('❌ ECharts 未加载 - 请检查网络或CDN');
+        }
+
+        // 3. 测试基础统计API
+        function testBasicAPI() {
+            $('#basic-api-test').removeClass('info error success').addClass('info').text('测试中...');
+            $('#api-response').text('请求中...');
+
+            $.ajax({
+                url: '/im/dashboard/basic',
+                method: 'GET',
+                timeout: 10000,
+                success: function(response) {
+                    $('#basic-api-test').removeClass('info').addClass('success').text('✅ API请求成功');
+                    $('#api-response').text('状态码: ' + response.code + '\n消息: ' + response.msg + '\n数据: ' + JSON.stringify(response.data, null, 2));
+                },
+                error: function(xhr, status, error) {
+                    $('#basic-api-test').removeClass('info').addClass('error').text('❌ API请求失败');
+                    $('#api-response').text('错误: ' + error + '\n状态码: ' + xhr.status + '\n响应文本: ' + xhr.responseText);
+                }
+            });
+        }
+
+        // 4. 测试趋势API
+        function testTrendAPI() {
+            $('#trend-api-test').removeClass('info error success').addClass('info').text('测试中...');
+            $('#api-response').text('请求中...');
+
+            $.ajax({
+                url: '/im/dashboard/trend?type=user&days=7',
+                method: 'GET',
+                timeout: 10000,
+                success: function(response) {
+                    $('#trend-api-test').removeClass('info').addClass('success').text('✅ API请求成功');
+                    $('#api-response').text('状态码: ' + response.code + '\n消息: ' + response.msg + '\n数据条数: ' + (response.data ? response.data.length : 0) + '\n数据: ' + JSON.stringify(response.data, null, 2));
+                },
+                error: function(xhr, status, error) {
+                    $('#trend-api-test').removeClass('info').addClass('error').text('❌ API请求失败');
+                    $('#api-response').text('错误: ' + error + '\n状态码: ' + xhr.status + '\n响应文本: ' + xhr.responseText);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

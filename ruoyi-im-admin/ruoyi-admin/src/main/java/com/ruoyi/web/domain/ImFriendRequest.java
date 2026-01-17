@@ -1,5 +1,9 @@
 package com.ruoyi.web.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -10,6 +14,9 @@ import java.time.LocalDateTime;
  *
  * @author ruoyi
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ImFriendRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -76,99 +83,4 @@ public class ImFriendRequest implements Serializable {
      */
     private String toNickname;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getFromUserId() {
-        return fromUserId;
-    }
-
-    public void setFromUserId(Long fromUserId) {
-        this.fromUserId = fromUserId;
-    }
-
-    public Long getToUserId() {
-        return toUserId;
-    }
-
-    public void setToUserId(Long toUserId) {
-        this.toUserId = toUserId;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getHandledTime() {
-        return handledTime;
-    }
-
-    public void setHandledTime(LocalDateTime handledTime) {
-        this.handledTime = handledTime;
-    }
-
-    public String getFromUsername() {
-        return fromUsername;
-    }
-
-    public void setFromUsername(String fromUsername) {
-        this.fromUsername = fromUsername;
-    }
-
-    public String getFromNickname() {
-        return fromNickname;
-    }
-
-    public void setFromNickname(String fromNickname) {
-        this.fromNickname = fromNickname;
-    }
-
-    public String getFromAvatar() {
-        return fromAvatar;
-    }
-
-    public void setFromAvatar(String fromAvatar) {
-        this.fromAvatar = fromAvatar;
-    }
-
-    public String getToUsername() {
-        return toUsername;
-    }
-
-    public void setToUsername(String toUsername) {
-        this.toUsername = toUsername;
-    }
-
-    public String getToNickname() {
-        return toNickname;
-    }
-
-    public void setToNickname(String toNickname) {
-        this.toNickname = toNickname;
-    }
 }

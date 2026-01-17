@@ -214,7 +214,7 @@ public class ImFileAssetController extends BaseController {
             result.put("filePath", fileAsset.getFilePath());
             result.put("fileSize", fileAsset.getFileSize());
             result.put("fileType", fileAsset.getFileType());
-            result.put("url", fileAsset.getFileUrl());
+            result.put("Path", fileAsset.getFilePath());
 
             return AjaxResult.success("上传成功", result);
         } catch (IllegalArgumentException e) {
@@ -246,12 +246,17 @@ public class ImFileAssetController extends BaseController {
             }
 
             // 构建文件路径
-            String filePath = ruoYiConfig.getProfile() + fileAsset.getFilePath();
-            Path path = Paths.get(filePath).normalize();
+            String filePath = fileAsset.getFilePath();
+            // 去掉路径中的/profile前缀
+            if (filePath.startsWith("/profile/")) {
+                filePath = filePath.substring("/profile/".length());
+            }
+            String fullPath = ruoYiConfig.getProfile() + "/" + filePath;
+            Path path = Paths.get(fullPath).normalize();
             Resource resource = new UrlResource(path.toUri());
 
             if (!resource.exists() || !resource.isReadable()) {
-                logger.warn("下载文件失败：文件无法读取，路径：{}", filePath);
+                logger.warn("下载文件失败：文件无法读取，路径：{}", fullPath);
                 return ResponseEntity.notFound().build();
             }
 
@@ -259,7 +264,7 @@ public class ImFileAssetController extends BaseController {
             imFileAssetService.incrementDownloadCount(id);
 
             // 确定内容类型
-            String contentType = fileAsset.getMimeType();
+            String contentType = fileAsset.getFileType();
             if (StringUtils.isEmpty(contentType)) {
                 contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
             }
@@ -298,17 +303,22 @@ public class ImFileAssetController extends BaseController {
             }
 
             // 构建文件路径
-            String filePath = ruoYiConfig.getProfile() + fileAsset.getFilePath();
-            Path path = Paths.get(filePath).normalize();
+            String filePath = fileAsset.getFilePath();
+            // 去掉路径中的/profile前缀
+            if (filePath.startsWith("/profile/")) {
+                filePath = filePath.substring("/profile/".length());
+            }
+            String fullPath = ruoYiConfig.getProfile() + "/" + filePath;
+            Path path = Paths.get(fullPath).normalize();
             Resource resource = new UrlResource(path.toUri());
 
             if (!resource.exists() || !resource.isReadable()) {
-                logger.warn("预览文件失败：文件无法读取，路径：{}", filePath);
+                logger.warn("预览文件失败：文件无法读取，路径：{}", fullPath);
                 return ResponseEntity.notFound().build();
             }
 
             // 确定内容类型
-            String contentType = fileAsset.getMimeType();
+            String contentType = fileAsset.getFileType();
             if (StringUtils.isEmpty(contentType)) {
                 contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
             }

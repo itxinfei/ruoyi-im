@@ -2,7 +2,9 @@ package com.ruoyi.web.domain;
 
 import com.ruoyi.common.core.domain.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,6 +18,8 @@ import java.util.Map;
  * @date 2025-01-15
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ImEmail extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;

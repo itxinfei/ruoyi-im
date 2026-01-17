@@ -116,7 +116,7 @@ public class ImFileAssetServiceImpl implements ImFileAssetService {
         // 上传文件到服务器
         String uploadPath;
         try {
-            uploadPath = FileUploadUtils.upload(ruoYiConfig.getProfile(), file);
+            uploadPath = FileUploadUtils.upload(RuoYiConfig.getUploadPath(), file);
         } catch (Exception e) {
             logger.error("文件上传失败", e);
             throw new Exception("文件上传失败: " + e.getMessage());
@@ -125,13 +125,10 @@ public class ImFileAssetServiceImpl implements ImFileAssetService {
         // 创建文件记录
         ImFileAsset fileAsset = new ImFileAsset();
         fileAsset.setFileName(originalFilename);
-        fileAsset.setOriginalName(originalFilename);
         fileAsset.setFileType(getFileTypeByExtension(fileExtension));
         fileAsset.setFileSize(file.getSize());
         fileAsset.setFileExtension(fileExtension);
         fileAsset.setFilePath(uploadPath);
-        fileAsset.setFileUrl("/profile/" + uploadPath);
-        fileAsset.setMimeType(file.getContentType());
         fileAsset.setUploaderId(uploaderId != null ? uploaderId : 1L);
         fileAsset.setDownloadCount(0);
         fileAsset.setStatus(ImFileAsset.STATUS_ACTIVE);

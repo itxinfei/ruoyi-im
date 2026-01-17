@@ -1,5 +1,9 @@
 package com.ruoyi.web.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -11,6 +15,9 @@ import java.time.LocalDateTime;
  *
  * @author ruoyi
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ImFriend implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -97,131 +104,4 @@ public class ImFriend implements Serializable {
      */
     private java.util.Map<String, Object> params;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getFriendId() {
-        return friendId;
-    }
-
-    public void setFriendId(Long friendId) {
-        this.friendId = friendId;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    public Integer getIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(Integer isDeleted) {
-        this.isDeleted = isDeleted;
-    }
-
-    public LocalDateTime getDeletedTime() {
-        return deletedTime;
-    }
-
-    public void setDeletedTime(LocalDateTime deletedTime) {
-        this.deletedTime = deletedTime;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public String getFriendUsername() {
-        return friendUsername;
-    }
-
-    public void setFriendUsername(String friendUsername) {
-        this.friendUsername = friendUsername;
-    }
-
-    public String getFriendNickname() {
-        return friendNickname;
-    }
-
-    public void setFriendNickname(String friendNickname) {
-        this.friendNickname = friendNickname;
-    }
-
-    public String getFriendAvatar() {
-        return friendAvatar;
-    }
-
-    public void setFriendAvatar(String friendAvatar) {
-        this.friendAvatar = friendAvatar;
-    }
-
-    public String getFriendMobile() {
-        return friendMobile;
-    }
-
-    public void setFriendMobile(String friendMobile) {
-        this.friendMobile = friendMobile;
-    }
-
-    public Integer getFriendStatus() {
-        return friendStatus;
-    }
-
-    public void setFriendStatus(Integer friendStatus) {
-        this.friendStatus = friendStatus;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public java.util.Map<String, Object> getParams() {
-        return params;
-    }
-
-    public void setParams(java.util.Map<String, Object> params) {
-        this.params = params;
-    }
 }

@@ -3,6 +3,10 @@ package com.ruoyi.web.domain;
 import com.ruoyi.common.core.domain.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -15,6 +19,10 @@ import java.time.LocalDateTime;
  * @date 2025-01-17
  */
 @Schema(description = "文件资产")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ImFileAsset extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -84,118 +92,6 @@ public class ImFileAsset extends BaseEntity implements Serializable {
     /** 状态（ACTIVE-正常 DELETED-已删除） */
     @Schema(description = "状态")
     private String status;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public Long getFileSize() {
-        return fileSize;
-    }
-
-    public void setFileSize(Long fileSize) {
-        this.fileSize = fileSize;
-    }
-
-    public String getFileType() {
-        return fileType;
-    }
-
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
-    }
-
-    public String getFileExtension() {
-        return fileExtension;
-    }
-
-    public void setFileExtension(String fileExtension) {
-        this.fileExtension = fileExtension;
-    }
-
-    public String getMd5() {
-        return md5;
-    }
-
-    public void setMd5(String md5) {
-        this.md5 = md5;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public String getMd5() {
-        return md5;
-    }
-
-    public void setMd5(String md5) {
-        this.md5 = md5;
-    }
-
-    public Long getUploaderId() {
-        return uploaderId;
-    }
-
-    public void setUploaderId(Long uploaderId) {
-        this.uploaderId = uploaderId;
-    }
-
-    public String getUploaderName() {
-        return uploaderName;
-    }
-
-    public void setUploaderName(String uploaderName) {
-        this.uploaderName = uploaderName;
-    }
-
-    public LocalDateTime getUploadTime() {
-        return uploadTime;
-    }
-
-    public void setUploadTime(LocalDateTime uploadTime) {
-        this.uploadTime = uploadTime;
-    }
-
-    public Integer getDownloadCount() {
-        return downloadCount;
-    }
-
-    public void setDownloadCount(Integer downloadCount) {
-        this.downloadCount = downloadCount;
-    }
-
-    public LocalDateTime getDownloadExpireTime() {
-        return downloadExpireTime;
-    }
-
-    public void setDownloadExpireTime(LocalDateTime downloadExpireTime) {
-        this.downloadExpireTime = downloadExpireTime;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     /**
      * 判断文件是否已删除
