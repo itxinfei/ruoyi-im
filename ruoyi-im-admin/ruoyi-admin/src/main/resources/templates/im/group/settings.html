@@ -44,6 +44,13 @@
             margin-right: 20px;
             font-weight: normal;
         }
+        .radio-box input[type="radio"] {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        .radio-box label {
+            cursor: pointer;
+        }
         .help-block {
             margin-top: 8px;
             color: #999;
@@ -51,6 +58,27 @@
         }
         .form-group {
             margin-bottom: 20px;
+        }
+
+        /* 表单输入框焦点效果 */
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        /* 按钮hover效果 */
+        .btn {
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* 链接样式 */
+        a[href="javascript:void(0)"] {
+            cursor: pointer;
+            text-decoration: none;
         }
     </style>
 </head>

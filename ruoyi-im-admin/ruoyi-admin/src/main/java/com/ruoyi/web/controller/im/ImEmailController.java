@@ -89,7 +89,7 @@ public class ImEmailController extends BaseController {
      * 获取邮件详细信息
      */
     @RequiresPermissions("im:email:query")
-    @GetMapping("/info/{id}")
+    @GetMapping("/{id}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(emailService.selectImEmailById(id));
@@ -100,9 +100,9 @@ public class ImEmailController extends BaseController {
      */
     @RequiresPermissions("im:email:add")
     @Log(title = "邮件管理", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/add")
     @ResponseBody
-    public AjaxResult add(@RequestBody ImEmail imEmail) {
+    public AjaxResult add(ImEmail imEmail) {
         return toAjax(emailService.insertImEmail(imEmail));
     }
 
@@ -113,7 +113,7 @@ public class ImEmailController extends BaseController {
     @Log(title = "邮件管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImEmail imEmail) {
+    public AjaxResult edit(ImEmail imEmail) {
         return toAjax(emailService.updateImEmail(imEmail));
     }
 

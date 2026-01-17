@@ -23,13 +23,12 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
-        <!-- spring-boot-devtools -->
-        <!-- 暂时禁用以排查启动问题 -->
-        <!--<dependency>
+        <!-- spring-boot-devtools 热部署支持 -->
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
-        </dependency>-->
+        </dependency>
 
         <!-- SpringDoc OpenAPI 3-->
         <dependency>

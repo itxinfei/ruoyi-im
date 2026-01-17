@@ -101,7 +101,7 @@
 
         // 加载群组基本信息
         function loadGroupInfo() {
-            $.get(ctx + "im/group/" + groupId, function(result) {
+            $.get(ctx + "im/group/info/" + groupId, function(result) {
                 if (result.code == 0 && result.data) {
                     var data = result.data;
                     $("#groupId").text(data.id || '-');

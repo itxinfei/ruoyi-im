@@ -89,6 +89,9 @@
     <update id="updateImEmail" parameterType="com.ruoyi.web.domain.ImEmail">
         update im_email
         <trim prefix="SET" suffixOverrides=",">
+            <if test="subject != null">subject = #{subject},</if>
+            <if test="textContent != null">text_content = #{textContent},</if>
+            <if test="htmlContent != null">html_content = #{htmlContent},</if>
             <if test="isRead != null">is_read = #{isRead},</if>
             <if test="isStarred != null">is_starred = #{isStarred},</if>
             <if test="folder != null">folder = #{folder},</if>

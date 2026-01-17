@@ -97,13 +97,23 @@ public class ImAppAdminController extends BaseController {
     }
 
     /**
+     * 应用详情页面
+     */
+    @RequiresPermissions("im:app:query")
+    @GetMapping("/detail/{id}")
+    public String detail(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("application", applicationService.selectImApplicationById(id));
+        return prefix + "/detail";
+    }
+
+    /**
      * 新增应用
      */
     @RequiresPermissions("im:app:add")
     @Log(title = "应用管理", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/add")
     @ResponseBody
-    public AjaxResult add(@RequestBody ImApplication imApplication) {
+    public AjaxResult add(ImApplication imApplication) {
         return toAjax(applicationService.insertImApplication(imApplication));
     }
 
@@ -114,7 +124,7 @@ public class ImAppAdminController extends BaseController {
     @Log(title = "应用管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImApplication imApplication) {
+    public AjaxResult edit(ImApplication imApplication) {
         return toAjax(applicationService.updateImApplication(imApplication));
     }
 
@@ -126,7 +136,29 @@ public class ImAppAdminController extends BaseController {
     @PostMapping("/remove/{ids}")
     @ResponseBody
     public AjaxResult remove(@PathVariable String ids) {
-        return toAjax(applicationService.deleteImApplicationByIds(Convert.toLongArray(ids)));
+        try {
+            return toAjax(applicationService.deleteImApplicationByIds(Convert.toLongArray(ids)));
+        } catch (Exception e) {
+            return AjaxResult.error("删除失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 批量设置应用可见性
+     */
+    @RequiresPermissions("im:app:edit")
+    @Log(title = "批量设置应用可见性", businessType = BusinessType.UPDATE)
+    @PutMapping("/batchVisibility")
+    @ResponseBody
+    public AjaxResult batchSetVisibility(@RequestParam Long[] ids, @RequestParam Boolean isVisible) {
+        try {
+            for (Long id : ids) {
+                applicationService.setVisibility(id, isVisible);
+            }
+            return AjaxResult.success("设置成功");
+        } catch (Exception e) {
+            return AjaxResult.error("设置失败：" + e.getMessage());
+        }
     }
 
     /**

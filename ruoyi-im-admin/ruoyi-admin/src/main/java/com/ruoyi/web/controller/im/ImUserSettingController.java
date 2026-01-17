@@ -94,8 +94,8 @@ public class ImUserSettingController extends BaseController {
      * 新增用户设置
      */
     @RequiresPermissions("im:userSetting:add")
-    @Log(title = "用户设置管理", businessType = BusinessType.INSERT)
-    @PostMapping
+    @Log(title = "用户设置", businessType = BusinessType.INSERT)
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(@RequestBody ImUserSetting imUserSetting) {
         return toAjax(imUserSettingService.insertImUserSetting(imUserSetting));

@@ -207,7 +207,7 @@ public class ImConversationController extends BaseController {
      */
     @RequiresPermissions("im:conversation:add")
     @Log(title = "会话管理", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(ImConversation imConversation) {
         return toAjax(imConversationService.insertImConversation(imConversation));

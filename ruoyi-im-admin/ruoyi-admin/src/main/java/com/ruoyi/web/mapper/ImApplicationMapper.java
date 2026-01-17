@@ -43,5 +43,7 @@ public interface ImApplicationMapper {
 
     void setVisibility(@Param("id") Long id, @Param("isVisible") Boolean isVisible);
 
+    void batchSetVisibility(@Param("ids") Long[] ids, @Param("isVisible") Boolean isVisible);
+
     Map<String, Object> getApplicationStatistics();
 }

@@ -74,7 +74,7 @@ public class ImSensitiveWordController extends BaseController {
      */
     @RequiresPermissions("im:sensitiveWord:add")
     @Log(title = "敏感词管理", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(@RequestBody ImSensitiveWord imSensitiveWord) {
         return toAjax(imSensitiveWordService.insertImSensitiveWord(imSensitiveWord));

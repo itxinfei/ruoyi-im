@@ -74,7 +74,7 @@ public class ImWorkReportController extends BaseController {
      */
     @RequiresPermissions("im:workReport:add")
     @Log(title = "工作报告管理", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(@RequestBody ImWorkReport imWorkReport) {
         return toAjax(imWorkReportService.insertImWorkReport(imWorkReport));

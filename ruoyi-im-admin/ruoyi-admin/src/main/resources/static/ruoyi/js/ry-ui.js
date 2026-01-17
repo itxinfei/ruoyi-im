@@ -1031,12 +1031,16 @@ var table = {
             },
             // 打开遮罩层
             loading: function (message) {
-                $.blockUI({ message: '<div class="loaderbox"><div class="loading-activity"></div> ' + message + '</div>' });
+                if (typeof $.blockUI === 'function') {
+                    $.blockUI({ message: '<div class="loaderbox"><div class="loading-activity"></div> ' + message + '</div>' });
+                }
             },
             // 关闭遮罩层
             closeLoading: function () {
                 setTimeout(function(){
-                    $.unblockUI();
+                    if (typeof $.unblockUI === 'function') {
+                        $.unblockUI();
+                    }
                 }, 50);
             },
             // 重新加载

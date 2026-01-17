@@ -157,6 +157,9 @@
                 <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:app:add">
                     <i class="fa fa-plus"></i> 新增
                 </a>
+                <a class="btn btn-info single disabled" onclick="$.operate.detail()" shiro:hasPermission="im:app:query">
+                    <i class="fa fa-search"></i> 详情
+                </a>
                 <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:app:edit">
                     <i class="fa fa-edit"></i> 修改
                 </a>
@@ -196,6 +199,7 @@
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
+                detailUrl: prefix + "/detail/{id}",
                 removeUrl: prefix + "/remove/{id}",
                 modalName: "应用",
                 columns: [{
@@ -298,9 +302,10 @@
                 {
                     title: '操作',
                     align: 'center',
-                    width: '200',
+                    width: '260',
                     formatter: function(value, row, index) {
                         var actions = [];
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" style="cursor: pointer;" onclick="$.operate.detail(' + row.id + ')"><i class="fa fa-search"></i>详情</a> ');
                         actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" style="cursor: pointer;" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
                         var toggleText = row.isVisible == true ? '隐藏' : '显示';
                         actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" style="cursor: pointer;" onclick="toggleOne(' + row.id + ', ' + row.isVisible + ')"><i class="fa fa-eye"></i>' + toggleText + '</a> ');
@@ -314,13 +319,19 @@
             $.table.init(options);
         });
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
+            $.get(prefix + "/statistics")
+            .done(function(result) {
                 if (result.code == 0) {
                     $("#totalCount").text(result.data.totalApps || 0);
                     $("#visibleCount").text(result.data.visibleApps || 0);
                     $("#hiddenCount").text(result.data.hiddenApps || 0);
                     $("#systemCount").text(result.data.systemApps || 0);
+                } else {
+                    $.modal.alertError(result.msg || "加载统计数据失败");
                 }
+            })
+            .fail(function() {
+                $.modal.alertError("加载统计数据失败");
             });
         }
         function toggleVisibility() {
@@ -331,14 +342,22 @@
             }
             var row = $.table.selectFirstRows()[0];
             var newVisibility = row.isVisible == true ? false : true;
-            $.modal.confirm("确定要" + (newVisibility == true ? "显示" : "隐藏") + "该应用吗？", function() {
+            $.modal.confirm("确定要" + (newVisibility == true ? "显示" : "隐藏") + "选中的 " + rows.length + " 个应用吗？", function() {
                 $.ajax({
-                    url: prefix + "/visibility",
+                    url: prefix + "/batchVisibility",
                     type: 'put',
-                    data: {id: row.id, isVisible: newVisibility},
-                    success: function() {
-                        $.table.refresh();
-                        loadStatistics();
+                    data: {ids: rows.join(','), isVisible: newVisibility},
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("设置成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.alertError(result.msg || "设置失败");
+                        }
+                    },
+                    error: function() {
+                        $.modal.alertError("设置失败");
                     }
                 });
             });
@@ -349,9 +368,17 @@
                 url: prefix + "/visibility",
                 type: 'put',
                 data: {id: id, isVisible: newVisibility},
-                success: function() {
-                    $.table.refresh();
-                    loadStatistics();
+                success: function(result) {
+                    if (result.code == 0) {
+                        $.modal.msgSuccess("设置成功");
+                        $.table.refresh();
+                        loadStatistics();
+                    } else {
+                        $.modal.alertError(result.msg || "设置失败");
+                    }
+                },
+                error: function() {
+                    $.modal.alertError("设置失败");
                 }
             });
         }

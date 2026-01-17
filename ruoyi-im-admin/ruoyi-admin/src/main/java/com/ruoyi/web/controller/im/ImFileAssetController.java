@@ -124,11 +124,11 @@ public class ImFileAssetController extends BaseController {
     }
 
     /**
-     * 新增文件资源
+     * 新增文件资产
      */
     @RequiresPermissions("im:file:add")
-    @Log(title = "文件资源", businessType = BusinessType.INSERT)
-    @PostMapping
+    @Log(title = "文件资产", businessType = BusinessType.INSERT)
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(ImFileAsset imFileAsset) {
         return toAjax(imFileAssetService.insertImFileAsset(imFileAsset));

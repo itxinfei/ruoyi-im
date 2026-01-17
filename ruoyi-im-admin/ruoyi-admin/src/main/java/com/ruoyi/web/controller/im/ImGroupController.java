@@ -117,7 +117,7 @@ public class ImGroupController extends BaseController {
      */
     @RequiresPermissions("im:group:add")
     @Log(title = "IM群组", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(ImGroup imGroup) {
         return toAjax(imGroupService.insertImGroup(imGroup));

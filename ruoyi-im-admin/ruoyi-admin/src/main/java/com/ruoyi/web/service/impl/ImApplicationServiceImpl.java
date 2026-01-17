@@ -29,16 +29,62 @@ public class ImApplicationServiceImpl implements ImApplicationService {
 
     @Override
     public int insertImApplication(ImApplication imApplication) {
+        if (imApplication.getName() == null || imApplication.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("应用名称不能为空");
+        }
+        if (imApplication.getCode() == null || imApplication.getCode().trim().isEmpty()) {
+            throw new IllegalArgumentException("应用编码不能为空");
+        }
+        if (imApplication.getCategory() == null) {
+            imApplication.setCategory("CUSTOM");
+        }
+        if (imApplication.getAppType() == null) {
+            imApplication.setAppType("ROUTE");
+        }
+        if (imApplication.getIsVisible() == null) {
+            imApplication.setIsVisible(true);
+        }
+        if (imApplication.getIsSystem() == null) {
+            imApplication.setIsSystem(false);
+        }
+        if (imApplication.getSortOrder() == null) {
+            imApplication.setSortOrder(0);
+        }
         return applicationMapper.insertImApplication(imApplication);
     }
 
     @Override
     public int updateImApplication(ImApplication imApplication) {
+        if (imApplication.getId() == null) {
+            throw new IllegalArgumentException("应用ID不能为空");
+        }
+        ImApplication existingApp = applicationMapper.selectImApplicationById(imApplication.getId());
+        if (existingApp == null) {
+            throw new IllegalArgumentException("应用不存在");
+        }
+        if (imApplication.getName() == null || imApplication.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("应用名称不能为空");
+        }
+        if (imApplication.getCode() == null || imApplication.getCode().trim().isEmpty()) {
+            throw new IllegalArgumentException("应用编码不能为空");
+        }
         return applicationMapper.updateImApplication(imApplication);
     }
 
     @Override
     public int deleteImApplicationByIds(Long[] ids) {
+        if (ids == null || ids.length == 0) {
+            throw new IllegalArgumentException("删除ID不能为空");
+        }
+        for (Long id : ids) {
+            ImApplication app = applicationMapper.selectImApplicationById(id);
+            if (app == null) {
+                throw new IllegalArgumentException("应用不存在，ID：" + id);
+            }
+            if (app.getIsSystem() != null && app.getIsSystem()) {
+                throw new IllegalArgumentException("系统应用不允许删除，应用名称：" + app.getName());
+            }
+        }
         return applicationMapper.deleteImApplicationByIds(ids);
     }
 

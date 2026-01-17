@@ -13,23 +13,27 @@
         <result property="fileUrl" column="file_url"/>
         <result property="mimeType" column="mime_type"/>
         <result property="uploaderId" column="uploader_id"/>
+        <result property="uploaderName" column="uploader_name"/>
         <result property="uploadTime" column="create_time"/>
         <result property="downloadCount" column="download_count"/>
         <result property="status" column="status"/>
     </resultMap>
 
     <select id="selectImFileAssetList" parameterType="com.ruoyi.web.domain.ImFileAsset" resultMap="ImFileAssetResult">
-        select id, file_name, file_type, file_size, file_path, file_ext, uploader_id, download_count, status, create_time
-        from im_file_asset
+        select f.id, f.file_name, f.file_type, f.file_size, f.file_path, f.file_ext, f.uploader_id,
+               u.nickname as uploader_name,
+               f.download_count, f.status, f.create_time
+        from im_file_asset f
+        left join im_user u on f.uploader_id = u.id
         <where>
-            status = 'ACTIVE'
-            <if test="fileName != null and fileName != ''"> and file_name like concat('%', #{fileName}, '%') </if>
-            <if test="fileType != null and fileType != ''"> and file_type = #{fileType} </if>
-            <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>
-            <if test="params.beginTime != null and params.beginTime != ''"> and date_format(create_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d') </if>
-            <if test="params.endTime != null and params.endTime != ''"> and date_format(create_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d') </if>
+            f.status = 'ACTIVE'
+            <if test="fileName != null and fileName != ''"> and f.file_name like concat('%', #{fileName}, '%') </if>
+            <if test="fileType != null and fileType != ''"> and f.file_type = #{fileType} </if>
+            <if test="uploaderId != null"> and f.uploader_id = #{uploaderId} </if>
+            <if test="params.beginTime != null and params.beginTime != ''"> and date_format(f.create_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d') </if>
+            <if test="params.endTime != null and params.endTime != ''"> and date_format(f.create_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d') </if>
         </where>
-        order by create_time desc
+        order by f.create_time desc
     </select>
 
     <select id="selectImFileAssetById" parameterType="Long" resultMap="ImFileAssetResult">

@@ -51,6 +51,9 @@ public class ImFileAsset extends BaseEntity implements Serializable {
     @Schema(description = "上传者ID")
     private Long uploaderId;
 
+    @Schema(description = "上传者名称（关联查询）")
+    private String uploaderName;
+
     @Schema(description = "上传时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime uploadTime;
@@ -154,6 +157,14 @@ public class ImFileAsset extends BaseEntity implements Serializable {
 
     public void setUploaderId(Long uploaderId) {
         this.uploaderId = uploaderId;
+    }
+
+    public String getUploaderName() {
+        return uploaderName;
+    }
+
+    public void setUploaderName(String uploaderName) {
+        this.uploaderName = uploaderName;
     }
 
     public LocalDateTime getUploadTime() {

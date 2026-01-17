@@ -101,7 +101,7 @@ public class ImDingMessageController extends BaseController {
      */
     @RequiresPermissions("im:ding:add")
     @Log(title = "DING消息管理", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(@RequestBody ImDingMessage imDingMessage) {
         return toAjax(dingMessageService.insertImDingMessage(imDingMessage));

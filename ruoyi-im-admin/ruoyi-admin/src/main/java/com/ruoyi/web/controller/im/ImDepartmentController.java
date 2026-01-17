@@ -86,7 +86,7 @@ public class ImDepartmentController extends BaseController {
      */
     @RequiresPermissions("im:department:add")
     @Log(title = "部门管理", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(@RequestBody ImDepartment imDepartment) {
         return toAjax(imDepartmentService.insertImDepartment(imDepartment));

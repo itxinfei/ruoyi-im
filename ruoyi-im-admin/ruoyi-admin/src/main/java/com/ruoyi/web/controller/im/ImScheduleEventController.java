@@ -80,12 +80,12 @@ public class ImScheduleEventController extends BaseController {
         return AjaxResult.success(imScheduleEventService.selectEventsByUserId(userId));
     }
 
-    /**
+/**
      * 新增日程事件
      */
     @RequiresPermissions("im:scheduleEvent:add")
-    @Log(title = "日程事件管理", businessType = BusinessType.INSERT)
-    @PostMapping
+    @Log(title = "日程事件", businessType = BusinessType.INSERT)
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(@RequestBody ImScheduleEvent imScheduleEvent) {
         return toAjax(imScheduleEventService.insertImScheduleEvent(imScheduleEvent));

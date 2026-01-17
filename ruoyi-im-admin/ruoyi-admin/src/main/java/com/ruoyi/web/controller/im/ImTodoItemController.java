@@ -113,7 +113,7 @@ public class ImTodoItemController extends BaseController {
      */
     @RequiresPermissions("im:todoItem:add")
     @Log(title = "待办事项管理", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(ImTodoItem imTodoItem) {
         return toAjax(imTodoItemService.insertImTodoItem(imTodoItem));

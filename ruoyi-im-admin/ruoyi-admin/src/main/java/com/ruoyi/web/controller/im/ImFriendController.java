@@ -124,7 +124,7 @@ public class ImFriendController extends BaseController {
      */
     @RequiresPermissions("im:friend:add")
     @Log(title = "好友管理", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(ImFriend imFriend) {
         return toAjax(imFriendService.insertImFriend(imFriend));

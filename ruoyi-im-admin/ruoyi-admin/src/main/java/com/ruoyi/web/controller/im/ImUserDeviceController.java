@@ -92,8 +92,8 @@ public class ImUserDeviceController extends BaseController {
      * 新增用户设备
      */
     @RequiresPermissions("im:userDevice:add")
-    @Log(title = "用户设备管理", businessType = BusinessType.INSERT)
-    @PostMapping
+    @Log(title = "用户设备", businessType = BusinessType.INSERT)
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(@RequestBody ImUserDevice imUserDevice) {
         return toAjax(imUserDeviceService.insertImUserDevice(imUserDevice));

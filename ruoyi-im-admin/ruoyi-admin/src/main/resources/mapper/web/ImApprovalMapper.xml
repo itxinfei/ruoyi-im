@@ -20,10 +20,12 @@
     </resultMap>
 
     <sql id="selectImApprovalVo">
-        select id, template_id, title, applicant_id, status, current_node_id,
-               form_data, attachments, apply_time, finish_time,
-               remark, create_time, update_time
-        from im_approval
+        select a.id, a.template_id, a.title, a.applicant_id, a.status, a.current_node_id,
+               a.form_data, a.attachments, a.apply_time, a.finish_time,
+               a.remark, a.create_time, a.update_time,
+               u.nickname as applicant_name
+        from im_approval a
+        left join im_user u on a.applicant_id = u.id
     </sql>
 
     <select id="selectImApprovalList" parameterType="com.ruoyi.web.domain.ImApproval" resultMap="ImApprovalResult">

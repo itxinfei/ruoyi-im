@@ -78,6 +78,12 @@ spring:
     restart:
       # 热部署开关
       enabled: true
+    # 排除不需要热部署的资源
+    exclude: static/**,public/**
+    # 热部署监听端口
+    livereload:
+      enabled: true
+      port: 35729
 
 # MyBatis
 mybatis:

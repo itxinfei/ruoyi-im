@@ -98,7 +98,7 @@ public class ImUserController extends BaseController {
      */
     @RequiresPermissions("im:user:add")
     @Log(title = "IM用户", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(@Valid ImUser imUser) {
         return toAjax(imUserService.insertImUser(imUser));
