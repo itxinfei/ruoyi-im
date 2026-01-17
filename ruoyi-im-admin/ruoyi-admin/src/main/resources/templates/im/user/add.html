@@ -5,6 +5,43 @@
     <title>新增IM用户</title>
     <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+    <style>
+        /* 表单样式优化 */
+        .form-horizontal .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* 输入框焦点效果 */
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        /* Radio box 样式优化 */
+        .radio-box label {
+            margin-right: 20px;
+            font-weight: normal;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+        }
+        .radio-box input[type="radio"] {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        /* 必填字段星号颜色 */
+        .control-label.is-required::after {
+            content: " *";
+            color: #f56c6c;
+        }
+
+        /* 文本域样式 */
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+    </style>
 </head>
 <body class="white-bg">
     <form class="form-horizontal m" id="form-user-add">

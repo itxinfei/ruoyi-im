@@ -222,7 +222,16 @@
                 {
                     field: 'senderId',
                     title: '发送者ID',
-                    width: '80'
+                    width: '80',
+                    visible: false
+                },
+                {
+                    field: 'senderName',
+                    title: '发送者',
+                    width: '120',
+                    formatter: function(value, row, index) {
+                        return value || '-';
+                    }
                 },
                 {
                     field: 'messageType',

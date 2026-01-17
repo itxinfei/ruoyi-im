@@ -116,6 +116,11 @@ public interface ImFriendMapper {
     int countPendingRequests();
 
     /**
+     * 获取好友统计数据
+     */
+    java.util.Map<String, Object> getFriendStatistics();
+
+    /**
      * 查询所有好友分组（去重）
      *
      * @return 分组名称列表

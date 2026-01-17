@@ -115,20 +115,10 @@ public class ImFriendServiceImpl implements ImFriendService {
     /**
      * 获取好友统计数据
      *
-     * @return 统计数据，包含totalCount、pendingCount、groupCount、blockedCount
+     * @return 统计数据，包含totalCount、pendingCount、groupCount、todayCount
      */
     @Override
     public Map<String, Object> getFriendStatistics() {
-        Map<String, Object> result = new HashMap<>();
-        // 好友关系总数
-        result.put("totalCount", imFriendMapper.countTotalFriends());
-        // 待处理好友请求数
-        result.put("pendingCount", imFriendMapper.countPendingRequests());
-        // 好友分组数（去重统计）
-        List<String> groups = imFriendMapper.selectDistinctGroups();
-        result.put("groupCount", groups != null ? groups.size() : 0);
-        // 拉黑好友数（暂未实现，返回0）
-        result.put("blockedCount", 0);
-        return result;
+        return imFriendMapper.getFriendStatistics();
     }
 }

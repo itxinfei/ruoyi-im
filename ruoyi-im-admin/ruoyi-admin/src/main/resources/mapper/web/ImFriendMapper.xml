@@ -51,6 +51,7 @@
             <if test="friendId != null">and f.friend_id = #{friendId}</if>
             <if test="groupName != null and groupName != ''">and f.group_name = #{groupName}</if>
             <if test="remark != null and remark != ''">and f.remark like concat('%', #{remark}, '%')</if>
+            <if test="params.friendStatus != null">and u2.status = #{params.friendStatus}</if>
         </where>
         order by f.create_time desc
     </select>
@@ -132,6 +133,16 @@
     <select id="countTodayAddedFriends" resultType="java.lang.Integer">
         select count(*) from im_friend
         where is_deleted = 0 and DATE(create_time) = CURDATE()
+    </select>
+
+    <!-- 获取好友统计数据 -->
+    <select id="getFriendStatistics" resultType="java.util.Map">
+        select
+            (SELECT COUNT(*) FROM im_friend WHERE is_deleted = 0) as totalCount,
+            (SELECT COUNT(*) FROM im_friend_request WHERE status = 'PENDING') as pendingCount,
+            (SELECT COUNT(DISTINCT group_name) FROM im_friend WHERE is_deleted = 0 AND group_name IS NOT NULL AND group_name != '') as groupCount,
+            (SELECT COUNT(*) FROM im_friend WHERE is_deleted = 0 AND DATE(create_time) = CURDATE()) as todayCount
+        from dual
     </select>
 
     <!-- 统计待处理好友申请数 -->

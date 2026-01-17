@@ -92,6 +92,11 @@ public class ImFriend implements Serializable {
      */
     private String userName;
 
+    /**
+     * 查询参数
+     */
+    private java.util.Map<String, Object> params;
+
     public Long getId() {
         return id;
     }
@@ -210,5 +215,13 @@ public class ImFriend implements Serializable {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public java.util.Map<String, Object> getParams() {
+        return params;
+    }
+
+    public void setParams(java.util.Map<String, Object> params) {
+        this.params = params;
     }
 }
