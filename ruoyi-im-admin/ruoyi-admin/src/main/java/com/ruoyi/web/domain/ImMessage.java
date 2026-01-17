@@ -11,10 +11,12 @@ import java.time.LocalDateTime;
  * IM消息实体
  *
  * 对应数据库表 im_message
- * 实际数据库字段：id, conversation_id, sender_id, message_type, content, reply_to_message_id,
- *                forward_from_message_id, file_url, file_name, file_size, sensitive_level,
- *                is_revoked, revoked_time, revoker_id, is_edited, edited_content, edit_count, edit_time,
- *                is_deleted, deleted_time, create_time, update_time
+ * 实际数据库字段：id, client_msg_id, send_status, send_retry_count, send_error_code,
+ *                send_error_msg, delivered_time, conversation_id, sender_id, message_type,
+ *                content, reply_to_message_id, forward_from_message_id, file_url, file_name,
+ *                file_size, sensitive_level, is_revoked, revoked_time, revoker_id, is_edited,
+ *                edited_content, edit_count, edit_time, is_deleted, deleted_time,
+ *                create_time, update_time
  *
  * @author ruoyi
  */
@@ -55,6 +57,25 @@ public class ImMessage extends BaseEntity implements Serializable {
 
     /** 敏感级别: NORMAL普通 SENSITIVE敏感 HIGH高级 */
     private String sensitiveLevel;
+
+    /** 客户端消息ID（用于去重和状态追踪） */
+    private String clientMsgId;
+
+    /** 发送状态: PENDING待发送 SENDING发送中 SENT已发送 DELIVERED已送达 FAILED发送失败 */
+    private String sendStatus;
+
+    /** 发送重试次数 */
+    private Integer sendRetryCount;
+
+    /** 发送错误码 */
+    private String sendErrorCode;
+
+    /** 发送错误信息 */
+    private String sendErrorMsg;
+
+    /** 送达时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime deliveredTime;
 
     /** 是否撤回: 0否 1是 */
     private Integer isRevoked;
