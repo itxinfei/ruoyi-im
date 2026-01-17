@@ -58,16 +58,16 @@
         where id = #{id}
     </update>
 
-    <delete id="deleteImSessionById" parameterType="Long">
+    <update id="deleteImSessionById" parameterType="Long">
         update im_conversation set is_deleted = 1, deleted_time = now() where id = #{id}
-    </delete>
+    </update>
 
-    <delete id="deleteImSessionByIds" parameterType="Long[]">
+    <update id="deleteImSessionByIds" parameterType="Long[]">
         update im_conversation set is_deleted = 1, deleted_time = now() where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
-    </delete>
+    </update>
 
     <select id="countOnlineSessions" resultType="java.lang.Integer">
         select count(*) from im_conversation where is_deleted = 0

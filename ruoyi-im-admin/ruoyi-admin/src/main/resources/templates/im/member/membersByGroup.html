@@ -3,316 +3,534 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="renderer" content="webkit">
-    <title>群组成员列表</title>
-    <link rel="shortcut icon" href="/favicon.ico">
+    <title>群组成员管理</title>
     <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
     <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
     <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
     <style>
-        /* 统计卡片样式 */
-        .statistics-section {
-            margin-top: 10px;
+        /* 页面容器样式 */
+        .page-container {
+            padding: 24px;
+        }
+
+        /* 群组信息头部 */
+        .group-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header-info {
+            display: inline-block;
+            margin-right: 40px;
             margin-bottom: 10px;
         }
-        .statistics-card {
+
+        .header-info-label {
+            display: block;
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .header-info-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* 统计卡片 */
+        .stats-container {
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
             padding: 15px;
-            border-radius: 4px;
+            border-radius: 6px;
+            text-align: center;
             color: #fff;
             position: relative;
             overflow: hidden;
         }
-        .stat-number {
-            font-size: 24px;
+
+        .stat-card .stat-number {
+            font-size: 28px;
             font-weight: bold;
+            margin-bottom: 5px;
         }
-        .stat-label {
-            font-size: 12px;
+
+        .stat-card .stat-label {
+            font-size: 13px;
             opacity: 0.9;
         }
-        .stat-icon {
+
+        .stat-card .stat-icon {
             position: absolute;
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 40px;
-            opacity: 0.2;
-        }
-        .stat-total { background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%); }
-        .stat-owner { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-        .stat-admin { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .stat-muted { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        
-        /* 搜索区域底部间距 */
-        .search-collapse {
-            margin-bottom: 10px;
+            font-size: 48px;
+            opacity: 0.15;
         }
 
-        /* 表格区域样式 */
-        .select-table.table-striped {
-            padding: 0;
+        .stat-total { background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%); }
+        .stat-owner { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-admin { background: linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%); }
+        .stat-member { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .stat-muted { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+
+        /* 搜索区域 */
+        .search-box {
+            padding: 15px;
+            background: #fff;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #e7eaec;
+        }
+
+        /* 表格样式 */
+        .member-table {
+            background: #fff;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nickname-cell {
+            font-weight: 500;
+        }
+
+        .role-badge {
+            padding: 5px 12px;
+            font-size: 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        /* 角色颜色 */
+        .role-owner {
+            background: #ff6b6b;
+            color: #fff;
+        }
+        .role-admin {
+            background: #feca57;
+            color: #fff;
+        }
+        .role-member {
+            background: #54a0ff;
+            color: #fff;
+        }
+
+        /* 状态图标 */
+        .status-icon {
+            font-size: 16px;
+        }
+
+        /* 操作按钮 */
+        .action-btn {
+            margin-right: 5px;
         }
     </style>
 </head>
-<body class="gray-bg">
-    <div class="container-div">
-        <div class="row">
-            <!-- 统计卡片 -->
-            <div class="col-sm-12 statistics-section">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-total">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">成员总数</div>
-                            <i class="fa fa-users stat-icon"></i>
-                        </div>
+<body class="white-bg">
+    <div class="container-div page-container">
+        <!-- 群组信息头部 -->
+        <div class="group-header">
+            <div class="header-info">
+                <span class="header-info-label">群组ID</span>
+                <span class="header-info-value" id="groupId">-</span>
+            </div>
+            <div class="header-info">
+                <span class="header-info-label">群组名称</span>
+                <span class="header-info-value" id="groupName">-</span>
+            </div>
+            <div class="header-info">
+                <span class="header-info-label">群主</span>
+                <span class="header-info-value" id="ownerName">-</span>
+            </div>
+            <div class="header-info">
+                <span class="header-info-label">创建时间</span>
+                <span class="header-info-value" id="createTime">-</span>
+            </div>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="stats-container">
+            <div class="row">
+                <div class="col-sm-2-4">
+                    <div class="stat-card stat-total">
+                        <div class="stat-number" id="totalCount">0</div>
+                        <div class="stat-label">成员总数</div>
+                        <i class="fa fa-users stat-icon"></i>
                     </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-owner">
-                            <div class="stat-number" id="ownerCount">0</div>
-                            <div class="stat-label">群主</div>
-                            <i class="fa fa-user-plus stat-icon"></i>
-                        </div>
+                </div>
+                <div class="col-sm-2-4">
+                    <div class="stat-card stat-owner">
+                        <div class="stat-number" id="ownerCount">0</div>
+                        <div class="stat-label">群主</div>
+                        <i class="fa fa-user-plus stat-icon"></i>
                     </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-admin">
-                            <div class="stat-number" id="adminCount">0</div>
-                            <div class="stat-label">管理员</div>
-                            <i class="fa fa-user-md stat-icon"></i>
-                        </div>
+                </div>
+                <div class="col-sm-2-4">
+                    <div class="stat-card stat-admin">
+                        <div class="stat-number" id="adminCount">0</div>
+                        <div class="stat-label">管理员</div>
+                        <i class="fa fa-user-md stat-icon"></i>
                     </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-muted">
-                            <div class="stat-number" id="mutedCount">0</div>
-                            <div class="stat-label">已禁言</div>
-                            <i class="fa fa-ban stat-icon"></i>
-                        </div>
+                </div>
+                <div class="col-sm-2-4">
+                    <div class="stat-card stat-member">
+                        <div class="stat-number" id="memberCountStat">0</div>
+                        <div class="stat-label">普通成员</div>
+                        <i class="fa fa-user stat-icon"></i>
+                    </div>
+                </div>
+                <div class="col-sm-2-4">
+                    <div class="stat-card stat-muted">
+                        <div class="stat-number" id="mutedCount">0</div>
+                        <div class="stat-label">已禁言</div>
+                        <i class="fa fa-ban stat-icon"></i>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="addMember()" shiro:hasPermission="im:group:member:add">
-                    <i class="fa fa-plus"></i> 添加成员
-                </a>
-                <a class="btn btn-primary single disabled" onclick="editRole()" shiro:hasPermission="im:group:member:edit">
-                    <i class="fa fa-edit"></i> 修改角色
-                </a>
-                <a class="btn btn-warning single disabled" onclick="toggleMute()" shiro:hasPermission="im:group:member:edit">
-                    <i class="fa fa-ban"></i> 禁言/解禁
-                </a>
-                <a class="btn btn-info single disabled" onclick="viewMemberLogs()" shiro:hasPermission="im:group:log:view">
-                    <i class="fa fa-list"></i> 操作日志
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="removeSelectedMembers()" shiro:hasPermission="im:group:member:remove">
-                    <i class="fa fa-remove"></i> 移除成员
-                </a>
-            </div>
-
-            <div class="col-sm-12 select-table table-striped">
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        <!-- 搜索区域 -->
+        <div class="search-box">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                        <input type="text" class="form-control" id="searchKeyword" placeholder="搜索昵称或用户名" onkeyup="searchMembers()">
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <select class="form-control" id="roleFilter" onchange="filterByRole()">
+                        <option value="">全部角色</option>
+                        <option value="OWNER">群主</option>
+                        <option value="ADMIN">管理员</option>
+                        <option value="MEMBER">普通成员</option>
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <select class="form-control" id="statusFilter" onchange="filterByStatus()">
+                        <option value="">全部状态</option>
+                        <option value="muted">已禁言</option>
+                        <option value="unread">有未读</option>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <button class="btn btn-default btn-block" onclick="resetFilters()">
+                        <i class="fa fa-refresh"></i> 重置
+                    </button>
+                </div>
             </div>
         </div>
+
+        <!-- 成员表格 -->
+        <div class="member-table">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
     </div>
+
     <!-- 通用JS -->
     <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
     <script th:src="@{/js/jquery.min.js}"></script>
     <script th:src="@{/js/bootstrap.min.js}"></script>
     <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
     <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js}"></script>
-    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
-    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
     <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-    <script th:src="@{/ajax/libs/layui/layui.min.js}"></script>
     <script th:src="@{/ruoyi/js/common.js}"></script>
     <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
     <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('im:group:member:edit')}]];
-        var removeFlag = [[${@permission.hasPermi('im:group:member:remove')}]];
         var groupId = [[${groupId}]];
         var prefix = ctx + "im/member";
+        var allMembers = []; // 存储所有成员数据
 
         $(function() {
-            loadStatistics();
-            var options = {
-                url: prefix + "/group/" + groupId,
-                createUrl: prefix + "/add",
-                modalName: "群组成员",
+            loadGroupInfo();
+            initMemberTable();
+        });
+
+        // 加载群组基本信息
+        function loadGroupInfo() {
+            $.get(ctx + "im/group/info/" + groupId, function(result) {
+                if (result.code == 0 && result.data) {
+                    var data = result.data;
+                    $("#groupId").text(data.id || '-');
+                    $("#groupName").text(data.name || '-');
+                    $("#ownerName").text(data.ownerName || '-');
+
+                    // 显示创建时间
+                    if (data.createTime) {
+                        $("#createTime").text(data.createTime.substring(0, 19).replace('T', ' '));
+                    }
+                }
+            });
+        }
+
+        // 初始化成员表格
+        function initMemberTable() {
+            $('#bootstrap-table').bootstrapTable({
+                data: [],
+                cache: false,
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: 'client',
+                search: false,
+                showColumns: false,
+                showRefresh: false,
                 columns: [{
-                    checkbox: true
-                },
-                {
-                    field: 'id',
-                    title: 'ID',
-                    visible: false
-                },
-                {
                     field: 'userId',
-                    title: '用户ID'
+                    title: '用户ID',
+                    width: '80',
+                    visible: false,
+                    searchable: false
+                },
+                {
+                    field: 'avatar',
+                    title: '头像',
+                    width: '60',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        if (value) {
+                            return '<img src="' + value + '" class="member-avatar" onerror="this.src=\'/img/profile.jpg\'"/>';
+                        }
+                        return '<i class="fa fa-user-circle fa-2x text-gray"></i>';
+                    },
+                    searchable: false
                 },
                 {
                     field: 'userNickname',
-                    title: '用户昵称'
-                },
-                {
-                    field: 'userName',
-                    title: '用户名'
+                    title: '昵称',
+                    width: '150',
+                    formatter: function(value, row, index) {
+                        var nickname = value || row.userName || '-';
+                        var html = '<div class="nickname-cell">' + nickname + '</div>';
+                        if (row.userName && row.userName !== value) {
+                            html += '<div class="text-muted" style="font-size:11px">@' + row.userName + '</div>';
+                        }
+                        return html;
+                    }
                 },
                 {
                     field: 'nickname',
-                    title: '群昵称'
+                    title: '群昵称',
+                    width: '120',
+                    formatter: function(value, row, index) {
+                        return value || row.userNickname || row.userName || '-';
+                    }
                 },
                 {
                     field: 'role',
                     title: '角色',
                     align: 'center',
+                    width: '100',
                     formatter: function(value, row, index) {
-                        if (value === 'OWNER') {
-                            return '<span class="badge badge-danger">群主</span>';
-                        } else if (value === 'ADMIN') {
-                            return '<span class="badge badge-warning">管理员</span>';
-                        } else {
-                            return '<span class="badge badge-info">成员</span>';
-                        }
-                    }
+                        var roleMap = {
+                            'OWNER': '<span class="role-badge role-owner">群主</span>',
+                            'ADMIN': '<span class="role-badge role-admin">管理员</span>',
+                            'MEMBER': '<span class="role-badge role-member">成员</span>'
+                        };
+                        return roleMap[value] || '<span class="role-badge role-member">成员</span>';
+                    },
+                    searchable: false
                 },
                 {
                     field: 'isMuted',
                     title: '禁言状态',
                     align: 'center',
+                    width: '100',
                     formatter: function(value, row, index) {
                         if (value == 1) {
-                            return '<span class="badge badge-warning">已禁言</span>';
-                        } else {
-                            return '<span class="badge badge-success">正常</span>';
+                            return '<span class="badge badge-warning" style="font-size:11px;">已禁言</span>';
                         }
+                        return '<span class="badge badge-success" style="font-size:11px;">正常</span>';
+                    },
+                    searchable: false
+                },
+                {
+                    field: 'unreadCount',
+                    title: '未读数',
+                    align: 'center',
+                    width: '80',
+                    formatter: function(value, row, index) {
+                        var count = value || 0;
+                        if (count > 0) {
+                            return '<span class="badge badge-danger" style="font-size:12px;padding:5px 10px;">' + count + '</span>';
+                        }
+                        return '<span class="text-muted">0</span>';
+                    },
+                    searchable: false
+                },
+                {
+                    field: 'joinTime',
+                    title: '加入时间',
+                    width: '160',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        if (value) {
+                            return value.substring(0, 19).replace('T', ' ');
+                        }
+                        return '-';
                     }
                 },
                 {
-                    field: 'userMobile',
-                    title: '手机号'
-                },
-                {
-                    field: 'createTime',
-                    title: '加入时间',
-                    sortable: true
-                },
-                {
+                    field: 'operate',
                     title: '操作',
                     align: 'center',
                     width: '150',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="changeRole(' + row.id + ', \'' + row.role + '\', ' + groupId + ', ' + row.userId + ')"><i class="fa fa-edit"></i>角色</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="removeMember(' + groupId + ', ' + row.userId + ')"><i class="fa fa-remove"></i>移除</a>');
+                        actions.push('<a class="btn btn-success btn-xs action-btn" href="javascript:void(0)" onclick="viewMemberDetail(' + row.userId + ', \'' + (row.userNickname || row.userName || '') + '\')" title="查看详情"><i class="fa fa-info-circle"></i></a> ');
                         return actions.join('');
+                    },
+                    searchable: false
+                }],
+                onLoadError: function(status) {
+                    $.modal.msgError("加载数据失败，请稍后重试");
+                },
+                responseHandler: function(res) {
+                    if (res.code === 0 || res.rows) {
+                        allMembers = res.rows || res.data || [];
+                        updateStatistics(allMembers);
+                        return allMembers;
                     }
-                }]
-            };
-            $.table.init(options);
-        });
-
-        function loadStatistics() {
-            $.get(prefix + "/group/" + groupId + "/count", function(result) {
-                if (result.code == 0) {
-                    var data = result.data;
-                    $("#totalCount").text(data.count || 0);
-                    // 为简单起见，这里不显示详细统计，因为API可能不提供
+                    return [];
+                },
+                queryParams: function(params) {
+                    return {};
                 }
             });
+
+            // 加载数据
+            loadMembers();
         }
 
-        /* 添加成员 */
-        function addMember() {
-            var url = prefix + "/add?groupId=" + groupId;
-            $.modal.open("添加群组成员", url, '800', '500');
-        }
-
-        /* 修改角色 */
-        function editRole() {
-            var rows = $.table.selectFirstColumns();
-            if (rows.length == 0) {
-                $.modal.alertWarning("请至少选择一条记录");
-                return;
-            }
-            var row = $.table.selectFirstRows()[0];
-            changeRole(row.id, row.role, groupId, row.userId);
-        }
-
-        /* 修改角色 */
-        function changeRole(id, currentRole, groupId, userId) {
-            var roles = ['OWNER', 'ADMIN', 'MEMBER'];
-            var roleNames = {'OWNER': '群主', 'ADMIN': '管理员', 'MEMBER': '普通成员'};
-            var html = '<select class="form-control" id="newRole">';
-            for (var i = 0; i < roles.length; i++) {
-                var selected = currentRole === roles[i] ? 'selected' : '';
-                html += '<option value="' + roles[i] + '" ' + selected + '>' + roleNames[roles[i]] + '</option>';
-            }
-            html += '</select>';
-            $.modal.confirm("选择新角色", html, function() {
-                var newRole = $('#newRole').val();
-                $.operate.post(prefix + "/role", {groupId: groupId, userId: userId, role: newRole});
+        // 加载成员数据
+        function loadMembers() {
+            $.get(prefix + "/group/" + groupId, function(result) {
+                if (result.code === 0 || result.rows) {
+                    allMembers = result.rows || result.data || [];
+                    $('#bootstrap-table').bootstrapTable('load', allMembers);
+                    updateStatistics(allMembers);
+                } else {
+                    $.modal.msgError(result.msg || "加载成员数据失败");
+                }
+            }).fail(function() {
+                $.modal.msgError("网络请求失败");
             });
         }
 
-        /* 禁言/解禁 */
-        function toggleMute() {
-            var rows = $.table.selectFirstColumns();
-            if (rows.length == 0) {
-                $.modal.alertWarning("请至少选择一条记录");
-                return;
-            }
-            var row = $.table.selectFirstRows()[0];
-            var newMuteStatus = row.isMuted == 1 ? 0 : 1;
-            $.modal.confirm("确定要" + (newMuteStatus == 1 ? "禁言" : "解除禁言") + "该成员吗？", function() {
-                var data = {id: row.id, groupId: groupId, userId: row.userId, isMuted: newMuteStatus};
-                $.operate.post(prefix + "/mute", data);
-            });
+        // 更新统计数据
+        function updateStatistics(members) {
+            var totalCount = members.length;
+            var ownerCount = members.filter(m => m.role === 'OWNER').length;
+            var adminCount = members.filter(m => m.role === 'ADMIN').length;
+            var memberCount = members.filter(m => m.role === 'MEMBER').length;
+            var mutedCount = members.filter(m => m.isMuted == 1).length;
+
+            $('#totalCount').text(totalCount);
+            $('#ownerCount').text(ownerCount);
+            $('#adminCount').text(adminCount);
+            $('#memberCountStat').text(memberCount);
+            $('#mutedCount').text(mutedCount);
         }
 
-        /* 移除选中的成员 */
-        function removeSelectedMembers() {
-            var rows = $.table.selectFirstColumns();
-            if (rows.length == 0) {
-                $.modal.alertWarning("请至少选择一条记录");
-                return;
-            }
-            var row = $.table.selectFirstRows()[0];
-            removeMember(groupId, row.userId);
-        }
+        // 搜索成员
+        function searchMembers() {
+            var keyword = $('#searchKeyword').val().toLowerCase();
+            var roleFilter = $('#roleFilter').val();
+            var statusFilter = $('#statusFilter').val();
 
-        /* 移除成员 */
-        function removeMember(groupId, userId) {
-            $.modal.confirm("确定要移除该成员吗？", function() {
-                $.ajax({
-                    url: prefix + "/remove",
-                    type: 'post',
-                    data: {groupId: groupId, userId: userId},
-                    success: function() {
-                        $.table.refresh();
-                        loadStatistics();
+            var filtered = allMembers.filter(function(member) {
+                // 关键词搜索
+                if (keyword) {
+                    var nickname = (member.userNickname || '').toLowerCase();
+                    var userName = (member.userName || '').toLowerCase();
+                    if (nickname.indexOf(keyword) === -1 && userName.indexOf(keyword) === -1) {
+                        return false;
                     }
-                });
+                }
+
+                // 角色筛选
+                if (roleFilter && member.role !== roleFilter) {
+                    return false;
+                }
+
+                // 状态筛选
+                if (statusFilter === 'muted' && member.isMuted != 1) {
+                    return false;
+                }
+                if (statusFilter === 'unread' && (!member.unreadCount || member.unreadCount == 0)) {
+                    return false;
+                }
+
+                return true;
             });
+
+            $('#bootstrap-table').bootstrapTable('load', filtered);
         }
 
-        /* 查看成员操作日志 */
-        function viewMemberLogs() {
-            var row = $.table.selectFirstRows()[0];
-            if (!row) {
-                $.modal.alertWarning("请先选择一个成员");
-                return;
-            }
-            var url = ctx + "im/group/log/group/" + groupId + "/view";
-            $.modal.openOptions({
-                title: '群组操作日志',
-                url: url,
-                width: '900px',
-                height: '600px'
+        // 按角色筛选
+        function filterByRole() {
+            searchMembers();
+        }
+
+        // 按状态筛选
+        function filterByStatus() {
+            searchMembers();
+        }
+
+        // 重置筛选
+        function resetFilters() {
+            $('#searchKeyword').val('');
+            $('#roleFilter').val('');
+            $('#statusFilter').val('');
+            $('#bootstrap-table').bootstrapTable('load', allMembers);
+        }
+
+        // 查看成员详情
+        function viewMemberDetail(userId, nickname) {
+            var member = allMembers.find(m => m.userId == userId);
+            if (!member) return;
+
+            var content = '<div style="padding:20px;">' +
+                '<table class="table table-bordered">' +
+                '<tr><td style="width:100px;"><strong>用户ID:</strong></td><td>' + (member.userId || '-') + '</td></tr>' +
+                '<tr><td><strong>用户名:</strong></td><td>' + (member.userName || '-') + '</td></tr>' +
+                '<tr><td><strong>昵称:</strong></td><td>' + (member.userNickname || '-') + '</td></tr>' +
+                '<tr><td><strong>群昵称:</strong></td><td>' + (member.nickname || '-') + '</td></tr>' +
+                '<tr><td><strong>角色:</strong></td><td>' + (member.role === 'OWNER' ? '群主' : (member.role === 'ADMIN' ? '管理员' : '普通成员')) + '</td></tr>' +
+                '<tr><td><strong>禁言状态:</strong></td><td>' + (member.isMuted == 1 ? '已禁言' : '正常') + '</td></tr>' +
+                '<tr><td><strong>未读数:</strong></td><td>' + (member.unreadCount || 0) + '</td></tr>' +
+                '<tr><td><strong>加入时间:</strong></td><td>' + (member.joinTime ? member.joinTime.substring(0, 19).replace('T', ' ') : '-') + '</td></tr>' +
+                '<tr><td><strong>操作:</strong></td><td>' +
+                '<button class="btn btn-info btn-xs" onclick="$.modal.close()"><i class="fa fa-close"></i> 关闭</button>' +
+                '</td></tr>' +
+                '</table>' +
+                '</div>';
+
+            layer.open({
+                type: 1,
+                title: '成员详情 - ' + nickname,
+                area: ['800px', '600px'],
+                content: content
             });
         }
-    </script></body>
+    </script>
+</body>
 </html>

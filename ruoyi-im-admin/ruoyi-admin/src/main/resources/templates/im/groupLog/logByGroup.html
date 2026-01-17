@@ -3,103 +3,135 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="renderer" content="webkit">
     <title>群组操作日志</title>
-    <link rel="shortcut icon" href="/favicon.ico">
     <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
     <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
     <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
     <style>
-        /* 搜索区域底部间距 */
-        .search-collapse {
-            margin-bottom: 10px;
+        .log-header {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 15px;
         }
-
-        /* 表格区域样式 */
-        .select-table.table-striped {
-            padding: 0;
+        .log-info {
+            display: inline-block;
+            margin-right: 30px;
         }
-
-        /* 操作类型徽章样式 */
-        .badge {
-            padding: 5px 10px;
+        .log-info-label {
+            color: #666;
             font-size: 12px;
+        }
+        .log-info-value {
+            color: #333;
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 5px;
         }
     </style>
 </head>
-<body class="gray-bg">
+<body class="white-bg">
     <div class="container-div">
         <div class="row">
-            <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse">
-                <form id="log-form">
-                    <div class="select-list">
-                        <ul>
-                            <li>
-                                操作类型：<select name="operationType">
-                                    <option value="">所有</option>
-                                    <option value="ADD_MEMBER">添加成员</option>
-                                    <option value="REMOVE_MEMBER">移除成员</option>
-                                    <option value="CHANGE_ROLE">修改角色</option>
-                                    <option value="MUTE_MEMBER">禁言成员</option>
-                                    <option value="UNMUTE_MEMBER">解除禁言</option>
-                                    <option value="DISMISS_GROUP">解散群组</option>
-                                    <option value="CHANGE_OWNER">转让群主</option>
-                                    <option value="UPDATE_INFO">修改群信息</option>
-                                </select>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                            </li>
-                        </ul>
+            <div class="col-sm-12">
+                <!-- 群组信息头部 -->
+                <div class="log-header">
+                    <div class="log-info">
+                        <span class="log-info-label">群组ID:</span>
+                        <span class="log-info-value" id="groupId">-</span>
                     </div>
-                </form>
-            </div>
+                    <div class="log-info">
+                        <span class="log-info-label">群组名称:</span>
+                        <span class="log-info-value" id="groupName">-</span>
+                    </div>
+                </div>
 
-            <div class="col-sm-12 select-table table-striped">
+                <!-- 搜索区域 -->
+                <div class="search-collapse" style="margin-bottom: 10px;">
+                    <form id="log-form">
+                        <div class="select-list">
+                            <ul>
+                                <li>
+                                    操作类型：<select name="operationType" id="operationType">
+                                        <option value="">所有</option>
+                                        <option value="ADD_MEMBER">添加成员</option>
+                                        <option value="REMOVE_MEMBER">移除成员</option>
+                                        <option value="CHANGE_ROLE">修改角色</option>
+                                        <option value="MUTE_MEMBER">禁言成员</option>
+                                        <option value="UNMUTE_MEMBER">解除禁言</option>
+                                        <option value="DISMISS_GROUP">解散群组</option>
+                                        <option value="CHANGE_OWNER">转让群主</option>
+                                        <option value="UPDATE_INFO">修改群信息</option>
+                                    </select>
+                                </li>
+                                <li>
+                                    <a class="btn btn-primary btn-rounded btn-sm" onclick="searchLogs()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                    <a class="btn btn-warning btn-rounded btn-sm" onclick="resetSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 日志表格 -->
                 <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
+
     <!-- 通用JS -->
     <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
     <script th:src="@{/js/jquery.min.js}"></script>
     <script th:src="@{/js/bootstrap.min.js}"></script>
     <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
     <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js}"></script>
-    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
-    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
     <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-    <script th:src="@{/ajax/libs/layui/layui.min.js}"></script>
     <script th:src="@{/ruoyi/js/common.js}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
     <script th:inline="javascript">
         var groupId = [[${groupId}]];
         var prefix = ctx + "im/group/log";
 
         $(function() {
-            var options = {
+            loadGroupInfo();
+            initLogTable();
+        });
+
+        // 加载群组基本信息
+        function loadGroupInfo() {
+            $.get(ctx + "im/group/info/" + groupId, function(result) {
+                if (result.code == 0 && result.data) {
+                    var data = result.data;
+                    $("#groupId").text(data.id || '-');
+                    $("#groupName").text(data.name || '-');
+                }
+            });
+        }
+
+        // 初始化日志表格
+        function initLogTable() {
+            $('#bootstrap-table').bootstrapTable({
                 url: prefix + "/list",
-                queryParams: function(params) {
-                    params.groupId = groupId;
-                    return params;
-                },
-                modalName: "群组操作日志",
+                method: 'post',
+                contentType: 'application/json',
+                cache: false,
+                pagination: true,
+                sidePagination: 'server',
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
                 columns: [{
                     field: 'id',
                     title: 'ID',
-                    width: '60'
+                    width: '60',
+                    visible: false
                 },
                 {
                     field: 'operatorName',
                     title: '操作者',
                     width: '120',
                     formatter: function(value, row, index) {
-                        return '<span class="text-primary">' + value + '</span>';
+                        return '<span class="text-primary">' + (value || '-') + '</span>';
                     }
                 },
                 {
@@ -118,7 +150,7 @@
                             'CHANGE_OWNER': '<span class="badge badge-warning">转让群主</span>',
                             'UPDATE_INFO': '<span class="badge badge-info">修改群信息</span>'
                         };
-                        return typeMap[value] || value;
+                        return typeMap[value] || (value || '-');
                     }
                 },
                 {
@@ -129,7 +161,7 @@
                         if (row.targetUserName) {
                             return value + ' <span class="text-muted">（目标：' + row.targetUserName + '）</span>';
                         }
-                        return value;
+                        return value || '-';
                     }
                 },
                 {
@@ -137,10 +169,35 @@
                     title: '操作时间',
                     width: '160',
                     sortable: true
-                }]
-            };
-            $.table.init(options);
-        });
+                }],
+                responseHandler: function(res) {
+                    if (res.code === 0 || res.rows) {
+                        return res.rows || [];
+                    }
+                    return [];
+                },
+                queryParams: function(params) {
+                    var query = {
+                        pageNum: params.pageNumber || 1,
+                        pageSize: params.pageSize || 20,
+                        groupId: groupId,
+                        operationType: $("#operationType").val()
+                    };
+                    return JSON.stringify(query);
+                }
+            });
+        }
+
+        // 搜索日志
+        function searchLogs() {
+            $('#bootstrap-table').bootstrapTable('refresh');
+        }
+
+        // 重置搜索
+        function resetSearch() {
+            $("#operationType").val("");
+            $('#bootstrap-table').bootstrapTable('refresh');
+        }
     </script>
 </body>
 </html>

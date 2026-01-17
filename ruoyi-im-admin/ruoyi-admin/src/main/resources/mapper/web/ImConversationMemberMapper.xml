@@ -119,26 +119,26 @@
         where id = #{id}
     </update>
 
-    <delete id="deleteImConversationMemberById" parameterType="Long">
+    <update id="deleteImConversationMemberById" parameterType="Long">
         update im_conversation_member set is_deleted = 1, deleted_time = now() where id = #{id}
-    </delete>
+    </update>
 
-    <delete id="deleteImConversationMemberByIds" parameterType="Long[]">
+    <update id="deleteImConversationMemberByIds" parameterType="Long[]">
         update im_conversation_member set is_deleted = 1, deleted_time = now() where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
-    </delete>
+    </update>
 
-    <delete id="deleteImConversationMemberByConversationId" parameterType="Long">
+    <update id="deleteImConversationMemberByConversationId" parameterType="Long">
         update im_conversation_member set is_deleted = 1, deleted_time = now()
         where conversation_id = #{conversationId}
-    </delete>
+    </update>
 
-    <delete id="removeMember" parameterType="map">
+    <update id="removeMember" parameterType="map">
         update im_conversation_member set is_deleted = 1, deleted_time = now()
         where conversation_id = #{conversationId} and user_id = #{userId}
-    </delete>
+    </update>
 
     <!-- 会话成员统计 -->
     <select id="getStatistics" resultType="java.util.Map">

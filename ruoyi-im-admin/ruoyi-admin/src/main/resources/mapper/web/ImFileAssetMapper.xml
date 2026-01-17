@@ -16,7 +16,6 @@
         <result property="uploadTime" column="create_time"/>
         <result property="downloadCount" column="download_count"/>
         <result property="status" column="status"/>
-        <result property="deleted" column="is_deleted"/>
     </resultMap>
 
     <select id="selectImFileAssetList" parameterType="com.ruoyi.web.domain.ImFileAsset" resultMap="ImFileAssetResult">
@@ -39,8 +38,8 @@
     </select>
 
     <insert id="insertImFileAsset" parameterType="com.ruoyi.web.domain.ImFileAsset" useGeneratedKeys="true" keyProperty="id">
-        insert into im_file_asset (file_name, file_type, file_size, file_path, uploader_id, create_time)
-        values (#{fileName}, #{fileType}, #{fileSize}, #{filePath}, #{uploaderId}, #{createTime})
+        insert into im_file_asset (file_name, file_type, file_size, file_path, uploader_id, status, create_time)
+        values (#{fileName}, #{fileType}, #{fileSize}, #{filePath}, #{uploaderId}, #{status}, NOW())
     </insert>
 
     <update id="updateImFileAsset" parameterType="com.ruoyi.web.domain.ImFileAsset">
@@ -52,16 +51,16 @@
         where id = #{id}
     </update>
 
-    <delete id="deleteImFileAssetById" parameterType="Long">
-        delete from im_file_asset where id = #{id}
-    </delete>
+    <update id="deleteImFileAssetById" parameterType="Long">
+        update im_file_asset set status = 'DELETED' where id = #{id}
+    </update>
 
-    <delete id="deleteImFileAssetByIds" parameterType="Long[]">
-        delete from im_file_asset where id in
+    <update id="deleteImFileAssetByIds" parameterType="Long[]">
+        update im_file_asset set status = 'DELETED' where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
-    </delete>
+    </update>
 
     <select id="countTotalFiles" parameterType="com.ruoyi.web.domain.ImFileAsset" resultType="java.lang.Integer">
         select count(*) from im_file_asset where status = 'ACTIVE'
@@ -78,18 +77,18 @@
         select IFNULL(sum(file_size), 0) from im_file_asset where status = 'ACTIVE'
     </select>
 
-    <delete id="cleanInvalidFiles">
-        delete from im_file_asset where file_path is null or file_path = ''
-    </delete>
+    <update id="cleanInvalidFiles">
+        update im_file_asset set status = 'DELETED' where file_path is null or file_path = ''
+    </update>
 
     <select id="getFileStatistics" resultType="java.util.Map">
-        select 
+        select
             IFNULL(count(*), 0) as totalCount,
-            IFNULL(sum(case when file_type = 'image' then 1 else 0 end), 0) as imageCount,
-            IFNULL(sum(case when file_type = 'video' then 1 else 0 end), 0) as videoCount,
-            IFNULL(sum(case when file_type = 'document' then 1 else 0 end), 0) as docCount,
-            IFNULL(sum(case when file_type = 'audio' then 1 else 0 end), 0) as audioCount,
-            IFNULL(sum(case when file_type = 'other' then 1 else 0 end), 0) as otherCount,
+            IFNULL(count(case when file_type = 'image' then 1 end), 0) as imageCount,
+            IFNULL(count(case when file_type = 'video' then 1 end), 0) as videoCount,
+            IFNULL(count(case when file_type = 'document' then 1 end), 0) as docCount,
+            IFNULL(count(case when file_type = 'audio' then 1 end), 0) as audioCount,
+            IFNULL(count(case when file_type = 'other' then 1 end), 0) as otherCount,
             IFNULL(sum(file_size), 0) as totalStorage,
             IFNULL(count(case when date(create_time) = curdate() then 1 end), 0) as todayUploads
         from im_file_asset

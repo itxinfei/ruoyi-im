@@ -1,0 +1,113 @@
+:root {
+  --dt-brand-color: #0089ff;
+  --dt-brand-hover: #0070d9;
+  --dt-brand-active: rgba(0, 137, 255, 0.1);
+  --dt-success-color: #52c41a;
+  --dt-warning-color: #faad14;
+  --dt-error-color: #ff4d4f;
+  --dt-text-primary: #262626;
+  --dt-text-secondary: #595959;
+  --dt-text-tertiary: #8c8c8c;
+  --dt-border-color: #e8e8e8;
+  --dt-border-color-light: #f0f0f0;
+  --dt-bg-color: #f5f5f5;
+  --dt-bg-white: #ffffff;
+  --dt-nav-sidebar-width: 64px;
+  --dt-nav-icon-size: 24px;
+  --dt-session-panel-width: 280px;
+  --dt-header-height: 48px;
+  --dt-radius-sm: 4px;
+  --dt-radius-md: 8px;
+  --dt-radius-lg: 12px;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--dt-text-primary);
+  background-color: var(--dt-bg-white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--dt-brand-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--dt-brand-hover);
+  }
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+input,
+textarea {
+  font-family: inherit;
+  outline: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+.el-button--primary {
+  background-color: var(--dt-brand-color);
+  border-color: var(--dt-brand-color);
+
+  &:hover {
+    background-color: var(--dt-brand-hover);
+    border-color: var(--dt-brand-hover);
+  }
+
+  &:active {
+    background-color: var(--dt-brand-hover);
+    border-color: var(--dt-brand-hover);
+  }
+}
+
+.el-input__wrapper {
+  border-radius: var(--dt-radius-sm);
+}
+
+.el-textarea__inner {
+  border-radius: var(--dt-radius-sm);
+}
+
+.el-avatar {
+  background-color: var(--dt-brand-color);
+}

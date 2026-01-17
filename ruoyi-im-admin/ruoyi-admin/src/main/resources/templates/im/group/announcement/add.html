@@ -5,6 +5,8 @@
     <title>新增群公告</title>
     <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+    <!-- datetimepicker 日期时间选择器 -->
+    <th:block th:include="include :: datetimepicker-css" />
 </head>
 <body class="white-bg">
     <form class="form-horizontal m" id="form-announcement-add">
@@ -33,7 +35,7 @@
         <div class="form-group">
             <label class="col-sm-3 control-label">公告内容：</label>
             <div class="col-sm-8">
-                <textarea name="content" class="form-control" rows="5" placeholder="请输入公告内容" required></textarea>
+                <textarea name="content" class="form-control" rows="12" placeholder="请输入公告内容" required></textarea>
             </div>
         </div>
         <div class="form-group">
@@ -54,14 +56,29 @@
         <div class="form-group">
             <label class="col-sm-3 control-label">过期时间：</label>
             <div class="col-sm-8">
-                <input name="expireTime" placeholder="请选择过期时间" class="form-control" type="text">
+                <div class="input-group date">
+                    <input name="expireTime" placeholder="请选择过期时间" class="form-control" type="text">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                </div>
             </div>
         </div>
     </form>
     <div th:include="include :: footer"></div>
+    <th:block th:include="include :: datetimepicker-js" />
     <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
     <script th:inline="javascript">
         var prefix = ctx + "im/group/announcement";
+
+        $(function() {
+            // 初始化日期时间选择器
+            $("input[name='expireTime']").parent(".input-group.date").datetimepicker({
+                format: "yyyy-mm-dd hh:ii:ss",
+                minView: "month",
+                autoclose: true,
+                todayBtn: true
+            });
+        });
+
         $("#form-announcement-add").validate({
             focusCleanup: true
         });

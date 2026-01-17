@@ -89,6 +89,7 @@ public class ImMessageController extends BaseController {
      */
     @RequiresPermissions("im:message:query")
     @GetMapping("/info/{id}")
+    @ResponseBody
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(imMessageService.selectImMessageById(id));
     }
@@ -98,6 +99,7 @@ public class ImMessageController extends BaseController {
      */
     @RequiresPermissions("im:message:query")
     @GetMapping("/{id}")
+    @ResponseBody
     public AjaxResult getMessageDetail(@PathVariable("id") Long id) {
         return AjaxResult.success(imMessageService.selectImMessageById(id));
     }
@@ -119,6 +121,7 @@ public class ImMessageController extends BaseController {
     @RequiresPermissions("im:message:edit")
     @Log(title = "撤回消息", businessType = BusinessType.UPDATE)
     @PutMapping("/{id}/revoke")
+    @ResponseBody
     public AjaxResult revoke(@PathVariable("id") Long messageId) {
         return toAjax(imMessageService.revokeMessage(messageId));
     }
@@ -167,6 +170,7 @@ public class ImMessageController extends BaseController {
      */
     @RequiresPermissions("im:message:list")
     @GetMapping("/conversation/{conversationId}")
+    @ResponseBody
     public AjaxResult getByConversation(@PathVariable("conversationId") Long conversationId,
                                       @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                       @RequestParam(value = "pageSize", defaultValue = "20") Integer pageSize) {
@@ -179,6 +183,7 @@ public class ImMessageController extends BaseController {
      */
     @RequiresPermissions("im:message:list")
     @GetMapping("/conversation/{conversationId}/range")
+    @ResponseBody
     public AjaxResult getByTimeRange(@PathVariable("conversationId") Long conversationId,
                                    @RequestParam String startTime,
                                    @RequestParam String endTime) {
@@ -191,6 +196,7 @@ public class ImMessageController extends BaseController {
      */
     @RequiresPermissions("im:message:list")
     @GetMapping("/statistics/sensitive")
+    @ResponseBody
     public AjaxResult getSensitiveStatistics() {
         // 调用 Service 获取统计数据
         Map<String, Object> dbStats = imMessageService.getMessageStatistics();

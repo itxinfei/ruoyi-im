@@ -127,6 +127,82 @@ public class ImConversationController extends BaseController {
     }
 
     /**
+     * 移除会话成员
+     */
+    @RequiresPermissions("im:conversation:edit")
+    @Log(title = "移除会话成员", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{conversationId}/members/{userId}")
+    @ResponseBody
+    public AjaxResult removeMember(@PathVariable("conversationId") Long conversationId,
+                                   @PathVariable("userId") Long userId) {
+        return toAjax(imConversationMemberService.removeMember(conversationId, userId));
+    }
+
+    /**
+     * 批量移除会话成员
+     */
+    @RequiresPermissions("im:conversation:edit")
+    @Log(title = "批量移除成员", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{conversationId}/members/batch")
+    @ResponseBody
+    public AjaxResult batchRemoveMembers(@PathVariable("conversationId") Long conversationId,
+                                        @RequestBody List<Long> userIds) {
+        int successCount = 0;
+        for (Long userId : userIds) {
+            int result = imConversationMemberService.removeMember(conversationId, userId);
+            if (result > 0) {
+                successCount++;
+            }
+        }
+        return AjaxResult.success("成功移除 " + successCount + " 位成员");
+    }
+
+    /**
+     * 设置成员角色
+     */
+    @RequiresPermissions("im:conversation:edit")
+    @Log(title = "设置成员角色", businessType = BusinessType.UPDATE)
+    @PutMapping("/{conversationId}/members/{userId}/role")
+    @ResponseBody
+    public AjaxResult updateMemberRole(@PathVariable("conversationId") Long conversationId,
+                                      @PathVariable("userId") Long userId,
+                                      @RequestParam String role) {
+        ImConversationMember member = new ImConversationMember();
+        member.setConversationId(conversationId);
+        member.setUserId(userId);
+        member.setRole(role);
+        return toAjax(imConversationMemberService.updateImConversationMember(member));
+    }
+
+    /**
+     * 添加会话成员页面
+     */
+    @RequiresPermissions("im:conversation:edit")
+    @GetMapping("/{conversationId}/addMember")
+    public String addMemberPage(@PathVariable("conversationId") Long conversationId,
+                               org.springframework.ui.ModelMap mmap) {
+        mmap.put("conversationId", conversationId);
+        return prefix + "/addMember";
+    }
+
+    /**
+     * 添加会话成员
+     */
+    @RequiresPermissions("im:conversation:edit")
+    @Log(title = "添加会话成员", businessType = BusinessType.INSERT)
+    @PostMapping("/{conversationId}/members")
+    @ResponseBody
+    public AjaxResult addMember(@PathVariable("conversationId") Long conversationId,
+                               @RequestParam Long userId,
+                               @RequestParam(defaultValue = "MEMBER") String role) {
+        ImConversationMember member = new ImConversationMember();
+        member.setConversationId(conversationId);
+        member.setUserId(userId);
+        member.setRole(role);
+        return toAjax(imConversationMemberService.insertImConversationMember(member));
+    }
+
+    /**
      * 新增会话
      */
     @RequiresPermissions("im:conversation:add")

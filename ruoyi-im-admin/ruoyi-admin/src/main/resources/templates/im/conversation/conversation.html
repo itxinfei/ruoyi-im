@@ -14,8 +14,8 @@
     <style>
         /* 统计卡片样式 */
         .statistics-section {
-            margin-top: 10px;
-            margin-bottom: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
         .statistics-card {
             padding: 15px;
@@ -46,7 +46,7 @@
         .stat-active { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
                 /* 搜索区域底部间距 */
                 .search-collapse {
-                    margin-bottom: 10px;
+                    margin-bottom: 20px;
                 }
         
                 /* 表格区域样式 */
@@ -253,10 +253,10 @@
         function viewMembers(conversationId) {
             var url = prefix + "/" + conversationId + "/members";
             $.modal.openOptions({
-                title: "会话成员",
+                title: "会话成员管理",
                 url: url,
-                width: '800px',
-                height: '500px',
+                width: '1400px',
+                height: '850px',
                 maxmin: true,
                 callback: function() {
                     $.table.refresh();

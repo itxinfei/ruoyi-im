@@ -208,6 +208,7 @@ public class ImFileAssetController extends BaseController {
             fileAsset.setFilePath(fileName);
             fileAsset.setUploaderId(userId != null ? userId : 1L);
             fileAsset.setMimeType(file.getContentType());
+            fileAsset.setStatus("ACTIVE");
 
             imFileAssetService.insertImFileAsset(fileAsset);
 

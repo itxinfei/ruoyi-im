@@ -9,32 +9,32 @@
     <link href="../static/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
     <link href="../static/css/style.min.css" th:href="@{/css/style.min.css}" rel="stylesheet"/>
     <style>
-        /* 自定义仪表板样式 */
         .dashboard-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
         }
-        
+
         .stat-card {
             background: white;
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            border: 1px solid #e8e8e8;
         }
-        
+
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
         }
-        
+
         .stat-card::before {
             content: '';
             position: absolute;
@@ -44,10 +44,10 @@
             height: 4px;
             background: linear-gradient(90deg, #667eea, #764ba2);
         }
-        
+
         .stat-icon {
-            width: 60px;
-            height: 60px;
+            width: 56px;
+            height: 56px;
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -56,81 +56,90 @@
             color: white;
             margin-bottom: 15px;
         }
-        
+
         .bg-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .bg-green { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
         .bg-orange { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
         .bg-purple { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
-        
+
         .stat-number {
-            font-size: 28px;
-            font-weight: bold;
+            font-size: 32px;
+            font-weight: 700;
             color: #2c3e50;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            line-height: 1;
         }
-        
+
         .stat-title {
             font-size: 14px;
             color: #7f8c8d;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 500;
         }
-        
+
         .stat-trend {
-            font-size: 12px;
-            margin-top: 5px;
+            font-size: 13px;
+            margin-top: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
         }
-        
+
         .trend-up {
             color: #27ae60;
+            background: rgba(39, 174, 96, 0.1);
         }
-        
+
         .trend-down {
             color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
         }
-        
+
         .function-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
         }
-        
+
         .function-card {
             background: white;
             border-radius: 12px;
-            padding: 20px 15px;
+            padding: 25px 20px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            border: none;
+            border: 1px solid #e8e8e8;
+            cursor: pointer;
         }
-        
+
         .function-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
         }
-        
+
         .function-card i {
-            font-size: 28px;
-            margin-bottom: 10px;
+            font-size: 32px;
+            margin-bottom: 12px;
             display: block;
         }
-        
+
         .function-card h4 {
-            font-size: 14px;
+            font-size: 15px;
             margin: 10px 0 5px 0;
             color: #2c3e50;
+            font-weight: 600;
         }
-        
+
         .function-card p {
-            font-size: 12px;
+            font-size: 13px;
             color: #7f8c8d;
             margin: 0;
         }
-        
+
         .function-card::after {
             content: '';
             position: absolute;
@@ -142,87 +151,95 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        
+
         .function-card:hover::after {
             opacity: 1;
         }
-        
+
         .section-title {
             font-size: 18px;
             font-weight: 600;
             color: #2c3e50;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
             border-bottom: 2px solid #ecf0f1;
             position: relative;
         }
-        
+
         .section-title::after {
             content: '';
             position: absolute;
             bottom: -2px;
             left: 0;
-            width: 50px;
+            width: 60px;
             height: 2px;
             background: linear-gradient(90deg, #667eea, #764ba2);
         }
-        
+
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 25px;
         }
-        
+
         .action-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 10px;
-            padding: 15px;
+            padding: 18px;
             text-align: center;
             transition: all 0.3s ease;
             text-decoration: none;
             display: block;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
-        
+
         .action-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
             color: white;
             text-decoration: none;
         }
-        
+
         .action-btn i {
-            font-size: 20px;
+            font-size: 24px;
             margin-bottom: 8px;
             display: block;
         }
-        
+
+        .action-btn div {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
         .info-table {
             background: white;
             border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 25px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border: 1px solid #e8e8e8;
         }
-        
+
         .info-table td {
-            padding: 12px 15px;
+            padding: 15px 18px;
             border-bottom: 1px solid #ecf0f1;
         }
-        
+
         .info-table tr:last-child td {
             border-bottom: none;
         }
-        
+
         .tech-stack {
             background: white;
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            margin-top: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-top: 25px;
+            border: 1px solid #e8e8e8;
         }
-        
+
         .tech-well {
             background: #f8f9fa;
             border-radius: 10px;
@@ -230,22 +247,25 @@
             margin-bottom: 15px;
             border-left: 4px solid #667eea;
         }
-        
+
         .tech-well h4 {
             color: #2c3e50;
             margin-bottom: 15px;
+            font-size: 15px;
+            font-weight: 600;
         }
-        
+
         .tech-well ul {
             margin: 0;
             padding-left: 20px;
         }
-        
+
         .tech-well li {
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             color: #7f8c8d;
+            font-size: 13px;
         }
-        
+
         .status-indicator {
             display: inline-block;
             width: 12px;
@@ -253,153 +273,179 @@
             border-radius: 50%;
             margin-right: 8px;
         }
-        
+
         .status-online {
             background: linear-gradient(135deg, #4CAF50, #81C784);
         }
-        
-        .status-offline {
-            background: linear-gradient(135deg, #F44336, #E57373);
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            z-index: 10;
         }
-        
-        .status-away {
-            background: linear-gradient(135deg, #FF9800, #FFB74D);
+
+        .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stat-card.loading {
+            pointer-events: none;
         }
     </style>
 </head>
-
 <body class="gray-bg">
     <div class="wrapper wrapper-content">
-        <!-- 欢迎区域 -->
         <div class="dashboard-header">
             <div class="row">
                 <div class="col-sm-8">
                     <h2><i class="fa fa-comments-o"></i> 欢迎使用 IM即时通讯管理系统</h2>
-                    <p style="font-size: 16px; opacity: 0.9; margin-top: 10px;">
+                    <p style="font-size: 16px; opacity: 0.9; margin-top: 12px;">
                         <i class="fa fa-check-circle"></i> 基于 Spring Boot + Vue 的企业级即时通讯系统
                     </p>
-                    <p style="font-size: 14px; opacity: 0.8; margin-top: 10px;">
+                    <p style="font-size: 14px; opacity: 0.8; margin-top: 8px;">
                         <i class="fa fa-bolt"></i> 支持单聊、群聊、文件传输、语音视频通话等功能
                     </p>
                 </div>
                 <div class="col-sm-4 text-right">
-                    <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 15px; margin-top: 20px;">
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 18px; margin-top: 15px;">
                         <div style="color: white; font-size: 14px;">
                             <div class="status-indicator status-online"></div>
                             系统状态: <strong>运行正常</strong>
                         </div>
-                        <div style="color: white; font-size: 14px; margin-top: 5px;">
+                        <div style="color: white; font-size: 14px; margin-top: 8px;">
                             <i class="fa fa-clock-o"></i> [[${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm')}]]
                         </div>
-                                            <div style="color: white; font-size: 14px; margin-top: 5px;">
-                                                <i class="fa fa-user"></i> [[${#strings.defaultString(user?.userName, '-')}]]
-                                            </div>                    </div>
+                        <div style="color: white; font-size: 14px; margin-top: 8px;">
+                            <i class="fa fa-user"></i> [[${#strings.defaultString(user?.userName, '-')}]]
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 统计卡片 -->
         <div class="row">
             <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
+                <div class="stat-card loading" id="userCard">
+                    <div class="loading-overlay">
+                        <div class="loading-spinner"></div>
+                    </div>
                     <div class="stat-icon bg-blue">
                         <i class="fa fa-users"></i>
                     </div>
-                    <div class="stat-number">1,258</div>
+                    <div class="stat-number" id="totalUsers">-</div>
                     <div class="stat-title">总用户数</div>
                     <div class="stat-trend trend-up">
-                        <i class="fa fa-arrow-up"></i> +12.5% 本月
+                        <i class="fa fa-user-plus"></i> 今日新增: <span id="todayRegister">-</span>
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
+                <div class="stat-card loading" id="messageCard">
+                    <div class="loading-overlay">
+                        <div class="loading-spinner"></div>
+                    </div>
                     <div class="stat-icon bg-green">
                         <i class="fa fa-comment"></i>
                     </div>
-                    <div class="stat-number">24,856</div>
+                    <div class="stat-number" id="totalMessages">-</div>
                     <div class="stat-title">消息总数</div>
                     <div class="stat-trend trend-up">
-                        <i class="fa fa-arrow-up"></i> +8.3% 今日
+                        <i class="fa fa-calendar"></i> 今日消息: <span id="todayMessages">-</span>
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
+                <div class="stat-card loading" id="groupCard">
+                    <div class="loading-overlay">
+                        <div class="loading-spinner"></div>
+                    </div>
                     <div class="stat-icon bg-orange">
                         <i class="fa fa-users"></i>
                     </div>
-                    <div class="stat-number">342</div>
+                    <div class="stat-number" id="totalGroups">-</div>
                     <div class="stat-title">群组数量</div>
                     <div class="stat-trend trend-up">
-                        <i class="fa fa-arrow-up"></i> +5.2% 本周
+                        <i class="fa fa-plus-circle"></i> 今日创建: <span id="todayCreatedGroups">-</span>
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
+                <div class="stat-card loading" id="onlineCard">
+                    <div class="loading-overlay">
+                        <div class="loading-spinner"></div>
+                    </div>
                     <div class="stat-icon bg-purple">
                         <i class="fa fa-bolt"></i>
                     </div>
-                    <div class="stat-number">785</div>
+                    <div class="stat-number" id="onlineUsers">-</div>
                     <div class="stat-title">在线用户</div>
                     <div class="stat-trend trend-up">
-                        <i class="fa fa-arrow-up"></i> +3.1% 实时
+                        <i class="fa fa-refresh"></i> 实时更新
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 功能模块 -->
         <div class="row">
             <div class="col-lg-12">
                 <h3 class="section-title">
                     <i class="fa fa-cogs"></i> IM系统功能模块
                 </h3>
                 <div class="function-grid">
-                    <div class="function-card">
+                    <div class="function-card" onclick="window.location.href='/im/user'">
                         <i class="fa fa-user" style="color: #667eea;"></i>
                         <h4>用户管理</h4>
                         <p>用户信息管理</p>
                     </div>
-                    <div class="function-card">
+                    <div class="function-card" onclick="window.location.href='/im/conversation'">
                         <i class="fa fa-comments" style="color: #4facfe;"></i>
                         <h4>会话管理</h4>
                         <p>单聊群聊管理</p>
                     </div>
-                    <div class="function-card">
+                    <div class="function-card" onclick="window.location.href='/im/message'">
                         <i class="fa fa-envelope" style="color: #fa709a;"></i>
                         <h4>消息管理</h4>
                         <p>消息记录审核</p>
                     </div>
-                    <div class="function-card">
+                    <div class="function-card" onclick="window.location.href='/im/group'">
                         <i class="fa fa-users" style="color: #a8edea;"></i>
                         <h4>群组管理</h4>
                         <p>群组成员管理</p>
                     </div>
-                    <div class="function-card">
+                    <div class="function-card" onclick="window.location.href='/im/file'">
                         <i class="fa fa-file" style="color: #667eea;"></i>
                         <h4>文件管理</h4>
                         <p>文件上传分享</p>
                     </div>
-                    <div class="function-card">
+                    <div class="function-card" onclick="window.location.href='/im/approval'">
                         <i class="fa fa-check-circle" style="color: #4facfe;"></i>
                         <h4>审批管理</h4>
                         <p>工作流审批</p>
                     </div>
-                    <div class="function-card">
+                    <div class="function-card" onclick="window.location.href='/im/ding'">
                         <i class="fa fa-bell" style="color: #fa709a;"></i>
                         <h4>DING消息</h4>
                         <p>重要事项提醒</p>
                     </div>
-                    <div class="function-card">
+                    <div class="function-card" onclick="window.location.href='/im/email'">
                         <i class="fa fa-envelope-o" style="color: #a8edea;"></i>
                         <h4>邮箱管理</h4>
                         <p>邮件服务管理</p>
@@ -408,7 +454,6 @@
             </div>
         </div>
 
-        <!-- 快捷操作 -->
         <div class="row">
             <div class="col-lg-12">
                 <h3 class="section-title">
@@ -444,7 +489,6 @@
         </div>
 
         <div class="row">
-            <!-- 系统信息 -->
             <div class="col-lg-6">
                 <h3 class="section-title">
                     <i class="fa fa-info-circle"></i> 系统信息
@@ -475,7 +519,6 @@
                 </div>
             </div>
 
-            <!-- 技术栈 -->
             <div class="col-lg-6">
                 <h3 class="section-title">
                     <i class="fa fa-gears"></i> 技术栈
@@ -531,36 +574,58 @@
         </div>
     </div>
 
-    <!-- 全局js -->
     <script th:src="@{/js/jquery.min.js}"></script>
     <script th:src="@{/js/bootstrap.min.js}"></script>
     <script>
+        var ctx = '/';
+
         $(document).ready(function() {
-            // 添加一些动态效果
-            $('.stat-card, .function-card, .action-btn').hover(
-                function() {
-                    $(this).css('transform', 'translateY(-5px)');
-                },
-                function() {
-                    $(this).css('transform', 'translateY(0)');
-                }
-            );
-            
-            // 页面加载动画
-            $('.stat-card, .function-card, .action-btn, .info-table, .tech-stack').each(function(index) {
-                $(this).css({
-                    'opacity': '0',
-                    'transform': 'translateY(20px)'
-                });
-                
-                setTimeout(() => {
-                    $(this).animate({
-                        opacity: 1,
-                        transform: 'translateY(0)'
-                    }, 600);
-                }, index * 100);
-            });
+            loadStatistics();
+
+            setInterval(loadStatistics, 30000);
         });
+
+        function loadStatistics() {
+            $.ajax({
+                url: ctx + 'im/dashboard/statistics',
+                type: 'GET',
+                success: function(result) {
+                    if (result.code === 0 && result.data) {
+                        var data = result.data;
+
+                        $('#totalUsers').text(formatNumber(data.totalUsers || 0));
+                        $('#onlineUsers').text(formatNumber(data.onlineUsers || 0));
+                        $('#todayRegister').text(formatNumber(data.todayRegister || 0));
+                        $('#totalMessages').text(formatNumber(data.totalMessages || 0));
+                        $('#todayMessages').text(formatNumber(data.todayMessages || 0));
+                        $('#totalGroups').text(formatNumber(data.totalGroups || 0));
+                        $('#todayCreatedGroups').text(formatNumber(data.todayCreatedGroups || 0));
+
+                        $('#userCard, #messageCard, #groupCard, #onlineCard').removeClass('loading');
+                    }
+                },
+                error: function() {
+                    $('#totalUsers').text('0');
+                    $('#onlineUsers').text('0');
+                    $('#todayRegister').text('0');
+                    $('#totalMessages').text('0');
+                    $('#todayMessages').text('0');
+                    $('#totalGroups').text('0');
+                    $('#todayCreatedGroups').text('0');
+
+                    $('#userCard, #messageCard, #groupCard, #onlineCard').removeClass('loading');
+                }
+            });
+        }
+
+        function formatNumber(num) {
+            if (num >= 10000) {
+                return (num / 10000).toFixed(1) + '万';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'k';
+            }
+            return num.toString();
+        }
     </script>
 </body>
 </html>

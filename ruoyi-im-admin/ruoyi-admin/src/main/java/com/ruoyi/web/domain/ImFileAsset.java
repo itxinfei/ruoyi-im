@@ -58,8 +58,8 @@ public class ImFileAsset extends BaseEntity implements Serializable {
     @Schema(description = "下载次数")
     private Integer downloadCount;
 
-    @Schema(description = "状态（0-删除 1-正常）")
-    private Integer status;
+    @Schema(description = "状态（ACTIVE-正常 DELETED-已删除）")
+    private String status;
 
     @Schema(description = "是否已删除")
     private Boolean deleted;
@@ -172,11 +172,11 @@ public class ImFileAsset extends BaseEntity implements Serializable {
         this.downloadCount = downloadCount;
     }
 
-    public Integer getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

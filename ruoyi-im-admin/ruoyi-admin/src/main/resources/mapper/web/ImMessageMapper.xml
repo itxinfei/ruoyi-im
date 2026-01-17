@@ -175,13 +175,14 @@
         </foreach>
     </delete>
 
-    <!-- 统计各敏感级别的消息数量 -->
+    <!-- 获取消息统计数据 -->
     <select id="getMessageStatistics" resultType="java.util.Map">
         select
+            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0) as totalMessages,
+            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND DATE(create_time) = CURDATE()) as todayMessages,
             (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND (sensitive_level IS NULL OR sensitive_level = 'NORMAL')) as normalCount,
             (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND sensitive_level = 'SENSITIVE') as sensitiveCount,
-            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND sensitive_level = 'HIGH') as highCount,
-            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0) as totalCount
+            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND sensitive_level = 'HIGH') as highCount
         from dual
     </select>
 </mapper>
