@@ -8,12 +8,10 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.file.FileUploadUtils;
 import com.ruoyi.web.domain.ImFileAsset;
 import com.ruoyi.web.service.ImFileAssetService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -24,10 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -38,13 +33,14 @@ import java.util.Map;
  * IM文件资源管理控制器（管理后台）
  *
  * @author ruoyi
- * @date 2025-01-07
+ * @date 2025-01-17
  */
 @Controller
 @RequestMapping("/im/file")
 public class ImFileAssetController extends BaseController {
 
-    private String prefix = "im/file";
+    /** 页面前缀 */
+    private static final String PAGE_PREFIX = "im/file";
 
     /**
      * 文件管理页面
@@ -52,7 +48,7 @@ public class ImFileAssetController extends BaseController {
     @RequiresPermissions("im:file:list")
     @GetMapping()
     public String file() {
-        return prefix + "/file";
+        return PAGE_PREFIX + "/file";
     }
 
     @Autowired
@@ -67,7 +63,7 @@ public class ImFileAssetController extends BaseController {
     @RequiresPermissions("im:file:add")
     @GetMapping("/add")
     public String add() {
-        return prefix + "/add";
+        return PAGE_PREFIX + "/add";
     }
 
     /**
@@ -77,7 +73,7 @@ public class ImFileAssetController extends BaseController {
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
         mmap.put("file", imFileAssetService.selectImFileAssetById(id));
-        return prefix + "/edit";
+        return PAGE_PREFIX + "/edit";
     }
 
     /**
@@ -146,25 +142,32 @@ public class ImFileAssetController extends BaseController {
     }
 
     /**
-     * 删除文件资源（POST方法，兼容RuoYi框架的删除操作）
-     */
-    @RequiresPermissions("im:file:remove")
-    @Log(title = "文件资源", businessType = BusinessType.DELETE)
-    @PostMapping("/remove/{ids}")
-    @ResponseBody
-    public AjaxResult remove(@PathVariable String ids) {
-        return toAjax(imFileAssetService.deleteImFileAssetByIds(Convert.toLongArray(ids)));
-    }
-
-    /**
-     * 删除文件资源（POST方法，兼容批量删除操作）
+     * 删除文件资源（支持单个和批量删除）
      */
     @RequiresPermissions("im:file:remove")
     @Log(title = "文件资源", businessType = BusinessType.DELETE)
     @PostMapping("/remove")
     @ResponseBody
-    public AjaxResult removeBatch(@RequestParam String ids) {
-        return toAjax(imFileAssetService.deleteImFileAssetByIds(Convert.toLongArray(ids)));
+    public AjaxResult remove(@RequestParam String ids) {
+        try {
+            Long[] idArray = Convert.toLongArray(ids);
+            int count = imFileAssetService.deleteImFileAssetByIds(idArray);
+            return toAjax(count);
+        } catch (Exception e) {
+            logger.error("删除文件失败", e);
+            return AjaxResult.error("删除失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 删除文件资源（路径参数方式，兼容REST风格）
+     */
+    @RequiresPermissions("im:file:remove")
+    @Log(title = "文件资源", businessType = BusinessType.DELETE)
+    @PostMapping("/remove/{ids}")
+    @ResponseBody
+    public AjaxResult removeByPath(@PathVariable String ids) {
+        return remove(ids);
     }
 
     /**
@@ -194,6 +197,7 @@ public class ImFileAssetController extends BaseController {
      */
     @PostMapping("/upload")
     @ResponseBody
+    @Log(title = "文件上传", businessType = BusinessType.INSERT)
     public AjaxResult uploadFile(@RequestParam("file") MultipartFile file,
                                  @RequestParam(required = false) Long userId) {
         try {
@@ -201,37 +205,23 @@ public class ImFileAssetController extends BaseController {
                 return AjaxResult.error("请选择文件");
             }
 
-            // 获取原始文件名
-            String originalFilename = file.getOriginalFilename();
-            String fileExtension = "";
-            if (StringUtils.isNotEmpty(originalFilename)) {
-                fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
-            }
-
-            // 上传文件
-            String fileName = FileUploadUtils.upload(ruoYiConfig.getProfile(), file);
-
-            // 创建文件记录
-            ImFileAsset fileAsset = new ImFileAsset();
-            fileAsset.setFileName(originalFilename);
-            fileAsset.setFileType(getFileType(fileExtension));
-            fileAsset.setFileSize(file.getSize());
-            fileAsset.setFilePath(fileName);
-            fileAsset.setUploaderId(userId != null ? userId : 1L);
-            fileAsset.setMimeType(file.getContentType());
-            fileAsset.setStatus("ACTIVE");
-
-            imFileAssetService.insertImFileAsset(fileAsset);
+            // 调用Service层上传文件
+            ImFileAsset fileAsset = imFileAssetService.uploadFile(file, userId);
 
             Map<String, Object> result = new HashMap<>();
             result.put("id", fileAsset.getId());
-            result.put("fileName", originalFilename);
-            result.put("filePath", fileName);
-            result.put("fileSize", file.getSize());
-            result.put("url", "/profile/" + fileName);
+            result.put("fileName", fileAsset.getFileName());
+            result.put("filePath", fileAsset.getFilePath());
+            result.put("fileSize", fileAsset.getFileSize());
+            result.put("fileType", fileAsset.getFileType());
+            result.put("url", fileAsset.getFileUrl());
 
             return AjaxResult.success("上传成功", result);
-        } catch (IOException e) {
+        } catch (IllegalArgumentException e) {
+            logger.warn("文件上传参数校验失败：{}", e.getMessage());
+            return AjaxResult.error(e.getMessage());
+        } catch (Exception e) {
+            logger.error("文件上传失败", e);
             return AjaxResult.error("上传失败: " + e.getMessage());
         }
     }
@@ -245,6 +235,13 @@ public class ImFileAssetController extends BaseController {
         try {
             ImFileAsset fileAsset = imFileAssetService.selectImFileAssetById(id);
             if (fileAsset == null) {
+                logger.warn("下载文件失败：文件不存在，ID：{}", id);
+                return ResponseEntity.notFound().build();
+            }
+
+            // 检查文件状态
+            if (!fileAsset.isActive()) {
+                logger.warn("下载文件失败：文件已删除，ID：{}", id);
                 return ResponseEntity.notFound().build();
             }
 
@@ -254,8 +251,12 @@ public class ImFileAssetController extends BaseController {
             Resource resource = new UrlResource(path.toUri());
 
             if (!resource.exists() || !resource.isReadable()) {
+                logger.warn("下载文件失败：文件无法读取，路径：{}", filePath);
                 return ResponseEntity.notFound().build();
             }
+
+            // 增加下载次数
+            imFileAssetService.incrementDownloadCount(id);
 
             // 确定内容类型
             String contentType = fileAsset.getMimeType();
@@ -269,6 +270,10 @@ public class ImFileAssetController extends BaseController {
                     .body(resource);
 
         } catch (MalformedURLException e) {
+            logger.error("下载文件异常，文件ID：{}", id, e);
+            return ResponseEntity.internalServerError().build();
+        } catch (Exception e) {
+            logger.error("下载文件异常", e);
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -282,6 +287,13 @@ public class ImFileAssetController extends BaseController {
         try {
             ImFileAsset fileAsset = imFileAssetService.selectImFileAssetById(id);
             if (fileAsset == null) {
+                logger.warn("预览文件失败：文件不存在，ID：{}", id);
+                return ResponseEntity.notFound().build();
+            }
+
+            // 检查文件状态
+            if (!fileAsset.isActive()) {
+                logger.warn("预览文件失败：文件已删除，ID：{}", id);
                 return ResponseEntity.notFound().build();
             }
 
@@ -291,6 +303,7 @@ public class ImFileAssetController extends BaseController {
             Resource resource = new UrlResource(path.toUri());
 
             if (!resource.exists() || !resource.isReadable()) {
+                logger.warn("预览文件失败：文件无法读取，路径：{}", filePath);
                 return ResponseEntity.notFound().build();
             }
 
@@ -306,6 +319,10 @@ public class ImFileAssetController extends BaseController {
                     .body(resource);
 
         } catch (MalformedURLException e) {
+            logger.error("预览文件异常，文件ID：{}", id, e);
+            return ResponseEntity.internalServerError().build();
+        } catch (Exception e) {
+            logger.error("预览文件异常", e);
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -331,25 +348,5 @@ public class ImFileAssetController extends BaseController {
         result.put("previewUrl", "/im/file/preview/" + id);
 
         return AjaxResult.success(result);
-    }
-
-    /**
-     * 根据文件扩展名获取文件类型
-     */
-    private String getFileType(String extension) {
-        extension = extension.toLowerCase();
-        if (extension.matches("jpg|jpeg|png|gif|bmp|webp")) {
-            return "image";
-        } else if (extension.matches("mp4|avi|mov|wmv|flv|mkv")) {
-            return "video";
-        } else if (extension.matches("mp3|wav|flac|aac|ogg")) {
-            return "audio";
-        } else if (extension.matches("pdf|doc|docx|xls|xlsx|ppt|pptx|txt")) {
-            return "document";
-        } else if (extension.matches("zip|rar|7z|tar|gz")) {
-            return "archive";
-        } else {
-            return "other";
-        }
     }
 }

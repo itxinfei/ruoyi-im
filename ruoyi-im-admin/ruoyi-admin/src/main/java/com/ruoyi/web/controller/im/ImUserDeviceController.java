@@ -106,7 +106,7 @@ public class ImUserDeviceController extends BaseController {
     @Log(title = "用户设备管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImUserDevice imUserDevice) {
+    public AjaxResult edit(ImUserDevice imUserDevice) {
         return toAjax(imUserDeviceService.updateImUserDevice(imUserDevice));
     }
 

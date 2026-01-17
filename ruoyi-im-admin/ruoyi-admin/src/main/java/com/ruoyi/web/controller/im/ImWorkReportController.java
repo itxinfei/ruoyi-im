@@ -87,7 +87,7 @@ public class ImWorkReportController extends BaseController {
     @Log(title = "工作报告管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImWorkReport imWorkReport) {
+    public AjaxResult edit(ImWorkReport imWorkReport) {
         return toAjax(imWorkReportService.updateImWorkReport(imWorkReport));
     }
 

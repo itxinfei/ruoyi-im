@@ -108,7 +108,7 @@ public class ImUserSettingController extends BaseController {
     @Log(title = "用户设置管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImUserSetting imUserSetting) {
+    public AjaxResult edit(ImUserSetting imUserSetting) {
         return toAjax(imUserSettingService.updateImUserSetting(imUserSetting));
     }
 

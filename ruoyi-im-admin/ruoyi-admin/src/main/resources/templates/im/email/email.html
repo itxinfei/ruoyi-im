@@ -248,10 +248,18 @@
                 {
                     title: '操作',
                     align: 'center',
-                    width: '150',
+                    width: '280',
                     formatter: function(value, row, index) {
                         var actions = [];
                         actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" style="cursor: pointer;" onclick="viewEmailById(' + row.id + ')"><i class="fa fa-eye"></i>查看</a> ');
+                        if (row.isRead == 0) {
+                            actions.push('<a class="btn btn-success btn-xs" href="javascript:void(0)" style="cursor: pointer;" onclick="markAsRead(' + row.id + ')"><i class="fa fa-envelope-open"></i>已读</a> ');
+                        }
+                        if (row.isStarred == 0) {
+                            actions.push('<a class="btn btn-warning btn-xs" href="javascript:void(0)" style="cursor: pointer;" onclick="toggleStar(' + row.id + ')"><i class="fa fa-star"></i>星标</a> ');
+                        } else {
+                            actions.push('<a class="btn btn-default btn-xs" href="javascript:void(0)" style="cursor: pointer;" onclick="toggleStar(' + row.id + ')"><i class="fa fa-star-o"></i>取消</a> ');
+                        }
                         actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" style="cursor: pointer;" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
@@ -296,6 +304,30 @@
                         title: '邮件详情',
                         area: ['1000px', '700px'],
                         content: content
+                    });
+                    // 标记为已读
+                    markAsRead(id);
+                }
+            });
+        }
+        function markAsRead(id) {
+            $.post(prefix + "/edit", {id: id, isRead: 1}, function(result) {
+                if (result.code == 0) {
+                    $.table.refresh();
+                    loadStatistics();
+                }
+            });
+        }
+        function toggleStar(id) {
+            $.get(prefix + "/" + id, function(result) {
+                if (result.code == 0) {
+                    var email = result.data;
+                    var newStarred = email.isStarred == 0 ? 1 : 0;
+                    $.post(prefix + "/edit", {id: id, isStarred: newStarred}, function(result) {
+                        if (result.code == 0) {
+                            $.table.refresh();
+                            loadStatistics();
+                        }
                     });
                 }
             });

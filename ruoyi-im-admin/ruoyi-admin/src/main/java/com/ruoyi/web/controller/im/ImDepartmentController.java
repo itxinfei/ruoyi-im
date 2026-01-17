@@ -99,7 +99,7 @@ public class ImDepartmentController extends BaseController {
     @Log(title = "部门管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImDepartment imDepartment) {
+    public AjaxResult edit(ImDepartment imDepartment) {
         return toAjax(imDepartmentService.updateImDepartment(imDepartment));
     }
 

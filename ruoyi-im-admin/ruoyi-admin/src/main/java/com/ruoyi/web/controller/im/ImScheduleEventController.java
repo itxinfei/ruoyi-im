@@ -98,7 +98,7 @@ public class ImScheduleEventController extends BaseController {
     @Log(title = "日程事件管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImScheduleEvent imScheduleEvent) {
+    public AjaxResult edit(ImScheduleEvent imScheduleEvent) {
         return toAjax(imScheduleEventService.updateImScheduleEvent(imScheduleEvent));
     }
 

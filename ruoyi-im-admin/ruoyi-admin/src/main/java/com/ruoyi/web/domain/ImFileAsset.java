@@ -12,64 +12,89 @@ import java.time.LocalDateTime;
  * 文件资产实体
  *
  * @author ruoyi
+ * @date 2025-01-17
  */
 @Schema(description = "文件资产")
 public class ImFileAsset extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /** 文件状态：正常 */
+    public static final String STATUS_ACTIVE = "ACTIVE";
+    /** 文件状态：已删除 */
+    public static final String STATUS_DELETED = "DELETED";
+
+    /** 文件类型：图片 */
+    public static final String TYPE_IMAGE = "image";
+    /** 文件类型：视频 */
+    public static final String TYPE_VIDEO = "video";
+    /** 文件类型：文档 */
+    public static final String TYPE_DOCUMENT = "document";
+    /** 文件类型：音频 */
+    public static final String TYPE_AUDIO = "audio";
+    /** 文件类型：其他 */
+    public static final String TYPE_OTHER = "other";
+
+    /** 文件资产ID */
     @Schema(description = "文件资产ID")
     private Long id;
 
+    /** 文件ID */
     @Schema(description = "文件ID")
     private Long fileId;
 
+    /** 文件名 */
     @Schema(description = "文件名")
     private String fileName;
 
+    /** 原始文件名 */
     @Schema(description = "原始文件名")
     private String originalName;
 
+    /** 文件大小（字节） */
     @Schema(description = "文件大小（字节）")
     private Long fileSize;
 
-    @Schema(description = "文件类型（image/video/document/audio/other）")
+    /** 文件类型（image/video/document/audio/other） */
+    @Schema(description = "文件类型")
     private String fileType;
 
+    /** 文件扩展名 */
     @Schema(description = "文件扩展名")
     private String fileExtension;
 
+    /** 文件路径 */
     @Schema(description = "文件路径")
     private String filePath;
 
+    /** 文件URL */
     @Schema(description = "文件URL")
     private String fileUrl;
 
+    /** MIME类型 */
     @Schema(description = "MIME类型")
     private String mimeType;
 
+    /** 上传者ID */
     @Schema(description = "上传者ID")
     private Long uploaderId;
 
-    @Schema(description = "上传者名称（关联查询）")
+    /** 上传者名称（关联查询，非数据库字段） */
+    @Schema(description = "上传者名称")
     private String uploaderName;
 
+    /** 上传时间（使用create_time） */
     @Schema(description = "上传时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime uploadTime;
 
+    /** 下载次数 */
     @Schema(description = "下载次数")
     private Integer downloadCount;
 
-    @Schema(description = "状态（ACTIVE-正常 DELETED-已删除）")
+    /** 状态（ACTIVE-正常 DELETED-已删除） */
+    @Schema(description = "状态")
     private String status;
-
-    @Schema(description = "是否已删除")
-    private Boolean deleted;
-
-    @Schema(description = "删除时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime deleteTime;
 
     public Long getId() {
         return id;
@@ -191,20 +216,55 @@ public class ImFileAsset extends BaseEntity implements Serializable {
         this.status = status;
     }
 
-    public Boolean getDeleted() {
-        return deleted;
+    /**
+     * 判断文件是否已删除
+     *
+     * @return true-已删除，false-正常
+     */
+    public boolean isDeleted() {
+        return STATUS_DELETED.equals(this.status);
     }
 
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
+    /**
+     * 判断文件是否正常
+     *
+     * @return true-正常，false-已删除
+     */
+    public boolean isActive() {
+        return STATUS_ACTIVE.equals(this.status) && !Boolean.TRUE.equals(this.deleted);
     }
 
-    public LocalDateTime getDeleteTime() {
-        return deleteTime;
+    /**
+     * 获取格式化的文件大小（可读格式）
+     *
+     * @return 格式化后的文件大小，如 "1.5 MB"
+     */
+    public String getFormattedFileSize() {
+        if (fileSize == null || fileSize <= 0) {
+            return "0 B";
+        }
+
+        final String[] units = {"B", "KB", "MB", "GB", "TB"};
+        int digitGroups = (int) (Math.log10(fileSize) / Math.log10(1024));
+        return String.format("%.1f %s", fileSize / Math.pow(1024, digitGroups), units[digitGroups]);
     }
 
-    public void setDeleteTime(LocalDateTime deleteTime) {
-        this.deleteTime = deleteTime;
+    /**
+     * 根据文件扩展名判断是否为图片
+     *
+     * @return true-是图片，false-不是图片
+     */
+    public boolean isImage() {
+        return TYPE_IMAGE.equals(this.fileType);
+    }
+
+    /**
+     * 根据文件扩展名判断是否为视频
+     *
+     * @return true-是视频，false-不是视频
+     */
+    public boolean isVideo() {
+        return TYPE_VIDEO.equals(this.fileType);
     }
 
 }

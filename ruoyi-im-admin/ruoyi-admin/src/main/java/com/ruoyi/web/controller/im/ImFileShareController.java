@@ -88,7 +88,7 @@ public class ImFileShareController extends BaseController {
     @Log(title = "文件分享管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImFileShare imFileShare) {
+    public AjaxResult edit(ImFileShare imFileShare) {
         return toAjax(imFileShareService.updateImFileShare(imFileShare));
     }
 

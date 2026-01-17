@@ -88,7 +88,7 @@ public class ImFriendRequestController extends BaseController {
     @Log(title = "好友申请管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImFriendRequest imFriendRequest) {
+    public AjaxResult edit(ImFriendRequest imFriendRequest) {
         return toAjax(imFriendRequestService.updateImFriendRequest(imFriendRequest));
     }
 

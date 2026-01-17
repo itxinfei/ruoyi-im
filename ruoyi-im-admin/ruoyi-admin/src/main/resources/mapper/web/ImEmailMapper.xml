@@ -23,12 +23,14 @@
     </resultMap>
 
     <sql id="selectImEmailVo">
-        select e.id, e.sender_id, e.sender_name, e.sender_email, e.receiver_id,
+        select e.id, e.sender_id, e.sender_email, e.receiver_id,
                e.subject, e.html_content, e.text_content, e.is_read, e.is_deleted,
                e.is_starred, e.folder, e.attachment_count, e.send_time, e.receive_time, e.create_time,
-               u.nickname as receiver_name
+               u1.nickname as sender_name,
+               u2.nickname as receiver_name
         from im_email e
-        left join im_user u on e.receiver_id = u.id
+        left join im_user u1 on e.sender_id = u1.id
+        left join im_user u2 on e.receiver_id = u2.id
     </sql>
 
     <select id="selectImEmailList" parameterType="com.ruoyi.web.domain.ImEmail" resultMap="ImEmailResult">

@@ -114,7 +114,7 @@ public class ImDingMessageController extends BaseController {
     @Log(title = "DING消息管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImDingMessage imDingMessage) {
+    public AjaxResult edit(ImDingMessage imDingMessage) {
         return toAjax(dingMessageService.updateImDingMessage(imDingMessage));
     }
 

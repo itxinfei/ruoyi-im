@@ -126,7 +126,7 @@ public class ImApprovalAdminController extends BaseController {
     @Log(title = "审批管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImApproval imApproval) {
+    public AjaxResult edit(ImApproval imApproval) {
         return toAjax(approvalService.updateImApproval(imApproval));
     }
 
