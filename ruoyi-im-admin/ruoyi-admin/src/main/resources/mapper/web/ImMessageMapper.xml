@@ -25,6 +25,12 @@
         <result property="deletedTime" column="deleted_time"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
+        <result property="clientMsgId" column="client_msg_id"/>
+        <result property="sendStatus" column="send_status"/>
+        <result property="sendRetryCount" column="send_retry_count"/>
+        <result property="sendErrorCode" column="send_error_code"/>
+        <result property="sendErrorMsg" column="send_error_msg"/>
+        <result property="deliveredTime" column="delivered_time"/>
         <!-- 关联字段 -->
         <result property="senderName" column="sender_name"/>
         <result property="conversationName" column="conversation_name"/>
@@ -36,6 +42,8 @@
                m.sensitive_level, m.is_revoked, m.revoked_time, m.revoker_id,
                m.is_edited, m.edited_content, m.edit_count, m.edit_time,
                m.is_deleted, m.deleted_time, m.create_time, m.update_time,
+               m.client_msg_id, m.send_status, m.send_retry_count,
+               m.send_error_code, m.send_error_msg, m.delivered_time,
                u.nickname as sender_name,
                CASE WHEN c.type = 'PRIVATE' THEN (SELECT nickname FROM im_user WHERE id = c.target_id)
                     ELSE (SELECT name FROM im_group WHERE id = c.target_id) END as conversation_name
@@ -105,6 +113,12 @@
             <if test="fileName != null">file_name,</if>
             <if test="fileSize != null">file_size,</if>
             <if test="sensitiveLevel != null">sensitive_level,</if>
+            <if test="clientMsgId != null">client_msg_id,</if>
+            <if test="sendStatus != null">send_status,</if>
+            <if test="sendRetryCount != null">send_retry_count,</if>
+            <if test="sendErrorCode != null">send_error_code,</if>
+            <if test="sendErrorMsg != null">send_error_msg,</if>
+            <if test="deliveredTime != null">delivered_time,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
         </trim>
@@ -119,6 +133,12 @@
             <if test="fileName != null">#{fileName},</if>
             <if test="fileSize != null">#{fileSize},</if>
             <if test="sensitiveLevel != null">#{sensitiveLevel},</if>
+            <if test="clientMsgId != null">#{clientMsgId},</if>
+            <if test="sendStatus != null">#{sendStatus},</if>
+            <if test="sendRetryCount != null">#{sendRetryCount},</if>
+            <if test="sendErrorCode != null">#{sendErrorCode},</if>
+            <if test="sendErrorMsg != null">#{sendErrorMsg},</if>
+            <if test="deliveredTime != null">#{deliveredTime},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
@@ -158,10 +178,10 @@
     <!-- 统计各敏感级别的消息数量 -->
     <select id="getMessageStatistics" resultType="java.util.Map">
         select
-            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND (sensitive_level IS NULL OR sensitive_level = 'NORMAL')) as normal_count,
-            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND sensitive_level = 'SENSITIVE') as sensitive_count,
-            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND sensitive_level = 'HIGH') as high_count,
-            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0) as total_count
+            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND (sensitive_level IS NULL OR sensitive_level = 'NORMAL')) as normalCount,
+            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND sensitive_level = 'SENSITIVE') as sensitiveCount,
+            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND sensitive_level = 'HIGH') as highCount,
+            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0) as totalCount
         from dual
     </select>
 </mapper>
