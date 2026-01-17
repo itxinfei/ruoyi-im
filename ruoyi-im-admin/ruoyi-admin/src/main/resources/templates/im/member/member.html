@@ -167,7 +167,7 @@
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
-                removeUrl: prefix + "/remove/{id}",
+                removeUrl: prefix + "/remove",
                 modalName: "群组成员",
                 columns: [{
                     checkbox: true
@@ -291,7 +291,22 @@
             html += '</select>';
             $.modal.confirm("选择新角色", html, function() {
                 var newRole = $('#newRole').val();
-                $.operate.post(prefix + "/role", {groupId: groupId, userId: userId, role: newRole});
+                $.ajax({
+                    url: prefix + "/role",
+                    type: 'post',
+                    data: {groupId: groupId, userId: userId, role: newRole},
+                    success: function(response) {
+                        if (response.code == 0) {
+                            $.table.refresh();
+                            $.modal.alertSuccess("角色修改成功");
+                        } else {
+                            $.modal.alertError("操作失败: " + (response.msg || response.message || "未知错误"));
+                        }
+                    },
+                    error: function(response) {
+                        $.modal.alertError("操作失败: " + (response.responseJSON?.message || response.message || "未知错误"));
+                    }
+                });
             });
         }
         /* 禁言/解禁 */
@@ -309,7 +324,23 @@
             var newMuteStatus = row.isMuted == 1 ? 0 : 1;
             $.modal.confirm("确定要" + (newMuteStatus == 1 ? "禁言" : "解除禁言") + "该成员吗？", function() {
                 var data = {id: row.id, groupId: row.groupId, userId: row.userId, isMuted: newMuteStatus};
-                $.operate.post(prefix + "/mute", data);
+                $.ajax({
+                    url: prefix + "/mute",
+                    type: 'post',
+                    data: data,
+                    success: function(response) {
+                        if (response.code == 0) {
+                            $.table.refresh();
+                            loadStatistics();
+                            $.modal.alertSuccess(newMuteStatus == 1 ? "已禁言" : "已解除禁言");
+                        } else {
+                            $.modal.alertError("操作失败: " + (response.msg || response.message || "未知错误"));
+                        }
+                    },
+                    error: function(response) {
+                        $.modal.alertError("操作失败: " + (response.responseJSON?.message || response.message || "未知错误"));
+                    }
+                });
             });
         }
         /* 移除成员 */

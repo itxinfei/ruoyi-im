@@ -257,7 +257,7 @@
         }
 
         function viewMembers(conversationId, conversationName) {
-            var url = prefix + "/members/" + conversationId;
+            var url = ctx + "im/conversation/" + conversationId + "/members";
             var title = "会话成员 - " + conversationName;
             $.modal.open(title, url, '800px', '600px');
         }
