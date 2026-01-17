@@ -109,7 +109,7 @@ public class ImMessageController extends BaseController {
     @Log(title = "IM消息", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImMessage imMessage) {
+    public AjaxResult edit(ImMessage imMessage) {
         return toAjax(imMessageService.updateImMessage(imMessage));
     }
 

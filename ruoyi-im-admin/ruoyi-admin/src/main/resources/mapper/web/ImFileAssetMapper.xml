@@ -27,6 +27,8 @@
             <if test="fileName != null and fileName != ''"> and file_name like concat('%', #{fileName}, '%') </if>
             <if test="fileType != null and fileType != ''"> and file_type = #{fileType} </if>
             <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>
+            <if test="params.beginTime != null and params.beginTime != ''"> and date_format(create_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d') </if>
+            <if test="params.endTime != null and params.endTime != ''"> and date_format(create_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d') </if>
         </where>
         order by create_time desc
         LIMIT 100

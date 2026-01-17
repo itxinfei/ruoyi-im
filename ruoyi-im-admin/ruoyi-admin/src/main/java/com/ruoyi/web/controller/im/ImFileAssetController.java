@@ -130,7 +130,7 @@ public class ImFileAssetController extends BaseController {
     @Log(title = "文件资源", businessType = BusinessType.INSERT)
     @PostMapping
     @ResponseBody
-    public AjaxResult add(@RequestBody ImFileAsset imFileAsset) {
+    public AjaxResult add(ImFileAsset imFileAsset) {
         return toAjax(imFileAssetService.insertImFileAsset(imFileAsset));
     }
 
@@ -141,18 +141,18 @@ public class ImFileAssetController extends BaseController {
     @Log(title = "文件资源", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImFileAsset imFileAsset) {
+    public AjaxResult edit(ImFileAsset imFileAsset) {
         return toAjax(imFileAssetService.updateImFileAsset(imFileAsset));
     }
 
     /**
-     * 删除文件资源
+     * 删除文件资源（POST方法，兼容RuoYi框架的删除操作）
      */
     @RequiresPermissions("im:file:remove")
     @Log(title = "文件资源", businessType = BusinessType.DELETE)
-    @PostMapping("/remove/{ids}")
+    @PostMapping("/remove")
     @ResponseBody
-    public AjaxResult remove(@PathVariable String ids) {
+    public AjaxResult remove(@RequestParam String ids) {
         return toAjax(imFileAssetService.deleteImFileAssetByIds(Convert.toLongArray(ids)));
     }
 

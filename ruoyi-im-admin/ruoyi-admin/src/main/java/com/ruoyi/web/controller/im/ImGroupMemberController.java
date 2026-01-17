@@ -117,7 +117,7 @@ public class ImGroupMemberController extends BaseController {
     @Log(title = "群组成员管理", businessType = BusinessType.INSERT)
     @PostMapping
     @ResponseBody
-    public AjaxResult add(@RequestBody ImGroupMember imGroupMember) {
+    public AjaxResult add(ImGroupMember imGroupMember) {
         return toAjax(imGroupMemberService.insertImGroupMember(imGroupMember));
     }
 
@@ -159,7 +159,7 @@ public class ImGroupMemberController extends BaseController {
     @Log(title = "群组成员管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImGroupMember imGroupMember) {
+    public AjaxResult edit(ImGroupMember imGroupMember) {
         return toAjax(imGroupMemberService.updateImGroupMember(imGroupMember));
     }
 
@@ -192,7 +192,7 @@ public class ImGroupMemberController extends BaseController {
     @Log(title = "设置成员禁言", businessType = BusinessType.UPDATE)
     @PutMapping("/mute")
     @ResponseBody
-    public AjaxResult updateMuteStatus(@RequestBody ImGroupMember imGroupMember) {
+    public AjaxResult updateMuteStatus(ImGroupMember imGroupMember) {
         return toAjax(imGroupMemberService.updateImGroupMember(imGroupMember));
     }
 

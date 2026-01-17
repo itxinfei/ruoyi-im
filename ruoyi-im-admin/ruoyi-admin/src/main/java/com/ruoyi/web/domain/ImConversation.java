@@ -43,11 +43,6 @@ public class ImConversation extends BaseEntity implements Serializable {
     private String avatar;
 
     /**
-     * 备注
-     */
-    private String remark;
-
-    /**
      * 最后消息ID
      */
     private Long lastMessageId;
@@ -122,14 +117,6 @@ public class ImConversation extends BaseEntity implements Serializable {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
     }
 
     public Long getLastMessageId() {

@@ -126,7 +126,7 @@ public class ImFriendController extends BaseController {
     @Log(title = "好友管理", businessType = BusinessType.INSERT)
     @PostMapping
     @ResponseBody
-    public AjaxResult add(@RequestBody ImFriend imFriend) {
+    public AjaxResult add(ImFriend imFriend) {
         return toAjax(imFriendService.insertImFriend(imFriend));
     }
 
@@ -148,7 +148,7 @@ public class ImFriendController extends BaseController {
     @Log(title = "好友管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImFriend imFriend) {
+    public AjaxResult edit(ImFriend imFriend) {
         return toAjax(imFriendService.updateImFriend(imFriend));
     }
 

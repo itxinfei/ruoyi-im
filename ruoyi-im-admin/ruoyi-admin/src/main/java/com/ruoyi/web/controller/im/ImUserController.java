@@ -100,7 +100,7 @@ public class ImUserController extends BaseController {
     @Log(title = "IM用户", businessType = BusinessType.INSERT)
     @PostMapping
     @ResponseBody
-    public AjaxResult add(@Valid @RequestBody ImUser imUser) {
+    public AjaxResult add(@Valid ImUser imUser) {
         return toAjax(imUserService.insertImUser(imUser));
     }
 

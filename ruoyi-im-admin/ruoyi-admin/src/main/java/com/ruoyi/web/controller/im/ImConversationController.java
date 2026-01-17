@@ -133,7 +133,7 @@ public class ImConversationController extends BaseController {
     @Log(title = "会话管理", businessType = BusinessType.INSERT)
     @PostMapping
     @ResponseBody
-    public AjaxResult add(@RequestBody ImConversation imConversation) {
+    public AjaxResult add(ImConversation imConversation) {
         return toAjax(imConversationService.insertImConversation(imConversation));
     }
 
@@ -155,7 +155,7 @@ public class ImConversationController extends BaseController {
     @Log(title = "会话管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImConversation imConversation) {
+    public AjaxResult edit(ImConversation imConversation) {
         return toAjax(imConversationService.updateImConversation(imConversation));
     }
 

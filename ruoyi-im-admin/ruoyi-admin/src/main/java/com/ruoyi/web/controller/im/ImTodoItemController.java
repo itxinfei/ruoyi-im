@@ -115,7 +115,7 @@ public class ImTodoItemController extends BaseController {
     @Log(title = "待办事项管理", businessType = BusinessType.INSERT)
     @PostMapping
     @ResponseBody
-    public AjaxResult add(@RequestBody ImTodoItem imTodoItem) {
+    public AjaxResult add(ImTodoItem imTodoItem) {
         return toAjax(imTodoItemService.insertImTodoItem(imTodoItem));
     }
 
@@ -126,7 +126,7 @@ public class ImTodoItemController extends BaseController {
     @Log(title = "待办事项管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImTodoItem imTodoItem) {
+    public AjaxResult edit(ImTodoItem imTodoItem) {
         return toAjax(imTodoItemService.updateImTodoItem(imTodoItem));
     }
 

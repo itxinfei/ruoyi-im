@@ -148,14 +148,14 @@
     <script th:src="@{/ajax/libs/layer/layer.min.js?v=3.7.0}"></script>
     <script th:src="@{/ajax/libs/layui/layui.min.js?v=2.8.18}"></script>
     <script th:src="@{/ruoyi/js/common.js?v=4.8.0}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js?v=4.8.0"></script>
+    <script th:src="@{/ruoyi/js/ry-ui.js?v=4.8.0}"></script>
     <script th:inline="javascript">
         var prefix = ctx + "im/file";
         $(function() {
             loadStatistics();
             var options = {
                 url: prefix + "/list",
-                removeUrl: prefix + "/remove/{id}",
+                removeUrl: prefix + "/remove",
                 modalName: "文件",
                 columns: [{
                     checkbox: true

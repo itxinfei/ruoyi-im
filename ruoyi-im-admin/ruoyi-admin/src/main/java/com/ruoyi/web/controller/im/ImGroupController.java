@@ -119,7 +119,7 @@ public class ImGroupController extends BaseController {
     @Log(title = "IM群组", businessType = BusinessType.INSERT)
     @PostMapping
     @ResponseBody
-    public AjaxResult add(@RequestBody ImGroup imGroup) {
+    public AjaxResult add(ImGroup imGroup) {
         return toAjax(imGroupService.insertImGroup(imGroup));
     }
 
@@ -130,7 +130,7 @@ public class ImGroupController extends BaseController {
     @Log(title = "IM群组", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult edit(@RequestBody ImGroup imGroup) {
+    public AjaxResult edit(ImGroup imGroup) {
         return toAjax(imGroupService.updateImGroup(imGroup));
     }
 

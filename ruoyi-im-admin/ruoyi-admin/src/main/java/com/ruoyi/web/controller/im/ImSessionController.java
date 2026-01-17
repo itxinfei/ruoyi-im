@@ -119,7 +119,7 @@ public class ImSessionController extends BaseController {
     }
 
     /**
-     * 删除IM会话
+     * 删除IM会话（DELETE方法，RESTful风格）
      */
     @RequiresPermissions("im:session:remove")
     @Log(title = "IM会话", businessType = BusinessType.DELETE)
@@ -127,6 +127,22 @@ public class ImSessionController extends BaseController {
     @ResponseBody
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(imConversationService.deleteImConversationByIds(ids));
+    }
+
+    /**
+     * 删除IM会话（POST方法，兼容RuoYi框架的删除操作）
+     */
+    @RequiresPermissions("im:session:remove")
+    @Log(title = "IM会话", businessType = BusinessType.DELETE)
+    @PostMapping("/remove")
+    @ResponseBody
+    public AjaxResult remove(@RequestParam String ids) {
+        String[] idArray = ids.split(",");
+        Long[] idLongArray = new Long[idArray.length];
+        for (int i = 0; i < idArray.length; i++) {
+            idLongArray[i] = Long.parseLong(idArray[i]);
+        }
+        return toAjax(imConversationService.deleteImConversationByIds(idLongArray));
     }
 
     /**

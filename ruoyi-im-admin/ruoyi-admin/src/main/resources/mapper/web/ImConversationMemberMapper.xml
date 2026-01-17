@@ -56,6 +56,9 @@
             <if test="conversationId != null">and cm.conversation_id = #{conversationId}</if>
             <if test="userId != null">and cm.user_id = #{userId}</if>
             <if test="role != null and role != ''">and cm.role = #{role}</if>
+            <if test="nickname != null and nickname != ''">
+                and (cm.nickname like concat('%', #{nickname}, '%') or u.nickname like concat('%', #{nickname}, '%'))
+            </if>
         </where>
         order by cm.create_time desc
     </select>

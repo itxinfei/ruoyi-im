@@ -76,7 +76,7 @@
             };
             $.get(prefix + "/members/data", params, function(result) {
                 if (result.code == 0) {
-                    var members = result.rows || result.data || [];
+                    var members = result.data || result.rows || [];
                     renderTable(members);
                 } else {
                     $.modal.alertError(result.msg || "加载失败");
