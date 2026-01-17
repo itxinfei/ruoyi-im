@@ -150,9 +150,20 @@ public class ImFileAssetController extends BaseController {
      */
     @RequiresPermissions("im:file:remove")
     @Log(title = "文件资源", businessType = BusinessType.DELETE)
+    @PostMapping("/remove/{ids}")
+    @ResponseBody
+    public AjaxResult remove(@PathVariable String ids) {
+        return toAjax(imFileAssetService.deleteImFileAssetByIds(Convert.toLongArray(ids)));
+    }
+
+    /**
+     * 删除文件资源（POST方法，兼容批量删除操作）
+     */
+    @RequiresPermissions("im:file:remove")
+    @Log(title = "文件资源", businessType = BusinessType.DELETE)
     @PostMapping("/remove")
     @ResponseBody
-    public AjaxResult remove(@RequestParam String ids) {
+    public AjaxResult removeBatch(@RequestParam String ids) {
         return toAjax(imFileAssetService.deleteImFileAssetByIds(Convert.toLongArray(ids)));
     }
 
