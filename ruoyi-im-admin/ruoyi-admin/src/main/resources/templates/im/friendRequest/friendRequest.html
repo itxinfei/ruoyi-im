@@ -190,6 +190,9 @@
                 <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:friendRequest:remove">
                     <i class="fa fa-remove"></i> 删除
                 </a>
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:friendRequest:export">
+                    <i class="fa fa-download"></i> 导出
+                </a>
             </div>
 
             <!-- 数据表格 -->
@@ -225,6 +228,7 @@
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove/{id}",
+                exportUrl: prefix + "/export",
                 modalName: "好友申请",
                 columns: [{
                     checkbox: true

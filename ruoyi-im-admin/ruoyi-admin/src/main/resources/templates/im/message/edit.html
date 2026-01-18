@@ -64,6 +64,80 @@
     <script th:inline="javascript">
         var prefix = ctx + "im/message";
 
+        /**
+         * 解密消息内容 - 尝试各种编码格式处理乱码
+         * 与后端Controller的decryptMessage方法逻辑一致
+         */
+        function decryptMessage(content) {
+            if (!content || content === '-') {
+                return content;
+            }
+
+            // 1. 尝试Base64解码
+            try {
+                var decoded = atob(content);
+                if (isReadableText(decoded)) {
+                    return decoded;
+                }
+            } catch (e) {
+                // 不是Base64，继续其他尝试
+            }
+
+            // 2. 检查是否为十六进制编码（格式：67677c...）
+            if (/^[0-9a-fA-F]+$/.test(content) && content.length > 20) {
+                try {
+                    var hexStr = hexToString(content);
+                    if (isReadableText(hexStr)) {
+                        return hexStr;
+                    }
+                } catch (e) {
+                    // 继续尝试其他方法
+                }
+            }
+
+            // 3. 如果内容太长且看起来像Base64，提示这是加密消息
+            if (content.length > 50 && isBase64Format(content)) {
+                return '[加密消息] ' + content.substring(0, 20) + '...';
+            }
+
+            // 4. 否则返回原内容
+            return content;
+        }
+
+        /**
+         * 判断是否为Base64格式
+         */
+        function isBase64Format(content) {
+            if (!content || content.length < 20) {
+                return false;
+            }
+            // Base64字符：A-Z, a-z, 0-9, +, /, =
+            return /^[A-Za-z0-9+/=]+$/.test(content);
+        }
+
+        /**
+         * 判断内容是否为可读文本
+         */
+        function isReadableText(text) {
+            if (!text || text.length < 5) {
+                return false;
+            }
+            // 检查是否包含可读字符（包含中文）
+            return /.*[\u4e00-\u9fff]+.*/.test(text);
+        }
+
+        /**
+         * 将十六进制字符串转换为文本
+         */
+        function hexToString(hex) {
+            var str = '';
+            for (var i = 0; i < hex.length; i += 2) {
+                var charCode = parseInt(hex.substr(i, 2), 16);
+                str += String.fromCharCode(charCode);
+            }
+            return str;
+        }
+
         // 中文正则表达式
         var CHINESE_PATTERN = /[\u4e00-\u9fa5]/;
 
@@ -111,6 +185,16 @@
 
             return true;
         }
+
+        // 页面加载时，自动解密消息内容
+        $(document).ready(function() {
+            var contentTextarea = $('textarea[name="content"]');
+            var originalContent = contentTextarea.val();
+            if (originalContent) {
+                var decryptedContent = decryptMessage(originalContent);
+                contentTextarea.val(decryptedContent);
+            }
+        });
 
         $("#form-message-edit").validate({
             focusCleanup: true,
