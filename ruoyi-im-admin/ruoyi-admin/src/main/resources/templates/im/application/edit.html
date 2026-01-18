@@ -70,8 +70,8 @@
             <label class="col-sm-3 control-label">是否系统应用：</label>
             <div class="col-sm-8">
                 <select name="isSystem" class="form-control">
-                    <option value="0" th:selected="${!application.isSystem}">否</option>
-                    <option value="1" th:selected="${application.isSystem}">是</option>
+                    <option value="0" th:selected="${application.isSystem == null or not application.isSystem}">否</option>
+                    <option value="1" th:selected="${application.isSystem != null and application.isSystem}">是</option>
                 </select>
             </div>
         </div>
@@ -79,8 +79,8 @@
             <label class="col-sm-3 control-label">是否可见：</label>
             <div class="col-sm-8">
                 <select name="isVisible" class="form-control">
-                    <option value="1" th:selected="${application.isVisible}">是</option>
-                    <option value="0" th:selected="${!application.isVisible}">否</option>
+                    <option value="1" th:selected="${application.isVisible != null and application.isVisible}">是</option>
+                    <option value="0" th:selected="${application.isVisible == null or not application.isVisible}">否</option>
                 </select>
             </div>
         </div>

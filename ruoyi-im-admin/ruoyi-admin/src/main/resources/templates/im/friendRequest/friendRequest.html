@@ -23,6 +23,12 @@
             color: #fff;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .statistics-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .stat-number {
             font-size: 24px;
@@ -44,22 +50,31 @@
         .stat-pending { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
         .stat-approved { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
         .stat-rejected { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-                /* 搜索区域底部间距 */
-                .search-collapse {
-                    margin-bottom: 10px;
-                }
-        
-                /* 表格区域样式 */
-                .select-table.table-striped {
-                    padding: 0;
-                }
+
+        /* 搜索区域样式 */
+        .search-collapse {
+            margin-bottom: 10px;
+        }
+
+        /* 表格区域样式 */
+        .select-table.table-striped {
+            padding: 0;
+        }
+
         /* 用户头像 */
         .user-avatar {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             object-fit: cover;
+            border: 2px solid #e5e6e7;
+            transition: all 0.3s ease;
         }
+        .user-avatar:hover {
+            transform: scale(1.1);
+            border-color: #667eea;
+        }
+
         /* 操作按钮样式优化 */
         .btn-xs {
             padding: 4px 8px;
@@ -72,6 +87,22 @@
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
+        /* 徽章样式 */
+        .badge {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 3px;
+        }
+
+        /* 消息文本样式 */
+        .message-text {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="gray-bg">
@@ -81,28 +112,28 @@
             <div class="col-sm-12 statistics-section">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-total">
+                        <div class="statistics-card stat-total" onclick="refreshStatistics()">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">申请总数</div>
                             <i class="fa fa-user-plus stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-pending">
+                        <div class="statistics-card stat-pending" onclick="filterByStatus('PENDING')">
                             <div class="stat-number" id="pendingCount">0</div>
                             <div class="stat-label">待处理</div>
                             <i class="fa fa-clock-o stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-approved">
+                        <div class="statistics-card stat-approved" onclick="filterByStatus('APPROVED')">
                             <div class="stat-number" id="approvedCount">0</div>
                             <div class="stat-label">已同意</div>
                             <i class="fa fa-check-circle stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-rejected">
+                        <div class="statistics-card stat-rejected" onclick="filterByStatus('REJECTED')">
                             <div class="stat-number" id="rejectedCount">0</div>
                             <div class="stat-label">已拒绝</div>
                             <i class="fa fa-times-circle stat-icon"></i>
@@ -110,6 +141,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="friendRequest-form">
@@ -122,8 +154,7 @@
                                 接收人：<input type="text" name="toUserId" placeholder="输入接收人ID或用户名"/>
                             </li>
                             <li>
-                                申请状态：
-                                <select name="status">
+                                申请状态：<select name="status">
                                     <option value="">所有</option>
                                     <option value="PENDING">待处理</option>
                                     <option value="APPROVED">已同意</option>
@@ -131,7 +162,7 @@
                                 </select>
                             </li>
                             <li>
-                                申请消息：<input type="text" name="message"/>
+                                申请消息：<input type="text" name="message" placeholder="输入申请消息"/>
                             </li>
                             <li>
                                 <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
@@ -141,30 +172,34 @@
                     </div>
                 </form>
             </div>
-                        <div class="btn-group-sm" id="toolbar" role="group">
-                            <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:friendRequest:add">
-                                <i class="fa fa-plus"></i> 新增
-                            </a>
-                            <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:friendRequest:edit">
-                                <i class="fa fa-edit"></i> 修改
-                            </a>
-                            <a class="btn btn-info single disabled" onclick="handleRequest(true)" shiro:hasPermission="im:friendRequest:handle">
-                                <i class="fa fa-check"></i> 同意
-                            </a>
-                            <a class="btn btn-warning single disabled" onclick="handleRequest(false)" shiro:hasPermission="im:friendRequest:handle">
-                                <i class="fa fa-times"></i> 拒绝
-                            </a>
-                            <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:friendRequest:remove">
-                                <i class="fa fa-remove"></i> 删除
-                            </a>
-                        </div>
-            
-                        <div class="col-sm-12 select-table table-striped">
-                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
-                        </div>
+
+            <!-- 操作按钮 -->
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:friendRequest:add">
+                    <i class="fa fa-plus"></i> 新增
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:friendRequest:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-info single disabled" onclick="handleRequest(true)" shiro:hasPermission="im:friendRequest:handle">
+                    <i class="fa fa-check"></i> 同意
+                </a>
+                <a class="btn btn-warning single disabled" onclick="handleRequest(false)" shiro:hasPermission="im:friendRequest:handle">
+                    <i class="fa fa-times"></i> 拒绝
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:friendRequest:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>
+            </div>
+
+            <!-- 数据表格 -->
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
         </div>
     </div>
-        <!-- 通用JS -->
+
+    <!-- 通用JS -->
     <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
     <script th:src="@{/js/jquery.min.js}"></script>
     <script th:src="@{/js/bootstrap.min.js}"></script>
@@ -182,6 +217,7 @@
         var removeFlag = [[${@permission.hasPermi('im:friendRequest:remove')}]];
         var handleFlag = [[${@permission.hasPermi('im:friendRequest:handle')}]];
         var prefix = ctx + "im/friendRequest";
+
         $(function() {
             loadStatistics();
             var options = {
@@ -214,6 +250,7 @@
                     field: 'fromNickname',
                     title: '申请人',
                     sortable: true,
+                    width: '120',
                     formatter: function(value, row, index) {
                         return value || row.fromUsername || '-';
                     }
@@ -221,6 +258,7 @@
                 {
                     field: 'toNickname',
                     title: '接收人',
+                    width: '120',
                     formatter: function(value, row, index) {
                         return value || row.toUsername || '-';
                     }
@@ -228,11 +266,12 @@
                 {
                     field: 'message',
                     title: '申请消息',
+                    width: '200',
                     formatter: function(value, row, index) {
                         if (value && value.length > 30) {
-                            return '<span title="' + value + '">' + value.substring(0, 30) + '...</span>';
+                            return '<span class="message-text" title="' + value + '">' + value.substring(0, 30) + '...</span>';
                         }
-                        return value || '-';
+                        return value || '<span class="text-muted">-</span>';
                     }
                 },
                 {
@@ -261,21 +300,22 @@
                 {
                     title: '操作',
                     align: 'center',
-                    width: '200',
+                    width: '220',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" style="cursor: pointer;" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
                         if (row.status === 'PENDING') {
-                            actions.push('<a class="btn btn-info btn-xs ' + handleFlag + '" href="javascript:void(0)" style="cursor: pointer;" onclick="handleOne(' + row.id + ', true)"><i class="fa fa-check"></i>同意</a> ');
-                            actions.push('<a class="btn btn-warning btn-xs ' + handleFlag + '" href="javascript:void(0)" style="cursor: pointer;" onclick="handleOne(' + row.id + ', false)"><i class="fa fa-times"></i>拒绝</a> ');
+                            actions.push('<a class="btn btn-info btn-xs ' + handleFlag + '" href="javascript:void(0)" onclick="handleOne(' + row.id + ', true)"><i class="fa fa-check"></i>同意</a> ');
+                            actions.push('<a class="btn btn-warning btn-xs ' + handleFlag + '" href="javascript:void(0)" onclick="handleOne(' + row.id + ', false)"><i class="fa fa-times"></i>拒绝</a> ');
                         }
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" style="cursor: pointer;" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
                 }]
             };
             $.table.init(options);
         });
+
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code == 0) {
@@ -286,29 +326,40 @@
                 }
             });
         }
+
+        function refreshStatistics() {
+            loadStatistics();
+            $.modal.msgSuccess("统计数据已刷新");
+        }
+
+        function filterByStatus(status) {
+            $("select[name='status']").val(status);
+            $.table.search();
+        }
+
         function handleRequest(approved) {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
                 $.modal.alertWarning("请至少选择一条记录");
                 return;
             }
-            
+
             var table = $('#bootstrap-table').bootstrapTable();
             var selectedRows = table.bootstrapTable('getSelections');
-            var pendingRows = selectedRows.filter(function(row) { 
-                return row.status === 'PENDING'; 
+            var pendingRows = selectedRows.filter(function(row) {
+                return row.status === 'PENDING';
             });
-            
+
             if (pendingRows.length === 0) {
                 $.modal.alertWarning("只能处理待处理的申请");
                 return;
             }
-            
+
             $.modal.confirm("确定要" + (approved ? "同意" : "拒绝") + "选中的" + pendingRows.length + "个好友申请吗？", function() {
                 var completed = 0;
                 var successCount = 0;
                 var errorCount = 0;
-                
+
                 function handleNext() {
                     if (completed >= pendingRows.length) {
                         var msg = "批量处理完成！成功: " + successCount + "，失败: " + errorCount;
@@ -321,16 +372,22 @@
                         loadStatistics();
                         return;
                     }
-                    
-                    handleOne(pendingRows[completed].id, approved, function() {
+
+                    handleOne(pendingRows[completed].id, approved, function(success) {
+                        if (success) {
+                            successCount++;
+                        } else {
+                            errorCount++;
+                        }
                         completed++;
                         handleNext();
                     });
                 }
-                
+
                 handleNext();
             });
         }
+
         /* 处理好友请求 */
         function handleOne(id, approved, callback) {
             $.ajax({
@@ -339,7 +396,7 @@
                 data: {approved: approved},
                 success: function() {
                     if (callback) {
-                        callback();
+                        callback(true);
                     } else {
                         $.table.refresh();
                         loadStatistics();
@@ -347,12 +404,13 @@
                 },
                 error: function() {
                     if (callback) {
-                        callback();
+                        callback(false);
                     } else {
                         $.modal.alertError("操作失败");
                     }
                 }
             });
         }
-    </script></body>
+    </script>
+</body>
 </html>

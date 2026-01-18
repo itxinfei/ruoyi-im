@@ -52,7 +52,7 @@
 
     <select id="selectImApprovalById" parameterType="Long" resultMap="ImApprovalResult">
         <include refid="selectImApprovalVo"/>
-        where id = #{id}
+        where a.id = #{id}
     </select>
 
     <insert id="insertImApproval" parameterType="com.ruoyi.web.domain.ImApproval" useGeneratedKeys="true" keyProperty="id">

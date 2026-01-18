@@ -116,8 +116,11 @@
         order by sort_order, id
     </select>
 
-    <select id="getApplicationsByCategory" resultType="java.util.Map">
-        select * from im_application order by category, sort_order
+    <select id="getApplicationsByCategory" resultMap="ImApplicationResult">
+        select id, name, code, icon, category, description, app_type, app_url,
+               is_system, is_visible, sort_order, permissions, create_time, update_time
+        from im_application
+        order by category, sort_order
     </select>
 
     <select id="getApplicationById" parameterType="Long" resultMap="ImApplicationResult">

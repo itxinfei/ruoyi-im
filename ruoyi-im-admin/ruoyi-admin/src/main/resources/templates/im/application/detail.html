@@ -99,13 +99,13 @@
                         </div>
                         <div class="detail-section">
                             <span class="detail-label">系统应用：</span>
-                            <span class="badge badge-danger badge-custom" th:if="${application.isSystem}">是</span>
-                            <span class="badge badge-default badge-custom" th:if="${!application.isSystem}">否</span>
+                            <span class="badge badge-danger badge-custom" th:if="${application.isSystem != null and application.isSystem}">是</span>
+                            <span class="badge badge-default badge-custom" th:if="${application.isSystem == null or not application.isSystem}">否</span>
                         </div>
                         <div class="detail-section">
                             <span class="detail-label">可见状态：</span>
-                            <span class="badge badge-success badge-custom" th:if="${application.isVisible}">可见</span>
-                            <span class="badge badge-warning badge-custom" th:if="${!application.isVisible}">隐藏</span>
+                            <span class="badge badge-success badge-custom" th:if="${application.isVisible != null and application.isVisible}">可见</span>
+                            <span class="badge badge-warning badge-custom" th:if="${application.isVisible == null or not application.isVisible}">隐藏</span>
                         </div>
                     </div>
                 </div>

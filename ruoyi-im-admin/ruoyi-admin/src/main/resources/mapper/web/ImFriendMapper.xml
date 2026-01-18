@@ -166,9 +166,10 @@
     <!-- 获取好友统计数据 -->
     <select id="getUserStatistics" resultType="java.util.Map">
         select
-            count(*) as totalFriends,
-            sum(case when date(create_time) = curdate() then 1 else 0 end) as todayAdded,
-            (select count(*) from im_friend_request where status = 'PENDING') as pendingRequests
+            count(*) as totalCount,
+            sum(case when date(create_time) = curdate() then 1 else 0 end) as todayCount,
+            (select count(*) from im_friend_request where status = 'PENDING') as pendingCount,
+            (select count(distinct group_name) from im_friend where is_deleted = 0 and group_name is not null and group_name != '') as groupCount
         from im_friend
         where is_deleted = 0
     </select>

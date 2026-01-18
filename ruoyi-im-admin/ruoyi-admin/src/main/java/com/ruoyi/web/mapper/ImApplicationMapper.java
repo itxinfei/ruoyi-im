@@ -39,7 +39,7 @@ public interface ImApplicationMapper {
 
     List<ImApplication> getApplications(@Param("category") String category);
 
-    Map<String, List<ImApplication>> getApplicationsByCategory();
+    List<ImApplication> getApplicationsByCategory();
 
     void setVisibility(@Param("id") Long id, @Param("isVisible") Boolean isVisible);
 

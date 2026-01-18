@@ -12,139 +12,106 @@
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
     <style>
-        body {
-            background-color: #f5f7fa;
-        }
-        .container-div {
-            padding: 15px;
-        }
+        /* 统计卡片样式 */
         .statistics-section {
-            margin-bottom: 20px;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
         .statistics-card {
-            padding: 20px;
-            border-radius: 8px;
+            padding: 15px;
+            border-radius: 4px;
             color: #fff;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
         .statistics-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .stat-number {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
-            margin-bottom: 5px;
         }
         .stat-label {
-            font-size: 13px;
-            opacity: 0.95;
+            font-size: 12px;
+            opacity: 0.9;
         }
         .stat-icon {
             position: absolute;
-            right: 20px;
+            right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 48px;
-            opacity: 0.15;
+            font-size: 40px;
+            opacity: 0.2;
         }
         .stat-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .stat-pending { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
         .stat-groups { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
         .stat-today { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        
+
+        /* 搜索区域样式 */
         .search-collapse {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 10px;
         }
-        .search-collapse .select-list ul {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: center;
-        }
-        .search-collapse .select-list li {
-            list-style: none;
-            margin: 0;
-            display: flex;
-            align-items: center;
-        }
-        .search-collapse .select-list li input[type="text"] {
-            height: 32px;
-            padding: 6px 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 13px;
-            transition: border-color 0.3s ease;
-        }
-        .search-collapse .select-list li input[type="text"]:focus {
-            border-color: #667eea;
-            outline: none;
-        }
-        .search-collapse .select-list li select {
-            height: 32px;
-            padding: 6px 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 13px;
-            background-color: #fff;
-        }
-        
-        .btn-group-sm {
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        
+
+        /* 表格区域样式 */
         .select-table.table-striped {
-            background: #fff;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 0;
         }
-        
+
+        /* 用户头像 */
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e5e6e7;
+            transition: all 0.3s ease;
+        }
+        .user-avatar:hover {
+            transform: scale(1.1);
+            border-color: #667eea;
+        }
+
+        /* 在线状态指示器 */
+        .online-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .online-status.online {
+            background-color: #52c41a;
+            box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+        }
+        .online-status.offline {
+            background-color: #d9d9d9;
+        }
+
+        /* 操作按钮样式优化 */
         .btn-xs {
-            padding: 4px 10px;
+            padding: 4px 8px;
             font-size: 12px;
             line-height: 1.5;
             transition: all 0.2s ease;
             cursor: pointer;
-            border-radius: 3px;
         }
         .btn-xs:hover {
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
-        .friend-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #f0f0f0;
-        }
-        
+
+        /* 徽章样式 */
         .badge {
             padding: 4px 8px;
             font-size: 11px;
             border-radius: 3px;
         }
-        
-        .text-muted {
-            color: #999;
-        }
-        
+
+        /* 加载遮罩 */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -152,11 +119,10 @@
             right: 0;
             bottom: 0;
             background: rgba(255,255,255,0.8);
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            display: none;
         }
         .loading-overlay.show {
             display: flex;
@@ -173,23 +139,28 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* 空状态提示 */
+        .no-data-tip {
+            text-align: center;
+            padding: 40px 0;
+            color: #999;
+        }
+        .no-data-tip i {
+            font-size: 48px;
+            margin-bottom: 10px;
+            display: block;
+        }
     </style>
 </head>
 <body class="gray-bg">
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
     </div>
-    
+
     <div class="container-div">
         <div class="row">
-            <div class="col-sm-12">
-                <h3 style="margin-bottom: 20px; color: #333; font-weight: 600;">
-                    <i class="fa fa-heart" style="color: #667eea;"></i> 好友关系管理
-                </h3>
-            </div>
-        </div>
-        
-        <div class="row">
+            <!-- 统计卡片 -->
             <div class="col-sm-12 statistics-section">
                 <div class="row">
                     <div class="col-sm-3">
@@ -222,74 +193,67 @@
                     </div>
                 </div>
             </div>
-            
+
+            <!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="friend-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label style="margin-right: 8px; font-weight: 500; color: #555;">用户ID：</label>
-                                <input type="text" name="userId" placeholder="请输入用户ID" style="width: 120px;"/>
+                                用户昵称：<input type="text" name="userId" placeholder="请输入用户ID或昵称"/>
                             </li>
                             <li>
-                                <label style="margin-right: 8px; font-weight: 500; color: #555;">好友ID：</label>
-                                <input type="text" name="friendId" placeholder="请输入好友ID" style="width: 120px;"/>
+                                好友昵称：<input type="text" name="friendId" placeholder="请输入好友ID或昵称"/>
                             </li>
                             <li>
-                                <label style="margin-right: 8px; font-weight: 500; color: #555;">分组：</label>
-                                <input type="text" name="groupName" placeholder="请输入分组名称" style="width: 120px;"/>
+                                分组：<input type="text" name="groupName" placeholder="请输入分组名称"/>
                             </li>
                             <li>
-                                <label style="margin-right: 8px; font-weight: 500; color: #555;">备注：</label>
-                                <input type="text" name="remark" placeholder="请输入备注" style="width: 150px;"/>
+                                备注：<input type="text" name="remark" placeholder="请输入备注"/>
                             </li>
                             <li>
-                                <label style="margin-right: 8px; font-weight: 500; color: #555;">状态：</label>
-                                <select name="friendStatus" style="width: 100px;">
+                                状态：<select name="friendStatus">
                                     <option value="">全部</option>
                                     <option value="1">正常</option>
                                     <option value="0">禁用</option>
                                 </select>
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()">
-                                    <i class="fa fa-search"></i>&nbsp;搜索
-                                </a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()">
-                                    <i class="fa fa-refresh"></i>&nbsp;重置
-                                </a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
-            
-            <div class="col-sm-12">
-                <div class="btn-group-sm" id="toolbar" role="group">
-                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:friend:add">
-                        <i class="fa fa-plus"></i> 新增好友
-                    </a>
-                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:friend:edit">
-                        <i class="fa fa-edit"></i> 修改
-                    </a>
-                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:friend:remove">
-                        <i class="fa fa-remove"></i> 批量删除
-                    </a>
-                    <a class="btn btn-info" onclick="exportData()" shiro:hasPermission="im:friend:export">
-                        <i class="fa fa-download"></i> 导出数据
-                    </a>
-                    <a class="btn btn-default" onclick="refreshData()">
-                        <i class="fa fa-refresh"></i> 刷新
-                    </a>
-                </div>
+
+            <!-- 操作按钮 -->
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:friend:add">
+                    <i class="fa fa-plus"></i> 新增好友
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:friend:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:friend:remove">
+                    <i class="fa fa-remove"></i> 批量删除
+                </a>
+                <a class="btn btn-info" onclick="exportData()" shiro:hasPermission="im:friend:export">
+                    <i class="fa fa-download"></i> 导出数据
+                </a>
+                <a class="btn btn-default" onclick="refreshData()">
+                    <i class="fa fa-refresh"></i> 刷新
+                </a>
             </div>
 
+            <!-- 数据表格 -->
             <div class="col-sm-12 select-table table-striped">
                 <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
-    
+
+    <!-- 通用JS -->
     <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
     <script th:src="@{/js/jquery.min.js}"></script>
     <script th:src="@{/js/bootstrap.min.js}"></script>
@@ -306,13 +270,9 @@
         var editFlag = [[${@permission.hasPermi('im:friend:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:friend:remove')}]];
         var prefix = ctx + "im/friend";
-        
+
         $(function() {
             loadStatistics();
-            initTable();
-        });
-        
-        function initTable() {
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -320,8 +280,7 @@
                 removeUrl: prefix + "/remove/{id}",
                 modalName: "好友关系",
                 columns: [{
-                    checkbox: true,
-                    width: '50'
+                    checkbox: true
                 },
                 {
                     field: 'id',
@@ -334,38 +293,46 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value && value.length > 0) {
-                            return '<img src="' + value + '" class="friend-avatar" onerror="this.src=&quot;/img/profile.jpg&quot;"/>';
+                        if (value) {
+                            return '<img src="' + value + '" class="user-avatar" onerror="this.src=\'/img/profile.jpg\'">';
                         }
-                        return '<img src="/img/profile.jpg" class="friend-avatar"/>';
+                        return '<img src="/img/profile.jpg" class="user-avatar">';
                     }
                 },
                 {
                     field: 'userId',
                     title: '用户ID',
-                    width: '80',
-                    align: 'center'
+                    visible: false
                 },
                 {
                     field: 'userName',
-                    title: '用户名称',
-                    width: '120'
+                    title: '用户昵称',
+                    width: '120',
+                    formatter: function(value, row, index) {
+                        return value || '<span class="text-muted">-</span>';
+                    }
                 },
                 {
                     field: 'friendId',
                     title: '好友ID',
-                    width: '80',
-                    align: 'center'
+                    visible: false
                 },
                 {
                     field: 'friendUsername',
                     title: '好友账号',
-                    width: '120'
+                    width: '120',
+                    visible: false
                 },
                 {
                     field: 'friendNickname',
                     title: '好友昵称',
-                    width: '120'
+                    width: '120',
+                    formatter: function(value, row, index) {
+                        var statusHtml = row.friendStatus === 1 ?
+                            '<span class="online-status online"></span>' :
+                            '<span class="online-status offline"></span>';
+                        return statusHtml + (value || row.friendUsername || '-');
+                    }
                 },
                 {
                     field: 'remark',
@@ -433,8 +400,8 @@
                 }]
             };
             $.table.init(options);
-        }
-        
+        });
+
         function loadStatistics() {
             showLoading();
             $.ajax({
@@ -454,33 +421,33 @@
                 }
             });
         }
-        
+
         function refreshStatistics() {
             loadStatistics();
             $.modal.msgSuccess("统计数据已刷新");
         }
-        
+
         function viewPendingRequests() {
-            $.modal.msg("待处理请求功能开发中");
+            window.location.href = ctx + "im/friendRequest";
         }
-        
+
         function viewGroups() {
             $.modal.msg("分组管理功能开发中");
         }
-        
+
         function viewTodayAdded() {
             var today = new Date().toISOString().split('T')[0];
             $("#friend-form input[name='params[beginTime]']").val(today);
             $("#friend-form input[name='params[endTime]']").val(today);
             $.table.search();
         }
-        
+
         function removeFriend(id) {
             $.modal.confirm("确定要删除这条好友关系吗？删除后对方也将无法看到此关系。", function() {
                 $.operate.remove(id);
             });
         }
-        
+
         function exportData() {
             var currentFormId = $.table._option.formId;
             var params = $("#" + currentFormId).serializeArray();
@@ -491,16 +458,16 @@
                 $.modal.closeLoading();
             }, 2000);
         }
-        
+
         function refreshData() {
             $.table.refresh();
             loadStatistics();
         }
-        
+
         function showLoading() {
             $("#loadingOverlay").addClass("show");
         }
-        
+
         function hideLoading() {
             $("#loadingOverlay").removeClass("show");
         }

@@ -95,7 +95,16 @@ public class ImApplicationServiceImpl implements ImApplicationService {
 
     @Override
     public Map<String, List<ImApplication>> getApplicationsByCategory() {
-        return applicationMapper.getApplicationsByCategory();
+        List<ImApplication> allApps = applicationMapper.getApplicationsByCategory();
+        Map<String, List<ImApplication>> result = new java.util.HashMap<>();
+        for (ImApplication app : allApps) {
+            String category = app.getCategory();
+            if (category == null) {
+                category = "CUSTOM";
+            }
+            result.computeIfAbsent(category, k -> new java.util.ArrayList<>()).add(app);
+        }
+        return result;
     }
 
     @Override
