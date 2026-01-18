@@ -63,6 +63,10 @@ public class ImFileAsset extends BaseEntity implements Serializable {
     @Schema(description = "文件扩展名")
     private String fileExtension;
 
+    /** 文件MD5值 */
+    @Schema(description = "文件MD5值")
+    private String md5;
+
     /** 文件路径 */
     @Schema(description = "文件路径")
     private String filePath;

@@ -10,59 +10,117 @@
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
     <style>
+        body {
+            background-color: #f5f7fa;
+        }
+        .wrapper-wrapper-content {
+            padding: 15px;
+        }
         .page-container {
-            padding: 20px;
+            padding: 0;
         }
         .log-header {
-            padding: 20px;
+            padding: 15px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #fff;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .log-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(10%, 10%); }
         }
         .log-header h3 {
             margin: 0;
             font-weight: 600;
+            font-size: 18px;
+            position: relative;
+            z-index: 1;
         }
         .log-header .group-info {
-            margin-top: 10px;
-            font-size: 14px;
+            margin-top: 8px;
+            font-size: 13px;
             opacity: 0.95;
+            position: relative;
+            z-index: 1;
         }
 
         /* 统计卡片 */
         .stats-section {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .stat-card {
-            padding: 20px;
+            padding: 12px;
             border-radius: 8px;
             text-align: center;
             color: #fff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .stat-card:hover::after {
+            opacity: 1;
         }
         .stat-number {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
         }
         .stat-label {
             font-size: 13px;
-            opacity: 0.9;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
         }
         .stat-icon {
             position: absolute;
             right: 20px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 48px;
+            font-size: 56px;
             opacity: 0.2;
+            transition: all 0.3s ease;
         }
-        .stat-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); position: relative; overflow: hidden; }
-        .stat-today { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); position: relative; overflow: hidden; }
-        .stat-create { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); position: relative; overflow: hidden; }
-        .stat-delete { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); position: relative; overflow: hidden; }
+        .stat-card:hover .stat-icon {
+            opacity: 0.3;
+            transform: translateY(-50%) scale(1.1);
+        }
+        .stat-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-today { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-create { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-delete { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
 
         /* 操作类型徽章 */
         .badge-create { background-color: #5cb85c; }
@@ -75,11 +133,20 @@
 
         /* 搜索区域 */
         .search-box {
-            padding: 15px;
+            padding: 20px;
             background: #fff;
-            border-radius: 6px;
+            border-radius: 8px;
             margin-bottom: 15px;
             border: 1px solid #e7eaec;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* 表格区域 */
+        .select-table {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         /* 操作按钮 */

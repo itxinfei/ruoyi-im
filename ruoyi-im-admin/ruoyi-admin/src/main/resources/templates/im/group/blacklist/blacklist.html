@@ -12,47 +12,75 @@
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
     <style>
+        body {
+            background-color: #f5f7fa;
+        }
+        .container-div {
+            padding: 15px;
+        }
+
         /* 统计卡片样式 */
         .statistics-section {
-            margin-top: 20px;
-            margin-bottom: 20px;
+            margin-top: 10px;
+            margin-bottom: 12px;
         }
         .statistics-card {
-            padding: 15px;
-            border-radius: 4px;
+            padding: 12px;
+            border-radius: 6px;
             color: #fff;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .statistics-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         .stat-number {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
+            margin-bottom: 2px;
         }
         .stat-label {
-            font-size: 12px;
+            font-size: 11px;
             opacity: 0.9;
         }
         .stat-icon {
             position: absolute;
-            right: 15px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 40px;
+            font-size: 32px;
             opacity: 0.2;
+            transition: all 0.3s ease;
+        }
+        .statistics-card:hover .stat-icon {
+            opacity: 0.3;
+            transform: translateY(-50%) scale(1.1);
         }
         .stat-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .stat-muted { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
         .stat-blacklisted { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
         .stat-today { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
 
-        /* 搜索区域底部间距 */
+        /* 搜索区域 */
         .search-collapse {
-            margin-bottom: 20px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
         /* 表格区域样式 */
         .select-table.table-striped {
             padding: 0;
+            background: #fff;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
         /* 操作按钮样式优化 */
@@ -66,6 +94,11 @@
         .btn-xs:hover {
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 工具栏样式 */
+        #toolbar {
+            margin-bottom: 12px;
         }
     </style>
 </head>

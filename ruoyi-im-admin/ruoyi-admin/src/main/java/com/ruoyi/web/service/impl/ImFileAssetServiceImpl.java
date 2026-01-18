@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -115,8 +117,10 @@ public class ImFileAssetServiceImpl implements ImFileAssetService {
 
         // 上传文件到服务器
         String uploadPath;
+        String fileMd5;
         try {
             uploadPath = FileUploadUtils.upload(RuoYiConfig.getUploadPath(), file);
+            fileMd5 = calculateMD5(file.getInputStream());
         } catch (Exception e) {
             logger.error("文件上传失败", e);
             throw new Exception("文件上传失败: " + e.getMessage());
@@ -129,6 +133,7 @@ public class ImFileAssetServiceImpl implements ImFileAssetService {
         fileAsset.setFileSize(file.getSize());
         fileAsset.setFileExtension(fileExtension);
         fileAsset.setFilePath(uploadPath);
+        fileAsset.setMd5(fileMd5);
         fileAsset.setUploaderId(uploaderId != null ? uploaderId : 1L);
         fileAsset.setDownloadCount(0);
         fileAsset.setStatus(ImFileAsset.STATUS_ACTIVE);
@@ -292,6 +297,32 @@ public class ImFileAssetServiceImpl implements ImFileAssetService {
         // 其他类型
         else {
             return ImFileAsset.TYPE_OTHER;
+        }
+    }
+
+    private String calculateMD5(InputStream inputStream) {
+        if (inputStream == null) {
+            return null;
+        }
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                md.update(buffer, 0, bytesRead);
+            }
+
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+
+            return sb.toString();
+        } catch (Exception e) {
+            logger.error("计算文件MD5失败", e);
+            return null;
         }
     }
 }

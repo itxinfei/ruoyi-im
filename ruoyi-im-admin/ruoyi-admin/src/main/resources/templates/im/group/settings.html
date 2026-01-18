@@ -7,10 +7,16 @@
     <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <style>
-        .settings-container {
-            max-width: 900px;
-            margin: 20px auto;
+        body {
+            background-color: #f5f7fa;
+        }
+        .wrapper-wrapper-content {
             padding: 20px;
+        }
+        .settings-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0;
         }
         .settings-section {
             background: #fff;
@@ -20,12 +26,17 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             border-left: 4px solid #667eea;
         }
+        .settings-section:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            transition: all 0.3s ease;
+        }
         .settings-title {
             font-size: 16px;
             font-weight: bold;
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 2px solid #f0f0f0;
+            color: #333;
         }
         .settings-title i {
             margin-right: 8px;
@@ -39,11 +50,22 @@
             border: 2px solid #ddd;
             margin-right: 15px;
             object-fit: cover;
+            transition: all 0.3s ease;
+        }
+        .avatar-preview:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
         }
         .radio-box label {
             margin-right: 20px;
             font-weight: normal;
             cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        .radio-box label:hover {
+            background-color: #f0f0f0;
         }
         .radio-box input[type="radio"] {
             margin-right: 5px;
@@ -85,6 +107,12 @@
         a[href="javascript:void(0)"] {
             cursor: pointer;
             text-decoration: none;
+        }
+
+        /* 文件输入框样式 */
+        .file-input {
+            display: flex;
+            align-items: center;
         }
     </style>
 </head>
@@ -216,6 +244,9 @@
     </div>
 
     <div th:include="include :: footer"></div>
+    <script th:src="@{/ruoyi/js/common.js}"></script>
+    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
+    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
     <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
     <script th:src="@{/js/jquery.min.js}"></script>
     <script th:src="@{/js/jquery.validate.min.js}"></script>
