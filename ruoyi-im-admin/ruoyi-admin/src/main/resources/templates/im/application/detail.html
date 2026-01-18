@@ -45,8 +45,8 @@
                                     <div th:if="${#strings.contains(application.icon, 'fa-')}">
                                         <i th:class="${application.icon} + ' fa-5x text-gray'"></i>
                                     </div>
-                                    <div th:if="${!#strings.contains(application.icon, 'fa-')}">
-                                        <img th:src="${application.icon}" class="app-icon-large" onerror="this.src='/img/profile.jpg'">
+                                    <div th:if="${not #strings.contains(application.icon, 'fa-')}">
+                                        <img th:src="${application.icon}" class="app-icon-large" onerror="this.src='/img/profile.jpg'" alt="应用图标">
                                     </div>
                                 </div>
                                 <div th:if="${application.icon == null or application.icon == ''}">
@@ -56,24 +56,24 @@
                             <div class="col-sm-10">
                                 <div class="detail-section">
                                     <span class="detail-label">应用名称：</span>
-                                    <span class="detail-value" th:text="${application.name}"></span>
+                                    <span class="detail-value" th:text="${application.name != null ? application.name : '-'}"></span>
                                 </div>
                                 <div class="detail-section">
                                     <span class="detail-label">应用编码：</span>
-                                    <span class="detail-value" th:text="${application.code}"></span>
+                                    <span class="detail-value" th:text="${application.code != null ? application.code : '-'}"></span>
                                 </div>
                                 <div class="detail-section">
                                     <span class="detail-label">应用分类：</span>
-                                    <span class="badge badge-primary badge-custom" th:if="${application.category == 'OFFICE'}">办公</span>
-                                    <span class="badge badge-info badge-custom" th:if="${application.category == 'DATA'}">数据</span>
-                                    <span class="badge badge-warning badge-custom" th:if="${application.category == 'TOOLS'}">工具</span>
-                                    <span class="badge badge-default badge-custom" th:if="${application.category == 'CUSTOM'}">自定义</span>
+                                    <span class="badge badge-primary badge-custom" th:if="${application.category != null and application.category == 'OFFICE'}">办公</span>
+                                    <span class="badge badge-info badge-custom" th:if="${application.category != null and application.category == 'DATA'}">数据</span>
+                                    <span class="badge badge-warning badge-custom" th:if="${application.category != null and application.category == 'TOOLS'}">工具</span>
+                                    <span class="badge badge-default badge-custom" th:if="${application.category == null or application.category == '' or application.category == 'CUSTOM'}">自定义</span>
                                 </div>
                                 <div class="detail-section">
                                     <span class="detail-label">应用类型：</span>
-                                    <span class="badge badge-success badge-custom" th:if="${application.appType == 'ROUTE'}">路由</span>
-                                    <span class="badge badge-info badge-custom" th:if="${application.appType == 'IFRAME'}">嵌入</span>
-                                    <span class="badge badge-primary badge-custom" th:if="${application.appType == 'LINK'}">外部链接</span>
+                                    <span class="badge badge-success badge-custom" th:if="${application.appType != null and application.appType == 'ROUTE'}">路由</span>
+                                    <span class="badge badge-info badge-custom" th:if="${application.appType != null and application.appType == 'IFRAME'}">嵌入</span>
+                                    <span class="badge badge-primary badge-custom" th:if="${application.appType == null or application.appType == '' or application.appType == 'LINK'}">外部链接</span>
                                 </div>
                             </div>
                         </div>
@@ -91,11 +91,11 @@
                     <div class="ibox-content">
                         <div class="detail-section">
                             <span class="detail-label">应用地址：</span>
-                            <span class="detail-value" th:text="${application.appUrl}"></span>
+                            <span class="detail-value" th:text="${application.appUrl != null ? application.appUrl : '-'}"></span>
                         </div>
                         <div class="detail-section">
                             <span class="detail-label">排序：</span>
-                            <span class="detail-value" th:text="${application.sortOrder}"></span>
+                            <span class="detail-value" th:text="${application.sortOrder != null ? application.sortOrder : '0'}"></span>
                         </div>
                         <div class="detail-section">
                             <span class="detail-label">系统应用：</span>
@@ -132,7 +132,7 @@
                         <h5>权限配置</h5>
                     </div>
                     <div class="ibox-content">
-                        <pre class="detail-value" th:text="${application.permissions}"></pre>
+                        <pre class="detail-value" style="white-space: pre-wrap; word-wrap: break-word;" th:text="${application.permissions}"></pre>
                     </div>
                 </div>
             </div>
@@ -147,11 +147,11 @@
                     <div class="ibox-content">
                         <div class="detail-section">
                             <span class="detail-label">创建者：</span>
-                            <span class="detail-value" th:text="${application.createBy}"></span>
+                            <span class="detail-value" th:text="${application.createBy != null ? application.createBy : '-'}"></span>
                         </div>
                         <div class="detail-section">
                             <span class="detail-label">创建时间：</span>
-                            <span class="detail-value" th:text="${#dates.format(application.createTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                            <span class="detail-value" th:text="${application.createTime != null ? #dates.format(application.createTime, 'yyyy-MM-dd HH:mm:ss') : '-'}"></span>
                         </div>
                     </div>
                 </div>
@@ -165,11 +165,11 @@
                     <div class="ibox-content">
                         <div class="detail-section">
                             <span class="detail-label">更新者：</span>
-                            <span class="detail-value" th:text="${application.updateBy}"></span>
+                            <span class="detail-value" th:text="${application.updateBy != null ? application.updateBy : '-'}"></span>
                         </div>
                         <div class="detail-section">
                             <span class="detail-label">更新时间：</span>
-                            <span class="detail-value" th:text="${#dates.format(application.updateTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                            <span class="detail-value" th:text="${application.updateTime != null ? #dates.format(application.updateTime, 'yyyy-MM-dd HH:mm:ss') : '-'}"></span>
                         </div>
                     </div>
                 </div>

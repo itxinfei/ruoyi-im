@@ -23,6 +23,12 @@
             color: #fff;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .statistics-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
         }
         .stat-number {
             font-size: 24px;
@@ -74,28 +80,28 @@
             <div class="col-sm-12 statistics-section">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-total">
+                        <div class="statistics-card stat-total" data-type="total" title="点击查看所有成员">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">成员总数</div>
                             <i class="fa fa-users stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-owner">
+                        <div class="statistics-card stat-owner" data-type="owner" title="点击查看群主">
                             <div class="stat-number" id="ownerCount">0</div>
                             <div class="stat-label">群主</div>
                             <i class="fa fa-user-plus stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-admin">
+                        <div class="statistics-card stat-admin" data-type="admin" title="点击查看管理员">
                             <div class="stat-number" id="adminCount">0</div>
                             <div class="stat-label">管理员</div>
                             <i class="fa fa-user-md stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-muted">
+                        <div class="statistics-card stat-muted" data-type="muted" title="点击查看已禁言成员">
                             <div class="stat-number" id="mutedCount">0</div>
                             <div class="stat-label">已禁言</div>
                             <i class="fa fa-ban stat-icon"></i>
@@ -109,10 +115,10 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                群组ID：<input type="text" name="groupId" value=""/>
+                                群组ID：<input type="text" name="groupId" value="" placeholder="输入群组ID"/>
                             </li>
                             <li>
-                                用户ID：<input type="text" name="userId" value=""/>
+                                用户昵称：<input type="text" name="userNickname" value="" placeholder="输入用户昵称"/>
                             </li>
                             <li>
                                 角色：<select name="role">
@@ -132,6 +138,7 @@
                             <li>
                                 <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
                                 <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <a class="btn btn-info btn-rounded btn-sm" onclick="manualRefresh()"><i class="fa fa-sync"></i>&nbsp;刷新</a>
                             </li>
                         </ul>
                     </div>
@@ -146,6 +153,12 @@
                 </a>
                 <a class="btn btn-warning single disabled" onclick="toggleMute()" shiro:hasPermission="im:group:member:edit">
                     <i class="fa fa-ban"></i> 禁言/解禁
+                </a>
+                <a class="btn btn-info multiple disabled" onclick="batchMute()" shiro:hasPermission="im:group:member:edit">
+                    <i class="fa fa-ban"></i> 批量禁言
+                </a>
+                <a class="btn btn-success multiple disabled" onclick="batchUnmute()" shiro:hasPermission="im:group:member:edit">
+                    <i class="fa fa-check-circle"></i> 批量解禁
                 </a>
                 <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:member:remove">
                     <i class="fa fa-remove"></i> 移除成员
@@ -199,7 +212,8 @@
                 },
                 {
                     field: 'userId',
-                    title: '用户ID'
+                    title: '用户ID',
+                    visible: false
                 },
                 {
                     field: 'userNickname',
@@ -207,7 +221,8 @@
                 },
                 {
                     field: 'userName',
-                    title: '用户名'
+                    title: '用户名',
+                    visible: false
                 },
                 {
                     field: 'nickname',
@@ -269,6 +284,94 @@
                     $("#adminCount").text(result.data.adminCount || 0);
                     $("#mutedCount").text(result.data.mutedCount || 0);
                 }
+            }).fail(function() {
+                $.modal.msgError("加载统计数据失败");
+            });
+        }
+
+        /* 统计卡片点击筛选 */
+        $(document).on('click', '.statistics-card', function() {
+            var cardType = $(this).attr('data-type');
+            var roleSelect = $("select[name='role']");
+            var muteSelect = $("select[name='isMuted']");
+
+            // 重置筛选
+            roleSelect.val('');
+            muteSelect.val('');
+
+            switch(cardType) {
+                case 'owner':
+                    roleSelect.val('OWNER');
+                    break;
+                case 'admin':
+                    roleSelect.val('ADMIN');
+                    break;
+                case 'muted':
+                    muteSelect.val('1');
+                    break;
+                case 'total':
+                default:
+                    // 不筛选
+                    break;
+            }
+
+            $.table.search();
+        });
+
+        /* 手动刷新 */
+        function manualRefresh() {
+            $.modal.msg("正在刷新数据...", {icon: 16, shade: 0.3, time: 0});
+            loadStatistics();
+            $.table.refresh();
+            setTimeout(function() {
+                layer.closeAll();
+                $.modal.msgSuccess("刷新成功");
+            }, 500);
+        }
+
+        /* 批量禁言 */
+        function batchMute() {
+            var rows = $.table.selectColumns("userId");
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            var groupIds = $.table.selectColumns("groupId");
+            if (!groupIds[0]) {
+                $.modal.alertWarning("未找到群组信息");
+                return;
+            }
+
+            $.modal.confirm("确定要禁言选中的 " + rows.length + " 个成员吗?", function() {
+                var data = {
+                    groupId: groupIds[0],
+                    userIds: rows,
+                    isMuted: 1
+                };
+                $.operate.post(prefix + "/batchMute", data);
+            });
+        }
+
+        /* 批量解禁 */
+        function batchUnmute() {
+            var rows = $.table.selectColumns("userId");
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            var groupIds = $.table.selectColumns("groupId");
+            if (!groupIds[0]) {
+                $.modal.alertWarning("未找到群组信息");
+                return;
+            }
+
+            $.modal.confirm("确定要解除禁言选中的 " + rows.length + " 个成员吗?", function() {
+                var data = {
+                    groupId: groupIds[0],
+                    userIds: rows,
+                    isMuted: 0
+                };
+                $.operate.post(prefix + "/batchMute", data);
             });
         }
         /* 添加成员 */
@@ -330,9 +433,17 @@
                     url: prefix + "/remove",
                     type: 'post',
                     data: {groupId: groupId, userId: userId},
-                    success: function() {
-                        $.table.refresh();
-                        loadStatistics();
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("移除成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.msgError(result.msg || "移除失败");
+                        }
+                    },
+                    error: function() {
+                        $.modal.msgError("网络请求失败");
                     }
                 });
             });

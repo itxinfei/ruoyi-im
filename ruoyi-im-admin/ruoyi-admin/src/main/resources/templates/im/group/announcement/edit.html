@@ -53,6 +53,13 @@
         .readonly-field {
             background-color: #f5f5f5;
         }
+        .editor-container {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .editor-container .w-e-text-container {
+            height: 350px !important;
+        }
     </style>
 </head>
 <body class="white-bg">
@@ -91,7 +98,8 @@
         <div class="form-group">
             <label class="col-sm-3 control-label">公告内容<span class="required-mark">*</span>：</label>
             <div class="col-sm-8">
-                <textarea name="content" id="contentInput" th:field="*{content}" class="form-control" rows="12" placeholder="请输入公告内容（最多500字）" required maxlength="500"></textarea>
+                <div id="editor" class="editor-container" style="height: 400px;"></div>
+                <input type="hidden" name="content" id="content" required>
                 <div class="char-count"><span id="charCount">0</span>/500</div>
             </div>
         </div>
@@ -139,11 +147,72 @@
     </form>
     <div th:include="include :: footer"></div>
     <th:block th:include="include :: datetimepicker-js" />
+    <script th:src="@{/ajax/libs/wangeditor/wangEditor.min.js}"></script>
     <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
     <script th:inline="javascript">
         var prefix = ctx + "im/group/announcement";
+        var editor; // 编辑器实例
 
         $(function() {
+            // 初始化富文本编辑器
+            const E = window.wangEditor;
+            editor = new E('#editor');
+
+            // 配置编辑器
+            editor.config.zIndex = 100;
+            editor.config.height = 400;
+            editor.config.focus = true;
+            editor.config.uploadImgShowBase64 = true;
+            editor.config.uploadFileName = 'file';
+            editor.config.uploadImgHeaders = {
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+            editor.config.uploadImgParams = {
+                token: $.table.token()
+            };
+
+            // 监听内容变化，更新字数统计和隐藏input
+            editor.config.onchange = function(newHtml) {
+                // 去除HTML标签获取纯文本长度
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = newHtml;
+                var textContent = tempDiv.textContent || tempDiv.innerText || '';
+                var currentLength = textContent.length;
+
+                // 更新隐藏input的值
+                $('#content').val(newHtml);
+
+                // 更新字数统计样式
+                $('#charCount').text(currentLength);
+                $('#charCount').removeClass('warning danger');
+                if (currentLength >= 500) {
+                    $('#charCount').addClass('danger');
+                } else if (currentLength >= 450) {
+                    $('#charCount').addClass('warning');
+                }
+            };
+
+            // 创建编辑器
+            editor.create();
+
+            // 加载现有内容到编辑器
+            var existingContent = /*[[${announcement.content}]]*/ '';
+            if (existingContent) {
+                editor.txt.html(existingContent);
+                // 初始化隐藏input的值
+                $('#content').val(existingContent);
+                // 初始化字数统计
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = existingContent;
+                var textContent = tempDiv.textContent || tempDiv.innerText || '';
+                var currentLength = textContent.length || 0;
+                $('#charCount').text(currentLength);
+                if (currentLength >= 500) {
+                    $('#charCount').addClass('danger');
+                } else if (currentLength >= 450) {
+                    $('#charCount').addClass('warning');
+                }
+            }
             // 从 URL 参数获取 groupId
             function getQueryParam(name) {
                 var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
@@ -166,32 +235,6 @@
                 autoclose: true,
                 todayBtn: true,
                 startDate: new Date()
-            });
-
-            // 初始化字数统计
-            var content = $("#contentInput").val() || '';
-            $("#charCount").text(content.length);
-            if (content.length >= 500) {
-                $("#charCount").addClass('danger');
-            } else if (content.length >= 450) {
-                $("#charCount").addClass('warning');
-            }
-
-            // 字数统计功能
-            $("#contentInput").on('input propertychange', function() {
-                var currentLength = $(this).val().length;
-                var maxLength = 500;
-                var $charCount = $("#charCount");
-                
-                $charCount.text(currentLength);
-                
-                // 更新字数统计样式
-                $charCount.removeClass('warning danger');
-                if (currentLength >= maxLength) {
-                    $charCount.addClass('danger');
-                } else if (currentLength >= maxLength * 0.9) {
-                    $charCount.addClass('warning');
-                }
             });
         });
 
@@ -245,6 +288,11 @@
                 var groupId = $("#groupIdInput").val();
                 if (!groupId && $("#hiddenGroupId").val()) {
                     $("#groupIdInput").val($("#hiddenGroupId").val());
+                }
+
+                // 确保编辑器内容同步到隐藏input
+                if (editor) {
+                    $('#content').val(editor.txt.html());
                 }
 
                 $.operate.save(prefix + "/edit", $('#form-announcement-edit').serialize());

@@ -178,11 +178,12 @@
     <!-- 获取消息统计数据 -->
     <select id="getMessageStatistics" resultType="java.util.Map">
         select
-            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0) as totalMessages,
-            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND DATE(create_time) = CURDATE()) as todayMessages,
-            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND (sensitive_level IS NULL OR sensitive_level = 'NORMAL')) as normalCount,
-            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND sensitive_level = 'SENSITIVE') as sensitiveCount,
-            (SELECT COUNT(*) FROM im_message WHERE is_deleted = 0 AND sensitive_level = 'HIGH') as highCount
-        from dual
+            COUNT(*) as total_count,
+            COUNT(CASE WHEN DATE(create_time) = CURDATE() THEN 1 END) as today_count,
+            COUNT(CASE WHEN sensitive_level IS NULL OR sensitive_level = 'NORMAL' THEN 1 END) as normal_count,
+            COUNT(CASE WHEN sensitive_level = 'SENSITIVE' THEN 1 END) as sensitive_count,
+            COUNT(CASE WHEN sensitive_level = 'HIGH' THEN 1 END) as high_count
+        from im_message
+        where is_deleted = 0
     </select>
 </mapper>
