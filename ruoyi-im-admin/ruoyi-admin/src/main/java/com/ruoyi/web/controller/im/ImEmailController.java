@@ -137,4 +137,176 @@ public class ImEmailController extends BaseController {
     public AjaxResult getStatistics() {
         return AjaxResult.success(emailService.getEmailStatistics());
     }
+
+    /**
+     * 标记邮件为已读
+     */
+    @RequiresPermissions("im:email:edit")
+    @Log(title = "标记邮件已读", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/read")
+    @ResponseBody
+    public AjaxResult markAsRead(@PathVariable("id") Long id) {
+        return toAjax(emailService.markAsRead(id));
+    }
+
+    /**
+     * 批量标记邮件为已读
+     */
+    @RequiresPermissions("im:email:edit")
+    @Log(title = "批量标记已读", businessType = BusinessType.UPDATE)
+    @PostMapping("/batch-read")
+    @ResponseBody
+    public AjaxResult batchMarkAsRead(@RequestBody List<Long> ids) {
+        int count = emailService.batchMarkAsRead(ids);
+        return AjaxResult.success("成功标记 " + count + " 封邮件为已读");
+    }
+
+    /**
+     * 标记邮件为未读
+     */
+    @RequiresPermissions("im:email:edit")
+    @Log(title = "标记邮件未读", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/unread")
+    @ResponseBody
+    public AjaxResult markAsUnread(@PathVariable("id") Long id) {
+        return toAjax(emailService.markAsUnread(id));
+    }
+
+    /**
+     * 标记邮件为重要
+     */
+    @RequiresPermissions("im:email:edit")
+    @Log(title = "标记邮件重要", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/star")
+    @ResponseBody
+    public AjaxResult markAsStarred(@PathVariable("id") Long id) {
+        return toAjax(emailService.markAsStarred(id));
+    }
+
+    /**
+     * 取消标记邮件为重要
+     */
+    @RequiresPermissions("im:email:edit")
+    @Log(title = "取消标记重要", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/unstar")
+    @ResponseBody
+    public AjaxResult unmarkAsStarred(@PathVariable("id") Long id) {
+        return toAjax(emailService.unmarkAsStarred(id));
+    }
+
+    /**
+     * 移动邮件到垃圾箱
+     */
+    @RequiresPermissions("im:email:edit")
+    @Log(title = "移动到垃圾箱", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/trash")
+    @ResponseBody
+    public AjaxResult moveToTrash(@PathVariable("id") Long id) {
+        return toAjax(emailService.moveToTrash(id));
+    }
+
+    /**
+     * 批量移动到垃圾箱
+     */
+    @RequiresPermissions("im:email:edit")
+    @Log(title = "批量移动到垃圾箱", businessType = BusinessType.UPDATE)
+    @PostMapping("/batch-trash")
+    @ResponseBody
+    public AjaxResult batchMoveToTrash(@RequestBody List<Long> ids) {
+        int count = emailService.batchMoveToTrash(ids);
+        return AjaxResult.success("成功移动 " + count + " 封邮件到垃圾箱");
+    }
+
+    /**
+     * 从垃圾箱恢复邮件
+     */
+    @RequiresPermissions("im:email:edit")
+    @Log(title = "恢复邮件", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/restore")
+    @ResponseBody
+    public AjaxResult restoreFromTrash(@PathVariable("id") Long id) {
+        return toAjax(emailService.restoreFromTrash(id));
+    }
+
+    /**
+     * 永久删除邮件
+     */
+    @RequiresPermissions("im:email:remove")
+    @Log(title = "永久删除邮件", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{id}/permanent")
+    @ResponseBody
+    public AjaxResult permanentDelete(@PathVariable("id") Long id) {
+        return toAjax(emailService.permanentDelete(id));
+    }
+
+    /**
+     * 清空垃圾箱
+     */
+    @RequiresPermissions("im:email:remove")
+    @Log(title = "清空垃圾箱", businessType = BusinessType.DELETE)
+    @DeleteMapping("/trash/clear")
+    @ResponseBody
+    public AjaxResult clearTrash() {
+        int count = emailService.clearTrash();
+        return AjaxResult.success("成功清空垃圾箱，共删除 " + count + " 封邮件");
+    }
+
+    /**
+     * 获取收件箱邮件
+     */
+    @RequiresPermissions("im:email:list")
+    @GetMapping("/inbox")
+    @ResponseBody
+    public TableDataInfo getInbox() {
+        startPage();
+        List<ImEmail> list = emailService.getEmailsByFolder("INBOX");
+        return getDataTable(list);
+    }
+
+    /**
+     * 获取发件箱邮件
+     */
+    @RequiresPermissions("im:email:list")
+    @GetMapping("/sent")
+    @ResponseBody
+    public TableDataInfo getSent() {
+        startPage();
+        List<ImEmail> list = emailService.getEmailsByFolder("SENT");
+        return getDataTable(list);
+    }
+
+    /**
+     * 获取草稿箱邮件
+     */
+    @RequiresPermissions("im:email:list")
+    @GetMapping("/drafts")
+    @ResponseBody
+    public TableDataInfo getDrafts() {
+        startPage();
+        List<ImEmail> list = emailService.getEmailsByFolder("DRAFT");
+        return getDataTable(list);
+    }
+
+    /**
+     * 获取垃圾箱邮件
+     */
+    @RequiresPermissions("im:email:list")
+    @GetMapping("/trash")
+    @ResponseBody
+    public TableDataInfo getTrash() {
+        startPage();
+        List<ImEmail> list = emailService.getEmailsByFolder("TRASH");
+        return getDataTable(list);
+    }
+
+    /**
+     * 获取未读邮件数量
+     */
+    @RequiresPermissions("im:email:list")
+    @GetMapping("/unread-count")
+    @ResponseBody
+    public AjaxResult getUnreadCount() {
+        int count = emailService.getUnreadCount();
+        return AjaxResult.success(count);
+    }
 }

@@ -49,4 +49,9 @@ public interface ImDingMessageMapper {
      * 获取DING消息回执详情
      */
     List<Map<String, Object>> getDingReceipts(Long dingId);
+
+    /**
+     * 获取DING消息回执统计
+     */
+    Map<String, Object> getReceiptStatistics(Long dingId);
 }

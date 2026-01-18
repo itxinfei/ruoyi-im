@@ -119,4 +119,15 @@
         where r.ding_id = #{dingId}
         order by r.read_time, r.confirm_time
     </select>
+
+    <select id="getReceiptStatistics" parameterType="Long" resultType="java.util.Map">
+        select
+            m.total_count as totalCount,
+            m.read_count as readCount,
+            m.confirmed_count as confirmedCount,
+            (m.total_count - m.read_count) as unreadCount,
+            (m.total_count - m.confirmed_count) as unconfirmedCount
+        from im_ding_message m
+        where m.id = #{dingId}
+    </select>
 </mapper>

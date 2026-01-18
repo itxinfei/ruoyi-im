@@ -43,4 +43,29 @@ public interface ImEmailMapper {
      * 获取邮件统计
      */
     Map<String, Object> getEmailStatistics();
+
+    /**
+     * 批量更新已读状态
+     */
+    int batchUpdateIsRead(List<Long> ids, Integer isRead);
+
+    /**
+     * 批量更新文件夹
+     */
+    int batchUpdateFolder(List<Long> ids, String folder);
+
+    /**
+     * 删除单个邮件
+     */
+    int deleteImEmailById(Long id);
+
+    /**
+     * 根据文件夹删除邮件
+     */
+    int deleteEmailsByFolder(String folder);
+
+    /**
+     * 统计邮件数量
+     */
+    int countEmails(ImEmail imEmail);
 }

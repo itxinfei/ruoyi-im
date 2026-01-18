@@ -146,6 +146,23 @@ public class ImMessageServiceImpl implements ImMessageService {
         return messageMapper.getMessageStatistics();
     }
 
+    @Override
+    public int batchUpdateSensitiveLevel(List<Long> messageIds, String sensitiveLevel) {
+        if (messageIds == null || messageIds.isEmpty()) {
+            throw new ServiceException("消息ID列表不能为空");
+        }
+        if (StringUtils.isEmpty(sensitiveLevel)) {
+            throw new ServiceException("敏感级别不能为空");
+        }
+
+        // 验证敏感级别是否合法
+        if (!"NORMAL".equals(sensitiveLevel) && !"SENSITIVE".equals(sensitiveLevel) && !"HIGH".equals(sensitiveLevel)) {
+            throw new ServiceException("敏感级别不合法");
+        }
+
+        return messageMapper.batchUpdateSensitiveLevel(messageIds, sensitiveLevel);
+    }
+
     /**
      * 校验消息对象
      */

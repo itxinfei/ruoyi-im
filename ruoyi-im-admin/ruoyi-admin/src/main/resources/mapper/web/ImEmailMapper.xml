@@ -117,4 +117,35 @@
             (SELECT COUNT(*) FROM im_email WHERE folder = 'SENT' AND is_deleted = 0) as sentCount
         from dual
     </select>
+
+    <update id="batchUpdateIsRead">
+        update im_email set is_read = #{isRead} where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="batchUpdateFolder">
+        update im_email set folder = #{folder} where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <delete id="deleteImEmailById" parameterType="Long">
+        update im_email set is_deleted = 1 where id = #{id}
+    </delete>
+
+    <delete id="deleteEmailsByFolder" parameterType="String">
+        update im_email set is_deleted = 1 where folder = #{folder}
+    </delete>
+
+    <select id="countEmails" parameterType="com.ruoyi.web.domain.ImEmail" resultType="int">
+        select count(*) from im_email
+        <where>
+            is_deleted = 0
+            <if test="folder != null and folder != ''">and folder = #{folder}</if>
+            <if test="isRead != null">and is_read = #{isRead}</if>
+        </where>
+    </select>
 </mapper>

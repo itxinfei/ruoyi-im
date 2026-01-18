@@ -207,6 +207,30 @@ public class ImFileAssetController extends BaseController {
                 return AjaxResult.error("请选择文件");
             }
 
+            // 文件大小限制 (100MB)
+            long maxSize = 100 * 1024 * 1024;
+            if (file.getSize() > maxSize) {
+                return AjaxResult.error("文件大小不能超过100MB");
+            }
+
+            // 获取文件名和扩展名
+            String originalFilename = file.getOriginalFilename();
+            if (StringUtils.isEmpty(originalFilename)) {
+                return AjaxResult.error("文件名不能为空");
+            }
+
+            // 验证文件扩展名
+            String extension = getFileExtension(originalFilename).toLowerCase();
+            if (!isAllowedFileType(extension)) {
+                return AjaxResult.error("不支持的文件类型：" + extension);
+            }
+
+            // 验证文件MIME类型
+            String contentType = file.getContentType();
+            if (!isAllowedMimeType(contentType, extension)) {
+                return AjaxResult.error("文件类型与扩展名不匹配");
+            }
+
             // 调用Service层上传文件
             ImFileAsset fileAsset = imFileAssetService.uploadFile(file, userId);
 
@@ -226,6 +250,88 @@ public class ImFileAssetController extends BaseController {
             logger.error("文件上传失败", e);
             return AjaxResult.error("上传失败: " + e.getMessage());
         }
+    }
+
+    /**
+     * 获取文件扩展名
+     */
+    private String getFileExtension(String filename) {
+        if (StringUtils.isEmpty(filename)) {
+            return "";
+        }
+        int lastDotIndex = filename.lastIndexOf('.');
+        if (lastDotIndex > 0 && lastDotIndex < filename.length() - 1) {
+            return filename.substring(lastDotIndex + 1);
+        }
+        return "";
+    }
+
+    /**
+     * 验证文件类型是否允许
+     */
+    private boolean isAllowedFileType(String extension) {
+        // 允许的文件类型白名单
+        String[] allowedTypes = {
+            // 图片
+            "jpg", "jpeg", "png", "gif", "bmp", "webp",
+            // 文档
+            "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt",
+            // 压缩文件
+            "zip", "rar", "7z", "tar", "gz",
+            // 音频
+            "mp3", "wav", "ogg", "m4a",
+            // 视频
+            "mp4", "avi", "mov", "wmv", "flv", "mkv"
+        };
+
+        for (String allowedType : allowedTypes) {
+            if (allowedType.equalsIgnoreCase(extension)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 验证MIME类型是否与扩展名匹配
+     */
+    private boolean isAllowedMimeType(String mimeType, String extension) {
+        if (StringUtils.isEmpty(mimeType)) {
+            return false;
+        }
+
+        // 扩展名到MIME类型的映射
+        Map<String, String> extensionToMime = new HashMap<>();
+        extensionToMime.put("jpg", "image/jpeg");
+        extensionToMime.put("jpeg", "image/jpeg");
+        extensionToMime.put("png", "image/png");
+        extensionToMime.put("gif", "image/gif");
+        extensionToMime.put("bmp", "image/bmp");
+        extensionToMime.put("webp", "image/webp");
+        extensionToMime.put("pdf", "application/pdf");
+        extensionToMime.put("doc", "application/msword");
+        extensionToMime.put("docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        extensionToMime.put("xls", "application/vnd.ms-excel");
+        extensionToMime.put("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        extensionToMime.put("ppt", "application/vnd.ms-powerpoint");
+        extensionToMime.put("pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+        extensionToMime.put("txt", "text/plain");
+        extensionToMime.put("zip", "application/zip");
+        extensionToMime.put("rar", "application/x-rar-compressed");
+        extensionToMime.put("7z", "application/x-7z-compressed");
+        extensionToMime.put("mp3", "audio/mpeg");
+        extensionToMime.put("wav", "audio/wav");
+        extensionToMime.put("mp4", "video/mp4");
+        extensionToMime.put("avi", "video/x-msvideo");
+
+        String expectedMime = extensionToMime.get(extension.toLowerCase());
+        if (expectedMime == null) {
+            // 如果没有映射，允许通过（因为有些MIME类型可能不在列表中）
+            return true;
+        }
+
+        // 检查MIME类型是否匹配（允许前缀匹配）
+        return mimeType.startsWith(expectedMime) || expectedMime.startsWith(mimeType);
     }
 
     /**

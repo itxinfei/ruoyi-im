@@ -9,63 +9,110 @@
     <link href="../static/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
     <link href="../static/css/style.min.css" th:href="@{/css/style.min.css}" rel="stylesheet"/>
     <link href="../static/css/login.min.css" th:href="@{/css/login.min.css}" rel="stylesheet"/>
-    <link href="../static/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=4.8.0}" rel="stylesheet"/>
     <!-- 360浏览器急速模式 -->
     <meta name="renderer" content="webkit">
     <!-- 避免IE使用兼容模式 -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="shortcut icon" href="../static/favicon.ico" th:href="@{favicon.ico}"/>
-    <style type="text/css">label.error { position:inherit;  }</style>
+    <style type="text/css">
+        label.error { position:inherit; }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            margin: 20px;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .login-header p {
+            color: #999;
+            font-size: 14px;
+        }
+        .login-form input {
+            height: 45px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+        .login-form input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        .login-form .btn {
+            height: 45px;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .checkbox-custom {
+            margin: 15px 0;
+        }
+        .checkbox-custom input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        .signup-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #999;
+            font-size: 12px;
+        }
+        .signup-footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .signup-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
     <script>
         if(window.top!==window.self){alert('未登录或登录超时。请重新登录');window.top.location=window.location};
     </script>
 </head>
-<body class="signin">
-    <div class="signinpanel">
-        <div class="row">
-            <div class="col-sm-7">
-                <div class="signin-info">
-                    <div class="logopanel m-b">
-                        <h1><img alt="IM即时通讯" src="../static/ruoyi.png" th:src="@{/ruoyi.png}"></h1>
-                    </div>
-                    <div class="m-b"></div>
-                    <h4>欢迎使用 <strong>IM即时通讯管理系统</strong></h4>
-                    <ul class="m-b">
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Spring Boot</li>
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> MyBatis Plus</li>
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> WebSocket</li>
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Redis</li>
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> MySQL</li>
-                    </ul>
-                    <strong th:if="${isAllowRegister}">还没有账号？ <a th:href="@{/register}">立即注册&raquo;</a></strong>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>IM即时通讯系统</h1>
+            <p>欢迎登录</p>
+        </div>
+        <form id="signupForm" class="login-form" autocomplete="off">
+            <input type="text" name="username" class="form-control uname" placeholder="用户名" value="admin" />
+            <input type="password" name="password" class="form-control pword" placeholder="密码" value="admin123" />
+            <div class="row m-t" th:if="${captchaEnabled==true}">
+                <div class="col-xs-6">
+                    <input type="text" name="validateCode" class="form-control code" placeholder="验证码" maxlength="5" />
+                </div>
+                <div class="col-xs-6">
+                    <a href="javascript:void(0);" title="点击更换验证码">
+                        <img th:src="@{/captcha/captchaImage(type=${captchaType})}" class="imgcode" width="85%"/>
+                    </a>
                 </div>
             </div>
-            <div class="col-sm-5">
-                <form id="signupForm" autocomplete="off">
-                    <h4 class="no-margins">登录：</h4>
-                    <p class="m-t-md">你若不离不弃，我必生死相依</p>
-                    <input type="text"     name="username" class="form-control uname"     placeholder="用户名" value="admin"    />
-                    <input type="password" name="password" class="form-control pword"     placeholder="密码"   value="admin123" />
-					<div class="row m-t" th:if="${captchaEnabled==true}">
-						<div class="col-xs-6">
-						    <input type="text" name="validateCode" class="form-control code" placeholder="验证码" maxlength="5" />
-						</div>
-						<div class="col-xs-6">
-							<a href="javascript:void(0);" title="点击更换验证码">
-								<img th:src="@{/captcha/captchaImage(type=${captchaType})}" class="imgcode" width="85%"/>
-							</a>
-						</div>
-					</div>
-                    <div class="checkbox-custom" th:if="${isRemembered}" th:classappend="${captchaEnabled==false} ? 'm-t'">
-				        <input type="checkbox" id="rememberme" name="rememberme"> <label for="rememberme">记住我</label>
-				    </div>
-                    <button class="btn btn-success btn-block" id="btnSubmit" data-loading="正在验证登录，请稍候...">登录</button>
-                </form>
+            <div class="checkbox-custom" th:if="${isRemembered}" th:classappend="${captchaEnabled==false} ? 'm-t'">
+                <input type="checkbox" id="rememberme" name="rememberme"> <label for="rememberme">记住我</label>
             </div>
-        </div>
+            <button class="btn btn-success btn-block" id="btnSubmit" data-loading="正在验证登录，请稍候...">登录</button>
+        </form>
         <div class="signup-footer">
-            <div class="pull-left">
-                Copyright © 2024 IM即时通讯系统 All Rights Reserved. <br>
+            <strong th:if="${isAllowRegister}">还没有账号？ <a th:href="@{/register}">立即注册&raquo;</a></strong>
+            <div style="margin-top: 10px;">
+                Copyright © 2024 IM即时通讯系统 All Rights Reserved.
             </div>
         </div>
     </div>

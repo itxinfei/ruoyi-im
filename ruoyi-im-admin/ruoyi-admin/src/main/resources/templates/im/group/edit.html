@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>修改群组</title>
     <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css" rel="stylesheet"/>
+    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
     <style>
         /* 页面容器 */
@@ -156,6 +156,12 @@
             color: #333;
             border-color: #ccc;
         }
+
+        .help-block {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body class="white-bg">
@@ -174,8 +180,9 @@
                     <div class="col-sm-8">
                         <div class="input-group">
                             <span class="input-group-addon"><i class="fa fa-users"></i></span>
-                            <input name="name" th:field="*{name}" placeholder="请输入群组名称" class="form-control" type="text" required maxlength="50">
+                            <input name="name" th:field="*{name}" placeholder="请输入群组名称（必须包含中文）" class="form-control" type="text" required maxlength="50">
                         </div>
+                        <span class="help-block">群组名称必须包含中文字符，中文字符占比不低于10%</span>
                     </div>
                 </div>
 
@@ -186,6 +193,7 @@
                             <span class="input-group-addon"><i class="fa fa-image"></i></span>
                             <input name="avatar" th:field="*{avatar}" placeholder="群组头像URL（选填）" class="form-control" type="text">
                         </div>
+                        <span class="help-block">建议尺寸：200x200像素，支持JPG、PNG格式</span>
                     </div>
                 </div>
 
@@ -202,7 +210,8 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label">群描述</label>
                     <div class="col-sm-8">
-                        <textarea name="description" th:field="*{description}" class="form-control" rows="4" placeholder="请输入群组描述（选填）"></textarea>
+                        <textarea name="description" th:field="*{description}" class="form-control" rows="4" placeholder="请输入群组描述（选填，建议包含中文）" maxlength="500"></textarea>
+                        <span class="help-block">群组描述不能超过500个字符</span>
                     </div>
                 </div>
 
@@ -212,9 +221,10 @@
                     <div class="col-sm-8">
                         <div class="input-group">
                             <span class="input-group-addon"><i class="fa fa-users"></i></span>
-                            <input name="maxMembers" th:field="*{maxMembers}" placeholder="请输入最大成员数" class="form-control" type="number">
+                            <input name="maxMembers" th:field="*{maxMembers}" placeholder="请输入最大成员数（2-500）" class="form-control" type="number" min="2" max="500">
                             <span class="input-group-addon">人</span>
                         </div>
+                        <span class="help-block">建议设置：普通群100人，大群500人</span>
                     </div>
                 </div>
 
@@ -223,11 +233,11 @@
                     <div class="col-sm-8">
                         <div class="radio-box">
                             <label>
-                                <input type="radio" name="allMuted" value="0" th:attr="checked=${group.allMuted == null or group.allMuted == 0}>
+                                <input type="radio" name="allMuted" value="0" th:attr="checked=${group.allMuted == null or group.allMuted == 0}">
                                 <span class="radio-label">允许成员发言</span>
                             </label>
                             <label>
-                                <input type="radio" name="allMuted" value="1" th:attr="checked=${group.allMuted == 1}>
+                                <input type="radio" name="allMuted" value="1" th:attr="checked=${group.allMuted == 1}">
                                 <span class="radio-label">全体禁言</span>
                             </label>
                         </div>
@@ -249,16 +259,124 @@
 
     <div th:include="include :: footer"></div>
     <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
-    <script th:src="@{/js/jquery.min.js"></script>
-    <script th:src="@{/js/jquery.validate.min.js"></script>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/jquery.validate.min.js}"></script>
     <script th:inline="javascript">
         var prefix = ctx + "im/group";
+
+        // 中文正则表达式
+        var CHINESE_PATTERN = /[\u4e00-\u9fa5]/;
+
+        /**
+         * 校验内容是否包含中文字符
+         * @param {string} content - 待校验的内容
+         * @param {string} fieldName - 字段名称
+         * @returns {boolean} 是否通过校验
+         */
+        function validateChineseContent(content, fieldName) {
+            if (!content || content.trim().length === 0) {
+                return true; // 空值由required校验
+            }
+
+            // 检查是否包含中文字符
+            if (!CHINESE_PATTERN.test(content)) {
+                $.modal.alertWarning(fieldName + "必须包含中文字符");
+                return false;
+            }
+
+            // 检查中文字符占比（至少10%，群组名称可能包含英文）
+            var chineseCharCount = 0;
+            var totalCharCount = 0;
+
+            for (var i = 0; i < content.length; i++) {
+                var c = content.charAt(i);
+                if (CHINESE_PATTERN.test(c)) {
+                    chineseCharCount++;
+                }
+                if (!/\s/.test(c)) {
+                    totalCharCount++;
+                }
+            }
+
+            if (totalCharCount > 0) {
+                var chineseRatio = chineseCharCount / totalCharCount;
+                if (chineseRatio < 0.1) {
+                    $.modal.alertWarning(fieldName + "中文字符占比不能低于10%");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         $("#form-group-edit").validate({
-            focusCleanup: true
+            focusCleanup: true,
+            rules: {
+                name: {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 50
+                },
+                ownerId: {
+                    required: true,
+                    digits: true,
+                    min: 1
+                },
+                avatar: {
+                    maxlength: 500,
+                    url: true
+                },
+                description: {
+                    maxlength: 500
+                },
+                maxMembers: {
+                    digits: true,
+                    min: 2,
+                    max: 500
+                }
+            },
+            messages: {
+                name: {
+                    required: "请输入群组名称",
+                    minlength: "群组名称长度不能少于2个字符",
+                    maxlength: "群组名称长度不能超过50个字符"
+                },
+                ownerId: {
+                    required: "请输入群主ID",
+                    digits: "群主ID必须是数字",
+                    min: "群主ID必须大于0"
+                },
+                avatar: {
+                    maxlength: "头像URL长度不能超过500个字符",
+                    url: "请输入有效的URL地址"
+                },
+                description: {
+                    maxlength: "群组描述不能超过500个字符"
+                },
+                maxMembers: {
+                    digits: "最大成员数必须是整数",
+                    min: "最大成员数不能少于2人",
+                    max: "最大成员数不能超过500人"
+                }
+            }
         });
 
         function submitHandler() {
             if ($.validate.form()) {
+                // 校验群组名称是否包含中文
+                var groupName = $('input[name="name"]').val();
+                if (!validateChineseContent(groupName, "群组名称")) {
+                    return;
+                }
+
+                // 校验群组描述（如果填写了）
+                var description = $('textarea[name="description"]').val();
+                if (description && description.trim().length > 0) {
+                    if (!validateChineseContent(description, "群组描述")) {
+                        return;
+                    }
+                }
+
                 $.operate.save(prefix + "/edit", $('#form-group-edit').serialize());
             }
         }

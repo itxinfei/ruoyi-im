@@ -186,4 +186,16 @@
         from im_message
         where is_deleted = 0
     </select>
+
+    <!-- 批量更新消息敏感级别 -->
+    <update id="batchUpdateSensitiveLevel" parameterType="map">
+        update im_message
+        set sensitive_level = #{sensitiveLevel},
+            update_time = NOW()
+        where id in
+        <foreach item="id" collection="messageIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        and is_deleted = 0
+    </update>
 </mapper>

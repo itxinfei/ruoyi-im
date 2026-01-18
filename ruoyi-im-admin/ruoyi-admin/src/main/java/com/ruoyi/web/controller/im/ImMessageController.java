@@ -302,6 +302,21 @@ public class ImMessageController extends BaseController {
     }
 
     /**
+     * 批量标记消息为敏感
+     */
+    @RequiresPermissions("im:message:edit")
+    @Log(title = "批量标记敏感消息", businessType = BusinessType.UPDATE)
+    @PostMapping("/batch-mark-sensitive")
+    @ResponseBody
+    public AjaxResult batchMarkSensitive(@RequestBody List<Long> messageIds) {
+        if (messageIds == null || messageIds.isEmpty()) {
+            return AjaxResult.error("请选择要标记的消息");
+        }
+        int successCount = imMessageService.batchUpdateSensitiveLevel(messageIds, "SENSITIVE");
+        return AjaxResult.success("成功标记 " + successCount + " 条消息");
+    }
+
+    /**
      * 取消标记敏感消息
      */
     @RequiresPermissions("im:message:edit")
@@ -313,6 +328,21 @@ public class ImMessageController extends BaseController {
         message.setId(messageId);
         message.setSensitiveLevel("NORMAL");
         return toAjax(imMessageService.updateImMessage(message));
+    }
+
+    /**
+     * 批量取消标记敏感消息
+     */
+    @RequiresPermissions("im:message:edit")
+    @Log(title = "批量取消标记敏感", businessType = BusinessType.UPDATE)
+    @PostMapping("/batch-unmark-sensitive")
+    @ResponseBody
+    public AjaxResult batchUnmarkSensitive(@RequestBody List<Long> messageIds) {
+        if (messageIds == null || messageIds.isEmpty()) {
+            return AjaxResult.error("请选择要取消标记的消息");
+        }
+        int successCount = imMessageService.batchUpdateSensitiveLevel(messageIds, "NORMAL");
+        return AjaxResult.success("成功取消标记 " + successCount + " 条消息");
     }
 
     /**

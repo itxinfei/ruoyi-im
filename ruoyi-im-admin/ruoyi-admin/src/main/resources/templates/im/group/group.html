@@ -303,17 +303,17 @@
         }
 
         function viewLogs(groupId, groupName) {
-            var url = ctx + "im/group/log/group/" + groupId + "/view";
+            var url = prefix + "/log/" + groupId + "/view";
             $.modal.openOptions({
-                title: '群组操作日志管理 - ' + groupName,
+                title: '群组操作日志 - ' + groupName,
                 url: url,
                 width: '1200px',
-                height: '650px'
+                height: '750px'
             });
         }
 
         function viewSettings(groupId) {
-            var url = ctx + "im/group/settings/" + groupId;
+            var url = prefix + "/settings/" + groupId;
             $.modal.openOptions({
                 title: '群组设置',
                 url: url,

@@ -37,4 +37,13 @@ public interface ImMessageService {
      * @return 统计数据
      */
     Map<String, Object> getMessageStatistics();
+
+    /**
+     * 批量更新消息敏感级别
+     *
+     * @param messageIds 消息ID列表
+     * @param sensitiveLevel 敏感级别
+     * @return 更新的记录数
+     */
+    int batchUpdateSensitiveLevel(List<Long> messageIds, String sensitiveLevel);
 }
