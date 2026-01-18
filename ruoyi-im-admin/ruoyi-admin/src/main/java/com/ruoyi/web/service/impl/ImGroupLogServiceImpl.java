@@ -93,4 +93,9 @@ public class ImGroupLogServiceImpl implements ImGroupLogService {
         log.setCreateTime(LocalDateTime.now());
         return imGroupLogMapper.insertImGroupLog(log);
     }
+
+    @Override
+    public java.util.Map<String, Object> getLogStatistics(Long groupId) {
+        return imGroupLogMapper.getLogStatistics(groupId);
+    }
 }

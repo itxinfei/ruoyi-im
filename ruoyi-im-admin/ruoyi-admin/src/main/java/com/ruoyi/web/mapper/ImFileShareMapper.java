@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ImFileShare接口
+ * IM文件分享数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM文件分享管理相关的数据库操作</p>
+ * <p>主要功能包括：文件分享的增删改查、访问次数统计、下载次数统计、过期分享清理等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImFileShareMapper {

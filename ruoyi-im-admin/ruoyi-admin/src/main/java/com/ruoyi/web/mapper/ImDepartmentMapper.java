@@ -7,9 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 部门Mapper接口
+ * IM部门数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM部门管理相关的数据库操作</p>
+ * <p>主要功能包括：部门的增删改查、部门树查询、子部门查询、部门状态管理等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImDepartmentMapper {

@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ImGroupLog接口
+ * IM群组管理日志数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM群组管理日志相关的数据库操作</p>
+ * <p>主要功能包括：群组日志的增删改查、按群组/操作者查询、日志统计等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImGroupLogMapper {
@@ -85,4 +89,12 @@ public interface ImGroupLogMapper {
      * @return 数量
      */
     int countLogsByGroupId(Long groupId);
+
+    /**
+     * 获取群组日志统计数据
+     *
+     * @param groupId 群组ID
+     * @return 统计数据
+     */
+    Map<String, Object> getLogStatistics(Long groupId);
 }

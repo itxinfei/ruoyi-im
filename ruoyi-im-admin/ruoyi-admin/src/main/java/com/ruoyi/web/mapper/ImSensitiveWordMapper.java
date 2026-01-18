@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 敏感词Mapper接口
+ * IM敏感词数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM敏感词管理相关的数据库操作</p>
+ * <p>主要功能包括：敏感词的增删改查、敏感词批量导入、敏感词统计等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImSensitiveWordMapper {

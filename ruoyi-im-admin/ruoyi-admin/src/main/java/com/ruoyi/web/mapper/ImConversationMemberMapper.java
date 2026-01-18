@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ImConversationMember接口
+ * IM会话成员数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM会话成员管理相关的数据库操作</p>
+ * <p>主要功能包括：会话成员的增删改查、成员移除、成员统计等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImConversationMemberMapper {

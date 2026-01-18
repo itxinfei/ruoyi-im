@@ -80,7 +80,21 @@
             background: #fff;
             border-radius: 6px;
             padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* 表格样式优化 */
+        .fixed-table-container {
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table > thead > tr > th,
+        .table > tbody > tr > td {
+            vertical-align: middle;
+            padding: 10px 8px;
         }
 
         /* 操作按钮样式优化 */
@@ -89,6 +103,7 @@
             font-size: 12px;
             line-height: 1.5;
             transition: all 0.2s ease;
+            border-radius: 3px;
         }
         .btn-xs:hover {
             transform: translateY(-1px);
@@ -98,6 +113,12 @@
         /* 工具栏样式 */
         #toolbar {
             margin-bottom: 15px;
+        }
+
+        /* 头像样式 */
+        .img-circle {
+            border-radius: 50%;
+            border: 2px solid #e7eaec;
         }
     </style>
 </head>

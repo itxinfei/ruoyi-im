@@ -107,4 +107,12 @@ public interface ImGroupLogService {
      * @return 结果
      */
     int logMemberOperation(Long groupId, Long operatorId, String operatorName, String operationType, String operationDesc, Long targetUserId, String targetUserName);
+
+    /**
+     * 获取群组日志统计数据
+     *
+     * @param groupId 群组ID
+     * @return 统计数据
+     */
+    java.util.Map<String, Object> getLogStatistics(Long groupId);
 }

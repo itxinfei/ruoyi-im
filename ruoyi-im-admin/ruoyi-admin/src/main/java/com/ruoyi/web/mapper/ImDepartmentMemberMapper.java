@@ -8,9 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ImDepartmentMember接口
+ * IM部门成员关系数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM部门成员关系管理相关的数据库操作</p>
+ * <p>主要功能包括：部门成员关系的增删改查、主部门管理、成员统计等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImDepartmentMemberMapper {

@@ -8,9 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ImScheduleEvent接口
+ * IM日程事件数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM日程事件管理相关的数据库操作</p>
+ * <p>主要功能包括：日程事件的增删改查、按时间范围查询、日程状态管理、日程统计等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImScheduleEventMapper {

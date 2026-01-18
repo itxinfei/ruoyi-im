@@ -8,9 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ImUserSetting接口
+ * IM用户设置数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM用户设置管理相关的数据库操作</p>
+ * <p>主要功能包括：用户设置的增删改查、批量插入或更新、设置重置、设置统计等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImUserSettingMapper {

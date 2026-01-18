@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 会话Mapper接口
+ * IM会话数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM会话管理相关的数据库操作</p>
+ * <p>主要功能包括：会话的增删改查、会话统计、活跃会话查询等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImConversationMapper {

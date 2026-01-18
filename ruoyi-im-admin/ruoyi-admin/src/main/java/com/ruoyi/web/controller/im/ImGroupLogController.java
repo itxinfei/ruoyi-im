@@ -114,4 +114,14 @@ public class ImGroupLogController extends BaseController {
     public AjaxResult clearLogsByGroupId(@PathVariable("groupId") Long groupId) {
         return toAjax(imGroupLogService.deleteImGroupLogByIds(new Long[]{groupId}));
     }
+
+    /**
+     * 获取群组日志统计数据
+     */
+    @RequiresPermissions("im:group:log:query")
+    @GetMapping("/statistics/{groupId}")
+    @ResponseBody
+    public AjaxResult getStatistics(@PathVariable("groupId") Long groupId) {
+        return AjaxResult.success(imGroupLogService.getLogStatistics(groupId));
+    }
 }

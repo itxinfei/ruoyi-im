@@ -8,9 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ImUserDevice接口
+ * IM用户设备数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM用户设备管理相关的数据库操作</p>
+ * <p>主要功能包括：用户设备的增删改查、设备状态管理、离线设备清理、设备统计等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImUserDeviceMapper {

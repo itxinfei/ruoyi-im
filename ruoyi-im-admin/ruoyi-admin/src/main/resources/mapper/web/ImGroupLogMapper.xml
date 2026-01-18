@@ -115,4 +115,15 @@
         delete from im_group_log where group_id = #{groupId}
     </delete>
 
+    <!-- 获取群组日志统计数据 -->
+    <select id="getLogStatistics" parameterType="Long" resultType="java.util.Map">
+        select
+            COUNT(*) as totalCount,
+            COUNT(CASE WHEN DATE(create_time) = CURDATE() THEN 1 END) as todayCount,
+            COUNT(CASE WHEN operation_type = 'CREATE' THEN 1 END) as createCount,
+            COUNT(CASE WHEN operation_type = 'DELETE' THEN 1 END) as deleteCount
+        from im_group_log
+        where group_id = #{groupId}
+    </select>
+
 </mapper>

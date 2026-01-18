@@ -258,8 +258,8 @@
             </div>
 
             <!-- 日志列表 -->
-            <div class="col-sm-12 select-table table-striped">
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            <div class="col-sm-12 select-table table-striped" style="padding: 0;">
+                <table id="bootstrap-table" data-mobile-responsive="true" style="width: 100%;"></table>
             </div>
         </div>
     </div>
@@ -297,6 +297,15 @@
                 removeUrl: prefix + "/remove/{id}",
                 exportUrl: prefix + "/export",
                 modalName: "群组日志",
+                sidePagination: "server",
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                showColumns: false,
+                showRefresh: true,
+                showToggle: false,
+                cardView: false,
+                detailView: false,
                 columns: [{
                     checkbox: true
                 },
@@ -382,6 +391,9 @@
                     $("#createCount").text(result.data.createCount || 0);
                     $("#deleteCount").text(result.data.deleteCount || 0);
                 }
+            }).fail(function() {
+                // 统计数据加载失败不影响页面显示
+                console.warn("统计数据加载失败");
             });
         }
     </script>

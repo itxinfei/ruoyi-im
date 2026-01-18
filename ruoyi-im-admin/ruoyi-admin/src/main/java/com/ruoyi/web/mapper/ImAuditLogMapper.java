@@ -8,9 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ImAuditLog接口
+ * IM审计日志数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM审计日志管理相关的数据库操作</p>
+ * <p>主要功能包括：审计日志的增删改查、按操作类型/用户统计、旧日志清理等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImAuditLogMapper {

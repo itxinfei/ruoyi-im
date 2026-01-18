@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ImFriendRequest接口
+ * IM好友申请数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM好友申请管理相关的数据库操作</p>
+ * <p>主要功能包括：好友申请的增删改查、申请统计等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImFriendRequestMapper {

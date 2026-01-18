@@ -8,9 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ImWorkReport接口
+ * IM工作报告数据访问层接口（Admin模块专用）
+ *
+ * <p>负责处理IM工作报告管理相关的数据库操作</p>
+ * <p>主要功能包括：工作报告的增删改查、报告审批、报告状态管理、报告统计等</p>
  *
  * @author ruoyi
+ * @date 2025-01-07
  */
 @Mapper
 public interface ImWorkReportMapper {
