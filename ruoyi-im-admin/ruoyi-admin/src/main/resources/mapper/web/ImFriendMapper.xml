@@ -51,7 +51,6 @@
             <if test="friendId != null">and f.friend_id = #{friendId}</if>
             <if test="groupName != null and groupName != ''">and f.group_name = #{groupName}</if>
             <if test="remark != null and remark != ''">and f.remark like concat('%', #{remark}, '%')</if>
-            <if test="params.friendStatus != null">and u2.status = #{params.friendStatus}</if>
         </where>
         order by f.create_time desc
     </select>

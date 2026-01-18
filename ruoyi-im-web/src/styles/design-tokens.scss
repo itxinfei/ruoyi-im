@@ -1,0 +1,107 @@
+// Design Tokens - DingTalk Style
+:root {
+  // === Brand Colors ===
+  --dt-brand-color: #1890FF;
+  --dt-brand-hover: #40A9FF;
+  --dt-brand-active: #096DD9;
+  --dt-brand-bg: #E6F7FF;
+  --dt-brand-light: rgba(24, 144, 255, 0.1);
+
+  // === Semantic Colors ===
+  --dt-success-color: #52C41A;
+  --dt-warning-color: #FAAD14;
+  --dt-error-color: #FF4D4F;
+  --dt-danger-color: #F5222D;
+  --dt-badge-color: #F5222D;
+
+  // === Background Colors ===
+  --dt-bg-body: #FFFFFF;
+  --dt-bg-sidebar: #FFFFFF;
+  --dt-bg-session-list: #FFFFFF;
+  --dt-bg-chat: #F5F7FA;
+  --dt-bg-session-hover: #F2F3F5;
+  --dt-bg-session-active: #EBF4FF;
+  --dt-bg-input: #FFFFFF;
+
+  // === Text Colors ===
+  --dt-text-primary: #1A1A1A;
+  --dt-text-secondary: #595959;
+  --dt-text-tertiary: #8C8C8C;
+  --dt-text-placeholder: #BFBFBF;
+  --dt-text-disabled: #D9D9D9;
+
+  // === Border Colors ===
+  --dt-border-color: #E5E5E5;
+  --dt-border-light: #F0F0F0;
+  --dt-border-dark: #D9D9D9;
+
+  // === Typography ===
+  --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 
+                   'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 
+                   'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --dt-font-size-xs: 11px;
+  --dt-font-size-sm: 12px;
+  --dt-font-size-base: 14px;
+  --dt-font-size-md: 15px;
+  --dt-font-size-lg: 16px;
+  --dt-font-size-xl: 18px;
+  --dt-font-size-xxl: 20px;
+  --dt-font-weight-normal: 400;
+  --dt-font-weight-medium: 500;
+  --dt-font-weight-semibold: 600;
+  --dt-font-weight-bold: 700;
+  --dt-line-height-tight: 1.2;
+  --dt-line-height-base: 1.5;
+  --dt-line-height-loose: 1.75;
+
+  // === Spacing (4px base unit) ===
+  --dt-space-xs: 4px;
+  --dt-space-sm: 8px;
+  --dt-space-md: 12px;
+  --dt-space-lg: 16px;
+  --dt-space-xl: 24px;
+  --dt-space-xxl: 32px;
+  --dt-space-xxxl: 48px;
+
+  // === Layout Dimensions ===
+  --dt-nav-sidebar-width: 64px;
+  --dt-session-panel-width: 320px;
+  --dt-header-height: 60px;
+  --dt-chat-header-height: 60px;
+  --dt-chat-input-height: 56px;
+  --dt-nav-item-height: 64px;
+  --dt-session-item-height: 72px;
+
+  // === Component Sizes ===
+  --dt-avatar-size-sm: 32px;
+  --dt-avatar-size: 48px;
+  --dt-avatar-size-lg: 64px;
+  --dt-btn-height-md: 36px;
+  --dt-btn-height-lg: 40px;
+  --dt-message-max-width: 480px;
+
+  // === Border Radius ===
+  --dt-radius-sm: 4px;
+  --dt-radius-md: 8px;
+  --dt-radius-lg: 12px;
+  --dt-radius-full: 50%;
+
+  // === Shadows ===
+  --dt-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --dt-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --dt-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+  // === Transitions ===
+  --dt-transition-fast: 0.15s ease;
+  --dt-transition-base: 0.3s ease;
+  --dt-transition-slow: 0.5s ease;
+
+  // === Z-Index ===
+  --dt-z-dropdown: 1000;
+  --dt-z-sticky: 1020;
+  --dt-z-fixed: 1030;
+  --dt-z-modal: 1040;
+  --dt-z-popover: 1050;
+  --dt-z-tooltip: 1060;
+  --dt-z-notification: 1070;
+}

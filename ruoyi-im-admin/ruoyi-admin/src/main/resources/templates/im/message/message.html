@@ -228,7 +228,7 @@
                 {
                     field: 'senderName',
                     title: '发送者',
-                    width: '120',
+                    width: '100',
                     formatter: function(value, row, index) {
                         return value || '-';
                     }
@@ -248,6 +248,20 @@
                     }
                 },
                 {
+                    field: 'sendStatus',
+                    title: '发送状态',
+                    align: 'center',
+                    width: '90',
+                    formatter: function(value, row, index) {
+                        if (value === 'PENDING') return '<span class="badge badge-default">待发送</span>';
+                        if (value === 'SENDING') return '<span class="badge badge-info">发送中</span>';
+                        if (value === 'SENT') return '<span class="badge badge-primary">已发送</span>';
+                        if (value === 'DELIVERED') return '<span class="badge badge-success">已送达</span>';
+                        if (value === 'FAILED') return '<span class="badge badge-danger">失败</span>';
+                        return '<span class="badge badge-default">-</span>';
+                    }
+                },
+                {
                     field: 'content',
                     title: '消息内容',
                     formatter: function(value, row, index) {
@@ -258,6 +272,31 @@
                             return value.substring(0, 50) + '...';
                         }
                         return value || '-';
+                    }
+                },
+                {
+                    field: 'fileName',
+                    title: '文件名',
+                    width: '120',
+                    visible: true,
+                    formatter: function(value, row, index) {
+                        if (row.messageType === 'FILE' || row.messageType === 'IMAGE' || row.messageType === 'VIDEO' || row.messageType === 'AUDIO') {
+                            return value || '-';
+                        }
+                        return '-';
+                    }
+                },
+                {
+                    field: 'fileSize',
+                    title: '文件大小',
+                    align: 'right',
+                    width: '90',
+                    formatter: function(value, row, index) {
+                        if (!value || value == 0) return '-';
+                        if (value < 1024) return value + ' B';
+                        if (value < 1024 * 1024) return (value / 1024).toFixed(2) + ' KB';
+                        if (value < 1024 * 1024 * 1024) return (value / (1024 * 1024)).toFixed(2) + ' MB';
+                        return (value / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
                     }
                 },
                 {
@@ -446,31 +485,111 @@
             $.get(prefix + "/" + id, function(result) {
                 if (result.code == 0) {
                     var msg = result.data;
-                    var content = '<div style="padding: 20px;">';
-                    content += '<table class="table table-bordered">';
-                    content += '<tr><th style="width:100px;">消息ID</th><td>' + (msg.id || '-') + '</td></tr>';
+                    var content = '<div style="padding: 20px;max-height:600px;overflow-y:auto;">';
+                    content += '<h4 style="margin-bottom:15px;">基本信息</h4>';
+                    content += '<table class="table table-bordered table-striped">';
+                    content += '<tr><th style="width:130px;">消息ID</th><td>' + (msg.id || '-') + '</td></tr>';
                     content += '<tr><th>会话ID</th><td>' + (msg.conversationId || '-') + '</td></tr>';
-                    content += '<tr><th>发送者ID</th><td>' + (msg.senderId || '-') + '</td></tr>';
+                    content += '<tr><th>发送者ID</th><td>' + (msg.senderId || '-') + (msg.senderName ? ' (' + msg.senderName + ')' : '') + '</td></tr>';
                     content += '<tr><th>消息类型</th><td>' + (msg.messageType || '-') + '</td></tr>';
                     content += '<tr><th>敏感级别</th><td>' + (msg.sensitiveLevel || 'NORMAL') + '</td></tr>';
+
+                    // 发送状态
+                    var sendStatusText = 'NORMAL';
+                    if (msg.sendStatus === 'PENDING') sendStatusText = '<span class="badge badge-default">待发送</span>';
+                    else if (msg.sendStatus === 'SENDING') sendStatusText = '<span class="badge badge-info">发送中</span>';
+                    else if (msg.sendStatus === 'SENT') sendStatusText = '<span class="badge badge-primary">已发送</span>';
+                    else if (msg.sendStatus === 'DELIVERED') sendStatusText = '<span class="badge badge-success">已送达</span>';
+                    else if (msg.sendStatus === 'FAILED') sendStatusText = '<span class="badge badge-danger">失败</span>';
+                    content += '<tr><th>发送状态</th><td>' + sendStatusText + '</td></tr>';
+
                     content += '<tr><th>发送时间</th><td>' + (msg.createTime || '-') + '</td></tr>';
+                    content += '<tr><th>送达时间</th><td>' + (msg.deliveredTime || '-') + '</td></tr>';
                     content += '</table>';
-                    if (msg.messageType === 'TEXT' && msg.content) {
-                        content += '<hr><p><strong>消息内容：</strong></p>';
-                        content += '<p style="white-space: pre-wrap;">' + msg.content + '</p>';
-                    } else if (msg.fileUrl) {
-                        content += '<hr><p><strong>文件：</strong>' + (msg.fileName || '') + '</p>';
+
+                    // 回复信息
+                    if (msg.replyToMessageId) {
+                        content += '<h4 style="margin:15px 0;">回复信息</h4>';
+                        content += '<table class="table table-bordered table-striped">';
+                        content += '<tr><th style="width:130px;">回复消息ID</th><td>' + msg.replyToMessageId + '</td></tr>';
+                        content += '</table>';
+                    }
+
+                    // 转发信息
+                    if (msg.forwardFromMessageId) {
+                        content += '<h4 style="margin:15px 0;">转发信息</h4>';
+                        content += '<table class="table table-bordered table-striped">';
+                        content += '<tr><th style="width:130px;">来源消息ID</th><td>' + msg.forwardFromMessageId + '</td></tr>';
+                        content += '</table>';
+                    }
+
+                    // 编辑历史
+                    if (msg.isEdited == 1) {
+                        content += '<h4 style="margin:15px 0;">编辑历史</h4>';
+                        content += '<table class="table table-bordered table-striped">';
+                        content += '<tr><th style="width:130px;">编辑次数</th><td>' + (msg.editCount || 0) + ' 次</td></tr>';
+                        content += '<tr><th>最后编辑时间</th><td>' + (msg.editTime || '-') + '</td></tr>';
+                        if (msg.editedContent) {
+                            content += '<tr><th>编辑后内容</th><td>' + msg.editedContent + '</td></tr>';
+                        }
+                        content += '</table>';
+                    }
+
+                    // 撤回信息
+                    if (msg.isRevoked == 1) {
+                        content += '<h4 style="margin:15px 0;">撤回信息</h4>';
+                        content += '<table class="table table-bordered table-striped">';
+                        content += '<tr><th style="width:130px;">撤回者ID</th><td>' + (msg.revokerId || '-') + '</td></tr>';
+                        content += '<tr><th>撤回时间</th><td>' + (msg.revokedTime || '-') + '</td></tr>';
+                        content += '</table>';
+                    }
+
+                    // 文件详情
+                    if (msg.fileUrl || msg.fileName) {
+                        content += '<h4 style="margin:15px 0;">文件详情</h4>';
+                        content += '<table class="table table-bordered table-striped">';
+                        content += '<tr><th style="width:130px;">文件名</th><td>' + (msg.fileName || '-') + '</td></tr>';
+                        if (msg.fileSize) {
+                            var size = msg.fileSize;
+                            var sizeText = size + ' B';
+                            if (size >= 1024 * 1024 * 1024) {
+                                sizeText = (size / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+                            } else if (size >= 1024 * 1024) {
+                                sizeText = (size / (1024 * 1024)).toFixed(2) + ' MB';
+                            } else if (size >= 1024) {
+                                sizeText = (size / 1024).toFixed(2) + ' KB';
+                            }
+                            content += '<tr><th>文件大小</th><td>' + sizeText + '</td></tr>';
+                        }
+                        content += '<tr><th>文件URL</th><td><a href="' + msg.fileUrl + '" target="_blank">' + msg.fileUrl + '</a></td></tr>';
+                        content += '</table>';
                         if (msg.messageType === 'IMAGE') {
-                            content += '<img src="' + msg.fileUrl + '" style="max-width:100%;max-height:400px;">';
-                        } else {
-                            content += '<a href="' + msg.fileUrl + '" target="_blank">点击下载</a>';
+                            content += '<p><strong>预览：</strong></p>';
+                            content += '<img src="' + msg.fileUrl + '" style="max-width:100%;max-height:400px;border:1px solid #ddd;">';
                         }
                     }
+
+                    // 消息内容（仅文本）
+                    if (msg.messageType === 'TEXT' && msg.content) {
+                        content += '<h4 style="margin:15px 0;">消息内容</h4>';
+                        content += '<div style="padding:10px;background:#f5f5f5;border-radius:4px;white-space:pre-wrap;">' + msg.content + '</div>';
+                    }
+
+                    // 错误信息
+                    if (msg.sendStatus === 'FAILED' && (msg.sendErrorCode || msg.sendErrorMsg)) {
+                        content += '<h4 style="margin:15px 0;color:#f56c6c;">发送失败详情</h4>';
+                        content += '<table class="table table-bordered table-striped">';
+                        content += '<tr><th style="width:130px;">错误码</th><td>' + (msg.sendErrorCode || '-') + '</td></tr>';
+                        content += '<tr><th>错误信息</th><td>' + (msg.sendErrorMsg || '-') + '</td></tr>';
+                        content += '<tr><th>重试次数</th><td>' + (msg.sendRetryCount || 0) + ' 次</td></tr>';
+                        content += '</table>';
+                    }
+
                     content += '</div>';
                     top.layer.open({
                         type: 1,
                         title: '消息详情',
-                        area: ['900px', 'auto'],
+                        area: ['800px', 'auto'],
                         content: content
                     });
                 }

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImDepartmentMemberMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImDepartmentMember" id="ImDepartmentMemberResult">
+        <id property="id" column="id"/>
+        <result property="departmentId" column="department_id"/>
+        <result property="departmentName" column="department_name"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="isPrimary" column="is_primary"/>
+        <result property="position" column="position"/>
+        <result property="joinTime" column="join_time"/>
+        <result property="leaveTime" column="leave_time"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectImDepartmentMemberVo">
+        SELECT dm.id, dm.department_id, dm.user_id, dm.is_primary, dm.position,
+               dm.join_time, dm.leave_time, dm.status, dm.create_time, dm.update_time, dm.remark,
+               d.name as department_name,
+               u.username as user_name,
+               u.nickname as user_nickname
+        FROM im_department_member dm
+        LEFT JOIN im_department d ON dm.department_id = d.id
+        LEFT JOIN im_user u ON dm.user_id = u.id
+    </sql>
+
+    <select id="selectImDepartmentMemberById" parameterType="Long" resultMap="ImDepartmentMemberResult">
+        <include refid="selectImDepartmentMemberVo"/>
+        WHERE dm.id = #{id}
+    </select>
+
+    <select id="selectImDepartmentMemberList" parameterType="com.ruoyi.web.domain.ImDepartmentMember"
+            resultMap="ImDepartmentMemberResult">
+        <include refid="selectImDepartmentMemberVo"/>
+        <where>
+            <if test="departmentId != null">
+                AND dm.department_id = #{departmentId}
+            </if>
+            <if test="userId != null">
+                AND dm.user_id = #{userId}
+            </if>
+            <if test="isPrimary != null">
+                AND dm.is_primary = #{isPrimary}
+            </if>
+            <if test="status != null">
+                AND dm.status = #{status}
+            </if>
+            <if test="position != null and position != ''">
+                AND dm.position like concat('%', #{position}, '%')
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                AND date_format(dm.join_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                AND date_format(dm.join_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d')
+            </if>
+        </where>
+        ORDER BY dm.is_primary DESC, dm.create_time DESC
+    </select>
+
+    <select id="selectMembersByDepartmentId" parameterType="Long" resultMap="ImDepartmentMemberResult">
+        <include refid="selectImDepartmentMemberVo"/>
+        WHERE dm.department_id = #{departmentId}
+        AND dm.status = 0
+        ORDER BY dm.is_primary DESC, dm.create_time DESC
+    </select>
+
+    <select id="selectDepartmentsByUserId" parameterType="Long" resultMap="ImDepartmentMemberResult">
+        <include refid="selectImDepartmentMemberVo"/>
+        WHERE dm.user_id = #{userId}
+        ORDER BY dm.is_primary DESC, dm.create_time DESC
+    </select>
+
+    <select id="selectPrimaryDepartmentByUserId" parameterType="Long" resultMap="ImDepartmentMemberResult">
+        <include refid="selectImDepartmentMemberVo"/>
+        WHERE dm.user_id = #{userId}
+        AND dm.is_primary = 1
+        LIMIT 1
+    </select>
+
+    <select id="selectByDepartmentIdAndUserId" resultMap="ImDepartmentMemberResult">
+        <include refid="selectImDepartmentMemberVo"/>
+        WHERE dm.department_id = #{departmentId}
+        AND dm.user_id = #{userId}
+        LIMIT 1
+    </select>
+
+    <select id="checkUserExistsInDepartment" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM im_department_member
+        WHERE department_id = #{departmentId}
+        AND user_id = #{userId}
+    </select>
+
+    <insert id="insertImDepartmentMember" parameterType="com.ruoyi.web.domain.ImDepartmentMember"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO im_department_member
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="departmentId != null">department_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="isPrimary != null">is_primary,</if>
+            <if test="position != null">position,</if>
+            <if test="joinTime != null">join_time,</if>
+            <if test="leaveTime != null">leave_time,</if>
+            <if test="status != null">status,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="departmentId != null">#{departmentId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="isPrimary != null">#{isPrimary},</if>
+            <if test="position != null">#{position},</if>
+            <if test="joinTime != null">#{joinTime},</if>
+            <if test="leaveTime != null">#{leaveTime},</if>
+            <if test="status != null">#{status},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImDepartmentMember" parameterType="com.ruoyi.web.domain.ImDepartmentMember">
+        UPDATE im_department_member
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="departmentId != null">department_id = #{departmentId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="isPrimary != null">is_primary = #{isPrimary},</if>
+            <if test="position != null">position = #{position},</if>
+            <if test="joinTime != null">join_time = #{joinTime},</if>
+            <if test="leaveTime != null">leave_time = #{leaveTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updatePrimaryDepartment">
+        UPDATE im_department_member
+        SET is_primary = CASE WHEN department_id = #{departmentId} THEN 1 ELSE 0 END
+        WHERE user_id = #{userId}
+    </update>
+
+    <delete id="deleteImDepartmentMemberById" parameterType="Long">
+        DELETE FROM im_department_member WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteImDepartmentMemberByIds" parameterType="Long[]">
+        DELETE FROM im_department_member WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteMembersByDepartmentId" parameterType="Long">
+        DELETE FROM im_department_member WHERE department_id = #{departmentId}
+    </delete>
+
+    <delete id="deleteDepartmentsByUserId" parameterType="Long">
+        DELETE FROM im_department_member WHERE user_id = #{userId}
+    </delete>
+
+    <select id="countMembersByDepartmentId" parameterType="Long" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM im_department_member
+        WHERE department_id = #{departmentId}
+        AND status = 0
+    </select>
+
+    <!-- 获取部门成员统计数据 -->
+    <select id="getDepartmentMemberStatistics" resultType="map">
+        SELECT
+            (SELECT COUNT(*) FROM im_department_member) AS totalCount,
+            (SELECT COUNT(*) FROM im_department_member WHERE status = 0) AS activeCount,
+            (SELECT COUNT(*) FROM im_department_member WHERE status = 1) AS leftCount,
+            (SELECT COUNT(*) FROM im_department_member WHERE is_primary = 1) AS primaryCount
+    </select>
+
+</mapper>

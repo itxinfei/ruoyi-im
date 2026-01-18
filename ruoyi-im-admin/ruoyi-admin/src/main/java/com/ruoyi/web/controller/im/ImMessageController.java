@@ -112,7 +112,95 @@ public class ImMessageController extends BaseController {
     @GetMapping("/{id}")
     @ResponseBody
     public AjaxResult getMessageDetail(@PathVariable("id") Long id) {
-        return AjaxResult.success(imMessageService.selectImMessageById(id));
+        ImMessage message = imMessageService.selectImMessageById(id);
+        if (message != null && message.getContent() != null) {
+            // 解密消息内容
+            String decryptedContent = decryptMessage(message.getContent());
+            message.setContent(decryptedContent);
+            // 如果有编辑后的内容，也需要解密
+            if (message.getEditedContent() != null) {
+                String decryptedEditedContent = decryptMessage(message.getEditedContent());
+                message.setEditedContent(decryptedContent);
+            }
+        }
+        return AjaxResult.success(message);
+    }
+
+    /**
+     * 处理消息内容 - 管理员可直接查看
+     * 尝试各种编码格式处理乱码
+     */
+    private String decryptMessage(String content) {
+        if (content == null || content.isEmpty()) {
+            return content;
+        }
+
+        // 1. 尝试Base64解码
+        try {
+            byte[] decoded = java.util.Base64.getDecoder().decode(content);
+            String decodedStr = new String(decoded, java.nio.charset.StandardCharsets.UTF_8);
+            // 检查解码后是否包含可读字符
+            if (isReadableText(decodedStr)) {
+                return decodedStr;
+            }
+        } catch (Exception e) {
+            // 不是Base64，继续其他尝试
+        }
+
+        // 2. 检查是否为十六进制编码（格式：67677c...）
+        if (content.matches("^[0-9a-fA-F]+$") && content.length() > 20) {
+            try {
+                byte[] hex = hexStringToBytes(content);
+                String hexStr = new String(hex, java.nio.charset.StandardCharsets.UTF_8);
+                if (isReadableText(hexStr)) {
+                    return hexStr;
+                }
+            } catch (Exception e) {
+                // 继续尝试其他方法
+            }
+        }
+
+        // 3. 检查是否为URL编码
+        try {
+            String urlDecoded = java.net.URLDecoder.decode(content, "UTF-8");
+            if (isReadableText(urlDecoded) && !urlDecoded.equals(content)) {
+                return urlDecoded;
+            }
+        } catch (Exception e) {
+            // 继续尝试其他方法
+        }
+
+        // 4. 如果内容太长且看起来像Base64，提示这是加密消息
+        if (content.length() > 50 && isBase64Like(content)) {
+            return "[加密消息 " + content.substring(0, 20) + "...]";
+        }
+
+        // 5. 否则返回原内容
+        return content;
+    }
+
+    /**
+     * 判断内容是否为可读文本
+     */
+    private boolean isReadableText(String text) {
+        if (text == null || text.length() < 5) {
+            return false;
+        }
+        // 检查是否包含可读字符（字母、数字、常用符号、中文字符）
+        return text.matches(".*[\\p{Alnum}\\p{Punct}\\s\\u4e00-\\u9fff]+.*");
+    }
+
+    /**
+     * 将十六进制字符串转换为字节数组
+     */
+    private byte[] hexStringToBytes(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i)) ? '0' : '9') * 16
+                                  + (Character.digit(s.charAt(i + 1)) ? '0' : '9'));
+        }
+        return data;
     }
 
     /**

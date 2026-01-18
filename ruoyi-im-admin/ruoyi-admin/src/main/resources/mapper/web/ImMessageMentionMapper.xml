@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImMessageMentionMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImMessageMention" id="ImMessageMentionResult">
+        <id property="id" column="id"/>
+        <result property="messageId" column="message_id"/>
+        <result property="mentionedUserId" column="mentioned_user_id"/>
+        <result property="mentionedBy" column="mentioned_by"/>
+        <result property="mentionType" column="mention_type"/>
+        <result property="isRead" column="is_read"/>
+        <result property="createTime" column="create_time"/>
+        <!-- 关联字段 -->
+        <result property="messageContent" column="message_content"/>
+        <result property="mentionedUserName" column="mentioned_user_name"/>
+        <result property="mentionedByUserName" column="mentioned_by_user_name"/>
+    </resultMap>
+
+    <sql id="selectImMessageMentionVo">
+        select mm.id, mm.message_id, mm.mentioned_user_id, mm.mentioned_by,
+               mm.mention_type, mm.is_read, mm.create_time,
+               m.content as message_content,
+               u1.nickname as mentioned_user_name,
+               u2.nickname as mentioned_by_user_name
+        from im_message_mention mm
+        left join im_message m on mm.message_id = m.id
+        left join im_user u1 on mm.mentioned_user_id = u1.id
+        left join im_user u2 on mm.mentioned_by = u2.id
+    </sql>
+
+    <select id="selectImMessageMentionList" parameterType="com.ruoyi.web.domain.ImMessageMention" resultMap="ImMessageMentionResult">
+        <include refid="selectImMessageMentionVo"/>
+        <where>
+            <if test="messageId != null">and mm.message_id = #{messageId}</if>
+            <if test="mentionedUserId != null">and mm.mentioned_user_id = #{mentionedUserId}</if>
+            <if test="mentionedBy != null">and mm.mentioned_by = #{mentionedBy}</if>
+            <if test="mentionType != null and mentionType != ''">and mm.mention_type = #{mentionType}</if>
+            <if test="isRead != null">and mm.is_read = #{isRead}</if>
+            <if test="params.beginTime != null and params.beginTime != ''">and date_format(mm.create_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d')</if>
+            <if test="params.endTime != null and params.endTime != ''">and date_format(mm.create_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d')</if>
+        </where>
+        order by mm.create_time desc
+    </select>
+
+    <select id="selectImMessageMentionById" parameterType="Long" resultMap="ImMessageMentionResult">
+        <include refid="selectImMessageMentionVo"/>
+        where mm.id = #{id}
+    </select>
+
+    <select id="selectImMessageMentionByMessageId" parameterType="Long" resultMap="ImMessageMentionResult">
+        <include refid="selectImMessageMentionVo"/>
+        where mm.message_id = #{messageId}
+        order by mm.create_time desc
+    </select>
+
+    <!-- 获取@统计数据 -->
+    <select id="getMentionStatistics" resultType="java.util.Map">
+        select
+            (SELECT COUNT(*) FROM im_message_mention) as totalCount,
+            (SELECT COUNT(*) FROM im_message_mention WHERE is_read = 1) as readCount,
+            (SELECT COUNT(*) FROM im_message_mention WHERE is_read = 0) as unreadCount,
+            (SELECT COUNT(*) FROM im_message_mention WHERE mention_type = 'ALL') as mentionAllCount
+        from dual
+    </select>
+</mapper>

@@ -1,25 +1,5 @@
-:root {
-  --dt-brand-color: #0089ff;
-  --dt-brand-hover: #0070d9;
-  --dt-brand-active: rgba(0, 137, 255, 0.1);
-  --dt-success-color: #52c41a;
-  --dt-warning-color: #faad14;
-  --dt-error-color: #ff4d4f;
-  --dt-text-primary: #262626;
-  --dt-text-secondary: #595959;
-  --dt-text-tertiary: #8c8c8c;
-  --dt-border-color: #e8e8e8;
-  --dt-border-color-light: #f0f0f0;
-  --dt-bg-color: #f5f5f5;
-  --dt-bg-white: #ffffff;
-  --dt-nav-sidebar-width: 64px;
-  --dt-nav-icon-size: 24px;
-  --dt-session-panel-width: 280px;
-  --dt-header-height: 48px;
-  --dt-radius-sm: 4px;
-  --dt-radius-md: 8px;
-  --dt-radius-lg: 12px;
-}
+// Global Base Styles
+@import './design-tokens.scss';
 
 html,
 body {
@@ -35,11 +15,11 @@ body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
+  font-family: var(--dt-font-family);
+  font-size: var(--dt-font-size-base);
+  line-height: var(--dt-line-height-base);
   color: var(--dt-text-primary);
-  background-color: var(--dt-bg-white);
+  background-color: var(--dt-bg-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -47,7 +27,7 @@ body {
 a {
   color: var(--dt-brand-color);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color var(--dt-transition-fast);
 
   &:hover {
     color: var(--dt-brand-hover);
@@ -67,6 +47,7 @@ textarea {
   outline: none;
 }
 
+// Scrollbar Styling
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -85,6 +66,13 @@ textarea {
   }
 }
 
+// Focus styles for accessibility
+*:focus-visible {
+  outline: 2px solid var(--dt-brand-color);
+  outline-offset: 2px;
+}
+
+// Element Plus Overrides
 .el-button--primary {
   background-color: var(--dt-brand-color);
   border-color: var(--dt-brand-color);
@@ -95,19 +83,128 @@ textarea {
   }
 
   &:active {
-    background-color: var(--dt-brand-hover);
-    border-color: var(--dt-brand-hover);
+    background-color: var(--dt-brand-active);
+    border-color: var(--dt-brand-active);
   }
 }
 
 .el-input__wrapper {
   border-radius: var(--dt-radius-sm);
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    border-color: var(--dt-border-dark);
+  }
+
+  &.is-focus {
+    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 2px var(--dt-brand-light);
+  }
 }
 
 .el-textarea__inner {
   border-radius: var(--dt-radius-sm);
+  transition: all var(--dt-transition-fast);
+
+  &:focus {
+    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 2px var(--dt-brand-light);
+  }
 }
 
 .el-avatar {
   background-color: var(--dt-brand-color);
+  border: 2px solid var(--dt-bg-body);
+}
+
+.el-badge__content {
+  background-color: var(--dt-badge-color);
+  border: none;
+}
+
+// Utility Classes
+.u-flex {
+  display: flex;
+}
+
+.u-flex-column {
+  flex-direction: column;
+}
+
+.u-flex-center {
+  align-items: center;
+  justify-content: center;
+}
+
+.u-flex-between {
+  justify-content: space-between;
+}
+
+.u-flex-1 {
+  flex: 1;
+}
+
+.u-text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.u-text-ellipsis-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.u-transition-all {
+  transition: all var(--dt-transition-base);
+}
+
+.u-transition-color {
+  transition: color var(--dt-transition-fast), 
+              background-color var(--dt-transition-fast),
+              border-color var(--dt-transition-fast);
+}
+
+// Animation utilities
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes typing {
+  0%, 80%, 100% { 
+    transform: scale(0); 
+    opacity: 0.5;
+  }
+  40% { 
+    transform: scale(1); 
+    opacity: 1;
+  }
+}
+
+.u-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.u-slide-in {
+  animation: slideIn 0.3s ease-out;
 }

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImGroupBlacklistMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImGroupBlacklist" id="ImGroupBlacklistResult">
+        <id property="id" column="id"/>
+        <result property="groupId" column="group_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="type" column="type"/>
+        <result property="reason" column="reason"/>
+        <result property="expireTime" column="expire_time"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <!-- 关联查询字段 -->
+        <result property="groupName" column="group_name"/>
+        <result property="userName" column="user_name"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="operatorName" column="operator_name"/>
+    </resultMap>
+
+    <sql id="selectImGroupBlacklistVo">
+        select b.id, b.group_id, b.user_id, b.operator_id, b.type, b.reason,
+               b.expire_time, b.is_active, b.create_time, b.update_time
+        from im_group_blacklist b
+    </sql>
+
+    <sql id="selectImGroupBlacklistWithRelationsVo">
+        select b.id, b.group_id, b.user_id, b.operator_id, b.type, b.reason,
+               b.expire_time, b.is_active, b.create_time, b.update_time,
+               g.name as group_name,
+               u.username as user_name, u.nickname as user_nickname,
+               op.username as operator_name
+        from im_group_blacklist b
+        left join im_group g on b.group_id = g.id
+        left join im_user u on b.user_id = u.id
+        left join im_user op on b.operator_id = op.id
+    </sql>
+
+    <select id="selectImGroupBlacklistList" parameterType="com.ruoyi.web.domain.ImGroupBlacklist" resultMap="ImGroupBlacklistResult">
+        <include refid="selectImGroupBlacklistWithRelationsVo"/>
+        <where>
+            <if test="groupId != null">and b.group_id = #{groupId}</if>
+            <if test="userId != null">and b.user_id = #{userId}</if>
+            <if test="operatorId != null">and b.operator_id = #{operatorId}</if>
+            <if test="type != null and type != ''">and b.type = #{type}</if>
+            <if test="isActive != null">and b.is_active = #{isActive}</if>
+            <if test="groupName != null and groupName != ''">and g.name like concat('%', #{groupName}, '%')</if>
+            <if test="userName != null and userName != ''">and u.username like concat('%', #{userName}, '%')</if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                and date_format(b.create_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and date_format(b.create_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d')
+            </if>
+        </where>
+        order by b.create_time desc
+    </select>
+
+    <select id="selectImGroupBlacklistById" parameterType="Long" resultMap="ImGroupBlacklistResult">
+        <include refid="selectImGroupBlacklistWithRelationsVo"/>
+        where b.id = #{id}
+    </select>
+
+    <select id="selectImGroupBlacklistByGroupId" parameterType="Long" resultMap="ImGroupBlacklistResult">
+        <include refid="selectImGroupBlacklistWithRelationsVo"/>
+        where b.group_id = #{groupId} and b.is_active = 1
+        order by b.create_time desc
+    </select>
+
+    <select id="checkUserInBlacklist" parameterType="map" resultType="java.lang.Integer">
+        select count(*) from im_group_blacklist
+        where group_id = #{groupId} and user_id = #{userId}
+        and type = #{type} and is_active = 1
+        and (expire_time is null or expire_time > NOW())
+    </select>
+
+    <insert id="insertImGroupBlacklist" parameterType="com.ruoyi.web.domain.ImGroupBlacklist" useGeneratedKeys="true" keyProperty="id">
+        insert into im_group_blacklist
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="groupId != null">group_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="operatorId != null">operator_id,</if>
+            <if test="type != null and type != ''">type,</if>
+            <if test="reason != null">reason,</if>
+            <if test="expireTime != null">expire_time,</if>
+            <if test="isActive != null">is_active,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="groupId != null">#{groupId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="operatorId != null">#{operatorId},</if>
+            <if test="type != null and type != ''">#{type},</if>
+            <if test="reason != null">#{reason},</if>
+            <if test="expireTime != null">#{expireTime},</if>
+            <if test="isActive != null">#{isActive},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImGroupBlacklist" parameterType="com.ruoyi.web.domain.ImGroupBlacklist">
+        update im_group_blacklist
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="groupId != null">group_id = #{groupId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="operatorId != null">operator_id = #{operatorId},</if>
+            <if test="type != null and type != ''">type = #{type},</if>
+            <if test="reason != null">reason = #{reason},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+            <if test="isActive != null">is_active = #{isActive},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImGroupBlacklistById" parameterType="Long">
+        delete from im_group_blacklist where id = #{id}
+    </delete>
+
+    <delete id="deleteImGroupBlacklistByIds" parameterType="Long[]">
+        delete from im_group_blacklist where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="releaseImGroupBlacklist" parameterType="Long">
+        update im_group_blacklist set is_active = 0, update_time = NOW() where id = #{id}
+    </update>
+
+    <!-- 统计群组黑名单总数 -->
+    <select id="countTotalBlacklist" resultType="java.lang.Integer">
+        select count(*) from im_group_blacklist where is_active = 1
+    </select>
+
+    <!-- 统计禁言用户总数 -->
+    <select id="countTotalMuted" resultType="java.lang.Integer">
+        select count(*) from im_group_blacklist
+        where type = 'MUTE' and is_active = 1
+        and (expire_time is null or expire_time > NOW())
+    </select>
+
+    <!-- 统计拉黑用户总数 -->
+    <select id="countTotalBlacklisted" resultType="java.lang.Integer">
+        select count(*) from im_group_blacklist
+        where type = 'BLACKLIST' and is_active = 1
+        and (expire_time is null or expire_time > NOW())
+    </select>
+
+    <!-- 统计今日新增黑名单数 -->
+    <select id="countTodayAdded" resultType="java.lang.Integer">
+        select count(*) from im_group_blacklist
+        where DATE(create_time) = CURDATE()
+    </select>
+
+</mapper>
