@@ -1,15 +1,18 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImGroupMember;
+import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 群组成员Mapper接口
+ * ImGroupMember接口
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImGroupMemberMapper {
+
 
     /**
      * 查询群组成员

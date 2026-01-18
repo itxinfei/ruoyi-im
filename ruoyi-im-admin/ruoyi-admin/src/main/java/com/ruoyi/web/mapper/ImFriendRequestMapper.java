@@ -1,15 +1,18 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImFriendRequest;
+import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 好友申请Mapper接口
+ * ImFriendRequest接口
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImFriendRequestMapper {
+
 
     /**
      * 查询好友申请

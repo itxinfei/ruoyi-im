@@ -1,16 +1,20 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImWorkReport;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 import java.util.Map;
 
 /**
- * 工作报告Mapper接口
+ * ImWorkReport接口
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImWorkReportMapper {
+
 
     /**
      * 查询工作报告

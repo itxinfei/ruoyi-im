@@ -134,4 +134,33 @@ public interface ImFriendMapper {
      * @return 好友关系，不存在返回null
      */
     ImFriend selectFriendByUsers(java.util.Map<String, Object> params);
+
+    /**
+     * 获取好友统计数据
+     *
+     * @return 统计数据
+     */
+    java.util.Map<String, Object> getUserStatistics();
+
+    /**
+     * 获取待处理好友请求数量
+     *
+     * @return 待处理请求数量
+     */
+    int getPendingRequestCount();
+
+    /**
+     * 获取分组数量
+     *
+     * @return 分组数量
+     */
+    int getGroupCount();
+
+    /**
+     * 根据用户ID查询分组列表
+     *
+     * @param userId 用户ID
+     * @return 分组列表
+     */
+    java.util.List<java.util.Map<String, Object>> getGroupList(Long userId);
 }

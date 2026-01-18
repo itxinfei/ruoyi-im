@@ -1,16 +1,20 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImAuditLog;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 import java.util.Map;
 
 /**
- * 审计日志Mapper接口
+ * ImAuditLog接口
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImAuditLogMapper {
+
 
     /**
      * 查询审计日志

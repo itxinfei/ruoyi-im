@@ -1,16 +1,20 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImUserSetting;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 import java.util.Map;
 
 /**
- * 用户设置Mapper接口
+ * ImUserSetting接口
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImUserSettingMapper {
+
 
     /**
      * 查询用户设置

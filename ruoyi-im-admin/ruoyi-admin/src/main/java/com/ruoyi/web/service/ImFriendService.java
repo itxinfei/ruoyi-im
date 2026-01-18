@@ -98,5 +98,30 @@ public interface ImFriendService {
     /**
      * 获取好友统计数据
      */
-    Map<String, Object> getFriendStatistics();
+    Map<String, Object> getUserStatistics();
+
+    /**
+     * 获取待处理好友请求数量
+     *
+     * @return 待处理请求数量
+     */
+    int getPendingRequestCount();
+
+    /**
+     * 获取分组数量
+     *
+     * @return 分组数量
+     */
+    int getGroupCount();
+
+
+
+
+    /**
+     * 根据用户ID查询分组列表
+     *
+     * @param userId 用户ID
+     * @return 分组列表
+     */
+    List<Map<String, Object>> getGroupList(Long userId);
 }

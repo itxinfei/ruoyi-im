@@ -1,6 +1,7 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImGroupAnnouncement;
+import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImGroupAnnouncementMapper {
 
     /**

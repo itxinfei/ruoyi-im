@@ -1,16 +1,18 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImFileShare;
-import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 文件分享Mapper接口
+ * ImFileShare接口
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImFileShareMapper {
+
 
     /**
      * 查询文件分享

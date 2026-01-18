@@ -1,17 +1,20 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImDepartmentMember;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * 部门成员Mapper接口
+ * ImDepartmentMember接口
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImDepartmentMemberMapper {
+
 
     /**
      * 查询部门成员关系

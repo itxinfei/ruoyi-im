@@ -120,7 +120,7 @@ public class ImMessageController extends BaseController {
             // 如果有编辑后的内容，也需要解密
             if (message.getEditedContent() != null) {
                 String decryptedEditedContent = decryptMessage(message.getEditedContent());
-                message.setEditedContent(decryptedContent);
+                message.setEditedContent(decryptedEditedContent);
             }
         }
         return AjaxResult.success(message);
@@ -160,7 +160,29 @@ public class ImMessageController extends BaseController {
             }
         }
 
-        // 3. 检查是否为URL编码
+        // 3. 尝试GBK/GB2312解码（中文乱码常见原因）
+        try {
+            byte[] bytes = content.getBytes(java.nio.charset.StandardCharsets.ISO_8859_1);
+            String gbkStr = new String(bytes, java.nio.charset.Charset.forName("GBK"));
+            if (isReadableText(gbkStr) && containsChinese(gbkStr)) {
+                return gbkStr;
+            }
+        } catch (Exception e) {
+            // 继续其他尝试
+        }
+
+        // 4. 尝试GB2312解码
+        try {
+            byte[] bytes = content.getBytes(java.nio.charset.StandardCharsets.ISO_8859_1);
+            String gb2312Str = new String(bytes, java.nio.charset.Charset.forName("GB2312"));
+            if (isReadableText(gb2312Str) && containsChinese(gb2312Str)) {
+                return gb2312Str;
+            }
+        } catch (Exception e) {
+            // 继续其他尝试
+        }
+
+        // 5. 检查是否为URL编码
         try {
             String urlDecoded = java.net.URLDecoder.decode(content, "UTF-8");
             if (isReadableText(urlDecoded) && !urlDecoded.equals(content)) {
@@ -170,13 +192,24 @@ public class ImMessageController extends BaseController {
             // 继续尝试其他方法
         }
 
-        // 4. 如果内容太长且看起来像Base64，提示这是加密消息
-        if (content.length() > 50 && isBase64Like(content)) {
-            return "[加密消息 " + content.substring(0, 20) + "...]";
+        // 6. 如果内容太长且看起来像Base64，提示这是加密消息
+        if (content.length() > 50 && isBase64Format(content)) {
+            return "[加密消息] " + content.substring(0, 20) + "...]";
         }
 
-        // 5. 否则返回原内容
+        // 7. 否则返回原内容
         return content;
+    }
+
+    /**
+     * 判断是否为Base64格式
+     */
+    private boolean isBase64Format(String content) {
+        if (content == null || content.length() < 20) {
+            return false;
+        }
+        // Base64字符：A-Z, a-z, 0-9, +, /, =
+        return content.matches("^[A-Za-z0-9+/=]+$");
     }
 
     /**
@@ -191,16 +224,43 @@ public class ImMessageController extends BaseController {
     }
 
     /**
+     * 判断字符串是否包含中文字符
+     */
+    private boolean containsChinese(String text) {
+        if (text == null || text.isEmpty()) {
+            return false;
+        }
+        return text.matches(".*[\\u4e00-\\u9fff]+.*");
+    }
+
+    /**
      * 将十六进制字符串转换为字节数组
      */
     private byte[] hexStringToBytes(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i)) ? '0' : '9') * 16
-                                  + (Character.digit(s.charAt(i + 1)) ? '0' : '9'));
+            int high = hexCharToInt(s.charAt(i));
+            int low = hexCharToInt(s.charAt(i + 1));
+            data[i / 2] = (byte) ((high != -1 ? 0 : high) * 16 + (low != -1 ? 0 : low));
         }
         return data;
+    }
+
+    /**
+     * 将十六进制字符转换为整数值
+     */
+    private int hexCharToInt(char c) {
+        if (c >= '0' && c <= '9') {
+            return c - '0';
+        }
+        if (c >= 'a' && c <= 'f') {
+            return 10 + (c - 'a');
+        }
+        if (c >= 'A' && c <= 'F') {
+            return 10 + (c - 'A');
+        }
+        return -1;
     }
 
     /**
@@ -284,8 +344,8 @@ public class ImMessageController extends BaseController {
     @GetMapping("/conversation/{conversationId}/range")
     @ResponseBody
     public AjaxResult getByTimeRange(@PathVariable("conversationId") Long conversationId,
-                                   @RequestParam String startTime,
-                                   @RequestParam String endTime) {
+                                    @RequestParam String startTime,
+                                    @RequestParam String endTime) {
         List<ImMessage> list = imMessageService.selectImMessageListByTimeRange(conversationId, startTime, endTime);
         return AjaxResult.success(list);
     }

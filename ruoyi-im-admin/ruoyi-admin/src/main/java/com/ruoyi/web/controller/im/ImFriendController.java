@@ -76,7 +76,7 @@ public class ImFriendController extends BaseController {
     @GetMapping("/statistics")
     @ResponseBody
     public AjaxResult getStatistics() {
-        return AjaxResult.success(imFriendService.getFriendStatistics());
+        return AjaxResult.success(imFriendService.getUserStatistics());
     }
 
     /**

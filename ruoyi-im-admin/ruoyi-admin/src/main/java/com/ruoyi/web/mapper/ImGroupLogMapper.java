@@ -1,14 +1,18 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImGroupLog;
+import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
+import java.util.Map;
 
 /**
- * 群组管理日志Mapper接口
+ * ImGroupLog接口
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImGroupLogMapper {
+
 
     /**
      * 查询群组管理日志

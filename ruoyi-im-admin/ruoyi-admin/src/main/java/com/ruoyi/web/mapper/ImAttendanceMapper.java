@@ -1,16 +1,20 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImAttendance;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 import java.util.Map;
 
 /**
- * 考勤记录Mapper接口
+ * ImAttendance接口
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImAttendanceMapper {
+
 
     /**
      * 查询考勤记录

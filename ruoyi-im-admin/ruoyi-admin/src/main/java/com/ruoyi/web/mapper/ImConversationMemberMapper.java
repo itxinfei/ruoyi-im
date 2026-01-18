@@ -1,17 +1,22 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImConversationMember;
+import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
+import java.util.Map;
 
 /**
- * 会话成员Mapper接口
+ * ImConversationMember接口
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImConversationMemberMapper {
+
 
     /**
      * 查询会话成员
+     *
      *
      * @param id 会话成员主键
      * @return 会话成员

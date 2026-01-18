@@ -163,4 +163,37 @@
         where f.user_id = #{userId} and f.friend_id = #{friendId} and f.is_deleted = 0
     </select>
 
+    <!-- 获取好友统计数据 -->
+    <select id="getUserStatistics" resultType="java.util.Map">
+        select
+            count(*) as totalFriends,
+            sum(case when date(create_time) = curdate() then 1 else 0 end) as todayAdded,
+            (select count(*) from im_friend_request where status = 'PENDING') as pendingRequests
+        from im_friend
+        where is_deleted = 0
+    </select>
+
+    <!-- 获取待处理好友请求数量 -->
+    <select id="getPendingRequestCount" resultType="java.lang.Integer">
+        select count(*) from im_friend_request
+        where status = 'PENDING'
+    </select>
+
+    <!-- 获取分组数量 -->
+    <select id="getGroupCount" resultType="java.lang.Integer">
+        select count(distinct group_name) from im_friend
+        where is_deleted = 0 and group_name is not null and group_name != ''
+    </select>
+
+    <!-- 根据用户ID查询分组列表 -->
+    <select id="getGroupList" parameterType="java.lang.Long" resultType="java.util.Map">
+        select
+            group_name as groupName,
+            count(*) as count
+        from im_friend
+        where user_id = #{userId} and is_deleted = 0
+        group by group_name
+        order by group_name asc
+    </select>
+
 </mapper>

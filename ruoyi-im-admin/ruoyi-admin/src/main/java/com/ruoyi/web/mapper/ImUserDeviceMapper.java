@@ -1,16 +1,20 @@
 package com.ruoyi.web.mapper;
 
 import com.ruoyi.web.domain.ImUserDevice;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 import java.util.Map;
 
 /**
- * 用户设备Mapper接口
+ * ImUserDevice接口
  *
  * @author ruoyi
  */
+@Mapper
 public interface ImUserDeviceMapper {
+
 
     /**
      * 查询用户设备
