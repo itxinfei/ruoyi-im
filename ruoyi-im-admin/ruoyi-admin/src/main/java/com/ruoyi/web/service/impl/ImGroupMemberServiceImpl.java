@@ -145,4 +145,9 @@ public class ImGroupMemberServiceImpl implements ImGroupMemberService {
     public Map<String, Object> getMemberStatistics() {
         return imGroupMemberMapper.getMemberStatistics();
     }
+
+    @Override
+    public Map<String, Object> getGroupInfo(Long groupId) {
+        return imGroupMemberMapper.getGroupInfo(groupId);
+    }
 }

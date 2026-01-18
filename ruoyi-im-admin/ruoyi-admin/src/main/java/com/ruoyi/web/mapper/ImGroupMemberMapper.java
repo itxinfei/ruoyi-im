@@ -136,4 +136,12 @@ public interface ImGroupMemberMapper {
      * @return 统计数据
      */
     public Map<String, Object> getMemberStatistics();
+
+    /**
+     * 获取群组信息
+     *
+     * @param groupId 群组ID
+     * @return 群组信息
+     */
+    Map<String, Object> getGroupInfo(Long groupId);
 }

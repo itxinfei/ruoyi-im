@@ -243,10 +243,10 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'OFFICE') return '<span class="badge badge-primary">办公</span>';
-                        if (value === 'DATA') return '<span class="badge badge-info">数据</span>';
-                        if (value === 'TOOLS') return '<span class="badge badge-warning">工具</span>';
-                        if (value === 'CUSTOM') return '<span class="badge badge-default">自定义</span>';
+                        if (value === 'OFFICE') { return '<span class="badge badge-primary">办公</span>'; }
+                        if (value === 'DATA') { return '<span class="badge badge-info">数据</span>'; }
+                        if (value === 'TOOLS') { return '<span class="badge badge-warning">工具</span>'; }
+                        if (value === 'CUSTOM') { return '<span class="badge badge-default">自定义</span>'; }
                         return value || '-';
                     }
                 },
@@ -256,9 +256,9 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'ROUTE') return '<span class="badge badge-success">路由</span>';
-                        if (value === 'IFRAME') return '<span class="badge badge-info">嵌入</span>';
-                        if (value === 'LINK') return '<span class="badge badge-primary">链接</span>';
+                        if (value === 'ROUTE') { return '<span class="badge badge-success">路由</span>'; }
+                        if (value === 'IFRAME') { return '<span class="badge badge-info">嵌入</span>'; }
+                        if (value === 'LINK') { return '<span class="badge badge-primary">链接</span>'; }
                         return value || '-';
                     }
                 },

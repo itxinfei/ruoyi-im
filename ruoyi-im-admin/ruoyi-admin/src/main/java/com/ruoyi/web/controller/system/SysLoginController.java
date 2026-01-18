@@ -22,8 +22,9 @@ import com.ruoyi.framework.web.service.ConfigService;
 
 /**
  * 登录验证
- * 
+ *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 public class SysLoginController extends BaseController

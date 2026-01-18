@@ -14,8 +14,9 @@ import com.ruoyi.framework.web.service.CacheService;
 
 /**
  * 缓存监控
- * 
+ *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 @RequestMapping("/monitor/cache")

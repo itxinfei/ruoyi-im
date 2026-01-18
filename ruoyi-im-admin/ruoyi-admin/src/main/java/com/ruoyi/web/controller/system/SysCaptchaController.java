@@ -18,8 +18,9 @@ import com.ruoyi.common.core.controller.BaseController;
 
 /**
  * 图片验证码（支持算术形式）
- * 
+ *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 @RequestMapping("/captcha")

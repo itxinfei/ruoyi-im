@@ -22,6 +22,7 @@ import java.util.List;
  * 群组管理日志控制器
  *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 @RequestMapping("/im/group/log")

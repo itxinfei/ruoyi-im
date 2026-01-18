@@ -21,9 +21,9 @@
 
         /* 群组信息头部 */
         .group-header {
-            padding: 15px;
+            padding: 12px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 8px;
+            border-radius: 6px;
             margin-bottom: 15px;
             color: #fff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -54,7 +54,7 @@
 
         .stat-card {
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 6px;
             text-align: center;
             color: #fff;
             position: relative;
@@ -65,33 +65,27 @@
         }
 
         .stat-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-3px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
         .stat-card .stat-number {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
-            margin-bottom: 4px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-            position: relative;
-            z-index: 1;
+            margin-bottom: 2px;
         }
 
         .stat-card .stat-label {
-            font-size: 12px;
-            opacity: 0.95;
-            font-weight: 500;
-            position: relative;
-            z-index: 1;
+            font-size: 11px;
+            opacity: 0.9;
         }
 
         .stat-card .stat-icon {
             position: absolute;
-            right: 10px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 40px;
+            font-size: 32px;
             opacity: 0.2;
             transition: all 0.3s ease;
         }
@@ -99,22 +93,6 @@
         .stat-card:hover .stat-icon {
             opacity: 0.3;
             transform: translateY(-50%) scale(1.1);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .stat-card:hover::before {
-            opacity: 1;
         }
 
         .stat-total {
@@ -387,8 +365,13 @@
             initMemberTable();
         });
 
-        // 加载群组基本信息
+// 加载群组基本信息
         function loadGroupInfo() {
+            if (!groupId) {
+                layer.msg("群组ID不能为空", {icon: 2});
+                return;
+            }
+            
             $.modal.msg("正在加载群组信息...", {icon: 16, shade: 0.3, time: 0});
             $.get(prefix + "/group/info/" + groupId, function(result) {
                 layer.closeAll();
@@ -400,14 +383,21 @@
 
                     // 显示创建时间
                     if (data.createTime) {
-                        $("#createTime").text(data.createTime.substring(0, 19).replace('T', ' '));
+                        var createTime = data.createTime;
+                        if (typeof createTime === 'string') {
+                            $("#createTime").text(createTime.substring(0, 19).replace('T', ' '));
+                        } else {
+                            $("#createTime").text('-');
+                        }
+                    } else {
+                        $("#createTime").text('-');
                     }
                 } else {
-                    $.modal.msgError(result.msg || "加载群组信息失败");
+                    layer.msg("加载群组信息失败：" + (result.msg || "未知错误"), {icon: 2});
                 }
             }).fail(function() {
                 layer.closeAll();
-                $.modal.msgError("网络请求失败");
+                layer.msg("加载群组信息失败，请检查网络连接", {icon: 2});
             });
         }
 
@@ -554,22 +544,37 @@
             loadMembers();
         }
 
-        // 加载成员数据
+// 加载成员数据
         function loadMembers() {
-            $('.loading-overlay').addClass('show');
+            if (!groupId) {
+                layer.msg("群组ID不能为空", {icon: 2});
+                return;
+            }
+
+            showLoading();
             $.get(prefix + "/group/" + groupId, function(result) {
-                $('.loading-overlay').removeClass('show');
+                hideLoading();
                 if (result.code === 0 || result.rows) {
                     allMembers = result.rows || result.data || [];
                     $('#bootstrap-table').bootstrapTable('load', allMembers);
                     updateStatistics(allMembers);
                 } else {
-                    $.modal.msgError(result.msg || "加载成员数据失败");
+                    layer.msg("加载成员数据失败：" + (result.msg || "未知错误"), {icon: 2});
                 }
             }).fail(function() {
-                $('.loading-overlay').removeClass('show');
-                $.modal.msgError("网络请求失败");
+                hideLoading();
+                layer.msg("加载成员数据失败，请检查网络连接", {icon: 2});
             });
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            $('.loading-overlay').fadeIn(200);
+        }
+
+        // 隐藏加载状态
+        function hideLoading() {
+            $('.loading-overlay').fadeOut(200);
         }
 
         // 返回列表页

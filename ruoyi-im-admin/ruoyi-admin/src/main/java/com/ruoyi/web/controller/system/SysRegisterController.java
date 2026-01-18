@@ -14,8 +14,9 @@ import com.ruoyi.system.service.ISysConfigService;
 
 /**
  * 注册验证
- * 
+ *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 public class SysRegisterController extends BaseController

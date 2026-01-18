@@ -22,8 +22,9 @@ import com.ruoyi.system.service.ISysConfigService;
 
 /**
  * 参数配置 信息操作处理
- * 
+ *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 @RequestMapping("/system/config")

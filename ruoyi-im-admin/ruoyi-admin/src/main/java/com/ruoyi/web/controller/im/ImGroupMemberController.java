@@ -22,6 +22,7 @@ import java.util.List;
  * 群组成员管理控制器
  *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 @RequestMapping("/im/member")
@@ -78,6 +79,17 @@ public class ImGroupMemberController extends BaseController {
     @ResponseBody
     public AjaxResult getMembersByGroupId(@PathVariable("groupId") Long groupId) {
         return AjaxResult.success(imGroupMemberService.selectMembersByGroupId(groupId));
+    }
+
+    /**
+     * 获取群组信息（用于成员详情页面）
+     */
+    @RequiresPermissions("im:group:member:query")
+    @GetMapping("/group/info/{groupId}")
+    @ResponseBody
+    public AjaxResult getGroupInfo(@PathVariable("groupId") Long groupId) {
+        // 通过GroupService获取群组信息
+        return AjaxResult.success(imGroupMemberService.getGroupInfo(groupId));
     }
 
     /**

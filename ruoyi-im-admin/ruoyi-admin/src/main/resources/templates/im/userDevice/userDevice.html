@@ -265,9 +265,9 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'PC') return '<span class="badge badge-primary"><i class="fa fa-desktop"></i> PC</span>';
-                        if (value === 'MOBILE') return '<span class="badge badge-success"><i class="fa fa-mobile"></i> 移动</span>';
-                        if (value === 'WEB') return '<span class="badge badge-info"><i class="fa fa-globe"></i> Web</span>';
+                        if (value === 'PC') { return '<span class="badge badge-primary"><i class="fa fa-desktop"></i> PC</span>'; }
+                        if (value === 'MOBILE') { return '<span class="badge badge-success"><i class="fa fa-mobile"></i> 移动</span>'; }
+                        if (value === 'WEB') { return '<span class="badge badge-info"><i class="fa fa-globe"></i> Web</span>'; }
                         return '<span class="badge badge-default">' + (value || '-') + '</span>';
                     }
                 },

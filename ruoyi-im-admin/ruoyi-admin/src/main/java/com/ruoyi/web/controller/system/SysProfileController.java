@@ -27,8 +27,9 @@ import com.ruoyi.system.service.ISysUserService;
 
 /**
  * 个人信息 业务处理
- * 
+ *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 @RequestMapping("/system/user/profile")

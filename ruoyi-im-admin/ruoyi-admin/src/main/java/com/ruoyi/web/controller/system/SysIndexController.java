@@ -28,8 +28,9 @@ import com.ruoyi.system.service.ISysMenuService;
 
 /**
  * 首页 业务处理
- * 
+ *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 public class SysIndexController extends BaseController

@@ -21,8 +21,9 @@ import com.ruoyi.system.service.ISysNoticeService;
 
 /**
  * 公告 信息操作处理
- * 
+ *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 @RequestMapping("/system/notice")

@@ -24,8 +24,9 @@ import com.ruoyi.system.service.ISysMenuService;
 
 /**
  * 菜单信息
- * 
+ *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 @RequestMapping("/system/menu")

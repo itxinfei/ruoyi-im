@@ -20,8 +20,9 @@ import com.ruoyi.system.service.ISysLogininforService;
 
 /**
  * 系统访问记录
- * 
+ *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 @RequestMapping("/monitor/logininfor")

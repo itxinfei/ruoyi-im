@@ -230,9 +230,9 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'DAILY') return '<span class="badge badge-primary">日报</span>';
-                        if (value === 'WEEKLY') return '<span class="badge badge-info">周报</span>';
-                        if (value === 'MONTHLY') return '<span class="badge badge-warning">月报</span>';
+                        if (value === 'DAILY') { return '<span class="badge badge-primary">日报</span>'; }
+                        if (value === 'WEEKLY') { return '<span class="badge badge-info">周报</span>'; }
+                        if (value === 'MONTHLY') { return '<span class="badge badge-warning">月报</span>'; }
                         return '<span class="badge badge-default">' + (value || '-') + '</span>';
                     }
                 },
@@ -261,10 +261,10 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'COMPLETED') return '<span class="label label-success">已完成</span>';
-                        if (value === 'IN_PROGRESS') return '<span class="label label-info">进行中</span>';
-                        if (value === 'PENDING') return '<span class="label label-warning">待处理</span>';
-                        return '<span class="label label-default">' + (value || '-') + '</span>';
+                        if (value === 'COMPLETED') { return '<span class="badge badge-success">已完成</span>'; }
+                        if (value === 'IN_PROGRESS') { return '<span class="badge badge-info">进行中</span>'; }
+                        if (value === 'PENDING') { return '<span class="badge badge-warning">待处理</span>'; }
+                        return '<span class="badge badge-default">' + (value || '-') + '</span>';
                     }
                 },
                 {
@@ -282,10 +282,10 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'DRAFT') return '<span class="badge badge-default">草稿</span>';
-                        if (value === 'SUBMITTED') return '<span class="badge badge-info">已提交</span>';
-                        if (value === 'APPROVED') return '<span class="badge badge-success">已审批</span>';
-                        if (value === 'REJECTED') return '<span class="badge badge-danger">已退回</span>';
+                        if (value === 'DRAFT') { return '<span class="badge badge-default">草稿</span>'; }
+                        if (value === 'SUBMITTED') { return '<span class="badge badge-info">已提交</span>'; }
+                        if (value === 'APPROVED') { return '<span class="badge badge-success">已审批</span>'; }
+                        if (value === 'REJECTED') { return '<span class="badge badge-danger">已退回</span>'; }
                         return '<span class="badge badge-default">' + (value || '-') + '</span>';
                     }
                 },

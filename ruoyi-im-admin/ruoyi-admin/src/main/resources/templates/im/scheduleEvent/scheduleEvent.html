@@ -299,13 +299,13 @@
                 },
                 {
                     field: 'visibility',
-                    title: '可见范围',
+                    title: '可见性',
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'PRIVATE') return '<span class="badge badge-default">私有</span>';
-                        if (value === 'DEPARTMENT') return '<span class="badge badge-info">部门</span>';
-                        if (value === 'PUBLIC') return '<span class="badge badge-success">公开</span>';
+                        if (value === 'PRIVATE') { return '<span class="badge badge-default">私有</span>'; }
+                        if (value === 'DEPARTMENT') { return '<span class="badge badge-info">部门</span>'; }
+                        if (value === 'PUBLIC') { return '<span class="badge badge-success">公开</span>'; }
                         return '<span class="badge badge-default">' + (value || '-') + '</span>';
                     }
                 },
@@ -315,9 +315,9 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'SCHEDULED') return '<span class="badge badge-primary">已安排</span>';
-                        if (value === 'COMPLETED') return '<span class="badge badge-success">已完成</span>';
-                        if (value === 'CANCELLED') return '<span class="badge badge-warning">已取消</span>';
+                        if (value === 'SCHEDULED') { return '<span class="badge badge-primary">已安排</span>'; }
+                        if (value === 'COMPLETED') { return '<span class="badge badge-success">已完成</span>'; }
+                        if (value === 'CANCELLED') { return '<span class="badge badge-warning">已取消</span>'; }
                         return '<span class="badge badge-default">' + (value || '-') + '</span>';
                     }
                 },

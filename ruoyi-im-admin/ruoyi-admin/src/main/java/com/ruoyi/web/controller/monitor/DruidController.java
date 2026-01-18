@@ -8,8 +8,9 @@ import com.ruoyi.common.core.controller.BaseController;
 
 /**
  * druid 监控
- * 
+ *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 @RequestMapping("/monitor/data")

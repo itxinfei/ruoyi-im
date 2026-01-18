@@ -16,6 +16,7 @@ import java.util.Set;
  * IM系统管理控制器
  *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @RestController("adminImSystemController")
 @RequestMapping("/api/admin/im/system")

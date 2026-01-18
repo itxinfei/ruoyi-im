@@ -157,4 +157,21 @@
         where is_deleted = 0
     </select>
 
+    <!-- 获取群组信息 -->
+    <select id="getGroupInfo" parameterType="Long" resultType="java.util.Map">
+        select
+            g.id,
+            g.name,
+            g.owner_id,
+            u.nickname as ownerName,
+            g.description,
+            g.avatar,
+            g.max_members,
+            g.all_muted,
+            g.create_time
+        from im_group g
+        left join im_user u on g.owner_id = u.id
+        where g.id = #{groupId}
+    </select>
+
 </mapper>

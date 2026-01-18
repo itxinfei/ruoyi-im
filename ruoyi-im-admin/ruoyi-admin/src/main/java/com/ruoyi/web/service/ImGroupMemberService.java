@@ -135,4 +135,12 @@ public interface ImGroupMemberService {
      * @return 统计数据
      */
     Map<String, Object> getMemberStatistics();
+
+    /**
+     * 获取群组信息
+     *
+     * @param groupId 群组ID
+     * @return 群组信息
+     */
+    Map<String, Object> getGroupInfo(Long groupId);
 }

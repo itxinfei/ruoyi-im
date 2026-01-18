@@ -23,8 +23,9 @@ import com.ruoyi.system.service.ISysDictTypeService;
 
 /**
  * 数据字典信息
- * 
+ *
  * @author ruoyi
+ * @date 2025-01-18
  */
 @Controller
 @RequestMapping("/system/dict")

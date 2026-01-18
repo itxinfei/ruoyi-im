@@ -215,10 +215,10 @@
                     align: 'center',
                     width: '90',
                     formatter: function(value, row, index) {
-                        if (value === 'PENDING') return '<span class="badge badge-warning">待审批</span>';
-                        if (value === 'APPROVED') return '<span class="badge badge-success">已通过</span>';
-                        if (value === 'REJECTED') return '<span class="badge badge-danger">已驳回</span>';
-                        if (value === 'CANCELLED') return '<span class="badge badge-default">已撤销</span>';
+                        if (value === 'PENDING') { return '<span class="badge badge-warning">待审批</span>'; }
+                        if (value === 'APPROVED') { return '<span class="badge badge-success">已通过</span>'; }
+                        if (value === 'REJECTED') { return '<span class="badge badge-danger">已驳回</span>'; }
+                        if (value === 'CANCELLED') { return '<span class="badge badge-default">已撤销</span>'; }
                         return value;
                     }
                 },
