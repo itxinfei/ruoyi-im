@@ -6,6 +6,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.web.domain.ImGroupLog;
 import com.ruoyi.web.service.ImGroupLogService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -46,6 +48,18 @@ public class ImGroupLogController extends BaseController {
         startPage();
         List<ImGroupLog> list = imGroupLogService.selectImGroupLogList(imGroupLog);
         return getDataTable(list);
+    }
+
+    /**
+     * 导出群组管理日志列表
+     */
+    @RequiresPermissions("im:group:log:export")
+    @Log(title = "群组管理日志", businessType = BusinessType.EXPORT)
+    @PostMapping("/export")
+    public void export(HttpServletResponse response, ImGroupLog imGroupLog) {
+        List<ImGroupLog> list = imGroupLogService.selectImGroupLogList(imGroupLog);
+        ExcelUtil<ImGroupLog> util = new ExcelUtil<>(ImGroupLog.class);
+        util.exportExcel(response, list, "群组管理日志数据");
     }
 
     /**

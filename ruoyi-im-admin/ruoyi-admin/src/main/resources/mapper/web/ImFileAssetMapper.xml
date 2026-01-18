@@ -77,7 +77,7 @@
 
     <update id="deleteImFileAssetByIds" parameterType="Long[]">
         update im_file_asset set status = 'DELETED' where id in
-        <foreach item="id" collection="array" open="(" separator="," close=")">
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
             #{id}
         </foreach>
     </update>

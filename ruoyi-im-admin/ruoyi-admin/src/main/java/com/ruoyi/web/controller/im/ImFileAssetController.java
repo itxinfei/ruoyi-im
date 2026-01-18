@@ -8,6 +8,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.web.domain.ImFileAsset;
 import com.ruoyi.web.service.ImFileAssetService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -106,7 +107,8 @@ public class ImFileAssetController extends BaseController {
     @PostMapping("/export")
     public void export(HttpServletResponse response, ImFileAsset imFileAsset) {
         List<ImFileAsset> list = imFileAssetService.selectImFileAssetList(imFileAsset);
-        // 导出逻辑
+        ExcelUtil<ImFileAsset> util = new ExcelUtil<>(ImFileAsset.class);
+        util.exportExcel(response, list, "文件资源数据");
     }
 
     /**

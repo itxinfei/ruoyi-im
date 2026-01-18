@@ -6,6 +6,8 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.ShiroUtils;
+import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.service.ImUserService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -59,6 +61,18 @@ public class ImUserController extends BaseController {
     public String edit(@PathVariable("userId") Long userId, org.springframework.ui.ModelMap mmap) {
         mmap.put("user", imUserService.selectImUserById(userId));
         return prefix + "/edit";
+    }
+
+    /**
+     * 重置密码页面
+     */
+    @RequiresPermissions("im:user:edit")
+    @GetMapping("/resetPassword/{userId}")
+    public String resetPassword(@PathVariable("userId") Long userId, org.springframework.ui.ModelMap mmap) {
+        ImUser user = imUserService.selectImUserById(userId);
+        mmap.put("userId", userId);
+        mmap.put("username", user != null ? user.getUsername() : "");
+        return prefix + "/resetPassword";
     }
 
     /**
@@ -146,7 +160,8 @@ public class ImUserController extends BaseController {
     @PostMapping("/export")
     public void export(HttpServletResponse response, ImUser imUser) {
         List<ImUser> list = imUserService.selectImUserList(imUser);
-        // 导出逻辑
+        ExcelUtil<ImUser> util = new ExcelUtil<>(ImUser.class);
+        util.exportExcel(response, list, "用户数据");
     }
 
     /**
@@ -158,18 +173,31 @@ public class ImUserController extends BaseController {
     @ResponseBody
     public AjaxResult resetPassword(@PathVariable("id") Long id, @RequestBody Map<String, String> params) {
         String newPassword = params.get("password");
+        String adminPassword = params.get("adminPassword");
+        
         if (newPassword == null || newPassword.trim().isEmpty()) {
-            return AjaxResult.error("密码不能为空");
+            return AjaxResult.error("新密码不能为空");
         }
         if (newPassword.length() < 6) {
             return AjaxResult.error("密码长度不能少于6位");
         }
+        if (newPassword.length() > 20) {
+            return AjaxResult.error("密码长度不能超过20位");
+        }
         
-        int result = imUserService.resetPassword(id, newPassword);
+        if (adminPassword == null || adminPassword.trim().isEmpty()) {
+            return AjaxResult.error("管理员密码不能为空");
+        }
+        
+        int result = imUserService.resetPassword(id, newPassword, adminPassword);
         if (result > 0) {
             return AjaxResult.success("密码重置成功");
+        } else if (result == -1) {
+            return AjaxResult.error("管理员密码验证失败");
+        } else if (result == -2) {
+            return AjaxResult.error("目标用户不存在");
         } else {
-            return AjaxResult.error("密码重置失败，请检查用户是否存在");
+            return AjaxResult.error("密码重置失败");
         }
     }
 

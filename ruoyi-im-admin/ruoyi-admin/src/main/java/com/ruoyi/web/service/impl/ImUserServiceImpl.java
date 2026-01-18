@@ -1,5 +1,6 @@
 package com.ruoyi.web.service.impl;
 
+import com.ruoyi.common.utils.ShiroUtils;
 import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.mapper.ImUserMapper;
 import com.ruoyi.web.service.ImUserService;
@@ -69,14 +70,22 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
-    public int resetPassword(Long id, String password) {
+    public int resetPassword(Long id, String password, String adminPassword) {
         try {
             ImUser user = userMapper.selectImUserById(id);
             if (user == null) {
-                return 0;
+                return -2;
             }
 
-            // 使用 BCrypt 加密新密码
+            ImUser adminUser = userMapper.selectImUserById(ShiroUtils.getUserId());
+            if (adminUser == null) {
+                return -1;
+            }
+
+            if (!passwordEncoder.matches(adminPassword, adminUser.getPassword())) {
+                return -1;
+            }
+
             String encryptedPassword = passwordEncoder.encode(password);
             user.setPassword(encryptedPassword);
             user.setUpdateTime(new java.util.Date());

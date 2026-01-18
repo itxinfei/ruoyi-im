@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <title>修改群公告</title>
     <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
+    <link href="/ajax/libs/wangeditor/wangEditor.min.css" th:href="@{/ajax/libs/wangeditor/wangEditor.min.css}" rel="stylesheet"/>
     <!-- datetimepicker 日期时间选择器 -->
     <th:block th:include="include :: datetimepicker-css" />
     <style>
@@ -128,7 +130,7 @@
             <label class="col-sm-3 control-label">过期时间：</label>
             <div class="col-sm-8">
                 <div class="input-group date">
-                    <input name="expireTime" th:value="${#temporals.format(announcement.expireTime, 'yyyy-MM-dd HH:mm:ss')}" placeholder="请选择过期时间（可选）" class="form-control" type="text">
+                    <input name="expireTime" th:value="${announcement.expireTime != null ? #temporals.format(announcement.expireTime, 'yyyy-MM-dd HH:mm:ss') : ''}" placeholder="请选择过期时间（可选）" class="form-control" type="text">
                     <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                 </div>
                 <span class="help-block">留空表示永久有效</span>

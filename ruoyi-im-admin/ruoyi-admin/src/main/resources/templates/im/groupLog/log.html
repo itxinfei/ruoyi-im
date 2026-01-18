@@ -12,35 +12,123 @@
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
     <style>
+        /* 统计卡片样式 */
+        .statistics-section {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .statistics-card {
+            padding: 15px;
+            border-radius: 4px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        .stat-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 40px;
+            opacity: 0.2;
+        }
+        .stat-total { background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%); }
+        .stat-add { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stat-remove { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-change { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+        
+        /* 搜索区域底部间距 */
+        .search-collapse {
+            margin-bottom: 10px;
+        }
+        
+        /* 表格区域样式 */
+        .select-table.table-striped {
+            padding: 0;
+        }
+        
         /* 操作按钮样式优化 */
         .btn-xs {
             padding: 4px 8px;
             font-size: 12px;
             line-height: 1.5;
             transition: all 0.2s ease;
+            cursor: pointer;
         }
         .btn-xs:hover {
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* 徽章样式 */
+        .badge {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 3px;
         }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div">
         <div class="row">
+            <!-- 统计卡片 -->
+            <div class="col-sm-12 statistics-section">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-total" onclick="filterByType('')">
+                            <div class="stat-number" id="totalCount">0</div>
+                            <div class="stat-label">日志总数</div>
+                            <i class="fa fa-list-alt stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-add" onclick="filterByType('ADD_MEMBER')">
+                            <div class="stat-number" id="addCount">0</div>
+                            <div class="stat-label">添加成员</div>
+                            <i class="fa fa-user-plus stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-remove" onclick="filterByType('REMOVE_MEMBER')">
+                            <div class="stat-number" id="removeCount">0</div>
+                            <div class="stat-label">移除成员</div>
+                            <i class="fa fa-user-times stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="statistics-card stat-change" onclick="filterByType('CHANGE_ROLE')">
+                            <div class="stat-number" id="changeCount">0</div>
+                            <div class="stat-label">修改角色</div>
+                            <i class="fa fa-exchange stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="log-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                群组ID：<input type="text" name="groupId" value=""/>
+                                群组ID：<input type="text" name="groupId" placeholder="请输入群组ID" style="width: 120px;"/>
                             </li>
                             <li>
-                                操作者ID：<input type="text" name="operatorId" value=""/>
+                                群组名称：<input type="text" name="groupName" placeholder="请输入群组名称" style="width: 150px;"/>
                             </li>
                             <li>
-                                操作类型：<select name="operationType">
+                                操作者ID：<input type="text" name="operatorId" placeholder="请输入操作者ID" style="width: 120px;"/>
+                            </li>
+                            <li>
+                                操作类型：<select name="operationType" style="width: 130px;">
                                     <option value="">所有</option>
                                     <option value="ADD_MEMBER">添加成员</option>
                                     <option value="REMOVE_MEMBER">移除成员</option>
@@ -64,6 +152,9 @@
             <div class="btn-group-sm" id="toolbar" role="group">
                 <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:log:remove">
                     <i class="fa fa-remove"></i> 删除
+                </a>
+                <a class="btn btn-info" onclick="exportData()" shiro:hasPermission="im:group:log:export">
+                    <i class="fa fa-download"></i> 导出
                 </a>
             </div>
 
@@ -90,6 +181,7 @@
         var prefix = ctx + "im/group/log";
 
         $(function() {
+            loadStatistics();
             var options = {
                 url: prefix + "/list",
                 modalName: "群组管理日志",
@@ -99,46 +191,65 @@
                 {
                     field: 'id',
                     title: 'ID',
-                    width: '60'
+                    visible: false
                 },
                 {
                     field: 'groupName',
                     title: '群组名称',
-                    width: '150'
+                    width: '150',
+                    formatter: function(value, row, index) {
+                        return '<span class="text-primary"><i class="fa fa-users"></i> ' + (value || '-') + '</span>';
+                    }
                 },
                 {
                     field: 'operatorName',
                     title: '操作者',
-                    width: '100'
+                    width: '100',
+                    formatter: function(value, row, index) {
+                        return '<span class="text-info"><i class="fa fa-user"></i> ' + (value || '-') + '</span>';
+                    }
                 },
                 {
                     field: 'operationType',
                     title: '操作类型',
                     align: 'center',
-                    width: '120',
+                    width: '140',
                     formatter: function(value, row, index) {
                         var typeMap = {
-                            'ADD_MEMBER': '<span class="badge badge-success">添加成员</span>',
-                            'REMOVE_MEMBER': '<span class="badge badge-danger">移除成员</span>',
-                            'CHANGE_ROLE': '<span class="badge badge-info">修改角色</span>',
-                            'MUTE_MEMBER': '<span class="badge badge-warning">禁言成员</span>',
-                            'UNMUTE_MEMBER': '<span class="badge badge-primary">解除禁言</span>',
-                            'DISMISS_GROUP': '<span class="badge badge-danger">解散群组</span>',
-                            'CHANGE_OWNER': '<span class="badge badge-warning">转让群主</span>',
-                            'UPDATE_INFO': '<span class="badge badge-info">修改群信息</span>'
+                            'ADD_MEMBER': '<span class="badge badge-success"><i class="fa fa-plus"></i> 添加成员</span>',
+                            'REMOVE_MEMBER': '<span class="badge badge-danger"><i class="fa fa-minus"></i> 移除成员</span>',
+                            'CHANGE_ROLE': '<span class="badge badge-info"><i class="fa fa-exchange"></i> 修改角色</span>',
+                            'MUTE_MEMBER': '<span class="badge badge-warning"><i class="fa fa-ban"></i> 禁言成员</span>',
+                            'UNMUTE_MEMBER': '<span class="badge badge-primary"><i class="fa fa-unlock"></i> 解除禁言</span>',
+                            'DISMISS_GROUP': '<span class="badge badge-danger"><i class="fa fa-trash"></i> 解散群组</span>',
+                            'CHANGE_OWNER': '<span class="badge badge-warning"><i class="fa fa-share"></i> 转让群主</span>',
+                            'UPDATE_INFO': '<span class="badge badge-info"><i class="fa fa-edit"></i> 修改群信息</span>'
                         };
-                        return typeMap[value] || value;
+                        return typeMap[value] || (value || '-');
                     }
                 },
                 {
                     field: 'operationDesc',
                     title: '操作描述',
-                    width: '300'
+                    width: '350',
+                    formatter: function(value, row, index) {
+                        var desc = value || '-';
+                        if (row.targetUserName) {
+                            desc += ' <span class="text-muted">（目标：' + row.targetUserName + '）</span>';
+                        }
+                        if (desc.length > 50) {
+                            return '<span title="' + desc + '">' + desc.substring(0, 50) + '...</span>';
+                        }
+                        return desc;
+                    }
                 },
                 {
                     field: 'targetUserName',
                     title: '目标用户',
-                    width: '100'
+                    width: '100',
+                    formatter: function(value, row, index) {
+                        return value ? '<span class="text-muted"><i class="fa fa-user"></i> ' + value + '</span>' : '-';
+                    }
                 },
                 {
                     field: 'createTime',
@@ -149,6 +260,7 @@
                 {
                     title: '操作',
                     align: 'center',
+                    width: '100',
                     formatter: function(value, row, index) {
                         var actions = [];
                         actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')" style="cursor: pointer;"><i class="fa fa-remove"></i>删除</a>');
@@ -158,6 +270,33 @@
             };
             $.table.init(options);
         });
+        
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code == 0) {
+                    $("#totalCount").text(result.data.totalCount || 0);
+                    $("#addCount").text(result.data.addCount || 0);
+                    $("#removeCount").text(result.data.removeCount || 0);
+                    $("#changeCount").text(result.data.changeCount || 0);
+                }
+            });
+        }
+        
+        function filterByType(operationType) {
+            $("select[name='operationType']").val(operationType);
+            $.table.search();
+        }
+        
+        function exportData() {
+            var currentFormId = $.table._option.formId;
+            var params = $("#" + currentFormId).serializeArray();
+            var url = $.table._option.exportUrl;
+            $.modal.loading("正在导出数据，请稍候...");
+            window.location.href = url + "?" + $.param(params);
+            setTimeout(function() {
+                $.modal.closeLoading();
+            }, 2000);
+        }
     </script>
 </body>
 </html>

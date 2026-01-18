@@ -22,7 +22,7 @@ public interface ImUserService {
 
     int deleteImUserByIds(Long[] ids);
 
-    int resetPassword(Long id, String password);
+    int resetPassword(Long id, String password, String adminPassword);
 
     int changeStatus(Long id, String status);
 

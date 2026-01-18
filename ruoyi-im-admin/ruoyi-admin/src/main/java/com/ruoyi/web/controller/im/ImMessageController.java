@@ -6,6 +6,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.web.domain.ImMessage;
 import com.ruoyi.web.service.ImMessageService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -81,7 +82,8 @@ public class ImMessageController extends BaseController {
     @PostMapping("/export")
     public void export(HttpServletResponse response, ImMessage imMessage) {
         List<ImMessage> list = imMessageService.selectImMessageList(imMessage);
-        // 导出逻辑
+        ExcelUtil<ImMessage> util = new ExcelUtil<>(ImMessage.class);
+        util.exportExcel(response, list, "消息数据");
     }
 
     /**
