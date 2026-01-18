@@ -23,7 +23,7 @@ public class ImGroupMemberServiceImpl implements ImGroupMemberService {
     @Autowired
     private ImGroupMemberMapper imGroupMemberMapper;
 
-    @Autowired
+    @Autowired(required = false)
     private ImGroupLogService imGroupLogService;
 
     @Override
@@ -59,7 +59,7 @@ public class ImGroupMemberServiceImpl implements ImGroupMemberService {
     @Override
     public int insertImGroupMemberWithLog(ImGroupMember imGroupMember, Long operatorId, String operatorName) {
         int result = imGroupMemberMapper.insertImGroupMember(imGroupMember);
-        if (result > 0 && imGroupMember.getUserId() != null) {
+        if (result > 0 && imGroupMember.getUserId() != null && imGroupLogService != null) {
             imGroupLogService.logMemberOperation(
                 imGroupMember.getGroupId(),
                 operatorId,
@@ -94,7 +94,7 @@ public class ImGroupMemberServiceImpl implements ImGroupMemberService {
         params.put("userId", userId);
         params.put("role", role);
         int result = imGroupMemberMapper.updateMemberRole(params);
-        if (result > 0) {
+        if (result > 0 && imGroupLogService != null) {
             imGroupLogService.logMemberOperation(
                 groupId,
                 operatorId,
@@ -127,7 +127,7 @@ public class ImGroupMemberServiceImpl implements ImGroupMemberService {
         params.put("groupId", groupId);
         params.put("userId", userId);
         int result = imGroupMemberMapper.removeMember(params);
-        if (result > 0) {
+        if (result > 0 && imGroupLogService != null) {
             imGroupLogService.logMemberOperation(
                 groupId,
                 operatorId,

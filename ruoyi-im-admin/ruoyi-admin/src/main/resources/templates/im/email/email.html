@@ -270,10 +270,10 @@
                     align: 'center',
                     width: '90',
                     formatter: function(value, row, index) {
-                        if (value === 'INBOX') return '<span class="badge badge-primary">收件箱</span>';
-                        if (value === 'SENT') return '<span class="badge badge-success">已发送</span>';
-                        if (value === 'DRAFTS') return '<span class="badge badge-default">草稿箱</span>';
-                        if (value === 'TRASH') return '<span class="badge badge-danger">已删除</span>';
+                        if (value === 'INBOX') { return '<span class="badge badge-primary">收件箱</span>'; }
+                        if (value === 'SENT') { return '<span class="badge badge-success">已发送</span>'; }
+                        if (value === 'DRAFTS') { return '<span class="badge badge-default">草稿箱</span>'; }
+                        if (value === 'TRASH') { return '<span class="badge badge-danger">已删除</span>'; }
                         return value;
                     }
                 },

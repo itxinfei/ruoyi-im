@@ -175,6 +175,9 @@
             vertical-align: middle;
             padding: 8px;
         }
+        .table-no-padding {
+            padding: 0;
+        }
     </style>
 </head>
 <body class="white-bg">
@@ -258,7 +261,7 @@
             </div>
 
             <!-- 日志列表 -->
-            <div class="col-sm-12 select-table table-striped" style="padding: 0;">
+            <div class="col-sm-12 select-table table-striped table-no-padding">
                 <table id="bootstrap-table" data-mobile-responsive="true" style="width: 100%;"></table>
             </div>
         </div>
@@ -325,13 +328,13 @@
                     align: 'center',
                     width: '100',
                     formatter: function(value, row, index) {
-                        if (value === 'CREATE') return '<span class="badge badge-create">创建</span>';
-                        if (value === 'UPDATE') return '<span class="badge badge-update">更新</span>';
-                        if (value === 'DELETE') return '<span class="badge badge-delete">删除</span>';
-                        if (value === 'JOIN') return '<span class="badge badge-join">加入</span>';
-                        if (value === 'LEAVE') return '<span class="badge badge-leave">退出</span>';
-                        if (value === 'MUTE') return '<span class="badge badge-muted">禁言</span>';
-                        if (value === 'UNMUTE') return '<span class="badge badge-unmuted">解除禁言</span>';
+                        if (value === 'CREATE') { return '<span class="badge badge-create">创建</span>'; }
+                        if (value === 'UPDATE') { return '<span class="badge badge-update">更新</span>'; }
+                        if (value === 'DELETE') { return '<span class="badge badge-delete">删除</span>'; }
+                        if (value === 'JOIN') { return '<span class="badge badge-join">加入</span>'; }
+                        if (value === 'LEAVE') { return '<span class="badge badge-leave">退出</span>'; }
+                        if (value === 'MUTE') { return '<span class="badge badge-muted">禁言</span>'; }
+                        if (value === 'UNMUTE') { return '<span class="badge badge-unmuted">解除禁言</span>'; }
                         return '<span class="badge badge-default">' + (value || '-') + '</span>';
                     }
                 },
@@ -354,10 +357,11 @@
                     title: '操作详情',
                     formatter: function(value, row, index) {
                         if (!value) return '-';
-                        if (value.length > 50) {
-                            return '<span title="' + value + '">' + value.substring(0, 50) + '...</span>';
+                        var escapedValue = escapeHtml(value);
+                        if (escapedValue.length > 50) {
+                            return '<span title="' + escapedValue + '">' + escapedValue.substring(0, 50) + '...</span>';
                         }
-                        return '<span title="' + value + '">' + value + '</span>';
+                        return '<span title="' + escapedValue + '">' + escapedValue + '</span>';
                     }
                 },
                 {
@@ -379,6 +383,19 @@
         });
 
         /**
+         * HTML转义函数，防止XSS攻击
+         */
+        function escapeHtml(text) {
+            if (!text) return text;
+            return text.toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        /**
          * 加载统计数据
          */
         function loadStatistics() {
@@ -391,9 +408,8 @@
                     $("#createCount").text(result.data.createCount || 0);
                     $("#deleteCount").text(result.data.deleteCount || 0);
                 }
-            }).fail(function() {
-                // 统计数据加载失败不影响页面显示
-                console.warn("统计数据加载失败");
+            }).fail(function(xhr, status, error) {
+                console.error("统计数据加载失败:", error);
             });
         }
     </script>

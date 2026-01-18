@@ -4,18 +4,75 @@ import java.util.Set;
 
 /**
  * IM消息推送Service接口（Admin模块专用）
+ *
+ * <p>负责处理IM系统中的消息推送业务逻辑</p>
+ * <p>主要功能包括：在线用户管理、用户状态查询、消息推送、消息广播等</p>
+ *
+ * @author ruoyi
+ * @date 2025-01-07
  */
 public interface ImMessagePushService {
-    
+
+    /**
+     * 获取在线用户数量
+     *
+     * <p>统计当前所有在线用户的总数</p>
+     * <p>用于系统监控和在线状态展示</p>
+     *
+     * @return 在线用户数量
+     */
     int getOnlineUserCount();
-    
+
+    /**
+     * 获取在线用户ID集合
+     *
+     * <p>查询所有在线用户的ID集合</p>
+     * <p>用于批量消息推送、用户筛选等场景</p>
+     *
+     * @return 在线用户ID集合
+     */
     Set<Long> getOnlineUserIds();
-    
+
+    /**
+     * 检查用户是否在线
+     *
+     * <p>判断指定用户当前是否在线</p>
+     * <p>用于消息推送前的在线状态判断</p>
+     *
+     * @param userId 用户ID，不能为空
+     * @return true-在线，false-离线
+     */
     boolean isUserOnline(Long userId);
-    
+
+    /**
+     * 断开用户连接
+     *
+     * <p>强制断开指定用户的WebSocket连接</p>
+     * <p>用于用户登出、强制下线等场景</p>
+     *
+     * @param userId 用户ID，不能为空
+     */
     void disconnectUser(Long userId);
-    
+
+    /**
+     * 发送消息给指定用户
+     *
+     * <p>向指定用户发送消息</p>
+     * <p>消息格式为JSON字符串，包含消息类型、内容等信息</p>
+     * <p>如果用户离线，消息将存储到离线消息队列</p>
+     *
+     * @param userId 用户ID，不能为空
+     * @param message 消息内容，JSON格式字符串
+     */
     void sendMessageToUser(Long userId, String message);
-    
+
+    /**
+     * 广播消息给所有在线用户
+     *
+     * <p>向所有在线用户广播消息</p>
+     * <p>用于系统公告、全局通知等场景</p>
+     *
+     * @param message 消息内容，JSON格式字符串
+     */
     void broadcastMessage(String message);
 }

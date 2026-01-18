@@ -290,8 +290,8 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'MUTE') return '<span class="badge badge-warning">禁言</span>';
-                        if (value === 'BLACKLIST') return '<span class="badge badge-danger">拉黑</span>';
+                        if (value === 'MUTE') { return '<span class="badge badge-warning">禁言</span>'; }
+                        if (value === 'BLACKLIST') { return '<span class="badge badge-danger">拉黑</span>'; }
                         return value || '-';
                     }
                 },

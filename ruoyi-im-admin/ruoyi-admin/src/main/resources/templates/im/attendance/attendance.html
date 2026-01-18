@@ -304,9 +304,9 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'WORK') return '<span class="badge badge-primary">工作日</span>';
-                        if (value === 'OVERTIME') return '<span class="badge badge-info">加班</span>';
-                        if (value === 'WEEKEND') return '<span class="badge badge-warning">周末</span>';
+                        if (value === 'WORK') { return '<span class="badge badge-primary">工作日</span>'; }
+                        if (value === 'OVERTIME') { return '<span class="badge badge-info">加班</span>'; }
+                        if (value === 'WEEKEND') { return '<span class="badge badge-warning">周末</span>'; }
                         return value || '-';
                     }
                 },
@@ -324,9 +324,9 @@
                     align: 'center',
                     width: '90',
                     formatter: function(value, row, index) {
-                        if (value === 'PENDING') return '<span class="badge badge-warning">待审批</span>';
-                        if (value === 'APPROVED') return '<span class="badge badge-success">已通过</span>';
-                        if (value === 'REJECTED') return '<span class="badge badge-danger">已拒绝</span>';
+                        if (value === 'PENDING') { return '<span class="badge badge-warning">待审批</span>'; }
+                        if (value === 'APPROVED') { return '<span class="badge badge-success">已通过</span>'; }
+                        if (value === 'REJECTED') { return '<span class="badge badge-danger">已拒绝</span>'; }
                         return '<span class="badge badge-default">-</span>';
                     }
                 },

@@ -284,9 +284,9 @@
                     align: 'center',
                     width: '90',
                     formatter: function(value, row, index) {
-                        if (value === 'PENDING') return '<span class="badge badge-warning">待处理</span>';
-                        if (value === 'APPROVED') return '<span class="badge badge-success">已同意</span>';
-                        if (value === 'REJECTED') return '<span class="badge badge-danger">已拒绝</span>';
+                        if (value === 'PENDING') { return '<span class="badge badge-warning">待处理</span>'; }
+                        if (value === 'APPROVED') { return '<span class="badge badge-success">已同意</span>'; }
+                        if (value === 'REJECTED') { return '<span class="badge badge-danger">已拒绝</span>'; }
                         return value || '-';
                     }
                 },

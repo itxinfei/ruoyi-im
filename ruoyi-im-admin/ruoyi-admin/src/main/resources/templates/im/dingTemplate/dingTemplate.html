@@ -163,10 +163,10 @@
                     align: 'center',
                     width: '90',
                     formatter: function(value, row, index) {
-                        if (value === 'MEETING') return '<span class="badge badge-primary">会议</span>';
-                        if (value === 'WORK') return '<span class="badge badge-info">工作</span>';
-                        if (value === 'NOTICE') return '<span class="badge badge-warning">通知</span>';
-                        if (value === 'REMIND') return '<span class="badge badge-success">提醒</span>';
+                        if (value === 'MEETING') { return '<span class="badge badge-primary">会议</span>'; }
+                        if (value === 'WORK') { return '<span class="badge badge-info">工作</span>'; }
+                        if (value === 'NOTICE') { return '<span class="badge badge-warning">通知</span>'; }
+                        if (value === 'REMIND') { return '<span class="badge badge-success">提醒</span>'; }
                         return value || '-';
                     }
                 },
@@ -206,8 +206,8 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'ACTIVE') return '<span class="badge badge-success">启用</span>';
-                        if (value === 'DISABLED') return '<span class="badge badge-default">停用</span>';
+                        if (value === 'ACTIVE') { return '<span class="badge badge-success">启用</span>'; }
+                        if (value === 'DISABLED') { return '<span class="badge badge-default">停用</span>'; }
                         return value || '-';
                     }
                 },

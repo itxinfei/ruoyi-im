@@ -317,11 +317,11 @@
                     align: 'center',
                     width: '70',
                     formatter: function(value, row, index) {
-                        if (value === 'TEXT') return '<span class="badge badge-primary">文本</span>';
-                        if (value === 'IMAGE') return '<span class="badge badge-info">图片</span>';
-                        if (value === 'VIDEO') return '<span class="badge badge-warning">视频</span>';
-                        if (value === 'AUDIO') return '<span class="badge badge-success">音频</span>';
-                        if (value === 'FILE') return '<span class="badge badge-default">文件</span>';
+                        if (value === 'TEXT') { return '<span class="badge badge-primary">文本</span>'; }
+                        if (value === 'IMAGE') { return '<span class="badge badge-info">图片</span>'; }
+                        if (value === 'VIDEO') { return '<span class="badge badge-warning">视频</span>'; }
+                        if (value === 'AUDIO') { return '<span class="badge badge-success">音频</span>'; }
+                        if (value === 'FILE') { return '<span class="badge badge-default">文件</span>'; }
                         return value || '-';
                     }
                 },
@@ -331,11 +331,11 @@
                     align: 'center',
                     width: '90',
                     formatter: function(value, row, index) {
-                        if (value === 'PENDING') return '<span class="badge badge-default">待发送</span>';
-                        if (value === 'SENDING') return '<span class="badge badge-info">发送中</span>';
-                        if (value === 'SENT') return '<span class="badge badge-primary">已发送</span>';
-                        if (value === 'DELIVERED') return '<span class="badge badge-success">已送达</span>';
-                        if (value === 'FAILED') return '<span class="badge badge-danger">失败</span>';
+                        if (value === 'PENDING') { return '<span class="badge badge-default">待发送</span>'; }
+                        if (value === 'SENDING') { return '<span class="badge badge-info">发送中</span>'; }
+                        if (value === 'SENT') { return '<span class="badge badge-primary">已发送</span>'; }
+                        if (value === 'DELIVERED') { return '<span class="badge badge-success">已送达</span>'; }
+                        if (value === 'FAILED') { return '<span class="badge badge-danger">失败</span>'; }
                         return '<span class="badge badge-default">-</span>';
                     }
                 },

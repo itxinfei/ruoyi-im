@@ -242,10 +242,10 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'POLITICAL') return '<span class="badge badge-danger">政治</span>';
-                        if (value === 'VULGAR') return '<span class="badge badge-warning">低俗</span>';
-                        if (value === 'VIOLENCE') return '<span class="badge badge-secondary">暴力</span>';
-                        if (value === 'AD') return '<span class="badge badge-info">广告</span>';
+                        if (value === 'POLITICAL') { return '<span class="badge badge-danger">政治</span>'; }
+                        if (value === 'VULGAR') { return '<span class="badge badge-warning">低俗</span>'; }
+                        if (value === 'VIOLENCE') { return '<span class="badge badge-secondary">暴力</span>'; }
+                        if (value === 'AD') { return '<span class="badge badge-info">广告</span>'; }
                         return '<span class="badge badge-default">其他</span>';
                     }
                 },
@@ -255,8 +255,8 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value == 3) return '<span class="label label-danger">高</span>';
-                        if (value == 2) return '<span class="label label-warning">中</span>';
+                        if (value == 3) { return '<span class="label label-danger">高</span>'; }
+                        if (value == 2) { return '<span class="label label-warning">中</span>'; }
                         return '<span class="label label-primary">低</span>';
                     }
                 },
@@ -266,7 +266,7 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'REPLACE') return '<span class="badge badge-success">替换</span>';
+                        if (value === 'REPLACE') { return '<span class="badge badge-success">替换</span>'; }
                         if (value === 'REJECT') return '<span class="badge badge-danger">拒绝</span>';
                         if (value === 'WARN') return '<span class="badge badge-warning">警告</span>';
                         return '<span class="badge badge-default">' + (value || '-') + '</span>';

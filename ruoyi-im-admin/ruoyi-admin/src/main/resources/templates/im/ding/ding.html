@@ -211,9 +211,9 @@
                     align: 'center',
                     width: '90',
                     formatter: function(value, row, index) {
-                        if (value === 'APP') return '<span class="badge badge-primary">应用</span>';
-                        if (value === 'SMS') return '<span class="badge badge-info">短信</span>';
-                        if (value === 'PHONE') return '<span class="badge badge-warning">电话</span>';
+                        if (value === 'APP') { return '<span class="badge badge-primary">应用</span>'; }
+                        if (value === 'SMS') { return '<span class="badge badge-info">短信</span>'; }
+                        if (value === 'PHONE') { return '<span class="badge badge-warning">电话</span>'; }
                         return value;
                     }
                 },
@@ -223,7 +223,7 @@
                     align: 'center',
                     width: '70',
                     formatter: function(value, row, index) {
-                        if (value == 1) return '<span class="badge badge-danger">紧急</span>';
+                        if (value == 1) { return '<span class="badge badge-danger">紧急</span>'; }
                         return '<span class="badge badge-default">普通</span>';
                     }
                 },
@@ -233,9 +233,9 @@
                     align: 'center',
                     width: '90',
                     formatter: function(value, row, index) {
-                        if (value === 'DRAFT') return '<span class="badge badge-default">草稿</span>';
-                        if (value === 'SENDING') return '<span class="badge badge-info">发送中</span>';
-                        if (value === 'SENT') return '<span class="badge badge-success">已发送</span>';
+                        if (value === 'DRAFT') { return '<span class="badge badge-default">草稿</span>'; }
+                        if (value === 'SENDING') { return '<span class="badge badge-info">发送中</span>'; }
+                        if (value === 'SENT') { return '<span class="badge badge-success">已发送</span>'; }
                         return value;
                     }
                 },
