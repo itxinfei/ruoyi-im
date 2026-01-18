@@ -167,4 +167,14 @@ public class ImGroupController extends BaseController {
     public AjaxResult dismiss(@PathVariable("id") Long groupId) {
         return toAjax(imGroupService.dismissGroup(groupId));
     }
+
+    /**
+     * 群组日志查看页面
+     */
+    @RequiresPermissions("im:group:query")
+    @GetMapping("/log/{id}/view")
+    public String viewLog(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
+        mmap.put("group", imGroupService.selectImGroupById(id));
+        return prefix + "/groupLog";
+    }
 }

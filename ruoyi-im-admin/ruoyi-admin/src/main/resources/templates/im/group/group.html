@@ -234,7 +234,8 @@
                     align: 'center',
                     formatter: function(value, row, index) {
                         if (value) {
-                            return '<img src="' + value + '" class="img-circle" style="width:32px;height:32px;">';
+                            // 添加错误处理,如果头像加载失败显示默认图标
+                            return '<img src="' + value + '" class="img-circle" style="width:32px;height:32px;" onerror="this.src=\'/img/profile.jpg\'">';
                         }
                         return '<i class="fa fa-users fa-2x text-gray"></i>';
                     }

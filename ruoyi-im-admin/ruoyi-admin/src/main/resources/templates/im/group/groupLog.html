@@ -155,10 +155,25 @@
             font-size: 12px;
             line-height: 1.5;
             transition: all 0.2s ease;
+            border-radius: 3px;
         }
         .btn-xs:hover {
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 表格样式优化 */
+        .fixed-table-container {
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table > thead > tr > th,
+        .table > tbody > tr > td {
+            vertical-align: middle;
+            padding: 8px;
         }
     </style>
 </head>
@@ -264,12 +279,19 @@
     <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
     <script th:inline="javascript">
         var prefix = ctx + "im/group/log";
-        var groupId = [[${group != null ? group.id : null}]];
+        var groupId = [[${group != null ? group.id : groupId}]];
 
         $(function() {
             loadStatistics();
             var options = {
                 url: prefix + "/list",
+                queryParams: function(params) {
+                    return {
+                        pageNum: params.pageNumber,
+                        pageSize: params.pageSize,
+                        groupId: groupId
+                    };
+                },
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove/{id}",

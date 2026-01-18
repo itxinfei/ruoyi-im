@@ -89,7 +89,8 @@ public class ImGroupLogController extends BaseController {
     @GetMapping("/group/{groupId}/view")
     public String viewLogsByGroupId(@PathVariable("groupId") Long groupId, ModelMap mmap) {
         mmap.put("groupId", groupId);
-        return prefix + "/logByGroup";
+        // 返回im/group/groupLog页面,而不是im/groupLog/logByGroup
+        return "im/group/groupLog";
     }
 
     /**
