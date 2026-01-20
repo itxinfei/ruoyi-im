@@ -158,6 +158,70 @@ var ImCommon = {
     },
 
     /**
+     * 格式化相对时间显示（如“5分钟前”、“刚刚”）
+     * @param dateTime 时间字符串或Date对象
+     * @returns {string} 相对时间描述
+     */
+    formatRelativeTime: function(dateTime) {
+        if (!dateTime) return '-';
+
+        var date;
+        if (typeof dateTime === 'string') {
+            date = new Date(dateTime.replace('T', ' '));
+        } else if (dateTime instanceof Date) {
+            date = dateTime;
+        } else {
+            return '-';
+        }
+
+        if (isNaN(date.getTime())) return '-';
+
+        var now = new Date();
+        var diff = now.getTime() - date.getTime();
+        var seconds = Math.floor(diff / 1000);
+        var minutes = Math.floor(seconds / 60);
+        var hours = Math.floor(minutes / 60);
+        var days = Math.floor(hours / 24);
+
+        if (seconds < 60) {
+            return '刚刚';
+        } else if (minutes < 60) {
+            return minutes + '分钟前';
+        } else if (hours < 24) {
+            return hours + '小时前';
+        } else if (days < 7) {
+            return days + '天前';
+        } else if (days < 30) {
+            return Math.floor(days / 7) + '周前';
+        } else if (days < 365) {
+            return Math.floor(days / 30) + '月前';
+        } else {
+            return Math.floor(days / 365) + '年前';
+        }
+    },
+
+    /**
+     * 格式化时间为完整格式（包含相对时间）
+     * @param dateTime 时间字符串
+     * @param showRelative 是否显示相对时间，默认true
+     * @returns {string} 格式化后的时间，包含title属性显示完整时间
+     */
+    formatDateTimeWithRelative: function(dateTime, showRelative) {
+        if (showRelative === false) {
+            return '<span title="' + this.formatDateTime(dateTime) + '">' + this.formatDateTime(dateTime) + '</span>';
+        }
+
+        var relativeTime = this.formatRelativeTime(dateTime);
+        var fullTime = this.formatDateTime(dateTime);
+
+        if (relativeTime === '刚刚' || relativeTime === '-') {
+            return '<span title="' + fullTime + '">' + relativeTime + '</span>';
+        }
+
+        return '<span title="' + fullTime + '">' + fullTime + ' <small class="text-muted">(' + relativeTime + ')</small></span>';
+    },
+
+    /**
      * 截断长文本
      * @param text 原文本
      * @param maxLength 最大长度，默认50
@@ -272,5 +336,190 @@ var ImCommon = {
             pageList: pageList || [10, 20, 50, 100],
             sidePagination: 'server'
         };
+    },
+
+    /**
+     * 显示加载状态
+     * @param target 目标元素选择器，默认为表格容器
+     */
+    showLoading: function(target) {
+        target = target || '.select-table';
+        var $target = $(target);
+
+        // 移除已存在的loading
+        this.hideLoading(target);
+
+        var loadingHtml = '<div class="im-table-loading" style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;z-index:100;min-height:200px;">' +
+            '<div><i class="fa fa-spinner fa-spin fa-2x text-primary"></i><p class="margin-top:10">数据加载中...</p></div>' +
+            '</div>';
+
+        if ($target.find('.fixed-table-container').length > 0) {
+            $target.find('.fixed-table-container').append(loadingHtml);
+        } else {
+            $target.append(loadingHtml);
+        }
+    },
+
+    /**
+     * 隐藏加载状态
+     * @param target 目标元素选择器，默认为表格容器
+     */
+    hideLoading: function(target) {
+        target = target || '.select-table';
+        $(target).find('.im-table-loading').remove();
+    },
+
+    /**
+     * 格式化空数据提示
+     * @param message 提示信息
+     * @param icon 图标类名，默认为'fa-inbox'
+     * @returns {string} HTML字符串
+     */
+    formatEmptyData: function(message, icon) {
+        message = message || '暂无数据';
+        icon = icon || 'fa-inbox';
+        return '<div class="text-center" style="padding:40px 20px;color:#999;">' +
+            '<i class="fa ' + icon + ' fa-3x" style="margin-bottom:15px;opacity:0.3;"></i>' +
+            '<p style="margin:0;font-size:14px;">' + message + '</p>' +
+            '</div>';
+    },
+
+    /**
+     * 格式化带链接的空数据提示
+     * @param message 提示信息
+     * @param linkText 链接文本
+     * @param linkAction 链接点击事件
+     * @param icon 图标类名，默认为'fa-inbox'
+     * @returns {string} HTML字符串
+     */
+    formatEmptyDataWithLink: function(message, linkText, linkAction, icon) {
+        message = message || '暂无数据';
+        linkText = linkText || '立即添加';
+        icon = icon || 'fa-inbox';
+
+        return '<div class="text-center" style="padding:40px 20px;color:#999;">' +
+            '<i class="fa ' + icon + ' fa-3x" style="margin-bottom:15px;opacity:0.3;"></i>' +
+            '<p style="margin:0;font-size:14px;margin-bottom:15px;">' + message + '</p>' +
+            '<a class="btn btn-primary btn-sm" onclick="' + linkAction + '">' + linkText + '</a>' +
+            '</div>';
+    },
+
+    /**
+     * 表格响应处理（自动处理空数据和错误）
+     * @param res 响应数据
+     * @param emptyMessage 空数据提示信息
+     * @param target 目标表格
+     * @returns {Array|Object} 处理后的数据
+     */
+    handleTableResponse: function(res, emptyMessage, target) {
+        if (!res) {
+            if (emptyMessage) {
+                this.showEmptyDataInTable(emptyMessage, target);
+            }
+            return [];
+        }
+
+        if (res.code !== undefined && res.code !== 0) {
+            $.modal.msgError(res.msg || '数据加载失败');
+            return [];
+        }
+
+        var rows = res.rows || res.data || [];
+
+        // 处理空数据
+        if (rows.length === 0 && emptyMessage) {
+            this.showEmptyDataInTable(emptyMessage, target);
+        }
+
+        return rows;
+    },
+
+    /**
+     * 在表格中显示空数据提示
+     * @param message 提示信息
+     * @param target 目标表格
+     */
+    showEmptyDataInTable: function(message, target) {
+        target = target || '#bootstrap-table';
+        var $table = $(target);
+
+        // 隐藏表格内容，显示空数据提示
+        $table.next('.fixed-table-body').hide();
+        $table.next('.im-empty-data').remove();
+
+        var emptyHtml = '<div class="im-empty-data" style="text-align:center;padding:40px 20px;color:#999;">' +
+            '<i class="fa fa-inbox fa-3x" style="margin-bottom:15px;opacity:0.3;"></i>' +
+            '<p style="margin:0;font-size:14px;">' + message + '</p>' +
+            '</div>';
+
+        $table.after(emptyHtml);
+    },
+
+    /**
+     * 移除空数据提示（准备加载新数据）
+     * @param target 目标表格
+     */
+    removeEmptyData: function(target) {
+        target = target || '#bootstrap-table';
+        var $table = $(target);
+        $table.next('.im-empty-data').remove();
+        $table.next('.fixed-table-body').show();
+    },
+
+    /**
+     * 格式化带tooltip的长文本
+     * @param text 原文本
+     * @param maxLength 最大长度，默认50
+     * @returns {string} HTML字符串，带title属性
+     */
+    formatTextWithTooltip: function(text, maxLength) {
+        maxLength = maxLength || 50;
+        if (!text) return '-';
+
+        if (text.length <= maxLength) {
+            return text;
+        }
+
+        var truncated = text.substring(0, maxLength) + '...';
+        return '<span title="' + this.escapeHtml(text) + '">' + this.escapeHtml(truncated) + '</span>';
+    },
+
+    /**
+     * HTML转义，防止XSS
+     * @param text 原文本
+     * @returns {string} 转义后的文本
+     */
+    escapeHtml: function(text) {
+        if (!text) return '';
+
+        var map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+
+        return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
+    },
+
+    /**
+     * 格式化文件大小
+     * @param size 文件大小（字节）
+     * @returns {string} 格式化后的大小（如“1.5MB”）
+     */
+    formatFileSize: function(size) {
+        if (!size || size === 0) return '0 B';
+
+        var units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        var index = 0;
+        var fileSize = size;
+
+        while (fileSize >= 1024 && index < units.length - 1) {
+            fileSize /= 1024;
+            index++;
+        }
+
+        return fileSize.toFixed(index === 0 ? 0 : 1) + ' ' + units[index];
     }
 };
