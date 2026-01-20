@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
+    <th:block th:include="include :: header('群公告管理')" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit">
@@ -402,5 +403,6 @@
             }
             $.modal.open("修改群公告", url, '1000', '650');
         }
-    </script></body>
+    </script>    <th:block th:include="include :: footer" />
+</body>
 </html>

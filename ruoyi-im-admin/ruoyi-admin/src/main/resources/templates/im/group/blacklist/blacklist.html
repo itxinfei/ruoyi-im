@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
+    <th:block th:include="include :: header('群组黑名单管理')" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit">
@@ -444,5 +445,6 @@
             });
         }
     </script>
+    <th:block th:include="include :: footer" />
 </body>
 </html>

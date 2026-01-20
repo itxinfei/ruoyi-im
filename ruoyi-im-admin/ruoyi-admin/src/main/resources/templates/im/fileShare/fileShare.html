@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
+    <th:block th:include="include :: header('文件分享管理')" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit">
@@ -383,5 +384,6 @@
             if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
             return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
         }
-    </script></body>
+    </script>    <th:block th:include="include :: footer" />
+</body>
 </html>
