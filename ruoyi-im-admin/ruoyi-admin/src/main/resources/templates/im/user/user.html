@@ -53,9 +53,9 @@
 
         /* ========== 批量操作按钮区域 ========== */
         #toolbar {
-            padding: 8px;
+            /* padding: 8px; */
             background: #f9f9f9;
-            border: 1px solid #e7eaec;
+            border: 0px solid #e7eaec;
             border-radius: 4px;
         }
 
@@ -72,6 +72,19 @@
         .fixed-table-toolbar .columns-right {
             display: flex;
             align-items: center;
+        }
+        /* 移除按钮组之间的间距 */
+        .fixed-table-toolbar .btn-group .btn {
+            margin-left: 0;
+            margin-right: 0;
+        }
+        .fixed-table-toolbar .btn-group > .btn:first-child {
+            border-top-left-radius: 3px;
+            border-bottom-left-radius: 3px;
+        }
+        .fixed-table-toolbar .btn-group > .btn:last-child {
+            border-top-right-radius: 3px;
+            border-bottom-right-radius: 3px;
         }
 
         /* ========== 搜索状态提示 ========== */
