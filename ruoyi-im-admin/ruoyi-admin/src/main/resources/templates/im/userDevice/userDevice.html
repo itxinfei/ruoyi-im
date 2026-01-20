@@ -78,7 +78,35 @@
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-    </style>
+    
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+</style>
 </head>
 <body class="gray-bg">
     <div class="container-div">
@@ -121,24 +149,19 @@
                 <form id="userDevice-form">
                     <div class="select-list">
                         <ul>
-                            <li>
-                                用户名：<input type="text" name="username"/>
+                            <li><label class="input-label">用户名</label><input type="text" name="username"/>
                             </li>
                             <li>
-                                昵称：<input type="text" name="nickname"/>
+                                <label class="input-label">昵称：</label><input type="text" name="nickname"/>
                             </li>
-                            <li>
-                                设备类型：
-                                <select name="deviceType">
+                            <li><label class="input-label">设备类型</label><select name="deviceType">
                                     <option value="">所有</option>
                                     <option value="PC">PC端</option>
                                     <option value="MOBILE">移动端</option>
                                     <option value="WEB">Web端</option>
                                 </select>
                             </li>
-                            <li>
-                                状态：
-                                <select name="status">
+                            <li><label class="input-label">状态</label><select name="status">
                                     <option value="">所有</option>
                                     <option value="ONLINE">在线</option>
                                     <option value="OFFLINE">离线</option>
@@ -226,7 +249,35 @@
                     font-size: 36px;
                     opacity: 0.15;
                 }
-            </style>
+            
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+</style>
         </div>
     </div>
     <!-- 清理离线设备弹窗 -->
@@ -303,7 +354,35 @@
                     font-size: 36px;
                     opacity: 0.15;
                 }
-            </style>
+            
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+</style>
         </div>
     </div>
         <!-- 通用JS -->

@@ -2,6 +2,36 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('好友管理')" />
+
+    <style type="text/css">
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div">
@@ -11,19 +41,19 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                用户昵称：<input type="text" name="userId" placeholder="请输入用户ID或昵称"/>
+                                <label class="input-label">用户昵称：</label><input type="text" name="userId" placeholder="请输入用户ID或昵称"/>
                             </li>
                             <li>
-                                好友昵称：<input type="text" name="friendId" placeholder="请输入好友ID或昵称"/>
+                                <label class="input-label">好友昵称：</label><input type="text" name="friendId" placeholder="请输入好友ID或昵称"/>
                             </li>
                             <li>
-                                分组：<input type="text" name="groupName" placeholder="请输入分组名称"/>
+                                <label class="input-label">分组：</label><input type="text" name="groupName" placeholder="请输入分组名称"/>
                             </li>
                             <li>
-                                备注：<input type="text" name="remark" placeholder="请输入备注"/>
+                                <label class="input-label">备注：</label><input type="text" name="remark" placeholder="请输入备注"/>
                             </li>
                             <li>
-                                状态：<select name="friendStatus">
+                                <label class="input-label">状态：</label><select name="friendStatus">
                                     <option value="">全部</option>
                                     <option value="1">正常</option>
                                     <option value="0">禁用</option>

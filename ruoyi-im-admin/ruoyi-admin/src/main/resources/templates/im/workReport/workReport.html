@@ -44,30 +44,23 @@
                 <form id="workReport-form">
                     <div class="select-list">
                         <ul>
-                            <li>
-                                用户名：<input type="text" name="username"/>
+                            <li><label class="input-label">用户名</label><input type="text" name="username"/>
                             </li>
-                            <li>
-                                报告类型：
-                                <select name="reportType">
+                            <li><label class="input-label">报告类型</label><select name="reportType">
                                     <option value="">所有</option>
                                     <option value="DAILY">日报</option>
                                     <option value="WEEKLY">周报</option>
                                     <option value="MONTHLY">月报</option>
                                 </select>
                             </li>
-                            <li>
-                                完成状态：
-                                <select name="completionStatus">
+                            <li><label class="input-label">完成状态</label><select name="completionStatus">
                                     <option value="">所有</option>
                                     <option value="COMPLETED">已完成</option>
                                     <option value="IN_PROGRESS">进行中</option>
                                     <option value="PENDING">待处理</option>
                                 </select>
                             </li>
-                            <li>
-                                报告状态：
-                                <select name="status">
+                            <li><label class="input-label">报告状态</label><select name="status">
                                     <option value="">所有</option>
                                     <option value="DRAFT">草稿</option>
                                     <option value="SUBMITTED">已提交</option>
@@ -266,6 +259,34 @@
                 }
 
                 /* 搜索输入框优化 */
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+
                 .search-collapse input[type="text"],
                 .search-collapse select {
                     border-radius: 4px;

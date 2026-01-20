@@ -71,7 +71,35 @@
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-    </style>
+    
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+</style>
 </head>
 <body class="gray-bg">
     <div class="container-div">
@@ -114,15 +142,11 @@
                 <form id="fileShare-form">
                     <div class="select-list">
                         <ul>
-                            <li>
-                                分享者：<input type="text" name="sharerName"/>
+                            <li><label class="input-label">分享者</label><input type="text" name="sharerName"/>
                             </li>
-                            <li>
-                                文件名：<input type="text" name="fileName"/>
+                            <li><label class="input-label">文件名</label><input type="text" name="fileName"/>
                             </li>
-                            <li>
-                                分享权限：
-                                <select name="permission">
+                            <li><label class="input-label">分享权限</label><select name="permission">
                                     <option value="">所有</option>
                                     <option value="1">公开</option>
                                     <option value="2">指定人</option>
@@ -205,7 +229,35 @@
                     font-size: 36px;
                     opacity: 0.15;
                 }
-            </style>
+            
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+</style>
         </div>
     </div>
     <!-- 清理过期分享弹窗 -->
@@ -273,7 +325,35 @@
                     font-size: 36px;
                     opacity: 0.15;
                 }
-            </style>
+            
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+</style>
         </div>
     </div>
         <!-- 通用JS -->

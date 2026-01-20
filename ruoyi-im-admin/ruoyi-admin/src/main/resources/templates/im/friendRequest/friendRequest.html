@@ -10,14 +10,12 @@
                 <form id="friendRequest-form">
                     <div class="select-list">
                         <ul>
-                            <li>
-                                申请人：<input type="text" name="userId" placeholder="请输入申请人ID"/>
+                            <li><label class="input-label">申请人</label><input type="text" name="userId" placeholder="请输入申请人ID"/>
+                            </li>
+                            <li><label class="input-label">目标用户</label><input type="text" name="targetUserId" placeholder="请输入目标用户ID"/>
                             </li>
                             <li>
-                                目标用户：<input type="text" name="targetUserId" placeholder="请输入目标用户ID"/>
-                            </li>
-                            <li>
-                                状态：<select name="status">
+                                <label class="input-label">状态：</label><select name="status">
                                     <option value="">所有</option>
                                     <option value="PENDING">待处理</option>
                                     <option value="APPROVED">已同意</option>
@@ -216,6 +214,34 @@
                 }
 
                 /* 搜索输入框优化 */
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+
                 .search-collapse input[type="text"],
                 .search-collapse select {
                     border-radius: 4px;

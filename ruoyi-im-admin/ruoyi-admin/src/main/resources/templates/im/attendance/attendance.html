@@ -11,13 +11,12 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                用户名称：<input type="text" name="userName" placeholder="请输入用户名称"/>
+                                <label class="input-label">用户名称：</label><input type="text" name="userName" placeholder="请输入用户名称"/>
+                            </li>
+                            <li><label class="input-label">打卡日期</label><input type="text" name="attendanceDate" class="time-input" placeholder="请选择日期"/>
                             </li>
                             <li>
-                                打卡日期：<input type="text" name="attendanceDate" class="time-input" placeholder="请选择日期"/>
-                            </li>
-                            <li>
-                                上班状态：<select name="checkInStatus">
+                                <label class="input-label">上班状态：</label><select name="checkInStatus">
                                     <option value="">所有</option>
                                     <option value="NORMAL">正常</option>
                                     <option value="LATE">迟到</option>
@@ -25,7 +24,7 @@
                                 </select>
                             </li>
                             <li>
-                                下班状态：<select name="checkOutStatus">
+                                <label class="input-label">下班状态：</label><select name="checkOutStatus">
                                     <option value="">所有</option>
                                     <option value="NORMAL">正常</option>
                                     <option value="EARLY">早退</option>
@@ -33,7 +32,7 @@
                                 </select>
                             </li>
                             <li>
-                                审批状态：<select name="approveStatus">
+                                <label class="input-label">审批状态：</label><select name="approveStatus">
                                     <option value="">所有</option>
                                     <option value="PENDING">待审批</option>
                                     <option value="APPROVED">已通过</option>
@@ -232,6 +231,34 @@
                 }
 
                 /* 搜索输入框优化 */
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+
                 .search-collapse input[type="text"],
                 .search-collapse select {
                     border-radius: 4px;

@@ -43,17 +43,15 @@
                 <form id="log-form">
                     <div class="select-list">
                         <ul>
-                            <li>
-                                群组ID：<input type="text" name="groupId" placeholder="请输入群组ID"/>
+                            <li><label class="input-label">群组ID</label><input type="text" name="groupId" placeholder="请输入群组ID"/>
                             </li>
                             <li>
-                                群组名称：<input type="text" name="groupName" placeholder="请输入群组名称"/>
+                                <label class="input-label">群组名称：</label><input type="text" name="groupName" placeholder="请输入群组名称"/>
+                            </li>
+                            <li><label class="input-label">操作者ID</label><input type="text" name="operatorId" placeholder="请输入操作者ID"/>
                             </li>
                             <li>
-                                操作者ID：<input type="text" name="operatorId" placeholder="请输入操作者ID"/>
-                            </li>
-                            <li>
-                                操作类型：<select name="operationType">
+                                <label class="input-label">操作类型：</label><select name="operationType">
                                     <option value="">所有</option>
                                     <option value="ADD_MEMBER">添加成员</option>
                                     <option value="REMOVE_MEMBER">移除成员</option>
@@ -244,6 +242,34 @@
                 }
 
                 /* 搜索输入框优化 */
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+
                 .search-collapse input[type="text"],
                 .search-collapse select {
                     border-radius: 4px;

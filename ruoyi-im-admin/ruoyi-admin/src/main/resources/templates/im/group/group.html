@@ -2,6 +2,35 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('群组管理')" />
+    <style type="text/css">
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div">
@@ -11,13 +40,11 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                群组名称：<input type="text" name="name" value=""/>
+                                <label class="input-label">群组名称：</label><input type="text" name="name" value=""/>
                             </li>
-                            <li>
-                                群主ID：<input type="text" name="ownerId" value=""/>
+                            <li><label class="input-label">群主ID：</label><input type="text" name="ownerId" value=""/>
                             </li>
-                            <li>
-                                全员禁言：<select name="allMuted">
+                            <li><label class="input-label">全员禁言：</label><select name="allMuted">
                                     <option value="">所有</option>
                                     <option value="0">否</option>
                                     <option value="1">是</option>

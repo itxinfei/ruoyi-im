@@ -12,14 +12,14 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                会话类型：<select name="type">
+                                <label class="input-label">会话类型：</label><select name="type">
                                     <option value="">所有</option>
                                     <option value="PRIVATE">私聊</option>
                                     <option value="GROUP">群聊</option>
                                 </select>
                             </li>
                             <li>
-                                会话名称：<input type="text" name="name" value=""/>
+                                <label class="input-label">会话名称：</label><input type="text" name="name" value=""/>
                             </li>
                             <li class="select-time">
                                 <label>创建时间： </label>
@@ -245,6 +245,34 @@
                 }
 
                 /* 搜索输入框优化 */
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+
                 .search-collapse input[type="text"],
                 .search-collapse select {
                     border-radius: 4px;

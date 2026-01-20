@@ -179,7 +179,35 @@
         .table-no-padding {
             padding: 0;
         }
-    </style>
+    
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+</style>
 </head>
 <body class="white-bg">
     <div class="wrapper wrapper-content">
@@ -230,9 +258,7 @@
                 <form id="log-form">
                     <div class="select-list">
                         <ul>
-                            <li>
-                                操作类型：
-                                <select name="operationType">
+                            <li><label class="input-label">操作类型</label><select name="operationType">
                                     <option value="">所有</option>
                                     <option value="CREATE">创建</option>
                                     <option value="UPDATE">更新</option>
@@ -243,8 +269,7 @@
                                     <option value="UNMUTE">解除禁言</option>
                                 </select>
                             </li>
-                            <li>
-                                操作人ID：<input type="text" name="operatorId" value=""/>
+                            <li><label class="input-label">操作人ID</label><input type="text" name="operatorId" value=""/>
                             </li>
                             <li class="select-time">
                                 <label>操作时间： </label>
@@ -311,7 +336,35 @@
                     font-size: 36px;
                     opacity: 0.15;
                 }
-            </style>
+            
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+</style>
         </div>
     </div>
 

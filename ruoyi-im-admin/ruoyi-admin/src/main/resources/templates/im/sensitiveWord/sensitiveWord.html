@@ -10,11 +10,10 @@
                 <form id="sensitiveWord-form">
                     <div class="select-list">
                         <ul>
-                            <li>
-                                敏感词：<input type="text" name="word" placeholder="请输入敏感词"/>
+                            <li><label class="input-label">敏感词</label><input type="text" name="word" placeholder="请输入敏感词"/>
                             </li>
                             <li>
-                                级别：<select name="level">
+                                <label class="input-label">级别：</label><select name="level">
                                     <option value="">所有</option>
                                     <option value="LOW">低级</option>
                                     <option value="MEDIUM">中级</option>
@@ -22,7 +21,7 @@
                                 </select>
                             </li>
                             <li>
-                                状态：<select name="status">
+                                <label class="input-label">状态：</label><select name="status">
                                     <option value="">所有</option>
                                     <option value="1">启用</option>
                                     <option value="0">禁用</option>
@@ -214,6 +213,34 @@
                 }
 
                 /* 搜索输入框优化 */
+                /* 搜索输入框优化 */
+                .search-collapse input[type="text"],
+                .search-collapse select {
+                    border-radius: 4px;
+                    border: 1px solid #e7eaec;
+                    transition: all 0.3s;
+                    min-width: 180px;
+                }
+                .search-collapse input[type="text"]:focus,
+                .search-collapse select:focus {
+                    border-color: #1ab394;
+                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+                }
+
+                /* 搜索标签优化 */
+                .search-collapse .select-list ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .search-collapse .select-list ul li label,
+                .search-collapse .select-list ul li .input-label {
+                    min-width: 80px;
+                    text-align: right;
+                    font-weight: 500;
+                    color: #676a6c;
+                }
+
                 .search-collapse input[type="text"],
                 .search-collapse select {
                     border-radius: 4px;
