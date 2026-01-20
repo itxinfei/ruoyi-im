@@ -4,6 +4,8 @@ import com.ruoyi.common.utils.ShiroUtils;
 import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.mapper.ImUserMapper;
 import com.ruoyi.web.service.ImUserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,8 @@ import java.util.Map;
  */
 @Service
 public class ImUserServiceImpl implements ImUserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ImUserServiceImpl.class);
 
     @Autowired
     private ImUserMapper userMapper;
@@ -97,8 +101,7 @@ public class ImUserServiceImpl implements ImUserService {
 
             return userMapper.updateImUser(user);
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("重置密码失败: " + e.getMessage());
+            logger.error("重置用户密码失败: userId={}", id, e);
             return 0;
         }
     }

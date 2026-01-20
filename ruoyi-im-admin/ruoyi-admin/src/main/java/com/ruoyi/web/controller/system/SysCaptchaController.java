@@ -8,6 +8,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +28,8 @@ import com.ruoyi.common.core.controller.BaseController;
 @RequestMapping("/captcha")
 public class SysCaptchaController extends BaseController
 {
+    private static final Logger logger = LoggerFactory.getLogger(SysCaptchaController.class);
+
     @Resource(name = "captchaProducer")
     private Producer captchaProducer;
 
@@ -72,7 +76,7 @@ public class SysCaptchaController extends BaseController
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            logger.error("验证码生成失败", e);
         }
         finally
         {
@@ -85,7 +89,7 @@ public class SysCaptchaController extends BaseController
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                logger.error("关闭输出流失败", e);
             }
         }
         return null;
