@@ -45,11 +45,12 @@
                m.client_msg_id, m.send_status, m.send_retry_count,
                m.send_error_code, m.send_error_msg, m.delivered_time,
                u.nickname as sender_name,
-               CASE WHEN c.type = 'PRIVATE' THEN (SELECT nickname FROM im_user WHERE id = c.target_id)
-                    ELSE (SELECT name FROM im_group WHERE id = c.target_id) END as conversation_name
+               CASE WHEN c.type = 'PRIVATE' THEN u2.nickname ELSE g.name END as conversation_name
         from im_message m
         left join im_user u on m.sender_id = u.id
         left join im_conversation c on m.conversation_id = c.id
+        left join im_user u2 on c.type = 'PRIVATE' and c.target_id = u2.id
+        left join im_group g on c.type = 'GROUP' and c.target_id = g.id
     </sql>
 
     <select id="selectImMessageList" parameterType="com.ruoyi.web.domain.ImMessage" resultMap="ImMessageResult">

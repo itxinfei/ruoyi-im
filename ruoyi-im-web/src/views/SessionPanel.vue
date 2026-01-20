@@ -125,7 +125,7 @@ const formatTime = (timestamp) => {
 .session-panel {
   display: flex;
   flex-direction: column;
-  width: 280px;
+  width: 320px;
   border-right: 1px solid #e8e8e8;
   background: #fff;
   height: 100%;

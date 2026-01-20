@@ -70,11 +70,13 @@ public class ImGroup implements Serializable {
     /**
      * 创建时间，群组创建的时间
      */
+    @TableField("create_time")
     private LocalDateTime createTime;
 
     /**
      * 更新时间，群组信息最后更新的时间
      */
+    @TableField("update_time")
     private LocalDateTime updateTime;
 
     // ==================== 以下字段为非数据库字段 ====================

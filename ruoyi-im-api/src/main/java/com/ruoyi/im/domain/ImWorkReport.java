@@ -87,10 +87,12 @@ public class ImWorkReport implements Serializable {
     @Schema(description = "审批备注")
     private String approveRemark;
 
+    @TableField("create_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
 
+    @TableField("update_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "更新时间")
     private LocalDateTime updateTime;

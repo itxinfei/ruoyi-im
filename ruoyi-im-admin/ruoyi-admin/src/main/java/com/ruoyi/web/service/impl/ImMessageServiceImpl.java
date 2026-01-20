@@ -7,6 +7,7 @@ import com.ruoyi.web.mapper.ImMessageMapper;
 import com.ruoyi.web.service.ImMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -164,6 +165,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     @Override
+    @Transactional
     public int batchRevokeMessages(Long[] messageIds) {
         if (messageIds == null || messageIds.length == 0) {
             throw new ServiceException("消息ID列表不能为空");
@@ -172,12 +174,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         int count = 0;
         for (Long messageId : messageIds) {
             if (messageId != null && messageId > 0) {
-                try {
-                    count += revokeMessage(messageId);
-                } catch (ServiceException e) {
-                    // 记录错误，但继续处理其他消息
-                    System.err.println("撤回消息失败: ID=" + messageId + ", 错误: " + e.getMessage());
-                }
+                count += revokeMessage(messageId);
             }
         }
         return count;

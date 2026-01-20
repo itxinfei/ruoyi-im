@@ -1,5 +1,11 @@
 <template>
   <aside class="nav-sidebar" :style="{ width: navWidth + 'px' }">
+    <div class="logo-area">
+      <div class="logo-box">
+        <span class="logo-text">钉</span>
+      </div>
+    </div>
+
     <nav class="nav-list">
       <el-tooltip
         v-for="item in navModules"
@@ -16,10 +22,32 @@
           <el-icon class="nav-icon">
             <component :is="item.icon" />
           </el-icon>
+          <span class="nav-label">{{ item.label }}</span>
           <span v-if="item.key === 'chat' && unreadCount > 0" class="nav-dot"></span>
         </div>
       </el-tooltip>
     </nav>
+
+    <div class="nav-footer">
+      <div
+        class="nav-item"
+        :class="{ active: activeModule === 'settings' }"
+        @click="handleNavClick('settings')"
+      >
+        <el-icon class="nav-icon">
+          <Setting />
+        </el-icon>
+        <span class="nav-label">设置</span>
+      </div>
+
+      <div
+        class="user-avatar"
+        :class="{ active: activeModule === 'profile' }"
+        @click="handleNavClick('profile')"
+      >
+        <span class="avatar-text">我</span>
+      </div>
+    </div>
   </aside>
 </template>
 
@@ -112,21 +140,48 @@ const handleNavClick = (moduleKey) => {
 .nav-sidebar {
   display: flex;
   flex-direction: column;
-  background-color: #2c2c2c;
+  background-color: #0089ff;
   border-right: 1px solid #e8e8e8;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
+  margin-bottom: 4px;
+}
+
+.logo-box {
+  width: 40px;
+  height: 40px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text {
+  color: #0089ff;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .nav-list {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 0;
-  gap: 4px;
+  padding: 4px 0;
+  gap: 2px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .nav-item {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 48px;
@@ -140,7 +195,7 @@ const handleNavClick = (moduleKey) => {
   }
 
   &.active {
-    background-color: rgba(0, 137, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.2);
   }
 
   &.active::before {
@@ -151,30 +206,79 @@ const handleNavClick = (moduleKey) => {
     transform: translateY(-50%);
     width: 3px;
     height: 24px;
-    background-color: #0089ff;
+    background-color: #ffffff;
     border-radius: 0 2px 2px 0;
   }
 }
 
 .nav-icon {
-  font-size: 24px;
-  color: #8c8c8c;
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.8);
   transition: all 0.2s ease;
 }
 
+.nav-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1;
+  margin-top: 2px;
+}
+
 .nav-item:hover .nav-icon,
-.nav-item.active .nav-icon {
-  color: #0089ff;
+.nav-item:hover .nav-label,
+.nav-item.active .nav-icon,
+.nav-item.active .nav-label {
+  color: #ffffff;
 }
 
 .nav-dot {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: 6px;
   width: 10px;
   height: 10px;
   background: linear-gradient(135deg, #ff4d4f, #ff7875);
   border-radius: 50%;
-  border: 2px solid #2c2c2c;
+  border: 2px solid #0089ff;
+}
+
+.nav-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 0 12px 0;
+  gap: 2px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+  background-color: rgba(255, 255, 255, 0.2);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  &.active {
+    background-color: #ffffff;
+  }
+}
+
+.avatar-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.user-avatar.active .avatar-text {
+  color: #0089ff;
 }
 </style>

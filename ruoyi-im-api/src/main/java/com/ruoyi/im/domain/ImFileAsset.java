@@ -67,6 +67,7 @@ public class ImFileAsset implements Serializable {
     private String status;
 
     @Schema(description = "创建时间")
+    @TableField("create_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 }

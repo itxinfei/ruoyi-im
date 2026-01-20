@@ -40,10 +40,12 @@ public class ImFriendRequest implements Serializable {
     private String status;
 
     /** 创建时间 */
+    @TableField("create_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     /** 处理时间 */
+    @TableField("handled_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime handledTime;
 

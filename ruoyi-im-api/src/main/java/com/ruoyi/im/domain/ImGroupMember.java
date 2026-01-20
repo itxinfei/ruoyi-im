@@ -74,7 +74,7 @@ public class ImGroupMember implements Serializable {
      * 回复消息ID
      */
     @TableField("reply_to_message_id")
-    private Integer replyToMessageId;
+    private Long replyToMessageId;
 
     /**
      * 创建时间，群组成员记录创建的时间

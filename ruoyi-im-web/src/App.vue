@@ -4,6 +4,12 @@
     <div class="main-container">
       <ImSideNav :active-module="activeModule" @switch-module="handleSwitchModule" />
       <SessionPanel v-if="activeModule === 'chat'" @select-session="handleSelectSession" />
+      <WorkbenchPanel v-if="activeModule === 'workbench'" />
+      <ContactsPanel v-if="activeModule === 'contacts'" />
+      <DocumentsPanel v-if="activeModule === 'drive'" />
+      <CalendarPanel v-if="activeModule === 'calendar'" />
+      <SettingsPanel v-if="activeModule === 'settings'" />
+      <UserProfilePanel v-if="activeModule === 'profile'" />
       <ChatPanel v-if="currentSession" :session="currentSession" />
     </div>
   </div>
@@ -14,6 +20,12 @@ import { ref } from 'vue'
 import ImHeader from './components/ImHeader/index.vue'
 import ImSideNav from './components/ImSideNav/index.vue'
 import SessionPanel from './views/SessionPanel.vue'
+import WorkbenchPanel from './views/WorkbenchPanel.vue'
+import ContactsPanel from './views/ContactsPanel.vue'
+import DocumentsPanel from './views/DocumentsPanel.vue'
+import CalendarPanel from './views/CalendarPanel.vue'
+import SettingsPanel from './views/SettingsPanel.vue'
+import UserProfilePanel from './views/UserProfilePanel.vue'
 import ChatPanel from './views/ChatPanel.vue'
 
 const activeModule = ref('chat')

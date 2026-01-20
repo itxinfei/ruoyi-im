@@ -1,6 +1,7 @@
 package com.ruoyi.im.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -49,10 +50,12 @@ public class ImGroupAnnouncement implements Serializable {
 
     @Schema(description = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @TableField("create_time")
     private LocalDateTime createTime;
 
     @Schema(description = "更新时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @TableField("update_time")
     private LocalDateTime updateTime;
 
     @Schema(description = "过期时间")

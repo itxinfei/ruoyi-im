@@ -33,11 +33,20 @@
 
     <select id="selectImConversationList" parameterType="com.ruoyi.web.domain.ImConversation" resultMap="ImConversationResult">
         select c.*,
-               IFNULL((SELECT COUNT(*) FROM im_conversation_member WHERE conversation_id = c.id AND is_deleted = 0), 0) as member_count,
-               IFNULL((SELECT SUM(unread_count) FROM im_conversation_member WHERE conversation_id = c.id AND is_deleted = 0), 0) as total_unread_count,
-               IFNULL(CASE WHEN c.type = 'PRIVATE' THEN (SELECT nickname FROM im_user WHERE id = c.target_id)
-                    ELSE (SELECT name FROM im_group WHERE id = c.target_id) END, '') as target_name
+               IFNULL(cm.member_count, 0) as member_count,
+               IFNULL(cm.total_unread_count, 0) as total_unread_count,
+               IFNULL(CASE WHEN c.type = 'PRIVATE' THEN u.nickname ELSE g.name END, '') as target_name
         from im_conversation c
+        left join (
+            select conversation_id,
+                   COUNT(*) as member_count,
+                   SUM(unread_count) as total_unread_count
+            from im_conversation_member
+            where is_deleted = 0
+            group by conversation_id
+        ) cm on c.id = cm.conversation_id
+        left join im_user u on c.type = 'PRIVATE' and c.target_id = u.id
+        left join im_group g on c.type = 'GROUP' and c.target_id = g.id
         <where>
             c.is_deleted = 0
             <if test="type != null and type != ''">and c.type = #{type}</if>
@@ -114,11 +123,20 @@
     <!-- 获取活跃会话列表 -->
     <select id="getActiveConversations" resultMap="ImConversationResult">
         select c.*,
-               (SELECT COUNT(*) FROM im_conversation_member WHERE conversation_id = c.id AND is_deleted = 0) as member_count,
-               (SELECT SUM(unread_count) FROM im_conversation_member WHERE conversation_id = c.id AND is_deleted = 0) as total_unread_count,
-               CASE WHEN c.type = 'PRIVATE' THEN (SELECT nickname FROM im_user WHERE id = c.target_id)
-                    ELSE (SELECT name FROM im_group WHERE id = c.target_id) END as target_name
+               IFNULL(cm.member_count, 0) as member_count,
+               IFNULL(cm.total_unread_count, 0) as total_unread_count,
+               IFNULL(CASE WHEN c.type = 'PRIVATE' THEN u.nickname ELSE g.name END, '') as target_name
         from im_conversation c
+        left join (
+            select conversation_id,
+                   COUNT(*) as member_count,
+                   SUM(unread_count) as total_unread_count
+            from im_conversation_member
+            where is_deleted = 0
+            group by conversation_id
+        ) cm on c.id = cm.conversation_id
+        left join im_user u on c.type = 'PRIVATE' and c.target_id = u.id
+        left join im_group g on c.type = 'GROUP' and c.target_id = g.id
         where c.is_deleted = 0
         order by c.last_message_time desc
         limit #{arg0}

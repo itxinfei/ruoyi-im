@@ -69,7 +69,7 @@ public class ImGroupMember implements Serializable {
     /**
      * 回复消息ID（可能用于回复功能）
      */
-    private Integer replyToMessageId;
+    private Long replyToMessageId;
 
     /**
      * 创建时间，群组成员记录创建的时间

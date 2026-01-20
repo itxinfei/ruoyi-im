@@ -102,7 +102,8 @@ public class ImFriendRequestServiceImpl implements ImFriendRequestService {
      * @param userId1 用户1 ID
      * @param userId2 用户2 ID
      */
-    private void createBidirectionalFriend(Long userId1, Long userId2) {
+    @Transactional
+    public void createBidirectionalFriend(Long userId1, Long userId2) {
         // 检查是否已经存在好友关系
         if (imFriendService.selectImFriendByUsers(userId1, userId2) == null) {
             ImFriend friend1 = new ImFriend();

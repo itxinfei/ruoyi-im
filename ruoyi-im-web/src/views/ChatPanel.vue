@@ -301,7 +301,8 @@ const scrollToBottom = () => {
 .chat-header {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
+  height: 56px;
+  padding: 0 16px;
   border-bottom: 1px solid #f0f0f0;
   gap: 12px;
 
