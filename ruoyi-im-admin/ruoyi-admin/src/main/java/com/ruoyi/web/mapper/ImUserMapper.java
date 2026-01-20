@@ -24,6 +24,11 @@ public interface ImUserMapper {
     ImUser selectImUserById(Long id);
 
     /**
+     * 根据ID数组查询用户列表
+     */
+    List<ImUser> selectImUserByIds(Long[] ids);
+
+    /**
      * 查询用户总数
      */
     int countUsers(ImUser imUser);

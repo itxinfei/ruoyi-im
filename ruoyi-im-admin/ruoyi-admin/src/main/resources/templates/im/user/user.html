@@ -68,11 +68,14 @@
                 <a class="btn btn-info multiple disabled" onclick="batchUpdateStatus()" shiro:hasPermission="im:user:edit">
                     <i class="fa fa-toggle-on"></i> 批量启用/停用
                 </a>
+                <a class="btn btn-purple multiple disabled" onclick="exportSelected()" shiro:hasPermission="im:user:export">
+                    <i class="fa fa-file-excel-o"></i> 导出选中
+                </a>
                 <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:user:remove">
                     <i class="fa fa-remove"></i> 删除
                 </a>
                 <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:user:export">
-                    <i class="fa fa-download"></i> 导出
+                    <i class="fa fa-download"></i> 导出全部
                 </a>
             </div>
 
@@ -319,6 +322,24 @@
         function viewUserGroups(userId, username) {
             var url = ctx + 'im/group?memberId=' + userId;
             $.modal.openTab(username + ' - 群组列表', url);
+        }
+
+        /**
+         * 批量导出选中的用户
+         */
+        function exportSelected() {
+            var rows = $.table.selectColumns('id');
+            if (rows.length === 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+
+            $.modal.confirm("确认要导出选中的 " + rows.length + " 条用户数据吗？", function() {
+                $.modal.msg("正在导出数据...", {icon: 16, shade: 0.3, time: 1000});
+                // 导出选中的用户数据
+                var url = prefix + "/export?ids=" + rows.join(",");
+                window.location.href = url;
+            });
         }
     </script>
 </body>

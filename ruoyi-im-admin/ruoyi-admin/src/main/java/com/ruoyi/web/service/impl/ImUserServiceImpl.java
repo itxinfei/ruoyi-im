@@ -37,6 +37,11 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    public List<ImUser> selectImUserByIds(Long[] ids) {
+        return userMapper.selectImUserByIds(ids);
+    }
+
+    @Override
     public int insertImUser(ImUser imUser) {
         // 对密码进行加密（BCrypt）
         if (imUser.getPassword() != null && !imUser.getPassword().isEmpty()) {

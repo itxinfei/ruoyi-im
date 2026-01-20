@@ -154,12 +154,31 @@ public class ImUserController extends BaseController {
 
     /**
      * 导出IM用户列表
+     * @param ids 可选，指定要导出的用户ID列表（逗号分隔）
      */
     @RequiresPermissions("im:user:export")
     @Log(title = "IM用户", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response, ImUser imUser) {
-        List<ImUser> list = imUserService.selectImUserList(imUser);
+    public void export(HttpServletResponse response, ImUser imUser, String ids) {
+        List<ImUser> list;
+
+        // 如果指定了ids，则只导出选中的用户
+        if (ids != null && !ids.trim().isEmpty()) {
+            String[] idArray = ids.split(",");
+            Long[] userIds = new Long[idArray.length];
+            for (int i = 0; i < idArray.length; i++) {
+                try {
+                    userIds[i] = Long.parseLong(idArray[i].trim());
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+            }
+            list = imUserService.selectImUserByIds(userIds);
+        } else {
+            // 否则导出所有符合条件的用户
+            list = imUserService.selectImUserList(imUser);
+        }
+
         ExcelUtil<ImUser> util = new ExcelUtil<>(ImUser.class);
         util.exportExcel(response, list, "用户数据");
     }

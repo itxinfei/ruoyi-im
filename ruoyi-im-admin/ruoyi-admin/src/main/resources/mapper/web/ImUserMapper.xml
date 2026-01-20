@@ -32,7 +32,15 @@
         <include refid="selectImUserVo"/>
         where id = #{id}
     </select>
-    
+
+    <select id="selectImUserByIds" parameterType="Long" resultMap="ImUserResult">
+        <include refid="selectImUserVo"/>
+        where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
     <select id="selectImUserList" parameterType="com.ruoyi.web.domain.ImUser" resultMap="ImUserResult">
         <include refid="selectImUserVo"/>
         <where>

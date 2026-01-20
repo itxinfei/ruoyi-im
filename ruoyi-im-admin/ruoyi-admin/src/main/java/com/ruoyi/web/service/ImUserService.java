@@ -39,6 +39,17 @@ public interface ImUserService {
     ImUser selectImUserById(Long id);
 
     /**
+     * 根据用户ID数组查询用户列表
+     *
+     * <p>通过多个用户ID批量查询用户信息</p>
+     * <p>用于批量导出、批量操作等场景</p>
+     *
+     * @param ids 用户主键ID数组，不能为空或空数组
+     * @return 用户信息列表，如果没有符合条件的数据则返回空列表
+     */
+    List<ImUser> selectImUserByIds(Long[] ids);
+
+    /**
      * 新增IM用户
      *
      * <p>创建新的用户账号，包括初始化用户基本信息和默认设置</p>
