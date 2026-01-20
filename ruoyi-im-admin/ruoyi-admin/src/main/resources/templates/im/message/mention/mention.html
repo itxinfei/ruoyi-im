@@ -168,6 +168,53 @@
 			<table id="bootstrap-table"></table>
                 </div>
             </div>
+        
+            <!-- 统计卡片样式 -->
+            <style type="text/css">
+                .stat-box {
+                    position: relative;
+                    padding: 15px;
+                    background: #fff;
+                    border-radius: 4px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                    transition: all 0.3s;
+                }
+                .stat-box:hover {
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                    transform: translateY(-2px);
+                }
+                .stat-box-primary {
+                    border-left: 4px solid #1ab394;
+                }
+                .stat-box-success {
+                    border-left: 4px solid #1c84c6;
+                }
+                .stat-box-danger {
+                    border-left: 4px solid #ed5565;
+                }
+                .stat-box-warning {
+                    border-left: 4px solid #f8ac59;
+                }
+                .stat-box .stat-number {
+                    font-size: 28px;
+                    font-weight: 600;
+                    color: #676a6c;
+                    margin-bottom: 5px;
+                }
+                .stat-box .stat-label {
+                    font-size: 13px;
+                    color: #999;
+                    margin-bottom: 0;
+                }
+                .stat-box .stat-icon {
+                    position: absolute;
+                    right: 15px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    font-size: 36px;
+                    opacity: 0.15;
+                }
+            </style>
         </div>
     </div>
 
