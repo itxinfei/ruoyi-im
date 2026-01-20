@@ -87,10 +87,11 @@
                 <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:department:export">
                     <i class="fa fa-download"></i> 导出
                 </a>
-            </div>
-
             <div class="col-sm-12 select-table table-striped">
-                <table id="bootstrap-table" data-mobile-responsive="true"
+			<div class="btn-group-sm" id="toolbar" role="group">
+				<!-- Buttons moved here -->
+			</div>
+			<table id="bootstrap-table" data-mobile-responsive="true"
                        data-tree-view="true"
                        data-tree-show-field="name">
                 </table>
@@ -119,6 +120,8 @@
         $(function() {
             var options = {
                 url: prefix + "/list",
+				toolbar: "#toolbar",
+				height: 650,
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove/{id}",

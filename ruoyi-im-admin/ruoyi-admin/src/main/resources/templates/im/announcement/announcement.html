@@ -156,10 +156,11 @@
                 <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:announcement:remove">
                     <i class="fa fa-remove"></i> 删除
                 </a>
-            </div>
-
             <div class="col-sm-12 select-table table-striped">
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+			<div class="btn-group-sm" id="toolbar" role="group">
+				<!-- Buttons moved here -->
+			</div>
+			<table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
@@ -192,6 +193,8 @@
 
             var options = {
                 url: prefix + "/list",
+				toolbar: "#toolbar",
+				height: 650,
                 createUrl: prefix + "/add?groupId=" + (currentGroupId || ''),
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove",

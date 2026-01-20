@@ -81,10 +81,11 @@
                 <a class="btn btn-info" onclick="exportData()" shiro:hasPermission="im:group:log:export">
                     <i class="fa fa-download"></i> 导出
                 </a>
-            </div>
-
             <div class="col-sm-12 select-table table-striped">
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+			<div class="btn-group-sm" id="toolbar" role="group">
+				<!-- Buttons moved here -->
+			</div>
+			<table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
@@ -97,6 +98,8 @@
         $(function() {
             var options = {
                 url: prefix + "/list",
+				toolbar: "#toolbar",
+				height: 650,
                 exportUrl: prefix + "/export",
                 modalName: "群组管理日志",
                 columns: [{

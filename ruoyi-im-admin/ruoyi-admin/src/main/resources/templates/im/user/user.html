@@ -54,33 +54,28 @@
                 </form>
             </div>
 
-            <!-- 操作按钮 -->
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:user:add">
-                    <i class="fa fa-plus"></i> 新增
-                </a>
-                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:user:edit">
-                    <i class="fa fa-edit"></i> 修改
-                </a>
-                <a class="btn btn-info single disabled" onclick="resetPwd()" shiro:hasPermission="im:user:edit">
-                    <i class="fa fa-key"></i> 重置
-                </a>
-                <a class="btn btn-info multiple disabled" onclick="batchUpdateStatus()" shiro:hasPermission="im:user:edit">
-                    <i class="fa fa-toggle-on"></i> 批量启用/停用
-                </a>
-                <a class="btn btn-purple multiple disabled" onclick="exportSelected()" shiro:hasPermission="im:user:export">
-                    <i class="fa fa-file-excel-o"></i> 导出选中
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:user:remove">
-                    <i class="fa fa-remove"></i> 删除
-                </a>
-                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:user:export">
-                    <i class="fa fa-download"></i> 导出全部
-                </a>
-            </div>
-
             <!-- 数据表格 -->
             <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:user:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:user:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-info single disabled" onclick="resetPwd()" shiro:hasPermission="im:user:edit">
+                        <i class="fa fa-key"></i> 重置
+                    </a>
+                    <a class="btn btn-info multiple disabled" onclick="batchUpdateStatus()" shiro:hasPermission="im:user:edit">
+                        <i class="fa fa-toggle-on"></i> 批量启用/停用
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:user:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:user:export">
+                        <i class="fa fa-download"></i> 导出全部
+                    </a>
+                </div>
                 <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
@@ -97,6 +92,8 @@
             var paginationConfig = ImCommon.getPaginationConfig(20, [10, 20, 50, 100]);
             var options = {
                 url: prefix + "/list",
+                toolbar: "#toolbar",
+                height: 650,
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove/{id}",
