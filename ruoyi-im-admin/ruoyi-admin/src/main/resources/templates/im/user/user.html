@@ -69,9 +69,9 @@
             display: flex;
             align-items: center;
         }
+        /* 不覆盖 columns-right，让 pull-right (float: right) 生效 */
         .fixed-table-toolbar .columns-right {
-            display: flex;
-            align-items: center;
+            float: right;
         }
         /* 移除按钮组之间的间距 */
         .fixed-table-toolbar .btn-group .btn {
