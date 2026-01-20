@@ -1,14 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>会话成员管理</title>
-    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
-    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
-    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
-    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+    <th:block th:include="include :: header('会话成员管理')" />
     <style>
         /* 页面容器样式 */
         .page-container {
@@ -544,10 +537,11 @@
             layer.open({
                 type: 1,
                 title: '成员详情 - ' + nickname,
-                area: ['1000px', '700px'],
+                area: ['95%', '90%'],
                 content: content
             });
         }
     </script>
+    <th:block th:include="include :: footer" />
 </body>
 </html>

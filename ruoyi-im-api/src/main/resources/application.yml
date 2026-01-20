@@ -67,6 +67,9 @@ spring:
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
+    # 忽略 JSON 中不存在的字段，避免前端多传参数导致报错
+    deserialization:
+      fail-on-unknown-properties: false
 
   # MVC配置
   mvc:

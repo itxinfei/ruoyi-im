@@ -1,191 +1,38 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="renderer" content="webkit">
-    <title>好友管理</title>
-    <link rel="shortcut icon" href="/favicon.ico">
-    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
-    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
-    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
-    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
-    <style>
-        /* 统计卡片样式 */
-        .statistics-section {
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-        .statistics-card {
-            padding: 15px;
-            border-radius: 4px;
-            color: #fff;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .statistics-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-        .stat-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 40px;
-            opacity: 0.2;
-        }
-        .stat-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .stat-pending { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .stat-groups { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .stat-today { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-
-        /* 搜索区域样式 */
-        .search-collapse {
-            margin-bottom: 10px;
-        }
-
-        /* 表格区域样式 */
-        .select-table.table-striped {
-            padding: 0;
-        }
-
-        /* 用户头像 */
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #e5e6e7;
-            transition: all 0.3s ease;
-        }
-        .user-avatar:hover {
-            transform: scale(1.1);
-            border-color: #667eea;
-        }
-
-        /* 在线状态指示器 */
-        .online-status {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-        .online-status.online {
-            background-color: #52c41a;
-            box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
-        }
-        .online-status.offline {
-            background-color: #d9d9d9;
-        }
-
-        /* 操作按钮样式优化 */
-        .btn-xs {
-            padding: 4px 8px;
-            font-size: 12px;
-            line-height: 1.5;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .btn-xs:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* 徽章样式 */
-        .badge {
-            padding: 4px 8px;
-            font-size: 11px;
-            border-radius: 3px;
-        }
-
-        /* 加载遮罩 */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255,255,255,0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        .loading-overlay.show {
-            display: flex;
-        }
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* 空状态提示 */
-        .no-data-tip {
-            text-align: center;
-            padding: 40px 0;
-            color: #999;
-        }
-        .no-data-tip i {
-            font-size: 48px;
-            margin-bottom: 10px;
-            display: block;
-        }
-    </style>
+    <th:block th:include="include :: header('好友管理')" />
+    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-    </div>
-
     <div class="container-div">
         <div class="row">
             <!-- 统计卡片 -->
             <div class="col-sm-12 statistics-section">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-total" onclick="refreshStatistics()">
+                        <div class="statistics-card stat-bg-purple">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">好友关系总数</div>
                             <i class="fa fa-heart stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-pending" onclick="viewPendingRequests()">
+                        <div class="statistics-card stat-bg-pink">
                             <div class="stat-number" id="pendingCount">0</div>
                             <div class="stat-label">待处理请求</div>
                             <i class="fa fa-user-plus stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-groups" onclick="viewGroups()">
+                        <div class="statistics-card stat-bg-cyan">
                             <div class="stat-number" id="groupCount">0</div>
                             <div class="stat-label">分组数量</div>
                             <i class="fa fa-tag stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-today" onclick="viewTodayAdded()">
+                        <div class="statistics-card stat-bg-teal">
                             <div class="stat-number" id="todayCount">0</div>
                             <div class="stat-label">今日新增</div>
                             <i class="fa fa-calendar-plus-o stat-icon"></i>
@@ -238,11 +85,8 @@
                 <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:friend:remove">
                     <i class="fa fa-remove"></i> 批量删除
                 </a>
-                <a class="btn btn-info" onclick="exportData()" shiro:hasPermission="im:friend:export">
-                    <i class="fa fa-download"></i> 导出数据
-                </a>
-                <a class="btn btn-default" onclick="refreshData()">
-                    <i class="fa fa-refresh"></i> 刷新
+                <a class="btn btn-info" onclick="$.table.exportExcel()" shiro:hasPermission="im:friend:export">
+                    <i class="fa fa-download"></i> 导出
                 </a>
             </div>
 
@@ -253,19 +97,7 @@
         </div>
     </div>
 
-    <!-- 通用JS -->
-    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
-    <script th:src="@{/js/jquery.min.js}"></script>
-    <script th:src="@{/js/bootstrap.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js}"></script>
-    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
-    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
-    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-    <script th:src="@{/ajax/libs/layui/layui.min.js}"></script>
-    <script th:src="@{/ruoyi/js/common.js}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
+    <th:block th:include="include :: footer" />
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:friend:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:friend:remove')}]];
@@ -273,6 +105,7 @@
 
         $(function() {
             loadStatistics();
+
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -301,28 +134,12 @@
                     }
                 },
                 {
-                    field: 'userId',
-                    title: '用户ID',
-                    visible: false
-                },
-                {
                     field: 'userName',
                     title: '用户昵称',
                     width: '120',
                     formatter: function(value, row, index) {
                         return value || '<span class="text-muted">-</span>';
                     }
-                },
-                {
-                    field: 'friendId',
-                    title: '好友ID',
-                    visible: false
-                },
-                {
-                    field: 'friendUsername',
-                    title: '好友账号',
-                    width: '120',
-                    visible: false
                 },
                 {
                     field: 'friendNickname',
@@ -391,11 +208,11 @@
                 {
                     title: '操作',
                     align: 'center',
-                    width: '180',
+                    width: '150',
                     formatter: function(value, row, index) {
                         var actions = [];
                         actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="removeFriend(' + row.id + ')"><i class="fa fa-remove"></i>删除</a>');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(' + row.id + ')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
                 }]
@@ -404,73 +221,14 @@
         });
 
         function loadStatistics() {
-            showLoading();
-            $.ajax({
-                url: prefix + "/statistics",
-                type: 'GET',
-                dataType: 'json',
-                success: function(result) {
-                    if (result.code == 0) {
-                        $("#totalCount").text(result.data.totalCount || 0);
-                        $("#pendingCount").text(result.data.pendingCount || 0);
-                        $("#groupCount").text(result.data.groupCount || 0);
-                        $("#todayCount").text(result.data.todayCount || 0);
-                    }
-                },
-                complete: function() {
-                    hideLoading();
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code == 0) {
+                    $("#totalCount").text(result.data.totalCount || 0);
+                    $("#pendingCount").text(result.data.pendingCount || 0);
+                    $("#groupCount").text(result.data.groupCount || 0);
+                    $("#todayCount").text(result.data.todayCount || 0);
                 }
             });
-        }
-
-        function refreshStatistics() {
-            loadStatistics();
-            $.modal.msgSuccess("统计数据已刷新");
-        }
-
-        function viewPendingRequests() {
-            window.location.href = ctx + "im/friendRequest";
-        }
-
-        function viewGroups() {
-            $.modal.msg("分组管理功能开发中");
-        }
-
-        function viewTodayAdded() {
-            var today = new Date().toISOString().split('T')[0];
-            $("#friend-form input[name='params[beginTime]']").val(today);
-            $("#friend-form input[name='params[endTime]']").val(today);
-            $.table.search();
-        }
-
-        function removeFriend(id) {
-            $.modal.confirm("确定要删除这条好友关系吗？删除后对方也将无法看到此关系。", function() {
-                $.operate.remove(id);
-            });
-        }
-
-        function exportData() {
-            var currentFormId = $.table._option.formId;
-            var params = $("#" + currentFormId).serializeArray();
-            var url = $.table._option.exportUrl;
-            $.modal.loading("正在导出数据，请稍候...");
-            window.location.href = url + "?" + $.param(params);
-            setTimeout(function() {
-                $.modal.closeLoading();
-            }, 2000);
-        }
-
-        function refreshData() {
-            $.table.refresh();
-            loadStatistics();
-        }
-
-        function showLoading() {
-            $("#loadingOverlay").addClass("show");
-        }
-
-        function hideLoading() {
-            $("#loadingOverlay").removeClass("show");
         }
     </script>
 </body>

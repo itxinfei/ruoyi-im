@@ -1,108 +1,37 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="renderer" content="webkit">
-    <title>应用管理</title>
-    <link rel="shortcut icon" href="/favicon.ico">
-    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
-    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
-    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
-    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
-    <style>
-        /* 统计卡片样式 */
-        .statistics-section {
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-        .statistics-card {
-            padding: 15px;
-            border-radius: 4px;
-            color: #fff;
-            position: relative;
-            overflow: hidden;
-        }
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-        .stat-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 40px;
-            opacity: 0.2;
-        }
-        .stat-total { background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%); }
-        .stat-visible { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-        .stat-hidden { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .stat-system { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-                /* 搜索区域底部间距 */
-                .search-collapse {
-                    margin-bottom: 10px;
-                }
-        
-                /* 表格区域样式 */
-                .select-table.table-striped {
-                    padding: 0;
-                }
-        /* 应用图标样式 */
-        .app-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 6px;
-            object-fit: cover;
-        }
-        /* 操作按钮样式优化 */
-        .btn-xs {
-            padding: 4px 8px;
-            font-size: 12px;
-            line-height: 1.5;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .btn-xs:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-    </style>
+    <th:block th:include="include :: header('应用管理')" />
+    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
         <div class="row">
-            <!-- 统计卡片 -->
             <div class="col-sm-12 statistics-section">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-total">
+                        <div class="statistics-card stat-bg-blue">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">应用总数</div>
                             <i class="fa fa-cube stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-visible">
+                        <div class="statistics-card stat-bg-green">
                             <div class="stat-number" id="visibleCount">0</div>
                             <div class="stat-label">已发布</div>
                             <i class="fa fa-eye stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-hidden">
+                        <div class="statistics-card stat-bg-orange">
                             <div class="stat-number" id="hiddenCount">0</div>
                             <div class="stat-label">未发布</div>
                             <i class="fa fa-eye-slash stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-system">
+                        <div class="statistics-card stat-bg-purple">
                             <div class="stat-number" id="systemCount">0</div>
                             <div class="stat-label">系统应用</div>
                             <i class="fa fa-lock stat-icon"></i>
@@ -110,7 +39,7 @@
                     </div>
                 </div>
             </div>
-            <!-- 搜索区域 -->
+
             <div class="col-sm-12 search-collapse">
                 <form id="application-form">
                     <div class="select-list">
@@ -153,12 +82,10 @@
                     </div>
                 </form>
             </div>
+
             <div class="btn-group-sm" id="toolbar" role="group">
                 <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:app:add">
                     <i class="fa fa-plus"></i> 新增
-                </a>
-                <a class="btn btn-info single disabled" onclick="$.operate.detail()" shiro:hasPermission="im:app:query">
-                    <i class="fa fa-search"></i> 详情
                 </a>
                 <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:app:edit">
                     <i class="fa fa-edit"></i> 修改
@@ -176,30 +103,20 @@
             </div>
         </div>
     </div>
-        <!-- 通用JS -->
-    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
-    <script th:src="@{/js/jquery.min.js}"></script>
-    <script th:src="@{/js/bootstrap.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js}"></script>
-    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
-    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
-    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-    <script th:src="@{/ajax/libs/layui/layui.min.js}"></script>
-    <script th:src="@{/ruoyi/js/common.js}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
+
+    <th:block th:include="include :: footer" />
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:app:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:app:remove')}]];
         var prefix = ctx + "im/application";
+
         $(function() {
             loadStatistics();
+
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
-                detailUrl: prefix + "/detail/{id}",
                 removeUrl: prefix + "/remove/{id}",
                 modalName: "应用",
                 columns: [{
@@ -217,7 +134,6 @@
                     align: 'center',
                     formatter: function(value, row, index) {
                         if (value) {
-                            // 判断是否为 Font Awesome 图标类名（包含 fa-）
                             if (value.indexOf('fa-') !== -1 || value.indexOf('fa ') !== -1) {
                                 return '<i class="' + value + ' fa-2x text-gray"></i>';
                             }
@@ -276,7 +192,7 @@
                     field: 'isSystem',
                     title: '系统应用',
                     align: 'center',
-                    width: '80',
+                    width: '90',
                     formatter: function(value, row, index) {
                         if (value == true) return '<span class="badge badge-danger">是</span>';
                         return '<span class="badge badge-default">否</span>';
@@ -302,15 +218,14 @@
                 {
                     title: '操作',
                     align: 'center',
-                    width: '260',
+                    width: '200',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" style="cursor: pointer;" onclick="$.operate.detail(' + row.id + ')"><i class="fa fa-search"></i>详情</a> ');
-                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" style="cursor: pointer;" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
                         var toggleText = row.isVisible == true ? '隐藏' : '显示';
-                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" style="cursor: pointer;" onclick="toggleOne(' + row.id + ', ' + row.isVisible + ')"><i class="fa fa-eye"></i>' + toggleText + '</a> ');
+                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="toggleOne(' + row.id + ', ' + row.isVisible + ')"><i class="fa fa-eye"></i>' + toggleText + '</a> ');
                         if (row.isSystem != true) {
-                            actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" style="cursor: pointer;" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                            actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         }
                         return actions.join('');
                     }
@@ -318,6 +233,7 @@
             };
             $.table.init(options);
         });
+
         function loadStatistics() {
             $.get(prefix + "/statistics")
             .done(function(result) {
@@ -334,6 +250,7 @@
                 $.modal.alertError("加载统计数据失败");
             });
         }
+
         function toggleVisibility() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
@@ -362,6 +279,7 @@
                 });
             });
         }
+
         function toggleOne(id, isVisible) {
             var newVisibility = !isVisible;
             $.ajax({
@@ -382,5 +300,6 @@
                 }
             });
         }
-    </script></body>
+    </script>
+</body>
 </html>

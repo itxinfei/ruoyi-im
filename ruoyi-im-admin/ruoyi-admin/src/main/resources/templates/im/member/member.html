@@ -1,150 +1,37 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="renderer" content="webkit">
-    <title>群组成员管理</title>
-    <link rel="shortcut icon" href="/favicon.ico">
-    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
-    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
-    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
-    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
-    <style>
-        body {
-            background-color: #f5f7fa;
-        }
-        .container-div {
-            padding: 15px;
-        }
-
-        /* 统计卡片样式 */
-        .statistics-section {
-            margin-top: 8px;
-            margin-bottom: 12px;
-        }
-        .statistics-card {
-            padding: 12px;
-            border-radius: 6px;
-            color: #fff;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .statistics-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .stat-number {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-        .stat-label {
-            font-size: 11px;
-            opacity: 0.9;
-        }
-        .stat-icon {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 32px;
-            opacity: 0.2;
-            transition: all 0.3s ease;
-        }
-        .statistics-card:hover .stat-icon {
-            opacity: 0.3;
-            transform: translateY(-50%) scale(1.1);
-        }
-        .stat-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .stat-owner { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .stat-admin { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-        .stat-muted { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-
-        /* 搜索区域 */
-        .search-collapse {
-            margin-bottom: 12px;
-            padding: 12px;
-            background: #fff;
-            border-radius: 6px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        /* 表格区域样式 */
-        .select-table.table-striped {
-            padding: 0;
-            background: #fff;
-            border-radius: 6px;
-            padding: 12px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        /* 表格样式优化 */
-        .fixed-table-container {
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .table {
-            margin-bottom: 0;
-        }
-        .table > thead > tr > th,
-        .table > tbody > tr > td {
-            vertical-align: middle;
-            padding: 10px 8px;
-        }
-
-        /* 操作按钮样式优化 */
-        .btn-xs {
-            padding: 4px 8px;
-            font-size: 12px;
-            line-height: 1.5;
-            transition: all 0.2s ease;
-            border-radius: 3px;
-        }
-        .btn-xs:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* 工具栏样式 */
-        #toolbar {
-            margin-bottom: 12px;
-        }
-    </style>
+    <th:block th:include="include :: header('群组成员管理')" />
+    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
         <div class="row">
-            <!-- 统计卡片 -->
             <div class="col-sm-12 statistics-section">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-total" data-type="total" title="点击查看所有成员">
+                        <div class="statistics-card stat-bg-purple">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">成员总数</div>
                             <i class="fa fa-users stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-owner" data-type="owner" title="点击查看群主">
+                        <div class="statistics-card stat-bg-pink">
                             <div class="stat-number" id="ownerCount">0</div>
                             <div class="stat-label">群主</div>
                             <i class="fa fa-user-plus stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-admin" data-type="admin" title="点击查看管理员">
+                        <div class="statistics-card stat-bg-orange">
                             <div class="stat-number" id="adminCount">0</div>
                             <div class="stat-label">管理员</div>
                             <i class="fa fa-user-md stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-muted" data-type="muted" title="点击查看已禁言成员">
+                        <div class="statistics-card stat-bg-blue">
                             <div class="stat-number" id="mutedCount">0</div>
                             <div class="stat-label">已禁言</div>
                             <i class="fa fa-ban stat-icon"></i>
@@ -152,7 +39,7 @@
                     </div>
                 </div>
             </div>
-            <!-- 搜索区域 -->
+
             <div class="col-sm-12 search-collapse">
                 <form id="member-form">
                     <div class="select-list">
@@ -187,6 +74,7 @@
                     </div>
                 </form>
             </div>
+
             <div class="btn-group-sm" id="toolbar" role="group">
                 <a class="btn btn-success" onclick="addMember()" shiro:hasPermission="im:group:member:add">
                     <i class="fa fa-plus"></i> 添加成员
@@ -197,10 +85,10 @@
                 <a class="btn btn-warning single disabled" onclick="toggleMute()" shiro:hasPermission="im:group:member:edit">
                     <i class="fa fa-ban"></i> 禁言/解禁
                 </a>
-                <a class="btn btn-info multiple disabled" onclick="batchMute()" shiro:hasPermission="im:group:member:edit">
+                <a class="btn-info multiple disabled" onclick="batchMute()" shiro:hasPermission="im:group:member:edit">
                     <i class="fa fa-ban"></i> 批量禁言
                 </a>
-                <a class="btn btn-success multiple disabled" onclick="batchUnmute()" shiro:hasPermission="im:group:member:edit">
+                <a class="btn-success multiple disabled" onclick="batchUnmute()" shiro:hasPermission="im:group:member:edit">
                     <i class="fa fa-check-circle"></i> 批量解禁
                 </a>
                 <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:member:remove">
@@ -210,30 +98,22 @@
                     <i class="fa fa-download"></i> 导出
                 </a>
             </div>
+
             <div class="col-sm-12 select-table table-striped">
                 <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
-        <!-- 通用JS -->
-    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
-    <script th:src="@{/js/jquery.min.js}"></script>
-    <script th:src="@{/js/bootstrap.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js}"></script>
-    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
-    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
-    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-    <script th:src="@{/ajax/libs/layui/layui.min.js}"></script>
-    <script th:src="@{/ruoyi/js/common.js}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
+
+    <th:block th:include="include :: footer" />
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:group:member:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:group:member:remove')}]];
         var prefix = ctx + "im/member";
+
         $(function() {
             loadStatistics();
+
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -255,7 +135,10 @@
                 },
                 {
                     field: 'groupName',
-                    title: '群组名称'
+                    title: '群组名称',
+                    formatter: function(value, row, index) {
+                        return '<span class="text-primary"><i class="fa fa-users"></i> ' + (value || '-') + '</span>';
+                    }
                 },
                 {
                     field: 'userId',
@@ -264,7 +147,10 @@
                 },
                 {
                     field: 'userNickname',
-                    title: '用户昵称'
+                    title: '用户昵称',
+                    formatter: function(value, row, index) {
+                        return value || '-';
+                    }
                 },
                 {
                     field: 'userName',
@@ -303,7 +189,10 @@
                 },
                 {
                     field: 'userMobile',
-                    title: '手机号'
+                    title: '手机号',
+                    formatter: function(value, row, index) {
+                        return value || '-';
+                    }
                 },
                 {
                     field: 'createTime',
@@ -313,16 +202,18 @@
                 {
                     title: '操作',
                     align: 'center',
+                    width: '180',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="changeRole(' + row.id + ', \'' + row.role + '\', ' + row.groupId + ', ' + row.userId + ')" style="cursor: pointer;"><i class="fa fa-edit"></i>角色</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="removeMember(' + row.groupId + ', ' + row.userId + ')" style="cursor: pointer;"><i class="fa fa-remove"></i>移除</a>');
+                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="changeRole(' + row.id + ', \'' + row.role + '\', ' + row.groupId + ', ' + row.userId + ')"><i class="fa fa-edit"></i>角色</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="removeMember(' + row.groupId + ', ' + row.userId + ')"><i class="fa fa-remove"></i>移除</a>');
                         return actions.join('');
                     }
                 }]
             };
             $.table.init(options);
         });
+
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code == 0) {
@@ -335,35 +226,6 @@
                 $.modal.msgError("加载统计数据失败");
             });
         }
-
-        /* 统计卡片点击筛选 */
-        $(document).on('click', '.statistics-card', function() {
-            var cardType = $(this).attr('data-type');
-            var roleSelect = $("select[name='role']");
-            var muteSelect = $("select[name='isMuted']");
-
-            // 重置筛选
-            roleSelect.val('');
-            muteSelect.val('');
-
-            switch(cardType) {
-                case 'owner':
-                    roleSelect.val('OWNER');
-                    break;
-                case 'admin':
-                    roleSelect.val('ADMIN');
-                    break;
-                case 'muted':
-                    muteSelect.val('1');
-                    break;
-                case 'total':
-                default:
-                    // 不筛选
-                    break;
-            }
-
-            $.table.search();
-        });
 
         /* 手动刷新 */
         function manualRefresh() {
@@ -421,11 +283,13 @@
                 $.operate.post(prefix + "/batchMute", data);
             });
         }
+
         /* 添加成员 */
         function addMember() {
             var url = prefix + "/add";
             $.modal.open("添加群组成员", url, '1000', '650');
         }
+
         /* 修改角色 */
         function editRole() {
             var rows = $.table.selectFirstColumns();
@@ -440,6 +304,7 @@
                 $.modal.alertWarning("请选择有效的记录");
             }
         }
+
         /* 修改角色 */
         function changeRole(id, currentRole, groupId, userId) {
             var roles = ['OWNER', 'ADMIN', 'MEMBER'];
@@ -455,6 +320,7 @@
                 $.operate.post(prefix + "/role", {groupId: groupId, userId: userId, role: newRole});
             });
         }
+
         /* 禁言/解禁 */
         function toggleMute() {
             var rows = $.table.selectFirstColumns();
@@ -473,6 +339,7 @@
                 $.operate.post(prefix + "/mute", data);
             });
         }
+
         /* 移除成员 */
         function removeMember(groupId, userId) {
             $.modal.confirm("确定要移除该成员吗？", function() {
@@ -495,5 +362,6 @@
                 });
             });
         }
-    </script></body>
+    </script>
+</body>
 </html>

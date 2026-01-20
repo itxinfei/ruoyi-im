@@ -1,71 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="renderer" content="webkit">
-    <title>审批管理</title>
-    <link rel="shortcut icon" href="/favicon.ico">
-    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
-    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
-    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
-    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
-    <style>
-        /* 统计卡片样式 */
-        .statistics-section {
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-        .statistics-card {
-            padding: 15px;
-            border-radius: 4px;
-            color: #fff;
-            position: relative;
-            overflow: hidden;
-        }
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-        .stat-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 40px;
-            opacity: 0.2;
-        }
-        .stat-total { background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%); }
-        .stat-pending { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
-        .stat-approved { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-        .stat-rejected { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-                /* 搜索区域底部间距 */
-                .search-collapse {
-                    margin-bottom: 10px;
-                }
-        
-                /* 表格区域样式 */
-                .select-table.table-striped {
-                    padding: 0;
-                }
-        /* 操作按钮样式优化 */
-        .btn-xs {
-            padding: 4px 8px;
-            font-size: 12px;
-            line-height: 1.5;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .btn-xs:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-    </style>
+    <th:block th:include="include :: header('审批管理')" />
+    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
@@ -74,28 +11,28 @@
             <div class="col-sm-12 statistics-section">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-total">
+                        <div class="statistics-card stat-bg-blue">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">审批总数</div>
                             <i class="fa fa-list-alt stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-pending">
+                        <div class="statistics-card stat-bg-orange">
                             <div class="stat-number" id="pendingCount">0</div>
                             <div class="stat-label">待处理</div>
                             <i class="fa fa-clock-o stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-approved">
+                        <div class="statistics-card stat-bg-green">
                             <div class="stat-number" id="approvedCount">0</div>
                             <div class="stat-label">已通过</div>
                             <i class="fa fa-check-circle stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-rejected">
+                        <div class="statistics-card stat-bg-red">
                             <div class="stat-number" id="rejectedCount">0</div>
                             <div class="stat-label">已驳回</div>
                             <i class="fa fa-times-circle stat-icon"></i>
@@ -103,6 +40,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="approval-form">
@@ -134,50 +72,42 @@
                     </div>
                 </form>
             </div>
-                        <div class="btn-group-sm" id="toolbar" role="group">
-                            <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:approval:add">
-                                <i class="fa fa-plus"></i> 新增
-                            </a>
-                            <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:approval:edit">
-                                <i class="fa fa-edit"></i> 修改
-                            </a>
-                            <a class="btn btn-info single disabled" onclick="showDetail()" shiro:hasPermission="im:approval:query">
-                                <i class="fa fa-eye"></i> 详情
-                            </a>
-                            <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:approval:remove">
-                                <i class="fa fa-remove"></i> 删除
-                            </a>
-                        </div>
-            
-                        <div class="col-sm-12 select-table table-striped">
-                            <table id="bootstrap-table" data-mobile-responsive="true"></table>
-                        </div>
+
+            <!-- 操作按钮 -->
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:approval:add">
+                    <i class="fa fa-plus"></i> 新增
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:approval:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:approval:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>
+            </div>
+
+            <!-- 数据表格 -->
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
         </div>
     </div>
-        <!-- 通用JS -->
-    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
-    <script th:src="@{/js/jquery.min.js}"></script>
-    <script th:src="@{/js/bootstrap.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js}"></script>
-    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
-    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
-    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-    <script th:src="@{/ajax/libs/layui/layui.min.js}"></script>
-    <script th:src="@{/ruoyi/js/common.js}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
+
+    <th:block th:include="include :: footer" />
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:approval:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:approval:remove')}]];
         var prefix = ctx + "im/approval";
+
         $(function() {
             loadStatistics();
+
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove/{id}",
+                exportUrl: prefix + "/export",
                 modalName: "审批",
                 columns: [{
                     checkbox: true
@@ -191,15 +121,10 @@
                     field: 'title',
                     title: '审批标题',
                     sortable: true,
+                    width: '200',
                     formatter: function(value, row, index) {
-                        return $.table.tooltip(value);
+                        return $.table.tooltip(value, 50);
                     }
-                },
-                {
-                    field: 'applicantId',
-                    title: '发起人ID',
-                    width: '80',
-                    visible: false
                 },
                 {
                     field: 'applicantName',
@@ -243,18 +168,18 @@
                 {
                     title: '操作',
                     align: 'center',
-                    width: '200',
+                    width: '150',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" style="cursor: pointer;" onclick="viewDetail(' + row.id + ')"><i class="fa fa-eye"></i>详情</a> ');
-                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" style="cursor: pointer;" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" style="cursor: pointer;" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
                 }]
             };
             $.table.init(options);
         });
+
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code == 0) {
@@ -265,40 +190,6 @@
                 }
             });
         }
-        function showDetail() {
-            var rows = $.table.selectFirstColumns();
-            if (rows.length == 0) {
-                $.modal.alertWarning("请至少选择一条记录");
-                return;
-            }
-            viewDetail(rows[0]);
-        }
-        function viewDetail(id) {
-            $.get(prefix + "/info/" + id, function(result) {
-                if (result.code == 0) {
-                    var data = result.data;
-                    var content = '<div style="padding: 20px;">';
-                    content += '<table class="table table-bordered">';
-                    content += '<tr><th style="width:100px;">审批标题</th><td>' + (data.title || '-') + '</td></tr>';
-                    content += '<tr><th>状态</th><td>' + (data.status || '-') + '</td></tr>';
-                    content += '<tr><th>发起人ID</th><td>' + (data.applicantId || '-') + '</td></tr>';
-                    content += '<tr><th>创建时间</th><td>' + (data.createTime || '-') + '</td></tr>';
-                    if (data.finishTime) {
-                        content += '<tr><th>完成时间</th><td>' + data.finishTime + '</td></tr>';
-                    }
-                    if (data.remark) {
-                        content += '<tr><th>备注</th><td>' + data.remark + '</td></tr>';
-                    }
-                    content += '</table>';
-                    content += '</div>';
-                    top.layer.open({
-                        type: 1,
-                        title: '审批详情',
-                        area: ['900px', 'auto'],
-                        content: content
-                    });
-                }
-            });
-        }
-    </script></body>
+    </script>
+</body>
 </html>

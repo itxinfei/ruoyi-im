@@ -1,110 +1,37 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="renderer" content="webkit">
-    <title>群组管理日志</title>
-    <link rel="shortcut icon" href="/favicon.ico">
-    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
-    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
-    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
-    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
-    <style>
-        /* 统计卡片样式 */
-        .statistics-section {
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-        .statistics-card {
-            padding: 15px;
-            border-radius: 4px;
-            color: #fff;
-            position: relative;
-            overflow: hidden;
-        }
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-        .stat-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 40px;
-            opacity: 0.2;
-        }
-        .stat-total { background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%); }
-        .stat-add { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-        .stat-remove { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .stat-change { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
-        
-        /* 搜索区域底部间距 */
-        .search-collapse {
-            margin-bottom: 10px;
-        }
-        
-        /* 表格区域样式 */
-        .select-table.table-striped {
-            padding: 0;
-        }
-        
-        /* 操作按钮样式优化 */
-        .btn-xs {
-            padding: 4px 8px;
-            font-size: 12px;
-            line-height: 1.5;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .btn-xs:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        /* 徽章样式 */
-        .badge {
-            padding: 4px 8px;
-            font-size: 11px;
-            border-radius: 3px;
-        }
-    </style>
+    <th:block th:include="include :: header('群组管理日志')" />
+    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
         <div class="row">
-            <!-- 统计卡片 -->
             <div class="col-sm-12 statistics-section">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-total" onclick="filterByType('')">
+                        <div class="statistics-card stat-bg-blue">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">日志总数</div>
                             <i class="fa fa-list-alt stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-add" onclick="filterByType('ADD_MEMBER')">
+                        <div class="statistics-card stat-bg-green">
                             <div class="stat-number" id="addCount">0</div>
                             <div class="stat-label">添加成员</div>
                             <i class="fa fa-user-plus stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-remove" onclick="filterByType('REMOVE_MEMBER')">
+                        <div class="statistics-card stat-bg-red">
                             <div class="stat-number" id="removeCount">0</div>
                             <div class="stat-label">移除成员</div>
                             <i class="fa fa-user-times stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-change" onclick="filterByType('CHANGE_ROLE')">
+                        <div class="statistics-card stat-bg-orange">
                             <div class="stat-number" id="changeCount">0</div>
                             <div class="stat-label">修改角色</div>
                             <i class="fa fa-exchange stat-icon"></i>
@@ -112,23 +39,22 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- 搜索区域 -->
+
             <div class="col-sm-12 search-collapse">
                 <form id="log-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                群组ID：<input type="text" name="groupId" placeholder="请输入群组ID" style="width: 120px;"/>
+                                群组ID：<input type="text" name="groupId" placeholder="请输入群组ID"/>
                             </li>
                             <li>
-                                群组名称：<input type="text" name="groupName" placeholder="请输入群组名称" style="width: 150px;"/>
+                                群组名称：<input type="text" name="groupName" placeholder="请输入群组名称"/>
                             </li>
                             <li>
-                                操作者ID：<input type="text" name="operatorId" placeholder="请输入操作者ID" style="width: 120px;"/>
+                                操作者ID：<input type="text" name="operatorId" placeholder="请输入操作者ID"/>
                             </li>
                             <li>
-                                操作类型：<select name="operationType" style="width: 130px;">
+                                操作类型：<select name="operationType">
                                     <option value="">所有</option>
                                     <option value="ADD_MEMBER">添加成员</option>
                                     <option value="REMOVE_MEMBER">移除成员</option>
@@ -163,25 +89,15 @@
             </div>
         </div>
     </div>
-    <!-- 通用JS -->
-    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
-    <script th:src="@{/js/jquery.min.js}"></script>
-    <script th:src="@{/js/bootstrap.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js}"></script>
-    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
-    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
-    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-    <script th:src="@{/ajax/libs/layui/layui.min.js}"></script>
-    <script th:src="@{/ruoyi/js/common.js}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
+
+    <th:block th:include="include :: footer" />
     <script th:inline="javascript">
         var removeFlag = [[${@permission.hasPermi('im:group:log:remove')}]];
         var prefix = ctx + "im/group/log";
 
         $(function() {
             loadStatistics();
+
             var options = {
                 url: prefix + "/list",
                 exportUrl: prefix + "/export",
@@ -264,14 +180,14 @@
                     width: '100',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')" style="cursor: pointer;"><i class="fa fa-remove"></i>删除</a>');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
                 }]
             };
             $.table.init(options);
         });
-        
+
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code == 0) {
@@ -282,12 +198,7 @@
                 }
             });
         }
-        
-        function filterByType(operationType) {
-            $("select[name='operationType']").val(operationType);
-            $.table.search();
-        }
-        
+
         function exportData() {
             var currentFormId = $.table._option.formId;
             var params = $("#" + currentFormId).serializeArray();
