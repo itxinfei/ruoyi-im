@@ -26,6 +26,16 @@ import java.util.Map;
 @RequestMapping("/im/dashboard")
 public class ImDashboardController extends BaseController {
 
+    private String prefix = "im/dashboard";
+
+    /**
+     * IM数据仪表盘页面
+     */
+    @GetMapping()
+    public String dashboard() {
+        return prefix + "/dashboard";
+    }
+
     @Autowired
     private ImUserMapper imUserMapper;
 

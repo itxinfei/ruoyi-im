@@ -195,12 +195,16 @@
                 {
                     title: '操作',
                     align: 'center',
-                    width: '200',
+                    width: '350',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
-                        actions.push('<a class="btn btn-info btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="resetPasswordById(' + row.id + ')"><i class="fa fa-key"></i>重置</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(' + row.id + ')"><i class="fa fa-remove"></i>删除</a>');
+                        // 快速查看按钮
+                        actions.push('<a class="btn btn-primary btn-xs" href="javascript:void(0)" onclick="viewUserConversations(' + row.id + ', \'' + row.username + '\')" title="查看会话"><i class="fa fa-comments"></i>会话</a> ');
+                        actions.push('<a class="btn btn-success btn-xs" href="javascript:void(0)" onclick="viewUserMessages(' + row.id + ', \'' + row.username + '\')" title="查看消息"><i class="fa fa-envelope"></i>消息</a> ');
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewUserGroups(' + row.id + ', \'' + row.username + '\')" title="查看群组"><i class="fa fa-users"></i>群组</a> ');
+                        // 原有操作按钮
+                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i></a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(' + row.id + ')"><i class="fa fa-remove"></i></a>');
                         return actions.join('');
                     }
                 }],
@@ -291,6 +295,30 @@
                     }
                 });
             });
+        }
+
+        /**
+         * 快速查看用户的会话列表
+         */
+        function viewUserConversations(userId, username) {
+            var url = ctx + 'im/conversation?userId=' + userId;
+            $.modal.openTab(username + ' - 会话列表', url);
+        }
+
+        /**
+         * 快速查看用户的消息记录
+         */
+        function viewUserMessages(userId, username) {
+            var url = ctx + 'im/message?senderId=' + userId;
+            $.modal.openTab(username + ' - 消息记录', url);
+        }
+
+        /**
+         * 快速查看用户加入的群组
+         */
+        function viewUserGroups(userId, username) {
+            var url = ctx + 'im/group?memberId=' + userId;
+            $.modal.openTab(username + ' - 群组列表', url);
         }
     </script>
 </body>
