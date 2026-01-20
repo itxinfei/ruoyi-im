@@ -2,35 +2,113 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('消息管理')" />
-
     <style type="text/css">
-                /* 搜索输入框优化 */
-                .search-collapse input[type="text"],
-                .search-collapse select {
-                    border-radius: 4px;
-                    border: 1px solid #e7eaec;
-                    transition: all 0.3s;
-                    min-width: 180px;
-                }
-                .search-collapse input[type="text"]:focus,
-                .search-collapse select:focus {
-                    border-color: #1ab394;
-                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
-                }
+        /* ========== 搜索区域样式 ========== */
+        .search-collapse {
+            border-radius: 8px;
+            border: 1px solid #e7eaec;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        .search-collapse:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .search-collapse input[type="text"],
+        .search-collapse select {
+            border-radius: 4px;
+            border: 1px solid #e7eaec;
+            transition: all 0.3s;
+            min-width: 180px;
+        }
+        .search-collapse input[type="text"]:focus,
+        .search-collapse select:focus {
+            border-color: #1ab394;
+            box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+        }
+        .search-collapse .select-list ul li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .search-collapse .select-list ul li label,
+        .search-collapse .select-list ul li .input-label {
+            min-width: 80px;
+            text-align: right;
+            font-weight: 500;
+            color: #676a6c;
+        }
 
-                /* 搜索标签优化 */
-                .search-collapse .select-list ul li {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-                .search-collapse .select-list ul li label,
-                .search-collapse .select-list ul li .input-label {
-                    min-width: 80px;
-                    text-align: right;
-                    font-weight: 500;
-                    color: #676a6c;
-                }
+        /* ========== 批量操作按钮区域 ========== */
+        #toolbar {
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e7eaec;
+            padding: 12px;
+        }
+
+        /* ========== 选中信息样式 ========== */
+        .selected-info {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #e8f4fd;
+            border: 1px solid #b3d7f7;
+            border-radius: 4px;
+            color: #1c84c6;
+            font-size: 13px;
+            margin-left: auto;
+        }
+        .selected-info strong {
+            color: #1c84c6;
+            font-size: 15px;
+            margin: 0 2px;
+        }
+
+        /* ========== 搜索状态提示 ========== */
+        .search-status {
+            padding: 8px 12px;
+            background: #f0f9ff;
+            border: 1px solid #b3d7f7;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        /* ========== 表格区域 ========== */
+        .select-table.table-striped {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e7eaec;
+        }
+        .table > thead > tr > th {
+            background: linear-gradient(to bottom, #f8f9fa 0%, #f1f3f5 100%);
+            color: #495057;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            padding: 14px 8px;
+            font-size: 13px;
+        }
+        .table > tbody > tr > td {
+            padding: 12px 8px;
+            vertical-align: middle;
+        }
+
+        /* ========== 下拉菜单样式 ========== */
+        .dropdown-menu > li > a {
+            padding: 8px 20px;
+            font-size: 13px;
+        }
+        .dropdown-menu > li > a i {
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+        }
+        .dropdown-menu .divider { margin: 5px 0; }
+        .dropdown-menu > li > a.text-danger { color: #ed5565; }
+        .dropdown-menu > li > a.text-danger:hover {
+            background-color: #ed5565;
+            color: #fff;
+        }
     </style>
 </head>
 <body class="gray-bg">
@@ -81,12 +159,6 @@
 
             <!-- 操作按钮 -->
             <div class="btn-group-sm" id="toolbar" role="group">
-                <!-- 选中状态显示 -->
-                <span id="selectedInfo" class="selected-info" style="display:none; margin-right: 15px;">
-                    已选 <strong id="selectedCount">0</strong> 项
-                    <a href="javascript:void(0)" onclick="ImCommon.clearSelection('#bootstrap-table'); ImCommon.updateSelectedInfo('#bootstrap-table');" style="margin-left: 10px;">清空</a>
-                </span>
-
                 <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:message:add">
                     <i class="fa fa-plus"></i> 新增
                 </a>
@@ -102,10 +174,15 @@
                 <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:message:export">
                     <i class="fa fa-download"></i> 导出
                 </a>
+                <!-- 选中状态显示（放在最后） -->
+                <span id="selectedInfo" class="selected-info" style="display:none;">
+                    已选 <strong id="selectedCount">0</strong> 项
+                    <a href="javascript:void(0)" onclick="ImCommon.clearSelection('#bootstrap-table'); ImCommon.updateSelectedInfo('#bootstrap-table');" style="margin-left: 10px;">清空</a>
+                </span>
             </div>
 
             <!-- 搜索状态提示 -->
-            <div class="search-status" id="searchStatus" style="display:none; margin-top:10px; padding:8px 12px; background:#f0f9ff; border:1px solid #b3d7f7; border-radius:4px; font-size:13px;">
+            <div class="search-status" id="searchStatus" style="display:none;">
                 <i class="fa fa-filter" style="color:#1c84c6;"></i>
                 搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
                 <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
@@ -126,7 +203,6 @@
         var prefix = ctx + "im/message";
 
         $(function() {
-            var paginationConfig = ImCommon.getPaginationConfig(20, [10, 20, 50, 100]);
             var options = {
                 url: prefix + "/list",
                 height: 650,
@@ -135,10 +211,11 @@
                 removeUrl: prefix + "/remove/{id}",
                 exportUrl: prefix + "/export",
                 modalName: "消息",
-                pagination: paginationConfig.pagination,
-                pageSize: paginationConfig.pageSize,
-                pageList: paginationConfig.pageList,
-                sidePagination: paginationConfig.sidePagination,
+                // 分页配置
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
                 // 固定列配置
                 fixedColumns: true,
                 fixedNumber: 1,
@@ -287,7 +364,9 @@
             $.table.init(options);
         });
 
-        // 加载统计数据        // 批量撤回消息
+        /**
+         * 批量撤回消息
+         */
         function batchRevoke() {
             var rows = $.table.selectColumns('id');
             if (!ImCommon.validateBatchOperation(rows, 1)) {
@@ -336,45 +415,5 @@
             $.table.search();
         }
     </script>
-
-    <!-- 优化样式 -->
-    <style type="text/css">
-        /* 选中信息样式 */
-        .selected-info {
-            display: inline-block;
-            padding: 6px 12px;
-            background: #e8f4fd;
-            border: 1px solid #b3d7f7;
-            border-radius: 4px;
-            color: #1c84c6;
-            font-size: 13px;
-        }
-        .selected-info strong {
-            color: #1c84c6;
-            font-size: 15px;
-            margin: 0 2px;
-        }
-
-        /* 下拉菜单样式优化 */
-        .dropdown-menu > li > a {
-            padding: 8px 20px;
-            font-size: 13px;
-        }
-        .dropdown-menu > li > a i {
-            margin-right: 8px;
-            width: 16px;
-            text-align: center;
-        }
-        .dropdown-menu .divider {
-            margin: 5px 0;
-        }
-        .dropdown-menu > li > a.text-danger {
-            color: #ed5565;
-        }
-        .dropdown-menu > li > a.text-danger:hover {
-            background-color: #ed5565;
-            color: #fff;
-        }
-    </style>
 </body>
 </html>
