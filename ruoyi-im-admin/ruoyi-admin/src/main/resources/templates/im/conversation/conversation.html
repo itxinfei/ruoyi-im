@@ -247,6 +247,7 @@
     </div>
 
     <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
     <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:conversation:edit')}]];
@@ -280,6 +281,13 @@
                 cookie: true,
                 cookieIdTable: 'im_conversation_table',
                 cookieExpire: '30d',
+                // 导出配置
+                showExport: true,
+                exportDataType: 'all',
+                exportTypes: ['excel'],
+                exportOptions: {
+                    fileName: '会话数据'
+                },
                 columns: [{
                     checkbox: true
                 }, {

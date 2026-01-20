@@ -158,6 +158,7 @@
     </div>
 
     <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:group:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:group:remove')}]];
@@ -188,6 +189,13 @@
                 cookie: true,
                 cookieIdTable: 'im_group_table',
                 cookieExpire: '30d',
+                // 导出配置
+                showExport: true,
+                exportDataType: 'all',
+                exportTypes: ['excel'],
+                exportOptions: {
+                    fileName: '群组数据'
+                },
                 columns: [{
                     checkbox: true
                 },

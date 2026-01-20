@@ -174,6 +174,7 @@
     </div>
 
     <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
     <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:message:edit')}]];
@@ -205,6 +206,13 @@
                 cookie: true,
                 cookieIdTable: 'im_message_table',
                 cookieExpire: '30d',
+                // 导出配置
+                showExport: true,
+                exportDataType: 'all',
+                exportTypes: ['excel'],
+                exportOptions: {
+                    fileName: '消息数据'
+                },
                 columns: [{
                     checkbox: true
                 },
