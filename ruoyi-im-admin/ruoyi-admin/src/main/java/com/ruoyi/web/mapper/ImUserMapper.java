@@ -61,7 +61,7 @@ public interface ImUserMapper {
     /**
      * 修改用户状态
      */
-    int changeStatus(Long id, String status);
+    int changeStatus(@Param("id") Long id, @Param("status") String status);
 
     /**
      * 获取在线用户数
