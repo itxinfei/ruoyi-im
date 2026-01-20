@@ -169,12 +169,7 @@
                     field: 'content',
                     title: '消息内容',
                     formatter: function(value, row, index) {
-                        if (!value) return '-';
-                        // 截断显示
-                        if (value.length > 50) {
-                            return value.substring(0, 50) + '...';
-                        }
-                        return value;
+                        return ImCommon.formatTextWithTooltip(value, 50);
                     }
                 },
                 {
@@ -219,8 +214,11 @@
                 {
                     field: 'createTime',
                     title: '发送时间',
-                    width: '160',
-                    sortable: true
+                    width: '200',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        return ImCommon.formatDateTimeWithRelative(value);
+                    }
                 },
                 {
                     title: '操作',
@@ -232,7 +230,23 @@
                         actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
-                }]
+                }],
+                responseHandler: function(res) {
+                    ImCommon.hideLoading();
+                    return ImCommon.handleTableResponse(res, '暂无消息数据', '#bootstrap-table');
+                },
+                onLoadError: function(status) {
+                    ImCommon.hideLoading();
+                    $.modal.msgError("数据加载失败，请稍后重试");
+                },
+                onLoadSuccess: function() {
+                    ImCommon.removeEmptyData('#bootstrap-table');
+                },
+                ajaxOptions: {
+                    beforeSend: function() {
+                        ImCommon.showLoading('.select-table');
+                    }
+                }
             };
             $.table.init(options);
         });
