@@ -1,89 +1,117 @@
 /**
- * IM管理后台公共样式
+ * IM管理后台公共样式 - 轻量扁平风
  * 统一所有IM模块的页面样式，确保一致性和可维护性
  */
 
-/* ==================== 统计卡片样式 ==================== */
+/* ==================== 统计卡片样式（轻量化）==================== */
 .statistics-section {
     margin-top: 10px;
     margin-bottom: 15px;
 }
 
 .statistics-card {
-    padding: 12px 15px;
-    border-radius: 6px;
+    padding: 15px;
+    border-radius: 4px;
     color: #fff;
     position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: #fff;
+    border-left: 3px solid #667eea;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
 }
 
 .statistics-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
 }
 
 .stat-number {
-    font-size: 22px;
-    font-weight: bold;
-    margin-bottom: 2px;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 3px;
+    color: #667eea;
 }
 
 .stat-label {
-    font-size: 11px;
-    opacity: 0.95;
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 500;
 }
 
 .stat-icon {
     position: absolute;
-    right: 12px;
+    right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 36px;
-    opacity: 0.2;
-    transition: all 0.3s ease;
+    font-size: 32px;
+    opacity: 0.15;
+    color: #667eea;
 }
 
-.statistics-card:hover .stat-icon {
-    opacity: 0.3;
-    transform: translateY(-50%) scale(1.1);
-}
+/* 统计卡片主题色（纯色，去除渐变）*/
+.stat-bg-blue { border-left-color: #5b86e5; }
+.stat-bg-blue .stat-number { color: #5b86e5; }
+.stat-bg-blue .stat-icon { color: #5b86e5; }
 
-/* 统计卡片渐变背景色 */
-.stat-bg-blue { background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%); }
-.stat-bg-purple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.stat-bg-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-.stat-bg-pink { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-.stat-bg-orange { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
-.stat-bg-cyan { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-.stat-bg-red { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
-.stat-bg-teal { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+.stat-bg-purple { border-left-color: #667eea; }
+.stat-bg-purple .stat-number { color: #667eea; }
+.stat-bg-purple .stat-icon { color: #667eea; }
+
+.stat-bg-green { border-left-color: #28a745; }
+.stat-bg-green .stat-number { color: #28a745; }
+.stat-bg-green .stat-icon { color: #28a745; }
+
+.stat-bg-pink { border-left-color: #e83e8c; }
+.stat-bg-pink .stat-number { color: #e83e8c; }
+.stat-bg-pink .stat-icon { color: #e83e8c; }
+
+.stat-bg-orange { border-left-color: #fd7e14; }
+.stat-bg-orange .stat-number { color: #fd7e14; }
+.stat-bg-orange .stat-icon { color: #fd7e14; }
+
+.stat-bg-cyan { border-left-color: #17a2b8; }
+.stat-bg-cyan .stat-number { color: #17a2b8; }
+.stat-bg-cyan .stat-icon { color: #17a2b8; }
+
+.stat-bg-red { border-left-color: #dc3545; }
+.stat-bg-red .stat-number { color: #dc3545; }
+.stat-bg-red .stat-icon { color: #dc3545; }
+
+.stat-bg-teal { border-left-color: #20c997; }
+.stat-bg-teal .stat-number { color: #20c997; }
+.stat-bg-teal .stat-icon { color: #20c997; }
 
 /* ==================== 搜索区域样式 ==================== */
 .search-collapse {
     margin-bottom: 15px;
     padding: 15px;
     background: #fff;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
 .search-collapse .select-list ul {
     margin-bottom: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
 }
 
 .search-collapse .select-list ul li {
-    margin-bottom: 8px;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* ==================== 表格区域样式 ==================== */
 .select-table.table-striped {
     padding: 0;
     background: #fff;
-    border-radius: 6px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
 .fixed-table-container {
@@ -95,19 +123,38 @@
     margin-bottom: 0;
 }
 
-.table > thead > tr > th,
+.table > thead > tr > th {
+    background: #f8f9fa;
+    color: #495057;
+    font-weight: 500;
+    border-bottom: 2px solid #e9ecef;
+    padding: 12px 8px;
+}
+
 .table > tbody > tr > td {
-    vertical-align: middle;
     padding: 10px 8px;
+    border-bottom: 1px solid #f1f3f5;
+    vertical-align: middle;
+}
+
+.table > tbody > tr:hover {
+    background: #f8f9fa;
 }
 
 /* ==================== 工具栏样式 ==================== */
 #toolbar {
     margin-bottom: 15px;
+    padding: 12px 15px;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
 }
 
 #toolbar .btn {
     margin-right: 5px;
+    border-radius: 4px;
+    font-size: 13px;
+    padding: 6px 14px;
 }
 
 /* ==================== 操作按钮样式 ==================== */
@@ -122,15 +169,15 @@
 
 .btn-xs:hover {
     transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 /* ==================== 徽章样式 ==================== */
 .badge {
-    padding: 4px 8px;
+    padding: 4px 10px;
     font-size: 11px;
     border-radius: 3px;
-    font-weight: normal;
+    font-weight: 500;
 }
 
 /* ==================== 头像样式 ==================== */
@@ -138,8 +185,8 @@
 .img-circle {
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #e5e6e7;
-    transition: all 0.3s ease;
+    border: 2px solid #e9ecef;
+    transition: all 0.2s ease;
 }
 
 .user-avatar {
@@ -154,7 +201,6 @@
 
 .user-avatar:hover,
 .img-circle:hover {
-    transform: scale(1.1);
     border-color: #667eea;
 }
 
@@ -182,11 +228,27 @@
 }
 
 .text-muted {
-    color: #777;
+    color: #6c757d;
 }
 
 .text-warning {
-    color: #f39c12;
+    color: #ffc107;
+}
+
+.text-success {
+    color: #28a745;
+}
+
+.text-danger {
+    color: #dc3545;
+}
+
+.text-info {
+    color: #17a2b8;
+}
+
+.text-primary {
+    color: #667eea;
 }
 
 /* ==================== 加载动画 ==================== */
@@ -196,7 +258,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.9);
     display: none;
     align-items: center;
     justify-content: center;
@@ -213,7 +275,7 @@
     border: 3px solid #f3f3f3;
     border-top: 3px solid #667eea;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
@@ -228,14 +290,107 @@
     }
 
     .stat-number {
-        font-size: 18px;
+        font-size: 20px;
     }
 
     .stat-label {
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .stat-icon {
-        font-size: 28px;
+        font-size: 24px;
     }
+
+    .search-collapse .select-list ul {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .search-collapse .select-list ul li {
+        width: 100%;
+    }
+
+    #toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    #toolbar .btn {
+        flex: 1;
+        min-width: 80px;
+    }
+}
+
+/* ==================== 表单控件优化 ==================== */
+.form-control:focus,
+select:focus,
+input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* ==================== 按钮优化 ==================== */
+.btn-primary {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.btn-primary:hover {
+    background-color: #5568d3;
+    border-color: #5568d3;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #218838;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #c82333;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #e0a800;
+    color: #212529;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #138496;
+}
+
+.btn-default {
+    background-color: #fff;
+    border-color: #dee2e6;
+    color: #495057;
+}
+
+.btn-default:hover {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #495057;
 }
