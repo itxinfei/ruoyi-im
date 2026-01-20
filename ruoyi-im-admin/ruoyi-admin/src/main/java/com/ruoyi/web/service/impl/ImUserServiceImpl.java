@@ -129,4 +129,19 @@ public class ImUserServiceImpl implements ImUserService {
         result.put("disabledCount", userMapper.countDisabledUsers());
         return result;
     }
+
+    @Override
+    public int batchUpdateStatus(Long[] userIds, String status) {
+        if (userIds == null || userIds.length == 0) {
+            return 0;
+        }
+
+        int count = 0;
+        for (Long userId : userIds) {
+            if (userId != null && userId > 0) {
+                count += changeStatus(userId, status);
+            }
+        }
+        return count;
+    }
 }

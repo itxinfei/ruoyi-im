@@ -151,4 +151,17 @@ public interface ImUserService {
      * @return 统计数据Map，包含 totalUsers（用户总数）、onlineUsers（在线用户数）、todayNewUsers（今日新增）等指标
      */
     Map<String, Object> getUserStatistics();
+
+    /**
+     * 批量修改用户状态
+     *
+     * <p>批量启用或停用多个用户账号</p>
+     * <p>状态包括：NORMAL（正常）、DISABLED（停用）、LOCKED（锁定）</p>
+     * <p>停用的用户无法登录系统，已登录的用户会被强制下线</p>
+     *
+     * @param userIds 用户ID数组，不能为空或空数组
+     * @param status 目标状态，如 NORMAL、DISABLED、LOCKED
+     * @return 更新的记录数，返回实际更新的用户数量
+     */
+    int batchUpdateStatus(Long[] userIds, String status);
 }

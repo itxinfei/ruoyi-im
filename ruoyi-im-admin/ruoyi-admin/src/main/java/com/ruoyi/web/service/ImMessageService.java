@@ -160,4 +160,16 @@ public interface ImMessageService {
      * @return 更新的记录数，返回实际更新的消息数量
      */
     int batchUpdateSensitiveLevel(List<Long> messageIds, String sensitiveLevel);
+
+    /**
+     * 批量撤回消息
+     *
+     * <p>将指定的多条消息批量标记为已撤回状态</p>
+     * <p>撤回后消息内容会被清空或替换为"消息已撤回"提示</p>
+     * <p>用于管理员批量撤回违规消息</p>
+     *
+     * @param messageIds 消息ID数组，不能为空或空数组
+     * @return 撤回的记录数，返回实际撤回的消息数量
+     */
+    int batchRevokeMessages(Long[] messageIds);
 }

@@ -1,0 +1,458 @@
+/**
+ * IM后台管理系统 - 弹窗子页面统一样式
+ * 轻量扁平风设计规范
+ */
+
+/* ==================== 基础变量 ==================== */
+:root {
+    /* 品牌主色 - 仅用于关键元素 */
+    --im-primary: #667eea;
+    --im-primary-light: #f0f2ff;
+    --im-primary-hover: #5568d3;
+
+    /* 辅助色 */
+    --im-success: #28a745;
+    --im-warning: #ffc107;
+    --im-danger: #dc3545;
+    --im-info: #17a2b8;
+
+    /* 中性色 */
+    --im-bg-body: #f8f9fa;
+    --im-bg-card: #ffffff;
+    --im-border: #e9ecef;
+    --im-border-dark: #dee2e6;
+    --im-text-primary: #495057;
+    --im-text-secondary: #6c757d;
+    --im-text-muted: #adb5bd;
+
+    /* 间距 */
+    --im-spacing-xs: 5px;
+    --im-spacing-sm: 10px;
+    --im-spacing-md: 15px;
+    --im-spacing-lg: 20px;
+    --im-spacing-xl: 25px;
+}
+
+/* ==================== 页面容器 ==================== */
+.modal-page-container {
+    padding: var(--im-spacing-md);
+    background: var(--im-bg-body);
+    min-height: 100%;
+}
+
+/* ==================== 头部区 ==================== */
+.modal-page-header {
+    background: var(--im-bg-card);
+    border-radius: 4px;
+    padding: var(--im-spacing-md);
+    margin-bottom: var(--im-spacing-md);
+    border: 1px solid var(--im-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--im-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-actions {
+    display: flex;
+    gap: var(--im-spacing-sm);
+}
+
+/* ==================== 信息栏 ==================== */
+.modal-page-info {
+    background: var(--im-bg-card);
+    border-radius: 4px;
+    padding: var(--im-spacing-sm) var(--im-spacing-md);
+    margin-bottom: var(--im-spacing-md);
+    border: 1px solid var(--im-border);
+    display: flex;
+    align-items: center;
+    gap: var(--im-spacing-md);
+    font-size: 13px;
+    color: var(--im-text-secondary);
+}
+
+.info-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.info-item strong {
+    color: var(--im-text-primary);
+    font-weight: 500;
+}
+
+.info-divider {
+    color: var(--im-text-muted);
+}
+
+/* ==================== 工具栏 ==================== */
+.modal-page-toolbar {
+    background: var(--im-bg-card);
+    border-radius: 4px;
+    padding: var(--im-spacing-md);
+    margin-bottom: var(--im-spacing-md);
+    border: 1px solid var(--im-border);
+    display: flex;
+    align-items: center;
+    gap: var(--im-spacing-sm);
+    flex-wrap: wrap;
+}
+
+.toolbar-input {
+    width: 200px;
+    display: inline-block;
+}
+
+.toolbar-select {
+    width: 120px;
+    display: inline-block;
+}
+
+.toolbar-stats {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--im-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--im-spacing-md);
+}
+
+.toolbar-stats strong {
+    color: var(--im-primary);
+    font-weight: 600;
+}
+
+/* ==================== 表格区 ==================== */
+.modal-page-table {
+    background: var(--im-bg-card);
+    border-radius: 4px;
+    padding: var(--im-spacing-md);
+    border: 1px solid var(--im-border);
+    position: relative;
+}
+
+/* ==================== 按钮样式 ==================== */
+/* 主要按钮 */
+.btn-im-primary {
+    background: var(--im-primary);
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.btn-im-primary:hover {
+    background: var(--im-primary-hover);
+    color: #fff;
+}
+
+/* 轮廓按钮 */
+.btn-im-outline {
+    background: #fff;
+    border: 1px solid var(--im-border-dark);
+    color: var(--im-text-primary);
+    border-radius: 4px;
+    padding: 5px 14px;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.btn-im-outline:hover {
+    border-color: var(--im-primary);
+    color: var(--im-primary);
+    background: var(--im-primary-light);
+}
+
+/* 默认按钮 */
+.btn-im-default {
+    background: #fff;
+    border: 1px solid var(--im-border-dark);
+    color: var(--im-text-secondary);
+    border-radius: 4px;
+    padding: 5px 14px;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.btn-im-default:hover {
+    background: var(--im-bg-body);
+    border-color: var(--im-border-dark);
+}
+
+/* 成功按钮 */
+.btn-im-success {
+    background: var(--im-success);
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.btn-im-success:hover {
+    background: #218838;
+    color: #fff;
+}
+
+/* 警告按钮 */
+.btn-im-warning {
+    background: var(--im-warning);
+    border: none;
+    color: #212529;
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.btn-im-warning:hover {
+    background: #e0a800;
+    color: #212529;
+}
+
+/* 危险按钮 */
+.btn-im-danger {
+    background: var(--im-danger);
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.btn-im-danger:hover {
+    background: #c82333;
+    color: #fff;
+}
+
+/* 信息按钮 */
+.btn-im-info {
+    background: var(--im-info);
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.btn-im-info:hover {
+    background: #138496;
+    color: #fff;
+}
+
+/* 小按钮 */
+.btn-im-xs {
+    padding: 3px 10px;
+    font-size: 12px;
+    border-radius: 3px;
+}
+
+/* ==================== 徽章样式 ==================== */
+.badge-im {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 3px;
+}
+
+.badge-im-primary {
+    background: var(--im-primary);
+    color: #fff;
+}
+
+.badge-im-success {
+    background: var(--im-success);
+    color: #fff;
+}
+
+.badge-im-warning {
+    background: var(--im-warning);
+    color: #212529;
+}
+
+.badge-im-danger {
+    background: var(--im-danger);
+    color: #fff;
+}
+
+.badge-im-info {
+    background: var(--im-info);
+    color: #fff;
+}
+
+.badge-im-default {
+    background: var(--im-text-muted);
+    color: #fff;
+}
+
+.badge-im-light {
+    background: var(--im-bg-body);
+    color: var(--im-text-primary);
+    border: 1px solid var(--im-border);
+}
+
+/* ==================== 表格样式 ==================== */
+.table-im {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+.table-im thead tr th {
+    background: var(--im-bg-body);
+    color: var(--im-text-primary);
+    font-weight: 500;
+    border-bottom: 2px solid var(--im-border);
+    padding: 12px 8px;
+    text-align: left;
+}
+
+.table-im tbody tr td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--im-border);
+    vertical-align: middle;
+}
+
+.table-im tbody tr:hover {
+    background: var(--im-bg-body);
+}
+
+/* ==================== 输入框样式 ==================== */
+.form-im-control {
+    display: block;
+    width: 100%;
+    padding: 6px 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--im-text-primary);
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    transition: all 0.15s ease-in-out;
+}
+
+.form-im-control:focus {
+    border-color: var(--im-primary);
+    outline: 0;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.form-im-control::placeholder {
+    color: var(--im-text-muted);
+    opacity: 1;
+}
+
+/* ==================== 加载状态 ==================== */
+.table-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.table-loading.show {
+    display: flex;
+}
+
+.table-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--im-bg-body);
+    border-top: 3px solid var(--im-primary);
+    border-radius: 50%;
+    animation: im-spin 0.8s linear infinite;
+}
+
+@keyframes im-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==================== 头像样式 ==================== */
+.avatar-im-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-im-sm {
+    width: 24px;
+    height: 24px;
+}
+
+.avatar-im-lg {
+    width: 40px;
+    height: 40px;
+}
+
+/* ==================== 空状态 ==================== */
+.im-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--im-text-muted);
+}
+
+.im-empty-state i {
+    font-size: 48px;
+    margin-bottom: var(--im-spacing-md);
+    opacity: 0.5;
+}
+
+.im-empty-state p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* ==================== 响应式调整 ==================== */
+@media (max-width: 768px) {
+    .modal-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--im-spacing-sm);
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .modal-page-info {
+        flex-wrap: wrap;
+    }
+
+    .modal-page-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-input,
+    .toolbar-select {
+        width: 100%;
+    }
+
+    .toolbar-stats {
+        margin-left: 0;
+        margin-top: var(--im-spacing-sm);
+    }
+}

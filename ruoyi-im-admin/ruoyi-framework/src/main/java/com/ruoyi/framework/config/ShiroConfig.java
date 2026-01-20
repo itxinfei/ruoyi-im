@@ -302,6 +302,7 @@ public class ShiroConfig
         filterChainDefinitionMap.put("/ajax/**", "anon");
         filterChainDefinitionMap.put("/js/**", "anon");
         filterChainDefinitionMap.put("/ruoyi/**", "anon");
+        filterChainDefinitionMap.put("/avatar/**", "anon");
         filterChainDefinitionMap.put("/captcha/captchaImage**", "anon");
         // 匿名访问不鉴权注解列表
         List<String> permitAllUrl = permitAllUrlProperties.getUrls();

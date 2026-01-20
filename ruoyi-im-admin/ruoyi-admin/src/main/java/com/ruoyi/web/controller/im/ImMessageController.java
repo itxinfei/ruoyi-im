@@ -288,6 +288,30 @@ public class ImMessageController extends BaseController {
     }
 
     /**
+     * 批量撤回消息
+     */
+    @RequiresPermissions("im:message:edit")
+    @Log(title = "批量撤回消息", businessType = BusinessType.UPDATE)
+    @PostMapping("/batchRevoke")
+    @ResponseBody
+    public AjaxResult batchRevoke(@RequestParam String messageIds) {
+        if (messageIds == null || messageIds.trim().isEmpty()) {
+            return AjaxResult.error("请选择要撤回的消息");
+        }
+        String[] ids = messageIds.split(",");
+        Long[] messageIdArray = new Long[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            try {
+                messageIdArray[i] = Long.parseLong(ids[i].trim());
+            } catch (NumberFormatException e) {
+                return AjaxResult.error("消息ID格式错误");
+            }
+        }
+        int count = imMessageService.batchRevokeMessages(messageIdArray);
+        return AjaxResult.success("成功撤回 " + count + " 条消息");
+    }
+
+    /**
      * 标记消息为敏感
      */
     @RequiresPermissions("im:message:edit")
@@ -380,6 +404,25 @@ public class ImMessageController extends BaseController {
                                     @RequestParam String endTime) {
         List<ImMessage> list = imMessageService.selectImMessageListByTimeRange(conversationId, startTime, endTime);
         return AjaxResult.success(list);
+    }
+
+    /**
+     * 获取消息统计数据
+     */
+    @RequiresPermissions("im:message:list")
+    @GetMapping("/statistics")
+    @ResponseBody
+    public AjaxResult getStatistics() {
+        // 调用 Service 获取统计数据
+        Map<String, Object> dbStats = imMessageService.getMessageStatistics();
+
+        // 转换字段名为驼峰格式（前端期望）
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalCount", dbStats.get("total_count"));
+        stats.put("todayCount", dbStats.get("today_count"));
+        stats.put("sensitiveCount", dbStats.get("sensitive_count"));
+        stats.put("failedCount", dbStats.get("failed_count"));
+        return AjaxResult.success(stats);
     }
 
     /**

@@ -9,192 +9,63 @@
     <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
-    <style>
-        .log-header {
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 8px;
-            margin-bottom: 20px;
-            color: white;
-        }
-        .log-info {
-            display: inline-block;
-            margin-right: 30px;
-        }
-        .log-info-label {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 13px;
-        }
-        .log-info-value {
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            margin-left: 8px;
-        }
-        .back-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            color: white;
-            text-decoration: none;
-            transform: translateX(-3px);
-        }
-        
-        /* 统计卡片样式 */
-        .statistics-section {
-            margin-bottom: 15px;
-        }
-        .statistics-card {
-            padding: 15px;
-            border-radius: 4px;
-            color: #fff;
-            position: relative;
-            overflow: hidden;
-        }
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-        .stat-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 40px;
-            opacity: 0.2;
-        }
-        .stat-total { background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%); }
-        .stat-add { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-        .stat-remove { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .stat-change { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
-        
-        /* 搜索区域 */
-        .search-collapse {
-            margin-bottom: 15px;
-        }
-        
-        /* 徽章样式 */
-        .badge {
-            padding: 4px 8px;
-            font-size: 11px;
-            border-radius: 3px;
-        }
-        
-        /* 加载遮罩 */
-        .loading-overlay {
-            position: relative;
-            min-height: 200px;
-        }
-        .loading-spinner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-    </style>
+    <link href="/css/im-modal.css" th:href="@{/css/im-modal.css}" rel="stylesheet"/>
 </head>
 <body class="white-bg">
-    <div class="container-div">
-        <div class="row">
-            <div class="col-sm-12">
-                <!-- 群组信息头部 -->
-                <div class="log-header">
-                    <div style="margin-bottom: 15px;">
-                        <a href="javascript:history.back()" class="back-btn">
-                            <i class="fa fa-arrow-left"></i> 返回
-                        </a>
-                    </div>
-                    <div class="log-info">
-                        <span class="log-info-label"><i class="fa fa-users"></i> 群组ID:</span>
-                        <span class="log-info-value" id="groupId">-</span>
-                    </div>
-                    <div class="log-info">
-                        <span class="log-info-label"><i class="fa fa-tag"></i> 群组名称:</span>
-                        <span class="log-info-value" id="groupName">-</span>
-                    </div>
-                </div>
-
-                <!-- 统计卡片 -->
-                <div class="col-sm-12 statistics-section">
-                    <div class="row">
-                        <div class="col-sm-3">
-                            <div class="statistics-card stat-total">
-                                <div class="stat-number" id="totalCount">0</div>
-                                <div class="stat-label">日志总数</div>
-                                <i class="fa fa-list-alt stat-icon"></i>
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="statistics-card stat-add">
-                                <div class="stat-number" id="addCount">0</div>
-                                <div class="stat-label">添加成员</div>
-                                <i class="fa fa-user-plus stat-icon"></i>
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="statistics-card stat-remove">
-                                <div class="stat-number" id="removeCount">0</div>
-                                <div class="stat-label">移除成员</div>
-                                <i class="fa fa-user-times stat-icon"></i>
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="statistics-card stat-change">
-                                <div class="stat-number" id="changeCount">0</div>
-                                <div class="stat-label">角色变更</div>
-                                <i class="fa fa-exchange stat-icon"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 搜索区域 -->
-                <div class="search-collapse">
-                    <form id="log-form">
-                        <div class="select-list">
-                            <ul>
-                                <li>
-                                    操作类型：<select name="operationType" id="operationType">
-                                        <option value="">所有</option>
-                                        <option value="ADD_MEMBER">添加成员</option>
-                                        <option value="REMOVE_MEMBER">移除成员</option>
-                                        <option value="CHANGE_ROLE">修改角色</option>
-                                        <option value="MUTE_MEMBER">禁言成员</option>
-                                        <option value="UNMUTE_MEMBER">解除禁言</option>
-                                        <option value="DISMISS_GROUP">解散群组</option>
-                                        <option value="CHANGE_OWNER">转让群主</option>
-                                        <option value="UPDATE_INFO">修改群信息</option>
-                                    </select>
-                                </li>
-                                <li>
-                                    <a class="btn btn-primary btn-rounded btn-sm" onclick="searchLogs()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                    <a class="btn btn-warning btn-rounded btn-sm" onclick="resetSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                                    <a class="btn btn-info btn-rounded btn-sm" onclick="refreshLogs()"><i class="fa fa-refresh"></i>&nbsp;刷新</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- 日志表格 -->
-                <div class="loading-overlay">
-                    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
-                        <i class="fa fa-spinner fa-spin fa-3x text-primary"></i>
-                    </div>
-                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
-                </div>
+    <div class="modal-page-container">
+        <!-- 头部区 -->
+        <div class="modal-page-header">
+            <div class="header-title">
+                <i class="fa fa-list-alt"></i>
+                <span>群组操作日志</span>
             </div>
+            <div class="header-actions">
+                <button class="btn-im-outline" onclick="ImModal.goBack()">
+                    <i class="fa fa-arrow-left"></i> 返回
+                </button>
+                <button class="btn-im-outline" onclick="refreshData()">
+                    <i class="fa fa-refresh"></i> 刷新
+                </button>
+            </div>
+        </div>
+
+        <!-- 信息栏 -->
+        <div class="modal-page-info">
+            <span class="info-item">群组ID: <strong id="groupId">-</strong></span>
+            <span class="info-divider">|</span>
+            <span class="info-item">群组名称: <strong id="groupName">-</strong></span>
+        </div>
+
+        <!-- 工具栏 -->
+        <div class="modal-page-toolbar">
+            <select class="form-im-control toolbar-select" id="operationType">
+                <option value="">所有操作类型</option>
+                <option value="ADD_MEMBER">添加成员</option>
+                <option value="REMOVE_MEMBER">移除成员</option>
+                <option value="CHANGE_ROLE">修改角色</option>
+                <option value="MUTE_MEMBER">禁言成员</option>
+                <option value="UNMUTE_MEMBER">解除禁言</option>
+                <option value="DISMISS_GROUP">解散群组</option>
+                <option value="CHANGE_OWNER">转让群主</option>
+                <option value="UPDATE_INFO">修改群信息</option>
+            </select>
+            <button class="btn-im-default" onclick="resetData()">
+                <i class="fa fa-refresh"></i> 重置
+            </button>
+            <div class="toolbar-stats">
+                总数: <strong id="totalCount">0</strong> |
+                添加: <strong id="addCount">0</strong> |
+                移除: <strong id="removeCount">0</strong> |
+                变更: <strong id="changeCount">0</strong>
+            </div>
+        </div>
+
+        <!-- 表格区 -->
+        <div class="modal-page-table">
+            <div class="table-loading">
+                <div class="table-loading-spinner"></div>
+            </div>
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
         </div>
     </div>
 
@@ -207,6 +78,7 @@
     <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
     <script th:src="@{/ruoyi/js/common.js}"></script>
     <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
+    <script th:src="@{/js/im-modal.js}"></script>
     <script th:inline="javascript">
         var groupId = [[${groupId}]];
         var prefix = ctx + "im/group/log";
@@ -214,80 +86,79 @@
         $(function() {
             loadGroupInfo();
             loadStatistics();
-            initLogTable();
+            initTable();
+            initFilters();
         });
 
         // 加载群组基本信息
         function loadGroupInfo() {
-            $.get(ctx + "im/group/info/" + groupId, function(result) {
-                if (result.code == 0 && result.data) {
-                    var data = result.data;
-                    $("#groupId").text(data.id || '-');
-                    $("#groupName").text(data.name || '-');
-                } else {
-                    layer.msg('加载群组信息失败', {icon: 2});
-                }
-            }).fail(function() {
-                layer.msg('加载群组信息失败', {icon: 2});
-            });
-        }
-        
-        // 加载统计数据
-        function loadStatistics() {
-            $.get(prefix + "/statistics", {groupId: groupId}, function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#addCount").text(result.data.addCount || 0);
-                    $("#removeCount").text(result.data.removeCount || 0);
-                    $("#changeCount").text(result.data.changeCount || 0);
+            ImModal.requestData({
+                url: ctx + "im/group/info/" + groupId,
+                success: function(result) {
+                    if (result.code == 0 && result.data) {
+                        var data = result.data;
+                        $("#groupId").text(data.id || '-');
+                        $("#groupName").text(data.name || '-');
+                    } else {
+                        layer.msg('加载群组信息失败', {icon: 2});
+                    }
                 }
             });
         }
 
-        // 初始化日志表格
-        function initLogTable() {
-            $('#bootstrap-table').bootstrapTable({
-                url: prefix + "/list",
+        // 加载统计数据
+        function loadStatistics() {
+            ImModal.requestData({
+                url: prefix + "/statistics",
+                data: {groupId: groupId},
+                success: function(result) {
+                    if (result.code == 0) {
+                        $("#totalCount").text(result.data.totalCount || 0);
+                        $("#addCount").text(result.data.addCount || 0);
+                        $("#removeCount").text(result.data.removeCount || 0);
+                        $("#changeCount").text(result.data.changeCount || 0);
+                    }
+                }
+            });
+        }
+
+        // 初始化表格
+        function initTable() {
+            ImModal.initTable({
                 method: 'post',
-                cache: false,
-                pagination: true,
                 sidePagination: 'server',
-                pageSize: 20,
-                pageList: [10, 20, 50, 100],
+                url: prefix + "/list",
                 columns: [{
                     field: 'id',
                     title: 'ID',
                     width: '60',
                     visible: false
-                },
-                {
+                }, {
                     field: 'operatorName',
                     title: '操作者',
                     width: '120',
                     formatter: function(value, row, index) {
                         return '<span class="text-info"><i class="fa fa-user"></i> ' + (value || '-') + '</span>';
                     }
-                },
-                {
+                }, {
                     field: 'operationType',
                     title: '操作类型',
                     align: 'center',
                     width: '140',
                     formatter: function(value, row, index) {
                         var typeMap = {
-                            'ADD_MEMBER': '<span class="badge badge-success"><i class="fa fa-plus"></i> 添加成员</span>',
-                            'REMOVE_MEMBER': '<span class="badge badge-danger"><i class="fa fa-minus"></i> 移除成员</span>',
-                            'CHANGE_ROLE': '<span class="badge badge-info"><i class="fa fa-exchange"></i> 修改角色</span>',
-                            'MUTE_MEMBER': '<span class="badge badge-warning"><i class="fa fa-ban"></i> 禁言成员</span>',
-                            'UNMUTE_MEMBER': '<span class="badge badge-primary"><i class="fa fa-unlock"></i> 解除禁言</span>',
-                            'DISMISS_GROUP': '<span class="badge badge-danger"><i class="fa fa-trash"></i> 解散群组</span>',
-                            'CHANGE_OWNER': '<span class="badge badge-warning"><i class="fa fa-share"></i> 转让群主</span>',
-                            'UPDATE_INFO': '<span class="badge badge-info"><i class="fa fa-edit"></i> 修改群信息</span>'
+                            'ADD_MEMBER': '<span class="badge-im badge-im-success"><i class="fa fa-plus"></i> 添加成员</span>',
+                            'REMOVE_MEMBER': '<span class="badge-im badge-im-danger"><i class="fa fa-minus"></i> 移除成员</span>',
+                            'CHANGE_ROLE': '<span class="badge-im badge-im-info"><i class="fa fa-exchange"></i> 修改角色</span>',
+                            'MUTE_MEMBER': '<span class="badge-im badge-im-warning"><i class="fa fa-ban"></i> 禁言成员</span>',
+                            'UNMUTE_MEMBER': '<span class="badge-im badge-im-primary"><i class="fa fa-unlock"></i> 解除禁言</span>',
+                            'DISMISS_GROUP': '<span class="badge-im badge-im-danger"><i class="fa fa-trash"></i> 解散群组</span>',
+                            'CHANGE_OWNER': '<span class="badge-im badge-im-warning"><i class="fa fa-share"></i> 转让群主</span>',
+                            'UPDATE_INFO': '<span class="badge-im badge-im-info"><i class="fa fa-edit"></i> 修改群信息</span>'
                         };
                         return typeMap[value] || (value || '-');
                     }
-                },
-                {
+                }, {
                     field: 'operationDesc',
                     title: '操作描述',
                     width: '400',
@@ -301,20 +172,21 @@
                         }
                         return desc;
                     }
-                },
-                {
+                }, {
                     field: 'targetUserName',
                     title: '目标用户',
                     width: '100',
                     formatter: function(value, row, index) {
                         return value ? '<span class="text-muted"><i class="fa fa-user"></i> ' + value + '</span>' : '-';
                     }
-                },
-                {
+                }, {
                     field: 'createTime',
                     title: '操作时间',
                     width: '160',
-                    sortable: true
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        return ImModal.formatDateTime(value, true);
+                    }
                 }],
                 responseHandler: function(res) {
                     if (res.code === 0 || res.rows) {
@@ -328,33 +200,30 @@
                         pageSize: params.pageSize || 20,
                         groupId: groupId,
                         operationType: $("#operationType").val()
-                    }
-                },
-                onLoadError: function(status) {
-                    layer.msg('加载日志失败', {icon: 2});
+                    };
                 }
             });
         }
 
-        // 搜索日志
-        function searchLogs() {
-            $('#bootstrap-table').bootstrapTable('refresh');
+        // 初始化筛选器
+        function initFilters() {
+            $('#operationType').on('change', function() {
+                $('#bootstrap-table').bootstrapTable('refresh');
+            });
         }
 
-        // 重置搜索
-        function resetSearch() {
+        // 重置数据
+        function resetData() {
             $("#operationType").val("");
             $('#bootstrap-table').bootstrapTable('refresh');
         }
-        
-        // 刷新日志
-        function refreshLogs() {
-            $("#loadingSpinner").show();
-            $('#bootstrap-table').bootstrapTable('refresh');
-            loadStatistics();
-            setTimeout(function() {
-                $("#loadingSpinner").hide();
-            }, 500);
+
+        // 刷新数据
+        function refreshData() {
+            ImModal.refresh(function() {
+                $('#bootstrap-table').bootstrapTable('refresh');
+                loadStatistics();
+            });
         }
     </script>
 </body>

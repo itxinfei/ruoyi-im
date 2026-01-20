@@ -100,6 +100,9 @@
                 <a class="btn btn-info single disabled" onclick="resetPwd()" shiro:hasPermission="im:user:edit">
                     <i class="fa fa-key"></i> 重置
                 </a>
+                <a class="btn btn-info multiple disabled" onclick="batchUpdateStatus()" shiro:hasPermission="im:user:edit">
+                    <i class="fa fa-toggle-on"></i> 批量启用/停用
+                </a>
                 <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:user:remove">
                     <i class="fa fa-remove"></i> 删除
                 </a>
@@ -116,6 +119,7 @@
     </div>
 
     <th:block th:include="include :: footer" />
+    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:user:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:user:remove')}]];
@@ -124,6 +128,7 @@
         $(function() {
             loadStatistics();
 
+            var paginationConfig = ImCommon.getPaginationConfig(20, [10, 20, 50, 100]);
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -131,6 +136,10 @@
                 removeUrl: prefix + "/remove/{id}",
                 exportUrl: prefix + "/export",
                 modalName: "用户",
+                pagination: paginationConfig.pagination,
+                pageSize: paginationConfig.pageSize,
+                pageList: paginationConfig.pageList,
+                sidePagination: paginationConfig.sidePagination,
                 columns: [{
                     checkbox: true
                 },
@@ -230,14 +239,17 @@
         });
 
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#onlineCount").text(result.data.onlineCount || 0);
-                    $("#offlineCount").text(result.data.offlineCount || 0);
-                    $("#disabledCount").text(result.data.disabledCount || 0);
-                }
-            });
+            ImCommon.loadStatisticsWithCache(
+                prefix + "/statistics",
+                function(data) {
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#onlineCount").text(data.onlineCount || 0);
+                    $("#offlineCount").text(data.offlineCount || 0);
+                    $("#disabledCount").text(data.disabledCount || 0);
+                },
+                'user_statistics',
+                5
+            );
         }
 
         function resetPwd() {
@@ -252,7 +264,53 @@
             }
 
             var userId = rows[0];
+            if (!userId || userId === '' || userId === 'undefined' || userId === 'null') {
+                $.modal.alertWarning("获取用户ID失败，请刷新页面重试");
+                return;
+            }
             $.modal.open("重置密码", prefix + "/resetPassword/" + userId);
+        }
+
+        function batchUpdateStatus() {
+            var rows = $.table.selectColumns('id');
+            if (!ImCommon.validateBatchOperation(rows, 1)) {
+                return;
+            }
+
+            var html = '<div class="form-group">' +
+                '<label class="col-sm-3 control-label">请选择状态：</label>' +
+                '<div class="col-sm-9">' +
+                '<select class="form-control" id="newStatus">' +
+                '<option value="1">启用</option>' +
+                '<option value="0">停用</option>' +
+                '</select>' +
+                '</div>' +
+                '</div>';
+
+            $.modal.confirm("确定要批量修改用户状态吗？", html, function() {
+                var newStatus = $('#newStatus').val();
+                var statusText = newStatus == '1' ? '启用' : '停用';
+
+                $.modal.msg("正在批量" + statusText + "用户...", {icon: 16, shade: 0.3, time: 0});
+                $.ajax({
+                    url: prefix + "/batchUpdateStatus",
+                    type: 'post',
+                    data: {userIds: rows.join(","), status: newStatus},
+                    success: function(result) {
+                        layer.closeAll();
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("批量" + statusText + "成功");
+                            $.table.refresh();
+                        } else {
+                            $.modal.msgError(result.msg || "批量操作失败");
+                        }
+                    },
+                    error: function() {
+                        layer.closeAll();
+                        $.modal.msgError("网络请求失败");
+                    }
+                });
+            });
         }
     </script>
 </body>

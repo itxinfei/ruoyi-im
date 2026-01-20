@@ -93,6 +93,9 @@
                 <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:message:edit">
                     <i class="fa fa-edit"></i> 修改
                 </a>
+                <a class="btn btn-info multiple disabled" onclick="batchRevoke()" shiro:hasPermission="im:message:revoke">
+                    <i class="fa fa-undo"></i> 批量撤回
+                </a>
                 <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:message:remove">
                     <i class="fa fa-remove"></i> 删除
                 </a>
@@ -109,6 +112,7 @@
     </div>
 
     <th:block th:include="include :: footer" />
+    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:message:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:message:remove')}]];
@@ -117,6 +121,7 @@
         $(function() {
             loadStatistics();
 
+            var paginationConfig = ImCommon.getPaginationConfig(20, [10, 20, 50, 100]);
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -124,6 +129,10 @@
                 removeUrl: prefix + "/remove/{id}",
                 exportUrl: prefix + "/export",
                 modalName: "消息",
+                pagination: paginationConfig.pagination,
+                pageSize: paginationConfig.pageSize,
+                pageList: paginationConfig.pageList,
+                sidePagination: paginationConfig.sidePagination,
                 columns: [{
                     checkbox: true
                 },
@@ -230,14 +239,46 @@
 
         // 加载统计数据
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    var data = result.data;
+            ImCommon.loadStatisticsWithCache(
+                prefix + "/statistics",
+                function(data) {
                     $("#totalCount").text(data.totalCount || 0);
                     $("#todayCount").text(data.todayCount || 0);
                     $("#sensitiveCount").text(data.sensitiveCount || 0);
                     $("#failedCount").text(data.failedCount || 0);
-                }
+                },
+                'message_statistics',
+                5
+            );
+        }
+
+        // 批量撤回消息
+        function batchRevoke() {
+            var rows = $.table.selectColumns('id');
+            if (!ImCommon.validateBatchOperation(rows, 1)) {
+                return;
+            }
+
+            $.modal.confirm("确定要批量撤回这 " + rows.length + " 条消息吗？撤回后消息将不可恢复。", function() {
+                $.modal.msg("正在批量撤回消息...", {icon: 16, shade: 0.3, time: 0});
+                $.ajax({
+                    url: prefix + "/batchRevoke",
+                    type: 'post',
+                    data: {messageIds: rows.join(",")},
+                    success: function(result) {
+                        layer.closeAll();
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("批量撤回成功");
+                            $.table.refresh();
+                        } else {
+                            $.modal.msgError(result.msg || "批量撤回失败");
+                        }
+                    },
+                    error: function() {
+                        layer.closeAll();
+                        $.modal.msgError("网络请求失败");
+                    }
+                });
             });
         }
     </script>

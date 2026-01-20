@@ -95,6 +95,7 @@
     </div>
 
     <th:block th:include="include :: footer" />
+    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:conversation:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:conversation:remove')}]];
@@ -103,6 +104,7 @@
         $(function() {
             loadStatistics();
 
+            var paginationConfig = ImCommon.getPaginationConfig(20, [10, 20, 50, 100]);
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -110,6 +112,10 @@
                 removeUrl: prefix + "/remove/{id}",
                 exportUrl: prefix + "/export",
                 modalName: "会话",
+                pagination: paginationConfig.pagination,
+                pageSize: paginationConfig.pageSize,
+                pageList: paginationConfig.pageList,
+                sidePagination: paginationConfig.sidePagination,
                 columns: [{
                     checkbox: true
                 },
@@ -139,7 +145,7 @@
                     align: 'center',
                     formatter: function(value, row, index) {
                         if (value) {
-                            return '<img src="' + value + '" class="img-circle" style="width:32px;height:32px;">';
+                            return '<img src="' + value + '" class="img-circle" style="width:32px;height:32px;" onerror="this.src=\'/img/profile.jpg\'">';
                         }
                         return '<i class="fa fa-comment fa-2x text-gray"></i>';
                     }
@@ -196,14 +202,17 @@
         });
 
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#privateCount").text(result.data.privateCount || 0);
-                    $("#groupCount").text(result.data.groupCount || 0);
-                    $("#activeCount").text(result.data.activeCount || 0);
-                }
-            });
+            ImCommon.loadStatisticsWithCache(
+                prefix + "/statistics",
+                function(data) {
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#privateCount").text(data.privateCount || 0);
+                    $("#groupCount").text(data.groupCount || 0);
+                    $("#activeCount").text(data.activeCount || 0);
+                },
+                'conversation_statistics',
+                5
+            );
         }
 
         function viewMembers(conversationId) {

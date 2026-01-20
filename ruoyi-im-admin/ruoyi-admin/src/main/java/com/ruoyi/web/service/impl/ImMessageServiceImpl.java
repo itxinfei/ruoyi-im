@@ -163,6 +163,26 @@ public class ImMessageServiceImpl implements ImMessageService {
         return messageMapper.batchUpdateSensitiveLevel(messageIds, sensitiveLevel);
     }
 
+    @Override
+    public int batchRevokeMessages(Long[] messageIds) {
+        if (messageIds == null || messageIds.length == 0) {
+            throw new ServiceException("消息ID列表不能为空");
+        }
+
+        int count = 0;
+        for (Long messageId : messageIds) {
+            if (messageId != null && messageId > 0) {
+                try {
+                    count += revokeMessage(messageId);
+                } catch (ServiceException e) {
+                    // 记录错误，但继续处理其他消息
+                    System.err.println("撤回消息失败: ID=" + messageId + ", 错误: " + e.getMessage());
+                }
+            }
+        }
+        return count;
+    }
+
     /**
      * 校验消息对象
      */

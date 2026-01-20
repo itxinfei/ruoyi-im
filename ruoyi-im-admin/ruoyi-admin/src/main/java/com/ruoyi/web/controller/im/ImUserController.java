@@ -213,6 +213,30 @@ public class ImUserController extends BaseController {
     }
 
     /**
+     * 批量启用/停用用户
+     */
+    @RequiresPermissions("im:user:edit")
+    @Log(title = "批量修改用户状态", businessType = BusinessType.UPDATE)
+    @PostMapping("/batchUpdateStatus")
+    @ResponseBody
+    public AjaxResult batchUpdateStatus(@RequestParam String userIds, @RequestParam String status) {
+        if (userIds == null || userIds.trim().isEmpty()) {
+            return AjaxResult.error("请选择要修改的用户");
+        }
+        String[] ids = userIds.split(",");
+        Long[] userIdArray = new Long[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            try {
+                userIdArray[i] = Long.parseLong(ids[i].trim());
+            } catch (NumberFormatException e) {
+                return AjaxResult.error("用户ID格式错误");
+            }
+        }
+        int count = imUserService.batchUpdateStatus(userIdArray, status);
+        return AjaxResult.success("成功修改 " + count + " 个用户的状态");
+    }
+
+    /**
      * 获取用户在线状态
      */
     @RequiresPermissions("im:user:query")
