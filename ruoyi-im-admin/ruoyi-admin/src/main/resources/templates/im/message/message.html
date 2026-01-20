@@ -71,8 +71,8 @@
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -81,6 +81,12 @@
 
             <!-- 操作按钮 -->
             <div class="btn-group-sm" id="toolbar" role="group">
+                <!-- 选中状态显示 -->
+                <span id="selectedInfo" class="selected-info" style="display:none; margin-right: 15px;">
+                    已选 <strong id="selectedCount">0</strong> 项
+                    <a href="javascript:void(0)" onclick="ImCommon.clearSelection('#bootstrap-table'); ImCommon.updateSelectedInfo('#bootstrap-table');" style="margin-left: 10px;">清空</a>
+                </span>
+
                 <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:message:add">
                     <i class="fa fa-plus"></i> 新增
                 </a>
@@ -96,6 +102,13 @@
                 <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:message:export">
                     <i class="fa fa-download"></i> 导出
                 </a>
+            </div>
+
+            <!-- 搜索状态提示 -->
+            <div class="search-status" id="searchStatus" style="display:none; margin-top:10px; padding:8px 12px; background:#f0f9ff; border:1px solid #b3d7f7; border-radius:4px; font-size:13px;">
+                <i class="fa fa-filter" style="color:#1c84c6;"></i>
+                搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
+                <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
             </div>
 
             <!-- 数据表格 -->
@@ -116,7 +129,7 @@
             var paginationConfig = ImCommon.getPaginationConfig(20, [10, 20, 50, 100]);
             var options = {
                 url: prefix + "/list",
-				height: 650,
+                height: 650,
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove/{id}",
@@ -126,6 +139,17 @@
                 pageSize: paginationConfig.pageSize,
                 pageList: paginationConfig.pageList,
                 sidePagination: paginationConfig.sidePagination,
+                // 固定列配置
+                fixedColumns: true,
+                fixedNumber: 1,
+                fixedRightNumber: 1,
+                // 列显示/隐藏配置
+                showColumns: true,
+                showColumnsToggleAll: true,
+                // 记住列选择
+                cookie: true,
+                cookieIdTable: 'im_message_table',
+                cookieExpire: '30d',
                 columns: [{
                     checkbox: true
                 },
@@ -150,12 +174,7 @@
                     align: 'center',
                     width: '80',
                     formatter: function(value, row, index) {
-                        if (value === 'TEXT') { return '<span class="badge badge-primary">文本</span>'; }
-                        if (value === 'IMAGE') { return '<span class="badge badge-info">图片</span>'; }
-                        if (value === 'VIDEO') { return '<span class="badge badge-warning">视频</span>'; }
-                        if (value === 'AUDIO') { return '<span class="badge badge-success">音频</span>'; }
-                        if (value === 'FILE') { return '<span class="badge badge-default">文件</span>'; }
-                        return value || '-';
+                        return ImCommon.formatMessageType(value);
                     }
                 },
                 {
@@ -182,6 +201,7 @@
                     title: '敏感级别',
                     align: 'center',
                     width: '90',
+                    visible: false,
                     formatter: function(value, row, index) {
                         if (value === 'SENSITIVE') {
                             return '<span class="badge badge-warning">敏感</span>';
@@ -216,12 +236,22 @@
                 {
                     title: '操作',
                     align: 'center',
-                    width: '180',
+                    width: '150',
                     formatter: function(value, row, index) {
-                        var actions = [];
-                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
-                        return actions.join('');
+                        var menuItems = [
+                            { divider: true },
+                            { text: '删除', icon: 'fa-remove', action: '$.operate.remove(row.id)', permissionClass: removeFlag }
+                        ];
+
+                        var mainAction = {
+                            text: '编辑',
+                            icon: 'fa-edit',
+                            action: '$.operate.edit(row.id)',
+                            permissionClass: editFlag,
+                            btnClass: 'btn-success'
+                        };
+
+                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
                     }
                 }],
                 responseHandler: function(res) {
@@ -239,6 +269,19 @@
                     beforeSend: function() {
                         ImCommon.showLoading('.select-table');
                     }
+                },
+                // 选择事件处理
+                onCheck: function(row, $element) {
+                    ImCommon.updateSelectedInfo('#bootstrap-table');
+                },
+                onUncheck: function(row, $element) {
+                    ImCommon.updateSelectedInfo('#bootstrap-table');
+                },
+                onCheckAll: function(rows, $element) {
+                    ImCommon.updateSelectedInfo('#bootstrap-table');
+                },
+                onUncheckAll: function(rows, $element) {
+                    ImCommon.updateSelectedInfo('#bootstrap-table');
                 }
             };
             $.table.init(options);
@@ -273,6 +316,65 @@
                 });
             });
         }
+
+        /**
+         * 清空搜索条件
+         */
+        function clearSearch() {
+            $.form.reset();
+            $('#searchStatus').hide();
+            $.table.search();
+        }
+
+        /**
+         * 执行搜索并显示搜索条件
+         */
+        function doSearch() {
+            // 显示搜索条件
+            ImCommon.showSearchConditions('#message-form', '#searchStatus', 'clearSearch()');
+            // 执行搜索
+            $.table.search();
+        }
     </script>
+
+    <!-- 优化样式 -->
+    <style type="text/css">
+        /* 选中信息样式 */
+        .selected-info {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #e8f4fd;
+            border: 1px solid #b3d7f7;
+            border-radius: 4px;
+            color: #1c84c6;
+            font-size: 13px;
+        }
+        .selected-info strong {
+            color: #1c84c6;
+            font-size: 15px;
+            margin: 0 2px;
+        }
+
+        /* 下拉菜单样式优化 */
+        .dropdown-menu > li > a {
+            padding: 8px 20px;
+            font-size: 13px;
+        }
+        .dropdown-menu > li > a i {
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+        }
+        .dropdown-menu .divider {
+            margin: 5px 0;
+        }
+        .dropdown-menu > li > a.text-danger {
+            color: #ed5565;
+        }
+        .dropdown-menu > li > a.text-danger:hover {
+            background-color: #ed5565;
+            color: #fff;
+        }
+    </style>
 </body>
 </html>

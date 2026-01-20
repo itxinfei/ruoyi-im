@@ -506,7 +506,7 @@ var ImCommon = {
     /**
      * 格式化文件大小
      * @param size 文件大小（字节）
-     * @returns {string} 格式化后的大小（如“1.5MB”）
+     * @returns {string} 格式化后的大小（如"1.5MB"）
      */
     formatFileSize: function(size) {
         if (!size || size === 0) return '0 B';
@@ -521,5 +521,213 @@ var ImCommon = {
         }
 
         return fileSize.toFixed(index === 0 ? 0 : 1) + ' ' + units[index];
+    },
+
+    /**
+     * 列配置管理
+     * 用于保存和恢复表格列的显示状态和宽度
+     */
+    ColumnConfig: {
+        /**
+         * 保存列配置到 localStorage
+         * @param tableId 表格ID
+         * @param columns 列配置数组
+         */
+        save: function(tableId, columns) {
+            try {
+                var config = columns.map(function(col) {
+                    return {
+                        field: col.field,
+                        visible: col.visible,
+                        width: col.width
+                    };
+                });
+                localStorage.setItem(tableId + '_columns', JSON.stringify(config));
+            } catch (e) {
+                console.warn('保存列配置失败:', e);
+            }
+        },
+
+        /**
+         * 从 localStorage 获取列配置
+         * @param tableId 表格ID
+         * @returns {Array|null} 列配置数组
+         */
+        get: function(tableId) {
+            try {
+                var config = localStorage.getItem(tableId + '_columns');
+                return config ? JSON.parse(config) : null;
+            } catch (e) {
+                console.warn('读取列配置失败:', e);
+                return null;
+            }
+        },
+
+        /**
+         * 应用列配置到列定义
+         * @param tableId 表格ID
+         * @param columns 列定义数组
+         * @returns {Array} 应用配置后的列定义数组
+         */
+        apply: function(tableId, columns) {
+            var config = this.get(tableId);
+            if (config) {
+                columns.forEach(function(col) {
+                    var saved = config.find(function(c) { return c.field === col.field; });
+                    if (saved) {
+                        col.visible = saved.visible;
+                        if (saved.width) col.width = saved.width;
+                    }
+                });
+            }
+            return columns;
+        }
+    },
+
+    /**
+     * 更新表格选中状态显示
+     * 显示"已选 X 项"并启用/禁用批量操作按钮
+     * @param tableId 表格ID或jQuery对象
+     * @param options 配置选项
+     */
+    updateSelectedInfo: function(tableId, options) {
+        options = options || {};
+        var selectedInfoId = options.selectedInfoId || '#selectedInfo';
+        var selectedCountId = options.selectedCountId || '#selectedCount';
+        var multipleClass = options.multipleClass || '.multiple';
+
+        var $table = typeof tableId === 'string' ? $(tableId) : tableId;
+        if ($table.length === 0) return;
+
+        // 获取选中的行
+        var rows = $table.bootstrapTable('getSelections');
+        var count = rows.length;
+
+        // 更新选中数量
+        $(selectedCountId).text(count);
+
+        // 显示/隐藏选中信息
+        if (count > 0) {
+            $(selectedInfoId).show();
+        } else {
+            $(selectedInfoId).hide();
+        }
+
+        // 启用/禁用批量按钮
+        if (count > 0) {
+            $(multipleClass).removeClass('disabled').removeAttr('disabled');
+        } else {
+            $(multipleClass).addClass('disabled').attr('disabled', 'disabled');
+        }
+    },
+
+    /**
+     * 清空表格选择
+     * @param tableId 表格ID
+     */
+    clearSelection: function(tableId) {
+        var $table = typeof tableId === 'string' ? $(tableId) : tableId;
+        $table.bootstrapTable('uncheckAll');
+    },
+
+    /**
+     * 生成操作列的下拉菜单HTML
+     * @param row 行数据
+     * @param menuItems 菜单项数组，每项包含 {text, icon, action, permissionClass}
+     * @param mainAction 主操作按钮配置 {text, icon, action, permissionClass, btnClass}
+     * @returns {string} HTML字符串
+     */
+    buildActionDropdown: function(row, menuItems, mainAction) {
+        var html = '<div class="btn-group">';
+
+        // 主操作按钮
+        if (mainAction) {
+            var permissionClass = mainAction.permissionClass || '';
+            var btnClass = mainAction.btnClass || 'btn-success';
+            var action = mainAction.action
+                .replace(/row\.id/g, row.id)
+                .replace(/row\.username/g, "'" + (row.username || '') + "'")
+                .replace(/row\.nickname/g, "'" + (row.nickname || '') + "'");
+
+            html += '<a class="btn ' + btnClass + ' btn-xs ' + permissionClass +
+                    '" href="javascript:void(0)" onclick="' + action + '" title="' + mainAction.text + '">' +
+                    '<i class="fa ' + mainAction.icon + '"></i> ' + mainAction.text +
+                    '</a> ';
+        }
+
+        // 下拉菜单按钮
+        html += '<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">' +
+                '<i class="fa fa-ellipsis-h"></i></button>' +
+                '<ul class="dropdown-menu pull-right">';
+
+        // 菜单项
+        for (var i = 0; i < menuItems.length; i++) {
+            var item = menuItems[i];
+            if (item.divider) {
+                html += '<li class="divider"></li>';
+            } else {
+                var permissionClass = item.permissionClass || '';
+                var action = item.action
+                    .replace(/row\.id/g, row.id)
+                    .replace(/row\.username/g, "'" + (row.username || '') + "'")
+                    .replace(/row\.nickname/g, "'" + (row.nickname || '') + "'");
+
+                html += '<li><a class="' + permissionClass + '" href="javascript:void(0)" onclick="' + action + '">' +
+                        '<i class="fa ' + item.icon + '"></i> ' + item.text +
+                        '</a></li>';
+            }
+        }
+
+        html += '</ul></div>';
+        return html;
+    },
+
+    /**
+     * 显示搜索条件状态
+     * @param formId 表单ID
+     * @param statusId 状态显示元素ID
+     * @param clearAction 清除操作函数名
+     */
+    showSearchConditions: function(formId, statusId, clearAction) {
+        formId = formId || '#user-form';
+        statusId = statusId || '#searchStatus';
+        clearAction = clearAction || 'clearSearch()';
+
+        var conditions = [];
+        $(formId + ' input[type="text"], ' + formId + ' select').each(function() {
+            var $input = $(this);
+            var $label = $input.closest('li').find('label');
+            var name = $label.text().replace('：', '').replace(':', '');
+            var value = $input.val();
+            if (value) {
+                conditions.push(name + '=' + value);
+            }
+        });
+
+        if (conditions.length > 0) {
+            var $status = $(statusId);
+            $status.find('.search-conditions').text(conditions.join('，'));
+            $status.show();
+        } else {
+            $(statusId).hide();
+        }
+    },
+
+    /**
+     * 优化后的空状态显示
+     * @param message 提示信息
+     * @param clearAction 清除操作函数名（可选）
+     * @returns {string} HTML字符串
+     */
+    formatEmptyState: function(message, clearAction) {
+        message = message || '暂无数据';
+        var clearBtn = clearAction ?
+            '<button class="btn btn-primary btn-sm" onclick="' + clearAction + '" style="margin-top:15px;">清空筛选</button>' : '';
+
+        return '<div class="text-center" style="padding:40px 20px;color:#999;">' +
+            '<i class="fa fa-inbox fa-3x" style="margin-bottom:15px;opacity:0.3;"></i>' +
+            '<p style="margin:0;font-size:14px;">' + message + '</p>' +
+            clearBtn +
+            '</div>';
     }
 };
