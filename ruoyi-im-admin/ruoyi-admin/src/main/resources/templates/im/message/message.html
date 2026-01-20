@@ -45,6 +45,74 @@
             border-radius: 8px;
             border: 1px solid #e7eaec;
             padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        /* ========== Bootstrap Table 工具栏按钮优化 ========== */
+        .fixed-table-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e7eaec;
+            margin-bottom: 15px;
+        }
+        .fixed-table-toolbar .columns-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .fixed-table-toolbar .columns-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .fixed-table-toolbar .btn {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .fixed-table-toolbar .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .fixed-table-toolbar .btn-default {
+            background: #fff;
+            border-color: #e7eaec;
+            color: #676a6c;
+        }
+        .fixed-table-toolbar .btn-default:hover {
+            background: #1ab394;
+            border-color: #18a689;
+            color: #fff;
+        }
+        .fixed-table-toolbar .search input {
+            border-radius: 4px;
+            border: 1px solid #e7eaec;
+            padding: 6px 12px;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        .fixed-table-toolbar .search input:focus {
+            border-color: #1ab394;
+            box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+            outline: none;
+        }
+        .fixed-table-toolbar .dropdown-menu {
+            border-radius: 6px;
+            border: 1px solid #e7eaec;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .fixed-table-toolbar .dropdown-menu li {
+            padding: 4px 8px;
+        }
+        .fixed-table-toolbar .dropdown-menu label {
+            margin: 0;
+            font-size: 13px;
+            cursor: pointer;
         }
 
         /* ========== 搜索状态提示 ========== */
