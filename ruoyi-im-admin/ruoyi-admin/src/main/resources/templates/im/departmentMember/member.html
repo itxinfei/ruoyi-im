@@ -2,48 +2,37 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('部门成员管理')" />
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="renderer" content="webkit">
-    <title>部门成员管理</title>
-    <link rel="shortcut icon" href="/favicon.ico">
-    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
-    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
-    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
-    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
-    
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
-        <div class="row">
-            <!-- 统计卡片 -->
-            <div class="col-sm-12 statistics-section">
+        <div class="row" style="padding-top: 6px;">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-total">
+                        <div class="stat-box stat-box-primary">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">总成员数</div>
                             <i class="fa fa-users stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-active">
+                        <div class="stat-box stat-box-success">
                             <div class="stat-number" id="activeCount">0</div>
                             <div class="stat-label">在职成员</div>
                             <i class="fa fa-user-plus stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-left">
+                        <div class="stat-box stat-box-danger">
                             <div class="stat-number" id="leftCount">0</div>
                             <div class="stat-label">离职成员</div>
                             <i class="fa fa-user-minus stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-primary">
+                        <div class="stat-box stat-box-warning">
                             <div class="stat-number" id="primaryCount">0</div>
                             <div class="stat-label">主部门成员</div>
                             <i class="fa fa-star stat-icon"></i>
@@ -53,82 +42,76 @@
             </div>
 
             <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse">
+            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
                 <form id="member-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                部门名称：<input type="text" name="departmentName"/>
+                                <label class="input-label">部门名称：</label><input type="text" name="departmentName" placeholder="请输入部门名称"/>
                             </li>
                             <li>
-                                用户名：<input type="text" name="userName"/>
+                                <label class="input-label">用户名：</label><input type="text" name="userName" placeholder="请输入用户名"/>
                             </li>
                             <li>
-                                职位：<input type="text" name="position"/>
+                                <label class="input-label">职位：</label><input type="text" name="position" placeholder="请输入职位"/>
                             </li>
                             <li>
-                                状态：
-                                <select name="status">
+                                <label class="input-label">状态：</label><select name="status">
                                     <option value="">所有</option>
                                     <option value="0">在职</option>
                                     <option value="1">离职</option>
                                 </select>
                             </li>
                             <li>
-                                是否主部门：
-                                <select name="isPrimary">
+                                <label class="input-label">是否主部门：</label><select name="isPrimary">
                                     <option value="">所有</option>
                                     <option value="1">是</option>
                                     <option value="0">否</option>
                                 </select>
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:departmentMember:add">
-                    <i class="fa fa-plus"></i> 新增
-                </a>
-                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:departmentMember:edit">
-                    <i class="fa fa-edit"></i> 修改
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:departmentMember:remove">
-                    <i class="fa fa-remove"></i> 删除
-                </a>
-                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:departmentMember:export">
-                    <i class="fa fa-download"></i> 导出
-                </a>
+            <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
-			<div class="btn-group-sm" id="toolbar" role="group">
-				<!-- Buttons moved here -->
-			</div>
-			<table id="bootstrap-table"></table>
+                <!-- 批量操作按钮 -->
+                <div class="btn-group-sm" id="toolbar">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:departmentMember:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:departmentMember:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:departmentMember:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:departmentMember:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
+                </div>
+
+                <!-- 搜索状态提示 -->
+                <div class="search-status" id="searchStatus" style="display:none;">
+                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
+                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
+                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
+                </div>
+
+                <!-- 数据表格 -->
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
-        
-            <!-- 统计卡片样式 -->
-            
         </div>
     </div>
 
-    <!-- 通用JS -->
-    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
-    <script th:src="@{/js/jquery.min.js}"></script>
-    <script th:src="@{/js/bootstrap.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js}"></script>
-    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
-    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
-    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-    <script th:src="@{/ajax/libs/layui/layui.min.js}"></script>
-    <script th:src="@{/ruoyi/js/common.js}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
+    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:departmentMember:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:departmentMember:remove')}]];
@@ -137,47 +120,67 @@
 
         $(function() {
             loadStatistics();
+
             var options = {
                 url: prefix + "/list",
-				toolbar: "#toolbar",
-				height: 650,
+                toolbar: "toolbar",
+                height: 650,
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove/{id}",
                 exportUrl: prefix + "/export",
                 modalName: "部门成员",
+                // 分页配置
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
+                // 固定列配置
+                fixedColumns: true,
+                fixedNumber: 1,
+                fixedRightNumber: 1,
+                // 列显示/隐藏配置
+                showColumns: true,
+                showColumnsToggleAll: true,
+                // 记住列选择
+                cookie: true,
+                cookieIdTable: 'im_department_member_table',
+                cookieExpire: '30d',
+                // 导出配置
+                showExport: true,
+                exportDataType: 'selected',
+                exportTypes: ['excel'],
+                exportOptions: {
+                    fileName: '部门成员数据'
+                },
                 columns: [{
                     checkbox: true
-                },
-                {
+                }, {
                     field: 'id',
                     title: 'ID',
-                    width: '60'
-                },
-                {
+                    visible: false
+                }, {
                     field: 'departmentName',
                     title: '部门名称',
-                    width: '150'
-                },
-                {
+                    width: '150',
+                    sortable: true
+                }, {
                     field: 'userName',
                     title: '用户名',
-                    width: '120'
-                },
-                {
+                    width: '120',
+                    sortable: true
+                }, {
                     field: 'userNickname',
                     title: '用户昵称',
                     width: '120'
-                },
-                {
+                }, {
                     field: 'position',
                     title: '职位',
                     width: '120',
                     formatter: function(value, row, index) {
                         return value || '-';
                     }
-                },
-                {
+                }, {
                     field: 'isPrimary',
                     title: '是否主部门',
                     align: 'center',
@@ -188,8 +191,7 @@
                         }
                         return '<span class="badge badge-default">否</span>';
                     }
-                },
-                {
+                }, {
                     field: 'status',
                     title: '状态',
                     align: 'center',
@@ -198,14 +200,12 @@
                         if (value == 0) return '<span class="badge badge-success">在职</span>';
                         return '<span class="badge badge-danger">离职</span>';
                     }
-                },
-                {
+                }, {
                     field: 'joinTime',
                     title: '入职时间',
                     width: '160',
                     sortable: true
-                },
-                {
+                }, {
                     field: 'leaveTime',
                     title: '离职时间',
                     width: '160',
@@ -213,16 +213,15 @@
                     formatter: function(value, row, index) {
                         return value || '-';
                     }
-                },
-                {
+                }, {
                     field: 'createTime',
                     title: '创建时间',
                     width: '160',
                     sortable: true
-                },
-                {
+                }, {
                     title: '操作',
                     align: 'center',
+                    width: '200',
                     formatter: function(value, row, index) {
                         var actions = [];
                         actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
@@ -232,7 +231,26 @@
                         }
                         return actions.join('');
                     }
-                }]
+                }],
+                responseHandler: function(res) {
+                    ImCommon.hideLoading();
+                    return ImCommon.handleTableResponse(res, '暂无部门成员数据', '#bootstrap-table');
+                },
+                onLoadError: function(status) {
+                    ImCommon.hideLoading();
+                    $.modal.msgError("数据加载失败，请稍后重试");
+                },
+                onLoadSuccess: function() {
+                    ImCommon.removeEmptyData('#bootstrap-table');
+                },
+                ajaxOptions: {
+                    beforeSend: function() {
+                        ImCommon.showLoading('.select-table');
+                    },
+                    complete: function() {
+                        ImCommon.hideLoading();
+                    }
+                }
             };
             $.table.init(options);
         });
@@ -241,14 +259,17 @@
          * 加载统计数据
          */
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == web_status.SUCCESS) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#activeCount").text(result.data.activeCount || 0);
-                    $("#leftCount").text(result.data.leftCount || 0);
-                    $("#primaryCount").text(result.data.primaryCount || 0);
-                }
-            });
+            ImCommon.loadStatisticsWithCache(
+                prefix + "/statistics",
+                function(data) {
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#activeCount").text(data.activeCount || 0);
+                    $("#leftCount").text(data.leftCount || 0);
+                    $("#primaryCount").text(data.primaryCount || 0);
+                },
+                'department_member_statistics',
+                5
+            );
         }
 
         /**
@@ -270,7 +291,23 @@
                 });
             });
         }
+
+        /**
+         * 清空搜索条件
+         */
+        function clearSearch() {
+            $.form.reset();
+            $('#searchStatus').hide();
+            $.table.search();
+        }
+
+        /**
+         * 执行搜索
+         */
+        function doSearch() {
+            ImCommon.showSearchConditions('#member-form', '#searchStatus', 'clearSearch()');
+            $.table.search();
+        }
     </script>
-    <th:block th:include="include :: footer" />
 </body>
 </html>

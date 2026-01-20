@@ -2,48 +2,37 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('群组黑名单管理')" />
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="renderer" content="webkit">
-    <title>群组黑名单管理</title>
-    <link rel="shortcut icon" href="/favicon.ico">
-    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
-    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
-    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
-    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
-    
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
         <div class="row" style="padding-top: 6px;">
-            <!-- 统计卡片 -->
-            <div class="col-sm-12 statistics-section">
-                <div class="row" style="padding-top: 6px;">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12">
+                <div class="row">
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-total">
+                        <div class="stat-box stat-box-primary">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">总记录数</div>
                             <i class="fa fa-list stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-muted">
+                        <div class="stat-box stat-box-warning">
                             <div class="stat-number" id="mutedCount">0</div>
                             <div class="stat-label">禁言数</div>
                             <i class="fa fa-ban stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-blacklisted">
+                        <div class="stat-box stat-box-danger">
                             <div class="stat-number" id="blacklistedCount">0</div>
                             <div class="stat-label">拉黑数</div>
                             <i class="fa fa-user-times stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-today">
+                        <div class="stat-box stat-box-success">
                             <div class="stat-number" id="todayCount">0</div>
                             <div class="stat-label">今日新增</div>
                             <i class="fa fa-calendar-plus-o stat-icon"></i>
@@ -53,7 +42,7 @@
             </div>
 
             <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse">
+            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
                 <form id="blacklist-form">
                     <div class="select-list">
                         <ul>
@@ -84,55 +73,51 @@
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:group:blacklist:add">
-                    <i class="fa fa-plus"></i> 新增
-                </a>
-                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:group:blacklist:edit">
-                    <i class="fa fa-edit"></i> 修改
-                </a>
-                <a class="btn btn-info single disabled" onclick="releaseBlacklist()" shiro:hasPermission="im:group:blacklist:edit">
-                    <i class="fa fa-unlock"></i> 解除
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:blacklist:remove">
-                    <i class="fa fa-remove"></i> 删除
-                </a>
-                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:group:blacklist:export">
-                    <i class="fa fa-download"></i> 导出
-                </a>
+            <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
-			<div class="btn-group-sm" id="toolbar" role="group">
-				<!-- Buttons moved here -->
-			</div>
-			<table id="bootstrap-table" data-mobile-responsive="true"></table>
+                <!-- 批量操作按钮 -->
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:group:blacklist:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:group:blacklist:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-info single disabled" onclick="releaseBlacklist()" shiro:hasPermission="im:group:blacklist:edit">
+                        <i class="fa fa-unlock"></i> 解除
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:blacklist:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:group:blacklist:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
+                </div>
+
+                <!-- 搜索状态提示 -->
+                <div class="search-status" id="searchStatus" style="display:none;">
+                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
+                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
+                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
+                </div>
+
+                <!-- 数据表格 -->
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
-        
-            <!-- 统计卡片样式 -->
-            
         </div>
     </div>
 
-    <!-- 通用JS -->
-    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
-    <script th:src="@{/js/jquery.min.js}"></script>
-    <script th:src="@{/js/bootstrap.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js}"></script>
-    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
-    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
-    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-    <script th:src="@{/ajax/libs/layui/layui.min.js}"></script>
-    <script th:src="@{/ruoyi/js/common.js}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
+    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:group:blacklist:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:group:blacklist:remove')}]];
@@ -143,51 +128,71 @@
 
             var options = {
                 url: prefix + "/list",
-				height: 650,
+                toolbar: "toolbar",
+                height: 650,
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove/{id}",
                 exportUrl: prefix + "/export",
                 modalName: "黑名单记录",
+                // 分页配置
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
+                // 固定列配置
+                fixedColumns: true,
+                fixedNumber: 1,
+                fixedRightNumber: 1,
+                // 列显示/隐藏配置
+                showColumns: true,
+                showColumnsToggleAll: true,
+                // 记住列选择
+                cookie: true,
+                cookieIdTable: 'im_group_blacklist_table',
+                cookieExpire: '30d',
+                // 导出配置
+                showExport: true,
+                exportDataType: 'selected',
+                exportTypes: ['excel'],
+                exportOptions: {
+                    fileName: '群组黑名单数据'
+                },
                 columns: [{
                     checkbox: true
-                },
-                {
+                }, {
                     field: 'id',
                     title: 'ID',
                     visible: false
-                },
-                {
+                }, {
                     field: 'groupId',
                     title: '群组ID',
                     width: '80',
                     visible: false
-                },
-                {
+                }, {
                     field: 'groupName',
                     title: '群组名称',
-                    width: '150'
-                },
-                {
+                    width: '150',
+                    formatter: function(value, row, index) {
+                        return '<span class="text-primary"><i class="fa fa-users"></i> ' + (value || '-') + '</span>';
+                    }
+                }, {
                     field: 'userId',
                     title: '用户ID',
                     width: '80',
                     visible: false
-                },
-                {
+                }, {
                     field: 'userName',
                     title: '用户名称',
                     width: '100'
-                },
-                {
+                }, {
                     field: 'userNickname',
                     title: '用户昵称',
                     width: '100',
                     formatter: function(value, row, index) {
                         return value || '-';
                     }
-                },
-                {
+                }, {
                     field: 'type',
                     title: '类型',
                     align: 'center',
@@ -197,37 +202,33 @@
                         if (value === 'BLACKLIST') { return '<span class="badge badge-danger">拉黑</span>'; }
                         return value || '-';
                     }
-                },
-                {
+                }, {
                     field: 'reason',
                     title: '原因',
                     width: '200',
                     formatter: function(value, row, index) {
                         if (!value) return '-';
                         if (value.length > 30) {
-                            return value.substring(0, 30) + '...';
+                            return '<span title="' + value + '">' + value.substring(0, 30) + '...</span>';
                         }
                         return value;
                     }
-                },
-                {
+                }, {
                     field: 'operatorName',
                     title: '操作者',
                     width: '100',
                     formatter: function(value, row, index) {
                         return value || '-';
                     }
-                },
-                {
+                }, {
                     field: 'expireTime',
                     title: '过期时间',
                     width: '160',
                     formatter: function(value, row, index) {
                         if (!value) return '<span class="text-gray">永久</span>';
-                        return value;
+                        return ImCommon.formatDateTimeWithRelative(value);
                     }
-                },
-                {
+                }, {
                     field: 'isActive',
                     title: '状态',
                     align: 'center',
@@ -236,14 +237,15 @@
                         if (value == 1) return '<span class="badge badge-success">有效</span>';
                         return '<span class="badge badge-default">已解除</span>';
                     }
-                },
-                {
+                }, {
                     field: 'createTime',
                     title: '创建时间',
                     width: '160',
-                    sortable: true
-                },
-                {
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        return ImCommon.formatDateTimeWithRelative(value);
+                    }
+                }, {
                     title: '操作',
                     align: 'center',
                     width: '200',
@@ -257,22 +259,50 @@
                         actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')" style="cursor: pointer;"><i class="fa fa-remove"></i></a>');
                         return actions.join('');
                     }
-                }]
+                }],
+                responseHandler: function(res) {
+                    ImCommon.hideLoading();
+                    return ImCommon.handleTableResponse(res, '暂无黑名单数据', '#bootstrap-table');
+                },
+                onLoadError: function(status) {
+                    ImCommon.hideLoading();
+                    $.modal.msgError("数据加载失败，请稍后重试");
+                },
+                onLoadSuccess: function() {
+                    ImCommon.removeEmptyData('#bootstrap-table');
+                },
+                ajaxOptions: {
+                    beforeSend: function() {
+                        ImCommon.showLoading('.select-table');
+                    },
+                    complete: function() {
+                        ImCommon.hideLoading();
+                    }
+                }
             };
             $.table.init(options);
         });
 
+        /**
+         * 加载统计数据
+         */
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#mutedCount").text(result.data.mutedCount || 0);
-                    $("#blacklistedCount").text(result.data.blacklistedCount || 0);
-                    $("#todayCount").text(result.data.todayCount || 0);
-                }
-            });
+            ImCommon.loadStatisticsWithCache(
+                prefix + "/statistics",
+                function(data) {
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#mutedCount").text(data.mutedCount || 0);
+                    $("#blacklistedCount").text(data.blacklistedCount || 0);
+                    $("#todayCount").text(data.todayCount || 0);
+                },
+                'group_blacklist_statistics',
+                5
+            );
         }
 
+        /**
+         * 解除黑名单
+         */
         function releaseBlacklist() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
@@ -295,6 +325,9 @@
             });
         }
 
+        /**
+         * 解除单个黑名单
+         */
         function releaseSingle(id, isBatch) {
             $.ajax({
                 url: prefix + "/" + id + "/release",
@@ -318,6 +351,9 @@
             });
         }
 
+        /**
+         * 查看详情
+         */
         function viewDetail(id) {
             $.get(prefix + "/" + id, function(result) {
                 if (result.code == 0) {
@@ -346,7 +382,23 @@
                 }
             });
         }
+
+        /**
+         * 清空搜索条件
+         */
+        function clearSearch() {
+            $.form.reset();
+            $('#searchStatus').hide();
+            $.table.search();
+        }
+
+        /**
+         * 执行搜索
+         */
+        function doSearch() {
+            ImCommon.showSearchConditions('#blacklist-form', '#searchStatus', 'clearSearch()');
+            $.table.search();
+        }
     </script>
-    <th:block th:include="include :: footer" />
 </body>
 </html>

@@ -7,31 +7,32 @@
 <body class="gray-bg">
     <div class="container-div">
         <div class="row" style="padding-top: 6px;">
-            <div class="col-sm-12 statistics-section">
-                <div class="row" style="padding-top: 6px;">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12">
+                <div class="row">
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-blue">
+                        <div class="stat-box stat-box-primary">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">应用总数</div>
                             <i class="fa fa-cube stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-green">
+                        <div class="stat-box stat-box-success">
                             <div class="stat-number" id="visibleCount">0</div>
                             <div class="stat-label">已发布</div>
                             <i class="fa fa-eye stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-orange">
+                        <div class="stat-box stat-box-danger">
                             <div class="stat-number" id="hiddenCount">0</div>
                             <div class="stat-label">未发布</div>
                             <i class="fa fa-eye-slash stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-purple">
+                        <div class="stat-box stat-box-warning">
                             <div class="stat-number" id="systemCount">0</div>
                             <div class="stat-label">系统应用</div>
                             <i class="fa fa-lock stat-icon"></i>
@@ -40,15 +41,16 @@
                 </div>
             </div>
 
-            <div class="col-sm-12 search-collapse">
+            <!-- 搜索区域 -->
+            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
                 <form id="application-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="input-label">应用名称：</label><input type="text" name="name" value=""/>
+                                <label class="input-label">应用名称：</label><input type="text" name="name" placeholder="请输入应用名称"/>
                             </li>
                             <li>
-                                <label class="input-label">应用编码：</label><input type="text" name="code" value=""/>
+                                <label class="input-label">应用编码：</label><input type="text" name="code" placeholder="请输入应用编码"/>
                             </li>
                             <li>
                                 <label class="input-label">分类：</label><select name="category">
@@ -75,85 +77,58 @@
                                 </select>
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <label class="input-label">系统应用：</label><select name="isSystem">
+                                    <option value="">所有</option>
+                                    <option value="true">是</option>
+                                    <option value="false">否</option>
+                                </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:app:add">
-                    <i class="fa fa-plus"></i> 新增
-                </a>
-                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:app:edit">
-                    <i class="fa fa-edit"></i> 修改
-                </a>
-                <a class="btn btn-warning single disabled" onclick="toggleVisibility()" shiro:hasPermission="im:app:edit">
-                    <i class="fa fa-eye-slash"></i> 显示/隐藏
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:app:remove">
-                    <i class="fa fa-remove"></i> 删除
-                </a>
+            <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
-			<div class="btn-group-sm" id="toolbar" role="group">
-				<!-- Buttons moved here -->
-			</div>
-			<table id="bootstrap-table" data-mobile-responsive="true"></table>
-            </div>
-        
-            <!-- 统计卡片样式 -->
-            
+                <!-- 批量操作按钮 -->
+                <div class="btn-group-sm" id="toolbar">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:app:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:app:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-warning single disabled" onclick="toggleVisibility()" shiro:hasPermission="im:app:edit">
+                        <i class="fa fa-eye-slash"></i> 显示/隐藏
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:app:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:app:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
+                </div>
 
-                .stat-box {
-                    position: relative;
-                    padding: 15px;
-                    background: #fff;
-                    border-radius: 4px;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                    transition: all 0.3s;
-                }
-                .stat-box:hover {
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-                    transform: translateY(-2px);
-                }
-                .stat-box-primary {
-                    border-left: 4px solid #1ab394;
-                }
-                .stat-box-success {
-                    border-left: 4px solid #1c84c6;
-                }
-                .stat-box-danger {
-                    border-left: 4px solid #ed5565;
-                }
-                .stat-box-warning {
-                    border-left: 4px solid #f8ac59;
-                }
-                .stat-box .stat-number {
-                    font-size: 28px;
-                    font-weight: 600;
-                    color: #676a6c;
-                    margin-bottom: 5px;
-                }
-                .stat-box .stat-label {
-                    font-size: 13px;
-                    color: #999;
-                    margin-bottom: 0;
-                }
-                .stat-box .stat-icon {
-                    position: absolute;
-                    right: 15px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    font-size: 36px;
-                    opacity: 0.15;
-                }
-            
+                <!-- 搜索状态提示 -->
+                <div class="search-status" id="searchStatus" style="display:none;">
+                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
+                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
+                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
+                </div>
+
+                <!-- 数据表格 -->
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
         </div>
     </div>
 
     <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
+    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:app:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:app:remove')}]];
@@ -164,20 +139,43 @@
 
             var options = {
                 url: prefix + "/list",
-				height: 650,
+                toolbar: "toolbar",
+                height: 650,
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove/{id}",
+                exportUrl: prefix + "/export",
                 modalName: "应用",
+                // 分页配置
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
+                // 固定列配置
+                fixedColumns: true,
+                fixedNumber: 1,
+                fixedRightNumber: 1,
+                // 列显示/隐藏配置
+                showColumns: true,
+                showColumnsToggleAll: true,
+                // 记住列选择
+                cookie: true,
+                cookieIdTable: 'im_application_table',
+                cookieExpire: '30d',
+                // 导出配置
+                showExport: true,
+                exportDataType: 'selected',
+                exportTypes: ['excel'],
+                exportOptions: {
+                    fileName: '应用数据'
+                },
                 columns: [{
                     checkbox: true
-                },
-                {
+                }, {
                     field: 'id',
                     title: 'ID',
                     visible: false
-                },
-                {
+                }, {
                     field: 'icon',
                     title: '图标',
                     width: '60',
@@ -187,23 +185,20 @@
                             if (value.indexOf('fa-') !== -1 || value.indexOf('fa ') !== -1) {
                                 return '<i class="' + value + ' fa-2x text-gray"></i>';
                             }
-                            return '<img src="' + value + '" class="app-icon" onerror="this.src=\'/img/profile.jpg\'">';
+                            return '<img src="' + value + '" class="app-icon" style="width:32px;height:32px;border-radius:4px;" onerror="this.src=\'/img/profile.jpg\'">';
                         }
                         return '<i class="fa fa-cube fa-2x text-gray"></i>';
                     }
-                },
-                {
+                }, {
                     field: 'name',
                     title: '应用名称',
                     sortable: true,
                     width: '150'
-                },
-                {
+                }, {
                     field: 'code',
                     title: '应用编码',
                     width: '120'
-                },
-                {
+                }, {
                     field: 'category',
                     title: '分类',
                     align: 'center',
@@ -215,8 +210,7 @@
                         if (value === 'CUSTOM') { return '<span class="badge badge-default">自定义</span>'; }
                         return value || '-';
                     }
-                },
-                {
+                }, {
                     field: 'appType',
                     title: '类型',
                     align: 'center',
@@ -227,8 +221,7 @@
                         if (value === 'LINK') { return '<span class="badge badge-primary">链接</span>'; }
                         return value || '-';
                     }
-                },
-                {
+                }, {
                     field: 'appUrl',
                     title: '应用地址',
                     formatter: function(value, row, index) {
@@ -237,8 +230,7 @@
                         }
                         return value || '-';
                     }
-                },
-                {
+                }, {
                     field: 'isSystem',
                     title: '系统应用',
                     align: 'center',
@@ -247,8 +239,7 @@
                         if (value == true) return '<span class="badge badge-danger">是</span>';
                         return '<span class="badge badge-default">否</span>';
                     }
-                },
-                {
+                }, {
                     field: 'isVisible',
                     title: '状态',
                     align: 'center',
@@ -257,37 +248,79 @@
                         if (value == true) return '<span class="badge badge-success">可见</span>';
                         return '<span class="badge badge-warning">隐藏</span>';
                     }
-                },
-                {
+                }, {
                     field: 'sortOrder',
                     title: '排序',
                     align: 'center',
                     width: '60',
                     sortable: true
-                },
-                {
+                }, {
+                    field: 'createTime',
+                    title: '创建时间',
+                    width: '160',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        return ImCommon.formatDateTimeWithRelative(value);
+                    }
+                }, {
                     title: '操作',
                     align: 'center',
-                    width: '200',
+                    width: '180',
                     formatter: function(value, row, index) {
                         var actions = [];
                         actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
                         var toggleText = row.isVisible == true ? '隐藏' : '显示';
-                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="toggleOne(' + row.id + ', ' + row.isVisible + ')"><i class="fa fa-eye"></i>' + toggleText + '</a> ');
+                        var toggleIcon = row.isVisible == true ? 'fa-eye-slash' : 'fa-eye';
+                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="toggleOne(' + row.id + ', ' + row.isVisible + ')"><i class="fa ' + toggleIcon + '"></i>' + toggleText + '</a> ');
                         if (row.isSystem != true) {
                             actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         }
                         return actions.join('');
                     }
-                }]
+                }],
+                responseHandler: function(res) {
+                    ImCommon.hideLoading();
+                    return ImCommon.handleTableResponse(res, '暂无应用数据', '#bootstrap-table');
+                },
+                onLoadError: function(status) {
+                    ImCommon.hideLoading();
+                    $.modal.msgError("数据加载失败，请稍后重试");
+                },
+                onLoadSuccess: function() {
+                    ImCommon.removeEmptyData('#bootstrap-table');
+                },
+                ajaxOptions: {
+                    beforeSend: function() {
+                        ImCommon.showLoading('.select-table');
+                    },
+                    complete: function() {
+                        ImCommon.hideLoading();
+                    }
+                }
             };
             $.table.init(options);
-        });            })
-            .fail(function() {
-                $.modal.alertError("加载统计数据失败");
-            });
+        });
+
+        /**
+         * 加载统计数据
+         */
+        function loadStatistics() {
+            ImCommon.loadStatisticsWithCache(
+                prefix + "/statistics",
+                function(data) {
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#visibleCount").text(data.visibleCount || 0);
+                    $("#hiddenCount").text(data.hiddenCount || 0);
+                    $("#systemCount").text(data.systemCount || 0);
+                },
+                'application_statistics',
+                5
+            );
         }
 
+        /**
+         * 批量切换可见性
+         */
         function toggleVisibility() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
@@ -316,6 +349,9 @@
             });
         }
 
+        /**
+         * 切换单个应用可见性
+         */
         function toggleOne(id, isVisible) {
             var newVisibility = !isVisible;
             $.ajax({
@@ -334,6 +370,23 @@
                     $.modal.alertError("设置失败");
                 }
             });
+        }
+
+        /**
+         * 清空搜索条件
+         */
+        function clearSearch() {
+            $.form.reset();
+            $('#searchStatus').hide();
+            $.table.search();
+        }
+
+        /**
+         * 执行搜索
+         */
+        function doSearch() {
+            ImCommon.showSearchConditions('#application-form', '#searchStatus', 'clearSearch()');
+            $.table.search();
         }
     </script>
 </body>

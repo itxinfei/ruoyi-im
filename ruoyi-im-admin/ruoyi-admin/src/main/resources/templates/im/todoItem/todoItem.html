@@ -8,31 +8,32 @@
 <body class="gray-bg">
     <div class="container-div">
         <div class="row" style="padding-top: 6px;">
-            <div class="col-sm-12 statistics-section">
-                <div class="row" style="padding-top: 6px;">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12">
+                <div class="row">
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-purple">
+                        <div class="stat-box stat-box-primary">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">待办总数</div>
                             <i class="fa fa-list stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-orange">
+                        <div class="stat-box stat-box-warning">
                             <div class="stat-number" id="pendingCount">0</div>
                             <div class="stat-label">待处理</div>
                             <i class="fa fa-clock-o stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-blue">
+                        <div class="stat-box stat-box-success">
                             <div class="stat-number" id="inProgressCount">0</div>
                             <div class="stat-label">进行中</div>
                             <i class="fa fa-spinner stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-red">
+                        <div class="stat-box stat-box-danger">
                             <div class="stat-number" id="overdueCount">0</div>
                             <div class="stat-label">已逾期</div>
                             <i class="fa fa-exclamation-triangle stat-icon"></i>
@@ -41,23 +42,27 @@
                 </div>
             </div>
 
-            <div class="col-sm-12 search-collapse">
+            <!-- 搜索区域 -->
+            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
                 <form id="todoItem-form">
                     <div class="select-list">
                         <ul>
-                            <li><label class="input-label">用户名</label><input type="text" name="username"/>
+                            <li>
+                                <label class="input-label">用户名</label><input type="text" name="username" placeholder="请输入用户名"/>
                             </li>
                             <li>
-                                <label class="input-label">待办标题：</label><input type="text" name="title"/>
+                                <label class="input-label">待办标题：</label><input type="text" name="title" placeholder="请输入待办标题"/>
                             </li>
-                            <li><label class="input-label">优先级</label><select name="priority">
+                            <li>
+                                <label class="input-label">优先级</label><select name="priority">
                                     <option value="">所有</option>
                                     <option value="1">低</option>
                                     <option value="2">中</option>
                                     <option value="3">高</option>
                                 </select>
                             </li>
-                            <li><label class="input-label">状态</label><select name="status">
+                            <li>
+                                <label class="input-label">状态</label><select name="status">
                                     <option value="">所有</option>
                                     <option value="PENDING">待办</option>
                                     <option value="IN_PROGRESS">进行中</option>
@@ -72,95 +77,58 @@
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:todoItem:add">
-                    <i class="fa fa-plus"></i> 新增
-                </a>
-                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:todoItem:edit">
-                    <i class="fa fa-edit"></i> 修改
-                </a>
-                <a class="btn btn-info single disabled" onclick="startItem()" shiro:hasPermission="im:todoItem:edit">
-                    <i class="fa fa-play"></i> 开始
-                </a>
-                <a class="btn btn-success single disabled" onclick="completeItem()" shiro:hasPermission="im:todoItem:edit">
-                    <i class="fa fa-check"></i> 完成
-                </a>
-                <a class="btn btn-warning single disabled" onclick="cancelItem()" shiro:hasPermission="im:todoItem:edit">
-                    <i class="fa fa-times"></i> 取消
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:todoItem:remove">
-                    <i class="fa fa-remove"></i> 删除
-                </a>
-                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:todoItem:export">
-                    <i class="fa fa-download"></i> 导出
-                </a>
+            <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
-			<div class="btn-group-sm" id="toolbar" role="group">
-				<!-- Buttons moved here -->
-			</div>
-			<table id="bootstrap-table" data-mobile-responsive="true"></table>
-            </div>
-        
-            <!-- 统计卡片样式 -->
-            
+                <!-- 批量操作按钮 -->
+                <div class="btn-group-sm" id="toolbar">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:todoItem:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:todoItem:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-info single disabled" onclick="startItem()" shiro:hasPermission="im:todoItem:edit">
+                        <i class="fa fa-play"></i> 开始
+                    </a>
+                    <a class="btn btn-success single disabled" onclick="completeItem()" shiro:hasPermission="im:todoItem:edit">
+                        <i class="fa fa-check"></i> 完成
+                    </a>
+                    <a class="btn btn-warning single disabled" onclick="cancelItem()" shiro:hasPermission="im:todoItem:edit">
+                        <i class="fa fa-times"></i> 取消
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:todoItem:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:todoItem:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
+                </div>
 
-                .stat-box {
-                    position: relative;
-                    padding: 15px;
-                    background: #fff;
-                    border-radius: 4px;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                    transition: all 0.3s;
-                }
-                .stat-box:hover {
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-                    transform: translateY(-2px);
-                }
-                .stat-box-primary {
-                    border-left: 4px solid #1ab394;
-                }
-                .stat-box-success {
-                    border-left: 4px solid #1c84c6;
-                }
-                .stat-box-danger {
-                    border-left: 4px solid #ed5565;
-                }
-                .stat-box-warning {
-                    border-left: 4px solid #f8ac59;
-                }
-                .stat-box .stat-number {
-                    font-size: 28px;
-                    font-weight: 600;
-                    color: #676a6c;
-                    margin-bottom: 5px;
-                }
-                .stat-box .stat-label {
-                    font-size: 13px;
-                    color: #999;
-                    margin-bottom: 0;
-                }
-                .stat-box .stat-icon {
-                    position: absolute;
-                    right: 15px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    font-size: 36px;
-                    opacity: 0.15;
-                }
-            
+                <!-- 搜索状态提示 -->
+                <div class="search-status" id="searchStatus" style="display:none;">
+                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
+                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
+                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
+                </div>
+
+                <!-- 数据表格 -->
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
         </div>
     </div>
 
     <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
     <script th:src="@{/ajax/libs/datapicker/bootstrap-datetimepicker.min.js}"></script>
+    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:todoItem:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:todoItem:remove')}]];
@@ -168,17 +136,40 @@
 
         $(function() {
             loadStatistics();
-
             initDatePicker();
 
             var options = {
                 url: prefix + "/list",
-				height: 650,
+                toolbar: "toolbar",
+                height: 650,
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove/{id}",
                 exportUrl: prefix + "/export",
                 modalName: "待办事项",
+                // 分页配置
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
+                // 固定列配置
+                fixedColumns: true,
+                fixedNumber: 1,
+                fixedRightNumber: 1,
+                // 列显示/隐藏配置
+                showColumns: true,
+                showColumnsToggleAll: true,
+                // 记住列选择
+                cookie: true,
+                cookieIdTable: 'im_todo_item_table',
+                cookieExpire: '30d',
+                // 导出配置
+                showExport: true,
+                exportDataType: 'selected',
+                exportTypes: ['excel'],
+                exportOptions: {
+                    fileName: '待办事项数据'
+                },
                 columns: [{
                     checkbox: true
                 },
@@ -293,11 +284,50 @@
                         actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
-                }]
+                }],
+                responseHandler: function(res) {
+                    ImCommon.hideLoading();
+                    return ImCommon.handleTableResponse(res, '暂无待办事项数据', '#bootstrap-table');
+                },
+                onLoadError: function(status) {
+                    ImCommon.hideLoading();
+                    $.modal.msgError("数据加载失败，请稍后重试");
+                },
+                onLoadSuccess: function() {
+                    ImCommon.removeEmptyData('#bootstrap-table');
+                },
+                ajaxOptions: {
+                    beforeSend: function() {
+                        ImCommon.showLoading('.select-table');
+                    },
+                    complete: function() {
+                        ImCommon.hideLoading();
+                    }
+                }
             };
             $.table.init(options);
         });
 
+        /**
+         * 加载统计数据
+         */
+        function loadStatistics() {
+            ImCommon.loadStatisticsWithCache(
+                prefix + "/statistics",
+                function(data) {
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#pendingCount").text(data.pendingCount || 0);
+                    $("#inProgressCount").text(data.inProgressCount || 0);
+                    $("#overdueCount").text(data.overdueCount || 0);
+                },
+                'todo_item_statistics',
+                5
+            );
+        }
+
+        /**
+         * 初始化日期选择器
+         */
         function initDatePicker() {
             var options = {
                 showYesterday: true,
@@ -307,9 +337,11 @@
             };
             $("#startTime").datetimepicker(options);
             $("#endTime").datetimepicker(options);
-        }            });
         }
 
+        /**
+         * 开始待办
+         */
         function startItem() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
@@ -336,6 +368,9 @@
             });
         }
 
+        /**
+         * 完成待办
+         */
         function completeItem() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
@@ -362,6 +397,9 @@
             });
         }
 
+        /**
+         * 取消待办
+         */
         function cancelItem() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
@@ -386,6 +424,23 @@
                     }
                 });
             });
+        }
+
+        /**
+         * 清空搜索条件
+         */
+        function clearSearch() {
+            $.form.reset();
+            $('#searchStatus').hide();
+            $.table.search();
+        }
+
+        /**
+         * 执行搜索
+         */
+        function doSearch() {
+            ImCommon.showSearchConditions('#todoItem-form', '#searchStatus', 'clearSearch()');
+            $.table.search();
         }
     </script>
 </body>

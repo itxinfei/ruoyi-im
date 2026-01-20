@@ -2,127 +2,8 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('群组操作日志')" />
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>群组操作日志</title>
-    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
-    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
-    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
-    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
     <style>
-        body {
-            background-color: #f5f7fa;
-        }
-        .wrapper-wrapper-content {
-            padding: 15px;
-        }
-        .page-container {
-            padding: 0;
-        }
-        .log-header {
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 6px;
-            margin-bottom: 15px;
-            color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-        }
-        .log-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: shine 3s infinite;
-        }
-        @keyframes shine {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(10%, 10%); }
-        }
-        .log-header h3 {
-            margin: 0;
-            font-weight: 600;
-            font-size: 18px;
-            position: relative;
-            z-index: 1;
-        }
-        .log-header .group-info {
-            margin-top: 8px;
-            font-size: 13px;
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* 统计卡片 */
-        .stats-section {
-            margin-bottom: 15px;
-        }
-        .stat-card {
-            padding: 12px;
-            border-radius: 6px;
-            text-align: center;
-            color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .stat-card::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .stat-card:hover::after {
-            opacity: 1;
-        }
-        .stat-number {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 2px;
-            position: relative;
-            z-index: 1;
-        }
-        .stat-label {
-            font-size: 13px;
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
-        }
-        .stat-icon {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 56px;
-            opacity: 0.2;
-            transition: all 0.3s ease;
-        }
-        .stat-card:hover .stat-icon {
-            opacity: 0.3;
-            transform: translateY(-50%) scale(1.1);
-        }
-        .stat-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .stat-today { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .stat-create { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .stat-delete { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-
         /* 操作类型徽章 */
         .badge-create { background-color: #5cb85c; }
         .badge-update { background-color: #5bc0de; }
@@ -131,134 +12,63 @@
         .badge-leave { background-color: #777; }
         .badge-muted { background-color: #d9534f; }
         .badge-unmuted { background-color: #5cb85c; }
-
-        /* 搜索区域 */
-        .search-box {
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #e7eaec;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        /* 表格区域 */
-        .select-table {
-            background: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        /* 操作按钮 */
-        .btn-xs {
-            padding: 4px 8px;
-            font-size: 12px;
-            line-height: 1.5;
-            transition: all 0.2s ease;
-            border-radius: 3px;
-        }
-        .btn-xs:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* 表格样式优化 */
-        .fixed-table-container {
-            border-radius: 6px;
-            overflow: hidden;
-        }
-        .table {
-            margin-bottom: 0;
-        }
-        .table > thead > tr > th,
-        .table > tbody > tr > td {
-            vertical-align: middle;
-            padding: 8px;
-        }
-        .table-no-padding {
-            padding: 0;
-        }
-    
-                /* 搜索输入框优化 */
-                .search-collapse input[type="text"],
-                .search-collapse select {
-                    border-radius: 4px;
-                    border: 1px solid #e7eaec;
-                    transition: all 0.3s;
-                    min-width: 180px;
-                }
-                .search-collapse input[type="text"]:focus,
-                .search-collapse select:focus {
-                    border-color: #1ab394;
-                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
-                }
-
-                /* 搜索标签优化 */
-                .search-collapse .select-list ul li {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-                .search-collapse .select-list ul li label,
-                .search-collapse .select-list ul li .input-label {
-                    min-width: 80px;
-                    text-align: right;
-                    font-weight: 500;
-                    color: #676a6c;
-                }
-</style>
+    </style>
 </head>
-<body class="white-bg">
-    <div class="wrapper wrapper-content">
-        <div class="page-container">
-            <!-- 日志头部 -->
-            <div class="log-header" th:if="${group != null}">
-                <h3><i class="fa fa-list-alt"></i> 群组操作日志</h3>
-                <div class="group-info">
-                    <strong>群组：</strong><span th:text="${group.name}"></span> |
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row" style="padding-top: 6px;">
+            <!-- 日志头部信息 -->
+            <div class="col-sm-12" th:if="${group != null}" style="padding-bottom: 6px;">
+                <div class="alert alert-info" style="margin-bottom: 0; padding: 10px 15px;">
+                    <i class="fa fa-list-alt"></i>
+                    <strong>群组：</strong><span th:text="${group.name}"></span>
+                    <span style="margin: 0 10px;">|</span>
                     <strong>群ID：</strong><span th:text="${group.id}"></span>
                 </div>
             </div>
 
-            <!-- 统计卡片 -->
-            <div class="row stats-section" th:if="${group != null}">
-                <div class="col-sm-3">
-                    <div class="stat-card stat-total">
-                        <div class="stat-number" id="totalCount">0</div>
-                        <div class="stat-label">总日志数</div>
-                        <i class="fa fa-list stat-icon"></i>
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" th:if="${group != null}">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="stat-box stat-box-primary">
+                            <div class="stat-number" id="totalCount">0</div>
+                            <div class="stat-label">总日志数</div>
+                            <i class="fa fa-list stat-icon"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="col-sm-3">
-                    <div class="stat-card stat-today">
-                        <div class="stat-number" id="todayCount">0</div>
-                        <div class="stat-label">今日操作</div>
-                        <i class="fa fa-calendar stat-icon"></i>
+                    <div class="col-sm-3">
+                        <div class="stat-box stat-box-success">
+                            <div class="stat-number" id="todayCount">0</div>
+                            <div class="stat-label">今日操作</div>
+                            <i class="fa fa-calendar stat-icon"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="col-sm-3">
-                    <div class="stat-card stat-create">
-                        <div class="stat-number" id="createCount">0</div>
-                        <div class="stat-label">创建操作</div>
-                        <i class="fa fa-plus stat-icon"></i>
+                    <div class="col-sm-3">
+                        <div class="stat-box stat-box-danger">
+                            <div class="stat-number" id="createCount">0</div>
+                            <div class="stat-label">创建操作</div>
+                            <i class="fa fa-plus stat-icon"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="col-sm-3">
-                    <div class="stat-card stat-delete">
-                        <div class="stat-number" id="deleteCount">0</div>
-                        <div class="stat-label">删除操作</div>
-                        <i class="fa fa-trash stat-icon"></i>
+                    <div class="col-sm-3">
+                        <div class="stat-box stat-box-warning">
+                            <div class="stat-number" id="deleteCount">0</div>
+                            <div class="stat-label">删除操作</div>
+                            <i class="fa fa-trash stat-icon"></i>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- 搜索区域 -->
-            <div class="search-box">
+            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
                 <form id="log-form">
                     <div class="select-list">
                         <ul>
-                            <li><label class="input-label">操作类型</label><select name="operationType">
+                            <li>
+                                <label class="input-label">操作类型：</label>
+                                <select name="operationType">
                                     <option value="">所有</option>
                                     <option value="CREATE">创建</option>
                                     <option value="UPDATE">更新</option>
@@ -269,127 +79,56 @@
                                     <option value="UNMUTE">解除禁言</option>
                                 </select>
                             </li>
-                            <li><label class="input-label">操作人ID</label><input type="text" name="operatorId" value=""/>
+                            <li>
+                                <label class="input-label">操作人ID：</label>
+                                <input type="text" name="operatorId" placeholder="请输入操作人ID"/>
                             </li>
                             <li class="select-time">
-                                <label>操作时间： </label>
+                                <label>操作时间：</label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <!-- 日志列表 -->
-            <div class="col-sm-12 select-table table-striped table-no-padding">
-                <table id="bootstrap-table" data-mobile-responsive="true" style="width: 100%;"></table>
+            <!-- 搜索状态提示 -->
+            <div class="col-sm-12" id="searchStatus" style="display:none; padding: 5px 0;">
+                <i class="fa fa-filter" style="color:#1c84c6;"></i>
+                搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
+                <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
             </div>
-        
-            <!-- 统计卡片样式 -->
-            <style type="text/css">
-                .stat-box {
-                    position: relative;
-                    padding: 15px;
-                    background: #fff;
-                    border-radius: 4px;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                    transition: all 0.3s;
-                }
-                .stat-box:hover {
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-                    transform: translateY(-2px);
-                }
-                .stat-box-primary {
-                    border-left: 4px solid #1ab394;
-                }
-                .stat-box-success {
-                    border-left: 4px solid #1c84c6;
-                }
-                .stat-box-danger {
-                    border-left: 4px solid #ed5565;
-                }
-                .stat-box-warning {
-                    border-left: 4px solid #f8ac59;
-                }
-                .stat-box .stat-number {
-                    font-size: 28px;
-                    font-weight: 600;
-                    color: #676a6c;
-                    margin-bottom: 5px;
-                }
-                .stat-box .stat-label {
-                    font-size: 13px;
-                    color: #999;
-                    margin-bottom: 0;
-                }
-                .stat-box .stat-icon {
-                    position: absolute;
-                    right: 15px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    font-size: 36px;
-                    opacity: 0.15;
-                }
-            
-                /* 搜索输入框优化 */
-                .search-collapse input[type="text"],
-                .search-collapse select {
-                    border-radius: 4px;
-                    border: 1px solid #e7eaec;
-                    transition: all 0.3s;
-                    min-width: 180px;
-                }
-                .search-collapse input[type="text"]:focus,
-                .search-collapse select:focus {
-                    border-color: #1ab394;
-                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
-                }
 
-                /* 搜索标签优化 */
-                .search-collapse .select-list ul li {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-                .search-collapse .select-list ul li label,
-                .search-collapse .select-list ul li .input-label {
-                    min-width: 80px;
-                    text-align: right;
-                    font-weight: 500;
-                    color: #676a6c;
-                }
-</style>
+            <!-- 数据展示区域 -->
+            <div class="col-sm-12 select-table table-striped">
+                <!-- 数据表格 -->
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
         </div>
     </div>
 
-    <!-- 通用JS -->
-    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
-    <script th:src="@{/js/jquery.min.js}"></script>
-    <script th:src="@{/js/bootstrap.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/extensions/mobile/bootstrap-table-mobile.js}"></script>
-    <script th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
-    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
-    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-    <script th:src="@{/ajax/libs/layui/layui.min.js}"></script>
-    <script th:src="@{/ruoyi/js/common.js}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
+    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
-        var prefix = ctx + "im/group/log";
+        var prefix = ctx + "im/group";
         var groupId = [[${group != null ? group.id : groupId}]];
 
         $(function() {
             loadStatistics();
+            initTable();
+        });
+
+        function initTable() {
             var options = {
-                url: prefix + "/list",
-				height: 650,
+                url: prefix + "/log/list",
+                height: 650,
                 queryParams: function(params) {
                     return {
                         pageNum: params.pageNumber,
@@ -397,34 +136,27 @@
                         groupId: groupId
                     };
                 },
-                createUrl: prefix + "/add",
-                updateUrl: prefix + "/edit/{id}",
-                removeUrl: prefix + "/remove/{id}",
-                exportUrl: prefix + "/export",
                 modalName: "群组日志",
                 sidePagination: "server",
                 pagination: true,
                 pageSize: 20,
                 pageList: [10, 20, 50, 100],
-                showColumns: false,
+                showColumns: true,
+                showColumnsToggleAll: true,
                 showRefresh: true,
-                showToggle: false,
                 cardView: false,
                 detailView: false,
                 columns: [{
                     checkbox: true
-                },
-                {
+                }, {
                     field: 'id',
                     title: 'ID',
                     visible: false
-                },
-                {
+                }, {
                     field: 'groupId',
                     title: '群组ID',
                     visible: false
-                },
-                {
+                }, {
                     field: 'operationType',
                     title: '操作类型',
                     align: 'center',
@@ -439,22 +171,19 @@
                         if (value === 'UNMUTE') { return '<span class="badge badge-unmuted">解除禁言</span>'; }
                         return '<span class="badge badge-default">' + (value || '-') + '</span>';
                     }
-                },
-                {
+                }, {
                     field: 'operatorName',
                     title: '操作人',
                     width: '100',
                     formatter: function(value, row, index) {
                         return value || '-';
                     }
-                },
-                {
+                }, {
                     field: 'operatorId',
                     title: '操作人ID',
                     width: '80',
                     visible: false
-                },
-                {
+                }, {
                     field: 'operationDetail',
                     title: '操作详情',
                     formatter: function(value, row, index) {
@@ -465,24 +194,44 @@
                         }
                         return '<span title="' + escapedValue + '">' + escapedValue + '</span>';
                     }
-                },
-                {
+                }, {
                     field: 'ipAddress',
                     title: 'IP地址',
                     width: '120',
                     formatter: function(value, row, index) {
                         return value || '-';
                     }
-                },
-                {
+                }, {
                     field: 'createTime',
                     title: '操作时间',
                     width: '160',
-                    sortable: true
-                }]
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        return ImCommon.formatDateTimeWithRelative(value);
+                    }
+                }],
+                responseHandler: function(res) {
+                    ImCommon.hideLoading();
+                    return ImCommon.handleTableResponse(res, '暂无日志数据', '#bootstrap-table');
+                },
+                onLoadError: function(status) {
+                    ImCommon.hideLoading();
+                    $.modal.msgError("数据加载失败，请稍后重试");
+                },
+                onLoadSuccess: function() {
+                    ImCommon.removeEmptyData('#bootstrap-table');
+                },
+                ajaxOptions: {
+                    beforeSend: function() {
+                        ImCommon.showLoading('.select-table');
+                    },
+                    complete: function() {
+                        ImCommon.hideLoading();
+                    }
+                }
             };
             $.table.init(options);
-        });
+        }
 
         /**
          * HTML转义函数，防止XSS攻击
@@ -503,18 +252,35 @@
         function loadStatistics() {
             if (!groupId) return;
 
-            $.get(prefix + "/statistics/" + groupId, function(result) {
-                if (result.code == 0) {
+            ImCommon.loadStatisticsWithCache(
+                prefix + "/log/statistics/" + groupId,
+                function(result) {
                     $("#totalCount").text(result.data.totalCount || 0);
                     $("#todayCount").text(result.data.todayCount || 0);
                     $("#createCount").text(result.data.createCount || 0);
                     $("#deleteCount").text(result.data.deleteCount || 0);
-                }
-            }).fail(function(xhr, status, error) {
-                console.error("统计数据加载失败:", error);
-            });
+                },
+                'group_log_statistics_' + groupId,
+                5
+            );
+        }
+
+        /**
+         * 清空搜索条件
+         */
+        function clearSearch() {
+            $.form.reset();
+            $('#searchStatus').hide();
+            $.table.search();
+        }
+
+        /**
+         * 执行搜索
+         */
+        function doSearch() {
+            ImCommon.showSearchConditions('#log-form', '#searchStatus', 'clearSearch()');
+            $.table.search();
         }
     </script>
-    <th:block th:include="include :: footer" />
 </body>
 </html>

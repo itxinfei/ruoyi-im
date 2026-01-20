@@ -125,9 +125,14 @@
 
         function submitHandler() {
             if ($.validate.form()) {
-                // 再次清空可能被自动填充的密码
-                $('input[name="password"]').val('');
-                $.operate.save(prefix + "/add", $('#form-user-add').serialize());
+                // 禁用提交按钮，防止重复提交
+                var $submitBtn = $(document).find('button[type="submit"]');
+                $submitBtn.attr('disabled', true).text('提交中...');
+
+                $.operate.save(prefix + "/add", $('#form-user-add').serialize(), function(data) {
+                    // 提交完成后恢复按钮
+                    $submitBtn.attr('disabled', false).text('提交');
+                });
             }
         }
     </script>

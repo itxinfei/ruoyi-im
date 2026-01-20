@@ -7,8 +7,42 @@
 <body class="gray-bg">
     <div class="container-div">
         <div class="row" style="padding-top: 6px;">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="stat-box stat-box-primary">
+                            <div class="stat-number" id="totalCount">0</div>
+                            <div class="stat-label">会话总数</div>
+                            <i class="fa fa-comments stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="stat-box stat-box-success">
+                            <div class="stat-number" id="privateCount">0</div>
+                            <div class="stat-label">私聊会话</div>
+                            <i class="fa fa-comment stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="stat-box stat-box-danger">
+                            <div class="stat-number" id="groupCount">0</div>
+                            <div class="stat-label">群聊会话</div>
+                            <i class="fa fa-users stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="stat-box stat-box-warning">
+                            <div class="stat-number" id="activeCount">0</div>
+                            <div class="stat-label">今日活跃</div>
+                            <i class="fa fa-clock-o stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse">
+            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
                 <form id="conversation-form">
                     <div class="select-list">
                         <ul>
@@ -20,10 +54,10 @@
                                 </select>
                             </li>
                             <li>
-                                <label class="input-label">会话名称：</label><input type="text" name="name" value=""/>
+                                <label class="input-label">会话名称：</label><input type="text" name="name" placeholder="请输入会话名称"/>
                             </li>
                             <li class="select-time">
-                                <label>创建时间： </label>
+                                <label>创建时间：</label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
@@ -37,55 +71,22 @@
                 </form>
             </div>
 
-            <!-- 数据表格 -->
+            <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
-                <div id="toolbar">
-                    <!-- 统计卡片 -->
-                    <div class="row" style="margin-bottom: 15px;">
-                        <div class="col-sm-3">
-                            <div class="stat-box stat-box-primary">
-                                <div class="stat-number" id="totalCount">0</div>
-                                <div class="stat-label">会话总数</div>
-                                <i class="fa fa-comments stat-icon"></i>
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="stat-box stat-box-success">
-                                <div class="stat-number" id="privateCount">0</div>
-                                <div class="stat-label">私聊会话</div>
-                                <i class="fa fa-comment stat-icon"></i>
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="stat-box stat-box-danger">
-                                <div class="stat-number" id="groupCount">0</div>
-                                <div class="stat-label">群聊会话</div>
-                                <i class="fa fa-users stat-icon"></i>
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="stat-box stat-box-warning">
-                                <div class="stat-number" id="activeCount">0</div>
-                                <div class="stat-label">今日活跃</div>
-                                <i class="fa fa-clock-o stat-icon"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- 操作按钮 -->
-                    <div class="btn-group-sm">
-                        <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:conversation:add">
-                            <i class="fa fa-plus"></i> 新增
-                        </a>
-                        <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:conversation:edit">
-                            <i class="fa fa-edit"></i> 修改
-                        </a>
-                        <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:conversation:remove">
-                            <i class="fa fa-remove"></i> 删除
-                        </a>
-                        <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:conversation:export">
-                            <i class="fa fa-download"></i> 导出
-                        </a>
-                    </div>
+                <!-- 批量操作按钮 -->
+                <div class="btn-group-sm" id="toolbar">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:conversation:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:conversation:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:conversation:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:conversation:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
                 </div>
 
                 <!-- 搜索状态提示 -->
@@ -95,6 +96,7 @@
                     <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
                 </div>
 
+                <!-- 数据表格 -->
                 <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
@@ -113,6 +115,7 @@
 
             var options = {
                 url: prefix + "/list",
+                toolbar: "toolbar",
                 height: 650,
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
@@ -159,7 +162,7 @@
                 }, {
                     field: 'avatar',
                     title: '头像',
-                    width: '50',
+                    width: '60',
                     align: 'center',
                     formatter: function(value, row, index) {
                         return ImCommon.formatCircleAvatar(value, 32);
@@ -213,6 +216,7 @@
                     formatter: function(value, row, index) {
                         var menuItems = [
                             { text: '查看成员', icon: 'fa-users', action: 'viewMembers(row.id)' },
+                            { text: '查看消息', icon: 'fa-envelope', action: 'viewMessages(row.id)' },
                             { divider: true },
                             { text: '删除', icon: 'fa-remove', action: '$.operate.remove(row.id)', permissionClass: removeFlag }
                         ];
@@ -242,6 +246,9 @@
                 ajaxOptions: {
                     beforeSend: function() {
                         ImCommon.showLoading('.select-table');
+                    },
+                    complete: function() {
+                        ImCommon.hideLoading();
                     }
                 }
             };
@@ -276,6 +283,14 @@
                 width: '95%',
                 height: '90%'
             });
+        }
+
+        /**
+         * 查看会话消息
+         */
+        function viewMessages(conversationId) {
+            var url = ctx + "im/message?conversationId=" + conversationId;
+            $.modal.openTab("会话消息", url);
         }
 
         /**

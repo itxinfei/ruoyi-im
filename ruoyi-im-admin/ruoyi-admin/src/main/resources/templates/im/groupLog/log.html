@@ -7,31 +7,32 @@
 <body class="gray-bg">
     <div class="container-div">
         <div class="row" style="padding-top: 6px;">
-            <div class="col-sm-12 statistics-section">
-                <div class="row" style="padding-top: 6px;">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12">
+                <div class="row">
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-blue">
+                        <div class="stat-box stat-box-primary">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">日志总数</div>
                             <i class="fa fa-list-alt stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-green">
+                        <div class="stat-box stat-box-success">
                             <div class="stat-number" id="addCount">0</div>
                             <div class="stat-label">添加成员</div>
                             <i class="fa fa-user-plus stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-red">
+                        <div class="stat-box stat-box-danger">
                             <div class="stat-number" id="removeCount">0</div>
                             <div class="stat-label">移除成员</div>
                             <i class="fa fa-user-times stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-orange">
+                        <div class="stat-box stat-box-warning">
                             <div class="stat-number" id="changeCount">0</div>
                             <div class="stat-label">修改角色</div>
                             <i class="fa fa-exchange stat-icon"></i>
@@ -40,16 +41,19 @@
                 </div>
             </div>
 
-            <div class="col-sm-12 search-collapse">
+            <!-- 搜索区域 -->
+            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
                 <form id="log-form">
                     <div class="select-list">
                         <ul>
-                            <li><label class="input-label">群组ID</label><input type="text" name="groupId" placeholder="请输入群组ID"/>
+                            <li>
+                                <label class="input-label">群组ID：</label><input type="text" name="groupId" placeholder="请输入群组ID"/>
                             </li>
                             <li>
                                 <label class="input-label">群组名称：</label><input type="text" name="groupName" placeholder="请输入群组名称"/>
                             </li>
-                            <li><label class="input-label">操作者ID</label><input type="text" name="operatorId" placeholder="请输入操作者ID"/>
+                            <li>
+                                <label class="input-label">操作者ID：</label><input type="text" name="operatorId" placeholder="请输入操作者ID"/>
                             </li>
                             <li>
                                 <label class="input-label">操作类型：</label><select name="operationType">
@@ -65,79 +69,42 @@
                                 </select>
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:log:remove">
-                    <i class="fa fa-remove"></i> 删除
-                </a>
-                <a class="btn btn-info" onclick="exportData()" shiro:hasPermission="im:group:log:export">
-                    <i class="fa fa-download"></i> 导出
-                </a>
+            <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
-			<div class="btn-group-sm" id="toolbar" role="group">
-				<!-- Buttons moved here -->
-			</div>
-			<table id="bootstrap-table" data-mobile-responsive="true"></table>
-            </div>
-        
-            <!-- 统计卡片样式 -->
-            
+                <!-- 批量操作按钮 -->
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:log:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="exportData()" shiro:hasPermission="im:group:log:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
+                </div>
 
-                .stat-box {
-                    position: relative;
-                    padding: 15px;
-                    background: #fff;
-                    border-radius: 4px;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                    transition: all 0.3s;
-                }
-                .stat-box:hover {
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-                    transform: translateY(-2px);
-                }
-                .stat-box-primary {
-                    border-left: 4px solid #1ab394;
-                }
-                .stat-box-success {
-                    border-left: 4px solid #1c84c6;
-                }
-                .stat-box-danger {
-                    border-left: 4px solid #ed5565;
-                }
-                .stat-box-warning {
-                    border-left: 4px solid #f8ac59;
-                }
-                .stat-box .stat-number {
-                    font-size: 28px;
-                    font-weight: 600;
-                    color: #676a6c;
-                    margin-bottom: 5px;
-                }
-                .stat-box .stat-label {
-                    font-size: 13px;
-                    color: #999;
-                    margin-bottom: 0;
-                }
-                .stat-box .stat-icon {
-                    position: absolute;
-                    right: 15px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    font-size: 36px;
-                    opacity: 0.15;
-                }
-            
+                <!-- 搜索状态提示 -->
+                <div class="search-status" id="searchStatus" style="display:none;">
+                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
+                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
+                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
+                </div>
+
+                <!-- 数据表格 -->
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
         </div>
     </div>
 
     <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
+    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var removeFlag = [[${@permission.hasPermi('im:group:log:remove')}]];
         var prefix = ctx + "im/group/log";
@@ -147,34 +114,54 @@
 
             var options = {
                 url: prefix + "/list",
-				height: 650,
+                toolbar: "toolbar",
+                height: 650,
                 exportUrl: prefix + "/export",
                 modalName: "群组管理日志",
+                // 分页配置
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
+                // 固定列配置
+                fixedColumns: true,
+                fixedNumber: 1,
+                fixedRightNumber: 1,
+                // 列显示/隐藏配置
+                showColumns: true,
+                showColumnsToggleAll: true,
+                // 记住列选择
+                cookie: true,
+                cookieIdTable: 'im_group_log_table',
+                cookieExpire: '30d',
+                // 导出配置
+                showExport: true,
+                exportDataType: 'selected',
+                exportTypes: ['excel'],
+                exportOptions: {
+                    fileName: '群组管理日志'
+                },
                 columns: [{
                     checkbox: true
-                },
-                {
+                }, {
                     field: 'id',
                     title: 'ID',
                     visible: false
-                },
-                {
+                }, {
                     field: 'groupName',
                     title: '群组名称',
                     width: '150',
                     formatter: function(value, row, index) {
                         return '<span class="text-primary"><i class="fa fa-users"></i> ' + (value || '-') + '</span>';
                     }
-                },
-                {
+                }, {
                     field: 'operatorName',
                     title: '操作者',
                     width: '100',
                     formatter: function(value, row, index) {
                         return '<span class="text-info"><i class="fa fa-user"></i> ' + (value || '-') + '</span>';
                     }
-                },
-                {
+                }, {
                     field: 'operationType',
                     title: '操作类型',
                     align: 'center',
@@ -192,8 +179,7 @@
                         };
                         return typeMap[value] || (value || '-');
                     }
-                },
-                {
+                }, {
                     field: 'operationDesc',
                     title: '操作描述',
                     width: '350',
@@ -207,22 +193,22 @@
                         }
                         return desc;
                     }
-                },
-                {
+                }, {
                     field: 'targetUserName',
                     title: '目标用户',
                     width: '100',
                     formatter: function(value, row, index) {
                         return value ? '<span class="text-muted"><i class="fa fa-user"></i> ' + value + '</span>' : '-';
                     }
-                },
-                {
+                }, {
                     field: 'createTime',
                     title: '操作时间',
                     width: '160',
-                    sortable: true
-                },
-                {
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        return ImCommon.formatDateTimeWithRelative(value);
+                    }
+                }, {
                     title: '操作',
                     align: 'center',
                     width: '100',
@@ -231,12 +217,50 @@
                         actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
-                }]
+                }],
+                responseHandler: function(res) {
+                    ImCommon.hideLoading();
+                    return ImCommon.handleTableResponse(res, '暂无日志数据', '#bootstrap-table');
+                },
+                onLoadError: function(status) {
+                    ImCommon.hideLoading();
+                    $.modal.msgError("数据加载失败，请稍后重试");
+                },
+                onLoadSuccess: function() {
+                    ImCommon.removeEmptyData('#bootstrap-table');
+                },
+                ajaxOptions: {
+                    beforeSend: function() {
+                        ImCommon.showLoading('.select-table');
+                    },
+                    complete: function() {
+                        ImCommon.hideLoading();
+                    }
+                }
             };
             $.table.init(options);
-        });            });
+        });
+
+        /**
+         * 加载统计数据
+         */
+        function loadStatistics() {
+            ImCommon.loadStatisticsWithCache(
+                prefix + "/statistics",
+                function(data) {
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#addCount").text(data.addCount || 0);
+                    $("#removeCount").text(data.removeCount || 0);
+                    $("#changeCount").text(data.changeCount || 0);
+                },
+                'group_log_statistics',
+                5
+            );
         }
 
+        /**
+         * 导出数据
+         */
         function exportData() {
             var currentFormId = $.table._option.formId;
             var params = $("#" + currentFormId).serializeArray();
@@ -246,6 +270,23 @@
             setTimeout(function() {
                 $.modal.closeLoading();
             }, 2000);
+        }
+
+        /**
+         * 清空搜索条件
+         */
+        function clearSearch() {
+            $.form.reset();
+            $('#searchStatus').hide();
+            $.table.search();
+        }
+
+        /**
+         * 执行搜索
+         */
+        function doSearch() {
+            ImCommon.showSearchConditions('#log-form', '#searchStatus', 'clearSearch()');
+            $.table.search();
         }
     </script>
 </body>

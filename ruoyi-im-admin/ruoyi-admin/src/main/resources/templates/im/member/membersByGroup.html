@@ -2,70 +2,90 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('群组成员管理')" />
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>群组成员管理</title>
-    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
-    <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
-    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
-    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="white-bg">
     <div class="wrapper wrapper-content animated fadeInRight ibox-content">
         <!-- 头部区 -->
         <h3 class="title-tm">成员管理</h3>
-            <div class="header-actions">
-                <button class="btn-im-outline" onclick="ImModal.goBack()">
-                    <i class="fa fa-arrow-left"></i> 返回
-                </button>
-                <button class="btn-im-outline" onclick="refreshData()">
-                    <i class="fa fa-refresh"></i> 刷新
-                </button>
-            </div>
-        </div>
-
-        <!-- 信息栏 --><!-- 工具栏 -->
-        <div class="search-collapse">
-            <input type="text" class="form-im-control toolbar-input" id="searchInput" placeholder="搜索昵称或用户名"/>
-            <select class="form-im-control toolbar-select" id="roleFilter">
-                <option value="">全部角色</option>
-                <option value="OWNER">群主</option>
-                <option value="ADMIN">管理员</option>
-                <option value="MEMBER">普通成员</option>
-            </select>
-            <select class="form-im-control toolbar-select" id="statusFilter">
-                <option value="">全部状态</option>
-                <option value="muted">已禁言</option>
-                <option value="unread">有未读</option>
-            </select>
-            <button class="btn-im-default" onclick="resetData()">
-                <i class="fa fa-refresh"></i> 重置
+        <div class="header-actions">
+            <button class="btn-im-outline" onclick="ImModal.goBack()">
+                <i class="fa fa-arrow-left"></i> 返回
             </button>
-            <div class="toolbar-stats">
-                总数: <strong id="totalCount">0</strong> |
-                群主: <strong id="ownerCount">0</strong> |
-                管理: <strong id="adminCount">0</strong> |
-                成员: <strong id="memberCount">0</strong> |
-                已禁言: <strong id="mutedCount">0</strong>
-            </div>
-        </div>
-
-        <!-- 表格区 -->
-        <div class="col-sm-12 select-table table-striped"></div>
-            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            <button class="btn-im-outline" onclick="refreshData()">
+                <i class="fa fa-refresh"></i> 刷新
+            </button>
         </div>
     </div>
 
-    <!-- 通用JS -->
-    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
-    <script th:src="@{/js/jquery.min.js}"></script>
-    <script th:src="@{/js/bootstrap.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/bootstrap-table.min.js}"></script>
-    <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
-    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-    <script th:src="@{/ruoyi/js/common.js}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>    <script th:inline="javascript">
+    <!-- 统计卡片区域 -->
+    <div class="col-sm-12">
+        <div class="row" style="padding-top: 6px;">
+            <div class="col-sm-3">
+                <div class="stat-box stat-box-primary">
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label">成员总数</div>
+                    <i class="fa fa-users stat-icon"></i>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="stat-box stat-box-success">
+                    <div class="stat-number" id="ownerCount">0</div>
+                    <div class="stat-label">群主</div>
+                    <i class="fa fa-user-plus stat-icon"></i>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="stat-box stat-box-info">
+                    <div class="stat-number" id="adminCount">0</div>
+                    <div class="stat-label">管理员</div>
+                    <i class="fa fa-user stat-icon"></i>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="stat-box stat-box-warning">
+                    <div class="stat-number" id="mutedCount">0</div>
+                    <div class="stat-label">已禁言</div>
+                    <i class="fa fa-ban stat-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="search-collapse" style="padding-top: 6px;">
+        <input type="text" class="form-im-control toolbar-input" id="searchInput" placeholder="搜索昵称或用户名"/>
+        <select class="form-im-control toolbar-select" id="roleFilter">
+            <option value="">全部角色</option>
+            <option value="OWNER">群主</option>
+            <option value="ADMIN">管理员</option>
+            <option value="MEMBER">普通成员</option>
+        </select>
+        <select class="form-im-control toolbar-select" id="statusFilter">
+            <option value="">全部状态</option>
+            <option value="muted">已禁言</option>
+            <option value="unread">有未读</option>
+        </select>
+        <button class="btn-im-default" onclick="resetData()">
+            <i class="fa fa-refresh"></i> 重置
+        </button>
+        <div class="toolbar-stats">
+            总数: <strong id="totalCount">0</strong> |
+            群主: <strong id="ownerCount">0</strong> |
+            管理: <strong id="adminCount">0</strong> |
+            成员: <strong id="memberCount">0</strong> |
+            已禁言: <strong id="mutedCount">0</strong>
+        </div>
+    </div>
+
+    <!-- 表格区 -->
+    <div class="col-sm-12 select-table table-striped">
+        <table id="bootstrap-table" data-mobile-responsive="true"></table>
+    </div>
+
+    <th:block th:include="include :: footer" />
+    <script th:src="@{/js/im-common.js}"></script>
+    <script th:inline="javascript">
         var groupId = [[${groupId}]];
         var prefix = ctx + "im/member";
         var allMembers = [];
@@ -91,7 +111,7 @@
                         $("#groupId").text(data.id || '-');
                         $("#groupName").text(data.name || '-');
                         $("#ownerName").text(data.ownerName || '-');
-                        $("#createTime").text(ImModal.formatDateTime(data.createTime, true));
+                        $("#createTime").text(ImCommon.formatDateTimeWithRelative(data.createTime));
                     } else {
                         layer.msg("加载群组信息失败：" + (result.msg || "未知错误"), {icon: 2});
                     }
@@ -170,7 +190,7 @@
                     width: '160',
                     sortable: true,
                     formatter: function(value, row, index) {
-                        return ImModal.formatDateTime(value, true);
+                        return ImCommon.formatDateTimeWithRelative(value);
                     }
                 }, {
                     field: 'operate',
@@ -336,7 +356,7 @@
                 '<tr><td><strong>角色:</strong></td><td>' + (member.role === 'OWNER' ? '群主' : (member.role === 'ADMIN' ? '管理员' : '普通成员')) + '</td></tr>' +
                 '<tr><td><strong>禁言状态:</strong></td><td>' + (member.isMuted == 1 ? '已禁言' : '正常') + '</td></tr>' +
                 '<tr><td><strong>未读数:</strong></td><td>' + (member.unreadCount || 0) + '</td></tr>' +
-                '<tr><td><strong>加入时间:</strong></td><td>' + ImModal.formatDateTime(member.joinTime, true) + '</td></tr>' +
+                '<tr><td><strong>加入时间:</strong></td><td>' + ImCommon.formatDateTimeWithRelative(member.joinTime) + '</td></tr>' +
                 '<tr><td><strong>操作:</strong></td><td>' +
                 '<button class="btn-im-default" onclick="$.modal.close()"><i class="fa fa-close"></i> 关闭</button>' +
                 '</td></tr>' +
@@ -351,6 +371,5 @@
             });
         }
     </script>
-    <th:block th:include="include :: footer" />
 </body>
 </html>
