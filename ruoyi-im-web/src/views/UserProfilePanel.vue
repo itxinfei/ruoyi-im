@@ -27,7 +27,7 @@
                 发送消息
               </el-button>
               <el-button class="qr-btn">
-                <el-icon><Grid /></el-icon>
+                <el-icon><GridIcon /></el-icon>
                 我的二维码
               </el-button>
               <el-button text class="icon-btn">
@@ -175,7 +175,7 @@
 <script setup>
 import {
   ChatDotRound,
-  Grid,
+  Grid as GridIcon,
   Share,
   MoreFilled,
   Edit,

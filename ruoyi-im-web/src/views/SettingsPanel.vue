@@ -163,7 +163,7 @@ import {
   Lock,
   Bell,
   View,
-  Globe,
+  Location,
   Brush,
   QuestionFilled,
   InfoFilled,
@@ -246,7 +246,7 @@ const privacySettings = ref([
 const generalSettings = ref([
   {
     id: 'language',
-    icon: Globe,
+    icon: Location,
     label: '语言',
     description: '简体中文',
     type: 'link'
