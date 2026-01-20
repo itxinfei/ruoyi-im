@@ -2,46 +2,10 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('消息管理')" />
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
-        <div class="row">
-            <!-- 统计卡片 -->
-            <div class="col-sm-12 statistics-section">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-blue">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">消息总数</div>
-                            <i class="fa fa-comments stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-green">
-                            <div class="stat-number" id="todayCount">0</div>
-                            <div class="stat-label">今日消息</div>
-                            <i class="fa fa-calendar stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-orange">
-                            <div class="stat-number" id="sensitiveCount">0</div>
-                            <div class="stat-label">敏感消息</div>
-                            <i class="fa fa-exclamation-triangle stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-red">
-                            <div class="stat-number" id="failedCount">0</div>
-                            <div class="stat-label">发送失败</div>
-                            <i class="fa fa-times-circle stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 搜索区域 -->
+        <div class="row"><!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="message-form">
                     <div class="select-list">
@@ -119,8 +83,6 @@
         var prefix = ctx + "im/message";
 
         $(function() {
-            loadStatistics();
-
             var paginationConfig = ImCommon.getPaginationConfig(20, [10, 20, 50, 100]);
             var options = {
                 url: prefix + "/list",
@@ -251,22 +213,7 @@
             $.table.init(options);
         });
 
-        // 加载统计数据
-        function loadStatistics() {
-            ImCommon.loadStatisticsWithCache(
-                prefix + "/statistics",
-                function(data) {
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#todayCount").text(data.todayCount || 0);
-                    $("#sensitiveCount").text(data.sensitiveCount || 0);
-                    $("#failedCount").text(data.failedCount || 0);
-                },
-                'message_statistics',
-                5
-            );
-        }
-
-        // 批量撤回消息
+        // 加载统计数据        // 批量撤回消息
         function batchRevoke() {
             var rows = $.table.selectColumns('id');
             if (!ImCommon.validateBatchOperation(rows, 1)) {

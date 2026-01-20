@@ -2,45 +2,10 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('IM用户管理')" />
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
         <div class="row">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12 statistics-section">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-blue">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">用户总数</div>
-                            <i class="fa fa-users stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-green">
-                            <div class="stat-number" id="onlineCount">0</div>
-                            <div class="stat-label">在线用户</div>
-                            <i class="fa fa-circle stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-pink">
-                            <div class="stat-number" id="offlineCount">0</div>
-                            <div class="stat-label">离线用户</div>
-                            <i class="fa fa-circle-o stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-cyan">
-                            <div class="stat-number" id="disabledCount">0</div>
-                            <div class="stat-label">禁用用户</div>
-                            <i class="fa fa-ban stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="user-form">
@@ -126,8 +91,6 @@
         var prefix = ctx + "im/user";
 
         $(function() {
-            loadStatistics();
-
             var paginationConfig = ImCommon.getPaginationConfig(20, [10, 20, 50, 100]);
             var options = {
                 url: prefix + "/list",
@@ -260,20 +223,6 @@
             };
             $.table.init(options);
         });
-
-        function loadStatistics() {
-            ImCommon.loadStatisticsWithCache(
-                prefix + "/statistics",
-                function(data) {
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#onlineCount").text(data.onlineCount || 0);
-                    $("#offlineCount").text(data.offlineCount || 0);
-                    $("#disabledCount").text(data.disabledCount || 0);
-                },
-                'user_statistics',
-                5
-            );
-        }
 
         function resetPwd() {
             var rows = $.table.selectFirstColumns();

@@ -2,7 +2,6 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('DING消息管理')" />
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
@@ -106,8 +105,6 @@
         var prefix = ctx + "im/ding";
 
         $(function() {
-            loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -186,17 +183,7 @@
                 }]
             };
             $.table.init(options);
-        });
-
-        function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#sentCount").text(result.data.sentCount || 0);
-                    $("#pendingCount").text(result.data.pendingCount || 0);
-                    $("#urgentCount").text(result.data.urgentCount || 0);
-                }
-            });
+        });            });
         }
     </script>
 </body>

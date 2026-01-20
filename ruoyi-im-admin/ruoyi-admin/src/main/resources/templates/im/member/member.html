@@ -2,7 +2,6 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('群组成员管理')" />
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
@@ -112,8 +111,6 @@
         var prefix = ctx + "im/member";
 
         $(function() {
-            loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -212,17 +209,7 @@
                 }]
             };
             $.table.init(options);
-        });
-
-        function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#ownerCount").text(result.data.ownerCount || 0);
-                    $("#adminCount").text(result.data.adminCount || 0);
-                    $("#mutedCount").text(result.data.mutedCount || 0);
-                }
-            }).fail(function() {
+        });            }).fail(function() {
                 $.modal.msgError("加载统计数据失败");
             });
         }
@@ -230,7 +217,6 @@
         /* 手动刷新 */
         function manualRefresh() {
             $.modal.msg("正在刷新数据...", {icon: 16, shade: 0.3, time: 0});
-            loadStatistics();
             $.table.refresh();
             setTimeout(function() {
                 layer.closeAll();
@@ -351,7 +337,6 @@
                         if (result.code == 0) {
                             $.modal.msgSuccess("移除成功");
                             $.table.refresh();
-                            loadStatistics();
                         } else {
                             $.modal.msgError(result.msg || "移除失败");
                         }

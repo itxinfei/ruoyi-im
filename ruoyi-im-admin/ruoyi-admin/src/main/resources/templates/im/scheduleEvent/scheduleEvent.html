@@ -2,7 +2,6 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('日程管理')" />
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
     <link th:href="@{/ajax/libs/datapicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
@@ -119,7 +118,6 @@
         var prefix = ctx + "im/scheduleEvent";
 
         $(function() {
-            loadStatistics();
             initDatePicker();
 
             var options = {
@@ -276,18 +274,7 @@
             };
             $("#startTime").datetimepicker(options);
             $("#endTime").datetimepicker(options);
-        }
-
-        function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    var data = result.data;
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#scheduledCount").text(data.scheduledCount || 0);
-                    $("#completedCount").text(data.completedCount || 0);
-                    $("#todayCount").text(data.todayCount || 0);
-                }
-            });
+        }            });
         }
 
         function completeEvent() {
@@ -308,7 +295,6 @@
                         if (result.code == 0) {
                             $.modal.msgSuccess("操作成功");
                             $.table.refresh();
-                            loadStatistics();
                         } else {
                             $.modal.alertError(result.msg || "操作失败");
                         }
@@ -335,7 +321,6 @@
                         if (result.code == 0) {
                             $.modal.msgSuccess("操作成功");
                             $.table.refresh();
-                            loadStatistics();
                         } else {
                             $.modal.alertError(result.msg || "操作失败");
                         }

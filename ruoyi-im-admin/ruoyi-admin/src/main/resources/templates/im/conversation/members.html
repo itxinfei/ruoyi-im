@@ -2,16 +2,11 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('会话成员管理')" />
-    <link href="/css/im-modal.css" th:href="@{/css/im-modal.css}" rel="stylesheet"/>
 </head>
 <body class="white-bg">
-    <div class="modal-page-container">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
         <!-- 头部区 -->
-        <div class="modal-page-header">
-            <div class="header-title">
-                <i class="fa fa-users"></i>
-                <span>会话成员管理</span>
-            </div>
+        <h3 class="title-tm">成员管理</h3>
             <div class="header-actions">
                 <button class="btn-im-outline" onclick="ImModal.goBack()">
                     <i class="fa fa-arrow-left"></i> 返回
@@ -22,19 +17,8 @@
             </div>
         </div>
 
-        <!-- 信息栏 -->
-        <div class="modal-page-info">
-            <span class="info-item">会话ID: <strong id="conversationId">-</strong></span>
-            <span class="info-divider">|</span>
-            <span class="info-item">会话名称: <strong id="conversationName">-</strong></span>
-            <span class="info-divider">|</span>
-            <span class="info-item">会话类型: <strong id="conversationType">-</strong></span>
-            <span class="info-divider">|</span>
-            <span class="info-item">创建时间: <strong id="createTime">-</strong></span>
-        </div>
-
-        <!-- 工具栏 -->
-        <div class="modal-page-toolbar">
+        <!-- 信息栏 --><!-- 工具栏 -->
+        <div class="search-collapse">
             <input type="text" class="form-im-control toolbar-input" id="searchInput" placeholder="搜索昵称或用户名"/>
             <select class="form-im-control toolbar-select" id="roleFilter">
                 <option value="">全部角色</option>
@@ -60,10 +44,7 @@
         </div>
 
         <!-- 表格区 -->
-        <div class="modal-page-table">
-            <div class="table-loading">
-                <div class="table-loading-spinner"></div>
-            </div>
+        <div class="col-sm-12 select-table table-striped"></div>
             <table id="bootstrap-table" data-mobile-responsive="true"></table>
         </div>
     </div>
@@ -76,9 +57,7 @@
     <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
     <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
     <script th:src="@{/ruoyi/js/common.js}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
-    <script th:src="@{/js/im-modal.js}"></script>
-    <script th:inline="javascript">
+    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>    <script th:inline="javascript">
         var conversationId = [[${conversationId}]];
         var hasEditPermission = [[${@permission.hasPermi('im:conversation:edit')}]];
         var prefix = ctx + "im/conversation";

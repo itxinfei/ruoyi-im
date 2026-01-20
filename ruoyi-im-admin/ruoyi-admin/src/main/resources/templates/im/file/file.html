@@ -2,46 +2,10 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('文件管理')" />
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
-        <div class="row">
-            <!-- 统计卡片 -->
-            <div class="col-sm-12 statistics-section">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-purple">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">文件总数</div>
-                            <i class="fa fa-file stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-green">
-                            <div class="stat-number" id="imageCount">0</div>
-                            <div class="stat-label">图片文件</div>
-                            <i class="fa fa-image stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-orange">
-                            <div class="stat-number" id="videoCount">0</div>
-                            <div class="stat-label">视频文件</div>
-                            <i class="fa fa-video stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-blue">
-                            <div class="stat-number" id="totalSize">0</div>
-                            <div class="stat-label">总大小(MB)</div>
-                            <i class="fa fa-hdd stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 搜索区域 -->
+        <div class="row"><!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="file-form">
                     <div class="select-list">
@@ -107,8 +71,6 @@
         var prefix = ctx + "im/file";
 
         $(function() {
-            loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -182,17 +144,7 @@
                 }]
             };
             $.table.init(options);
-        });
-
-        function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#imageCount").text(result.data.imageCount || 0);
-                    $("#videoCount").text(result.data.videoCount || 0);
-                    $("#totalSize").text((result.data.totalSize || 0).toFixed(2));
-                }
-            });
+        });            });
         }
 
         function getFileIcon(fileType) {

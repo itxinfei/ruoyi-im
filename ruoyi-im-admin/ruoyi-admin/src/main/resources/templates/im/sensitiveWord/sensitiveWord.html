@@ -2,46 +2,10 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('敏感词管理')" />
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
-        <div class="row">
-            <!-- 统计卡片 -->
-            <div class="col-sm-12 statistics-section">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-purple">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">敏感词总数</div>
-                            <i class="fa fa-shield stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-green">
-                            <div class="stat-number" id="enabledCount">0</div>
-                            <div class="stat-label">已启用</div>
-                            <i class="fa fa-check-circle stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-pink">
-                            <div class="stat-number" id="disabledCount">0</div>
-                            <div class="stat-label">已禁用</div>
-                            <i class="fa fa-ban stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-orange">
-                            <div class="stat-number" id="highLevelCount">0</div>
-                            <div class="stat-label">高级敏感</div>
-                            <i class="fa fa-exclamation-triangle stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 搜索区域 -->
+        <div class="row"><!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="sensitiveWord-form">
                     <div class="select-list">
@@ -103,8 +67,6 @@
         var prefix = ctx + "im/sensitiveWord";
 
         $(function() {
-            loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -179,17 +141,7 @@
                 }]
             };
             $.table.init(options);
-        });
-
-        function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#enabledCount").text(result.data.enabledCount || 0);
-                    $("#disabledCount").text(result.data.disabledCount || 0);
-                    $("#highLevelCount").text(result.data.highLevelCount || 0);
-                }
-            });
+        });            });
         }
     </script>
 </body>

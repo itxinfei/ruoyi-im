@@ -2,7 +2,6 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('DING回执管理')" />
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
@@ -103,8 +102,6 @@
         var prefix = ctx + "im/dingReceipt";
 
         $(function() {
-            loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 exportUrl: prefix + "/export",
@@ -207,18 +204,7 @@
                 }]
             };
             $.table.init(options);
-        });
-
-        function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#readCount").text(result.data.readCount || 0);
-                    $("#unreadCount").text(result.data.unreadCount || 0);
-                    $("#confirmedCount").text(result.data.confirmedCount || 0);
-                    $("#unconfirmedCount").text(result.data.unconfirmedCount || 0);
-                }
-            });
+        });            });
         }
 
         function viewDetail(id) {

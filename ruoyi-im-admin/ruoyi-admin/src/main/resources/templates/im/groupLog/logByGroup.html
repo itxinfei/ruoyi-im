@@ -9,16 +9,11 @@
     <link href="/ajax/libs/bootstrap-table/bootstrap-table.min.css" th:href="@{/ajax/libs/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
-    <link href="/css/im-modal.css" th:href="@{/css/im-modal.css}" rel="stylesheet"/>
 </head>
 <body class="white-bg">
-    <div class="modal-page-container">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
         <!-- 头部区 -->
-        <div class="modal-page-header">
-            <div class="header-title">
-                <i class="fa fa-list-alt"></i>
-                <span>群组操作日志</span>
-            </div>
+        <h3 class="title-tm">成员管理</h3>
             <div class="header-actions">
                 <button class="btn-im-outline" onclick="ImModal.goBack()">
                     <i class="fa fa-arrow-left"></i> 返回
@@ -29,15 +24,8 @@
             </div>
         </div>
 
-        <!-- 信息栏 -->
-        <div class="modal-page-info">
-            <span class="info-item">群组ID: <strong id="groupId">-</strong></span>
-            <span class="info-divider">|</span>
-            <span class="info-item">群组名称: <strong id="groupName">-</strong></span>
-        </div>
-
-        <!-- 工具栏 -->
-        <div class="modal-page-toolbar">
+        <!-- 信息栏 --><!-- 工具栏 -->
+        <div class="search-collapse">
             <select class="form-im-control toolbar-select" id="operationType">
                 <option value="">所有操作类型</option>
                 <option value="ADD_MEMBER">添加成员</option>
@@ -61,10 +49,7 @@
         </div>
 
         <!-- 表格区 -->
-        <div class="modal-page-table">
-            <div class="table-loading">
-                <div class="table-loading-spinner"></div>
-            </div>
+        <div class="col-sm-12 select-table table-striped"></div>
             <table id="bootstrap-table" data-mobile-responsive="true"></table>
         </div>
     </div>
@@ -77,9 +62,7 @@
     <script th:src="@{/ajax/libs/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
     <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
     <script th:src="@{/ruoyi/js/common.js}"></script>
-    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
-    <script th:src="@{/js/im-modal.js}"></script>
-    <script th:inline="javascript">
+    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>    <script th:inline="javascript">
         var groupId = [[${groupId}]];
         var prefix = ctx + "im/group/log";
 

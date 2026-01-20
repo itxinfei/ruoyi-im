@@ -2,46 +2,10 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('好友管理')" />
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
-        <div class="row">
-            <!-- 统计卡片 -->
-            <div class="col-sm-12 statistics-section">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-purple">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">好友关系总数</div>
-                            <i class="fa fa-heart stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-pink">
-                            <div class="stat-number" id="pendingCount">0</div>
-                            <div class="stat-label">待处理请求</div>
-                            <i class="fa fa-user-plus stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-cyan">
-                            <div class="stat-number" id="groupCount">0</div>
-                            <div class="stat-label">分组数量</div>
-                            <i class="fa fa-tag stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-teal">
-                            <div class="stat-number" id="todayCount">0</div>
-                            <div class="stat-label">今日新增</div>
-                            <i class="fa fa-calendar-plus-o stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 搜索区域 -->
+        <div class="row"><!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="friend-form">
                     <div class="select-list">
@@ -104,8 +68,6 @@
         var prefix = ctx + "im/friend";
 
         $(function() {
-            loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -218,17 +180,7 @@
                 }]
             };
             $.table.init(options);
-        });
-
-        function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#pendingCount").text(result.data.pendingCount || 0);
-                    $("#groupCount").text(result.data.groupCount || 0);
-                    $("#todayCount").text(result.data.todayCount || 0);
-                }
-            });
+        });            });
         }
     </script>
 </body>

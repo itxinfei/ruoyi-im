@@ -12,7 +12,6 @@
     <link href="/ajax/libs/bootstrap-table/extensions/treetable/bootstrap-table-tree.min.css" th:href="@{/ajax/libs/bootstrap-table/extensions/treetable/bootstrap-table-tree.min.css}" rel="stylesheet"/>
     <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
@@ -117,8 +116,6 @@
         var prefix = ctx + "im/department";
 
         $(function() {
-            loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -207,18 +204,7 @@
                 }]
             };
             $.table.init(options);
-        });
-
-        function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    var data = result.data;
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#activeCount").text(data.activeCount || 0);
-                    $("#disabledCount").text(data.disabledCount || 0);
-                    $("#rootCount").text(data.rootCount || 0);
-                }
-            });
+        });            });
         }
 
         function addChild(parentId, parentName) {
@@ -254,7 +240,6 @@
                             if (result.code == 0) {
                                 $.modal.msgSuccess("新增成功");
                                 $.table.refresh();
-                                loadStatistics();
                                 $.modal.close(index);
                             } else {
                                 $.modal.msgError(result.msg || "新增失败");
@@ -275,7 +260,6 @@
                         if (result.code == 0) {
                             $.modal.msgSuccess("删除成功");
                             $.table.refresh();
-                            loadStatistics();
                         } else {
                             $.modal.msgError(result.msg || "删除失败");
                         }

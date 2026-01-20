@@ -2,7 +2,6 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('群组管理日志')" />
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
@@ -96,8 +95,6 @@
         var prefix = ctx + "im/group/log";
 
         $(function() {
-            loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 exportUrl: prefix + "/export",
@@ -186,17 +183,7 @@
                 }]
             };
             $.table.init(options);
-        });
-
-        function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#addCount").text(result.data.addCount || 0);
-                    $("#removeCount").text(result.data.removeCount || 0);
-                    $("#changeCount").text(result.data.changeCount || 0);
-                }
-            });
+        });            });
         }
 
         function exportData() {

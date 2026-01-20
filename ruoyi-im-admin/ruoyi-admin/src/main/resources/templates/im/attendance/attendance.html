@@ -2,60 +2,10 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('考勤管理')" />
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
-        <div class="row">
-            <!-- 统计卡片 -->
-            <div class="col-sm-12 statistics-section">
-                <div class="row">
-                    <div class="col-sm-2">
-                        <div class="statistics-card stat-bg-purple">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">总打卡次数</div>
-                            <i class="fa fa-calendar-check-o stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <div class="statistics-card stat-bg-green">
-                            <div class="stat-number" id="normalCount">0</div>
-                            <div class="stat-label">正常打卡</div>
-                            <i class="fa fa-check stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <div class="statistics-card stat-bg-orange">
-                            <div class="stat-number" id="lateCount">0</div>
-                            <div class="stat-label">迟到次数</div>
-                            <i class="fa fa-clock-o stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <div class="statistics-card stat-bg-pink">
-                            <div class="stat-number" id="earlyCount">0</div>
-                            <div class="stat-label">早退次数</div>
-                            <i class="fa fa-arrow-left stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <div class="statistics-card stat-bg-red">
-                            <div class="stat-number" id="absentCount">0</div>
-                            <div class="stat-label">缺卡次数</div>
-                            <i class="fa fa-times stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <div class="statistics-card stat-bg-cyan">
-                            <div class="stat-number" id="pendingCount">0</div>
-                            <div class="stat-label">待审批</div>
-                            <i class="fa fa-hourglass-half stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 搜索区域 -->
+        <div class="row"><!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="attendance-form">
                     <div class="select-list">
@@ -135,8 +85,6 @@
         var prefix = ctx + "im/attendance";
 
         $(function() {
-            loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -260,19 +208,7 @@
                 }]
             };
             $.table.init(options);
-        });
-
-        function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#normalCount").text(result.data.normalCount || 0);
-                    $("#lateCount").text(result.data.lateCount || 0);
-                    $("#earlyCount").text(result.data.earlyCount || 0);
-                    $("#absentCount").text(result.data.absentCount || 0);
-                    $("#pendingCount").text(result.data.pendingCount || 0);
-                }
-            });
+        });            });
         }
     </script>
 </body>

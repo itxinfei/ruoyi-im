@@ -2,46 +2,10 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('审批管理')" />
-    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
-        <div class="row">
-            <!-- 统计卡片 -->
-            <div class="col-sm-12 statistics-section">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-blue">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">审批总数</div>
-                            <i class="fa fa-list-alt stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-orange">
-                            <div class="stat-number" id="pendingCount">0</div>
-                            <div class="stat-label">待处理</div>
-                            <i class="fa fa-clock-o stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-green">
-                            <div class="stat-number" id="approvedCount">0</div>
-                            <div class="stat-label">已通过</div>
-                            <i class="fa fa-check-circle stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="statistics-card stat-bg-red">
-                            <div class="stat-number" id="rejectedCount">0</div>
-                            <div class="stat-label">已驳回</div>
-                            <i class="fa fa-times-circle stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 搜索区域 -->
+        <div class="row"><!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse">
                 <form id="approval-form">
                     <div class="select-list">
@@ -100,8 +64,6 @@
         var prefix = ctx + "im/approval";
 
         $(function() {
-            loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -178,17 +140,7 @@
                 }]
             };
             $.table.init(options);
-        });
-
-        function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
-                if (result.code == 0) {
-                    $("#totalCount").text(result.data.total || 0);
-                    $("#pendingCount").text(result.data.pending || 0);
-                    $("#approvedCount").text(result.data.approved || 0);
-                    $("#rejectedCount").text(result.data.rejected || 0);
-                }
-            });
+        });            });
         }
     </script>
 </body>

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('IM数据仪表盘')" />
+    <link href="/css/im-admin.css" th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+    <!-- ECharts 图表库 -->
+    <script th:src="@{/ajax/libs/echarts/echarts.min.js}"></script>
+    <style type="text/css">
+        .dashboard-container {
+            padding: 15px;
+        }
+
+        .dashboard-header {
+            margin-bottom: 20px;
+        }
+
+        .dashboard-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .dashboard-subtitle {
+            font-size: 14px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .refresh-btn {
+            float: right;
+            margin-top: -45px;
+        }
+
+        .metric-card {
+            background: #fff;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .metric-card.blue::before { background: #5b86e5; }
+        .metric-card.green::before { background: #28a745; }
+        .metric-card.orange::before { background: #fd7e14; }
+        .metric-card.purple::before { background: #667eea; }
+        .metric-card.red::before { background: #dc3545; }
+        .metric-card.cyan::before { background: #17a2b8; }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .metric-trend {
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .metric-trend.up { color: #28a745; }
+        .metric-trend.down { color: #dc3545; }
+
+        .chart-container {
+            background: #fff;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .chart-box {
+            height: 300px;
+        }
+
+        .chart-box.small {
+            height: 250px;
+        }
+
+        .ranking-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .ranking-item:last-child {
+            border-bottom: none;
+        }
+
+        .ranking-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .ranking-number.top-1 {
+            background: #ffd700;
+            color: #fff;
+        }
+
+        .ranking-number.top-2 {
+            background: #c0c0c0;
+            color: #fff;
+        }
+
+        .ranking-number.top-3 {
+            background: #cd7f32;
+            color: #fff;
+        }
+
+        .ranking-number.other {
+            background: #f8f9fa;
+            color: #666;
+        }
+
+        .ranking-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ranking-name {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ranking-value {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: 4px;
+        }
+
+        .loading-text {
+            margin-left: 10px;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+    <div class="container-div dashboard-container">
+        <!-- 页面头部 -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">IM 系统数据仪表盘</h1>
+            <p class="dashboard-subtitle">实时监控 IM 系统运行状态和数据趋势</p>
+            <button class="btn btn-primary btn-sm refresh-btn" onclick="refreshAllData()">
+                <i class="fa fa-refresh"></i> 刷新数据
+            </button>
+        </div>
+
+        <!-- 核心指标卡片 -->
+        <div class="row" style="margin-bottom: 20px;">
+            <div class="col-sm-2">
+                <div class="metric-card blue">
+                    <div class="metric-value" id="totalUsers">-</div>
+                    <div class="metric-label">总用户数</div>
+                    <div class="metric-trend" id="totalUsersTrend"></div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="metric-card green">
+                    <div class="metric-value" id="onlineUsers">-</div>
+                    <div class="metric-label">在线用户</div>
+                    <div class="metric-trend" id="onlineUsersTrend"></div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="metric-card purple">
+                    <div class="metric-value" id="totalGroups">-</div>
+                    <div class="metric-label">总群组数</div>
+                    <div class="metric-trend" id="totalGroupsTrend"></div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="metric-card orange">
+                    <div class="metric-value" id="totalMessages">-</div>
+                    <div class="metric-label">总消息数</div>
+                    <div class="metric-trend" id="totalMessagesTrend"></div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="metric-card cyan">
+                    <div class="metric-value" id="todayMessages">-</div>
+                    <div class="metric-label">今日消息</div>
+                    <div class="metric-trend" id="todayMessagesTrend"></div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="metric-card red">
+                    <div class="metric-value" id="sensitiveMessages">-</div>
+                    <div class="metric-label">敏感消息</div>
+                    <div class="metric-trend" id="sensitiveMessagesTrend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 趋势图表 -->
+        <div class="row" style="margin-bottom: 20px;">
+            <div class="col-sm-6">
+                <div class="chart-container">
+                    <div class="chart-title">用户注册趋势 (最近7天)</div>
+                    <div class="chart-box" id="userTrendChart"></div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="chart-container">
+                    <div class="chart-title">消息发送趋势 (最近7天)</div>
+                    <div class="chart-box" id="messageTrendChart"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 20px;">
+            <div class="col-sm-6">
+                <div class="chart-container">
+                    <div class="chart-title">群组创建趋势 (最近7天)</div>
+                    <div class="chart-box" id="groupTrendChart"></div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="chart-container">
+                    <div class="chart-title">每小时活跃度 (最近24小时)</div>
+                    <div class="chart-box" id="hourlyActivityChart"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分布图表 + 排行榜 -->
+        <div class="row" style="margin-bottom: 20px;">
+            <div class="col-sm-6">
+                <div class="chart-container">
+                    <div class="chart-title">消息类型分布</div>
+                    <div class="chart-box small" id="msgTypeDistributionChart"></div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="chart-container">
+                    <div class="chart-title">用户活跃度分布</div>
+                    <div class="chart-box small" id="userActivityChart"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 活跃排行榜 -->
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="chart-container">
+                    <div class="chart-title">最活跃用户 (Top 10)</div>
+                    <ul class="ranking-list" id="topActiveUsers"></ul>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="chart-container">
+                    <div class="chart-title">最活跃群组 (Top 10)</div>
+                    <ul class="ranking-list" id="topActiveGroups"></ul>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="chart-container">
+                    <div class="chart-title">消息发送排行 (Top 10)</div>
+                    <ul class="ranking-list" id="topMessageSenders"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var ctx = [[@{/}]];
+        var charts = {}; // 存储所有图表实例
+
+        $(function() {
+            // 初始化页面
+            initDashboard();
+
+            // 每5分钟自动刷新
+            setInterval(refreshAllData, 5 * 60 * 1000);
+        });
+
+        /**
+         * 初始化仪表盘
+         */
+        function initDashboard() {
+            // 显示加载状态
+            showLoading();
+
+            // 加载所有数据
+            loadBasicStatistics();
+            loadTrendCharts();
+            loadDistributionCharts();
+            loadRankings();
+        }
+
+        /**
+         * 显示加载状态
+         */
+        function showLoading() {
+            $('.metric-value').html('<i class="fa fa-spinner fa-spin"></i>');
+        }
+
+        /**
+         * 刷新所有数据
+         */
+        function refreshAllData() {
+            $.modal.msg("正在刷新数据...", {icon: 16, shade: 0.3, time: 500});
+            initDashboard();
+        }
+
+        /**
+         * 加载基础统计数据
+         */
+        function loadBasicStatistics() {
+            $.get(ctx + 'im/dashboard/statistics', function(result) {
+                if (result.code === 0) {
+                    var data = result.data;
+
+                    // 更新指标卡片
+                    updateMetric('totalUsers', data.totalUsers, data.todayRegister || 0, '今日新增');
+                    updateMetric('onlineUsers', data.onlineUsers, 0, '在线');
+                    updateMetric('totalGroups', data.totalGroups, data.todayCreatedGroups || 0, '今日创建');
+                    updateMetric('totalMessages', data.totalMessages, 0, '累计');
+                    updateMetric('todayMessages', data.todayMessages, 0, '今日发送');
+                    updateMetric('sensitiveMessages', data.sensitiveMessages || 0, 0, '需关注');
+                }
+            }).fail(function() {
+                $('.metric-value').text('加载失败');
+            });
+        }
+
+        /**
+         * 更新指标卡片
+         */
+        function updateMetric(id, value, change, label) {
+            // 更新数值
+            $('#' + id).text(formatNumber(value));
+
+            // 更新趋势
+            if (change > 0) {
+                $('#' + id + 'Trend').html('<span class="up"><i class="fa fa-arrow-up"></i> +' + change + ' ' + label + '</span>');
+            } else if (change < 0) {
+                $('#' + id + 'Trend').html('<span class="down"><i class="fa fa-arrow-down"></i> ' + change + ' ' + label + '</span>');
+            } else {
+                $('#' + id + 'Trend').text('');
+            }
+        }
+
+        /**
+         * 格式化数字
+         */
+        function formatNumber(num) {
+            if (num === undefined || num === null) return '-';
+
+            if (num >= 10000) {
+                return (num / 10000).toFixed(1) + '万';
+            } else if (num >= 1000) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            return num.toString();
+        }
+
+        /**
+         * 加载趋势图表
+         */
+        function loadTrendCharts() {
+            // 用户注册趋势
+            loadTrendChart('user', 7, 'userTrendChart', function(data) {
+                return {
+                    title: { text: '' },
+                    tooltip: { trigger: 'axis' },
+                    xAxis: { type: 'category', data: data.map(item => item.date) },
+                    yAxis: { type: 'value' },
+                    series: [{
+                        name: '新增用户',
+                        type: 'line',
+                        data: data.map(item => item.count),
+                        smooth: true,
+                        areaStyle: { opacity: 0.3 },
+                        itemStyle: { color: '#5b86e5' }
+                    }]
+                };
+            });
+
+            // 消息发送趋势
+            loadTrendChart('message', 7, 'messageTrendChart', function(data) {
+                return {
+                    title: { text: '' },
+                    tooltip: { trigger: 'axis' },
+                    xAxis: { type: 'category', data: data.map(item => item.date) },
+                    yAxis: { type: 'value' },
+                    series: [{
+                        name: '消息数量',
+                        type: 'line',
+                        data: data.map(item => item.count),
+                        smooth: true,
+                        areaStyle: { opacity: 0.3 },
+                        itemStyle: { color: '#28a745' }
+                    }]
+                };
+            });
+
+            // 群组创建趋势
+            loadTrendChart('group', 7, 'groupTrendChart', function(data) {
+                return {
+                    title: { text: '' },
+                    tooltip: { trigger: 'axis' },
+                    xAxis: { type: 'category', data: data.map(item => item.date) },
+                    yAxis: { type: 'value' },
+                    series: [{
+                        name: '新增群组',
+                        type: 'line',
+                        data: data.map(item => item.count),
+                        smooth: true,
+                        areaStyle: { opacity: 0.3 },
+                        itemStyle: { color: '#667eea' }
+                    }]
+                };
+            });
+
+            // 每小时活跃度
+            loadTrendChart('hourly', 1, 'hourlyActivityChart', function(data) {
+                return {
+                    title: { text: '' },
+                    tooltip: { trigger: 'axis' },
+                    xAxis: { type: 'category', data: data.map(item => item.hour + ':00') },
+                    yAxis: { type: 'value' },
+                    series: [{
+                        name: '活跃用户',
+                        type: 'bar',
+                        data: data.map(item => item.count),
+                        itemStyle: { color: '#fd7e14' }
+                    }]
+                };
+            });
+        }
+
+        /**
+         * 加载趋势图表
+         */
+        function loadTrendChart(type, days, elementId, optionBuilder) {
+            $.get(ctx + 'im/dashboard/trend', { type: type, days: days }, function(result) {
+                if (result.code === 0 && result.data && result.data.length > 0) {
+                    var chart = echarts.init(document.getElementById(elementId));
+                    chart.setOption(optionBuilder(result.data));
+                    charts[elementId] = chart;
+                } else {
+                    $('#' + elementId).html('<div style="text-align:center;padding-top:100px;color:#999;">暂无数据</div>');
+                }
+            }).fail(function() {
+                $('#' + elementId).html('<div style="text-align:center;padding-top:100px;color:#999;">加载失败</div>');
+            });
+        }
+
+        /**
+         * 加载分布图表
+         */
+        function loadDistributionCharts() {
+            // 消息类型分布
+            loadDistributionChart('msgType', null, 'msgTypeDistributionChart', function(data) {
+                return {
+                    title: { text: '' },
+                    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+                    legend: { orient: 'vertical', right: 10, top: 'center' },
+                    series: [{
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        label: { show: false },
+                        emphasis: { label: { show: true, fontSize: '14', fontWeight: 'bold' } },
+                        data: data.map(item => ({ name: item.type, value: item.count }))
+                    }]
+                };
+            });
+
+            // 用户活跃度分布
+            loadDistributionChart('userActivity', 30, 'userActivityChart', function(data) {
+                return {
+                    title: { text: '' },
+                    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+                    legend: { orient: 'vertical', right: 10, top: 'center' },
+                    series: [{
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        label: { show: false },
+                        emphasis: { label: { show: true, fontSize: '14', fontWeight: 'bold' } },
+                        data: data.map(item => ({ name: item.level, value: item.count }))
+                    }]
+                };
+            });
+        }
+
+        /**
+         * 加载分布图表
+         */
+        function loadDistributionChart(type, days, elementId, optionBuilder) {
+            var params = { type: type };
+            if (days !== null) {
+                params.days = days;
+            }
+
+            $.get(ctx + 'im/dashboard/distribution', params, function(result) {
+                if (result.code === 0 && result.data && result.data.length > 0) {
+                    var chart = echarts.init(document.getElementById(elementId));
+                    chart.setOption(optionBuilder(result.data));
+                    charts[elementId] = chart;
+                } else {
+                    $('#' + elementId).html('<div style="text-align:center;padding-top:80px;color:#999;">暂无数据</div>');
+                }
+            }).fail(function() {
+                $('#' + elementId).html('<div style="text-align:center;padding-top:80px;color:#999;">加载失败</div>');
+            });
+        }
+
+        /**
+         * 加载排行榜
+         */
+        function loadRankings() {
+            // 最活跃用户
+            loadRanking('users', 7, 10, 'topActiveUsers', function(data) {
+                renderRankingList('topActiveUsers', data, 'username', 'count', '条消息');
+            });
+
+            // 最活跃群组
+            loadRanking('groups', 7, 10, 'topActiveGroups', function(data) {
+                renderRankingList('topActiveGroups', data, 'name', 'count', '条消息');
+            });
+
+            // 消息发送排行
+            loadRanking('senders', 7, 10, 'topMessageSenders', function(data) {
+                renderRankingList('topMessageSenders', data, 'username', 'count', '条消息');
+            });
+        }
+
+        /**
+         * 加载排行榜数据
+         */
+        function loadRanking(type, days, limit, elementId, callback) {
+            $.get(ctx + 'im/dashboard/ranking', { type: type, days: days, limit: limit }, function(result) {
+                if (result.code === 0 && result.data && result.data.length > 0) {
+                    callback(result.data);
+                } else {
+                    $('#' + elementId).html('<li style="text-align:center;padding:20px;color:#999;">暂无数据</li>');
+                }
+            }).fail(function() {
+                $('#' + elementId).html('<li style="text-align:center;padding:20px;color:#999;">加载失败</li>');
+            });
+        }
+
+        /**
+         * 渲染排行榜列表
+         */
+        function renderRankingList(elementId, data, nameField, countField, unit) {
+            var html = '';
+            data.forEach(function(item, index) {
+                var rankClass = 'other';
+                if (index === 0) rankClass = 'top-1';
+                else if (index === 1) rankClass = 'top-2';
+                else if (index === 2) rankClass = 'top-3';
+
+                html += '<li class="ranking-item">';
+                html += '<div class="ranking-number ' + rankClass + '">' + (index + 1) + '</div>';
+                html += '<div class="ranking-info">';
+                html += '<div class="ranking-name" title="' + item[nameField] + '">' + item[nameField] + '</div>';
+                html += '<div class="ranking-value">' + formatNumber(item[countField]) + ' ' + unit + '</div>';
+                html += '</div>';
+                html += '</li>';
+            });
+
+            $('#' + elementId).html(html);
+        }
+
+        // 窗口大小改变时重绘图表
+        window.onresize = function() {
+            Object.values(charts).forEach(function(chart) {
+                if (chart) {
+                    chart.resize();
+                }
+            });
+        };
+    </script>
+</body>
+</html>
