@@ -47,23 +47,6 @@
             padding: 12px;
         }
 
-        /* ========== 选中信息样式 ========== */
-        .selected-info {
-            display: inline-block;
-            padding: 6px 12px;
-            background: #e8f4fd;
-            border: 1px solid #b3d7f7;
-            border-radius: 4px;
-            color: #1c84c6;
-            font-size: 13px;
-            margin-left: auto;
-        }
-        .selected-info strong {
-            color: #1c84c6;
-            font-size: 15px;
-            margin: 0 2px;
-        }
-
         /* ========== 搜索状态提示 ========== */
         .search-status {
             padding: 8px 12px;
@@ -160,11 +143,6 @@
                 <a class="btn btn-info" onclick="$.table.exportExcel()" shiro:hasPermission="im:friend:export">
                     <i class="fa fa-download"></i> 导出
                 </a>
-                <!-- 选中状态显示（放在最后） -->
-                <span id="selectedInfo" class="selected-info" style="display:none;">
-                    已选 <strong id="selectedCount">0</strong> 项
-                    <a href="javascript:void(0)" onclick="ImCommon.clearSelection('#bootstrap-table'); ImCommon.updateSelectedInfo('#bootstrap-table');" style="margin-left: 10px;">清空</a>
-                </span>
             </div>
 
             <!-- 搜索状态提示 -->
@@ -339,19 +317,6 @@
                     beforeSend: function() {
                         ImCommon.showLoading('.select-table');
                     }
-                },
-                // 选择事件处理
-                onCheck: function(row, $element) {
-                    ImCommon.updateSelectedInfo('#bootstrap-table');
-                },
-                onUncheck: function(row, $element) {
-                    ImCommon.updateSelectedInfo('#bootstrap-table');
-                },
-                onCheckAll: function(rows, $element) {
-                    ImCommon.updateSelectedInfo('#bootstrap-table');
-                },
-                onUncheckAll: function(rows, $element) {
-                    ImCommon.updateSelectedInfo('#bootstrap-table');
                 }
             };
             $.table.init(options);
