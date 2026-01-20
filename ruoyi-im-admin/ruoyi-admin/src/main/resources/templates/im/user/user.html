@@ -6,104 +6,60 @@
         /* ========== 统计卡片样式 ========== */
         .stat-box {
             position: relative;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            overflow: hidden;
+            padding: 15px;
+            border-radius: 4px;
             color: #fff;
         }
-        .stat-box::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .stat-box:hover::before { opacity: 1; }
-        .stat-box:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-        }
         .stat-box .stat-number {
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 700;
-            margin-bottom: 8px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 1;
         }
         .stat-box .stat-label {
-            font-size: 14px;
-            font-weight: 500;
-            position: relative;
-            z-index: 1;
+            font-size: 12px;
         }
         .stat-box .stat-icon {
             position: absolute;
-            right: 20px;
+            right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 48px;
+            font-size: 36px;
             opacity: 0.2;
-            transition: all 0.3s;
-            z-index: 1;
         }
-        .stat-box:hover .stat-icon {
-            transform: translateY(-50%) scale(1.1) rotate(5deg);
-        }
-        .stat-box-primary { background: linear-gradient(135deg, #1ab394 0%, #18a689 100%); }
-        .stat-box-success { background: linear-gradient(135deg, #1c84c6 0%, #1a7bb9 100%); }
-        .stat-box-danger { background: linear-gradient(135deg, #ed5565 0%, #ec4d5d 100%); }
-        .stat-box-warning { background: linear-gradient(135deg, #f8ac59 0%, #f7a54d 100%); }
+        .stat-box-primary { background: #1ab394; }
+        .stat-box-success { background: #1c84c6; }
+        .stat-box-danger { background: #ed5565; }
+        .stat-box-warning { background: #f8ac59; }
 
         /* ========== 搜索区域样式 ========== */
         .search-collapse {
-            border-radius: 8px;
             border: 1px solid #e7eaec;
             background: #fff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            transition: all 0.3s;
-        }
-        .search-collapse:hover {
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
         .search-collapse input[type="text"],
         .search-collapse select {
-            border-radius: 4px;
             border: 1px solid #e7eaec;
-            transition: all 0.3s;
-            min-width: 180px;
-        }
-        .search-collapse input[type="text"]:focus,
-        .search-collapse select:focus {
-            border-color: #1ab394;
-            box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+            min-width: 160px;
         }
         .search-collapse .select-list ul li {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .search-collapse .select-list ul li label,
-        .search-collapse .select-list ul li .input-label {
+        .search-collapse .select-list ul li label {
             min-width: 80px;
             text-align: right;
-            font-weight: 500;
             color: #676a6c;
         }
 
         /* ========== 批量操作按钮区域 ========== */
         #toolbar {
+            padding: 8px;
             background: #f9f9f9;
-            border-radius: 8px;
-            border: solid #e7eaec;
-            padding: 12px;
+            border: 1px solid #e7eaec;
+            border-radius: 4px;
         }
 
-        /* ========== Bootstrap Table 工具栏按钮优化 ========== */
+        /* ========== Bootstrap Table 工具栏 ========== */
         .fixed-table-toolbar {
             display: flex;
             align-items: center;
@@ -124,77 +80,46 @@
             font-size: 12px;
             border-radius: 3px;
         }
-        .fixed-table-toolbar .btn:hover {
-            background: #e6e6e6;
-        }
         .fixed-table-toolbar .search input {
-            border-radius: 3px;
             border: 1px solid #ddd;
             padding: 4px 8px;
             font-size: 12px;
             height: 28px;
         }
-        .fixed-table-toolbar .search input:focus {
-            border-color: #1ab394;
-            outline: none;
-        }
-        .fixed-table-toolbar .dropdown-menu {
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        .fixed-table-toolbar .dropdown-menu li {
-            padding: 2px 5px;
-        }
-        .fixed-table-toolbar .dropdown-menu label {
-            margin: 0;
-            font-size: 12px;
-        }
 
         /* ========== 搜索状态提示 ========== */
         .search-status {
-            padding: 8px 12px;
+            padding: 6px 10px;
             background: #f0f9ff;
-            border: solid #b3d7f7;
-            border-radius: 4px;
-            font-size: 13px;
-            margin-top: 10px;
+            border: 1px solid #b3d7f7;
+            font-size: 12px;
         }
 
         /* ========== 表格区域 ========== */
         .select-table.table-striped {
-            border-radius: 8px;
-            overflow: hidden;
-            border: solid #e7eaec;
+            border: 1px solid #e7eaec;
         }
         .table > thead > tr > th {
-            background: linear-gradient(to bottom, #f8f9fa 0%, #f1f3f5 100%);
-            color: #495057;
-            font-weight: 600;
-            border-bottom: 2px solid #dee2e6;
-            padding: 14px 8px;
-            font-size: 13px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 8px;
+            font-size: 12px;
         }
         .table > tbody > tr > td {
-            padding: 12px 8px;
-            vertical-align: middle;
+            padding: 8px;
         }
 
         /* ========== 下拉菜单样式 ========== */
         .dropdown-menu > li > a {
-            padding: 8px 20px;
-            font-size: 13px;
+            padding: 6px 15px;
+            font-size: 12px;
         }
         .dropdown-menu > li > a i {
-            margin-right: 8px;
-            width: 16px;
-            text-align: center;
+            margin-right: 6px;
+            width: 14px;
         }
-        .dropdown-menu .divider { margin: 5px 0; }
+        .dropdown-menu .divider { margin: 4px 0; }
         .dropdown-menu > li > a.text-danger { color: #ed5565; }
-        .dropdown-menu > li > a.text-danger:hover {
-            background-color: #ed5565;
-            color: #fff;
-        }
     </style>
 </head>
 <body class="gray-bg">
