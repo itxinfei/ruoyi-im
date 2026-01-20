@@ -34,13 +34,13 @@ public class ImBackupServiceImpl implements ImBackupService {
     private String backupPath;
 
     /** 数据库配置 */
-    @Value("${spring.datasource.url}")
+    @Value("${spring.datasource.druid.master.url}")
     private String dbUrl;
 
-    @Value("${spring.datasource.username}")
+    @Value("${spring.datasource.druid.master.username}")
     private String dbUsername;
 
-    @Value("${spring.datasource.password}")
+    @Value("${spring.datasource.druid.master.password}")
     private String dbPassword;
 
     /** MySQL dump 命令路径 */

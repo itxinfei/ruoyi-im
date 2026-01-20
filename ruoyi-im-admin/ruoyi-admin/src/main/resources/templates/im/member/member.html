@@ -369,7 +369,7 @@
          */
         function addMember() {
             var url = prefix + "/add";
-            $.modal.open("添加群组成员", url, '1000', '650');
+            $.modal.open("添加群组成员", url, 550, 400);
         }
 
         /**
@@ -394,15 +394,59 @@
         function changeRole(id, currentRole, groupId, userId) {
             var roles = ['OWNER', 'ADMIN', 'MEMBER'];
             var roleNames = {'OWNER': '群主', 'ADMIN': '管理员', 'MEMBER': '普通成员'};
-            var html = '<select class="form-control" id="newRole">';
-            for (var i = 0; i < roles.length; i++) {
-                var selected = currentRole === roles[i] ? 'selected' : '';
-                html += '<option value="' + roles[i] + '" ' + selected + '>' + roleNames[roles[i]] + '</option>';
-            }
-            html += '</select>';
-            $.modal.confirm("选择新角色", html, function() {
-                var newRole = $('#newRole').val();
-                $.operate.post(prefix + "/role", {groupId: groupId, userId: userId, role: newRole});
+            var roleColors = {'OWNER': 'btn-danger', 'ADMIN': 'btn-warning', 'MEMBER': 'btn-primary'};
+            var roleIcons = {'OWNER': 'fa-crown', 'ADMIN': 'fa-shield', 'MEMBER': 'fa-user'};
+
+            // 显示选择对话框
+            top.layer.open({
+                type: 1,
+                title: '修改成员角色',
+                area: ['480px', '260px'],
+                content: '<div style="padding: 25px 30px 20px;">' +
+                    '<p style="margin-bottom: 25px; font-size: 14px; text-align: center;">请选择新角色：</p>' +
+                    '<div style="display: flex; justify-content: center; gap: 12px;">' +
+                    '<button class="btn ' + (currentRole === 'OWNER' ? 'btn-default' : 'btn-danger') + '" id="btnOwner" style="padding: 10px 20px; border-radius: 4px;' + (currentRole === 'OWNER' ? 'opacity:0.5;cursor:not-allowed;' : '') + '">' +
+                    '<i class="fa fa-crown"></i> 群主' +
+                    '</button>' +
+                    '<button class="btn ' + (currentRole === 'ADMIN' ? 'btn-default' : 'btn-warning') + '" id="btnAdmin" style="padding: 10px 20px; border-radius: 4px;' + (currentRole === 'ADMIN' ? 'opacity:0.5;cursor:not-allowed;' : '') + '">' +
+                    '<i class="fa fa-shield"></i> 管理员' +
+                    '</button>' +
+                    '<button class="btn ' + (currentRole === 'MEMBER' ? 'btn-default' : 'btn-primary') + '" id="btnMember" style="padding: 10px 20px; border-radius: 4px;' + (currentRole === 'MEMBER' ? 'opacity:0.5;cursor:not-allowed;' : '') + '">' +
+                    '<i class="fa fa-user"></i> 普通成员' +
+                    '</button>' +
+                    '</div>' +
+                    '</div>',
+                btn: ['取消'],
+                yes: function(index) {
+                    top.layer.close(index);
+                },
+                success: function(layero, index) {
+                    // 使用 layero 查找按钮并绑定事件（跳过当前角色）
+                    if (currentRole !== 'OWNER') {
+                        layero.find('#btnOwner').on('click', function() {
+                            top.layer.close(index);
+                            $.modal.confirm("确定要将该成员的角色修改为【群主】吗？", function() {
+                                $.operate.post(prefix + "/role", {groupId: groupId, userId: userId, role: 'OWNER'});
+                            });
+                        });
+                    }
+                    if (currentRole !== 'ADMIN') {
+                        layero.find('#btnAdmin').on('click', function() {
+                            top.layer.close(index);
+                            $.modal.confirm("确定要将该成员的角色修改为【管理员】吗？", function() {
+                                $.operate.post(prefix + "/role", {groupId: groupId, userId: userId, role: 'ADMIN'});
+                            });
+                        });
+                    }
+                    if (currentRole !== 'MEMBER') {
+                        layero.find('#btnMember').on('click', function() {
+                            top.layer.close(index);
+                            $.modal.confirm("确定要将该成员的角色修改为【普通成员】吗？", function() {
+                                $.operate.post(prefix + "/role", {groupId: groupId, userId: userId, role: 'MEMBER'});
+                            });
+                        });
+                    }
+                }
             });
         }
 

@@ -329,8 +329,25 @@
                 $.modal.alertWarning("获取用户ID失败，请刷新页面重试");
                 return;
             }
-            $.modal.open("重置密码", prefix + "/resetPassword/" + userId);
+            // 设置弹窗宽度为 480px，高度为 280px
+            $.modal.open("重置密码", prefix + "/resetPassword/" + userId, 480, 280);
         }
+
+        /**
+         * 覆盖默认的添加方法，使用合适的弹窗大小
+         */
+        $.operate.add = function(id) {
+            table.set();
+            $.modal.open("添加" + table.options.modalName, $.operate.addUrl(id), 580, 580);
+        };
+
+        /**
+         * 覆盖默认的编辑方法，使用合适的弹窗大小
+         */
+        $.operate.edit = function(id) {
+            table.set();
+            $.modal.open("修改" + table.options.modalName, $.operate.editUrl(id), 580, 520);
+        };
 
         /**
          * 批量修改用户状态
@@ -341,20 +358,50 @@
                 return;
             }
 
-            var html = '<div class="form-group">' +
-                '<label class="col-sm-3 control-label">请选择状态：</label>' +
-                '<div class="col-sm-9">' +
-                '<select class="form-control" id="newStatus">' +
-                '<option value="1">启用</option>' +
-                '<option value="0">停用</option>' +
-                '</select>' +
-                '</div>' +
-                '</div>';
+            // 显示选择对话框
+            top.layer.open({
+                type: 1,
+                title: '批量修改用户状态',
+                area: ['480px', '220px'],
+                content: '<div style="padding: 25px 30px 20px;">' +
+                    '<p style="margin-bottom: 20px; font-size: 14px; text-align: center;">已选中 <strong style="color: #667eea; font-size: 16px;">' + rows.length + '</strong> 个用户，请选择操作：</p>' +
+                    '<div style="display: flex; justify-content: center; gap: 12px;">' +
+                    '<button class="btn btn-success" id="btnEnable" style="padding: 10px 30px; border-radius: 6px; font-size: 14px;">' +
+                    '<i class="fa fa-check"></i> 启用' +
+                    '</button>' +
+                    '<button class="btn btn-danger" id="btnDisable" style="padding: 10px 30px; border-radius: 6px; font-size: 14px;">' +
+                    '<i class="fa fa-ban"></i> 停用' +
+                    '</button>' +
+                    '<button class="btn btn-default" id="btnCancel" style="padding: 10px 30px; border-radius: 6px; font-size: 14px;">' +
+                    '<i class="fa fa-close"></i> 取消' +
+                    '</button>' +
+                    '</div>' +
+                    '</div>',
+                closeBtn: 1,
+                success: function(layero, index) {
+                    // 使用 layero 查找按钮并绑定事件
+                    layero.find('#btnEnable').on('click', function() {
+                        top.layer.close(index);
+                        executeBatchUpdate(rows, '1', '启用');
+                    });
 
-            $.modal.confirm("确定要批量修改以下 " + rows.length + " 个用户的状态吗？", html, function() {
-                var newStatus = $('#newStatus').val();
-                var statusText = newStatus == '1' ? '启用' : '停用';
+                    layero.find('#btnDisable').on('click', function() {
+                        top.layer.close(index);
+                        executeBatchUpdate(rows, '0', '停用');
+                    });
 
+                    layero.find('#btnCancel').on('click', function() {
+                        top.layer.close(index);
+                    });
+                }
+            });
+        }
+
+        /**
+         * 执行批量更新状态
+         */
+        function executeBatchUpdate(rows, newStatus, statusText) {
+            $.modal.confirm("确定要批量" + statusText + "选中的 " + rows.length + " 个用户吗？", function() {
                 $.modal.msg("正在批量" + statusText + "用户...", {icon: 16, shade: 0.3, time: 0});
                 $.ajax({
                     url: prefix + "/batchUpdateStatus",

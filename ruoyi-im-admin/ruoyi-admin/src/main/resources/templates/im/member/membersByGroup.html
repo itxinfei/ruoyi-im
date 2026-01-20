@@ -297,25 +297,76 @@
 
         // 修改角色
         function changeRole(id, currentRole, userId) {
-            var roles = ['OWNER', 'ADMIN', 'MEMBER'];
             var roleNames = {'OWNER': '群主', 'ADMIN': '管理员', 'MEMBER': '普通成员'};
-            var html = '<select class="form-im-control" id="newRole" style="width:200px;">';
-            for (var i = 0; i < roles.length; i++) {
-                var selected = currentRole === roles[i] ? 'selected' : '';
-                html += '<option value="' + roles[i] + '" ' + selected + '>' + roleNames[roles[i]] + '</option>';
-            }
-            html += '</select>';
 
-            $.modal.confirm("选择新角色", html, function() {
-                var newRole = $('#newRole').val();
-                ImModal.doAction("修改角色", prefix + "/role", {
-                    groupId: groupId,
-                    userId: userId,
-                    role: newRole
-                }, function() {
-                    loadMembers();
-                });
+            // 显示选择对话框
+            top.layer.open({
+                type: 1,
+                title: '修改成员角色',
+                area: ['450px', '250px'],
+                content: '<div style="padding: 25px; text-align: center;">' +
+                    '<p style="margin-bottom: 25px; font-size: 14px;">请选择新角色：</p>' +
+                    '<div style="display: flex; justify-content: center; gap: 15px;">' +
+                    '<button class="btn ' + (currentRole === 'OWNER' ? 'btn-gray' : 'btn-danger') + '" id="btnOwner" style="padding: 12px 25px;' + (currentRole === 'OWNER' ? 'opacity:0.5;cursor:not-allowed;' : '') + '">' +
+                    '<i class="fa fa-crown"></i> 群主' +
+                    '</button>' +
+                    '<button class="btn ' + (currentRole === 'ADMIN' ? 'btn-gray' : 'btn-warning') + '" id="btnAdmin" style="padding: 12px 25px;' + (currentRole === 'ADMIN' ? 'opacity:0.5;cursor:not-allowed;' : '') + '">' +
+                    '<i class="fa fa-shield"></i> 管理员' +
+                    '</button>' +
+                    '<button class="btn ' + (currentRole === 'MEMBER' ? 'btn-gray' : 'btn-primary') + '" id="btnMember" style="padding: 12px 25px;' + (currentRole === 'MEMBER' ? 'opacity:0.5;cursor:not-allowed;' : '') + '">' +
+                    '<i class="fa fa-user"></i> 普通成员' +
+                    '</button>' +
+                    '</div>' +
+                    '</div>',
+                btn: ['取消'],
+                yes: function(index) {
+                    top.layer.close(index);
+                }
             });
+
+            // 绑定按钮事件（跳过当前角色）
+            if (currentRole !== 'OWNER') {
+                $('#btnOwner').on('click', function() {
+                    top.layer.closeAll();
+                    $.modal.confirm("确定要将该成员的角色修改为【群主】吗？", function() {
+                        ImModal.doAction("修改角色", prefix + "/role", {
+                            groupId: groupId,
+                            userId: userId,
+                            role: 'OWNER'
+                        }, function() {
+                            loadMembers();
+                        });
+                    });
+                });
+            }
+            if (currentRole !== 'ADMIN') {
+                $('#btnAdmin').on('click', function() {
+                    top.layer.closeAll();
+                    $.modal.confirm("确定要将该成员的角色修改为【管理员】吗？", function() {
+                        ImModal.doAction("修改角色", prefix + "/role", {
+                            groupId: groupId,
+                            userId: userId,
+                            role: 'ADMIN'
+                        }, function() {
+                            loadMembers();
+                        });
+                    });
+                });
+            }
+            if (currentRole !== 'MEMBER') {
+                $('#btnMember').on('click', function() {
+                    top.layer.closeAll();
+                    $.modal.confirm("确定要将该成员的角色修改为【普通成员】吗？", function() {
+                        ImModal.doAction("修改角色", prefix + "/role", {
+                            groupId: groupId,
+                            userId: userId,
+                            role: 'MEMBER'
+                        }, function() {
+                            loadMembers();
+                        });
+                    });
+                });
+            }
         }
 
         // 禁言/解禁

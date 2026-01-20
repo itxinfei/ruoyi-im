@@ -4,83 +4,190 @@
     <meta charset="utf-8">
     <title>新增消息</title>
     <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+    <style>
+        .wrapper { padding: 25px; max-width: 600px; margin: 0 auto; }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px 35px;
+            border-top: 3px solid #8b5cf6;
+        }
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .page-title i { color: #8b5cf6; margin-right: 10px; font-size: 20px; }
+        .form-horizontal .form-group { margin-bottom: 20px; }
+        .control-label {
+            font-weight: 500;
+            font-size: 14px;
+            color: #555;
+            padding-top: 12px;
+        }
+        .control-label.is-required::after {
+            content: " *";
+            color: #f56c6c;
+            font-size: 16px;
+            margin-left: 4px;
+        }
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+            outline: none;
+        }
+        select.form-control {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b5cf6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            padding-right: 40px;
+            appearance: none;
+        }
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.6;
+        }
+        .form-btn-group {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+        .btn {
+            padding: 10px 30px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            border: none;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
+        }
+        .btn-default {
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #666;
+        }
+        .btn-default:hover {
+            background: #f8f9fa;
+            color: #333;
+            border-color: #ccc;
+        }
+        .input-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        .input-hint i { margin-right: 3px; }
+    </style>
 </head>
 <body class="white-bg">
-    <form class="form-horizontal m" id="form-message-add">
-        <div class="form-group">
-            <label class="col-sm-3 control-label">会话ID：</label>
-            <div class="col-sm-8">
-                <input name="conversationId" placeholder="请输入会话ID" class="form-control" type="number" required>
+    <div class="wrapper">
+        <div class="card">
+            <div class="page-title">
+                <i class="fa fa-envelope"></i> 新增消息
             </div>
+
+            <form class="form-horizontal m" id="form-message-add">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label is-required">会话ID</label>
+                    <div class="col-sm-9">
+                        <input name="conversationId" placeholder="请输入会话ID" class="form-control" type="number" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label is-required">发送者ID</label>
+                    <div class="col-sm-9">
+                        <input name="senderId" placeholder="请输入发送者用户ID" class="form-control" type="number" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label is-required">消息类型</label>
+                    <div class="col-sm-9">
+                        <select name="messageType" class="form-control" required>
+                            <option value="TEXT">文本</option>
+                            <option value="IMAGE">图片</option>
+                            <option value="VIDEO">视频</option>
+                            <option value="AUDIO">音频</option>
+                            <option value="FILE">文件</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label is-required">消息内容</label>
+                    <div class="col-sm-9">
+                        <textarea name="content" class="form-control" rows="4" placeholder="请输入消息内容（文本消息建议包含中文）" required></textarea>
+                        <div class="input-hint"><i class="fa fa-info-circle"></i> 文本消息必须包含中文字符</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">敏感级别</label>
+                    <div class="col-sm-9">
+                        <select name="sensitiveLevel" class="form-control">
+                            <option value="NORMAL">普通</option>
+                            <option value="SENSITIVE">敏感</option>
+                            <option value="HIGH">高级</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-btn-group">
+                    <button type="button" class="btn btn-primary" onclick="submitHandler()">
+                        <i class="fa fa-paper-plane"></i> 发送消息
+                    </button>
+                    <button type="button" class="btn btn-default" onclick="$.modal.close()">
+                        <i class="fa fa-reply"></i> 取消
+                    </button>
+                </div>
+            </form>
         </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label">发送者ID：</label>
-            <div class="col-sm-8">
-                <input name="senderId" placeholder="请输入发送者用户ID" class="form-control" type="number" required>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label">消息类型：</label>
-            <div class="col-sm-8">
-                <select name="messageType" class="form-control" required>
-                    <option value="TEXT">文本</option>
-                    <option value="IMAGE">图片</option>
-                    <option value="VIDEO">视频</option>
-                    <option value="AUDIO">音频</option>
-                    <option value="FILE">文件</option>
-                </select>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label">消息内容：</label>
-            <div class="col-sm-8">
-                <textarea name="content" class="form-control" rows="4" placeholder="请输入消息内容" required></textarea>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label">敏感级别：</label>
-            <div class="col-sm-8">
-                <select name="sensitiveLevel" class="form-control">
-                    <option value="NORMAL">普通</option>
-                    <option value="SENSITIVE">敏感</option>
-                    <option value="HIGH">高级</option>
-                </select>
-            </div>
-        </div>
-    </form>
-    <div th:include="include :: footer"></div>
+    </div>
+
+    <th:block th:include="include :: footer"></th:block>
     <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
     <script th:inline="javascript">
         var prefix = ctx + "im/message";
-
-        // 中文正则表达式
         var CHINESE_PATTERN = /[\u4e00-\u9fa5]/;
 
-        /**
-         * 校验内容是否包含中文字符
-         * @param {string} content - 待校验的内容
-         * @param {string} fieldName - 字段名称
-         * @returns {boolean} 是否通过校验
-         */
         function validateChineseContent(content, fieldName) {
             if (!content || content.trim().length === 0) {
-                return true; // 空值由required校验
+                return true;
             }
-
-            // 移除HTML标签
             var textContent = content.replace(/<[^>]*>/g, '').trim();
-
-            // 检查是否包含中文字符
             if (!CHINESE_PATTERN.test(textContent)) {
                 $.modal.alertWarning(fieldName + "必须包含中文字符");
                 return false;
             }
-
-            // 检查中文字符占比（至少20%）
             var chineseCharCount = 0;
             var totalCharCount = 0;
-
             for (var i = 0; i < textContent.length; i++) {
                 var c = textContent.charAt(i);
                 if (CHINESE_PATTERN.test(c)) {
@@ -90,7 +197,6 @@
                     totalCharCount++;
                 }
             }
-
             if (totalCharCount > 0) {
                 var chineseRatio = chineseCharCount / totalCharCount;
                 if (chineseRatio < 0.2) {
@@ -98,69 +204,37 @@
                     return false;
                 }
             }
-
             return true;
         }
 
         $("#form-message-add").validate({
             focusCleanup: true,
             rules: {
-                conversationId: {
-                    required: true,
-                    digits: true,
-                    min: 1
-                },
-                senderId: {
-                    required: true,
-                    digits: true,
-                    min: 1
-                },
-                messageType: {
-                    required: true
-                },
-                content: {
-                    required: function() {
-                        // 文本消息必须有内容
-                        var messageType = $('select[name="messageType"]').val();
-                        return messageType === 'TEXT';
-                    },
-                    maxlength: 5000
-                }
+                conversationId: { required: true, digits: true, min: 1 },
+                senderId: { required: true, digits: true, min: 1 },
+                messageType: { required: true },
+                content: { required: function() {
+                    var messageType = $('select[name="messageType"]').val();
+                    return messageType === 'TEXT';
+                }, maxlength: 5000 }
             },
             messages: {
-                conversationId: {
-                    required: "请输入会话ID",
-                    digits: "会话ID必须是数字",
-                    min: "会话ID必须大于0"
-                },
-                senderId: {
-                    required: "请输入发送者ID",
-                    digits: "发送者ID必须是数字",
-                    min: "发送者ID必须大于0"
-                },
-                messageType: {
-                    required: "请选择消息类型"
-                },
-                content: {
-                    required: "请输入消息内容",
-                    maxlength: "消息内容不能超过5000字"
-                }
+                conversationId: { required: "请输入会话ID", digits: "会话ID必须是数字", min: "会话ID必须大于0" },
+                senderId: { required: "请输入发送者ID", digits: "发送者ID必须是数字", min: "发送者ID必须大于0" },
+                messageType: { required: "请选择消息类型" },
+                content: { required: "请输入消息内容", maxlength: "消息内容不能超过5000字" }
             }
         });
 
         function submitHandler() {
             if ($.validate.form()) {
-                // 校验中文内容
                 var content = $('textarea[name="content"]').val();
                 var messageType = $('select[name="messageType"]').val();
-
-                // 文本消息必须包含中文
                 if (messageType === 'TEXT' && content) {
                     if (!validateChineseContent(content, "消息内容")) {
                         return;
                     }
                 }
-
                 $.operate.save(prefix + "/add", $('#form-message-add').serialize());
             }
         }

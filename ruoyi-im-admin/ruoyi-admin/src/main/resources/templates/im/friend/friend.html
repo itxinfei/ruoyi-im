@@ -82,6 +82,7 @@
         $(function() {
             var options = {
                 url: prefix + "/list",
+                toolbar: "toolbar",
                 height: 650,
                 createUrl: prefix + "/add",
                 updateUrl: prefix + "/edit/{id}",
@@ -236,11 +237,30 @@
                 ajaxOptions: {
                     beforeSend: function() {
                         ImCommon.showLoading('.select-table');
+                    },
+                    complete: function() {
+                        ImCommon.hideLoading();
                     }
                 }
             };
             $.table.init(options);
         });
+
+        /**
+         * 覆盖默认的添加方法，使用合适的弹窗大小
+         */
+        $.operate.add = function(id) {
+            table.set();
+            $.modal.open("添加" + table.options.modalName, $.operate.addUrl(id), 550, 450);
+        };
+
+        /**
+         * 覆盖默认的编辑方法，使用合适的弹窗大小
+         */
+        $.operate.edit = function(id) {
+            table.set();
+            $.modal.open("修改" + table.options.modalName, $.operate.editUrl(id), 550, 450);
+        };
 
         /**
          * 清空搜索条件

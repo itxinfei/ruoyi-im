@@ -9,9 +9,6 @@
         <div class="header-status">在线</div>
       </div>
       <div class="header-actions">
-        <el-tooltip content="搜索">
-          <el-button :icon="Search" text circle size="small" />
-        </el-tooltip>
         <el-tooltip content="语音通话">
           <el-button :icon="Phone" text circle size="small" />
         </el-tooltip>
@@ -72,18 +69,6 @@
         <el-tooltip content="@成员">
           <el-button :icon="Promotion" text class="toolbar-btn" />
         </el-tooltip>
-        <el-tooltip content="语音通话">
-          <el-button :icon="Phone" text class="toolbar-btn" />
-        </el-tooltip>
-        <el-tooltip content="视频通话">
-          <el-button :icon="VideoCamera" text class="toolbar-btn" />
-        </el-tooltip>
-        <el-tooltip content="截图">
-          <el-button :icon="Crop" text class="toolbar-btn" />
-        </el-tooltip>
-        <el-tooltip content="历史记录">
-          <el-button :icon="Clock" text class="toolbar-btn" />
-        </el-tooltip>
       </div>
 
       <div class="input-area-wrapper">
@@ -113,16 +98,13 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue'
 import {
-  Search,
   Phone,
   VideoCamera,
   MoreFilled,
   ChatDotRound,
   Folder,
   Picture,
-  Promotion,
-  Crop,
-  Clock
+  Promotion
 } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -144,39 +126,7 @@ const inputMessage = ref('')
 const messageAreaRef = ref(null)
 
 const messages = computed(() => {
-  if (!props.session) return []
-  return [
-    {
-      id: 1,
-      content: '你好，在吗？',
-      senderId: 2,
-      senderName: '张三',
-      senderAvatar: 'https://via.placeholder.com/40',
-      timestamp: Date.now() - 3600000,
-      isOwn: false,
-      isRead: true
-    },
-    {
-      id: 2,
-      content: '在的，有什么事吗？',
-      senderId: 1,
-      senderName: '测试用户',
-      senderAvatar: 'https://via.placeholder.com/40',
-      timestamp: Date.now() - 1800000,
-      isOwn: true,
-      isRead: true
-    },
-    {
-      id: 3,
-      content: '明天下午3点开会',
-      senderId: 2,
-      senderName: '张三',
-      senderAvatar: 'https://via.placeholder.com/40',
-      timestamp: Date.now() - 600000,
-      isOwn: false,
-      isRead: false
-    }
-  ]
+  return props.session?.messages || []
 })
 
 const messagesWithTimeDivider = computed(() => {
@@ -184,17 +134,16 @@ const messagesWithTimeDivider = computed(() => {
   if (msgs.length === 0) return []
   
   const result = []
-  let lastHour = -1
+  let lastDate = null
   
-  msgs.forEach((msg, index) => {
-    const msgTime = new Date(msg.timestamp)
-    const currentHour = msgTime.getHours()
+  msgs.forEach((msg) => {
+    const msgDate = new Date(msg.timestamp).toDateString()
     
-    if (currentHour !== lastHour && index > 0) {
-      lastHour = currentHour
+    if (msgDate !== lastDate) {
+      lastDate = msgDate
       result.push({
         isTimeDivider: true,
-        timeText: formatTimeDivider(msgTime)
+        timeText: formatMessageTime(msg.timestamp)
       })
     }
     
@@ -208,43 +157,20 @@ const canSend = computed(() => {
   return inputMessage.value.trim().length > 0
 })
 
-const formatTimeDivider = (date) => {
-  const now = new Date()
-  const diff = now - date
-  
-  if (diff < 3600000) {
-    const minutes = Math.floor(diff / 60000)
-    if (minutes < 1) return '刚刚'
-    return `${minutes}分钟前`
-  }
-  
-  if (diff < 86400000) {
-    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
-  }
-  
-  if (diff < 604800000) {
-    const weeks = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
-    return weeks[date.getDay()]
-  }
-  
-  return `${date.getMonth() + 1}月${date.getDate()}日`
-}
-
 const formatMessageTime = (timestamp) => {
   const date = new Date(timestamp)
   const now = new Date()
-  const diff = now - date
-
+  
   if (date.toDateString() === now.toDateString()) {
     return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
   }
-
+  
   const yesterday = new Date(now)
   yesterday.setDate(yesterday.getDate() - 1)
   if (date.toDateString() === yesterday.toDateString()) {
     return `昨天 ${date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
   }
-
+  
   return date.toLocaleString('zh-CN', {
     month: '2-digit',
     day: '2-digit',

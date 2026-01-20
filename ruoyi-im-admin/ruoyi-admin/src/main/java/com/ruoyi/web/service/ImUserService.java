@@ -118,7 +118,7 @@ public interface ImUserService {
      * @param status 目标状态，如 NORMAL、DISABLED、LOCKED
      * @return 影响的记录数，成功返回1，失败返回0
      */
-    int changeStatus(Long id, String status);
+    int changeStatus(Long id, Integer status);
 
     /**
      * 统计在线用户数量
@@ -174,7 +174,7 @@ public interface ImUserService {
      * @param status 目标状态，如 NORMAL、DISABLED、LOCKED
      * @return 更新的记录数，返回实际更新的用户数量
      */
-    int batchUpdateStatus(Long[] userIds, String status);
+    int batchUpdateStatus(Long[] userIds, Integer status);
 
     /**
      * 批量导入用户
@@ -188,4 +188,12 @@ public interface ImUserService {
      * @return 导入结果，包含成功数量、失败数量、失败详情等
      */
     Map<String, Object> batchImportUsers(java.util.List<ImUser> users, boolean updateSupported);
+
+    /**
+     * 检查用户是否有关联数据
+     *
+     * @param userId 用户ID
+     * @return 关联数据数量，0表示无关联数据
+     */
+    int checkUserRelations(Long userId);
 }

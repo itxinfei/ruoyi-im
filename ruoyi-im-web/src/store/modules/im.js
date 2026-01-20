@@ -54,53 +54,31 @@ export default {
   }),
 
   getters: {
-    // 当前会话的消息列表
-    currentMessages: (state) => {
-      if (!state.currentSession) {
-        return []
-      }
+    currentMessages(state) {
+      if (!state.currentSession) return []
       return state.messages[state.currentSession.id] || []
     },
 
-    // 当前会话的未读数
-    currentSessionUnread: (state) => {
-      if (!state.currentSession) {
-        return 0
-      }
+    currentSessionUnread(state) {
+      if (!state.currentSession) return 0
       const session = state.sessions.find(s => s.id === state.currentSession.id)
       return session?.unreadCount || 0
     },
 
-    // 按未读数排序的会话列表
-    sortedSessions: (state) => {
+    sortedSessions(state) {
       return [...state.sessions].sort((a, b) => {
-        // 先按置顶排序
         if (a.isPinned && !b.isPinned) return -1
         if (!a.isPinned && b.isPinned) return 1
-
-        // 再按时间排序
-        const timeA = new Date(a.lastMessageTime || 0).getTime()
-        const timeB = new Date(b.lastMessageTime || 0).getTime()
-        return timeB - timeA
+        return new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0)
       })
     },
 
-    // 获取联系人 Map（便于快速查找）
-    contactMap: (state) => {
-      const map = new Map()
-      state.contacts.forEach(contact => {
-        map.set(contact.id, contact)
-      })
-      return map
+    contactMap(state) {
+      return new Map(state.contacts.map(contact => [contact.id, contact]))
     },
 
-    // 获取群组 Map
-    groupMap: (state) => {
-      const map = new Map()
-      state.groups.forEach(group => {
-        map.set(group.id, group)
-      })
-      return map
+    groupMap(state) {
+      return new Map(state.groups.map(group => [group.id, group]))
     }
   },
 
@@ -200,7 +178,6 @@ export default {
   },
 
   actions: {
-    // 初始化：加载会话列表
     async loadSessions({ commit }) {
       commit('SET_LOADING', { key: 'sessions', value: true })
       try {
@@ -208,14 +185,11 @@ export default {
         if (res.code === 200 && res.data) {
           commit('SET_SESSIONS', res.data)
         }
-      } catch (error) {
-        console.error('加载会话列表失败:', error)
       } finally {
         commit('SET_LOADING', { key: 'sessions', value: false })
       }
     },
 
-    // 加载消息列表
     async loadMessages({ commit }, { sessionId, lastMessageId = null, pageSize = 20 }) {
       commit('SET_LOADING', { key: 'messages', value: true })
       try {
@@ -227,53 +201,37 @@ export default {
         if (res.code === 200 && res.data) {
           commit('SET_MESSAGES', { sessionId, messages: res.data })
         }
-      } catch (error) {
-        console.error('加载消息失败:', error)
       } finally {
         commit('SET_LOADING', { key: 'messages', value: false })
       }
     },
 
-    // 发送消息
-    async sendMessage({ commit, state }, { sessionId, messageType = 'TEXT', content, replyToMessageId = null }) {
-      try {
-        const res = await apiSendMessage({
-          conversationId: sessionId,
-          messageType,
-          content,
-          replyToMessageId
+    async sendMessage({ commit }, { sessionId, messageType = 'TEXT', content, replyToMessageId = null }) {
+      const res = await apiSendMessage({
+        conversationId: sessionId,
+        messageType,
+        content,
+        replyToMessageId
+      })
+
+      if (res.code === 200 && res.data) {
+        commit('ADD_MESSAGE', { sessionId, message: res.data })
+        commit('UPDATE_SESSION', {
+          id: sessionId,
+          lastMessage: content,
+          lastMessageTime: res.data.timestamp
         })
-
-        if (res.code === 200 && res.data) {
-          // 添加到消息列表
-          commit('ADD_MESSAGE', { sessionId, message: res.data })
-
-          // 更新会话的最后消息信息
-          commit('UPDATE_SESSION', {
-            id: sessionId,
-            lastMessage: content,
-            lastMessageTime: res.data.timestamp
-          })
-
-          return res.data
-        }
-      } catch (error) {
-        console.error('发送消息失败:', error)
-        throw error
+        return res.data
       }
+      throw new Error('发送消息失败')
     },
 
-    // 标记已读
     async markMessageAsRead({ commit }, { conversationId, messageId }) {
-      try {
-        await markAsRead({ conversationId, messageId })
-        commit('UPDATE_SESSION', {
-          id: conversationId,
-          unreadCount: 0
-        })
-      } catch (error) {
-        console.error('标记已读失败:', error)
-      }
+      await markAsRead({ conversationId, messageId })
+      commit('UPDATE_SESSION', {
+        id: conversationId,
+        unreadCount: 0
+      })
     },
 
     // 接收消息（WebSocket 推送）
@@ -292,7 +250,6 @@ export default {
       })
     },
 
-    // 加载联系人列表
     async loadContacts({ commit }) {
       commit('SET_LOADING', { key: 'contacts', value: true })
       try {
@@ -300,14 +257,11 @@ export default {
         if (res.code === 200 && res.data) {
           commit('SET_CONTACTS', res.data)
         }
-      } catch (error) {
-        console.error('加载联系人失败:', error)
       } finally {
         commit('SET_LOADING', { key: 'contacts', value: false })
       }
     },
 
-    // 加载群组列表
     async loadGroups({ commit }) {
       commit('SET_LOADING', { key: 'groups', value: true })
       try {
@@ -315,17 +269,13 @@ export default {
         if (res.code === 200 && res.data) {
           commit('SET_GROUPS', res.data)
         }
-      } catch (error) {
-        console.error('加载群组失败:', error)
       } finally {
         commit('SET_LOADING', { key: 'groups', value: false })
       }
     },
 
-    // 选择会话
     selectSession({ commit }, session) {
       commit('SET_CURRENT_SESSION', session)
-      // 清空该会话的未读数
       commit('UPDATE_SESSION', {
         id: session.id,
         unreadCount: 0

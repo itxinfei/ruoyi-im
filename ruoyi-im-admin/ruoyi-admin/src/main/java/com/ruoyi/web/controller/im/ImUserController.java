@@ -121,6 +121,10 @@ public class ImUserController extends BaseController {
     @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(@Valid ImUser imUser) {
+        // 检查用户名是否已存在
+        if (!imUserService.checkUsernameUnique(imUser.getUsername())) {
+            return AjaxResult.error("新增用户失败，用户名 '" + imUser.getUsername() + "' 已存在");
+        }
         return toAjax(imUserService.insertImUser(imUser));
     }
 
@@ -155,7 +159,19 @@ public class ImUserController extends BaseController {
     @PostMapping("/remove/{ids}")
     @ResponseBody
     public AjaxResult remove(@PathVariable String ids) {
-        return toAjax(imUserService.deleteImUserByIds(Convert.toLongArray(ids)));
+        Long[] userIds = Convert.toLongArray(ids);
+
+        // 检查用户是否有关联数据
+        for (Long userId : userIds) {
+            int relationCount = imUserService.checkUserRelations(userId);
+            if (relationCount > 0) {
+                ImUser user = imUserService.selectImUserById(userId);
+                String username = user != null ? user.getUsername() : String.valueOf(userId);
+                return AjaxResult.error("删除失败，用户 '" + username + "' 存在关联数据，请先处理关联数据");
+            }
+        }
+
+        return toAjax(imUserService.deleteImUserByIds(userIds));
     }
 
     /**
@@ -233,7 +249,7 @@ public class ImUserController extends BaseController {
     @Log(title = "修改用户状态", businessType = BusinessType.UPDATE)
     @PutMapping("/{id}/status")
     @ResponseBody
-    public AjaxResult changeStatus(@PathVariable("id") Long id, @RequestParam String status) {
+    public AjaxResult changeStatus(@PathVariable("id") Long id, @RequestParam Integer status) {
         return toAjax(imUserService.changeStatus(id, status));
     }
 
@@ -244,7 +260,7 @@ public class ImUserController extends BaseController {
     @Log(title = "批量修改用户状态", businessType = BusinessType.UPDATE)
     @PostMapping("/batchUpdateStatus")
     @ResponseBody
-    public AjaxResult batchUpdateStatus(@RequestParam String userIds, @RequestParam String status) {
+    public AjaxResult batchUpdateStatus(@RequestParam String userIds, @RequestParam Integer status) {
         if (userIds == null || userIds.trim().isEmpty()) {
             return AjaxResult.error("请选择要修改的用户");
         }

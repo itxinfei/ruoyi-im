@@ -42,14 +42,23 @@
     display: flex;
     align-items: center;
 }
-/* 不覆盖 columns-right，让 pull-right (float: right) 生效 */
+/* 右侧按钮组 - 使用 flex 布局，右对齐 */
 .fixed-table-toolbar .columns-right {
-    float: right;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+/* 按钮组样式优化 */
+.fixed-table-toolbar .columns-right .btn-group {
+    display: flex;
 }
 /* 移除按钮组之间的间距 */
 .fixed-table-toolbar .btn-group .btn {
     margin-left: 0;
     margin-right: 0;
+}
+.fixed-table-toolbar .btn-group .btn + .btn {
+    margin-left: -1px; /* 按钮组相连 */
 }
 .fixed-table-toolbar .btn-group > .btn:first-child {
     border-top-left-radius: 3px;
@@ -58,6 +67,10 @@
 .fixed-table-toolbar .btn-group > .btn:last-child {
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
+}
+/* 独立的按钮之间保持间距 */
+.fixed-table-toolbar .columns-right > .btn:not(.btn-group) + .btn:not(.btn-group) {
+    margin-left: 5px;
 }
 
 /* ========== 搜索状态提示 ========== */

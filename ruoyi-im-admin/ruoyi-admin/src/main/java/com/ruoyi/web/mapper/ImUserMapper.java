@@ -63,7 +63,7 @@ public interface ImUserMapper {
     /**
      * 修改用户状态
      */
-    int changeStatus(@Param("id") Long id, @Param("status") String status);
+    int changeStatus(@Param("id") Long id, @Param("status") Integer status);
 
     /**
      * 获取在线用户数
@@ -99,4 +99,11 @@ public interface ImUserMapper {
      * 统计禁用用户数
      */
     int countDisabledUsers();
+
+    /**
+     * 检查用户是否有关联数据
+     * @param userId 用户ID
+     * @return 关联数据数量
+     */
+    int checkUserRelations(Long userId);
 }

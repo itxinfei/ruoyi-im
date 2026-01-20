@@ -270,19 +270,30 @@
                 {
                     title: '操作',
                     align: 'center',
-                    width: '200',
+                    width: '150',
                     formatter: function(value, row, index) {
-                        var actions = [];
-                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
+                        var menuItems = [];
+
+                        // 根据状态添加不同的菜单项
                         if (row.status === 'PENDING') {
-                            actions.push('<a class="btn btn-info btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="startOne(' + row.id + ')"><i class="fa fa-play"></i>开始</a> ');
+                            menuItems.push({ text: '开始', icon: 'fa-play', action: 'startOne(' + row.id + ')', permissionClass: editFlag });
                         }
                         if (row.status === 'PENDING' || row.status === 'IN_PROGRESS') {
-                            actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="completeOne(' + row.id + ')"><i class="fa fa-check"></i>完成</a> ');
-                            actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="cancelOne(' + row.id + ')"><i class="fa fa-times"></i>取消</a> ');
+                            menuItems.push({ text: '完成', icon: 'fa-check', action: 'completeOne(' + row.id + ')', permissionClass: editFlag });
+                            menuItems.push({ text: '取消', icon: 'fa-times', action: 'cancelOne(' + row.id + ')', permissionClass: editFlag });
+                            menuItems.push({ divider: true });
                         }
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
-                        return actions.join('');
+                        menuItems.push({ text: '删除', icon: 'fa-remove', action: '$.operate.remove(\'' + row.id + '\')', permissionClass: removeFlag });
+
+                        var mainAction = {
+                            text: '编辑',
+                            icon: 'fa-edit',
+                            action: '$.operate.edit(' + row.id + ')',
+                            permissionClass: editFlag,
+                            btnClass: 'btn-success'
+                        };
+
+                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
                     }
                 }],
                 responseHandler: function(res) {

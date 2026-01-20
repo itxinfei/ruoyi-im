@@ -4,40 +4,156 @@
     <meta charset="utf-8">
     <title>新增会话</title>
     <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
     <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+    <style>
+        .wrapper { padding: 25px; max-width: 550px; margin: 0 auto; }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px 35px;
+            border-top: 3px solid #f59e0b;
+        }
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .page-title i { color: #f59e0b; margin-right: 10px; font-size: 20px; }
+        .form-horizontal .form-group { margin-bottom: 20px; }
+        .control-label {
+            font-weight: 500;
+            font-size: 14px;
+            color: #555;
+            padding-top: 12px;
+        }
+        .control-label.is-required::after {
+            content: " *";
+            color: #f56c6c;
+            font-size: 16px;
+            margin-left: 4px;
+        }
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+            outline: none;
+        }
+        select.form-control {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f59e0b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            padding-right: 40px;
+            appearance: none;
+        }
+        .form-btn-group {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+        .btn {
+            padding: 10px 30px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border: none;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+        }
+        .btn-default {
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #666;
+        }
+        .btn-default:hover {
+            background: #f8f9fa;
+            color: #333;
+            border-color: #ccc;
+        }
+        .input-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        .input-hint i { margin-right: 3px; }
+    </style>
 </head>
 <body class="white-bg">
-    <form class="form-horizontal m" id="form-conversation-add">
-        <div class="form-group">
-            <label class="col-sm-3 control-label is-required">会话类型：</label>
-            <div class="col-sm-8">
-                <select name="type" class="form-control" required>
-                    <option value="">请选择会话类型</option>
-                    <option value="PRIVATE">私聊</option>
-                    <option value="GROUP">群聊</option>
-                </select>
+    <div class="wrapper">
+        <div class="card">
+            <div class="page-title">
+                <i class="fa fa-comments"></i> 新增会话
             </div>
+
+            <form class="form-horizontal m" id="form-conversation-add">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label is-required">会话类型</label>
+                    <div class="col-sm-9">
+                        <select name="type" class="form-control" required>
+                            <option value="">请选择会话类型</option>
+                            <option value="PRIVATE">私聊</option>
+                            <option value="GROUP">群聊</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label is-required">目标ID</label>
+                    <div class="col-sm-9">
+                        <input name="targetId" placeholder="私聊为对方用户ID，群聊为群组ID" class="form-control" type="number" required>
+                        <div class="input-hint"><i class="fa fa-info-circle"></i> 私聊会话对方用户ID，群聊会话填群组ID</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">会话名称</label>
+                    <div class="col-sm-9">
+                        <input name="name" placeholder="请输入会话名称（可选）" class="form-control" type="text">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">会话头像</label>
+                    <div class="col-sm-9">
+                        <input name="avatar" placeholder="请输入会话头像URL" class="form-control" type="text">
+                    </div>
+                </div>
+
+                <div class="form-btn-group">
+                    <button type="button" class="btn btn-primary" onclick="submitHandler()">
+                        <i class="fa fa-save"></i> 立即创建
+                    </button>
+                    <button type="button" class="btn btn-default" onclick="$.modal.close()">
+                        <i class="fa fa-reply"></i> 取消
+                    </button>
+                </div>
+            </form>
         </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label is-required">目标ID：</label>
-            <div class="col-sm-8">
-                <input name="targetId" placeholder="私聊为对方用户ID，群聊为群组ID" class="form-control" type="number" required>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label">会话名称：</label>
-            <div class="col-sm-8">
-                <input name="name" placeholder="请输入会话名称" class="form-control" type="text">
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label">会话头像：</label>
-            <div class="col-sm-8">
-                <input name="avatar" placeholder="请输入会话头像URL" class="form-control" type="text">
-            </div>
-        </div>
-    </form>
-    <div th:include="include :: footer"></div>
+    </div>
+
+    <th:block th:include="include :: footer"></th:block>
     <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
     <script th:inline="javascript">
         var prefix = ctx + "im/conversation";

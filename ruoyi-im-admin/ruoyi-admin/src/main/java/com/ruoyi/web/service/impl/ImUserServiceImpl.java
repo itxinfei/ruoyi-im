@@ -110,7 +110,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
-    public int changeStatus(Long id, String status) {
+    public int changeStatus(Long id, Integer status) {
         return userMapper.changeStatus(id, status);
     }
 
@@ -142,7 +142,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
-    public int batchUpdateStatus(Long[] userIds, String status) {
+    public int batchUpdateStatus(Long[] userIds, Integer status) {
         if (userIds == null || userIds.length == 0) {
             return 0;
         }
@@ -321,5 +321,10 @@ public class ImUserServiceImpl implements ImUserService {
         }
 
         return null;
+    }
+
+    @Override
+    public int checkUserRelations(Long userId) {
+        return userMapper.checkUserRelations(userId);
     }
 }

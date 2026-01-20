@@ -276,6 +276,22 @@
         });
 
         /**
+         * 覆盖默认的添加方法，使用合适的弹窗大小
+         */
+        $.operate.add = function(id) {
+            table.set();
+            $.modal.open("添加" + table.options.modalName, $.operate.addUrl(id), 750, 650);
+        };
+
+        /**
+         * 覆盖默认的编辑方法，使用合适的弹窗大小
+         */
+        $.operate.edit = function(id) {
+            table.set();
+            $.modal.open("修改" + table.options.modalName, $.operate.editUrl(id), 750, 650);
+        };
+
+        /**
          * 加载统计数据
          */
         function loadStatistics() {

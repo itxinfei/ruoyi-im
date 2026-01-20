@@ -1,37 +1,26 @@
 package com.ruoyi.im.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.common.Result;
-import com.ruoyi.im.domain.ImConversationMember;
-import com.ruoyi.im.domain.ImMessage;
-import com.ruoyi.im.domain.ImMessageMention;
 import com.ruoyi.im.dto.message.ImMessageForwardRequest;
-import com.ruoyi.im.dto.message.ImMessageRecallRequest;
 import com.ruoyi.im.dto.message.ImMessageReplyRequest;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.dto.message.ImMessageSearchRequest;
 import com.ruoyi.im.dto.message.MessageEditRequest;
 import com.ruoyi.im.dto.reaction.ImMessageReactionAddRequest;
-import com.ruoyi.im.mapper.ImConversationMemberMapper;
-import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImMessageReactionService;
 import com.ruoyi.im.service.ImMessageService;
-import com.ruoyi.im.utils.MessageEncryptionUtil;
+import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import com.ruoyi.im.vo.reaction.ImMessageReactionVO;
-import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,235 +36,68 @@ import java.util.Map;
 public class ImMessageController {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageController.class);
+    private static final Long DEFAULT_USER_ID = 1L;
 
-    @Autowired
-    private ImMessageService imMessageService;
+    private final ImMessageService imMessageService;
+    private final ImMessageReactionService reactionService;
+    private final ImMessageMentionService mentionService;
+    private final ImWebSocketBroadcastService broadcastService;
 
-    @Autowired
-    private ImMessageReactionService reactionService;
+    public ImMessageController(
+            ImMessageService imMessageService,
+            ImMessageReactionService reactionService,
+            ImMessageMentionService mentionService,
+            ImWebSocketBroadcastService broadcastService) {
+        this.imMessageService = imMessageService;
+        this.reactionService = reactionService;
+        this.mentionService = mentionService;
+        this.broadcastService = broadcastService;
+    }
 
-    @Autowired
-    private ImMessageMentionService mentionService;
-
-    @Autowired
-    private ImMessageMapper imMessageMapper;
-
-    @Autowired
-    private ImConversationMemberMapper conversationMemberMapper;
-
-    @Autowired
-    private MessageEncryptionUtil encryptionUtil;
-
-    /**
-     * 发送消息
-     * 发送文本、图片、文件等类型的消息到指定会话
-     *
-     * @param request 消息发送请求参数，包含会话ID、消息类型、消息内容等
-     * @param userId 当前登录用户ID，从请求头中获取
-     * @return 发送结果，包含新消息ID
-     * @apiNote 使用 @Valid 注解进行参数校验，消息发送后会通过WebSocket推送给接收方
-     * @throws BusinessException 当会话不存在或发送失败时抛出业务异常
-     */
-    @Operation(summary = "发送消息", description = "发送文本、图片、文件等类型的消息到指定会话")
     @PostMapping("/send")
     public Result<Long> send(@Valid @RequestBody ImMessageSendRequest request,
                             @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
-
-        // 注意：REST API只负责保存消息，不进行WebSocket广播
-        // 消息广播统一由WebSocket端点处理，避免重复发送
-        // 前端应该通过WebSocket发送消息以获得实时体验
+        userId = getUserIdOrDefault(userId);
         Long messageId = imMessageService.sendMessage(request, userId);
 
-        // 通知WebSocket端点进行广播（仅用于REST API调用场景）
         if (messageId != null) {
-            broadcastMessageToConversation(request.getConversationId(), messageId, userId);
+            broadcastService.broadcastMessageToConversation(request.getConversationId(), messageId, userId);
         }
 
         return Result.success("发送成功", messageId);
     }
 
-    /**
-     * 广播消息给会话中的所有在线用户
-     *
-     * @param conversationId 会话ID
-     * @param messageId 消息ID
-     * @param senderId 发送者ID（不发送给自己）
-     */
-    private void broadcastMessageToConversation(Long conversationId, Long messageId, Long senderId) {
-        try {
-            log.info("=== 开始广播消息 === conversationId={}, messageId={}, senderId={}",
-                conversationId, messageId, senderId);
-
-            // 获取会话中的所有成员
-            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
-            log.info("查询到会话成员: conversationId={}, memberCount={}",
-                conversationId, members != null ? members.size() : 0);
-
-            if (members == null || members.isEmpty()) {
-                log.warn("会话中没有成员: conversationId={}", conversationId);
-                return;
-            }
-
-            // 获取完整消息对象
-            ImMessage message = imMessageMapper.selectImMessageById(messageId);
-            if (message == null) {
-                log.warn("广播消息失败：消息不存在, messageId={}", messageId);
-                return;
-            }
-
-            // 构建符合API规范的WebSocket消息格式
-            // 规范: 使用conversationId，同时兼容sessionId（向后兼容）
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> wsMessage = new HashMap<>();
-
-            // 规范要求: type使用消息类型 (text, image, file等)
-            wsMessage.put("type", message.getMessageType() != null ?
-                message.getMessageType().toLowerCase() : "text");
-            // 规范要求: 使用conversationId，同时保留sessionId做兼容
-            wsMessage.put("conversationId", message.getConversationId());
-            wsMessage.put("sessionId", message.getConversationId()); // 向后兼容
-            wsMessage.put("id", message.getId());
-            // 解密消息内容后再发送给前端
-            String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
-            wsMessage.put("content", decryptedContent);
-            wsMessage.put("senderId", message.getSenderId());
-            wsMessage.put("timestamp", message.getCreateTime() != null ?
-                message.getCreateTime().toString() : String.valueOf(System.currentTimeMillis()));
-
-            // 可选字段
-            if (message.getFileUrl() != null) {
-                Map<String, Object> contentData = new HashMap<>();
-                contentData.put("url", message.getFileUrl());
-                contentData.put("name", message.getFileName());
-                contentData.put("size", message.getFileSize());
-                // 如果content为空或非JSON，使用fileUrl作为content
-                if (message.getContent() == null || message.getContent().isEmpty()) {
-                    wsMessage.put("content", message.getFileUrl());
-                }
-            }
-
-            // 回复消息ID
-            if (message.getReplyToMessageId() != null) {
-                wsMessage.put("replyTo", message.getReplyToMessageId());
-            }
-
-            // 撤回状态
-            if (message.getIsRevoked() != null && message.getIsRevoked() == 1) {
-                wsMessage.put("revoked", true);
-                wsMessage.put("content", "[消息已撤回]");
-            }
-
-            String messageJson = mapper.writeValueAsString(wsMessage);
-
-            // 从 WebSocket 端点获取在线用户集合
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-            log.info("当前在线用户数: {}, 在线用户IDs: {}", onlineUsers.size(), onlineUsers.keySet());
-
-            // 向会话中的每个在线用户发送消息
-            for (ImConversationMember member : members) {
-                Long targetUserId = member.getUserId();
-                log.info("检查成员: targetUserId={}, senderId={}", targetUserId, senderId);
-
-                // 不发送给发送者自己
-                if (targetUserId.equals(senderId)) {
-                    log.info("跳过发送者自己: userId={}", targetUserId);
-                    continue;
-                }
-
-                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-                log.info("目标用户在线状态: userId={}, isOnline={}, sessionOpen={}",
-                    targetUserId, targetSession != null, targetSession != null && targetSession.isOpen());
-
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                        log.info("消息已通过 REST API WebSocket 广播给用户: userId={}, messageId={}", targetUserId, messageId);
-                    } catch (Exception e) {
-                        log.error("发送消息给用户失败: userId={}", targetUserId, e);
-                    }
-                } else {
-                    log.warn("用户不在线或会话已关闭: userId={}", targetUserId);
-                }
-            }
-
-            log.info("消息已通过 REST API 广播到会话: conversationId={}, messageId={}, memberCount={}",
-                conversationId, messageId, members.size());
-
-        } catch (Exception e) {
-            log.error("广播消息异常: conversationId={}, messageId={}", conversationId, messageId, e);
-        }
+    private Long getUserIdOrDefault(Long userId) {
+        return userId != null ? userId : DEFAULT_USER_ID;
     }
 
-    /**
-     * 获取会话消息列表
-     * 分页查询指定会话的历史消息，支持从指定消息ID开始查询
-     *
-     * @param conversationId 会话ID
-     * @param lastId 最后一条消息ID，用于分页查询（可选）
-     * @param limit 每页消息数量，默认20条
-     * @param userId 当前登录用户ID，从请求头中获取
-     * @return 消息列表，按发送时间倒序排列
-     * @apiNote 返回的消息会标记是否为当前用户发送的消息（isSelf字段）
-     * @throws BusinessException 当会话不存在时抛出业务异常
-     */
-    @Operation(summary = "获取会话消息列表", description = "分页查询指定会话的历史消息")
+
+
     @GetMapping("/list/{conversationId}")
     public Result<List<ImMessageVO>> getMessages(
             @PathVariable Long conversationId,
             @RequestParam(required = false) Long lastId,
             @RequestParam(required = false, defaultValue = "20") Integer limit,
             @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+        userId = getUserIdOrDefault(userId);
         List<ImMessageVO> list = imMessageService.getMessages(conversationId, userId, lastId, limit);
         return Result.success(list);
     }
 
-    /**
-     * 撤回消息
-     * 撤回已发送的消息，撤回后消息内容将显示为"消息已撤回"
-     *
-     * @param messageId 消息ID
-     * @param userId 当前登录用户ID，从请求头中获取
-     * @return 撤回结果
-     * @apiNote 消息撤回有时间限制（如2分钟），超时后无法撤回；撤回后会通过WebSocket通知接收方
-     * @throws BusinessException 当消息不存在、无权限撤回或超时时抛出业务异常
-     */
-    @Operation(summary = "撤回消息", description = "撤回已发送的消息，有时间限制")
     @DeleteMapping("/{messageId}/recall")
     public Result<Void> recall(@PathVariable Long messageId,
                                @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+        userId = getUserIdOrDefault(userId);
         imMessageService.recallMessage(messageId, userId);
         return Result.success("消息已撤回");
     }
 
-    /**
-     * 编辑消息
-     * 编辑已发送的文本消息
-     *
-     * @param messageId 消息ID
-     * @param request 编辑请求参数，包含新内容
-     * @param userId 当前登录用户ID
-     * @return 编辑结果
-     * @apiNote 消息编辑有时间限制（15分钟），只能编辑文本消息；编辑后会通过WebSocket通知接收方
-     * @throws BusinessException 当消息不存在、无权限编辑、超时或消息类型不支持时抛出业务异常
-     */
-    @Operation(summary = "编辑消息", description = "编辑已发送的文本消息")
     @PutMapping("/{messageId}/edit")
     public Result<Void> edit(
             @PathVariable Long messageId,
             @RequestBody MessageEditRequest request,
             @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+        userId = getUserIdOrDefault(userId);
         imMessageService.editMessage(messageId, request.getNewContent(), userId);
         return Result.success("消息已编辑");
     }
@@ -605,72 +427,7 @@ public class ImMessageController {
         return Result.success(result);
     }
 
-    /**
-     * 广播消息反应更新给会话中的其他用户
-     *
-     * @param conversationId 会话ID
-     * @param messageId 消息ID
-     * @param userId 操作用户ID
-     * @param emoji 表情符号
-     * @param action 操作类型 (add/remove)
-     */
-    private void broadcastReactionUpdate(Long conversationId, Long messageId, Long userId, String emoji, String action) {
-        try {
-            log.info("=== 开始广播消息反应更新 === conversationId={}, messageId={}, userId={}, emoji={}, action={}",
-                    conversationId, messageId, userId, emoji, action);
 
-            // 获取会话中的所有成员
-            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) {
-                log.warn("会话中没有成员: conversationId={}", conversationId);
-                return;
-            }
-
-            // 构建WebSocket消息
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> reactionMessage = new HashMap<>();
-            reactionMessage.put("type", "reaction");
-            reactionMessage.put("action", action);
-            reactionMessage.put("conversationId", conversationId);
-            reactionMessage.put("messageId", messageId);
-            reactionMessage.put("userId", userId);
-            if (emoji != null) {
-                reactionMessage.put("emoji", emoji);
-            }
-            reactionMessage.put("timestamp", System.currentTimeMillis());
-
-            String messageJson = mapper.writeValueAsString(reactionMessage);
-
-            // 从 WebSocket 端点获取在线用户集合
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-
-            // 向会话中的每个在线用户发送消息（不包括操作者自己）
-            for (ImConversationMember member : members) {
-                Long targetUserId = member.getUserId();
-
-                // 不发送给操作者自己
-                if (targetUserId.equals(userId)) {
-                    continue;
-                }
-
-                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                        log.info("反应更新已推送给用户: userId={}, messageId={}, action={}", targetUserId, messageId, action);
-                    } catch (Exception e) {
-                        log.error("发送反应更新给用户失败: userId={}", targetUserId, e);
-                    }
-                }
-            }
-
-            log.info("反应更新已广播到会话: conversationId={}, messageId={}, action={}, memberCount={}",
-                    conversationId, messageId, action, members.size());
-
-        } catch (Exception e) {
-            log.error("广播反应更新异常: conversationId={}, messageId={}", conversationId, messageId, e);
-        }
-    }
 
     // ==================== 消息已读回执功能 ====================
 
