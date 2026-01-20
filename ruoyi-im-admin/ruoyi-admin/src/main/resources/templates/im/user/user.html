@@ -2,13 +2,177 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('IM用户管理')" />
+    <style type="text/css">
+        /* ========== 统计卡片样式 ========== */
+        .stat-box {
+            position: relative;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            overflow: hidden;
+            color: #fff;
+        }
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .stat-box:hover::before { opacity: 1; }
+        .stat-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        .stat-box .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+        .stat-box .stat-label {
+            font-size: 14px;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+        .stat-box .stat-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 48px;
+            opacity: 0.2;
+            transition: all 0.3s;
+            z-index: 1;
+        }
+        .stat-box:hover .stat-icon {
+            transform: translateY(-50%) scale(1.1) rotate(5deg);
+        }
+        .stat-box-primary { background: linear-gradient(135deg, #1ab394 0%, #18a689 100%); }
+        .stat-box-success { background: linear-gradient(135deg, #1c84c6 0%, #1a7bb9 100%); }
+        .stat-box-danger { background: linear-gradient(135deg, #ed5565 0%, #ec4d5d 100%); }
+        .stat-box-warning { background: linear-gradient(135deg, #f8ac59 0%, #f7a54d 100%); }
+
+        /* ========== 搜索区域样式 ========== */
+        .search-collapse {
+            border-radius: 8px;
+            border: 1px solid #e7eaec;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        .search-collapse:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .search-collapse input[type="text"],
+        .search-collapse select {
+            border-radius: 4px;
+            border: 1px solid #e7eaec;
+            transition: all 0.3s;
+            min-width: 180px;
+        }
+        .search-collapse input[type="text"]:focus,
+        .search-collapse select:focus {
+            border-color: #1ab394;
+            box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
+        }
+        .search-collapse .select-list ul li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .search-collapse .select-list ul li label,
+        .search-collapse .select-list ul li .input-label {
+            min-width: 80px;
+            text-align: right;
+            font-weight: 500;
+            color: #676a6c;
+        }
+
+        /* ========== 批量操作按钮区域 ========== */
+        #toolbar {
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e7eaec;
+            padding: 12px;
+        }
+
+        /* ========== 选中信息样式 ========== */
+        .selected-info {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #e8f4fd;
+            border: 1px solid #b3d7f7;
+            border-radius: 4px;
+            color: #1c84c6;
+            font-size: 13px;
+            margin-left: auto;
+        }
+        .selected-info strong {
+            color: #1c84c6;
+            font-size: 15px;
+            margin: 0 2px;
+        }
+
+        /* ========== 搜索状态提示 ========== */
+        .search-status {
+            padding: 8px 12px;
+            background: #f0f9ff;
+            border: 1px solid #b3d7f7;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        /* ========== 表格区域 ========== */
+        .select-table.table-striped {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e7eaec;
+        }
+        .table > thead > tr > th {
+            background: linear-gradient(to bottom, #f8f9fa 0%, #f1f3f5 100%);
+            color: #495057;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            padding: 14px 8px;
+            font-size: 13px;
+        }
+        .table > tbody > tr > td {
+            padding: 12px 8px;
+            vertical-align: middle;
+        }
+
+        /* ========== 下拉菜单样式 ========== */
+        .dropdown-menu > li > a {
+            padding: 8px 20px;
+            font-size: 13px;
+        }
+        .dropdown-menu > li > a i {
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+        }
+        .dropdown-menu .divider { margin: 5px 0; }
+        .dropdown-menu > li > a.text-danger { color: #ed5565; }
+        .dropdown-menu > li > a.text-danger:hover {
+            background-color: #ed5565;
+            color: #fff;
+        }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div">
         <div class="row" style="padding-top: 6px;">
-            <!-- 顶部：统计卡片区域 -->
+            <!-- 统计卡片区域 -->
             <div class="col-sm-12">
-                <div class="row" >
+                <div class="row">
                     <div class="col-sm-3">
                         <div class="stat-box stat-box-primary">
                             <div class="stat-number" id="totalCount">0</div>
@@ -40,7 +204,7 @@
                 </div>
             </div>
 
-            <!-- 中间：搜索区域 -->
+            <!-- 搜索区域 -->
             <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
                 <form id="user-form">
                     <div class="select-list">
@@ -88,16 +252,10 @@
                 </form>
             </div>
 
-            <!-- 底部：数据展示区域 -->
+            <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
                 <!-- 批量操作按钮 -->
                 <div class="btn-group-sm" id="toolbar">
-                    <!-- 选中状态显示 -->
-                    <span id="selectedInfo" class="selected-info" style="display:none; margin-right: 15px;">
-                        已选 <strong id="selectedCount">0</strong> 项
-                        <a href="javascript:void(0)" onclick="ImCommon.clearSelection('#bootstrap-table'); ImCommon.updateSelectedInfo('#bootstrap-table');" style="margin-left: 10px;">清空</a>
-                    </span>
-
                     <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:user:add">
                         <i class="fa fa-plus"></i> 新增
                     </a>
@@ -114,231 +272,25 @@
                         <i class="fa fa-remove"></i> 删除
                     </a>
                     <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:user:export">
-                        <i class="fa fa-download"></i> 导出全部
+                        <i class="fa fa-download"></i> 导出
                     </a>
+                    <!-- 选中状态显示（放在最后） -->
+                    <span id="selectedInfo" class="selected-info" style="display:none;">
+                        已选 <strong id="selectedCount">0</strong> 项
+                        <a href="javascript:void(0)" onclick="ImCommon.clearSelection('#bootstrap-table'); ImCommon.updateSelectedInfo('#bootstrap-table');" style="margin-left: 10px;">清空</a>
+                    </span>
                 </div>
 
                 <!-- 搜索状态提示 -->
-                <div class="search-status" id="searchStatus" style="display:none; margin-top:10px; padding:8px 12px; background:#f0f9ff; border:1px solid #b3d7f7; border-radius:4px; font-size:13px;">
+                <div class="search-status" id="searchStatus" style="display:none;">
                     <i class="fa fa-filter" style="color:#1c84c6;"></i>
                     搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
                     <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
                 </div>
+
                 <!-- 数据表格 -->
                 <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
-
-            <!-- 统计卡片样式 -->
-            <style type="text/css">
-                /* 统计卡片基础样式 */
-                .stat-box {
-                    position: relative;
-                    padding: 20px;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    cursor: pointer;
-                    overflow: hidden;
-                }
-                .stat-box::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-                    opacity: 0;
-                    transition: opacity 0.3s;
-                }
-                .stat-box:hover::before {
-                    opacity: 1;
-                }
-                .stat-box:active {
-                    transform: translateY(-1px) scale(0.98);
-                    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-                }
-
-                /* 统计卡片 - 主色（绿色渐变） */
-                .stat-box-primary {
-                    background: linear-gradient(135deg, #1ab394 0%, #18a689 100%);
-                    color: #fff;
-                }
-                .stat-box-primary .stat-number {
-                    color: #fff;
-                }
-                .stat-box-primary .stat-label {
-                    color: rgba(255,255,255,0.85);
-                }
-                .stat-box-primary .stat-icon {
-                    color: rgba(255,255,255,0.2);
-                }
-
-                /* 统计卡片 - 成功色（蓝色渐变） */
-                .stat-box-success {
-                    background: linear-gradient(135deg, #1c84c6 0%, #1a7bb9 100%);
-                    color: #fff;
-                }
-                .stat-box-success .stat-number {
-                    color: #fff;
-                }
-                .stat-box-success .stat-label {
-                    color: rgba(255,255,255,0.85);
-                }
-                .stat-box-success .stat-icon {
-                    color: rgba(255,255,255,0.2);
-                }
-
-                /* 统计卡片 - 危险色（红色渐变） */
-                .stat-box-danger {
-                    background: linear-gradient(135deg, #ed5565 0%, #ec4d5d 100%);
-                    color: #fff;
-                }
-                .stat-box-danger .stat-number {
-                    color: #fff;
-                }
-                .stat-box-danger .stat-label {
-                    color: rgba(255,255,255,0.85);
-                }
-                .stat-box-danger .stat-icon {
-                    color: rgba(255,255,255,0.2);
-                }
-
-                /* 统计卡片 - 警告色（橙色渐变） */
-                .stat-box-warning {
-                    background: linear-gradient(135deg, #f8ac59 0%, #f7a54d 100%);
-                    color: #fff;
-                }
-                .stat-box-warning .stat-number {
-                    color: #fff;
-                }
-                .stat-box-warning .stat-label {
-                    color: rgba(255,255,255,0.85);
-                }
-                .stat-box-warning .stat-icon {
-                    color: rgba(255,255,255,0.2);
-                }
-
-                /* 悬停效果 */
-                .stat-box:hover {
-                    transform: translateY(-4px);
-                    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-                }
-                .stat-box-primary:hover {
-                    box-shadow: 0 8px 16px rgba(26, 179, 148, 0.3);
-                }
-                .stat-box-success:hover {
-                    box-shadow: 0 8px 16px rgba(28, 132, 198, 0.3);
-                }
-                .stat-box-danger:hover {
-                    box-shadow: 0 8px 16px rgba(237, 85, 101, 0.3);
-                }
-                .stat-box-warning:hover {
-                    box-shadow: 0 8px 16px rgba(248, 172, 89, 0.3);
-                }
-
-                /* 数字样式 */
-                .stat-box .stat-number {
-                    font-size: 32px;
-                    font-weight: 700;
-                    margin-bottom: 8px;
-                    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    position: relative;
-                    z-index: 1;
-                }
-
-                /* 标签样式 */
-                .stat-box .stat-label {
-                    font-size: 14px;
-                    font-weight: 500;
-                    margin-bottom: 0;
-                    position: relative;
-                    z-index: 1;
-                }
-
-                /* 图标样式 */
-                .stat-box .stat-icon {
-                    position: absolute;
-                    right: 20px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    font-size: 48px;
-                    transition: all 0.3s;
-                    z-index: 1;
-                }
-                .stat-box:hover .stat-icon {
-                    transform: translateY(-50%) scale(1.1) rotate(5deg);
-                }
-
-                /* 搜索区域优化 */
-                .search-collapse {
-                    border-radius: 8px;
-                    border: 1px solid #e7eaec;
-                    background: #fff;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                    transition: all 0.3s;
-                }
-                .search-collapse:hover {
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-                }
-
-                /* 搜索输入框优化 */
-                .search-collapse input[type="text"],
-                .search-collapse select {
-                    border-radius: 4px;
-                    border: 1px solid #e7eaec;
-                    transition: all 0.3s;
-                    min-width: 180px;
-                }
-                .search-collapse input[type="text"]:focus,
-                .search-collapse select:focus {
-                    border-color: #1ab394;
-                    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1);
-                }
-
-                /* 搜索标签优化 */
-                .search-collapse .select-list ul li {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-                .search-collapse .select-list ul li label,
-                .search-collapse .select-list ul li .input-label {
-                    min-width: 80px;
-                    text-align: right;
-                    font-weight: 500;
-                    color: #676a6c;
-                }
-
-                /* 批量操作按钮区域优化 */
-                #toolbar {
-                    /* padding: 12px; */
-                    background: #f9f9f9;
-                    border-radius: 8px;
-                    border: 1px solid #e7eaec;
-                }
-
-                /* 表格区域优化 */
-                .select-table.table-striped {
-                    border-radius: 8px;
-                    overflow: hidden;
-                    border: 1px solid #e7eaec;
-                }
-
-                .table > thead > tr > th {
-                    background: linear-gradient(to bottom, #f8f9fa 0%, #f1f3f5 100%);
-                    color: #495057;
-                    font-weight: 600;
-                    border-bottom: 2px solid #dee2e6;
-                    padding: 14px 8px;
-                    font-size: 13px;
-                }
-
-                .table > tbody > tr > td {
-                    padding: 12px 8px;
-                    vertical-align: middle;
-                }
-            </style>
         </div>
     </div>
 
@@ -352,7 +304,6 @@
         $(function() {
             loadStatistics();
 
-            var paginationConfig = ImCommon.getPaginationConfig(20, [10, 20, 50, 100]);
             var options = {
                 url: prefix + "/list",
                 toolbar: "toolbar",
@@ -362,10 +313,11 @@
                 removeUrl: prefix + "/remove/{id}",
                 exportUrl: prefix + "/export",
                 modalName: "用户",
-                pagination: paginationConfig.pagination,
-                pageSize: paginationConfig.pageSize,
-                pageList: paginationConfig.pageList,
-                sidePagination: paginationConfig.sidePagination,
+                // 分页配置
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
                 // 固定列配置
                 fixedColumns: true,
                 fixedNumber: 1,
@@ -379,76 +331,59 @@
                 cookieExpire: '30d',
                 columns: [{
                     checkbox: true
-                },
-                {
+                }, {
                     field: 'id',
                     title: 'ID',
                     visible: false
-                },
-                {
+                }, {
                     field: 'avatar',
                     title: '头像',
                     width: '60',
                     align: 'center',
                     formatter: function(value, row, index) {
-                        if (value) {
-                            return '<img src="' + value + '" class="user-avatar" onerror="this.src=\'/img/profile.jpg\'">';
-                        }
-                        return '<i class="fa fa-user-circle fa-2x text-gray"></i>';
+                        return ImCommon.formatCircleAvatar(value, 32);
                     }
-                },
-                {
+                }, {
                     field: 'username',
                     title: '用户名称',
                     sortable: true
-                },
-                {
+                }, {
                     field: 'nickname',
                     title: '用户昵称'
-                },
-                {
+                }, {
                     field: 'mobile',
                     title: '手机号码'
-                },
-                {
+                }, {
                     field: 'email',
                     title: '邮箱',
                     formatter: function(value, row, index) {
                         return value || '-';
                     }
-                },
-                {
+                }, {
                     field: 'gender',
                     title: '性别',
                     align: 'center',
                     width: '60',
                     formatter: function(value, row, index) {
-                        if (value == 1) return '<span class="badge badge-primary">男</span>';
-                        if (value == 2) return '<span class="badge badge-danger">女</span>';
-                        return '<span class="badge badge-default">未知</span>';
+                        return ImCommon.formatGender(value);
                     }
-                },
-                {
+                }, {
                     field: 'status',
                     title: '状态',
                     align: 'center',
                     width: '70',
                     formatter: function(value, row, index) {
-                        if (value == 1) return '<span class="badge badge-success">正常</span>';
-                        return '<span class="badge badge-danger">停用</span>';
+                        return ImCommon.formatUserStatus(value);
                     }
-                },
-                {
+                }, {
                     field: 'isOnline',
                     title: '在线',
                     align: 'center',
                     width: '60',
                     formatter: function(value, row, index) {
-                        if (value == 1) return '<span class="badge badge-success">在线</span>';
-                        return '<span class="badge badge-default">离线</span>';
+                        return ImCommon.formatOnlineStatus(value);
                     }
-                },
-                {
+                }, {
                     field: 'lastOnlineTime',
                     title: '最后在线',
                     width: '200',
@@ -456,8 +391,7 @@
                     formatter: function(value, row, index) {
                         return ImCommon.formatDateTimeWithRelative(value);
                     }
-                },
-                {
+                }, {
                     field: 'createTime',
                     title: '创建时间',
                     width: '200',
@@ -465,8 +399,7 @@
                     formatter: function(value, row, index) {
                         return ImCommon.formatDateTimeWithRelative(value);
                     }
-                },
-                {
+                }, {
                     title: '操作',
                     align: 'center',
                     width: '150',
@@ -520,11 +453,6 @@
                 },
                 onUncheckAll: function(rows, $element) {
                     ImCommon.updateSelectedInfo('#bootstrap-table');
-                },
-                // 列配置保存
-                onColumnSearch: function(search) {
-                    // 搜索时显示搜索条件
-                    ImCommon.showSearchConditions('#user-form', '#searchStatus', 'clearSearch()');
                 }
             };
             $.table.init(options);
@@ -547,6 +475,9 @@
             );
         }
 
+        /**
+         * 重置密码
+         */
         function resetPwd() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
@@ -557,15 +488,12 @@
                 $.modal.alertWarning("一次只能重置一个用户的密码");
                 return;
             }
-
-            var userId = rows[0];
-            if (!userId || userId === '' || userId === 'undefined' || userId === 'null') {
-                $.modal.alertWarning("获取用户ID失败，请刷新页面重试");
-                return;
-            }
-            $.modal.open("重置密码", prefix + "/resetPassword/" + userId);
+            resetPasswordById(rows[0]);
         }
 
+        /**
+         * 根据用户ID重置密码
+         */
         function resetPasswordById(userId) {
             if (!userId || userId === '' || userId === 'undefined' || userId === 'null') {
                 $.modal.alertWarning("获取用户ID失败，请刷新页面重试");
@@ -574,6 +502,9 @@
             $.modal.open("重置密码", prefix + "/resetPassword/" + userId);
         }
 
+        /**
+         * 批量修改用户状态
+         */
         function batchUpdateStatus() {
             var rows = $.table.selectColumns('id');
             if (!ImCommon.validateBatchOperation(rows, 1)) {
@@ -590,7 +521,7 @@
                 '</div>' +
                 '</div>';
 
-            $.modal.confirm("确定要批量修改用户状态吗？", html, function() {
+            $.modal.confirm("确定要批量修改以下 " + rows.length + " 个用户的状态吗？", html, function() {
                 var newStatus = $('#newStatus').val();
                 var statusText = newStatus == '1' ? '启用' : '停用';
 
@@ -617,7 +548,7 @@
         }
 
         /**
-         * 快速查看用户的会话列表
+         * 查看用户会话
          */
         function viewUserConversations(userId, username) {
             var url = ctx + 'im/conversation?userId=' + userId;
@@ -625,7 +556,7 @@
         }
 
         /**
-         * 快速查看用户的消息记录
+         * 查看用户消息
          */
         function viewUserMessages(userId, username) {
             var url = ctx + 'im/message?senderId=' + userId;
@@ -633,29 +564,11 @@
         }
 
         /**
-         * 快速查看用户加入的群组
+         * 查看用户群组
          */
         function viewUserGroups(userId, username) {
             var url = ctx + 'im/group?memberId=' + userId;
             $.modal.openTab(username + ' - 群组列表', url);
-        }
-
-        /**
-         * 批量导出选中的用户
-         */
-        function exportSelected() {
-            var rows = $.table.selectColumns('id');
-            if (rows.length === 0) {
-                $.modal.alertWarning("请至少选择一条记录");
-                return;
-            }
-
-            $.modal.confirm("确认要导出选中的 " + rows.length + " 条用户数据吗？", function() {
-                $.modal.msg("正在导出数据...", {icon: 16, shade: 0.3, time: 1000});
-                // 导出选中的用户数据
-                var url = prefix + "/export?ids=" + rows.join(",");
-                window.location.href = url;
-            });
         }
 
         /**
@@ -668,54 +581,12 @@
         }
 
         /**
-         * 执行搜索并显示搜索条件
+         * 执行搜索
          */
         function doSearch() {
-            // 显示搜索条件
             ImCommon.showSearchConditions('#user-form', '#searchStatus', 'clearSearch()');
-            // 执行搜索
             $.table.search();
         }
     </script>
-
-    <!-- 优化样式 -->
-    <style type="text/css">
-        /* 选中信息样式 */
-        .selected-info {
-            display: inline-block;
-            padding: 6px 12px;
-            background: #e8f4fd;
-            border: 1px solid #b3d7f7;
-            border-radius: 4px;
-            color: #1c84c6;
-            font-size: 13px;
-        }
-        .selected-info strong {
-            color: #1c84c6;
-            font-size: 15px;
-            margin: 0 2px;
-        }
-
-        /* 下拉菜单样式优化 */
-        .dropdown-menu > li > a {
-            padding: 8px 20px;
-            font-size: 13px;
-        }
-        .dropdown-menu > li > a i {
-            margin-right: 8px;
-            width: 16px;
-            text-align: center;
-        }
-        .dropdown-menu .divider {
-            margin: 5px 0;
-        }
-        .dropdown-menu > li > a.text-danger {
-            color: #ed5565;
-        }
-        .dropdown-menu > li > a.text-danger:hover {
-            background-color: #ed5565;
-            color: #fff;
-        }
-    </style>
 </body>
 </html>
