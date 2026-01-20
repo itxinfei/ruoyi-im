@@ -2,125 +2,7 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('IM用户管理')" />
-    <style type="text/css">
-        /* ========== 统计卡片样式 ========== */
-        .stat-box {
-            position: relative;
-            padding: 15px;
-            border-radius: 4px;
-            color: #fff;
-        }
-        .stat-box .stat-number {
-            font-size: 24px;
-            font-weight: 700;
-        }
-        .stat-box .stat-label {
-            font-size: 12px;
-        }
-        .stat-box .stat-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 36px;
-            opacity: 0.2;
-        }
-        .stat-box-primary { background: #1ab394; }
-        .stat-box-success { background: #1c84c6; }
-        .stat-box-danger { background: #ed5565; }
-        .stat-box-warning { background: #f8ac59; }
-
-        /* ========== 搜索区域样式 ========== */
-        .search-collapse {
-            border: 1px solid #e7eaec;
-            background: #fff;
-        }
-        .search-collapse input[type="text"],
-        .search-collapse select {
-            border: 1px solid #e7eaec;
-            min-width: 160px;
-        }
-        .search-collapse .select-list ul li {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .search-collapse .select-list ul li label {
-            min-width: 80px;
-            text-align: right;
-            color: #676a6c;
-        }
-
-        /* ========== 批量操作按钮区域 ========== */
-        #toolbar {
-            /* padding: 8px; */
-            background: #f9f9f9;
-            border: 0px solid #e7eaec;
-            border-radius: 4px;
-        }
-
-        /* ========== Bootstrap Table 工具栏 ========== */
-        .fixed-table-toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .fixed-table-toolbar .columns-left {
-            display: flex;
-            align-items: center;
-        }
-        /* 不覆盖 columns-right，让 pull-right (float: right) 生效 */
-        .fixed-table-toolbar .columns-right {
-            float: right;
-        }
-        /* 移除按钮组之间的间距 */
-        .fixed-table-toolbar .btn-group .btn {
-            margin-left: 0;
-            margin-right: 0;
-        }
-        .fixed-table-toolbar .btn-group > .btn:first-child {
-            border-top-left-radius: 3px;
-            border-bottom-left-radius: 3px;
-        }
-        .fixed-table-toolbar .btn-group > .btn:last-child {
-            border-top-right-radius: 3px;
-            border-bottom-right-radius: 3px;
-        }
-
-        /* ========== 搜索状态提示 ========== */
-        .search-status {
-            padding: 6px 10px;
-            background: #f0f9ff;
-            border: 1px solid #b3d7f7;
-            font-size: 12px;
-        }
-
-        /* ========== 表格区域 ========== */
-        .select-table.table-striped {
-            border: 1px solid #e7eaec;
-        }
-        .table > thead > tr > th {
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            padding: 10px 8px;
-            font-size: 12px;
-        }
-        .table > tbody > tr > td {
-            padding: 8px;
-        }
-
-        /* ========== 下拉菜单样式 ========== */
-        .dropdown-menu > li > a {
-            padding: 6px 15px;
-            font-size: 12px;
-        }
-        .dropdown-menu > li > a i {
-            margin-right: 6px;
-            width: 14px;
-        }
-        .dropdown-menu .divider { margin: 4px 0; }
-        .dropdown-menu > li > a.text-danger { color: #ed5565; }
-    </style>
+    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
     <div class="container-div">
@@ -397,6 +279,9 @@
                 ajaxOptions: {
                     beforeSend: function() {
                         ImCommon.showLoading('.select-table');
+                    },
+                    complete: function() {
+                        ImCommon.hideLoading();
                     }
                 }
             };

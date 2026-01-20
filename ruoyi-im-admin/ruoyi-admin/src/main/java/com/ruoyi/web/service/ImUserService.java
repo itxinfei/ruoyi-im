@@ -175,4 +175,17 @@ public interface ImUserService {
      * @return 更新的记录数，返回实际更新的用户数量
      */
     int batchUpdateStatus(Long[] userIds, String status);
+
+    /**
+     * 批量导入用户
+     *
+     * <p>从 Excel 文件批量导入用户数据</p>
+     * <p>支持导入用户名、昵称、手机号、邮箱、部门等信息</p>
+     * <p>会自动校验数据格式、检查重复、处理错误行</p>
+     *
+     * @param users 用户列表
+     * @param updateSupported 是否支持更新已存在的用户
+     * @return 导入结果，包含成功数量、失败数量、失败详情等
+     */
+    Map<String, Object> batchImportUsers(java.util.List<ImUser> users, boolean updateSupported);
 }

@@ -11,9 +11,13 @@ import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.service.ImUserService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -29,6 +33,8 @@ import java.util.Map;
 @Controller
 @RequestMapping("/im/user")
 public class ImUserController extends BaseController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ImUserController.class);
 
     private String prefix = "im/user";
 
@@ -129,7 +135,7 @@ public class ImUserController extends BaseController {
         imUser.setId(id);
         return toAjax(imUserService.updateImUser(imUser));
     }
-    
+
     /**
      * 修改IM用户（表单提交方式，用于编辑页面）
      */
@@ -193,7 +199,7 @@ public class ImUserController extends BaseController {
     public AjaxResult resetPassword(@PathVariable("id") Long id, @RequestBody Map<String, String> params) {
         String newPassword = params.get("password");
         String adminPassword = params.get("adminPassword");
-        
+
         if (newPassword == null || newPassword.trim().isEmpty()) {
             return AjaxResult.error("新密码不能为空");
         }
@@ -203,11 +209,11 @@ public class ImUserController extends BaseController {
         if (newPassword.length() > 20) {
             return AjaxResult.error("密码长度不能超过20位");
         }
-        
+
         if (adminPassword == null || adminPassword.trim().isEmpty()) {
             return AjaxResult.error("管理员密码不能为空");
         }
-        
+
         int result = imUserService.resetPassword(id, newPassword, adminPassword);
         if (result > 0) {
             return AjaxResult.success("密码重置成功");
@@ -274,5 +280,51 @@ public class ImUserController extends BaseController {
     public AjaxResult searchUsers(@RequestParam String keyword) {
         List<ImUser> list = imUserService.searchUsers(keyword);
         return AjaxResult.success(list);
+    }
+
+    /**
+     * 导入用户数据页面
+     */
+    @RequiresPermissions("im:user:import")
+    @GetMapping("/importTemplate")
+    @ResponseBody
+    public AjaxResult importTemplate() {
+        ExcelUtil<ImUser> util = new ExcelUtil<>(ImUser.class);
+        return util.importTemplateExcel("用户数据");
+    }
+
+    /**
+     * 批量导入用户数据
+     *
+     * @param file 上传的Excel文件
+     * @param updateSupported 是否支持更新已存在的用户
+     */
+    @RequiresPermissions("im:user:import")
+    @Log(title = "IM用户", businessType = BusinessType.IMPORT)
+    @PostMapping("/importData")
+    @ResponseBody
+    public AjaxResult importData(@RequestParam("file") MultipartFile file,
+                                  @RequestParam(value = "updateSupported", defaultValue = "false") boolean updateSupported) {
+        if (file.isEmpty()) {
+            return AjaxResult.error("请选择要上传的文件");
+        }
+
+        try {
+            ExcelUtil<ImUser> util = new ExcelUtil<>(ImUser.class);
+            List<ImUser> userList = util.importExcel(file.getInputStream());
+
+            if (userList == null || userList.isEmpty()) {
+                return AjaxResult.error("导入文件中没有有效的用户数据");
+            }
+
+            // 调用 Service 进行批量导入
+            Map<String, Object> result = imUserService.batchImportUsers(userList, updateSupported);
+
+            return AjaxResult.success(result);
+
+        } catch (Exception e) {
+            logger.error("导入用户数据失败", e);
+            return AjaxResult.error("导入失败: " + e.getMessage());
+        }
     }
 }

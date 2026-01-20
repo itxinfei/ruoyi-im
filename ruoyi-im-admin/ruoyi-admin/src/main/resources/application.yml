@@ -19,6 +19,23 @@ im:
     # 是否启用认证（测试时可设置为false）
     enabled: false
 
+# 备份配置
+backup:
+  # 备份文件存储路径
+  path: D:/ruoyi-im-backups
+  # 自动备份配置
+  auto:
+    daily:
+      # 是否启用每日自动备份
+      enabled: false
+      # 每天凌晨2点执行
+      cron: "0 0 2 * * ?"
+    weekly:
+      # 是否启用每周自动备份
+      enabled: false
+      # 每周日凌晨3点执行
+      cron: "0 0 3 ? * SUN"
+
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8081

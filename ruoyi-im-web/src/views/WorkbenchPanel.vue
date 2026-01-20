@@ -96,7 +96,7 @@
           <div class="card">
             <div class="card-header">
               <div class="card-title">
-                <el-icon><TrendCharts /></el-icon>
+                <el-icon><TrendChartsIcon /></el-icon>
                 团队数据
               </div>
             </div>
@@ -109,7 +109,7 @@
                   <p class="stat-label">团队成员</p>
                   <p class="stat-value">24人</p>
                 </div>
-                <el-icon class="stat-trend"><TrendCharts /></el-icon>
+                <el-icon class="stat-trend"><TrendChartsIcon /></el-icon>
               </div>
               <div class="stat-item stat-green">
                 <div class="stat-icon">
@@ -119,7 +119,7 @@
                   <p class="stat-label">本周完成任务</p>
                   <p class="stat-value">38个</p>
                 </div>
-                <el-icon class="stat-trend"><TrendCharts /></el-icon>
+                <el-icon class="stat-trend"><TrendChartsIcon /></el-icon>
               </div>
             </div>
           </div>
@@ -167,7 +167,7 @@ import {
   Clock,
   Check,
   User,
-  TrendCharts,
+  TrendCharts as TrendChartsIcon,
   Document,
   Bell,
   ArrowRight

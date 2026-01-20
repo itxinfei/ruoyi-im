@@ -10,12 +10,16 @@ import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.web.domain.ImGroup;
 import com.ruoyi.web.service.ImGroupService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IM群组管理控制器
@@ -26,6 +30,8 @@ import java.util.List;
 @Controller
 @RequestMapping("/im/group")
 public class ImGroupController extends BaseController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ImGroupController.class);
 
     private String prefix = "im/group";
 
@@ -176,5 +182,51 @@ public class ImGroupController extends BaseController {
     public String viewLog(@PathVariable("id") Long id, org.springframework.ui.ModelMap mmap) {
         mmap.put("group", imGroupService.selectImGroupById(id));
         return prefix + "/groupLog";
+    }
+
+    /**
+     * 导入群组数据模板
+     */
+    @RequiresPermissions("im:group:import")
+    @GetMapping("/importTemplate")
+    @ResponseBody
+    public AjaxResult importTemplate() {
+        ExcelUtil<ImGroup> util = new ExcelUtil<>(ImGroup.class);
+        return util.importTemplateExcel("群组数据");
+    }
+
+    /**
+     * 批量导入群组数据
+     *
+     * @param file 上传的Excel文件
+     * @param updateSupported 是否支持更新已存在的群组
+     */
+    @RequiresPermissions("im:group:import")
+    @Log(title = "IM群组", businessType = BusinessType.IMPORT)
+    @PostMapping("/importData")
+    @ResponseBody
+    public AjaxResult importData(@RequestParam("file") MultipartFile file,
+                                  @RequestParam(value = "updateSupported", defaultValue = "false") boolean updateSupported) {
+        if (file.isEmpty()) {
+            return AjaxResult.error("请选择要上传的文件");
+        }
+
+        try {
+            ExcelUtil<ImGroup> util = new ExcelUtil<>(ImGroup.class);
+            List<ImGroup> groupList = util.importExcel(file.getInputStream());
+
+            if (groupList == null || groupList.isEmpty()) {
+                return AjaxResult.error("导入文件中没有有效的群组数据");
+            }
+
+            // 调用 Service 进行批量导入
+            Map<String, Object> result = imGroupService.batchImportGroups(groupList, updateSupported);
+
+            return AjaxResult.success(result);
+
+        } catch (Exception e) {
+            logger.error("导入群组数据失败", e);
+            return AjaxResult.error("导入失败: " + e.getMessage());
+        }
     }
 }

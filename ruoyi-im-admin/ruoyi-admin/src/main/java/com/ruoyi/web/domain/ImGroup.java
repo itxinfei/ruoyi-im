@@ -1,5 +1,6 @@
 package com.ruoyi.web.domain;
 
+import com.ruoyi.common.annotation.Excel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,31 +31,37 @@ public class ImGroup implements Serializable {
     /**
      * 群组名称
      */
+    @Excel(name = "群组名称", width = 30)
     private String name;
 
     /**
      * 群头像URL
      */
+    @Excel(name = "群头像", width = 60)
     private String avatar;
 
     /**
      * 群主用户ID
      */
+    @Excel(name = "群主用户ID", width = 15)
     private Long ownerId;
 
     /**
      * 群描述
      */
+    @Excel(name = "群描述", width = 60)
     private String description;
 
     /**
      * 最大成员数
      */
+    @Excel(name = "最大成员数", width = 10)
     private Integer maxMembers;
 
     /**
      * 全员禁言: 0否 1是
      */
+    @Excel(name = "全员禁言", width = 10, readConverterExp = "0=否,1=是")
     private Integer allMuted;
 
     /**

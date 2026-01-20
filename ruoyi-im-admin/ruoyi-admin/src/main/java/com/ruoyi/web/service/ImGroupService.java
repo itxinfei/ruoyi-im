@@ -130,4 +130,17 @@ public interface ImGroupService {
      * @return 统计数据Map，包含 totalGroups（群组总数）、totalMembers（成员总数）等指标
      */
     Map<String, Object> getGroupStatistics();
+
+    /**
+     * 批量导入群组
+     *
+     * <p>从 Excel 文件批量导入群组数据</p>
+     * <p>支持导入群组名称、群主ID、描述、最大成员数等信息</p>
+     * <p>会自动校验数据格式、检查重复、处理错误行</p>
+     *
+     * @param groups 群组列表
+     * @param updateSupported 是否支持更新已存在的群组
+     * @return 导入结果，包含成功数量、失败数量、失败详情等
+     */
+    Map<String, Object> batchImportGroups(List<ImGroup> groups, boolean updateSupported);
 }
