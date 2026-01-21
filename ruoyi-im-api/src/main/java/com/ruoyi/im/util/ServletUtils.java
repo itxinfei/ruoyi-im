@@ -1,4 +1,4 @@
-package com.ruoyi.im.utils;
+package com.ruoyi.im.util;
 
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;

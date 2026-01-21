@@ -4,7 +4,7 @@ import com.ruoyi.im.annotation.RequirePermission;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImUserService;
-import com.ruoyi.im.utils.SecurityUtils;
+import com.ruoyi.im.util.SecurityUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

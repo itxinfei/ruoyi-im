@@ -5,7 +5,7 @@ import com.ruoyi.im.dto.user.ImLoginRequest;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImUserService;
-import com.ruoyi.im.utils.JwtUtils;
+import com.ruoyi.im.util.JwtUtils;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;

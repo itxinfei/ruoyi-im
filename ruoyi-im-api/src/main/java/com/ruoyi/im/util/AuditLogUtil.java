@@ -1,4 +1,4 @@
-package com.ruoyi.im.utils;
+package com.ruoyi.im.util;
 
 import com.ruoyi.im.domain.ImAuditLog;
 import com.ruoyi.im.service.IAuditLogService;

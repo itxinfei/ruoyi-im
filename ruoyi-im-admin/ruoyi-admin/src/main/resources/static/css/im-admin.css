@@ -95,9 +95,12 @@
 }
 
 #toolbar {
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 0;       /* 移除顶部边距，紧接搜索区域 */
+    margin-bottom: 5px;  /* 减小底部边距，紧接表格 */
     padding: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 /* 统一所有 CRUD 按钮的横向间距 */
@@ -117,6 +120,23 @@
     margin-right: 0 !important;
 }
 
+/* 显式控制 Bootstrap Table 工具栏边距 */
+.fixed-table-toolbar {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    position: relative;
+    z-index: 10; /* 确保层级高于表格内容 */
+}
+
+.fixed-table-toolbar .columns-right {
+    margin-top: 5px; /* 微调垂直对齐 */
+    margin-bottom: 5px;
+}
+
+.fixed-table-toolbar .btn-group {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
 
 /* 搜索状态条 (专业提示风格) */
 .search-status-bar {
@@ -147,4 +167,38 @@
 .search-status-bar a:hover {
     text-decoration: underline;
     color: #ed5565;
+}
+
+/* ========== 极简版选中提示 (New) ========== */
+/* 替换掉原来的紫色块状提示，改为文本式 */
+.selected-info-text {
+    display: inline-block;
+    font-size: 13px;
+    color: #666;
+    margin-left: 15px;
+    background: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 20px;
+    animation: fadeIn 0.2s ease;
+}
+
+.selected-info-text .count {
+    color: #1ab394;
+    font-weight: bold;
+    margin: 0 2px;
+}
+
+.selected-info-text .clear-link {
+    color: #999;
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.selected-info-text .clear-link:hover {
+    color: #ed5565;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-5px); }
+    to { opacity: 1; transform: translateX(0); }
 }

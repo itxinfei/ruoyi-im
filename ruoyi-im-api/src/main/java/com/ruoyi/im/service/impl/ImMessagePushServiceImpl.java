@@ -14,7 +14,7 @@ import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessagePushService;
 import com.ruoyi.im.service.ImMessageService;
-import com.ruoyi.im.utils.ImRedisUtil;
+import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;

@@ -81,6 +81,7 @@
 
             <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
+                <!-- 工具栏：功能按钮 -->
                 <div class="btn-group-sm" id="toolbar" role="group">
                     <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:user:add">
                         <i class="fa fa-plus"></i> 新增
@@ -96,16 +97,6 @@
                     </a>
                 </div>
 
-                <!-- 搜索状态提示条 -->
-                <div class="search-status-bar" id="searchStatus" style="display:none;">
-                    <span>
-                        <i class="fa fa-filter"></i> 当前筛选：<span class="condition-text"></span>
-                    </span>
-                    <a href="javascript:void(0)" onclick="clearSearch()" class="text-danger">
-                        <i class="fa fa-times-circle"></i> 清除筛选
-                    </a>
-                </div>
-
                 <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
@@ -113,6 +104,7 @@
 
     <th:block th:include="include :: footer" />
     <th:block th:include="include :: bootstrap-table-export-js" />
+    <!-- 引入版本号，防止缓存 -->
     <script th:src="@{/js/im-common.js?v=1.0.1}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:user:edit')}]];
@@ -120,6 +112,7 @@
         var prefix = ctx + "im/user";
 
         $(function() {
+            // 初始化 IM 通用功能（含快捷键、选中提示等）
             ImCommon.initPage({ tableId: '#bootstrap-table' });
             loadStatistics();
 
@@ -129,6 +122,7 @@
                 updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove/{id}",
                 exportUrl: prefix + "/export",
+                toolbar: "toolbar", // 【重要】绑定工具栏，确保若依能识别
                 modalName: "用户",
                 sortName: "createTime",
                 sortOrder: "desc",
@@ -171,7 +165,6 @@
                     sortable: true,
                     width: '160',
                     formatter: function(value) {
-                         // 简单的日期截断显示，根据需要可调整
                          return value ? value.substring(0, 19) : '-';
                     }
                 }, { 
@@ -180,17 +173,25 @@
                     width: '200',
                     formatter: function(value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" onclick="$.operate.edit(\' + row.id + '\')"><i class="fa fa-edit"></i> 编辑</a>');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" onclick="$.operate.remove(\' + row.id + '\')"><i class="fa fa-remove"></i> 删除</a>');
-                        actions.push('<a class="btn btn-info btn-xs" onclick="resetPasswordById(' + row.id + ')"><i class="fa fa-key"></i> 重置</a>');
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\"' + row.id + '\")"><i class="fa fa-edit"></i> 编辑</a>');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\"' + row.id + '\")"><i class="fa fa-remove"></i> 删除</a>');
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="resetPasswordById(' + row.id + ')"><i class="fa fa-key"></i> 重置</a>');
                         return actions.join('');
                     }
                 }]
             };
             $.table.init(options);
+
+            // 绑定右上角刷新按钮
+            $(document).on('click', "button[name='refresh']", function() {
+                $.table.refresh();
+                loadStatistics();
+            });
         });
 
+        /* 加载统计数据 */
         function loadStatistics() {
+            // 使用 ImCommon.get (已修复)
             ImCommon.get(prefix + "/statistics", function(data) {
                 $('#totalCount').text(data.totalCount || 0);
                 $('#onlineCount').text(data.onlineCount || 0);
@@ -199,40 +200,67 @@
             });
         }
 
+        /* 状态筛选 */
         function filterByStatus(status) {
             $('select[name="status"]').val(status);
             doSearch();
         }
 
+        /* 在线状态筛选 */
         function filterByOnline(isOnline) {
             $('select[name="isOnline"]').val(isOnline);
             doSearch();
         }
 
-        function resetPasswordById(userId) {
-            $.modal.open("重置密码", prefix + "/resetPassword/" + userId, 480, 260);
+        /* 工具栏重置密码按钮 */
+        function resetPwd() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            resetPasswordById(rows[0]);
         }
 
-        function doSearch() {
-            var s = "";
-            var statusVal = $('select[name="status"]').val();
-            var onlineVal = $('select[name="isOnline"]').val();
-            
-            if(statusVal) s += " [状态: " + (statusVal=="1"?"正常":"停用") + "]";
-            if(onlineVal) s += " [在线: " + (onlineVal=="1"?"是":"否") + "]";
-            
-            if(s) { 
-                $('#searchStatus .condition-text').text(s); 
-                $('#searchStatus').fadeIn(200); 
-            } else { 
-                $('#searchStatus').hide(); 
+        /* 重置密码弹窗 */
+        function resetPasswordById(userId) {
+            // 指定宽度 480px, 高度 280px
+            $.modal.open("重置密码", prefix + "/resetPassword/" + userId, 480, 280);
+        }
+
+        /* 覆盖默认添加方法 - 指定合适的宽高 */
+        $.operate.add = function(id) {
+            var url = $.table._option.createUrl;
+            if ($.common.isNotEmpty(id)) {
+                url = url.replace("{id}", id);
             }
+            $.modal.open("添加" + $.table._option.modalName, url, 580, 580);
+        };
+
+        /* 覆盖默认修改方法 - 指定合适的宽高 */
+        $.operate.edit = function(id) {
+            var url = $.table._option.updateUrl;
+            if ($.common.isNotEmpty(id)) {
+                url = url.replace("{id}", id);
+            } else {
+                var selectedId = $.table.selectFirstColumns();
+                if ($.common.isEmpty(selectedId)) {
+                    $.modal.alertWarning("请至少选择一条记录");
+                    return;
+                }
+                url = url.replace("{id}", selectedId);
+            }
+            $.modal.open("修改" + $.table._option.modalName, url, 580, 520);
+        };
+
+        /* 执行搜索 */
+        function doSearch() {
             $.table.search();
         }
 
+        /* 清空搜索 */
         function clearSearch() {
             $.form.reset();
-            $('#searchStatus').hide();
             $.table.search();
         }
     </script>

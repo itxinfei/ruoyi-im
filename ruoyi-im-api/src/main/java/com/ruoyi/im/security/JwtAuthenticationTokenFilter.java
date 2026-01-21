@@ -1,6 +1,6 @@
 package com.ruoyi.im.security;
 
-import com.ruoyi.im.utils.JwtUtils;
+import com.ruoyi.im.util.JwtUtils;
 import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.domain.ImUser;
 import org.springframework.beans.factory.annotation.Autowired;

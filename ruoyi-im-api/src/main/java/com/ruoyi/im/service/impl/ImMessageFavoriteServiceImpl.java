@@ -10,7 +10,7 @@ import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImMessageFavoriteMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.service.ImMessageFavoriteService;
-import com.ruoyi.im.utils.MessageEncryptionUtil;
+import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.vo.favorite.FavoriteMessageVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,7 +4,7 @@ import com.ruoyi.im.domain.ImFileAsset;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImFileAssetMapper;
 import com.ruoyi.im.service.ImFileService;
-import com.ruoyi.im.utils.FileUtils;
+import com.ruoyi.im.util.FileUtils;
 import com.ruoyi.im.vo.file.ImFileStatisticsVO;
 import com.ruoyi.im.vo.file.ImFileVO;
 import org.slf4j.Logger;

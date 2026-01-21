@@ -10,9 +10,9 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImUserService;
 
-import com.ruoyi.im.utils.FileUtils;
-import com.ruoyi.im.utils.ImRedisUtil;
-import com.ruoyi.im.utils.JwtUtils;
+import com.ruoyi.im.util.FileUtils;
+import com.ruoyi.im.util.ImRedisUtil;
+import com.ruoyi.im.util.JwtUtils;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import org.slf4j.Logger;

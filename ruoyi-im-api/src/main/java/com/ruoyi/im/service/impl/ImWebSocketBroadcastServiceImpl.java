@@ -6,7 +6,7 @@ import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
-import com.ruoyi.im.utils.MessageEncryptionUtil;
+import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

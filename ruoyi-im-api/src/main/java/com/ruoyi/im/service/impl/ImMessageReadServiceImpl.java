@@ -13,7 +13,7 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImMessageReadMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageReadService;
-import com.ruoyi.im.utils.MessageEncryptionUtil;
+import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import com.ruoyi.im.vo.message.ImMessageReadDetailVO;
 import com.ruoyi.im.vo.message.ImMessageReadStatusVO;

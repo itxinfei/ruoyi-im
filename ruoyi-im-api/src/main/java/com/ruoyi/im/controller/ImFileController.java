@@ -3,7 +3,7 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.file.ImFileUploadRequest;
 import com.ruoyi.im.service.ImFileService;
-import com.ruoyi.im.utils.FileUtils;
+import com.ruoyi.im.util.FileUtils;
 import com.ruoyi.im.vo.file.ImFileStatisticsVO;
 import com.ruoyi.im.vo.file.ImFileVO;
 import io.swagger.v3.oas.annotations.Operation;

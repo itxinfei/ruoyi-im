@@ -16,7 +16,7 @@ import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
-import com.ruoyi.im.utils.ImRedisUtil;
+import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.vo.conversation.ImConversationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

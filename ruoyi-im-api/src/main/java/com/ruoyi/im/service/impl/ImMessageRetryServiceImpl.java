@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.service.ImMessageRetryService;
 import com.ruoyi.im.service.ImMessageService;
-import com.ruoyi.im.utils.ImRedisUtil;
+import com.ruoyi.im.util.ImRedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

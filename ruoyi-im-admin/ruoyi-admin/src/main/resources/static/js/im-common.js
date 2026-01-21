@@ -1051,17 +1051,17 @@ var ImCommon = {
 
     /* ========== 新增：选中计数显示 ========== */
     /**
-     * 更新表格选中信息（增强版）
+     * 更新表格选中信息（极简文本版）
      * @param tableId 表格ID
      * @param options 配置选项
      */
     updateSelectedInfo: function(tableId, options) {
         options = options || {};
-        var targetId = options.targetId || '.select-table';
-        var infoId = options.infoId || '#selectedInfo';
+        // 目标容器改为工具栏，实现融合效果
+        var targetToolbar = options.targetToolbar || '#toolbar';
+        var infoId = 'selectedInfoText';
         var multipleClass = options.multipleClass || '.multiple';
         var singleClass = options.singleClass || '.single';
-        var text = options.text || '已选中 {count} 项';
 
         var $table = typeof tableId === 'string' ? $(tableId) : tableId;
         if ($table.length === 0) return;
@@ -1069,29 +1069,24 @@ var ImCommon = {
         var rows = $table.bootstrapTable('getSelections');
         var count = rows.length;
 
-        // 更新或创建选中信息
-        var $info = $(infoId);
+        // 获取或创建提示元素
+        var $toolbar = $(targetToolbar);
+        var $info = $toolbar.find('#' + infoId);
+        
         if ($info.length === 0) {
-            $info = $(
-                '<div class="selected-info" id="' + infoId.replace('#', '') + '">' +
-                '<i class="fa fa-check-square"></i> ' +
-                '<span class="selected-count">0</span> ' +
-                '<span class="selected-text">项</span>' +
-                '<button class="clear-btn" onclick="ImCommon.clearSelection(\'' + tableId + '\')">' +
-                '<i class="fa fa-close"></i> 取消选择' +
-                '</button>' +
-                '</div>'
-            );
-            $(targetId).prepend($info);
+            $info = $('<span id="' + infoId + '" class="selected-info-text" style="display:none;"></span>');
+            $toolbar.append($info);
         }
 
-        // 更新数量
-        $info.find('.selected-count').text(count);
-        $info.find('.selected-text').text('项');
-
-        // 显示/隐藏
+        // 更新内容
         if (count > 0) {
-            $info.addClass('visible');
+            $info.html(
+                '已选择 <span class="count">' + count + '</span> 项' +
+                '<i class="fa fa-times-circle clear-link" onclick="ImCommon.clearSelection(\'' + tableId + '\')" title="取消选择"></i>'
+            );
+            $info.css('display', 'inline-flex').css('align-items', 'center'); // 显示
+            
+            // 按钮状态控制
             $(multipleClass).removeClass('disabled').removeAttr('disabled');
             if (count === 1) {
                 $(singleClass).removeClass('disabled').removeAttr('disabled');
@@ -1099,7 +1094,7 @@ var ImCommon = {
                 $(singleClass).addClass('disabled').attr('disabled', 'disabled');
             }
         } else {
-            $info.removeClass('visible');
+            $info.hide(); // 隐藏
             $(multipleClass).addClass('disabled').attr('disabled', 'disabled');
             $(singleClass).addClass('disabled').attr('disabled', 'disabled');
         }

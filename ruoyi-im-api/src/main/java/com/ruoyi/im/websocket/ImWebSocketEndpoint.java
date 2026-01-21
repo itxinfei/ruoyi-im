@@ -10,8 +10,8 @@ import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImUserService;
 
-import com.ruoyi.im.utils.ImRedisUtil;
-import com.ruoyi.im.utils.JwtUtils;
+import com.ruoyi.im.util.ImRedisUtil;
+import com.ruoyi.im.util.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

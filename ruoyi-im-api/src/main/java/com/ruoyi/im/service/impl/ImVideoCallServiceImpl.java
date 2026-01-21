@@ -4,7 +4,7 @@ import com.ruoyi.im.domain.ImVideoCall;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImVideoCallMapper;
 import com.ruoyi.im.service.ImVideoCallService;
-import com.ruoyi.im.utils.ImRedisUtil;
+import com.ruoyi.im.util.ImRedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.ruoyi.im.utils;
+package com.ruoyi.im.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
