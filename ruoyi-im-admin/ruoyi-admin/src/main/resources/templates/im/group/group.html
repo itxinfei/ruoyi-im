@@ -1,355 +1,398 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head>
     <th:block th:include="include :: header('群组管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-admin.css}" rel="stylesheet" />
 </head>
+
 <body class="gray-bg">
     <div class="container-div">
         <div class="row" style="padding-top: 6px;">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-primary">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">群组总数</div>
-                            <i class="fa fa-users stat-icon"></i>
+            <div class="row pt-5">
+                <!-- 1. 统计面板 (Premium Minimalist) -->
+                <div class="col-sm-12">
+                    <div class="im-stat-group">
+                        <div class="im-stat-item" onclick="filterByStatus('')">
+                            <div class="stat-header">
+                                <span class="stat-label">群组总数</span>
+                                <div class="stat-icon-box"><i class="fa fa-users"></i></div>
+                            </div>
+                            <div class="stat-number" id="totalCount">-</div>
+                            <div class="stat-footer text-muted">包含频道、公群与私语群</div>
                         </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-success">
-                            <div class="stat-number" id="activeCount">0</div>
-                            <div class="stat-label">活跃群组</div>
-                            <i class="fa fa-commenting stat-icon"></i>
+                        <div class="im-stat-item" onclick="filterByStatus('active')">
+                            <div class="stat-header">
+                                <span class="stat-label">活跃互动群</span>
+                                <div class="stat-icon-box" style="background: #ecfdf5; color: #10b981;"><i
+                                        class="fa fa-commenting"></i></div>
+                            </div>
+                            <div class="stat-number" id="activeCount">-</div>
+                            <div class="stat-footer text-muted">今日产生有效消息的群组</div>
                         </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-danger">
-                            <div class="stat-number" id="mutedCount">0</div>
-                            <div class="stat-label">全员禁言</div>
-                            <i class="fa fa-ban stat-icon"></i>
+                        <div class="im-stat-item" onclick="filterByStatus('muted')">
+                            <div class="stat-header">
+                                <span class="stat-label">全员禁言中</span>
+                                <div class="stat-icon-box" style="background: #fff7ed; color: #f59e0b;"><i
+                                        class="fa fa-ban"></i></div>
+                            </div>
+                            <div class="stat-number" id="mutedCount">-</div>
+                            <div class="stat-footer text-muted">处于管制状态的通信渠道</div>
                         </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-warning">
-                            <div class="stat-number" id="largeCount">0</div>
-                            <div class="stat-label">大群(>100人)</div>
-                            <i class="fa fa-group stat-icon"></i>
+                        <div class="im-stat-item" onclick="filterByStatus('large')">
+                            <div class="stat-header">
+                                <span class="stat-label">超大规模群</span>
+                                <div class="stat-icon-box" style="background: #fef2f2; color: #ef4444;"><i
+                                        class="fa fa-group"></i></div>
+                            </div>
+                            <div class="stat-number" id="largeCount">-</div>
+                            <div class="stat-footer text-muted">成员数超过 100 人的大型频道</div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
-                <form id="group-form">
-                    <div class="select-list">
-                        <ul>
-                            <li>
-                                <label class="input-label">群组名称：</label><input type="text" name="name" placeholder="请输入群组名称"/>
-                            </li>
-                            <li>
-                                <label class="input-label">群主ID：</label><input type="text" name="ownerId" placeholder="请输入群主ID"/>
-                            </li>
-                            <li>
-                                <label class="input-label">全员禁言：</label><select name="allMuted">
-                                    <option value="">所有</option>
-                                    <option value="0">否</option>
-                                    <option value="1">是</option>
-                                </select>
-                            </li>
-                            <li class="select-time">
-                                <label>创建时间：</label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
-                                <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                            </li>
-                        </ul>
+                <!-- 搜索区域 -->
+                <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
+                    <form id="group-form">
+                        <div class="select-list">
+                            <ul>
+                                <li>
+                                    <label class="input-label">群组名称：</label><input type="text" name="name"
+                                        placeholder="请输入群组名称" />
+                                </li>
+                                <li>
+                                    <label class="input-label">群主ID：</label><input type="text" name="ownerId"
+                                        placeholder="请输入群主ID" />
+                                </li>
+                                <li>
+                                    <label class="input-label">全员禁言：</label><select name="allMuted">
+                                        <option value="">所有</option>
+                                        <option value="0">否</option>
+                                        <option value="1">是</option>
+                                    </select>
+                                </li>
+                                <li class="select-time">
+                                    <label>创建时间：</label>
+                                    <input type="text" class="time-input" id="startTime" placeholder="开始时间"
+                                        name="params[beginTime]" />
+                                    <span>-</span>
+                                    <input type="text" class="time-input" id="endTime" placeholder="结束时间"
+                                        name="params[endTime]" />
+                                </li>
+                                <li>
+                                    <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i
+                                            class="fa fa-search"></i>&nbsp;搜索</a>
+                                    <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i
+                                            class="fa fa-refresh"></i>&nbsp;重置</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 数据展示区域 -->
+                <div class="col-sm-12 select-table table-striped">
+                    <!-- 批量操作按钮 -->
+                    <div class="btn-group-sm" id="toolbar">
+                        <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:group:add">
+                            <i class="fa fa-plus"></i> 新增
+                        </a>
+                        <a class="btn btn-primary single disabled" onclick="$.operate.edit()"
+                            shiro:hasPermission="im:group:edit">
+                            <i class="fa fa-edit"></i> 修改
+                        </a>
+                        <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                            shiro:hasPermission="im:group:remove">
+                            <i class="fa fa-remove"></i> 删除
+                        </a>
+                        <a class="btn btn-warning" onclick="$.table.exportExcel()"
+                            shiro:hasPermission="im:group:export">
+                            <i class="fa fa-download"></i> 导出
+                        </a>
                     </div>
-                </form>
-            </div>
 
-            <!-- 数据展示区域 -->
-            <div class="col-sm-12 select-table table-striped">
-                <!-- 批量操作按钮 -->
-                <div class="btn-group-sm" id="toolbar">
-                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:group:add">
-                        <i class="fa fa-plus"></i> 新增
-                    </a>
-                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:group:edit">
-                        <i class="fa fa-edit"></i> 修改
-                    </a>
-                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:remove">
-                        <i class="fa fa-remove"></i> 删除
-                    </a>
-                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:group:export">
-                        <i class="fa fa-download"></i> 导出
-                    </a>
+                    <!-- 搜索状态提示 -->
+                    <div class="search-status" id="searchStatus" style="display:none;">
+                        <i class="fa fa-filter" style="color:#1c84c6;"></i>
+                        搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
+                        <a href="javascript:void(0)" onclick="clearSearch()"
+                            style="margin-left:10px; color:#1c84c6;">清除</a>
+                    </div>
+
+                    <!-- 数据表格 -->
+                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
                 </div>
-
-                <!-- 搜索状态提示 -->
-                <div class="search-status" id="searchStatus" style="display:none;">
-                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
-                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
-                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
-                </div>
-
-                <!-- 数据表格 -->
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
-    </div>
 
-    <th:block th:include="include :: footer" />
-    <th:block th:include="include :: bootstrap-table-export-js" />
-    <script th:src="@{/js/im-common.js}"></script>
-    <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('im:group:edit')}]];
-        var removeFlag = [[${@permission.hasPermi('im:group:remove')}]];
-        var prefix = ctx + "im/group";
+        <th:block th:include="include :: footer" />
+        <th:block th:include="include :: bootstrap-table-export-js" />
+        <script th:src="@{/js/im-common.js}"></script>
+        <script th:inline="javascript">
+            var editFlag = [[${@permission.hasPermi('im:group:edit') }]];
+            var removeFlag = [[${@permission.hasPermi('im:group:remove') }]];
+            var prefix = ctx + "im/group";
 
-        $(function() {
-            loadStatistics();
-            var options = {
-                url: prefix + "/list",
-                toolbar: "toolbar",
-                height: 650,
-                createUrl: prefix + "/add",
-                updateUrl: prefix + "/edit/{id}",
-                removeUrl: prefix + "/remove/{id}",
-                exportUrl: prefix + "/export",
-                modalName: "群组",
-                // 分页配置
-                pagination: true,
-                pageSize: 20,
-                pageList: [10, 20, 50, 100],
-                sidePagination: "server",
-                // 固定列配置
-                fixedColumns: true,
-                fixedNumber: 1,
-                fixedRightNumber: 1,
-                // 列显示/隐藏配置
-                showColumns: true,
-                showColumnsToggleAll: true,
-                // 记住列选择
-                cookie: true,
-                cookieIdTable: 'im_group_table',
-                cookieExpire: '30d',
-                // 导出配置
-                showExport: true,
-                exportDataType: 'all',
-                exportTypes: ['excel'],
-                exportOptions: {
-                    fileName: '群组数据'
-                },
-                columns: [{
-                    checkbox: true
-                },
-                {
-                    field: 'id',
-                    title: 'ID',
-                    visible: false
-                },
-                {
-                    field: 'avatar',
-                    title: '头像',
-                    width: '60',
-                    align: 'center',
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatCircleAvatar(value, 32);
-                    }
-                },
-                {
-                    field: 'name',
-                    title: '群组名称',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatTextWithTooltip(value, 50);
-                    }
-                },
-                {
-                    field: 'ownerId',
-                    title: '群主ID',
-                    width: '80'
-                },
-                {
-                    field: 'ownerName',
-                    title: '群主',
-                    width: '100',
-                    formatter: function(value, row, index) {
-                        return value || '-';
-                    }
-                },
-                {
-                    field: 'memberCount',
-                    title: '成员数',
-                    align: 'center',
-                    width: '80'
-                },
-                {
-                    field: 'description',
-                    title: '群描述',
-                    width: '200',
-                    visible: false,
-                    formatter: function(value, row, index) {
-                        if (!value) return '-';
-                        if (value.length > 30) {
-                            return value.substring(0, 30) + '...';
-                        }
-                        return value;
-                    }
-                },
-                {
-                    field: 'maxMembers',
-                    title: '上限',
-                    align: 'center',
-                    width: '70'
-                },
-                {
-                    field: 'allMuted',
-                    title: '全员禁言',
-                    align: 'center',
-                    width: '90',
-                    formatter: function(value, row, index) {
-                        if (value == 1) return '<span class="badge badge-warning">是</span>';
-                        return '<span class="badge badge-primary">否</span>';
-                    }
-                },
-                {
-                    field: 'createTime',
-                    title: '创建时间',
-                    width: '200',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
-                },
-                {
-                    title: '操作',
-                    align: 'center',
-                    width: '150',
-                    formatter: function(value, row, index) {
-                        var menuItems = [
-                            { text: '查看成员', icon: 'fa-users', action: 'viewMembers(row.id)' },
-                            { text: '查看日志', icon: 'fa-list-alt', action: 'viewLog(row.id, row.name)' },
-                            { divider: true },
-                            { text: '删除', icon: 'fa-remove', action: '$.operate.remove(row.id)', permissionClass: removeFlag }
-                        ];
+            $(function () {
+                // 初始化通用功能
+                ImCommon.initPage({ tableId: '#bootstrap-table' });
+                loadStatistics();
 
-                        var mainAction = {
-                            text: '编辑',
-                            icon: 'fa-edit',
-                            action: '$.operate.edit(row.id)',
-                            permissionClass: editFlag,
-                            btnClass: 'btn-success'
-                        };
-
-                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
-                    }
-                }],
-                responseHandler: function(res) {
-                    ImCommon.hideLoading();
-                    return ImCommon.handleTableResponse(res, '暂无群组数据', '#bootstrap-table');
-                },
-                onLoadError: function(status) {
-                    ImCommon.hideLoading();
-                    $.modal.msgError("数据加载失败，请稍后重试");
-                },
-                onLoadSuccess: function() {
-                    ImCommon.removeEmptyData('#bootstrap-table');
-                },
-                ajaxOptions: {
-                    beforeSend: function() {
-                        ImCommon.showLoading('.select-table');
+                var options = {
+                    url: prefix + "/list",
+                    toolbar: "toolbar",
+                    height: 650,
+                    createUrl: prefix + "/add",
+                    updateUrl: prefix + "/edit/{id}",
+                    removeUrl: prefix + "/remove/{id}",
+                    exportUrl: prefix + "/export",
+                    modalName: "群组",
+                    // 分页配置
+                    pagination: true,
+                    pageSize: 20,
+                    pageList: [10, 20, 50, 100],
+                    sidePagination: "server",
+                    // 固定列配置
+                    fixedColumns: true,
+                    fixedNumber: 1,
+                    fixedRightNumber: 1,
+                    // 列显示/隐藏配置
+                    showColumns: true,
+                    showColumnsToggleAll: true,
+                    // 记住列选择
+                    cookie: true,
+                    cookieIdTable: 'im_group_table',
+                    cookieExpire: '30d',
+                    // 导出配置
+                    showExport: true,
+                    exportDataType: 'all',
+                    exportTypes: ['excel'],
+                    exportOptions: {
+                        fileName: '群组数据'
                     },
-                    complete: function() {
+                    columns: [{
+                        checkbox: true
+                    },
+                    {
+                        field: 'id',
+                        title: 'ID',
+                        visible: false
+                    },
+                    {
+                        field: 'avatar',
+                        title: '头像',
+                        width: '60',
+                        align: 'center',
+                        formatter: function (value, row, index) {
+                            return ImCommon.formatCircleAvatar(value, 32);
+                        }
+                    },
+                    {
+                        field: 'name',
+                        title: '群组名称',
+                        sortable: true,
+                        formatter: function (value, row, index) {
+                            return ImCommon.formatTextWithTooltip(value, 50);
+                        }
+                    },
+                    {
+                        field: 'ownerId',
+                        title: '群主ID',
+                        width: '80',
+                        visible: false
+                    },
+                    {
+                        field: 'ownerName',
+                        title: '群主',
+                        width: '120',
+                        formatter: function (value, row, index) {
+                            return ImCommon.formatUserCard(row.ownerId, value, null);
+                        }
+                    },
+                    {
+                        field: 'memberCount',
+                        title: '成员数',
+                        align: 'center',
+                        width: '80'
+                    },
+                    {
+                        field: 'description',
+                        title: '群描述',
+                        width: '200',
+                        visible: false,
+                        formatter: function (value, row, index) {
+                            if (!value) return '-';
+                            if (value.length > 30) {
+                                return value.substring(0, 30) + '...';
+                            }
+                            return value;
+                        }
+                    },
+                    {
+                        field: 'maxMembers',
+                        title: '上限',
+                        align: 'center',
+                        width: '70'
+                    },
+                    {
+                        field: 'allMuted',
+                        title: '全员禁言',
+                        align: 'center',
+                        width: '90',
+                        formatter: function (value, row, index) {
+                            if (value == 1) return '<span class="badge badge-warning">是</span>';
+                            return '<span class="badge badge-primary">否</span>';
+                        }
+                    },
+                    {
+                        field: 'createTime',
+                        title: '创建时间',
+                        width: '200',
+                        sortable: true,
+                        formatter: function (value, row, index) {
+                            return ImCommon.formatDateTimeWithRelative(value);
+                        }
+                    },
+                    {
+                        title: '操作',
+                        align: 'center',
+                        width: '150',
+                        formatter: function (value, row, index) {
+                            var menuItems = [
+                                { text: '查看成员', icon: 'fa-users', action: 'viewMembers(row.id)' },
+                                { text: '查看日志', icon: 'fa-list-alt', action: 'viewLog(row.id, row.name)' },
+                                { divider: true },
+                                { text: '删除', icon: 'fa-remove', action: '$.operate.remove(row.id)', permissionClass: removeFlag }
+                            ];
+
+                            var mainAction = {
+                                text: '编辑',
+                                icon: 'fa-edit',
+                                action: '$.operate.edit(row.id)',
+                                permissionClass: editFlag,
+                                btnClass: 'btn-success'
+                            };
+
+                            return ImCommon.buildActionDropdown(row, menuItems, mainAction);
+                        }
+                    }],
+                    responseHandler: function (res) {
                         ImCommon.hideLoading();
+                        return ImCommon.handleTableResponse(res, '暂无群组数据', '#bootstrap-table');
+                    },
+                    onLoadError: function (status) {
+                        ImCommon.hideLoading();
+                        $.modal.msgError("数据加载失败，请稍后重试");
+                    },
+                    onLoadSuccess: function () {
+                        ImCommon.removeEmptyData('#bootstrap-table');
+                    },
+                    ajaxOptions: {
+                        beforeSend: function () {
+                            ImCommon.showLoading('.select-table');
+                        },
+                        complete: function () {
+                            ImCommon.hideLoading();
+                        }
                     }
-                }
+                };
+                $.table.init(options);
+            });
+
+            /**
+             * 覆盖默认的添加方法，使用合适的弹窗大小
+             */
+            $.operate.add = function (id) {
+                table.set();
+                $.modal.open("添加" + table.options.modalName, $.operate.addUrl(id), 750, 650);
             };
-            $.table.init(options);
-        });
 
-        /**
-         * 覆盖默认的添加方法，使用合适的弹窗大小
-         */
-        $.operate.add = function(id) {
-            table.set();
-            $.modal.open("添加" + table.options.modalName, $.operate.addUrl(id), 750, 650);
-        };
+            /**
+             * 覆盖默认的编辑方法，使用合适的弹窗大小
+             */
+            $.operate.edit = function (id) {
+                table.set();
+                $.modal.open("修改" + table.options.modalName, $.operate.editUrl(id), 750, 650);
+            };
 
-        /**
-         * 覆盖默认的编辑方法，使用合适的弹窗大小
-         */
-        $.operate.edit = function(id) {
-            table.set();
-            $.modal.open("修改" + table.options.modalName, $.operate.editUrl(id), 750, 650);
-        };
+            /**
+             * 加载统计数据
+             */
+            function loadStatistics() {
+                var $stats = $('.stat-number');
+                $stats.html('<i class="fa fa-spinner fa-spin"></i>');
 
-        /**
-         * 加载统计数据
-         */
-        function loadStatistics() {
-            ImCommon.loadStatisticsWithCache(
-                prefix + "/statistics",
-                function(data) {
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#activeCount").text(data.activeCount || 0);
-                    $("#mutedCount").text(data.mutedCount || 0);
-                    $("#largeCount").text(data.largeCount || 0);
-                },
-                'group_statistics',
-                5
-            );
-        }
+                ImCommon.get(prefix + "/statistics", function (data) {
+                    $('#totalCount').text(data.totalCount || 0);
+                    $('#activeCount').text(data.activeCount || 0);
+                    $('#mutedCount').text(data.mutedCount || 0);
+                    $('#largeCount').text(data.largeCount || 0);
+                });
+            }
 
-        /**
-         * 查看成员
-         */
-        function viewMembers(groupId) {
-            var url = prefix + "/members/" + groupId;
-            $.modal.openOptions({
-                title: '群组成员管理',
-                url: url,
-                width: '95%',
-                height: '90%'
+            /**
+             * 按状态过滤（扩展功能，后端需支持对应标记筛选，目前仅作为示例展示交互同步）
+             */
+            function filterByStatus(type) {
+                if (type === 'muted') {
+                    $("select[name='allMuted']").val('1');
+                } else if (type === '') {
+                    $.form.reset();
+                }
+                // type 为 active 或 large 时目前后端 list 接口尚未直接支持该标记位筛选
+                // 后续如有需求可扩展 ImGroup 实现对应逻辑
+                doSearch();
+            }
+
+            // 绑定刷新按钮同步更新统计
+            $(document).off('click', "button[name='refresh']").on('click', "button[name='refresh']", function () {
+                $.table.refresh();
+                loadStatistics();
             });
-        }
 
-        /**
-         * 查看日志
-         */
-        function viewLog(groupId, groupName) {
-            var url = prefix + "/log/{id}/view";
-            $.modal.openOptions({
-                title: groupName + ' - 操作日志',
-                url: url.replace('{id}', groupId),
-                width: '95%',
-                height: '90%'
-            });
-        }
+            /**
+             * 查看成员
+             */
+            function viewMembers(groupId) {
+                var url = prefix + "/members/" + groupId;
+                $.modal.openOptions({
+                    title: '群组成员管理',
+                    url: url,
+                    width: '95%',
+                    height: '90%'
+                });
+            }
 
-        /**
-         * 清空搜索条件
-         */
-        function clearSearch() {
-            $.form.reset();
-            $('#searchStatus').hide();
-            $.table.search();
-        }
+            /**
+             * 查看日志
+             */
+            function viewLog(groupId, groupName) {
+                var url = prefix + "/log/{id}/view";
+                $.modal.openOptions({
+                    title: groupName + ' - 操作日志',
+                    url: url.replace('{id}', groupId),
+                    width: '95%',
+                    height: '90%'
+                });
+            }
 
-        /**
-         * 执行搜索
-         */
-        function doSearch() {
-            ImCommon.showSearchConditions('#group-form', '#searchStatus', 'clearSearch()');
-            $.table.search();
-        }
-    </script>
+            /**
+             * 清空搜索条件
+             */
+            function clearSearch() {
+                $.form.reset();
+                $('#searchStatus').hide();
+                $.table.search();
+            }
+
+            /**
+             * 执行搜索
+             */
+            function doSearch() {
+                ImCommon.showSearchConditions('#group-form', '#searchStatus', 'clearSearch()');
+                $.table.search();
+            }
+        </script>
 </body>
+
 </html>

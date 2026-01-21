@@ -15,11 +15,11 @@ var ImCommon = {
      * @param successCallback 成功回调
      * @param errorCallback 失败回调
      */
-    get: function(url, successCallback, errorCallback) {
+    get: function (url, successCallback, errorCallback) {
         $.ajax({
             url: url,
             type: 'GET',
-            success: function(result) {
+            success: function (result) {
                 if (result.code === 0 || result.code === 200) {
                     if (typeof successCallback === 'function') {
                         successCallback(result.data || result);
@@ -32,7 +32,7 @@ var ImCommon = {
                     }
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 if (typeof errorCallback === 'function') {
                     errorCallback(xhr);
                 } else {
@@ -48,8 +48,8 @@ var ImCommon = {
      * @param data 请求数据
      * @param successCallback 成功回调
      */
-    post: function(url, data, successCallback) {
-        $.operate.post(url, data, function(result) {
+    post: function (url, data, successCallback) {
+        $.operate.post(url, data, function (result) {
             if (typeof successCallback === 'function') {
                 successCallback(result);
             }
@@ -63,7 +63,7 @@ var ImCommon = {
      * @param style 额外样式
      * @returns {string} HTML字符串
      */
-    formatAvatar: function(avatar, cssClass, style) {
+    formatAvatar: function (avatar, cssClass, style) {
         cssClass = cssClass || 'user-avatar';
         style = style || '';
 
@@ -79,7 +79,7 @@ var ImCommon = {
      * @param size 尺寸，默认32px
      * @returns {string} HTML字符串
      */
-    formatUserAvatar: function(avatar, size) {
+    formatUserAvatar: function (avatar, size) {
         size = size || 32;
         return this.formatAvatar(avatar, 'user-avatar', 'width:' + size + 'px;height:' + size + 'px;');
     },
@@ -90,9 +90,24 @@ var ImCommon = {
      * @param size 尺寸，默认32px
      * @returns {string} HTML字符串
      */
-    formatCircleAvatar: function(avatar, size) {
+    formatCircleAvatar: function (avatar, size) {
         size = size || 32;
         return this.formatAvatar(avatar, 'img-circle', 'width:' + size + 'px;height:' + size + 'px;');
+    },
+
+    /**
+     * 格式化展示用户信息卡片
+     * @param userId 用户ID
+     * @param username 用户名
+     * @param avatar 用户头像
+     * @param nickname 昵称 (可选)
+     * @returns {string} HTML
+     */
+    formatUserCard: function (userId, username, avatar, nickname) {
+        var nameStr = (nickname && nickname !== username) ? (nickname + ' (' + username + ')') : username;
+        var avatarHtml = this.formatUserAvatar(avatar, 24);
+        return '<div class="user-info-card" title="ID: ' + userId + '">' +
+            avatarHtml + '<span class="m-l-xs">' + nameStr + '</span></div>';
     },
 
     /**
@@ -100,7 +115,7 @@ var ImCommon = {
      * @param avatar 头像路径
      * @returns {string} HTML字符串
      */
-    formatMemberAvatar: function(avatar) {
+    formatMemberAvatar: function (avatar) {
         return this.formatAvatar(avatar, 'member-avatar', 'width:40px;height:40px;');
     },
 
@@ -109,7 +124,7 @@ var ImCommon = {
      * @param gender 性别值：0-未知，1-男，2-女
      * @returns {string} HTML字符串
      */
-    formatGender: function(gender) {
+    formatGender: function (gender) {
         if (gender == 1) return '<span class="badge badge-primary">男</span>';
         if (gender == 2) return '<span class="badge badge-danger">女</span>';
         return '<span class="badge badge-default">未知</span>';
@@ -120,7 +135,7 @@ var ImCommon = {
      * @param status 状态值：0-停用，1-正常
      * @returns {string} HTML字符串
      */
-    formatUserStatus: function(status) {
+    formatUserStatus: function (status) {
         if (status == 1) return '<span class="badge badge-success">正常</span>';
         return '<span class="badge badge-danger">停用</span>';
     },
@@ -130,7 +145,7 @@ var ImCommon = {
      * @param isOnline 在线状态：0-离线，1-在线
      * @returns {string} HTML字符串
      */
-    formatOnlineStatus: function(isOnline) {
+    formatOnlineStatus: function (isOnline) {
         if (isOnline == 1) return '<span class="badge badge-success">在线</span>';
         return '<span class="badge badge-default">离线</span>';
     },
@@ -140,7 +155,7 @@ var ImCommon = {
      * @param type 会话类型：PRIVATE-私聊，GROUP-群聊
      * @returns {string} HTML字符串
      */
-    formatConversationType: function(type) {
+    formatConversationType: function (type) {
         if (type === 'PRIVATE') {
             return '<span class="badge badge-primary">私聊</span>';
         } else if (type === 'GROUP') {
@@ -154,7 +169,7 @@ var ImCommon = {
      * @param messageType 消息类型：TEXT-文本，IMAGE-图片，FILE-文件，VOICE-语音，VIDEO-视频
      * @returns {string} HTML字符串
      */
-    formatMessageType: function(messageType) {
+    formatMessageType: function (messageType) {
         var typeMap = {
             'TEXT': '<span class="badge badge-primary">文本</span>',
             'IMAGE': '<span class="badge badge-info">图片</span>',
@@ -171,7 +186,7 @@ var ImCommon = {
      * @param role 角色类型：OWNER-群主，ADMIN-管理员，MEMBER-成员
      * @returns {string} HTML字符串
      */
-    formatGroupRole: function(role) {
+    formatGroupRole: function (role) {
         var roleMap = {
             'OWNER': '<span class="role-badge role-owner">群主</span>',
             'ADMIN': '<span class="role-badge role-admin">管理员</span>',
@@ -185,7 +200,7 @@ var ImCommon = {
      * @param isMuted 禁言状态：0-正常，1-已禁言
      * @returns {string} HTML字符串
      */
-    formatMuteStatus: function(isMuted) {
+    formatMuteStatus: function (isMuted) {
         if (isMuted == 1) {
             return '<span class="badge badge-warning" style="font-size:11px;">已禁言</span>';
         }
@@ -197,7 +212,7 @@ var ImCommon = {
      * @param dateTime 时间字符串
      * @returns {string} 格式化后的时间
      */
-    formatDateTime: function(dateTime) {
+    formatDateTime: function (dateTime) {
         if (!dateTime) return '-';
         if (typeof dateTime === 'string') {
             return dateTime.substring(0, 19).replace('T', ' ');
@@ -210,7 +225,7 @@ var ImCommon = {
      * @param dateTime 时间字符串或Date对象
      * @returns {string} 相对时间描述
      */
-    formatRelativeTime: function(dateTime) {
+    formatRelativeTime: function (dateTime) {
         if (!dateTime) return '-';
 
         var date;
@@ -254,7 +269,7 @@ var ImCommon = {
      * @param showRelative 是否显示相对时间，默认true
      * @returns {string} 格式化后的时间，包含title属性显示完整时间
      */
-    formatDateTimeWithRelative: function(dateTime, showRelative) {
+    formatDateTimeWithRelative: function (dateTime, showRelative) {
         if (showRelative === false) {
             return '<span title="' + this.formatDateTime(dateTime) + '">' + this.formatDateTime(dateTime) + '</span>';
         }
@@ -275,7 +290,7 @@ var ImCommon = {
      * @param maxLength 最大长度，默认50
      * @returns {string} 截断后的文本
      */
-    truncateText: function(text, maxLength) {
+    truncateText: function (text, maxLength) {
         maxLength = maxLength || 50;
         if (!text) return '-';
         if (text.length <= maxLength) return text;
@@ -289,7 +304,7 @@ var ImCommon = {
      * @param maxCount 最大选择数量，默认null（不限制）
      * @returns {boolean} 是否通过验证
      */
-    validateBatchOperation: function(rows, minCount, maxCount) {
+    validateBatchOperation: function (rows, minCount, maxCount) {
         minCount = minCount || 1;
         if (rows.length == 0) {
             $.modal.alertWarning("请至少选择一条记录");
@@ -313,7 +328,7 @@ var ImCommon = {
      * @param cacheKey 缓存键名，默认使用URL
      * @param cacheDuration 缓存时长（分钟），默认5分钟
      */
-    loadStatisticsWithCache: function(url, updateUI, cacheKey, cacheDuration) {
+    loadStatisticsWithCache: function (url, updateUI, cacheKey, cacheDuration) {
         cacheKey = cacheKey || 'statistics_' + url;
         cacheDuration = cacheDuration || 5;
         var now = new Date().getTime();
@@ -333,7 +348,7 @@ var ImCommon = {
         }
 
         // 请求数据
-        $.get(url, function(result) {
+        $.get(url, function (result) {
             if (result.code == 0) {
                 updateUI(result.data);
 
@@ -347,7 +362,7 @@ var ImCommon = {
                     console.warn('写入缓存失败:', e);
                 }
             }
-        }).fail(function() {
+        }).fail(function () {
             console.error('请求统计数据失败:', url);
         });
     },
@@ -358,14 +373,14 @@ var ImCommon = {
      * @param delay 延迟时间（毫秒），默认500ms
      * @returns {Function} 防抖后的函数
      */
-    debounce: function(func, delay) {
+    debounce: function (func, delay) {
         delay = delay || 500;
         var timer = null;
-        return function() {
+        return function () {
             var context = this;
             var args = arguments;
             clearTimeout(timer);
-            timer = setTimeout(function() {
+            timer = setTimeout(function () {
                 func.apply(context, args);
             }, delay);
         };
@@ -377,7 +392,7 @@ var ImCommon = {
      * @param pageList 可选的每页条数列表
      * @returns {Object} 分页配置对象
      */
-    getPaginationConfig: function(pageSize, pageList) {
+    getPaginationConfig: function (pageSize, pageList) {
         return {
             pagination: true,
             pageSize: pageSize || 20,
@@ -390,7 +405,7 @@ var ImCommon = {
      * 显示加载状态
      * @param target 目标元素选择器，默认为表格容器
      */
-    showLoading: function(target) {
+    showLoading: function (target) {
         target = target || '.select-table';
         var $target = $(target);
 
@@ -412,7 +427,7 @@ var ImCommon = {
      * 隐藏加载状态
      * @param target 目标元素选择器，默认为表格容器
      */
-    hideLoading: function(target) {
+    hideLoading: function (target) {
         target = target || '.select-table';
         $(target).find('.im-table-loading').remove();
     },
@@ -423,7 +438,7 @@ var ImCommon = {
      * @param icon 图标类名，默认为'fa-inbox'
      * @returns {string} HTML字符串
      */
-    formatEmptyData: function(message, icon) {
+    formatEmptyData: function (message, icon) {
         message = message || '暂无数据';
         icon = icon || 'fa-inbox';
         return '<div class="text-center" style="padding:40px 20px;color:#999;">' +
@@ -440,7 +455,7 @@ var ImCommon = {
      * @param icon 图标类名，默认为'fa-inbox'
      * @returns {string} HTML字符串
      */
-    formatEmptyDataWithLink: function(message, linkText, linkAction, icon) {
+    formatEmptyDataWithLink: function (message, linkText, linkAction, icon) {
         message = message || '暂无数据';
         linkText = linkText || '立即添加';
         icon = icon || 'fa-inbox';
@@ -459,7 +474,7 @@ var ImCommon = {
      * @param target 目标表格
      * @returns {Array|Object} 处理后的数据
      */
-    handleTableResponse: function(res, emptyMessage, target) {
+    handleTableResponse: function (res, emptyMessage, target) {
         if (!res) {
             if (emptyMessage) {
                 this.showEmptyDataInTable(emptyMessage, target);
@@ -487,7 +502,7 @@ var ImCommon = {
      * @param message 提示信息
      * @param target 目标表格
      */
-    showEmptyDataInTable: function(message, target) {
+    showEmptyDataInTable: function (message, target) {
         target = target || '#bootstrap-table';
         var $table = $(target);
 
@@ -507,7 +522,7 @@ var ImCommon = {
      * 移除空数据提示（准备加载新数据）
      * @param target 目标表格
      */
-    removeEmptyData: function(target) {
+    removeEmptyData: function (target) {
         target = target || '#bootstrap-table';
         var $table = $(target);
         $table.next('.im-empty-data').remove();
@@ -520,7 +535,7 @@ var ImCommon = {
      * @param maxLength 最大长度，默认50
      * @returns {string} HTML字符串，带title属性
      */
-    formatTextWithTooltip: function(text, maxLength) {
+    formatTextWithTooltip: function (text, maxLength) {
         maxLength = maxLength || 50;
         if (!text) return '-';
 
@@ -537,7 +552,7 @@ var ImCommon = {
      * @param text 原文本
      * @returns {string} 转义后的文本
      */
-    escapeHtml: function(text) {
+    escapeHtml: function (text) {
         if (!text) return '';
 
         var map = {
@@ -548,7 +563,7 @@ var ImCommon = {
             "'": '&#039;'
         };
 
-        return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
+        return text.toString().replace(/[&<>"']/g, function (m) { return map[m]; });
     },
 
     /**
@@ -556,7 +571,7 @@ var ImCommon = {
      * @param size 文件大小（字节）
      * @returns {string} 格式化后的大小（如"1.5MB"）
      */
-    formatFileSize: function(size) {
+    formatFileSize: function (size) {
         if (!size || size === 0) return '0 B';
 
         var units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -581,9 +596,9 @@ var ImCommon = {
          * @param tableId 表格ID
          * @param columns 列配置数组
          */
-        save: function(tableId, columns) {
+        save: function (tableId, columns) {
             try {
-                var config = columns.map(function(col) {
+                var config = columns.map(function (col) {
                     return {
                         field: col.field,
                         visible: col.visible,
@@ -601,7 +616,7 @@ var ImCommon = {
          * @param tableId 表格ID
          * @returns {Array|null} 列配置数组
          */
-        get: function(tableId) {
+        get: function (tableId) {
             try {
                 var config = localStorage.getItem(tableId + '_columns');
                 return config ? JSON.parse(config) : null;
@@ -617,11 +632,11 @@ var ImCommon = {
          * @param columns 列定义数组
          * @returns {Array} 应用配置后的列定义数组
          */
-        apply: function(tableId, columns) {
+        apply: function (tableId, columns) {
             var config = this.get(tableId);
             if (config) {
-                columns.forEach(function(col) {
-                    var saved = config.find(function(c) { return c.field === col.field; });
+                columns.forEach(function (col) {
+                    var saved = config.find(function (c) { return c.field === col.field; });
                     if (saved) {
                         col.visible = saved.visible;
                         if (saved.width) col.width = saved.width;
@@ -638,7 +653,7 @@ var ImCommon = {
      * @param tableId 表格ID或jQuery对象
      * @param options 配置选项
      */
-    updateSelectedInfo: function(tableId, options) {
+    updateSelectedInfo: function (tableId, options) {
         options = options || {};
         var selectedInfoId = options.selectedInfoId || '#selectedInfo';
         var selectedCountId = options.selectedCountId || '#selectedCount';
@@ -673,7 +688,7 @@ var ImCommon = {
      * 清空表格选择
      * @param tableId 表格ID
      */
-    clearSelection: function(tableId) {
+    clearSelection: function (tableId) {
         var $table = typeof tableId === 'string' ? $(tableId) : tableId;
         $table.bootstrapTable('uncheckAll');
     },
@@ -685,7 +700,7 @@ var ImCommon = {
      * @param mainAction 主操作按钮配置 {text, icon, action, permissionClass, btnClass}
      * @returns {string} HTML字符串
      */
-    buildActionDropdown: function(row, menuItems, mainAction) {
+    buildActionDropdown: function (row, menuItems, mainAction) {
         var html = '<div class="btn-group">';
 
         // 主操作按钮
@@ -698,15 +713,15 @@ var ImCommon = {
                 .replace(/row\.nickname/g, "'" + (row.nickname || '') + "'");
 
             html += '<a class="btn ' + btnClass + ' btn-xs ' + permissionClass +
-                    '" href="javascript:void(0)" onclick="' + action + '" title="' + mainAction.text + '">' +
-                    '<i class="fa ' + mainAction.icon + '"></i> ' + mainAction.text +
-                    '</a> ';
+                '" href="javascript:void(0)" onclick="' + action + '" title="' + mainAction.text + '">' +
+                '<i class="fa ' + mainAction.icon + '"></i> ' + mainAction.text +
+                '</a> ';
         }
 
         // 下拉菜单按钮
         html += '<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">' +
-                '<i class="fa fa-ellipsis-h"></i></button>' +
-                '<ul class="dropdown-menu pull-right">';
+            '<i class="fa fa-ellipsis-h"></i></button>' +
+            '<ul class="dropdown-menu pull-right">';
 
         // 菜单项
         for (var i = 0; i < menuItems.length; i++) {
@@ -721,8 +736,8 @@ var ImCommon = {
                     .replace(/row\.nickname/g, "'" + (row.nickname || '') + "'");
 
                 html += '<li><a class="' + permissionClass + '" href="javascript:void(0)" onclick="' + action + '">' +
-                        '<i class="fa ' + item.icon + '"></i> ' + item.text +
-                        '</a></li>';
+                    '<i class="fa ' + item.icon + '"></i> ' + item.text +
+                    '</a></li>';
             }
         }
 
@@ -736,13 +751,13 @@ var ImCommon = {
      * @param statusId 状态显示元素ID
      * @param clearAction 清除操作函数名
      */
-    showSearchConditions: function(formId, statusId, clearAction) {
+    showSearchConditions: function (formId, statusId, clearAction) {
         formId = formId || '#user-form';
         statusId = statusId || '#searchStatus';
         clearAction = clearAction || 'clearSearch()';
 
         var conditions = [];
-        $(formId + ' input[type="text"], ' + formId + ' select').each(function() {
+        $(formId + ' input[type="text"], ' + formId + ' select').each(function () {
             var $input = $(this);
             var $label = $input.closest('li').find('label');
             var name = $label.text().replace('：', '').replace(':', '');
@@ -767,7 +782,7 @@ var ImCommon = {
      * @param clearAction 清除操作函数名（可选）
      * @returns {string} HTML字符串
      */
-    formatEmptyState: function(message, clearAction) {
+    formatEmptyState: function (message, clearAction) {
         message = message || '暂无数据';
         var clearBtn = clearAction ?
             '<button class="btn btn-primary btn-sm" onclick="' + clearAction + '" style="margin-top:15px;">清空筛选</button>' : '';
@@ -785,7 +800,7 @@ var ImCommon = {
      * @param searchContainer 搜索容器选择器，默认为 .search-collapse
      * @param options 配置选项
      */
-    initSearchCollapse: function(searchContainer, options) {
+    initSearchCollapse: function (searchContainer, options) {
         searchContainer = searchContainer || '.search-collapse';
         options = options || {
             collapsed: false,           // 默认是否折叠
@@ -813,7 +828,7 @@ var ImCommon = {
             $container.append($btn);
 
             // 绑定点击事件
-            $btn.on('click', function() {
+            $btn.on('click', function () {
                 var isCollapsed = $container.hasClass('collapsed');
                 if (isCollapsed) {
                     $container.removeClass('collapsed');
@@ -836,7 +851,7 @@ var ImCommon = {
      * 切换搜索区域折叠状态
      * @param searchContainer 搜索容器选择器
      */
-    toggleSearchCollapse: function(searchContainer) {
+    toggleSearchCollapse: function (searchContainer) {
         searchContainer = searchContainer || '.search-collapse';
         var $container = $(searchContainer);
         var $btn = $container.find('.search-toggle-btn');
@@ -869,7 +884,7 @@ var ImCommon = {
          * @param handler 处理函数
          * @param description 描述信息
          */
-        register: function(key, handler, description) {
+        register: function (key, handler, description) {
             this.shortcuts[key.toLowerCase()] = {
                 handler: handler,
                 description: description || key
@@ -879,9 +894,9 @@ var ImCommon = {
         /**
          * 初始化快捷键监听
          */
-        init: function() {
+        init: function () {
             var self = this;
-            $(document).on('keydown', function(e) {
+            $(document).on('keydown', function (e) {
                 if (!self.isEnabled) return;
 
                 // 忽略在输入框中的按键
@@ -902,7 +917,7 @@ var ImCommon = {
         /**
          * 获取按键字符串
          */
-        _getKeyString: function(e) {
+        _getKeyString: function (e) {
             var keys = [];
             if (e.ctrlKey) keys.push('ctrl');
             if (e.altKey) keys.push('alt');
@@ -924,7 +939,7 @@ var ImCommon = {
         /**
          * 显示快捷键帮助面板
          */
-        showHelp: function() {
+        showHelp: function () {
             if (this.helpVisible) return;
             this.helpVisible = true;
 
@@ -948,12 +963,12 @@ var ImCommon = {
             $('body').append($bar);
 
             // 延迟显示
-            setTimeout(function() {
+            setTimeout(function () {
                 $bar.addClass('visible');
             }, 10);
 
             // 点击关闭
-            $bar.on('click', function() {
+            $bar.on('click', function () {
                 self.hideHelp();
             });
         },
@@ -961,10 +976,10 @@ var ImCommon = {
         /**
          * 隐藏快捷键帮助面板
          */
-        hideHelp: function() {
+        hideHelp: function () {
             this.helpVisible = false;
             $('#shortcutHelpBar').removeClass('visible');
-            setTimeout(function() {
+            setTimeout(function () {
                 $('#shortcutHelpBar').remove();
             }, 300);
         },
@@ -972,14 +987,14 @@ var ImCommon = {
         /**
          * 启用快捷键
          */
-        enable: function() {
+        enable: function () {
             this.isEnabled = true;
         },
 
         /**
          * 禁用快捷键
          */
-        disable: function() {
+        disable: function () {
             this.isEnabled = false;
         }
     },
@@ -989,7 +1004,7 @@ var ImCommon = {
      * 批量操作进度管理器
      */
     BatchProgress: {
-        show: function(target, options) {
+        show: function (target, options) {
             target = target || '#toolbar';
             options = options || {
                 total: 0,
@@ -1012,7 +1027,7 @@ var ImCommon = {
             $container.append(progressHtml);
         },
 
-        update: function(target, current, total, text) {
+        update: function (target, current, total, text) {
             target = target || '#toolbar';
             var $progress = $(target).find('#batchProgress');
             if ($progress.length === 0) return;
@@ -1024,18 +1039,18 @@ var ImCommon = {
             $progress.find('.batch-progress-text').text(statusText + ' ' + current + '/' + total);
         },
 
-        hide: function(target) {
+        hide: function (target) {
             target = target || '#toolbar';
             var $progress = $(target).find('#batchProgress');
             if ($progress.length > 0) {
                 $progress.removeClass('active');
-                setTimeout(function() {
+                setTimeout(function () {
                     $progress.remove();
                 }, 300);
             }
         },
 
-        complete: function(target, text) {
+        complete: function (target, text) {
             target = target || '#toolbar';
             var $progress = $(target).find('#batchProgress');
             if ($progress.length === 0) return;
@@ -1043,7 +1058,7 @@ var ImCommon = {
             $progress.find('.progress-fill').css('width', '100%');
             $progress.find('.batch-progress-text').text(text || '处理完成');
 
-            setTimeout(function() {
+            setTimeout(function () {
                 ImCommon.BatchProgress.hide(target);
             }, 1500);
         }
@@ -1055,7 +1070,7 @@ var ImCommon = {
      * @param tableId 表格ID
      * @param options 配置选项
      */
-    updateSelectedInfo: function(tableId, options) {
+    updateSelectedInfo: function (tableId, options) {
         options = options || {};
         // 目标容器改为工具栏，实现融合效果
         var targetToolbar = options.targetToolbar || '#toolbar';
@@ -1072,7 +1087,7 @@ var ImCommon = {
         // 获取或创建提示元素
         var $toolbar = $(targetToolbar);
         var $info = $toolbar.find('#' + infoId);
-        
+
         if ($info.length === 0) {
             $info = $('<span id="' + infoId + '" class="selected-info-text" style="display:none;"></span>');
             $toolbar.append($info);
@@ -1085,7 +1100,7 @@ var ImCommon = {
                 '<i class="fa fa-times-circle clear-link" onclick="ImCommon.clearSelection(\'' + tableId + '\')" title="取消选择"></i>'
             );
             $info.css('display', 'inline-flex').css('align-items', 'center'); // 显示
-            
+
             // 按钮状态控制
             $(multipleClass).removeClass('disabled').removeAttr('disabled');
             if (count === 1) {
@@ -1107,14 +1122,14 @@ var ImCommon = {
      * @param target 目标值
      * @param duration 动画时长（毫秒）
      */
-    animateNumber: function(element, target, duration) {
+    animateNumber: function (element, target, duration) {
         duration = duration || 1000;
         var $element = $(element);
         var start = parseInt($element.text()) || 0;
         var increment = (target - start) / (duration / 16);
         var current = start;
 
-        var timer = setInterval(function() {
+        var timer = setInterval(function () {
             current += increment;
             if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
                 current = target;
@@ -1129,7 +1144,7 @@ var ImCommon = {
      * @param data 数据对象，格式为 { selector: value }
      * @param duration 动画时长
      */
-    animateStatistics: function(data, duration) {
+    animateStatistics: function (data, duration) {
         duration = duration || 1000;
         for (var selector in data) {
             this.animateNumber(selector, data[selector], duration);
@@ -1143,11 +1158,11 @@ var ImCommon = {
      * @param columns 列配置数组
      * @param options 额外选项
      */
-    saveColumnConfig: function(tableId, columns, options) {
+    saveColumnConfig: function (tableId, columns, options) {
         options = options || {};
         try {
             var config = {
-                columns: columns.map(function(col) {
+                columns: columns.map(function (col) {
                     return {
                         field: col.field,
                         visible: col.visible !== false,
@@ -1169,7 +1184,7 @@ var ImCommon = {
      * @param tableId 表格ID
      * @returns {Object|null} 配置对象
      */
-    getColumnConfig: function(tableId) {
+    getColumnConfig: function (tableId) {
         try {
             var config = localStorage.getItem(tableId + '_columns_v2');
             return config ? JSON.parse(config) : null;
@@ -1186,7 +1201,7 @@ var ImCommon = {
      * @param type 消息类型：success, error, warning, info
      * @param duration 显示时长（毫秒），0 表示不自动关闭
      */
-    toast: function(message, type, duration) {
+    toast: function (message, type, duration) {
         type = type || 'info';
         duration = duration || 3000;
 
@@ -1237,19 +1252,19 @@ var ImCommon = {
         var $toast = $('#' + toastId);
 
         // 关闭按钮
-        $toast.find('.toast-close').on('click', function() {
+        $toast.find('.toast-close').on('click', function () {
             $toast.css('animation', 'slideOutRight 0.3s ease');
-            setTimeout(function() {
+            setTimeout(function () {
                 $toast.remove();
             }, 300);
         });
 
         // 自动关闭
         if (duration > 0) {
-            setTimeout(function() {
+            setTimeout(function () {
                 if ($toast.length > 0) {
                     $toast.css('animation', 'slideOutRight 0.3s ease');
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $toast.remove();
                     }, 300);
                 }
@@ -1271,7 +1286,7 @@ var ImCommon = {
          * @param operator 操作符（=, !=, >, <, like, in）
          * @param value 值
          */
-        add: function(tableId, field, operator, value) {
+        add: function (tableId, field, operator, value) {
             var key = tableId + '_filters';
             if (!this.filters[key]) {
                 this.filters[key] = [];
@@ -1288,7 +1303,7 @@ var ImCommon = {
          * @param tableId 表格ID
          * @returns {Array} 筛选条件数组
          */
-        get: function(tableId) {
+        get: function (tableId) {
             var key = tableId + '_filters';
             return this.filters[key] || [];
         },
@@ -1297,7 +1312,7 @@ var ImCommon = {
          * 清除筛选条件
          * @param tableId 表格ID
          */
-        clear: function(tableId) {
+        clear: function (tableId) {
             var key = tableId + '_filters';
             delete this.filters[key];
         },
@@ -1307,10 +1322,10 @@ var ImCommon = {
          * @param tableId 表格ID
          * @returns {Object} 查询参数对象
          */
-        buildParams: function(tableId) {
+        buildParams: function (tableId) {
             var filters = this.get(tableId);
             var params = {};
-            filters.forEach(function(filter, index) {
+            filters.forEach(function (filter, index) {
                 params['filter[' + index + '][field]'] = filter.field;
                 params['filter[' + index + '][operator]'] = filter.operator;
                 params['filter[' + index + '][value]'] = filter.value;
@@ -1324,7 +1339,7 @@ var ImCommon = {
      * 增强的数据导出功能
      * @param options 导出选项
      */
-    exportData: function(options) {
+    exportData: function (options) {
         options = options || {};
         var defaultOptions = {
             url: '',
@@ -1346,7 +1361,7 @@ var ImCommon = {
         var ids = [];
         if (defaultOptions.selectedOnly) {
             var rows = $(defaultOptions.tableId).bootstrapTable('getSelections');
-            ids = rows.map(function(row) { return row.id; });
+            ids = rows.map(function (row) { return row.id; });
         }
 
         // 显示进度
@@ -1366,7 +1381,7 @@ var ImCommon = {
             xhrFields: {
                 responseType: 'blob'
             },
-            success: function(blob, status, xhr) {
+            success: function (blob, status, xhr) {
                 var filename = defaultOptions.fileName + '.' + defaultOptions.fileType;
 
                 // 尝试从响应头获取文件名
@@ -1391,7 +1406,7 @@ var ImCommon = {
                     defaultOptions.onComplete(true);
                 }
             },
-            error: function() {
+            error: function () {
                 ImCommon.BatchProgress.hide('#toolbar');
                 ImCommon.toast('数据导出失败', 'error');
                 if (defaultOptions.onComplete) {
@@ -1406,7 +1421,7 @@ var ImCommon = {
      * 初始化页面通用功能
      * @param options 配置选项
      */
-    initPage: function(options) {
+    initPage: function (options) {
         options = options || {
             searchCollapse: true,
             keyboardShortcuts: true,
@@ -1426,34 +1441,34 @@ var ImCommon = {
             self._registerDefaultShortcuts(options.tableId);
         }
 
-        // 监听表格选中变化
+        // 监听表格选中变化 (防重绑定)
         if (options.tableId) {
-            $(options.tableId).on('check.bs.table uncheck.bs.table ' +
-                'check-all.bs.table uncheck-all.bs.table', function() {
-                self.updateSelectedInfo(options.tableId);
-            });
+            $(options.tableId).off('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table')
+                .on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', function () {
+                    self.updateSelectedInfo(options.tableId);
+                });
         }
     },
 
     /**
      * 注册默认快捷键
      */
-    _registerDefaultShortcuts: function(tableId) {
+    _registerDefaultShortcuts: function (tableId) {
         tableId = tableId || '#bootstrap-table';
         var self = this;
 
         // F1 - 显示快捷键帮助
-        this.KeyboardShortcuts.register('f1', function() {
+        this.KeyboardShortcuts.register('f1', function () {
             self.KeyboardShortcuts.showHelp();
         }, '快捷键帮助');
 
         // Ctrl+F - 聚焦搜索框
-        this.KeyboardShortcuts.register('ctrl+f', function() {
+        this.KeyboardShortcuts.register('ctrl+f', function () {
             $('.search-collapse input[type="text"]:first').focus();
         }, '聚焦搜索');
 
         // Ctrl+R - 刷新表格
-        this.KeyboardShortcuts.register('ctrl+r', function(e) {
+        this.KeyboardShortcuts.register('ctrl+r', function (e) {
             e.preventDefault();
             if ($.table && $.table.refresh) {
                 $.table.refresh();
@@ -1462,7 +1477,7 @@ var ImCommon = {
         }, '刷新表格');
 
         // ESC - 清除选择
-        this.KeyboardShortcuts.register('esc', function() {
+        this.KeyboardShortcuts.register('esc', function () {
             self.KeyboardShortcuts.hideHelp();
             if ($(tableId).length > 0) {
                 self.clearSelection(tableId);
@@ -1470,7 +1485,7 @@ var ImCommon = {
         }, '取消选择');
 
         // Ctrl+A - 全选
-        this.KeyboardShortcuts.register('ctrl+a', function() {
+        this.KeyboardShortcuts.register('ctrl+a', function () {
             if ($(tableId).length > 0) {
                 $(tableId).bootstrapTable('checkAll');
             }

@@ -1,5 +1,7 @@
 package com.ruoyi.web.service.impl;
 
+import com.ruoyi.common.utils.CacheUtils;
+import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.ShiroUtils;
 import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.domain.dto.ImUserAdvancedSearchDTO;
@@ -123,6 +125,28 @@ public class ImUserServiceImpl implements ImUserService {
         return userMapper.changeStatus(id, status);
     }
 
+    /**
+     * 简化版重置密码实现（无需管理员密码验证）
+     */
+    @Override
+    public int resetPasswordSimple(Long id, String password) {
+        try {
+            ImUser user = userMapper.selectImUserById(id);
+            if (user == null) {
+                return -2;
+            }
+
+            String encryptedPassword = passwordEncoder.encode(password);
+            user.setPassword(encryptedPassword);
+            user.setUpdateTime(new java.util.Date());
+
+            return userMapper.updateImUser(user);
+        } catch (Exception e) {
+            logger.error("简化版重置用户密码失败: userId={}", id, e);
+            return 0;
+        }
+    }
+
     @Override
     public int countOnlineUsers() {
         return userMapper.countOnlineUsers();
@@ -140,14 +164,33 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public Map<String, Object> getUserStatistics() {
-        Map<String, Object> result = new HashMap<>();
-        int total = userMapper.countTotalUsers();
-        int online = userMapper.countOnlineUsers();
-        result.put("totalCount", total);
-        result.put("onlineCount", online);
-        result.put("offlineCount", total - online);
-        result.put("disabledCount", userMapper.countDisabledUsers());
-        return result;
+        String cacheKey = "im:user:stats";
+        String cacheName = "im-stats";
+        
+        // 1. 尝试从缓存获取
+        Map<String, Object> stats = (Map<String, Object>) CacheUtils.get(cacheName, cacheKey);
+        if (stats != null) {
+            return stats;
+        }
+
+        // 2. 聚合统计查询
+        stats = userMapper.selectUserStatistics();
+        if (stats == null) {
+            stats = new HashMap<>();
+            stats.put("totalCount", 0);
+            stats.put("onlineCount", 0);
+            stats.put("disabledCount", 0);
+        }
+        
+        // 3. 计算离线人数及处理类型转换
+        long total = Long.parseLong(stats.getOrDefault("totalCount", 0).toString());
+        long online = Long.parseLong(stats.getOrDefault("onlineCount", 0).toString());
+        stats.put("offlineCount", total - online);
+        
+        // 4. 存入缓存 (TTL 60s 已在 ehcache-shiro.xml 配置)
+        CacheUtils.put(cacheName, cacheKey, stats);
+        
+        return stats;
     }
 
     @Override

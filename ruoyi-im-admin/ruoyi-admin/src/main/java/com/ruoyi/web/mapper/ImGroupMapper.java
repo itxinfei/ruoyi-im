@@ -4,6 +4,7 @@ import com.ruoyi.web.domain.ImGroup;
 import com.ruoyi.web.domain.ImGroupMember;
 import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IM群组Mapper接口（Admin模块专用）
@@ -88,4 +89,9 @@ public interface ImGroupMapper {
      * 统计大群数（成员>100）
      */
     int countLargeGroups();
+    /**
+     * 获取群组统计信息（聚合查询）
+     * @return 统计数据Map
+     */
+    Map<String, Object> selectGroupStatistics();
 }

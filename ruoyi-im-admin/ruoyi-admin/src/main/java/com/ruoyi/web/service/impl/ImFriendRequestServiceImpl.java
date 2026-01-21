@@ -1,5 +1,6 @@
 package com.ruoyi.web.service.impl;
 
+import com.ruoyi.common.utils.CacheUtils;
 import com.ruoyi.web.domain.ImFriend;
 import com.ruoyi.web.domain.ImFriendRequest;
 import com.ruoyi.web.mapper.ImFriendRequestMapper;
@@ -126,6 +127,30 @@ public class ImFriendRequestServiceImpl implements ImFriendRequestService {
 
     @Override
     public Map<String, Object> getFriendRequestStatistics() {
-        return imFriendRequestMapper.getFriendRequestStatistics();
+        String cacheKey = "im:friendRequest:stats";
+        String cacheName = "im-stats";
+
+        // 1. 尝试从缓存获取
+        Map<String, Object> stats = (Map<String, Object>) CacheUtils.get(cacheName, cacheKey);
+        if (stats != null) {
+            return stats;
+        }
+
+        // 2. 聚合统计查询
+        stats = imFriendRequestMapper.getFriendRequestStatistics();
+
+        // 3. 结果处理（防止Null并确保类型正确）
+        if (stats == null) {
+            stats = new java.util.HashMap<>();
+            stats.put("totalCount", 0);
+            stats.put("pendingCount", 0);
+            stats.put("approvedCount", 0);
+            stats.put("rejectedCount", 0);
+        }
+
+        // 4. 存入缓存
+        CacheUtils.put(cacheName, cacheKey, stats);
+
+        return stats;
     }
 }

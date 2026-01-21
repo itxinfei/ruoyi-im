@@ -117,6 +117,18 @@ public interface ImUserService {
     int resetPassword(Long id, String password, String adminPassword);
 
     /**
+     * 简化版重置密码（无需管理员密码验证）
+     *
+     * <p>管理员直接重置指定用户的密码</p>
+     * <p>重置后的密码会进行加密存储</p>
+     *
+     * @param id 用户ID，不能为空
+     * @param password 新密码，不能为空
+     * @return 操作结果：成功返回1，用户不存在返回-2，其他失败返回0
+     */
+    int resetPasswordSimple(Long id, String password);
+
+    /**
      * 修改用户状态
      *
      * <p>启用或停用用户账号</p>

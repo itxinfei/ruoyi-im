@@ -1,22 +1,60 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head>
     <th:block th:include="include :: header('好友请求管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-admin.css}" rel="stylesheet" />
 </head>
+
 <body class="gray-bg">
     <div class="container-div">
-        <div class="row" style="padding-top: 6px;">
+        <div class="row pt-5">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="im-stat-box bg-primary" onclick="filterByStatus('')">
+                            <div class="stat-number" id="totalCount">0</div>
+                            <div class="stat-label">申请总数</div>
+                            <i class="fa fa-list-alt stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="im-stat-box bg-warning" onclick="filterByStatus('PENDING')">
+                            <div class="stat-number" id="pendingCount">0</div>
+                            <div class="stat-label">待处理</div>
+                            <i class="fa fa-clock-o stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="im-stat-box bg-success" onclick="filterByStatus('APPROVED')">
+                            <div class="stat-number" id="approvedCount">0</div>
+                            <div class="stat-label">已同意</div>
+                            <i class="fa fa-check-circle stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="im-stat-box bg-danger" onclick="filterByStatus('REJECTED')">
+                            <div class="stat-number" id="rejectedCount">0</div>
+                            <div class="stat-label">已拒绝</div>
+                            <i class="fa fa-times-circle stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
+            <div class="col-sm-12 search-collapse">
                 <form id="friendRequest-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="input-label">申请人：</label><input type="text" name="userId" placeholder="请输入申请人ID"/>
+                                <label class="input-label">申请人：</label><input type="text" name="fromUserId"
+                                    placeholder="请输入申请人ID" />
                             </li>
                             <li>
-                                <label class="input-label">目标用户：</label><input type="text" name="targetUserId" placeholder="请输入目标用户ID"/>
+                                <label class="input-label">接收人：</label><input type="text" name="toUserId"
+                                    placeholder="请输入接收人ID" />
                             </li>
                             <li>
                                 <label class="input-label">状态：</label><select name="status">
@@ -28,13 +66,17 @@
                             </li>
                             <li class="select-time">
                                 <label>申请时间： </label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始时间"
+                                    name="params[beginTime]" />
                                 <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束时间"
+                                    name="params[endTime]" />
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i
+                                        class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i
+                                        class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -48,13 +90,16 @@
                     <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:friendRequest:add">
                         <i class="fa fa-plus"></i> 新增
                     </a>
-                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:friendRequest:edit">
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()"
+                        shiro:hasPermission="im:friendRequest:edit">
                         <i class="fa fa-edit"></i> 修改
                     </a>
-                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:friendRequest:remove">
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                        shiro:hasPermission="im:friendRequest:remove">
                         <i class="fa fa-remove"></i> 删除
                     </a>
-                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:friendRequest:export">
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()"
+                        shiro:hasPermission="im:friendRequest:export">
                         <i class="fa fa-download"></i> 导出
                     </a>
                 </div>
@@ -75,11 +120,15 @@
     <th:block th:include="include :: footer" />
     <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('im:friendRequest:edit')}]];
-        var removeFlag = [[${@permission.hasPermi('im:friendRequest:remove')}]];
+        var editFlag = [[${@permission.hasPermi('im:friendRequest:edit') }]];
+        var removeFlag = [[${@permission.hasPermi('im:friendRequest:remove') }]];
         var prefix = ctx + "im/friendRequest";
 
-        $(function() {
+        $(function () {
+            // 初始化通用功能
+            ImCommon.initPage({ tableId: '#bootstrap-table' });
+            loadStatistics();
+
             var options = {
                 url: prefix + "/list",
                 toolbar: "toolbar",
@@ -119,33 +168,33 @@
                     title: 'ID',
                     visible: false
                 }, {
-                    field: 'userId',
+                    field: 'fromUserId',
                     title: '申请人ID',
                     width: '100'
                 }, {
-                    field: 'userName',
-                    title: '申请人',
+                    field: 'fromUsername',
+                    title: '申请人账号',
                     width: '120',
-                    formatter: function(value, row, index) {
-                        return value || '-';
+                    formatter: function (value, row, index) {
+                        return ImCommon.formatUserCard(row.fromUserId, value, row.fromAvatar);
                     }
                 }, {
-                    field: 'targetUserId',
-                    title: '目标用户ID',
+                    field: 'toUserId',
+                    title: '接收人ID',
                     width: '100',
                     visible: false
                 }, {
-                    field: 'targetUserName',
-                    title: '目标用户',
+                    field: 'toUsername',
+                    title: '接收人',
                     width: '120',
-                    formatter: function(value, row, index) {
+                    formatter: function (value, row, index) {
                         return value || '-';
                     }
                 }, {
                     field: 'message',
                     title: '申请消息',
                     width: '200',
-                    formatter: function(value, row, index) {
+                    formatter: function (value, row, index) {
                         if (!value) return '<span class="text-muted">-</span>';
                         if (value.length > 30) {
                             return value.substring(0, 30) + '...';
@@ -157,7 +206,7 @@
                     title: '状态',
                     align: 'center',
                     width: '90',
-                    formatter: function(value, row, index) {
+                    formatter: function (value, row, index) {
                         if (value === 'PENDING') { return '<span class="badge badge-warning">待处理</span>'; }
                         if (value === 'APPROVED') { return '<span class="badge badge-success">已同意</span>'; }
                         if (value === 'REJECTED') { return '<span class="badge badge-danger">已拒绝</span>'; }
@@ -168,21 +217,21 @@
                     title: '申请时间',
                     width: '160',
                     sortable: true,
-                    formatter: function(value, row, index) {
+                    formatter: function (value, row, index) {
                         return ImCommon.formatDateTimeWithRelative(value);
                     }
                 }, {
                     field: 'processTime',
                     title: '处理时间',
                     width: '160',
-                    formatter: function(value, row, index) {
+                    formatter: function (value, row, index) {
                         return ImCommon.formatDateTimeWithRelative(value);
                     }
                 }, {
                     title: '操作',
                     align: 'center',
                     width: '120',
-                    formatter: function(value, row, index) {
+                    formatter: function (value, row, index) {
                         var menuItems = [
                             { text: '删除', icon: 'fa-remove', action: '$.operate.remove(\'' + row.id + '\')', permissionClass: removeFlag }
                         ];
@@ -198,28 +247,51 @@
                         return ImCommon.buildActionDropdown(row, menuItems, mainAction);
                     }
                 }],
-                responseHandler: function(res) {
+                responseHandler: function (res) {
                     ImCommon.hideLoading();
                     return ImCommon.handleTableResponse(res, '暂无好友申请数据', '#bootstrap-table');
                 },
-                onLoadError: function(status) {
+                onLoadError: function (status) {
                     ImCommon.hideLoading();
                     $.modal.msgError("数据加载失败，请稍后重试");
                 },
-                onLoadSuccess: function() {
+                onLoadSuccess: function () {
                     ImCommon.removeEmptyData('#bootstrap-table');
                 },
                 ajaxOptions: {
-                    beforeSend: function() {
+                    beforeSend: function () {
                         ImCommon.showLoading('.select-table');
                     },
-                    complete: function() {
+                    complete: function () {
                         ImCommon.hideLoading();
                     }
                 }
             };
             $.table.init(options);
         });
+
+        /**
+         * 加载统计数据
+         */
+        function loadStatistics() {
+            var $stats = $('.stat-number');
+            $stats.html('<i class="fa fa-spinner fa-spin"></i>');
+
+            ImCommon.get(prefix + "/statistics", function (data) {
+                $('#totalCount').text(data.totalCount || 0);
+                $('#pendingCount').text(data.pendingCount || 0);
+                $('#approvedCount').text(data.approvedCount || 0);
+                $('#rejectedCount').text(data.rejectedCount || 0);
+            });
+        }
+
+        /**
+         * 按状态过滤
+         */
+        function filterByStatus(status) {
+            $("select[name='status']").val(status);
+            doSearch();
+        }
 
         /**
          * 清空搜索条件
@@ -237,6 +309,13 @@
             ImCommon.showSearchConditions('#friendRequest-form', '#searchStatus', 'clearSearch()');
             $.table.search();
         }
+
+        // 绑定刷新按钮同步更新统计
+        $(document).off('click', "button[name='refresh']").on('click', "button[name='refresh']", function () {
+            $.table.refresh();
+            loadStatistics();
+        });
     </script>
 </body>
+
 </html>

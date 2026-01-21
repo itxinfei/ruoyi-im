@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * IM用户Mapper接口（Admin模块专用）
@@ -99,6 +100,12 @@ public interface ImUserMapper {
      * 统计禁用用户数
      */
     int countDisabledUsers();
+
+    /**
+     * 获取用户统计信息（聚合查询）
+     * @return 统计数据Map
+     */
+    Map<String, Object> selectUserStatistics();
 
     /**
      * 检查用户是否有关联数据

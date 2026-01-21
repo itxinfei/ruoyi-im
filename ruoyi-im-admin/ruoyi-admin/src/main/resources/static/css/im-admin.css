@@ -1,204 +1,237 @@
 /**
- * IM 管理后台通用样式 - 精致版
- * 优化细节体验，保持若依原生风格
+ * RuoYi-IM 管理系统 UI 设计系统 (极致简约版)
+ * 遵循“极简实用”原则，强调功能层级、视觉重心与专业感。
  */
 
-/* ========== 辅助类 ========== */
-.pt-5 { padding-top: 5px !important; }
-.mb-10 { margin-bottom: 10px !important; }
-
-/* ========== 统计卡片 (精致质感) ========== */
-.im-stat-box {
-    padding: 20px 24px;
-    border-radius: 4px; /* 回归若依的微圆角 */
-    color: #fff;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 15px;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); /* 阴影更柔和 */
-    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+:root {
+    --im-primary: #2563eb;
+    --im-primary-soft: #eff6ff;
+    --im-success: #10b981;
+    --im-warning: #f59e0b;
+    --im-danger: #ef4444;
+    --im-text-main: #1f2937;
+    --im-text-sub: #6b7280;
+    --im-bg-gray: #f9fafb;
+    --im-border: #e2e8f0;
+    --im-radius: 4px;
+    --im-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-.im-stat-box:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+/* ========== 基础排版 ========== */
+.gray-bg {
+    background-color: var(--im-bg-gray) !important;
 }
 
-.im-stat-box .stat-number {
-    font-size: 30px;
-    font-weight: 700;
-    margin-bottom: 4px;
-    letter-spacing: 0.5px; /* 增加数字间距，更易读 */
-    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+/* ========== 高质感工作台组件 ========== */
+
+/* 1. 扁平统计卡片 (Premium Minimalist) */
+.im-stat-group {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
-.im-stat-box .stat-label {
-    font-size: 13px;
-    opacity: 0.9;
-    letter-spacing: 0.5px;
-}
-
-.im-stat-box .stat-icon {
-    position: absolute;
-    right: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 42px;
-    opacity: 0.15; /* 降低透明度，作为背景纹理 */
-    transition: transform 0.3s ease;
-}
-
-.im-stat-box:hover .stat-icon {
-    transform: translateY(-50%) scale(1.1);
-}
-
-/* 渐变背景 (微调角度，更显高级) */
-.bg-primary { background: linear-gradient(120deg, #1ab394 0%, #16987e 100%); }
-.bg-success { background: linear-gradient(120deg, #1c84c6 0%, #1872ab 100%); }
-.bg-danger  { background: linear-gradient(120deg, #ed5565 0%, #d64050 100%); }
-.bg-warning { background: linear-gradient(120deg, #f8ac59 0%, #df9036 100%); }
-
-/* ========== 搜索区域 (实用主义) ========== */
-.search-collapse {
+.im-stat-item {
+    flex: 1;
     background: #fff;
-    border: 1px solid #e7eaec;
-    border-top: none; /* 与页面背景融合 */
-    padding: 12px 15px 2px 15px;
-    margin-bottom: 10px;
-    border-radius: 0 0 4px 4px;
+    padding: 24px;
+    border: 1px solid var(--im-border);
+    border-radius: var(--im-radius);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    cursor: pointer;
 }
 
-.select-list ul li {
-    margin-bottom: 10px;
+.im-stat-item:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-color: var(--im-primary);
 }
 
-.select-list ul li label {
+.im-stat-item .stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.im-stat-item .stat-label {
+    font-size: 14px;
+    color: var(--im-text-sub);
     font-weight: 500;
-    color: #676a6c;
 }
 
-.select-list ul li input, 
-.select-list ul li select {
-    border: 1px solid #e5e6e7;
-    border-radius: 2px;
-}
-
-.select-list ul li input:focus, 
-.select-list ul li select:focus {
-    border-color: #1ab394;
-}
-
-/* ========== 数据展示区与按钮 ========== */
-.select-table {
-    padding: 0 15px 15px 15px;
-}
-
-#toolbar {
-    margin-top: 0;       /* 移除顶部边距，紧接搜索区域 */
-    margin-bottom: 5px;  /* 减小底部边距，紧接表格 */
-    padding: 0;
+.im-stat-item .stat-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
+    justify-content: center;
+    background: var(--im-primary-soft);
+    color: var(--im-primary);
 }
 
-/* 统一所有 CRUD 按钮的横向间距 */
-#toolbar .btn,
-.select-table .btn-xs {
-    margin-right: 8px !important; /* 统一设为 8px */
-    margin-left: 0 !important;
-    margin-bottom: 2px !important; /* 增加微小下边距，防止多行时粘连 */
-    border-radius: 3px;
-    box-shadow: none !important;
-    border-bottom: 1px solid transparent !important;
+.im-stat-item .stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--im-text-main);
+    line-height: 1;
 }
 
-/* 最后一个按钮不需要右边距 */
-#toolbar .btn:last-child,
-.select-table .btn-xs:last-child {
-    margin-right: 0 !important;
+.im-stat-item .stat-footer {
+    margin-top: 12px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-/* 显式控制 Bootstrap Table 工具栏边距 */
-.fixed-table-toolbar {
-    margin-top: 0px;
-    margin-bottom: 0px;
-    position: relative;
-    z-index: 10; /* 确保层级高于表格内容 */
+.im-stat-item .trend-up {
+    color: var(--im-success);
 }
 
-.fixed-table-toolbar .columns-right {
-    margin-top: 5px; /* 微调垂直对齐 */
-    margin-bottom: 5px;
+.im-stat-item .trend-down {
+    color: var(--im-danger);
 }
 
-.fixed-table-toolbar .btn-group {
-    margin-top: 0px;
-    margin-bottom: 0px;
+/* 2. 快捷管理操作栏 (Shortcut Bar) */
+.im-action-bar {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--im-border);
+    padding: 12px 20px;
+    border-radius: var(--im-radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
 }
 
-/* 搜索状态条 (专业提示风格) */
-.search-status-bar {
-    background-color: #f3f8fb;
-    border: 1px solid #e7eaec;
-    border-left: 4px solid #1c84c6; /* 左侧高亮条 */
-    padding: 8px 15px;
-    margin-bottom: 15px;
-    font-size: 13px;
-    color: #676a6c;
-    border-radius: 2px;
+.im-action-btn-group {
+    display: flex;
+    gap: 12px;
+}
+
+/* 3. 数据板块 (Data Board) */
+.im-board {
+    background: #fff;
+    border: 1px solid var(--im-border);
+    border-radius: var(--im-radius);
+    margin-bottom: 24px;
+}
+
+.im-board-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--im-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.search-status-bar i {
-    color: #1c84c6;
+.im-board-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--im-text-main);
+}
+
+.im-board-content {
+    padding: 20px;
+}
+
+/* 4. 实时风控/动态列表 (Feed Style) */
+.im-feed-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.im-feed-item {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+    align-items: center;
+}
+
+.im-feed-item:last-child {
+    border-bottom: none;
+}
+
+.im-feed-icon {
+    margin-right: 12px;
+    font-size: 16px;
+}
+
+.im-feed-body {
+    flex: 1;
+    font-size: 14px;
+    color: var(--im-text-main);
+}
+
+.im-feed-time {
+    font-size: 12px;
+    color: var(--im-text-sub);
+}
+
+/* ========== 响应式细节 ========== */
+@media (max-width: 992px) {
+    .im-stat-group {
+        flex-wrap: wrap;
+    }
+
+    .im-stat-item {
+        flex: 1 1 45%;
+    }
+}
+
+@media (max-width: 600px) {
+    .im-stat-item {
+        flex: 1 1 100%;
+    }
+
+    .im-action-bar {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+}
+
+/* 状态圆点 (在线/离线) */
+.dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
     margin-right: 6px;
 }
 
-.search-status-bar .condition-text {
+.dot-online {
+    background-color: var(--im-success);
+    box-shadow: 0 0 4px var(--im-success);
+}
+
+.dot-offline {
+    background-color: var(--im-text-sub);
+}
+
+/* 精致徽章 */
+.im-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
     font-weight: 600;
-    color: #333;
-    margin-left: 5px;
 }
 
-.search-status-bar a:hover {
-    text-decoration: underline;
-    color: #ed5565;
+.badge-blue {
+    background: #dbeafe;
+    color: #1e40af;
 }
 
-/* ========== 极简版选中提示 (New) ========== */
-/* 替换掉原来的紫色块状提示，改为文本式 */
-.selected-info-text {
-    display: inline-block;
-    font-size: 13px;
-    color: #666;
-    margin-left: 15px;
-    background: #f0f0f0;
-    padding: 4px 10px;
-    border-radius: 20px;
-    animation: fadeIn 0.2s ease;
+.badge-green {
+    background: #dcfce7;
+    color: #166534;
 }
 
-.selected-info-text .count {
-    color: #1ab394;
-    font-weight: bold;
-    margin: 0 2px;
-}
-
-.selected-info-text .clear-link {
-    color: #999;
-    margin-left: 8px;
-    cursor: pointer;
-    font-size: 12px;
-}
-.selected-info-text .clear-link:hover {
-    color: #ed5565;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateX(-5px); }
-    to { opacity: 1; transform: translateX(0); }
+.badge-red {
+    background: #fee2e2;
+    color: #991b1b;
 }

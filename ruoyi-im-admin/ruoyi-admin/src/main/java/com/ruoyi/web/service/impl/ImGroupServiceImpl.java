@@ -1,5 +1,6 @@
 package com.ruoyi.web.service.impl;
 
+import com.ruoyi.common.utils.CacheUtils;
 import com.ruoyi.web.domain.ImGroup;
 import com.ruoyi.web.domain.ImGroupMember;
 import com.ruoyi.web.mapper.ImGroupMapper;
@@ -78,16 +79,31 @@ public class ImGroupServiceImpl implements ImGroupService {
      */
     @Override
     public Map<String, Object> getGroupStatistics() {
-        Map<String, Object> result = new HashMap<>();
-        // 群组总数
-        result.put("totalCount", groupMapper.countTotalGroups());
-        // 活跃群组数（7天内有消息）
-        result.put("activeCount", groupMapper.countActiveGroups());
-        // 全员禁言群组数
-        result.put("mutedCount", groupMapper.countMutedGroups());
-        // 大群数（成员>100）
-        result.put("largeCount", groupMapper.countLargeGroups());
-        return result;
+        String cacheKey = "im:group:stats";
+        String cacheName = "im-stats";
+
+        // 1. 尝试从缓存获取
+        Map<String, Object> stats = (Map<String, Object>) CacheUtils.get(cacheName, cacheKey);
+        if (stats != null) {
+            return stats;
+        }
+
+        // 2. 聚合统计查询
+        stats = groupMapper.selectGroupStatistics();
+
+        // 3. 结果处理（防止Null并确保类型正确）
+        if (stats == null) {
+            stats = new HashMap<>();
+            stats.put("totalCount", 0);
+            stats.put("activeCount", 0);
+            stats.put("mutedCount", 0);
+            stats.put("largeCount", 0);
+        }
+
+        // 4. 存入缓存
+        CacheUtils.put(cacheName, cacheKey, stats);
+
+        return stats;
     }
 
     @Override

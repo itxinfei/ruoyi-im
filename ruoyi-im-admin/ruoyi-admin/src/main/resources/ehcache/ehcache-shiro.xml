@@ -60,6 +60,16 @@
            overflowToDisk="true"
            statistics="false">
     </cache>
+
+    <!-- IM统计数据缓存 60秒过期 -->
+    <cache name="im-stats"
+           maxEntriesLocalHeap="100"
+           eternal="false"
+           timeToIdleSeconds="0"
+           timeToLiveSeconds="60"
+           overflowToDisk="false"
+           statistics="false">
+    </cache>
     
     <!-- 系统参数缓存 -->
     <cache name="sys-config"

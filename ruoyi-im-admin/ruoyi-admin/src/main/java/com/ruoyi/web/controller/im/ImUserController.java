@@ -93,9 +93,36 @@ public class ImUserController extends BaseController {
     @GetMapping("/resetPassword/{userId}")
     public String resetPassword(@PathVariable("userId") Long userId, org.springframework.ui.ModelMap mmap) {
         ImUser user = imUserService.selectImUserById(userId);
-        mmap.put("userId", userId);
-        mmap.put("username", user != null ? user.getUsername() : "");
+        mmap.put("user", user);
         return prefix + "/resetPassword";
+    }
+
+    /**
+     * 重置密码 - 表单提交方式
+     */
+    @RequiresPermissions("im:user:edit")
+    @Log(title = "重置用户密码", businessType = BusinessType.UPDATE)
+    @PostMapping("/resetPassword")
+    @ResponseBody
+    public AjaxResult resetPasswordByForm(@RequestParam("userId") Long userId, @RequestParam("password") String password) {
+        if (password == null || password.trim().isEmpty()) {
+            return AjaxResult.error("新密码不能为空");
+        }
+        if (password.length() < 5) {
+            return AjaxResult.error("密码长度不能少于5位");
+        }
+        if (password.length() > 20) {
+            return AjaxResult.error("密码长度不能超过20位");
+        }
+
+        int result = imUserService.resetPasswordSimple(userId, password);
+        if (result > 0) {
+            return AjaxResult.success("密码重置成功");
+        } else if (result == -2) {
+            return AjaxResult.error("目标用户不存在");
+        } else {
+            return AjaxResult.error("密码重置失败");
+        }
     }
 
     /**
@@ -716,6 +743,17 @@ public class ImUserController extends BaseController {
     @ResponseBody
     public AjaxResult changeStatus(@PathVariable("id") Long id, @RequestParam Integer status) {
         return toAjax(imUserService.changeStatus(id, status));
+    }
+
+    /**
+     * 启用/禁用用户 (适配前端 /changeStatus 调用)
+     */
+    @RequiresPermissions("im:user:edit")
+    @Log(title = "修改用户状态", businessType = BusinessType.UPDATE)
+    @PutMapping("/changeStatus")
+    @ResponseBody
+    public AjaxResult changeStatus(@RequestBody ImUser user) {
+        return toAjax(imUserService.changeStatus(user.getId(), user.getStatus()));
     }
 
     /**

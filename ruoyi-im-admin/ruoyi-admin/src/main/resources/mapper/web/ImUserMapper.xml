@@ -171,6 +171,15 @@
         select count(*) from im_user where status = 0
     </select>
 
+    <!-- 获取用户统计信息（聚合查询） -->
+    <select id="selectUserStatistics" resultType="java.util.Map">
+        SELECT 
+            COUNT(*) as totalCount,
+            SUM(CASE WHEN last_online_time >= DATE_SUB(NOW(), INTERVAL 5 MINUTE) THEN 1 ELSE 0 END) as onlineCount,
+            SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as disabledCount
+        FROM im_user
+    </select>
+
     <!-- 检查用户是否有关联数据 -->
     <select id="checkUserRelations" resultType="java.lang.Integer">
         select count(*) from (

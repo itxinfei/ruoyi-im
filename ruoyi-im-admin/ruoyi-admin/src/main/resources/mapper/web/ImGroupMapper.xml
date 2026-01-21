@@ -14,6 +14,9 @@
         <result property="deletedTime" column="deleted_time"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
+        <!-- 关联字段 -->
+        <result property="ownerName" column="owner_name"/>
+        <result property="memberCount" column="member_count"/>
     </resultMap>
 
     <resultMap type="com.ruoyi.web.domain.ImGroupMember" id="ImGroupMemberResult">
@@ -29,23 +32,28 @@
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
-    <sql id="selectImGroupVo">
-        select id, name, avatar, description, owner_id, max_members, all_muted,
-               is_deleted, deleted_time, create_time, update_time
-        from im_group
+    <sql id="selectImGroupWithUserVo">
+        select g.id, g.name, g.avatar, g.description, g.owner_id, g.max_members, g.all_muted,
+               g.is_deleted, g.deleted_time, g.create_time, g.update_time,
+               u.username as owner_name,
+               (select count(*) from im_group_member where group_id = g.id and is_deleted = 0) as member_count
+        from im_group g
+        left join im_user u on g.owner_id = u.id
     </sql>
 
     <select id="selectImGroupList" parameterType="com.ruoyi.web.domain.ImGroup" resultMap="ImGroupResult">
-        <include refid="selectImGroupVo"/>
+        <include refid="selectImGroupWithUserVo"/>
         <where>
-            and is_deleted = 0
-            <if test="name != null and name != ''"> and name like concat('%', #{name}, '%') </if>
+            and g.is_deleted = 0
+            <if test="name != null and name != ''"> and g.name like concat('%', #{name}, '%') </if>
+            <if test="ownerId != null"> and g.owner_id = #{ownerId} </if>
+            <if test="allMuted != null"> and g.all_muted = #{allMuted} </if>
         </where>
     </select>
 
     <select id="selectImGroupById" parameterType="Long" resultMap="ImGroupResult">
-        <include refid="selectImGroupVo"/>
-        where id = #{id} and is_deleted = 0
+        <include refid="selectImGroupWithUserVo"/>
+        where g.id = #{id} and g.is_deleted = 0
     </select>
 
     <insert id="insertImGroup" parameterType="com.ruoyi.web.domain.ImGroup" useGeneratedKeys="true" keyProperty="id">
@@ -138,4 +146,14 @@
         where g.is_deleted = 0
         and (select count(*) from im_group_member where group_id = g.id and is_deleted = 0) > 100
     </select>
+
+    <!-- 获取群组统计信息（聚合查询） -->
+    <select id="selectGroupStatistics" resultType="java.util.Map">
+        SELECT 
+            (SELECT COUNT(*) FROM im_group WHERE is_deleted = 0) as totalCount,
+            (SELECT COUNT(*) FROM im_group WHERE is_deleted = 0 AND all_muted = 1) as mutedCount,
+            (SELECT COUNT(DISTINCT g.id) FROM im_group g INNER JOIN im_conversation c ON c.target_id = g.id AND c.type = 'GROUP' WHERE g.is_deleted = 0 AND c.last_message_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)) as activeCount,
+            (SELECT COUNT(*) FROM (SELECT group_id FROM im_group_member WHERE is_deleted = 0 GROUP BY group_id HAVING COUNT(*) > 100) t) as largeCount
+    </select>
+
 </mapper>

@@ -111,12 +111,13 @@
     </select>
 
     <!-- 获取好友申请统计数据 -->
-    <select id="getFriendRequestStatistics" resultType="map">
-        select
-            (select count(*) from im_friend_request) as totalCount,
-            (select count(*) from im_friend_request where status = 'PENDING') as pendingCount,
-            (select count(*) from im_friend_request where status = 'APPROVED') as approvedCount,
-            (select count(*) from im_friend_request where status = 'REJECTED') as rejectedCount
+    <select id="getFriendRequestStatistics" resultType="java.util.Map">
+        SELECT 
+            COUNT(*) as totalCount,
+            SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) as pendingCount,
+            SUM(CASE WHEN status = 'APPROVED' THEN 1 ELSE 0 END) as approvedCount,
+            SUM(CASE WHEN status = 'REJECTED' THEN 1 ELSE 0 END) as rejectedCount
+        FROM im_friend_request
     </select>
 
 </mapper>
