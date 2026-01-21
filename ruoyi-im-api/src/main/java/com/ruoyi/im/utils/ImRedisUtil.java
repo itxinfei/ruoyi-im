@@ -237,7 +237,8 @@ public class ImRedisUtil {
 
         // 同时记录用户上线时间
         String onlineTimeKey = buildKey(ONLINE_PREFIX, "time", String.valueOf(userId));
-        redisTemplate.opsForValue().set(onlineTimeKey, System.currentTimeMillis(), ONLINE_STATUS_EXPIRE, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(onlineTimeKey, System.currentTimeMillis(), ONLINE_STATUS_EXPIRE,
+                TimeUnit.MINUTES);
     }
 
     /**
@@ -448,7 +449,7 @@ public class ImRedisUtil {
      * 记录客户端消息ID与服务器消息ID的映射关系
      *
      * @param clientMsgId 客户端消息ID
-     * @param messageId 服务器消息ID
+     * @param messageId   服务器消息ID
      */
     public void recordClientMsgId(String clientMsgId, Long messageId) {
         if (redisTemplate == null || clientMsgId == null || clientMsgId.isEmpty()) {
@@ -457,6 +458,59 @@ public class ImRedisUtil {
         String key = buildKey(IDEMPOTENT_MSG_PREFIX, clientMsgId);
         redisTemplate.opsForValue().set(key, messageId.toString(), IDEMPOTENT_MSG_EXPIRE, TimeUnit.HOURS);
         log.debug("记录客户端消息ID映射: clientMsgId={}, messageId={}", clientMsgId, messageId);
+    }
+
+    // ==================== 群组信息缓存 ====================
+    private static final String GROUP_PREFIX = "group:";
+    private static final long GROUP_INFO_EXPIRE = 30; // 群组信息缓存30分钟
+
+    /**
+     * 缓存群组信息
+     */
+    public void cacheGroupInfo(Long groupId, Object groupInfo) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String key = buildKey(GROUP_PREFIX, "info", String.valueOf(groupId));
+        redisTemplate.opsForValue().set(key, groupInfo, GROUP_INFO_EXPIRE, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 获取群组信息
+     */
+    public Object getGroupInfo(Long groupId) {
+        if (redisTemplate == null) {
+            return null;
+        }
+        String key = buildKey(GROUP_PREFIX, "info", String.valueOf(groupId));
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    /**
+     * 删除群组信息缓存
+     */
+    public void evictGroupInfo(Long groupId) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String key = buildKey(GROUP_PREFIX, "info", String.valueOf(groupId));
+        redisTemplate.delete(key);
+    }
+
+    /**
+     * 获取群组信息，如果不存在则从数据库加载
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getOrLoadGroupInfo(Long groupId, Class<T> clazz, Supplier<T> loader) {
+        T cached = (T) getGroupInfo(groupId);
+        if (cached != null) {
+            return cached;
+        }
+        T loaded = loader.get();
+        if (loaded != null) {
+            cacheGroupInfo(groupId, loaded);
+        }
+        return loaded;
     }
 
     // ==================== 私有方法 ====================

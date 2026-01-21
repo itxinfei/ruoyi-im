@@ -54,6 +54,9 @@ public class ImFriendServiceImpl implements ImFriendService {
     @Autowired
     private com.ruoyi.im.utils.ImDistributedLock distributedLock;
 
+    @Autowired
+    private com.ruoyi.im.utils.ImRedisUtil imRedisUtil;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long sendFriendRequest(ImFriendAddRequest request, Long userId) {
@@ -83,6 +86,10 @@ public class ImFriendServiceImpl implements ImFriendService {
                 existingFriend.setGroupName(request.getGroupName());
                 existingFriend.setUpdateTime(LocalDateTime.now());
                 imFriendMapper.updateImFriend(existingFriend);
+
+                // 清除缓存
+                clearFriendListCache(userId);
+
                 return existingFriend.getId();
             } else {
                 throw new BusinessException("已经是好友关系");
@@ -145,6 +152,9 @@ public class ImFriendServiceImpl implements ImFriendService {
         }
         friend.setUpdateTime(LocalDateTime.now());
         imFriendMapper.updateImFriend(friend);
+
+        // 清除缓存
+        clearFriendListCache(userId);
     }
 
     @Override
@@ -165,10 +175,22 @@ public class ImFriendServiceImpl implements ImFriendService {
         friend.setDeletedTime(LocalDateTime.now());
         friend.setUpdateTime(LocalDateTime.now());
         imFriendMapper.updateImFriend(friend);
+
+        // 清除缓存
+        clearFriendListCache(userId);
     }
 
     @Override
     public List<ImFriendVO> getFriendList(Long userId) {
+        String cacheKey = "contact:list:" + userId;
+
+        // 尝试从缓存获取
+        @SuppressWarnings("unchecked")
+        List<ImFriendVO> cachedList = (List<ImFriendVO>) imRedisUtil.get(cacheKey);
+        if (cachedList != null) {
+            return cachedList;
+        }
+
         ImFriend query = new ImFriend();
         query.setUserId(userId);
         List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
@@ -214,7 +236,8 @@ public class ImFriendServiceImpl implements ImFriendService {
                 // 从批量查询结果中获取用户信息
                 ImUser friendUser = userMap.get(friend.getFriendId());
                 if (friendUser != null) {
-                    vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
+                    vo.setFriendName(
+                            friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
                     vo.setFriendAvatar(friendUser.getAvatar());
                     vo.setUsername(friendUser.getUsername());
                     vo.setEmail(friendUser.getEmail());
@@ -222,7 +245,8 @@ public class ImFriendServiceImpl implements ImFriendService {
                     vo.setSignature(friendUser.getSignature());
 
                     // 如果用户状态是ACTIVE，可以认为是在线的（这只是一个简化判断）
-                    vo.setOnline("ACTIVE".equals(friendUser.getStatus()));
+                    // 实际在线状态应从Redis获取
+                    vo.setOnline(imRedisUtil.isOnlineUser(friend.getFriendId()));
                 } else {
                     vo.setOnline(false);
                 }
@@ -230,11 +254,20 @@ public class ImFriendServiceImpl implements ImFriendService {
             }
         }
 
+        // 存入缓存，过期时间30分钟
+        imRedisUtil.set(cacheKey, voList, 30, java.util.concurrent.TimeUnit.MINUTES);
+
         return voList;
+    }
+
+    private void clearFriendListCache(Long userId) {
+        String cacheKey = "contact:list:" + userId;
+        imRedisUtil.delete(cacheKey);
     }
 
     /**
      * 批量获取用户信息，避免N+1查询问题
+     * 
      * @param userIds 用户ID列表
      * @return 用户ID -> 用户信息的映射
      */
@@ -280,7 +313,8 @@ public class ImFriendServiceImpl implements ImFriendService {
             if ("PENDING".equals(request.getStatus())) {
                 ImUser fromUser = imUserMapper.selectImUserById(request.getFromUserId());
                 if (fromUser != null) {
-                    request.setFromUserName(fromUser.getNickname() != null ? fromUser.getNickname() : fromUser.getUsername());
+                    request.setFromUserName(
+                            fromUser.getNickname() != null ? fromUser.getNickname() : fromUser.getUsername());
                     request.setFromUserAvatar(fromUser.getAvatar());
                 }
                 pendingList.add(request);
@@ -310,8 +344,7 @@ public class ImFriendServiceImpl implements ImFriendService {
             distributedLock.executeWithLock(
                     com.ruoyi.im.utils.ImDistributedLock.LockKeys.friendRelationKey(fromUserId, toUserId),
                     15,
-                    () -> doCreateFriendRelationship(fromUserId, toUserId, request)
-            );
+                    () -> doCreateFriendRelationship(fromUserId, toUserId, request));
         } else {
             // 拒绝
             request.setStatus("REJECTED");
@@ -388,6 +421,10 @@ public class ImFriendServiceImpl implements ImFriendService {
             imFriendMapper.insertImFriend(friendForSender);
         }
 
+        // 清除双方缓存
+        clearFriendListCache(fromUserId);
+        clearFriendListCache(toUserId);
+
         // 创建双向私聊会话（双方都能看到会话）
         createPrivateSession(toUserId, fromUserId);
         createPrivateSession(fromUserId, toUserId);
@@ -401,41 +438,12 @@ public class ImFriendServiceImpl implements ImFriendService {
 
     @Override
     public List<ImContactGroupVO> getGroupedFriendList(Long userId) {
-        ImFriend query = new ImFriend();
-        query.setUserId(userId);
-        List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
-
-        // 使用Map进行去重，同一个friendId只保留一条记录
-        // 如果有重复的friendId，保留ID最小的记录（最早创建的）
-        Map<Long, ImFriend> uniqueFriendMap = new HashMap<>();
-        for (ImFriend friend : friendList) {
-            // 使用isDeleted字段判断是否已删除
-            if (friend.getIsDeleted() != null && friend.getIsDeleted() == 1) {
-                continue;
-            }
-
-            Long friendId = friend.getFriendId();
-            ImFriend existing = uniqueFriendMap.get(friendId);
-            if (existing == null) {
-                uniqueFriendMap.put(friendId, friend);
-            } else {
-                // 如果已存在，保留ID较小的记录（通常是更早创建的）
-                if (friend.getId() < existing.getId()) {
-                    uniqueFriendMap.put(friendId, friend);
-                }
-            }
-        }
-
-        // 批量查询好友用户信息，避免N+1查询问题
-        Map<Long, ImUser> userMap = new HashMap<>();
-        if (!uniqueFriendMap.isEmpty()) {
-            List<Long> friendIds = new ArrayList<>(uniqueFriendMap.keySet());
-            userMap = batchGetUsers(friendIds);
-        }
+        // 复用缓存的getFriendList
+        List<ImFriendVO> friendList = getFriendList(userId);
 
         // 按分组组织去重后的好友
         Map<String, List<ImFriendVO>> groupMap = new HashMap<>();
-        for (ImFriend friend : uniqueFriendMap.values()) {
+        for (ImFriendVO friend : friendList) {
             String groupName = friend.getGroupName();
             if (groupName == null) {
                 groupName = "默认分组";
@@ -443,16 +451,7 @@ public class ImFriendServiceImpl implements ImFriendService {
             if (!groupMap.containsKey(groupName)) {
                 groupMap.put(groupName, new ArrayList<>());
             }
-            ImFriendVO vo = new ImFriendVO();
-            BeanUtils.copyProperties(friend, vo);
-
-            // 从批量查询结果中获取用户信息
-            ImUser friendUser = userMap.get(friend.getFriendId());
-            if (friendUser != null) {
-                vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
-                vo.setFriendAvatar(friendUser.getAvatar());
-            }
-            groupMap.get(groupName).add(vo);
+            groupMap.get(groupName).add(friend);
         }
 
         List<ImContactGroupVO> result = new ArrayList<>();
@@ -487,7 +486,7 @@ public class ImFriendServiceImpl implements ImFriendService {
             vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
             vo.setFriendAvatar(friendUser.getAvatar());
             // 根据用户状态判断是否在线
-            vo.setOnline("ACTIVE".equals(friendUser.getStatus()));
+            vo.setOnline(imRedisUtil.isOnlineUser(friend.getFriendId()));
         } else {
             vo.setOnline(false);
         }
@@ -516,6 +515,9 @@ public class ImFriendServiceImpl implements ImFriendService {
         }
         friend.setUpdateTime(LocalDateTime.now());
         imFriendMapper.updateImFriend(friend);
+
+        // 清除缓存
+        clearFriendListCache(userId);
     }
 
     @Override
@@ -535,7 +537,12 @@ public class ImFriendServiceImpl implements ImFriendService {
             query.setUserId(userId);
             query.setFriendId(user.getId());
             List<ImFriend> existingFriends = imFriendMapper.selectImFriendList(query);
+
+            // 如果已经是好友，则跳过
             boolean isFriend = existingFriends != null && !existingFriends.isEmpty();
+            if (isFriend) {
+                continue;
+            }
 
             ImUserVO vo = new ImUserVO();
             BeanUtils.copyProperties(user, vo);
@@ -557,12 +564,11 @@ public class ImFriendServiceImpl implements ImFriendService {
 
     @Override
     public List<String> getGroupNames(Long userId) {
-        ImFriend query = new ImFriend();
-        query.setUserId(userId);
-        List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
+        // 复用 getFriendList 缓存
+        List<ImFriendVO> friendList = getFriendList(userId);
 
         return friendList.stream()
-                .map(ImFriend::getGroupName)
+                .map(ImFriendVO::getGroupName)
                 .filter(name -> name != null && !name.isEmpty())
                 .distinct()
                 .collect(Collectors.toList());
@@ -592,6 +598,9 @@ public class ImFriendServiceImpl implements ImFriendService {
             friend.setUpdateTime(LocalDateTime.now());
             imFriendMapper.updateImFriend(friend);
         }
+
+        // 清除缓存
+        clearFriendListCache(userId);
     }
 
     @Override
@@ -611,6 +620,9 @@ public class ImFriendServiceImpl implements ImFriendService {
             friend.setUpdateTime(LocalDateTime.now());
             imFriendMapper.updateImFriend(friend);
         }
+
+        // 清除缓存
+        clearFriendListCache(userId);
     }
 
     @Override
@@ -635,5 +647,8 @@ public class ImFriendServiceImpl implements ImFriendService {
             friend.setUpdateTime(LocalDateTime.now());
             imFriendMapper.updateImFriend(friend);
         }
+
+        // 清除缓存
+        clearFriendListCache(userId);
     }
 }

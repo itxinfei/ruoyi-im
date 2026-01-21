@@ -23,7 +23,7 @@ import javax.validation.Valid;
  */
 @Tag(name = "认证管理", description = "用户登录、注册、获取信息等接口")
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/im/auth")
 public class ImAuthController {
 
     @Autowired
@@ -79,18 +79,18 @@ public class ImAuthController {
         if (userId == null) {
             throw new BusinessException("用户未认证");
         }
-        
+
         ImUserVO userVO = imUserService.getUserById(userId);
         if (userVO == null) {
             throw new BusinessException("用户不存在");
         }
-        
+
         // 生成新的JWT令牌
         String token = jwtUtils.generateToken(userVO.getUsername(), userVO.getId());
-        
+
         ImLoginVO loginVO = new ImLoginVO();
         loginVO.setToken(token);
-        
+
         // 设置用户信息
         ImLoginVO.UserInfo userInfo = new ImLoginVO.UserInfo();
         userInfo.setId(userVO.getId());
@@ -98,7 +98,7 @@ public class ImAuthController {
         userInfo.setNickname(userVO.getNickname());
         userInfo.setAvatar(userVO.getAvatar());
         loginVO.setUserInfo(userInfo);
-        
+
         return Result.success(loginVO);
     }
 
@@ -116,7 +116,72 @@ public class ImAuthController {
         // 实际应用中可以在这里做一些清理工作，如：
         // 1. 从Redis中移除用户token
         // 2. 通知WebSocket断开连接等
-        
+
         return Result.success("退出成功");
+    }
+
+    /**
+     * 刷新Token
+     * 使用refresh token获取新的access token
+     *
+     * @param refreshToken 刷新令牌
+     * @return 新的登录信息，包含新的JWT Token
+     * @apiNote 当access token过期时，使用此接口获取新token
+     */
+    @Operation(summary = "刷新Token", description = "使用refresh token获取新的access token")
+    @PostMapping("/refresh")
+    public Result<ImLoginVO> refreshToken(@RequestParam String refreshToken) {
+        try {
+            // 验证refresh token
+            if (!jwtUtils.validateToken(refreshToken)) {
+                throw new BusinessException("刷新令牌无效或已过期");
+            }
+
+            // 从token中获取用户信息
+            Long userId = jwtUtils.getUserIdFromToken(refreshToken);
+
+            // 获取用户详细信息
+            ImUserVO userVO = imUserService.getUserById(userId);
+            if (userVO == null) {
+                throw new BusinessException("用户不存在");
+            }
+
+            // 生成新的JWT令牌
+            String newToken = jwtUtils.generateToken(userVO.getUsername(), userVO.getId());
+
+            ImLoginVO loginVO = new ImLoginVO();
+            loginVO.setToken(newToken);
+
+            // 设置用户信息
+            ImLoginVO.UserInfo userInfo = new ImLoginVO.UserInfo();
+            userInfo.setId(userVO.getId());
+            userInfo.setUsername(userVO.getUsername());
+            userInfo.setNickname(userVO.getNickname());
+            userInfo.setAvatar(userVO.getAvatar());
+            loginVO.setUserInfo(userInfo);
+
+            return Result.success(loginVO);
+        } catch (Exception e) {
+            throw new BusinessException("刷新Token失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 验证Token
+     * 验证token是否有效
+     *
+     * @param token JWT令牌
+     * @return 验证结果，true表示有效，false表示无效
+     * @apiNote 用于前端检查token是否仍然有效
+     */
+    @Operation(summary = "验证Token", description = "验证token是否有效")
+    @PostMapping("/validateToken")
+    public Result<Boolean> validateToken(@RequestParam String token) {
+        try {
+            boolean valid = jwtUtils.validateToken(token);
+            return Result.success(valid);
+        } catch (Exception e) {
+            return Result.success(false);
+        }
     }
 }

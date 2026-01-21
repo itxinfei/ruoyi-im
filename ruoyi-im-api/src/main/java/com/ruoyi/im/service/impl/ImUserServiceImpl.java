@@ -63,8 +63,6 @@ public class ImUserServiceImpl implements ImUserService {
     @Value("${file.upload.url-prefix}")
     private String urlPrefix;
 
-
-
     @Override
     public ImLoginVO login(ImLoginRequest request) {
         ImUser user = imUserMapper.selectImUserByUsername(request.getUsername());
@@ -72,12 +70,12 @@ public class ImUserServiceImpl implements ImUserService {
             throw new BusinessException("USER_NOT_EXIST", "用户不存在");
         }
 
-        logger.info("用户登录 - 用户名: {}, 请求密码: {}, 数据库密码: {}", 
-            request.getUsername(), request.getPassword(), user.getPassword());
+        logger.info("用户登录 - 用户名: {}, 请求密码: {}, 数据库密码: {}",
+                request.getUsername(), request.getPassword(), user.getPassword());
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            logger.error("密码验证失败 - 用户名: {}, 请求密码长度: {}, 数据库密码长度: {}", 
-                request.getUsername(), request.getPassword().length(), user.getPassword().length());
+            logger.error("密码验证失败 - 用户名: {}, 请求密码长度: {}, 数据库密码长度: {}",
+                    request.getUsername(), request.getPassword().length(), user.getPassword().length());
             throw new BusinessException("PASSWORD_ERROR", "密码错误");
         }
 
@@ -284,7 +282,7 @@ public class ImUserServiceImpl implements ImUserService {
         // 通过ImRedisUtil获取在线用户列表
         Set<String> onlineUserIds = imRedisUtil.getOnlineUsers();
         List<ImUserVO> onlineUsers = new ArrayList<>();
-        
+
         for (String userIdStr : onlineUserIds) {
             try {
                 Long userId = Long.parseLong(userIdStr);
@@ -299,7 +297,7 @@ public class ImUserServiceImpl implements ImUserService {
                 // 忽略无效的用户ID
             }
         }
-        
+
         return onlineUsers;
     }
 
@@ -311,7 +309,7 @@ public class ImUserServiceImpl implements ImUserService {
 
         String originalFilename = file.getOriginalFilename();
         String fileExtension = FileUtils.getFileExtension(originalFilename);
-        
+
         // 验证文件类型
         if (!FileUtils.isImage(originalFilename)) {
             throw new BusinessException("FILE_TYPE_ERROR", "只支持图片格式的头像");
@@ -356,6 +354,9 @@ public class ImUserServiceImpl implements ImUserService {
         user.setAvatar(avatarUrl);
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
+
+        // 清除缓存
+        imRedisUtil.evictUserInfo(userId);
 
         logger.info("用户头像上传成功，userId={}, avatarUrl={}", userId, avatarUrl);
 

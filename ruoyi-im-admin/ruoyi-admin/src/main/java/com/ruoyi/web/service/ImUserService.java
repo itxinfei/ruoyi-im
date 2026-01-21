@@ -1,9 +1,16 @@
 package com.ruoyi.web.service;
 
 import com.ruoyi.web.domain.ImUser;
+import com.ruoyi.web.domain.dto.ImUserAdvancedSearchDTO;
+import com.ruoyi.web.domain.dto.ImUserEnhancedBatchOperationDTO;
 import com.ruoyi.web.domain.dto.ImUserQuickOperationDTO;
+import com.ruoyi.web.domain.dto.ImUserLifecycleDTO;
+import com.ruoyi.web.domain.vo.ImUserAdvancedSearchResultVO;
+import com.ruoyi.web.domain.vo.ImUserEnhancedBatchOperationResultVO;
 import com.ruoyi.web.domain.vo.ImUserQuickOperationResultVO;
+import com.ruoyi.web.domain.vo.ImUserLifecycleResultVO;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -230,4 +237,81 @@ public interface ImUserService {
      * @return 预检查结果，包含警告信息、风险评估、建议等
      */
     Map<String, Object> batchOperationPrecheck(ImUserQuickOperationDTO operationDTO);
+
+    /**
+     * 高级搜索接口
+     *
+     * <p>支持复杂条件组合、多字段搜索、范围搜索等高级搜索功能</p>
+     * <p>提供搜索统计、分页信息、搜索建议等功能</p>
+     *
+     * @param searchDTO 高级搜索请求对象，包含搜索条件、分页参数等
+     * @return 搜索结果对象，包含用户列表、统计信息、分页数据等
+     */
+    ImUserAdvancedSearchResultVO advancedSearch(ImUserAdvancedSearchDTO searchDTO);
+
+    /**
+     * 保存搜索条件
+     *
+     * <p>将用户配置的搜索条件保存为可复用的搜索模板</p>
+     * <p>支持搜索条件命名、分类、权限控制等功能</p>
+     *
+     * @param searchDTO 搜索条件对象
+     * @return 搜索ID，用于后续调用和使用
+     */
+    String saveSearchCondition(ImUserAdvancedSearchDTO searchDTO);
+
+    /**
+     * 获取保存的搜索条件列表
+     *
+     * <p>返回当前用户保存的所有搜索条件</p>
+     * <p>按创建时间、使用频率等排序展示</p>
+     *
+     * @return 搜索条件列表，包含搜索ID、名称、条件详情等
+     */
+    List<Map<String, Object>> getSavedSearches();
+
+    /**
+     * 删除保存的搜索条件
+     *
+     * <p>删除用户保存的指定搜索条件</p>
+     * <p>同时清理相关的搜索缓存</p>
+     *
+     * @param searchId 搜索条件ID
+     * @return 删除结果，成功返回true
+     */
+    boolean deleteSavedSearch(String searchId);
+
+    /**
+     * 获取搜索建议
+     *
+     * <p>根据用户输入提供智能搜索建议</p>
+     * <p>包括拼写纠正、相关搜索、自动补全等功能</p>
+     *
+     * @param keyword 搜索关键词
+     * @param field 搜索字段（可选）
+     * @return 建议列表，包含建议文本、类型、权重等
+     */
+    List<Map<String, Object>> getSearchSuggestions(String keyword, String field);
+
+    /**
+     * 用户生命周期管理接口
+     *
+     * <p>支持用户入职、离职、调动、批量激活/停用等生命周期操作</p>
+     * <p>提供异步处理、进度跟踪、批量操作优化等功能</p>
+     *
+     * @param lifecycleDTO 生命周期管理请求对象，包含操作类型、用户信息、时间设置等
+     * @return 生命周期管理结果对象，包含操作状态、处理统计、错误详情等
+     */
+    ImUserLifecycleResultVO manageUserLifecycle(@Valid ImUserLifecycleDTO lifecycleDTO);
+
+    /**
+     * 增强的批量操作接口
+     *
+     * <p>支持安全验证、事务控制、多级审批等高级功能</p>
+     * <p>提供操作前预检查、风险评估、操作结果统计等</p>
+     *
+     * @param operationDTO 增强批量操作请求对象，包含操作参数、安全配置、事务控制等
+     * @return 增强的批量操作结果对象，包含操作状态、安全验证、事务管理、警告信息等
+     */
+    ImUserEnhancedBatchOperationResultVO enhancedBatchOperation(@Valid ImUserEnhancedBatchOperationDTO operationDTO);
 }

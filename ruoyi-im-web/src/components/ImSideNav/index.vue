@@ -30,17 +30,6 @@
 
     <div class="nav-footer">
       <div
-        class="nav-item"
-        :class="{ active: activeModule === 'settings' }"
-        @click="handleNavClick('settings')"
-      >
-        <el-icon class="nav-icon">
-          <Setting />
-        </el-icon>
-        <span class="nav-label">设置</span>
-      </div>
-
-      <div
         class="user-avatar"
         :class="{ active: activeModule === 'profile' }"
         @click="handleNavClick('profile')"
@@ -123,11 +112,6 @@ const navModules = ref([
     key: 'assistant',
     label: 'AI助理',
     icon: MagicStick
-  },
-  {
-    key: 'settings',
-    label: '设置',
-    icon: Setting
   }
 ])
 
@@ -140,8 +124,13 @@ const handleNavClick = (moduleKey) => {
 .nav-sidebar {
   display: flex;
   flex-direction: column;
+  width: 64px;
+  min-width: 64px;
+  max-width: 64px;
+  flex-shrink: 0;
   background-color: #0089ff;
   border-right: 1px solid #e8e8e8;
+  height: 100%;
 }
 
 .logo-area {

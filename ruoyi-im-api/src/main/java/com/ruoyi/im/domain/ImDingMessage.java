@@ -7,19 +7,22 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import com.ruoyi.im.common.BaseEntity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * DING消息实体
+ * 钉消息实体
  *
  * @author ruoyi
  */
 @TableName("im_ding_message")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Schema(description = "DING消息")
-public class ImDingMessage implements Serializable {
+public class ImDingMessage extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

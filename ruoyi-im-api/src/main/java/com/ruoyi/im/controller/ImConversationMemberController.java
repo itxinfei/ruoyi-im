@@ -18,7 +18,7 @@ import java.util.List;
  * @author ruoyi
  */
 @RestController
-@RequestMapping("/im/conversationMember")
+@RequestMapping("/api/im/conversationMember")
 public class ImConversationMemberController {
 
     @Autowired
@@ -29,7 +29,8 @@ public class ImConversationMemberController {
      */
     @GetMapping("/list")
     public Result<List<ImConversationMemberVO>> list(ImConversationMember conversationMember) {
-        List<ImConversationMemberVO> list = conversationMemberService.getConversationMemberList(conversationMember.getUserId());
+        List<ImConversationMemberVO> list = conversationMemberService
+                .getConversationMemberList(conversationMember.getUserId());
         return Result.success(list);
     }
 
@@ -57,7 +58,8 @@ public class ImConversationMemberController {
      * 更新会话成员信息
      */
     @PutMapping("/{conversationId}")
-    public Result<Void> edit(@PathVariable Long conversationId, @RequestBody ImConversationMemberUpdateRequest request) {
+    public Result<Void> edit(@PathVariable Long conversationId,
+            @RequestBody ImConversationMemberUpdateRequest request) {
         Long userId = 1L;
         conversationMemberService.updateConversationMember(conversationId, userId, request);
         return Result.success();

@@ -46,6 +46,9 @@ public class ImGroupServiceImpl implements ImGroupService {
     private ImConversationMapper imConversationMapper;
 
     @Autowired
+    private com.ruoyi.im.utils.ImRedisUtil imRedisUtil;
+
+    @Autowired
     private ImConversationMemberMapper imConversationMemberMapper;
 
     @Override
@@ -144,6 +147,9 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
         group.setUpdateTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
     }
 
     @Override
@@ -162,24 +168,31 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setUpdateTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
 
-        imGroupMemberMapper.deleteImGroupMemberByGroupIds(new Long[]{groupId});
+        imGroupMemberMapper.deleteImGroupMemberByGroupIds(new Long[] { groupId });
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
     }
 
     @Override
     public ImGroupVO getGroupById(Long groupId, Long userId) {
-        ImGroup group = imGroupMapper.selectImGroupById(groupId);
-        if (group == null) {
-            throw new BusinessException("群组不存在");
-        }
+        // 使用缓存获取群组信息
+        ImGroupVO vo = imRedisUtil.getOrLoadGroupInfo(groupId, ImGroupVO.class, () -> {
+            ImGroup group = imGroupMapper.selectImGroupById(groupId);
+            if (group == null) {
+                throw new BusinessException("群组不存在");
+            }
+            ImGroupVO groupVO = new ImGroupVO();
+            BeanUtils.copyProperties(group, groupVO);
 
-        ImGroupVO vo = new ImGroupVO();
-        BeanUtils.copyProperties(group, vo);
+            ImUser owner = imUserMapper.selectImUserById(group.getOwnerId());
+            if (owner != null) {
+                groupVO.setOwnerName(owner.getNickname());
+            }
+            return groupVO;
+        });
 
-        ImUser owner = imUserMapper.selectImUserById(group.getOwnerId());
-        if (owner != null) {
-            vo.setOwnerName(owner.getNickname());
-        }
-
+        // 个人角色信息不缓存，实时查询
         ImGroupMember myMember = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (myMember != null) {
             vo.setMyRole(myMember.getRole());
@@ -198,6 +211,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         List<ImGroupMember> memberList = imGroupMemberMapper.selectImGroupMemberList(query);
 
         for (ImGroupMember member : memberList) {
+            // 这里可以考虑优化，先不走缓存，或者批量获取
             ImGroup group = imGroupMapper.selectImGroupById(member.getGroupId());
             if (group != null && group.getIsDeleted() == 0) {
                 ImGroupVO vo = new ImGroupVO();
@@ -281,6 +295,9 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setMemberCount(group.getMemberCount() + addedCount);
         group.setUpdateTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
     }
 
     @Override
@@ -315,6 +332,9 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setMemberCount(group.getMemberCount() - userIds.size());
         group.setUpdateTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
     }
 
     @Override
@@ -338,6 +358,9 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setMemberCount(group.getMemberCount() - 1);
         group.setUpdateTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
     }
 
     @Override
@@ -367,6 +390,10 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
         member.setUpdateTime(LocalDateTime.now());
         imGroupMemberMapper.updateImGroupMember(member);
+
+        // 虽然群组基本信息没变，但成员角色变了，可能影响展示，暂时不清除groupInfo，因为groupInfo主要是群组描述等。
+        // 但是getGroupById不返回成员列表。
+        // 所以这里不需要evictGroupInfo。
     }
 
     @Override
@@ -401,6 +428,8 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
         member.setUpdateTime(LocalDateTime.now());
         imGroupMemberMapper.updateImGroupMember(member);
+
+        // 不需要清除groupInfo
     }
 
     @Override
@@ -436,17 +465,21 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setOwnerId(newOwnerId);
         group.setUpdateTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
     }
 
     /**
      * 添加成员到会话
      *
      * @param conversationId 会话ID
-     * @param userId 用户ID
+     * @param userId         用户ID
      */
     private void addConversationMember(Long conversationId, Long userId) {
-        // 检查用户是否已经在会话中
-        ImConversationMember existing = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        // ... (unchanged)
+        ImConversationMember existing = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
+                userId);
         if (existing != null) {
             // 用户已存在，恢复状态（如果被删除）
             if (existing.getIsDeleted() != null && existing.getIsDeleted() == 1) {

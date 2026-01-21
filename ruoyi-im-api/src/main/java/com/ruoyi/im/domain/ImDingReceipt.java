@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import com.ruoyi.im.common.BaseEntity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -18,8 +20,9 @@ import java.time.LocalDateTime;
  */
 @TableName("im_ding_receipt")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Schema(description = "DING回执")
-public class ImDingReceipt implements Serializable {
+public class ImDingReceipt extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

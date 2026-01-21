@@ -1,421 +1,642 @@
 <template>
   <div class="workbench-panel">
-    <div class="workbench-content">
-      <div class="panel-header">
-        <div class="header-left">
-          <h1 class="panel-title">工作台</h1>
-          <p class="panel-subtitle">欢迎回来，开始高效工作</p>
+    <!-- 顶部统计卡片 -->
+    <div class="stats-cards">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+          <el-icon><Clock /></el-icon>
         </div>
-        <div class="header-right">
-          <p class="date-label">今天是</p>
-          <p class="date-text">{{ currentDate }}</p>
-        </div>
-      </div>
-
-      <div class="quick-actions">
-        <div
-          v-for="action in quickActions"
-          :key="action.id"
-          class="action-card"
-          @click="handleActionClick(action.id)"
-        >
-          <div class="action-icon" :class="action.colorClass">
-            <el-icon class="icon">
-              <component :is="action.icon" />
-            </el-icon>
-          </div>
-          <span class="action-label">{{ action.label }}</span>
+        <div class="stat-info">
+          <div class="stat-value">{{ statistics.pendingTodos || 0 }}</div>
+          <div class="stat-label">待办事项</div>
         </div>
       </div>
 
-      <div class="content-grid">
-        <div class="grid-item">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">
-                <el-icon><Check /></el-icon>
-                我的待办
-              </div>
-              <el-badge :value="todos.length" class="todo-badge" />
-            </div>
-            <div class="card-body">
-              <div
-                v-for="todo in todos"
-                :key="todo.id"
-                class="todo-item"
-                @click="handleTodoClick(todo)"
-              >
-                <div class="todo-checkbox"></div>
-                <div class="todo-content">
-                  <p class="todo-title">{{ todo.title }}</p>
-                  <div class="todo-time">
-                    <el-icon><Clock /></el-icon>
-                    <span>{{ todo.time }}</span>
-                  </div>
-                </div>
-              </div>
-              <el-button text class="view-all-btn">
-                查看全部
-                <el-icon><ArrowRight /></el-icon>
-              </el-button>
-            </div>
-          </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">
+          <el-icon><Document /></el-icon>
         </div>
-
-        <div class="grid-item">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">
-                <el-icon><Bell /></el-icon>
-                公告通知
-              </div>
-            </div>
-            <div class="card-body">
-              <div
-                v-for="notice in notices"
-                :key="notice.id"
-                class="notice-item"
-                @click="handleNoticeClick(notice)"
-              >
-                <div v-if="notice.unread" class="unread-dot"></div>
-                <div v-else class="unread-placeholder"></div>
-                <div class="notice-content">
-                  <p class="notice-title" :class="{ unread: notice.unread }">{{ notice.title }}</p>
-                  <span class="notice-time">{{ notice.time }}</span>
-                </div>
-              </div>
-              <el-button text class="view-all-btn">
-                查看全部
-                <el-icon><ArrowRight /></el-icon>
-              </el-button>
-            </div>
-          </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ statistics.pendingApprovals || 0 }}</div>
+          <div class="stat-label">待审批</div>
         </div>
+      </div>
 
-        <div class="grid-item">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">
-                <el-icon><TrendChartsIcon /></el-icon>
-                团队数据
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="stat-item stat-blue">
-                <div class="stat-icon">
-                  <el-icon><User /></el-icon>
-                </div>
-                <div class="stat-info">
-                  <p class="stat-label">团队成员</p>
-                  <p class="stat-value">24人</p>
-                </div>
-                <el-icon class="stat-trend"><TrendChartsIcon /></el-icon>
-              </div>
-              <div class="stat-item stat-green">
-                <div class="stat-icon">
-                  <el-icon><Check /></el-icon>
-                </div>
-                <div class="stat-info">
-                  <p class="stat-label">本周完成任务</p>
-                  <p class="stat-value">38个</p>
-                </div>
-                <el-icon class="stat-trend"><TrendChartsIcon /></el-icon>
-              </div>
-            </div>
-          </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">
+          <el-icon><Calendar /></el-icon>
         </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ statistics.todayMeetings || 0 }}</div>
+          <div class="stat-label">今日会议</div>
+        </div>
+      </div>
 
-        <div class="grid-item">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">
-                <el-icon><Document /></el-icon>
-                最近文档
-              </div>
-            </div>
-            <div class="card-body">
-              <div
-                v-for="doc in recentDocs"
-                :key="doc.id"
-                class="doc-item"
-                @click="handleDocClick(doc)"
-              >
-                <div class="doc-icon" :class="doc.iconClass">
-                  <el-icon><Document /></el-icon>
-                </div>
-                <div class="doc-content">
-                  <p class="doc-title">{{ doc.title }}</p>
-                  <span class="doc-time">{{ doc.time }}</span>
-                </div>
-              </div>
-              <el-button text class="view-all-btn">
-                查看全部
-                <el-icon><ArrowRight /></el-icon>
-              </el-button>
-            </div>
-          </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)">
+          <el-icon><ChatDotRound /></el-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ statistics.unreadMessages || 0 }}</div>
+          <div class="stat-label">未读消息</div>
         </div>
       </div>
     </div>
+
+    <!-- 考勤打卡 -->
+    <div class="attendance-section">
+      <el-card class="attendance-card">
+        <template #header>
+          <div class="card-header">
+            <span>考勤打卡</span>
+            <el-tag v-if="todayAttendance.checkIn" type="success" size="small">
+              已打卡
+            </el-tag>
+          </div>
+        </template>
+        <div class="attendance-content">
+          <div class="attendance-time">
+            <div class="current-time">{{ currentTime }}</div>
+            <div class="current-date">{{ currentDate }}</div>
+          </div>
+          <div class="attendance-actions">
+            <el-button
+              v-if="!todayAttendance.checkIn"
+              type="primary"
+              size="large"
+              :loading="checkingIn"
+              @click="handleCheckIn"
+            >
+              上班打卡
+            </el-button>
+            <el-button
+              v-else-if="!todayAttendance.checkOut"
+              type="warning"
+              size="large"
+              :loading="checkingOut"
+              @click="handleCheckOut"
+            >
+              下班打卡
+            </el-button>
+            <div v-else class="attendance-complete">
+              <el-icon class="check-icon"><CircleCheck /></el-icon>
+              <span>今日打卡已完成</span>
+            </div>
+          </div>
+          <div v-if="todayAttendance.checkIn" class="attendance-records">
+            <div class="record-item">
+              <span class="record-label">上班:</span>
+              <span class="record-time">{{ todayAttendance.checkIn }}</span>
+            </div>
+            <div v-if="todayAttendance.checkOut" class="record-item">
+              <span class="record-label">下班:</span>
+              <span class="record-time">{{ todayAttendance.checkOut }}</span>
+            </div>
+          </div>
+        </div>
+      </el-card>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="main-content">
+      <!-- 待办事项 -->
+      <div class="content-section">
+        <el-card>
+          <template #header>
+            <div class="card-header">
+              <span>待办事项</span>
+              <el-button text @click="showCreateTodoDialog = true">
+                <el-icon><Plus /></el-icon>
+                新建
+              </el-button>
+            </div>
+          </template>
+          <div v-loading="loadingTodos" class="todo-list">
+            <div
+              v-for="todo in todos"
+              :key="todo.id"
+              class="todo-item"
+              :class="{ completed: todo.completed }"
+            >
+              <el-checkbox
+                v-model="todo.completed"
+                @change="handleTodoComplete(todo)"
+              />
+              <div class="todo-content">
+                <div class="todo-title">{{ todo.title }}</div>
+                <div class="todo-meta">
+                  <el-tag v-if="todo.priority === 'HIGH'" type="danger" size="small">
+                    高优先级
+                  </el-tag>
+                  <span class="todo-date">{{ formatDate(todo.dueDate) }}</span>
+                </div>
+              </div>
+            </div>
+            <el-empty v-if="!loadingTodos && todos.length === 0" description="暂无待办事项" />
+          </div>
+        </el-card>
+      </div>
+
+      <!-- 待审批 -->
+      <div class="content-section">
+        <el-card>
+          <template #header>
+            <div class="card-header">
+              <span>待审批</span>
+              <el-badge :value="approvals.length" :max="99" />
+            </div>
+          </template>
+          <div v-loading="loadingApprovals" class="approval-list">
+            <div
+              v-for="approval in approvals"
+              :key="approval.id"
+              class="approval-item"
+              @click="handleApprovalClick(approval)"
+            >
+              <el-avatar :size="40" :src="approval.applicantAvatar">
+                {{ approval.applicantName?.charAt(0) }}
+              </el-avatar>
+              <div class="approval-content">
+                <div class="approval-title">{{ approval.title }}</div>
+                <div class="approval-meta">
+                  <span class="approval-applicant">{{ approval.applicantName }}</span>
+                  <span class="approval-time">{{ formatTime(approval.createTime) }}</span>
+                </div>
+              </div>
+              <el-tag :type="getApprovalTypeTag(approval.type)" size="small">
+                {{ approval.typeName }}
+              </el-tag>
+            </div>
+            <el-empty v-if="!loadingApprovals && approvals.length === 0" description="暂无待审批" />
+          </div>
+        </el-card>
+      </div>
+    </div>
+
+    <!-- 公告栏 -->
+    <div class="announcements-section">
+      <el-card>
+        <template #header>
+          <div class="card-header">
+            <span>公告通知</span>
+          </div>
+        </template>
+        <div v-loading="loadingAnnouncements" class="announcement-list">
+          <div
+            v-for="announcement in announcements"
+            :key="announcement.id"
+            class="announcement-item"
+          >
+            <div class="announcement-header">
+              <el-icon class="announcement-icon"><Bell /></el-icon>
+              <span class="announcement-title">{{ announcement.title }}</span>
+              <span class="announcement-time">{{ formatTime(announcement.createTime) }}</span>
+            </div>
+            <div class="announcement-content">{{ announcement.content }}</div>
+          </div>
+          <el-empty v-if="!loadingAnnouncements && announcements.length === 0" description="暂无公告" />
+        </div>
+      </el-card>
+    </div>
+
+    <!-- 创建待办对话框 -->
+    <el-dialog
+      v-model="showCreateTodoDialog"
+      title="新建待办"
+      width="500px"
+    >
+      <el-form :model="todoForm" label-width="80px">
+        <el-form-item label="标题">
+          <el-input v-model="todoForm.title" placeholder="请输入待办标题" />
+        </el-form-item>
+        <el-form-item label="内容">
+          <el-input
+            v-model="todoForm.content"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入待办内容"
+          />
+        </el-form-item>
+        <el-form-item label="截止日期">
+          <el-date-picker
+            v-model="todoForm.dueDate"
+            type="datetime"
+            placeholder="选择截止日期"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="优先级">
+          <el-radio-group v-model="todoForm.priority">
+            <el-radio label="LOW">低</el-radio>
+            <el-radio label="MEDIUM">中</el-radio>
+            <el-radio label="HIGH">高</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showCreateTodoDialog = false">取消</el-button>
+        <el-button type="primary" @click="handleCreateTodo">创建</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import {
-  Calendar,
   Clock,
-  Check,
-  User,
-  TrendCharts as TrendChartsIcon,
   Document,
-  Bell,
-  ArrowRight
+  Calendar,
+  ChatDotRound,
+  CircleCheck,
+  Plus,
+  Bell
 } from '@element-plus/icons-vue'
+import {
+  getTodos,
+  createTodo,
+  completeTodo,
+  getApprovals,
+  checkIn,
+  getAttendance,
+  getAnnouncements,
+  getStatistics
+} from '@/api/im/workbench'
 
-const quickActions = ref([
-  {
-    id: 'calendar',
-    icon: Calendar,
-    label: '日程',
-    colorClass: 'action-blue'
-  },
-  {
-    id: 'attendance',
-    icon: Clock,
-    label: '考勤打卡',
-    colorClass: 'action-green'
-  },
-  {
-    id: 'approval',
-    icon: Check,
-    label: '审批',
-    colorClass: 'action-orange'
-  },
-  {
-    id: 'report',
-    icon: Document,
-    label: '日报',
-    colorClass: 'action-purple'
-  }
-])
+const statistics = ref({
+  pendingTodos: 0,
+  pendingApprovals: 0,
+  todayMeetings: 0,
+  unreadMessages: 0
+})
 
-const todos = ref([
-  {
-    id: '1',
-    title: '完成项目设计稿',
-    time: '今天 15:00',
-    status: 'pending'
-  },
-  {
-    id: '2',
-    title: '参加团队会议',
-    time: '今天 16:30',
-    status: 'pending'
-  },
-  {
-    id: '3',
-    title: '审批报销单',
-    time: '明天 10:00',
-    status: 'pending'
-  }
-])
-
-const notices = ref([
-  {
-    id: '1',
-    title: '关于调整工作时间的通知',
-    time: '2小时前',
-    unread: true
-  },
-  {
-    id: '2',
-    title: '本月绩效考核开始',
-    time: '昨天',
-    unread: true
-  },
-  {
-    id: '3',
-    title: '公司年会活动通知',
-    time: '2天前',
-    unread: false
-  }
-])
-
-const recentDocs = ref([
-  {
-    id: '1',
-    title: '产品需求文档V2.0',
-    time: '2小时前',
-    iconClass: 'doc-blue'
-  },
-  {
-    id: '2',
-    title: 'Q1季度总结报告',
-    time: '昨天',
-    iconClass: 'doc-green'
-  }
-])
-
+const currentTime = ref('')
 const currentDate = ref('')
+const todayAttendance = ref({
+  checkIn: null,
+  checkOut: null
+})
 
-const formatDate = () => {
+const checkingIn = ref(false)
+const checkingOut = ref(false)
+const loadingTodos = ref(false)
+const loadingApprovals = ref(false)
+const loadingAnnouncements = ref(false)
+
+const todos = ref([])
+const approvals = ref([])
+const announcements = ref([])
+
+const showCreateTodoDialog = ref(false)
+const todoForm = reactive({
+  title: '',
+  content: '',
+  dueDate: null,
+  priority: 'MEDIUM'
+})
+
+let timeInterval = null
+
+// 更新时间
+const updateTime = () => {
   const now = new Date()
-  const year = now.getFullYear()
-  const month = now.getMonth() + 1
-  const date = now.getDate()
-  const days = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
-  const day = days[now.getDay()]
-  currentDate.value = `${year}年${month}月${date}日 ${day}`
+  currentTime.value = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  currentDate.value = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
 }
 
-const handleActionClick = (actionId) => {
-  console.log('Action clicked:', actionId)
+// 加载统计数据
+const loadStatistics = async () => {
+  try {
+    const response = await getStatistics()
+    if (response && response.data) {
+      statistics.value = response.data
+    }
+  } catch (error) {
+    console.error('加载统计数据失败:', error)
+  }
 }
 
-const handleTodoClick = (todo) => {
-  console.log('Todo clicked:', todo)
+// 加载待办列表
+const loadTodos = async () => {
+  loadingTodos.value = true
+  try {
+    const response = await getTodos({ pageNum: 1, pageSize: 10 })
+    if (response && response.data) {
+      todos.value = response.data.list || response.data
+    }
+  } catch (error) {
+    console.error('加载待办列表失败:', error)
+  } finally {
+    loadingTodos.value = false
+  }
 }
 
-const handleNoticeClick = (notice) => {
-  console.log('Notice clicked:', notice)
+// 加载审批列表
+const loadApprovals = async () => {
+  loadingApprovals.value = true
+  try {
+    const response = await getApprovals({ status: 'PENDING' })
+    if (response && response.data) {
+      approvals.value = response.data.list || response.data
+    }
+  } catch (error) {
+    console.error('加载审批列表失败:', error)
+  } finally {
+    loadingApprovals.value = false
+  }
 }
 
-const handleDocClick = (doc) => {
-  console.log('Doc clicked:', doc)
+// 加载公告列表
+const loadAnnouncements = async () => {
+  loadingAnnouncements.value = true
+  try {
+    const response = await getAnnouncements()
+    if (response && response.data) {
+      announcements.value = (response.data.list || response.data).slice(0, 5)
+    }
+  } catch (error) {
+    console.error('加载公告列表失败:', error)
+  } finally {
+    loadingAnnouncements.value = false
+  }
 }
 
+// 加载考勤记录
+const loadAttendance = async () => {
+  try {
+    const today = new Date().toISOString().split('T')[0]
+    const response = await getAttendance({ date: today })
+    if (response && response.data) {
+      todayAttendance.value = response.data
+    }
+  } catch (error) {
+    console.error('加载考勤记录失败:', error)
+  }
+}
+
+// 上班打卡
+const handleCheckIn = async () => {
+  checkingIn.value = true
+  try {
+    await checkIn({
+      type: 'CHECK_IN',
+      location: '办公室' // TODO: 获取实际位置
+    })
+    ElMessage.success('上班打卡成功')
+    await loadAttendance()
+  } catch (error) {
+    console.error('打卡失败:', error)
+    ElMessage.error('打卡失败')
+  } finally {
+    checkingIn.value = false
+  }
+}
+
+// 下班打卡
+const handleCheckOut = async () => {
+  checkingOut.value = true
+  try {
+    await checkIn({
+      type: 'CHECK_OUT',
+      location: '办公室'
+    })
+    ElMessage.success('下班打卡成功')
+    await loadAttendance()
+  } catch (error) {
+    console.error('打卡失败:', error)
+    ElMessage.error('打卡失败')
+  } finally {
+    checkingOut.value = false
+  }
+}
+
+// 创建待办
+const handleCreateTodo = async () => {
+  if (!todoForm.title) {
+    ElMessage.warning('请输入待办标题')
+    return
+  }
+
+  try {
+    await createTodo(todoForm)
+    ElMessage.success('待办创建成功')
+    showCreateTodoDialog.value = false
+    todoForm.title = ''
+    todoForm.content = ''
+    todoForm.dueDate = null
+    todoForm.priority = 'MEDIUM'
+    await loadTodos()
+  } catch (error) {
+    console.error('创建待办失败:', error)
+    ElMessage.error('创建失败')
+  }
+}
+
+// 完成待办
+const handleTodoComplete = async (todo) => {
+  try {
+    await completeTodo(todo.id)
+    ElMessage.success(todo.completed ? '待办已完成' : '待办已恢复')
+  } catch (error) {
+    console.error('操作失败:', error)
+    todo.completed = !todo.completed
+    ElMessage.error('操作失败')
+  }
+}
+
+// 审批点击
+const handleApprovalClick = (approval) => {
+  ElMessage.info('审批详情功能开发中...')
+  // TODO: 打开审批详情对话框
+}
+
+// 获取审批类型标签
+const getApprovalTypeTag = (type) => {
+  const typeMap = {
+    'LEAVE': 'warning',
+    'EXPENSE': 'danger',
+    'PURCHASE': 'primary',
+    'OTHER': 'info'
+  }
+  return typeMap[type] || 'info'
+}
+
+// 格式化日期
+const formatDate = (date) => {
+  if (!date) return ''
+  const d = new Date(date)
+  return d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+}
+
+// 格式化时间
+const formatTime = (timestamp) => {
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  const now = new Date()
+  const diff = now - date
+
+  if (diff < 60000) return '刚刚'
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
+  
+  return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+}
+
+// 组件挂载
 onMounted(() => {
-  formatDate()
+  updateTime()
+  timeInterval = setInterval(updateTime, 1000)
+  
+  loadStatistics()
+  loadTodos()
+  loadApprovals()
+  loadAnnouncements()
+  loadAttendance()
+})
+
+// 组件卸载
+onUnmounted(() => {
+  if (timeInterval) {
+    clearInterval(timeInterval)
+  }
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .workbench-panel {
-  flex: 1;
-  background-color: #f7f8fa;
+  padding: 20px;
+  background: #f5f5f5;
+  min-height: 100%;
   overflow-y: auto;
 }
 
-.workbench-content {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-.header-left {
-  .panel-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: #262626;
-    margin: 0 0 4px 0;
-  }
-
-  .panel-subtitle {
-    font-size: 14px;
-    color: #8c8c8c;
-    margin: 0;
-  }
-}
-
-.header-right {
-  text-align: right;
-
-  .date-label {
-    font-size: 14px;
-    color: #8c8c8c;
-    margin: 0 0 4px 0;
-  }
-
-  .date-text {
-    font-size: 18px;
-    font-weight: 500;
-    color: #262626;
-    margin: 0;
-  }
-}
-
-.quick-actions {
+.stats-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: 24px;
-}
+  margin-bottom: 20px;
 
-.action-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  .stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
 
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 24px;
+    }
+
+    .stat-info {
+      flex: 1;
+
+      .stat-value {
+        font-size: 28px;
+        font-weight: 600;
+        color: #262626;
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        font-size: 14px;
+        color: #8c8c8c;
+      }
+    }
   }
 }
 
-.action-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.attendance-section {
+  margin-bottom: 20px;
 
-  .icon {
-    font-size: 28px;
-    color: #fff;
+  .attendance-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
-  &.action-blue {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-  }
+  .attendance-content {
+    display: flex;
+    align-items: center;
+    gap: 24px;
 
-  &.action-green {
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-  }
+    .attendance-time {
+      flex: 1;
 
-  &.action-orange {
-    background: linear-gradient(135deg, #f97316, #ea580c);
-  }
+      .current-time {
+        font-size: 48px;
+        font-weight: 600;
+        color: #262626;
+        font-family: 'Courier New', monospace;
+      }
 
-  &.action-purple {
-    background: linear-gradient(135deg, #a855f7, #9333ea);
+      .current-date {
+        font-size: 14px;
+        color: #8c8c8c;
+        margin-top: 8px;
+      }
+    }
+
+    .attendance-actions {
+      .attendance-complete {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #52c41a;
+        font-size: 16px;
+
+        .check-icon {
+          font-size: 24px;
+        }
+      }
+    }
+
+    .attendance-records {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .record-item {
+        display: flex;
+        gap: 8px;
+        font-size: 14px;
+
+        .record-label {
+          color: #8c8c8c;
+        }
+
+        .record-time {
+          color: #262626;
+          font-weight: 500;
+        }
+      }
+    }
   }
 }
 
-.action-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #262626;
-}
-
-.content-grid {
+.main-content {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
+  gap: 20px;
+  margin-bottom: 20px;
 
-.grid-item {
-  .card {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+  .content-section {
+    :deep(.el-card) {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
   }
 }
 
@@ -423,214 +644,138 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  font-size: 16px;
+  font-weight: 500;
+}
 
-  .card-title {
+.todo-list {
+  min-height: 200px;
+
+  .todo-item {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 16px;
-    font-weight: 500;
-    color: #262626;
-    margin: 0;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: background-color 0.2s;
 
-    .el-icon {
-      font-size: 16px;
-      color: #595959;
+    &:hover {
+      background-color: #f5f5f5;
+    }
+
+    &.completed {
+      .todo-title {
+        text-decoration: line-through;
+        color: #8c8c8c;
+      }
+    }
+
+    .todo-content {
+      flex: 1;
+
+      .todo-title {
+        font-size: 14px;
+        color: #262626;
+        margin-bottom: 8px;
+      }
+
+      .todo-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .todo-date {
+          font-size: 12px;
+          color: #8c8c8c;
+        }
+      }
     }
   }
+}
 
-  .todo-badge {
-    background-color: #e6f7ff;
-    color: #1890ff;
+.approval-list {
+  min-height: 200px;
+
+  .approval-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+
+    .approval-content {
+      flex: 1;
+
+      .approval-title {
+        font-size: 14px;
+        color: #262626;
+        margin-bottom: 4px;
+      }
+
+      .approval-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #8c8c8c;
+      }
+    }
   }
 }
 
-.card-body {
-  padding: 12px 20px;
-}
-
-.todo-item,
-.notice-item,
-.doc-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #f5f5f5;
-  }
-}
-
-.todo-checkbox {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #1890ff;
-  border-radius: 4px;
-  flex-shrink: 0;
-  margin-top: 2px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #e6f7ff;
-  }
-}
-
-.todo-content,
-.notice-content,
-.doc-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.todo-title,
-.notice-title,
-.doc-title {
-  font-size: 14px;
-  color: #262626;
-  margin: 0 0 4px 0;
-  line-height: 1.4;
-
-  &.unread {
-    font-weight: 500;
-  }
-}
-
-.todo-time,
-.notice-time,
-.doc-time {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: #8c8c8c;
-
-  .el-icon {
-    font-size: 12px;
-  }
-}
-
-.unread-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #ff4d4f;
-  flex-shrink: 0;
-  margin-top: 6px;
-}
-
-.unread-placeholder {
-  width: 8px;
-  height: 8px;
-  flex-shrink: 0;
-  margin-top: 6px;
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 8px;
-
-  &.stat-blue {
-    background-color: #e6f7ff;
+.announcements-section {
+  :deep(.el-card) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
-  &.stat-green {
-    background-color: #f6ffed;
-  }
-}
+  .announcement-list {
+    .announcement-item {
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
 
-.stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+      &:last-child {
+        border-bottom: none;
+      }
 
-  .el-icon {
-    font-size: 20px;
-  }
+      .announcement-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
 
-  .stat-blue & {
-    background-color: #bae7ff;
-    color: #1890ff;
-  }
+        .announcement-icon {
+          font-size: 16px;
+          color: #0089ff;
+        }
 
-  .stat-green & {
-    background-color: #d9f7be;
-    color: #52c41a;
-  }
-}
+        .announcement-title {
+          flex: 1;
+          font-size: 14px;
+          font-weight: 500;
+          color: #262626;
+        }
 
-.stat-info {
-  flex: 1;
+        .announcement-time {
+          font-size: 12px;
+          color: #8c8c8c;
+        }
+      }
 
-  .stat-label {
-    font-size: 12px;
-    color: #595959;
-    margin: 0 0 4px 0;
-  }
-
-  .stat-value {
-    font-size: 20px;
-    font-weight: 600;
-    color: #262626;
-    margin: 0;
-  }
-}
-
-.stat-trend {
-  font-size: 20px;
-  color: #52c41a;
-}
-
-.doc-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  .el-icon {
-    font-size: 20px;
-  }
-
-  &.doc-blue {
-    background-color: #e6f7ff;
-    color: #1890ff;
-  }
-
-  &.doc-green {
-    background-color: #f6ffed;
-    color: #52c41a;
-  }
-}
-
-.view-all-btn {
-  width: 100%;
-  color: #1890ff;
-  font-size: 14px;
-  margin-top: 8px;
-  padding: 8px 0;
-
-  &:hover {
-    background-color: #e6f7ff;
-    color: #1890ff;
-  }
-
-  .el-icon {
-    margin-left: 4px;
+      .announcement-content {
+        font-size: 13px;
+        color: #595959;
+        line-height: 1.6;
+        padding-left: 24px;
+      }
+    }
   }
 }
 </style>

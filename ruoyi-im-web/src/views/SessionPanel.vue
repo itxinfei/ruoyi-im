@@ -2,9 +2,23 @@
   <div class="session-panel">
     <div class="panel-header">
       <h3>消息</h3>
-      <el-tooltip content="新建会话">
-        <el-button :icon="Plus" text circle size="small" @click="handleNewConversation" />
-      </el-tooltip>
+      <el-dropdown trigger="click" @command="handleCommand">
+        <el-tooltip content="新建会话">
+          <el-button :icon="Plus" text circle size="small" />
+        </el-tooltip>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="group">
+              <el-icon><UserFilled /></el-icon>
+              创建群组
+            </el-dropdown-item>
+            <el-dropdown-item command="chat">
+              <el-icon><ChatDotRound /></el-icon>
+              发起单聊
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </div>
 
     <div class="search-bar">
@@ -46,15 +60,22 @@
         <el-empty description="暂无会话" />
       </div>
     </div>
+
+    <!-- 创建群组对话框 -->
+    <CreateGroupDialog
+      v-model="showCreateGroupDialog"
+      @success="handleGroupCreated"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Search, Plus } from '@element-plus/icons-vue'
+import { Search, Plus, UserFilled, ChatDotRound } from '@element-plus/icons-vue'
 import { getConversations } from '@/api/im/conversation'
 import { useImWebSocket } from '@/composables/useImWebSocket'
+import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
 
 const props = defineProps({
   currentSession: {
@@ -68,9 +89,25 @@ const emit = defineEmits(['select-session'])
 const searchKeyword = ref('')
 const sessions = ref([])
 const loading = ref(false)
+const showCreateGroupDialog = ref(false)
 
 // WebSocket 连接
 const { isConnected, connect, onMessage } = useImWebSocket()
+
+// 处理下拉菜单命令
+const handleCommand = (command) => {
+  if (command === 'group') {
+    showCreateGroupDialog.value = true
+  } else if (command === 'chat') {
+    ElMessage.info('发起单聊功能开发中...')
+  }
+}
+
+// 群组创建成功
+const handleGroupCreated = (groupData) => {
+  ElMessage.success('群组创建成功')
+  loadSessions() // 重新加载会话列表
+}
 
 // 加载会话列表
 const loadSessions = async () => {
@@ -184,6 +221,8 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   width: 320px;
+  min-width: 320px;
+  flex-shrink: 0;
   border-right: 1px solid #e8e8e8;
   background: #fff;
   height: 100%;

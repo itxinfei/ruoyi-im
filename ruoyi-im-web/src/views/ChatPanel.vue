@@ -60,15 +60,42 @@
     </div>
 
     <div class="chat-input">
+      <!-- 文件上传组件（隐藏） -->
+      <FileUpload
+        ref="fileUploadRef"
+        type="file"
+        accept="*"
+        :max-size="100"
+        @success="handleFileUploadSuccess"
+        @error="handleUploadError"
+      />
+
+      <!-- 图片上传组件（隐藏） -->
+      <FileUpload
+        ref="imageUploadRef"
+        type="image"
+        accept="image/*"
+        :max-size="10"
+        @success="handleImageUploadSuccess"
+        @error="handleUploadError"
+      />
+
       <div class="input-toolbar">
-        <el-tooltip content="表情">
-          <el-button :icon="ChatDotRound" text class="toolbar-btn" />
-        </el-tooltip>
+        <div class="emoji-picker-wrapper">
+          <el-tooltip content="表情">
+            <el-button :icon="ChatDotRound" text class="toolbar-btn" @click="toggleEmojiPicker" />
+          </el-tooltip>
+          <EmojiPicker
+            v-if="showEmojiPicker"
+            @select="selectEmoji"
+            @click.stop
+          />
+        </div>
         <el-tooltip content="上传文件">
-          <el-button :icon="Folder" text class="toolbar-btn" />
+          <el-button :icon="Folder" text class="toolbar-btn" @click="handleUploadFile" />
         </el-tooltip>
         <el-tooltip content="上传图片">
-          <el-button :icon="Picture" text class="toolbar-btn" />
+          <el-button :icon="Picture" text class="toolbar-btn" @click="handleUploadImage" />
         </el-tooltip>
         <el-tooltip content="@成员">
           <el-button :icon="Promotion" text class="toolbar-btn" />
@@ -97,12 +124,18 @@
         </div>
       </div>
     </div>
+
+    <!-- 转发对话框 -->
+    <ForwardDialog
+      ref="forwardDialogRef"
+      @forward="handleForwardMessage"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, nextTick, watch, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Phone,
   VideoCamera,
@@ -110,10 +143,18 @@ import {
   ChatDotRound,
   Folder,
   Picture,
-  Promotion
+  Promotion,
+  TopRight,
+  Close,
+  DocumentCopy,
+  RefreshLeft,
+  Delete
 } from '@element-plus/icons-vue'
-import { getMessages, sendMessage as sendMessageApi, markAsRead } from '@/api/im/message'
+import { getMessages, sendMessage as sendMessageApi, markAsRead, recallMessage, deleteMessage } from '@/api/im/message'
 import { useImWebSocket } from '@/composables/useImWebSocket'
+import FileUpload from '@/components/FileUpload/index.vue'
+import ForwardDialog from '@/components/ForwardDialog/index.vue'
+import EmojiPicker from '@/components/EmojiPicker/index.vue'
 
 const props = defineProps({
   session: {
@@ -133,9 +174,412 @@ const messageAreaRef = ref(null)
 const messages = ref([])
 const loading = ref(false)
 const sending = ref(false)
+const replyingTo = ref(null)
+const contextMessage = ref(null)
+const contextMenuRef = ref(null)
+const fileUploadRef = ref(null)
+const imageUploadRef = ref(null)
+const forwardDialogRef = ref(null)
+const showEmojiPicker = ref(false)
 
 // WebSocket
 const { sendMessage: wsSendMessage, onMessage } = useImWebSocket()
+
+// 处理右键菜单
+const handleContextMenu = (event, message) => {
+  contextMessage.value = message
+  // 使用 Element Plus 的 dropdown 组件显示菜单
+  const dropdown = contextMenuRef.value
+  if (dropdown) {
+    dropdown.handleOpen()
+  }
+}
+
+// 处理菜单命令
+const handleMenuCommand = async (command) => {
+  const message = contextMessage.value
+  if (!message) return
+
+  switch (command) {
+    case 'reply':
+      handleReply(message)
+      break
+    case 'forward':
+      handleForward(message)
+      break
+    case 'copy':
+      handleCopy(message)
+      break
+    case 'recall':
+      await handleRecall(message)
+      break
+    case 'delete':
+      await handleDelete(message)
+      break
+  }
+}
+
+// 回复消息
+const handleReply = (message) => {
+  replyingTo.value = message
+  ElMessage.info(`回复 ${message.senderName}`)
+}
+
+// 取消回复
+const cancelReply = () => {
+  replyingTo.value = null
+}
+
+// 转发消息
+const handleForward = (message) => {
+  forwardDialogRef.value?.open(message)
+}
+
+// 切换表情选择器显示状态
+const toggleEmojiPicker = () => {
+  showEmojiPicker.value = !showEmojiPicker.value
+}
+
+// 选择表情
+const selectEmoji = (emoji) => {
+  inputMessage.value += emoji
+  showEmojiPicker.value = false
+}
+
+// 处理转发消息
+const handleForwardMessage = async ({ message, targetSessionId }) => {
+  try {
+    sending.value = true
+
+    // 调用 API 转发消息
+    const response = await sendMessageApi({
+      conversationId: targetSessionId,
+      messageType: message.messageType,
+      content: message.content,
+      forwardFromMessageId: message.id
+    })
+
+    if (response && response.data) {
+      ElMessage.success('转发成功')
+
+      // 如果转发到当前会话，显示在消息列表中
+      if (targetSessionId === props.session.id) {
+        const newMessage = {
+          id: response.data.messageId || response.data.id || Date.now(),
+          content: message.content,
+          messageType: message.messageType,
+          fileData: message.fileData,
+          imageData: message.imageData,
+          forwardFrom: message,
+          senderId: currentUser.value.id,
+          senderName: currentUser.value.name,
+          senderAvatar: currentUser.value.avatar,
+          timestamp: response.data.createTime || Date.now(),
+          isOwn: true,
+          isRead: false
+        }
+
+        messages.value.push(newMessage)
+
+        nextTick(() => {
+          scrollToBottom()
+        })
+      }
+    }
+  } catch (error) {
+    console.error('转发消息失败:', error)
+    ElMessage.error('转发失败')
+  } finally {
+    sending.value = false
+  }
+}
+
+// 复制消息
+const handleCopy = async (message) => {
+  try {
+    await navigator.clipboard.writeText(message.content)
+    ElMessage.success('已复制到剪贴板')
+  } catch (error) {
+    console.error('复制失败:', error)
+    ElMessage.error('复制失败')
+  }
+}
+
+// 撤回消息
+const handleRecall = async (message) => {
+  try {
+    // 检查是否在2分钟内
+    const timeDiff = Date.now() - message.timestamp
+    if (timeDiff > 2 * 60 * 1000) {
+      ElMessage.warning('只能撤回2分钟内的消息')
+      return
+    }
+
+    await ElMessageBox.confirm(
+      '确定要撤回这条消息吗？',
+      '撤回消息',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    await recallMessage(message.id)
+    
+    // 更新消息为已撤回状态
+    const index = messages.value.findIndex(m => m.id === message.id)
+    if (index !== -1) {
+      messages.value[index].content = '你撤回了一条消息'
+      messages.value[index].isRecalled = true
+    }
+
+    ElMessage.success('消息已撤回')
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('撤回消息失败:', error)
+      ElMessage.error('撤回失败')
+    }
+  }
+}
+
+// 删除消息
+const handleDelete = async (message) => {
+  try {
+    await ElMessageBox.confirm(
+      '删除后无法恢复，确定要删除这条消息吗？',
+      '删除消息',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    await deleteMessage(message.id)
+    
+    // 从列表中移除消息
+    messages.value = messages.value.filter(m => m.id !== message.id)
+
+    ElMessage.success('消息已删除')
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除消息失败:', error)
+      ElMessage.error('删除失败')
+    }
+  }
+}
+
+// 上传文件
+const handleUploadFile = () => {
+  fileUploadRef.value?.triggerUpload()
+}
+
+// 上传图片
+const handleUploadImage = () => {
+  imageUploadRef.value?.triggerUpload()
+}
+
+// 文件上传成功
+const handleFileUploadSuccess = async ({ data }) => {
+  try {
+    sending.value = true
+
+    // 调用 API 发送文件消息
+    const response = await sendMessageApi({
+      conversationId: props.session.id,
+      messageType: 'FILE',
+      content: JSON.stringify({
+        fileName: data.fileName,
+        fileSize: data.fileSize,
+        fileUrl: data.fileUrl
+      })
+    })
+
+    if (response && response.data) {
+      // 添加到消息列表
+      const newMessage = {
+        id: response.data.messageId || response.data.id || Date.now(),
+        content: `[文件] ${data.fileName}`,
+        messageType: 'FILE',
+        fileData: {
+          fileName: data.fileName,
+          fileSize: data.fileSize,
+          fileUrl: data.fileUrl
+        },
+        senderId: currentUser.value.id,
+        senderName: currentUser.value.name,
+        senderAvatar: currentUser.value.avatar,
+        timestamp: response.data.createTime || Date.now(),
+        isOwn: true,
+        isRead: false
+      }
+
+      messages.value.push(newMessage)
+
+      // 通过 WebSocket 发送消息通知
+      wsSendMessage({
+        type: 'message',
+        data: {
+          conversationId: props.session.id,
+          messageId: newMessage.id,
+          messageType: 'FILE',
+          content: JSON.stringify({
+            fileName: data.fileName,
+            fileSize: data.fileSize,
+            fileUrl: data.fileUrl
+          })
+        }
+      })
+
+      nextTick(() => {
+        scrollToBottom()
+      })
+    }
+  } catch (error) {
+    console.error('发送文件消息失败:', error)
+    ElMessage.error('发送文件消息失败')
+  } finally {
+    sending.value = false
+  }
+}
+
+// 图片上传成功
+const handleImageUploadSuccess = async ({ data }) => {
+  try {
+    sending.value = true
+
+    // 调用 API 发送图片消息
+    const response = await sendMessageApi({
+      conversationId: props.session.id,
+      messageType: 'IMAGE',
+      content: JSON.stringify({
+        imageUrl: data.fileUrl,
+        width: data.width,
+        height: data.height
+      })
+    })
+
+    if (response && response.data) {
+      // 添加到消息列表
+      const newMessage = {
+        id: response.data.messageId || response.data.id || Date.now(),
+        content: '[图片]',
+        messageType: 'IMAGE',
+        imageData: {
+          imageUrl: data.fileUrl,
+          width: data.width,
+          height: data.height
+        },
+        senderId: currentUser.value.id,
+        senderName: currentUser.value.name,
+        senderAvatar: currentUser.value.avatar,
+        timestamp: response.data.createTime || Date.now(),
+        isOwn: true,
+        isRead: false
+      }
+
+      messages.value.push(newMessage)
+
+      // 通过 WebSocket 发送消息通知
+      wsSendMessage({
+        type: 'message',
+        data: {
+          conversationId: props.session.id,
+          messageId: newMessage.id,
+          messageType: 'IMAGE',
+          content: JSON.stringify({
+            imageUrl: data.fileUrl,
+            width: data.width,
+            height: data.height
+          })
+        }
+      })
+
+      nextTick(() => {
+        scrollToBottom()
+      })
+    }
+  } catch (error) {
+    console.error('发送图片消息失败:', error)
+    ElMessage.error('发送图片消息失败')
+  } finally {
+    sending.value = false
+  }
+}
+
+// 上传错误处理
+const handleUploadError = ({ error }) => {
+  console.error('上传失败:', error)
+  ElMessage.error(error || '上传失败')
+}
+  try {
+    sending.value = true
+
+    // 调用 API 发送图片消息
+    const response = await sendMessageApi({
+      conversationId: props.session.id,
+      messageType: 'IMAGE',
+      content: JSON.stringify({
+        imageUrl: data.fileUrl,
+        width: data.width,
+        height: data.height
+      })
+    })
+
+    if (response && response.data) {
+      // 添加到消息列表
+      const newMessage = {
+        id: response.data.messageId || response.data.id || Date.now(),
+        content: '[图片]',
+        messageType: 'IMAGE',
+        imageData: {
+          imageUrl: data.fileUrl,
+          width: data.width,
+          height: data.height
+        },
+        senderId: currentUser.value.id,
+        senderName: currentUser.value.name,
+        senderAvatar: currentUser.value.avatar,
+        timestamp: response.data.createTime || Date.now(),
+        isOwn: true,
+        isRead: false
+      }
+
+      messages.value.push(newMessage)
+
+      // 通过 WebSocket 发送消息通知
+      wsSendMessage({
+        type: 'message',
+        data: {
+          conversationId: props.session.id,
+          messageId: newMessage.id,
+          messageType: 'IMAGE',
+          content: JSON.stringify({
+            imageUrl: data.fileUrl,
+            width: data.width,
+            height: data.height
+          })
+        }
+      })
+
+      nextTick(() => {
+        scrollToBottom()
+      })
+    }
+  } catch (error) {
+    console.error('发送图片消息失败:', error)
+    ElMessage.error('发送图片消息失败')
+  } finally {
+    sending.value = false
+  }
+}
+
+// 滚动到指定消息
+const scrollToMessage = (messageId) => {
+  // TODO: 实现滚动到指定消息
+  console.log('滚动到消息:', messageId)
+}
 
 // 加载用户信息
 const loadUserInfo = () => {
@@ -269,7 +713,8 @@ const sendMessage = async () => {
     const response = await sendMessageApi({
       conversationId: props.session.id,
       messageType: 'TEXT',
-      content: content
+      content: content,
+      replyToMessageId: replyingTo.value?.id // 回复消息ID
     })
 
     if (response && response.data) {
@@ -283,11 +728,17 @@ const sendMessage = async () => {
         timestamp: response.data.createTime || Date.now(),
         isOwn: true,
         isRead: false,
-        messageType: 'TEXT'
+        messageType: 'TEXT',
+        replyTo: replyingTo.value ? {
+          id: replyingTo.value.id,
+          senderName: replyingTo.value.senderName,
+          content: replyingTo.value.content
+        } : null
       }
 
       messages.value.push(newMessage)
       inputMessage.value = ''
+      replyingTo.value = null // 清除回复状态
 
       // 通过 WebSocket 发送消息通知
       wsSendMessage({
@@ -296,7 +747,8 @@ const sendMessage = async () => {
           conversationId: props.session.id,
           messageId: newMessage.id,
           content: content,
-          messageType: 'TEXT'
+          messageType: 'TEXT',
+          replyToMessageId: newMessage.replyTo?.id
         }
       })
 

@@ -109,8 +109,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         Long messageId = distributedLock.executeWithLock(
                 com.ruoyi.im.utils.ImDistributedLock.LockKeys.sendMessageKey(finalConversationId),
                 10, // 10秒过期时间足够
-                () -> doSendMessage(request, userId, finalConversationId, sender, finalClientMsgId)
-        );
+                () -> doSendMessage(request, userId, finalConversationId, sender, finalClientMsgId));
 
         return messageId;
     }
@@ -119,7 +118,8 @@ public class ImMessageServiceImpl implements ImMessageService {
      * 实际执行发送消息的逻辑
      * 支持消息发送状态追踪
      */
-    private Long doSendMessage(ImMessageSendRequest request, Long userId, Long conversationId, ImUser sender, String clientMsgId) {
+    private Long doSendMessage(ImMessageSendRequest request, Long userId, Long conversationId, ImUser sender,
+            String clientMsgId) {
         ImMessage message = new ImMessage();
         message.setConversationId(conversationId);
         message.setSenderId(userId);
@@ -154,13 +154,25 @@ public class ImMessageServiceImpl implements ImMessageService {
         imConversationMapper.updateById(conversationUpdate);
 
         // 增加会话中其他成员的未读消息数
-        List<com.ruoyi.im.domain.ImConversationMember> members =
-            imConversationMemberMapper.selectByConversationId(conversationId);
+        List<com.ruoyi.im.domain.ImConversationMember> members = imConversationMemberMapper
+                .selectByConversationId(conversationId);
+
+        // 性能优化：只有在成员数量较少时才清除接收者的会话列表缓存
+        // 大群（>20人）依赖WebSocket更新或TTL过期，避免循环操作Redis导致发送延迟
+        boolean shouldEvictCache = members.size() <= 20;
+
         for (com.ruoyi.im.domain.ImConversationMember member : members) {
             if (!member.getUserId().equals(userId)) {
                 imConversationMemberMapper.incrementUnreadCount(conversationId, member.getUserId(), 1);
+
+                if (shouldEvictCache) {
+                    redisUtil.delete("conversation:list:" + member.getUserId());
+                }
             }
         }
+
+        // 始终清除发送者的会话列表缓存，确保发送者看到最新状态
+        redisUtil.delete("conversation:list:" + userId);
 
         // 处理@提及
         ImMentionInfo mentionInfo = request.getMentionInfo();
@@ -168,7 +180,8 @@ public class ImMessageServiceImpl implements ImMessageService {
             // 自动解析消息内容中的@提及
             mentionInfo = messageMentionService.parseMentions(request.getContent());
         }
-        if (mentionInfo != null && (mentionInfo.getUserIds() != null || Boolean.TRUE.equals(mentionInfo.getMentionAll()))) {
+        if (mentionInfo != null
+                && (mentionInfo.getUserIds() != null || Boolean.TRUE.equals(mentionInfo.getMentionAll()))) {
             // 设置会话ID用于权限验证
             mentionInfo.setConversationId(conversationId);
             messageMentionService.createMentions(message.getId(), mentionInfo, userId);
@@ -284,9 +297,9 @@ public class ImMessageServiceImpl implements ImMessageService {
      * 构建引用消息VO（从预加载的Map中获取数据）
      * 优化版本，避免N+1查询问题
      *
-     * @param messageId 被回复的消息ID
+     * @param messageId         被回复的消息ID
      * @param replyToMessageMap 预加载的消息Map
-     * @param userMap 预加载的用户Map
+     * @param userMap           预加载的用户Map
      * @return 引用消息VO
      */
     private ImMessageVO.QuotedMessageVO buildQuotedMessageFromMap(
@@ -514,7 +527,8 @@ public class ImMessageServiceImpl implements ImMessageService {
         String decryptedContent = encryptionUtil.decryptMessage(originalMessage.getContent());
 
         ImMessage forwardMessage = new ImMessage();
-        forwardMessage.setConversationId(toConversationId != null ? toConversationId : originalMessage.getConversationId());
+        forwardMessage
+                .setConversationId(toConversationId != null ? toConversationId : originalMessage.getConversationId());
         forwardMessage.setSenderId(userId);
         forwardMessage.setReceiverId(toUserId != null ? toUserId : originalMessage.getReceiverId());
         forwardMessage.setMessageType(originalMessage.getMessageType()); // 转发时保留原消息类型
@@ -563,9 +577,9 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     @Override
     public ImMessageSearchResultVO searchMessages(Long conversationId, String keyword, String messageType,
-                                                   Long senderId, LocalDateTime startTime, LocalDateTime endTime,
-                                                   Integer pageNum, Integer pageSize, Boolean includeRevoked,
-                                                   Boolean exactMatch, Long userId) {
+            Long senderId, LocalDateTime startTime, LocalDateTime endTime,
+            Integer pageNum, Integer pageSize, Boolean includeRevoked,
+            Boolean exactMatch, Long userId) {
         // 参数校验和默认值设置
         if (pageNum == null || pageNum < 1) {
             pageNum = 1;
@@ -654,8 +668,8 @@ public class ImMessageServiceImpl implements ImMessageService {
      * 生成高亮片段
      * 截取包含关键词的上下文
      *
-     * @param content   原始内容
-     * @param keyword   关键词
+     * @param content       原始内容
+     * @param keyword       关键词
      * @param snippetLength 片段长度
      * @return 高亮片段
      */
@@ -707,8 +721,7 @@ public class ImMessageServiceImpl implements ImMessageService {
      */
     private void broadcastRecallNotification(Long conversationId, Long messageId, Long userId) {
         try {
-            com.ruoyi.im.websocket.ImWebSocketEndpoint wsEndpoint =
-                new com.ruoyi.im.websocket.ImWebSocketEndpoint();
+            com.ruoyi.im.websocket.ImWebSocketEndpoint wsEndpoint = new com.ruoyi.im.websocket.ImWebSocketEndpoint();
 
             java.util.Map<String, Object> recallNotification = new java.util.HashMap<>();
             recallNotification.put("type", "recall");
@@ -721,17 +734,18 @@ public class ImMessageServiceImpl implements ImMessageService {
             if (imUserMapper != null) {
                 com.ruoyi.im.domain.ImUser user = imUserMapper.selectImUserById(userId);
                 if (user != null) {
-                    recallNotification.put("userName", user.getNickname() != null ? user.getNickname() : user.getUsername());
+                    recallNotification.put("userName",
+                            user.getNickname() != null ? user.getNickname() : user.getUsername());
                 }
             }
 
             // 获取会话成员
-            List<com.ruoyi.im.domain.ImConversationMember> members =
-                imConversationMemberMapper.selectByConversationId(conversationId);
+            List<com.ruoyi.im.domain.ImConversationMember> members = imConversationMemberMapper
+                    .selectByConversationId(conversationId);
 
             if (members != null) {
-                java.util.Map<Long, javax.websocket.Session> onlineUsers =
-                    com.ruoyi.im.websocket.ImWebSocketEndpoint.getOnlineUsers();
+                java.util.Map<Long, javax.websocket.Session> onlineUsers = com.ruoyi.im.websocket.ImWebSocketEndpoint
+                        .getOnlineUsers();
 
                 com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
                 String messageJson = mapper.writeValueAsString(recallNotification);
