@@ -49,7 +49,7 @@
         </template>
       </el-dropdown>
 
-      <el-dropdown trigger="click" placement="bottom-end">
+      <el-dropdown trigger="click" placement="bottom-end" @command="handleCommand">
         <div class="header-user">
           <el-avatar :size="32" :src="currentUser?.avatar">
             {{ currentUser?.name?.charAt(0) }}
@@ -61,8 +61,8 @@
         </div>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item>个人设置</el-dropdown-item>
-            <el-dropdown-item>退出登录</el-dropdown-item>
+            <el-dropdown-item command="profile">个人设置</el-dropdown-item>
+            <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -71,7 +71,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
   Bell,
@@ -80,12 +82,88 @@ import {
   ArrowDown,
   ChatDotRound
 } from '@element-plus/icons-vue'
+import { logout } from '@/api/im/auth'
 
+const router = useRouter()
 const searchKeyword = ref('')
 const currentUser = ref({
-  id: 1,
-  name: '测试用户',
-  avatar: 'https://via.placeholder.com/40'
+  id: null,
+  name: '用户',
+  avatar: ''
+})
+
+// 从 localStorage 加载用户信息
+const loadUserInfo = () => {
+  const userInfoStr = localStorage.getItem('user_info')
+  if (userInfoStr) {
+    try {
+      const userInfo = JSON.parse(userInfoStr)
+      currentUser.value = {
+        id: userInfo.userId || userInfo.id,
+        name: userInfo.userName || userInfo.name || '用户',
+        avatar: userInfo.avatar || ''
+      }
+    } catch (error) {
+      console.error('解析用户信息失败:', error)
+    }
+  }
+}
+
+// 处理登出
+const handleLogout = async () => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要退出登录吗？',
+      '提示',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    // 调用登出接口
+    try {
+      await logout()
+    } catch (error) {
+      console.error('登出接口调用失败:', error)
+      // 即使接口失败也继续清除本地数据
+    }
+
+    // 清除本地存储
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('user_info')
+
+    ElMessage.success('已退出登录')
+
+    // 跳转到登录页
+    router.push('/login')
+  } catch (error) {
+    // 用户取消登出
+    if (error !== 'cancel') {
+      console.error('登出失败:', error)
+    }
+  }
+}
+
+// 处理下拉菜单点击
+const handleCommand = (command) => {
+  switch (command) {
+    case 'profile':
+      // 跳转到个人设置页面
+      console.log('打开个人设置')
+      break
+    case 'logout':
+      handleLogout()
+      break
+    default:
+      break
+  }
+}
+
+// 组件挂载时加载用户信息
+onMounted(() => {
+  loadUserInfo()
 })
 </script>
 

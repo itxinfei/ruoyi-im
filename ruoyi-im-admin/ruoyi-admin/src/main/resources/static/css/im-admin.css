@@ -1,8 +1,20 @@
 /**
- * IM 管理后台通用样式
+ * IM 管理后台通用样式（增强版）
  * 用于统一所有 IM 列表页面的布局和样式
  * 使用方式：在页面 <head> 中添加 <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
  */
+
+/* ========== 全局过渡动画 ========== */
+* {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease,
+                box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+/* 禁用表格内部元素的过渡，提高性能 */
+.table *,
+.fixed-table-container *,
+.bootstrap-table * {
+    transition: none !important;
+}
 
 /* ========== 搜索区域样式 ========== */
 .search-collapse {
@@ -144,4 +156,455 @@
 }
 .stat-box-warning {
     background: #f8ac59;
+}
+
+/* ========== 统计卡片增强样式 ========== */
+.stat-box {
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+.stat-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+.stat-box:active {
+    transform: translateY(-2px);
+}
+.stat-box .stat-icon {
+    transition: transform 0.3s ease;
+}
+.stat-box:hover .stat-icon {
+    transform: translateY(-50%) scale(1.1) rotate(5deg);
+}
+/* 统计卡片点击波纹效果 */
+.stat-box {
+    position: relative;
+    overflow: hidden;
+}
+.stat-box::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+.stat-box:active::before {
+    width: 300px;
+    height: 300px;
+}
+/* 统计数字动画 */
+.stat-box .stat-number {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+.stat-box:hover .stat-number {
+    transform: scale(1.05);
+}
+
+/* ========== 搜索区域增强样式 ========== */
+/* 搜索区域折叠/展开 */
+.search-collapse {
+    position: relative;
+    transition: all 0.3s ease;
+}
+.search-collapse.collapsed .select-list ul {
+    max-height: 50px;
+    overflow: hidden;
+}
+.search-collapse.collapsed .select-list ul li {
+    display: none;
+}
+.search-collapse.collapsed .select-list ul li:first-child {
+    display: flex;
+}
+/* 搜索折叠按钮 */
+.search-collapse .search-toggle-btn {
+    position: absolute;
+    right: 10px;
+    bottom: -30px;
+    z-index: 10;
+    background: #fff;
+    border: 1px solid #e7eaec;
+    border-radius: 0 0 4px 4px;
+    padding: 5px 15px;
+    font-size: 12px;
+    color: #676a6c;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.search-collapse .search-toggle-btn:hover {
+    background: #f8f9fa;
+}
+.search-collapse .search-toggle-btn i {
+    transition: transform 0.3s ease;
+}
+.search-collapse.collapsed .search-toggle-btn i {
+    transform: rotate(180deg);
+}
+/* 搜索条件高亮 */
+.search-collapse input:focus,
+.search-collapse select:focus {
+    border-color: #1ab394 !important;
+    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.1) !important;
+}
+/* 搜索按钮组增强 */
+.search-collapse .btn {
+    transition: all 0.2s ease;
+}
+.search-collapse .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.search-collapse .btn:active {
+    transform: translateY(0);
+}
+
+/* ========== 批量操作按钮区域增强 ========== */
+#toolbar {
+    background: linear-gradient(to bottom, #ffffff, #f9f9f9);
+    border: 1px solid #e7eaec;
+    border-radius: 4px;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+#toolbar:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+#toolbar .btn {
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+#toolbar .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+#toolbar .btn:active {
+    transform: translateY(0);
+}
+#toolbar .btn.disabled {
+    transform: none !important;
+    box-shadow: none !important;
+}
+/* 批量操作进度条 */
+.batch-progress {
+    display: none;
+    margin-top: 10px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    padding: 10px;
+}
+.batch-progress.active {
+    display: block;
+}
+.batch-progress-bar {
+    height: 4px;
+    background: #e8e8e8;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.batch-progress-bar .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #1ab394, #1c84c6);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+.batch-progress-text {
+    text-align: center;
+    font-size: 12px;
+    color: #676a6c;
+    margin-top: 5px;
+}
+
+/* ========== Bootstrap Table 工具栏增强 ========== */
+.fixed-table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+}
+.fixed-table-toolbar .columns-left {
+    display: flex;
+    align-items: center;
+}
+.fixed-table-toolbar .columns-right {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    gap: 5px;
+}
+/* 列宽调整手柄 */
+.th-inner {
+    position: relative;
+}
+.th-inner::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    cursor: col-resize;
+    background: transparent;
+}
+.th-inner:hover::after {
+    background: rgba(26, 179, 148, 0.3);
+}
+
+/* ========== 表格行增强样式 ========== */
+.table > tbody > tr {
+    transition: background-color 0.2s ease;
+}
+.table > tbody > tr:hover {
+    background-color: #f8f9fa !important;
+}
+.table > tbody > tr.selected {
+    background-color: #e8f4fd !important;
+}
+/* 表格单元格内容过长时的省略 */
+.table > tbody > tr > td {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.table > tbody > tr > td:hover {
+    overflow: visible;
+    white-space: normal;
+}
+
+/* ========== 下拉菜单增强样式 ========== */
+.dropdown-menu {
+    border: 1px solid #e7eaec;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 5px 0;
+}
+.dropdown-menu > li > a {
+    padding: 8px 15px;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+.dropdown-menu > li > a:hover {
+    background-color: #f8f9fa;
+    padding-left: 20px;
+}
+.dropdown-menu > li > a i {
+    margin-right: 8px;
+    width: 14px;
+    text-align: center;
+}
+.dropdown-menu .divider {
+    margin: 5px 0;
+    border-color: #e7eaec;
+}
+.dropdown-menu > li > a.text-danger:hover {
+    background-color: #fee;
+    color: #d43f3a !important;
+}
+
+/* ========== 操作按钮组增强 ========== */
+.btn-group .btn {
+    position: relative;
+}
+.btn-group .btn:focus {
+    box-shadow: 0 0 0 2px rgba(26, 179, 148, 0.25);
+}
+
+/* ========== 搜索状态提示增强 ========== */
+.search-status {
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e8f4fd 100%);
+    border: 1px solid #b3d7f7;
+    border-radius: 4px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideDown 0.3s ease;
+}
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.search-status .search-conditions {
+    color: #1c84c6;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 2px 8px;
+    border-radius: 3px;
+}
+
+/* ========== 空状态增强样式 ========== */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+    animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.empty-state .empty-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.3;
+    animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+.empty-state .empty-text {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+.empty-state .empty-hint {
+    font-size: 13px;
+    color: #bbb;
+}
+
+/* ========== 加载状态增强 ========== */
+.im-table-loading {
+    animation: fadeIn 0.2s ease;
+}
+.im-table-loading .fa-spinner {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ========== 徽章增强样式 ========== */
+.badge {
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+}
+/* 添加紫色徽章样式 */
+.badge-purple {
+    background: #9b59b6;
+    color: #fff;
+}
+
+/* ========== 快捷键提示样式 ========== */
+.keyboard-hint {
+    display: inline-block;
+    padding: 2px 6px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 11px;
+    color: #666;
+    margin-left: 5px;
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+.shortcut-bar {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-size: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+.shortcut-bar.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.shortcut-bar h4 {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    color: #1ab394;
+}
+.shortcut-bar .shortcut-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+    min-width: 200px;
+}
+.shortcut-bar .shortcut-key {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Consolas', monospace;
+}
+
+/* ========== 选中计数提示 ========== */
+.selected-info {
+    display: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    align-items: center;
+    gap: 10px;
+    animation: slideDown 0.3s ease;
+}
+.selected-info.visible {
+    display: flex;
+}
+.selected-info .selected-count {
+    font-weight: bold;
+    font-size: 16px;
+}
+.selected-info .clear-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: auto;
+}
+.selected-info .clear-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ========== 表格固定列阴影 ========== */
+.fixed-table-container {
+    position: relative;
+}
+.fixed-table-header-columns,
+.fixed-table-body-columns {
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== 响应式优化 ========== */
+@media (max-width: 768px) {
+    .stat-box {
+        margin-bottom: 10px;
+    }
+    .search-collapse .select-list ul li {
+        width: 100%;
+    }
+    .search-collapse .select-list ul li label {
+        min-width: 70px;
+    }
+    #toolbar .btn {
+        margin-bottom: 5px;
+    }
 }

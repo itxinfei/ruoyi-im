@@ -1,6 +1,8 @@
 package com.ruoyi.web.service;
 
 import com.ruoyi.web.domain.ImUser;
+import com.ruoyi.web.domain.dto.ImUserQuickOperationDTO;
+import com.ruoyi.web.domain.vo.ImUserQuickOperationResultVO;
 
 import java.util.List;
 import java.util.Map;
@@ -196,4 +198,36 @@ public interface ImUserService {
      * @return 关联数据数量，0表示无关联数据
      */
     int checkUserRelations(Long userId);
+
+    /**
+     * 执行用户快速操作
+     *
+     * <p>支持批量启用、禁用、重置密码、分配角色、删除等操作</p>
+     * <p>提供操作前预检查、操作中事务控制、操作后结果统计</p>
+     *
+     * @param operationDTO 快速操作请求对象，包含操作类型、用户ID列表、操作参数等
+     * @return 操作结果对象，包含成功数量、失败数量、错误详情等
+     */
+    ImUserQuickOperationResultVO executeQuickOperation(ImUserQuickOperationDTO operationDTO);
+
+    /**
+     * 获取快速操作配置信息
+     *
+     * <p>返回当前登录用户可执行的快速操作类型和配置选项</p>
+     * <p>根据用户权限动态生成可操作列表</p>
+     *
+     * @return 配置信息Map，包含操作类型、权限要求、参数配置等
+     */
+    Map<String, Object> getQuickOperationConfig();
+
+    /**
+     * 批量操作预检查
+     *
+     * <p>在执行批量操作前检查可能的风险和影响</p>
+     * <p>包括权限检查、数据关联检查、操作风险评估等</p>
+     *
+     * @param operationDTO 操作请求对象
+     * @return 预检查结果，包含警告信息、风险评估、建议等
+     */
+    Map<String, Object> batchOperationPrecheck(ImUserQuickOperationDTO operationDTO);
 }

@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <div class="message-area" ref="messageAreaRef">
+    <div v-loading="loading" class="message-area" ref="messageAreaRef">
       <template v-for="(msg, index) in messagesWithTimeDivider" :key="msg.id || `divider-${index}`">
         <div v-if="msg.isTimeDivider" class="time-divider">
           <span>{{ msg.timeText }}</span>
@@ -53,6 +53,10 @@
           </el-avatar>
         </div>
       </template>
+
+      <div v-if="!loading && messages.length === 0" class="empty-state">
+        <el-empty description="暂无消息，开始聊天吧" />
+      </div>
     </div>
 
     <div class="chat-input">
@@ -85,6 +89,7 @@
           <el-button
             type="primary"
             :disabled="!canSend"
+            :loading="sending"
             @click="sendMessage"
           >
             发送
@@ -96,7 +101,8 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import {
   Phone,
   VideoCamera,
@@ -106,6 +112,8 @@ import {
   Picture,
   Promotion
 } from '@element-plus/icons-vue'
+import { getMessages, sendMessage as sendMessageApi, markAsRead } from '@/api/im/message'
+import { useImWebSocket } from '@/composables/useImWebSocket'
 
 const props = defineProps({
   session: {
@@ -114,21 +122,85 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['send-message'])
-
 const currentUser = ref({
-  id: 1,
-  name: '测试用户',
-  avatar: 'https://via.placeholder.com/40'
+  id: null,
+  name: '用户',
+  avatar: ''
 })
 
 const inputMessage = ref('')
 const messageAreaRef = ref(null)
+const messages = ref([])
+const loading = ref(false)
+const sending = ref(false)
 
-const messages = computed(() => {
-  return props.session?.messages || []
-})
+// WebSocket
+const { sendMessage: wsSendMessage, onMessage } = useImWebSocket()
 
+// 加载用户信息
+const loadUserInfo = () => {
+  const userInfoStr = localStorage.getItem('user_info')
+  if (userInfoStr) {
+    try {
+      const userInfo = JSON.parse(userInfoStr)
+      currentUser.value = {
+        id: userInfo.userId || userInfo.id,
+        name: userInfo.userName || userInfo.name || '用户',
+        avatar: userInfo.avatar || ''
+      }
+    } catch (error) {
+      console.error('解析用户信息失败:', error)
+    }
+  }
+}
+
+// 加载消息列表
+const loadMessages = async () => {
+  if (!props.session?.id) return
+  
+  loading.value = true
+  try {
+    const response = await getMessages({
+      conversationId: props.session.id,
+      pageSize: 50
+    })
+    
+    if (response && response.data) {
+      messages.value = response.data.map(item => ({
+        id: item.messageId || item.id,
+        content: item.content,
+        senderId: item.senderId,
+        senderName: item.senderName || '未知用户',
+        senderAvatar: item.senderAvatar || '',
+        timestamp: item.createTime || item.timestamp,
+        isOwn: item.senderId === currentUser.value.id,
+        isRead: item.isRead || false,
+        messageType: item.messageType || 'TEXT'
+      }))
+      
+      // 滚动到底部
+      nextTick(() => {
+        scrollToBottom()
+      })
+      
+      // 标记已读
+      if (messages.value.length > 0) {
+        const lastMessage = messages.value[messages.value.length - 1]
+        markAsRead({
+          conversationId: props.session.id,
+          messageId: lastMessage.id
+        }).catch(err => console.error('标记已读失败:', err))
+      }
+    }
+  } catch (error) {
+    console.error('加载消息失败:', error)
+    ElMessage.error('加载消息失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 消息带时间分割线
 const messagesWithTimeDivider = computed(() => {
   const msgs = messages.value
   if (msgs.length === 0) return []
@@ -186,26 +258,58 @@ const handleKeydown = (event) => {
   }
 }
 
-const sendMessage = () => {
-  if (!canSend.value) return
+const sendMessage = async () => {
+  if (!canSend.value || !props.session?.id) return
 
-  const message = {
-    id: Date.now(),
-    content: inputMessage.value.trim(),
-    senderId: currentUser.value.id,
-    senderName: currentUser.value.name,
-    senderAvatar: currentUser.value.avatar,
-    timestamp: Date.now(),
-    isOwn: true,
-    isRead: false
+  const content = inputMessage.value.trim()
+  sending.value = true
+
+  try {
+    // 调用 API 发送消息
+    const response = await sendMessageApi({
+      conversationId: props.session.id,
+      messageType: 'TEXT',
+      content: content
+    })
+
+    if (response && response.data) {
+      // 添加到消息列表
+      const newMessage = {
+        id: response.data.messageId || response.data.id || Date.now(),
+        content: content,
+        senderId: currentUser.value.id,
+        senderName: currentUser.value.name,
+        senderAvatar: currentUser.value.avatar,
+        timestamp: response.data.createTime || Date.now(),
+        isOwn: true,
+        isRead: false,
+        messageType: 'TEXT'
+      }
+
+      messages.value.push(newMessage)
+      inputMessage.value = ''
+
+      // 通过 WebSocket 发送消息通知
+      wsSendMessage({
+        type: 'message',
+        data: {
+          conversationId: props.session.id,
+          messageId: newMessage.id,
+          content: content,
+          messageType: 'TEXT'
+        }
+      })
+
+      nextTick(() => {
+        scrollToBottom()
+      })
+    }
+  } catch (error) {
+    console.error('发送消息失败:', error)
+    ElMessage.error('发送消息失败')
+  } finally {
+    sending.value = false
   }
-
-  emit('send-message', message)
-  inputMessage.value = ''
-
-  nextTick(() => {
-    scrollToBottom()
-  })
 }
 
 const scrollToBottom = () => {
@@ -213,6 +317,43 @@ const scrollToBottom = () => {
     messageAreaRef.value.scrollTop = messageAreaRef.value.scrollHeight
   }
 }
+
+// 监听 WebSocket 消息
+onMessage((message) => {
+  // 只处理当前会话的消息
+  if (message.conversationId === props.session?.id) {
+    const newMessage = {
+      id: message.messageId || message.id || Date.now(),
+      content: message.content,
+      senderId: message.senderId,
+      senderName: message.senderName || '未知用户',
+      senderAvatar: message.senderAvatar || '',
+      timestamp: message.timestamp || Date.now(),
+      isOwn: message.senderId === currentUser.value.id,
+      isRead: false,
+      messageType: message.messageType || 'TEXT'
+    }
+
+    messages.value.push(newMessage)
+
+    nextTick(() => {
+      scrollToBottom()
+    })
+  }
+})
+
+// 监听会话变化
+watch(() => props.session, (newSession) => {
+  if (newSession) {
+    messages.value = []
+    loadMessages()
+  }
+}, { immediate: true })
+
+// 组件挂载时加载用户信息
+onMounted(() => {
+  loadUserInfo()
+})
 </script>
 
 <style scoped lang="scss">
@@ -330,6 +471,13 @@ const scrollToBottom = () => {
       font-size: 12px;
       color: #8c8c8c;
     }
+  }
+
+  .empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
   }
 }
 

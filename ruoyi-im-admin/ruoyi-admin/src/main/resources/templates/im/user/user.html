@@ -11,28 +11,28 @@
             <div class="col-sm-12">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="stat-box stat-box-primary">
+                        <div class="stat-box stat-box-primary" onclick="filterByStatus('')">
                             <div class="stat-number" id="totalCount">0</div>
                             <div class="stat-label">用户总数</div>
                             <i class="fa fa-users stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="stat-box stat-box-success">
+                        <div class="stat-box stat-box-success" onclick="filterByStatus('1')">
                             <div class="stat-number" id="onlineCount">0</div>
                             <div class="stat-label">在线用户</div>
                             <i class="fa fa-circle stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="stat-box stat-box-danger">
+                        <div class="stat-box stat-box-danger" onclick="filterByOnline('0')">
                             <div class="stat-number" id="offlineCount">0</div>
                             <div class="stat-label">离线用户</div>
                             <i class="fa fa-circle-o stat-icon"></i>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="stat-box stat-box-warning">
+                        <div class="stat-box stat-box-warning" onclick="filterByStatus('0')">
                             <div class="stat-number" id="disabledCount">0</div>
                             <div class="stat-label">禁用用户</div>
                             <i class="fa fa-ban stat-icon"></i>
@@ -81,7 +81,7 @@
                                 </select>
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索 <span class="keyboard-hint">Ctrl+F</span></a>
                                 <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
@@ -135,6 +135,13 @@
         var prefix = ctx + "im/user";
 
         $(function() {
+            // 初始化页面增强功能
+            ImCommon.initPage({
+                searchCollapse: true,
+                keyboardShortcuts: true,
+                tableId: '#bootstrap-table'
+            });
+
             loadStatistics();
 
             var options = {
@@ -289,20 +296,41 @@
         });
 
         /**
-         * 加载统计数据
+         * 加载统计数据（带动画）
          */
         function loadStatistics() {
             ImCommon.loadStatisticsWithCache(
                 prefix + "/statistics",
                 function(data) {
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#onlineCount").text(data.onlineCount || 0);
-                    $("#offlineCount").text(data.offlineCount || 0);
-                    $("#disabledCount").text(data.disabledCount || 0);
+                    // 使用数字滚动动画更新统计
+                    ImCommon.animateStatistics({
+                        '#totalCount': data.totalCount || 0,
+                        '#onlineCount': data.onlineCount || 0,
+                        '#offlineCount': data.offlineCount || 0,
+                        '#disabledCount': data.disabledCount || 0
+                    }, 800);
                 },
                 'user_statistics',
                 5
             );
+        }
+
+        /**
+         * 根据状态筛选（统计卡片点击）
+         * @param status 状态值：空=全部，1=正常，0=停用
+         */
+        function filterByStatus(status) {
+            $('select[name="status"]').val(status);
+            doSearch();
+        }
+
+        /**
+         * 根据在线状态筛选
+         * @param isOnline 在线状态：空=全部，1=在线，0=离线
+         */
+        function filterByOnline(isOnline) {
+            $('select[name="isOnline"]').val(isOnline);
+            doSearch();
         }
 
         /**
@@ -398,26 +426,34 @@
         }
 
         /**
-         * 执行批量更新状态
+         * 执行批量更新状态（带进度提示）
          */
         function executeBatchUpdate(rows, newStatus, statusText) {
             $.modal.confirm("确定要批量" + statusText + "选中的 " + rows.length + " 个用户吗？", function() {
-                $.modal.msg("正在批量" + statusText + "用户...", {icon: 16, shade: 0.3, time: 0});
+                // 显示进度条
+                ImCommon.BatchProgress.show('#toolbar', {
+                    total: rows.length,
+                    current: 0,
+                    text: '正在批量' + statusText + '...'
+                });
+
                 $.ajax({
                     url: prefix + "/batchUpdateStatus",
                     type: 'post',
                     data: {userIds: rows.join(","), status: newStatus},
                     success: function(result) {
-                        layer.closeAll();
                         if (result.code == 0) {
-                            $.modal.msgSuccess("批量" + statusText + "成功");
+                            ImCommon.BatchProgress.complete('#toolbar', '批量' + statusText + '成功');
+                            ImCommon.toast("批量" + statusText + "成功，共 " + rows.length + " 个用户", 'success');
                             $.table.refresh();
+                            loadStatistics();
                         } else {
+                            ImCommon.BatchProgress.hide('#toolbar');
                             $.modal.msgError(result.msg || "批量操作失败");
                         }
                     },
                     error: function() {
-                        layer.closeAll();
+                        ImCommon.BatchProgress.hide('#toolbar');
                         $.modal.msgError("网络请求失败");
                     }
                 });

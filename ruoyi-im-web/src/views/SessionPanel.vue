@@ -3,7 +3,7 @@
     <div class="panel-header">
       <h3>消息</h3>
       <el-tooltip content="新建会话">
-        <el-button :icon="Plus" text circle size="small" />
+        <el-button :icon="Plus" text circle size="small" @click="handleNewConversation" />
       </el-tooltip>
     </div>
 
@@ -17,7 +17,7 @@
       />
     </div>
 
-    <div class="session-list">
+    <div v-loading="loading" class="session-list">
       <div
         v-for="session in filteredSessions"
         :key="session.id"
@@ -37,17 +37,24 @@
             <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
           </div>
           <div class="session-preview">
-            {{ session.lastMessage }}
+            {{ session.lastMessage || '暂无消息' }}
           </div>
         </div>
+      </div>
+
+      <div v-if="!loading && sessions.length === 0" class="empty-state">
+        <el-empty description="暂无会话" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import { Search, Plus } from '@element-plus/icons-vue'
+import { getConversations } from '@/api/im/conversation'
+import { useImWebSocket } from '@/composables/useImWebSocket'
 
 const props = defineProps({
   currentSession: {
@@ -59,52 +66,63 @@ const props = defineProps({
 const emit = defineEmits(['select-session'])
 
 const searchKeyword = ref('')
+const sessions = ref([])
+const loading = ref(false)
 
-const sessions = ref([
-  {
-    id: 1,
-    name: '张三',
-    avatar: 'https://via.placeholder.com/40',
-    lastMessage: '你好，在吗？',
-    lastMessageTime: Date.now() - 3600000,
-    unreadCount: 2
-  },
-  {
-    id: 2,
-    name: '李四',
-    avatar: 'https://via.placeholder.com/40',
-    lastMessage: '明天开会',
-    lastMessageTime: Date.now() - 7200000,
-    unreadCount: 0
-  },
-  {
-    id: 3,
-    name: '项目群',
-    avatar: 'https://via.placeholder.com/40',
-    lastMessage: '王五: 收到',
-    lastMessageTime: Date.now() - 86400000,
-    unreadCount: 5,
-    isGroup: true
+// WebSocket 连接
+const { isConnected, connect, onMessage } = useImWebSocket()
+
+// 加载会话列表
+const loadSessions = async () => {
+  loading.value = true
+  try {
+    const response = await getConversations()
+    if (response && response.data) {
+      sessions.value = response.data.map(item => ({
+        id: item.conversationId || item.id,
+        name: item.conversationName || item.name || '未命名',
+        avatar: item.avatar || '',
+        lastMessage: item.lastMessage || '',
+        lastMessageTime: item.lastMessageTime || item.updateTime,
+        unreadCount: item.unreadCount || 0,
+        isGroup: item.type === 'GROUP'
+      }))
+    }
+  } catch (error) {
+    console.error('加载会话列表失败:', error)
+    ElMessage.error('加载会话列表失败')
+  } finally {
+    loading.value = false
   }
-])
+}
 
+// 过滤会话列表
 const filteredSessions = computed(() => {
   if (!searchKeyword.value) return sessions.value
   
   return sessions.value.filter(session => 
     session.name.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-    session.lastMessage.toLowerCase().includes(searchKeyword.value.toLowerCase())
+    (session.lastMessage && session.lastMessage.toLowerCase().includes(searchKeyword.value.toLowerCase()))
   )
 })
 
+// 判断是否为当前会话
 const isActiveSession = (session) => {
   return props.currentSession?.id === session.id
 }
 
+// 处理会话点击
 const handleSessionClick = (session) => {
   emit('select-session', session)
 }
 
+// 处理新建会话
+const handleNewConversation = () => {
+  console.log('新建会话')
+  // TODO: 打开新建会话对话框
+}
+
+// 格式化时间
 const formatTime = (timestamp) => {
   if (!timestamp) return ''
   
@@ -119,6 +137,46 @@ const formatTime = (timestamp) => {
   
   return `${date.getMonth() + 1}/${date.getDate()}`
 }
+
+// 更新会话最后一条消息
+const updateSessionMessage = (message) => {
+  const session = sessions.value.find(s => s.id === message.conversationId)
+  if (session) {
+    session.lastMessage = message.content
+    session.lastMessageTime = message.timestamp || Date.now()
+    
+    // 如果不是当前会话，增加未读数
+    if (props.currentSession?.id !== session.id) {
+      session.unreadCount = (session.unreadCount || 0) + 1
+    }
+    
+    // 将会话移到列表顶部
+    const index = sessions.value.indexOf(session)
+    if (index > 0) {
+      sessions.value.splice(index, 1)
+      sessions.value.unshift(session)
+    }
+  }
+}
+
+// 监听 WebSocket 消息
+onMessage((message) => {
+  console.log('SessionPanel 收到消息:', message)
+  updateSessionMessage(message)
+})
+
+// 组件挂载时加载数据
+onMounted(async () => {
+  await loadSessions()
+  
+  // 连接 WebSocket
+  if (!isConnected.value) {
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      connect(token)
+    }
+  }
+})
 </script>
 
 <style scoped lang="scss">
@@ -204,6 +262,14 @@ const formatTime = (timestamp) => {
           text-overflow: ellipsis;
         }
       }
+    }
+
+    .empty-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 40px 20px;
     }
   }
 }

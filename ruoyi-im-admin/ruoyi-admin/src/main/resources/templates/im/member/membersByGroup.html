@@ -196,16 +196,27 @@
                     field: 'operate',
                     title: '操作',
                     align: 'center',
-                    width: '180',
+                    width: '150',
                     formatter: function(value, row, index) {
-                        var actions = [];
-                        actions.push('<a class="btn-im-info btn-im-xs" href="javascript:void(0)" onclick="viewDetail(' + row.userId + ', \'' + (row.userNickname || row.userName || '') + '\')" title="查看详情"><i class="fa fa-info-circle"></i></a> ');
-                        actions.push('<a class="btn-im-warning btn-im-xs" href="javascript:void(0)" onclick="changeRole(' + row.id + ', \'' + row.role + '\', ' + row.userId + ')" title="修改角色"><i class="fa fa-edit"></i></a> ');
-                        actions.push('<a class="btn-im-default btn-im-xs" href="javascript:void(0)" onclick="toggleMute(' + row.id + ', ' + row.isMuted + ', ' + row.userId + ')" title="' + (row.isMuted == 1 ? '解除禁言' : '禁言') + '"><i class="fa fa-ban"></i></a> ');
+                        var nickname = (row.userNickname || row.userName || '').replace(/'/g, "\\'");
+                        var menuItems = [
+                            { text: '查看详情', icon: 'fa-info-circle', action: 'viewDetail(' + row.userId + ', \'' + nickname + '\')' },
+                            { text: '修改角色', icon: 'fa-edit', action: 'changeRole(' + row.id + ', \'' + row.role + '\', ' + row.userId + ')' },
+                            { text: row.isMuted == 1 ? '解除禁言' : '禁言', icon: 'fa-ban', action: 'toggleMute(' + row.id + ', ' + row.isMuted + ', ' + row.userId + ')' }
+                        ];
                         if (row.role !== 'OWNER') {
-                            actions.push('<a class="btn-im-danger btn-im-xs" href="javascript:void(0)" onclick="removeMember(' + row.userId + ', \'' + (row.userNickname || row.userName || '') + '\')" title="移除成员"><i class="fa fa-remove"></i></a>');
+                            menuItems.push({ divider: true });
+                            menuItems.push({ text: '移除成员', icon: 'fa-remove', action: 'removeMember(' + row.userId + ', \'' + nickname + '\')', btnClass: 'text-danger' });
                         }
-                        return actions.join('');
+
+                        var mainAction = {
+                            text: '修改角色',
+                            icon: 'fa-edit',
+                            action: 'changeRole(' + row.id + ', \'' + row.role + '\', ' + row.userId + ')',
+                            btnClass: 'btn-warning'
+                        };
+
+                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
                     }
                 }],
                 responseHandler: function(res) {

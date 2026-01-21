@@ -1,6 +1,5 @@
 <template>
   <div id="app" class="dingtalk-app">
-    <ImHeader />
     <div class="main-container">
       <ImSideNav :active-module="activeModule" @switch-module="handleSwitchModule" />
       <SessionPanel v-if="activeModule === 'chat'" @select-session="handleSelectSession" />
@@ -17,7 +16,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import ImHeader from './components/ImHeader/index.vue'
 import ImSideNav from './components/ImSideNav/index.vue'
 import SessionPanel from './views/SessionPanel.vue'
 import WorkbenchPanel from './views/WorkbenchPanel.vue'

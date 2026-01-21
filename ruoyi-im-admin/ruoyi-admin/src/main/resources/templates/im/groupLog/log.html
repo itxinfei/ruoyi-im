@@ -213,9 +213,19 @@
                     align: 'center',
                     width: '100',
                     formatter: function(value, row, index) {
-                        var actions = [];
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
-                        return actions.join('');
+                        var menuItems = [
+                            { text: '删除', icon: 'fa-remove', action: '$.operate.remove(\'' + row.id + '\')', permissionClass: removeFlag }
+                        ];
+
+                        var mainAction = {
+                            text: '删除',
+                            icon: 'fa-remove',
+                            action: '$.operate.remove(\'' + row.id + '\')',
+                            permissionClass: removeFlag,
+                            btnClass: 'btn-danger'
+                        };
+
+                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
                     }
                 }],
                 responseHandler: function(res) {

@@ -9,6 +9,8 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.ShiroUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.web.domain.ImUser;
+import com.ruoyi.web.domain.dto.ImUserQuickOperationDTO;
+import com.ruoyi.web.domain.vo.ImUserQuickOperationResultVO;
 import com.ruoyi.web.service.ImUserService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -341,6 +343,81 @@ public class ImUserController extends BaseController {
         } catch (Exception e) {
             logger.error("导入用户数据失败", e);
             return AjaxResult.error("导入失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 用户快速操作面板
+     * 支持批量启用、禁用、重置密码、分配角色、删除等操作
+     */
+    @RequiresPermissions("im:user:edit")
+    @Log(title = "用户快速操作", businessType = BusinessType.UPDATE)
+    @PostMapping("/quickOperation")
+    @ResponseBody
+    public AjaxResult quickOperation(@Valid @RequestBody ImUserQuickOperationDTO operationDTO) {
+        try {
+            // 验证操作参数
+            if (!operationDTO.isValid()) {
+                return AjaxResult.error("操作参数无效");
+            }
+
+            // 设置操作来源信息
+            operationDTO.setClientIp(getIpAddr());
+            operationDTO.setUserAgent(getRequest().getHeader("User-Agent"));
+
+            // 执行快速操作
+            ImUserQuickOperationResultVO result = imUserService.executeQuickOperation(operationDTO);
+
+            if (result.isAllSuccess()) {
+                return AjaxResult.success("操作成功", result);
+            } else if (result.isPartialSuccess()) {
+                return AjaxResult.warn("操作部分成功，请查看详情", result);
+            } else {
+                return AjaxResult.error("操作失败", result);
+            }
+
+        } catch (Exception e) {
+            logger.error("用户快速操作失败", e);
+            return AjaxResult.error("操作失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取快速操作配置信息
+     * 返回当前用户可执行的操作类型和配置选项
+     */
+    @RequiresPermissions("im:user:list")
+    @GetMapping("/quickOperation/config")
+    @ResponseBody
+    public AjaxResult getQuickOperationConfig() {
+        try {
+            Map<String, Object> config = imUserService.getQuickOperationConfig();
+            return AjaxResult.success(config);
+        } catch (Exception e) {
+            logger.error("获取快速操作配置失败", e);
+            return AjaxResult.error("获取配置失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 批量操作预检查
+     * 在执行批量操作前检查可能的风险和影响
+     */
+    @RequiresPermissions("im:user:edit")
+    @PostMapping("/batchOperation/precheck")
+    @ResponseBody
+    public AjaxResult batchOperationPrecheck(@RequestBody ImUserQuickOperationDTO operationDTO) {
+        try {
+            if (!operationDTO.isValid()) {
+                return AjaxResult.error("操作参数无效");
+            }
+
+            Map<String, Object> precheckResult = imUserService.batchOperationPrecheck(operationDTO);
+            return AjaxResult.success(precheckResult);
+
+        } catch (Exception e) {
+            logger.error("批量操作预检查失败", e);
+            return AjaxResult.error("预检查失败: " + e.getMessage());
         }
     }
 }

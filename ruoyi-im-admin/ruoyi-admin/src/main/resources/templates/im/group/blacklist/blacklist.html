@@ -248,16 +248,28 @@
                 }, {
                     title: '操作',
                     align: 'center',
-                    width: '200',
+                    width: '150',
                     formatter: function(value, row, index) {
-                        var actions = [];
-                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewDetail(' + row.id + ')" style="cursor: pointer;"><i class="fa fa-eye"></i>详情</a> ');
+                        var menuItems = [];
+
+                        // 根据状态添加不同的菜单项
+                        menuItems.push({ text: '详情', icon: 'fa-eye', action: 'viewDetail(' + row.id + ')' });
+
                         if (row.isActive == 1) {
-                            actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="releaseSingle(' + row.id + ')" style="cursor: pointer;" title="解除"><i class="fa fa-unlock"></i></a> ');
+                            menuItems.push({ text: '解除', icon: 'fa-unlock', action: 'releaseSingle(' + row.id + ')', permissionClass: editFlag });
                         }
-                        actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')" style="cursor: pointer;"><i class="fa fa-edit"></i></a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')" style="cursor: pointer;"><i class="fa fa-remove"></i></a>');
-                        return actions.join('');
+                        menuItems.push({ divider: true });
+                        menuItems.push({ text: '编辑', icon: 'fa-edit', action: '$.operate.edit(' + row.id + ')', permissionClass: editFlag });
+                        menuItems.push({ text: '删除', icon: 'fa-remove', action: '$.operate.remove(\'' + row.id + '\')', permissionClass: removeFlag });
+
+                        var mainAction = {
+                            text: '操作',
+                            icon: 'fa fa-ellipsis-h',
+                            action: '',
+                            btnClass: 'btn-default'
+                        };
+
+                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
                     }
                 }],
                 responseHandler: function(res) {

@@ -1,6 +1,7 @@
 /**
- * IM模块公共函数库
+ * IM模块公共函数库（增强版）
  * 用于统一IM后台管理系统的公共功能
+ * 新增功能：搜索折叠、快捷键支持、批量操作进度、选中计数等
  */
 var ImCommon = {
     /**
@@ -729,5 +730,708 @@ var ImCommon = {
             '<p style="margin:0;font-size:14px;">' + message + '</p>' +
             clearBtn +
             '</div>';
+    },
+
+    /* ========== 新增：搜索区域折叠/展开功能 ========== */
+    /**
+     * 初始化搜索区域折叠功能
+     * @param searchContainer 搜索容器选择器，默认为 .search-collapse
+     * @param options 配置选项
+     */
+    initSearchCollapse: function(searchContainer, options) {
+        searchContainer = searchContainer || '.search-collapse';
+        options = options || {
+            collapsed: false,           // 默认是否折叠
+            collapseCount: 4,            // 超过多少个搜索条件时显示折叠按钮
+            collapseText: '收起搜索',   // 折叠按钮文本
+            expandText: '展开搜索'      // 展开按钮文本
+        };
+
+        var $container = $(searchContainer);
+        if ($container.length === 0) return;
+
+        var $ul = $container.find('.select-list ul');
+        var itemCount = $ul.find('li').length;
+        var btnId = searchContainer.replace(/\./g, '-') + '-toggle';
+
+        // 移除已存在的折叠按钮
+        $container.find('.search-toggle-btn').remove();
+
+        // 只有当搜索条件超过指定数量时才显示折叠按钮
+        if (itemCount > options.collapseCount) {
+            var $btn = $('<button type="button" class="search-toggle-btn" id="' + btnId + '">' +
+                '<i class="fa fa-angle-up"></i> ' + options.collapseText +
+                '</button>');
+
+            $container.append($btn);
+
+            // 绑定点击事件
+            $btn.on('click', function() {
+                var isCollapsed = $container.hasClass('collapsed');
+                if (isCollapsed) {
+                    $container.removeClass('collapsed');
+                    $(this).html('<i class="fa fa-angle-up"></i> ' + options.collapseText);
+                } else {
+                    $container.addClass('collapsed');
+                    $(this).html('<i class="fa fa-angle-down"></i> ' + options.expandText);
+                }
+            });
+
+            // 如果默认折叠
+            if (options.collapsed) {
+                $container.addClass('collapsed');
+                $btn.html('<i class="fa fa-angle-down"></i> ' + options.expandText);
+            }
+        }
+    },
+
+    /**
+     * 切换搜索区域折叠状态
+     * @param searchContainer 搜索容器选择器
+     */
+    toggleSearchCollapse: function(searchContainer) {
+        searchContainer = searchContainer || '.search-collapse';
+        var $container = $(searchContainer);
+        var $btn = $container.find('.search-toggle-btn');
+
+        if ($container.hasClass('collapsed')) {
+            $container.removeClass('collapsed');
+            if ($btn.length > 0) {
+                $btn.html('<i class="fa fa-angle-up"></i> 收起搜索');
+            }
+        } else {
+            $container.addClass('collapsed');
+            if ($btn.length > 0) {
+                $btn.html('<i class="fa fa-angle-down"></i> 展开搜索');
+            }
+        }
+    },
+
+    /* ========== 新增：快捷键支持 ========== */
+    /**
+     * 快捷键管理器
+     */
+    KeyboardShortcuts: {
+        shortcuts: {},
+        isEnabled: true,
+        helpVisible: false,
+
+        /**
+         * 注册快捷键
+         * @param key 快捷键（如 'ctrl+s', 'f1', 'escape'）
+         * @param handler 处理函数
+         * @param description 描述信息
+         */
+        register: function(key, handler, description) {
+            this.shortcuts[key.toLowerCase()] = {
+                handler: handler,
+                description: description || key
+            };
+        },
+
+        /**
+         * 初始化快捷键监听
+         */
+        init: function() {
+            var self = this;
+            $(document).on('keydown', function(e) {
+                if (!self.isEnabled) return;
+
+                // 忽略在输入框中的按键
+                if ($(e.target).is('input, textarea, select')) {
+                    return;
+                }
+
+                var key = self._getKeyString(e);
+                var shortcut = self.shortcuts[key];
+
+                if (shortcut) {
+                    e.preventDefault();
+                    shortcut.handler(e);
+                }
+            });
+        },
+
+        /**
+         * 获取按键字符串
+         */
+        _getKeyString: function(e) {
+            var keys = [];
+            if (e.ctrlKey) keys.push('ctrl');
+            if (e.altKey) keys.push('alt');
+            if (e.shiftKey) keys.push('shift');
+
+            var key = e.key.toLowerCase();
+            // 特殊键处理
+            if (key === ' ') key = 'space';
+            if (key === 'escape') key = 'esc';
+            if (key === 'arrowup') key = 'up';
+            if (key === 'arrowdown') key = 'down';
+            if (key === 'arrowleft') key = 'left';
+            if (key === 'arrowright') key = 'right';
+
+            keys.push(key);
+            return keys.join('+');
+        },
+
+        /**
+         * 显示快捷键帮助面板
+         */
+        showHelp: function() {
+            if (this.helpVisible) return;
+            this.helpVisible = true;
+
+            var html = '<div class="shortcut-bar" id="shortcutHelpBar">';
+            html += '<h4><i class="fa fa-keyboard-o"></i> 快捷键</h4>';
+
+            for (var key in this.shortcuts) {
+                var shortcut = this.shortcuts[key];
+                var displayKey = key.toUpperCase().replace('CTRL', 'Ctrl+').replace('ALT', 'Alt+');
+                html += '<div class="shortcut-item">';
+                html += '<span>' + shortcut.description + '</span>';
+                html += '<span class="shortcut-key">' + displayKey + '</span>';
+                html += '</div>';
+            }
+
+            html += '<div style="text-align:center;margin-top:10px;font-size:11px;color:#888;">';
+            html += '按 ESC 或点击关闭</div>';
+            html += '</div>';
+
+            var $bar = $(html);
+            $('body').append($bar);
+
+            // 延迟显示
+            setTimeout(function() {
+                $bar.addClass('visible');
+            }, 10);
+
+            // 点击关闭
+            $bar.on('click', function() {
+                self.hideHelp();
+            });
+        },
+
+        /**
+         * 隐藏快捷键帮助面板
+         */
+        hideHelp: function() {
+            this.helpVisible = false;
+            $('#shortcutHelpBar').removeClass('visible');
+            setTimeout(function() {
+                $('#shortcutHelpBar').remove();
+            }, 300);
+        },
+
+        /**
+         * 启用快捷键
+         */
+        enable: function() {
+            this.isEnabled = true;
+        },
+
+        /**
+         * 禁用快捷键
+         */
+        disable: function() {
+            this.isEnabled = false;
+        }
+    },
+
+    /* ========== 新增：批量操作进度管理 ========== */
+    /**
+     * 批量操作进度管理器
+     */
+    BatchProgress: {
+        show: function(target, options) {
+            target = target || '#toolbar';
+            options = options || {
+                total: 0,
+                current: 0,
+                text: '处理中...'
+            };
+
+            // 移除已存在的进度条
+            this.hide(target);
+
+            var $container = $(target);
+            var progressHtml =
+                '<div class="batch-progress active" id="batchProgress">' +
+                '<div class="batch-progress-bar">' +
+                '<div class="progress-fill" style="width:0%"></div>' +
+                '</div>' +
+                '<div class="batch-progress-text">' + options.text + ' 0/' + options.total + '</div>' +
+                '</div>';
+
+            $container.append(progressHtml);
+        },
+
+        update: function(target, current, total, text) {
+            target = target || '#toolbar';
+            var $progress = $(target).find('#batchProgress');
+            if ($progress.length === 0) return;
+
+            var percentage = Math.round((current / total) * 100);
+            $progress.find('.progress-fill').css('width', percentage + '%');
+
+            var statusText = text || '处理中';
+            $progress.find('.batch-progress-text').text(statusText + ' ' + current + '/' + total);
+        },
+
+        hide: function(target) {
+            target = target || '#toolbar';
+            var $progress = $(target).find('#batchProgress');
+            if ($progress.length > 0) {
+                $progress.removeClass('active');
+                setTimeout(function() {
+                    $progress.remove();
+                }, 300);
+            }
+        },
+
+        complete: function(target, text) {
+            target = target || '#toolbar';
+            var $progress = $(target).find('#batchProgress');
+            if ($progress.length === 0) return;
+
+            $progress.find('.progress-fill').css('width', '100%');
+            $progress.find('.batch-progress-text').text(text || '处理完成');
+
+            setTimeout(function() {
+                ImCommon.BatchProgress.hide(target);
+            }, 1500);
+        }
+    },
+
+    /* ========== 新增：选中计数显示 ========== */
+    /**
+     * 更新表格选中信息（增强版）
+     * @param tableId 表格ID
+     * @param options 配置选项
+     */
+    updateSelectedInfo: function(tableId, options) {
+        options = options || {};
+        var targetId = options.targetId || '.select-table';
+        var infoId = options.infoId || '#selectedInfo';
+        var multipleClass = options.multipleClass || '.multiple';
+        var singleClass = options.singleClass || '.single';
+        var text = options.text || '已选中 {count} 项';
+
+        var $table = typeof tableId === 'string' ? $(tableId) : tableId;
+        if ($table.length === 0) return;
+
+        var rows = $table.bootstrapTable('getSelections');
+        var count = rows.length;
+
+        // 更新或创建选中信息
+        var $info = $(infoId);
+        if ($info.length === 0) {
+            $info = $(
+                '<div class="selected-info" id="' + infoId.replace('#', '') + '">' +
+                '<i class="fa fa-check-square"></i> ' +
+                '<span class="selected-count">0</span> ' +
+                '<span class="selected-text">项</span>' +
+                '<button class="clear-btn" onclick="ImCommon.clearSelection(\'' + tableId + '\')">' +
+                '<i class="fa fa-close"></i> 取消选择' +
+                '</button>' +
+                '</div>'
+            );
+            $(targetId).prepend($info);
+        }
+
+        // 更新数量
+        $info.find('.selected-count').text(count);
+        $info.find('.selected-text').text('项');
+
+        // 显示/隐藏
+        if (count > 0) {
+            $info.addClass('visible');
+            $(multipleClass).removeClass('disabled').removeAttr('disabled');
+            if (count === 1) {
+                $(singleClass).removeClass('disabled').removeAttr('disabled');
+            } else {
+                $(singleClass).addClass('disabled').attr('disabled', 'disabled');
+            }
+        } else {
+            $info.removeClass('visible');
+            $(multipleClass).addClass('disabled').attr('disabled', 'disabled');
+            $(singleClass).addClass('disabled').attr('disabled', 'disabled');
+        }
+    },
+
+    /* ========== 新增：统计卡片数字动画 ========== */
+    /**
+     * 数字滚动动画
+     * @param element 目标元素
+     * @param target 目标值
+     * @param duration 动画时长（毫秒）
+     */
+    animateNumber: function(element, target, duration) {
+        duration = duration || 1000;
+        var $element = $(element);
+        var start = parseInt($element.text()) || 0;
+        var increment = (target - start) / (duration / 16);
+        var current = start;
+
+        var timer = setInterval(function() {
+            current += increment;
+            if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
+                current = target;
+                clearInterval(timer);
+            }
+            $element.text(Math.round(current));
+        }, 16);
+    },
+
+    /**
+     * 批量动画更新统计数字
+     * @param data 数据对象，格式为 { selector: value }
+     * @param duration 动画时长
+     */
+    animateStatistics: function(data, duration) {
+        duration = duration || 1000;
+        for (var selector in data) {
+            this.animateNumber(selector, data[selector], duration);
+        }
+    },
+
+    /* ========== 新增：表格列配置管理增强 ========== */
+    /**
+     * 保存表格列配置（增强版）
+     * @param tableId 表格ID
+     * @param columns 列配置数组
+     * @param options 额外选项
+     */
+    saveColumnConfig: function(tableId, columns, options) {
+        options = options || {};
+        try {
+            var config = {
+                columns: columns.map(function(col) {
+                    return {
+                        field: col.field,
+                        visible: col.visible !== false,
+                        width: col.width,
+                        order: col.order
+                    };
+                }),
+                options: options,
+                timestamp: new Date().getTime()
+            };
+            localStorage.setItem(tableId + '_columns_v2', JSON.stringify(config));
+        } catch (e) {
+            console.warn('保存列配置失败:', e);
+        }
+    },
+
+    /**
+     * 获取表格列配置（增强版）
+     * @param tableId 表格ID
+     * @returns {Object|null} 配置对象
+     */
+    getColumnConfig: function(tableId) {
+        try {
+            var config = localStorage.getItem(tableId + '_columns_v2');
+            return config ? JSON.parse(config) : null;
+        } catch (e) {
+            console.warn('读取列配置失败:', e);
+            return null;
+        }
+    },
+
+    /* ========== 新增：Toast 消息提示 ========== */
+    /**
+     * 显示 Toast 消息
+     * @param message 消息内容
+     * @param type 消息类型：success, error, warning, info
+     * @param duration 显示时长（毫秒），0 表示不自动关闭
+     */
+    toast: function(message, type, duration) {
+        type = type || 'info';
+        duration = duration || 3000;
+
+        var iconMap = {
+            success: 'fa-check-circle',
+            error: 'fa-times-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+
+        var colorMap = {
+            success: '#1ab394',
+            error: '#ed5565',
+            warning: '#f8ac59',
+            info: '#1c84c6'
+        };
+
+        var toastId = 'toast_' + Date.now();
+        var toastHtml =
+            '<div class="im-toast" id="' + toastId + '" style="' +
+            'position:fixed;top:20px;right:20px;' +
+            'background:#fff;border-left:4px solid ' + colorMap[type] + ';' +
+            'box-shadow:0 4px 12px rgba(0,0,0,0.15);' +
+            'border-radius:4px;padding:15px 20px;' +
+            'display:flex;align-items:center;gap:10px;' +
+            'z-index:10000;min-width:280px;' +
+            'animation:slideInRight 0.3s ease;">' +
+            '<i class="fa ' + iconMap[type] + '" style="color:' + colorMap[type] + ';font-size:18px;"></i>' +
+            '<span style="flex:1;font-size:14px;color:#333;">' + message + '</span>' +
+            '<button class="toast-close" style="background:none;border:none;cursor:pointer;color:#999;font-size:16px;">&times;</button>' +
+            '</div>' +
+            '<style>' +
+            '@keyframes slideInRight {' +
+            'from{transform:translateX(100%);opacity:0;}' +
+            'to{transform:translateX(0);opacity:1;}' +
+            '}' +
+            '@keyframes slideOutRight {' +
+            'from{transform:translateX(0);opacity:1;}' +
+            'to{transform:translateX(100%);opacity:0;}' +
+            '}' +
+            '</style>';
+
+        // 移除已存在的 toast
+        $('.im-toast').remove();
+
+        $('body').append(toastHtml);
+
+        var $toast = $('#' + toastId);
+
+        // 关闭按钮
+        $toast.find('.toast-close').on('click', function() {
+            $toast.css('animation', 'slideOutRight 0.3s ease');
+            setTimeout(function() {
+                $toast.remove();
+            }, 300);
+        });
+
+        // 自动关闭
+        if (duration > 0) {
+            setTimeout(function() {
+                if ($toast.length > 0) {
+                    $toast.css('animation', 'slideOutRight 0.3s ease');
+                    setTimeout(function() {
+                        $toast.remove();
+                    }, 300);
+                }
+            }, duration);
+        }
+    },
+
+    /* ========== 新增：表格高级筛选 ========== */
+    /**
+     * 表格高级筛选
+     */
+    TableFilter: {
+        filters: {},
+
+        /**
+         * 添加筛选条件
+         * @param tableId 表格ID
+         * @param field 字段名
+         * @param operator 操作符（=, !=, >, <, like, in）
+         * @param value 值
+         */
+        add: function(tableId, field, operator, value) {
+            var key = tableId + '_filters';
+            if (!this.filters[key]) {
+                this.filters[key] = [];
+            }
+            this.filters[key].push({
+                field: field,
+                operator: operator,
+                value: value
+            });
+        },
+
+        /**
+         * 获取筛选条件
+         * @param tableId 表格ID
+         * @returns {Array} 筛选条件数组
+         */
+        get: function(tableId) {
+            var key = tableId + '_filters';
+            return this.filters[key] || [];
+        },
+
+        /**
+         * 清除筛选条件
+         * @param tableId 表格ID
+         */
+        clear: function(tableId) {
+            var key = tableId + '_filters';
+            delete this.filters[key];
+        },
+
+        /**
+         * 构建查询参数
+         * @param tableId 表格ID
+         * @returns {Object} 查询参数对象
+         */
+        buildParams: function(tableId) {
+            var filters = this.get(tableId);
+            var params = {};
+            filters.forEach(function(filter, index) {
+                params['filter[' + index + '][field]'] = filter.field;
+                params['filter[' + index + '][operator]'] = filter.operator;
+                params['filter[' + index + '][value]'] = filter.value;
+            });
+            return params;
+        }
+    },
+
+    /* ========== 新增：数据导出增强 ========== */
+    /**
+     * 增强的数据导出功能
+     * @param options 导出选项
+     */
+    exportData: function(options) {
+        options = options || {};
+        var defaultOptions = {
+            url: '',
+            tableId: '#bootstrap-table',
+            fileName: 'export',
+            fileType: 'excel',
+            selectedOnly: false,
+            showProgress: true,
+            onComplete: null
+        };
+        $.extend(true, defaultOptions, options);
+
+        if (!defaultOptions.url) {
+            this.toast('请指定导出接口地址', 'warning');
+            return;
+        }
+
+        // 获取要导出的数据
+        var ids = [];
+        if (defaultOptions.selectedOnly) {
+            var rows = $(defaultOptions.tableId).bootstrapTable('getSelections');
+            ids = rows.map(function(row) { return row.id; });
+        }
+
+        // 显示进度
+        if (defaultOptions.showProgress) {
+            this.BatchProgress.show('#toolbar', {
+                total: 1,
+                current: 0,
+                text: '正在导出数据...'
+            });
+        }
+
+        // 执行导出
+        $.ajax({
+            url: defaultOptions.url,
+            type: 'post',
+            data: { ids: ids.join(',') },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                var filename = defaultOptions.fileName + '.' + defaultOptions.fileType;
+
+                // 尝试从响应头获取文件名
+                var disposition = xhr.getResponseHeader('Content-Disposition');
+                if (disposition && disposition.indexOf('filename=') !== -1) {
+                    filename = decodeURIComponent(
+                        disposition.substring(disposition.indexOf('filename=') + 9).replace(/"/g, '')
+                    );
+                }
+
+                // 创建下载链接
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = filename;
+                link.click();
+                window.URL.revokeObjectURL(link.href);
+
+                ImCommon.BatchProgress.complete('#toolbar', '导出成功');
+                ImCommon.toast('数据导出成功', 'success');
+
+                if (defaultOptions.onComplete) {
+                    defaultOptions.onComplete(true);
+                }
+            },
+            error: function() {
+                ImCommon.BatchProgress.hide('#toolbar');
+                ImCommon.toast('数据导出失败', 'error');
+                if (defaultOptions.onComplete) {
+                    defaultOptions.onComplete(false);
+                }
+            }
+        });
+    },
+
+    /* ========== 新增：页面辅助功能 ========== */
+    /**
+     * 初始化页面通用功能
+     * @param options 配置选项
+     */
+    initPage: function(options) {
+        options = options || {
+            searchCollapse: true,
+            keyboardShortcuts: true,
+            tableId: '#bootstrap-table'
+        };
+
+        var self = this;
+
+        // 初始化搜索折叠
+        if (options.searchCollapse) {
+            self.initSearchCollapse();
+        }
+
+        // 初始化快捷键
+        if (options.keyboardShortcuts) {
+            self.KeyboardShortcuts.init();
+            self._registerDefaultShortcuts(options.tableId);
+        }
+
+        // 监听表格选中变化
+        if (options.tableId) {
+            $(options.tableId).on('check.bs.table uncheck.bs.table ' +
+                'check-all.bs.table uncheck-all.bs.table', function() {
+                self.updateSelectedInfo(options.tableId);
+            });
+        }
+    },
+
+    /**
+     * 注册默认快捷键
+     */
+    _registerDefaultShortcuts: function(tableId) {
+        tableId = tableId || '#bootstrap-table';
+        var self = this;
+
+        // F1 - 显示快捷键帮助
+        this.KeyboardShortcuts.register('f1', function() {
+            self.KeyboardShortcuts.showHelp();
+        }, '快捷键帮助');
+
+        // Ctrl+F - 聚焦搜索框
+        this.KeyboardShortcuts.register('ctrl+f', function() {
+            $('.search-collapse input[type="text"]:first').focus();
+        }, '聚焦搜索');
+
+        // Ctrl+R - 刷新表格
+        this.KeyboardShortcuts.register('ctrl+r', function(e) {
+            e.preventDefault();
+            if ($.table && $.table.refresh) {
+                $.table.refresh();
+                self.toast('表格已刷新', 'info');
+            }
+        }, '刷新表格');
+
+        // ESC - 清除选择
+        this.KeyboardShortcuts.register('esc', function() {
+            self.KeyboardShortcuts.hideHelp();
+            if ($(tableId).length > 0) {
+                self.clearSelection(tableId);
+            }
+        }, '取消选择');
+
+        // Ctrl+A - 全选
+        this.KeyboardShortcuts.register('ctrl+a', function() {
+            if ($(tableId).length > 0) {
+                $(tableId).bootstrapTable('checkAll');
+            }
+        }, '全选当前页');
     }
 };
