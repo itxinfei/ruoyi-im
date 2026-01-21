@@ -52,7 +52,7 @@ export function getContact(contactId) {
  */
 export function sendFriendRequest(data) {
   return request({
-    url: '/im/contact/request',
+    url: '/im/contact/request/send',
     method: 'post',
     data
   })
@@ -66,11 +66,11 @@ export function sendFriendRequest(data) {
  * @param {string} data.remark - 备注信息（接受时填写）
  * @returns {Promise}
  */
-export function handleFriendRequest(data) {
+export function handleFriendRequest(requestId, approved) {
   return request({
-    url: '/im/contact/request/handle',
-    method: 'put',
-    data
+    url: `/im/contact/request/${requestId}/handle`,
+    method: 'post',
+    params: { approved }
   })
 }
 
@@ -80,7 +80,7 @@ export function handleFriendRequest(data) {
  */
 export function getFriendRequests() {
   return request({
-    url: '/im/contact/requests',
+    url: '/im/contact/request/received',
     method: 'get'
   })
 }
@@ -92,9 +92,9 @@ export function getFriendRequests() {
  * @param {string} data.remark - 备注名称
  * @returns {Promise}
  */
-export function updateContactRemark(data) {
+export function updateContactRemark(contactId, data) {
   return request({
-    url: '/im/contact/remark',
+    url: `/im/contact/${contactId}`,
     method: 'put',
     data
   })
@@ -121,8 +121,81 @@ export function deleteContact(contactId) {
  */
 export function moveContactToGroup(data) {
   return request({
-    url: '/im/contact/move',
+    url: '/im/contact/group/move',
     method: 'put',
     data
+  })
+}
+
+/**
+ * 获取分组好友列表
+ * @returns {Promise}
+ */
+export function getGroupedFriendList() {
+  return request({
+    url: '/im/contact/grouped',
+    method: 'get'
+  })
+}
+
+/**
+ * 拉黑/解除拉黑好友
+ * @param {number} contactId - 联系人ID
+ * @param {boolean} blocked - 是否拉黑
+ * @returns {Promise}
+ */
+export function blockFriend(contactId, blocked) {
+  return request({
+    url: `/im/contact/${contactId}/block`,
+    method: 'put',
+    params: { blocked }
+  })
+}
+
+/**
+ * 获取好友分组列表
+ * @returns {Promise}
+ */
+export function getGroupList() {
+  return request({
+    url: '/im/contact/group/list',
+    method: 'get'
+  })
+}
+
+/**
+ * 重命名好友分组
+ * @param {string} oldName - 旧分组名称
+ * @param {string} newName - 新分组名称
+ * @returns {Promise}
+ */
+export function renameGroup(oldName, newName) {
+  return request({
+    url: `/im/contact/group/${encodeURIComponent(oldName)}`,
+    method: 'put',
+    data: { newName }
+  })
+}
+
+/**
+ * 删除好友分组
+ * @param {string} groupName - 分组名称
+ * @returns {Promise}
+ */
+export function deleteGroup(groupName) {
+  return request({
+    url: `/im/contact/group/${encodeURIComponent(groupName)}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 获取发送的好友申请列表
+ * @returns {Promise}
+ */
+export function getSentRequests() {
+  return request({
+    url: '/im/contact/request/sent',
+    method: 'get'
   })
 }

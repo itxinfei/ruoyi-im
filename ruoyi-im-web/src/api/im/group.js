@@ -49,7 +49,7 @@ export function createGroup(data) {
  */
 export function dismissGroup(groupId) {
   return request({
-    url: `/im/group/${groupId}/dismiss`,
+    url: `/im/group/${groupId}`,
     method: 'delete'
   })
 }
@@ -61,7 +61,7 @@ export function dismissGroup(groupId) {
  */
 export function leaveGroup(groupId) {
   return request({
-    url: `/im/group/${groupId}/leave`,
+    url: `/im/group/${groupId}/quit`,
     method: 'post'
   })
 }
@@ -73,11 +73,11 @@ export function leaveGroup(groupId) {
  * @param {Array} data.userIds - 用户ID列表
  * @returns {Promise}
  */
-export function addGroupMembers(data) {
+export function addGroupMembers(groupId, userIds) {
   return request({
-    url: '/im/group/members/add',
+    url: `/im/group/${groupId}/members`,
     method: 'post',
-    data
+    data: userIds
   })
 }
 
@@ -88,11 +88,11 @@ export function addGroupMembers(data) {
  * @param {number} data.userId - 用户ID
  * @returns {Promise}
  */
-export function removeGroupMember(data) {
+export function removeGroupMember(groupId, userIds) {
   return request({
-    url: '/im/group/members/remove',
+    url: `/im/group/${groupId}/members`,
     method: 'delete',
-    data
+    data: userIds
   })
 }
 
@@ -104,11 +104,11 @@ export function removeGroupMember(data) {
  * @param {boolean} data.isAdmin - 是否为管理员
  * @returns {Promise}
  */
-export function setGroupAdmin(data) {
+export function setGroupAdmin(groupId, targetUserId, isAdmin) {
   return request({
-    url: '/im/group/admin/set',
+    url: `/im/group/${groupId}/admin/${targetUserId}`,
     method: 'put',
-    data
+    params: { isAdmin }
   })
 }
 
@@ -119,11 +119,10 @@ export function setGroupAdmin(data) {
  * @param {number} data.newOwnerId - 新群主ID
  * @returns {Promise}
  */
-export function transferGroupOwner(data) {
+export function transferGroupOwner(groupId, newOwnerId) {
   return request({
-    url: '/im/group/owner/transfer',
-    method: 'put',
-    data
+    url: `/im/group/${groupId}/transfer/${newOwnerId}`,
+    method: 'put'
   })
 }
 
@@ -136,9 +135,9 @@ export function transferGroupOwner(data) {
  * @param {string} data.notice - 群公告
  * @returns {Promise}
  */
-export function updateGroup(data) {
+export function updateGroup(groupId, data) {
   return request({
-    url: '/im/group/update',
+    url: `/im/group/${groupId}`,
     method: 'put',
     data
   })
@@ -179,10 +178,10 @@ export function setGroupMute(data) {
  * @param {number} data.duration - 禁言时长（秒）
  * @returns {Promise}
  */
-export function muteGroupMember(data) {
+export function muteGroupMember(groupId, targetUserId, duration) {
   return request({
-    url: '/im/group/member/mute',
+    url: `/im/group/${groupId}/mute/${targetUserId}`,
     method: 'put',
-    data
+    params: { duration }
   })
 }

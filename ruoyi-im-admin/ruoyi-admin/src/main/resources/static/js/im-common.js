@@ -10,6 +10,53 @@ var ImCommon = {
     DEFAULT_AVATAR: '/img/profile.jpg',
 
     /**
+     * 通用GET请求
+     * @param url 请求地址
+     * @param successCallback 成功回调
+     * @param errorCallback 失败回调
+     */
+    get: function(url, successCallback, errorCallback) {
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(result) {
+                if (result.code === 0 || result.code === 200) {
+                    if (typeof successCallback === 'function') {
+                        successCallback(result.data || result);
+                    }
+                } else {
+                    if (typeof errorCallback === 'function') {
+                        errorCallback(result);
+                    } else {
+                        console.error('请求失败:', result.msg);
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                if (typeof errorCallback === 'function') {
+                    errorCallback(xhr);
+                } else {
+                    console.error('网络请求错误:', error);
+                }
+            }
+        });
+    },
+
+    /**
+     * 通用POST请求
+     * @param url 请求地址
+     * @param data 请求数据
+     * @param successCallback 成功回调
+     */
+    post: function(url, data, successCallback) {
+        $.operate.post(url, data, function(result) {
+            if (typeof successCallback === 'function') {
+                successCallback(result);
+            }
+        });
+    },
+
+    /**
      * 格式化头像显示
      * @param avatar 头像路径
      * @param cssClass CSS类名

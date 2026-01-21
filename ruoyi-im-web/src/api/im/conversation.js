@@ -60,11 +60,11 @@ export function deleteConversation(conversationId) {
  * @param {boolean} data.isPinned - 是否置顶
  * @returns {Promise}
  */
-export function pinConversation(data) {
+export function pinConversation(conversationId, pinned) {
   return request({
-    url: '/im/conversation/pin',
+    url: `/im/conversation/${conversationId}/pinned`,
     method: 'put',
-    data
+    params: { pinned }
   })
 }
 
@@ -75,22 +75,41 @@ export function pinConversation(data) {
  * @param {boolean} data.isMuted - 是否免打扰
  * @returns {Promise}
  */
-export function muteConversation(data) {
+export function muteConversation(conversationId, muted) {
   return request({
-    url: '/im/conversation/mute',
+    url: `/im/conversation/${conversationId}/muted`,
     method: 'put',
-    data
+    params: { muted }
+  })
+}
+
+export function markConversationAsRead(conversationId) {
+  return request({
+    url: `/im/conversation/${conversationId}/markAsRead`,
+    method: 'put'
   })
 }
 
 /**
- * 清除会话未读数
- * @param {number} conversationId - 会话ID
+ * 搜索会话
+ * @param {string} keyword - 搜索关键词
  * @returns {Promise}
  */
-export function clearUnread(conversationId) {
+export function searchConversations(keyword) {
   return request({
-    url: `/im/conversation/${conversationId}/clear-unread`,
-    method: 'put'
+    url: '/im/conversation/search',
+    method: 'get',
+    params: { keyword }
+  })
+}
+
+/**
+ * 获取未读消息总数
+ * @returns {Promise}
+ */
+export function getTotalUnreadCount() {
+  return request({
+    url: '/im/conversation/unreadCount',
+    method: 'get'
   })
 }

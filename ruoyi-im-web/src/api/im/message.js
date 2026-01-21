@@ -28,9 +28,9 @@ export function sendMessage(data) {
  * @param {number} params.pageSize - 每页数量（默认20）
  * @returns {Promise}
  */
-export function getMessages(params) {
+export function getMessages(conversationId, params = {}) {
   return request({
-    url: '/im/message/list',
+    url: `/im/message/list/${conversationId}`,
     method: 'get',
     params
   })
@@ -44,7 +44,7 @@ export function getMessages(params) {
 export function recallMessage(messageId) {
   return request({
     url: `/im/message/${messageId}/recall`,
-    method: 'put'
+    method: 'delete'
   })
 }
 
@@ -55,9 +55,9 @@ export function recallMessage(messageId) {
  * @param {string} data.content - 新内容
  * @returns {Promise}
  */
-export function editMessage(data) {
+export function editMessage(messageId, data) {
   return request({
-    url: '/im/message/edit',
+    url: `/im/message/${messageId}/edit`,
     method: 'put',
     data
   })
@@ -99,11 +99,11 @@ export function forwardMessage(data) {
  * @param {number} params.pageSize - 每页数量
  * @returns {Promise}
  */
-export function searchMessages(params) {
+export function searchMessages(data) {
   return request({
     url: '/im/message/search',
-    method: 'get',
-    params
+    method: 'post',
+    data
   })
 }
 
@@ -117,19 +117,121 @@ export function searchMessages(params) {
 export function markAsRead(data) {
   return request({
     url: '/im/message/read',
-    method: 'post',
+    method: 'put',
     data
   })
 }
 
 /**
  * 获取消息已读用户列表
+ * @param {number} conversationId - 会话ID
  * @param {number} messageId - 消息ID
  * @returns {Promise}
  */
-export function getMessageReadUsers(messageId) {
+export function getMessageReadUsers(conversationId, messageId) {
   return request({
-    url: `/im/message/${messageId}/read-users`,
+    url: `/im/message/read/status/${conversationId}/${messageId}`,
     method: 'get'
   })
 }
+
+/**
+ * 回复消息
+ * @param {Object} data - 回复数据
+ * @param {number} data.messageId - 原消息ID
+ * @param {string} data.content - 回复内容
+ * @returns {Promise}
+ */
+export function replyMessage(data) {
+  return request({
+    url: '/im/message/reply',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 添加消息表情反应
+ * @param {number} messageId - 消息ID
+ * @param {Object} data - 反应数据
+ * @param {string} data.emoji - 表情符号
+ * @returns {Promise}
+ */
+export function addReaction(messageId, data) {
+  return request({
+    url: `/im/message/${messageId}/reaction`,
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 删除消息表情反应
+ * @param {number} messageId - 消息ID
+ * @returns {Promise}
+ */
+export function removeReaction(messageId) {
+  return request({
+    url: `/im/message/${messageId}/reaction`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 获取消息的表情反应列表
+ * @param {number} messageId - 消息ID
+ * @returns {Promise}
+ */
+export function getMessageReactions(messageId) {
+  return request({
+    url: `/im/message/${messageId}/reactions`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取未读@提及列表
+ * @returns {Promise}
+ */
+export function getUnreadMentions() {
+  return request({
+    url: '/im/message/mention/unread',
+    method: 'get'
+  })
+}
+
+/**
+ * 获取未读@提及数量
+ * @returns {Promise}
+ */
+export function getUnreadMentionCount() {
+  return request({
+    url: '/im/message/mention/unread/count',
+    method: 'get'
+  })
+}
+
+/**
+ * 标记@提及为已读
+ * @param {number} messageId - 消息ID
+ * @returns {Promise}
+ */
+export function markMentionAsRead(messageId) {
+  return request({
+    url: `/im/message/${messageId}/mention/read`,
+    method: 'put'
+  })
+}
+
+/**
+ * 获取会话未读消息数
+ * @param {number} conversationId - 会话ID
+ * @returns {Promise}
+ */
+export function getUnreadCount(conversationId) {
+  return request({
+    url: `/im/message/unread/count/${conversationId}`,
+    method: 'get'
+  })
+}
+
