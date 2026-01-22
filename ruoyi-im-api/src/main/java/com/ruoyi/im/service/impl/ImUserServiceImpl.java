@@ -66,20 +66,27 @@ public class ImUserServiceImpl implements ImUserService {
     @Override
     public ImLoginVO login(ImLoginRequest request) {
         ImUser user = imUserMapper.selectImUserByUsername(request.getUsername());
+
         if (user == null) {
+            logger.warn("登录失败 - 用户不存在: {}", request.getUsername());
             throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
         }
 
-        logger.info("用户登录 - 用户名: {}, 请求密码: {}, 数据库密码: {}",
-                request.getUsername(), request.getPassword(), user.getPassword());
+        // 防御性检查：确保密码不为 null
+        String password = request.getPassword();
+        String dbPassword = user.getPassword();
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            logger.error("密码验证失败 - 用户名: {}, 请求密码长度: {}, 数据库密码长度: {}",
-                    request.getUsername(), request.getPassword().length(), user.getPassword().length());
+        logger.info("用户登录尝试 - 用户名: {}, 请求密码长度: {}, 数据库密码长度: {}",
+                request.getUsername(),
+                password != null ? password.length() : "null",
+                dbPassword != null ? dbPassword.length() : "null");
+
+        if (password == null || dbPassword == null || !passwordEncoder.matches(password, dbPassword)) {
+            logger.error("密码验证失败 - 用户名: {}", request.getUsername());
             throw new BusinessException("PASSWORD_ERROR", "密码错误");
         }
 
-        logger.info("密码验证成功 - 用户名: {}", request.getUsername());
+        logger.info("密码验证成功 - 用户名: {}, 用户ID: {}", request.getUsername(), user.getId());
 
         String token = jwtUtils.generateToken(user.getUsername(), user.getId());
 

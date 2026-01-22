@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RuoYi-IM 日历 - 新建日程</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1677ff",
+                        "background-light": "#f4f7f9",
+                        "background-dark": "#0f172a",
+                        "sidebar-light": "#ffffff",
+                        "sidebar-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "8px",
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+        }
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display h-screen flex overflow-hidden relative">
+<nav class="w-20 bg-primary flex flex-col items-center py-6 gap-6 z-20 shrink-0 shadow-lg">
+<div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center cursor-pointer mb-2 shrink-0">
+<span class="text-white font-bold text-xl italic">若</span>
+</div>
+<div class="flex flex-col gap-3 flex-1 items-center w-full px-2">
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">chat_bubble</span>
+<span class="text-[11px] font-medium tracking-wide">消息</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">group</span>
+<span class="text-[11px] font-medium tracking-wide">通讯录</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">grid_view</span>
+<span class="text-[11px] font-medium tracking-wide">工作台</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">phone_in_talk</span>
+<span class="text-[11px] font-medium tracking-wide">电话</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">description</span>
+<span class="text-[11px] font-medium tracking-wide">文档</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 bg-white/20 text-white rounded-xl transition-all shadow-inner border border-white/10">
+<span class="material-symbols-outlined text-2xl">calendar_today</span>
+<span class="text-[11px] font-medium tracking-wide">日历</span>
+</button>
+</div>
+<div class="flex flex-col gap-4 items-center w-full px-2 pb-2">
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" onclick="document.documentElement.classList.toggle('dark')" title="切换主题">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" title="设置">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-blue-400 border-2 border-white/20 flex items-center justify-center text-white text-xs overflow-hidden hover:border-white/50 transition-colors cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDifOp46XiqD0Ri7bzlZl6tZnBHN2aFm0N1YHCQzQpi6Q_P7K4XFLjO04LVcBYaQnhwkylx_oBj4xa9ovCS9U939yrB8lqS9MkDHbISjoNW6lnmqiBhn_PHqRpPI-4kWF8WJtFKQZLXjMFUO0HY6Q2qX6HcdntKzTeM9yGlNxDlGm5xWF2Gyv6YN-tVqlC6Lpl9NYv02vKsRK70gHAeclSeoplDy2dGDDFcYZoQQLLrQR87jklm6PrclEo4R-9s_jdrLUyXnJdcn5I"/>
+</div>
+</div>
+</nav>
+<div class="flex-1 flex overflow-hidden">
+<main class="flex-1 flex flex-col bg-white dark:bg-slate-900 min-w-0">
+<header class="h-16 px-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between shrink-0 bg-white dark:bg-slate-800">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">2023年 10月</h2>
+<button class="ml-2 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+<div class="flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5">
+<button class="p-1 hover:bg-white dark:hover:bg-slate-600 rounded shadow-sm transition-all text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</button>
+<button class="px-3 py-0.5 text-sm font-medium text-slate-600 dark:text-slate-300">今天</button>
+<button class="p-1 hover:bg-white dark:hover:bg-slate-600 rounded shadow-sm transition-all text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1 text-sm font-medium">
+<button class="px-4 py-1 bg-white dark:bg-slate-600 text-primary dark:text-white shadow rounded-md transition-all">月</button>
+<button class="px-4 py-1 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">周</button>
+<button class="px-4 py-1 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">日</button>
+<button class="px-4 py-1 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">日程</button>
+</div>
+</header>
+<div class="grid grid-cols-7 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+<div class="py-3 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">周一</div>
+<div class="py-3 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">周二</div>
+<div class="py-3 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">周三</div>
+<div class="py-3 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">周四</div>
+<div class="py-3 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">周五</div>
+<div class="py-3 text-center text-sm font-semibold text-slate-500 dark:text-slate-400 text-primary">周六</div>
+<div class="py-3 text-center text-sm font-semibold text-slate-500 dark:text-slate-400 text-primary">周日</div>
+</div>
+<div class="calendar-grid flex-1 overflow-y-auto bg-slate-100 dark:bg-slate-800 gap-px border-l border-slate-200 dark:border-slate-700">
+<div class="bg-white dark:bg-slate-900 p-2 min-h-[120px] relative group cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors">
+<span class="text-slate-400 dark:text-slate-600 font-medium">25</span>
+</div>
+<div class="bg-blue-50/50 dark:bg-blue-900/20 p-2 min-h-[120px] relative group cursor-pointer ring-1 ring-inset ring-primary/20 z-10">
+<span class="w-7 h-7 flex items-center justify-center bg-primary text-white rounded-full text-sm font-bold shadow-md shadow-blue-500/30">24</span>
+<div class="mt-2 text-xs bg-primary text-white px-2 py-1 rounded truncate shadow-sm">产品需求评审</div>
+</div>
+<script>
+                for(let i=0; i<33; i++) {
+                    document.write('<div class="bg-white dark:bg-slate-900 p-2 min-h-[120px] relative group cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors"><span class="text-slate-700 dark:text-slate-300 font-medium">' + ((i % 31) + 1) + '</span></div>');
+                }
+            </script>
+</div>
+</main>
+<aside class="w-80 bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 flex flex-col shadow-xl z-10">
+<div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h3 class="text-xl font-bold text-slate-800 dark:text-white">10月24日</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">周二 · 农历九月初十</p>
+</div>
+<div class="flex flex-col items-center justify-center w-12 h-12 bg-primary/10 rounded-xl text-primary font-bold text-2xl">24</div>
+</div>
+<button class="w-full bg-primary hover:bg-blue-600 text-white py-3 rounded-lg flex items-center justify-center gap-2 font-medium shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-0.5">
+<span class="material-symbols-outlined">add</span>
+                新建日程
+            </button>
+</div>
+<div class="flex-1 overflow-y-auto p-5">
+<h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">今日日程</h4>
+<div class="space-y-4">
+<div class="flex gap-4 group">
+<div class="flex flex-col items-center shrink-0">
+<div class="w-2.5 h-2.5 rounded-full bg-primary mt-1.5"></div>
+</div>
+<div class="flex-1">
+<div class="text-sm font-bold text-slate-800 dark:text-white">产品需求评审会议</div>
+<div class="text-xs text-slate-500 mt-0.5">10:00 - 11:30</div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<div class="fixed inset-0 z-[100] flex items-center justify-center modal-overlay">
+<div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
+<div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+<h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">event_note</span>
+                新建日程
+            </h3>
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-6 space-y-5">
+<div class="relative group">
+<input class="w-full border-0 border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary dark:focus:border-primary focus:ring-0 bg-transparent py-2 text-lg font-medium placeholder:text-slate-400 placeholder:font-normal transition-all" placeholder="日程标题" type="text"/>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+<span class="text-sm font-medium">起止时间</span>
+</div>
+<label class="flex items-center cursor-pointer gap-2">
+<span class="text-xs text-slate-500">全天</span>
+<div class="relative inline-flex items-center">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex-1 relative">
+<input class="w-full rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-900 text-sm focus:border-primary focus:ring-primary/20 transition-all" type="datetime-local" value="2023-10-24T10:00"/>
+</div>
+<span class="text-slate-400">至</span>
+<div class="flex-1 relative">
+<input class="w-full rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-900 text-sm focus:border-primary focus:ring-primary/20 transition-all" type="datetime-local" value="2023-10-24T11:30"/>
+</div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span class="text-sm font-medium">参与人</span>
+</div>
+<div class="flex flex-wrap gap-2 p-2 border border-dashed border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50/50 dark:bg-slate-900/50 min-h-[44px] items-center">
+<div class="flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-full text-xs text-slate-700 dark:text-slate-300 shadow-sm">
+<img class="w-4 h-4 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOAa5R1teiIs6-sEkqYuVLEYAOaSoc3nCf_ZG8tsrcHolOa1D0Y0tRvsJi1uC6qAo1MGZrNya9SXyU6JmX4mHnxNdMzSrthOC23cXBnmc4lEk0XX_Ed0ti1Q8g0TrdNZDovo8y46XwkGJA_JHlX2jUnalYw9Vn4ZF_pl7wdA9IMVs0aKRgCEtZ4y4t2zreZ4--vBwyLAJAQp9Abh5tRb4ufSMoPb7Da6nr7Gh0_7wmHsWcfcXNNuQtwqjJJXheOWUy-ab-ypenPCU"/>
+<span>李经理 (我)</span>
+</div>
+<button class="flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-all">
+<span class="material-symbols-outlined text-[16px]">add_circle</span>
+                        从组织架构选择
+                    </button>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-[20px]">location_on</span>
+<span class="text-sm font-medium">日程地点</span>
+</div>
+<input class="w-full rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-900 text-sm focus:border-primary focus:ring-primary/20 transition-all" placeholder="请输入地点或会议室" type="text"/>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-[20px]">notifications_active</span>
+<span class="text-sm font-medium">提醒设置</span>
+</div>
+<div class="relative">
+<select class="w-full rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-900 text-sm focus:border-primary focus:ring-primary/20 transition-all appearance-none">
+<option>无提醒</option>
+<option>日程开始时</option>
+<option selected="">提前 15 分钟</option>
+<option>提前 30 分钟</option>
+<option>提前 1 小时</option>
+<option>提前 1 天</option>
+</select>
+<div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-[20px]">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-6 py-5 bg-slate-50 dark:bg-slate-900/50 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-700">
+<button class="px-5 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all">
+                取消
+            </button>
+<button class="px-7 py-2 text-sm font-medium text-white bg-primary hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/20 transition-all">
+                保存
+            </button>
+</div>
+</div>
+</div>
+
+</body></html>

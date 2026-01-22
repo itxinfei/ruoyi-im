@@ -155,42 +155,42 @@ if (rememberedUsername) {
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  padding: 48px 40px;
+  padding: 36px 32px 32px;
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 
   .logo {
     display: flex;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 
     .logo-icon {
-      width: 64px;
-      height: 64px;
+      width: 56px;
+      height: 56px;
       background: linear-gradient(135deg, #0089ff, #0066cc);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #ffffff;
-      font-size: 28px;
+      font-size: 26px;
       font-weight: bold;
       box-shadow: 0 8px 16px rgba(0, 137, 255, 0.3);
     }
   }
 
   .title {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 600;
     color: #262626;
-    margin: 0 0 8px 0;
+    margin: 0 0 6px 0;
   }
 
   .subtitle {
-    font-size: 14px;
+    font-size: 13px;
     color: #8c8c8c;
     margin: 0;
   }
@@ -198,7 +198,7 @@ if (rememberedUsername) {
 
 .login-form {
   :deep(.el-form-item) {
-    margin-bottom: 24px;
+    margin-bottom: 18px;
   }
 
   :deep(.el-input__wrapper) {
@@ -247,7 +247,7 @@ if (rememberedUsername) {
 }
 
 .login-footer {
-  margin-top: 32px;
+  margin-top: 20px;
   text-align: center;
 
   p {

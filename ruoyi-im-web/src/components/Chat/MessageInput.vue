@@ -24,6 +24,21 @@
       <el-tooltip content="上传图片">
         <el-button :icon="Picture" text class="toolbar-btn" @click="$emit('upload-image')" />
       </el-tooltip>
+      <el-tooltip v-if="session?.type === 'GROUP'" content="@成员">
+        <el-button text class="toolbar-btn" @click="handleAtMember">@</el-button>
+      </el-tooltip>
+      <el-tooltip content="语音通话">
+        <el-button :icon="Phone" text class="toolbar-btn" @click="$emit('voice-call')" />
+      </el-tooltip>
+      <el-tooltip content="视频通话">
+        <el-button :icon="VideoCamera" text class="toolbar-btn" @click="$emit('video-call')" />
+      </el-tooltip>
+      <el-tooltip content="截图">
+        <el-button :icon="Scissor" text class="toolbar-btn" />
+      </el-tooltip>
+      <el-tooltip content="历史记录">
+        <el-button :icon="Clock" text class="toolbar-btn" />
+      </el-tooltip>
     </div>
 
     <div class="input-area">
@@ -41,23 +56,33 @@
         </el-button>
       </div>
     </div>
+
+    <!-- @成员选择器 -->
+    <AtMemberPicker
+      ref="atMemberPickerRef"
+      :session-id="session?.id"
+      @select="onAtSelect"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { ChatDotRound, Folder, Picture, Close } from '@element-plus/icons-vue'
+import { ChatDotRound, Folder, Picture, Close, Phone, VideoCamera, Scissor, Clock } from '@element-plus/icons-vue'
 import EmojiPicker from '@/components/EmojiPicker/index.vue'
+import AtMemberPicker from './AtMemberPicker.vue'
 
 const props = defineProps({
+  session: Object,
   sending: Boolean,
   replyingMessage: Object
 })
 
-const emit = defineEmits(['send', 'upload-file', 'upload-image', 'cancel-reply'])
+const emit = defineEmits(['send', 'upload-file', 'upload-image', 'cancel-reply', 'voice-call', 'video-call'])
 
 const message = ref('')
 const showEmojiPicker = ref(false)
+const atMemberPickerRef = ref(null)
 
 const toggleEmojiPicker = () => {
   showEmojiPicker.value = !showEmojiPicker.value
@@ -68,10 +93,24 @@ const selectEmoji = (emoji) => {
   showEmojiPicker.value = false
 }
 
+const handleAtMember = () => {
+  atMemberPickerRef.value?.open()
+}
+
+const onAtSelect = (member) => {
+  const atText = `@${member.nickname || member.username} `
+  message.value += atText
+}
+
 const handleKeydown = (e) => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault()
     handleSend()
+  } else if (e.key === '@' && props.session?.type === 'GROUP') {
+    // 延迟打开，避免在输入框还没输入@就打开
+    setTimeout(() => {
+      handleAtMember()
+    }, 100)
   }
 }
 
@@ -86,13 +125,13 @@ const handleSend = () => {
 .chat-input-container {
   border-top: 1px solid #f0f0f0;
   background: #fff;
-  padding: 10px 20px 20px;
+  padding: 12px 16px 16px;
 }
 
 .input-toolbar {
   display: flex;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .toolbar-btn {
@@ -105,17 +144,31 @@ const handleSend = () => {
   position: relative;
 }
 
+.input-area {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.custom-textarea {
+  flex: 1;
+}
+
 .custom-textarea :deep(.el-textarea__inner) {
   box-shadow: none;
   background: #f5f5f5;
   border-radius: 8px;
-  padding: 10px;
+  padding: 10px 12px;
+  resize: none;
 }
 
 .send-btn-wrapper {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 10px;
+  flex-shrink: 0;
+}
+
+.send-btn-wrapper .el-button {
+  height: 36px;
+  padding: 0 20px;
 }
 
 .reply-preview {
@@ -124,7 +177,7 @@ const handleSend = () => {
   background: #f0f0f0;
   padding: 8px 12px;
   border-radius: 4px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   justify-content: space-between;
   
   .reply-content {

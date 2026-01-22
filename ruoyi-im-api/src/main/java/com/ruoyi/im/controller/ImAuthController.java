@@ -10,6 +10,8 @@ import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +27,8 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/im/auth")
 public class ImAuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ImAuthController.class);
 
     @Autowired
     private ImUserService imUserService;
@@ -44,8 +48,18 @@ public class ImAuthController {
     @Operation(summary = "用户登录", description = "验证用户名和密码，返回JWT Token")
     @PostMapping("/login")
     public Result<ImLoginVO> login(@Valid @RequestBody ImLoginRequest request) {
-        ImLoginVO vo = imUserService.login(request);
-        return Result.success(vo);
+        logger.info("收到登录请求 - 用户名: {}, 客户端: {}", request.getUsername(), request.getClientType());
+        try {
+            ImLoginVO vo = imUserService.login(request);
+            logger.info("登录成功 - 用户名: {}", request.getUsername());
+            return Result.success(vo);
+        } catch (BusinessException e) {
+            logger.warn("登录业务异常 - 用户名: {}, 错误: {}", request.getUsername(), e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("登录系统异常 - 用户名: {}, 异常: {}", request.getUsername(), e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>若依IM - 企业云盘</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1677ff",
+                        "background-light": "#f4f7f9",
+                        "background-dark": "#0f172a",
+                        "sidebar-light": "#ffffff",
+                        "sidebar-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "8px",
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            ::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 10px;
+            }
+            .dark ::-webkit-scrollbar-thumb {
+                background: #475569;
+            }
+        }
+        .file-row:hover .file-actions {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display h-screen flex overflow-hidden">
+<nav class="w-20 bg-primary flex flex-col items-center py-6 gap-6 z-20 shrink-0 shadow-lg">
+<div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center cursor-pointer mb-2 shrink-0">
+<span class="text-white font-bold text-xl italic">若</span>
+</div>
+<div class="flex flex-col gap-3 flex-1 items-center w-full px-2">
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">chat_bubble</span>
+<span class="text-[11px] font-medium tracking-wide">消息</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">group</span>
+<span class="text-[11px] font-medium tracking-wide">通讯录</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 bg-white/20 text-white rounded-xl transition-all shadow-inner border border-white/10">
+<span class="material-symbols-outlined text-2xl">grid_view</span>
+<span class="text-[11px] font-medium tracking-wide">工作台</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">phone_in_talk</span>
+<span class="text-[11px] font-medium tracking-wide">电话</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">description</span>
+<span class="text-[11px] font-medium tracking-wide">文档</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">calendar_today</span>
+<span class="text-[11px] font-medium tracking-wide">日历</span>
+</button>
+</div>
+<div class="flex flex-col gap-4 items-center w-full px-2 pb-2">
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" onclick="document.documentElement.classList.toggle('dark')" title="切换主题">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" title="设置">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-blue-400 border-2 border-white/20 flex items-center justify-center text-white text-xs overflow-hidden hover:border-white/50 transition-colors cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDifOp46XiqD0Ri7bzlZl6tZnBHN2aFm0N1YHCQzQpi6Q_P7K4XFLjO04LVcBYaQnhwkylx_oBj4xa9ovCS9U939yrB8lqS9MkDHbISjoNW6lnmqiBhn_PHqRpPI-4kWF8WJtFKQZLXjMFUO0HY6Q2qX6HcdntKzTeM9yGlNxDlGm5xWF2Gyv6YN-tVqlC6Lpl9NYv02vKsRK70gHAeclSeoplDy2dGDDFcYZoQQLLrQR87jklm6PrclEo4R-9s_jdrLUyXnJdcn5I"/>
+</div>
+</div>
+</nav>
+<div class="flex-1 flex overflow-hidden">
+<aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col shrink-0">
+<div class="p-6">
+<h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">cloud_queue</span>
+                企业云盘
+            </h2>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 bg-blue-50 dark:bg-blue-900/20 text-primary rounded-lg font-medium transition-colors" href="#">
+<span class="material-symbols-outlined">folder_shared</span>
+                我的文件
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-blue-400">groups</span>
+                团队空间
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-green-400">public</span>
+                公共区域
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-orange-400">star</span>
+                收藏夹
+            </a>
+<div class="pt-4 pb-2 px-3">
+<div class="h-px bg-slate-100 dark:bg-slate-700 w-full"></div>
+</div>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-slate-400">delete</span>
+                回收站
+            </a>
+</nav>
+<div class="p-6 mt-auto">
+<div class="space-y-2">
+<div class="flex justify-between text-xs text-slate-500">
+<span>已用 12.4 GB / 100 GB</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[12.4%]"></div>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900">
+<header class="h-16 border-b border-slate-200 dark:border-slate-700 px-6 flex items-center justify-between shrink-0">
+<div class="flex items-center gap-4 text-sm text-slate-500">
+<nav class="flex items-center gap-2">
+<span class="hover:text-primary cursor-pointer">我的文件</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-slate-900 dark:text-slate-200 font-medium">产品设计方案</span>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative mr-2">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="pl-9 pr-4 py-1.5 bg-slate-100 dark:bg-slate-800 border-none rounded-full text-sm w-48 focus:w-64 focus:ring-1 focus:ring-primary transition-all" placeholder="搜索文件..." type="text"/>
+</div>
+<button class="flex items-center gap-2 px-4 py-1.5 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium">
+<span class="material-symbols-outlined text-lg">upload</span>
+                    上传文件
+                </button>
+<button class="flex items-center gap-2 px-4 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm font-medium">
+<span class="material-symbols-outlined text-lg">create_new_folder</span>
+                    新建文件夹
+                </button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto">
+<table class="w-full text-left border-collapse min-w-[800px]">
+<thead class="sticky top-0 bg-white dark:bg-slate-900 z-10">
+<tr class="text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
+<th class="px-6 py-4 w-12 text-center">
+<input class="rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
+</th>
+<th class="px-4 py-4">文件名</th>
+<th class="px-4 py-4 w-40">大小</th>
+<th class="px-4 py-4 w-40">所有者</th>
+<th class="px-4 py-4 w-48">最后修改日期</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<tr class="file-row hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-slate-50 dark:border-slate-800 transition-colors group cursor-pointer">
+<td class="px-6 py-4 text-center">
+<input class="rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
+</td>
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-yellow-500 text-3xl fill-current">folder</span>
+<span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-primary transition-colors">2023年度Q4营销素材库</span>
+</div>
+</td>
+<td class="px-4 py-4 text-slate-500">-</td>
+<td class="px-4 py-4 text-slate-500">张三 (市场部)</td>
+<td class="px-4 py-4 text-slate-500">2023-10-24 14:30</td>
+</tr>
+<tr class="file-row hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-slate-50 dark:border-slate-800 transition-colors group cursor-pointer">
+<td class="px-6 py-4 text-center">
+<input class="rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
+</td>
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-blue-500 text-3xl">description</span>
+<span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-primary transition-colors">产品迭代需求文档_v2.0.docx</span>
+</div>
+</td>
+<td class="px-4 py-4 text-slate-500">2.4 MB</td>
+<td class="px-4 py-4 text-slate-500">李四 (产品组)</td>
+<td class="px-4 py-4 text-slate-500">2023-10-23 09:15</td>
+</tr>
+<tr class="file-row hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-slate-50 dark:border-slate-800 transition-colors group cursor-pointer">
+<td class="px-6 py-4 text-center">
+<input class="rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
+</td>
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-green-500 text-3xl">table_chart</span>
+<span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-primary transition-colors">10月份加班统计明细.xlsx</span>
+</div>
+</td>
+<td class="px-4 py-4 text-slate-500">856 KB</td>
+<td class="px-4 py-4 text-slate-500">我</td>
+<td class="px-4 py-4 text-slate-500">2小时前</td>
+</tr>
+<tr class="file-row hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-slate-50 dark:border-slate-800 transition-colors group cursor-pointer">
+<td class="px-6 py-4 text-center">
+<input class="rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
+</td>
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-rose-500 text-3xl">picture_as_pdf</span>
+<span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-primary transition-colors">若依IM系统部署手册.pdf</span>
+</div>
+</td>
+<td class="px-4 py-4 text-slate-500">15.2 MB</td>
+<td class="px-4 py-4 text-slate-500">王五 (运维组)</td>
+<td class="px-4 py-4 text-slate-500">昨天 17:45</td>
+</tr>
+<tr class="file-row hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-slate-50 dark:border-slate-800 transition-colors group cursor-pointer">
+<td class="px-6 py-4 text-center">
+<input class="rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
+</td>
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-indigo-500 text-3xl">image</span>
+<span class="font-medium text-slate-700 dark:text-slate-200 group-hover:text-primary transition-colors">登录页设计稿最终确认版.png</span>
+</div>
+</td>
+<td class="px-4 py-4 text-slate-500">4.1 MB</td>
+<td class="px-4 py-4 text-slate-500">陈六 (设计组)</td>
+<td class="px-4 py-4 text-slate-500">3天前</td>
+</tr>
+</tbody>
+</table>
+</div>
+<footer class="h-10 border-t border-slate-100 dark:border-slate-800 px-6 flex items-center text-xs text-slate-400 shrink-0">
+            共 128 个文件，已加载 20 个
+        </footer>
+</main>
+</div>
+
+</body></html>

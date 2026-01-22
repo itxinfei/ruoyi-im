@@ -50,7 +50,34 @@
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-          <div class="time">{{ formatTime(msg.timestamp) }}</div>
+          
+          <div class="message-footer">
+            <div v-if="msg.isOwn" class="read-status">
+              <span v-if="msg.isRead" class="read">已读</span>
+              <el-popover
+                v-else-if="msg.readCount > 0"
+                placement="top"
+                :width="200"
+                trigger="hover"
+                @before-enter="fetchReadUsers(msg)"
+              >
+                <template #reference>
+                  <span class="read-count">{{ msg.readCount }}人已读</span>
+                </template>
+                <div v-loading="loadingReadUsers[msg.id]" class="read-users-list">
+                  <div v-for="user in readUsersMap[msg.id]" :key="user.id" class="read-user-item">
+                    <el-avatar :size="24" :src="user.avatar">{{ user.name?.charAt(0) }}</el-avatar>
+                    <span>{{ user.name }}</span>
+                  </div>
+                  <div v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)" class="empty">
+                    加载中...
+                  </div>
+                </div>
+              </el-popover>
+              <span v-else class="unread">未读</span>
+            </div>
+            <div class="time">{{ formatTime(msg.timestamp) }}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -61,11 +88,13 @@
 import { computed, ref, nextTick, watch, onMounted } from 'vue'
 import { Document, Loading } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getMessageReadUsers } from '@/api/im/message'
 
 const props = defineProps({
   messages: Array,
   currentUser: Object,
-  loading: Boolean
+  loading: Boolean,
+  sessionId: [String, Number]
 })
 
 const emit = defineEmits(['delete', 'recall', 'reply', 'load-more'])
@@ -73,6 +102,25 @@ const emit = defineEmits(['delete', 'recall', 'reply', 'load-more'])
 const listRef = ref(null)
 const showImageViewer = ref(false)
 const previewUrl = ref('')
+
+const readUsersMap = ref({})
+const loadingReadUsers = ref({})
+
+const fetchReadUsers = async (msg) => {
+  if (readUsersMap.value[msg.id] || loadingReadUsers.value[msg.id]) return
+  
+  loadingReadUsers.value[msg.id] = true
+  try {
+    const res = await getMessageReadUsers(props.sessionId, msg.id)
+    if (res.code === 200) {
+      readUsersMap.value[msg.id] = res.data
+    }
+  } catch (error) {
+    console.error('获取已读用户失败', error)
+  } finally {
+    loadingReadUsers.value[msg.id] = false
+  }
+}
 
 const parseContent = (msg) => {
   try {
@@ -106,14 +154,50 @@ const downloadFile = (fileInfo) => {
   window.open(fileInfo.fileUrl, '_blank')
 }
 
+const formatTimeDivider = (timestamp) => {
+  const date = new Date(timestamp)
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const msgDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+
+  const diffDays = Math.floor((today - msgDate) / (1000 * 60 * 60 * 24))
+
+  const timeStr = date.toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+
+  if (diffDays === 0) return `今天 ${timeStr}`
+  if (diffDays === 1) return `昨天 ${timeStr}`
+  if (diffDays < 7) {
+    const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+    return `${weekDays[date.getDay()]} ${timeStr}`
+  }
+
+  return `${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
+}
+
 const messagesWithDividers = computed(() => {
   const res = []
-  let lastDate = ''
-  props.messages.forEach(msg => {
-    const d = new Date(msg.timestamp).toDateString()
-    if (d !== lastDate) {
-      res.push({ isTimeDivider: true, timeText: d, id: 'd-' + d + msg.id })
-      lastDate = d
+  props.messages.forEach((msg, index) => {
+    let showDivider = false
+    if (index === 0) {
+      showDivider = true
+    } else {
+      const prevMsg = props.messages[index - 1]
+      const timeDiff = msg.timestamp - prevMsg.timestamp
+      // 30分钟间隔或每10条消息
+      if (timeDiff > 30 * 60 * 1000 || index % 10 === 0) {
+        showDivider = true
+      }
+    }
+
+    if (showDivider) {
+      res.push({ 
+        isTimeDivider: true, 
+        timeText: formatTimeDivider(msg.timestamp), 
+        id: 'divider-' + msg.timestamp + '-' + index 
+      })
     }
     res.push(msg)
   })
@@ -181,14 +265,30 @@ defineExpose({ scrollToBottom, maintainScroll })
 .message-list {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 16px;
   background: #f7f8fa;
 }
 .time-divider {
-  text-align: center;
-  color: #ccc;
-  font-size: 12px;
-  margin: 10px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0;
+  
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.04);
+    margin: 0 12px;
+  }
+  
+  .time-text {
+    background: rgba(0, 0, 0, 0.04);
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #bfbfbf;
+  }
 }
 .message-item {
   display: flex;
@@ -200,36 +300,101 @@ defineExpose({ scrollToBottom, maintainScroll })
 .avatar {
   margin: 0 10px;
   background: #409eff;
+  flex-shrink: 0;
 }
 .content-wrapper {
-  max-width: 60%;
+  max-width: 70%;
   display: flex;
   flex-direction: column;
 }
 .sender-name {
   font-size: 12px;
-  color: #999;
+  color: #8c8c8c;
   margin-bottom: 4px;
+  padding-left: 4px;
 }
 .is-own .sender-name {
   text-align: right;
+  padding-right: 4px;
 }
 .bubble {
   background: #fff;
   padding: 10px 14px;
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   font-size: 14px;
   word-break: break-all;
+  line-height: 1.5;
+  color: #262626;
 }
 .is-own .bubble {
-  background: #95ec69;
+  background: #0089ff;
+  color: #ffffff;
 }
 .msg-image {
   max-width: 100%;
   border-radius: 4px;
   cursor: pointer;
 }
+
+.message-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.is-own .message-footer {
+  flex-direction: row-reverse;
+}
+
+.read-status {
+  color: #bfbfbf;
+  
+  .read {
+    color: #bfbfbf;
+  }
+  
+  .unread {
+    color: #0089ff;
+  }
+  
+  .read-count {
+    color: #0089ff;
+    cursor: pointer;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.read-users-list {
+  max-height: 200px;
+  overflow-y: auto;
+  
+  .read-user-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 13px;
+    
+    &:not(:last-child) {
+      border-bottom: 1px solid #f0f0f0;
+    }
+  }
+  
+  .empty {
+    text-align: center;
+    color: #999;
+    padding: 8px 0;
+    font-size: 12px;
+  }
+}
+
+.time {
+  color: #bfbfbf;
+}
+
 .msg-file {
   display: flex;
   align-items: center;
@@ -264,15 +429,6 @@ defineExpose({ scrollToBottom, maintainScroll })
     width: 100%;
     border-radius: 4px;
   }
-}
-.time {
-  font-size: 12px;
-  color: #ccc;
-  margin-top: 4px;
-  text-align: right;
-}
-.is-own .time {
-  text-align: left;
 }
 
 .reply-wrapper {

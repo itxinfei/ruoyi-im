@@ -181,6 +181,35 @@
       </div>
     </div>
 
+    <!-- 应用中心 -->
+    <div class="apps-section">
+      <el-card>
+        <template #header>
+          <div class="card-header">
+            <span>应用中心</span>
+            <el-button text>全部应用</el-button>
+          </div>
+        </template>
+        <div v-loading="loadingApps" class="apps-grid">
+          <div
+            v-for="app in applications"
+            :key="app.id"
+            class="app-item"
+            @click="handleAppClick(app)"
+          >
+            <div class="app-icon-wrap">
+              <el-image v-if="app.icon" :src="app.icon" class="app-icon" />
+              <div v-else class="app-icon-placeholder">
+                {{ app.name?.charAt(0) }}
+              </div>
+            </div>
+            <div class="app-name">{{ app.name }}</div>
+          </div>
+          <el-empty v-if="!loadingApps && applications.length === 0" description="暂无可用应用" />
+        </div>
+      </el-card>
+    </div>
+
     <!-- 公告栏 -->
     <div class="announcements-section">
       <el-card>
@@ -283,6 +312,7 @@ import {
 } from '@/api/im/workbench'
 import { getPendingApprovals, getMyApprovals } from '@/api/im/approval'
 import { getTodayStatus, checkIn, checkOut } from '@/api/im/attendance'
+import { getVisibleApplications } from '@/api/im/app'
 import ApprovalDetailDialog from '@/components/Workplace/ApprovalDetailDialog.vue'
 import CreateApprovalDialog from '@/components/Workplace/CreateApprovalDialog.vue'
 
@@ -309,6 +339,9 @@ const loadingAnnouncements = ref(false)
 const todos = ref([])
 const approvals = ref([])
 const announcements = ref([])
+const applications = ref([])
+
+const loadingApps = ref(false)
 
 const showCreateTodoDialog = ref(false)
 const showCreateApproval = ref(false)
@@ -395,6 +428,36 @@ const loadAnnouncements = async () => {
     console.error('加载公告列表失败:', error)
   } finally {
     loadingAnnouncements.value = false
+  }
+}
+
+// 加载应用列表
+const loadApplications = async () => {
+  loadingApps.value = true
+  try {
+    const response = await getVisibleApplications()
+    if (response && response.code === 200) {
+      applications.value = response.data
+    }
+  } catch (error) {
+    console.error('加载应用列表失败:', error)
+  } finally {
+    loadingApps.value = false
+  }
+}
+
+// 处理应用点击
+const handleAppClick = (app) => {
+  if (app.appUrl) {
+    if (app.appType === 'LINK') {
+      window.open(app.appUrl, '_blank')
+    } else {
+      // 路由跳转
+      // router.push(app.appUrl)
+      ElMessage.info(`正在打开: ${app.name}`)
+    }
+  } else {
+    ElMessage.info(`应用 ${app.name} 暂未配置地址`)
   }
 }
 
@@ -541,6 +604,7 @@ onMounted(() => {
   loadApprovals()
   loadAnnouncements()
   loadAttendance()
+  loadApplications()
 })
 
 // 组件卸载
@@ -822,6 +886,73 @@ onUnmounted(() => {
         color: #595959;
         line-height: 1.6;
         padding-left: 24px;
+      }
+    }
+  }
+}
+
+.apps-section {
+  margin-bottom: 20px;
+
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 20px;
+    padding: 10px;
+
+    .app-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 12px;
+      border-radius: 12px;
+
+      &:hover {
+        background-color: #f0f7ff;
+        transform: translateY(-2px);
+      }
+
+      .app-icon-wrap {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        .app-icon {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .app-icon-placeholder {
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #409eff 0%, #1e80ff 100%);
+          color: #fff;
+          font-size: 20px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      .app-name {
+        font-size: 13px;
+        color: #262626;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
       }
     }
   }

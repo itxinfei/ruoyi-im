@@ -4,47 +4,117 @@
     <th:block th:include="include :: header('用户管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
     <style>
-        /* 整体边距 */
-        .wrapper-content { padding: 6px !important; padding-top: 10px !important; }
+        /* ============================================
+           用户管理页面 - 现代化精美样式
+           主色: #1ab394 (若依青绿)
+           ============================================ */
 
-        /* 统计卡片区域样式 */
+        /* 整体边距 */
+        .wrapper-content { padding: 8px !important; padding-top: 12px !important; }
+        body.gray-bg { background: #f0f2f8 !important; }
+
+        /* ===== 统计卡片区域 ===== */
         .stat-box {
-            background: #fff;
-            border-radius: 4px;
-            padding: 16px 20px;
-            margin-bottom: 6px;
-            border-top: 3px solid #1ab394;
+            background: linear-gradient(135deg, #fff 0%, #fcfcfc 100%);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            border: none;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 0 1px rgba(0,0,0,0.04);
+        }
+
+        /* 卡片光效装饰 */
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, currentColor, transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-box:hover::before {
+            opacity: 1;
         }
 
         .stat-box:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 0 1px rgba(0,0,0,0.06);
+            transform: translateY(-3px);
         }
 
-        .stat-box.stat-box-primary { border-top-color: #1c84c6; }
-        .stat-box.stat-box-success { border-top-color: #1ab394; }
-        .stat-box.stat-box-warning { border-top-color: #f8ac59; }
-        .stat-box.stat-box-danger { border-top-color: #ed5565; }
+        .stat-box.stat-box-primary { color: #1c84c6; }
+        .stat-box.stat-box-primary::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(28,132,198,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .stat-box.stat-box-success { color: #1ab394; }
+        .stat-box.stat-box-success::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(26,179,148,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .stat-box.stat-box-warning { color: #f8ac59; }
+        .stat-box.stat-box-warning::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(248,172,89,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .stat-box.stat-box-danger { color: #ed5565; }
+        .stat-box.stat-box-danger::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(237,85,101,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
 
         .stat-box.active {
-            box-shadow: 0 0 0 2px rgba(24,144,255,0.3);
+            box-shadow: 0 0 0 2px currentColor, 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .stat-number {
-            font-size: 28px;
-            font-weight: 600;
-            color: #676a6c;
+            font-size: 32px;
+            font-weight: 700;
+            color: #262626;
             line-height: 1;
+            letter-spacing: -0.5px;
         }
 
         .stat-label {
             font-size: 13px;
-            color: #999;
+            color: #8c8c8c;
             margin-top: 6px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
 
         .stat-icon {
@@ -52,17 +122,18 @@
             right: 20px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 40px;
-            opacity: 0.15;
+            font-size: 48px;
+            opacity: 0.08;
         }
 
-        /* 搜索区域样式 */
+        /* ===== 搜索区域 ===== */
         .search-collapse {
-            background: #fff;
-            border-radius: 4px;
-            padding: 12px 16px;
-            margin-bottom: 6px;
-            border: 1px solid #e7eaec;
+            background: linear-gradient(135deg, #fff 0%, #fafbfc 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+            border: 1px solid #e8e8e8;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 0 1px rgba(0,0,0,0.04);
         }
 
         .select-list ul {
@@ -72,126 +143,258 @@
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .select-list li {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .input-label {
             font-size: 13px;
-            color: #676a6c;
+            color: #595959;
             white-space: nowrap;
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
 
         .select-list .form-control {
-            height: 30px;
-            padding: 4px 10px;
+            height: 36px;
+            padding: 6px 14px;
             font-size: 13px;
-            border-radius: 2px;
-            border-color: #e7eaec;
+            border-radius: 8px;
+            border-color: #e0e0e0;
+            background: #fff;
+            transition: all 0.25s ease;
         }
 
         .select-list .form-control:focus {
             border-color: #1ab394;
-            box-shadow: none;
+            box-shadow: 0 0 0 3px rgba(26,179,148,0.1);
+            outline: none;
+            background: #fff;
+        }
+
+        .select-list .form-control:hover {
+            border-color: #d0d0d0;
         }
 
         .time-input {
-            width: 140px;
+            width: 150px;
         }
 
         /* 快捷筛选按钮 */
         .quick-filter {
             display: flex;
-            gap: 8px;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed #e7eaec;
+            gap: 10px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed #e8e8e8;
         }
 
         .quick-filter-btn {
-            padding: 4px 12px;
-            font-size: 12px;
-            background: #f5f7fa;
-            border: 1px solid #e7eaec;
-            border-radius: 3px;
+            padding: 8px 16px;
+            font-size: 13px;
+            background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
             cursor: pointer;
-            color: #676a6c;
-            transition: all 0.2s;
+            color: #595959;
+            transition: all 0.25s ease;
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
 
         .quick-filter-btn:hover {
-            background: #e8ebef;
-            color: #1ab394;
+            background: linear-gradient(135deg, #1ab394 0%, #18a689 100%);
+            border-color: #1ab394;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26,179,148,0.25);
+        }
+
+        .quick-filter-btn i {
+            margin-right: 4px;
         }
 
         /* 高级筛选区域 */
         .advanced-filter {
             display: none;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px dashed #e7eaec;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed #e8e8e8;
         }
 
         .advanced-filter.show {
             display: block;
+            animation: slideDown 0.25s ease;
         }
 
-        /* 表格区域样式 */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== 表格区域 ===== */
         .select-table {
-            background: #fff;
-            border-radius: 4px;
-            padding: 12px 16px;
-            border: 1px solid #e7eaec;
+            background: linear-gradient(135deg, #fff 0%, #fafbfc 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e8e8e8;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 0 1px rgba(0,0,0,0.04);
         }
 
+        /* 工具栏按钮组 */
         .btn-group-sm > .btn {
-            margin: 0 3px;
-            padding: 4px 10px;
-            font-size: 12px;
+            margin: 0 5px 8px 0;
+            padding: 8px 16px;
+            font-size: 13px;
+            border-radius: 8px;
+            transition: all 0.25s ease;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            border: none;
+        }
+
+        .btn-group-sm > .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .btn-group-sm > .btn:active {
+            transform: translateY(0);
+        }
+
+        /* 主要按钮样式覆盖 */
+        .btn-success {
+            background: linear-gradient(135deg, #52c41a 0%, #3cb371 100%) !important;
+            color: #fff !important;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f8ac59 0%, #f39c12 100%) !important;
+            color: #fff !important;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ed5565 0%, #d43f3a 100%) !important;
+            color: #fff !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1ab394 0%, #18a689 100%) !important;
+            color: #fff !important;
+        }
+
+        /* 下拉按钮样式 */
+        .btn-dropdown {
+            position: relative;
+        }
+
+        .btn-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 140px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            border: 1px solid #e8e8e8;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .btn-dropdown.show .btn-dropdown-menu {
+            display: block;
+            animation: fadeInUp 0.2s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-dropdown-item {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 10px 16px;
+            text-align: left;
+            border: none;
+            background: none;
+            font-size: 13px;
+            color: #595959;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(26,179,148,0.08) 0%, rgba(26,179,148,0.05) 100%);
+            color: #1ab394;
+        }
+
+        .btn-dropdown-item i {
+            margin-right: 10px;
+            width: 16px;
+            text-align: center;
         }
 
         /* 表格单元格 */
         .table > tbody > tr > td,
         .table > thead > tr > th {
-            padding: 8px 12px;
+            padding: 12px 14px;
             vertical-align: middle;
         }
 
         .table > thead > tr > th {
-            background: #f5f7fa;
-            font-size: 12px;
+            background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+            font-size: 13px;
             font-weight: 600;
-            color: #606266;
-            border-bottom: 1px solid #e7eaec;
+            color: #262626;
+            border-bottom: 1px solid #e8e8e8;
+            letter-spacing: 0.3px;
         }
 
         .table > tbody > tr > td {
             font-size: 13px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f5f5f5;
+            color: #595959;
         }
 
         .table > tbody > tr:hover > td {
-            background: #f5f7fa;
+            background: linear-gradient(135deg, rgba(26,179,148,0.02) 0%, rgba(26,179,148,0.01) 100%);
         }
 
         /* 用户单元格 */
         .user-cell {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .user-avatar {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid #f0f0f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .user-info {
@@ -200,49 +403,54 @@
         }
 
         .user-name {
-            font-weight: 500;
-            color: #333;
-            font-size: 13px;
+            font-weight: 600;
+            color: #262626;
+            font-size: 14px;
+            letter-spacing: 0.2px;
         }
 
         .user-desc {
             font-size: 12px;
-            color: #999;
+            color: #8c8c8c;
         }
 
         /* 状态徽章 */
         .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 3px 10px;
-            border-radius: 10px;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 16px;
             font-size: 12px;
+            font-weight: 500;
         }
 
         .status-badge-success {
-            background: #f0f9ff;
-            color: #1ab394;
+            background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+            color: #52c41a;
         }
 
         .status-badge-error {
-            background: #fef0f0;
+            background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%);
             color: #ed5565;
         }
 
-        .status-badge::before {
+        .status-badge-success::before {
             content: '';
             width: 6px;
             height: 6px;
             border-radius: 50%;
-        }
-
-        .status-badge-success::before {
-            background: #1ab394;
+            background: #52c41a;
+            box-shadow: 0 0 4px rgba(82,196,26,0.3);
         }
 
         .status-badge-error::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
             background: #ed5565;
+            box-shadow: 0 0 4px rgba(237,85,101,0.3);
         }
 
         /* 在线状态 */
@@ -251,6 +459,7 @@
             align-items: center;
             gap: 6px;
             font-size: 13px;
+            font-weight: 500;
         }
 
         .online-dot::before {
@@ -262,15 +471,25 @@
 
         .online-dot.online::before {
             background: #1ab394;
-            box-shadow: 0 0 4px rgba(26,179,148,0.4);
+            box-shadow: 0 0 8px rgba(26,179,148,0.5);
+            animation: pulse 2s infinite;
         }
 
         .online-dot.offline::before {
-            background: #ccc;
+            background: #d9d9d9;
         }
 
         .online-dot.online { color: #1ab394; }
-        .online-dot.offline { color: #999; }
+        .online-dot.offline { color: #8c8c8c; }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
 
         /* 文本省略 */
         .text-ellipsis {
@@ -288,10 +507,17 @@
             text-decoration: none;
             margin: 0 3px;
             cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            display: inline-block;
         }
 
         .action-link:hover {
             color: #1ab394;
+            background: rgba(26,179,148,0.08);
+            transform: translateY(-1px);
         }
 
         .action-link.danger {
@@ -300,17 +526,17 @@
 
         .action-link.danger:hover {
             color: #d43f3a;
+            background: rgba(237,85,101,0.08);
         }
 
-        /* 分隔符 */
         .action-separator {
-            color: #d9d9d9;
-            margin: 0 2px;
+            color: #e8e8e8;
+            margin: 0 1px;
         }
 
-        /* 响应式 */
+        /* ===== 响应式 ===== */
         @media (max-width: 1200px) {
-            .stat-box { margin-bottom: 8px; }
+            .stat-box { margin-bottom: 12px; }
         }
 
         @media (max-width: 768px) {
@@ -326,6 +552,10 @@
 
             .select-list .form-control {
                 width: 100%;
+            }
+
+            .btn-group-sm > .btn {
+                margin: 4px 2px;
             }
         }
     </style>
@@ -445,26 +675,28 @@
 
             <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table" style="padding: 0 6px;">
-                <!-- 批量操作按钮 -->
+                <!-- 工具栏按钮 -->
                 <div class="btn-group-sm" id="toolbar" role="group">
                     <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:user:add">
                         <i class="fa fa-plus"></i> 新增
                     </a>
-                    <a class="btn btn-info single disabled" onclick="viewUserDetail()" shiro:hasPermission="im:user:query">
-                        <i class="fa fa-eye"></i> 查看
-                    </a>
-                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:user:edit">
-                        <i class="fa fa-edit"></i> 编辑
-                    </a>
                     <a class="btn btn-warning multiple disabled" onclick="batchResetPassword()" shiro:hasPermission="im:user:edit">
                         <i class="fa fa-key"></i> 重置密码
                     </a>
-                    <a class="btn btn-default multiple disabled" onclick="batchChangeStatus(1)" shiro:hasPermission="im:user:edit">
-                        <i class="fa fa-check"></i> 批量启用
-                    </a>
-                    <a class="btn btn-default multiple disabled" onclick="batchChangeStatus(0)" shiro:hasPermission="im:user:edit">
-                        <i class="fa fa-ban"></i> 批量停用
-                    </a>
+                    <!-- 批量状态切换下拉按钮 -->
+                    <div class="btn-dropdown btn-group-sm" style="display:inline-block;">
+                        <a class="btn btn-default multiple disabled" onclick="toggleStatusDropdown()" shiro:hasPermission="im:user:edit">
+                            <i class="fa fa-toggle-on"></i> 状态切换 <i class="fa fa-caret-down"></i>
+                        </a>
+                        <div class="btn-dropdown-menu" id="statusDropdown">
+                            <button type="button" class="btn-dropdown-item" onclick="batchChangeStatus(1)">
+                                <i class="fa fa-check" style="color:#52c41a"></i> 批量启用
+                            </button>
+                            <button type="button" class="btn-dropdown-item" onclick="batchChangeStatus(0)">
+                                <i class="fa fa-ban" style="color:#ed5565"></i> 批量停用
+                            </button>
+                        </div>
+                    </div>
                     <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:user:remove">
                         <i class="fa fa-remove"></i> 批量删除
                     </a>
@@ -481,6 +713,7 @@
 
     <th:block th:include="include :: footer" />
     <th:block th:include="include :: bootstrap-table-export-js" />
+    <th:block th:include="include :: datetimepicker-js" />
     <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var prefix = ctx + "im/user";
@@ -490,7 +723,24 @@
             loadStatistics();
             initTable();
             initDateRange();
+
+            // 点击外部关闭下拉菜单
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.btn-dropdown').length) {
+                    $('.btn-dropdown').removeClass('show');
+                }
+            });
         });
+
+        /**
+         * 切换状态下拉菜单
+         */
+        function toggleStatusDropdown() {
+            var $dropdown = $('.btn-dropdown');
+            // 关闭其他下拉菜单
+            $('.btn-dropdown').not($dropdown).removeClass('show');
+            $dropdown.toggleClass('show');
+        }
 
         /**
          * 加载统计数据
@@ -814,22 +1064,6 @@
                     height: 450
                 });
             });
-        }
-
-        /**
-         * 查看用户详情
-         */
-        function viewUserDetail() {
-            var rows = $.table.selectFirstColumns();
-            if (rows.length == 0) {
-                $.modal.alertWarning("请选择一条记录");
-                return;
-            }
-            if (rows.length > 1) {
-                $.modal.alertWarning("只能选择一条记录");
-                return;
-            }
-            viewUserDetailById(rows[0]);
         }
 
         /**

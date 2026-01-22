@@ -69,7 +69,8 @@
                         <label class="col-sm-4 control-label">用户状态：</label>
                         <div class="col-sm-8">
                             <label class="toggle-switch switch-solid">
-	                            	                        <input type="checkbox" id="status" th:checked="${user?.status == '0' ? true : false}">	                            <span></span>
+	                            <input type="checkbox" id="status" th:checked="${user?.status == '0' ? true : false}">
+	                            <span></span>
 	                        </label>
                         </div>
                     </div>
@@ -78,21 +79,23 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label class="col-sm-4 control-label">岗位：</label>
-                        <div class="col-sm-8">
-                            <select id="post" class="form-control select2-multiple" multiple>
-								<option th:each="post:${posts}" th:value="${post.postId}" th:text="${post.postName}" th:selected="${post.flag}" th:disabled="${post.status == '1'}"></option>
-							</select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                    <div class="form-group">
                         <label class="col-sm-4 control-label">用户性别：</label>
                         <div class="col-sm-8">
                             <select name="sex" class="form-control m-b" th:with="type=${@dict.getType('sys_user_sex')}">
 				                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{sex}"></option>
 				            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+            	<div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label">岗位：</label>
+                        <div class="col-xs-10">
+                            <select id="post" class="form-control select2-multiple" multiple>
+								<option th:each="post:${posts}" th:value="${post.postId}" th:text="${post.postName}" th:selected="${post.flag}" th:disabled="${post.status == '1'}"></option>
+							</select>
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RuoYi-IM 文档 (布局优化版)</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1677ff",
+                        "background-light": "#f4f7f9",
+                        "background-dark": "#0f172a",
+                        "sidebar-light": "#ffffff",
+                        "sidebar-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "system-ui", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "8px",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display h-screen flex overflow-hidden">
+<nav class="w-20 bg-primary flex flex-col items-center py-6 gap-6 z-20 shrink-0 shadow-lg">
+<div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center cursor-pointer mb-2 shrink-0 backdrop-blur-sm">
+<span class="text-white font-bold text-xl italic">若</span>
+</div>
+<div class="flex flex-col gap-4 flex-1 items-center w-full px-2">
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-0.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-icons-outlined text-2xl">chat_bubble</span>
+<span class="text-[10px] font-medium tracking-wide">消息</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-0.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-icons-outlined text-2xl">group</span>
+<span class="text-[10px] font-medium tracking-wide">通讯录</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-0.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-icons-outlined text-2xl">grid_view</span>
+<span class="text-[10px] font-medium tracking-wide">工作台</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-0.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-icons-outlined text-2xl">phone_in_talk</span>
+<span class="text-[10px] font-medium tracking-wide">电话</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-0.5 bg-white/20 text-white rounded-xl transition-all shadow-inner border border-white/10">
+<span class="material-icons-outlined text-2xl">description</span>
+<span class="text-[10px] font-medium tracking-wide">文档</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-0.5 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-icons-outlined text-2xl">calendar_today</span>
+<span class="text-[10px] font-medium tracking-wide">日历</span>
+</button>
+</div>
+<div class="flex flex-col gap-4 items-center w-full px-2 pb-2">
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" onclick="document.documentElement.classList.toggle('dark')" title="切换主题">
+<span class="material-icons-outlined">dark_mode</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-blue-400 border-2 border-white/20 flex items-center justify-center text-white text-xs overflow-hidden hover:border-white/50 transition-colors cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDifOp46XiqD0Ri7bzlZl6tZnBHN2aFm0N1YHCQzQpi6Q_P7K4XFLjO04LVcBYaQnhwkylx_oBj4xa9ovCS9U939yrB8lqS9MkDHbISjoNW6lnmqiBhn_PHqRpPI-4kWF8WJtFKQZLXjMFUO0HY6Q2qX6HcdntKzTeM9yGlNxDlGm5xWF2Gyv6YN-tVqlC6Lpl9NYv02vKsRK70gHAeclSeoplDy2dGDDFcYZoQQLLrQR87jklm6PrclEo4R-9s_jdrLUyXnJdcn5I"/>
+</div>
+</div>
+</nav>
+<aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col shrink-0">
+<div class="p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-700/50">
+<h1 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+<span class="material-icons-outlined text-primary">cloud</span>
+                云文档
+            </h1>
+</div>
+<div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+<div class="group flex items-center gap-3 px-3 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-primary dark:text-blue-300 rounded-lg cursor-pointer transition-all font-medium">
+<span class="material-icons-outlined text-[20px]">schedule</span>
+<span class="text-sm">最近使用</span>
+</div>
+<div class="group flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200 rounded-lg cursor-pointer transition-all">
+<span class="material-icons-outlined text-[20px]">folder_special</span>
+<span class="text-sm">我创建的</span>
+</div>
+<div class="group flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200 rounded-lg cursor-pointer transition-all">
+<span class="material-icons-outlined text-[20px]">share</span>
+<span class="text-sm">分享给我</span>
+</div>
+<div class="group flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200 rounded-lg cursor-pointer transition-all">
+<span class="material-icons-outlined text-[20px]">star_border</span>
+<span class="text-sm">收藏夹</span>
+</div>
+<div class="my-4 border-t border-slate-100 dark:border-slate-700"></div>
+<div class="px-3 pb-2">
+<span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">存储位置</span>
+</div>
+<div class="group flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200 rounded-lg cursor-pointer transition-all">
+<span class="material-icons-outlined text-[20px]">corporate_fare</span>
+<span class="text-sm">企业空间</span>
+</div>
+<div class="group flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200 rounded-lg cursor-pointer transition-all">
+<span class="material-icons-outlined text-[20px]">person_outline</span>
+<span class="text-sm">个人空间</span>
+</div>
+<div class="group flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200 rounded-lg cursor-pointer transition-all mt-auto">
+<span class="material-icons-outlined text-[20px]">delete_outline</span>
+<span class="text-sm">回收站</span>
+</div>
+</div>
+<div class="p-4 border-t border-slate-100 dark:border-slate-700">
+<div class="bg-slate-100 dark:bg-slate-700/50 rounded-lg p-3">
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs text-slate-500 dark:text-slate-400">存储空间</span>
+<span class="text-xs text-primary font-medium">85%</span>
+</div>
+<div class="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-1.5">
+<div class="bg-primary h-1.5 rounded-full" style="width: 85%"></div>
+</div>
+<div class="mt-2 text-[10px] text-slate-400 text-right">85GB / 100GB</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col bg-slate-50 dark:bg-slate-900 overflow-hidden relative">
+<header class="h-16 px-8 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between shrink-0 shadow-sm z-10">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-semibold text-slate-800 dark:text-white">最近使用</h2>
+<div class="h-4 w-px bg-slate-300 dark:bg-slate-600 mx-2"></div>
+<div class="relative group">
+<span class="material-icons-outlined absolute left-2.5 top-2 text-slate-400 text-[18px] group-focus-within:text-primary transition-colors">search</span>
+<input class="w-64 bg-slate-100 dark:bg-slate-700/50 border-none rounded-lg py-1.5 pl-9 pr-4 text-sm focus:ring-2 focus:ring-primary/20 focus:bg-white dark:focus:bg-slate-700 transition-all dark:text-slate-200 placeholder-slate-400" placeholder="搜索文件" type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5">
+<button class="p-1.5 bg-white dark:bg-slate-600 shadow-sm rounded-md text-slate-600 dark:text-slate-200">
+<span class="material-icons-outlined text-lg">list</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+<span class="material-icons-outlined text-lg">grid_view</span>
+</button>
+</div>
+<button class="bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+<span class="material-icons-outlined text-lg">add</span>
+                    新建
+                </button>
+</div>
+</header>
+<div class="flex-1 overflow-auto p-8">
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+<th class="px-6 py-4 font-medium w-1/2">名称</th>
+<th class="px-6 py-4 font-medium">所有者</th>
+<th class="px-6 py-4 font-medium">修改时间</th>
+<th class="px-6 py-4 font-medium text-right">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-500 shrink-0">
+<span class="material-icons-outlined">folder</span>
+</div>
+<div>
+<div class="font-medium text-slate-900 dark:text-slate-100">2023年度项目资料</div>
+<div class="text-[10px] text-slate-400 mt-0.5">3 个文件</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-[10px]">我</div>
+<span>我</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-500">2023-11-01 14:20</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary p-1 rounded opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-icons-outlined text-lg">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 shrink-0">
+<span class="material-icons-outlined">description</span>
+</div>
+<div>
+<div class="font-medium text-slate-900 dark:text-slate-100">RuoYi-IM 产品需求规格说明书 v2.0.docx</div>
+<div class="text-[10px] text-slate-400 mt-0.5">2.4 MB</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center text-white text-[10px]">李</div>
+<span>李明</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-500">2023-10-28 09:15</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary p-1 rounded opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-icons-outlined text-lg">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 shrink-0">
+<span class="material-icons-outlined">table_view</span>
+</div>
+<div>
+<div class="font-medium text-slate-900 dark:text-slate-100">Q4 研发部预算表.xlsx</div>
+<div class="text-[10px] text-slate-400 mt-0.5">1.1 MB</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center text-white text-[10px]">张</div>
+<span>张伟</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-500">2023-10-27 16:45</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary p-1 rounded opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-icons-outlined text-lg">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500 shrink-0">
+<span class="material-icons-outlined">picture_as_pdf</span>
+</div>
+<div>
+<div class="font-medium text-slate-900 dark:text-slate-100">系统架构设计图_Final.pdf</div>
+<div class="text-[10px] text-slate-400 mt-0.5">5.8 MB</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center text-white text-[10px]">王</div>
+<span>王芳</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-500">2023-10-25 11:30</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary p-1 rounded opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-icons-outlined text-lg">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group cursor-pointer">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-500 shrink-0">
+<span class="material-icons-outlined">image</span>
+</div>
+<div>
+<div class="font-medium text-slate-900 dark:text-slate-100">登录页UI_v3.png</div>
+<div class="text-[10px] text-slate-400 mt-0.5">856 KB</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-cyan-500 flex items-center justify-center text-white text-[10px]">刘</div>
+<span>刘洋</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-500">2023-10-24 15:10</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary p-1 rounded opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-icons-outlined text-lg">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
+<span>共 5 个项目</span>
+<div class="flex gap-2">
+<button class="hover:text-primary disabled:opacity-50" disabled="">上一页</button>
+<span class="text-slate-300">|</span>
+<button class="hover:text-primary">下一页</button>
+</div>
+</div>
+</div>
+</main>
+
+</body></html>

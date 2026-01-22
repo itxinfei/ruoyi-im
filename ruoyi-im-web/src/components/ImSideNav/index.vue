@@ -206,7 +206,7 @@ const handleNavClick = (moduleKey) => {
 }
 
 .nav-icon {
-  font-size: 20px;
+  font-size: 24px;
   color: rgba(255, 255, 255, 0.8);
   transition: all 0.2s ease;
 }

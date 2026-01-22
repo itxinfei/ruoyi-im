@@ -245,8 +245,8 @@ onUnmounted(() => {
 .session-panel {
   display: flex;
   flex-direction: column;
-  width: 320px;
-  min-width: 320px;
+  width: 280px;
+  min-width: 280px;
   flex-shrink: 0;
   border-right: 1px solid #e8e8e8;
   background: #fff;
@@ -256,19 +256,19 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px;
+    padding: 12px 16px;
     border-bottom: 1px solid #f0f0f0;
     
     h3 {
       margin: 0;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       color: #262626;
     }
   }
 
   .search-bar {
-    padding: 12px 16px;
+    padding: 10px 12px;
     border-bottom: 1px solid #f0f0f0;
   }
 
@@ -279,10 +279,11 @@ onUnmounted(() => {
     .session-item {
       display: flex;
       align-items: center;
-      padding: 12px 16px;
+      height: 64px;
+      padding: 0 12px;
       cursor: pointer;
-      transition: all 0.2s ease;
-      
+      transition: background 0.2s;
+      position: relative;
       &:hover {
         background: rgba(0, 0, 0, 0.04);
       }
@@ -308,7 +309,7 @@ onUnmounted(() => {
       .session-info {
         flex: 1;
         min-width: 0;
-        margin-left: 12px;
+        margin-left: 10px;
         
         .session-top {
           display: flex;

@@ -3,8 +3,30 @@
 <head>
     <th:block th:include="include :: header('用户详情')" />
     <style>
+        /* ============================================
+           用户详情页面 - 现代化精美样式
+           主色: #1ab394 (若依青绿)
+           ============================================ */
+        :root {
+            --primary-color: #1ab394;
+            --primary-hover: #18a689;
+            --primary-light: rgba(26,179,148,0.1);
+            --success-color: #52c41a;
+            --warning-color: #f8ac59;
+            --danger-color: #ed5565;
+            --text-primary: #262626;
+            --text-secondary: #595959;
+            --text-tertiary: #8c8c8c;
+            --border-color: #e0e0e0;
+            --border-light: #e8e8e8;
+            --bg-light: #fafafa;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
         body {
-            background: #f5f7fa;
+            background: #f0f2f8;
         }
 
         .detail-container {
@@ -15,30 +37,60 @@
         .user-header {
             display: flex;
             align-items: center;
-            gap: 20px;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 8px;
+            gap: 24px;
+            padding: 28px;
+            background: linear-gradient(135deg, #1ab394 0%, #18a689 100%);
+            border-radius: var(--radius-lg);
             color: #fff;
             margin-bottom: 20px;
+            box-shadow: 0 6px 20px rgba(26,179,148,0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        .user-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        .user-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            right: 10%;
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
         }
 
         .user-avatar-large {
-            width: 80px;
-            height: 80px;
+            width: 88px;
+            height: 88px;
             border-radius: 50%;
             border: 4px solid rgba(255,255,255,0.3);
             object-fit: cover;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: relative;
+            z-index: 1;
         }
 
         .user-header-info {
             flex: 1;
+            position: relative;
+            z-index: 1;
         }
 
         .user-header-name {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 600;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
         }
 
         .user-header-meta {
@@ -50,60 +102,68 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
         }
 
         .status-badge {
-            padding: 6px 16px;
-            border-radius: 20px;
+            padding: 8px 20px;
+            border-radius: 24px;
             font-size: 13px;
             font-weight: 500;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
         }
-
         .status-badge.online {
-            background: rgba(26,179,148,0.2);
-            border: 1px solid rgba(26,179,148,0.5);
+            background: rgba(82,196,26,0.25);
+            border-color: rgba(82,196,26,0.4);
         }
-
         .status-badge.offline {
-            background: rgba(150,150,150,0.2);
-            border: 1px solid rgba(150,150,150,0.5);
+            background: rgba(140,140,140,0.25);
+            border-color: rgba(140,140,140,0.4);
         }
-
         .status-badge.disabled {
-            background: rgba(237,85,101,0.2);
-            border: 1px solid rgba(237,85,101,0.5);
+            background: rgba(237,85,101,0.25);
+            border-color: rgba(237,85,101,0.4);
         }
 
         /* 详情卡片 */
         .detail-section {
             background: #fff;
-            border-radius: 8px;
-            padding: 20px;
+            border-radius: var(--radius-lg);
+            padding: 24px;
             margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 0 1px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-light);
+            transition: all 0.25s ease;
+        }
+        .detail-section:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 0 1px rgba(0,0,0,0.04);
         }
 
         .detail-section-title {
             font-size: 15px;
             font-weight: 600;
-            color: #333;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #f0f0f0;
+            color: var(--text-primary);
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid var(--primary-light);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .detail-section-title i {
-            color: #1ab394;
+            color: var(--primary-color);
+            font-size: 16px;
         }
 
         .detail-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px 24px;
+            gap: 18px 28px;
         }
 
         .detail-item {
@@ -114,90 +174,82 @@
 
         .detail-label {
             font-size: 12px;
-            color: #999;
+            color: var(--text-tertiary);
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
 
         .detail-value {
             font-size: 14px;
-            color: #333;
+            color: var(--text-primary);
+            font-weight: 400;
         }
 
         .detail-value.empty {
-            color: #ccc;
-        }
-
-        /* 统计数字 */
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 16px;
-            background: #f5f7fa;
-            border-radius: 8px;
-        }
-
-        .stat-item-value {
-            font-size: 24px;
-            font-weight: 600;
-            color: #1ab394;
-        }
-
-        .stat-item-label {
-            font-size: 12px;
-            color: #999;
-            margin-top: 4px;
+            color: #bfbfbf;
         }
 
         /* 操作按钮 */
         .detail-actions {
             display: flex;
             justify-content: center;
-            gap: 12px;
-            padding-top: 20px;
-            border-top: 1px solid #f0f0f0;
+            gap: 14px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-light);
         }
 
         .btn {
-            padding: 8px 20px;
-            border-radius: 4px;
-            font-size: 13px;
+            height: 40px;
+            padding: 0 24px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.3px;
         }
 
         .btn-primary {
-            background: #1ab394;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
             color: #fff;
             border: none;
+            box-shadow: 0 2px 8px rgba(26,179,148,0.25);
         }
-
         .btn-primary:hover {
-            background: #18a689;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(26,179,148,0.35);
         }
 
         .btn-default {
             background: #fff;
-            color: #666;
-            border: 1px solid #d9d9d9;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
         }
-
         .btn-default:hover {
-            border-color: #1ab394;
-            color: #1ab394;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
         }
 
         .btn-danger {
-            background: #ed5565;
+            background: linear-gradient(135deg, var(--danger-color) 0%, #d43f3a 100%);
             color: #fff;
             border: none;
+            box-shadow: 0 2px 8px rgba(237,85,101,0.25);
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(237,85,101,0.35);
         }
 
-        .btn-danger:hover {
-            background: #d43f3a;
+        @media (max-width: 600px) {
+            .user-header { flex-direction: column; text-align: center; }
+            .user-header-status { width: 100%; }
+            .detail-grid { grid-template-columns: 1fr; }
+            .detail-actions { flex-direction: column-reverse; }
+            .btn { width: 100%; }
         }
     </style>
 </head>

@@ -5,6 +5,7 @@ export * as messageApi from './message'
 export * as conversationApi from './conversation'
 export * as contactApi from './contact'
 export * as groupApi from './group'
+export * as userApi from './user'
 
 // 直接导出常用方法
 export {

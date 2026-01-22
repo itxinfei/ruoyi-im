@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>若依IM - 公司公告</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1677ff",
+                        "background-light": "#f4f7f9",
+                        "background-dark": "#0f172a",
+                        "sidebar-light": "#ffffff",
+                        "sidebar-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "8px",
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .announcement-list-item:hover .preview-btn {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display h-screen flex overflow-hidden">
+<nav class="w-20 bg-primary flex flex-col items-center py-6 gap-6 z-20 shrink-0 shadow-lg">
+<div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center cursor-pointer mb-2 shrink-0">
+<span class="text-white font-bold text-xl italic">若</span>
+</div>
+<div class="flex flex-col gap-3 flex-1 items-center w-full px-2">
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">chat_bubble</span>
+<span class="text-[11px] font-medium tracking-wide">消息</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">group</span>
+<span class="text-[11px] font-medium tracking-wide">通讯录</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 bg-white/20 text-white rounded-xl transition-all shadow-inner border border-white/10">
+<span class="material-symbols-outlined text-2xl">grid_view</span>
+<span class="text-[11px] font-medium tracking-wide">工作台</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">phone_in_talk</span>
+<span class="text-[11px] font-medium tracking-wide">电话</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">description</span>
+<span class="text-[11px] font-medium tracking-wide">文档</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">calendar_today</span>
+<span class="text-[11px] font-medium tracking-wide">日历</span>
+</button>
+</div>
+<div class="flex flex-col gap-4 items-center w-full px-2 pb-2">
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" onclick="document.documentElement.classList.toggle('dark')" title="切换主题">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" title="设置">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-blue-400 border-2 border-white/20 flex items-center justify-center text-white text-xs overflow-hidden hover:border-white/50 transition-colors cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDifOp46XiqD0Ri7bzlZl6tZnBHN2aFm0N1YHCQzQpi6Q_P7K4XFLjO04LVcBYaQnhwkylx_oBj4xa9ovCS9U939yrB8lqS9MkDHbISjoNW6lnmqiBhn_PHqRpPI-4kWF8WJtFKQZLXjMFUO0HY6Q2qX6HcdntKzTeM9yGlNxDlGm5xWF2Gyv6YN-tVqlC6Lpl9NYv02vKsRK70gHAeclSeoplDy2dGDDFcYZoQQLLrQR87jklm6PrclEo4R-9s_jdrLUyXnJdcn5I"/>
+</div>
+</div>
+</nav>
+<main class="flex-1 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900">
+<header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between z-10">
+<div class="flex items-center gap-4">
+<button class="p-1 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-xl font-bold text-slate-800 dark:text-white">公司公告</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-sm">search</span>
+<input class="w-64 bg-slate-100 dark:bg-slate-900 border-none rounded-lg py-2 pl-9 pr-4 text-sm focus:ring-1 focus:ring-primary dark:text-slate-200 placeholder-slate-400 transition-all" placeholder="搜索公告标题或内容..." type="text"/>
+</div>
+<button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm text-sm font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-lg">edit_note</span>
+                发布公告
+            </button>
+</div>
+</header>
+<div class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-8">
+<div class="flex gap-8">
+<button class="py-4 text-sm font-bold text-primary border-b-2 border-primary relative">
+                全体公告
+                <span class="absolute -right-3 top-3.5 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center scale-90">2</span>
+</button>
+<button class="py-4 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary transition-colors border-b-2 border-transparent">部门公告</button>
+<button class="py-4 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary transition-colors border-b-2 border-transparent">制度通知</button>
+</div>
+</div>
+<div class="flex-1 flex overflow-hidden">
+<div class="flex-1 overflow-y-auto p-6 space-y-3">
+<div class="announcement-list-item bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer group relative">
+<div class="flex items-start justify-between">
+<div class="flex gap-3">
+<div class="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 shrink-0"></div>
+<div>
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 bg-red-50 dark:bg-red-900/20 text-red-500 text-[10px] font-bold rounded border border-red-100 dark:border-red-900/30">重要</span>
+<h3 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 group-hover:text-primary transition-colors">关于2023年国庆节放假安排的通知</h3>
+</div>
+<div class="flex items-center gap-4 mt-2 text-xs text-slate-400">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">corporate_fare</span>人事行政部</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span>2023-09-25 09:30</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">visibility</span>1,284 次浏览</span>
+</div>
+</div>
+</div>
+<button class="preview-btn opacity-0 text-primary text-xs font-medium flex items-center gap-0.5 transition-opacity">
+                        点击预览 <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="announcement-list-item bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer group relative">
+<div class="flex items-start justify-between">
+<div class="flex gap-3">
+<div class="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 shrink-0"></div>
+<div>
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-500 text-[10px] font-bold rounded border border-blue-100 dark:border-blue-900/30">通知</span>
+<h3 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 group-hover:text-primary transition-colors">若依IM移动端V3.5版本升级日志</h3>
+</div>
+<div class="flex items-center gap-4 mt-2 text-xs text-slate-400">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">corporate_fare</span>技术研发部</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span>昨天 14:20</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">visibility</span>856 次浏览</span>
+</div>
+</div>
+</div>
+<button class="preview-btn opacity-0 text-primary text-xs font-medium flex items-center gap-0.5 transition-opacity">
+                        点击预览 <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="announcement-list-item bg-white/60 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer group relative">
+<div class="flex items-start justify-between">
+<div class="flex gap-3">
+<div class="w-1.5 h-1.5 bg-transparent rounded-full mt-2 shrink-0"></div>
+<div>
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold rounded border border-slate-200 dark:border-slate-600">常规</span>
+<h3 class="text-[15px] font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">关于公司内部停车位调整的公示</h3>
+</div>
+<div class="flex items-center gap-4 mt-2 text-xs text-slate-400">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">corporate_fare</span>总务部</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span>2023-09-20</span>
+<span class="text-slate-300 dark:text-slate-600">已读</span>
+</div>
+</div>
+</div>
+<button class="preview-btn opacity-0 text-primary text-xs font-medium flex items-center gap-0.5 transition-opacity">
+                        点击预览 <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="announcement-list-item bg-white/60 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer group relative">
+<div class="flex items-start justify-between">
+<div class="flex gap-3">
+<div class="w-1.5 h-1.5 bg-transparent rounded-full mt-2 shrink-0"></div>
+<div>
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 text-green-500 text-[10px] font-bold rounded border border-green-100 dark:border-green-900/30">文化</span>
+<h3 class="text-[15px] font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">“中秋佳节”员工关怀礼包领取通知</h3>
+</div>
+<div class="flex items-center gap-4 mt-2 text-xs text-slate-400">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">corporate_fare</span>工会</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span>2023-09-18</span>
+<span class="text-slate-300 dark:text-slate-600">已读</span>
+</div>
+</div>
+</div>
+<button class="preview-btn opacity-0 text-primary text-xs font-medium flex items-center gap-0.5 transition-opacity">
+                        点击预览 <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<aside class="w-[420px] bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 hidden xl:flex flex-col shadow-2xl">
+<div class="p-6 overflow-y-auto">
+<div class="flex justify-between items-center mb-6">
+<span class="text-xs font-bold text-primary px-2 py-1 bg-blue-50 dark:bg-blue-900/30 rounded">快照预览</span>
+<div class="flex gap-2">
+<button class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors text-slate-500">
+<span class="material-symbols-outlined text-lg">share</span>
+</button>
+<button class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors text-slate-500">
+<span class="material-symbols-outlined text-lg">open_in_new</span>
+</button>
+</div>
+</div>
+<article class="prose prose-slate dark:prose-invert max-w-none">
+<h2 class="text-xl font-bold leading-tight mb-2">关于2023年国庆节放假安排的通知</h2>
+<div class="flex items-center gap-2 text-sm text-slate-400 mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+<div class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 text-[10px] font-bold">行</div>
+<span>人事行政部 · 王大伟</span>
+<span class="mx-1">•</span>
+<span>3小时前发布</span>
+</div>
+<p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                        各位同事：<br/><br/>
+                        根据国家法定节假日放假安排，结合公司实际生产经营情况，现将2023年国庆节放假及调休安排通知如下：
+                    </p>
+<div class="my-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-800">
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-2">一、放假时间</p>
+<p class="text-sm text-slate-600 dark:text-slate-400">9月29日（星期五）至10月6日（星期五）放假调休，共8天。</p>
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-3 mb-2">二、调休上班</p>
+<p class="text-sm text-slate-600 dark:text-slate-400">10月7日（星期六）、10月8日（星期日）正常上班。</p>
+</div>
+<p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                        请各部门提前做好工作安排，放假前注意关闭电源、锁好门窗，做好安全防疫工作。
+                    </p>
+<div class="mt-8 flex flex-col items-end text-sm text-slate-500">
+<p>若依IM 人事行政部</p>
+<p>2023年9月25日</p>
+</div>
+</article>
+<div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700">
+<p class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">相关附件</p>
+<div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700 group cursor-pointer">
+<span class="material-symbols-outlined text-red-400">picture_as_pdf</span>
+<div class="flex-1">
+<p class="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">2023年国庆假期值班表.pdf</p>
+<p class="text-[10px] text-slate-400">428 KB</p>
+</div>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">download</span>
+</div>
+</div>
+</div>
+<div class="mt-auto p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">
+<button class="w-full py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-primary hover:text-primary transition-all shadow-sm">
+                    查看完整详情
+                </button>
+</div>
+</aside>
+</div>
+</main>
+
+</body></html>

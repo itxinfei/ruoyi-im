@@ -7,6 +7,7 @@
       <ChatHeader :session="session" />
       <MessageList 
         ref="msgListRef"
+        :session-id="session?.id"
         :messages="messages" 
         :loading="loading" 
         :current-user="currentUser" 
@@ -16,6 +17,7 @@
         @load-more="handleLoadMore"
       />
       <MessageInput 
+        :session="session"
         :sending="sending" 
         :replying-message="replyingMessage"
         @send="handleSend" 

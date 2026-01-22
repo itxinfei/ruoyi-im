@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>若依IM - 汇报中心</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1677ff",
+                        "background-light": "#f4f7f9",
+                        "background-dark": "#0f172a",
+                        "sidebar-light": "#ffffff",
+                        "sidebar-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "8px",
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            ::-webkit-scrollbar {
+                width: 6px;
+            }
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 10px;
+            }
+            .dark ::-webkit-scrollbar-thumb {
+                background: #475569;
+            }
+        }
+        .report-card:hover .action-buttons {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display h-screen flex overflow-hidden">
+<nav class="w-20 bg-primary flex flex-col items-center py-6 gap-6 z-20 shrink-0 shadow-lg">
+<div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center cursor-pointer mb-2 shrink-0">
+<span class="text-white font-bold text-xl italic">若</span>
+</div>
+<div class="flex flex-col gap-3 flex-1 items-center w-full px-2">
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">chat_bubble</span>
+<span class="text-[11px] font-medium tracking-wide">消息</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">group</span>
+<span class="text-[11px] font-medium tracking-wide">通讯录</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 bg-white/20 text-white rounded-xl transition-all shadow-inner border border-white/10">
+<span class="material-symbols-outlined text-2xl">grid_view</span>
+<span class="text-[11px] font-medium tracking-wide">工作台</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">phone_in_talk</span>
+<span class="text-[11px] font-medium tracking-wide">电话</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">description</span>
+<span class="text-[11px] font-medium tracking-wide">文档</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">calendar_today</span>
+<span class="text-[11px] font-medium tracking-wide">日历</span>
+</button>
+</div>
+<div class="flex flex-col gap-4 items-center w-full px-2 pb-2">
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" onclick="document.documentElement.classList.toggle('dark')" title="切换主题">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" title="设置">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-blue-400 border-2 border-white/20 flex items-center justify-center text-white text-xs overflow-hidden hover:border-white/50 transition-colors cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDifOp46XiqD0Ri7bzlZl6tZnBHN2aFm0N1YHCQzQpi6Q_P7K4XFLjO04LVcBYaQnhwkylx_oBj4xa9ovCS9U939yrB8lqS9MkDHbISjoNW6lnmqiBhn_PHqRpPI-4kWF8WJtFKQZLXjMFUO0HY6Q2qX6HcdntKzTeM9yGlNxDlGm5xWF2Gyv6YN-tVqlC6Lpl9NYv02vKsRK70gHAeclSeoplDy2dGDDFcYZoQQLLrQR87jklm6PrclEo4R-9s_jdrLUyXnJdcn5I"/>
+</div>
+</div>
+</nav>
+<main class="flex-1 flex flex-col overflow-hidden bg-[#f0f2f5] dark:bg-slate-900">
+<header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-8 py-4 flex items-center justify-between shadow-sm z-10 shrink-0">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">arrow_back</span>
+</button>
+<div>
+<h1 class="text-xl font-bold text-slate-800 dark:text-white">汇报中心</h1>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-xs text-slate-500">我的汇报</span>
+<span class="text-slate-300">|</span>
+<span class="text-xs text-slate-500">我收到的</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-2 text-slate-400 text-xl">search</span>
+<input class="w-64 bg-slate-100 dark:bg-slate-900 border-none rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-1 focus:ring-primary dark:text-slate-200 placeholder-slate-400 transition-all" placeholder="搜索汇报内容或成员..." type="text"/>
+</div>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors shadow-md text-sm font-medium">
+<span class="material-symbols-outlined text-lg">edit_square</span>
+                写汇报
+            </button>
+</div>
+</header>
+<div class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-8">
+<div class="flex gap-8">
+<button class="py-4 px-1 border-b-2 border-primary text-primary font-medium text-sm transition-all">日报</button>
+<button class="py-4 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium text-sm transition-all">周报</button>
+<button class="py-4 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium text-sm transition-all">月报</button>
+<button class="py-4 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium text-sm transition-all">统计</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-6">
+<div class="max-w-4xl mx-auto space-y-4">
+<div class="flex items-center justify-between text-sm text-slate-500 mb-2">
+<div class="flex items-center gap-4">
+<span>全部部门</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</div>
+<div class="flex items-center gap-2">
+<span>排序: 最新发布</span>
+<span class="material-symbols-outlined text-sm">sort</span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 transition-all hover:shadow-md report-card">
+<div class="flex gap-4">
+<img alt="Avatar" class="w-12 h-12 rounded-lg bg-blue-100 object-cover shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjZN77tpmN_Fb069GNe0k6Ze18jV0gHInUKD-TYDVLd1cWjCS6OQ6hXPMc_oeNYGT0qP5OR-T-t7Zu-wWguGXXdasUlGSWMyrpu1kel9K1Sy34m0MIh_qeymgaGxQ25HWpkmsxxrRH5NKG7elWrtO2P-alZAChvNq5BnE1XqmAyWkSVHR9tBAAc0jrfZylejPRuhCKzaAXH7MAoAEcFIVThNuphKGTys76IDFoYHs0KRZOSdSwpd1ScuRSH2qVkK-LCXbOOKo61sY"/>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-bold text-slate-800 dark:text-white">张三 (技术部)</span>
+<span class="px-2 py-0.5 bg-blue-50 text-blue-500 text-[10px] rounded border border-blue-100 font-medium uppercase">日报</span>
+</div>
+<span class="text-xs text-slate-400">10月24日 17:45</span>
+</div>
+<div class="mt-3 space-y-3">
+<div>
+<h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+<span class="w-1 h-3 bg-blue-500 rounded-full"></span>
+                                    今日完成工作
+                                </h4>
+<ul class="mt-1.5 text-sm text-slate-600 dark:text-slate-400 list-disc list-inside space-y-1 pl-1">
+<li>完成 IM 工作台汇报中心页面原型设计</li>
+<li>修复了移动端头像上传偶发的 403 错误</li>
+<li>与产品经理沟通 Q4 季度报表模块需求</li>
+</ul>
+</div>
+<div>
+<h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+<span class="w-1 h-3 bg-orange-500 rounded-full"></span>
+                                    明日工作计划
+                                </h4>
+<p class="mt-1.5 text-sm text-slate-600 dark:text-slate-400 pl-2">开始汇报中心页面的前端开发，对接后端 API 接口，并进行初步联调。</p>
+</div>
+</div>
+<div class="mt-4 flex gap-2">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-slate-600 cursor-pointer hover:bg-slate-100 transition-colors">
+<span class="material-symbols-outlined text-sm text-blue-500">description</span>
+<span class="text-xs text-slate-600 dark:text-slate-300">原型方案.pdf</span>
+</div>
+</div>
+<div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<button class="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">thumb_up</span>
+<span class="text-xs font-medium">12</span>
+</button>
+<button class="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">chat_bubble_outline</span>
+<span class="text-xs font-medium">3</span>
+</button>
+</div>
+<div class="flex -space-x-2">
+<img alt="liker" class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800 bg-slate-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKzVAG3-txoZYlucR72TdS18Wt0r43Fn6GFSapZ4UDZWkDW8PYHbLh-g8IQBcmzJoPtxjuTpBQLoXiYzlsnRGwoPBFEur3juhOpiu81nw9ify4N1USHUYZpffscsdWRPyPvmNOthMWnWSRIABPL5U0RTfv8KzFtLw6hrfo_oUWkAq29tAy3DmamTOtcuWJUjwItCjPVbFDJ1OBRCiMiKGL8ddV-O7-hK2LF5J4jO3c8hCbjacf3k39hP86QY6wSE2PHzKpyuf0T3M"/>
+<img alt="liker" class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800 bg-slate-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxmuvtKC_eckAIxWIsyqcfVMy8IKTiodapWXCotWL9BgEWtyxiMws7hCZV_6C0Y0phxqPMNpF6n4pVb_sNC-kPjybqaGOKbkViQNW21RYHf3GjcGrEL_VTcECFC5CFN327l4FHT3B-i4kZ-8fIhkT-ILVvsnfw_COYNRQpC7KL7L9wL0bQoCD93gUAB-sy3J_lsrtHf7Lpqt2UgdBwyswuqazGTnvpZsWeEmmefHIlkJduiTu2IV0ojIsycFKLkHKsW_vy-ADkEkM"/>
+<div class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800 bg-slate-100 flex items-center justify-center text-[10px] text-slate-400">+10</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 transition-all hover:shadow-md report-card">
+<div class="flex gap-4">
+<img alt="Avatar" class="w-12 h-12 rounded-lg bg-pink-100 object-cover shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCS1qmj41jlmNVUfsVcylyRFinEKPRXJFaCnzqZTSz78Uj83QkIeAUR2Cn5HF3d0TGSr9bfDuGWmwXWtX5sOTf2uEgUck0C4ZLXHfVOSzkR1bT6oa3Ka9Kb7jvziYVU2y1BVtpKb9Fa2F2pwRz24ToIPbXfw5t0aswXg08AmT3EUt99TfnVmk8jotXfbrDrrNIVrHHR3BKPPdcsV12QOAlzTAvzj1-hzHt3KEMany0yLUwr4Dx-YrQNhKe_Cf-UQ7ph6OFglfQt8UE"/>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-bold text-slate-800 dark:text-white">李思思 (设计部)</span>
+<span class="px-2 py-0.5 bg-green-50 text-green-500 text-[10px] rounded border border-green-100 font-medium uppercase">周报</span>
+</div>
+<span class="text-xs text-slate-400">10月24日 16:20</span>
+</div>
+<div class="mt-3 space-y-3">
+<div>
+<h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+<span class="w-1 h-3 bg-green-500 rounded-full"></span>
+                                    本周工作总结
+                                </h4>
+<p class="mt-1.5 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+                                    本周主要完成了 RuoYi-IM 官网视觉升级的终稿交付，并启动了移动端 3.0 版本的深色模式适配设计。针对用户反馈的表单复杂问题，重新梳理了交互链路。
+                                </p>
+</div>
+</div>
+<div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<button class="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">thumb_up</span>
+<span class="text-xs font-medium">8</span>
+</button>
+<button class="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">chat_bubble_outline</span>
+<span class="text-xs font-medium">5</span>
+</button>
+</div>
+<button class="text-xs text-primary font-medium hover:underline">查看详情</button>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 transition-all hover:shadow-md report-card">
+<div class="flex gap-4">
+<img alt="Avatar" class="w-12 h-12 rounded-lg bg-orange-100 object-cover shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvBV7GNzUeCoZs2e5WvUoEGLxuROLpeDSfKCqaEl8n4PL4Vlj9_WNIyB8hvoYJb4rPtb6EDI89A_9Gn4lwMmh8-SJORNt9r8mV79Dzc7nBPZCjGNTS7B2TSbXEz8fqPF47v7dhXZGdBDCAzQQYgugYiyzEXq4E4tBQ5v-fNxUoJRK-5SQgJL6DoG2ahJ8pzJJGoeEdaSS6AhcR_x0DUgZKskmf5F365LMCLpA80Q0EsB1kVQPF-sqmK8ul3hurQUtq9612mAklijs"/>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-bold text-slate-800 dark:text-white">王五 (市场部)</span>
+<span class="px-2 py-0.5 bg-blue-50 text-blue-500 text-[10px] rounded border border-blue-100 font-medium uppercase">日报</span>
+</div>
+<span class="text-xs text-slate-400">10月24日 15:10</span>
+</div>
+<div class="mt-3">
+<p class="text-sm text-slate-600 dark:text-slate-400">
+                                走访了3家潜在企业客户，收集了关于私有化部署的安全性需求反馈。整理了竞品分析报告初稿。
+                            </p>
+</div>
+<div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<button class="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">thumb_up</span>
+<span class="text-xs font-medium">赞</span>
+</button>
+<button class="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">chat_bubble_outline</span>
+<span class="text-xs font-medium">评论</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-center py-8">
+<div class="flex items-center gap-2 text-slate-400 text-sm">
+<div class="w-4 h-4 border-2 border-slate-300 border-t-primary rounded-full animate-spin"></div>
+                    正在加载更多汇报...
+                </div>
+</div>
+</div>
+</div>
+</main>
+
+</body></html>

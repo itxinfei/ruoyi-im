@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RuoYi-IM 云文档 - 文件分享</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1677ff",
+                        "background-light": "#f4f7f9",
+                        "background-dark": "#0f172a",
+                        "sidebar-light": "#ffffff",
+                        "sidebar-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "system-ui", "sans-serif", "PingFang SC", "Microsoft YaHei"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "8px",
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display h-screen flex overflow-hidden">
+<div class="flex h-full w-full filter blur-[2px] pointer-events-none select-none">
+<nav class="w-20 bg-primary flex flex-col items-center py-6 gap-6 z-20 shrink-0 shadow-lg">
+<div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center cursor-pointer mb-2 shrink-0 backdrop-blur-sm">
+<span class="text-white font-bold text-xl italic">若</span>
+</div>
+<div class="flex flex-col gap-4 flex-1 items-center w-full px-2">
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-0.5 text-white/70 rounded-xl">
+<span class="material-icons-outlined text-2xl">chat_bubble</span>
+<span class="text-[10px] font-medium tracking-wide">消息</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-0.5 text-white/70 rounded-xl">
+<span class="material-icons-outlined text-2xl">group</span>
+<span class="text-[10px] font-medium tracking-wide">通讯录</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-0.5 text-white/70 rounded-xl">
+<span class="material-icons-outlined text-2xl">grid_view</span>
+<span class="text-[10px] font-medium tracking-wide">工作台</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-0.5 bg-white/20 text-white rounded-xl shadow-inner border border-white/10">
+<span class="material-icons-outlined text-2xl">description</span>
+<span class="text-[10px] font-medium tracking-wide">文档</span>
+</button>
+</div>
+</nav>
+<aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col shrink-0">
+<div class="p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-700/50">
+<h1 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+<span class="material-icons-outlined text-primary">cloud</span> 云文档
+            </h1>
+</div>
+<div class="flex-1 py-4 px-3 space-y-1">
+<div class="flex items-center gap-3 px-3 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-primary rounded-lg">
+<span class="material-icons-outlined text-[20px]">schedule</span>
+<span class="text-sm">最近使用</span>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col bg-slate-50 dark:bg-slate-900 overflow-hidden">
+<header class="h-16 px-8 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+<h2 class="text-xl font-semibold text-slate-800 dark:text-white">最近使用</h2>
+<button class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium">新建</button>
+</header>
+<div class="p-8">
+<div class="bg-white dark:bg-slate-800 rounded-xl h-96 border border-slate-200 dark:border-slate-700"></div>
+</div>
+</main>
+</div>
+<div class="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+<div class="bg-white dark:bg-slate-800 w-full max-w-xl rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+<div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-xl">share</span>
+</div>
+<div>
+<h3 class="font-bold text-slate-800 dark:text-white">分享文件</h3>
+<p class="text-[11px] text-slate-500 dark:text-slate-400 leading-none mt-1">RuoYi-IM 产品需求规格说明书 v2.0.docx</p>
+</div>
+</div>
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-6 space-y-6">
+<div class="space-y-3">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                    邀请协作者
+                    <span class="text-[10px] font-normal text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">企业内部</span>
+</label>
+<div class="flex gap-2">
+<div class="relative flex-1 group">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-xl group-focus-within:text-primary transition-colors">person_search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-slate-200" placeholder="搜索姓名、部门或邮箱..." type="text"/>
+</div>
+<div class="relative w-32">
+<select class="w-full pl-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm appearance-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-slate-200 cursor-pointer">
+<option>可查看</option>
+<option>可编辑</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2.5 text-slate-400 pointer-events-none text-xl">expand_more</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mt-2">
+<div class="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 py-1 pl-1.5 pr-2 rounded-full">
+<div class="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] text-white">李</div>
+<span class="text-xs text-blue-700 dark:text-blue-300">李明 (研发部)</span>
+<button class="text-blue-400 hover:text-blue-600"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+<div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 py-1 pl-1.5 pr-2 rounded-full">
+<div class="w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center text-[10px] text-white">张</div>
+<span class="text-xs text-slate-600 dark:text-slate-300">张伟</span>
+<button class="text-slate-400 hover:text-slate-600"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+</div>
+</div>
+<div class="relative">
+<div aria-hidden="true" class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-slate-100 dark:border-slate-700"></div>
+</div>
+<div class="relative flex justify-center">
+<span class="bg-white dark:bg-slate-800 px-3 text-xs text-slate-400">公开分享设置</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400">link</span>
+<span class="text-sm text-slate-700 dark:text-slate-200 font-medium">公开分享链接</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1.5">
+<label class="text-[12px] text-slate-500 dark:text-slate-400">查看权限</label>
+<div class="relative">
+<select class="w-full pl-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm appearance-none focus:ring-2 focus:ring-primary/20 dark:text-slate-200 cursor-pointer">
+<option>获得链接的任何人可查看</option>
+<option>获得链接的任何人可编辑</option>
+<option>仅限企业成员访问</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2.5 text-slate-400 pointer-events-none text-xl">expand_more</span>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="text-[12px] text-slate-500 dark:text-slate-400">有效期设置</label>
+<div class="relative">
+<select class="w-full pl-3 pr-8 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm appearance-none focus:ring-2 focus:ring-primary/20 dark:text-slate-200 cursor-pointer">
+<option>7 天后过期</option>
+<option>30 天后过期</option>
+<option>永久有效</option>
+<option>自定义时间...</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2.5 text-slate-400 pointer-events-none text-xl">calendar_today</span>
+</div>
+</div>
+</div>
+<div class="bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 p-3 rounded-lg flex items-center gap-3">
+<div class="flex-1 truncate">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">分享链接</p>
+<p class="text-sm text-slate-600 dark:text-slate-300 truncate font-mono">https://docs.ruoyi-im.com/share/f798e21a...</p>
+</div>
+<button class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-primary hover:bg-slate-50 dark:hover:bg-slate-700 transition-all rounded-lg text-sm font-medium whitespace-nowrap active:scale-95 shadow-sm">
+                        复制链接
+                    </button>
+</div>
+</div>
+</div>
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+<div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+<span class="material-symbols-outlined text-lg">verified_user</span>
+<span class="text-[11px] font-medium">符合企业级数据加密分享标准</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-5 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+                    取消
+                </button>
+<button class="px-6 py-2 bg-primary hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+                    完成分享
+                </button>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

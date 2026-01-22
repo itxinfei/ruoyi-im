@@ -150,7 +150,7 @@
 	</section>
     
     <th:block th:include="include :: footer" />
-    <script>
+    <script th:inline="javascript">
 	    /*用户管理-头像*/
 	    function avatar() {
 	        var url = ctx + 'system/user/profile/avatar';

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RuoYi-IM 个人名片</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1677ff",
+                        "background-light": "#f4f7f9",
+                        "background-dark": "#0f172a",
+                        "sidebar-light": "#ffffff",
+                        "sidebar-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "system-ui", "sans-serif", "PingFang SC", "Microsoft YaHei"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "8px",
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .chat-bubble-left::after {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 12px;
+            border-width: 6px 6px 6px 0;
+            border-color: transparent white transparent transparent;
+        }
+        .dark .chat-bubble-left::after {
+            border-color: transparent #1e293b transparent transparent;
+        }
+        .profile-card-arrow {
+            position: absolute;
+            bottom: -8px;
+            left: 20px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            transform: rotate(45deg);
+            z-index: -1;
+        }
+        .dark .profile-card-arrow {
+            background: #1e293b;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display h-screen flex overflow-hidden">
+<nav class="w-20 bg-primary flex flex-col items-center py-6 gap-6 z-20 shrink-0 shadow-lg relative">
+<div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center cursor-pointer mb-2 shrink-0">
+<span class="text-white font-bold text-xl italic">若</span>
+</div>
+<div class="flex flex-col gap-3 flex-1 items-center w-full px-2">
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 bg-white/20 text-white rounded-xl transition-all shadow-inner border border-white/10">
+<span class="material-symbols-outlined text-2xl">chat_bubble</span>
+<span class="text-[11px] font-medium tracking-wide">消息</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">group</span>
+<span class="text-[11px] font-medium tracking-wide">通讯录</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">grid_view</span>
+<span class="text-[11px] font-medium tracking-wide">工作台</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">phone_in_talk</span>
+<span class="text-[11px] font-medium tracking-wide">电话</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">description</span>
+<span class="text-[11px] font-medium tracking-wide">文档</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">calendar_today</span>
+<span class="text-[11px] font-medium tracking-wide">日历</span>
+</button>
+</div>
+<div class="flex flex-col gap-4 items-center w-full px-2 pb-2 relative">
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" onclick="document.documentElement.classList.toggle('dark')" title="切换主题">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" title="设置">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="relative group">
+<div class="w-10 h-10 rounded-full bg-blue-400 border-2 border-white/20 flex items-center justify-center text-white text-xs overflow-hidden hover:border-white/50 transition-colors cursor-pointer ring-2 ring-primary ring-offset-2 ring-offset-primary">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDifOp46XiqD0Ri7bzlZl6tZnBHN2aFm0N1YHCQzQpi6Q_P7K4XFLjO04LVcBYaQnhwkylx_oBj4xa9ovCS9U939yrB8lqS9MkDHbISjoNW6lnmqiBhn_PHqRpPI-4kWF8WJtFKQZLXjMFUO0HY6Q2qX6HcdntKzTeM9yGlNxDlGm5xWF2Gyv6YN-tVqlC6Lpl9NYv02vKsRK70gHAeclSeoplDy2dGDDFcYZoQQLLrQR87jklm6PrclEo4R-9s_jdrLUyXnJdcn5I"/>
+</div>
+<div class="absolute bottom-0 left-14 w-[280px] bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
+<div class="h-20 bg-gradient-to-r from-blue-500 to-primary relative"></div>
+<div class="px-5 pb-5 pt-1 relative">
+<div class="absolute -top-10 left-5">
+<img alt="Developer" class="w-16 h-16 rounded-2xl border-4 border-white dark:border-slate-800 shadow-md object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDifOp46XiqD0Ri7bzlZl6tZnBHN2aFm0N1YHCQzQpi6Q_P7K4XFLjO04LVcBYaQnhwkylx_oBj4xa9ovCS9U939yrB8lqS9MkDHbISjoNW6lnmqiBhn_PHqRpPI-4kWF8WJtFKQZLXjMFUO0HY6Q2qX6HcdntKzTeM9yGlNxDlGm5xWF2Gyv6YN-tVqlC6Lpl9NYv02vKsRK70gHAeclSeoplDy2dGDDFcYZoQQLLrQR87jklm6PrclEo4R-9s_jdrLUyXnJdcn5I"/>
+</div>
+<div class="mt-8">
+<div class="flex items-center gap-2">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">开发者</h3>
+<span class="bg-blue-50 text-primary text-[10px] px-1.5 py-0.5 rounded border border-blue-100 dark:bg-blue-900/30 dark:border-blue-800">在线</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">高级前端工程师</p>
+</div>
+<div class="mt-5 space-y-3">
+<div class="flex items-center gap-3 text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined text-lg opacity-60">corporate_fare</span>
+<span class="text-sm">技术研发部</span>
+</div>
+<div class="flex items-center gap-3 text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined text-lg opacity-60">call</span>
+<span class="text-sm">138 0000 0000</span>
+</div>
+</div>
+<div class="mt-6 flex gap-2">
+<button class="flex-1 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                            编辑资料
+                        </button>
+<button class="flex-1 py-2 text-sm font-medium text-red-500 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                            退出登录
+                        </button>
+</div>
+</div>
+<div class="profile-card-arrow"></div>
+</div>
+</div>
+</div>
+</nav>
+<aside class="w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col">
+<div class="p-4 flex items-center justify-between">
+<h1 class="text-xl font-bold dark:text-white">消息</h1>
+<button class="text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<div class="px-4 pb-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2 text-slate-400 text-sm">search</span>
+<input class="w-full bg-slate-100 dark:bg-slate-900 border-none rounded-md py-1.5 pl-9 pr-4 text-sm focus:ring-1 focus:ring-primary dark:text-slate-200 placeholder-slate-400" placeholder="搜索" type="text"/>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto">
+<div class="px-4 py-3 flex items-center gap-3 bg-blue-50 dark:bg-blue-900/20 cursor-pointer border-l-4 border-primary">
+<div class="relative">
+<div class="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-white font-medium text-lg">产</div>
+<span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full border-2 border-white dark:border-slate-800">5</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-0.5">
+<span class="font-medium text-slate-900 dark:text-slate-100 truncate">产品设计团队 ⭐</span>
+<span class="text-[10px] text-slate-400">14:32</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 truncate">李明: 新版本UI已经完成，请查看</p>
+</div>
+</div>
+<div class="px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+<div class="relative">
+<div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium text-lg">张</div>
+<span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full border-2 border-white dark:border-slate-800">2</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-0.5">
+<span class="font-medium text-slate-900 dark:text-slate-100 truncate">张伟</span>
+<span class="text-[10px] text-slate-400">13:15</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 truncate">今天的会议改到下午3点</p>
+</div>
+</div>
+<div class="px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+<div class="w-12 h-12 bg-blue-400 rounded-lg flex items-center justify-center text-white font-medium text-lg">项</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-0.5">
+<span class="font-medium text-slate-900 dark:text-slate-100 truncate">项目组A</span>
+<span class="text-[10px] text-slate-400">11:20</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 truncate">王芳: 项目进度更新完毕</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col bg-slate-50 dark:bg-slate-900 overflow-hidden">
+<header class="h-16 px-6 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between shrink-0">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold">产</div>
+<div>
+<h2 class="font-semibold text-slate-900 dark:text-white leading-tight">产品设计团队</h2>
+<span class="text-[10px] text-slate-500 dark:text-slate-400">12人</span>
+</div>
+</div>
+<div class="flex items-center gap-4 text-slate-500">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">phone</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">videocam</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">more_horiz</span></button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center text-white shrink-0 text-sm">李</div>
+<div class="flex flex-col gap-1 max-w-[70%]">
+<div class="flex items-center gap-2">
+<span class="text-xs text-slate-500 dark:text-slate-400">李明</span>
+<span class="text-[10px] text-slate-400">10:23</span>
+</div>
+<div class="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-sm text-sm dark:text-slate-200 relative chat-bubble-left">
+                    大家好，今天我们讨论一下新项目的设计方案
+                </div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-2 pr-12">
+<span class="text-[10px] text-slate-400">10:25</span>
+</div>
+<div class="flex items-start gap-3 justify-end">
+<div class="bg-primary text-white p-3 rounded-lg shadow-sm text-sm max-w-[70%]">
+                    好的，我现在查看一下
+                </div>
+<div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0 text-sm">我</div>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center text-white shrink-0 text-sm">李</div>
+<div class="flex flex-col gap-1 max-w-[70%]">
+<div class="flex items-center gap-2">
+<span class="text-xs text-slate-500 dark:text-slate-400">李明</span>
+<span class="text-[10px] text-slate-400">10:26</span>
+</div>
+<div class="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-sm text-sm dark:text-slate-200 relative chat-bubble-left">
+                    整体风格采用扁平化设计，主色调是蓝色系
+                </div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800 p-4 border-t border-slate-200 dark:border-slate-700">
+<div class="flex items-center gap-4 mb-4 text-slate-500 dark:text-slate-400">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">sentiment_satisfied</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">attachment</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">image</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">mic</span></button>
+</div>
+<div class="relative">
+<textarea class="w-full border-none focus:ring-0 text-sm dark:bg-slate-800 dark:text-slate-100 placeholder-slate-400 resize-none" placeholder="输入消息..." rows="3"></textarea>
+<div class="flex justify-end mt-2">
+<button class="bg-primary hover:bg-blue-600 text-white px-5 py-2 rounded-md flex items-center gap-2 text-sm transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-sm">send</span>
+                    发送
+                </button>
+</div>
+</div>
+</div>
+</main>
+
+</body></html>

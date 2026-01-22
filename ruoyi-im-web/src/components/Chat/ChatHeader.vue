@@ -33,7 +33,7 @@ defineProps({
 
 <style scoped>
 .chat-header {
-  height: 60px;
+  height: 56px;
   border-bottom: 1px solid #f0f0f0;
   display: flex;
   align-items: center;

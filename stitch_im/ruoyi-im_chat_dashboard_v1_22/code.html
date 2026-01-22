@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>若依IM 工作台 - 审批中心</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1677ff",
+                        "background-light": "#f4f7f9",
+                        "background-dark": "#0f172a",
+                        "sidebar-light": "#ffffff",
+                        "sidebar-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "8px",
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            ::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 10px;
+            }
+            .dark ::-webkit-scrollbar-thumb {
+                background: #475569;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display h-screen flex overflow-hidden">
+<nav class="w-20 bg-primary flex flex-col items-center py-6 gap-6 z-20 shrink-0 shadow-lg">
+<div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center cursor-pointer mb-2 shrink-0">
+<span class="text-white font-bold text-xl italic">若</span>
+</div>
+<div class="flex flex-col gap-3 flex-1 items-center w-full px-2">
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">chat_bubble</span>
+<span class="text-[11px] font-medium tracking-wide">消息</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">group</span>
+<span class="text-[11px] font-medium tracking-wide">通讯录</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 bg-white/20 text-white rounded-xl transition-all shadow-inner border border-white/10">
+<span class="material-symbols-outlined text-2xl">grid_view</span>
+<span class="text-[11px] font-medium tracking-wide">工作台</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">phone_in_talk</span>
+<span class="text-[11px] font-medium tracking-wide">电话</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">description</span>
+<span class="text-[11px] font-medium tracking-wide">文档</span>
+</button>
+<button class="w-full aspect-square flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+<span class="material-symbols-outlined text-2xl">calendar_today</span>
+<span class="text-[11px] font-medium tracking-wide">日历</span>
+</button>
+</div>
+<div class="flex flex-col gap-4 items-center w-full px-2 pb-2">
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" onclick="document.documentElement.classList.toggle('dark')" title="切换主题">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all" title="设置">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-blue-400 border-2 border-white/20 flex items-center justify-center text-white text-xs overflow-hidden hover:border-white/50 transition-colors cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDifOp46XiqD0Ri7bzlZl6tZnBHN2aFm0N1YHCQzQpi6Q_P7K4XFLjO04LVcBYaQnhwkylx_oBj4xa9ovCS9U939yrB8lqS9MkDHbISjoNW6lnmqiBhn_PHqRpPI-4kWF8WJtFKQZLXjMFUO0HY6Q2qX6HcdntKzTeM9yGlNxDlGm5xWF2Gyv6YN-tVqlC6Lpl9NYv02vKsRK70gHAeclSeoplDy2dGDDFcYZoQQLLrQR87jklm6PrclEo4R-9s_jdrLUyXnJdcn5I"/>
+</div>
+</div>
+</nav>
+<main class="flex-1 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900">
+<header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-8 py-5 flex items-center justify-between shadow-sm z-10">
+<div class="flex items-center gap-3">
+<button class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors text-slate-500">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div>
+<h1 class="text-xl font-bold text-slate-800 dark:text-white">审批中心</h1>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-xs text-slate-500">当前高效处理中</span>
+<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+</div>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2 text-slate-400 text-xl">search</span>
+<input class="w-64 bg-slate-100 dark:bg-slate-900 border-none rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-1 focus:ring-primary dark:text-slate-200 placeholder-slate-400 transition-all" placeholder="搜索审批记录..." type="text"/>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm text-sm font-medium">
+<span class="material-symbols-outlined text-lg">add</span>
+                    发起审批
+                </button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8">
+<div class="max-w-6xl mx-auto space-y-8">
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+<span class="w-1 h-5 bg-primary rounded-full"></span>
+                            审批快捷发起
+                        </h3>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+<div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all cursor-pointer group flex flex-col items-center justify-center gap-3">
+<div class="w-14 h-14 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">event_busy</span>
+</div>
+<span class="text-slate-700 dark:text-slate-200 font-medium text-sm">请假</span>
+</div>
+<div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all cursor-pointer group flex flex-col items-center justify-center gap-3">
+<div class="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">receipt_long</span>
+</div>
+<span class="text-slate-700 dark:text-slate-200 font-medium text-sm">报销</span>
+</div>
+<div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all cursor-pointer group flex flex-col items-center justify-center gap-3">
+<div class="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">flight_takeoff</span>
+</div>
+<span class="text-slate-700 dark:text-slate-200 font-medium text-sm">出差</span>
+</div>
+<div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all cursor-pointer group flex flex-col items-center justify-center gap-3">
+<div class="w-14 h-14 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">work_history</span>
+</div>
+<span class="text-slate-700 dark:text-slate-200 font-medium text-sm">加班</span>
+</div>
+<div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all cursor-pointer group flex flex-col items-center justify-center gap-3">
+<div class="w-14 h-14 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">inventory_2</span>
+</div>
+<span class="text-slate-700 dark:text-slate-200 font-medium text-sm">物品申领</span>
+</div>
+<div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all cursor-pointer group flex flex-col items-center justify-center gap-3">
+<div class="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">badge</span>
+</div>
+<span class="text-slate-700 dark:text-slate-200 font-medium text-sm">转正</span>
+</div>
+</div>
+</section>
+<section>
+<div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+<div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+<div class="flex items-center gap-4">
+<h4 class="font-bold text-slate-800 dark:text-white">待我审批</h4>
+<div class="flex items-center gap-1 bg-red-50 dark:bg-red-900/20 text-red-600 px-2.5 py-0.5 rounded-full text-xs font-semibold">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+</span>
+                                    8条待处理
+                                </div>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-sm text-slate-500 hover:text-primary transition-colors">批量处理</button>
+<div class="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
+<a class="text-primary text-sm font-medium hover:underline" href="#">历史记录</a>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-900/50">
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">审批类型</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">申请人</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">摘要描述</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">提交时间</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">状态</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-orange-100 text-orange-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">event_busy</span>
+</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200">年假申请</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<img alt="avatar" class="w-7 h-7 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDX0sDRpxkf5acgcFmKw1RLiDZ_W3XOye1egZOR3YmHggfVxdLp0BGtLqDcs3aWq-shBK01vZG20eX-0jbHkX6oxu1DGr6WF2RthrS3D4MCrILso4keNOV0yLc8YJOUnRd1ziXXBGXZAy9JB7_jNM27VB6-t1EQgtP3z_PQ_M8KJzUQiMScwTrs7agATZaZSwdqzh0_x2a4UTeA9_nBarUMDIpjvBIiqsP6N7BKXC6_QYhafE5NbwN4ILXWqNzSVXksMzFx9yjj1sE"/>
+<span class="text-sm text-slate-600 dark:text-slate-300">张晓明</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-slate-500 truncate max-w-[200px] block">休假 3 天 (11.01-11.03)</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs text-slate-500">2023-10-24 10:20</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                                待审核
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-blue-700 text-sm font-medium">详情</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-blue-100 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">receipt_long</span>
+</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200">差旅报销</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<img alt="avatar" class="w-7 h-7 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAB9JClO38Uj2nxdyHZdajmPWieFeUAwJSQUrldyB-4U87SrtICV4EIp2dv-ApQWk6RY05g1KyNQWeI47iEU6uYDp6CyTPTzITOyyplok99o_7_Lnlb59CZwKfunKdvCOs82jn5m9-0wVdFpKtqKgLg8KT9V0kNVMZlr1X6_jMrYCBagXXu5yvt9kgMAefYQF1GRBz6yxGJXn9oiar1JR2lvjEdf-pY1H1sW_qfWmz_0CHEnxbt0xUuPpmBUtaFzsLaoZiW3YpkiEk"/>
+<span class="text-sm text-slate-600 dark:text-slate-300">李莉</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-slate-500 truncate max-w-[200px] block">Q4 杭州出差交通费报销</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs text-slate-500">2023-10-24 09:15</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                                待审核
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-blue-700 text-sm font-medium">详情</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer group opacity-75">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">flight_takeoff</span>
+</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200">出差申请</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<img alt="avatar" class="w-7 h-7 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDGO5j39SEm7PxiprITZtaCD7Ow8o-6rmdqh2V9hEB-6mik-KD6b1XB1FOrMUnEy9-P5QYZyVJCKBkWdsjBpNpaRgdmSHGs3rdiqNUnVW2-6vm_5FuptBCk_jUK0JcMmHcAdVjtZHupCFvG6MtMyd4TaigilzSZB683SmJ9TDBACdfsK1bKvhTQUo6Btn6m-tZGAGM43jSRqd92YPxbF2MN5evhNqNS2SiPHq98h9qw1zpSyhirUBA2_IFJ5V4G7zvvA58VWCPVEA"/>
+<span class="text-sm text-slate-600 dark:text-slate-300">王强</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-slate-500 truncate max-w-[200px] block">前往上海参加技术交流会</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs text-slate-500">2023-10-23 16:40</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                                已通过
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary text-sm font-medium">查看</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-purple-100 text-purple-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">work_history</span>
+</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200">加班申请</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<img alt="avatar" class="w-7 h-7 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWGzCl97tNoLSbh7D7z35Hx-4ZBwXBeQNKmsFcCqrQZSQ-O-90Vf-RTYaJ1LEQLrz0p2XCcse77GerX1tUKLT_osSPbM_CRgD7ZePlLDepokh50d2ar-NPqQtecLNni_uY6QCd6dcCkAP9Eol8yRaX1CGHSQhmHRw2yonqu400evm639vebFfbRywdoTzp7fqppgUUOVvsaXG3I9pStEAjmO3vtiJNcc7OT7oUVSieiFn_vZgHK1riuC7_DRD8xgN5TDY_CoxZ_T8"/>
+<span class="text-sm text-slate-600 dark:text-slate-300">陈思思</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-slate-500 truncate max-w-[200px] block">双11大促保障加班</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs text-slate-500">2023-10-23 15:20</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                                待审核
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-blue-700 text-sm font-medium">详情</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/30 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+<span class="text-xs text-slate-500">显示第 1 到 4 条，共 8 条待审批记录</span>
+<div class="flex items-center gap-2">
+<button class="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="w-6 h-6 rounded bg-primary text-white text-xs">1</button>
+<button class="w-6 h-6 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs">2</button>
+<button class="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+<h4 class="font-bold text-slate-800 dark:text-white mb-4">本月审批概览</h4>
+<div class="grid grid-cols-3 gap-4">
+<div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+<p class="text-2xl font-bold text-primary">24</p>
+<p class="text-xs text-slate-500 mt-1">已处理</p>
+</div>
+<div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+<p class="text-2xl font-bold text-amber-500">8</p>
+<p class="text-xs text-slate-500 mt-1">待我审</p>
+</div>
+<div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+<p class="text-2xl font-bold text-slate-700 dark:text-slate-200">12</p>
+<p class="text-xs text-slate-500 mt-1">我发起的</p>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+<div>
+<h4 class="font-bold text-slate-800 dark:text-white mb-1">审批效能分析</h4>
+<p class="text-sm text-slate-500">您本月的平均审批时间为 1.5 小时</p>
+<button class="mt-4 text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                                查看详细报告 <span class="material-symbols-outlined text-xs">trending_up</span>
+</button>
+</div>
+<div class="w-20 h-20 border-4 border-primary border-t-slate-100 rounded-full flex items-center justify-center">
+<span class="text-sm font-bold text-primary">85%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+</body></html>
