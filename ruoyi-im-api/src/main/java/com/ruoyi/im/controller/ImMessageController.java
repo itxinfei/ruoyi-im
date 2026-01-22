@@ -104,6 +104,14 @@ public class ImMessageController {
         return Result.success("消息已撤回");
     }
 
+    @DeleteMapping("/{messageId}")
+    public Result<Void> deleteMessage(@PathVariable Long messageId,
+            @RequestHeader(value = "userId", required = false) Long userId) {
+        userId = getUserIdOrDefault(userId);
+        imMessageService.deleteMessage(messageId, userId);
+        return Result.success("消息已删除");
+    }
+
     @PutMapping("/{messageId}/edit")
     public Result<Void> edit(
             @PathVariable Long messageId,

@@ -52,10 +52,10 @@ public class ImFriendServiceImpl implements ImFriendService {
     private ImConversationService imConversationService;
 
     @Autowired
-    private com.ruoyi.im.utils.ImDistributedLock distributedLock;
+    private com.ruoyi.im.util.ImDistributedLock distributedLock;
 
     @Autowired
-    private com.ruoyi.im.utils.ImRedisUtil imRedisUtil;
+    private com.ruoyi.im.util.ImRedisUtil imRedisUtil;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -345,7 +345,7 @@ public class ImFriendServiceImpl implements ImFriendService {
 
             // 使用分布式锁防止并发创建好友关系导致的数据不一致
             distributedLock.executeWithLock(
-                    com.ruoyi.im.utils.ImDistributedLock.LockKeys.friendRelationKey(fromUserId, toUserId),
+                    com.ruoyi.im.util.ImDistributedLock.LockKeys.friendRelationKey(fromUserId, toUserId),
                     15,
                     () -> doCreateFriendRelationship(fromUserId, toUserId, request));
         } else {

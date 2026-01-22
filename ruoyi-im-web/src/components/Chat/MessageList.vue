@@ -12,18 +12,27 @@
         <div class="content-wrapper">
           <div v-if="!msg.isOwn" class="sender-name">{{ msg.senderName }}</div>
           
-          <div class="bubble" :class="msg.messageType">
-            <span v-if="msg.messageType === 'TEXT'">{{ msg.content }}</span>
-            <img v-else-if="msg.messageType === 'IMAGE'" 
-                 :src="parseContent(msg).imageUrl" 
-                 class="msg-image" 
-                 @click="previewImage(parseContent(msg).imageUrl)" />
-            <div v-else-if="msg.messageType === 'FILE'" class="msg-file">
-              <el-icon><Document /></el-icon>
-              <span>{{ parseContent(msg).fileName }}</span>
-            </div>
-            <span v-else>[未知消息类型]</span>
-          </div>
+            <el-dropdown trigger="contextmenu" @command="(cmd) => handleCommand(cmd, msg)">
+              <div class="bubble" :class="msg.messageType">
+                <span v-if="msg.messageType === 'TEXT'">{{ msg.content }}</span>
+                <img v-else-if="msg.messageType === 'IMAGE'" 
+                     :src="parseContent(msg).imageUrl" 
+                     class="msg-image" 
+                     @click="previewImage(parseContent(msg).imageUrl)" />
+                <div v-else-if="msg.messageType === 'FILE'" class="msg-file">
+                  <el-icon><Document /></el-icon>
+                  <span>{{ parseContent(msg).fileName }}</span>
+                </div>
+                <span v-else>[未知消息类型]</span>
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="copy" v-if="msg.messageType === 'TEXT'">复制</el-dropdown-item>
+                  <el-dropdown-item command="recall" v-if="msg.isOwn && canRecall(msg)">撤回</el-dropdown-item>
+                  <el-dropdown-item command="delete" v-if="msg.isOwn">删除</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           <div class="time">{{ formatTime(msg.timestamp) }}</div>
         </div>
       </div>
@@ -34,12 +43,15 @@
 <script setup>
 import { computed, ref, nextTick, watch } from 'vue'
 import { Document } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const props = defineProps({
   messages: Array,
   currentUser: Object,
   loading: Boolean
 })
+
+const emit = defineEmits(['delete', 'recall'])
 
 const listRef = ref(null)
 
@@ -79,6 +91,27 @@ const scrollToBottom = () => {
 
 // Watch messages length to scroll
 watch(() => props.messages.length, () => scrollToBottom())
+
+
+// Can recall within 2 minutes
+const canRecall = (msg) => {
+  return (Date.now() - new Date(msg.timestamp).getTime()) < 2 * 60 * 1000
+}
+
+const handleCommand = (cmd, msg) => {
+  if (cmd === 'copy') {
+    navigator.clipboard.writeText(msg.content)
+    ElMessage.success('已复制')
+  } else if (cmd === 'recall') {
+    emit('recall', msg.id)
+  } else if (cmd === 'delete') {
+    ElMessageBox.confirm('确定删除这条消息吗？', '提示', {
+      type: 'warning'
+    }).then(() => {
+      emit('delete', msg.id)
+    })
+  }
+}
 
 defineExpose({ scrollToBottom })
 </script>

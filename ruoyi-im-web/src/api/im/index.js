@@ -26,7 +26,7 @@ export {
   deleteConversation,
   pinConversation,
   muteConversation,
-  clearUnread
+  markConversationAsRead
 } from './conversation'
 
 export {

@@ -140,8 +140,8 @@ shiro:
     unauthorizedUrl: /unauth
     # 首页地址
     indexUrl: /index
-    # 验证码开关
-    captchaEnabled: false
+# 验证码开关
+    captchaEnabled: true
     # 验证码类型 math 数字计算 char 字符验证
     captchaType: math
   cookie:

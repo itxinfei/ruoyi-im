@@ -233,7 +233,7 @@ public class ImWebSocketEndpoint {
                 Session oldSession = onlineUsers.get(userId);
                 if (oldSession != null && oldSession.isOpen()) {
                     log.info("用户已存在连接，关闭旧连接: userId={}, oldSessionId={}, newSessionId={}",
-                             userId, oldSession.getId(), session.getId());
+                            userId, oldSession.getId(), session.getId());
                     try {
                         // 先从映射中移除，防止并发问题
                         sessionUserMap.remove(oldSession);
@@ -295,7 +295,8 @@ public class ImWebSocketEndpoint {
             if (userId == -1L) {
                 // 只允许认证消息通过
                 ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> messageMap = mapper.readValue(message, new TypeReference<Map<String, Object>>() {});
+                Map<String, Object> messageMap = mapper.readValue(message, new TypeReference<Map<String, Object>>() {
+                });
                 String type = (String) messageMap.get("type");
                 if ("auth".equals(type)) {
                     handleAuthMessage(session, messageMap);
@@ -308,10 +309,11 @@ public class ImWebSocketEndpoint {
             log.debug("收到消息: userId={}, message={}", userId, message);
 
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> messageMap = mapper.readValue(message, new TypeReference<Map<String, Object>>() {});
+            Map<String, Object> messageMap = mapper.readValue(message, new TypeReference<Map<String, Object>>() {
+            });
 
             String type = (String) messageMap.get("type");
-            Object payload = messageMap.get("payload");
+            Object payload = messageMap.get("data");
 
             switch (type) {
                 case "auth":
@@ -393,7 +395,7 @@ public class ImWebSocketEndpoint {
      * 清理异常连接并记录错误日志
      *
      * @param session WebSocket 会话
-     * @param error 异常信息
+     * @param error   异常信息
      */
     @OnError
     public void onError(Session session, Throwable error) {
@@ -415,7 +417,7 @@ public class ImWebSocketEndpoint {
      * 保存消息到数据库并推送给会话中的其他用户
      * 支持ACK响应和错误处理
      *
-     * @param userId 发送者用户ID
+     * @param userId  发送者用户ID
      * @param payload 消息数据
      */
     private void handleChatMessage(Long userId, Object payload) {
@@ -424,7 +426,8 @@ public class ImWebSocketEndpoint {
 
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> messageData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
+            Map<String, Object> messageData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
+            });
 
             // 兼容 conversationId 和 sessionId 两种字段名（优先使用 conversationId）
             Object idValue = messageData.get("conversationId");
@@ -451,7 +454,8 @@ public class ImWebSocketEndpoint {
 
             // 获取可选参数
             String replyToMessageIdStr = messageData.get("replyToMessageId") != null
-                ? messageData.get("replyToMessageId").toString() : null;
+                    ? messageData.get("replyToMessageId").toString()
+                    : null;
             clientMsgId = (String) messageData.get("clientMsgId");
 
             // 构建消息发送请求
@@ -500,9 +504,9 @@ public class ImWebSocketEndpoint {
      * 发送ACK确认消息
      * 确认已收到消息并返回消息ID
      *
-     * @param session WebSocket会话
+     * @param session     WebSocket会话
      * @param clientMsgId 客户端消息ID
-     * @param messageId 服务器消息ID
+     * @param messageId   服务器消息ID
      */
     private void sendAckMessage(Session session, String clientMsgId, Long messageId) {
         if (session == null || !session.isOpen()) {
@@ -525,9 +529,9 @@ public class ImWebSocketEndpoint {
     /**
      * 发送错误消息
      *
-     * @param session WebSocket会话
-     * @param clientMsgId 客户端消息ID
-     * @param errorCode 错误码
+     * @param session      WebSocket会话
+     * @param clientMsgId  客户端消息ID
+     * @param errorCode    错误码
      * @param errorMessage 错误信息
      */
     private void sendErrorMessage(Session session, String clientMsgId, String errorCode, String errorMessage) {
@@ -544,7 +548,7 @@ public class ImWebSocketEndpoint {
 
             sendMessage(session, errorMsg);
             log.warn("发送错误消息: clientMsgId={}, errorCode={}, errorMessage={}",
-                clientMsgId, errorCode, errorMessage);
+                    clientMsgId, errorCode, errorMessage);
         } catch (Exception e) {
             log.error("发送错误消息失败", e);
         }
@@ -554,13 +558,14 @@ public class ImWebSocketEndpoint {
      * 处理正在输入状态
      * 广播用户的输入状态给会话中的其他用户
      *
-     * @param userId 用户ID
+     * @param userId  用户ID
      * @param payload 输入状态数据
      */
     private void handleTypingStatus(Long userId, Object payload) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> typingData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
+            Map<String, Object> typingData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
+            });
 
             // 兼容 conversationId 和 sessionId 两种字段名
             Object idValue = typingData.get("conversationId");
@@ -588,7 +593,7 @@ public class ImWebSocketEndpoint {
      * 处理认证消息
      * 验证用户身份并返回认证结果
      *
-     * @param session WebSocket会话
+     * @param session     WebSocket会话
      * @param messageData 认证消息数据
      */
     private void handleAuthMessage(Session session, Map<String, Object> messageData) {
@@ -668,7 +673,7 @@ public class ImWebSocketEndpoint {
                     Session oldSession = onlineUsers.get(userId);
                     if (oldSession != null && oldSession.isOpen() && !oldSession.getId().equals(session.getId())) {
                         log.info("用户已存在连接，关闭旧连接: userId={}, oldSessionId={}, newSessionId={}",
-                                 userId, oldSession.getId(), session.getId());
+                                userId, oldSession.getId(), session.getId());
                         try {
                             // 从sessionUserMap中删除旧会话
                             sessionUserMap.remove(oldSession);
@@ -737,13 +742,14 @@ public class ImWebSocketEndpoint {
      * 处理消息已读
      * 更新消息的已读状态并广播已读回执
      *
-     * @param userId 用户ID
+     * @param userId  用户ID
      * @param payload 已读数据
      */
     private void handleReadReceipt(Long userId, Object payload) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> readData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {});
+            Map<String, Object> readData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
+            });
 
             // 兼容 conversationId 和 sessionId 两种字段名
             Object idValue = readData.get("conversationId");
@@ -779,20 +785,20 @@ public class ImWebSocketEndpoint {
      * 根据会话ID获取会话成员并推送消息
      *
      * @param conversationId 会话ID
-     * @param message 消息对象
+     * @param message        消息对象
      */
     private void broadcastMessageToSession(Long conversationId, com.ruoyi.im.domain.ImMessage message) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> messageMap = new HashMap<>();
             messageMap.put("type", "message");
-            messageMap.put("payload", message);
+            messageMap.put("data", message);
 
             String messageJson = mapper.writeValueAsString(messageMap);
 
             // 直接通过mapper获取会话中的所有成员
-            List<com.ruoyi.im.domain.ImConversationMember> members =
-                staticConversationMemberMapper.selectByConversationId(conversationId);
+            List<com.ruoyi.im.domain.ImConversationMember> members = staticConversationMemberMapper
+                    .selectByConversationId(conversationId);
 
             if (members == null || members.isEmpty()) {
                 log.warn("会话无成员，无法广播消息: conversationId={}", conversationId);
@@ -814,7 +820,7 @@ public class ImWebSocketEndpoint {
             }
 
             log.info("消息已广播到会话: conversationId={}, memberCount={}, messageId={}",
-                conversationId, members.size(), message.getId());
+                    conversationId, members.size(), message.getId());
 
         } catch (Exception e) {
             log.error("广播消息异常", e);
@@ -826,8 +832,8 @@ public class ImWebSocketEndpoint {
      * 向会话中的其他用户发送输入状态通知
      *
      * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @param isTyping 是否正在输入
+     * @param userId         用户ID
+     * @param isTyping       是否正在输入
      */
     private void broadcastTypingStatus(Long conversationId, Long userId, boolean isTyping) {
         try {
@@ -863,8 +869,8 @@ public class ImWebSocketEndpoint {
      * 向会话中的其他用户发送消息已读通知
      *
      * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @param messageIds 消息ID列表
+     * @param userId         用户ID
+     * @param messageIds     消息ID列表
      */
     private void broadcastReadReceipt(Long conversationId, Long userId, List<Long> messageIds) {
         try {
@@ -985,8 +991,8 @@ public class ImWebSocketEndpoint {
                 return;
             }
 
-            List<com.ruoyi.im.domain.ImConversationMember> members =
-                staticConversationMemberMapper.selectByConversationId(conversationId);
+            List<com.ruoyi.im.domain.ImConversationMember> members = staticConversationMemberMapper
+                    .selectByConversationId(conversationId);
 
             if (members == null || members.isEmpty()) {
                 return;
@@ -1023,9 +1029,9 @@ public class ImWebSocketEndpoint {
      * 构建状态消息
      * 创建标准格式的状态消息对象
      *
-     * @param type 消息类型
+     * @param type   消息类型
      * @param userId 用户ID
-     * @param data 消息数据
+     * @param data   消息数据
      * @return 状态消息 Map
      */
     private Map<String, Object> buildStatusMessage(String type, Long userId, Object data) {
@@ -1093,7 +1099,7 @@ public class ImWebSocketEndpoint {
      * 发送消息给指定用户
      * 向指定在线用户发送消息，如果用户不在线则忽略
      *
-     * @param userId 目标用户ID
+     * @param userId  目标用户ID
      * @param message 消息对象
      */
     public static void sendToUser(Long userId, Object message) {
@@ -1116,7 +1122,7 @@ public class ImWebSocketEndpoint {
      * 通知被叫方有来电
      *
      * @param calleeId 接收者ID
-     * @param callId 通话ID
+     * @param callId   通话ID
      * @param callType 通话类型 VIDEO/VOICE
      * @param callerId 发起者ID
      */
@@ -1134,7 +1140,8 @@ public class ImWebSocketEndpoint {
                 try {
                     com.ruoyi.im.domain.ImUser caller = staticImUserMapper.selectImUserById(callerId);
                     if (caller != null) {
-                        notification.put("callerName", caller.getNickname() != null ? caller.getNickname() : caller.getUsername());
+                        notification.put("callerName",
+                                caller.getNickname() != null ? caller.getNickname() : caller.getUsername());
                         notification.put("callerAvatar", caller.getAvatar());
                     }
                 } catch (Exception e) {
@@ -1154,7 +1161,7 @@ public class ImWebSocketEndpoint {
      * 发送WebRTC信令消息
      * 转发offer/answer/ice-candidate等信令给通话对端
      *
-     * @param callId 通话ID
+     * @param callId     通话ID
      * @param fromUserId 发送者用户ID
      * @param signalType 信令类型 offer/answer/ice-candidate/hangup
      * @param signalData 信令数据（JSON字符串）
@@ -1187,10 +1194,10 @@ public class ImWebSocketEndpoint {
      * 发送通话状态变化通知
      * 通知通话参与者通话状态变化
      *
-     * @param callId 通话ID
+     * @param callId   通话ID
      * @param callerId 发起者ID
      * @param calleeId 接收者ID
-     * @param status 新状态
+     * @param status   新状态
      */
     public static void sendCallStatusUpdate(Long callId, Long callerId, Long calleeId, String status) {
         try {

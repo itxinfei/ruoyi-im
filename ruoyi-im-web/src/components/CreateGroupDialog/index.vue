@@ -135,6 +135,8 @@ const loadContacts = async () => {
   }
 }
 
+import { uploadAvatar } from '@/api/im/user'
+
 // 头像上传前验证
 const beforeAvatarUpload = (file) => {
   const isImage = file.type.startsWith('image/')
@@ -149,9 +151,20 @@ const beforeAvatarUpload = (file) => {
     return false
   }
 
-  // TODO: 实现图片上传
-  ElMessage.info('图片上传功能开发中...')
-  return false
+  // Upload image
+  const formData = new FormData()
+  formData.append('avatarfile', file)
+  
+  uploadAvatar(formData).then(res => {
+     if(res.code === 200) {
+        form.avatar = res.data
+        ElMessage.success('上传成功')
+     }
+  }).catch(err => {
+     ElMessage.error('上传失败')
+  })
+
+  return false // Stop auto upload by element
 }
 
 // 提交表单

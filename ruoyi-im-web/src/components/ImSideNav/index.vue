@@ -34,14 +34,18 @@
         :class="{ active: activeModule === 'profile' }"
         @click="handleNavClick('profile')"
       >
-        <span class="avatar-text">我</span>
+        <div class="avatar-content">
+          <img v-if="currentUser.avatar" :src="currentUser.avatar" class="avatar-img" />
+          <span v-else class="avatar-text">{{ (currentUser.nickname || currentUser.username || '我').charAt(0) }}</span>
+        </div>
       </div>
     </div>
   </aside>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useStore } from 'vuex'
 import {
   ChatDotRound,
   User,
@@ -63,9 +67,10 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['switchModule'])
-
+const store = useStore()
 const navWidth = ref(64)
-const unreadCount = ref(5)
+const unreadCount = computed(() => store.state.im.totalUnreadCount)
+const currentUser = computed(() => store.getters['user/currentUser'])
 
 const navModules = ref([
   {
@@ -265,6 +270,22 @@ const handleNavClick = (moduleKey) => {
   font-weight: 500;
   color: #ffffff;
   transition: all 0.2s ease;
+}
+
+.avatar-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .user-avatar.active .avatar-text {

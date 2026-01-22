@@ -71,10 +71,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import { Search, Plus, UserFilled, ChatDotRound } from '@element-plus/icons-vue'
-import { getConversations } from '@/api/im/conversation'
-import { useImWebSocket } from '@/composables/useImWebSocket'
 import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
 
 const props = defineProps({
@@ -85,61 +84,37 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['select-session'])
+const store = useStore()
 
 const searchKeyword = ref('')
-const sessions = ref([])
-const loading = ref(false)
 const showCreateGroupDialog = ref(false)
 
-// WebSocket 连接
-const { isConnected, connect, onMessage } = useImWebSocket()
+const sessions = computed(() => store.state.im.sessions || [])
+const loading = computed(() => store.state.im.loading.sessions)
 
 // 处理下拉菜单命令
 const handleCommand = (command) => {
   if (command === 'group') {
     showCreateGroupDialog.value = true
   } else if (command === 'chat') {
-    ElMessage.info('发起单聊功能开发中...')
+    ElMessage.info('发起单聊请前往联系人页面选择好友')
   }
 }
 
 // 群组创建成功
 const handleGroupCreated = (groupData) => {
   ElMessage.success('群组创建成功')
-  loadSessions() // 重新加载会话列表
-}
-
-// 加载会话列表
-const loadSessions = async () => {
-  loading.value = true
-  try {
-    const response = await getConversations()
-    if (response && response.data) {
-      sessions.value = response.data.map(item => ({
-        id: item.conversationId || item.id,
-        name: item.conversationName || item.name || '未命名',
-        avatar: item.avatar || '',
-        lastMessage: item.lastMessage || '',
-        lastMessageTime: item.lastMessageTime || item.updateTime,
-        unreadCount: item.unreadCount || 0,
-        isGroup: item.type === 'GROUP'
-      }))
-    }
-  } catch (error) {
-    console.error('加载会话列表失败:', error)
-    ElMessage.error('加载会话列表失败')
-  } finally {
-    loading.value = false
-  }
+  store.dispatch('im/loadSessions')
 }
 
 // 过滤会话列表
 const filteredSessions = computed(() => {
-  if (!searchKeyword.value) return sessions.value
+  const keyword = searchKeyword.value.toLowerCase()
+  if (!keyword) return sessions.value
   
   return sessions.value.filter(session => 
-    session.name.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-    (session.lastMessage && session.lastMessage.toLowerCase().includes(searchKeyword.value.toLowerCase()))
+    (session.name && session.name.toLowerCase().includes(keyword)) ||
+    (session.lastMessage && session.lastMessage.toLowerCase().includes(keyword))
   )
 })
 
@@ -151,12 +126,6 @@ const isActiveSession = (session) => {
 // 处理会话点击
 const handleSessionClick = (session) => {
   emit('select-session', session)
-}
-
-// 处理新建会话
-const handleNewConversation = () => {
-  console.log('新建会话')
-  // TODO: 打开新建会话对话框
 }
 
 // 格式化时间
@@ -175,43 +144,10 @@ const formatTime = (timestamp) => {
   return `${date.getMonth() + 1}/${date.getDate()}`
 }
 
-// 更新会话最后一条消息
-const updateSessionMessage = (message) => {
-  const session = sessions.value.find(s => s.id === message.conversationId)
-  if (session) {
-    session.lastMessage = message.content
-    session.lastMessageTime = message.timestamp || Date.now()
-    
-    // 如果不是当前会话，增加未读数
-    if (props.currentSession?.id !== session.id) {
-      session.unreadCount = (session.unreadCount || 0) + 1
-    }
-    
-    // 将会话移到列表顶部
-    const index = sessions.value.indexOf(session)
-    if (index > 0) {
-      sessions.value.splice(index, 1)
-      sessions.value.unshift(session)
-    }
-  }
-}
-
-// 监听 WebSocket 消息
-onMessage((message) => {
-  console.log('SessionPanel 收到消息:', message)
-  updateSessionMessage(message)
-})
-
-// 组件挂载时加载数据
-onMounted(async () => {
-  await loadSessions()
-  
-  // 连接 WebSocket
-  if (!isConnected.value) {
-    const token = localStorage.getItem('access_token')
-    if (token) {
-      connect(token)
-    }
+onMounted(() => {
+  // 确保会话加载 (App.vue already does this, but safe to check or refresh)
+  if (sessions.value.length === 0) {
+    store.dispatch('im/loadSessions')
   }
 })
 </script>

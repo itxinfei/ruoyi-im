@@ -17,6 +17,7 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
+import { useImWebSocket } from '@/composables/useImWebSocket'
 import ImSideNav from './components/ImSideNav/index.vue'
 import SessionPanel from './views/SessionPanel.vue'
 import WorkbenchPanel from './views/WorkbenchPanel.vue'
@@ -30,6 +31,8 @@ import ChatPanel from './views/ChatPanel.vue'
 const store = useStore()
 const activeModule = ref('chat')
 const currentSession = computed(() => store.state.im.currentSession)
+
+const { connect, onMessage, isConnected } = useImWebSocket()
 
 const handleSwitchModule = (module) => {
   activeModule.value = module
@@ -46,9 +49,22 @@ watch(currentSession, (sess) => {
   }
 })
 
-onMounted(() => {
-  store.dispatch('user/getUserInfo')
-  store.dispatch('im/loadSessions')
+// Global WebSocket Message Handler
+onMessage((msg) => {
+  store.dispatch('im/receiveMessage', msg)
+})
+
+onMounted(async () => {
+  await store.dispatch('user/getUserInfo')
+  await store.dispatch('im/loadSessions')
+  
+  if (!isConnected.value) {
+    // Attempt to connect if we have a token (user info loaded implies token might be valid or present)
+    const token = localStorage.getItem('im_token') // Ensure consistent token key
+    if (token) {
+        connect(token)
+    }
+  }
 })
 </script>
 

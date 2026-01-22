@@ -2,11 +2,9 @@ package com.ruoyi.web.service;
 
 import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.domain.dto.ImUserAdvancedSearchDTO;
-import com.ruoyi.web.domain.dto.ImUserEnhancedBatchOperationDTO;
 import com.ruoyi.web.domain.dto.ImUserQuickOperationDTO;
 import com.ruoyi.web.domain.dto.ImUserLifecycleDTO;
 import com.ruoyi.web.domain.vo.ImUserAdvancedSearchResultVO;
-import com.ruoyi.web.domain.vo.ImUserEnhancedBatchOperationResultVO;
 import com.ruoyi.web.domain.vo.ImUserQuickOperationResultVO;
 import com.ruoyi.web.domain.vo.ImUserLifecycleResultVO;
 
@@ -315,15 +313,4 @@ public interface ImUserService {
      * @return 生命周期管理结果对象，包含操作状态、处理统计、错误详情等
      */
     ImUserLifecycleResultVO manageUserLifecycle(@Valid ImUserLifecycleDTO lifecycleDTO);
-
-    /**
-     * 增强的批量操作接口
-     *
-     * <p>支持安全验证、事务控制、多级审批等高级功能</p>
-     * <p>提供操作前预检查、风险评估、操作结果统计等</p>
-     *
-     * @param operationDTO 增强批量操作请求对象，包含操作参数、安全配置、事务控制等
-     * @return 增强的批量操作结果对象，包含操作状态、安全验证、事务管理、警告信息等
-     */
-    ImUserEnhancedBatchOperationResultVO enhancedBatchOperation(@Valid ImUserEnhancedBatchOperationDTO operationDTO);
 }

@@ -10,6 +10,8 @@
         :messages="messages" 
         :loading="loading" 
         :current-user="currentUser" 
+        @delete="handleDelete"
+        @recall="handleRecall"
       />
       <MessageInput 
         :sending="sending" 
@@ -32,7 +34,7 @@ import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInput.vue'
 import FileUpload from '@/components/FileUpload/index.vue'
-import { getMessages, sendMessage } from '@/api/im/message'
+import { getMessages } from '@/api/im/message'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 
 const props = defineProps({
@@ -73,14 +75,12 @@ const transformMsg = (m) => ({
 const handleSend = async (content) => {
   sending.value = true
   try {
-    const res = await sendMessage({
-      conversationId: props.session.id,
+    const msg = await store.dispatch('im/sendMessage', {
+      sessionId: props.session.id,
       messageType: 'TEXT',
       content
     })
-    if (res.code === 200) {
-      messages.value.push(transformMsg(res.data))
-    }
+    messages.value.push(transformMsg(msg))
   } finally {
     sending.value = false
     msgListRef.value?.scrollToBottom()
@@ -103,14 +103,74 @@ watch(() => props.session, () => {
 const triggerFile = () => fileRef.value?.triggerUpload()
 const triggerImage = () => imgRef.value?.triggerUpload()
 
-// Specific handlers for file/img success would go here calling sendMessage with type FILE/IMAGE
-const handleFileSuccess = ({ data }) => {
-   // Logic...
-   // Reuse sendMessage with type FILE
+const handleFileSuccess = async ({ data }) => {
+  sending.value = true
+  try {
+    const msg = await store.dispatch('im/sendMessage', {
+      sessionId: props.session.id,
+      messageType: 'FILE',
+      content: JSON.stringify({
+        fileName: data.fileName,
+        fileSize: data.fileSize,
+        fileUrl: data.fileUrl
+      })
+    })
+    messages.value.push(transformMsg(msg))
+  } finally {
+    sending.value = false
+    msgListRef.value?.scrollToBottom()
+  }
 }
-const handleImgSuccess = ({ data }) => {
-   // Logic...
+
+const handleImgSuccess = async ({ data }) => {
+  sending.value = true
+  try {
+    const msg = await store.dispatch('im/sendMessage', {
+      sessionId: props.session.id,
+      messageType: 'IMAGE',
+      content: JSON.stringify({
+        imageUrl: data.fileUrl,
+        width: data.width,
+        height: data.height
+      })
+    })
+    messages.value.push(transformMsg(msg))
+  } finally {
+    sending.value = false
+    msgListRef.value?.scrollToBottom()
+  }
 }
+
+const handleDelete = async (messageId) => {
+  try {
+    await store.dispatch('im/deleteMessage', messageId)
+    // 移除本地消息
+    const index = messages.value.findIndex(m => m.id === messageId)
+    if (index !== -1) {
+      messages.value.splice(index, 1)
+    }
+  } catch (error) {
+    console.error('删除失败', error)
+  }
+}
+
+const handleRecall = async (messageId) => {
+  try {
+    await store.dispatch('im/recallMessage', messageId)
+    // 更新本地消息状态
+    const index = messages.value.findIndex(m => m.id === messageId)
+    if (index !== -1) {
+      messages.value[index].type = 'RECALLED' // 或其他处理
+      messages.value[index].content = '消息已撤回'
+    }
+  } catch (error) {
+    console.error('撤回失败', error)
+  }
+}
+
+onMounted(() => {
+  if (props.session) loadHistory()
+})
 </script>
 
 <style scoped>

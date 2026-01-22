@@ -17,8 +17,6 @@ import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.util.AuditLogUtil;
-import com.ruoyi.im.util.ImDistributedLock;
-import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
@@ -63,10 +61,10 @@ public class ImMessageServiceImpl implements ImMessageService {
     private ImMessageEditHistoryMapper editHistoryMapper;
 
     @Autowired
-    private com.ruoyi.im.utils.ImDistributedLock distributedLock;
+    private com.ruoyi.im.util.ImDistributedLock distributedLock;
 
     @Autowired
-    private com.ruoyi.im.utils.ImRedisUtil redisUtil;
+    private com.ruoyi.im.util.ImRedisUtil redisUtil;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -107,7 +105,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         final Long finalConversationId = conversationId;
         final String finalClientMsgId = clientMsgId;
         Long messageId = distributedLock.executeWithLock(
-                com.ruoyi.im.utils.ImDistributedLock.LockKeys.sendMessageKey(finalConversationId),
+                com.ruoyi.im.util.ImDistributedLock.LockKeys.sendMessageKey(finalConversationId),
                 10, // 10秒过期时间足够
                 () -> doSendMessage(request, userId, finalConversationId, sender, finalClientMsgId));
 
@@ -356,61 +354,6 @@ public class ImMessageServiceImpl implements ImMessageService {
         return quotedMessage;
     }
 
-    /**
-     * 构建引用消息VO（原始版本，单独查询）
-     * 保留用于向后兼容
-     *
-     * @param messageId 被回复的消息ID
-     * @return 引用消息VO
-     */
-    private ImMessageVO.QuotedMessageVO buildQuotedMessage(Long messageId) {
-        ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
-        if (originalMessage == null) {
-            return null;
-        }
-
-        ImMessageVO.QuotedMessageVO quotedMessage = new ImMessageVO.QuotedMessageVO();
-        quotedMessage.setId(originalMessage.getId());
-        quotedMessage.setType(originalMessage.getMessageType());
-        quotedMessage.setSendTime(originalMessage.getCreateTime());
-
-        // 获取发送者信息
-        ImUser sender = imUserMapper.selectImUserById(originalMessage.getSenderId());
-        if (sender != null) {
-            quotedMessage.setSenderName(sender.getNickname());
-        } else {
-            quotedMessage.setSenderName("未知用户");
-        }
-
-        // 解密并截取消息内容
-        String content = encryptionUtil.decryptMessage(originalMessage.getContent());
-
-        // 根据消息类型处理内容
-        String messageType = originalMessage.getMessageType();
-        if ("IMAGE".equalsIgnoreCase(messageType) || "FILE".equalsIgnoreCase(messageType)
-                || "VIDEO".equalsIgnoreCase(messageType) || "VOICE".equalsIgnoreCase(messageType)) {
-            quotedMessage.setIsFile(true);
-            if ("IMAGE".equalsIgnoreCase(messageType)) {
-                quotedMessage.setContent("[图片]");
-            } else if ("VIDEO".equalsIgnoreCase(messageType)) {
-                quotedMessage.setContent("[视频]");
-            } else if ("VOICE".equalsIgnoreCase(messageType)) {
-                quotedMessage.setContent("[语音]");
-            } else {
-                quotedMessage.setContent("[文件]");
-            }
-        } else {
-            quotedMessage.setIsFile(false);
-            if (content != null && content.length() > 50) {
-                quotedMessage.setContent(content.substring(0, 50) + "...");
-            } else {
-                quotedMessage.setContent(content);
-            }
-        }
-
-        return quotedMessage;
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void recallMessage(Long messageId, Long userId) {
@@ -482,6 +425,28 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setIsEdited(1);
         message.setEditCount(message.getEditCount() == null ? 1 : message.getEditCount() + 1);
         message.setEditTime(now);
+        imMessageMapper.updateImMessage(message);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteMessage(Long messageId, Long userId) {
+        ImMessage message = imMessageMapper.selectImMessageById(messageId);
+        if (message == null) {
+            throw new BusinessException("消息不存在");
+        }
+
+        // 软删除，设置is_deleted = 1
+        // 注意：这里只允许删除自己的消息，或者管理员可以删除任何消息
+        // 如果是双向删除（删除后对方也不可见），需要权限校验
+        // 如果是单向删除（仅自己不可见），需要另外的表来记录删除状态
+        // 这里简化实现，假设是双向删除，且只能删除自己的消息
+        if (!message.getSenderId().equals(userId)) {
+            throw new BusinessException("无权删除该消息");
+        }
+
+        message.setIsDeleted(1);
+        message.setDeletedTime(LocalDateTime.now());
         imMessageMapper.updateImMessage(message);
     }
 
@@ -721,7 +686,8 @@ public class ImMessageServiceImpl implements ImMessageService {
      */
     private void broadcastRecallNotification(Long conversationId, Long messageId, Long userId) {
         try {
-            com.ruoyi.im.websocket.ImWebSocketEndpoint wsEndpoint = new com.ruoyi.im.websocket.ImWebSocketEndpoint();
+            // com.ruoyi.im.websocket.ImWebSocketEndpoint wsEndpoint = new
+            // com.ruoyi.im.websocket.ImWebSocketEndpoint();
 
             java.util.Map<String, Object> recallNotification = new java.util.HashMap<>();
             recallNotification.put("type", "recall");

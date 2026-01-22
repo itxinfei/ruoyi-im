@@ -316,13 +316,15 @@ public class ShiroConfig
         filterChainDefinitionMap.put("/login", "anon,captchaValidate");
                 // 注册相关
                 filterChainDefinitionMap.put("/register", "anon,captchaValidate");
-                // IM模块相关路径 - 允许匿名访问登录接口
+// IM模块相关路径 - 仅允许登录和注册接口匿名访问
                 filterChainDefinitionMap.put("/im/login", "anon,captchaValidate");
                 filterChainDefinitionMap.put("/im/register", "anon,captchaValidate");
                 filterChainDefinitionMap.put("/im/public/**", "anon");
-                filterChainDefinitionMap.put("/im/websocket/**", "anon"); // WebSocket不需要权限
-                filterChainDefinitionMap.put("/ws/im/**", "anon"); // WebSocket端点
-                filterChainDefinitionMap.put("/api/im/**", "anon"); // IM API接口（开发环境）
+                // 移除WebSocket端点的匿名访问，改为需要认证
+                filterChainDefinitionMap.put("/im/websocket/**", "user"); // WebSocket需要认证
+                filterChainDefinitionMap.put("/ws/im/**", "user"); // WebSocket端点需要认证
+                // 移除IM API的匿名访问，改为需要认证
+                filterChainDefinitionMap.put("/api/im/**", "user"); // IM API接口需要认证
                 
                 // 系统权限列表
                 // filterChainDefinitionMap.putAll(SpringUtils.getBean(IMenuService.class).selectPermsAll());

@@ -46,7 +46,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     private ImConversationMapper imConversationMapper;
 
     @Autowired
-    private com.ruoyi.im.utils.ImRedisUtil imRedisUtil;
+    private com.ruoyi.im.util.ImRedisUtil imRedisUtil;
 
     @Autowired
     private ImConversationMemberMapper imConversationMemberMapper;

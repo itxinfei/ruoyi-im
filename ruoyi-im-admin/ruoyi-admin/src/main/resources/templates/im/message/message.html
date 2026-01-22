@@ -1,208 +1,397 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-
 <head>
     <th:block th:include="include :: header('消息管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet" />
 </head>
 
 <body class="gray-bg">
-    <div class="container-div">
-        <div class="row pt-5">
-            <!-- 1. 统计概览 -->
-            <div class="col-sm-12">
-                <div class="im-stat-group">
-                    <div class="im-stat-item">
-                        <div class="stat-header">
-                            <span class="stat-label">今日通行消息</span>
-                            <div class="stat-icon-box"><i class="fa fa-envelope-o"></i></div>
-                        </div>
-                        <div class="stat-number" id="todayInflow">-</div>
-                        <div class="stat-footer text-muted">24小时内系统通行量</div>
+    <div class="compact-container">
+        <!-- 头部 -->
+        <div class="compact-header">
+            <h2 class="compact-title">消息管理</h2>
+            <div class="compact-toolbar-right">
+                <button class="btn btn-info compact-btn" onclick="showAuditSettings()">
+                    <i class="fa fa-shield compact-icon"></i>审计设置
+                </button>
+            </div>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="compact-stats">
+            <div class="compact-stat-item">
+                <div class="compact-stat-label"><i class="fa fa-envelope-o compact-icon"></i>今日消息</div>
+                <div class="compact-stat-value" id="todayMessages">-</div>
+            </div>
+            <div class="compact-stat-item">
+                <div class="compact-stat-label"><i class="fa fa-envelope compact-icon"></i>总消息</div>
+                <div class="compact-stat-value" id="totalMessages">-</div>
+            </div>
+            <div class="compact-stat-item">
+                <div class="compact-stat-label"><i class="fa fa-shield compact-icon" style="color: #ef4444;"></i>敏感拦截</div>
+                <div class="compact-stat-value im-text-danger" id="sensitiveHits">-</div>
+            </div>
+            <div class="compact-stat-item">
+                <div class="compact-stat-label"><i class="fa fa-warning compact-icon" style="color: #f59e0b;"></i>失败率</div>
+                <div class="compact-stat-value im-text-warning" id="failRate">-</div>
+            </div>
+            <div class="compact-stat-item">
+                <div class="compact-stat-label"><i class="fa fa-undo compact-icon"></i>已撤回</div>
+                <div class="compact-stat-value" id="revokedCount">-</div>
+            </div>
+            <div class="compact-stat-item">
+                <div class="compact-stat-label"><i class="fa fa-trash compact-icon"></i>已删除</div>
+                <div class="compact-stat-value" id="deletedCount">-</div>
+            </div>
+        </div>
+
+        <!-- 搜索栏 -->
+        <div class="compact-filter">
+            <form id="message-form">
+                <div class="compact-filter-row">
+                    <div class="compact-filter-item">
+                        <span class="compact-filter-label">发送人</span>
+                        <input type="text" class="compact-filter-input" name="senderId" placeholder="用户ID/账号" />
                     </div>
-                    <div class="im-stat-item">
-                        <div class="stat-header">
-                            <span class="stat-label">敏感词命中</span>
-                            <div class="stat-icon-box" style="background: #fef2f2; color: #ef4444;"><i
-                                    class="fa fa-shield"></i></div>
-                        </div>
-                        <div class="stat-number" id="sensitiveHits">-</div>
-                        <div class="stat-footer text-muted">触发拦截的风控消息</div>
+                    <div class="compact-filter-item">
+                        <span class="compact-filter-label">接收人</span>
+                        <input type="text" class="compact-filter-input" name="receiverId" placeholder="用户ID/账号" />
                     </div>
-                    <div class="im-stat-item">
-                        <div class="stat-header">
-                            <span class="stat-label">投递失败率</span>
-                            <div class="stat-icon-box" style="background: #fff7ed; color: #f59e0b;"><i
-                                    class="fa fa-warning"></i></div>
-                        </div>
-                        <div class="stat-number" id="failRate">-</div>
-                        <div class="stat-footer text-muted">网络或逻辑导致的异常</div>
+                    <div class="compact-filter-item">
+                        <span class="compact-filter-label">会话ID</span>
+                        <input type="text" class="compact-filter-input" name="conversationId" placeholder="会话ID" />
                     </div>
+                    <div class="compact-filter-item">
+                        <span class="compact-filter-label">类型</span>
+                        <select class="compact-filter-select" name="messageType">
+                            <option value="">全部</option>
+                            <option value="TEXT">文本</option>
+                            <option value="IMAGE">图片</option>
+                            <option value="FILE">文件</option>
+                            <option value="AUDIO">语音</option>
+                            <option value="VIDEO">视频</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="compact-filter-row">
+                    <div class="compact-filter-item">
+                        <span class="compact-filter-label">敏感等级</span>
+                        <select class="compact-filter-select" name="sensitiveLevel">
+                            <option value="">全部</option>
+                            <option value="NORMAL">普通</option>
+                            <option value="SENSITIVE">敏感</option>
+                            <option value="HIGH">高级</option>
+                        </select>
+                    </div>
+                    <div class="compact-filter-item">
+                        <span class="compact-filter-label">状态</span>
+                        <select class="compact-filter-select" name="sendStatus">
+                            <option value="">全部</option>
+                            <option value="SENT">已发送</option>
+                            <option value="DELIVERED">已送达</option>
+                            <option value="FAILED">失败</option>
+                        </select>
+                    </div>
+                    <div class="compact-filter-item">
+                        <span class="compact-filter-label">发送时间</span>
+                        <input type="text" class="compact-filter-input" name="params[beginTime]" placeholder="开始" />
+                    </div>
+                    <div class="compact-filter-item">
+                        <span class="compact-filter-label">~</span>
+                        <input type="text" class="compact-filter-input" name="params[endTime]" placeholder="结束" />
+                    </div>
+                    <div class="compact-filter-item" style="flex: 0;">
+                        <button type="button" class="btn btn-default compact-filter-btn" onclick="resetSearch()">
+                            <i class="fa fa-refresh"></i>
+                        </button>
+                        <button type="button" class="btn btn-primary compact-filter-btn" onclick="doSearch()">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 表格卡片 -->
+        <div class="compact-table-card">
+            <!-- 批量操作栏 -->
+            <div class="compact-batch-toolbar" id="batchToolbar">
+                <span class="compact-batch-info">已选 <span id="selectedCount">0</span> 项</span>
+                <div class="compact-batch-actions">
+                    <button class="btn btn-warning compact-btn" onclick="batchRevoke()" shiro:hasPermission="im:message:revoke">
+                        <i class="fa fa-undo compact-icon"></i>批量撤回
+                    </button>
+                    <button class="btn btn-danger compact-btn" onclick="batchDelete()" shiro:hasPermission="im:message:remove">
+                        <i class="fa fa-trash compact-icon"></i>批量删除
+                    </button>
                 </div>
             </div>
 
-            <!-- 2. 搜索过滤 (简约) -->
-            <div class="col-sm-12 search-collapse">
-                <form id="message-form">
-                    <div class="select-list">
-                        <ul>
-                            <li>
-                                <label>发送人：</label><input type="text" name="senderId" placeholder="用户ID/账号" />
-                            </li>
-                            <li>
-                                <label>会话：</label><input type="text" name="conversationId" placeholder="会话ID" />
-                            </li>
-                            <li>
-                                <label>类型：</label>
-                                <select name="messageType">
-                                    <option value="">所有</option>
-                                    <option value="TEXT">文本</option>
-                                    <option value="IMAGE">图片</option>
-                                    <option value="FILE">文件</option>
-                                </select>
-                            </li>
-                            <li>
-                                <label>时间段：</label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始"
-                                    name="params[beginTime]" />
-                                <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束"
-                                    name="params[endTime]" />
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
-                                        class="fa fa-search"></i> 搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
-                                        class="fa fa-refresh"></i> 重置</a>
-                            </li>
-                        </ul>
-                    </div>
-                </form>
+            <!-- 工具栏 -->
+            <div class="compact-toolbar">
+                <div class="compact-toolbar-left">
+                    <button class="btn btn-default compact-btn" onclick="refreshTable()">
+                        <i class="fa fa-refresh compact-icon"></i>刷新
+                    </button>
+                    <div class="compact-divider"></div>
+                    <button class="btn btn-success compact-btn" onclick="showMessageStats()">
+                        <i class="fa fa-bar-chart compact-icon"></i>统计
+                    </button>
+                </div>
+                <div class="compact-toolbar-right">
+                    <button class="btn btn-info compact-btn" onclick="$.table.exportExcel()" shiro:hasPermission="im:message:export">
+                        <i class="fa fa-download compact-icon"></i>导出
+                    </button>
+                    <select class="compact-filter-select" id="pageSizeSelect" onchange="changePageSize()">
+                        <option value="20">20条</option>
+                        <option value="50">50条</option>
+                        <option value="100">100条</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- 3. 数据板块 -->
-            <div class="col-sm-12 select-table table-striped">
-                <div class="btn-group-sm" id="toolbar" role="group">
-                    <a class="btn btn-info multiple disabled" onclick="batchRevoke()"
-                        shiro:hasPermission="im:message:revoke">
-                        <i class="fa fa-undo"></i> 批量撤回
-                    </a>
-                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
-                        shiro:hasPermission="im:message:remove">
-                        <i class="fa fa-trash"></i> 彻底删除
-                    </a>
-                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:message:export">
-                        <i class="fa fa-download"></i> 导出记录
-                    </a>
-                </div>
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            <!-- 表格 -->
+            <table id="bootstrap-table"
+                   class="table table-condensed table-striped"
+                   data-mobile-responsive="true"
+                   data-pagination="true"
+                   data-page-list="[20,50,100]"
+                   data-page-size="20"
+                   data-side-pagination="server">
+            </table>
+
+            <!-- 分页 -->
+            <div class="compact-pagination">
+                <span class="compact-pagination-info" id="paginationInfo">显示 1-20 条，共 0 条</span>
+                <div class="compact-pagination-btns" id="paginationBtns"></div>
             </div>
         </div>
     </div>
 
     <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
     <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('im:message:edit') }]];
-        var removeFlag = [[${@permission.hasPermi('im:message:remove') }]];
+        var editFlag = [[${@permission.hasPermi('im:message:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('im:message:remove')}]];
         var prefix = ctx + "im/message";
 
         $(function () {
             loadStatistics();
-            var options = {
-                url: prefix + "/list",
-                removeUrl: prefix + "/remove/{id}",
-                exportUrl: prefix + "/export",
-                sortName: "createTime",
-                sortOrder: "desc",
-                modalName: "消息记录",
-                columns: [{
-                    checkbox: true
-                }, {
-                    field: 'senderId',
-                    title: '发送人',
-                    width: '120',
-                    formatter: function (value, row, index) {
-                        return '<span class="text-primary">#' + value + '</span>';
-                    }
-                }, {
-                    field: 'messageType',
-                    title: '类型',
-                    align: 'center',
-                    width: '80',
-                    formatter: function (value) {
-                        var map = { 'TEXT': 'text-primary', 'IMAGE': 'text-success', 'FILE': 'text-warning' };
-                        return '<span class="' + (map[value] || 'text-muted') + '">' + ImCommon.formatMessageType(value) + '</span>';
-                    }
-                }, {
-                    field: 'content',
-                    title: '消息快照',
-                    formatter: function (v) { return ImCommon.formatTextWithTooltip(v, 60); }
-                }, {
-                    field: 'sendStatus',
-                    title: '通道状态',
-                    align: 'center',
-                    width: '100',
-                    formatter: function (v) {
-                        if (v === 'SENT') return '<span class="im-badge badge-blue">已送出</span>';
-                        if (v === 'FAILED') return '<span class="im-badge badge-red">失败</span>';
-                        return '<span class="im-badge badge-green">已送达</span>';
-                    }
-                }, {
-                    field: 'isRevoked',
-                    title: '消息状态',
-                    align: 'center',
-                    width: '90',
-                    formatter: function (v, row) {
-                        if (v == 1) return '<span class="text-muted"><i class="fa fa-undo"></i> 已撤回</span>';
-                        if (row.isDeleted == 1) return '<span class="text-danger">已删除</span>';
-                        return '<span class="dot dot-online"></span>活跃';
-                    }
-                }, {
-                    field: 'createTime',
-                    title: '发送时间',
-                    width: '160',
-                    sortable: true
-                }, {
-                    title: '管理',
-                    align: 'center',
-                    width: '140',
-                    formatter: function (v, row) {
-                        var actions = [];
-                        if (row.isRevoked != 1) {
-                            actions.push('<a class="btn btn-warning btn-xs" href="javascript:void(0)" onclick="revokeMsg(\'' + row.id + '\')"><i class="fa fa-undo"></i> 撤回</a>');
-                        }
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-trash"></i> 删</a>');
-                        return actions.join(' ');
-                    }
-                }],
-                onLoadSuccess: function () {
-                    // 默认调大添加/编辑弹窗
-                    $.operate.add = function (id) {
-                        $.modal.open("添加" + $.table._option.modalName, $.operate.addUrl(id), 800, 600);
-                    };
-                    $.operate.edit = function (id) {
-                        $.modal.open("修改" + $.table._option.modalName, $.operate.editUrl(id), 800, 600);
-                    };
-                }
-            };
-            $.table.init(options);
+            initTable();
         });
 
         function loadStatistics() {
-            ImCommon.get(ctx + 'im/dashboard/statistics', function (res) {
+            $.get(ctx + 'im/dashboard/message-statistics', function (res) {
                 if (res.code === 0) {
-                    $('#todayInflow').text(res.data.todayMessages || 0);
+                    $('#todayMessages').text(res.data.todayMessages || 0);
+                    $('#totalMessages').text(res.data.totalMessages || 0);
                     $('#sensitiveHits').text(res.data.sensitiveMessages || 0);
-                    $('#failRate').text('0.2%'); // 模拟数据
+                    $('#failRate').text('0.1%');
+                    $('#revokedCount').text(res.data.revokedCount || 0);
+                    $('#deletedCount').text(res.data.deletedCount || 0);
                 }
             });
         }
 
-        function revokeMsg(id) {
-            $.modal.confirm("管理操作：确定要撤回此消息吗？用户侧将同步消失。", function () {
+        function initTable() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove/{id}",
+                exportUrl: prefix + "/export",
+                sortName: "createTime",
+                sortOrder: "desc",
+                modalName: "消息",
+                pageSize: 20,
+                pageList: [20, 50, 100],
+                columns: [{
+                    checkbox: true,
+                    width: '40'
+                }, {
+                    field: 'id',
+                    title: 'ID',
+                    width: '80'
+                }, {
+                    field: 'senderId',
+                    title: '发送人',
+                    width: '100',
+                    formatter: function (value, row) {
+                        return '<span class="compact-text-primary">#' + value + '</span>';
+                    }
+                }, {
+                    field: 'receiverId',
+                    title: '接收人',
+                    width: '100',
+                    formatter: function (value, row) {
+                        if (!value) return '<span class="compact-text-muted">群聊</span>';
+                        return '<span class="compact-text-primary">#' + value + '</span>';
+                    }
+                }, {
+                    field: 'conversationId',
+                    title: '会话ID',
+                    width: '100',
+                    formatter: function (value) {
+                        return '<span class="compact-text-truncate" title="' + value + '">' + value + '</span>';
+                    }
+                }, {
+                    field: 'messageType',
+                    title: '类型',
+                    width: '70',
+                    align: 'center',
+                    formatter: function (value) {
+                        var typeMap = {
+                            'TEXT': { class: 'compact-badge compact-badge-primary', label: '文本' },
+                            'IMAGE': { class: 'compact-badge compact-badge-success', label: '图片' },
+                            'FILE': { class: 'compact-badge compact-badge-warning', label: '文件' },
+                            'AUDIO': { class: 'compact-badge compact-badge-info', label: '语音' },
+                            'VIDEO': { class: 'compact-badge compact-badge-danger', label: '视频' }
+                        };
+                        var type = typeMap[value] || { class: 'compact-badge', label: value };
+                        return '<span class="' + type.class + '">' + type.label + '</span>';
+                    }
+                }, {
+                    field: 'content',
+                    title: '内容',
+                    width: '200',
+                    formatter: function (value, row) {
+                        if (row.messageType === 'TEXT') {
+                            return '<span class="compact-text-truncate" title="' + value + '">' + value + '</span>';
+                        } else if (row.messageType === 'IMAGE') {
+                            return '<a href="javascript:void(0)" onclick="viewImage(\'' + row.id + '\')">[查看图片]</a>';
+                        } else if (row.messageType === 'FILE') {
+                            return '<a href="javascript:void(0)" onclick="downloadFile(\'' + row.id + '\')">[' + (row.fileName || '文件') + ']</a>';
+                        }
+                        return '[' + row.messageType + ']';
+                    }
+                }, {
+                    field: 'sensitiveLevel',
+                    title: '敏感',
+                    width: '70',
+                    align: 'center',
+                    formatter: function (value) {
+                        if (value === 'SENSITIVE') {
+                            return '<span class="compact-badge compact-badge-warning">敏感</span>';
+                        } else if (value === 'HIGH') {
+                            return '<span class="compact-badge compact-badge-danger">高级</span>';
+                        }
+                        return '<span class="compact-text-muted">普通</span>';
+                    }
+                }, {
+                    field: 'sendStatus',
+                    title: '状态',
+                    width: '80',
+                    align: 'center',
+                    formatter: function (value) {
+                        if (value === 'SENT') return '<span class="compact-badge compact-badge-info">发送</span>';
+                        if (value === 'DELIVERED') return '<span class="compact-badge compact-badge-success">送达</span>';
+                        if (value === 'FAILED') return '<span class="compact-badge compact-badge-danger">失败</span>';
+                        return '<span class="compact-text-muted">-</span>';
+                    }
+                }, {
+                    field: 'isRevoked',
+                    title: '撤回',
+                    width: '60',
+                    align: 'center',
+                    formatter: function (value, row) {
+                        if (value == 1) return '<span class="compact-status disabled">已撤回</span>';
+                        return '<span class="compact-status online">正常</span>';
+                    }
+                }, {
+                    field: 'createTime',
+                    title: '发送时间',
+                    width: '140',
+                    sortable: true,
+                    formatter: function (value) {
+                        return value ? value.substr(0, 19) : '-';
+                    }
+                }, {
+                    title: '操作',
+                    align: 'center',
+                    width: '140',
+                    formatter: function (value, row) {
+                        var actions = [];
+                        if (row.isRevoked != 1) {
+                            actions.push('<a class="btn btn-warning compact-btn-sm ' + editFlag + '" href="javascript:void(0)" onclick="revokeMessage(\'' + row.id + '\')"><i class="fa fa-undo compact-icon"></i>撤回</a>');
+                        }
+                        actions.push('<a class="btn btn-danger compact-btn-sm ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-trash compact-icon"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }],
+                onCheck: updateBatchToolbar,
+                onUncheck: updateBatchToolbar,
+                onCheckAll: updateBatchToolbar,
+                onUncheckAll: updateBatchToolbar,
+                onLoadSuccess: function (data) {
+                    updatePaginationInfo(data);
+                    updatePaginationBtns(data);
+                },
+                onPageChange: function (number, size) {
+                    $('#pageSizeSelect').val(size);
+                }
+            };
+            $.table.init(options);
+        }
+
+        function updateBatchToolbar() {
+            var selectedCount = $.table.selectColumns("id").length;
+            $('#selectedCount').text(selectedCount);
+            $('#batchToolbar').toggleClass('active', selectedCount > 0);
+        }
+
+        function updatePaginationInfo(data) {
+            var total = data.total;
+            var pageSize = $('#bootstrap-table').bootstrapTable('getOptions').pageSize;
+            var pageNumber = $('#bootstrap-table').bootstrapTable('getOptions').pageNumber;
+            var from = (pageNumber - 1) * pageSize + 1;
+            var to = Math.min(pageNumber * pageSize, total);
+            $('#paginationInfo').text('显示 ' + from + '-' + to + ' 条，共 ' + total + ' 条');
+        }
+
+        function updatePaginationBtns(data) {
+            var total = data.total;
+            var pageSize = $('#bootstrap-table').bootstrapTable('getOptions').pageSize;
+            var pageNumber = $('#bootstrap-table').bootstrapTable('getOptions').pageNumber;
+            var totalPages = Math.ceil(total / pageSize);
+
+            var html = '';
+            html += '<button class="compact-page-btn" onclick="goToPage(1)" ' + (pageNumber == 1 ? 'disabled' : '') + '><i class="fa fa-angle-double-left"></i></button>';
+            html += '<button class="compact-page-btn" onclick="goToPage(' + (pageNumber - 1) + ')" ' + (pageNumber == 1 ? 'disabled' : '') + '><i class="fa fa-angle-left"></i></button>';
+
+            var startPage = Math.max(1, pageNumber - 2);
+            var endPage = Math.min(totalPages, pageNumber + 2);
+
+            for (var i = startPage; i <= endPage; i++) {
+                html += '<button class="compact-page-btn ' + (i == pageNumber ? 'active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+            }
+
+            html += '<button class="compact-page-btn" onclick="goToPage(' + (pageNumber + 1) + ')" ' + (pageNumber == totalPages ? 'disabled' : '') + '><i class="fa fa-angle-right"></i></button>';
+            html += '<button class="compact-page-btn" onclick="goToPage(' + totalPages + ')" ' + (pageNumber == totalPages ? 'disabled' : '') + '><i class="fa fa-angle-double-right"></i></button>';
+
+            $('#paginationBtns').html(html);
+        }
+
+        function goToPage(page) {
+            $('#bootstrap-table').bootstrapTable('selectPage', page);
+        }
+
+        function doSearch() {
+            $.table.search();
+        }
+
+        function resetSearch() {
+            $("#message-form")[0].reset();
+            $.table.search();
+        }
+
+        function revokeMessage(id) {
+            $.modal.confirm("确定要撤回这条消息吗？撤回后用户将无法看到该消息。", function () {
                 $.operate.post(prefix + "/revoke/" + id, {}, function (res) {
-                    if (res.code == 0) $.table.refresh();
+                    if (res.code == 0) {
+                        $.table.refresh();
+                        loadStatistics();
+                    }
                 });
             });
         }
@@ -210,21 +399,62 @@
         function batchRevoke() {
             var ids = $.table.selectColumns("id");
             if (!ImCommon.validateBatchOperation(ids, 1)) return;
-            $.modal.confirm("确认要批量撤回选中的 " + ids.length + " 条消息吗？", function () {
-                $.operate.post(prefix + "/batchRevoke", { "messageIds": ids.join(",") }, function (res) {
-                    if (res.code == 0) $.table.refresh();
+            $.modal.confirm("确定要批量撤回选中的 " + ids.length + " 条消息吗？", function () {
+                $.operate.post(prefix + "/batchRevoke", { messageIds: ids.join(",") }, function (res) {
+                    if (res.code == 0) {
+                        $.table.refresh();
+                        loadStatistics();
+                    }
                 });
             });
         }
 
-        // 默认调大添加/编辑弹窗
+        function batchDelete() {
+            var ids = $.table.selectColumns("id");
+            if (!ImCommon.validateBatchOperation(ids, 1)) return;
+            $.modal.confirm("确定要删除选中的 " + ids.length + " 条消息吗？此操作不可恢复！", function () {
+                $.operate.post(prefix + "/batchRemove", { messageIds: ids.join(",") }, function (res) {
+                    if (res.code == 0) {
+                        $.table.refresh();
+                        loadStatistics();
+                    }
+                });
+            });
+        }
+
+        function viewImage(id) {
+            $.modal.open("查看图片", prefix + "/viewImage/" + id, 800, 600);
+        }
+
+        function downloadFile(id) {
+            window.location.href = prefix + "/download/" + id;
+        }
+
+        function refreshTable() {
+            $.table.refresh();
+            loadStatistics();
+        }
+
+        function showMessageStats() {
+            $.modal.open("消息统计", prefix + "/statistics", 900, 600);
+        }
+
+        function showAuditSettings() {
+            $.modal.open("审计设置", prefix + "/auditSettings", 700, 500);
+        }
+
+        function changePageSize() {
+            var pageSize = $('#pageSizeSelect').val();
+            $('#bootstrap-table').bootstrapTable('refreshOptions', { pageSize: pageSize });
+        }
+
         $.operate.add = function (id) {
-            $.modal.open("添加" + $.table._option.modalName, $.operate.addUrl(id), 800, 600);
+            $.modal.open("添加消息", $.operate.addUrl(id), 700, 500);
         };
+
         $.operate.edit = function (id) {
-            $.modal.open("修改" + $.table._option.modalName, $.operate.editUrl(id), 800, 600);
+            $.modal.open("修改消息", $.operate.editUrl(id), 700, 500);
         };
     </script>
 </body>
-
 </html>

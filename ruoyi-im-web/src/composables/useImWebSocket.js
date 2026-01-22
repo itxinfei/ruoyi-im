@@ -16,7 +16,7 @@ export function useImWebSocket() {
   // 连接 WebSocket
   const connect = (token) => {
     if (!token) {
-      token = localStorage.getItem('access_token')
+      token = localStorage.getItem('im_token')
     }
 
     if (!token) {

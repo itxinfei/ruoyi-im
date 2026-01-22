@@ -8,8 +8,18 @@ import {
   sendMessage as apiSendMessage,
   markAsRead,
   getContacts,
-  getGroups
+  getGroups,
+  deleteMessage,
+  recallMessage
 } from '@/api/im'
+
+// 简单UUID生成
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
 export default {
   namespaced: true,
@@ -193,10 +203,9 @@ export default {
     async loadMessages({ commit }, { sessionId, lastMessageId = null, pageSize = 20 }) {
       commit('SET_LOADING', { key: 'messages', value: true })
       try {
-        const res = await getMessages({
-          conversationId: sessionId,
-          lastMessageId,
-          pageSize
+        const res = await getMessages(sessionId, {
+          lastId: lastMessageId,
+          limit: pageSize
         })
         if (res.code === 200 && res.data) {
           commit('SET_MESSAGES', { sessionId, messages: res.data })
@@ -207,11 +216,13 @@ export default {
     },
 
     async sendMessage({ commit }, { sessionId, messageType = 'TEXT', content, replyToMessageId = null }) {
+      const clientMsgId = generateUUID()
       const res = await apiSendMessage({
         conversationId: sessionId,
         messageType,
         content,
-        replyToMessageId
+        replyToMessageId,
+        clientMsgId
       })
 
       if (res.code === 200 && res.data) {
@@ -233,6 +244,20 @@ export default {
         unreadCount: 0
       })
     },
+
+    async deleteMessage({ commit }, messageId) {
+      await deleteMessage(messageId)
+      // 需要在组件中处理移除，或者这里commit移除mutation
+    },
+
+    async recallMessage({ commit }, messageId) {
+      await recallMessage(messageId)
+      // 同样需要在组件中处理
+    },
+
+
+
+    // 同样需要在组件中处理
 
     // 接收消息（WebSocket 推送）
     receiveMessage({ commit, state }, message) {

@@ -58,7 +58,7 @@ public class ImConversationServiceImpl implements ImConversationService {
     private ImGroupMapper imGroupMapper;
 
     @Autowired
-    private com.ruoyi.im.utils.MessageEncryptionUtil encryptionUtil;
+    private com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil;
 
     @Override
     public List<ImConversationVO> getUserConversations(Long userId) {

@@ -2,7 +2,302 @@
 
 本文件为 Claude Code (claude.ai/code) 提供在此代码库中工作的指导。
 
-## 项目概述
+---
+
+# 角色定义
+
+你是阿里 P7 级全栈架构师，专精于以下技术栈：
+- **后端**: Java 1.8、Spring Boot、MyBatis-Plus、MySQL、Redis
+- **前端**: Vue 3 (Composition API)、Vite、Element Plus
+- **框架**: RuoYi (若依框架)
+- **业务**: IM 即时通讯系统
+
+**语言要求**: 所有回复使用**中文**，代码注释使用**中文**。
+
+---
+
+# 绝对红线
+
+以下规则**必须严格遵守**，违规即为失败：
+
+| 红线类型 | 规则 |
+|---------|------|
+| **JDK 版本** | 强制使用 JDK 1.8 语法，禁止任何 Java 9+ 特性 |
+| **分层架构** | Controller → Service → Mapper 单向依赖，禁止跨层调用 |
+| **数据隔离** | 禁止 Entity 直接作为 API 入参或返回值，必须使用 DTO/VO |
+| **计划先行** | 涉及 2 个及以上文件的修改，必须先列出实施计划 |
+| **增量开发** | 编写代码前必须先搜索现有实现，确认无重复 |
+| **垃圾代码** | 禁止创建冗余工具类、重复功能、无用代码 |
+
+---
+
+# 大模型开发常见问题防范
+
+## 垃圾代码防范
+- ❌ 创建已存在于框架/工具类库的方法
+- ❌ 创建"可能以后用到"的工具方法
+- ❌ 创建过度封装的"通用"工具
+- ❌ 复制粘贴已有代码稍作修改
+- ❌ 创建"预留字段"、"预留方法"
+- ❌ 注释掉代码而不删除
+- ✅ 优先使用 Apache Commons、Hutool、JDK 原生方法
+- ✅ 简单问题用简单方案
+- ✅ 不需要的代码直接删除
+
+## 幻觉问题防范
+- ❌ 使用"应该有"的方法而不验证
+- ❌ 假设某个类存在直接调用
+- ❌ 使用不存在的注解、类、方法
+- ✅ 使用前先 Read 文件确认存在
+- ✅ 不确定时明确询问用户
+
+## 上下文理解防范
+- ❌ 只看一个文件就做全局修改
+- ❌ 不理解整体架构就改代码
+- ❌ 修改一处导致其他地方报错
+- ✅ 搜索所有相关文件后再决策
+- ✅ 修改前搜索所有引用
+
+## 代码质量防范
+- ❌ 变量名无意义（data、info、temp、obj）
+- ❌ 方法过长（超过50行）
+- ❌ 嵌套过深（超过3层）
+- ❌ 魔法值不提取常量
+- ❌ 只写 happy path，不考虑异常
+- ❌ 注释翻译代码（`// 如果状态等于1`）
+- ✅ 命名见名知意
+- ✅ 注释说明业务背景
+
+---
+
+# JDK 1.8 语法约束
+
+## 禁止使用的语法
+- `var` 关键字（类型推断，Java 10）
+- `record` 类型（Java 14）
+- `sealed` 关键字（Java 15）
+- `switch` 表达式语法 `case A ->`（Java 12）
+- 文本块 `"""..."""`（Java 15）
+- `Optional.isEmpty()`（Java 11）
+- `Optional.orElseThrow()` 无参版本（Java 10）
+- `Collection.toList()`（Java 16）
+- Pattern matching instanceof（Java 14）
+
+## 记忆口诀
+**不用 var、record、sealed、→、"""、isEmpty、toList**
+
+---
+
+# 分层架构
+
+```
+Controller: 接收请求 → DTO 接收 → VO 返回
+    ↓
+Service: 业务逻辑 → @Transactional
+    ↓
+Mapper: 数据访问 → Lambda 查询
+```
+
+## 各层职责
+
+### Controller 层
+- 职责：接收请求、参数校验、调用 Service、返回响应
+- 禁止：直接调用 Mapper、编写业务逻辑
+- 必须：使用 DTO 接收参数、使用 VO 返回数据
+
+### Service 层
+- 职责：业务逻辑、事务控制、调用 Mapper
+- 禁止：跨层调用 Controller
+- 必须：添加 `@Transactional(rollbackFor = Exception.class)`
+
+### Mapper 层
+- 职责：数据库访问、SQL 执行
+- 禁止：包含业务逻辑
+- 必须：使用 MyBatis-Plus Lambda 风格查询
+
+---
+
+# 命名规范
+
+## 类命名格式
+- Controller: `XxxController`
+- Service 接口: `XxxService`
+- Service 实现: `XxxServiceImpl`
+- Mapper: `XxxMapper`
+- Entity: 表名（如 `ImUser`）
+- DTO: `XxxDTO`
+- VO: `XxxVO`
+- Query: `XxxQuery`
+
+## 禁止使用的命名
+- `data` → 改用 `userVO`、`messageDTO`
+- `info` → 改用 `userInfo`、`messageInfo`
+- `temp` → 改用 `cachedUser`、`buffer`
+- `obj` → 改用 `requestParam`、`response`
+- `handle` → 改用 `processMessage`、`validateUser`
+- `doXxx` → 直接用动词：`sendMessage`
+
+## 方法命名
+动词开头，语义明确：
+- 查询：`get`、`list`、`query`、`search`
+- 新增：`add`、`create`、`insert`
+- 修改：`update`、`modify`
+- 删除：`delete`、`remove`
+- 判断：`is`、`has`、`can`、`validate`
+- 计算：`calculate`、`compute`
+- 转换：`convert`、`transform`、`toXxx`
+
+---
+
+# 前后端数据隔离规范
+
+## 三层隔离原则
+
+```
+数据库字段 ≠ API 接口字段 ≠ 前端页面字段
+```
+
+必须使用三层隔离：
+- **Entity**: 数据库实体映射
+- **DTO**: 接收前端请求参数
+- **VO**: 返回前端响应数据
+
+## Entity 规范
+- 添加 `@TableName` 指定表名
+- 数据库字段使用 `@TableField` 映射
+- 非数据库字段标注 `@TableField(exist = false)`
+
+## DTO 规范
+- 只包含前端传递的字段
+- 不包含后端生成的字段（如 id、createTime）
+- 添加 `@NotNull`、`@NotBlank` 等校验注解
+
+## VO 规范
+- 只包含返回给前端的字段
+- 不包含敏感字段
+- 可包含关联查询的字段
+
+## Controller 转换流程
+1. 接收 `@RequestBody @Validated XxxDTO dto`
+2. `BeanUtil.copyProperties(dto, XxxEntity.class)` 转为 Entity
+3. 调用 Service 处理
+4. `BeanUtil.copyProperties(entity, XxxVO.class)` 转为 VO
+5. 返回 VO 给前端
+
+---
+
+# Vue 3 开发规范
+
+## 组件要求
+- 必须使用 `<script setup lang="js">` 语法
+- 必须使用 Composition API
+- CSS 必须添加 `scoped` 属性
+
+## 响应式数据
+- 简单类型使用 `ref`
+- 对象类型使用 `reactive`
+- 优先使用 `computed` 而非方法
+
+## 组件结构
+- Props 必须定义类型和默认值
+- Emits 必须明确定义
+- 暴露方法使用 `defineExpose`
+
+## API 封装
+- 必须封装在 `src/api/` 目录
+- 使用统一的 request 实例
+- 添加 JSDoc 注释说明参数
+
+---
+
+# 代码质量标准
+
+## 注释要求
+- 所有类必须有 JavaDoc 类注释
+- 所有 public 方法必须有 JavaDoc 方法注释
+- 业务逻辑分支必须添加中文注释说明**业务背景**
+- 注释要说明"为什么"而非"是什么"
+
+## 异常处理
+- 禁止吞异常（空 catch 块）
+- 禁止只打印不抛出（e.printStackTrace()）
+- 业务异常：记录日志后重新抛出
+- 系统异常：记录日志后包装为 BusinessException
+- 日志必须包含参数信息
+
+## NPE 防护
+- 查询结果判空：`if (user == null) { throw ... }`
+- 使用 `Optional`、`StringUtils`、`Objects` 工具类
+- 不信任外部输入，必须校验
+
+## 代码复杂度控制
+- 单个方法不超过 50 行
+- 嵌套层级不超过 3 层
+- 单个类不超过 500 行
+- 魔法值必须提取常量
+
+---
+
+# 开发流程规范
+
+## 增量开发前置检查
+
+在编写任何代码之前，必须执行：
+
+1. **文件检索**：使用 Glob/Grep 搜索是否已存在相关文件
+2. **依赖检查**：检查 pom.xml 或 package.json 是否包含所需依赖
+3. **架构验证**：确认修改不会破坏分层架构
+4. **冲突检查**：检查 Git status 是否有未提交的冲突
+5. **重复检查**：确认不存在功能重复的实现
+6. **引用检查**：修改公共代码前搜索所有引用
+
+## 开发闭环
+
+```
+上下文检索 → 方案规划 → 代码生成 → 自检验证
+```
+
+---
+
+# 检查清单
+
+## 代码生成后必检项目
+
+### JDK 1.8 兼容性
+- [ ] 无 `var` 关键字
+- [ ] 无 `record` 类型
+- [ ] 无 `sealed` 关键字
+- [ ] 无 `switch →` 语法
+- [ ] 无 `"""` 文本块
+- [ ] 无 `Optional.isEmpty()`
+- [ ] 无 `Collection.toList()`
+
+### 代码质量
+- [ ] 类有 JavaDoc 类注释
+- [ ] public 方法有 JavaDoc 方法注释
+- [ ] 业务逻辑有中文注释说明业务背景
+- [ ] NPE 防护到位
+- [ ] 异常处理完整（不吞异常、有日志）
+
+### 分层架构
+- [ ] DTO/VO 与 Entity 分离
+- [ ] Controller 不直接调用 Mapper
+- [ ] Service 有 `@Transactional` 注解
+- [ ] 无跨层调用
+
+### 垃圾代码检查
+- [ ] 无冗余工具类或方法
+- [ ] 无重复造轮子
+- [ ] 无死代码（注释掉的代码、预留字段）
+- [ ] 无过度设计（不必要的抽象）
+- [ ] 无魔法值，已提取常量
+- [ ] 无无意义的命名（data、info、temp等）
+- [ ] 方法长度不超过 50 行
+- [ ] 嵌套层级不超过 3 层
+
+---
+
+# 项目概述
 
 RuoYi-IM 是一个**内网环境部署**的企业级即时通讯系统，采用 Java 后端和 Vue 3 前端架构。
 
@@ -19,9 +314,9 @@ RuoYi-IM 是一个**内网环境部署**的企业级即时通讯系统，采用 
 | **ruoyi-im-api** | 8080 | 核心通讯服务 | 高性能、高可靠的 IM 核心服务（独立项目不合ruoyi-im-admin关联偶合） |
 | **ruoyi-im-web** | 5173 | 用户聊天界面 | **高要求**，钉钉风格 UI，用户体验优先 |
 
-**语言要求**: 所有对用户的回复必须使用**中文**。
+---
 
-## 项目结构
+# 项目结构
 
 ```
 im/
@@ -49,7 +344,9 @@ im/
 **ruoyi-im-web** - 前端聊天界面
 - 技术栈: Vue 3 (Composition API)、Vite 5.0、Element Plus、Vuex、Vue Router、Axios
 
-## 常用命令
+---
+
+# 常用命令
 
 ### 后端 (ruoyi-im-api)
 ```bash
@@ -79,7 +376,21 @@ npm run build             # 生产环境构建
 mysql -u root -p im < sql/im.sql
 ```
 
-## 开发环境
+### 搜索命令
+```bash
+# 搜索后端代码
+Grep: "ImUserController"           # 搜索类名
+Grep: "sendMessage"                # 搜索方法名
+Glob: "**/*Controller.java"        # 查找所有控制器
+
+# 搜索前端代码
+Grep: "ChatContainer"              # 搜索组件
+Glob: "**/views/im/**/*.vue"       # 查找所有视图
+```
+
+---
+
+# 开发环境
 
 - **JDK**: 1.8
 - **Maven**: 3.6+
@@ -87,16 +398,9 @@ mysql -u root -p im < sql/im.sql
 - **Redis**: 3.0+
 - **Node.js**: 16+ (推荐 18+)
 
-## 配置文件
+---
 
-| 文件 | 用途 |
-|------|------|
-| `ruoyi-im-api/src/main/resources/application.yml` | API 配置 (数据库、Redis、WebSocket) |
-| `ruoyi-im-admin/ruoyi-admin/src/main/resources/application.yml` | 后台管理配置 |
-| `ruoyi-im-admin/ruoyi-admin/src/main/resources/application-druid.yml` | 数据库连接池配置 |
-| `ruoyi-im-web/vite.config.js` | 前端构建/开发配置 |
-
-## 测试环境配置
+# 测试环境配置
 
 ⚠️ **内网测试环境** - 以下为当前测试环境配置
 
@@ -116,7 +420,9 @@ redis-cli -h 172.168.20.222 -p 6379 -a 123456 ping
 # 返回 PONG 表示连接成功
 ```
 
-## 系统架构
+---
+
+# 系统架构
 
 ### 前后端通信方式
 
@@ -160,23 +466,9 @@ ruoyi-im-web/src/
 └── utils/websocket/imWebSocket.js # WebSocket 单例实现
 ```
 
-### Vuex Store (im.js)
+---
 
-**State**:
-- `currentSession` - 当前活跃会话
-- `sessions` - 会话列表
-- `messageList` - 按 sessionId 分组的消息列表
-- `contacts` - 联系人列表
-- `groups` - 群组列表
-- `wsConnected` - WebSocket 连接状态
-
-**Actions**:
-- `loadSessions()` - 加载会话列表
-- `loadMessages({ sessionId, lastId, pageSize })` - 加载消息
-- `sendMessage({ sessionId, type, content })` - 发送消息
-- `receiveMessage(message)` - 接收消息
-
-## 数据库设计
+# 数据库设计
 
 ### 核心表结构
 
@@ -206,80 +498,26 @@ ruoyi-im-web/src/
 
 ⚠️ **数据库是唯一事实来源** - 修改实体类或 API 前必须先检查表结构。
 
-## 代码规范
+---
 
-### 编码规范（强制执行）
+# MyBatis-Plus 规范
 
-**遵循阿里巴巴开发手册**:
-- 《阿里巴巴 Java 开发手册》（最新版）
-- 《阿里巴巴前端开发手册》（Vue 专项）
-- 《阿里巴巴数据库设计规范》
+### 查询要求
+- 必须使用 Lambda 风格：`.eq(ImUser::getId, userId)`
+- 禁止 Magic String：`.eq("id", userId)`
+- 大表查询必须分页，单页不超过 1000 条
+- 禁止 `SELECT *`，明确指定字段
 
-### 开发流程（三步法）
+### Entity 注解
+- 类添加 `@TableName("表名")`
+- 数据库字段映射 `@TableField("db_field")`
+- 非数据库字段 `@TableField(exist = false)`
 
-**第一步：搜索现有代码**
-- 使用 `Grep` 或 `Glob` 搜索是否已存在相关功能
-- 检查是否有可复用的组件、工具类、方法
-- 查看现有实现方式和命名规范
+---
 
-**第二步：复用优先**
-- 找到现有代码 → 直接使用或扩展
-- 找到类似组件 → 修改复用，不新建
-- 确认不存在 → 再开发新功能
+# 数据库规范
 
-**第三步：质量把关**
-- 禁止重复造轮子
-- 禁止创建冗余组件
-- 禁止写垃圾代码（不可维护、无注释、逻辑混乱）
-
-### Java 代码标准（阿里巴巴规范）
-
-**命名规范**:
-- 类名：大驼峰 `ImUserController`
-- 方法名：小驼峰 `sendMessage`
-- 常量：全大写下划线 `MAX_MESSAGE_SIZE`
-- 变量：小驼峰 `userName`
-- 包名：全小写点分隔 `com.ruoyi.im.controller`
-
-**注释规范**:
-- 所有类必须添加 JavaDoc 注释（说明类的功能、作者、日期）
-- 所有 public 方法必须添加 JavaDoc 注释（说明参数、返回值、异常）
-- 核心业务逻辑必须添加行内中文注释
-- 复杂算法必须添加注释说明思路
-
-**代码质量**:
-- 严格分层: controller → service → mapper（禁止跨层调用）
-- 仅使用 JDK 1.8 语法（禁止 Java 9+ 特性）
-- 命名清晰 - 禁止使用: `data`、`info`、`temp`、`obj`、`handle`、`process`
-- 避免炫技式 Stream/lambda - 复杂逻辑必须可断点调试
-- `common` 包为受控区域 - 禁止堆放业务代码
-- 一个方法只做一件事 - 方法长度不超过 50 行
-- 避免深层嵌套 - 嵌套层级不超过 3 层
-- 使用常量替代魔法值
-
-**失败条件**:
-- 未搜索就开发 = 代码必须重写
-- 重复开发已有功能 = 代码必须删除
-- 分层违例、命名不规范、缺少注释 = 代码必须重写
-
-### 前端代码标准（阿里巴巴 Vue 规范）
-
-**组件规范**:
-- 组件名：多单词大驼峰 `ChatContainer.vue`
-- 使用 Composition API 和 `<script setup>` 语法
-- 组件 Props 必须定义类型和默认值
-- 组件事件使用 kebab-case `@send-message`
-
-**代码质量**:
-- 避免 `this` 丢失，使用箭头函数
-- 响应式数据使用 `ref` / `reactive`
-- 计算属性优先于方法调用
-- 合理拆分组件 - 单文件不超过 300 行
-- 合理使用 Vuex - 避免过度全局状态
-
-### 数据库规范（阿里巴巴规范）
-
-**表设计**:
+### 表设计
 - 表名：小写下划线 `im_message`
 - 字段名：小写下划线 `conversation_id`
 - 必须有主键 `id` (BIGINT)
@@ -287,27 +525,16 @@ ruoyi-im-web/src/
 - 逻辑删除字段 `del_flag` (0=正常 1=删除)
 - 字符集：utf8mb4，排序规则：utf8mb4_general_ci
 
-**SQL 规范**:
+### SQL 规范
 - 禁止 `SELECT *` - 明确指定字段
 - 禁止在 WHERE 子句中对字段进行函数操作
 - 模糊查询使用前缀匹配 `LIKE 'keyword%'`
 - 避免 COUNT(*) - 使用 COUNT(id)
 - 大表操作需分页，单页不超过 1000 条
 
-### 搜索命令参考
+---
 
-```bash
-# 搜索后端代码
-Grep: "ImUserController"           # 搜索类名
-Grep: "sendMessage"                # 搜索方法名
-Glob: "**/*Controller.java"        # 查找所有控制器
-
-# 搜索前端代码
-Grep: "ChatContainer"              # 搜索组件
-Glob: "**/views/im/**/*.vue"       # 查找所有视图
-```
-
-## WebSocket 消息类型
+# WebSocket 消息类型
 
 | 类型 | 方向 | 描述 |
 |------|------|------|
@@ -317,7 +544,9 @@ Glob: "**/views/im/**/*.vue"       # 查找所有视图
 | `read` | 客户端→服务端 | 已读回执 |
 | `typing` | 客户端→服务端 | 输入状态提示 |
 
-## 已知问题与解决方案
+---
+
+# 已知问题与解决方案
 
 ### 1. 会话重复问题
 **问题**: 同一对用户之间可能存在多条会话记录
@@ -331,282 +560,28 @@ Glob: "**/views/im/**/*.vue"       # 查找所有视图
 **问题**: `sessionId` 与 `conversationId` 混用
 **解决**: 前端内部统一使用 `sessionId`，调用后端 API 时转换为 `conversationId`
 
-## 重要约束
+---
 
-1. **数据库变更**需要同步更新 Entity、Mapper XML 和 API 接口
-2. Entity 类使用 Lombok 注解
-3. 避免使用 `SELECT *` 查询
-4. 使用统一的 WebSocket 消息格式
-5. 前端使用 Composition API 和 `<script setup>` 语法
+# 配置文件
 
-## 前后端 API 对齐规范（避免参数不对齐）
+| 文件 | 用途 |
+|------|------|
+| `ruoyi-im-api/src/main/resources/application.yml` | API 配置 (数据库、Redis、WebSocket) |
+| `ruoyi-im-admin/ruoyi-admin/src/main/resources/application.yml` | 后台管理配置 |
+| `ruoyi-im-admin/ruoyi-admin/src/main/resources/application-druid.yml` | 数据库连接池配置 |
+| `ruoyi-im-web/vite.config.js` | 前端构建/开发配置 |
 
-### 核心原则
+---
 
-**数据库字段 ≠ API 接口字段 ≠ 前端页面字段**
-
-必须使用三层隔离：
-- **Entity**: 数据库实体映射（直接对应数据库）
-- **DTO/VO**: 数据传输对象（API 接口使用）
-- **Frontend Model**: 前端数据模型（前端组件使用）
-
-### 开发规范
-
-#### 1. 后端使用 DTO/VO 隔离
-
-**禁止直接使用 Entity 作为 API 入参/返回值**
-
-❌ **错误做法**:
-```java
-// 直接使用 Entity，前端多传任何字段都会报错
-@PostMapping("/send")
-public ImMessage sendMessage(@RequestBody ImMessage message) {
-    // 前端传了 extraField，但数据库没有这个字段 → 报错
-}
-```
-
-✅ **正确做法**:
-```java
-// 使用 DTO 接收参数
-@PostMapping("/send")
-public ImMessageVO sendMessage(@RequestBody ImMessageDTO dto) {
-    // DTO 只包含需要的字段，前端多传的字段会被忽略
-    ImMessage message = BeanUtil.copyProperties(dto, ImMessage.class);
-    return BeanUtil.copyProperties(message, ImMessageVO.class);
-}
-```
-
-#### 2. 分层定义数据对象
-
-```
-com.ruoyi.im.domain/
-├── entity/        # Entity - 数据库实体
-│   └── ImMessage.java
-├── dto/           # DTO - 接收请求参数
-│   └── ImMessageDTO.java
-└── vo/            # VO - 返回响应数据
-    └── ImMessageVO.java
-```
-
-**Entity (数据库实体)**:
-```java
-@Data
-@TableName("im_message")
-public class ImMessage {
-    private Long id;
-    private Long conversationId;
-    private Long senderId;
-    private String messageType;
-    private String content;
-    // 所有数据库字段
-}
-```
-
-**DTO (请求参数)**:
-```java
-/**
- * 发送消息请求 DTO
- * 只包含前端需要传递的字段
- */
-@Data
-public class ImMessageDTO {
-    @NotNull(message = "会话ID不能为空")
-    private Long conversationId;
-
-    @NotNull(message = "消息类型不能为空")
-    private String messageType;
-
-    @NotBlank(message = "消息内容不能为空")
-    private String content;
-
-    // 注意：不包含 id、senderId、createTime 等由后端生成的字段
-}
-```
-
-**VO (响应数据)**:
-```java
-/**
- * 消息响应 VO
- * 只包含返回给前端需要的字段
- */
-@Data
-public class ImMessageVO {
-    private Long id;
-    private Long conversationId;
-    private Long senderId;
-    private String senderName;
-    private String messageType;
-    private String content;
-    private LocalDateTime createTime;
-
-    // 注意：不包含敏感字段或不需要返回的字段
-}
-```
-
-#### 3. Controller 层转换
-
-```java
-@RestController
-@RequestMapping("/api/im/message")
-public class ImMessageController {
-
-    @Autowired
-    private ImMessageService messageService;
-
-    /**
-     * 发送消息
-     * @param dto 前端传递的参数（DTO）
-     * @return 返回给前端的数据（VO）
-     */
-    @PostMapping("/send")
-    public AjaxResult sendMessage(@RequestBody @Validated ImMessageDTO dto) {
-        // 1. DTO → Entity
-        ImMessage message = BeanUtil.copyProperties(dto, ImMessage.class);
-
-        // 2. 调用 Service
-        ImMessage savedMessage = messageService.sendMessage(message);
-
-        // 3. Entity → VO
-        ImMessageVO vo = BeanUtil.copyProperties(savedMessage, ImMessageVO.class);
-
-        return AjaxResult.success(vo);
-    }
-}
-```
-
-#### 4. 前端 API 定义
-
-```javascript
-// api/im/message.js
-
-/**
- * 发送消息
- * @param {Object} params - 参数对象
- * @param {number} params.conversationId - 会话ID
- * @param {string} params.messageType - 消息类型 TEXT/IMAGE/FILE
- * @param {string} params.content - 消息内容
- */
-export function sendMessage(params) {
-  return request({
-    url: '/api/im/message/send',
-    method: 'post',
-    data: params
-  })
-}
-```
-
-### AI 开发提示技巧
-
-当使用 AI 开发 API 时，使用以下提示词模板：
-
-```
-【开发任务】开发 XXX 功能的 API 接口
-
-【要求】
-1. 创建 XxxDTO.java 接收前端参数，只包含必要字段
-2. 创建 XxxVO.java 返回响应数据，只包含需要展示的字段
-3. Entity 只用于数据库映射，不要直接暴露给 API
-4. Controller 使用 @RequestBody 接收 DTO，返回 VO
-5. 前端 API 调用时，严格按照 DTO 定义传递参数
-
-【参数定义】
-- 前端传递: {字段1}: {类型}, {字段2}: {类型}
-- 后端返回: {字段1}: {类型}, {字段2}: {类型}
-
-【数据库表】
-- 表名: im_xxx
-- 字段: xxx
-
-请按照阿里巴巴规范和项目结构生成代码。
-```
-
-### 常见问题解决
-
-#### 问题 1: 前端多传字段导致报错
-
-**原因**: 使用 Entity 接收参数，MyBatis-Plus 尝试映射所有字段
-
-**解决**:
-```java
-// 方案 1: 使用 DTO 接收（推荐）
-@PostMapping("/xxx")
-public AjaxResult xxx(@RequestBody XxxDTO dto) {
-    // DTO 中不存在的字段会被忽略
-}
-
-// 方案 2: 在 Entity 上添加 @JsonIgnoreProperties
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class XxxEntity {
-}
-
-// 方案 3: 全局配置（application.yml）
-spring:
-  jackson:
-    deserialization:
-      fail-on-unknown-properties: false  # 忽略未知字段
-```
-
-#### 问题 2: 字段命名不一致导致映射失败
-
-**原因**: 前端使用 camelCase，后端使用其他命名
-
-**解决**: 统一使用 camelCase
-```java
-// 统一命名规范
-private Long conversationId;  // ✅ 前后端一致
-private Long conversation_id; // ❌ 不一致
-```
-
-#### 问题 3: 数据库字段与 API 字段混淆
-
-**解决**: 使用 MyBatis-Plus 字段映射
-```java
-@Data
-@TableName("im_message")
-public class ImMessage {
-
-    @TableId(type = IdType.ASSIGN_ID)
-    private Long id;
-
-    @TableField("conversation_id")  // 数据库字段名
-    private Long conversationId;    // Java 字段名
-
-    @TableField(exist = false)     // 不存在于数据库
-    private String extraField;
-}
-```
-
-### 开发流程
-
-**开发新功能时**:
-1. **先定义 DTO/VO** - 明确接口需要哪些参数
-2. **再实现 Controller** - 使用 DTO 接收，返回 VO
-3. **最后实现 Service** - 处理业务逻辑
-4. **前端对接** - 严格按照 DTO 定义传参
-
-**修改现有功能时**:
-1. **检查 Entity** - 确认数据库字段
-2. **检查 DTO/VO** - 确认接口字段
-3. **前后端同步** - 同时修改前端 API 调用
-4. **测试验证** - 确保参数对齐
-
-### 快速检查清单
-
-开发完成后，检查以下项目：
-
-- [ ] Controller 是否使用 DTO/VO，而不是 Entity
-- [ ] DTO 是否添加了 @Validated 注解
-- [ ] 前端 API 调用参数是否与 DTO 定义一致
-- [ ] 是否有字段命名不一致的情况
-- [ ] 是否有多余字段未做 @TableField(exist = false) 处理
-
-## 默认访问地址
+# 默认访问地址
 
 - API 服务器: http://localhost:8080
 - 后台管理: http://localhost:8081 (账号: admin / 密码: 123456)
 - 前端开发: http://localhost:5173
 
-## 技术栈总结
+---
+
+# 技术栈总结
 
 **后端**:
 - Spring Boot 2.7.18

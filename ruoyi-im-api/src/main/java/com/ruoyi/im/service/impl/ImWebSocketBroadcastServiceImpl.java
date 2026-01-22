@@ -50,8 +50,13 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
                 return;
             }
 
-            Map<String, Object> wsMessage = createWebSocketMessage(message);
-            String messageJson = objectMapper.writeValueAsString(wsMessage);
+            Map<String, Object> payload = createWebSocketMessage(message);
+
+            Map<String, Object> wrapper = new HashMap<>();
+            wrapper.put("type", "message");
+            wrapper.put("data", payload);
+
+            String messageJson = objectMapper.writeValueAsString(wrapper);
 
             broadcastToMembers(members, messageJson, senderId);
         } catch (Exception e) {
@@ -67,7 +72,8 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
                 return;
             }
 
-            Map<String, Object> reactionMessage = createReactionMessage(conversationId, messageId, userId, emoji, action);
+            Map<String, Object> reactionMessage = createReactionMessage(conversationId, messageId, userId, emoji,
+                    action);
             String messageJson = objectMapper.writeValueAsString(reactionMessage);
 
             broadcastToMembers(members, messageJson, userId);
@@ -101,8 +107,8 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         wsMessage.put("id", message.getId());
         wsMessage.put("content", encryptionUtil.decryptMessage(message.getContent()));
         wsMessage.put("senderId", message.getSenderId());
-        wsMessage.put("timestamp", message.getCreateTime() != null ? 
-            message.getCreateTime().toString() : String.valueOf(System.currentTimeMillis()));
+        wsMessage.put("timestamp", message.getCreateTime() != null ? message.getCreateTime().toString()
+                : String.valueOf(System.currentTimeMillis()));
 
         if (message.getFileUrl() != null) {
             wsMessage.put("fileUrl", message.getFileUrl());
@@ -122,7 +128,8 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         return wsMessage;
     }
 
-    private Map<String, Object> createReactionMessage(Long conversationId, Long messageId, Long userId, String emoji, String action) {
+    private Map<String, Object> createReactionMessage(Long conversationId, Long messageId, Long userId, String emoji,
+            String action) {
         Map<String, Object> reactionMessage = new HashMap<>();
         reactionMessage.put("type", "reaction");
         reactionMessage.put("action", action);

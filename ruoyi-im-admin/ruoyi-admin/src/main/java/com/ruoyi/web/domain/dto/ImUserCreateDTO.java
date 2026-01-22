@@ -1,6 +1,7 @@
 package com.ruoyi.web.domain.dto;
 
 import com.ruoyi.common.annotation.Excel;
+import com.ruoyi.common.annotation.StrongPassword;
 import lombok.Data;
 import javax.validation.constraints.*;
 import org.hibernate.validator.constraints.Length;
@@ -24,8 +25,7 @@ public class ImUserCreateDTO {
     @Excel(name = "密码")
     @NotBlank(message = "密码不能为空")
     @Length(min = 8, max = 128, message = "密码长度必须在8-128个字符之间")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]", 
-             message = "密码必须包含大小写字母、数字和特殊字符")
+    @StrongPassword
     private String password;
 
     @Excel(name = "昵称")

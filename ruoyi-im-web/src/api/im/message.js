@@ -118,7 +118,10 @@ export function markAsRead(data) {
   return request({
     url: '/im/message/read',
     method: 'put',
-    data
+    params: {
+      conversationId: data.conversationId,
+      lastReadMessageId: data.messageId
+    }
   })
 }
 
