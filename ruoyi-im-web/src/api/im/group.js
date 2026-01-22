@@ -9,7 +9,7 @@ import request from '../request'
  */
 export function getGroups() {
   return request({
-    url: '/im/group/list',
+    url: '/api/im/group/list',
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getGroups() {
  */
 export function getGroup(groupId) {
   return request({
-    url: `/im/group/${groupId}`,
+    url: `/api/im/group/${groupId}`,
     method: 'get'
   })
 }
@@ -36,7 +36,7 @@ export function getGroup(groupId) {
  */
 export function createGroup(data) {
   return request({
-    url: '/im/group/create',
+    url: '/api/im/group/create',
     method: 'post',
     data
   })
@@ -49,7 +49,7 @@ export function createGroup(data) {
  */
 export function dismissGroup(groupId) {
   return request({
-    url: `/im/group/${groupId}`,
+    url: `/api/im/group/${groupId}`,
     method: 'delete'
   })
 }
@@ -61,7 +61,7 @@ export function dismissGroup(groupId) {
  */
 export function leaveGroup(groupId) {
   return request({
-    url: `/im/group/${groupId}/quit`,
+    url: `/api/im/group/${groupId}/quit`,
     method: 'post'
   })
 }
@@ -75,7 +75,7 @@ export function leaveGroup(groupId) {
  */
 export function addGroupMembers(groupId, userIds) {
   return request({
-    url: `/im/group/${groupId}/members`,
+    url: `/api/im/group/${groupId}/members`,
     method: 'post',
     data: userIds
   })
@@ -90,7 +90,7 @@ export function addGroupMembers(groupId, userIds) {
  */
 export function removeGroupMember(groupId, userIds) {
   return request({
-    url: `/im/group/${groupId}/members`,
+    url: `/api/im/group/${groupId}/members`,
     method: 'delete',
     data: userIds
   })
@@ -106,7 +106,7 @@ export function removeGroupMember(groupId, userIds) {
  */
 export function setGroupAdmin(groupId, targetUserId, isAdmin) {
   return request({
-    url: `/im/group/${groupId}/admin/${targetUserId}`,
+    url: `/api/im/group/${groupId}/admin/${targetUserId}`,
     method: 'put',
     params: { isAdmin }
   })
@@ -121,7 +121,7 @@ export function setGroupAdmin(groupId, targetUserId, isAdmin) {
  */
 export function transferGroupOwner(groupId, newOwnerId) {
   return request({
-    url: `/im/group/${groupId}/transfer/${newOwnerId}`,
+    url: `/api/im/group/${groupId}/transfer/${newOwnerId}`,
     method: 'put'
   })
 }
@@ -137,7 +137,7 @@ export function transferGroupOwner(groupId, newOwnerId) {
  */
 export function updateGroup(groupId, data) {
   return request({
-    url: `/im/group/${groupId}`,
+    url: `/api/im/group/${groupId}`,
     method: 'put',
     data
   })
@@ -150,7 +150,7 @@ export function updateGroup(groupId, data) {
  */
 export function getGroupMembers(groupId) {
   return request({
-    url: `/im/group/${groupId}/members`,
+    url: `/api/im/group/${groupId}/members`,
     method: 'get'
   })
 }
@@ -164,7 +164,7 @@ export function getGroupMembers(groupId) {
  */
 export function setGroupMute(data) {
   return request({
-    url: '/im/group/mute/set',
+    url: '/api/im/group/mute/set',
     method: 'put',
     data
   })
@@ -180,7 +180,7 @@ export function setGroupMute(data) {
  */
 export function muteGroupMember(groupId, targetUserId, duration) {
   return request({
-    url: `/im/group/${groupId}/mute/${targetUserId}`,
+    url: `/api/im/group/${groupId}/mute/${targetUserId}`,
     method: 'put',
     params: { duration }
   })

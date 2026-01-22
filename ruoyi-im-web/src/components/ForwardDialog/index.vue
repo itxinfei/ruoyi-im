@@ -9,15 +9,13 @@
       <div class="forward-message">
         <div class="forward-message-label">转发消息：</div>
         <div class="forward-message-content">
-          <div v-if="message.messageType === 'IMAGE'">
-            <el-image
-              v-if="message.imageData?.imageUrl"
-              :src="message.imageData.imageUrl"
-              style="max-width: 200px; max-height: 200px"
-              fit="cover"
-            />
+          <div v-if="message.type === 'IMAGE'">
+            <img :src="JSON.parse(message.content).imageUrl" class="msg-img" />
           </div>
-          <div v-else-if="message.messageType === 'FILE'">
+          <div v-if="message.type === 'VIDEO'">
+            <video :src="JSON.parse(message.content).videoUrl" class="msg-video" controls />
+          </div>
+          <div v-else-if="message.type === 'FILE'">
             <div class="file-preview">
               <el-icon><Document /></el-icon>
               <span>{{ message.fileData?.fileName || message.content }}</span>

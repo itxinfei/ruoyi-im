@@ -12,7 +12,7 @@ import request from '../request'
  */
 export function getTodos(params) {
     return request({
-        url: '/im/workbench/todos',
+        url: '/api/im/workbench/todos',
         method: 'get',
         params
     })
@@ -28,7 +28,7 @@ export function getTodos(params) {
  */
 export function createTodo(data) {
     return request({
-        url: '/im/workbench/todo',
+        url: '/api/im/workbench/todo',
         method: 'post',
         data
     })
@@ -41,7 +41,7 @@ export function createTodo(data) {
  */
 export function completeTodo(todoId) {
     return request({
-        url: `/im/workbench/todo/${todoId}/complete`,
+        url: `/api/im/workbench/todo/${todoId}/complete`,
         method: 'put'
     })
 }
@@ -54,7 +54,7 @@ export function completeTodo(todoId) {
  */
 export function getApprovals(params) {
     return request({
-        url: '/im/approval/pending',
+        url: '/api/im/approval/pending',
         method: 'get',
         params
     })
@@ -70,7 +70,7 @@ export function getApprovals(params) {
  */
 export function handleApproval(data) {
     return request({
-        url: '/im/approval/handle',
+        url: '/api/im/approval/handle',
         method: 'post',
         data
     })
@@ -85,7 +85,7 @@ export function handleApproval(data) {
  */
 export function checkIn(data) {
     return request({
-        url: '/im/attendance/checkIn',
+        url: '/api/im/attendance/checkIn',
         method: 'post',
         data
     })
@@ -99,7 +99,7 @@ export function checkIn(data) {
  */
 export function getAttendance(params) {
     return request({
-        url: '/im/attendance/records',
+        url: '/api/im/attendance/records',
         method: 'get',
         params
     })
@@ -111,7 +111,7 @@ export function getAttendance(params) {
  */
 export function getAnnouncements() {
     return request({
-        url: '/im/announcement/list',
+        url: '/api/im/announcement/list',
         method: 'get'
     })
 }
@@ -122,7 +122,7 @@ export function getAnnouncements() {
  */
 export function getStatistics() {
     return request({
-        url: '/im/workbench/statistics',
+        url: '/api/im/workbench/statistics',
         method: 'get'
     })
 }

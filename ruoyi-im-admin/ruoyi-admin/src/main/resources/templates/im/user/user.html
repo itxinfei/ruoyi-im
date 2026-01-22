@@ -4,609 +4,479 @@
     <th:block th:include="include :: header('用户管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet" />
     <style>
-        /* 紧凑布局变量 */
-        :root {
-            --compact-spacing-xs: 2px;
-            --compact-spacing-sm: 4px;
-            --compact-spacing-md: 8px;
-            --compact-spacing-lg: 12px;
-            --compact-font-sm: 11px;
-            --compact-font-md: 12px;
-            --compact-font-lg: 13px;
+        /* 页面特定样式 */
+        .wrapper-content {
+            padding: 16px !important;
         }
 
-        .compact-container {
-            padding: 8px 12px;
-        }
-
-        .compact-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            margin-bottom: 8px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .compact-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1e293b;
-            margin: 0;
-        }
-
-        .compact-stats {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .compact-stat-item {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 4px;
-            padding: 6px 10px;
-            flex: 1;
+        /* 统计卡片点击效果 */
+        .im-stat-card.clickable {
             cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .compact-stat-item:hover {
-            border-color: #2563eb;
-            background: #eff6ff;
+        .im-stat-card.clickable:active {
+            transform: translateY(0);
         }
 
-        .compact-stat-label {
-            font-size: var(--compact-font-sm);
-            color: #64748b;
-            margin-bottom: 2px;
-        }
-
-        .compact-stat-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .compact-stat-icon {
-            font-size: 14px;
-            margin-right: 4px;
-        }
-
-        /* 紧凑搜索栏 */
-        .compact-filter {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 4px;
-            padding: 8px 10px;
-            margin-bottom: 8px;
-        }
-
-        .compact-filter-row {
+        /* 用户名样式 */
+        .user-name-cell {
             display: flex;
+            align-items: center;
             gap: 8px;
-            flex-wrap: wrap;
-            align-items: center;
-            margin-bottom: 6px;
         }
 
-        .compact-filter-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .compact-filter-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            flex: 1;
-            min-width: 120px;
-        }
-
-        .compact-filter-label {
-            font-size: var(--compact-font-sm);
-            color: #64748b;
-            white-space: nowrap;
-            width: 50px;
-        }
-
-        .compact-filter-input,
-        .compact-filter-select {
-            height: 26px;
-            padding: 2px 6px;
-            border: 1px solid #e2e8f0;
-            border-radius: 3px;
-            font-size: var(--compact-font-md);
-            flex: 1;
-        }
-
-        .compact-filter-input:focus,
-        .compact-filter-select:focus {
-            outline: none;
-            border-color: #2563eb;
-        }
-
-        .compact-filter-btn {
-            height: 26px;
-            padding: 2px 10px;
-            border-radius: 3px;
-            font-size: var(--compact-font-md);
-        }
-
-        /* 紧凑表格 */
-        .compact-table-card {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .compact-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 10px;
-            border-bottom: 1px solid #e2e8f0;
-            background: #f8fafc;
-        }
-
-        .compact-toolbar-left,
-        .compact-toolbar-right {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-        }
-
-        .compact-btn {
-            height: 24px;
-            padding: 0 8px;
-            font-size: var(--compact-font-sm);
-            border-radius: 3px;
-        }
-
-        .compact-btn-sm {
-            height: 20px;
-            padding: 0 6px;
-            font-size: var(--compact-font-sm);
-            border-radius: 2px;
-        }
-
-        /* 紧凑表格样式 */
-        .table-condensed > tbody > tr > td,
-        .table-condensed > tbody > tr > th {
-            padding: 6px 8px;
-            font-size: var(--compact-font-md);
-        }
-
-        .table-condensed > thead > tr > th {
-            padding: 6px 8px;
-            font-size: var(--compact-font-md);
-            font-weight: 600;
-            background: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        /* 紧凑用户信息 */
-        .compact-user-cell {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .compact-avatar {
-            width: 28px;
-            height: 28px;
+        .user-name-cell .avatar {
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            border: 1px solid #e2e8f0;
+            object-fit: cover;
         }
 
-        .compact-user-info {
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-        }
-
-        .compact-user-name {
-            font-size: var(--compact-font-md);
-            font-weight: 600;
-            color: #1e293b;
-            line-height: 1.2;
-        }
-
-        .compact-user-account {
-            font-size: var(--compact-font-sm);
-            color: #94a3b8;
-            line-height: 1;
-        }
-
-        /* 紧凑状态标签 */
-        .compact-status {
+        .user-name-cell .name-badge {
             display: inline-flex;
             align-items: center;
-            gap: 3px;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: var(--compact-font-sm);
+            padding: 2px 8px;
+            background: var(--im-primary-light);
+            color: var(--im-primary);
+            border-radius: 4px;
+            font-size: 12px;
             font-weight: 500;
         }
 
-        .compact-status.online {
-            background: #ecfdf5;
-            color: #059669;
+        /* 在线状态指示器 */
+        .online-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
         }
 
-        .compact-status.offline {
-            background: #f8fafc;
-            color: #94a3b8;
-        }
-
-        .compact-status.disabled {
-            background: #fef2f2;
-            color: #dc2626;
-        }
-
-        .compact-status-dot {
-            width: 5px;
-            height: 5px;
+        .online-indicator .dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
         }
 
-        /* 紧凑徽章 */
-        .compact-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            font-size: var(--compact-font-sm);
-            font-weight: 600;
-            border-radius: 3px;
-            line-height: 1.3;
+        .online-indicator.online .dot {
+            background: var(--im-success);
+            box-shadow: 0 0 0 2px var(--im-success-bg);
         }
 
-        .compact-badge-primary {
-            background: #eff6ff;
-            color: #1e40af;
+        .online-indicator.offline .dot {
+            background: var(--im-text-quaternary);
         }
 
-        .compact-badge-success {
-            background: #ecfdf5;
-            color: #059669;
-        }
-
-        .compact-badge-warning {
-            background: #fff7ed;
-            color: #d97706;
-        }
-
-        .compact-badge-danger {
-            background: #fef2f2;
-            color: #dc2626;
-        }
-
-        /* 紧凑分页 */
-        .compact-pagination {
+        /* 操作按钮组 */
+        .action-buttons {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 10px;
-            border-top: 1px solid #e2e8f0;
-            background: #f8fafc;
+            gap: 4px;
+            flex-wrap: wrap;
         }
 
-        .compact-pagination-info {
-            font-size: var(--compact-font-sm);
-            color: #64748b;
-        }
-
-        .compact-pagination-btns {
-            display: flex;
-            gap: 2px;
-        }
-
-        .compact-page-btn {
-            height: 24px;
-            min-width: 24px;
-            padding: 0 6px;
-            font-size: var(--compact-font-sm);
-            border: 1px solid #e2e8f0;
-            border-radius: 3px;
-            background: #fff;
+        .action-btn {
+            padding: 2px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid transparent;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .compact-page-btn:hover {
-            border-color: #2563eb;
-            background: #eff6ff;
-        }
-
-        .compact-page-btn.active {
-            background: #2563eb;
-            color: #fff;
-            border-color: #2563eb;
-        }
-
-        .compact-page-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* 紧凑批量操作栏 */
-        .compact-batch-toolbar {
-            display: none;
-            padding: 4px 10px;
-            background: #eff6ff;
-            border-bottom: 1px solid #bfdbfe;
+            transition: var(--im-transition);
+            display: inline-flex;
             align-items: center;
-            justify-content: space-between;
-        }
-
-        .compact-batch-toolbar.active {
-            display: flex;
-        }
-
-        .compact-batch-info {
-            font-size: var(--compact-font-md);
-            color: #2563eb;
-        }
-
-        .compact-batch-actions {
-            display: flex;
             gap: 4px;
         }
 
-        /* 紧凑操作按钮组 */
-        .compact-action-group {
-            display: flex;
-            gap: 2px;
+        .action-btn-edit {
+            background: var(--im-success-bg);
+            color: var(--im-success);
         }
 
-        .compact-action-btn {
-            height: 20px;
-            padding: 0 6px;
-            font-size: var(--compact-font-sm);
-            border-radius: 2px;
-            border: 1px solid #e2e8f0;
-            background: #fff;
-            cursor: pointer;
-            transition: all 0.2s;
+        .action-btn-edit:hover {
+            background: var(--im-success);
+            color: #fff;
         }
 
-        .compact-action-btn:hover {
-            border-color: #2563eb;
-            color: #2563eb;
+        .action-btn-disable {
+            background: var(--im-warning-bg);
+            color: var(--im-warning);
         }
 
-        /* 紧凑文本 */
-        .compact-text-primary {
-            color: #2563eb;
-            font-size: var(--compact-font-md);
+        .action-btn-disable:hover {
+            background: var(--im-warning);
+            color: #fff;
         }
 
-        .compact-text-muted {
-            color: #94a3b8;
-            font-size: var(--compact-font-sm);
+        .action-btn-enable {
+            background: var(--im-success-bg);
+            color: var(--im-success);
         }
 
-        .compact-text-truncate {
-            max-width: 150px;
+        .action-btn-enable:hover {
+            background: var(--im-success);
+            color: #fff;
+        }
+
+        .action-btn-delete {
+            background: var(--im-danger-bg);
+            color: var(--im-danger);
+        }
+
+        .action-btn-delete:hover {
+            background: var(--im-danger);
+            color: #fff;
+        }
+
+        /* 表格样式优化 */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: var(--im-bg-hover);
+            font-weight: 600;
+            color: var(--im-text-primary);
+            border-bottom: 1px solid var(--im-border);
+        }
+
+        .table tbody tr {
+            transition: var(--im-transition);
+        }
+
+        .table tbody tr:hover {
+            background: var(--im-bg-hover);
+        }
+
+        /* 响应式表格容器 */
+        .table-responsive {
+            border-radius: var(--im-radius-md);
             overflow: hidden;
-            text-overflow: ellipsis;
+        }
+
+        /* 搜索折叠面板 */
+        .search-collapse {
+            background: var(--im-bg-container);
+            border-radius: var(--im-radius-md);
+            padding: var(--im-spacing-md);
+            margin-bottom: var(--im-spacing-md);
+            box-shadow: var(--im-shadow-sm);
+            border: 1px solid var(--im-border-light);
+        }
+
+        .select-list ul {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--im-spacing-md);
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+        }
+
+        .select-list ul li {
+            display: flex;
+            align-items: center;
+            gap: var(--im-spacing-sm);
+        }
+
+        .select-list .input-label {
+            font-size: 14px;
+            color: var(--im-text-secondary);
+            font-weight: 500;
             white-space: nowrap;
         }
 
-        /* 紧凑图标 */
-        .compact-icon {
-            font-size: 12px;
-            margin-right: 2px;
+        .select-list input,
+        .select-list select {
+            height: 32px;
+            padding: 4px 12px;
+            border: 1px solid var(--im-border);
+            border-radius: var(--im-radius-sm);
+            font-size: 14px;
+            min-width: 140px;
+            transition: var(--im-transition);
         }
 
-        /* 紧凑分隔线 */
-        .compact-divider {
-            width: 1px;
-            height: 16px;
-            background: #e2e8f0;
-            margin: 0 4px;
+        .select-list input:focus,
+        .select-list select:focus {
+            outline: none;
+            border-color: var(--im-primary);
+            box-shadow: 0 0 0 2px var(--im-primary-light);
         }
 
-        /* 响应式调整 */
+        .select-list input::placeholder {
+            color: var(--im-text-quaternary);
+        }
+
+        /* 按钮组样式优化 */
+        .btn-group-sm .btn {
+            height: 32px;
+            padding: 4px 12px;
+            font-size: 13px;
+            border-radius: var(--im-radius-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: var(--im-transition);
+        }
+
+        .btn-group-sm .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--im-shadow-sm);
+        }
+
+        .btn-group-sm .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: var(--im-success);
+            border-color: var(--im-success);
+        }
+
+        .btn-primary {
+            background: var(--im-primary);
+            border-color: var(--im-primary);
+        }
+
+        .btn-danger {
+            background: var(--im-danger);
+            border-color: var(--im-danger);
+        }
+
+        .btn-info {
+            background: var(--im-info);
+            border-color: var(--im-info);
+        }
+
+        .btn-warning {
+            background: var(--im-warning);
+            border-color: var(--im-warning);
+        }
+
+        .btn-default {
+            background: var(--im-bg-container);
+            border-color: var(--im-border);
+            color: var(--im-text-primary);
+        }
+
+        .btn-default:hover {
+            border-color: var(--im-primary);
+            color: var(--im-primary);
+        }
+
+        /* 统计卡片样式优化 */
+        .ibox {
+            margin-bottom: 0;
+            background: var(--im-bg-container);
+            border-radius: var(--im-radius-md);
+            box-shadow: var(--im-shadow-sm);
+            border: 1px solid var(--im-border-light);
+            overflow: hidden;
+        }
+
+        .ibox-title {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--im-divider);
+            background: var(--im-bg-hover);
+        }
+
+        .ibox-title h5 {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--im-text-secondary);
+        }
+
+        .ibox-content {
+            padding: var(--im-spacing-md);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--im-transition);
+        }
+
+        .ibox-content:hover {
+            background: var(--im-bg-hover);
+        }
+
+        .ibox-content .no-margins {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--im-text-primary);
+            margin: 0;
+        }
+
+        .text-success {
+            color: var(--im-success);
+        }
+
+        .text-danger {
+            color: var(--im-danger);
+        }
+
+        .text-primary {
+            color: var(--im-primary);
+        }
+
+        .text-muted {
+            color: var(--im-text-tertiary);
+        }
+
+        /* 响应式优化 */
         @media (max-width: 768px) {
-            .compact-filter-row {
+            .select-list ul {
                 flex-direction: column;
                 align-items: stretch;
             }
 
-            .compact-filter-item {
-                width: 100%;
-            }
-
-            .compact-toolbar {
+            .select-list ul li {
                 flex-direction: column;
-                gap: 6px;
                 align-items: stretch;
             }
 
-            .compact-toolbar-left,
-            .compact-toolbar-right {
+            .select-list input,
+            .select-list select {
                 width: 100%;
-                flex-wrap: wrap;
+                min-width: unset;
             }
 
-            .compact-stats {
-                flex-wrap: wrap;
+            .action-buttons {
+                flex-direction: column;
             }
 
-            .compact-stat-item {
-                flex: 0 0 calc(50% - 4px);
+            .action-btn {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
 </head>
 
 <body class="gray-bg">
-    <div class="compact-container">
-        <!-- 紧凑头部 -->
-        <div class="compact-header">
-            <h2 class="compact-title">用户管理</h2>
-            <div class="compact-toolbar-right">
-                <button class="btn btn-default compact-btn" onclick="$.modal.open('批量操作', ctx + 'im/user/batch_operations_enhanced', 700, 500)">
-                    <i class="fa fa-list compact-icon"></i>批量操作
-                </button>
-                <button class="btn btn-primary compact-btn" onclick="$.operate.add()" shiro:hasPermission="im:user:add">
-                    <i class="fa fa-plus compact-icon"></i>新增
-                </button>
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <!-- 统计卡片区域 -->
+        <div class="row" style="margin-bottom: var(--im-spacing-md);">
+            <div class="col-sm-3">
+                <div class="ibox">
+                    <div class="ibox-title">
+                        <h5><i class="fa fa-users" style="margin-right: 6px;"></i>用户总数</h5>
+                    </div>
+                    <div class="ibox-content" onclick="filterByStatus('')">
+                        <h1 class="no-margins" id="totalCount">-</h1>
+                        <small class="text-muted">全部用户</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="ibox">
+                    <div class="ibox-title">
+                        <h5><i class="fa fa-circle text-success" style="margin-right: 6px; font-size: 10px;"></i>在线用户</h5>
+                    </div>
+                    <div class="ibox-content" onclick="filterByOnline('1')">
+                        <h1 class="no-margins text-success" id="onlineCount">-</h1>
+                        <small class="text-muted">当前在线</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="ibox">
+                    <div class="ibox-title">
+                        <h5><i class="fa fa-ban text-danger" style="margin-right: 6px;"></i>停用账号</h5>
+                    </div>
+                    <div class="ibox-content" onclick="filterByStatus('0')">
+                        <h1 class="no-margins text-danger" id="disabledCount">-</h1>
+                        <small class="text-muted">已停用</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="ibox">
+                    <div class="ibox-title">
+                        <h5><i class="fa fa-user-plus text-primary" style="margin-right: 6px;"></i>今日新增</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins text-primary" id="todayRegister">-</h1>
+                        <small class="text-muted">今日注册</small>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- 紧凑统计 -->
-        <div class="compact-stats">
-            <div class="compact-stat-item" onclick="filterByStatus('')">
-                <div class="compact-stat-label"><i class="fa fa-users compact-icon"></i>用户总数</div>
-                <div class="compact-stat-value" id="totalCount">-</div>
-            </div>
-            <div class="compact-stat-item" onclick="filterByOnline('1')">
-                <div class="compact-stat-label"><i class="fa fa-circle compact-icon" style="color: #10b981;"></i>在线</div>
-                <div class="compact-stat-value im-text-success" id="onlineCount">-</div>
-            </div>
-            <div class="compact-stat-item" onclick="filterByOnline('0')">
-                <div class="compact-stat-label"><i class="fa fa-circle-o compact-icon"></i>离线</div>
-                <div class="compact-stat-value im-text-tertiary" id="offlineCount">-</div>
-            </div>
-            <div class="compact-stat-item" onclick="filterByStatus('0')">
-                <div class="compact-stat-label"><i class="fa fa-ban compact-icon" style="color: #ef4444;"></i>停用</div>
-                <div class="compact-stat-value im-text-danger" id="disabledCount">-</div>
-            </div>
-            <div class="compact-stat-item">
-                <div class="compact-stat-label"><i class="fa fa-user-plus compact-icon"></i>今日新增</div>
-                <div class="compact-stat-value" id="todayRegister">-</div>
-            </div>
-            <div class="compact-stat-item">
-                <div class="compact-stat-label"><i class="fa fa-user-times compact-icon"></i>今日删除</div>
-                <div class="compact-stat-value" id="todayDelete">-</div>
+        <!-- 搜索区域 -->
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="user-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label class="input-label">用户名</label>
+                                <input type="text" name="username" placeholder="请输入用户名" />
+                            </li>
+                            <li>
+                                <label class="input-label">昵称</label>
+                                <input type="text" name="nickname" placeholder="请输入昵称" />
+                            </li>
+                            <li>
+                                <label class="input-label">手机号</label>
+                                <input type="text" name="phone" placeholder="请输入手机号" />
+                            </li>
+                            <li>
+                                <label class="input-label">状态</label>
+                                <select name="status">
+                                    <option value="">全部</option>
+                                    <option value="1">正常</option>
+                                    <option value="0">停用</option>
+                                </select>
+                            </li>
+                            <li>
+                                <label class="input-label">在线</label>
+                                <select name="isOnline">
+                                    <option value="">全部</option>
+                                    <option value="1">在线</option>
+                                    <option value="0">离线</option>
+                                </select>
+                            </li>
+                            <li style="margin-left: auto;">
+                                <a class="btn btn-primary btn-sm" onclick="$.table.search()">
+                                    <i class="fa fa-search"></i>&nbsp;搜索
+                                </a>
+                                <a class="btn btn-default btn-sm" onclick="$.form.reset()">
+                                    <i class="fa fa-refresh"></i>&nbsp;重置
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <!-- 紧凑搜索 -->
-        <div class="compact-filter">
-            <form id="user-form">
-                <div class="compact-filter-row">
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">用户名</span>
-                        <input type="text" class="compact-filter-input" name="username" placeholder="用户名/账号" />
-                    </div>
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">昵称</span>
-                        <input type="text" class="compact-filter-input" name="nickname" placeholder="请输入昵称" />
-                    </div>
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">手机</span>
-                        <input type="text" class="compact-filter-input" name="phone" placeholder="手机号" />
-                    </div>
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">状态</span>
-                        <select class="compact-filter-select" name="status">
-                            <option value="">全部</option>
-                            <option value="1">正常</option>
-                            <option value="0">停用</option>
-                        </select>
-                    </div>
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">在线</span>
-                        <select class="compact-filter-select" name="isOnline">
-                            <option value="">全部</option>
-                            <option value="1">在线</option>
-                            <option value="0">离线</option>
-                        </select>
-                    </div>
+        <!-- 表格区域 -->
+        <div class="row">
+            <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar" role="group" style="margin-bottom: var(--im-spacing-sm);">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:user:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:user:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:user:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                    <a class="btn btn-info" onclick="showImportModal()" shiro:hasPermission="im:user:import">
+                        <i class="fa fa-upload"></i> 导入
+                    </a>
+                    <a class="btn btn-warning multiple disabled" onclick="batchChangeStatus(1)" shiro:hasPermission="im:user:edit">
+                        <i class="fa fa-check"></i> 批量启用
+                    </a>
+                    <a class="btn btn-warning multiple disabled" onclick="batchChangeStatus(0)" shiro:hasPermission="im:user:edit">
+                        <i class="fa fa-ban"></i> 批量停用
+                    </a>
+                    <a class="btn btn-default" onclick="$.table.exportExcel()" shiro:hasPermission="im:user:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
                 </div>
-                <div class="compact-filter-row">
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">部门</span>
-                        <select class="compact-filter-select" name="departmentId">
-                            <option value="">全部部门</option>
-                        </select>
-                    </div>
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">注册</span>
-                        <input type="text" class="compact-filter-input" name="params[beginTime]" placeholder="开始" />
-                    </div>
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">~</span>
-                        <input type="text" class="compact-filter-input" name="params[endTime]" placeholder="结束" />
-                    </div>
-                    <div class="compact-filter-item" style="flex: 0;">
-                        <button type="button" class="btn btn-default compact-filter-btn" onclick="resetSearch()">
-                            <i class="fa fa-refresh"></i>
-                        </button>
-                        <button type="button" class="btn btn-primary compact-filter-btn" onclick="doSearch()">
-                            <i class="fa fa-search"></i>
-                        </button>
-                    </div>
+                <div class="table-responsive">
+                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
                 </div>
-            </form>
-        </div>
-
-        <!-- 紧凑表格 -->
-        <div class="compact-table-card">
-            <!-- 批量操作栏 -->
-            <div class="compact-batch-toolbar" id="batchToolbar">
-                <span class="compact-batch-info">已选 <span id="selectedCount">0</span> 项</span>
-                <div class="compact-batch-actions">
-                    <button class="btn btn-success compact-btn" onclick="batchEnable()" shiro:hasPermission="im:user:edit">
-                        <i class="fa fa-check compact-icon"></i>启用
-                    </button>
-                    <button class="btn btn-warning compact-btn" onclick="batchDisable()" shiro:hasPermission="im:user:edit">
-                        <i class="fa fa-ban compact-icon"></i>停用
-                    </button>
-                    <button class="btn btn-danger compact-btn" onclick="batchDelete()" shiro:hasPermission="im:user:remove">
-                        <i class="fa fa-trash compact-icon"></i>删除
-                    </button>
-                    <button class="btn btn-info compact-btn" onclick="batchExport()" shiro:hasPermission="im:user:export">
-                        <i class="fa fa-download compact-icon"></i>导出
-                    </button>
-                </div>
-            </div>
-
-            <!-- 工具栏 -->
-            <div class="compact-toolbar">
-                <div class="compact-toolbar-left">
-                    <button class="btn btn-primary compact-btn" onclick="$.operate.add()" shiro:hasPermission="im:user:add">
-                        <i class="fa fa-plus compact-icon"></i>新增
-                    </button>
-                    <button class="btn btn-success compact-btn" onclick="showImportModal()" shiro:hasPermission="im:user:import">
-                        <i class="fa fa-upload compact-icon"></i>导入
-                    </button>
-                    <div class="compact-divider"></div>
-                    <button class="btn btn-default compact-btn" onclick="refreshTable()">
-                        <i class="fa fa-refresh compact-icon"></i>刷新
-                    </button>
-                </div>
-                <div class="compact-toolbar-right">
-                    <button class="btn btn-info compact-btn" onclick="$.table.exportExcel()" shiro:hasPermission="im:user:export">
-                        <i class="fa fa-download compact-icon"></i>导出
-                    </button>
-                    <button class="btn btn-default compact-btn" onclick="toggleColumns()">
-                        <i class="fa fa-columns compact-icon"></i>列
-                    </button>
-                    <select class="compact-filter-select" id="pageSizeSelect" onchange="changePageSize()">
-                        <option value="20">20条</option>
-                        <option value="50">50条</option>
-                        <option value="100">100条</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- 表格 -->
-            <table id="bootstrap-table"
-                   class="table table-condensed table-striped"
-                   data-mobile-responsive="true"
-                   data-pagination="true"
-                   data-page-list="[20,50,100]"
-                   data-page-size="20"
-                   data-side-pagination="server">
-            </table>
-
-            <!-- 紧凑分页 -->
-            <div class="compact-pagination">
-                <span class="compact-pagination-info" id="paginationInfo">显示 1-20 条，共 0 条</span>
-                <div class="compact-pagination-btns" id="paginationBtns"></div>
             </div>
         </div>
     </div>
@@ -615,9 +485,10 @@
     <th:block th:include="include :: bootstrap-table-export-js" />
     <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
+        var prefix = ctx + "im/user";
         var editFlag = [[${@permission.hasPermi('im:user:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:user:remove')}]];
-        var prefix = ctx + "im/user";
+        var resetPwdFlag = [[${@permission.hasPermi('im:user:resetPwd')}]];
 
         $(function () {
             loadStatistics();
@@ -629,11 +500,14 @@
                 if (res.code === 0) {
                     $('#totalCount').text(res.data.totalUsers || 0);
                     $('#onlineCount').text(res.data.onlineUsers || 0);
-                    $('#offlineCount').text(res.data.totalUsers - res.data.onlineUsers || 0);
                     $('#disabledCount').text(res.data.disabledUsers || 0);
                     $('#todayRegister').text(res.data.todayRegister || 0);
-                    $('#todayDelete').text(res.data.todayDelete || 0);
                 }
+            }).fail(function() {
+                $('#totalCount').text('-');
+                $('#onlineCount').text('-');
+                $('#disabledCount').text('-');
+                $('#todayRegister').text('-');
             });
         }
 
@@ -647,213 +521,118 @@
                 sortName: "createTime",
                 sortOrder: "desc",
                 modalName: "用户",
-                pageSize: 20,
-                pageList: [20, 50, 100],
-                showColumns: true,
-                showRefresh: false,
-                showToggle: false,
-                showFullscreen: false,
                 columns: [{
-                    checkbox: true,
-                    width: '40'
+                    checkbox: true
+                }, {
+                    field: 'id',
+                    visible: false
                 }, {
                     field: 'avatar',
                     title: '头像',
-                    width: '50',
+                    width: 80,
                     align: 'center',
                     formatter: function (value, row) {
                         var avatar = value || '/img/profile.jpg';
-                        return '<img src="' + avatar + '" class="compact-avatar" alt="' + row.nickname + '" />';
+                        var name = row.nickname || row.username || '用户';
+                        return '<div class="user-name-cell">' +
+                            '<img src="' + avatar + '" class="avatar" onerror="this.src=\'/img/profile.jpg\'" />' +
+                            '<span class="name-badge">' + (row.username || '') + '</span>' +
+                            '</div>';
                     }
                 }, {
-                    field: 'username',
-                    title: '用户',
-                    width: '140',
+                    field: 'nickname',
+                    title: '昵称',
+                    width: 120,
                     formatter: function (value, row) {
-                        return '<div class="compact-user-cell">' +
-                            '<img src="' + (row.avatar || '/img/profile.jpg') + '" class="compact-avatar" />' +
-                            '<div class="compact-user-info">' +
-                            '<span class="compact-user-name">' + (row.nickname || value) + '</span>' +
-                            '<span class="compact-user-account">@' + value + '</span>' +
-                            '</div>' +
-                            '</div>';
+                        return value || '<span class="text-muted">未设置</span>';
                     }
                 }, {
                     field: 'departmentName',
                     title: '部门',
-                    width: '100',
+                    width: 120,
                     formatter: function (value) {
-                        return value || '<span class="compact-text-muted">未分配</span>';
+                        return value || '<span class="text-muted">-</span>';
                     }
                 }, {
                     field: 'phone',
-                    title: '手机',
-                    width: '110',
-                    formatter: function (value) {
-                        return value || '-';
-                    }
+                    title: '手机号',
+                    width: 120
                 }, {
                     field: 'email',
                     title: '邮箱',
-                    width: '150',
+                    width: 180,
                     formatter: function (value) {
-                        if (!value) return '-';
-                        return '<span class="compact-text-truncate" title="' + value + '">' + value + '</span>';
+                        if (!value) return '<span class="text-muted">-</span>';
+                        return '<span style="display:inline-block;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + value + '">' + value + '</span>';
                     }
                 }, {
                     field: 'status',
                     title: '状态',
-                    width: '70',
-                    align: 'center',
-                    formatter: function (value) {
-                        if (value == 0) {
-                            return '<span class="compact-status disabled"><span class="compact-status-dot"></span>停用</span>';
-                        }
-                        return '<span class="compact-status online"><span class="compact-status-dot"></span>正常</span>';
-                    }
-                }, {
-                    field: 'isOnline',
-                    title: '在线',
-                    width: '60',
+                    width: 80,
                     align: 'center',
                     formatter: function (value) {
                         if (value == 1) {
-                            return '<span class="compact-status online"><span class="compact-status-dot"></span>在线</span>';
+                            return '<span class="im-badge im-badge-success">正常</span>';
+                        } else {
+                            return '<span class="im-badge im-badge-danger">停用</span>';
                         }
-                        return '<span class="compact-status offline"><span class="compact-status-dot"></span>离线</span>';
+                    }
+                }, {
+                    field: 'isOnline',
+                    title: '在线状态',
+                    width: 100,
+                    align: 'center',
+                    formatter: function (value) {
+                        if (value == 1) {
+                            return '<div class="online-indicator online"><span class="dot"></span>在线</div>';
+                        } else {
+                            return '<div class="online-indicator offline"><span class="dot"></span>离线</div>';
+                        }
                     }
                 }, {
                     field: 'lastLoginTime',
                     title: '最后登录',
-                    width: '140',
+                    width: 160,
                     sortable: true,
                     formatter: function (value) {
-                        return value ? value.substr(0, 16) : '-';
+                        return value || '<span class="text-muted">从未登录</span>';
                     }
                 }, {
                     field: 'createTime',
                     title: '注册时间',
-                    width: '140',
-                    sortable: true,
-                    formatter: function (value) {
-                        return value ? value.substr(0, 16) : '-';
-                    }
+                    width: 160,
+                    sortable: true
                 }, {
                     title: '操作',
                     align: 'center',
-                    width: '160',
+                    width: 180,
                     formatter: function (value, row) {
                         var actions = [];
-                        actions.push('<a class="btn btn-primary compact-btn-sm ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit compact-icon"></i>编辑</a>');
-
+                        actions.push('<a class="action-btn action-btn-edit" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
                         if (row.status == 1) {
-                            actions.push('<a class="btn btn-warning compact-btn-sm ' + editFlag + '" href="javascript:void(0)" onclick="toggleStatus(\'' + row.id + '\', 0)"><i class="fa fa-ban compact-icon"></i>停用</a>');
+                            actions.push('<a class="action-btn action-btn-disable" href="javascript:void(0)" onclick="changeStatus(\'' + row.id + '\', 0)"><i class="fa fa-ban"></i>停用</a> ');
                         } else {
-                            actions.push('<a class="btn btn-success compact-btn-sm ' + editFlag + '" href="javascript:void(0)" onclick="toggleStatus(\'' + row.id + '\', 1)"><i class="fa fa-check compact-icon"></i>启用</a>');
+                            actions.push('<a class="action-btn action-btn-enable" href="javascript:void(0)" onclick="changeStatus(\'' + row.id + '\', 1)"><i class="fa fa-check"></i>启用</a> ');
                         }
-
-                        actions.push('<a class="btn btn-danger compact-btn-sm ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-trash compact-icon"></i>删除</a>');
-
-                        return actions.join('');
+                        actions.push('<a class="action-btn action-btn-delete" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-trash"></i>删除</a>');
+                        return '<div class="action-buttons">' + actions.join('') + '</div>';
                     }
-                }],
-                onCheck: function (row) {
-                    updateBatchToolbar();
-                },
-                onUncheck: function (row) {
-                    updateBatchToolbar();
-                },
-                onCheckAll: function (rows) {
-                    updateBatchToolbar();
-                },
-                onUncheckAll: function (rows) {
-                    updateBatchToolbar();
-                },
-                onLoadSuccess: function (data) {
-                    updatePaginationInfo(data);
-                    updatePaginationBtns(data);
-                },
-                onPageChange: function (number, size) {
-                    $('#pageSizeSelect').val(size);
-                }
+                }]
             };
             $.table.init(options);
         }
 
-        function updateBatchToolbar() {
-            var selectedCount = $.table.selectColumns("id").length;
-            $('#selectedCount').text(selectedCount);
-            if (selectedCount > 0) {
-                $('#batchToolbar').addClass('active');
-            } else {
-                $('#batchToolbar').removeClass('active');
-            }
-        }
-
-        function updatePaginationInfo(data) {
-            var total = data.total;
-            var pageSize = $('#bootstrap-table').bootstrapTable('getOptions').pageSize;
-            var pageNumber = $('#bootstrap-table').bootstrapTable('getOptions').pageNumber;
-            var from = (pageNumber - 1) * pageSize + 1;
-            var to = Math.min(pageNumber * pageSize, total);
-            $('#paginationInfo').text('显示 ' + from + '-' + to + ' 条，共 ' + total + ' 条');
-        }
-
-        function updatePaginationBtns(data) {
-            var total = data.total;
-            var pageSize = $('#bootstrap-table').bootstrapTable('getOptions').pageSize;
-            var pageNumber = $('#bootstrap-table').bootstrapTable('getOptions').pageNumber;
-            var totalPages = Math.ceil(total / pageSize);
-
-            var html = '';
-
-            // 首页
-            html += '<button class="compact-page-btn" onclick="goToPage(1)" ' + (pageNumber == 1 ? 'disabled' : '') + '><i class="fa fa-angle-double-left"></i></button>';
-
-            // 上一页
-            html += '<button class="compact-page-btn" onclick="goToPage(' + (pageNumber - 1) + ')" ' + (pageNumber == 1 ? 'disabled' : '') + '><i class="fa fa-angle-left"></i></button>';
-
-            // 页码
-            var startPage = Math.max(1, pageNumber - 2);
-            var endPage = Math.min(totalPages, pageNumber + 2);
-
-            for (var i = startPage; i <= endPage; i++) {
-                html += '<button class="compact-page-btn ' + (i == pageNumber ? 'active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
-            }
-
-            // 下一页
-            html += '<button class="compact-page-btn" onclick="goToPage(' + (pageNumber + 1) + ')" ' + (pageNumber == totalPages ? 'disabled' : '') + '><i class="fa fa-angle-right"></i></button>';
-
-            // 末页
-            html += '<button class="compact-page-btn" onclick="goToPage(' + totalPages + ')" ' + (pageNumber == totalPages ? 'disabled' : '') + '><i class="fa fa-angle-double-right"></i></button>';
-
-            $('#paginationBtns').html(html);
-        }
-
-        function goToPage(page) {
-            $('#bootstrap-table').bootstrapTable('selectPage', page);
-        }
-
-        function doSearch() {
-            $.table.search();
-        }
-
-        function resetSearch() {
-            $("#user-form")[0].reset();
-            $.table.search();
-        }
-
         function filterByStatus(status) {
             $('select[name="status"]').val(status);
-            doSearch();
+            $.table.search();
         }
 
         function filterByOnline(online) {
             $('select[name="isOnline"]').val(online);
-            doSearch();
+            $.table.search();
         }
 
-        function toggleStatus(id, status) {
+        function changeStatus(id, status) {
             var action = status == 1 ? '启用' : '停用';
             $.modal.confirm("确定要" + action + "该用户吗？", function () {
                 $.operate.post(prefix + "/changeStatus", { userId: id, status: status }, function (res) {
@@ -865,78 +644,27 @@
             });
         }
 
-        function batchEnable() {
-            var ids = $.table.selectColumns("id");
-            if (!ImCommon.validateBatchOperation(ids, 1)) return;
-            $.modal.confirm("确定要批量启用选中的 " + ids.length + " 个用户吗？", function () {
-                $.operate.post(prefix + "/batchChangeStatus", { userIds: ids.join(","), status: 1 }, function (res) {
+        function batchChangeStatus(status) {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            var action = status == 1 ? '启用' : '停用';
+            $.modal.confirm("确定要批量" + action + "吗？", function () {
+                var ids = rows.join();
+                $.operate.post(prefix + "/batchUpdateStatus", { userIds: ids, status: status }, function (res) {
                     if (res.code == 0) {
                         $.table.refresh();
                         loadStatistics();
                     }
                 });
             });
-        }
-
-        function batchDisable() {
-            var ids = $.table.selectColumns("id");
-            if (!ImCommon.validateBatchOperation(ids, 1)) return;
-            $.modal.confirm("确定要批量停用选中的 " + ids.length + " 个用户吗？", function () {
-                $.operate.post(prefix + "/batchChangeStatus", { userIds: ids.join(","), status: 0 }, function (res) {
-                    if (res.code == 0) {
-                        $.table.refresh();
-                        loadStatistics();
-                    }
-                });
-            });
-        }
-
-        function batchDelete() {
-            var ids = $.table.selectColumns("id");
-            if (!ImCommon.validateBatchOperation(ids, 1)) return;
-            $.modal.confirm("确定要删除选中的 " + ids.length + " 个用户吗？此操作不可恢复！", function () {
-                $.operate.post(prefix + "/batchRemove", { userIds: ids.join(",") }, function (res) {
-                    if (res.code == 0) {
-                        $.table.refresh();
-                        loadStatistics();
-                    }
-                });
-            });
-        }
-
-        function batchExport() {
-            var ids = $.table.selectColumns("id");
-            window.location.href = prefix + "/export?userIds=" + ids.join(",");
         }
 
         function showImportModal() {
             $.modal.open("导入用户", prefix + "/import", 600, 400);
         }
-
-        function refreshTable() {
-            $.table.refresh();
-            loadStatistics();
-        }
-
-        function toggleColumns() {
-            $('#bootstrap-table').bootstrapTable('toggleColumn', 'avatar');
-        }
-
-        function changePageSize() {
-            var pageSize = $('#pageSizeSelect').val();
-            $('#bootstrap-table').bootstrapTable('refreshOptions', {
-                pageSize: pageSize
-            });
-        }
-
-        // 自定义弹窗大小
-        $.operate.add = function (id) {
-            $.modal.open("添加用户", $.operate.addUrl(id), 700, 500);
-        };
-
-        $.operate.edit = function (id) {
-            $.modal.open("修改用户", $.operate.editUrl(id), 700, 500);
-        };
     </script>
 </body>
 </html>

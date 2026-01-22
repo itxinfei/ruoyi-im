@@ -77,7 +77,7 @@ const handleSend = async (content) => {
   try {
     const msg = await store.dispatch('im/sendMessage', {
       sessionId: props.session.id,
-      messageType: 'TEXT',
+      type: 'TEXT',
       content
     })
     messages.value.push(transformMsg(msg))
@@ -108,7 +108,7 @@ const handleFileSuccess = async ({ data }) => {
   try {
     const msg = await store.dispatch('im/sendMessage', {
       sessionId: props.session.id,
-      messageType: 'FILE',
+      type: 'FILE',
       content: JSON.stringify({
         fileName: data.fileName,
         fileSize: data.fileSize,
@@ -127,7 +127,7 @@ const handleImgSuccess = async ({ data }) => {
   try {
     const msg = await store.dispatch('im/sendMessage', {
       sessionId: props.session.id,
-      messageType: 'IMAGE',
+      type: 'IMAGE',
       content: JSON.stringify({
         imageUrl: data.fileUrl,
         width: data.width,

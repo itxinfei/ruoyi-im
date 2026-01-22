@@ -81,7 +81,7 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
                 redisUtil.set(retryKey, "1", RETRY_EXPIRE_HOURS, TimeUnit.HOURS);
 
                 log.warn("记录消息发送失败: clientMsgId={}, retryCount={}, error={}",
-                    clientMsgId, currentCount + 1, errorMessage);
+                        clientMsgId, currentCount + 1, errorMessage);
             } else {
                 log.error("消息已达最大重试次数: clientMsgId={}, maxRetry={}", clientMsgId, MAX_RETRY_COUNT);
             }
@@ -124,7 +124,8 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
             // 尝试重新发送
             log.info("开始重试发送消息: clientMsgId={}, retryCount={}", clientMsgId, retryCount + 1);
 
-            Long messageId = messageService.sendMessage(data.getRequest(), data.getUserId());
+            com.ruoyi.im.vo.message.ImMessageVO vo = messageService.sendMessage(data.getRequest(), data.getUserId());
+            Long messageId = vo != null ? vo.getId() : null;
 
             if (messageId != null) {
                 log.info("消息重试发送成功: clientMsgId={}, messageId={}", clientMsgId, messageId);

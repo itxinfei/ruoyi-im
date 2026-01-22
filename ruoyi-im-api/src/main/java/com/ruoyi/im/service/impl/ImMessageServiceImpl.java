@@ -66,16 +66,31 @@ public class ImMessageServiceImpl implements ImMessageService {
     @Autowired
     private com.ruoyi.im.util.ImRedisUtil redisUtil;
 
+    @Autowired
+    private com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long sendMessage(ImMessageSendRequest request, Long userId) {
+    public ImMessageVO sendMessage(ImMessageSendRequest request, Long userId) {
         // 幂等性检查：使用clientMsgId防止重复发送
         String clientMsgId = request.getClientMsgId();
         if (clientMsgId != null && !clientMsgId.isEmpty()) {
             Long existingMessageId = redisUtil.checkAndRecordClientMsgId(clientMsgId);
             if (existingMessageId != null) {
                 log.info("消息已存在，跳过重复发送: clientMsgId={}, messageId={}", clientMsgId, existingMessageId);
-                return existingMessageId;
+                ImMessage existingMessage = imMessageMapper.selectImMessageById(existingMessageId);
+                if (existingMessage != null) {
+                    ImMessageVO vo = new ImMessageVO();
+                    BeanUtils.copyProperties(existingMessage, vo);
+                    vo.setContent(encryptionUtil.decryptMessage(existingMessage.getContent())); // 解密
+                    vo.setIsSelf(existingMessage.getSenderId().equals(userId));
+                    ImUser sender = imUserMapper.selectImUserById(existingMessage.getSenderId());
+                    if (sender != null) {
+                        vo.setSenderName(sender.getNickname());
+                        vo.setSenderAvatar(sender.getAvatar());
+                    }
+                    return vo;
+                }
             }
         }
 
@@ -104,19 +119,19 @@ public class ImMessageServiceImpl implements ImMessageService {
         // 使用分布式锁防止并发发送消息导致的数据不一致
         final Long finalConversationId = conversationId;
         final String finalClientMsgId = clientMsgId;
-        Long messageId = distributedLock.executeWithLock(
+        ImMessageVO messageVO = distributedLock.executeWithLock(
                 com.ruoyi.im.util.ImDistributedLock.LockKeys.sendMessageKey(finalConversationId),
                 10, // 10秒过期时间足够
                 () -> doSendMessage(request, userId, finalConversationId, sender, finalClientMsgId));
 
-        return messageId;
+        return messageVO;
     }
 
     /**
      * 实际执行发送消息的逻辑
      * 支持消息发送状态追踪
      */
-    private Long doSendMessage(ImMessageSendRequest request, Long userId, Long conversationId, ImUser sender,
+    private ImMessageVO doSendMessage(ImMessageSendRequest request, Long userId, Long conversationId, ImUser sender,
             String clientMsgId) {
         ImMessage message = new ImMessage();
         message.setConversationId(conversationId);
@@ -125,25 +140,24 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setMessageType(request.getType());
         message.setReplyToMessageId(request.getReplyToMessageId());
 
-        String contentToSave = encryptionUtil.encryptMessage(request.getContent());
+        String plainContent = request.getContent();
+        String contentToSave = encryptionUtil.encryptMessage(plainContent);
         message.setContent(contentToSave);
         message.setIsRevoked(0);
         message.setCreateTime(LocalDateTime.now());
+        message.setUpdateTime(LocalDateTime.now());
 
-        // 设置发送状态相关字段
         message.setClientMsgId(clientMsgId);
-        message.setSendStatus("SENDING"); // 初始状态为发送中
+        message.setSendStatus("SENDING");
         message.setSendRetryCount(0);
-        message.setDeliveredTime(LocalDateTime.now()); // 暂时设置为当前时间，表示已处理
+        message.setDeliveredTime(LocalDateTime.now());
 
         imMessageMapper.insertImMessage(message);
 
-        // 记录clientMsgId与消息ID的映射（用于幂等性）
         if (clientMsgId != null && !clientMsgId.isEmpty()) {
             redisUtil.recordClientMsgId(clientMsgId, message.getId());
         }
 
-        // 更新会话的最后消息ID和时间（确保会话列表正确显示最新消息）
         ImConversation conversationUpdate = new ImConversation();
         conversationUpdate.setId(conversationId);
         conversationUpdate.setLastMessageId(message.getId());
@@ -151,12 +165,9 @@ public class ImMessageServiceImpl implements ImMessageService {
         conversationUpdate.setUpdateTime(LocalDateTime.now());
         imConversationMapper.updateById(conversationUpdate);
 
-        // 增加会话中其他成员的未读消息数
         List<com.ruoyi.im.domain.ImConversationMember> members = imConversationMemberMapper
                 .selectByConversationId(conversationId);
 
-        // 性能优化：只有在成员数量较少时才清除接收者的会话列表缓存
-        // 大群（>20人）依赖WebSocket更新或TTL过期，避免循环操作Redis导致发送延迟
         boolean shouldEvictCache = members.size() <= 20;
 
         for (com.ruoyi.im.domain.ImConversationMember member : members) {
@@ -169,26 +180,35 @@ public class ImMessageServiceImpl implements ImMessageService {
             }
         }
 
-        // 始终清除发送者的会话列表缓存，确保发送者看到最新状态
         redisUtil.delete("conversation:list:" + userId);
 
-        // 处理@提及
         ImMentionInfo mentionInfo = request.getMentionInfo();
         if (mentionInfo == null && request.getContent() != null) {
-            // 自动解析消息内容中的@提及
             mentionInfo = messageMentionService.parseMentions(request.getContent());
         }
+
         if (mentionInfo != null
                 && (mentionInfo.getUserIds() != null || Boolean.TRUE.equals(mentionInfo.getMentionAll()))) {
-            // 设置会话ID用于权限验证
             mentionInfo.setConversationId(conversationId);
             messageMentionService.createMentions(message.getId(), mentionInfo, userId);
         }
 
-        // 记录消息发送审计日志
         AuditLogUtil.logSendMessage(userId, message.getId(), conversationId, true);
 
-        return message.getId();
+        ImMessageVO vo = new ImMessageVO();
+        BeanUtils.copyProperties(message, vo);
+        vo.setContent(plainContent);
+        vo.setType(message.getMessageType());
+        vo.setIsSelf(true);
+        vo.setSenderName(sender.getNickname());
+        vo.setSenderAvatar(sender.getAvatar());
+        vo.setSendTime(message.getCreateTime());
+        vo.setStatus(1);
+
+        // 异步广播消息
+        broadcastService.broadcastMessageToConversation(conversationId, message.getId(), userId);
+
+        return vo;
     }
 
     @Override

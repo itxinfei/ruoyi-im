@@ -18,9 +18,9 @@ public interface ImMessageService {
      *
      * @param request 发送请求
      * @param userId  当前用户ID
-     * @return 消息ID
+     * @return 消息VO(包含完整的消息信息)
      */
-    Long sendMessage(ImMessageSendRequest request, Long userId);
+    ImMessageVO sendMessage(ImMessageSendRequest request, Long userId);
 
     /**
      * 获取会话消息列表

@@ -67,7 +67,7 @@ public class ImUserServiceImpl implements ImUserService {
     public ImLoginVO login(ImLoginRequest request) {
         ImUser user = imUserMapper.selectImUserByUsername(request.getUsername());
         if (user == null) {
-            throw new BusinessException("USER_NOT_EXIST", "用户不存在");
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
         }
 
         logger.info("用户登录 - 用户名: {}, 请求密码: {}, 数据库密码: {}",
@@ -127,7 +127,7 @@ public class ImUserServiceImpl implements ImUserService {
     public ImUserVO getUserById(Long userId) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException("USER_NOT_EXIST", "用户不存在");
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
         }
 
         ImUserVO vo = new ImUserVO();
@@ -140,7 +140,7 @@ public class ImUserServiceImpl implements ImUserService {
     public void updateUser(Long userId, ImUserUpdateRequest request) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException("USER_NOT_EXIST", "用户不存在");
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
         }
 
         BeanUtils.copyProperties(request, user);
@@ -152,7 +152,7 @@ public class ImUserServiceImpl implements ImUserService {
     public void updateStatus(Long userId, Integer status) { // 0=禁用, 1=启用
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException("USER_NOT_EXIST", "用户不存在");
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
         }
 
         user.setStatus(status);
@@ -164,7 +164,7 @@ public class ImUserServiceImpl implements ImUserService {
     public boolean changePassword(Long userId, String oldPassword, String newPassword) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException("USER_NOT_EXIST", "用户不存在");
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
         }
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {

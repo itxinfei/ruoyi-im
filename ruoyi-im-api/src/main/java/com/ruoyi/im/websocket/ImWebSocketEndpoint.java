@@ -469,7 +469,8 @@ public class ImWebSocketEndpoint {
             request.setClientMsgId(clientMsgId);
 
             // 保存消息到数据库
-            Long messageId = staticImMessageService.sendMessage(request, userId);
+            com.ruoyi.im.vo.message.ImMessageVO vo = staticImMessageService.sendMessage(request, userId);
+            Long messageId = vo != null ? vo.getId() : null;
 
             if (messageId != null) {
                 // 立即返回ACK确认

@@ -317,7 +317,8 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
 
     @Override
     public Long saveAndSendMessage(ImMessageSendRequest request, Long senderId) {
-        Long messageId = imMessageService.sendMessage(request, senderId);
+        com.ruoyi.im.vo.message.ImMessageVO vo = imMessageService.sendMessage(request, senderId);
+        Long messageId = vo != null ? vo.getId() : null;
 
         if (messageId == null) {
             log.error("Failed to save message");
@@ -341,7 +342,8 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
 
         List<ImConversationMemberVO> members = conversationMemberService.getConversationMemberList(null);
         for (ImConversationMemberVO member : members) {
-            if (!member.getUserId().equals(senderId) && member.getConversationId().equals(request.getConversationId())) {
+            if (!member.getUserId().equals(senderId)
+                    && member.getConversationId().equals(request.getConversationId())) {
                 pushToUser(member.getUserId(), pushMessage);
             }
         }

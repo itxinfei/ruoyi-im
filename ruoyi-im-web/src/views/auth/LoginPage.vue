@@ -66,10 +66,11 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { login } from '@/api/im/auth'
 
+const store = useStore()
 const router = useRouter()
 const loginFormRef = ref(null)
 const loading = ref(false)
@@ -84,8 +85,7 @@ const loginForm = reactive({
 // 表单验证规则
 const loginRules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 2, max: 20, message: '用户名长度在 2 到 20 个字符', trigger: 'blur' }
+    { required: true, message: '请输入用户名', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
@@ -103,40 +103,29 @@ const handleLogin = async () => {
 
     loading.value = true
 
-    // 调用登录接口
-    const response = await login({
+    // 调用 Vuex 登录 action
+    await store.dispatch('user/login', {
       username: loginForm.username,
       password: loginForm.password
     })
 
-    // 存储 token
-    if (response.data && response.data.token) {
-      localStorage.setItem('access_token', response.data.token)
-      
-      // 如果勾选记住密码，存储用户名
-      if (loginForm.rememberMe) {
-        localStorage.setItem('remembered_username', loginForm.username)
-      } else {
-        localStorage.removeItem('remembered_username')
-      }
-
-      // 存储用户信息
-      if (response.data.userInfo) {
-        localStorage.setItem('user_info', JSON.stringify(response.data.userInfo))
-      }
-
-      ElMessage.success('登录成功')
-
-      // 跳转到主页
-      router.push('/')
+    // 处理记住用户名逻辑
+    if (loginForm.rememberMe) {
+      localStorage.setItem('remembered_username', loginForm.username)
     } else {
-      ElMessage.error('登录失败：未获取到 Token')
+      localStorage.removeItem('remembered_username')
     }
+
+    ElMessage.success('登录成功')
+
+    // 跳转到主页 (或跳转回重定向前的页面)
+    const redirectUrl = router.currentRoute.value.query.redirect || '/'
+    router.push(redirectUrl)
+    
   } catch (error) {
     console.error('登录失败:', error)
-    if (error.message) {
-      ElMessage.error(error.message)
-    }
+    const errorMsg = error.message || (error.response?.data?.msg) || '登录失败，请检查用户名和密码'
+    ElMessage.error(errorMsg)
   } finally {
     loading.value = false
   }

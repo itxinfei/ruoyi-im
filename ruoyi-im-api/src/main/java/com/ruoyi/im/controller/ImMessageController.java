@@ -69,16 +69,11 @@ public class ImMessageController {
     }
 
     @PostMapping("/send")
-    public Result<Long> send(@Valid @RequestBody ImMessageSendRequest request,
+    public Result<ImMessageVO> send(@Valid @RequestBody ImMessageSendRequest request,
             @RequestHeader(value = "userId", required = false) Long userId) {
         userId = getUserIdOrDefault(userId);
-        Long messageId = imMessageService.sendMessage(request, userId);
-
-        if (messageId != null) {
-            broadcastService.broadcastMessageToConversation(request.getConversationId(), messageId, userId);
-        }
-
-        return Result.success("发送成功", messageId);
+        ImMessageVO messageVO = imMessageService.sendMessage(request, userId);
+        return Result.success(messageVO);
     }
 
     private Long getUserIdOrDefault(Long userId) {

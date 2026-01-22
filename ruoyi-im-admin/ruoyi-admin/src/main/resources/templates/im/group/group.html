@@ -2,165 +2,278 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('群组管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet" />
     <style>
-        /* 引入紧凑布局样式 */
-        @import url(../fragments/compact-style.css);
+        /* 整体边距 */
+        .wrapper-content {
+            padding: 5px !important;
+        }
+
+        /* 紧凑统计卡片 */
+        .compact-ibox {
+            margin-bottom: 5px;
+        }
+
+        .compact-ibox .ibox-content {
+            padding: 8px 10px;
+            border: 1px solid #e7eaec;
+            border-top: 3px solid #1ab394;
+        }
+
+        .compact-ibox:hover .ibox-content {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .compact-ibox h1 {
+            font-size: 28px;
+            margin: 5px 0 3px 0;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .compact-ibox .stat-percent {
+            font-size: 12px;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        /* 搜索区域 - 紧凑无边距 */
+        .compact-search {
+            margin-bottom: 5px;
+        }
+
+        .compact-search .ibox {
+            margin-bottom: 0;
+        }
+
+        .compact-search .ibox-content {
+            padding: 8px 10px;
+            border: 1px solid #e7eaec;
+            background: #fff;
+        }
+
+        .compact-search .row {
+            margin: 0 -3px;
+        }
+
+        .compact-search .col-sm-1,
+        .compact-search .col-sm-2,
+        .compact-search .col-sm-3,
+        .compact-search .col-sm-4,
+        .compact-search .col-sm-6,
+        .compact-search .col-sm-12 {
+            padding: 0 3px;
+        }
+
+        .compact-search .form-control {
+            height: 26px;
+            padding: 3px 6px;
+            font-size: 12px;
+            border-radius: 2px;
+        }
+
+        .compact-search .input-group {
+            margin-bottom: 0;
+        }
+
+        .compact-search .input-group .input-group-addon {
+            padding: 3px 6px;
+            font-size: 12px;
+            border-radius: 2px;
+            background: #f5f7fa;
+            border: 1px solid #e7eaec;
+        }
+
+        .compact-search .input-group .form-control {
+            height: 26px;
+            border-radius: 2px;
+        }
+
+        .compact-search .btn {
+            padding: 3px 10px;
+            font-size: 12px;
+            height: 26px;
+            border-radius: 2px;
+        }
+
+        /* 表格区域 - 紧凑无边距 */
+        .compact-table {
+            margin-bottom: 0;
+        }
+
+        .compact-table .ibox {
+            margin-bottom: 0;
+        }
+
+        .compact-table .ibox-content {
+            padding: 8px 10px;
+            border: 1px solid #e7eaec;
+            background: #fff;
+        }
+
+        /* 表格工具栏紧凑 */
+        .fixed-table-container {
+            margin-top: 5px;
+        }
+
+        .btn-group-sm > .btn {
+            margin: 0 1px;
+            padding: 2px 6px;
+            font-size: 12px;
+            height: 22px;
+            border-radius: 2px;
+        }
+
+        /* 表格单元格紧凑 */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table > tbody > tr > td,
+        .table > thead > tr > th {
+            padding: 3px 5px;
+            vertical-align: middle;
+            line-height: 1.3;
+        }
+
+        .table > thead > tr > th {
+            background: #f5f7fa;
+            font-size: 11px;
+            font-weight: 600;
+            color: #606266;
+            border-bottom: 1px solid #e7eaec;
+        }
+
+        .table > tbody > tr > td {
+            font-size: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .table > tbody > tr:hover > td {
+            background: #f5f7fa;
+        }
+
+        /* 标签紧凑 */
+        .label {
+            padding: 2px 5px;
+            font-size: 10px;
+            border-radius: 2px;
+            line-height: 1.2;
+        }
+
+        /* 下拉菜单宽度 */
+        select.form-control {
+            width: 60px;
+            min-width: 60px;
+        }
     </style>
 </head>
 
 <body class="gray-bg">
-    <div class="compact-container">
-        <!-- 头部 -->
-        <div class="compact-header">
-            <h2 class="compact-title">群组管理</h2>
-            <div class="compact-toolbar-right">
-                <button class="btn btn-default compact-btn" onclick="showBatchOperation()">
-                    <i class="fa fa-list compact-icon"></i>批量操作
-                </button>
-                <button class="btn btn-primary compact-btn" onclick="$.operate.add()" shiro:hasPermission="im:group:add">
-                    <i class="fa fa-plus compact-icon"></i>新增群组
-                </button>
-            </div>
-        </div>
-
-        <!-- 统计卡片 -->
-        <div class="compact-stats">
-            <div class="compact-stat-item" onclick="filterByStatus('')">
-                <div class="compact-stat-label"><i class="fa fa-users compact-icon"></i>群组总数</div>
-                <div class="compact-stat-value" id="totalCount">-</div>
-            </div>
-            <div class="compact-stat-item" onclick="filterByActive()">
-                <div class="compact-stat-label"><i class="fa fa-comments compact-icon" style="color: #10b981;"></i>活跃群</div>
-                <div class="compact-stat-value im-text-success" id="activeCount">-</div>
-            </div>
-            <div class="compact-stat-item" onclick="filterByMuted()">
-                <div class="compact-stat-label"><i class="fa fa-ban compact-icon" style="color: #f59e0b;"></i>禁言群</div>
-                <div class="compact-stat-value im-text-warning" id="mutedCount">-</div>
-            </div>
-            <div class="compact-stat-item" onclick="filterByLarge()">
-                <div class="compact-stat-label"><i class="fa fa-group compact-icon" style="color: #ef4444;"></i>大群</div>
-                <div class="compact-stat-value im-text-danger" id="largeCount">-</div>
-            </div>
-            <div class="compact-stat-item">
-                <div class="compact-stat-label"><i class="fa fa-user-plus compact-icon"></i>今日新增</div>
-                <div class="compact-stat-value" id="todayCreate">-</div>
-            </div>
-            <div class="compact-stat-item">
-                <div class="compact-stat-label"><i class="fa fa-users compact-icon"></i>总成员数</div>
-                <div class="compact-stat-value" id="totalMembers">-</div>
-            </div>
-        </div>
-
-        <!-- 搜索栏 -->
-        <div class="compact-filter">
-            <form id="group-form">
-                <div class="compact-filter-row">
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">群名称</span>
-                        <input type="text" class="compact-filter-input" name="name" placeholder="请输入群组名称" />
-                    </div>
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">群主ID</span>
-                        <input type="text" class="compact-filter-input" name="ownerId" placeholder="群主ID/账号" />
-                    </div>
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">类型</span>
-                        <select class="compact-filter-select" name="groupType">
-                            <option value="">全部</option>
-                            <option value="PUBLIC">公开群</option>
-                            <option value="PRIVATE">私有群</option>
-                        </select>
-                    </div>
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">禁言</span>
-                        <select class="compact-filter-select" name="allMuted">
-                            <option value="">全部</option>
-                            <option value="0">否</option>
-                            <option value="1">是</option>
-                        </select>
-                    </div>
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <!-- 统计卡片区域 -->
+        <div class="row">
+            <div class="col-sm-3 compact-ibox">
+                <div class="ibox-content" style="text-align: center; cursor: pointer; border-top-color: #1ab394;" onclick="filterByType('')">
+                    <h1 class="no-margins" id="totalCount">0</h1>
+                    <div class="stat-percent font-bold text-navy">群组总数</div>
                 </div>
-                <div class="compact-filter-row">
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">成员数</span>
-                        <input type="text" class="compact-filter-input" name="memberCount" placeholder="成员数范围，如: 10-50" />
+            </div>
+            <div class="col-sm-3 compact-ibox">
+                <div class="ibox-content" style="text-align: center; cursor: pointer; border-top-color: #f8ac59;" onclick="filterByMuted()">
+                    <h1 class="no-margins text-warning" id="mutedCount">0</h1>
+                    <div class="stat-percent font-bold text-warning">禁言群组</div>
+                </div>
+            </div>
+            <div class="col-sm-3 compact-ibox">
+                <div class="ibox-content" style="text-align: center; cursor: pointer; border-top-color: #ed5565;" onclick="filterByLarge()">
+                    <h1 class="no-margins text-danger" id="largeCount">0</h1>
+                    <div class="stat-percent font-bold text-danger">大规模群</div>
+                </div>
+            </div>
+            <div class="col-sm-3 compact-ibox">
+                <div class="ibox-content" style="text-align: center; border-top-color: #1c84c6;">
+                    <h1 class="no-margins text-primary" id="todayCreate">0</h1>
+                    <div class="stat-percent font-bold text-primary">今日新增</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 搜索区域 -->
+        <div class="ibox compact-search">
+            <div class="ibox-content">
+                <form id="group-form">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" name="name" placeholder="群组名称" />
+                        </div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" name="ownerName" placeholder="群主" />
+                        </div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" name="memberCount" placeholder="成员数" />
+                        </div>
+                        <div class="col-sm-1">
+                            <select class="form-control" name="groupType">
+                                <option value="">类型</option>
+                                <option value="PUBLIC">公开</option>
+                                <option value="PRIVATE">私有</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-1">
+                            <select class="form-control" name="allMuted">
+                                <option value="">禁言</option>
+                                <option value="1">是</option>
+                                <option value="0">否</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="input-daterange input-group">
+                                <input type="text" class="form-control" name="params[beginTime]" placeholder="开始" />
+                                <span class="input-group-addon">-</span>
+                                <input type="text" class="form-control" name="params[endTime]" placeholder="结束" />
+                            </div>
+                        </div>
                     </div>
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">创建时间</span>
-                        <input type="text" class="compact-filter-input" name="params[beginTime]" placeholder="开始" />
-                    </div>
-                    <div class="compact-filter-item">
-                        <span class="compact-filter-label">~</span>
-                        <input type="text" class="compact-filter-input" name="params[endTime]" placeholder="结束" />
-                    </div>
-                    <div class="compact-filter-item" style="flex: 0;">
-                        <button type="button" class="btn btn-default compact-filter-btn" onclick="resetSearch()">
-                            <i class="fa fa-refresh"></i>
+                    <div style="margin-top: 5px; text-align: right;">
+                        <button type="button" class="btn btn-primary" onclick="$.table.search()">
+                            <i class="fa fa-search"></i> 搜索
                         </button>
-                        <button type="button" class="btn btn-primary compact-filter-btn" onclick="doSearch()">
-                            <i class="fa fa-search"></i>
+                        <button type="button" class="btn btn-default" onclick="$.form.reset()">
+                            <i class="fa fa-refresh"></i> 重置
                         </button>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
 
-        <!-- 表格卡片 -->
-        <div class="compact-table-card">
-            <!-- 批量操作栏 -->
-            <div class="compact-batch-toolbar" id="batchToolbar">
-                <span class="compact-batch-info">已选 <span id="selectedCount">0</span> 项</span>
-                <div class="compact-batch-actions">
-                    <button class="btn btn-warning compact-btn" onclick="batchMute()" shiro:hasPermission="im:group:edit">
-                        <i class="fa fa-ban compact-icon"></i>禁言
-                    </button>
-                    <button class="btn btn-success compact-btn" onclick="batchUnmute()" shiro:hasPermission="im:group:edit">
-                        <i class="fa fa-unlock compact-icon"></i>解除禁言
-                    </button>
-                    <button class="btn btn-danger compact-btn" onclick="batchDelete()" shiro:hasPermission="im:group:remove">
-                        <i class="fa fa-trash compact-icon"></i>解散
-                    </button>
+        <!-- 表格区域 -->
+        <div class="ibox compact-table">
+            <div class="ibox-content">
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:group:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:group:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:remove">
+                        <i class="fa fa-remove"></i> 解散
+                    </a>
+                    <a class="btn btn-warning multiple disabled" onclick="batchMute()" shiro:hasPermission="im:group:edit">
+                        <i class="fa fa-ban"></i> 禁言
+                    </a>
+                    <a class="btn btn-success multiple disabled" onclick="batchUnmute()" shiro:hasPermission="im:group:edit">
+                        <i class="fa fa-check"></i> 解除
+                    </a>
+                    <a class="btn btn-default" onclick="exportExcel()" shiro:hasPermission="im:group:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
                 </div>
-            </div>
-
-            <!-- 工具栏 -->
-            <div class="compact-toolbar">
-                <div class="compact-toolbar-left">
-                    <button class="btn btn-primary compact-btn" onclick="$.operate.add()" shiro:hasPermission="im:group:add">
-                        <i class="fa fa-plus compact-icon"></i>新增
-                    </button>
-                    <div class="compact-divider"></div>
-                    <button class="btn btn-default compact-btn" onclick="refreshTable()">
-                        <i class="fa fa-refresh compact-icon"></i>刷新
-                    </button>
+                <div class="fixed-table-container">
+                    <table id="bootstrap-table"
+                           data-mobile-responsive="true"
+                           class="table table-hover table-striped"></table>
                 </div>
-                <div class="compact-toolbar-right">
-                    <button class="btn btn-info compact-btn" onclick="$.table.exportExcel()" shiro:hasPermission="im:group:export">
-                        <i class="fa fa-download compact-icon"></i>导出
-                    </button>
-                    <select class="compact-filter-select" id="pageSizeSelect" onchange="changePageSize()">
-                        <option value="20">20条</option>
-                        <option value="50">50条</option>
-                        <option value="100">100条</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- 表格 -->
-            <table id="bootstrap-table"
-                   class="table table-condensed table-striped"
-                   data-mobile-responsive="true"
-                   data-pagination="true"
-                   data-page-list="[20,50,100]"
-                   data-page-size="20"
-                   data-side-pagination="server">
-            </table>
-
-            <!-- 分页 -->
-            <div class="compact-pagination">
-                <span class="compact-pagination-info" id="paginationInfo">显示 1-20 条，共 0 条</span>
-                <div class="compact-pagination-btns" id="paginationBtns"></div>
             </div>
         </div>
     </div>
@@ -169,8 +282,6 @@
     <th:block th:include="include :: bootstrap-table-export-js" />
     <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('im:group:edit')}]];
-        var removeFlag = [[${@permission.hasPermi('im:group:remove')}]];
         var prefix = ctx + "im/group";
 
         $(function () {
@@ -182,11 +293,9 @@
             $.get(ctx + 'im/dashboard/group-statistics', function (res) {
                 if (res.code === 0) {
                     $('#totalCount').text(res.data.totalGroups || 0);
-                    $('#activeCount').text(res.data.activeGroups || 0);
                     $('#mutedCount').text(res.data.mutedGroups || 0);
                     $('#largeCount').text(res.data.largeGroups || 0);
                     $('#todayCreate').text(res.data.todayCreatedGroups || 0);
-                    $('#totalMembers').text(res.data.totalGroupMembers || 0);
                 }
             });
         }
@@ -202,75 +311,66 @@
                 sortOrder: "desc",
                 modalName: "群组",
                 pageSize: 20,
-                pageList: [20, 50, 100],
                 columns: [{
-                    checkbox: true,
-                    width: '40'
+                    checkbox: true
                 }, {
                     field: 'id',
-                    title: 'ID',
-                    width: '60'
+                    visible: false
                 }, {
                     field: 'name',
-                    title: '群名称',
-                    width: '150',
-                    formatter: function (value, row) {
-                        return '<div class="compact-user-cell">' +
-                            '<span class="compact-user-name">' + value + '</span>' +
-                            '</div>';
+                    title: '群组名称',
+                    width: 140,
+                    formatter: function (value) {
+                        return '<strong>' + value + '</strong>';
                     }
                 }, {
                     field: 'groupType',
                     title: '类型',
-                    width: '70',
+                    width: 50,
                     align: 'center',
                     formatter: function (value) {
-                        if (value == 'PUBLIC') {
-                            return '<span class="compact-badge compact-badge-primary">公开</span>';
-                        }
-                        return '<span class="compact-badge compact-badge-success">私有</span>';
+                        return value == 'PUBLIC' ? '<span class="label label-primary">公开</span>' : '<span class="label label-success">私有</span>';
                     }
                 }, {
                     field: 'ownerName',
                     title: '群主',
-                    width: '100',
-                    formatter: function (value) {
-                        return value || '-';
-                    }
+                    width: 70
                 }, {
                     field: 'memberCount',
                     title: '成员数',
-                    width: '70',
+                    width: 50,
                     align: 'center',
                     formatter: function (value) {
-                        return value || 0;
+                        return '<span class="label label-info">' + (value || 0) + '</span>';
                     }
                 }, {
                     field: 'allMuted',
                     title: '禁言',
-                    width: '60',
+                    width: 45,
                     align: 'center',
                     formatter: function (value) {
-                        if (value == 1) {
-                            return '<span class="compact-status disabled"><span class="compact-status-dot"></span>禁言</span>';
-                        }
-                        return '<span class="compact-status online"><span class="compact-status-dot"></span>正常</span>';
+                        return value == 1 ? '<span class="label label-warning">是</span>' : '<span class="label label-default">否</span>';
                     }
                 }, {
                     field: 'status',
                     title: '状态',
-                    width: '60',
+                    width: 45,
                     align: 'center',
                     formatter: function (value) {
-                        if (value == 0) {
-                            return '<span class="compact-status disabled">禁用</span>';
-                        }
-                        return '<span class="compact-status online">正常</span>';
+                        return value == 1 ? '<span class="label label-success">正常</span>' : '<span class="label label-danger">禁用</span>';
                     }
                 }, {
                     field: 'createTime',
                     title: '创建时间',
-                    width: '140',
+                    width: 110,
+                    sortable: true,
+                    formatter: function (value) {
+                        return value ? value.substr(0, 16) : '-';
+                    }
+                }, {
+                    field: 'updateTime',
+                    title: '更新时间',
+                    width: 110,
                     sortable: true,
                     formatter: function (value) {
                         return value ? value.substr(0, 16) : '-';
@@ -278,112 +378,37 @@
                 }, {
                     title: '操作',
                     align: 'center',
-                    width: '180',
+                    width: 100,
                     formatter: function (value, row) {
                         var actions = [];
-                        actions.push('<a class="btn btn-primary compact-btn-sm ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit compact-icon"></i>编辑</a>');
-
-                        if (row.allMuted == 0) {
-                            actions.push('<a class="btn btn-warning compact-btn-sm ' + editFlag + '" href="javascript:void(0)" onclick="toggleMute(\'' + row.id + '\', 1)"><i class="fa fa-ban compact-icon"></i>禁言</a>');
-                        } else {
-                            actions.push('<a class="btn btn-success compact-btn-sm ' + editFlag + '" href="javascript:void(0)" onclick="toggleMute(\'' + row.id + '\', 0)"><i class="fa fa-unlock compact-icon"></i>解除</a>');
-                        }
-
-                        actions.push('<a class="btn btn-info compact-btn-sm ' + editFlag + '" href="javascript:void(0)" onclick="showMembers(\'' + row.id + '\')"><i class="fa fa-users compact-icon"></i>成员</a>');
-                        actions.push('<a class="btn btn-danger compact-btn-sm ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-trash compact-icon"></i>解散</a>');
-
+                        actions.push('<a class="btn btn-primary btn-xs" onclick="$.operate.edit(\'' + row.id + '\')" shiro:hasPermission="im:group:edit"><i class="fa fa-edit"></i></a> ');
+                        actions.push('<a class="btn btn-' + (row.allMuted == 1 ? 'success' : 'warning') + ' btn-xs" onclick="toggleMute(\'' + row.id + '\',' + (row.allMuted == 1 ? '0' : '1') + ')" shiro:hasPermission="im:group:edit"><i class="fa fa-' + (row.allMuted == 1 ? 'check' : 'ban') + '"></i></a> ');
+                        actions.push('<a class="btn btn-info btn-xs" onclick="showMembers(\'' + row.id + '\')" shiro:hasPermission="im:group:query"><i class="fa fa-users"></i></a> ');
+                        actions.push('<a class="btn btn-danger btn-xs" onclick="$.operate.remove(\'' + row.id + '\')" shiro:hasPermission="im:group:remove"><i class="fa fa-trash"></i></a>');
                         return actions.join('');
                     }
-                }],
-                onCheck: updateBatchToolbar,
-                onUncheck: updateBatchToolbar,
-                onCheckAll: updateBatchToolbar,
-                onUncheckAll: updateBatchToolbar,
-                onLoadSuccess: function (data) {
-                    updatePaginationInfo(data);
-                    updatePaginationBtns(data);
-                },
-                onPageChange: function (number, size) {
-                    $('#pageSizeSelect').val(size);
-                }
+                }]
             };
             $.table.init(options);
         }
 
-        function updateBatchToolbar() {
-            var selectedCount = $.table.selectColumns("id").length;
-            $('#selectedCount').text(selectedCount);
-            $('#batchToolbar').toggleClass('active', selectedCount > 0);
-        }
-
-        function updatePaginationInfo(data) {
-            var total = data.total;
-            var pageSize = $('#bootstrap-table').bootstrapTable('getOptions').pageSize;
-            var pageNumber = $('#bootstrap-table').bootstrapTable('getOptions').pageNumber;
-            var from = (pageNumber - 1) * pageSize + 1;
-            var to = Math.min(pageNumber * pageSize, total);
-            $('#paginationInfo').text('显示 ' + from + '-' + to + ' 条，共 ' + total + ' 条');
-        }
-
-        function updatePaginationBtns(data) {
-            var total = data.total;
-            var pageSize = $('#bootstrap-table').bootstrapTable('getOptions').pageSize;
-            var pageNumber = $('#bootstrap-table').bootstrapTable('getOptions').pageNumber;
-            var totalPages = Math.ceil(total / pageSize);
-
-            var html = '';
-            html += '<button class="compact-page-btn" onclick="goToPage(1)" ' + (pageNumber == 1 ? 'disabled' : '') + '><i class="fa fa-angle-double-left"></i></button>';
-            html += '<button class="compact-page-btn" onclick="goToPage(' + (pageNumber - 1) + ')" ' + (pageNumber == 1 ? 'disabled' : '') + '><i class="fa fa-angle-left"></i></button>';
-
-            var startPage = Math.max(1, pageNumber - 2);
-            var endPage = Math.min(totalPages, pageNumber + 2);
-
-            for (var i = startPage; i <= endPage; i++) {
-                html += '<button class="compact-page-btn ' + (i == pageNumber ? 'active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
-            }
-
-            html += '<button class="compact-page-btn" onclick="goToPage(' + (pageNumber + 1) + ')" ' + (pageNumber == totalPages ? 'disabled' : '') + '><i class="fa fa-angle-right"></i></button>';
-            html += '<button class="compact-page-btn" onclick="goToPage(' + totalPages + ')" ' + (pageNumber == totalPages ? 'disabled' : '') + '><i class="fa fa-angle-double-right"></i></button>';
-
-            $('#paginationBtns').html(html);
-        }
-
-        function goToPage(page) {
-            $('#bootstrap-table').bootstrapTable('selectPage', page);
-        }
-
-        function doSearch() {
+        function filterByType(type) {
+            $('select[name="groupType"]').val(type);
             $.table.search();
-        }
-
-        function resetSearch() {
-            $("#group-form")[0].reset();
-            $.table.search();
-        }
-
-        function filterByStatus(status) {
-            $('select[name="status"]').val(status);
-            doSearch();
-        }
-
-        function filterByActive() {
-            $('#group-form input[name="name"]').val('');
-            doSearch();
         }
 
         function filterByMuted() {
             $('select[name="allMuted"]').val('1');
-            doSearch();
+            $.table.search();
         }
 
         function filterByLarge() {
             $('input[name="memberCount"]').val('100-');
-            doSearch();
+            $.table.search();
         }
 
         function toggleMute(id, muted) {
-            var action = muted == 1 ? '禁言' : '解除禁言';
-            $.modal.confirm("确定要" + action + "该群组吗？", function () {
+            $.modal.confirm('确定要' + (muted == 1 ? '解除禁言' : '禁言') + '该群组吗？', function () {
                 $.operate.post(prefix + "/toggleMute", { groupId: id, allMuted: muted }, function (res) {
                     if (res.code == 0) {
                         $.table.refresh();
@@ -394,10 +419,13 @@
         }
 
         function batchMute() {
-            var ids = $.table.selectColumns("id");
-            if (!ImCommon.validateBatchOperation(ids, 1)) return;
-            $.modal.confirm("确定要批量禁言选中的 " + ids.length + " 个群组吗？", function () {
-                $.operate.post(prefix + "/batchMute", { groupIds: ids.join(",") }, function (res) {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm('确定要批量禁言选中的群组吗？', function () {
+                $.operate.post(prefix + "/batchMute", { groupIds: rows.join() }, function (res) {
                     if (res.code == 0) {
                         $.table.refresh();
                         loadStatistics();
@@ -407,23 +435,13 @@
         }
 
         function batchUnmute() {
-            var ids = $.table.selectColumns("id");
-            if (!ImCommon.validateBatchOperation(ids, 1)) return;
-            $.modal.confirm("确定要批量解除禁言选中的 " + ids.length + " 个群组吗？", function () {
-                $.operate.post(prefix + "/batchUnmute", { groupIds: ids.join(",") }, function (res) {
-                    if (res.code == 0) {
-                        $.table.refresh();
-                        loadStatistics();
-                    }
-                });
-            });
-        }
-
-        function batchDelete() {
-            var ids = $.table.selectColumns("id");
-            if (!ImCommon.validateBatchOperation(ids, 1)) return;
-            $.modal.confirm("确定要解散选中的 " + ids.length + " 个群组吗？此操作不可恢复！", function () {
-                $.operate.post(prefix + "/batchRemove", { groupIds: ids.join(",") }, function (res) {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm('确定要批量解除禁言吗？', function () {
+                $.operate.post(prefix + "/batchUnmute", { groupIds: rows.join() }, function (res) {
                     if (res.code == 0) {
                         $.table.refresh();
                         loadStatistics();
@@ -436,26 +454,14 @@
             $.modal.open("群组成员", prefix + "/members/" + id, 900, 600);
         }
 
-        function refreshTable() {
-            $.table.refresh();
-            loadStatistics();
+        function exportExcel() {
+            $.table.exportExcel();
         }
 
-        function changePageSize() {
-            var pageSize = $('#pageSizeSelect').val();
-            $('#bootstrap-table').bootstrapTable('refreshOptions', { pageSize: pageSize });
-        }
-
-        function showBatchOperation() {
-            $.modal.open("批量操作", prefix + "/batch_operations", 700, 500);
-        }
-
-        $.operate.add = function (id) {
-            $.modal.open("添加群组", $.operate.addUrl(id), 700, 500);
-        };
-
-        $.operate.edit = function (id) {
-            $.modal.open("修改群组", $.operate.editUrl(id), 700, 500);
+        $.modal.open = function(title, url, width, height) {
+            width = width || 700;
+            height = height || 500;
+            _open({title: title, url: url, width: width, height: height});
         };
     </script>
 </body>

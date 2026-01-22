@@ -10,7 +10,7 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('../App.vue'),
+    component: () => import('../views/MainPage.vue'),
     meta: { requiresAuth: true }
   }
 ]
@@ -22,7 +22,7 @@ const router = createRouter({
 
 // 路由守卫：检查登录状态
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('access_token')
+  const token = localStorage.getItem('im_token')
 
   // 如果路由需要认证
   if (to.meta.requiresAuth) {

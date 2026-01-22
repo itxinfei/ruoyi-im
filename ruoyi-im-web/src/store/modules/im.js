@@ -215,11 +215,11 @@ export default {
       }
     },
 
-    async sendMessage({ commit }, { sessionId, messageType = 'TEXT', content, replyToMessageId = null }) {
+    async sendMessage({ commit }, { sessionId, type = 'TEXT', content, replyToMessageId = null }) {
       const clientMsgId = generateUUID()
       const res = await apiSendMessage({
         conversationId: sessionId,
-        messageType,
+        type,
         content,
         replyToMessageId,
         clientMsgId

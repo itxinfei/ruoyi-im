@@ -14,7 +14,7 @@ import request from '../request'
  */
 export function sendMessage(data) {
   return request({
-    url: '/im/message/send',
+    url: '/api/im/message/send',
     method: 'post',
     data
   })
@@ -30,7 +30,7 @@ export function sendMessage(data) {
  */
 export function getMessages(conversationId, params = {}) {
   return request({
-    url: `/im/message/list/${conversationId}`,
+    url: `/api/im/message/list/${conversationId}`,
     method: 'get',
     params
   })
@@ -43,7 +43,7 @@ export function getMessages(conversationId, params = {}) {
  */
 export function recallMessage(messageId) {
   return request({
-    url: `/im/message/${messageId}/recall`,
+    url: `/api/im/message/${messageId}/recall`,
     method: 'delete'
   })
 }
@@ -57,7 +57,7 @@ export function recallMessage(messageId) {
  */
 export function editMessage(messageId, data) {
   return request({
-    url: `/im/message/${messageId}/edit`,
+    url: `/api/im/message/${messageId}/edit`,
     method: 'put',
     data
   })
@@ -70,7 +70,7 @@ export function editMessage(messageId, data) {
  */
 export function deleteMessage(messageId) {
   return request({
-    url: `/im/message/${messageId}`,
+    url: `/api/im/message/${messageId}`,
     method: 'delete'
   })
 }
@@ -84,7 +84,7 @@ export function deleteMessage(messageId) {
  */
 export function forwardMessage(data) {
   return request({
-    url: '/im/message/forward',
+    url: '/api/im/message/forward',
     method: 'post',
     data
   })
@@ -101,7 +101,7 @@ export function forwardMessage(data) {
  */
 export function searchMessages(data) {
   return request({
-    url: '/im/message/search',
+    url: '/api/im/message/search',
     method: 'post',
     data
   })
@@ -116,7 +116,7 @@ export function searchMessages(data) {
  */
 export function markAsRead(data) {
   return request({
-    url: '/im/message/read',
+    url: '/api/im/message/read',
     method: 'put',
     params: {
       conversationId: data.conversationId,
@@ -133,7 +133,7 @@ export function markAsRead(data) {
  */
 export function getMessageReadUsers(conversationId, messageId) {
   return request({
-    url: `/im/message/read/status/${conversationId}/${messageId}`,
+    url: `/api/im/message/read/status/${conversationId}/${messageId}`,
     method: 'get'
   })
 }
@@ -147,7 +147,7 @@ export function getMessageReadUsers(conversationId, messageId) {
  */
 export function replyMessage(data) {
   return request({
-    url: '/im/message/reply',
+    url: '/api/im/message/reply',
     method: 'post',
     data
   })
@@ -162,7 +162,7 @@ export function replyMessage(data) {
  */
 export function addReaction(messageId, data) {
   return request({
-    url: `/im/message/${messageId}/reaction`,
+    url: `/api/im/message/${messageId}/reaction`,
     method: 'post',
     data
   })
@@ -175,7 +175,7 @@ export function addReaction(messageId, data) {
  */
 export function removeReaction(messageId) {
   return request({
-    url: `/im/message/${messageId}/reaction`,
+    url: `/api/im/message/${messageId}/reaction`,
     method: 'delete'
   })
 }
@@ -187,7 +187,7 @@ export function removeReaction(messageId) {
  */
 export function getMessageReactions(messageId) {
   return request({
-    url: `/im/message/${messageId}/reactions`,
+    url: `/api/im/message/${messageId}/reactions`,
     method: 'get'
   })
 }
@@ -198,7 +198,7 @@ export function getMessageReactions(messageId) {
  */
 export function getUnreadMentions() {
   return request({
-    url: '/im/message/mention/unread',
+    url: '/api/im/message/mention/unread',
     method: 'get'
   })
 }
@@ -209,7 +209,7 @@ export function getUnreadMentions() {
  */
 export function getUnreadMentionCount() {
   return request({
-    url: '/im/message/mention/unread/count',
+    url: '/api/im/message/mention/unread/count',
     method: 'get'
   })
 }
@@ -221,7 +221,7 @@ export function getUnreadMentionCount() {
  */
 export function markMentionAsRead(messageId) {
   return request({
-    url: `/im/message/${messageId}/mention/read`,
+    url: `/api/im/message/${messageId}/mention/read`,
     method: 'put'
   })
 }
@@ -233,7 +233,7 @@ export function markMentionAsRead(messageId) {
  */
 export function getUnreadCount(conversationId) {
   return request({
-    url: `/im/message/unread/count/${conversationId}`,
+    url: `/api/im/message/unread/count/${conversationId}`,
     method: 'get'
   })
 }

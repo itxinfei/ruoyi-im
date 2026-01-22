@@ -13,13 +13,13 @@
           <div v-if="!msg.isOwn" class="sender-name">{{ msg.senderName }}</div>
           
             <el-dropdown trigger="contextmenu" @command="(cmd) => handleCommand(cmd, msg)">
-              <div class="bubble" :class="msg.messageType">
-                <span v-if="msg.messageType === 'TEXT'">{{ msg.content }}</span>
-                <img v-else-if="msg.messageType === 'IMAGE'" 
+              <div class="bubble" :class="msg.type">
+                <span v-if="msg.type === 'TEXT'">{{ msg.content }}</span>
+                <img v-else-if="msg.type === 'IMAGE'" 
                      :src="parseContent(msg).imageUrl" 
                      class="msg-image" 
                      @click="previewImage(parseContent(msg).imageUrl)" />
-                <div v-else-if="msg.messageType === 'FILE'" class="msg-file">
+                <div v-else-if="msg.type === 'FILE'" class="msg-file">
                   <el-icon><Document /></el-icon>
                   <span>{{ parseContent(msg).fileName }}</span>
                 </div>
@@ -27,7 +27,7 @@
               </div>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="copy" v-if="msg.messageType === 'TEXT'">复制</el-dropdown-item>
+                  <el-dropdown-item command="copy" v-if="msg.type === 'TEXT'">复制</el-dropdown-item>
                   <el-dropdown-item command="recall" v-if="msg.isOwn && canRecall(msg)">撤回</el-dropdown-item>
                   <el-dropdown-item command="delete" v-if="msg.isOwn">删除</el-dropdown-item>
                 </el-dropdown-menu>
@@ -57,7 +57,7 @@ const listRef = ref(null)
 
 const parseContent = (msg) => {
   try {
-    return typeof msg.content === 'string' && (msg.messageType === 'IMAGE' || msg.messageType === 'FILE')
+    return typeof msg.content === 'string' && (msg.type === 'IMAGE' || msg.type === 'FILE')
       ? JSON.parse(msg.content)
       : msg.content
   } catch (e) {

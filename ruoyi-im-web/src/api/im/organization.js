@@ -9,7 +9,7 @@ import request from '../request'
  */
 export function getOrgTree() {
     return request({
-        url: '/im/organization/tree',
+        url: '/api/im/organization/tree',
         method: 'get'
     })
 }
@@ -21,7 +21,7 @@ export function getOrgTree() {
  */
 export function getDepartment(deptId) {
     return request({
-        url: `/im/organization/dept/${deptId}`,
+        url: `/api/im/organization/dept/${deptId}`,
         method: 'get'
     })
 }
@@ -33,7 +33,7 @@ export function getDepartment(deptId) {
  */
 export function getDepartmentMembers(deptId) {
     return request({
-        url: `/im/organization/dept/${deptId}/members`,
+        url: `/api/im/organization/dept/${deptId}/members`,
         method: 'get'
     })
 }
@@ -46,7 +46,7 @@ export function getDepartmentMembers(deptId) {
  */
 export function searchOrgMembers(params) {
     return request({
-        url: '/im/organization/search',
+        url: '/api/im/organization/search',
         method: 'get',
         params
     })

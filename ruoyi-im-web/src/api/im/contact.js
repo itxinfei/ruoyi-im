@@ -11,7 +11,7 @@ import request from '../request'
  */
 export function getContacts(params) {
   return request({
-    url: '/im/contact/list',
+    url: '/api/im/contact/list',
     method: 'get',
     params
   })
@@ -25,7 +25,7 @@ export function getContacts(params) {
  */
 export function searchContacts(params) {
   return request({
-    url: '/im/contact/search',
+    url: '/api/im/contact/search',
     method: 'get',
     params
   })
@@ -38,7 +38,7 @@ export function searchContacts(params) {
  */
 export function getContact(contactId) {
   return request({
-    url: `/im/contact/${contactId}`,
+    url: `/api/im/contact/${contactId}`,
     method: 'get'
   })
 }
@@ -52,7 +52,7 @@ export function getContact(contactId) {
  */
 export function sendFriendRequest(data) {
   return request({
-    url: '/im/contact/request/send',
+    url: '/api/im/contact/request/send',
     method: 'post',
     data
   })
@@ -68,7 +68,7 @@ export function sendFriendRequest(data) {
  */
 export function handleFriendRequest(requestId, approved) {
   return request({
-    url: `/im/contact/request/${requestId}/handle`,
+    url: `/api/im/contact/request/${requestId}/handle`,
     method: 'post',
     params: { approved }
   })
@@ -80,7 +80,7 @@ export function handleFriendRequest(requestId, approved) {
  */
 export function getFriendRequests() {
   return request({
-    url: '/im/contact/request/received',
+    url: '/api/im/contact/request/received',
     method: 'get'
   })
 }
@@ -94,7 +94,7 @@ export function getFriendRequests() {
  */
 export function updateContactRemark(contactId, data) {
   return request({
-    url: `/im/contact/${contactId}`,
+    url: `/api/im/contact/${contactId}`,
     method: 'put',
     data
   })
@@ -107,7 +107,7 @@ export function updateContactRemark(contactId, data) {
  */
 export function deleteContact(contactId) {
   return request({
-    url: `/im/contact/${contactId}`,
+    url: `/api/im/contact/${contactId}`,
     method: 'delete'
   })
 }
@@ -121,7 +121,7 @@ export function deleteContact(contactId) {
  */
 export function moveContactToGroup(data) {
   return request({
-    url: '/im/contact/group/move',
+    url: '/api/im/contact/group/move',
     method: 'put',
     data
   })
@@ -133,7 +133,7 @@ export function moveContactToGroup(data) {
  */
 export function getGroupedFriendList() {
   return request({
-    url: '/im/contact/grouped',
+    url: '/api/im/contact/grouped',
     method: 'get'
   })
 }
@@ -146,7 +146,7 @@ export function getGroupedFriendList() {
  */
 export function blockFriend(contactId, blocked) {
   return request({
-    url: `/im/contact/${contactId}/block`,
+    url: `/api/im/contact/${contactId}/block`,
     method: 'put',
     params: { blocked }
   })
@@ -158,7 +158,7 @@ export function blockFriend(contactId, blocked) {
  */
 export function getGroupList() {
   return request({
-    url: '/im/contact/group/list',
+    url: '/api/im/contact/group/list',
     method: 'get'
   })
 }
@@ -171,7 +171,7 @@ export function getGroupList() {
  */
 export function renameGroup(oldName, newName) {
   return request({
-    url: `/im/contact/group/${encodeURIComponent(oldName)}`,
+    url: `/api/im/contact/group/${encodeURIComponent(oldName)}`,
     method: 'put',
     data: { newName }
   })
@@ -184,7 +184,7 @@ export function renameGroup(oldName, newName) {
  */
 export function deleteGroup(groupName) {
   return request({
-    url: `/im/contact/group/${encodeURIComponent(groupName)}`,
+    url: `/api/im/contact/group/${encodeURIComponent(groupName)}`,
     method: 'delete'
   })
 }
@@ -195,7 +195,7 @@ export function deleteGroup(groupName) {
  */
 export function getSentRequests() {
   return request({
-    url: '/im/contact/request/sent',
+    url: '/api/im/contact/request/sent',
     method: 'get'
   })
 }

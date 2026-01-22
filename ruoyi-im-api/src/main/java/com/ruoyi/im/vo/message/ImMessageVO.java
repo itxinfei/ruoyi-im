@@ -88,4 +88,17 @@ public class ImMessageVO implements Serializable {
         /** 是否为图片/文件类型 */
         private Boolean isFile;
     }
+
+    /** 时间戳（毫秒）- 兼容前端 */
+    private Long timestamp;
+
+    public Long getTimestamp() {
+        if (this.timestamp != null) {
+            return this.timestamp;
+        }
+        if (this.sendTime != null) {
+            return this.sendTime.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+        }
+        return System.currentTimeMillis();
+    }
 }

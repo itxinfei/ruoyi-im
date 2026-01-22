@@ -39,7 +39,7 @@ service.interceptors.response.use(
       // 401: 未授权
       if (res.code === 401) {
         // 清除 token 并跳转登录页
-        localStorage.removeItem('access_token')
+        localStorage.removeItem('im_token')
         window.location.href = '/login'
       }
 
@@ -60,7 +60,7 @@ service.interceptors.response.use(
           break
         case 401:
           ElMessage.error('未授权，请重新登录')
-          localStorage.removeItem('access_token')
+          localStorage.removeItem('im_token')
           window.location.href = '/login'
           break
         case 403:
