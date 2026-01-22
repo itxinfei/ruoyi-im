@@ -10,7 +10,11 @@ import {
   getContacts,
   getGroups,
   deleteMessage,
-  recallMessage
+  recallMessage,
+  pinConversation,
+  muteConversation,
+  deleteConversation as apiDeleteConversation,
+  markConversationAsRead
 } from '@/api/im'
 
 // 简单UUID生成
@@ -60,7 +64,10 @@ export default {
       messages: false,
       contacts: false,
       groups: false
-    }
+    },
+
+    // 当前正在回复的消息
+    replyingMessage: null
   }),
 
   getters: {
@@ -126,6 +133,14 @@ export default {
       state.messages[sessionId] = messages
     },
 
+    // 预加消息（历史消息）
+    PREPEND_MESSAGES(state, { sessionId, messages }) {
+      if (!state.messages[sessionId]) {
+        state.messages[sessionId] = []
+      }
+      state.messages[sessionId] = [...messages, ...state.messages[sessionId]]
+    },
+
     // 添加消息
     ADD_MESSAGE(state, { sessionId, message }) {
       if (!state.messages[sessionId]) {
@@ -156,6 +171,18 @@ export default {
       }
     },
 
+    // 删除会话
+    DELETE_SESSION(state, sessionId) {
+      const index = state.sessions.findIndex(s => s.id === sessionId)
+      if (index !== -1) {
+        state.sessions.splice(index, 1)
+      }
+      if (state.currentSession && state.currentSession.id === sessionId) {
+        state.currentSession = null
+      }
+      state.totalUnreadCount = state.sessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0)
+    },
+
     // 设置联系人列表
     SET_CONTACTS(state, contacts) {
       state.contacts = contacts
@@ -176,6 +203,11 @@ export default {
       state.loading[key] = value
     },
 
+    // 设置正在回复的消息
+    SET_REPLYING_MESSAGE(state, message) {
+      state.replyingMessage = message
+    },
+
     // 清空状态
     CLEAR_STATE(state) {
       state.sessions = []
@@ -183,6 +215,7 @@ export default {
       state.messages = {}
       state.contacts = []
       state.groups = []
+      state.replyingMessage = null
       state.totalUnreadCount = 0
     }
   },
@@ -200,15 +233,19 @@ export default {
       }
     },
 
-    async loadMessages({ commit }, { sessionId, lastMessageId = null, pageSize = 20 }) {
+    async loadMessages({ commit }, { sessionId, lastMessageId = null, pageSize = 20, isLoadMore = false }) {
       commit('SET_LOADING', { key: 'messages', value: true })
       try {
-        const res = await getMessages(sessionId, {
-          lastId: lastMessageId,
-          limit: pageSize
-        })
+        const res = await getMessages({ conversationId: sessionId, lastId: lastMessageId, pageSize })
         if (res.code === 200 && res.data) {
-          commit('SET_MESSAGES', { sessionId, messages: res.data })
+          // 后端返回是按时间倒序的 (newest first)，前端需要 newest at bottom
+          const transformed = res.data.reverse()
+          if (isLoadMore) {
+            commit('PREPEND_MESSAGES', { sessionId, messages: transformed })
+          } else {
+            commit('SET_MESSAGES', { sessionId, messages: transformed })
+          }
+          return transformed
         }
       } finally {
         commit('SET_LOADING', { key: 'messages', value: false })
@@ -255,23 +292,47 @@ export default {
       // 同样需要在组件中处理
     },
 
+    async pinSession({ commit }, { sessionId, pinned }) {
+      await pinConversation(sessionId, pinned)
+      commit('UPDATE_SESSION', { id: sessionId, isPinned: pinned })
+    },
+
+    async muteSession({ commit }, { sessionId, muted }) {
+      await muteConversation(sessionId, muted)
+      commit('UPDATE_SESSION', { id: sessionId, isMuted: muted })
+    },
+
+    async deleteSession({ commit }, sessionId) {
+      await apiDeleteConversation(sessionId)
+      commit('DELETE_SESSION', sessionId)
+    },
+
+    async markSessionAsRead({ commit }, sessionId) {
+      await markConversationAsRead(sessionId)
+      commit('UPDATE_SESSION', { id: sessionId, unreadCount: 0 })
+    },
+
 
 
     // 同样需要在组件中处理
 
     // 接收消息（WebSocket 推送）
     receiveMessage({ commit, state }, message) {
-      const sessionId = message.conversationId
+      const sessionId = message.conversationId || message.sessionId
+      if (!sessionId) return
 
       // 添加消息到列表
       commit('ADD_MESSAGE', { sessionId, message })
 
-      // 更新会话信息
+      // 如果不是当前正在查看的会话，则增加未读数
+      const isCurrentSession = state.currentSession && state.currentSession.id === sessionId
+      const session = state.sessions.find(s => s.id === sessionId)
+
       commit('UPDATE_SESSION', {
         id: sessionId,
         lastMessage: message.content,
         lastMessageTime: message.timestamp,
-        unreadCount: (state.sessions.find(s => s.id === sessionId)?.unreadCount || 0) + 1
+        unreadCount: isCurrentSession ? 0 : ((session?.unreadCount || 0) + 1)
       })
     },
 
@@ -299,12 +360,17 @@ export default {
       }
     },
 
-    selectSession({ commit }, session) {
+    async selectSession({ commit, dispatch }, session) {
       commit('SET_CURRENT_SESSION', session)
       commit('UPDATE_SESSION', {
         id: session.id,
         unreadCount: 0
       })
+      try {
+        await markConversationAsRead(session.id)
+      } catch (e) {
+        console.warn('标记已读失败', e)
+      }
     }
   }
 }

@@ -99,6 +99,20 @@ public class ImUserController extends BaseController {
     }
 
     /**
+     * 用户详情页面
+     */
+    @RequiresPermissions("im:user:query")
+    @GetMapping("/detail/{userId}")
+    public String detail(@PathVariable("userId") Long userId, org.springframework.ui.ModelMap mmap) {
+        ImUser user = imUserService.selectImUserById(userId);
+        mmap.put("user", user);
+        // 使用 Subject.isPermitted 检查权限
+        mmap.put("hasEditPermission", ShiroUtils.getSubject().isPermitted("im:user:edit"));
+        mmap.put("hasRemovePermission", ShiroUtils.getSubject().isPermitted("im:user:remove"));
+        return prefix + "/detail";
+    }
+
+    /**
      * 重置密码 - 表单提交方式
      */
     @RequiresPermissions("im:user:edit")

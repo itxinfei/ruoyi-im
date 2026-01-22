@@ -70,4 +70,10 @@ public class ImUser extends BaseEntity implements Serializable {
     /** 在线状态（非数据库字段，用于前端显示） */
     private Integer isOnline;
 
+    /** 关键词搜索（非数据库字段，用于搜索） */
+    private String keyword;
+
+    /** 是否有头像（非数据库字段，用于搜索） */
+    private Integer hasAvatar;
+
 }

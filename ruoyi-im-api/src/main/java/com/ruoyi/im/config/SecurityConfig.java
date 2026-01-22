@@ -56,23 +56,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // 禁用 CSRF
-            .csrf().disable()
-            // 启用跨域
-            .cors().and()
-            // 禁用默认的Session管理
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-            // 设置未认证访问的处理类
-            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-            // 配置权限访问
-            .authorizeRequests()
-            // 对于登录接口允许匿名访问
-            .antMatchers("/", "/health", "/auth/login", "/auth/register", "/api/auth/login", "/api/auth/register", "/ws/**", "/websocket/**", "/public/**", "/error", "/test/**").permitAll()
-            // 静态资源访问
-            .antMatchers("/avatar/**", "/uploads/**", "/profile/**").permitAll()
-            .antMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.gif", "/**/*.jpeg", "/**/*.svg", "/**/*.ico").permitAll()
-            // Swagger相关接口
-            .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
+                // 禁用 CSRF
+                .csrf().disable()
+                // 启用跨域
+                .cors().and()
+                // 禁用默认的Session管理
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                // 设置未认证访问的处理类
+                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+                // 配置权限访问
+                .authorizeRequests()
+                // 对于登录接口允许匿名访问
+                .antMatchers("/", "/health", "/auth/login", "/auth/register", "/api/auth/login", "/api/auth/register",
+                        "/api/im/auth/login", "/api/im/auth/register", "/ws/**", "/websocket/**", "/public/**",
+                        "/error", "/test/**")
+                .permitAll()
+                // 静态资源访问
+                .antMatchers("/avatar/**", "/uploads/**", "/profile/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg",
+                        "/**/*.gif", "/**/*.jpeg", "/**/*.svg", "/**/*.ico")
+                .permitAll()
+                // Swagger相关接口
+                .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
 
         // 根据配置决定是否启用认证
         if (securityEnabled) {

@@ -12,12 +12,16 @@
         :current-user="currentUser" 
         @delete="handleDelete"
         @recall="handleRecall"
+        @reply="handleReply"
+        @load-more="handleLoadMore"
       />
       <MessageInput 
         :sending="sending" 
+        :replying-message="replyingMessage"
         @send="handleSend" 
         @upload-file="triggerFile" 
         @upload-image="triggerImage" 
+        @cancel-reply="handleCancelReply"
       />
       
       <!-- Hidden Uploads -->
@@ -46,6 +50,8 @@ const currentUser = computed(() => store.getters['user/currentUser'])
 const messages = ref([])
 const loading = ref(false)
 const sending = ref(false)
+const noMore = ref(false)
+const replyingMessage = computed(() => store.state.im.replyingMessage)
 const msgListRef = ref(null)
 const fileRef = ref(null)
 const imgRef = ref(null)
@@ -55,14 +61,44 @@ const { onMessage } = useImWebSocket()
 const loadHistory = async () => {
   if (!props.session?.id) return
   loading.value = true
+  noMore.value = false
   try {
-    const res = await getMessages({ conversationId: props.session.id, pageSize: 50 })
-    if (res.code === 200) {
-      messages.value = res.data.map(transformMsg).reverse() // Backend often returns new->old
-    }
+    const res = await store.dispatch('im/loadMessages', {
+      sessionId: props.session.id,
+      pageSize: 50
+    })
+    messages.value = res || []
   } finally {
     loading.value = false
     msgListRef.value?.scrollToBottom()
+  }
+}
+
+const handleLoadMore = async () => {
+  if (loading.value || noMore.value) return
+  
+  const firstMsg = messages.value[0]
+  if (!firstMsg) return
+
+  loading.value = true
+  const oldHeight = msgListRef.value?.$refs.listRef.scrollHeight
+  
+  try {
+    const newMsgs = await store.dispatch('im/loadMessages', {
+      sessionId: props.session.id,
+      lastMessageId: firstMsg.id,
+      pageSize: 20,
+      isLoadMore: true
+    })
+    
+    if (newMsgs && newMsgs.length > 0) {
+      messages.value = [...newMsgs, ...messages.value]
+      msgListRef.value?.maintainScroll(oldHeight)
+    } else {
+      noMore.value = true
+    }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -78,9 +114,11 @@ const handleSend = async (content) => {
     const msg = await store.dispatch('im/sendMessage', {
       sessionId: props.session.id,
       type: 'TEXT',
-      content
+      content,
+      replyToMessageId: replyingMessage.value?.id
     })
     messages.value.push(transformMsg(msg))
+    store.commit('im/SET_REPLYING_MESSAGE', null)
   } finally {
     sending.value = false
     msgListRef.value?.scrollToBottom()
@@ -166,6 +204,14 @@ const handleRecall = async (messageId) => {
   } catch (error) {
     console.error('撤回失败', error)
   }
+}
+
+const handleReply = (message) => {
+  store.commit('im/SET_REPLYING_MESSAGE', message)
+}
+
+const handleCancelReply = () => {
+  store.commit('im/SET_REPLYING_MESSAGE', null)
 }
 
 onMounted(() => {

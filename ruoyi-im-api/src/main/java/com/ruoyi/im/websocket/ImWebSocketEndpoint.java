@@ -2,7 +2,6 @@ package com.ruoyi.im.websocket;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationMemberService;
@@ -10,6 +9,8 @@ import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImUserService;
 
+import com.ruoyi.im.service.ImWebSocketBroadcastService;
+import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.JwtUtils;
 import org.slf4j.Logger;
@@ -57,44 +58,11 @@ public class ImWebSocketEndpoint {
 
     private static ImMessageService staticImMessageService;
     private static JwtUtils staticJwtUtils;
-    private static ImUserService staticImUserService;
     private static ImUserMapper staticImUserMapper;
     private static ImRedisUtil staticImRedisUtil;
-    private static ImConversationMemberService staticConversationMemberService;
-    private static ImConversationService staticConversationService;
-    private static ImConversationMemberMapper staticConversationMemberMapper;
+    private static ImWebSocketBroadcastService staticBroadcastService;
     private static boolean staticSecurityEnabled;
     private static Long staticDevUserId;
-
-    @Autowired
-    private ImMessageService imMessageService;
-
-    @Autowired
-    private JwtUtils jwtUtils;
-
-    @Autowired
-    private ImUserService imUserService;
-
-    @Autowired
-    private ImUserMapper imUserMapper;
-
-    @Autowired
-    private ImRedisUtil imRedisUtil;
-
-    @Autowired
-    private ImConversationMemberService conversationMemberService;
-
-    @Autowired
-    private ImConversationService conversationService;
-
-    @Autowired
-    private ImConversationMemberMapper conversationMemberMapper;
-
-    @Value("${app.security.enabled:true}")
-    private boolean securityEnabled;
-
-    @Value("${app.dev.user-id:1}")
-    private Long devUserId;
 
     @Autowired
     public void setImMessageService(ImMessageService imMessageService) {
@@ -107,8 +75,8 @@ public class ImWebSocketEndpoint {
     }
 
     @Autowired
-    public void setImUserService(ImUserService imUserService) {
-        staticImUserService = imUserService;
+    public void setBroadcastService(ImWebSocketBroadcastService broadcastService) {
+        staticBroadcastService = broadcastService;
     }
 
     @Autowired
@@ -119,21 +87,6 @@ public class ImWebSocketEndpoint {
     @Autowired
     public void setImRedisUtil(ImRedisUtil imRedisUtil) {
         staticImRedisUtil = imRedisUtil;
-    }
-
-    @Autowired
-    public void setConversationMemberService(ImConversationMemberService conversationMemberService) {
-        staticConversationMemberService = conversationMemberService;
-    }
-
-    @Autowired
-    public void setConversationService(ImConversationService conversationService) {
-        staticConversationService = conversationService;
-    }
-
-    @Autowired
-    public void setConversationMemberMapper(ImConversationMemberMapper conversationMemberMapper) {
-        staticConversationMemberMapper = conversationMemberMapper;
     }
 
     /**
@@ -256,7 +209,9 @@ public class ImWebSocketEndpoint {
             log.info("用户上线: userId={}, sessionId={}", userId, session.getId());
 
             // 广播用户上线消息
-            broadcastOnlineStatus(userId, true);
+            if (staticBroadcastService != null) {
+                staticBroadcastService.broadcastOnlineStatus(userId, true);
+            }
 
             // 发送连接成功消息给客户端
             sendMessage(session, buildStatusMessage("connected", userId, true));
@@ -379,9 +334,10 @@ public class ImWebSocketEndpoint {
                 }
 
                 log.info("用户离线: userId={}, sessionId={}", userId, session.getId());
-
                 // 广播用户离线消息
-                broadcastOnlineStatus(userId, false);
+                if (staticBroadcastService != null) {
+                    staticBroadcastService.broadcastOnlineStatus(userId, false);
+                }
             } else if (userId != null && userId == -1L) {
                 log.info("未认证会话关闭: sessionId={}", session.getId());
             }
@@ -475,18 +431,6 @@ public class ImWebSocketEndpoint {
             if (messageId != null) {
                 // 立即返回ACK确认
                 sendAckMessage(senderSession, clientMsgId, messageId);
-
-                // 获取完整消息对象
-                com.ruoyi.im.domain.ImMessage message = new com.ruoyi.im.domain.ImMessage();
-                message.setId(messageId);
-                message.setConversationId(conversationId);
-                message.setSenderId(userId);
-                message.setType(messageType);
-                message.setContent(content);
-                message.setClientMsgId(clientMsgId);
-
-                // 广播消息给会话中的所有用户（不包括发送者）
-                broadcastMessageToSession(conversationId, message);
 
                 log.info("消息已发送: messageId={}, conversationId={}, senderId={}", messageId, conversationId, userId);
             } else {
@@ -583,7 +527,9 @@ public class ImWebSocketEndpoint {
             boolean isTyping = isTypingValue != null && Boolean.parseBoolean(isTypingValue.toString());
 
             // 广播正在输入状态
-            broadcastTypingStatus(conversationId, userId, isTyping);
+            if (staticBroadcastService != null) {
+                staticBroadcastService.broadcastTypingStatus(conversationId, userId, isTyping);
+            }
 
         } catch (Exception e) {
             log.error("处理正在输入状态异常", e);
@@ -706,9 +652,9 @@ public class ImWebSocketEndpoint {
 
                 log.info("用户认证成功: userId={}, sessionId={}", userId, session.getId());
 
-                // 如果是新登录（从未认证到认证），广播用户上线消息并推送离线消息
-                if (isNewLogin) {
-                    broadcastOnlineStatus(userId, true);
+                // 如果是新登录（从此前状态变更为已认证），广播上线消息并推送离线消息
+                if (isNewLogin && staticBroadcastService != null) {
+                    staticBroadcastService.broadcastOnlineStatus(userId, true);
                     pushOfflineMessages(userId);
                 }
             } else {
@@ -769,10 +715,16 @@ public class ImWebSocketEndpoint {
             // 更新消息状态为已读
             if (messageIds != null && !messageIds.isEmpty()) {
                 staticImMessageService.markAsRead(conversationId, userId, messageIds);
-            }
 
-            // 广播已读回执
-            broadcastReadReceipt(conversationId, userId, messageIds);
+                // 广播已读回执
+                if (staticBroadcastService != null) {
+                    // 这里注意：Service目前的方法是 broadcastReadReceipt(Long conversationId, Long
+                    // lastReadMessageId, Long userId)
+                    // 而这里是 messageIds。为了简化，我们取最后一个ID
+                    Long lastId = messageIds.get(messageIds.size() - 1);
+                    staticBroadcastService.broadcastReadReceipt(conversationId, lastId, userId);
+                }
+            }
 
             log.info("消息已读: conversationId={}, userId={}", conversationId, userId);
 
@@ -782,161 +734,21 @@ public class ImWebSocketEndpoint {
     }
 
     /**
-     * 广播消息给会话中的所有用户
-     * 根据会话ID获取会话成员并推送消息
+     * 构建状态消息
+     * 创建标准格式的状态消息对象
      *
-     * @param conversationId 会话ID
-     * @param message        消息对象
-     */
-    private void broadcastMessageToSession(Long conversationId, com.ruoyi.im.domain.ImMessage message) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> messageMap = new HashMap<>();
-            messageMap.put("type", "message");
-            messageMap.put("data", message);
-
-            String messageJson = mapper.writeValueAsString(messageMap);
-
-            // 直接通过mapper获取会话中的所有成员
-            List<com.ruoyi.im.domain.ImConversationMember> members = staticConversationMemberMapper
-                    .selectByConversationId(conversationId);
-
-            if (members == null || members.isEmpty()) {
-                log.warn("会话无成员，无法广播消息: conversationId={}", conversationId);
-                return;
-            }
-
-            // 向会话中的所有在线用户发送消息
-            for (com.ruoyi.im.domain.ImConversationMember member : members) {
-                Long targetUserId = member.getUserId();
-                Session targetSession = onlineUsers.get(targetUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                        log.debug("消息已发送给用户: userId={}, messageId={}", targetUserId, message.getId());
-                    } catch (IOException e) {
-                        log.error("发送消息给用户失败: userId={}", targetUserId, e);
-                    }
-                }
-            }
-
-            log.info("消息已广播到会话: conversationId={}, memberCount={}, messageId={}",
-                    conversationId, members.size(), message.getId());
-
-        } catch (Exception e) {
-            log.error("广播消息异常", e);
-        }
-    }
-
-    /**
-     * 广播正在输入状态
-     * 向会话中的其他用户发送输入状态通知
-     *
-     * @param conversationId 会话ID
-     * @param userId         用户ID
-     * @param isTyping       是否正在输入
-     */
-    private void broadcastTypingStatus(Long conversationId, Long userId, boolean isTyping) {
-        try {
-            Map<String, Object> statusMap = new HashMap<>();
-            statusMap.put("type", "typing");
-            statusMap.put("conversationId", conversationId);
-            statusMap.put("userId", userId);
-            statusMap.put("isTyping", isTyping);
-            statusMap.put("timestamp", System.currentTimeMillis());
-
-            // 获取用户信息
-            if (staticImUserMapper != null) {
-                try {
-                    com.ruoyi.im.domain.ImUser user = staticImUserMapper.selectImUserById(userId);
-                    if (user != null) {
-                        statusMap.put("userName", user.getNickname() != null ? user.getNickname() : user.getUsername());
-                    }
-                } catch (Exception e) {
-                    log.warn("获取用户信息失败: userId={}", userId, e);
-                }
-            }
-
-            // 只向该会话的其他成员广播，不是所有人
-            broadcastToConversation(conversationId, userId, statusMap);
-
-        } catch (Exception e) {
-            log.error("广播正在输入状态异常", e);
-        }
-    }
-
-    /**
-     * 广播已读回执
-     * 向会话中的其他用户发送消息已读通知
-     *
-     * @param conversationId 会话ID
-     * @param userId         用户ID
-     * @param messageIds     消息ID列表
-     */
-    private void broadcastReadReceipt(Long conversationId, Long userId, List<Long> messageIds) {
-        try {
-            Map<String, Object> receiptMap = new HashMap<>();
-            receiptMap.put("type", "read_receipt");
-            receiptMap.put("conversationId", conversationId);
-            receiptMap.put("userId", userId);
-            receiptMap.put("messageIds", messageIds);
-            receiptMap.put("timestamp", System.currentTimeMillis());
-
-            ObjectMapper mapper = new ObjectMapper();
-            String messageJson = mapper.writeValueAsString(receiptMap);
-
-            broadcastToAllOnline(messageJson);
-
-        } catch (Exception e) {
-            log.error("广播已读回执异常", e);
-        }
-    }
-
-    /**
-     * 广播用户在线状态
-     * 向所有在线用户发送用户上线/离线通知
-     *
+     * @param type   消息类型
      * @param userId 用户ID
-     * @param online 是否在线
+     * @param data   消息数据
+     * @return 状态消息 Map
      */
-    private void broadcastOnlineStatus(Long userId, boolean online) {
-        try {
-            // 获取用户详细信息
-            Map<String, Object> userInfo = new HashMap<>();
-            userInfo.put("userId", userId);
-            userInfo.put("online", online);
-            userInfo.put("timestamp", System.currentTimeMillis());
-
-            // 尝试获取用户详细信息
-            if (staticImUserMapper != null) {
-                try {
-                    com.ruoyi.im.domain.ImUser user = staticImUserMapper.selectImUserById(userId);
-                    if (user != null) {
-                        userInfo.put("userName", user.getNickname() != null ? user.getNickname() : user.getUsername());
-                        userInfo.put("avatar", user.getAvatar());
-                        userInfo.put("status", user.getStatus());
-                    }
-                } catch (Exception e) {
-                    log.warn("获取用户信息失败: userId={}", userId, e);
-                }
-            }
-
-            Map<String, Object> statusMap = new HashMap<>();
-            statusMap.put("type", online ? "online" : "offline");
-            statusMap.put("userId", userId);
-            statusMap.put("userInfo", userInfo);
-            statusMap.put("timestamp", System.currentTimeMillis());
-
-            ObjectMapper mapper = new ObjectMapper();
-            String messageJson = mapper.writeValueAsString(statusMap);
-
-            broadcastToAllOnline(messageJson);
-
-            log.info("广播在线状态: userId={}, online={}", userId, online);
-
-        } catch (Exception e) {
-            log.error("广播在线状态异常", e);
-        }
+    private Map<String, Object> buildStatusMessage(String type, Long userId, Object data) {
+        Map<String, Object> message = new HashMap<>();
+        message.put("type", type);
+        message.put("userId", userId);
+        message.put("data", data);
+        message.put("timestamp", System.currentTimeMillis());
+        return message;
     }
 
     /**
@@ -948,7 +760,7 @@ public class ImWebSocketEndpoint {
      */
     private void sendMessage(Session session, Object message) {
         try {
-            if (session.isOpen()) {
+            if (session != null && session.isOpen()) {
                 ObjectMapper mapper = new ObjectMapper();
                 String messageJson = mapper.writeValueAsString(message);
                 session.getBasicRemote().sendText(messageJson);
@@ -975,73 +787,6 @@ public class ImWebSocketEndpoint {
                 }
             }
         }
-    }
-
-    /**
-     * 广播消息给会话中的其他成员（排除发送者）
-     *
-     * @param conversationId 会话ID
-     * @param excludeUserId  排除的用户ID（通常是发送者）
-     * @param message        消息对象
-     */
-    private void broadcastToConversation(Long conversationId, Long excludeUserId, Object message) {
-        try {
-            // 获取会话成员
-            if (staticConversationMemberMapper == null) {
-                log.warn("conversationMemberMapper 未初始化，无法广播消息");
-                return;
-            }
-
-            List<com.ruoyi.im.domain.ImConversationMember> members = staticConversationMemberMapper
-                    .selectByConversationId(conversationId);
-
-            if (members == null || members.isEmpty()) {
-                return;
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            String messageJson = mapper.writeValueAsString(message);
-
-            // 向会话中的每个成员发送消息
-            for (com.ruoyi.im.domain.ImConversationMember member : members) {
-                Long targetUserId = member.getUserId();
-
-                // 不发送给排除的用户（通常是发送者自己）
-                if (targetUserId.equals(excludeUserId)) {
-                    continue;
-                }
-
-                Session targetSession = onlineUsers.get(targetUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                    } catch (IOException e) {
-                        log.error("发送消息给会话成员失败: userId={}", targetUserId, e);
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            log.error("广播消息到会话异常: conversationId={}", conversationId, e);
-        }
-    }
-
-    /**
-     * 构建状态消息
-     * 创建标准格式的状态消息对象
-     *
-     * @param type   消息类型
-     * @param userId 用户ID
-     * @param data   消息数据
-     * @return 状态消息 Map
-     */
-    private Map<String, Object> buildStatusMessage(String type, Long userId, Object data) {
-        Map<String, Object> message = new HashMap<>();
-        message.put("type", type);
-        message.put("userId", userId);
-        message.put("data", data);
-        message.put("timestamp", System.currentTimeMillis());
-        return message;
     }
 
     /**

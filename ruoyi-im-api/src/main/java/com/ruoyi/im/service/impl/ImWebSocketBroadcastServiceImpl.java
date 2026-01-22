@@ -23,16 +23,19 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
     private final ImConversationMemberMapper conversationMemberMapper;
     private final ImMessageMapper messageMapper;
+    private final com.ruoyi.im.mapper.ImUserMapper imUserMapper;
     private final MessageEncryptionUtil encryptionUtil;
     private final ObjectMapper objectMapper;
 
     public ImWebSocketBroadcastServiceImpl(
             ImConversationMemberMapper conversationMemberMapper,
             ImMessageMapper messageMapper,
+            com.ruoyi.im.mapper.ImUserMapper imUserMapper,
             MessageEncryptionUtil encryptionUtil,
             ObjectMapper objectMapper) {
         this.conversationMemberMapper = conversationMemberMapper;
         this.messageMapper = messageMapper;
+        this.imUserMapper = imUserMapper;
         this.encryptionUtil = encryptionUtil;
         this.objectMapper = objectMapper;
     }
@@ -50,13 +53,12 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
                 return;
             }
 
-            Map<String, Object> payload = createWebSocketMessage(message);
+            // 构建标准推送格式: {type: 'message', data: {...}}
+            Map<String, Object> wsMessage = new HashMap<>();
+            wsMessage.put("type", "message");
+            wsMessage.put("data", createMessageData(message));
 
-            Map<String, Object> wrapper = new HashMap<>();
-            wrapper.put("type", "message");
-            wrapper.put("data", payload);
-
-            String messageJson = objectMapper.writeValueAsString(wrapper);
+            String messageJson = objectMapper.writeValueAsString(wsMessage);
 
             broadcastToMembers(members, messageJson, senderId);
         } catch (Exception e) {
@@ -99,33 +101,103 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         }
     }
 
-    private Map<String, Object> createWebSocketMessage(ImMessage message) {
-        Map<String, Object> wsMessage = new HashMap<>();
-        wsMessage.put("type", message.getMessageType() != null ? message.getMessageType().toLowerCase() : "text");
-        wsMessage.put("conversationId", message.getConversationId());
-        wsMessage.put("sessionId", message.getConversationId());
-        wsMessage.put("id", message.getId());
-        wsMessage.put("content", encryptionUtil.decryptMessage(message.getContent()));
-        wsMessage.put("senderId", message.getSenderId());
-        wsMessage.put("timestamp", message.getCreateTime() != null ? message.getCreateTime().toString()
-                : String.valueOf(System.currentTimeMillis()));
+    @Override
+    public void broadcastTypingStatus(Long conversationId, Long userId, boolean isTyping) {
+        try {
+            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            if (members == null || members.isEmpty()) {
+                return;
+            }
+
+            Map<String, Object> statusMap = new HashMap<>();
+            statusMap.put("type", "typing");
+            Map<String, Object> data = new HashMap<>();
+            data.put("conversationId", conversationId);
+            data.put("userId", userId);
+            data.put("isTyping", isTyping);
+            data.put("timestamp", System.currentTimeMillis());
+            statusMap.put("data", data);
+
+            String messageJson = objectMapper.writeValueAsString(statusMap);
+            broadcastToMembers(members, messageJson, userId);
+        } catch (Exception e) {
+            log.error("广播输入状态异常: conversationId={}", conversationId, e);
+        }
+    }
+
+    @Override
+    public void broadcastOnlineStatus(Long userId, boolean online) {
+        try {
+            Map<String, Object> statusMap = new HashMap<>();
+            statusMap.put("type", online ? "online" : "offline");
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("userId", userId);
+            data.put("online", online);
+            data.put("timestamp", System.currentTimeMillis());
+            statusMap.put("data", data);
+
+            String messageJson = objectMapper.writeValueAsString(statusMap);
+
+            // 广播给所有在线用户
+            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            for (javax.websocket.Session session : onlineUsers.values()) {
+                if (session.isOpen()) {
+                    try {
+                        session.getBasicRemote().sendText(messageJson);
+                    } catch (Exception e) {
+                        // 忽略单个发送失败
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("广播在线状态异常: userId={}", userId, e);
+        }
+    }
+
+    private Map<String, Object> createMessageData(ImMessage message) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", message.getId());
+        data.put("conversationId", message.getConversationId());
+        data.put("sessionId", message.getConversationId()); // 兼容旧版前端
+        data.put("senderId", message.getSenderId());
+        data.put("type", message.getMessageType() != null ? message.getMessageType().toUpperCase() : "TEXT");
+        data.put("content", encryptionUtil.decryptMessage(message.getContent()));
+
+        // 尝试获取发送者信息
+        try {
+            com.ruoyi.im.domain.ImUser sender = imUserMapper.selectImUserById(message.getSenderId());
+            if (sender != null) {
+                data.put("senderName", sender.getNickname());
+                data.put("senderAvatar", sender.getAvatar());
+            }
+        } catch (Exception e) {
+            log.warn("构建WS消息时获取发送者信息失败: userId={}", message.getSenderId());
+        }
+
+        // 统一时间戳为毫秒数
+        long timestamp = System.currentTimeMillis();
+        if (message.getCreateTime() != null) {
+            timestamp = message.getCreateTime().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+        }
+        data.put("timestamp", timestamp);
 
         if (message.getFileUrl() != null) {
-            wsMessage.put("fileUrl", message.getFileUrl());
-            wsMessage.put("fileName", message.getFileName());
-            wsMessage.put("fileSize", message.getFileSize());
+            data.put("fileUrl", message.getFileUrl());
+            data.put("fileName", message.getFileName());
+            data.put("fileSize", message.getFileSize());
         }
 
         if (message.getReplyToMessageId() != null) {
-            wsMessage.put("replyTo", message.getReplyToMessageId());
+            data.put("replyToMessageId", message.getReplyToMessageId());
         }
 
         if (message.getIsRevoked() != null && message.getIsRevoked() == 1) {
-            wsMessage.put("revoked", true);
-            wsMessage.put("content", "[消息已撤回]");
+            data.put("isRevoked", 1);
+            data.put("content", "[消息已撤回]");
         }
 
-        return wsMessage;
+        return data;
     }
 
     private Map<String, Object> createReactionMessage(Long conversationId, Long messageId, Long userId, String emoji,

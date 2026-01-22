@@ -1,6 +1,86 @@
 <template>
   <div class="friend-requests-panel">
+    <template v-if="inline">
+      <div v-loading="loading" class="requests-list">
+        <el-tabs v-model="activeTab">
+          <el-tab-pane label="收到的申请" name="received">
+            <div class="request-items">
+              <div
+                v-for="request in receivedRequests"
+                :key="request.id"
+                class="request-item"
+              >
+                <el-avatar :size="48" :src="request.avatar">
+                  {{ request.name?.charAt(0) }}
+                </el-avatar>
+                <div class="request-info">
+                  <div class="request-name">{{ request.name }}</div>
+                  <div class="request-message">{{ request.message || '请求添加你为好友' }}</div>
+                  <div class="request-time">{{ formatTime(request.createTime) }}</div>
+                </div>
+                <div class="request-actions">
+                  <el-button
+                    v-if="request.status === 'PENDING'"
+                    type="primary"
+                    size="small"
+                    @click="handleAccept(request)"
+                  >
+                    接受
+                  </el-button>
+                  <el-button
+                    v-if="request.status === 'PENDING'"
+                    size="small"
+                    @click="handleReject(request)"
+                  >
+                    拒绝
+                  </el-button>
+                  <el-tag v-if="request.status === 'ACCEPTED'" type="success" size="small">
+                    已接受
+                  </el-tag>
+                  <el-tag v-if="request.status === 'REJECTED'" type="info" size="small">
+                    已拒绝
+                  </el-tag>
+                </div>
+              </div>
+              <el-empty v-if="receivedRequests.length === 0" description="暂无好友申请" />
+            </div>
+          </el-tab-pane>
+
+          <el-tab-pane label="发出的申请" name="sent">
+            <div class="request-items">
+              <div
+                v-for="request in sentRequests"
+                :key="request.id"
+                class="request-item"
+              >
+                <el-avatar :size="48" :src="request.avatar">
+                  {{ request.name?.charAt(0) }}
+                </el-avatar>
+                <div class="request-info">
+                  <div class="request-name">{{ request.name }}</div>
+                  <div class="request-message">{{ request.message || '等待对方确认' }}</div>
+                  <div class="request-time">{{ formatTime(request.createTime) }}</div>
+                </div>
+                <div class="request-status">
+                  <el-tag v-if="request.status === 'PENDING'" type="warning" size="small">
+                    等待确认
+                  </el-tag>
+                  <el-tag v-if="request.status === 'ACCEPTED'" type="success" size="small">
+                    已同意
+                  </el-tag>
+                  <el-tag v-if="request.status === 'REJECTED'" type="danger" size="small">
+                    已拒绝
+                  </el-tag>
+                </div>
+              </div>
+              <el-empty v-if="sentRequests.length === 0" description="暂无发出的申请" />
+            </div>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
+    </template>
     <el-dialog
+      v-else
       v-model="visible"
       title="好友申请"
       width="600px"
@@ -97,6 +177,10 @@ const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false
+  },
+  inline: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -129,11 +213,7 @@ const loadRequests = async () => {
 // 接受申请
 const handleAccept = async (request) => {
   try {
-    await handleFriendRequest({
-      requestId: request.id,
-      accept: true,
-      remark: ''
-    })
+    await handleFriendRequest(request.id, true)
     request.status = 'ACCEPTED'
     ElMessage.success('已接受好友申请')
     emit('refresh')
@@ -146,10 +226,7 @@ const handleAccept = async (request) => {
 // 拒绝申请
 const handleReject = async (request) => {
   try {
-    await handleFriendRequest({
-      requestId: request.id,
-      accept: false
-    })
+    await handleFriendRequest(request.id, false)
     request.status = 'REJECTED'
     ElMessage.success('已拒绝好友申请')
   } catch (error) {

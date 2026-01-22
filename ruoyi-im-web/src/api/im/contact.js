@@ -60,10 +60,8 @@ export function sendFriendRequest(data) {
 
 /**
  * 处理好友申请
- * @param {Object} data - 处理数据
- * @param {number} data.requestId - 申请ID
- * @param {boolean} data.accept - 是否接受
- * @param {string} data.remark - 备注信息（接受时填写）
+ * @param {number} requestId - 申请ID
+ * @param {boolean} approved - 是否通过
  * @returns {Promise}
  */
 export function handleFriendRequest(requestId, approved) {

@@ -1,5 +1,12 @@
 <template>
   <div class="chat-input-container">
+    <div v-if="replyingMessage" class="reply-preview">
+      <div class="reply-content">
+        <span class="reply-user">{{ replyingMessage.senderName }}:</span>
+        <span class="reply-text">{{ replyingMessage.content }}</span>
+      </div>
+      <el-icon class="close-icon" @click="$emit('cancel-reply')"><Close /></el-icon>
+    </div>
     <div class="input-toolbar">
       <div class="emoji-picker-wrapper">
         <el-tooltip content="表情">
@@ -39,14 +46,15 @@
 
 <script setup>
 import { ref } from 'vue'
-import { ChatDotRound, Folder, Picture } from '@element-plus/icons-vue'
+import { ChatDotRound, Folder, Picture, Close } from '@element-plus/icons-vue'
 import EmojiPicker from '@/components/EmojiPicker/index.vue'
 
 const props = defineProps({
-  sending: Boolean
+  sending: Boolean,
+  replyingMessage: Object
 })
 
-const emit = defineEmits(['send', 'upload-file', 'upload-image'])
+const emit = defineEmits(['send', 'upload-file', 'upload-image', 'cancel-reply'])
 
 const message = ref('')
 const showEmojiPicker = ref(false)
@@ -108,5 +116,35 @@ const handleSend = () => {
   display: flex;
   justify-content: flex-end;
   margin-top: 10px;
+}
+
+.reply-preview {
+  display: flex;
+  align-items: center;
+  background: #f0f0f0;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  justify-content: space-between;
+  
+  .reply-content {
+    font-size: 12px;
+    color: #8c8c8c;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+    .reply-user {
+      font-weight: bold;
+      margin-right: 4px;
+    }
+  }
+  
+  .close-icon {
+    cursor: pointer;
+    color: #bfbfbf;
+    &:hover { color: #8c8c8c; }
+  }
 }
 </style>

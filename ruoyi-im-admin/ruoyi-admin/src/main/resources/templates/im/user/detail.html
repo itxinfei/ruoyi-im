@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('用户详情')" />
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+
+        .detail-container {
+            padding: 24px;
+        }
+
+        /* 用户头部信息 */
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .user-avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid rgba(255,255,255,0.3);
+            object-fit: cover;
+        }
+
+        .user-header-info {
+            flex: 1;
+        }
+
+        .user-header-name {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .user-header-meta {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .user-header-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-badge.online {
+            background: rgba(26,179,148,0.2);
+            border: 1px solid rgba(26,179,148,0.5);
+        }
+
+        .status-badge.offline {
+            background: rgba(150,150,150,0.2);
+            border: 1px solid rgba(150,150,150,0.5);
+        }
+
+        .status-badge.disabled {
+            background: rgba(237,85,101,0.2);
+            border: 1px solid rgba(237,85,101,0.5);
+        }
+
+        /* 详情卡片 */
+        .detail-section {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .detail-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-section-title i {
+            color: #1ab394;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px 24px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .detail-value.empty {
+            color: #ccc;
+        }
+
+        /* 统计数字 */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: #f5f7fa;
+            border-radius: 8px;
+        }
+
+        .stat-item-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1ab394;
+        }
+
+        .stat-item-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        /* 操作按钮 */
+        .detail-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #1ab394;
+            color: #fff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: #18a689;
+        }
+
+        .btn-default {
+            background: #fff;
+            color: #666;
+            border: 1px solid #d9d9d9;
+        }
+
+        .btn-default:hover {
+            border-color: #1ab394;
+            color: #1ab394;
+        }
+
+        .btn-danger {
+            background: #ed5565;
+            color: #fff;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background: #d43f3a;
+        }
+    </style>
+</head>
+<body class="white-bg">
+    <div class="detail-container">
+        <!-- 用户头部信息 -->
+        <div class="user-header">
+            <img th:src="${user.avatar ?: '/img/profile.jpg'}" class="user-avatar-large" onerror="this.src='/img/profile.jpg'"/>
+            <div class="user-header-info">
+                <div class="user-header-name" th:text="${user.nickname ?: user.username}">用户昵称</div>
+                <div class="user-header-meta">
+                    <span>账号：<span th:text="${user.username}">username</span></span>
+                    <span style="margin-left: 16px;" th:if="${user.signature}">签名：<span th:text="${user.signature}">个性签名</span></span>
+                </div>
+            </div>
+            <div class="user-header-status">
+                <span class="status-badge" th:class="${user.status == 1 ? 'status-badge online' : 'status-badge offline'}"
+                      th:classappend="${user.status == 0 ? 'disabled' : ''}"
+                      th:text="${user.status == 1 ? (user.isOnline == 1 ? '在线' : '离线') : '已停用'}">在线</span>
+            </div>
+        </div>
+
+        <!-- 基本信息 -->
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa fa-user"></i> 基本信息
+            </div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">用户ID</span>
+                    <span class="detail-value" th:text="${user.id}">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">用户名</span>
+                    <span class="detail-value" th:text="${user.username}">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">昵称</span>
+                    <span class="detail-value" th:class="${user.nickname} ? '' : 'empty'" th:text="${user.nickname ?: '未设置'}">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">性别</span>
+                    <span class="detail-value">
+                        <span th:if="${user.gender == 1}" style="color:#1c84c6">男</span>
+                        <span th:if="${user.gender == 2}" style="color:#ed5565">女</span>
+                        <span th:if="${user.gender == null or user.gender == 0}" style="color:#ccc">未知</span>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">个性签名</span>
+                    <span class="detail-value" th:class="${user.signature} ? '' : 'empty'" th:text="${user.signature ?: '未设置'}">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">账号状态</span>
+                    <span class="detail-value">
+                        <span th:if="${user.status == 1}" style="color:#1ab394">正常</span>
+                        <span th:if="${user.status == 0}" style="color:#ed5565">停用</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 联系方式 -->
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa fa-address-book"></i> 联系方式
+            </div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">手机号</span>
+                    <span class="detail-value" th:class="${user.mobile} ? '' : 'empty'" th:text="${user.mobile ?: '未绑定'}">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">邮箱</span>
+                    <span class="detail-value" th:class="${user.email} ? '' : 'empty'" th:text="${user.email ?: '未绑定'}">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 账号信息 -->
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa fa-info-circle"></i> 账号信息
+            </div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">注册时间</span>
+                    <span class="detail-value" th:text="${user.createTime}">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">最后在线</span>
+                    <span class="detail-value" th:class="${user.lastOnlineTime} ? '' : 'empty'" th:text="${user.lastOnlineTime ?: '从未登录'}">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">更新时间</span>
+                    <span class="detail-value" th:text="${user.updateTime}">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">在线状态</span>
+                    <span class="detail-value">
+                        <span th:if="${user.isOnline == 1}" style="color:#1ab394">● 在线</span>
+                        <span th:if="${user.isOnline == 0 or user.isOnline == null}" style="color:#999">○ 离线</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="detail-actions">
+            <button type="button" class="btn btn-default" onclick="$.modal.close()">关闭</button>
+            <button type="button" class="btn btn-primary" onclick="editUser()" th:if="${hasEditPermission}">编辑</button>
+            <button type="button" class="btn btn-danger" onclick="deleteUser()" th:if="${hasRemovePermission}">删除</button>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        var userId = [[${user.id}]];
+        var hasEditPermission = [[${hasEditPermission}]];
+        var hasRemovePermission = [[${hasRemovePermission}]];
+
+        function editUser() {
+            $.modal.close();
+            $.operate.edit(userId);
+        }
+
+        function deleteUser() {
+            $.modal.confirm("确定要删除该用户吗？", function() {
+                $.modal.close();
+                $.operate.remove(userId);
+            });
+        }
+    </script>
+</body>
+</html>

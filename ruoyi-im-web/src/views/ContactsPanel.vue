@@ -14,14 +14,23 @@
         ref="contactListRef"
         :current-contact="selectedContact"
         @select="handleSelect"
+        @nav="handleNav"
       />
     </div>
     
     <div class="contacts-right">
-      <ContactDetail
-        :contact="selectedContact"
-        @update="refreshList"
-      />
+      <template v-if="view === 'detail'">
+        <ContactDetail
+          :contact="selectedContact"
+          @update="refreshList"
+        />
+      </template>
+      <template v-else-if="view === 'new-friends'">
+        <div class="new-friends-view">
+          <div class="view-header">新朋友</div>
+          <FriendRequestsDialog :inline="true" @refresh="refreshList" />
+        </div>
+      </template>
     </div>
 
     <!-- Dialogs -->
@@ -40,6 +49,7 @@ import FriendRequestsDialog from '@/components/FriendRequestsDialog/index.vue'
 import { getFriendRequests } from '@/api/im/contact'
 
 const selectedContact = ref(null)
+const view = ref('detail') // detail | new-friends
 const showAddDialog = ref(false)
 const showRequests = ref(false)
 const requestCount = ref(0)
@@ -47,6 +57,12 @@ const contactListRef = ref(null)
 
 const handleSelect = (contact) => {
   selectedContact.value = contact
+  view.value = 'detail'
+}
+
+const handleNav = (target) => {
+  view.value = target
+  selectedContact.value = null
 }
 
 const refreshList = () => {
@@ -101,6 +117,32 @@ onMounted(() => {
 
 .contacts-right {
   flex: 1;
-  overflow: hidden;
+  overflow-y: auto;
+  background: white;
+}
+
+.new-friends-view {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .view-header {
+    padding: 24px 40px;
+    font-size: 20px;
+    font-weight: 600;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  :deep(.friend-requests-panel) {
+    padding: 20px 40px;
+    .el-dialog {
+      margin: 0;
+      width: 100% !important;
+      box-shadow: none;
+      border: none;
+      .el-dialog__header { display: none; }
+      .el-dialog__body { padding: 0; }
+    }
+  }
 }
 </style>

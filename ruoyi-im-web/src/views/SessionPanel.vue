@@ -33,12 +33,14 @@
 
     <div v-loading="loading" class="session-list">
       <div
-        v-for="session in filteredSessions"
+        v-for="session in sortedSessions"
         :key="session.id"
         class="session-item"
-        :class="{ active: isActiveSession(session) }"
+        :class="{ active: isActiveSession(session), pinned: session.isPinned }"
         @click="handleSessionClick(session)"
+        @contextmenu.prevent="handleContextMenu($event, session)"
       >
+        <div v-if="session.isPinned" class="pinned-tag"></div>
         <el-badge :value="session.unreadCount" :hidden="session.unreadCount === 0" :max="99">
           <el-avatar :size="40" :src="session.avatar">
             {{ session.name?.charAt(0) }}
@@ -47,13 +49,29 @@
         
         <div class="session-info">
           <div class="session-top">
-            <span class="session-name">{{ session.name }}</span>
+            <div class="session-name-wrapper">
+              <span class="session-name">{{ session.name }}</span>
+              <el-icon v-if="session.isMuted" class="muted-icon"><Mute /></el-icon>
+            </div>
             <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
           </div>
           <div class="session-preview">
             {{ session.lastMessage || '暂无消息' }}
           </div>
         </div>
+      </div>
+
+      <!-- 右键菜单 -->
+      <div v-if="contextMenu.show" class="context-menu" :style="contextMenuStyle">
+        <div class="menu-item" @click="handleMarkAsRead">标记已读</div>
+        <div class="menu-item" @click="handleTogglePin">
+          {{ contextMenu.session?.isPinned ? '取消置顶' : '置顶会话' }}
+        </div>
+        <div class="menu-item" @click="handleToggleMute">
+          {{ contextMenu.session?.isMuted ? '取消静音' : '消息免打扰' }}
+        </div>
+        <div class="menu-divider"></div>
+        <div class="menu-item danger" @click="handleDeleteSession">删除会话</div>
       </div>
 
       <div v-if="!loading && sessions.length === 0" class="empty-state">
@@ -70,10 +88,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
-import { ElMessage } from 'element-plus'
-import { Search, Plus, UserFilled, ChatDotRound } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Search, Plus, UserFilled, ChatDotRound, Mute } from '@element-plus/icons-vue'
 import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
 
 const props = defineProps({
@@ -134,21 +152,92 @@ const formatTime = (timestamp) => {
   
   const date = new Date(timestamp)
   const now = new Date()
-  const diff = now - date
   
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
-  if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`
+  // 检查是否是今天
+  if (date.toDateString() === now.toDateString()) {
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+  }
+  
+  const diff = now - date
+  if (diff < 86400000 * 2) return '昨天'
+  if (diff < 86400000 * 7) return `${Math.floor(diff / 86400000)}天前`
   
   return `${date.getMonth() + 1}/${date.getDate()}`
 }
 
+// 右键菜单状态
+const contextMenu = reactive({
+  show: false,
+  x: 0,
+  y: 0,
+  session: null
+})
+
+const contextMenuStyle = computed(() => ({
+  left: `${contextMenu.x}px`,
+  top: `${contextMenu.y}px`
+}))
+
+const handleContextMenu = (e, session) => {
+  contextMenu.show = true
+  contextMenu.x = e.clientX
+  contextMenu.y = e.clientY
+  contextMenu.session = session
+}
+
+const hideContextMenu = () => {
+  contextMenu.show = false
+}
+
+// 会话操作
+const handleMarkAsRead = async () => {
+  if (!contextMenu.session) return
+  await store.dispatch('im/markSessionAsRead', contextMenu.session.id)
+  hideContextMenu()
+}
+
+const handleTogglePin = async () => {
+  if (!contextMenu.session) return
+  const pinned = !contextMenu.session.isPinned
+  await store.dispatch('im/pinSession', { sessionId: contextMenu.session.id, pinned })
+  ElMessage.success(pinned ? '已置顶' : '已取消置顶')
+  hideContextMenu()
+}
+
+const handleToggleMute = async () => {
+  if (!contextMenu.session) return
+  const muted = !contextMenu.session.isMuted
+  await store.dispatch('im/muteSession', { sessionId: contextMenu.session.id, muted })
+  ElMessage.success(muted ? '已开启免打扰' : '已关闭免打扰')
+  hideContextMenu()
+}
+
+const handleDeleteSession = () => {
+  if (!contextMenu.session) return
+  ElMessageBox.confirm('确定要删除该会话吗？历史消息将保留。', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    await store.dispatch('im/deleteSession', contextMenu.session.id)
+    ElMessage.success('已删除')
+    hideContextMenu()
+  }).catch(() => {})
+}
+
+// 使用 getter 中的排序会话
+const sortedSessions = computed(() => store.getters['im/sortedSessions'])
+
 onMounted(() => {
-  // 确保会话加载 (App.vue already does this, but safe to check or refresh)
+  // 确保会话加载
   if (sessions.value.length === 0) {
     store.dispatch('im/loadSessions')
   }
+  window.addEventListener('click', hideContextMenu)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', hideContextMenu)
 })
 </script>
 
@@ -201,6 +290,20 @@ onMounted(() => {
       &.active {
         background: rgba(0, 137, 255, 0.1);
       }
+
+      &.pinned {
+        background: #fcfcfc;
+      }
+      
+      .pinned-tag {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 0;
+        border-top: 6px solid #0089ff;
+        border-right: 6px solid transparent;
+      }
       
       .session-info {
         flex: 1;
@@ -213,13 +316,26 @@ onMounted(() => {
           align-items: center;
           margin-bottom: 4px;
           
-          .session-name {
-            font-size: 14px;
-            font-weight: 500;
-            color: #262626;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+          .session-name-wrapper {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            min-width: 0;
+            
+            .session-name {
+              font-size: 14px;
+              font-weight: 500;
+              color: #262626;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+
+            .muted-icon {
+              margin-left: 4px;
+              font-size: 12px;
+              color: #bfbfbf;
+            }
           }
           
           .session-time {
@@ -236,6 +352,43 @@ onMounted(() => {
           overflow: hidden;
           text-overflow: ellipsis;
         }
+      }
+    }
+
+    .context-menu {
+      position: fixed;
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+      z-index: 2000;
+      padding: 4px 0;
+      min-width: 120px;
+      
+      .menu-item {
+        padding: 8px 16px;
+        font-size: 13px;
+        color: #595959;
+        cursor: pointer;
+        transition: all 0.2s;
+        
+        &:hover {
+          background: #f5f5f5;
+          color: #0089ff;
+        }
+        
+        &.danger {
+          color: #ff4d4f;
+          &:hover {
+            background: #fff1f0;
+          }
+        }
+      }
+      
+      .menu-divider {
+        height: 1px;
+        background: #f0f0f0;
+        margin: 4px 0;
       }
     }
 

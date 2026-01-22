@@ -142,8 +142,16 @@
         <el-card>
           <template #header>
             <div class="card-header">
-              <span>待审批</span>
-              <el-badge :value="approvals.length" :max="99" />
+              <div class="header-left">
+                <span class="mr-10">审批中心</span>
+                <el-radio-group v-model="approvalTab" size="small" @change="loadApprovals">
+                  <el-radio-button label="pending">待处理</el-radio-button>
+                  <el-radio-button label="my">我发起</el-radio-button>
+                </el-radio-group>
+              </div>
+              <el-button type="primary" size="small" @click="showCreateApproval = true">
+                <el-icon><Plus /></el-icon> 发起
+              </el-button>
             </div>
           </template>
           <div v-loading="loadingApprovals" class="approval-list">
@@ -238,6 +246,19 @@
         <el-button type="primary" @click="handleCreateTodo">创建</el-button>
       </template>
     </el-dialog>
+
+    <!-- 发起审批 -->
+    <CreateApprovalDialog
+      v-model="showCreateApproval"
+      @success="handleApprovalSuccess"
+    />
+
+    <!-- 审批详情 -->
+    <ApprovalDetailDialog
+      v-model="showApprovalDetail"
+      :approval-id="selectedApprovalId"
+      @refresh="loadApprovals"
+    />
   </div>
 </template>
 
@@ -257,12 +278,13 @@ import {
   getTodos,
   createTodo,
   completeTodo,
-  getApprovals,
-  checkIn,
-  getAttendance,
   getAnnouncements,
   getStatistics
 } from '@/api/im/workbench'
+import { getPendingApprovals, getMyApprovals } from '@/api/im/approval'
+import { getTodayStatus, checkIn, checkOut } from '@/api/im/attendance'
+import ApprovalDetailDialog from '@/components/Workplace/ApprovalDetailDialog.vue'
+import CreateApprovalDialog from '@/components/Workplace/CreateApprovalDialog.vue'
 
 const statistics = ref({
   pendingTodos: 0,
@@ -289,6 +311,11 @@ const approvals = ref([])
 const announcements = ref([])
 
 const showCreateTodoDialog = ref(false)
+const showCreateApproval = ref(false)
+const showApprovalDetail = ref(false)
+const selectedApprovalId = ref(null)
+const approvalTab = ref('pending') // pending | my
+
 const todoForm = reactive({
   title: '',
   content: '',
@@ -336,15 +363,24 @@ const loadTodos = async () => {
 const loadApprovals = async () => {
   loadingApprovals.value = true
   try {
-    const response = await getApprovals({ status: 'PENDING' })
-    if (response && response.data) {
-      approvals.value = response.data.list || response.data
+    const response = approvalTab.value === 'pending' 
+      ? await getPendingApprovals() 
+      : await getMyApprovals()
+      
+    if (response && response.code === 200) {
+      approvals.value = response.data
     }
   } catch (error) {
     console.error('加载审批列表失败:', error)
   } finally {
     loadingApprovals.value = false
   }
+}
+
+const handleApprovalSuccess = () => {
+  approvalTab.value = 'my'
+  loadApprovals()
+  loadStatistics()
 }
 
 // 加载公告列表
@@ -365,14 +401,26 @@ const loadAnnouncements = async () => {
 // 加载考勤记录
 const loadAttendance = async () => {
   try {
-    const today = new Date().toISOString().split('T')[0]
-    const response = await getAttendance({ date: today })
+    const response = await getTodayStatus()
     if (response && response.data) {
-      todayAttendance.value = response.data
+      // Backend ImAttendance has id, checkInTime, checkOutTime, status
+      // Mapping to todayAttendance format
+      todayAttendance.value = {
+        id: response.data.id,
+        checkIn: response.data.checkInTime ? formatTimeOnly(response.data.checkInTime) : null,
+        checkOut: response.data.checkOutTime ? formatTimeOnly(response.data.checkOutTime) : null
+      }
     }
   } catch (error) {
     console.error('加载考勤记录失败:', error)
   }
+}
+
+const formatTimeOnly = (fullTime) => {
+  if (!fullTime) return null
+  // assuming fullTime is "YYYY-MM-DD HH:mm:ss" or ISO
+  const d = new Date(fullTime)
+  return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
 }
 
 // 上班打卡
@@ -380,8 +428,8 @@ const handleCheckIn = async () => {
   checkingIn.value = true
   try {
     await checkIn({
-      type: 'CHECK_IN',
-      location: '办公室' // TODO: 获取实际位置
+      location: JSON.stringify({ address: '办公室', latitude: 0, longitude: 0 }),
+      deviceInfo: 'Web'
     })
     ElMessage.success('上班打卡成功')
     await loadAttendance()
@@ -397,9 +445,9 @@ const handleCheckIn = async () => {
 const handleCheckOut = async () => {
   checkingOut.value = true
   try {
-    await checkIn({
-      type: 'CHECK_OUT',
-      location: '办公室'
+    await checkOut({
+      location: JSON.stringify({ address: '办公室', latitude: 0, longitude: 0 }),
+      deviceInfo: 'Web'
     })
     ElMessage.success('下班打卡成功')
     await loadAttendance()
@@ -447,8 +495,8 @@ const handleTodoComplete = async (todo) => {
 
 // 审批点击
 const handleApprovalClick = (approval) => {
-  ElMessage.info('审批详情功能开发中...')
-  // TODO: 打开审批详情对话框
+  selectedApprovalId.value = approval.id
+  showApprovalDetail.value = true
 }
 
 // 获取审批类型标签

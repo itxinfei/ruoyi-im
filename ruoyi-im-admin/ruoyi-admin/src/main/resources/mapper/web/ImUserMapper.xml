@@ -44,16 +44,44 @@
     <select id="selectImUserList" parameterType="com.ruoyi.web.domain.ImUser" resultMap="ImUserResult">
         <include refid="selectImUserVo"/>
         <where>
+            <!-- 关键词搜索：用户名/昵称/手机号/邮箱 -->
+            <if test="keyword != null and keyword != ''">
+                and (username like concat('%', #{keyword}, '%')
+                or nickname like concat('%', #{keyword}, '%')
+                or mobile like concat('%', #{keyword}, '%')
+                or email like concat('%', #{keyword}, '%'))
+            </if>
             <if test="username != null and username != ''"> and username like concat('%', #{username}, '%') </if>
             <if test="nickname != null and nickname != ''"> and nickname like concat('%', #{nickname}, '%') </if>
-            <if test="email != null and email != ''"> and email = #{email} </if>
-            <if test="mobile != null and mobile != ''"> and mobile = #{mobile} </if>
+            <if test="email != null and email != ''"> and email like concat('%', #{email}, '%') </if>
+            <if test="mobile != null and mobile != ''"> and mobile like concat('%', #{mobile}, '%') </if>
             <if test="status != null"> and status = #{status} </if>
             <if test="gender != null"> and gender = #{gender} </if>
             <if test="isOnline != null">
                 <choose>
                     <when test="isOnline == 1"> and last_online_time >= DATE_SUB(NOW(), INTERVAL 5 MINUTE) </when>
-                    <otherwise> and last_online_time &lt; DATE_SUB(NOW(), INTERVAL 5 MINUTE) </otherwise>
+                    <otherwise> and (last_online_time &lt; DATE_SUB(NOW(), INTERVAL 5 MINUTE) or last_online_time is null) </otherwise>
+                </choose>
+            </if>
+            <!-- 注册时间范围 -->
+            <if test="params != null and params.beginTime != null and params.beginTime != ''">
+                and date(create_time) &gt;= #{params.beginTime}
+            </if>
+            <if test="params != null and params.endTime != null and params.endTime != ''">
+                and date(create_time) &lt;= #{params.endTime}
+            </if>
+            <!-- 最后登录时间范围 -->
+            <if test="params != null and params.lastLoginBegin != null and params.lastLoginBegin != ''">
+                and date(last_online_time) &gt;= #{params.lastLoginBegin}
+            </if>
+            <if test="params != null and params.lastLoginEnd != null and params.lastLoginEnd != ''">
+                and date(last_online_time) &lt;= #{params.lastLoginEnd}
+            </if>
+            <!-- 是否有头像 -->
+            <if test="hasAvatar != null">
+                <choose>
+                    <when test="hasAvatar == 1"> and avatar is not null and avatar != '' </when>
+                    <otherwise> and (avatar is null or avatar = '') </otherwise>
                 </choose>
             </if>
         </where>

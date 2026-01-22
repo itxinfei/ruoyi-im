@@ -3,666 +3,406 @@
 <head>
     <th:block th:include="include :: header('新增IM用户')" />
     <th:block th:include="include :: bootstrap-fileinput-css"/>
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet" />
     <style>
-        /* 页面容器 */
+        /* 大厂表单设计规范 */
+        :root {
+            --primary-color: #1890ff;
+            --success-color: #52c41a;
+            --warning-color: #faad14;
+            --danger-color: #ff4d4f;
+            --text-primary: #262626;
+            --text-secondary: #595959;
+            --text-tertiary: #8c8c8c;
+            --border-color: #d9d9d9;
+            --border-light: #e8e8e8;
+            --bg-light: #fafafa;
+            --bg-card: #ffffff;
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+        }
+
+        body { background: #f5f7fa !important; }
         .ibox-content {
-            padding: var(--im-spacing-lg);
+            background: #fff;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 28px !important;
+            max-width: 100%;
+            margin: 0;
         }
 
-        .form-horizontal .form-group {
-            margin-bottom: var(--im-spacing-md);
-        }
+        /* 表单标题 */
+        .form-header { margin-bottom: 24px; }
+        .form-title { font-size: 18px; font-weight: 500; color: var(--text-primary); }
+        .form-desc { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; }
 
-        /* 表单布局 */
-        .im-form-container {
-            display: flex;
-            gap: var(--im-spacing-xl);
-        }
-
-        .im-form-main {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .im-form-sidebar {
-            width: 240px;
-            flex-shrink: 0;
-        }
-
-        /* 表单分区标题 */
-        .im-section-title {
+        /* 表单分组 */
+        .form-section { margin-bottom: 24px; }
+        .form-section-title {
             font-size: 14px;
-            font-weight: 600;
-            color: var(--im-text-primary);
-            margin: 0 0 var(--im-spacing-md) 0;
-            padding-bottom: var(--im-spacing-sm);
-            border-bottom: 2px solid var(--im-primary-light);
+            font-weight: 500;
+            color: var(--text-primary);
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-light);
             display: flex;
             align-items: center;
-            gap: var(--im-spacing-sm);
+            gap: 6px;
         }
+        .form-section-title i { color: var(--primary-color); }
 
-        .im-section-title i {
-            color: var(--im-primary);
-            font-size: 16px;
-        }
+        .form-group { margin-bottom: 16px; }
+        .form-group:last-child { margin-bottom: 0; }
 
-        /* 表单控件 */
-        .form-control {
-            height: 36px;
-            border: 1px solid var(--im-border);
-            border-radius: var(--im-radius-sm);
-            padding: 6px 12px;
-            font-size: 14px;
-            transition: var(--im-transition);
-        }
-
-        .form-control:focus {
-            border-color: var(--im-primary);
-            box-shadow: 0 0 0 2px var(--im-primary-light);
-            outline: none;
-        }
-
-        .form-control.is-valid {
-            border-color: var(--im-success);
-        }
-
-        .form-control.is-invalid {
-            border-color: var(--im-danger);
-        }
-
-        /* 表单标签 */
         .control-label {
             font-size: 13px;
-            font-weight: 500;
-            color: var(--im-text-secondary);
-            padding-top: 8px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            padding-top: 6px;
+            margin-bottom: 4px;
         }
+        .control-label.required::before { content: '*'; color: var(--danger-color); margin-right: 4px; }
 
-        .control-label.is-required::after {
-            content: '*';
-            color: var(--im-danger);
-            margin-left: 4px;
+        .form-control {
+            height: 36px;
+            padding: 0 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            transition: all 0.2s;
         }
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(24,144,255,0.1);
+            outline: none;
+        }
+        .form-control::placeholder { color: #bfbfbf; }
+        textarea.form-control { height: auto; min-height: 80px; resize: vertical; }
 
-        /* 验证反馈 */
-        .im-feedback {
-            font-size: 12px;
-            margin-top: 4px;
-            min-height: 18px;
-            color: var(--im-text-tertiary);
-        }
+        /* 必填/错误/成功状态 */
+        .form-control.is-invalid { border-color: var(--danger-color); }
+        .form-control.is-valid { border-color: var(--success-color); }
 
-        .im-feedback.success {
-            color: var(--im-success);
-        }
-
-        .im-feedback.error {
-            color: var(--im-danger);
-        }
+        /* 帮助文本 */
+        .help-text { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+        .help-text i { margin-right: 4px; }
 
         /* 输入组 */
         .input-group .input-group-addon {
-            width: 40px;
-            height: 36px;
+            width: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--im-bg-hover);
-            border: 1px solid var(--im-border);
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
             border-left: none;
-            border-radius: 0 var(--im-radius-sm) var(--im-radius-sm) 0;
             cursor: pointer;
-            color: var(--im-text-tertiary);
-            transition: var(--im-transition);
+            color: var(--text-tertiary);
+            transition: all 0.2s;
         }
+        .input-group-addon:hover { background: #e6e6e6; color: var(--text-primary); }
+        .input-group .form-control { border-top-right-radius: 0; border-bottom-right-radius: 0; }
 
-        .input-group .input-group-addon:hover {
-            background: var(--im-bg-active);
-            color: var(--im-primary);
-        }
+        /* 密码强度 */
+        .strength-bar { height: 3px; background: var(--border-light); border-radius: 2px; overflow: hidden; margin-top: 6px; }
+        .strength-fill { height: 100%; width: 0; transition: width 0.3s; }
+        .strength-fill.weak { width: 33%; background: var(--danger-color); }
+        .strength-fill.medium { width: 66%; background: var(--warning-color); }
+        .strength-fill.strong { width: 100%; background: var(--success-color); }
+        .strength-text { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
 
-        .input-group .form-control {
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-        }
-
-        /* 侧边栏卡片 */
-        .im-sidebar-card {
-            background: var(--im-bg-hover);
-            border-radius: var(--im-radius-md);
-            padding: var(--im-spacing-md);
-            border: 1px solid var(--im-border-light);
+        /* 单选框 */
+        .radio-group { display: flex; gap: 20px; }
+        .radio-label {
             display: flex;
-            flex-direction: column;
             align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
         }
+        .radio-label input { margin: 0; }
 
-        .im-sidebar-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--im-text-primary);
-            margin-bottom: var(--im-spacing-sm);
+        /* 头像选择区 */
+        .avatar-section {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            align-items: flex-start;
         }
+        .avatar-form { flex: 1; }
 
-        /* 头像预览 */
-        .im-avatar-preview {
-            width: 100px;
-            height: 100px;
+        .avatar-preview-box {
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            border: 3px solid var(--im-border-light);
+            border: 2px dashed var(--border-color);
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--im-bg-container);
-            margin-bottom: var(--im-spacing-md);
+            background: var(--bg-light);
             overflow: hidden;
-            box-shadow: var(--im-shadow-sm);
+            flex-shrink: 0;
         }
+        .avatar-preview-box img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-preview-box i { font-size: 28px; color: var(--text-tertiary); }
 
-        .im-avatar-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .im-avatar-preview .fa-user {
-            font-size: 40px;
-            color: var(--im-text-quaternary);
-        }
-
-        /* 默认头像选择 */
-        .im-avatar-options {
+        .avatar-options {
             display: flex;
             gap: 6px;
-            justify-content: center;
-            margin-bottom: var(--im-spacing-md);
-            flex-wrap: wrap;
+            margin-bottom: 12px;
         }
-
-        .im-avatar-option {
-            width: 36px;
-            height: 36px;
+        .avatar-option {
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             cursor: pointer;
             border: 2px solid transparent;
-            overflow: hidden;
-            transition: var(--im-transition);
+            transition: all 0.2s;
         }
+        .avatar-option:hover { transform: scale(1.1); }
+        .avatar-option.selected { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(24,144,255,0.2); }
 
-        .im-avatar-option:hover {
-            transform: scale(1.1);
-        }
+        .avatar-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+        .avatar-upload { font-size: 13px; color: var(--primary-color); cursor: pointer; }
 
-        .im-avatar-option.selected {
-            border-color: var(--im-primary);
-            box-shadow: 0 0 0 2px var(--im-primary-light);
-        }
-
-        /* 密码强度 */
-        .im-password-strength {
-            margin-top: var(--im-spacing-sm);
-        }
-
-        .im-strength-bar {
-            height: 4px;
-            background: var(--im-divider);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .im-strength-fill {
-            height: 100%;
-            width: 0;
-            transition: width 0.3s ease;
-        }
-
-        .im-strength-fill.weak { width: 33%; background: var(--im-danger); }
-        .im-strength-fill.medium { width: 66%; background: var(--im-warning); }
-        .im-strength-fill.strong { width: 100%; background: var(--im-success); }
-
-        .im-strength-text {
-            font-size: 11px;
-            margin-top: 4px;
-            color: var(--im-text-tertiary);
-        }
-
-        /* 状态选择 */
-        .im-status-section {
-            margin-top: var(--im-spacing-md);
-            padding-top: var(--im-spacing-md);
-            border-top: 1px solid var(--im-divider);
-            width: 100%;
-        }
-
-        .im-status-label {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--im-text-primary);
-            margin-bottom: var(--im-spacing-sm);
-            display: block;
-        }
-
-        .im-status-options {
+        /* 按钮区 */
+        .form-actions {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-light);
             display: flex;
-            gap: var(--im-spacing-md);
+            justify-content: flex-end;
+            gap: 12px;
         }
-
-        .im-status-option {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: var(--im-text-secondary);
-            cursor: pointer;
-        }
-
-        /* 上传按钮 */
-        .im-upload-btn {
+        .btn {
+            height: 36px;
+            padding: 0 20px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 400;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            height: 32px;
-            padding: 4px 12px;
-            background: var(--im-primary);
-            color: #fff;
-            border-radius: var(--im-radius-sm);
-            font-size: 13px;
             cursor: pointer;
-            transition: var(--im-transition);
-            border: none;
+            transition: all 0.2s;
         }
+        .btn-primary { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+        .btn-primary:hover { background: #40a9ff; border-color: #40a9ff; }
+        .btn-default { background: #fff; border-color: var(--border-color); color: var(--text-primary); }
+        .btn-default:hover { border-color: var(--primary-color); color: var(--primary-color); }
 
-        .im-upload-btn:hover {
-            background: var(--im-primary-hover);
-        }
-
-        .im-upload-hint {
-            font-size: 11px;
-            color: var(--im-text-tertiary);
-            text-align: center;
-            margin-bottom: var(--im-spacing-sm);
-        }
-
-        /* 响应式 */
-        @media (max-width: 768px) {
-            .im-form-container {
-                flex-direction: column-reverse;
-            }
-
-            .im-form-sidebar {
-                width: 100%;
-            }
+        @media (max-width: 600px) {
+            .avatar-section { flex-direction: column; }
+            .avatar-preview-box { margin: 0 auto; }
         }
     </style>
 </head>
 <body class="white-bg">
-    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
-        <form class="form-horizontal m" id="form-user-add">
-            <div class="im-form-container">
-                <!-- 左侧表单区域 -->
-                <div class="im-form-main">
-                    <!-- 账号信息 -->
-                    <div class="form-group">
-                        <h4 class="im-section-title">
-                            <i class="fa fa-user-circle"></i>
-                            账号信息
-                        </h4>
-                    </div>
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="ibox-content">
+            <div class="form-header">
+                <div class="form-title">新增用户</div>
+                <div class="form-desc">填写以下信息创建新用户账号</div>
+            </div>
 
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label is-required" for="username">登录账号</label>
-                        <div class="col-sm-8">
-                            <input name="username" class="form-control" type="text"
-                                   placeholder="请输入2-20个字符（字母、数字、下划线）" id="username" required>
-                            <div class="im-feedback" id="username-feedback">用于登录系统的账号，创建后不可修改</div>
-                        </div>
-                    </div>
+            <form class="form-horizontal m" id="form-user-add">
+                <input type="hidden" name="avatar" id="avatarInput">
 
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label is-required" for="nickname">用户昵称</label>
-                        <div class="col-sm-8">
-                            <input name="nickname" class="form-control" type="text"
-                                   placeholder="请输入用户昵称" id="nickname" required>
-                            <div class="im-feedback" id="nickname-feedback">用户在系统中显示的名称</div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label is-required">登录密码</label>
-                        <div class="col-sm-8">
-                            <div class="input-group">
-                                <input name="password" class="form-control" type="password"
-                                       placeholder="请输入5-20个字符" id="password" required>
-                                <span class="input-group-addon" onclick="togglePassword()" title="显示/隐藏密码">
-                                    <i class="fa fa-eye" id="password-eye"></i>
-                                </span>
-                            </div>
-                            <div class="im-password-strength">
-                                <div class="im-strength-bar">
-                                    <div class="im-strength-fill" id="strength-fill"></div>
-                                </div>
-                                <div class="im-strength-text" id="strength-text">密码强度: 未设置</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 联系信息 -->
-                    <div class="form-group">
-                        <h4 class="im-section-title" style="margin-top: var(--im-spacing-lg);">
-                            <i class="fa fa-address-book"></i>
-                            联系信息
-                        </h4>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="mobile">手机号码</label>
-                        <div class="col-sm-8">
-                            <input name="mobile" class="form-control" type="text"
-                                   placeholder="请输入手机号码" id="mobile">
-                            <div class="im-feedback" id="mobile-feedback">用于接收系统通知</div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="email">邮箱</label>
-                        <div class="col-sm-8">
-                            <input name="email" class="form-control" type="email"
-                                   placeholder="请输入邮箱地址" id="email">
-                            <div class="im-feedback" id="email-feedback">用于接收邮件通知</div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="gender">性别</label>
-                        <div class="col-sm-8">
-                            <select name="gender" class="form-control" id="gender">
-                                <option value="">请选择性别</option>
-                                <option th:each="dict : ${@dict.getType('sys_user_sex')}"
-                                        th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="signature">个性签名</label>
-                        <div class="col-sm-8">
-                            <textarea name="signature" class="form-control" rows="2"
-                                      placeholder="请输入个性签名" id="signature"
-                                      style="resize: none; height: 60px;"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 右侧头像区域 -->
-                <div class="im-form-sidebar">
-                    <div class="im-sidebar-card">
-                        <div class="im-sidebar-title">用户头像</div>
-
-                        <div class="im-avatar-preview" id="avatarPreview">
+                <!-- 头像选择 -->
+                <div class="form-section">
+                    <div class="avatar-section">
+                        <div class="avatar-preview-box" id="avatarPreview">
                             <i class="fa fa-user"></i>
                         </div>
+                        <div class="avatar-form">
+                            <div class="avatar-label">选择头像</div>
+                            <div class="avatar-options" id="defaultAvatars">
+                                <div class="avatar-option selected" data-avatar="/profile/avatar/default1.png" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                                <div class="avatar-option" data-avatar="/profile/avatar/default2.png" style="background: linear-gradient(135deg, #f5576c, #f093fb);"></div>
+                                <div class="avatar-option" data-avatar="/profile/avatar/default3.png" style="background: linear-gradient(135deg, #4facfe, #00f2fe);"></div>
+                                <div class="avatar-option" data-avatar="/profile/avatar/default4.png" style="background: linear-gradient(135deg, #43e97b, #38f9d7);"></div>
+                            </div>
+                            <label class="avatar-upload" onclick="$('#avatarFile').click()">
+                                <i class="fa fa-upload"></i> 上传自定义头像
+                            </label>
+                            <input type="file" id="avatarFile" class="file" style="display: none;" accept="image/png,image/jpeg,image/gif">
+                        </div>
+                    </div>
+                </div>
 
-                        <!-- 默认头像选择 -->
-                        <div class="im-avatar-options" id="defaultAvatars">
-                            <div class="im-avatar-option" data-avatar="/profile/avatar/default1.png" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            </div>
-                            <div class="im-avatar-option" data-avatar="/profile/avatar/default2.png" style="background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);">
-                            </div>
-                            <div class="im-avatar-option" data-avatar="/profile/avatar/default3.png" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                            </div>
-                            <div class="im-avatar-option" data-avatar="/profile/avatar/default4.png" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                            </div>
-                            <div class="im-avatar-option" data-avatar="/profile/avatar/default5.png" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                            </div>
-                            <div class="im-avatar-option" data-avatar="/profile/avatar/default6.png" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                <!-- 账号信息 -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fa fa-user-circle"></i>账号信息
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label required">用户名</label>
+                                <input name="username" class="form-control" placeholder="2-20个字符，支持字母、数字、下划线" id="username" required>
+                                <div class="help-text"><i class="fa fa-info-circle"></i>用于登录系统，创建后不可修改</div>
                             </div>
                         </div>
-
-                        <div class="im-upload-hint">或上传自定义头像</div>
-
-                        <input type="hidden" name="avatar" id="avatarInput">
-                        <div class="file-loading">
-                            <input class="form-control file-upload" id="avatar" name="file" type="file" style="display: none;"
-                                   accept="image/png,image/jpeg,image/gif">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label required">昵称</label>
+                                <input name="nickname" class="form-control" placeholder="请输入用户昵称" id="nickname" required>
+                            </div>
                         </div>
-                        <label for="avatar" class="im-upload-btn">
-                            <i class="fa fa-upload"></i> 上传头像
-                        </label>
+                    </div>
 
-                        <!-- 账号状态 -->
-                        <div class="im-status-section">
-                            <span class="im-status-label">账号状态</span>
-                            <div class="im-status-options">
-                                <label class="im-status-option">
-                                    <input type="radio" name="status" value="1" checked> 正常
-                                </label>
-                                <label class="im-status-option">
-                                    <input type="radio" name="status" value="0"> 停用
-                                </label>
+                    <div class="form-group">
+                        <label class="control-label required">登录密码</label>
+                        <div class="input-group" style="max-width: 300px;">
+                            <input name="password" class="form-control" type="password" placeholder="请输入5-20个字符" id="password" required>
+                            <span class="input-group-addon" onclick="togglePassword()">
+                                <i class="fa fa-eye" id="password-eye"></i>
+                            </span>
+                        </div>
+                        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+                        <div class="strength-text" id="strength-text">密码强度: 未设置</div>
+                    </div>
+                </div>
+
+                <!-- 联系信息 -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fa fa-address-book"></i>联系信息
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">手机号</label>
+                                <input name="mobile" class="form-control" placeholder="请输入手机号码" id="mobile">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">邮箱</label>
+                                <input name="email" class="form-control" type="email" placeholder="请输入邮箱地址" id="email">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">性别</label>
+                                <select name="gender" class="form-control">
+                                    <option value="">请选择性别</option>
+                                    <option th:each="dict : ${@dict.getType('sys_user_sex')}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">账号状态</label>
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="status" value="1" checked> 正常
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="status" value="0"> 停用
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </form>
+
+                <!-- 按钮区 -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-default" onclick="$.modal.close()">取消</button>
+                    <button type="submit" class="btn btn-primary">确定新增</button>
+                </div>
+            </form>
+        </div>
     </div>
+
     <th:block th:include="include :: footer" />
     <th:block th:include="include :: bootstrap-fileinput-js"/>
     <script type="text/javascript">
         var prefix = ctx + "im/user";
-        var usernameUnique = false;
 
         $(document).ready(function() {
-            initDefaultAvatars();
-            initAvatarUpload();
-            initRealtimeValidation();
-            selectDefaultAvatar('/profile/avatar/default1.png');
+            initAvatarSelect();
+            initPasswordStrength();
+            selectAvatar('/profile/avatar/default1.png');
         });
 
         $("#form-user-add").validate({
             focusCleanup: true,
             rules: {
-                username: {
-                    required: true,
-                    minlength: 2,
-                    maxlength: 20,
-                    remote: {
-                        url: prefix + "/checkUsernameUnique",
-                        type: "post",
-                        dataType: "json",
-                        data: { "username": function() { return $.common.trim($("#username").val()); } },
-                        dataFilter: function(data, type) {
-                            usernameUnique = $.validate.unique(data);
-                            updateValidationUI('username', usernameUnique, usernameUnique ? "账号可用" : "账号已存在");
-                            return usernameUnique;
-                        }
-                    }
-                },
+                username: { required: true, minlength: 2, maxlength: 20, remote: { url: prefix + "/checkUsernameUnique", type: "post", dataType: "json", data: { "username": function() { return $.common.trim($("#username").val()); } } } },
                 nickname: { required: true, minlength: 2, maxlength: 30 },
                 password: { required: true, minlength: 5, maxlength: 20 },
                 email: { email: true },
                 mobile: { isPhone: true }
             },
-            messages: {
-                username: { required: "请输入登录账号", remote: "账号已存在" },
-                nickname: { required: "请输入用户昵称" },
-                password: { required: "请输入登录密码" }
-            }
+            messages: { username: { required: "请输入用户名", remote: "用户名已存在" } }
         });
 
-        function initRealtimeValidation() {
-            $("#username").on('input blur', function() {
-                var val = $(this).val();
-                if (val.length > 0) {
-                    if (val.length < 2) {
-                        updateValidationUI('username', false, "账号长度至少2个字符");
-                    } else if (val.length > 20) {
-                        updateValidationUI('username', false, "账号长度不能超过20个字符");
-                    } else if (!/^[a-zA-Z0-9_]+$/.test(val)) {
-                        updateValidationUI('username', false, "账号只能包含字母、数字和下划线");
-                    } else {
-                        updateValidationUI('username', true, "格式正确");
-                    }
-                } else {
-                    resetValidationUI('username');
-                }
-            });
-
-            $("#nickname").on('input blur', function() {
-                var val = $(this).val();
-                if (val.length > 0) {
-                    updateValidationUI('nickname', val.length >= 2, val.length >= 2 ? "格式正确" : "昵称长度至少2个字符");
-                } else {
-                    resetValidationUI('nickname');
-                }
-            });
-
+        function initPasswordStrength() {
             $("#password").on('input', function() {
-                var val = $(this).val();
-                if (val.length > 0) {
-                    if (val.length < 5) {
-                        updateValidationUI('password', false, "密码长度至少5个字符");
-                        updatePasswordStrength(0);
-                    } else {
-                        updateValidationUI('password', true, "格式正确");
-                        updatePasswordStrength(calculatePasswordStrength(val));
-                    }
-                } else {
-                    resetValidationUI('password');
-                    updatePasswordStrength(0);
-                }
-            });
+                var val = $(this).val(), score = 0;
+                if (val.length >= 8) score++;
+                if (val.length >= 12) score++;
+                if (/[a-z]/.test(val) && /[A-Z]/.test(val)) score++;
+                if (/\d/.test(val)) score++;
+                if (/[^a-zA-Z0-9]/.test(val)) score++;
 
-            $("#email").on('input blur', function() {
-                var val = $(this).val();
-                if (val.length > 0) {
-                    var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    updateValidationUI('email', regex.test(val), regex.test(val) ? "邮箱格式正确" : "请输入正确的邮箱格式");
-                } else {
-                    resetValidationUI('email');
-                }
-            });
-
-            $("#mobile").on('input blur', function() {
-                var val = $(this).val();
-                if (val.length > 0) {
-                    var regex = /^1[3-9]\d{9}$/;
-                    updateValidationUI('mobile', regex.test(val), regex.test(val) ? "手机号格式正确" : "请输入正确的手机号");
-                } else {
-                    resetValidationUI('mobile');
-                }
+                var $fill = $('#strength-fill'), $text = $('#strength-text');
+                $fill.removeClass('weak medium strong');
+                if (val.length == 0) { $text.text('密码强度: 未设置'); }
+                else if (score <= 2) { $fill.addClass('weak'); $text.text('密码强度: 弱'); }
+                else if (score <= 3) { $fill.addClass('medium'); $text.text('密码强度: 中'); }
+                else { $fill.addClass('strong'); $text.text('密码强度: 强'); }
             });
         }
 
-        function updateValidationUI(fieldId, isValid, message) {
-            var $input = $('#' + fieldId);
-            var $feedback = $('#' + fieldId + '-feedback');
-
-            $input.removeClass('is-valid is-invalid').addClass(isValid ? 'is-valid' : 'is-invalid');
-            $feedback.removeClass('success error').addClass(isValid ? 'success' : 'error').text(message);
-        }
-
-        function resetValidationUI(fieldId) {
-            $('#' + fieldId).removeClass('is-valid is-invalid');
-            $('#' + fieldId + '-feedback').removeClass('success error');
-            var msgs = {
-                'username': '用于登录系统的账号，创建后不可修改',
-                'nickname': '用户在系统中显示的名称',
-                'mobile': '用于接收系统通知',
-                'email': '用于接收邮件通知'
-            };
-            if (msgs[fieldId]) {
-                $('#' + fieldId + '-feedback').text(msgs[fieldId]).addClass('im-feedback');
-            }
-        }
-
-        function calculatePasswordStrength(password) {
-            var score = 0;
-            if (password.length >= 8) score++;
-            if (password.length >= 12) score++;
-            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
-            if (/\d/.test(password)) score++;
-            if (/[^a-zA-Z0-9]/.test(password)) score++;
-            return score;
-        }
-
-        function updatePasswordStrength(strength) {
-            var $fill = $('#strength-fill');
-            var $text = $('#strength-text');
-            $fill.removeClass('weak medium strong');
-            if (strength <= 1) {
-                $text.text('密码强度: 弱');
-            } else if (strength <= 3) {
-                $fill.addClass('medium');
-                $text.text('密码强度: 中');
-            } else {
-                $fill.addClass('strong');
-                $text.text('密码强度: 强');
-            }
-        }
-
-        function initDefaultAvatars() {
-            $('.im-avatar-option').on('click', function() {
-                selectDefaultAvatar($(this).data('avatar'));
+        function initAvatarSelect() {
+            $('.avatar-option').on('click', function() {
+                selectAvatar($(this).data('avatar'));
             });
-        }
 
-        function selectDefaultAvatar(avatar) {
-            $('#avatarInput').val(avatar);
-            $('.im-avatar-option').removeClass('selected');
-            var $selected = $('.im-avatar-option[data-avatar="' + avatar + '"]');
-            if ($selected.length > 0) {
-                $selected.addClass('selected');
-                var color = $selected.css('background');
-                $('#avatarPreview').html('<div style="width:100%;height:100%;background:' + color + ';display:flex;align-items:center;justify-content:center;"><i class="fa fa-user" style="color:#fff;font-size:40px;"></i></div>');
-            }
-        }
-
-        function initAvatarUpload() {
-            $(".file-upload").fileinput({
+            $("#avatarFile").fileinput({
                 uploadUrl: ctx + 'common/upload',
-                maxFileCount: 1,
-                autoReplace: true,
-                allowedFileExtensions: ["jpg", "png", "gif", "jpeg"],
-                maxFileSize: 2048,
-                showUpload: false,
-                showCaption: false,
-                browseClass: "btn btn-primary btn-sm",
-                dropZoneEnabled: false
-            }).on('fileuploaded', function (event, data, previewId, index) {
+                maxFileCount: 1, autoReplace: true,
+                allowedFileExtensions: ["jpg", "png", "gif", "jpeg"], maxFileSize: 2048,
+                showUpload: false, showCaption: false, dropZoneEnabled: false,
+                showRemove: true, previewClass: 'file-preview-box'
+            }).on('fileuploaded', function(e, data) {
                 if (data.response && data.response.url) {
                     $('#avatarInput').val(data.response.url);
-                    $('#avatarPreview').html('<img src="' + data.response.url + '" alt="头像预览">');
-                    $('.im-avatar-option').removeClass('selected');
+                    $('#avatarPreview').html('<img src="' + data.response.url + '">');
+                    $('.avatar-option').removeClass('selected');
                 }
-            }).on('fileremoved', function (event, id, index) {
-                $('#avatarInput').val('');
-                $('#avatarPreview').html('<i class="fa fa-user"></i>');
             });
+        }
+
+        function selectAvatar(avatar) {
+            $('#avatarInput').val(avatar);
+            $('.avatar-option').removeClass('selected');
+            var $sel = $('.avatar-option[data-avatar="' + avatar + '"]');
+            if ($sel.length) {
+                $sel.addClass('selected');
+                $('#avatarPreview').html('<div style="width:100%;height:100%;background:' + $sel.css('background') + ';display:flex;align-items:center;justify-content:center;"><i class="fa fa-user" style="color:#fff;font-size:28px;"></i></div>');
+            }
         }
 
         function togglePassword() {
-            var $input = $('#password');
-            var $eyeIcon = $('#password-eye');
-            if ($input.attr('type') == 'password') {
-                $input.attr('type', 'text');
-                $eyeIcon.removeClass('fa-eye').addClass('fa-eye-slash');
-            } else {
-                $input.attr('type', 'password');
-                $eyeIcon.removeClass('fa-eye-slash').addClass('fa-eye');
-            }
+            var $p = $('#password'), $i = $('#password-eye');
+            if ($p.attr('type') == 'password') { $p.attr('type', 'text'); $i.removeClass('fa-eye').addClass('fa-eye-slash'); }
+            else { $p.attr('type', 'password'); $i.removeClass('fa-eye-slash').addClass('fa-eye'); }
         }
 
         function submitHandler() {
-            if (!$('#avatarInput').val()) {
-                $.modal.msgWarning("请选择用户头像");
-                return;
-            }
-            if ($.validate.form()) {
-                $.operate.save(prefix + "/add", $('#form-user-add').serialize());
-            }
+            if (!$('#avatarInput').val()) { $.modal.msgWarning("请选择头像"); return; }
+            if ($.validate.form()) { $.operate.save(prefix + "/add", $('#form-user-add').serialize()); }
         }
     </script>
 </body>

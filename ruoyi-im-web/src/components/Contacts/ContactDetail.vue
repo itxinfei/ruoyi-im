@@ -2,56 +2,84 @@
   <div v-if="contact" class="contact-detail">
     <div class="header">
       <div class="avatar-large">
-        <img v-if="contact.friendAvatar" :src="contact.friendAvatar" />
+        <img v-if="getAvatar" :src="getAvatar" />
         <div v-else class="avatar-text">
-          {{ (contact.friendName || '?').charAt(0) }}
+          {{ getName.charAt(0) }}
         </div>
       </div>
       <div class="main-info">
         <div class="name-row">
-          <span class="name">{{ contact.friendName }}</span>
-          <el-tag size="small" type="success" v-if="contact.online">在线</el-tag>
-          <el-tag size="small" type="info" v-else>离线</el-tag>
+          <span class="name">{{ getName }}</span>
+          <template v-if="!contact.isGroup">
+            <el-tag size="small" type="success" v-if="contact.online">在线</el-tag>
+            <el-tag size="small" type="info" v-else>离线</el-tag>
+          </template>
         </div>
-        <div class="meta">{{ contact.position || '职位未知' }} · {{ contact.department || '部门未知' }}</div>
+        <div class="meta">
+          <template v-if="contact.isGroup">
+            群号: {{ contact.id }} · {{ contact.memberCount || 0 }} 成员
+          </template>
+          <template v-else>
+            {{ contact.position || '职位未知' }} · {{ contact.department || '部门未知' }}
+          </template>
+        </div>
       </div>
     </div>
 
     <div class="actions">
       <el-button type="primary" :icon="ChatDotRound" @click="startChat">发消息</el-button>
-      <el-button :icon="hide ? StarFilled : Star" @click="toggleFavorite">
-        {{ contact.isFavorite ? '已收藏' : '收藏' }}
-      </el-button>
-      <el-dropdown @command="handleMoreCommand">
-        <el-button :icon="MoreFilled" circle />
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item command="editRemark">修改备注</el-dropdown-item>
-            <el-dropdown-item command="delete" divided class="danger-text">删除好友</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+      
+      <template v-if="!contact.isGroup">
+        <el-button :icon="contact.isFavorite ? StarFilled : Star" @click="toggleFavorite">
+          {{ contact.isFavorite ? '已收藏' : '收藏' }}
+        </el-button>
+        <el-dropdown @command="handleMoreCommand">
+          <el-button :icon="MoreFilled" circle />
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="editRemark">修改备注</el-dropdown-item>
+              <el-dropdown-item command="delete" divided class="danger-text">删除好友</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </template>
+      <template v-else>
+        <!-- 群组操作 -->
+        <el-button :icon="Setting" @click="handleGroupConfig">群设置</el-button>
+      </template>
     </div>
 
     <el-divider />
 
     <div class="info-list">
-      <div class="info-item">
-        <span class="label">手机</span>
-        <span class="value">{{ contact.phone || '-' }}</span>
-      </div>
-      <div class="info-item">
-        <span class="label">邮箱</span>
-        <span class="value">{{ contact.email || '-' }}</span>
-      </div>
-      <div class="info-item">
-        <span class="label">签名</span>
-        <span class="value">{{ contact.signature || '-' }}</span>
-      </div>
-      <div class="info-item">
-        <span class="label">分组</span>
-        <span class="value">{{ contact.groupName || '默认分组' }}</span>
-      </div>
+      <template v-if="contact.isGroup">
+        <div class="info-item">
+          <span class="label">群公告</span>
+          <span class="value">{{ contact.notice || '暂无公告' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">群描述</span>
+          <span class="value">{{ contact.description || '暂无描述' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">群主</span>
+          <span class="value">{{ contact.ownerName || '-' }}</span>
+        </div>
+      </template>
+      <template v-else>
+        <div class="info-item">
+          <span class="label">手机</span>
+          <span class="value">{{ contact.phone || '-' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">邮箱</span>
+          <span class="value">{{ contact.email || '-' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">签名</span>
+          <span class="value">{{ contact.signature || '-' }}</span>
+        </div>
+      </template>
     </div>
   </div>
   <div v-else class="empty-state">
@@ -66,23 +94,54 @@ import {
   ChatDotRound, 
   Star, 
   StarFilled, 
-  MoreFilled 
+  MoreFilled,
+  Setting
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { updateContactRemark, deleteContact } from '@/api/im/contact'
+import { createConversation } from '@/api/im/conversation'
 
 const props = defineProps({
   contact: Object
 })
 
 const emit = defineEmits(['update'])
-const startChat = () => {
-  // Navigate to chat with this user
-  store.dispatch('im/selectSession', {
-    id: props.contact.friendId, // Assuming session ID matches user ID for private chat or need creation
-    type: 'private',
-    name: props.contact.friendName
-  })
+const store = useStore()
+
+const getName = computed(() => {
+  if (!props.contact) return ''
+  return props.contact.isGroup ? props.contact.name : props.contact.friendName
+})
+
+const getAvatar = computed(() => {
+  if (!props.contact) return ''
+  return props.contact.isGroup ? props.contact.avatar : props.contact.friendAvatar
+})
+
+const startChat = async () => {
+  try {
+    const isGroup = props.contact.isGroup
+    // For friends, targetId is friendId. For groups, it's id.
+    const targetId = isGroup ? props.contact.id : props.contact.friendId
+    const type = isGroup ? 'GROUP' : 'PRIVATE'
+
+    const res = await createConversation({ type, targetId })
+    if (res.code === 200) {
+      const conv = res.data
+      store.commit('im/SET_CURRENT_SESSION', conv)
+      // Signal parent or use router to switch to Chat tab
+      ElMessage.success('已发起聊天')
+      // NOTE: We usually emit an event or use a global event bus to switch tabs
+      window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'chat' }))
+    }
+  } catch (e) {
+    console.error('发起聊天失败', e)
+    ElMessage.error('无法发起聊天')
+  }
+}
+
+const handleGroupConfig = () => {
+  ElMessage.info('该功能正在迭代中...')
 }
 
 const toggleFavorite = async () => {

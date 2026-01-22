@@ -2,481 +2,479 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('用户管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet" />
+    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
     <style>
-        /* 页面特定样式 */
-        .wrapper-content {
-            padding: 16px !important;
-        }
+        /* 整体边距 */
+        .wrapper-content { padding: 6px !important; padding-top: 10px !important; }
 
-        /* 统计卡片点击效果 */
-        .im-stat-card.clickable {
+        /* 统计卡片区域样式 */
+        .stat-box {
+            background: #fff;
+            border-radius: 4px;
+            padding: 16px 20px;
+            margin-bottom: 6px;
+            border-top: 3px solid #1ab394;
             cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
         }
 
-        .im-stat-card.clickable:active {
-            transform: translateY(0);
+        .stat-box:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
         }
 
-        /* 用户名样式 */
-        .user-name-cell {
+        .stat-box.stat-box-primary { border-top-color: #1c84c6; }
+        .stat-box.stat-box-success { border-top-color: #1ab394; }
+        .stat-box.stat-box-warning { border-top-color: #f8ac59; }
+        .stat-box.stat-box-danger { border-top-color: #ed5565; }
+
+        .stat-box.active {
+            box-shadow: 0 0 0 2px rgba(24,144,255,0.3);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 600;
+            color: #676a6c;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #999;
+            margin-top: 6px;
+        }
+
+        .stat-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 40px;
+            opacity: 0.15;
+        }
+
+        /* 搜索区域样式 */
+        .search-collapse {
+            background: #fff;
+            border-radius: 4px;
+            padding: 12px 16px;
+            margin-bottom: 6px;
+            border: 1px solid #e7eaec;
+        }
+
+        .select-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .select-list li {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
-        .user-name-cell .avatar {
-            width: 32px;
-            height: 32px;
+        .input-label {
+            font-size: 13px;
+            color: #676a6c;
+            white-space: nowrap;
+        }
+
+        .select-list .form-control {
+            height: 30px;
+            padding: 4px 10px;
+            font-size: 13px;
+            border-radius: 2px;
+            border-color: #e7eaec;
+        }
+
+        .select-list .form-control:focus {
+            border-color: #1ab394;
+            box-shadow: none;
+        }
+
+        .time-input {
+            width: 140px;
+        }
+
+        /* 快捷筛选按钮 */
+        .quick-filter {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #e7eaec;
+        }
+
+        .quick-filter-btn {
+            padding: 4px 12px;
+            font-size: 12px;
+            background: #f5f7fa;
+            border: 1px solid #e7eaec;
+            border-radius: 3px;
+            cursor: pointer;
+            color: #676a6c;
+            transition: all 0.2s;
+        }
+
+        .quick-filter-btn:hover {
+            background: #e8ebef;
+            color: #1ab394;
+        }
+
+        /* 高级筛选区域 */
+        .advanced-filter {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed #e7eaec;
+        }
+
+        .advanced-filter.show {
+            display: block;
+        }
+
+        /* 表格区域样式 */
+        .select-table {
+            background: #fff;
+            border-radius: 4px;
+            padding: 12px 16px;
+            border: 1px solid #e7eaec;
+        }
+
+        .btn-group-sm > .btn {
+            margin: 0 3px;
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+
+        /* 表格单元格 */
+        .table > tbody > tr > td,
+        .table > thead > tr > th {
+            padding: 8px 12px;
+            vertical-align: middle;
+        }
+
+        .table > thead > tr > th {
+            background: #f5f7fa;
+            font-size: 12px;
+            font-weight: 600;
+            color: #606266;
+            border-bottom: 1px solid #e7eaec;
+        }
+
+        .table > tbody > tr > td {
+            font-size: 13px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .table > tbody > tr:hover > td {
+            background: #f5f7fa;
+        }
+
+        /* 用户单元格 */
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             object-fit: cover;
+            border: 2px solid #f0f0f0;
         }
 
-        .user-name-cell .name-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 2px 8px;
-            background: var(--im-primary-light);
-            color: var(--im-primary);
-            border-radius: 4px;
-            font-size: 12px;
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
             font-weight: 500;
-        }
-
-        /* 在线状态指示器 */
-        .online-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+            color: #333;
             font-size: 13px;
         }
 
-        .online-indicator .dot {
+        .user-desc {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* 状态徽章 */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        .status-badge-success {
+            background: #f0f9ff;
+            color: #1ab394;
+        }
+
+        .status-badge-error {
+            background: #fef0f0;
+            color: #ed5565;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-badge-success::before {
+            background: #1ab394;
+        }
+
+        .status-badge-error::before {
+            background: #ed5565;
+        }
+
+        /* 在线状态 */
+        .online-dot {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .online-dot::before {
+            content: '';
             width: 8px;
             height: 8px;
             border-radius: 50%;
         }
 
-        .online-indicator.online .dot {
-            background: var(--im-success);
-            box-shadow: 0 0 0 2px var(--im-success-bg);
+        .online-dot.online::before {
+            background: #1ab394;
+            box-shadow: 0 0 4px rgba(26,179,148,0.4);
         }
 
-        .online-indicator.offline .dot {
-            background: var(--im-text-quaternary);
+        .online-dot.offline::before {
+            background: #ccc;
         }
 
-        /* 操作按钮组 */
-        .action-buttons {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-        }
+        .online-dot.online { color: #1ab394; }
+        .online-dot.offline { color: #999; }
 
-        .action-btn {
-            padding: 2px 8px;
-            font-size: 12px;
-            border-radius: 4px;
-            border: 1px solid transparent;
-            cursor: pointer;
-            transition: var(--im-transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .action-btn-edit {
-            background: var(--im-success-bg);
-            color: var(--im-success);
-        }
-
-        .action-btn-edit:hover {
-            background: var(--im-success);
-            color: #fff;
-        }
-
-        .action-btn-disable {
-            background: var(--im-warning-bg);
-            color: var(--im-warning);
-        }
-
-        .action-btn-disable:hover {
-            background: var(--im-warning);
-            color: #fff;
-        }
-
-        .action-btn-enable {
-            background: var(--im-success-bg);
-            color: var(--im-success);
-        }
-
-        .action-btn-enable:hover {
-            background: var(--im-success);
-            color: #fff;
-        }
-
-        .action-btn-delete {
-            background: var(--im-danger-bg);
-            color: var(--im-danger);
-        }
-
-        .action-btn-delete:hover {
-            background: var(--im-danger);
-            color: #fff;
-        }
-
-        /* 表格样式优化 */
-        .table {
-            margin-bottom: 0;
-        }
-
-        .table thead th {
-            background: var(--im-bg-hover);
-            font-weight: 600;
-            color: var(--im-text-primary);
-            border-bottom: 1px solid var(--im-border);
-        }
-
-        .table tbody tr {
-            transition: var(--im-transition);
-        }
-
-        .table tbody tr:hover {
-            background: var(--im-bg-hover);
-        }
-
-        /* 响应式表格容器 */
-        .table-responsive {
-            border-radius: var(--im-radius-md);
+        /* 文本省略 */
+        .text-ellipsis {
+            display: inline-block;
+            max-width: 180px;
             overflow: hidden;
-        }
-
-        /* 搜索折叠面板 */
-        .search-collapse {
-            background: var(--im-bg-container);
-            border-radius: var(--im-radius-md);
-            padding: var(--im-spacing-md);
-            margin-bottom: var(--im-spacing-md);
-            box-shadow: var(--im-shadow-sm);
-            border: 1px solid var(--im-border-light);
-        }
-
-        .select-list ul {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--im-spacing-md);
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            align-items: center;
-        }
-
-        .select-list ul li {
-            display: flex;
-            align-items: center;
-            gap: var(--im-spacing-sm);
-        }
-
-        .select-list .input-label {
-            font-size: 14px;
-            color: var(--im-text-secondary);
-            font-weight: 500;
+            text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .select-list input,
-        .select-list select {
-            height: 32px;
-            padding: 4px 12px;
-            border: 1px solid var(--im-border);
-            border-radius: var(--im-radius-sm);
-            font-size: 14px;
-            min-width: 140px;
-            transition: var(--im-transition);
-        }
-
-        .select-list input:focus,
-        .select-list select:focus {
-            outline: none;
-            border-color: var(--im-primary);
-            box-shadow: 0 0 0 2px var(--im-primary-light);
-        }
-
-        .select-list input::placeholder {
-            color: var(--im-text-quaternary);
-        }
-
-        /* 按钮组样式优化 */
-        .btn-group-sm .btn {
-            height: 32px;
-            padding: 4px 12px;
+        /* 操作链接 */
+        .action-link {
+            color: #1c84c6;
             font-size: 13px;
-            border-radius: var(--im-radius-sm);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: var(--im-transition);
-        }
-
-        .btn-group-sm .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--im-shadow-sm);
-        }
-
-        .btn-group-sm .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-success {
-            background: var(--im-success);
-            border-color: var(--im-success);
-        }
-
-        .btn-primary {
-            background: var(--im-primary);
-            border-color: var(--im-primary);
-        }
-
-        .btn-danger {
-            background: var(--im-danger);
-            border-color: var(--im-danger);
-        }
-
-        .btn-info {
-            background: var(--im-info);
-            border-color: var(--im-info);
-        }
-
-        .btn-warning {
-            background: var(--im-warning);
-            border-color: var(--im-warning);
-        }
-
-        .btn-default {
-            background: var(--im-bg-container);
-            border-color: var(--im-border);
-            color: var(--im-text-primary);
-        }
-
-        .btn-default:hover {
-            border-color: var(--im-primary);
-            color: var(--im-primary);
-        }
-
-        /* 统计卡片样式优化 */
-        .ibox {
-            margin-bottom: 0;
-            background: var(--im-bg-container);
-            border-radius: var(--im-radius-md);
-            box-shadow: var(--im-shadow-sm);
-            border: 1px solid var(--im-border-light);
-            overflow: hidden;
-        }
-
-        .ibox-title {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--im-divider);
-            background: var(--im-bg-hover);
-        }
-
-        .ibox-title h5 {
-            margin: 0;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--im-text-secondary);
-        }
-
-        .ibox-content {
-            padding: var(--im-spacing-md);
-            text-align: center;
+            text-decoration: none;
+            margin: 0 3px;
             cursor: pointer;
-            transition: var(--im-transition);
         }
 
-        .ibox-content:hover {
-            background: var(--im-bg-hover);
+        .action-link:hover {
+            color: #1ab394;
         }
 
-        .ibox-content .no-margins {
-            font-size: 28px;
-            font-weight: 600;
-            color: var(--im-text-primary);
-            margin: 0;
+        .action-link.danger {
+            color: #ed5565;
         }
 
-        .text-success {
-            color: var(--im-success);
+        .action-link.danger:hover {
+            color: #d43f3a;
         }
 
-        .text-danger {
-            color: var(--im-danger);
+        /* 分隔符 */
+        .action-separator {
+            color: #d9d9d9;
+            margin: 0 2px;
         }
 
-        .text-primary {
-            color: var(--im-primary);
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .stat-box { margin-bottom: 8px; }
         }
 
-        .text-muted {
-            color: var(--im-text-tertiary);
-        }
-
-        /* 响应式优化 */
         @media (max-width: 768px) {
             .select-list ul {
                 flex-direction: column;
                 align-items: stretch;
             }
 
-            .select-list ul li {
+            .select-list li {
                 flex-direction: column;
                 align-items: stretch;
             }
 
-            .select-list input,
-            .select-list select {
+            .select-list .form-control {
                 width: 100%;
-                min-width: unset;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .action-btn {
-                width: 100%;
-                justify-content: center;
             }
         }
     </style>
 </head>
 
 <body class="gray-bg">
-    <div class="wrapper wrapper-content animated fadeInRight">
-        <!-- 统计卡片区域 -->
-        <div class="row" style="margin-bottom: var(--im-spacing-md);">
-            <div class="col-sm-3">
-                <div class="ibox">
-                    <div class="ibox-title">
-                        <h5><i class="fa fa-users" style="margin-right: 6px;"></i>用户总数</h5>
-                    </div>
-                    <div class="ibox-content" onclick="filterByStatus('')">
-                        <h1 class="no-margins" id="totalCount">-</h1>
-                        <small class="text-muted">全部用户</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="ibox">
-                    <div class="ibox-title">
-                        <h5><i class="fa fa-circle text-success" style="margin-right: 6px; font-size: 10px;"></i>在线用户</h5>
-                    </div>
-                    <div class="ibox-content" onclick="filterByOnline('1')">
-                        <h1 class="no-margins text-success" id="onlineCount">-</h1>
-                        <small class="text-muted">当前在线</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="ibox">
-                    <div class="ibox-title">
-                        <h5><i class="fa fa-ban text-danger" style="margin-right: 6px;"></i>停用账号</h5>
-                    </div>
-                    <div class="ibox-content" onclick="filterByStatus('0')">
-                        <h1 class="no-margins text-danger" id="disabledCount">-</h1>
-                        <small class="text-muted">已停用</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="ibox">
-                    <div class="ibox-title">
-                        <h5><i class="fa fa-user-plus text-primary" style="margin-right: 6px;"></i>今日新增</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <h1 class="no-margins text-primary" id="todayRegister">-</h1>
-                        <small class="text-muted">今日注册</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 搜索区域 -->
+    <div class="container-div">
         <div class="row">
-            <div class="col-sm-12 search-collapse">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="padding: 0 6px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="stat-box stat-box-primary" onclick="filterByStat('all')">
+                            <div class="stat-number" id="totalCount">0</div>
+                            <div class="stat-label">用户总数</div>
+                            <i class="fa fa-users stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="stat-box stat-box-success" onclick="filterByStat('online')">
+                            <div class="stat-number" id="onlineCount">0</div>
+                            <div class="stat-label">在线用户</div>
+                            <i class="fa fa-circle stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="stat-box stat-box-danger" onclick="filterByStat('disabled')">
+                            <div class="stat-number" id="disabledCount">0</div>
+                            <div class="stat-label">停用账号</div>
+                            <i class="fa fa-ban stat-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="stat-box stat-box-warning" onclick="filterByStat('today')">
+                            <div class="stat-number" id="todayRegister">0</div>
+                            <div class="stat-label">今日新增</div>
+                            <i class="fa fa-user-plus stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 搜索区域 -->
+            <div class="col-sm-12 search-collapse" style="padding: 0 6px;">
                 <form id="user-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="input-label">用户名</label>
-                                <input type="text" name="username" placeholder="请输入用户名" />
+                                <label class="input-label">关键词：</label>
+                                <input type="text" name="keyword" class="form-control" placeholder="用户名/昵称/手机号/邮箱" style="width: 200px;"/>
                             </li>
                             <li>
-                                <label class="input-label">昵称</label>
-                                <input type="text" name="nickname" placeholder="请输入昵称" />
-                            </li>
-                            <li>
-                                <label class="input-label">手机号</label>
-                                <input type="text" name="phone" placeholder="请输入手机号" />
-                            </li>
-                            <li>
-                                <label class="input-label">状态</label>
-                                <select name="status">
+                                <label class="input-label">状态：</label>
+                                <select name="status" class="form-control">
                                     <option value="">全部</option>
                                     <option value="1">正常</option>
                                     <option value="0">停用</option>
                                 </select>
                             </li>
                             <li>
-                                <label class="input-label">在线</label>
-                                <select name="isOnline">
+                                <label class="input-label">在线：</label>
+                                <select name="isOnline" class="form-control">
                                     <option value="">全部</option>
                                     <option value="1">在线</option>
                                     <option value="0">离线</option>
                                 </select>
                             </li>
-                            <li style="margin-left: auto;">
-                                <a class="btn btn-primary btn-sm" onclick="$.table.search()">
-                                    <i class="fa fa-search"></i>&nbsp;搜索
-                                </a>
-                                <a class="btn btn-default btn-sm" onclick="$.form.reset()">
-                                    <i class="fa fa-refresh"></i>&nbsp;重置
-                                </a>
+                            <li>
+                                <label class="input-label">性别：</label>
+                                <select name="gender" class="form-control">
+                                    <option value="">全部</option>
+                                    <option value="1">男</option>
+                                    <option value="2">女</option>
+                                    <option value="0">未知</option>
+                                </select>
+                            </li>
+                            <li>
+                                <label class="input-label">注册时间：</label>
+                                <input type="text" class="time-input form-control" name="params[beginTime]" placeholder="开始时间"/>
+                                <span>-</span>
+                                <input type="text" class="time-input form-control" name="params[endTime]" placeholder="结束时间"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="resetSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
+                        <!-- 快捷筛选 -->
+                        <div class="quick-filter">
+                            <button type="button" class="quick-filter-btn" onclick="quickFilter('todayNew')"><i class="fa fa-calendar-plus-o"></i> 今日新增</button>
+                            <button type="button" class="quick-filter-btn" onclick="quickFilter('weekActive')"><i class="fa fa-line-chart"></i> 本周活跃</button>
+                            <button type="button" class="quick-filter-btn" onclick="quickFilter('neverLogin')"><i class="fa fa-clock-o"></i> 从未登录</button>
+                            <button type="button" class="quick-filter-btn" onclick="toggleAdvancedFilter()"><i class="fa fa-sliders"></i> 高级筛选</button>
+                        </div>
+                        <!-- 高级筛选 -->
+                        <div class="advanced-filter" id="advancedFilter">
+                            <ul style="margin-top: 8px;">
+                                <li>
+                                    <label class="input-label">是否有头像：</label>
+                                    <select name="hasAvatar" class="form-control">
+                                        <option value="">全部</option>
+                                        <option value="1">有头像</option>
+                                        <option value="0">无头像</option>
+                                    </select>
+                                </li>
+                                <li>
+                                    <label class="input-label">最后登录：</label>
+                                    <input type="text" class="time-input form-control" name="params[lastLoginBegin]" placeholder="开始时间"/>
+                                    <span>-</span>
+                                    <input type="text" class="time-input form-control" name="params[lastLoginEnd]" placeholder="结束时间"/>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </form>
             </div>
-        </div>
 
-        <!-- 表格区域 -->
-        <div class="row">
-            <div class="col-sm-12 select-table table-striped">
-                <div class="btn-group-sm" id="toolbar" role="group" style="margin-bottom: var(--im-spacing-sm);">
+            <!-- 数据展示区域 -->
+            <div class="col-sm-12 select-table" style="padding: 0 6px;">
+                <!-- 批量操作按钮 -->
+                <div class="btn-group-sm" id="toolbar" role="group">
                     <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:user:add">
                         <i class="fa fa-plus"></i> 新增
                     </a>
+                    <a class="btn btn-info single disabled" onclick="viewUserDetail()" shiro:hasPermission="im:user:query">
+                        <i class="fa fa-eye"></i> 查看
+                    </a>
                     <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:user:edit">
-                        <i class="fa fa-edit"></i> 修改
+                        <i class="fa fa-edit"></i> 编辑
                     </a>
-                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:user:remove">
-                        <i class="fa fa-remove"></i> 删除
+                    <a class="btn btn-warning multiple disabled" onclick="batchResetPassword()" shiro:hasPermission="im:user:edit">
+                        <i class="fa fa-key"></i> 重置密码
                     </a>
-                    <a class="btn btn-info" onclick="showImportModal()" shiro:hasPermission="im:user:import">
-                        <i class="fa fa-upload"></i> 导入
-                    </a>
-                    <a class="btn btn-warning multiple disabled" onclick="batchChangeStatus(1)" shiro:hasPermission="im:user:edit">
+                    <a class="btn btn-default multiple disabled" onclick="batchChangeStatus(1)" shiro:hasPermission="im:user:edit">
                         <i class="fa fa-check"></i> 批量启用
                     </a>
-                    <a class="btn btn-warning multiple disabled" onclick="batchChangeStatus(0)" shiro:hasPermission="im:user:edit">
+                    <a class="btn btn-default multiple disabled" onclick="batchChangeStatus(0)" shiro:hasPermission="im:user:edit">
                         <i class="fa fa-ban"></i> 批量停用
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:user:remove">
+                        <i class="fa fa-remove"></i> 批量删除
                     </a>
                     <a class="btn btn-default" onclick="$.table.exportExcel()" shiro:hasPermission="im:user:export">
                         <i class="fa fa-download"></i> 导出
                     </a>
                 </div>
-                <div class="table-responsive">
-                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
-                </div>
+
+                <!-- 数据表格 -->
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
@@ -486,31 +484,46 @@
     <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var prefix = ctx + "im/user";
-        var editFlag = [[${@permission.hasPermi('im:user:edit')}]];
-        var removeFlag = [[${@permission.hasPermi('im:user:remove')}]];
-        var resetPwdFlag = [[${@permission.hasPermi('im:user:resetPwd')}]];
+        var currentStatFilter = null; // 当前统计卡片筛选状态
 
         $(function () {
             loadStatistics();
             initTable();
+            initDateRange();
         });
 
+        /**
+         * 加载统计数据
+         */
         function loadStatistics() {
-            $.get(ctx + 'im/dashboard/user-statistics', function (res) {
+            $.get(prefix + '/statistics', function (res) {
                 if (res.code === 0) {
-                    $('#totalCount').text(res.data.totalUsers || 0);
-                    $('#onlineCount').text(res.data.onlineUsers || 0);
-                    $('#disabledCount').text(res.data.disabledUsers || 0);
-                    $('#todayRegister').text(res.data.todayRegister || 0);
+                    var data = res.data || {};
+                    $('#totalCount').text(data.totalCount || 0);
+                    $('#onlineCount').text(data.onlineCount || 0);
+                    $('#disabledCount').text(data.disabledCount || 0);
+                    // 今日新增从当前统计中获取，如果没有则使用0
+                    $('#todayRegister').text(data.todayRegister || 0);
                 }
-            }).fail(function() {
-                $('#totalCount').text('-');
-                $('#onlineCount').text('-');
-                $('#disabledCount').text('-');
-                $('#todayRegister').text('-');
             });
         }
 
+        /**
+         * 初始化日期选择器
+         */
+        function initDateRange() {
+            var options = {
+                format: 'yyyy-mm-dd',
+                minView: 2,
+                autoclose: true,
+                todayBtn: true
+            };
+            $('.time-input').datetimepicker(options);
+        }
+
+        /**
+         * 初始化表格
+         */
         function initTable() {
             var options = {
                 url: prefix + "/list",
@@ -528,42 +541,42 @@
                     visible: false
                 }, {
                     field: 'avatar',
-                    title: '头像',
-                    width: 80,
-                    align: 'center',
+                    title: '用户',
+                    width: 200,
                     formatter: function (value, row) {
                         var avatar = value || '/img/profile.jpg';
-                        var name = row.nickname || row.username || '用户';
-                        return '<div class="user-name-cell">' +
-                            '<img src="' + avatar + '" class="avatar" onerror="this.src=\'/img/profile.jpg\'" />' +
-                            '<span class="name-badge">' + (row.username || '') + '</span>' +
+                        var username = row.username || '';
+                        var nickname = row.nickname || '';
+                        return '<div class="user-cell">' +
+                            '<img src="' + avatar + '" class="user-avatar" onerror="this.src=\'/img/profile.jpg\'" />' +
+                            '<div class="user-info">' +
+                            '<span class="user-name">' + username + '</span>' +
+                            '<span class="user-desc">' + (nickname || '-') + '</span>' +
+                            '</div>' +
                             '</div>';
                     }
                 }, {
-                    field: 'nickname',
-                    title: '昵称',
-                    width: 120,
-                    formatter: function (value, row) {
-                        return value || '<span class="text-muted">未设置</span>';
-                    }
-                }, {
-                    field: 'departmentName',
-                    title: '部门',
+                    field: 'mobile',
+                    title: '手机号',
                     width: 120,
                     formatter: function (value) {
-                        return value || '<span class="text-muted">-</span>';
+                        return value || '<span style="color:#ccc">-</span>';
                     }
-                }, {
-                    field: 'phone',
-                    title: '手机号',
-                    width: 120
                 }, {
                     field: 'email',
-                    title: '邮箱',
-                    width: 180,
                     formatter: function (value) {
-                        if (!value) return '<span class="text-muted">-</span>';
-                        return '<span style="display:inline-block;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + value + '">' + value + '</span>';
+                        if (!value) return '<span style="color:#ccc">-</span>';
+                        return '<span class="text-ellipsis" title="' + value + '">' + value + '</span>';
+                    }
+                }, {
+                    field: 'gender',
+                    title: '性别',
+                    width: 60,
+                    align: 'center',
+                    formatter: function (value) {
+                        if (value == 1) return '<span style="color:#1c84c6">男</span>';
+                        if (value == 2) return '<span style="color:#ed5565">女</span>';
+                        return '<span style="color:#ccc">-</span>';
                     }
                 }, {
                     field: 'status',
@@ -571,71 +584,152 @@
                     width: 80,
                     align: 'center',
                     formatter: function (value) {
-                        if (value == 1) {
-                            return '<span class="im-badge im-badge-success">正常</span>';
-                        } else {
-                            return '<span class="im-badge im-badge-danger">停用</span>';
-                        }
+                        return value == 1
+                            ? '<span class="status-badge status-badge-success">正常</span>'
+                            : '<span class="status-badge status-badge-error">停用</span>';
                     }
                 }, {
                     field: 'isOnline',
-                    title: '在线状态',
-                    width: 100,
+                    title: '在线',
+                    width: 80,
                     align: 'center',
                     formatter: function (value) {
-                        if (value == 1) {
-                            return '<div class="online-indicator online"><span class="dot"></span>在线</div>';
-                        } else {
-                            return '<div class="online-indicator offline"><span class="dot"></span>离线</div>';
-                        }
+                        return value == 1
+                            ? '<span class="online-dot online">● 在线</span>'
+                            : '<span class="online-dot offline">○ 离线</span>';
                     }
                 }, {
-                    field: 'lastLoginTime',
+                    field: 'lastOnlineTime',
                     title: '最后登录',
-                    width: 160,
+                    width: 150,
                     sortable: true,
                     formatter: function (value) {
-                        return value || '<span class="text-muted">从未登录</span>';
+                        if (!value) return '<span style="color:#ccc">从未</span>';
+                        return value;
                     }
                 }, {
                     field: 'createTime',
                     title: '注册时间',
-                    width: 160,
+                    width: 150,
                     sortable: true
                 }, {
                     title: '操作',
                     align: 'center',
-                    width: 180,
+                    width: 200,
                     formatter: function (value, row) {
                         var actions = [];
-                        actions.push('<a class="action-btn action-btn-edit" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
-                        if (row.status == 1) {
-                            actions.push('<a class="action-btn action-btn-disable" href="javascript:void(0)" onclick="changeStatus(\'' + row.id + '\', 0)"><i class="fa fa-ban"></i>停用</a> ');
-                        } else {
-                            actions.push('<a class="action-btn action-btn-enable" href="javascript:void(0)" onclick="changeStatus(\'' + row.id + '\', 1)"><i class="fa fa-check"></i>启用</a> ');
-                        }
-                        actions.push('<a class="action-btn action-btn-delete" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-trash"></i>删除</a>');
-                        return '<div class="action-buttons">' + actions.join('') + '</div>';
+                        actions.push('<a class="action-link" onclick="viewUserDetailById(\'' + row.id + '\')">查看</a>');
+                        actions.push('<span class="action-separator">|</span>');
+                        actions.push('<a class="action-link" onclick="$.operate.edit(\'' + row.id + '\')">编辑</a>');
+                        actions.push('<span class="action-separator">|</span>');
+                        actions.push('<a class="action-link" onclick="resetUserPassword(\'' + row.id + '\')">重置密码</a>');
+                        actions.push('<span class="action-separator">|</span>');
+                        actions.push('<a class="action-link" onclick="changeStatus(\'' + row.id + '\', ' + (row.status == 1 ? '0' : '1') + ')">' + (row.status == 1 ? '停用' : '启用') + '</a>');
+                        actions.push('<span class="action-separator">|</span>');
+                        actions.push('<a class="action-link danger" onclick="$.operate.remove(\'' + row.id + '\')">删除</a>');
+                        return actions.join('');
                     }
                 }]
             };
             $.table.init(options);
         }
 
-        function filterByStatus(status) {
-            $('select[name="status"]').val(status);
+        /**
+         * 统计卡片筛选
+         */
+        function filterByStat(type) {
+            // 清除之前的激活状态
+            $('.stat-box').removeClass('active');
+
+            // 设置当前激活状态
+            var $activeBox;
+            switch(type) {
+                case 'all':
+                    $activeBox = $('.stat-box-primary');
+                    $('select[name="status"]').val('');
+                    $('select[name="isOnline"]').val('');
+                    break;
+                case 'online':
+                    $activeBox = $('.stat-box-success');
+                    $('select[name="status"]').val('');
+                    $('select[name="isOnline"]').val('1');
+                    break;
+                case 'disabled':
+                    $activeBox = $('.stat-box-danger');
+                    $('select[name="status"]').val('0');
+                    $('select[name="isOnline"]').val('');
+                    break;
+                case 'today':
+                    $activeBox = $('.stat-box-warning');
+                    // 设置今天日期范围
+                    var today = new Date().toISOString().split('T')[0];
+                    $('input[name="params[beginTime]"]').val(today);
+                    $('input[name="params[endTime]"]').val(today);
+                    break;
+            }
+
+            if ($activeBox) {
+                $activeBox.addClass('active');
+            }
+
+            currentStatFilter = type;
             $.table.search();
         }
 
-        function filterByOnline(online) {
-            $('select[name="isOnline"]').val(online);
+        /**
+         * 快捷筛选
+         */
+        function quickFilter(type) {
+            // 先重置筛选条件
+            resetSearch();
+
+            switch(type) {
+                case 'todayNew':
+                    // 今日新增
+                    var today = new Date().toISOString().split('T')[0];
+                    $('input[name="params[beginTime]"]').val(today);
+                    $('input[name="params[endTime]"]').val(today);
+                    break;
+                case 'weekActive':
+                    // 本周活跃（最后登录时间在一周内）
+                    var weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    $('input[name="params[lastLoginBegin]"]').val(weekAgo.toISOString().split('T')[0]);
+                    break;
+                case 'neverLogin':
+                    // 从未登录
+                    // 通过设置一个不可能的时间范围来实现
+                    $('input[name="params[lastLoginBegin]"]').val('1900-01-01');
+                    $('input[name="params[lastLoginEnd]"]').val('1900-01-01');
+                    break;
+            }
+
             $.table.search();
         }
 
+        /**
+         * 切换高级筛选
+         */
+        function toggleAdvancedFilter() {
+            $('#advancedFilter').toggleClass('show');
+        }
+
+        /**
+         * 重置搜索
+         */
+        function resetSearch() {
+            $.form.reset();
+            $('.stat-box').removeClass('active');
+            currentStatFilter = null;
+        }
+
+        /**
+         * 修改用户状态
+         */
         function changeStatus(id, status) {
             var action = status == 1 ? '启用' : '停用';
             $.modal.confirm("确定要" + action + "该用户吗？", function () {
-                $.operate.post(prefix + "/changeStatus", { userId: id, status: status }, function (res) {
+                $.operate.get(prefix + "/changeStatus", { id: id, status: status }, function (res) {
                     if (res.code == 0) {
                         $.table.refresh();
                         loadStatistics();
@@ -644,6 +738,9 @@
             });
         }
 
+        /**
+         * 批量修改状态
+         */
         function batchChangeStatus(status) {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
@@ -651,19 +748,100 @@
                 return;
             }
             var action = status == 1 ? '启用' : '停用';
-            $.modal.confirm("确定要批量" + action + "吗？", function () {
-                var ids = rows.join();
-                $.operate.post(prefix + "/batchUpdateStatus", { userIds: ids, status: status }, function (res) {
+            $.modal.confirm("确定要批量" + action + "选中的 " + rows.length + " 个用户吗？", function () {
+                $.operate.post(prefix + "/batchUpdateStatus", { userIds: rows.join(), status: status }, function (res) {
                     if (res.code == 0) {
                         $.table.refresh();
                         loadStatistics();
+                        $.modal.msgSuccess("成功" + action + " " + rows.length + " 个用户");
                     }
                 });
             });
         }
 
-        function showImportModal() {
-            $.modal.open("导入用户", prefix + "/import", 600, 400);
+        /**
+         * 覆盖默认的添加方法，设置合适的弹窗大小
+         */
+        $.operate.add = function() {
+            table.set();
+            $.modal.openOptions({
+                title: "添加" + table.options.modalName,
+                url: $.operate.addUrl(),
+                width: 900,
+                height: 650
+            });
+        };
+
+        /**
+         * 覆盖默认的编辑方法，设置合适的弹窗大小
+         */
+        $.operate.edit = function(id) {
+            table.set();
+            $.modal.openOptions({
+                title: "修改" + table.options.modalName,
+                url: $.operate.editUrl(id),
+                width: 900,
+                height: 550
+            });
+        };
+
+        /**
+         * 重置用户密码
+         */
+        function resetUserPassword(userId) {
+            $.modal.openOptions({
+                title: "重置密码",
+                url: prefix + "/resetPassword/" + userId,
+                width: 600,
+                height: 450
+            });
+        }
+
+        /**
+         * 批量重置密码
+         */
+        function batchResetPassword() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm("确定要批量重置选中的 " + rows.length + " 个用户的密码吗？", function () {
+                $.modal.openOptions({
+                    title: "批量重置密码",
+                    url: prefix + "/batchResetPassword?userIds=" + rows.join(),
+                    width: 600,
+                    height: 450
+                });
+            });
+        }
+
+        /**
+         * 查看用户详情
+         */
+        function viewUserDetail() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请选择一条记录");
+                return;
+            }
+            if (rows.length > 1) {
+                $.modal.alertWarning("只能选择一条记录");
+                return;
+            }
+            viewUserDetailById(rows[0]);
+        }
+
+        /**
+         * 根据ID查看用户详情
+         */
+        function viewUserDetailById(userId) {
+            $.modal.openOptions({
+                title: "用户详情",
+                url: prefix + "/detail/" + userId,
+                width: 700,
+                height: 600
+            });
         }
     </script>
 </body>
