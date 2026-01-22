@@ -43,4 +43,12 @@ public class ImUserUpdateRequest implements Serializable {
     /** 签名 */
     @Size(max = 200, message = "签名长度不能超过200个字符")
     private String signature;
+
+    /** 部门 */
+    @Size(max = 100, message = "部门长度不能超过100")
+    private String department;
+
+    /** 职位 */
+    @Size(max = 100, message = "职位长度不能超过100")
+    private String position;
 }

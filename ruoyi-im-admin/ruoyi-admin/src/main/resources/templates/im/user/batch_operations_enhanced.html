@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<head>
+    <th:block th:include="include :: header('用户批量管理')" />
+    <link th:href="@{/css/im-admin.css}" rel="stylesheet" />
+    <style>
+        .batch-operation-panel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .batch-operation-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .batch-form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #66afe9;
+            outline: none;
+            box-shadow: 0 0 5px rgba(102, 175, 233, 0.2);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .selection-summary {
+            background: #e3f2fd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .selected-count {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .selection-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .result-summary {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #007bff;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row pt-5">
+            <div class="col-sm-12">
+                <!-- 批量操作面板 -->
+                <div class="batch-operation-panel">
+                    <h3 class="batch-operation-title">批量用户操作</h3>
+                </div>
+
+                <!-- 批量操作表单 -->
+                <div class="batch-form">
+                    <form id="batchOperationForm">
+                        <div class="form-group">
+                            <label>操作类型</label>
+                            <select class="form-control" id="operationType" name="operationType">
+                                <option value="updateStatus">更新状态</option>
+                                <option value="resetPassword">重置密码</option>
+                                <option value="delete">删除用户</option>
+                                <option value="forceLogout">强制下线</option>
+                                <option value="clearCache">清除缓存</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="statusGroup" style="display: none;">
+                            <label>目标状态</label>
+                            <select class="form-control" name="targetStatus">
+                                <option value="0">正常</option>
+                                <option value="1">禁用</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="newPasswordGroup" style="display: none;">
+                            <label>新密码</label>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword" 
+                                   placeholder="输入新密码（至少8位，包含大小写字母、数字和特殊字符）">
+                        </div>
+
+                        <div class="form-group" id="confirmPasswordGroup" style="display: none;">
+                            <label>确认密码</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
+                                   placeholder="再次输入新密码">
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" id="selectUsersBtn">
+                                <i class="fa fa-users"></i> 选择用户
+                            </button>
+                            <button type="button" class="btn btn-warning" id="previewBtn" disabled>
+                                <i class="fa fa-eye"></i> 预览操作
+                            </button>
+                            <button type="submit" class="btn btn-danger" id="executeBtn" disabled>
+                                <i class="fa fa-cogs"></i> 执行操作
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 选择汇总 -->
+                <div class="selection-summary" id="selectionSummary">
+                    <div class="selected-count">
+                        已选择 <span id="selectedCount">0</span> 个用户
+                    </div>
+                    <div class="selection-actions">
+                        <button type="button" class="btn btn-primary" id="selectAllBtn">
+                            <i class="fa fa-check-square"></i> 全选
+                        </button>
+                        <button type="button" class="btn btn-primary" id="clearSelectionBtn">
+                            <i class="fa fa-times"></i> 清除选择
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 进度条 -->
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">准备中...</div>
+                </div>
+
+                <!-- 结果汇总 -->
+                <div class="result-summary" id="resultSummary">
+                    <h4>操作结果汇总</h4>
+                    <div id="resultContent">
+                        <!-- 结果内容将动态插入 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:include="include :: footer" />
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:inline="javascript">
+        var selectedUserIds = [];
+        var currentOperation = null;
+
+        $(function () {
+            initializeEventHandlers();
+            updateUserTable();
+        });
+
+        function initializeEventHandlers() {
+            // 操作类型变更事件
+            $('#operationType').change(function() {
+                var operationType = $(this).val();
+                updateFormVisibility(operationType);
+                clearResults();
+            });
+
+            // 选择用户按钮事件
+            $('#selectUsersBtn').click(function() {
+                openUserSelector();
+            });
+
+            // 全选/清除选择按钮事件
+            $('#selectAllBtn').click(function() {
+                selectAllUsers();
+            });
+
+            $('#clearSelectionBtn').click(function() {
+                clearUserSelection();
+            });
+
+            // 预览按钮事件
+            $('#previewBtn').click(function() {
+                previewOperation();
+            });
+
+            // 执行操作按钮事件
+            $('#executeBtn').click(function() {
+                executeBatchOperation();
+            });
+
+            // 密码输入同步事件
+            $('#newPassword, #confirmPassword').on('input', function() {
+                validatePasswords();
+            });
+
+            // 表单提交事件
+            $('#batchOperationForm').submit(function(e) {
+                e.preventDefault();
+                executeBatchOperation();
+            });
+        }
+
+        function updateFormVisibility(operationType) {
+            // 隐藏所有组
+            $('#statusGroup, #newPasswordGroup, #confirmPasswordGroup').hide();
+            
+            // 根据操作类型显示相应的表单字段
+            switch (operationType) {
+                case 'updateStatus':
+                case 'resetPassword':
+                    $('#statusGroup').show();
+                    break;
+                case 'delete':
+                    // 不需要额外字段
+                    break;
+                default:
+                    // 默认不显示任何字段
+                    break;
+            }
+
+            // 更新预览和执行按钮状态
+            var hasSelection = selectedUserIds.length > 0;
+            $('#previewBtn').prop('disabled', !hasSelection);
+            $('#executeBtn').prop('disabled', !hasSelection);
+            
+            // 更新按钮文本
+            updateButtonText(operationType, hasSelection);
+        }
+
+        function updateButtonText(operationType, hasSelection) {
+            var executeText = '';
+            var previewText = '';
+
+            switch (operationType) {
+                case 'updateStatus':
+                    executeText = hasSelection ? '更新状态' : '请选择用户';
+                    previewText = hasSelection ? '预览状态更新' : '请选择用户';
+                    break;
+                case 'resetPassword':
+                    executeText = hasSelection ? '重置密码' : '请选择用户';
+                    previewText = hasSelection ? '预览密码重置' : '请选择用户';
+                    break;
+                case 'delete':
+                    executeText = hasSelection ? '删除用户' : '请选择用户';
+                    previewText = hasSelection ? '预览用户删除' : '请选择用户';
+                    break;
+                case 'forceLogout':
+                    executeText = hasSelection ? '强制下线' : '请选择用户';
+                    previewText = hasSelection ? '预览强制下线' : '请选择用户';
+                    break;
+                case 'clearCache':
+                    executeText = hasSelection ? '清除缓存' : '请选择用户';
+                    previewText = hasSelection ? '预览清除缓存' : '请选择用户';
+                    break;
+            }
+
+            $('#executeBtn').html('<i class="fa fa-cogs"></i> ' + executeText);
+            $('#previewBtn').html('<i class="fa fa-eye"></i> ' + previewText);
+        }
+
+        function openUserSelector() {
+            // 这里可以打开用户选择弹窗
+            // 暂时使用模拟的用户选择
+            
+            // 模拟选择一些用户
+            var mockUsers = [
+                { id: 1, username: 'admin', nickname: '管理员', status: 0 },
+                { id: 2, username: 'user1', nickname: '用户1', status: 0 },
+                { id: 3, username: 'user2', nickname: '用户2', status: 0 },
+                { id: 4, username: 'user3', nickname: '用户3', status: 1 },
+                { id: 5, username: 'user4', nickname: '用户4', status: 0 }
+            ];
+
+            var userTable = '<div class="user-selector" style="max-height: 400px; overflow-y: auto;">';
+            userTable += '<div class="user-selector-header">';
+            userTable += '<input type="checkbox" id="selectAllInSelector"> <label>全选</label>';
+            userTable += '<button type="button" class="btn btn-sm btn-primary" onclick="confirmUserSelection()">确定</button>';
+            userTable += '<button type="button" class="btn btn-sm btn-default" onclick="cancelUserSelection()">取消</button>';
+            userTable += '</div>';
+            userTable += '<div class="user-selector-body">';
+
+            mockUsers.forEach(function(user) {
+                userTable += '<div class="user-item">';
+                userTable += '<input type="checkbox" value="' + user.id + '" class="user-checkbox">';
+                userTable += '<span class="user-name">' + user.username + ' (' + user.nickname + ')</span>';
+                userTable += '<span class="user-status ' + (user.status === 0 ? 'status-active' : 'status-inactive') + '">' + (user.status === 0 ? '正常' : '禁用') + '</span>';
+                userTable += '</div>';
+            });
+
+            userTable += '</div>';
+            userTable += '</div>';
+
+            // 显示用户选择弹窗
+            layer.open({
+                type: 1,
+                title: '选择用户',
+                area: ['600px', '400px'],
+                content: userTable,
+                btn: ['确定', '取消']
+            });
+        }
+
+        function confirmUserSelection() {
+            var checkboxes = $('.user-checkbox:checked');
+            selectedUserIds = [];
+            
+            checkboxes.each(function() {
+                selectedUserIds.push(parseInt($(this).val()));
+            });
+
+            updateUserSelection();
+            layer.closeAll();
+        }
+
+        function cancelUserSelection() {
+            $('.user-checkbox').prop('checked', false);
+            selectedUserIds = [];
+            updateUserSelection();
+        }
+
+        function selectAllUsers() {
+            var selectAll = $('#selectAllInSelector').prop('checked');
+            $('.user-checkbox').prop('checked', selectAll);
+            
+            if (selectAll) {
+                selectedUserIds = [];
+                $('.user-checkbox').each(function() {
+                    selectedUserIds.push(parseInt($(this).val()));
+                });
+            } else {
+                selectedUserIds = [];
+            }
+
+            updateUserSelection();
+        }
+
+        function updateUserSelection() {
+            $('#selectedCount').text(selectedUserIds.length);
+            
+            var hasValidSelection = currentOperation && 
+                ((currentOperation === 'delete' && selectedUserIds.length > 0) ||
+                 (currentOperation === 'resetPassword' && selectedUserIds.length > 0) ||
+                 (currentOperation === 'updateStatus' && selectedUserIds.length > 0));
+
+            $('#executeBtn').prop('disabled', !hasValidSelection);
+        }
+
+        function validatePasswords() {
+            var newPassword = $('#newPassword').val();
+            var confirmPassword = $('#confirmPassword').val();
+            
+            var isValid = newPassword.length >= 8 && 
+                           /[A-Z]/.test(newPassword) && 
+                           /[a-z]/.test(newPassword) && 
+                           /\d/.test(newPassword) &&
+                           /[!@#$%^&*]/.test(newPassword) &&
+                           newPassword === confirmPassword;
+
+            if (!isValid) {
+                $('#executeBtn').prop('disabled', true);
+                layer.msg('密码格式不正确，请重新输入', {icon: 2});
+            } else {
+                $('#executeBtn').prop('disabled', false);
+            }
+        }
+
+        function previewOperation() {
+            if (selectedUserIds.length === 0) {
+                layer.msg('请先选择要操作的用户', {icon: 2});
+                return;
+            }
+
+            var operation = $('#operationType').val();
+            var previewContent = '<div class="operation-preview">';
+            previewContent += '<h4>操作预览</h4>';
+            previewContent += '<p><strong>操作类型：</strong>' + getOperationTypeName(operation) + '</p>';
+            previewContent += '<p><strong>选择用户数量：</strong>' + selectedUserIds.length + ' 个</p>';
+            previewContent += '<p><strong>用户列表：</strong></p>';
+            previewContent += '<ol>';
+            
+            selectedUserIds.forEach(function(userId) {
+                // 这里应该从用户列表中获取用户信息
+                previewContent += '<li>用户ID: ' + userId + '</li>';
+            });
+            
+            previewContent += '</ol>';
+
+            if (operation === 'resetPassword') {
+                var newPassword = $('#newPassword').val();
+                if (newPassword) {
+                    previewContent += '<p><strong>新密码：</strong>' + '*'.repeat(newPassword.length) + '</p>';
+                }
+            }
+
+            previewContent += '</div>';
+
+            layer.open({
+                type: 1,
+                title: '操作预览',
+                area: ['500px', '400px'],
+                content: previewContent
+            });
+        }
+
+        function getOperationTypeName(operationType) {
+            var names = {
+                'updateStatus': '更新状态',
+                'resetPassword': '重置密码',
+                'delete': '删除用户',
+                'forceLogout': '强制下线',
+                'clearCache': '清除缓存'
+            };
+            return names[operationType] || operationType;
+        }
+
+        function executeBatchOperation() {
+            var operationType = $('#operationType').val();
+            var targetStatus = $('#targetStatus').val();
+            var newPassword = $('#newPassword').val();
+            
+            if (selectedUserIds.length === 0) {
+                layer.msg('请先选择要操作的用户', {icon: 2});
+                return;
+            }
+
+            // 显示进度条
+            $('#progressContainer').show();
+            updateProgress(0, '准备中...');
+
+            // 准备操作数据
+            var operationData = {
+                operationType: operationType,
+                userIds: selectedUserIds,
+                targetStatus: targetStatus,
+                newPassword: newPassword
+            };
+
+            // 执行批量操作
+            $.ajax({
+                url: ctx + 'im/user/batch/execute',
+                type: 'POST',
+                data: operationData,
+                xhr: function() {
+                    var xhr = new XMLHttpRequest();
+                    // 进度回调
+                    xhr.upload.addEventListener('progress', function(e) {
+                        if (e.lengthComputable) {
+                            var percentComplete = Math.round(e.loaded / e.total * 100);
+                            updateProgress(percentComplete, getProgressText(operationType, percentComplete));
+                        }
+                    });
+                    return xhr;
+                },
+                success: function(result) {
+                    updateProgress(100, getProgressText(operationType, 100));
+                    
+                    if (result.code === 200) {
+                        showResultSummary(true, result.data, operationType);
+                        layer.msg('批量操作执行成功', {icon: 1});
+                        
+                        // 刷新用户列表
+                        updateUserTable();
+                    } else {
+                        showResultSummary(false, result.msg, operationType);
+                        layer.msg('批量操作执行失败: ' + result.msg, {icon: 2});
+                    }
+                },
+                error: function(xhr, status, error) {
+                    updateProgress(0, '操作失败');
+                    showResultSummary(false, '操作失败: ' + error, operationType);
+                    layer.msg('批量操作执行失败', {icon: 2});
+                },
+                complete: function() {
+                    setTimeout(function() {
+                        $('#progressContainer').hide();
+                    }, 1000);
+                }
+            });
+        }
+
+        function updateProgress(percent, text) {
+            $('#progressFill').css('width', percent + '%');
+            $('#progressText').text(text);
+        }
+
+        function showResultSummary(success, data, operationType) {
+            $('#resultSummary').show();
+            
+            var resultHtml = '<div class="result-content">';
+            resultHtml += '<div class="' + (success ? 'result-success' : 'result-error') + '">';
+            resultHtml += '<h5>' + (success ? '✓' : '✗') + ' 操作' + getOperationTypeName(operationType) + '</h5>';
+            
+            if (success) {
+                resultHtml += '<p><strong>执行时间：</strong>' + new Date().toLocaleString() + '</p>';
+                resultHtml += '<p><strong>影响用户数：</strong>' + (data.affectedCount || 0) + ' 个</p>';
+                
+                if (data.successCount && data.successCount > 0) {
+                    resultHtml += '<p><strong>成功操作数：</strong>' + data.successCount + '</p>';
+                }
+                
+                if (data.failureCount && data.failureCount > 0) {
+                    resultHtml += '<p><strong>失败操作数：</strong>' + data.failureCount + '</p>';
+                    resultHtml += '<p><strong>失败详情：</strong></p>';
+                    if (data.failures && data.failures.length > 0) {
+                        resultHtml += '<ul>';
+                        data.failures.forEach(function(failure) {
+                            resultHtml += '<li>用户ID ' + failure.userId + ': ' + failure.reason + '</li>';
+                        });
+                        resultHtml += '</ul>';
+                    }
+                }
+            } else {
+                resultHtml += '<p><strong>错误信息：</strong>' + (data.message || '未知错误') + '</p>';
+            }
+            
+            resultHtml += '</div>';
+            resultHtml += '</div>';
+            
+            $('#resultContent').html(resultHtml);
+        }
+
+        function updateUserTable() {
+            // 这里应该重新加载用户列表数据
+            // 暂时模拟表格刷新
+            setTimeout(function() {
+                layer.msg('用户列表已更新', {icon: 1});
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

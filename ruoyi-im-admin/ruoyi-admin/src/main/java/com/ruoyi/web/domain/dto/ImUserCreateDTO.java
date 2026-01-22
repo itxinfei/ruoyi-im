@@ -1,4 +1,4 @@
-package com.ruoyi.im.domain.dto;
+package com.ruoyi.web.domain.dto;
 
 import com.ruoyi.common.annotation.Excel;
 import lombok.Data;

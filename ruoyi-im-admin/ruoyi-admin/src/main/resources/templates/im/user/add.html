@@ -1,308 +1,389 @@
 <!DOCTYPE html>
-<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:include="include :: header('新增IM用户')" />
     <th:block th:include="include :: bootstrap-fileinput-css"/>
+    <link th:href="@{/css/im-admin.css}" rel="stylesheet" />
     <style>
-        .user-add-container {
+        .im-form-container {
             display: flex;
-            gap: 16px;
+            gap: var(--im-spacing-lg);
         }
 
-        .user-form-section {
+        .im-form-main {
             flex: 1;
         }
 
-        .user-avatar-section {
-            width: 200px;
-            background: #f8f9fa;
-            border-radius: 4px;
-            padding: 16px;
+        .im-form-sidebar {
+            width: 220px;
+            background: var(--im-bg-container);
+            border-radius: var(--im-radius-md);
+            padding: var(--im-spacing-md);
+            border: 1px solid var(--im-border-light);
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        .section-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: #495057;
-            margin: 0 0 12px 0;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #dee2e6;
-            width: 100%;
+        .im-form-section {
+            margin-bottom: var(--im-spacing-lg);
         }
 
-        .form-section {
-            margin-bottom: 16px;
-        }
-
-        .input-icon {
-            position: relative;
-        }
-        .input-icon .form-control {
-            padding-left: 36px;
-        }
-        .input-icon .field-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #adb5bd;
+        .im-form-section-title {
             font-size: 14px;
-            pointer-events: none;
+            font-weight: 600;
+            color: var(--im-text-primary);
+            margin: 0 0 var(--im-spacing-md) 0;
+            padding-bottom: var(--im-spacing-sm);
+            border-bottom: 2px solid var(--im-primary-light);
+            display: flex;
+            align-items: center;
+            gap: var(--im-spacing-sm);
         }
 
-        .avatar-preview {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            border: 2px solid #dee2e6;
+        .im-form-section-title i {
+            color: var(--im-primary);
+        }
+
+        .im-form-group {
+            margin-bottom: var(--im-spacing-md);
+        }
+
+        .im-form-group label {
+            display: block;
+            margin-bottom: var(--im-spacing-xs);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--im-text-secondary);
+        }
+
+        .im-form-group label.is-required::before {
+            content: '*';
+            color: var(--im-danger);
+            margin-right: 4px;
+        }
+
+        .im-form-input,
+        .im-form-select {
+            width: 100%;
+            height: 36px;
+            padding: 6px 12px;
+            border: 1px solid var(--im-border);
+            border-radius: var(--im-radius-sm);
+            font-size: 14px;
+            color: var(--im-text-primary);
+            transition: var(--im-transition);
+        }
+
+        .im-form-input:focus,
+        .im-form-select:focus {
+            outline: none;
+            border-color: var(--im-primary);
+            box-shadow: 0 0 0 2px var(--im-primary-light);
+        }
+
+        .im-form-input.is-valid {
+            border-color: var(--im-success);
+        }
+
+        .im-form-input.is-invalid {
+            border-color: var(--im-danger);
+        }
+
+        .im-form-feedback {
+            font-size: 12px;
+            margin-top: 4px;
+            min-height: 16px;
+        }
+
+        .im-form-feedback.success {
+            color: var(--im-success);
+        }
+
+        .im-form-feedback.error {
+            color: var(--im-danger);
+        }
+
+        .im-form-feedback.info {
+            color: var(--im-text-tertiary);
+        }
+
+        .im-input-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .im-input-group .im-form-input {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .im-input-group-addon {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #fff;
-            margin-bottom: 12px;
+            width: 40px;
+            height: 36px;
+            background: var(--im-bg-hover);
+            border: 1px solid var(--im-border);
+            border-left: none;
+            border-radius: 0 var(--im-radius-sm) var(--im-radius-sm) 0;
+            cursor: pointer;
+            color: var(--im-text-tertiary);
+            transition: var(--im-transition);
+        }
+
+        .im-input-group-addon:hover {
+            background: var(--im-bg-active);
+            color: var(--im-primary);
+        }
+
+        /* 头像预览 */
+        .im-avatar-preview {
+            width: 88px;
+            height: 88px;
+            border-radius: var(--im-radius-full);
+            border: 3px solid var(--im-border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--im-bg-hover);
+            margin-bottom: var(--im-spacing-sm);
             overflow: hidden;
         }
-        .avatar-preview img {
+
+        .im-avatar-preview img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        .avatar-preview .fa-user {
-            font-size: 32px;
-            color: #dee2e6;
+
+        .im-avatar-preview .fa-user {
+            font-size: 36px;
+            color: var(--im-text-quaternary);
         }
 
-        .default-avatars {
+        /* 默认头像选择 */
+        .im-default-avatars {
             display: flex;
             gap: 6px;
             justify-content: center;
-            margin-bottom: 10px;
+            margin-bottom: var(--im-spacing-sm);
             flex-wrap: wrap;
         }
-        .default-avatar-item {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+
+        .im-default-avatar-item {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--im-radius-full);
             cursor: pointer;
             border: 2px solid transparent;
             overflow: hidden;
-            transition: border-color 0.15s, transform 0.15s;
+            transition: var(--im-transition);
         }
-        .default-avatar-item:hover {
+
+        .im-default-avatar-item:hover {
             transform: scale(1.1);
         }
-        .default-avatar-item:focus {
-            outline: 2px solid #337ab7;
-            outline-offset: 2px;
-        }
-        .default-avatar-item.selected {
-            border-color: #337ab7;
+
+        .im-default-avatar-item.selected {
+            border-color: var(--im-primary);
+            box-shadow: 0 0 0 2px var(--im-primary-light);
         }
 
-        .field-feedback {
-            font-size: 12px;
-            margin-top: 4px;
-            min-height: 17px;
+        /* 密码强度 */
+        .im-password-strength {
+            margin-top: var(--im-spacing-sm);
         }
-        .field-feedback.success { color: #28a745; }
-        .field-feedback.error { color: #dc3545; }
-        .field-feedback.info { color: #6c757d; }
 
-        .password-strength {
-            margin-top: 6px;
-        }
-        .strength-bar {
-            height: 3px;
-            background: #e9ecef;
+        .im-strength-bar {
+            height: 4px;
+            background: var(--im-divider);
             border-radius: 2px;
             overflow: hidden;
         }
-        .strength-fill {
+
+        .im-strength-fill {
             height: 100%;
             width: 0;
-            transition: width 0.2s ease;
+            transition: width 0.3s ease;
         }
-        .strength-fill.weak { width: 33%; background: #dc3545; }
-        .strength-fill.medium { width: 66%; background: #ffc107; }
-        .strength-fill.strong { width: 100%; background: #28a745; }
-        .strength-text {
+
+        .im-strength-fill.weak { width: 33%; background: var(--im-danger); }
+        .im-strength-fill.medium { width: 66%; background: var(--im-warning); }
+        .im-strength-fill.strong { width: 100%; background: var(--im-success); }
+
+        .im-strength-text {
             font-size: 11px;
-            margin-top: 3px;
-            color: #6c757d;
+            margin-top: 4px;
+            color: var(--im-text-tertiary);
         }
 
-        .avatar-upload-btn {
-            cursor: pointer;
-        }
-        .avatar-upload-btn:hover {
-            background-color: #286090;
+        /* 状态单选 */
+        .im-status-radios {
+            display: flex;
+            gap: var(--im-spacing-md);
         }
 
-        .toggle-password {
+        .im-radio-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--im-text-secondary);
             cursor: pointer;
         }
-        .toggle-password:hover {
-            background-color: #e9ecef;
+
+        .im-radio-label input[type="radio"] {
+            margin: 0;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .im-form-container {
+                flex-direction: column-reverse;
+            }
+
+            .im-form-sidebar {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body class="white-bg">
     <div class="wrapper wrapper-content animated fadeInRight ibox-content">
-        <form class="form-horizontal m" id="form-user-add" aria-label="新增用户表单">
-            <div class="user-add-container">
+        <form class="form-horizontal m" id="form-user-add">
+            <div class="im-form-container">
                 <!-- 左侧表单区域 -->
-                <div class="user-form-section">
+                <div class="im-form-main">
                     <!-- 账号信息 -->
-                    <div class="form-section">
-                        <div class="section-title">账号信息</div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label is-required" for="username">登录账号</label>
-                            <div class="col-sm-8">
-                                <div class="input-icon">
-                                    <input name="username" class="form-control" type="text"
-                                           placeholder="2-20个字符" id="username" required
-                                           aria-required="true" aria-describedby="username-feedback">
-                                    <i class="fa fa-user field-icon" aria-hidden="true"></i>
-                                </div>
-                                <div class="field-feedback info" id="username-feedback" role="status" aria-live="polite">请输入登录账号</div>
-                            </div>
+                    <div class="im-form-section">
+                        <h4 class="im-form-section-title">
+                            <i class="fa fa-user-circle"></i>
+                            账号信息
+                        </h4>
+
+                        <div class="im-form-group">
+                            <label class="is-required" for="username">登录账号</label>
+                            <input name="username" class="im-form-input" type="text"
+                                   placeholder="请输入2-20个字符" id="username" required>
+                            <div class="im-form-feedback info" id="username-feedback">用于登录系统的账号</div>
                         </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label is-required" for="nickname">用户昵称</label>
-                            <div class="col-sm-8">
-                                <div class="input-icon">
-                                    <input name="nickname" class="form-control" type="text"
-                                           placeholder="请输入用户昵称" id="nickname" required
-                                           aria-required="true" aria-describedby="nickname-feedback">
-                                    <i class="fa fa-id-card field-icon" aria-hidden="true"></i>
-                                </div>
-                                <div class="field-feedback info" id="nickname-feedback" role="status" aria-live="polite">用户在系统中显示的名称</div>
-                            </div>
+
+                        <div class="im-form-group">
+                            <label class="is-required" for="nickname">用户昵称</label>
+                            <input name="nickname" class="im-form-input" type="text"
+                                   placeholder="请输入用户昵称" id="nickname" required>
+                            <div class="im-form-feedback info" id="nickname-feedback">用户在系统中显示的名称</div>
                         </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label is-required" for="password">登录密码</label>
-                            <div class="col-sm-8">
-                                <div class="input-group">
-                                    <span class="input-group-addon"><i class="fa fa-key" aria-hidden="true"></i></span>
-                                    <input name="password" class="form-control" type="password"
-                                           placeholder="5-20个字符" id="password" required
-                                           aria-required="true" aria-describedby="password-feedback strength-text">
-                                    <span class="input-group-addon toggle-password" onclick="togglePassword()"
-                                          role="button" tabindex="0" aria-label="显示密码"
-                                          onkeypress="if(event.key==='Enter')togglePassword()">
-                                        <i class="fa fa-eye" id="password-eye" aria-hidden="true"></i>
-                                    </span>
+
+                        <div class="im-form-group">
+                            <label class="is-required" for="password">登录密码</label>
+                            <div class="im-input-group">
+                                <input name="password" class="im-form-input" type="password"
+                                       placeholder="请输入5-20个字符" id="password" required>
+                                <span class="im-input-group-addon" onclick="togglePassword()">
+                                    <i class="fa fa-eye" id="password-eye"></i>
+                                </span>
+                            </div>
+                            <div class="im-password-strength">
+                                <div class="im-strength-bar">
+                                    <div class="im-strength-fill" id="strength-fill"></div>
                                 </div>
-                                <div class="password-strength">
-                                    <div class="strength-bar" aria-hidden="true">
-                                        <div class="strength-fill" id="strength-fill"></div>
-                                    </div>
-                                    <div class="strength-text" id="strength-text" role="status" aria-live="polite">密码强度: 未设置</div>
-                                </div>
+                                <div class="im-strength-text" id="strength-text">密码强度: 未设置</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- 联系信息 -->
-                    <div class="form-section">
-                        <div class="section-title">联系信息</div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="mobile">手机号码</label>
-                            <div class="col-sm-8">
-                                <div class="input-icon">
-                                    <input name="mobile" class="form-control" type="text"
-                                           placeholder="请输入手机号码" id="mobile"
-                                           aria-describedby="mobile-feedback">
-                                    <i class="fa fa-phone field-icon" aria-hidden="true"></i>
-                                </div>
-                                <div class="field-feedback info" id="mobile-feedback" role="status" aria-live="polite">用于接收系统通知</div>
-                            </div>
+                    <div class="im-form-section">
+                        <h4 class="im-form-section-title">
+                            <i class="fa fa-address-book"></i>
+                            联系信息
+                        </h4>
+
+                        <div class="im-form-group">
+                            <label for="mobile">手机号码</label>
+                            <input name="mobile" class="im-form-input" type="text"
+                                   placeholder="请输入手机号码" id="mobile">
+                            <div class="im-form-feedback info" id="mobile-feedback">用于接收系统通知</div>
                         </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="email">邮箱</label>
-                            <div class="col-sm-8">
-                                <div class="input-icon">
-                                    <input name="email" class="form-control" type="text"
-                                           placeholder="请输入邮箱地址" id="email"
-                                           aria-describedby="email-feedback">
-                                    <i class="fa fa-envelope field-icon" aria-hidden="true"></i>
-                                </div>
-                                <div class="field-feedback info" id="email-feedback" role="status" aria-live="polite">用于接收邮件通知</div>
-                            </div>
+
+                        <div class="im-form-group">
+                            <label for="email">邮箱</label>
+                            <input name="email" class="im-form-input" type="text"
+                                   placeholder="请输入邮箱地址" id="email">
+                            <div class="im-form-feedback info" id="email-feedback">用于接收邮件通知</div>
                         </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="gender">性别</label>
-                            <div class="col-sm-8">
-                                <select name="gender" class="form-control" id="gender">
-                                    <option value="">请选择性别</option>
-                                    <option th:each="dict : ${@dict.getType('sys_user_sex')}"
-                                            th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
-                                </select>
-                            </div>
+
+                        <div class="im-form-group">
+                            <label for="gender">性别</label>
+                            <select name="gender" class="im-form-select" id="gender">
+                                <option value="">请选择性别</option>
+                                <option th:each="dict : ${@dict.getType('sys_user_sex')}"
+                                        th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
                 <!-- 右侧头像区域 -->
-                <div class="user-avatar-section" aria-label="用户头像选择">
-                    <div class="section-title">用户头像</div>
+                <div class="im-form-sidebar">
+                    <div style="font-size: 14px; font-weight: 600; color: var(--im-text-primary); width: 100%; text-align: center; margin-bottom: var(--im-spacing-sm);">
+                        用户头像
+                    </div>
 
-                    <div class="avatar-preview" id="avatarPreview" aria-hidden="true">
+                    <div class="im-avatar-preview" id="avatarPreview">
                         <i class="fa fa-user"></i>
                     </div>
 
                     <!-- 默认头像选择 -->
-                    <div class="default-avatars" id="defaultAvatars" role="radiogroup" aria-label="选择默认头像">
-                        <button type="button" class="default-avatar-item" data-avatar="/profile/avatar/default1.png"
-                                aria-label="紫色头像" tabindex="0">
+                    <div class="im-default-avatars" id="defaultAvatars">
+                        <button type="button" class="im-default-avatar-item" data-avatar="/profile/avatar/default1.png">
                             <div style="width:100%;height:100%;background:#667eea;display:flex;align-items:center;justify-content:center;">
                                 <i class="fa fa-user" style="color:#fff;font-size:14px;"></i>
                             </div>
                         </button>
-                        <button type="button" class="default-avatar-item" data-avatar="/profile/avatar/default2.png"
-                                aria-label="粉色头像" tabindex="0">
+                        <button type="button" class="im-default-avatar-item" data-avatar="/profile/avatar/default2.png">
                             <div style="width:100%;height:100%;background:#f5576c;display:flex;align-items:center;justify-content:center;">
                                 <i class="fa fa-user" style="color:#fff;font-size:14px;"></i>
                             </div>
                         </button>
-                        <button type="button" class="default-avatar-item" data-avatar="/profile/avatar/default3.png"
-                                aria-label="蓝色头像" tabindex="0">
+                        <button type="button" class="im-default-avatar-item" data-avatar="/profile/avatar/default3.png">
                             <div style="width:100%;height:100%;background:#00f2fe;display:flex;align-items:center;justify-content:center;">
                                 <i class="fa fa-user" style="color:#fff;font-size:14px;"></i>
                             </div>
                         </button>
-                        <button type="button" class="default-avatar-item" data-avatar="/profile/avatar/default4.png"
-                                aria-label="绿色头像" tabindex="0">
+                        <button type="button" class="im-default-avatar-item" data-avatar="/profile/avatar/default4.png">
                             <div style="width:100%;height:100%;background:#43e97b;display:flex;align-items:center;justify-content:center;">
                                 <i class="fa fa-user" style="color:#fff;font-size:14px;"></i>
                             </div>
                         </button>
                     </div>
 
-                    <div style="text-align: center; margin-bottom: 8px; color: #6c757d; font-size: 12px;">
+                    <div style="text-align: center; margin-bottom: var(--im-spacing-sm); color: var(--im-text-tertiary); font-size: 12px;">
                         或上传自定义头像
                     </div>
 
-                    <input type="hidden" name="avatar" id="avatarInput" aria-label="已选择的头像路径">
+                    <input type="hidden" name="avatar" id="avatarInput">
                     <div class="file-loading">
                         <input class="form-control file-upload" id="avatar" name="file" type="file" style="display: none;"
-                               accept="image/png,image/jpeg,image/gif" aria-label="上传头像文件">
+                               accept="image/png,image/jpeg,image/gif">
                     </div>
-                    <label for="avatar" class="btn btn-primary btn-sm avatar-upload-btn" tabindex="0">
-                        <i class="fa fa-upload" aria-hidden="true"></i> 上传头像
+                    <label for="avatar" class="im-btn im-btn-primary im-btn-sm" style="cursor: pointer;">
+                        <i class="fa fa-upload"></i> 上传头像
                     </label>
 
-                    <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #dee2e6; width: 100%;">
-                        <div style="font-size: 13px; margin-bottom: 8px; font-weight: 500;">账号状态</div>
-                        <label class="radio-inline">
-                            <input type="radio" name="status" value="0" checked> 正常
-                        </label>
-                        <label class="radio-inline">
-                            <input type="radio" name="status" value="1"> 停用
-                        </label>
+                    <div style="margin-top: auto; padding-top: var(--im-spacing-md); border-top: 1px solid var(--im-divider); width: 100%;">
+                        <div style="font-size: 13px; margin-bottom: var(--im-spacing-sm); font-weight: 500; color: var(--im-text-primary);">账号状态</div>
+                        <div class="im-status-radios">
+                            <label class="im-radio-label">
+                                <input type="radio" name="status" value="1" checked> 正常
+                            </label>
+                            <label class="im-radio-label">
+                                <input type="radio" name="status" value="0"> 停用
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -407,17 +488,14 @@
             var $input = $('#' + fieldId);
             var $feedback = $('#' + fieldId + '-feedback');
 
-            // 更新边框颜色
-            $input.css('border-color', isValid ? '#28a745' : (isValid === false ? '#dc3545' : ''));
-
-            // 更新反馈文字
+            $input.removeClass('is-valid is-invalid').addClass(isValid ? 'is-valid' : 'is-invalid');
             $feedback.removeClass('info success error').addClass(isValid ? 'success' : 'error').text(message);
         }
 
         function resetValidationUI(fieldId) {
-            $('#' + fieldId).css('border-color', '');
+            $('#' + fieldId).removeClass('is-valid is-invalid');
             $('#' + fieldId + '-feedback').removeClass('success error').addClass('info');
-            var msgs = { 'username': '请输入登录账号', 'nickname': '用户在系统中显示的名称', 'mobile': '用于接收系统通知', 'email': '用于接收邮件通知' };
+            var msgs = { 'username': '用于登录系统的账号', 'nickname': '用户在系统中显示的名称', 'mobile': '用于接收系统通知', 'email': '用于接收邮件通知' };
             if (msgs[fieldId]) $('#' + fieldId + '-feedback').text(msgs[fieldId]);
         }
 
@@ -441,22 +519,17 @@
         }
 
         function initDefaultAvatars() {
-            $('.default-avatar-item').on('click', function() {
+            $('.im-default-avatar-item').on('click', function() {
                 selectDefaultAvatar($(this).data('avatar'));
-            }).on('keypress', function(e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    selectDefaultAvatar($(this).data('avatar'));
-                }
             });
         }
 
         function selectDefaultAvatar(avatar) {
             $('#avatarInput').val(avatar);
-            $('.default-avatar-item').removeClass('selected').attr('aria-selected', 'false');
-            var $selected = $('.default-avatar-item[data-avatar="' + avatar + '"]');
+            $('.im-default-avatar-item').removeClass('selected');
+            var $selected = $('.im-default-avatar-item[data-avatar="' + avatar + '"]');
             if ($selected.length > 0) {
-                $selected.addClass('selected').attr('aria-selected', 'true');
+                $selected.addClass('selected');
                 $('#avatarPreview').html($selected.find(' > div').clone());
             }
         }
@@ -476,7 +549,7 @@
                 if (data.response && data.response.url) {
                     $('#avatarInput').val(data.response.url);
                     $('#avatarPreview').html('<img src="' + data.response.url + '" alt="头像预览">');
-                    $('.default-avatar-item').removeClass('selected').attr('aria-selected', 'false');
+                    $('.im-default-avatar-item').removeClass('selected');
                 }
             }).on('fileremoved', function (event, id, index) {
                 $('#avatarInput').val('');
@@ -487,16 +560,12 @@
         function togglePassword() {
             var $input = $('#password');
             var $eyeIcon = $('#password-eye');
-            var $toggleBtn = $('.toggle-password');
-
             if ($input.attr('type') == 'password') {
                 $input.attr('type', 'text');
                 $eyeIcon.removeClass('fa-eye').addClass('fa-eye-slash');
-                $toggleBtn.attr('aria-label', '隐藏密码');
             } else {
                 $input.attr('type', 'password');
                 $eyeIcon.removeClass('fa-eye-slash').addClass('fa-eye');
-                $toggleBtn.attr('aria-label', '显示密码');
             }
         }
 

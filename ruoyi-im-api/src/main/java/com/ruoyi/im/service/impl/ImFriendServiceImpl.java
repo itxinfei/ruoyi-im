@@ -243,6 +243,8 @@ public class ImFriendServiceImpl implements ImFriendService {
                     vo.setEmail(friendUser.getEmail());
                     vo.setPhone(friendUser.getMobile());
                     vo.setSignature(friendUser.getSignature());
+                    vo.setDepartment(friendUser.getDepartment());
+                    vo.setPosition(friendUser.getPosition());
 
                     // 如果用户状态是ACTIVE，可以认为是在线的（这只是一个简化判断）
                     // 实际在线状态应从Redis获取
@@ -271,28 +273,29 @@ public class ImFriendServiceImpl implements ImFriendService {
      * @param userIds 用户ID列表
      * @return 用户ID -> 用户信息的映射
      */
+    /**
+     * 批量获取用户信息，避免N+1查询问题
+     * 
+     * @param userIds 用户ID列表
+     * @return 用户ID -> 用户信息的映射
+     */
     private Map<Long, ImUser> batchGetUsers(List<Long> userIds) {
         Map<Long, ImUser> userMap = new HashMap<>();
         if (userIds == null || userIds.isEmpty()) {
             return userMap;
         }
 
-        // 尝试使用批量查询方法（如果ImUserMapper支持）
         try {
-            // 检查是否有selectImUserByIds方法
-            java.lang.reflect.Method method = imUserMapper.getClass()
-                    .getMethod("selectImUserByIds", List.class);
-            @SuppressWarnings("unchecked")
-            List<ImUser> users = (List<ImUser>) method.invoke(imUserMapper, userIds);
+            List<ImUser> users = imUserMapper.selectImUserListByIds(userIds);
             if (users != null) {
                 for (ImUser user : users) {
                     userMap.put(user.getId(), user);
                 }
             }
-            log.debug("批量查询用户信息: 使用selectImUserByIds方法，查询{}个用户", userIds.size());
+            log.debug("批量查询用户信息: 查询{}个用户，成功获取{}个", userIds.size(), userMap.size());
         } catch (Exception e) {
-            // 如果批量查询方法不存在，回退到逐个查询
-            log.warn("批量查询方法不存在，使用逐个查询: {}", e.getMessage());
+            log.error("批量查询用户信息失败: {}", e.getMessage(), e);
+            // 本地降级：逐个查询
             for (Long userId : userIds) {
                 ImUser user = imUserMapper.selectImUserById(userId);
                 if (user != null) {
@@ -485,6 +488,8 @@ public class ImFriendServiceImpl implements ImFriendService {
         if (friendUser != null) {
             vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
             vo.setFriendAvatar(friendUser.getAvatar());
+            vo.setDepartment(friendUser.getDepartment());
+            vo.setPosition(friendUser.getPosition());
             // 根据用户状态判断是否在线
             vo.setOnline(imRedisUtil.isOnlineUser(friend.getFriendId()));
         } else {

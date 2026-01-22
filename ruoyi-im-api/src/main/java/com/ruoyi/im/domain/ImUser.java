@@ -55,6 +55,12 @@ public class ImUser extends BaseEntity implements Serializable {
     /** 签名,用户个人简介或个性签名 */
     private String signature;
 
+    /** 部门 */
+    private String department;
+
+    /** 职位 */
+    private String position;
+
     /** 最后在线时间,记录用户最近一次在线的时间 */
     @TableField("last_online_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

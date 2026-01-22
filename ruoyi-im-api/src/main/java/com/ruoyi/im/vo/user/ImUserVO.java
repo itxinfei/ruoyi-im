@@ -43,6 +43,12 @@ public class ImUserVO implements Serializable {
     /** 签名 */
     private String signature;
 
+    /** 部门 */
+    private String department;
+
+    /** 职位 */
+    private String position;
+
     /** 在线状态 */
     private Boolean online;
 

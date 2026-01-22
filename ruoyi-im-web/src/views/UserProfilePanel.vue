@@ -6,186 +6,149 @@
       <div class="profile-card">
         <div class="profile-header">
           <div class="avatar-section">
-            <div class="avatar">
-              <span class="avatar-text">我</span>
+            <div class="avatar" v-if="currentUser.avatar">
+              <img :src="currentUser.avatar" alt="Avatar" />
             </div>
-            <div class="online-indicator"></div>
+            <div class="avatar placeholder" v-else>
+              <span class="avatar-text">{{ (currentUser.nickname || currentUser.username || '?').charAt(0) }}</span>
+            </div>
+            <div v-if="isOnline" class="online-indicator"></div>
           </div>
 
           <div class="profile-info">
             <div class="info-top">
               <div class="name-section">
-                <h1 class="user-name">王小明</h1>
-                <el-badge class="status-badge" type="success">在线</el-badge>
+                <h1 class="user-name">{{ currentUser.nickname || currentUser.username }}</h1>
+                <el-badge class="status-badge" type="success" v-if="isOnline">在线</el-badge>
+                <el-badge class="status-badge" type="info" v-else>离线</el-badge>
               </div>
-              <p class="user-position">产品设计师 · 产品部</p>
+              <p class="user-position">
+                {{ currentUser.position || '暂无职位' }} · {{ currentUser.department || '暂无部门' }}
+              </p>
             </div>
 
             <div class="action-buttons">
-              <el-button type="primary" class="message-btn">
-                <el-icon><ChatDotRound /></el-icon>
-                发送消息
+              <el-button class="edit-btn" @click="showEditDialog = true">
+                <el-icon><Edit /></el-icon>
+                编辑资料
               </el-button>
-              <el-button class="qr-btn">
-                <el-icon><GridIcon /></el-icon>
-                我的二维码
-              </el-button>
-              <el-button text class="icon-btn">
-                <el-icon><Share /></el-icon>
-              </el-button>
-              <el-button text class="icon-btn">
-                <el-icon><MoreFilled /></el-icon>
-              </el-button>
-            </div>
-          </div>
-
-          <el-button class="edit-btn">
-            <el-icon><Edit /></el-icon>
-            编辑资料
-          </el-button>
-        </div>
-
-        <el-divider class="profile-divider" />
-
-        <div class="contact-section">
-          <h2 class="section-title">联系方式</h2>
-          <div class="contact-grid">
-            <div class="contact-item">
-              <div class="contact-icon icon-blue">
-                <el-icon><Phone /></el-icon>
-              </div>
-              <div class="contact-details">
-                <p class="contact-label">手机号码</p>
-                <p class="contact-value">138-1234-5678</p>
-              </div>
-            </div>
-
-            <div class="contact-item">
-              <div class="contact-icon icon-purple">
-                <el-icon><Message /></el-icon>
-              </div>
-              <div class="contact-details">
-                <p class="contact-label">邮箱地址</p>
-                <p class="contact-value">wangxiaoming@company.com</p>
-              </div>
             </div>
           </div>
         </div>
 
         <el-divider class="profile-divider" />
 
-        <div class="work-section">
-          <h2 class="section-title">工作信息</h2>
-          <div class="work-grid">
-            <div class="work-item">
-              <div class="work-icon icon-green">
-                <el-icon><OfficeBuilding /></el-icon>
+        <div class="section-container">
+          <!-- 联系方式 -->
+          <div class="info-group">
+            <h2 class="section-title">联系方式</h2>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="icon-box icon-blue"><el-icon><Phone /></el-icon></div>
+                <div>
+                  <div class="label">手机号码</div>
+                  <div class="value">{{ currentUser.mobile || '未填写' }}</div>
+                </div>
               </div>
-              <div class="work-details">
-                <p class="work-label">所属部门</p>
-                <p class="work-value">产品部 / 设计组</p>
-              </div>
-            </div>
-
-            <div class="work-item">
-              <div class="work-icon icon-orange">
-                <el-icon><Briefcase /></el-icon>
-              </div>
-              <div class="work-details">
-                <p class="work-label">职位</p>
-                <p class="work-value">高级产品设计师</p>
-              </div>
-            </div>
-
-            <div class="work-item">
-              <div class="work-icon icon-red">
-                <el-icon><Location /></el-icon>
-              </div>
-              <div class="work-details">
-                <p class="work-label">办公地点</p>
-                <p class="work-value">北京市朝阳区望京SOHO</p>
-              </div>
-            </div>
-
-            <div class="work-item">
-              <div class="work-icon icon-cyan">
-                <el-icon><Calendar /></el-icon>
-              </div>
-              <div class="work-details">
-                <p class="work-label">入职时间</p>
-                <p class="work-value">2022年6月15日</p>
+              <div class="info-item">
+                <div class="icon-box icon-purple"><el-icon><Message /></el-icon></div>
+                <div>
+                  <div class="label">邮箱地址</div>
+                  <div class="value">{{ currentUser.email || '未填写' }}</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <el-divider class="profile-divider" />
-
-        <div class="other-section">
-          <h2 class="section-title">其他信息</h2>
-          <div class="other-list">
-            <div class="other-item">
-              <span class="other-label">工号</span>
-              <span class="other-value">20220615001</span>
+          <!-- 工作信息 -->
+          <div class="info-group">
+            <h2 class="section-title">工作信息</h2>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="icon-box icon-green"><el-icon><OfficeBuilding /></el-icon></div>
+                <div>
+                  <div class="label">所属部门</div>
+                  <div class="value">{{ currentUser.department || '未填写' }}</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="icon-box icon-orange"><el-icon><Briefcase /></el-icon></div>
+                <div>
+                  <div class="label">职位</div>
+                  <div class="value">{{ currentUser.position || '未填写' }}</div>
+                </div>
+              </div>
+              <div class="info-item">
+                 <div class="icon-box icon-cyan"><el-icon><Calendar /></el-icon></div>
+                 <div>
+                   <div class="label">注册时间</div>
+                   <div class="value">{{ formatDate(currentUser.createTime) }}</div>
+                 </div>
+              </div>
             </div>
-            <div class="other-item">
-              <span class="other-label">直属上级</span>
-              <span class="other-value link">张伟 (产品总监)</span>
-            </div>
-            <div class="other-item">
-              <span class="other-label">汇报对象</span>
-              <span class="other-value link">李明 (设计总监)</span>
-            </div>
           </div>
-        </div>
-      </div>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="stat-title">本月考勤</span>
-            <el-badge class="stat-badge" type="success">正常</el-badge>
+          <!-- 个性签名 -->
+          <div class="info-group" v-if="currentUser.signature">
+            <h2 class="section-title">个性签名</h2>
+             <p class="signature-text">{{ currentUser.signature }}</p>
           </div>
-          <p class="stat-value">22天</p>
-          <p class="stat-subtitle">迟到0次 · 早退0次</p>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="stat-title">待办任务</span>
-            <el-badge class="stat-badge" type="warning">进行中</el-badge>
-          </div>
-          <p class="stat-value">8个</p>
-          <p class="stat-subtitle">已完成15个</p>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="stat-title">团队协作</span>
-            <el-badge class="stat-badge" type="primary">活跃</el-badge>
-          </div>
-          <p class="stat-value">156次</p>
-          <p class="stat-subtitle">本月沟通次数</p>
         </div>
       </div>
     </div>
+
+    <!-- Edit Profile Dialog -->
+    <EditProfileDialog 
+      v-model:visible="showEditDialog"
+      :user-info="currentUser"
+      @save="handleSaveProfile"
+    />
   </div>
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
 import {
-  ChatDotRound,
-  Grid as GridIcon,
-  Share,
-  MoreFilled,
   Edit,
   Phone,
   Message,
   OfficeBuilding,
   Briefcase,
-  Location,
   Calendar
 } from '@element-plus/icons-vue'
+import EditProfileDialog from '@/components/EditProfileDialog/index.vue'
+
+const store = useStore()
+const showEditDialog = ref(false)
+
+const currentUser = computed(() => store.getters['user/currentUser'] || {})
+const isOnline = computed(() => store.state.user.online)
+
+onMounted(async () => {
+  await store.dispatch('user/getUserInfo')
+})
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '未知'
+  try {
+    return new Date(dateStr).toLocaleDateString()
+  } catch (e) {
+    return dateStr
+  }
+}
+
+const handleSaveProfile = async (formData) => {
+  try {
+    await store.dispatch('user/updateProfile', formData)
+    ElMessage.success('更新成功')
+    showEditDialog.value = false
+  } catch (error) {
+    console.error(error)
+    ElMessage.error(error.message || '更新失败')
+  }
+}
 </script>
 
 <style scoped>
@@ -193,314 +156,156 @@ import {
   flex: 1;
   background-color: #f7f8fa;
   overflow-y: auto;
+  padding-bottom: 40px;
 }
 
 .profile-content {
-  max-width: 896px;
+  max-width: 800px;
   margin: 0 auto;
 }
 
 .cover-image {
-  height: 192px;
+  height: 160px;
   background: linear-gradient(135deg, #60a5fa, #3b82f6, #2563eb);
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.1);
-  }
 }
 
 .profile-card {
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  margin: -64px 24px 24px;
+  margin: -40px 20px 0;
   position: relative;
-  z-index: 10;
   padding: 24px;
 }
 
 .profile-header {
   display: flex;
-  align-items: flex-start;
   gap: 24px;
-  margin-bottom: 24px;
 }
 
 .avatar-section {
   position: relative;
-  flex-shrink: 0;
+  margin-top: -48px; 
 }
 
 .avatar {
   width: 96px;
   height: 96px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #60a5fa, #2563eb);
-  color: #fff;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  overflow: hidden;
+  background-color: #eee;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 4px #fff;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar.placeholder {
+  background: linear-gradient(135deg, #60a5fa, #2563eb);
+  color: #fff;
 }
 
 .avatar-text {
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 600;
 }
 
 .online-indicator {
   position: absolute;
-  bottom: -4px;
-  right: -4px;
-  width: 24px;
-  height: 24px;
+  bottom: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background-color: #52c41a;
-  border: 2px solid #fff;
+  border: 3px solid #fff;
 }
 
 .profile-info {
   flex: 1;
+  padding-top: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.info-top .user-name {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.user-position {
+  color: #666;
+  margin-top: 4px;
+}
+
+.section-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.info-top {
-  .name-section {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .user-name {
-    font-size: 24px;
-    font-weight: 500;
-    color: #262626;
-    margin: 0;
-  }
-
-  .status-badge {
-    :deep(.el-badge__content) {
-      background-color: #e6f7ff;
-      color: #1890ff;
-      border: none;
-    }
-  }
-
-  .user-position {
-    font-size: 14px;
-    color: #595959;
-    margin: 0;
-  }
-}
-
-.action-buttons {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.message-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.qr-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.icon-btn {
-  .el-icon {
-    font-size: 16px;
-  }
-}
-
-.edit-btn {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.profile-divider {
-  margin: 24px 0;
+  gap: 24px;
 }
 
 .section-title {
   font-size: 16px;
-  font-weight: 500;
-  color: #262626;
-  margin: 0 0 16px 0;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
 }
 
-.contact-grid,
-.work-grid {
+.info-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
 }
 
-.contact-item,
-.work-item {
+.info-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
 }
 
-.contact-icon,
-.work-icon {
+.icon-box {
   width: 40px;
   height: 40px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-
-  .el-icon {
-    font-size: 20px;
-  }
-
-  &.icon-blue {
-    background-color: #e6f7ff;
-    color: #1890ff;
-  }
-
-  &.icon-purple {
-    background-color: #f9f0ff;
-    color: #722ed1;
-  }
-
-  &.icon-green {
-    background-color: #f6ffed;
-    color: #52c41a;
-  }
-
-  &.icon-orange {
-    background-color: #fff7e6;
-    color: #fa8c16;
-  }
-
-  &.icon-red {
-    background-color: #fff1f0;
-    color: #f5222d;
-  }
-
-  &.icon-cyan {
-    background-color: #e6fffb;
-    color: #13c2c2;
-  }
 }
 
-.contact-details,
-.work-details {
-  flex: 1;
-}
+.icon-blue { background: #e6f7ff; color: #1890ff; }
+.icon-purple { background: #f9f0ff; color: #722ed1; }
+.icon-green { background: #f6ffed; color: #52c41a; }
+.icon-orange { background: #fff7e6; color: #fa8c16; }
+.icon-cyan { background: #e6fffb; color: #13c2c2; }
 
-.contact-label,
-.work-label {
+.label {
   font-size: 12px;
-  color: #8c8c8c;
-  margin: 0 0 4px 0;
+  color: #888;
 }
 
-.contact-value,
-.work-value {
+.value {
   font-size: 14px;
   font-weight: 500;
-  color: #262626;
-  margin: 0;
+  color: #333;
 }
 
-.other-section {
-  .other-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-}
-
-.other-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-
-  .other-label {
-    font-size: 14px;
-    color: #595959;
-  }
-
-  .other-value {
-    font-size: 14px;
-    font-weight: 500;
-    color: #262626;
-
-    &.link {
-      color: #1890ff;
-      cursor: pointer;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.stat-card {
-  background: #fff;
-  border-radius: 8px;
+.signature-text {
   padding: 16px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.stat-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.stat-title {
-  font-size: 14px;
-  color: #595959;
-}
-
-.stat-badge {
-  :deep(.el-badge__content) {
-    background-color: #f0f0f0;
-    color: #595959;
-    border: none;
-  }
-}
-
-.stat-value {
-  font-size: 24px;
-  font-weight: 600;
-  color: #262626;
-  margin: 0 0 4px 0;
-}
-
-.stat-subtitle {
-  font-size: 12px;
-  color: #8c8c8c;
-  margin: 0;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  color: #555;
+  font-style: italic;
 }
 </style>

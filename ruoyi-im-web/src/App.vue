@@ -15,7 +15,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
+import { useStore } from 'vuex'
 import ImSideNav from './components/ImSideNav/index.vue'
 import SessionPanel from './views/SessionPanel.vue'
 import WorkbenchPanel from './views/WorkbenchPanel.vue'
@@ -26,16 +27,29 @@ import SettingsPanel from './views/SettingsPanel.vue'
 import UserProfilePanel from './views/UserProfilePanel.vue'
 import ChatPanel from './views/ChatPanel.vue'
 
+const store = useStore()
 const activeModule = ref('chat')
-const currentSession = ref(null)
+const currentSession = computed(() => store.state.im.currentSession)
 
 const handleSwitchModule = (module) => {
   activeModule.value = module
 }
 
 const handleSelectSession = (session) => {
-  currentSession.value = session
+  store.dispatch('im/selectSession', session)
 }
+
+// Watch session change to auto-switch to chat
+watch(currentSession, (sess) => {
+  if (sess) {
+    activeModule.value = 'chat'
+  }
+})
+
+onMounted(() => {
+  store.dispatch('user/getUserInfo')
+  store.dispatch('im/loadSessions')
+})
 </script>
 
 <style lang="scss">

@@ -1,4 +1,4 @@
-package com.ruoyi.im.domain.dto;
+package com.ruoyi.web.domain.dto;
 
 import lombok.Data;
 import javax.validation.constraints.*;

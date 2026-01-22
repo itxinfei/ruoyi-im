@@ -1,4 +1,4 @@
-package com.ruoyi.im.domain.vo;
+package com.ruoyi.web.domain.vo;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonFormat;

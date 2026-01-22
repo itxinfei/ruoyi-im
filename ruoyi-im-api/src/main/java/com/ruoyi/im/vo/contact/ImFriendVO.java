@@ -79,4 +79,14 @@ public class ImFriendVO implements Serializable {
      * 好友个性签名
      */
     private String signature;
+
+    /**
+     * 部门
+     */
+    private String department;
+
+    /**
+     * 职位
+     */
+    private String position;
 }

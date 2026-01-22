@@ -40,4 +40,12 @@ public class ImRegisterRequest implements Serializable {
     /** 手机号 */
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
     private String mobile;
+
+    /** 部门 */
+    @Size(max = 100, message = "部门长度不能超过100")
+    private String department;
+
+    /** 职位 */
+    @Size(max = 100, message = "职位长度不能超过100")
+    private String position;
 }
