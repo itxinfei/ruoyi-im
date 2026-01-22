@@ -9,313 +9,332 @@
 <body class="gray-bg">
     <div class="container-div">
         <div class="row pt-5">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="im-stat-box bg-primary" onclick="filterByStatus('')">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">申请总数</div>
-                            <i class="fa fa-list-alt stat-icon"></i>
+            <div class="row pt-5">
+                <!-- 1. 统计面板 (Premium Minimalist) -->
+                <div class="col-sm-12">
+                    <div class="im-stat-group">
+                        <div class="im-stat-item" onclick="filterByStatus('')">
+                            <div class="stat-header">
+                                <span class="stat-label">申请总记录数</span>
+                                <div class="stat-icon-box"><i class="fa fa-list-alt"></i></div>
+                            </div>
+                            <div class="stat-number" id="totalCount">-</div>
+                            <div class="stat-footer text-muted">包含待处理与历史申请</div>
                         </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="im-stat-box bg-warning" onclick="filterByStatus('PENDING')">
-                            <div class="stat-number" id="pendingCount">0</div>
-                            <div class="stat-label">待处理</div>
-                            <i class="fa fa-clock-o stat-icon"></i>
+                        <div class="im-stat-item" onclick="filterByStatus('PENDING')">
+                            <div class="stat-header">
+                                <span class="stat-label">待处理请求</span>
+                                <div class="stat-icon-box" style="background: #fff7ed; color: #f59e0b;"><i
+                                        class="fa fa-clock-o"></i></div>
+                            </div>
+                            <div class="stat-number" id="pendingCount">-</div>
+                            <div class="stat-footer text-muted">急需审核处理的好友申请</div>
                         </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="im-stat-box bg-success" onclick="filterByStatus('APPROVED')">
-                            <div class="stat-number" id="approvedCount">0</div>
-                            <div class="stat-label">已同意</div>
-                            <i class="fa fa-check-circle stat-icon"></i>
+                        <div class="im-stat-item" onclick="filterByStatus('APPROVED')">
+                            <div class="stat-header">
+                                <span class="stat-label">已通过/结谊</span>
+                                <div class="stat-icon-box" style="background: #ecfdf5; color: #10b981;"><i
+                                        class="fa fa-check-circle"></i></div>
+                            </div>
+                            <div class="stat-number" id="approvedCount">-</div>
+                            <div class="stat-footer text-muted">成功建立好友关系的记录</div>
                         </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="im-stat-box bg-danger" onclick="filterByStatus('REJECTED')">
-                            <div class="stat-number" id="rejectedCount">0</div>
-                            <div class="stat-label">已拒绝</div>
-                            <i class="fa fa-times-circle stat-icon"></i>
+                        <div class="im-stat-item" onclick="filterByStatus('REJECTED')">
+                            <div class="stat-header">
+                                <span class="stat-label">已拒绝/驳回</span>
+                                <div class="stat-icon-box" style="background: #fef2f2; color: #ef4444;"><i
+                                        class="fa fa-times-circle"></i></div>
+                            </div>
+                            <div class="stat-number" id="rejectedCount">-</div>
+                            <div class="stat-footer text-muted">未获准建立关系的申请</div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse">
-                <form id="friendRequest-form">
-                    <div class="select-list">
-                        <ul>
-                            <li>
-                                <label class="input-label">申请人：</label><input type="text" name="fromUserId"
-                                    placeholder="请输入申请人ID" />
-                            </li>
-                            <li>
-                                <label class="input-label">接收人：</label><input type="text" name="toUserId"
-                                    placeholder="请输入接收人ID" />
-                            </li>
-                            <li>
-                                <label class="input-label">状态：</label><select name="status">
-                                    <option value="">所有</option>
-                                    <option value="PENDING">待处理</option>
-                                    <option value="APPROVED">已同意</option>
-                                    <option value="REJECTED">已拒绝</option>
-                                </select>
-                            </li>
-                            <li class="select-time">
-                                <label>申请时间： </label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间"
-                                    name="params[beginTime]" />
-                                <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间"
-                                    name="params[endTime]" />
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i
-                                        class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i
-                                        class="fa fa-refresh"></i>&nbsp;重置</a>
-                            </li>
-                        </ul>
+                <!-- 搜索区域 -->
+                <div class="col-sm-12 search-collapse">
+                    <form id="friendRequest-form">
+                        <div class="select-list">
+                            <ul>
+                                <li>
+                                    <label class="input-label">申请人：</label><input type="text" name="fromUserId"
+                                        placeholder="请输入申请人ID" />
+                                </li>
+                                <li>
+                                    <label class="input-label">接收人：</label><input type="text" name="toUserId"
+                                        placeholder="请输入接收人ID" />
+                                </li>
+                                <li>
+                                    <label class="input-label">状态：</label><select name="status">
+                                        <option value="">所有</option>
+                                        <option value="PENDING">待处理</option>
+                                        <option value="APPROVED">已同意</option>
+                                        <option value="REJECTED">已拒绝</option>
+                                    </select>
+                                </li>
+                                <li class="select-time">
+                                    <label>申请时间： </label>
+                                    <input type="text" class="time-input" id="startTime" placeholder="开始时间"
+                                        name="params[beginTime]" />
+                                    <span>-</span>
+                                    <input type="text" class="time-input" id="endTime" placeholder="结束时间"
+                                        name="params[endTime]" />
+                                </li>
+                                <li>
+                                    <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i
+                                            class="fa fa-search"></i>&nbsp;搜索</a>
+                                    <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i
+                                            class="fa fa-refresh"></i>&nbsp;重置</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 数据展示区域 -->
+                <div class="col-sm-12 select-table table-striped">
+                    <!-- 批量操作按钮 -->
+                    <div class="btn-group-sm" id="toolbar">
+                        <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:friendRequest:add">
+                            <i class="fa fa-plus"></i> 新增
+                        </a>
+                        <a class="btn btn-primary single disabled" onclick="$.operate.edit()"
+                            shiro:hasPermission="im:friendRequest:edit">
+                            <i class="fa fa-edit"></i> 修改
+                        </a>
+                        <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                            shiro:hasPermission="im:friendRequest:remove">
+                            <i class="fa fa-remove"></i> 删除
+                        </a>
+                        <a class="btn btn-warning" onclick="$.table.exportExcel()"
+                            shiro:hasPermission="im:friendRequest:export">
+                            <i class="fa fa-download"></i> 导出
+                        </a>
                     </div>
-                </form>
-            </div>
 
-            <!-- 数据展示区域 -->
-            <div class="col-sm-12 select-table table-striped">
-                <!-- 批量操作按钮 -->
-                <div class="btn-group-sm" id="toolbar">
-                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:friendRequest:add">
-                        <i class="fa fa-plus"></i> 新增
-                    </a>
-                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()"
-                        shiro:hasPermission="im:friendRequest:edit">
-                        <i class="fa fa-edit"></i> 修改
-                    </a>
-                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
-                        shiro:hasPermission="im:friendRequest:remove">
-                        <i class="fa fa-remove"></i> 删除
-                    </a>
-                    <a class="btn btn-warning" onclick="$.table.exportExcel()"
-                        shiro:hasPermission="im:friendRequest:export">
-                        <i class="fa fa-download"></i> 导出
-                    </a>
+                    <!-- 搜索状态提示 -->
+                    <div class="search-status" id="searchStatus" style="display:none;">
+                        <i class="fa fa-filter" style="color:#1c84c6;"></i>
+                        搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
+                        <a href="javascript:void(0)" onclick="clearSearch()"
+                            style="margin-left:10px; color:#1c84c6;">清除</a>
+                    </div>
+
+                    <!-- 数据表格 -->
+                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
                 </div>
-
-                <!-- 搜索状态提示 -->
-                <div class="search-status" id="searchStatus" style="display:none;">
-                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
-                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
-                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
-                </div>
-
-                <!-- 数据表格 -->
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
-    </div>
 
-    <th:block th:include="include :: footer" />
-    <script th:src="@{/js/im-common.js}"></script>
-    <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('im:friendRequest:edit') }]];
-        var removeFlag = [[${@permission.hasPermi('im:friendRequest:remove') }]];
-        var prefix = ctx + "im/friendRequest";
+        <th:block th:include="include :: footer" />
+        <script th:src="@{/js/im-common.js}"></script>
+        <script th:inline="javascript">
+            var editFlag = [[${@permission.hasPermi('im:friendRequest:edit') }]];
+            var removeFlag = [[${@permission.hasPermi('im:friendRequest:remove') }]];
+            var prefix = ctx + "im/friendRequest";
 
-        $(function () {
-            // 初始化通用功能
-            ImCommon.initPage({ tableId: '#bootstrap-table' });
-            loadStatistics();
+            $(function () {
+                // 初始化通用功能
+                ImCommon.initPage({ tableId: '#bootstrap-table' });
+                loadStatistics();
 
-            var options = {
-                url: prefix + "/list",
-                toolbar: "toolbar",
-                height: 650,
-                createUrl: prefix + "/add",
-                updateUrl: prefix + "/edit/{id}",
-                removeUrl: prefix + "/remove/{id}",
-                exportUrl: prefix + "/export",
-                modalName: "好友申请",
-                // 分页配置
-                pagination: true,
-                pageSize: 20,
-                pageList: [10, 20, 50, 100],
-                sidePagination: "server",
-                // 固定列配置
-                fixedColumns: true,
-                fixedNumber: 1,
-                fixedRightNumber: 1,
-                // 列显示/隐藏配置
-                showColumns: true,
-                showColumnsToggleAll: true,
-                // 记住列选择
-                cookie: true,
-                cookieIdTable: 'im_friendRequest_table',
-                cookieExpire: '30d',
-                // 导出配置
-                showExport: true,
-                exportDataType: 'selected',
-                exportTypes: ['excel'],
-                exportOptions: {
-                    fileName: '好友申请数据'
-                },
-                columns: [{
-                    checkbox: true
-                }, {
-                    field: 'id',
-                    title: 'ID',
-                    visible: false
-                }, {
-                    field: 'fromUserId',
-                    title: '申请人ID',
-                    width: '100'
-                }, {
-                    field: 'fromUsername',
-                    title: '申请人账号',
-                    width: '120',
-                    formatter: function (value, row, index) {
-                        return ImCommon.formatUserCard(row.fromUserId, value, row.fromAvatar);
-                    }
-                }, {
-                    field: 'toUserId',
-                    title: '接收人ID',
-                    width: '100',
-                    visible: false
-                }, {
-                    field: 'toUsername',
-                    title: '接收人',
-                    width: '120',
-                    formatter: function (value, row, index) {
-                        return value || '-';
-                    }
-                }, {
-                    field: 'message',
-                    title: '申请消息',
-                    width: '200',
-                    formatter: function (value, row, index) {
-                        if (!value) return '<span class="text-muted">-</span>';
-                        if (value.length > 30) {
-                            return value.substring(0, 30) + '...';
-                        }
-                        return value;
-                    }
-                }, {
-                    field: 'status',
-                    title: '状态',
-                    align: 'center',
-                    width: '90',
-                    formatter: function (value, row, index) {
-                        if (value === 'PENDING') { return '<span class="badge badge-warning">待处理</span>'; }
-                        if (value === 'APPROVED') { return '<span class="badge badge-success">已同意</span>'; }
-                        if (value === 'REJECTED') { return '<span class="badge badge-danger">已拒绝</span>'; }
-                        return '<span class="badge badge-default">-</span>';
-                    }
-                }, {
-                    field: 'createTime',
-                    title: '申请时间',
-                    width: '160',
-                    sortable: true,
-                    formatter: function (value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
-                }, {
-                    field: 'processTime',
-                    title: '处理时间',
-                    width: '160',
-                    formatter: function (value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
-                }, {
-                    title: '操作',
-                    align: 'center',
-                    width: '120',
-                    formatter: function (value, row, index) {
-                        var menuItems = [
-                            { text: '删除', icon: 'fa-remove', action: '$.operate.remove(\'' + row.id + '\')', permissionClass: removeFlag }
-                        ];
-
-                        var mainAction = {
-                            text: '修改',
-                            icon: 'fa-edit',
-                            action: '$.operate.edit(\'' + row.id + '\')',
-                            permissionClass: editFlag,
-                            btnClass: 'btn-success'
+                var options = {
+                    url: prefix + "/list",
+                    toolbar: "toolbar",
+                    height: 650,
+                    createUrl: prefix + "/add",
+                    updateUrl: prefix + "/edit/{id}",
+                    removeUrl: prefix + "/remove/{id}",
+                    exportUrl: prefix + "/export",
+                    modalName: "好友申请",
+                    // 默认调大添加/编辑弹窗
+                    onLoadSuccess: function () {
+                        $.operate.add = function (id) {
+                            $.modal.open("添加" + $.table._option.modalName, $.operate.addUrl(id), 800, 600);
                         };
-
-                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
-                    }
-                }],
-                responseHandler: function (res) {
-                    ImCommon.hideLoading();
-                    return ImCommon.handleTableResponse(res, '暂无好友申请数据', '#bootstrap-table');
-                },
-                onLoadError: function (status) {
-                    ImCommon.hideLoading();
-                    $.modal.msgError("数据加载失败，请稍后重试");
-                },
-                onLoadSuccess: function () {
-                    ImCommon.removeEmptyData('#bootstrap-table');
-                },
-                ajaxOptions: {
-                    beforeSend: function () {
-                        ImCommon.showLoading('.select-table');
+                        $.operate.edit = function (id) {
+                            $.modal.open("修改" + $.table._option.modalName, $.operate.editUrl(id), 800, 600);
+                        };
+                        ImCommon.removeEmptyData('#bootstrap-table');
                     },
-                    complete: function () {
+                    // 分页配置
+                    pagination: true,
+                    pageSize: 20,
+                    pageList: [10, 20, 50, 100],
+                    sidePagination: "server",
+                    // 固定列配置
+                    fixedColumns: true,
+                    fixedNumber: 1,
+                    fixedRightNumber: 1,
+                    // 列显示/隐藏配置
+                    showColumns: true,
+                    showColumnsToggleAll: true,
+                    // 记住列选择
+                    cookie: true,
+                    cookieIdTable: 'im_friendRequest_table',
+                    cookieExpire: '30d',
+                    // 导出配置
+                    showExport: true,
+                    exportDataType: 'selected',
+                    exportTypes: ['excel'],
+                    exportOptions: {
+                        fileName: '好友申请数据'
+                    },
+                    columns: [{
+                        checkbox: true
+                    }, {
+                        field: 'id',
+                        title: 'ID',
+                        visible: false
+                    }, {
+                        field: 'fromUserId',
+                        title: '申请人ID',
+                        width: '100'
+                    }, {
+                        field: 'fromUsername',
+                        title: '申请人账号',
+                        width: '120',
+                        formatter: function (value, row, index) {
+                            return ImCommon.formatUserCard(row.fromUserId, value, row.fromAvatar);
+                        }
+                    }, {
+                        field: 'toUserId',
+                        title: '接收人ID',
+                        width: '100',
+                        visible: false
+                    }, {
+                        field: 'toUsername',
+                        title: '接收人',
+                        width: '120',
+                        formatter: function (value, row, index) {
+                            return value || '-';
+                        }
+                    }, {
+                        field: 'message',
+                        title: '申请消息',
+                        width: '200',
+                        formatter: function (value, row, index) {
+                            if (!value) return '<span class="text-muted">-</span>';
+                            if (value.length > 30) {
+                                return value.substring(0, 30) + '...';
+                            }
+                            return value;
+                        }
+                    }, {
+                        field: 'status',
+                        title: '状态',
+                        align: 'center',
+                        width: '90',
+                        formatter: function (value, row, index) {
+                            if (value === 'PENDING') { return '<span class="badge badge-warning">待处理</span>'; }
+                            if (value === 'APPROVED') { return '<span class="badge badge-success">已同意</span>'; }
+                            if (value === 'REJECTED') { return '<span class="badge badge-danger">已拒绝</span>'; }
+                            return '<span class="badge badge-default">-</span>';
+                        }
+                    }, {
+                        field: 'createTime',
+                        title: '申请时间',
+                        width: '160',
+                        sortable: true,
+                        formatter: function (value, row, index) {
+                            return ImCommon.formatDateTimeWithRelative(value);
+                        }
+                    }, {
+                        field: 'processTime',
+                        title: '处理时间',
+                        width: '160',
+                        formatter: function (value, row, index) {
+                            return ImCommon.formatDateTimeWithRelative(value);
+                        }
+                    }, {
+                        title: '操作',
+                        align: 'center',
+                        width: '120',
+                        formatter: function (value, row, index) {
+                            var menuItems = [
+                                { text: '删除', icon: 'fa-remove', action: '$.operate.remove(\'' + row.id + '\')', permissionClass: removeFlag }
+                            ];
+
+                            var mainAction = {
+                                text: '修改',
+                                icon: 'fa-edit',
+                                action: '$.operate.edit(\'' + row.id + '\')',
+                                permissionClass: editFlag,
+                                btnClass: 'btn-success'
+                            };
+
+                            return ImCommon.buildActionDropdown(row, menuItems, mainAction);
+                        }
+                    }],
+                    responseHandler: function (res) {
                         ImCommon.hideLoading();
+                        return ImCommon.handleTableResponse(res, '暂无好友申请数据', '#bootstrap-table');
+                    },
+                    onLoadError: function (status) {
+                        ImCommon.hideLoading();
+                        $.modal.msgError("数据加载失败，请稍后重试");
+                    },
+                    onLoadSuccess: function () {
+                        ImCommon.removeEmptyData('#bootstrap-table');
+                    },
+                    ajaxOptions: {
+                        beforeSend: function () {
+                            ImCommon.showLoading('.select-table');
+                        },
+                        complete: function () {
+                            ImCommon.hideLoading();
+                        }
                     }
-                }
-            };
-            $.table.init(options);
-        });
-
-        /**
-         * 加载统计数据
-         */
-        function loadStatistics() {
-            var $stats = $('.stat-number');
-            $stats.html('<i class="fa fa-spinner fa-spin"></i>');
-
-            ImCommon.get(prefix + "/statistics", function (data) {
-                $('#totalCount').text(data.totalCount || 0);
-                $('#pendingCount').text(data.pendingCount || 0);
-                $('#approvedCount').text(data.approvedCount || 0);
-                $('#rejectedCount').text(data.rejectedCount || 0);
+                };
+                $.table.init(options);
             });
-        }
 
-        /**
-         * 按状态过滤
-         */
-        function filterByStatus(status) {
-            $("select[name='status']").val(status);
-            doSearch();
-        }
+            /**
+             * 加载统计数据
+             */
+            function loadStatistics() {
+                var $stats = $('.stat-number');
+                $stats.html('<i class="fa fa-spinner fa-spin"></i>');
 
-        /**
-         * 清空搜索条件
-         */
-        function clearSearch() {
-            $.form.reset();
-            $('#searchStatus').hide();
-            $.table.search();
-        }
+                ImCommon.get(prefix + "/statistics", function (data) {
+                    $('#totalCount').text(data.totalCount || 0);
+                    $('#pendingCount').text(data.pendingCount || 0);
+                    $('#approvedCount').text(data.approvedCount || 0);
+                    $('#rejectedCount').text(data.rejectedCount || 0);
+                });
+            }
 
-        /**
-         * 执行搜索
-         */
-        function doSearch() {
-            ImCommon.showSearchConditions('#friendRequest-form', '#searchStatus', 'clearSearch()');
-            $.table.search();
-        }
+            /**
+             * 按状态过滤
+             */
+            function filterByStatus(status) {
+                $("select[name='status']").val(status);
+                doSearch();
+            }
 
-        // 绑定刷新按钮同步更新统计
-        $(document).off('click', "button[name='refresh']").on('click', "button[name='refresh']", function () {
-            $.table.refresh();
-            loadStatistics();
-        });
-    </script>
+            /**
+             * 清空搜索条件
+             */
+            function clearSearch() {
+                $.form.reset();
+                $('#searchStatus').hide();
+                $.table.search();
+            }
+
+            /**
+             * 执行搜索
+             */
+            function doSearch() {
+                ImCommon.showSearchConditions('#friendRequest-form', '#searchStatus', 'clearSearch()');
+                $.table.search();
+            }
+
+            // 绑定刷新按钮同步更新统计
+            $(document).off('click', "button[name='refresh']").on('click', "button[name='refresh']", function () {
+                $.table.refresh();
+                loadStatistics();
+            });
+        </script>
 </body>
 
 </html>

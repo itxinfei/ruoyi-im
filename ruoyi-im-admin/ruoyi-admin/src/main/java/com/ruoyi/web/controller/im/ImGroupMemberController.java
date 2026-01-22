@@ -165,17 +165,6 @@ public class ImGroupMemberController extends BaseController {
     }
 
     /**
-     * 修改群组成员（表单提交方式，用于编辑页面）
-     */
-    @RequiresPermissions("im:group:member:edit")
-    @Log(title = "群组成员管理", businessType = BusinessType.UPDATE)
-    @PostMapping("/edit")
-    @ResponseBody
-    public AjaxResult edit(ImGroupMember imGroupMember) {
-        return toAjax(imGroupMemberService.updateImGroupMember(imGroupMember));
-    }
-
-    /**
      * 修改成员角色
      */
     @RequiresPermissions("im:group:member:edit")
@@ -201,11 +190,23 @@ public class ImGroupMemberController extends BaseController {
      * 设置成员禁言状态
      */
     @RequiresPermissions("im:group:member:edit")
-    @Log(title = "设置成员禁言", businessType = BusinessType.UPDATE)
-    @PutMapping("/mute")
+    @Log(title = "批量禁言成员", businessType = BusinessType.UPDATE)
+    @PostMapping("/batchMute")
     @ResponseBody
-    public AjaxResult updateMuteStatus(ImGroupMember imGroupMember) {
-        return toAjax(imGroupMemberService.updateImGroupMember(imGroupMember));
+    public AjaxResult batchMute(@RequestParam Long groupId, @RequestParam String userIds, @RequestParam Integer isMuted) {
+        if (userIds == null || userIds.isEmpty()) {
+            return AjaxResult.error("请选择要操作的成员");
+        }
+        Long[] userIdArray = Convert.toLongArray(userIds);
+        int successCount = 0;
+        for (Long userId : userIdArray) {
+            ImGroupMember member = new ImGroupMember();
+            member.setGroupId(groupId);
+            member.setUserId(userId);
+            member.setIsMuted(isMuted);
+            successCount += imGroupMemberService.updateImGroupMember(member);
+        }
+        return AjaxResult.success("成功处理 " + successCount + " 个成员");
     }
 
     /**

@@ -3,293 +3,402 @@
 
 <head>
     <th:block th:include="include :: header('IM用户管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet" />
 </head>
 
 <body class="gray-bg">
     <div class="container-div">
-        <div class="row pt-5">
-            <div class="row pt-5">
-                <!-- 1. 统计面板 (Premium Minimalist) -->
-                <div class="col-sm-12">
-                    <div class="im-stat-group">
-                        <div class="im-stat-item" onclick="filterByStatus('')">
-                            <div class="stat-header">
-                                <span class="stat-label">用户总规模</span>
-                                <div class="stat-icon-box"><i class="fa fa-users"></i></div>
+        <div class="row">
+            <!-- 统计面板 (标准 RuoYi 风格) -->
+            <div class="col-sm-12 search-collapse"
+                style="margin-bottom: 0px; padding-bottom: 0px; border: 0px; box-shadow: none;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">Total</span>
+                                <h5>用户总数</h5>
                             </div>
-                            <div class="stat-number" id="totalCount">-</div>
-                            <div class="stat-footer text-muted">系统内存量账号总数</div>
-                        </div>
-                        <div class="im-stat-item" onclick="filterByOnline('1')">
-                            <div class="stat-header">
-                                <span class="stat-label">在线用户</span>
-                                <div class="stat-icon-box" style="background: #ecfdf5; color: #10b981;"><i
-                                        class="fa fa-circle"></i></div>
+                            <div class="ibox-content">
+                                <h1 class="no-margins" id="totalCount">-</h1>
+                                <small>系统内存量账号</small>
                             </div>
-                            <div class="stat-number" id="onlineCount">-</div>
-                            <div class="stat-footer text-muted">当前实时通信连接数</div>
-                        </div>
-                        <div class="im-stat-item" onclick="filterByOnline('0')">
-                            <div class="stat-header">
-                                <span class="stat-label">离线状态</span>
-                                <div class="stat-icon-box" style="background: #f1f5f9; color: #64748b;"><i
-                                        class="fa fa-toggle-off"></i></div>
-                            </div>
-                            <div class="stat-number" id="offlineCount">-</div>
-                            <div class="stat-footer text-muted">非活跃离线用户</div>
-                        </div>
-                        <div class="im-stat-item" onclick="filterByStatus('0')">
-                            <div class="stat-header">
-                                <span class="stat-label">已停用/封禁</span>
-                                <div class="stat-icon-box" style="background: #fef2f2; color: #ef4444;"><i
-                                        class="fa fa-ban"></i></div>
-                            </div>
-                            <div class="stat-number" id="disabledCount">-</div>
-                            <div class="stat-footer text-muted">因违规或行政操作禁用的账号</div>
                         </div>
                     </div>
-                </div>
-
-                <!-- 搜索区域 -->
-                <div class="col-sm-12 search-collapse">
-                    <form id="user-form">
-                        <div class="select-list">
-                            <ul>
-                                <li>
-                                    <label>用户名：</label><input type="text" name="username" placeholder="登录账号" />
-                                </li>
-                                <li>
-                                    <label>昵称：</label><input type="text" name="nickname" placeholder="模糊搜索" />
-                                </li>
-                                <li>
-                                    <label>状态：</label>
-                                    <select name="status">
-                                        <option value="">所有</option>
-                                        <option value="1">正常</option>
-                                        <option value="0">停用</option>
-                                    </select>
-                                </li>
-                                <li>
-                                    <label>在线：</label>
-                                    <select name="isOnline">
-                                        <option value="">所有</option>
-                                        <option value="1">在线</option>
-                                        <option value="0">离线</option>
-                                    </select>
-                                </li>
-                                <li>
-                                    <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i
-                                            class="fa fa-search"></i> 搜索</a>
-                                    <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i
-                                            class="fa fa-refresh"></i> 重置</a>
-                                </li>
-                            </ul>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">Online</span>
+                                <h5>在线用户</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h1 class="no-margins text-success" id="onlineCount">-</h1>
+                                <small>实时连接数</small>
+                            </div>
                         </div>
-                    </form>
-                </div>
-
-                <!-- 数据展示区域 -->
-                <div class="col-sm-12 select-table table-striped">
-                    <!-- 工具栏 -->
-                    <div class="btn-group-sm" id="toolbar" role="group">
-                        <a class="btn btn-success" onclick="addUser()" shiro:hasPermission="im:user:add">
-                            <i class="fa fa-plus"></i> 新增
-                        </a>
-                        <a class="btn btn-primary single disabled" onclick="editUser()"
-                            shiro:hasPermission="im:user:edit">
-                            <i class="fa fa-edit"></i> 修改
-                        </a>
-                        <a class="btn btn-info single disabled" onclick="resetPwd()" shiro:hasPermission="im:user:edit">
-                            <i class="fa fa-key"></i> 重置密码
-                        </a>
-                        <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
-                            shiro:hasPermission="im:user:remove">
-                            <i class="fa fa-remove"></i> 删除
-                        </a>
                     </div>
-
-                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <span class="label label-default pull-right">Offline</span>
+                                <h5>离线用户</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h1 class="no-margins text-muted" id="offlineCount">-</h1>
+                                <small>非活跃账号</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <span class="label label-danger pull-right">Disabled</span>
+                                <h5>停用账号</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h1 class="no-margins text-danger" id="disabledCount">-</h1>
+                                <small>已封禁</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <!-- 搜索区域 -->
+            <div class="col-sm-12 search-collapse">
+                <form id="user-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                用户名：<input type="text" name="username" />
+                            </li>
+                            <li>
+                                昵称：<input type="text" name="nickname" />
+                            </li>
+                            <li>
+                                状态：
+                                <select name="status">
+                                    <option value="">所有</option>
+                                    <option value="1">正常</option>
+                                    <option value="0">停用</option>
+                                </select>
+                            </li>
+                            <li>
+                                在线：
+                                <select name="isOnline">
+                                    <option value="">所有</option>
+                                    <option value="1">在线</option>
+                                    <option value="0">离线</option>
+                                </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                        class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                        class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 数据展示区域 -->
+            <div class="col-sm-12 select-table table-striped">
+                <!-- 工具栏 -->
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-success" onclick="addUser()" shiro:hasPermission="im:user:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="editUser()" shiro:hasPermission="im:user:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-info single disabled" onclick="resetPwd()" shiro:hasPermission="im:user:edit">
+                        <i class="fa fa-key"></i> 重置密码
+                    </a>
+                    <a class="btn btn-success multiple disabled" onclick="batchEnable()"
+                        shiro:hasPermission="im:user:edit">
+                        <i class="fa fa-check"></i> 批量启用
+                    </a>
+                    <a class="btn btn-warning multiple disabled" onclick="batchDisable()"
+                        shiro:hasPermission="im:user:edit">
+                        <i class="fa fa-ban"></i> 批量停用
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                        shiro:hasPermission="im:user:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:user:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
+                </div>
+
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
         </div>
+    </div>
 
-        <th:block th:include="include :: footer" />
-        <th:block th:include="include :: bootstrap-table-export-js" />
-        <script th:src="@{/js/im-common.js?v=1.0.2}"></script>
-        <script th:inline="javascript">
-            var editFlag = [[${@permission.hasPermi('im:user:edit') }]];
-            var removeFlag = [[${@permission.hasPermi('im:user:remove') }]];
-            var prefix = ctx + "im/user";
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
+    <script th:src="@{/js/im-common.js?v=1.0.3}"></script>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('im:user:edit') }]];
+        var removeFlag = [[${@permission.hasPermi('im:user:remove') }]];
+        var prefix = ctx + "im/user";
 
-            $(function () {
-                // 初始化页面配置
-                ImCommon.initPage({ tableId: '#bootstrap-table' });
+        $(function () {
+            // 初始加载统计数据
+            loadStatistics();
+
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove/{id}",
+                exportUrl: prefix + "/export",
+                toolbar: "toolbar",
+                modalName: "用户",
+                sortName: "createTime",
+                sortOrder: "desc",
+                columns: [{
+                    checkbox: true
+                }, {
+                    field: 'avatar',
+                    title: '头像',
+                    align: 'center',
+                    width: '60',
+                    formatter: function (value, row, index) {
+                        return ImCommon.formatCircleAvatar(value, 36);
+                    }
+                }, {
+                    field: 'username',
+                    title: '登录账号',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return ImCommon.formatTextWithTooltip(value, 15);
+                    }
+                }, {
+                    field: 'nickname',
+                    title: '昵称',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return ImCommon.formatUserCard(row.id, row.username, row.avatar, row.nickname)
+                            .replace(/<img[^>]*>/, ''); // 复用 UserCard 逻辑但去掉头像，仅保留名字格式
+                    }
+                }, {
+                    field: 'status',
+                    title: '账号状态',
+                    align: 'center',
+                    width: '100',
+                    formatter: function (value, row, index) {
+                        return statusTools(row);
+                    }
+                }, {
+                    field: 'isOnline',
+                    title: '在线状态',
+                    align: 'center',
+                    width: '90',
+                    formatter: function (value, row, index) {
+                        return ImCommon.formatOnlineStatus(value); // 使用公共库格式化
+                    }
+                }, {
+                    field: 'createTime',
+                    title: '创建时间',
+                    sortable: true,
+                    width: '160',
+                    formatter: function (value) {
+                        return ImCommon.formatDateTime(value);
+                    }
+                }, {
+                    title: '操作',
+                    align: 'center',
+                    width: '180',
+                    formatter: function (value, row, index) {
+                        // 使用 ImCommon 构建标准化下拉菜单及按钮
+                        var menuItems = [
+                            { text: '重置密码', icon: 'fa-key', action: "resetPasswordById('" + row.id + "')", permissionClass: '' },
+                            { divider: true },
+                            { text: '删除账号', icon: 'fa-remove', action: "$.operate.remove('" + row.id + "')", permissionClass: removeFlag }
+                        ];
+
+                        var mainAction = {
+                            text: '修改',
+                            icon: 'fa-edit',
+                            action: "editUser('" + row.id + "')",
+                            permissionClass: editFlag
+                        };
+
+                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
+                    }
+                }]
+            };
+            $.table.init(options);
+
+            // 按钮刷新监听
+            $(document).off('click', "button[name='refresh']").on('click', "button[name='refresh']", function () {
+                $.table.refresh();
                 loadStatistics();
+            });
+        });
 
-                var options = {
-                    url: prefix + "/list",
-                    createUrl: prefix + "/add",
-                    updateUrl: prefix + "/edit/{id}",
-                    removeUrl: prefix + "/remove/{id}",
-                    exportUrl: prefix + "/export",
-                    toolbar: "toolbar",
-                    modalName: "用户",
-                    sortName: "createTime",
-                    sortOrder: "desc",
-                    columns: [{
-                        checkbox: true
-                    }, {
-                        field: 'avatar',
-                        title: '头像',
-                        align: 'center',
-                        width: '60',
-                        formatter: function (value, row, index) {
-                            return ImCommon.formatCircleAvatar(value, 36);
-                        }
-                    }, {
-                        field: 'username',
-                        title: '登录账号',
-                        sortable: true
-                    }, {
-                        field: 'nickname',
-                        title: '昵称',
-                        sortable: true
-                    }, {
-                        field: 'status',
-                        title: '账号状态',
-                        align: 'center',
-                        width: '90',
-                        formatter: function (value, row, index) {
-                            var newStatus = value == 1 ? 0 : 1;
-                            var statusText = value == 1 ? '正常' : '停用';
-                            var labelClass = value == 1 ? 'label-primary' : 'label-danger';
-                            return '<a href="javascript:void(0)" onclick="changeStatus(' + row.id + ', ' + newStatus + ')" ' +
-                                'title="点击切换状态" class="label ' + labelClass + ' badge-pill" style="text-decoration:none;">' +
-                                statusText + '</a>';
-                        }
-                    }, {
-                        field: 'isOnline',
-                        title: '在线状态',
-                        align: 'center',
-                        width: '90',
-                        formatter: function (value, row, index) {
-                            var dotClass = (value == 1) ? 'dot-online' : 'dot-offline';
-                            var text = (value == 1) ? '在线' : '离线';
-                            return '<span class="dot ' + dotClass + '"></span>' + text;
-                        }
-                    }, {
-                        field: 'createTime',
-                        title: '创建时间',
-                        sortable: true,
-                        width: '160',
-                        formatter: function (value) {
-                            return value ? value.substring(0, 16) : '-';
-                        }
-                    }, {
-                        title: '操作',
-                        align: 'center',
-                        width: '180',
-                        formatter: function (value, row, index) {
-                            var actions = [];
-                            actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="editUser(\'' + row.id + '\')"><i class="fa fa-edit"></i>修改</a>');
-                            actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="resetPasswordById(\'' + row.id + '\')"><i class="fa fa-key"></i>重置</a>');
-                            actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
-                            return actions.join(' ');
-                        }
-                    }]
-                };
-                $.table.init(options);
+        /* 状态显示与切换 - 使用 Switch 风格 */
+        function statusTools(row) {
+            if (row.status == 1) { // 正常
+                return '<div class="custom-control custom-switch custom-switch-on-success" title="点击停用">' +
+                    '<input type="checkbox" class="custom-control-input" id="status_' + row.id + '" checked onclick="changeStatus(\'' + row.id + '\', 0)">' +
+                    '<label class="custom-control-label" for="status_' + row.id + '"></label>' +
+                    '</div>';
+            } else { // 停用
+                return '<div class="custom-control custom-switch custom-switch-off-danger" title="点击启用">' +
+                    '<input type="checkbox" class="custom-control-input" id="status_' + row.id + '" onclick="changeStatus(\'' + row.id + '\', 1)">' +
+                    '<label class="custom-control-label" for="status_' + row.id + '"></label>' +
+                    '</div>';
+            }
+        }
 
-                // 按钮刷新监听
-                $(document).off('click', "button[name='refresh']").on('click', "button[name='refresh']", function () {
-                    $.table.refresh();
-                    loadStatistics();
+        /* 加载统计数据（带动画） */
+        function loadStatistics() {
+            var $stats = $('.stat-number');
+            // 首次加载显示 loading
+            if ($stats.text() === '-') {
+                $stats.html('<i class="fa fa-spinner fa-spin"></i>');
+            }
+
+            // 使用 ImCommon 的缓存加载机制
+            ImCommon.loadStatisticsWithCache(prefix + "/statistics", function (data) {
+                // 使用动画更新数字
+                ImCommon.animateStatistics({
+                    '#totalCount': data.totalCount || 0,
+                    '#onlineCount': data.onlineCount || 0,
+                    '#offlineCount': data.offlineCount || 0,
+                    '#disabledCount': data.disabledCount || 0
                 });
             });
+        }
 
-            function loadStatistics() {
-                var $stats = $('.stat-number');
-                $stats.html('<i class="fa fa-spinner fa-spin"></i>');
-                ImCommon.get(prefix + "/statistics", function (data) {
-                    $('#totalCount').text(data.totalCount || 0);
-                    $('#onlineCount').text(data.onlineCount || 0);
-                    $('#offlineCount').text(data.offlineCount || 0);
-                    $('#disabledCount').text(data.disabledCount || 0);
-                });
-            }
+        function filterByStatus(status) {
+            $('select[name="status"]').val(status);
+            doSearch();
+            ImCommon.toast('已筛选状态: ' + (status === '' ? '所有' : (status === '1' ? '正常' : '停用')), 'info');
+        }
 
-            function filterByStatus(status) {
-                $('select[name="status"]').val(status);
-                doSearch();
-            }
+        function filterByOnline(isOnline) {
+            $('select[name="isOnline"]').val(isOnline);
+            doSearch();
+            ImCommon.toast('已筛选在线状态: ' + (isOnline === '' ? '所有' : (isOnline === '1' ? '在线' : '离线')), 'info');
+        }
 
-            function filterByOnline(isOnline) {
-                $('select[name="isOnline"]').val(isOnline);
-                doSearch();
-            }
+        function doSearch() {
+            $.table.search();
+            ImCommon.toast('搜索已更新', 'success', 1500);
+        }
 
-            function doSearch() {
-                $.table.search();
-            }
+        function clearSearch() {
+            $.form.reset();
+            $.table.search();
+            ImCommon.toast('筛选条件已重置', 'info');
+        }
 
-            function clearSearch() {
-                $.form.reset();
-                $.table.search();
-            }
-
-            function resetPwd() {
+        function resetPwd(userId) {
+            var targetId = userId;
+            // 如果传入的 userId 无效（如 event 对象或为空），则尝试从表格获取
+            if ($.common.isEmpty(targetId) || (typeof targetId !== 'string' && typeof targetId !== 'number')) {
                 var selectedId = $.table.selectFirstColumns();
                 if ($.common.isEmpty(selectedId)) {
                     $.modal.alertWarning("请至少选择一条记录");
                     return;
                 }
-                resetPasswordById(selectedId);
+                targetId = selectedId;
             }
 
-            function resetPasswordById(userId) {
-                $.modal.open("重置密码", prefix + "/resetPassword/" + userId, 380, 260);
-            }
+            // 最终执行，确保 targetId 有值
+            $.modal.open("重置密码", prefix + "/resetPassword/" + targetId, 800, 600);
+        }
 
-            function addUser() {
-                $.modal.open("添加用户", prefix + "/add", 620, 440);
-            }
+        // 兼容旧的调用方式（如果有的话），指向同一个入口
+        function resetPasswordById(userId) {
+            resetPwd(userId);
+        }
 
-            function editUser(id) {
-                var url = prefix + "/edit/";
-                if ($.common.isNotEmpty(id)) {
-                    url += id;
-                } else {
-                    var selectedId = $.table.selectFirstColumns();
-                    if ($.common.isEmpty(selectedId)) {
-                        $.modal.alertWarning("请选择要修改的数据");
-                        return;
-                    }
-                    url += selectedId;
+        function addUser() {
+            $.modal.open("添加用户", prefix + "/add", 800, 600);
+        }
+
+        function editUser(id) {
+            var url = prefix + "/edit/";
+            // 严谨判断 id 是否有效 (ID 必须是字符串或数字，且排除 event 对象)
+            if ($.common.isNotEmpty(id) && (typeof id === 'string' || typeof id === 'number')) {
+                url += id;
+            } else {
+                var selectedId = $.table.selectFirstColumns();
+                if ($.common.isEmpty(selectedId)) {
+                    $.modal.alertWarning("请选择要修改的数据");
+                    return;
                 }
-                $.modal.open("修改用户", url, 550, 400);
+                url += selectedId;
             }
+            $.modal.open("修改用户", url, 800, 600);
+        }
 
-            function changeStatus(userId, status) {
-                var msg = status == 1 ? "启用" : "停用";
-                $.modal.confirm("确认要" + msg + "该用户吗？", function () {
-                    $.ajax({
-                        url: prefix + "/changeStatus",
-                        type: "PUT",
-                        contentType: "application/json",
-                        data: JSON.stringify({ "id": userId, "status": status }),
-                        success: function (result) {
-                            if (result.code == 0) {
-                                $.modal.msgSuccess(result.msg);
-                                $.table.refresh();
-                            } else {
-                                $.modal.msgError(result.msg);
-                            }
+        /* 单条状态修改 */
+        function changeStatus(userId, status) {
+            var msg = status == 1 ? "启用" : "停用";
+            $.modal.confirm("确认要" + msg + "该用户吗？", function () {
+                $.ajax({
+                    url: prefix + "/changeStatus",
+                    type: "PUT",
+                    contentType: "application/json",
+                    data: JSON.stringify({ "id": userId, "status": status }),
+                    success: function (result) {
+                        if (result.code == 0) {
+                            ImCommon.toast(result.msg, 'success');
+                            $.table.refresh();
+                            loadStatistics(); // 状态改变后刷新统计
+                        } else {
+                            $.modal.msgError(result.msg);
+                            $.table.refresh();
                         }
-                    });
+                    }
                 });
-            }
-        </script>
+            }, function () {
+                $.table.refresh();
+            });
+        }
+
+        /* 批量启用 */
+        function batchEnable() {
+            var userIds = $.table.selectColumns("id");
+            if (!ImCommon.validateBatchOperation(userIds, 1)) return;
+            $.modal.confirm("确认要批量启用选中的 " + userIds.length + " 个用户吗？", function () {
+                ImCommon.BatchProgress.show('#toolbar', { total: userIds.length, current: 0 });
+                $.operate.post(prefix + "/batchUpdateStatus", { "userIds": userIds.join(","), "status": 1 }, function (result) {
+                    ImCommon.BatchProgress.complete('#toolbar', '批量启用完成');
+                    loadStatistics();
+                });
+            });
+        }
+
+        /* 批量停用 */
+        function batchDisable() {
+            var userIds = $.table.selectColumns("id");
+            if (!ImCommon.validateBatchOperation(userIds, 1)) return;
+            $.modal.confirm("确认要批量停用选中的 " + userIds.length + " 个用户吗？此操作将导致这些用户无法登录。", function () {
+                ImCommon.BatchProgress.show('#toolbar', { total: userIds.length, current: 0 });
+                $.operate.post(prefix + "/batchUpdateStatus", { "userIds": userIds.join(","), "status": 0 }, function (result) {
+                    ImCommon.BatchProgress.complete('#toolbar', '批量停用完成');
+                    loadStatistics();
+                });
+            });
+        }
+
+        // 覆盖默认的添加方法，使用合适的弹窗大小
+        $.operate.add = function (id) {
+            $.modal.open("添加" + $.table._option.modalName, $.operate.addUrl(id), 800, 600);
+        };
+
+        // 覆盖默认的编辑方法，使用合适的弹窗大小
+        $.operate.edit = function (id) {
+            $.modal.open("修改" + $.table._option.modalName, $.operate.editUrl(id), 800, 600);
+        };
+    </script>
 </body>
 
 </html>

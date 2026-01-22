@@ -281,7 +281,7 @@ public class ImMessageController extends BaseController {
      */
     @RequiresPermissions("im:message:edit")
     @Log(title = "撤回消息", businessType = BusinessType.UPDATE)
-    @PutMapping("/{id}/revoke")
+    @PostMapping("/revoke/{id}")
     @ResponseBody
     public AjaxResult revoke(@PathVariable("id") Long messageId) {
         return toAjax(imMessageService.revokeMessage(messageId));

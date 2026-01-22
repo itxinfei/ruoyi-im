@@ -175,7 +175,16 @@
                         actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-trash"></i> 删</a>');
                         return actions.join(' ');
                     }
-                }]
+                }],
+                onLoadSuccess: function () {
+                    // 默认调大添加/编辑弹窗
+                    $.operate.add = function (id) {
+                        $.modal.open("添加" + $.table._option.modalName, $.operate.addUrl(id), 800, 600);
+                    };
+                    $.operate.edit = function (id) {
+                        $.modal.open("修改" + $.table._option.modalName, $.operate.editUrl(id), 800, 600);
+                    };
+                }
             };
             $.table.init(options);
         });
@@ -200,11 +209,21 @@
 
         function batchRevoke() {
             var ids = $.table.selectColumns("id");
+            if (!ImCommon.validateBatchOperation(ids, 1)) return;
             $.modal.confirm("确认要批量撤回选中的 " + ids.length + " 条消息吗？", function () {
-                // 后端实现逻辑略，同单条
-                $.modal.msgSuccess("批量指令已下发");
+                $.operate.post(prefix + "/batchRevoke", { "messageIds": ids.join(",") }, function (res) {
+                    if (res.code == 0) $.table.refresh();
+                });
             });
         }
+
+        // 默认调大添加/编辑弹窗
+        $.operate.add = function (id) {
+            $.modal.open("添加" + $.table._option.modalName, $.operate.addUrl(id), 800, 600);
+        };
+        $.operate.edit = function (id) {
+            $.modal.open("修改" + $.table._option.modalName, $.operate.editUrl(id), 800, 600);
+        };
     </script>
 </body>
 

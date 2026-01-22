@@ -1,516 +1,544 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head>
     <th:block th:include="include :: header('群组成员管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-admin.css}" rel="stylesheet" />
 </head>
+
 <body class="gray-bg">
     <div class="container-div">
         <div class="row" style="padding-top: 6px;">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-primary">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">成员总数</div>
-                            <i class="fa fa-users stat-icon"></i>
+            <div class="row pt-5">
+                <!-- 1. 统计面板 (Premium Minimalist) -->
+                <div class="col-sm-12">
+                    <div class="im-stat-group">
+                        <div class="im-stat-item" onclick="$.table.search()">
+                            <div class="stat-header">
+                                <span class="stat-label">成员总基数</span>
+                                <div class="stat-icon-box"><i class="fa fa-users"></i></div>
+                            </div>
+                            <div class="stat-number" id="totalCount">-</div>
+                            <div class="stat-footer text-muted">所有群组内的累计成员数</div>
                         </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-success">
-                            <div class="stat-number" id="ownerCount">0</div>
-                            <div class="stat-label">群主</div>
-                            <i class="fa fa-user-plus stat-icon"></i>
+                        <div class="im-stat-item" onclick="$('select[name=\'role\']').val('OWNER');doSearch()">
+                            <div class="stat-header">
+                                <span class="stat-label">核心群主</span>
+                                <div class="stat-icon-box" style="background: #fef2f2; color: #ef4444;"><i
+                                        class="fa fa-user-plus"></i></div>
+                            </div>
+                            <div class="stat-number" id="ownerCount">-</div>
+                            <div class="stat-footer text-muted">拥有频道最高权限的所有权人</div>
                         </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-warning">
-                            <div class="stat-number" id="adminCount">0</div>
-                            <div class="stat-label">管理员</div>
-                            <i class="fa fa-user-md stat-icon"></i>
+                        <div class="im-stat-item" onclick="$('select[name=\'role\']').val('ADMIN');doSearch()">
+                            <div class="stat-header">
+                                <span class="stat-label">职能管理员</span>
+                                <div class="stat-icon-box" style="background: #fff7ed; color: #f59e0b;"><i
+                                        class="fa fa-user-md"></i></div>
+                            </div>
+                            <div class="stat-number" id="adminCount">-</div>
+                            <div class="stat-footer text-muted">承担日常运维与禁言权限的人员</div>
                         </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-danger">
-                            <div class="stat-number" id="mutedCount">0</div>
-                            <div class="stat-label">已禁言</div>
-                            <i class="fa fa-ban stat-icon"></i>
+                        <div class="im-stat-item" onclick="$('select[name=\'isMuted\']').val('1');doSearch()">
+                            <div class="stat-header">
+                                <span class="stat-label">受限禁言中</span>
+                                <div class="stat-icon-box" style="background: #f1f5f9; color: #64748b;"><i
+                                        class="fa fa-ban"></i></div>
+                            </div>
+                            <div class="stat-number" id="mutedCount">-</div>
+                            <div class="stat-footer text-muted">当前处于言论管控状态的成员</div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
-                <form id="member-form">
-                    <div class="select-list">
-                        <ul>
-                            <li>
-                                <label class="input-label">群组ID：</label><input type="text" name="groupId" placeholder="请输入群组ID"/>
-                            </li>
-                            <li>
-                                <label class="input-label">用户昵称：</label><input type="text" name="userNickname" placeholder="请输入用户昵称"/>
-                            </li>
-                            <li>
-                                <label class="input-label">角色：</label><select name="role">
-                                    <option value="">所有</option>
-                                    <option value="OWNER">群主</option>
-                                    <option value="ADMIN">管理员</option>
-                                    <option value="MEMBER">普通成员</option>
-                                </select>
-                            </li>
-                            <li>
-                                <label class="input-label">是否禁言：</label><select name="isMuted">
-                                    <option value="">所有</option>
-                                    <option value="0">否</option>
-                                    <option value="1">是</option>
-                                </select>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                                <a class="btn btn-info btn-rounded btn-sm" onclick="manualRefresh()"><i class="fa fa-sync"></i>&nbsp;刷新</a>
-                            </li>
-                        </ul>
+                <!-- 搜索区域 -->
+                <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
+                    <form id="member-form">
+                        <div class="select-list">
+                            <ul>
+                                <li>
+                                    <label class="input-label">群组ID：</label><input type="text" name="groupId"
+                                        placeholder="请输入群组ID" />
+                                </li>
+                                <li>
+                                    <label class="input-label">用户昵称：</label><input type="text" name="userNickname"
+                                        placeholder="请输入用户昵称" />
+                                </li>
+                                <li>
+                                    <label class="input-label">角色：</label><select name="role">
+                                        <option value="">所有</option>
+                                        <option value="OWNER">群主</option>
+                                        <option value="ADMIN">管理员</option>
+                                        <option value="MEMBER">普通成员</option>
+                                    </select>
+                                </li>
+                                <li>
+                                    <label class="input-label">是否禁言：</label><select name="isMuted">
+                                        <option value="">所有</option>
+                                        <option value="0">否</option>
+                                        <option value="1">是</option>
+                                    </select>
+                                </li>
+                                <li>
+                                    <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i
+                                            class="fa fa-search"></i>&nbsp;搜索</a>
+                                    <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i
+                                            class="fa fa-refresh"></i>&nbsp;重置</a>
+                                    <a class="btn btn-info btn-rounded btn-sm" onclick="manualRefresh()"><i
+                                            class="fa fa-sync"></i>&nbsp;刷新</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 数据展示区域 -->
+                <div class="col-sm-12 select-table table-striped">
+                    <!-- 批量操作按钮 -->
+                    <div class="btn-group-sm" id="toolbar">
+                        <a class="btn btn-success" onclick="addMember()" shiro:hasPermission="im:group:member:add">
+                            <i class="fa fa-plus"></i> 添加成员
+                        </a>
+                        <a class="btn btn-primary single disabled" onclick="editRole()"
+                            shiro:hasPermission="im:group:member:edit">
+                            <i class="fa fa-edit"></i> 修改角色
+                        </a>
+                        <a class="btn btn-warning single disabled" onclick="toggleMute()"
+                            shiro:hasPermission="im:group:member:edit">
+                            <i class="fa fa-ban"></i> 禁言/解禁
+                        </a>
+                        <a class="btn btn-info multiple disabled" onclick="batchMute()"
+                            shiro:hasPermission="im:group:member:edit">
+                            <i class="fa fa-ban"></i> 批量禁言
+                        </a>
+                        <a class="btn btn-success multiple disabled" onclick="batchUnmute()"
+                            shiro:hasPermission="im:group:member:edit">
+                            <i class="fa fa-check-circle"></i> 批量解禁
+                        </a>
+                        <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                            shiro:hasPermission="im:group:member:remove">
+                            <i class="fa fa-remove"></i> 移除成员
+                        </a>
+                        <a class="btn btn-warning" onclick="$.table.exportExcel()"
+                            shiro:hasPermission="im:group:member:export">
+                            <i class="fa fa-download"></i> 导出
+                        </a>
                     </div>
-                </form>
-            </div>
 
-            <!-- 数据展示区域 -->
-            <div class="col-sm-12 select-table table-striped">
-                <!-- 批量操作按钮 -->
-                <div class="btn-group-sm" id="toolbar">
-                    <a class="btn btn-success" onclick="addMember()" shiro:hasPermission="im:group:member:add">
-                        <i class="fa fa-plus"></i> 添加成员
-                    </a>
-                    <a class="btn btn-primary single disabled" onclick="editRole()" shiro:hasPermission="im:group:member:edit">
-                        <i class="fa fa-edit"></i> 修改角色
-                    </a>
-                    <a class="btn btn-warning single disabled" onclick="toggleMute()" shiro:hasPermission="im:group:member:edit">
-                        <i class="fa fa-ban"></i> 禁言/解禁
-                    </a>
-                    <a class="btn btn-info multiple disabled" onclick="batchMute()" shiro:hasPermission="im:group:member:edit">
-                        <i class="fa fa-ban"></i> 批量禁言
-                    </a>
-                    <a class="btn btn-success multiple disabled" onclick="batchUnmute()" shiro:hasPermission="im:group:member:edit">
-                        <i class="fa fa-check-circle"></i> 批量解禁
-                    </a>
-                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:member:remove">
-                        <i class="fa fa-remove"></i> 移除成员
-                    </a>
-                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:group:member:export">
-                        <i class="fa fa-download"></i> 导出
-                    </a>
+                    <!-- 搜索状态提示 -->
+                    <div class="search-status" id="searchStatus" style="display:none;">
+                        <i class="fa fa-filter" style="color:#1c84c6;"></i>
+                        搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
+                        <a href="javascript:void(0)" onclick="clearSearch()"
+                            style="margin-left:10px; color:#1c84c6;">清除</a>
+                    </div>
+
+                    <!-- 数据表格 -->
+                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
                 </div>
-
-                <!-- 搜索状态提示 -->
-                <div class="search-status" id="searchStatus" style="display:none;">
-                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
-                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
-                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
-                </div>
-
-                <!-- 数据表格 -->
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
-    </div>
 
-    <th:block th:include="include :: footer" />
-    <th:block th:include="include :: bootstrap-table-export-js" />
-    <script th:src="@{/js/im-common.js}"></script>
-    <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('im:group:member:edit')}]];
-        var removeFlag = [[${@permission.hasPermi('im:group:member:remove')}]];
-        var prefix = ctx + "im/member";
+        <th:block th:include="include :: footer" />
+        <th:block th:include="include :: bootstrap-table-export-js" />
+        <script th:src="@{/js/im-common.js}"></script>
+        <script th:inline="javascript">
+            var editFlag = [[${@permission.hasPermi('im:group:member:edit') }]];
+            var removeFlag = [[${@permission.hasPermi('im:group:member:remove') }]];
+            var prefix = ctx + "im/member";
 
-        $(function() {
-            loadStatistics();
+            $(function () {
+                loadStatistics();
 
-            var options = {
-                url: prefix + "/list",
-                toolbar: "toolbar",
-                height: 650,
-                createUrl: prefix + "/add",
-                updateUrl: prefix + "/edit/{id}",
-                removeUrl: prefix + "/remove/{id}",
-                exportUrl: prefix + "/export",
-                modalName: "群组成员",
-                // 分页配置
-                pagination: true,
-                pageSize: 20,
-                pageList: [10, 20, 50, 100],
-                sidePagination: "server",
-                // 固定列配置
-                fixedColumns: true,
-                fixedNumber: 1,
-                fixedRightNumber: 1,
-                // 列显示/隐藏配置
-                showColumns: true,
-                showColumnsToggleAll: true,
-                // 记住列选择
-                cookie: true,
-                cookieIdTable: 'im_group_member_table',
-                cookieExpire: '30d',
-                // 导出配置
-                showExport: true,
-                exportDataType: 'all',
-                exportTypes: ['excel'],
-                exportOptions: {
-                    fileName: '群组成员数据'
-                },
-                columns: [{
-                    checkbox: true
-                }, {
-                    field: 'id',
-                    title: 'ID',
-                    visible: false
-                }, {
-                    field: 'groupId',
-                    title: '群组ID',
-                    visible: false
-                }, {
-                    field: 'groupName',
-                    title: '群组名称',
-                    formatter: function(value, row, index) {
-                        return '<span class="text-primary"><i class="fa fa-users"></i> ' + (value || '-') + '</span>';
-                    }
-                }, {
-                    field: 'userId',
-                    title: '用户ID',
-                    visible: false
-                }, {
-                    field: 'userNickname',
-                    title: '用户昵称',
-                    formatter: function(value, row, index) {
-                        return value || '-';
-                    }
-                }, {
-                    field: 'userName',
-                    title: '用户名',
-                    visible: false
-                }, {
-                    field: 'nickname',
-                    title: '群昵称',
-                    formatter: function(value, row, index) {
-                        return value || '-';
-                    }
-                }, {
-                    field: 'role',
-                    title: '角色',
-                    align: 'center',
-                    width: '100',
-                    formatter: function(value, row, index) {
-                        if (value === 'OWNER') {
-                            return '<span class="badge badge-danger">群主</span>';
-                        } else if (value === 'ADMIN') {
-                            return '<span class="badge badge-warning">管理员</span>';
-                        } else {
-                            return '<span class="badge badge-info">成员</span>';
-                        }
-                    }
-                }, {
-                    field: 'isMuted',
-                    title: '禁言状态',
-                    align: 'center',
-                    width: '100',
-                    formatter: function(value, row, index) {
-                        if (value == 1) {
-                            return '<span class="badge badge-warning">已禁言</span>';
-                        } else {
-                            return '<span class="badge badge-success">正常</span>';
-                        }
-                    }
-                }, {
-                    field: 'userMobile',
-                    title: '手机号',
-                    formatter: function(value, row, index) {
-                        return value || '-';
-                    }
-                }, {
-                    field: 'createTime',
-                    title: '加入时间',
-                    width: '160',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
-                }, {
-                    title: '操作',
-                    align: 'center',
-                    width: '180',
-                    formatter: function(value, row, index) {
-                        var menuItems = [
-                            { text: '修改角色', icon: 'fa-edit', action: 'changeRole(' + row.id + ', \'' + row.role + '\', ' + row.groupId + ', ' + row.userId + ')', permissionClass: editFlag },
-                            { divider: true },
-                            { text: '移除', icon: 'fa-remove', action: 'removeMember(' + row.groupId + ', ' + row.userId + ')', permissionClass: removeFlag }
-                        ];
-
-                        var mainAction = {
-                            text: '编辑',
-                            icon: 'fa-edit',
-                            action: '$.operate.edit(row.id)',
-                            permissionClass: editFlag,
-                            btnClass: 'btn-success'
+                var options = {
+                    url: prefix + "/list",
+                    toolbar: "toolbar",
+                    height: 650,
+                    createUrl: prefix + "/add",
+                    updateUrl: prefix + "/edit/{id}",
+                    removeUrl: prefix + "/remove/{id}",
+                    exportUrl: prefix + "/export",
+                    modalName: "群组成员",
+                    // 默认调大添加/编辑弹窗
+                    onLoadSuccess: function () {
+                        $.operate.add = function (id) {
+                            $.modal.open("添加" + $.table._option.modalName, $.operate.addUrl(id), 800, 600);
                         };
-
-                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
-                    }
-                }],
-                responseHandler: function(res) {
-                    ImCommon.hideLoading();
-                    return ImCommon.handleTableResponse(res, '暂无成员数据', '#bootstrap-table');
-                },
-                onLoadError: function(status) {
-                    ImCommon.hideLoading();
-                    $.modal.msgError("数据加载失败，请稍后重试");
-                },
-                onLoadSuccess: function() {
-                    ImCommon.removeEmptyData('#bootstrap-table');
-                },
-                ajaxOptions: {
-                    beforeSend: function() {
-                        ImCommon.showLoading('.select-table');
+                        $.operate.edit = function (id) {
+                            $.modal.open("修改" + $.table._option.modalName, $.operate.editUrl(id), 800, 600);
+                        };
+                        ImCommon.removeEmptyData('#bootstrap-table');
                     },
-                    complete: function() {
+                    // 固定列配置
+                    fixedColumns: true,
+                    fixedNumber: 1,
+                    fixedRightNumber: 1,
+                    // 列显示/隐藏配置
+                    showColumns: true,
+                    showColumnsToggleAll: true,
+                    // 记住列选择
+                    cookie: true,
+                    cookieIdTable: 'im_group_member_table',
+                    cookieExpire: '30d',
+                    // 导出配置
+                    showExport: true,
+                    exportDataType: 'all',
+                    exportTypes: ['excel'],
+                    exportOptions: {
+                        fileName: '群组成员数据'
+                    },
+                    columns: [{
+                        checkbox: true
+                    }, {
+                        field: 'id',
+                        title: 'ID',
+                        visible: false
+                    }, {
+                        field: 'groupId',
+                        title: '群组ID',
+                        visible: false
+                    }, {
+                        field: 'groupName',
+                        title: '群组名称',
+                        formatter: function (value, row, index) {
+                            return '<span class="text-primary"><i class="fa fa-users"></i> ' + (value || '-') + '</span>';
+                        }
+                    }, {
+                        field: 'userId',
+                        title: '用户ID',
+                        visible: false
+                    }, {
+                        field: 'userNickname',
+                        title: '用户昵称',
+                        formatter: function (value, row, index) {
+                            return value || '-';
+                        }
+                    }, {
+                        field: 'userName',
+                        title: '用户名',
+                        visible: false
+                    }, {
+                        field: 'nickname',
+                        title: '群昵称',
+                        formatter: function (value, row, index) {
+                            return value || '-';
+                        }
+                    }, {
+                        field: 'role',
+                        title: '角色',
+                        align: 'center',
+                        width: '100',
+                        formatter: function (value, row, index) {
+                            if (value === 'OWNER') {
+                                return '<span class="badge badge-danger">群主</span>';
+                            } else if (value === 'ADMIN') {
+                                return '<span class="badge badge-warning">管理员</span>';
+                            } else {
+                                return '<span class="badge badge-info">成员</span>';
+                            }
+                        }
+                    }, {
+                        field: 'isMuted',
+                        title: '禁言状态',
+                        align: 'center',
+                        width: '100',
+                        formatter: function (value, row, index) {
+                            if (value == 1) {
+                                return '<span class="badge badge-warning">已禁言</span>';
+                            } else {
+                                return '<span class="badge badge-success">正常</span>';
+                            }
+                        }
+                    }, {
+                        field: 'userMobile',
+                        title: '手机号',
+                        formatter: function (value, row, index) {
+                            return value || '-';
+                        }
+                    }, {
+                        field: 'createTime',
+                        title: '加入时间',
+                        width: '160',
+                        sortable: true,
+                        formatter: function (value, row, index) {
+                            return ImCommon.formatDateTimeWithRelative(value);
+                        }
+                    }, {
+                        title: '操作',
+                        align: 'center',
+                        width: '180',
+                        formatter: function (value, row, index) {
+                            var menuItems = [
+                                { text: '修改角色', icon: 'fa-edit', action: 'changeRole(' + row.id + ', \'' + row.role + '\', ' + row.groupId + ', ' + row.userId + ')', permissionClass: editFlag },
+                                { divider: true },
+                                { text: '移除', icon: 'fa-remove', action: 'removeMember(' + row.groupId + ', ' + row.userId + ')', permissionClass: removeFlag }
+                            ];
+
+                            var mainAction = {
+                                text: '编辑',
+                                icon: 'fa-edit',
+                                action: '$.operate.edit(row.id)',
+                                permissionClass: editFlag,
+                                btnClass: 'btn-success'
+                            };
+
+                            return ImCommon.buildActionDropdown(row, menuItems, mainAction);
+                        }
+                    }],
+                    responseHandler: function (res) {
                         ImCommon.hideLoading();
+                        return ImCommon.handleTableResponse(res, '暂无成员数据', '#bootstrap-table');
+                    },
+                    onLoadError: function (status) {
+                        ImCommon.hideLoading();
+                        $.modal.msgError("数据加载失败，请稍后重试");
+                    },
+                    onLoadSuccess: function () {
+                        ImCommon.removeEmptyData('#bootstrap-table');
+                    },
+                    ajaxOptions: {
+                        beforeSend: function () {
+                            ImCommon.showLoading('.select-table');
+                        },
+                        complete: function () {
+                            ImCommon.hideLoading();
+                        }
                     }
-                }
-            };
-            $.table.init(options);
-        });
-
-        /**
-         * 加载统计数据
-         */
-        function loadStatistics() {
-            $.ajax({
-                url: prefix + "/statistics",
-                type: 'GET',
-                success: function(result) {
-                    if (result.code == 0) {
-                        var data = result.data || {};
-                        $("#totalCount").text(data.totalCount || 0);
-                        $("#ownerCount").text(data.ownerCount || 0);
-                        $("#adminCount").text(data.adminCount || 0);
-                        $("#mutedCount").text(data.mutedCount || 0);
-                    }
-                },
-                error: function() {
-                    $.modal.msgError("加载统计数据失败");
-                }
-            });
-        }
-
-        /**
-         * 手动刷新
-         */
-        function manualRefresh() {
-            $.modal.msg("正在刷新数据...", {icon: 16, shade: 0.3, time: 0});
-            $.table.refresh();
-            loadStatistics();
-            setTimeout(function() {
-                layer.closeAll();
-                $.modal.msgSuccess("刷新成功");
-            }, 500);
-        }
-
-        /**
-         * 批量禁言
-         */
-        function batchMute() {
-            var rows = $.table.selectColumns("userId");
-            if (!ImCommon.validateBatchOperation(rows, 1)) {
-                return;
-            }
-            var groupIds = $.table.selectColumns("groupId");
-            if (!groupIds[0]) {
-                $.modal.alertWarning("未找到群组信息");
-                return;
-            }
-
-            $.modal.confirm("确定要禁言选中的 " + rows.length + " 个成员吗?", function() {
-                var data = {
-                    groupId: groupIds[0],
-                    userIds: rows,
-                    isMuted: 1
                 };
-                $.operate.post(prefix + "/batchMute", data);
+                $.table.init(options);
             });
-        }
 
-        /**
-         * 批量解禁
-         */
-        function batchUnmute() {
-            var rows = $.table.selectColumns("userId");
-            if (!ImCommon.validateBatchOperation(rows, 1)) {
-                return;
-            }
-            var groupIds = $.table.selectColumns("groupId");
-            if (!groupIds[0]) {
-                $.modal.alertWarning("未找到群组信息");
-                return;
-            }
-
-            $.modal.confirm("确定要解除禁言选中的 " + rows.length + " 个成员吗?", function() {
-                var data = {
-                    groupId: groupIds[0],
-                    userIds: rows,
-                    isMuted: 0
-                };
-                $.operate.post(prefix + "/batchMute", data);
-            });
-        }
-
-        /**
-         * 添加成员
-         */
-        function addMember() {
-            var url = prefix + "/add";
-            $.modal.open("添加群组成员", url, 550, 400);
-        }
-
-        /**
-         * 修改角色
-         */
-        function editRole() {
-            var rows = $.table.selectFirstColumns();
-            if (!ImCommon.validateBatchOperation(rows, 1)) {
-                return;
-            }
-            var row = $.table.selectFirstRows()[0];
-            if (row.id) {
-                changeRole(row.id, row.role, row.groupId, row.userId);
-            } else {
-                $.modal.alertWarning("请选择有效的记录");
-            }
-        }
-
-        /**
-         * 修改角色
-         */
-        function changeRole(id, currentRole, groupId, userId) {
-            var roles = ['OWNER', 'ADMIN', 'MEMBER'];
-            var roleNames = {'OWNER': '群主', 'ADMIN': '管理员', 'MEMBER': '普通成员'};
-            var roleColors = {'OWNER': 'btn-danger', 'ADMIN': 'btn-warning', 'MEMBER': 'btn-primary'};
-            var roleIcons = {'OWNER': 'fa-crown', 'ADMIN': 'fa-shield', 'MEMBER': 'fa-user'};
-
-            // 显示选择对话框
-            top.layer.open({
-                type: 1,
-                title: '修改成员角色',
-                area: ['480px', '260px'],
-                content: '<div style="padding: 25px 30px 20px;">' +
-                    '<p style="margin-bottom: 25px; font-size: 14px; text-align: center;">请选择新角色：</p>' +
-                    '<div style="display: flex; justify-content: center; gap: 12px;">' +
-                    '<button class="btn ' + (currentRole === 'OWNER' ? 'btn-default' : 'btn-danger') + '" id="btnOwner" style="padding: 10px 20px; border-radius: 4px;' + (currentRole === 'OWNER' ? 'opacity:0.5;cursor:not-allowed;' : '') + '">' +
-                    '<i class="fa fa-crown"></i> 群主' +
-                    '</button>' +
-                    '<button class="btn ' + (currentRole === 'ADMIN' ? 'btn-default' : 'btn-warning') + '" id="btnAdmin" style="padding: 10px 20px; border-radius: 4px;' + (currentRole === 'ADMIN' ? 'opacity:0.5;cursor:not-allowed;' : '') + '">' +
-                    '<i class="fa fa-shield"></i> 管理员' +
-                    '</button>' +
-                    '<button class="btn ' + (currentRole === 'MEMBER' ? 'btn-default' : 'btn-primary') + '" id="btnMember" style="padding: 10px 20px; border-radius: 4px;' + (currentRole === 'MEMBER' ? 'opacity:0.5;cursor:not-allowed;' : '') + '">' +
-                    '<i class="fa fa-user"></i> 普通成员' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>',
-                btn: ['取消'],
-                yes: function(index) {
-                    top.layer.close(index);
-                },
-                success: function(layero, index) {
-                    // 使用 layero 查找按钮并绑定事件（跳过当前角色）
-                    if (currentRole !== 'OWNER') {
-                        layero.find('#btnOwner').on('click', function() {
-                            top.layer.close(index);
-                            $.modal.confirm("确定要将该成员的角色修改为【群主】吗？", function() {
-                                $.operate.post(prefix + "/role", {groupId: groupId, userId: userId, role: 'OWNER'});
-                            });
-                        });
-                    }
-                    if (currentRole !== 'ADMIN') {
-                        layero.find('#btnAdmin').on('click', function() {
-                            top.layer.close(index);
-                            $.modal.confirm("确定要将该成员的角色修改为【管理员】吗？", function() {
-                                $.operate.post(prefix + "/role", {groupId: groupId, userId: userId, role: 'ADMIN'});
-                            });
-                        });
-                    }
-                    if (currentRole !== 'MEMBER') {
-                        layero.find('#btnMember').on('click', function() {
-                            top.layer.close(index);
-                            $.modal.confirm("确定要将该成员的角色修改为【普通成员】吗？", function() {
-                                $.operate.post(prefix + "/role", {groupId: groupId, userId: userId, role: 'MEMBER'});
-                            });
-                        });
-                    }
-                }
-            });
-        }
-
-        /**
-         * 禁言/解禁
-         */
-        function toggleMute() {
-            var rows = $.table.selectFirstColumns();
-            if (!ImCommon.validateBatchOperation(rows, 1)) {
-                return;
-            }
-            var row = $.table.selectFirstRows()[0];
-            if (!row.id) {
-                $.modal.alertWarning("请选择有效的记录");
-                return;
-            }
-            var newMuteStatus = row.isMuted == 1 ? 0 : 1;
-            $.modal.confirm("确定要" + (newMuteStatus == 1 ? "禁言" : "解除禁言") + "该成员吗？", function() {
-                var data = {id: row.id, groupId: row.groupId, userId: row.userId, isMuted: newMuteStatus};
-                $.operate.post(prefix + "/mute", data);
-            });
-        }
-
-        /**
-         * 移除成员
-         */
-        function removeMember(groupId, userId) {
-            $.modal.confirm("确定要移除该成员吗？", function() {
+            /**
+             * 加载统计数据
+             */
+            function loadStatistics() {
                 $.ajax({
-                    url: prefix + "/remove",
-                    type: 'post',
-                    data: {groupId: groupId, userId: userId},
-                    success: function(result) {
+                    url: prefix + "/statistics",
+                    type: 'GET',
+                    success: function (result) {
                         if (result.code == 0) {
-                            $.modal.msgSuccess("移除成功");
-                            $.table.refresh();
-                            loadStatistics();
-                        } else {
-                            $.modal.msgError(result.msg || "移除失败");
+                            var data = result.data || {};
+                            $("#totalCount").text(data.totalCount || 0);
+                            $("#ownerCount").text(data.ownerCount || 0);
+                            $("#adminCount").text(data.adminCount || 0);
+                            $("#mutedCount").text(data.mutedCount || 0);
                         }
                     },
-                    error: function() {
-                        $.modal.msgError("网络请求失败");
+                    error: function () {
+                        $.modal.msgError("加载统计数据失败");
                     }
                 });
-            });
-        }
+            }
 
-        /**
-         * 清空搜索条件
-         */
-        function clearSearch() {
-            $.form.reset();
-            $('#searchStatus').hide();
-            $.table.search();
-        }
+            /**
+             * 手动刷新
+             */
+            function manualRefresh() {
+                $.modal.msg("正在刷新数据...", { icon: 16, shade: 0.3, time: 0 });
+                $.table.refresh();
+                loadStatistics();
+                setTimeout(function () {
+                    layer.closeAll();
+                    $.modal.msgSuccess("刷新成功");
+                }, 500);
+            }
 
-        /**
-         * 执行搜索
-         */
-        function doSearch() {
-            ImCommon.showSearchConditions('#member-form', '#searchStatus', 'clearSearch()');
-            $.table.search();
-        }
-    </script>
+            /**
+             * 批量禁言
+             */
+            function batchMute() {
+                var rows = $.table.selectColumns("userId");
+                if (!ImCommon.validateBatchOperation(rows, 1)) {
+                    return;
+                }
+                var groupIds = $.table.selectColumns("groupId");
+                if (!groupIds[0]) {
+                    $.modal.alertWarning("未找到群组信息");
+                    return;
+                }
+
+                $.modal.confirm("确定要禁言选中的 " + rows.length + " 个成员吗?", function () {
+                    var data = {
+                        groupId: groupIds[0],
+                        userIds: rows,
+                        isMuted: 1
+                    };
+                    $.operate.post(prefix + "/batchMute", data);
+                });
+            }
+
+            /**
+             * 批量解禁
+             */
+            function batchUnmute() {
+                var rows = $.table.selectColumns("userId");
+                if (!ImCommon.validateBatchOperation(rows, 1)) {
+                    return;
+                }
+                var groupIds = $.table.selectColumns("groupId");
+                if (!groupIds[0]) {
+                    $.modal.alertWarning("未找到群组信息");
+                    return;
+                }
+
+                $.modal.confirm("确定要解除禁言选中的 " + rows.length + " 个成员吗?", function () {
+                    var data = {
+                        groupId: groupIds[0],
+                        userIds: rows,
+                        isMuted: 0
+                    };
+                    $.operate.post(prefix + "/batchMute", data);
+                });
+            }
+
+            /**
+             * 添加成员
+             */
+            function addMember() {
+                var url = prefix + "/add";
+                $.modal.open("添加群组成员", url, 550, 400);
+            }
+
+            /**
+             * 修改角色
+             */
+            function editRole() {
+                var rows = $.table.selectFirstColumns();
+                if (!ImCommon.validateBatchOperation(rows, 1)) {
+                    return;
+                }
+                var row = $.table.selectFirstRows()[0];
+                if (row.id) {
+                    changeRole(row.id, row.role, row.groupId, row.userId);
+                } else {
+                    $.modal.alertWarning("请选择有效的记录");
+                }
+            }
+
+            /**
+             * 修改角色
+             */
+            function changeRole(id, currentRole, groupId, userId) {
+                var roles = ['OWNER', 'ADMIN', 'MEMBER'];
+                var roleNames = { 'OWNER': '群主', 'ADMIN': '管理员', 'MEMBER': '普通成员' };
+                var roleColors = { 'OWNER': 'btn-danger', 'ADMIN': 'btn-warning', 'MEMBER': 'btn-primary' };
+                var roleIcons = { 'OWNER': 'fa-crown', 'ADMIN': 'fa-shield', 'MEMBER': 'fa-user' };
+
+                // 显示选择对话框
+                top.layer.open({
+                    type: 1,
+                    title: '修改成员角色',
+                    area: ['480px', '260px'],
+                    content: '<div style="padding: 25px 30px 20px;">' +
+                        '<p style="margin-bottom: 25px; font-size: 14px; text-align: center;">请选择新角色：</p>' +
+                        '<div style="display: flex; justify-content: center; gap: 12px;">' +
+                        '<button class="btn ' + (currentRole === 'OWNER' ? 'btn-default' : 'btn-danger') + '" id="btnOwner" style="padding: 10px 20px; border-radius: 4px;' + (currentRole === 'OWNER' ? 'opacity:0.5;cursor:not-allowed;' : '') + '">' +
+                        '<i class="fa fa-crown"></i> 群主' +
+                        '</button>' +
+                        '<button class="btn ' + (currentRole === 'ADMIN' ? 'btn-default' : 'btn-warning') + '" id="btnAdmin" style="padding: 10px 20px; border-radius: 4px;' + (currentRole === 'ADMIN' ? 'opacity:0.5;cursor:not-allowed;' : '') + '">' +
+                        '<i class="fa fa-shield"></i> 管理员' +
+                        '</button>' +
+                        '<button class="btn ' + (currentRole === 'MEMBER' ? 'btn-default' : 'btn-primary') + '" id="btnMember" style="padding: 10px 20px; border-radius: 4px;' + (currentRole === 'MEMBER' ? 'opacity:0.5;cursor:not-allowed;' : '') + '">' +
+                        '<i class="fa fa-user"></i> 普通成员' +
+                        '</button>' +
+                        '</div>' +
+                        '</div>',
+                    btn: ['取消'],
+                    yes: function (index) {
+                        top.layer.close(index);
+                    },
+                    success: function (layero, index) {
+                        // 使用 layero 查找按钮并绑定事件（跳过当前角色）
+                        if (currentRole !== 'OWNER') {
+                            layero.find('#btnOwner').on('click', function () {
+                                top.layer.close(index);
+                                $.modal.confirm("确定要将该成员的角色修改为【群主】吗？", function () {
+                                    $.operate.post(prefix + "/role", { groupId: groupId, userId: userId, role: 'OWNER' });
+                                });
+                            });
+                        }
+                        if (currentRole !== 'ADMIN') {
+                            layero.find('#btnAdmin').on('click', function () {
+                                top.layer.close(index);
+                                $.modal.confirm("确定要将该成员的角色修改为【管理员】吗？", function () {
+                                    $.operate.post(prefix + "/role", { groupId: groupId, userId: userId, role: 'ADMIN' });
+                                });
+                            });
+                        }
+                        if (currentRole !== 'MEMBER') {
+                            layero.find('#btnMember').on('click', function () {
+                                top.layer.close(index);
+                                $.modal.confirm("确定要将该成员的角色修改为【普通成员】吗？", function () {
+                                    $.operate.post(prefix + "/role", { groupId: groupId, userId: userId, role: 'MEMBER' });
+                                });
+                            });
+                        }
+                    }
+                });
+            }
+
+            /**
+             * 禁言/解禁
+             */
+            function toggleMute() {
+                var rows = $.table.selectFirstColumns();
+                if (!ImCommon.validateBatchOperation(rows, 1)) {
+                    return;
+                }
+                var row = $.table.selectFirstRows()[0];
+                if (!row.id) {
+                    $.modal.alertWarning("请选择有效的记录");
+                    return;
+                }
+                var newMuteStatus = row.isMuted == 1 ? 0 : 1;
+                $.modal.confirm("确定要" + (newMuteStatus == 1 ? "禁言" : "解除禁言") + "该成员吗？", function () {
+                    var data = { id: row.id, groupId: row.groupId, userId: row.userId, isMuted: newMuteStatus };
+                    $.operate.post(prefix + "/mute", data);
+                });
+            }
+
+            /**
+             * 移除成员
+             */
+            function removeMember(groupId, userId) {
+                $.modal.confirm("确定要移除该成员吗？", function () {
+                    $.ajax({
+                        url: prefix + "/remove",
+                        type: 'post',
+                        data: { groupId: groupId, userId: userId },
+                        success: function (result) {
+                            if (result.code == 0) {
+                                $.modal.msgSuccess("移除成功");
+                                $.table.refresh();
+                                loadStatistics();
+                            } else {
+                                $.modal.msgError(result.msg || "移除失败");
+                            }
+                        },
+                        error: function () {
+                            $.modal.msgError("网络请求失败");
+                        }
+                    });
+                });
+            }
+
+            /**
+             * 清空搜索条件
+             */
+            function clearSearch() {
+                $.form.reset();
+                $('#searchStatus').hide();
+                $.table.search();
+            }
+
+            /**
+             * 执行搜索
+             */
+            function doSearch() {
+                ImCommon.showSearchConditions('#member-form', '#searchStatus', 'clearSearch()');
+                $.table.search();
+            }
+        </script>
 </body>
+
 </html>

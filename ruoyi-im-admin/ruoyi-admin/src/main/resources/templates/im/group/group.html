@@ -147,6 +147,16 @@
                     removeUrl: prefix + "/remove/{id}",
                     exportUrl: prefix + "/export",
                     modalName: "群组",
+                    // 默认调大添加/编辑弹窗
+                    onLoadSuccess: function () {
+                        $.operate.add = function (id) {
+                            $.modal.open("添加" + $.table._option.modalName, $.operate.addUrl(id), 800, 600);
+                        };
+                        $.operate.edit = function (id) {
+                            $.modal.open("修改" + $.table._option.modalName, $.operate.editUrl(id), 800, 600);
+                        };
+                        ImCommon.removeEmptyData('#bootstrap-table');
+                    },
                     // 分页配置
                     pagination: true,
                     pageSize: 20,
@@ -284,9 +294,9 @@
                         ImCommon.hideLoading();
                         $.modal.msgError("数据加载失败，请稍后重试");
                     },
-                    onLoadSuccess: function () {
-                        ImCommon.removeEmptyData('#bootstrap-table');
-                    },
+                    // onLoadSuccess: function () { // Moved to the new onLoadSuccess above
+                    //     ImCommon.removeEmptyData('#bootstrap-table');
+                    // },
                     ajaxOptions: {
                         beforeSend: function () {
                             ImCommon.showLoading('.select-table');
@@ -299,21 +309,7 @@
                 $.table.init(options);
             });
 
-            /**
-             * 覆盖默认的添加方法，使用合适的弹窗大小
-             */
-            $.operate.add = function (id) {
-                table.set();
-                $.modal.open("添加" + table.options.modalName, $.operate.addUrl(id), 750, 650);
-            };
-
-            /**
-             * 覆盖默认的编辑方法，使用合适的弹窗大小
-             */
-            $.operate.edit = function (id) {
-                table.set();
-                $.modal.open("修改" + table.options.modalName, $.operate.editUrl(id), 750, 650);
-            };
+            // Removed the original $.operate.add and $.operate.edit overrides here.
 
             /**
              * 加载统计数据
