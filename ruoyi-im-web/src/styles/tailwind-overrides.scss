@@ -1,0 +1,149 @@
+// Tailwind 自定义样式覆盖
+// 使用 @layer 指令扩展 Tailwind
+
+// 自定义滚动条样式
+@layer utilities {
+  /* 滚动条样式 - 亮色模式 */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  /* 滚动条样式 - 暗色模式 */
+  .dark .scrollbar-thin {
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+
+  /* WebKit 滚动条样式 */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* 侧边栏滚动条样式 */
+  .scrollbar-sidebar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+  }
+
+  .scrollbar-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* 消息气泡样式 */
+  .message-bubble {
+    @apply max-w-[70%] rounded-lg px-4 py-2 break-words;
+  }
+
+  .message-bubble-mine {
+    @apply bg-primary text-white ml-auto;
+  }
+
+  .message-bubble-other {
+    @apply bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700;
+  }
+
+  /* 会话列表项样式 */
+  .session-item {
+    @apply px-4 py-3 cursor-pointer transition-colors border-l-2 border-transparent;
+  }
+
+  .session-item:hover {
+    @apply bg-slate-50 dark:bg-slate-800/50;
+  }
+
+  .session-item-active {
+    @apply bg-blue-50 dark:bg-slate-800 border-l-primary;
+  }
+
+  /* 导航项样式 */
+  .nav-item {
+    @apply w-full aspect-square flex flex-col items-center justify-center gap-1 rounded-xl transition-all;
+  }
+
+  .nav-item-default {
+    @apply text-white/70;
+  }
+
+  .nav-item-active {
+    @apply bg-white/20 text-white shadow-inner border border-white/10;
+  }
+
+  /* 卡片样式 */
+  .card {
+    @apply bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700;
+  }
+
+  .card-hover {
+    @apply hover:border-primary hover:shadow-lg transition-all;
+  }
+}
+
+// 自定义组件样式
+@layer components {
+  /* 按钮样式 */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-900 dark:text-slate-100 px-4 py-2 rounded-lg transition-colors;
+  }
+
+  /* 输入框样式 */
+  .input-base {
+    @apply w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all;
+  }
+
+  /* 头像样式 */
+  .avatar {
+    @apply rounded-full object-cover;
+  }
+
+  .avatar-sm {
+    @apply w-8 h-8;
+  }
+
+  .avatar-md {
+    @apply w-10 h-10;
+  }
+
+  .avatar-lg {
+    @apply w-12 h-12;
+  }
+
+  /* 徽章样式 */
+  .badge {
+    @apply absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-xs rounded-full;
+  }
+
+  /* 工具栏样式 */
+  .toolbar-btn {
+    @apply p-2 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors;
+  }
+}

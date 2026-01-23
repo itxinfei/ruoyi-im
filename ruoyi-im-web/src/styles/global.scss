@@ -1,5 +1,11 @@
+// Tailwind CSS 指令
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 // Global Base Styles
 @import './design-tokens.scss';
+@import './tailwind-overrides.scss';
 
 html,
 body {

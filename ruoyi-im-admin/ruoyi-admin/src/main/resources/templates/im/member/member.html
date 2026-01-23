@@ -3,33 +3,99 @@
 <head>
     <th:block th:include="include :: header('群组成员管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-</head>
+
+    <style>
+        .select-list ul li {
+            margin: 0px 10px 5px 0px !important;
+        }
+        .select-list ul li input {
+            width: 140px !important;
+        }
+        .select-list ul li select {
+            width: 140px !important;
+        }
+        .member-stat-card {
+            margin-bottom: 10px;
+        }
+        .ibox-content {
+            padding: 10px 15px;
+        }
+        .ibox-title {
+            padding: 10px 15px;
+            min-height: 40px;
+        }
+        .no-margins {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+        }
+    </style></head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins member-stat-card">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>成员总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>群组成员总量</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins member-stat-card">
+                            <div class="ibox-title">
+                                <span class="label label-danger pull-right">主</span>
+                                <h5>群主数量</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-danger" id="ownerCount">0</h2>
+                                <small>群主人数</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins member-stat-card">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">管</span>
+                                <h5>管理数量</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="adminCount">0</h2>
+                                <small>管理员人数</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins member-stat-card">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">禁</span>
+                                <h5>禁言数量</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="mutedCount">0</h2>
+                                <small>已禁言成员</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="member-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                成员总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
-                            </li>
-                            <li>
-                                群主：<a onclick="$('select[name=\\'role\\']').val('OWNER');$.table.search()"><span class="label label-danger" id="ownerCount">0</span></a>
-                            </li>
-                            <li>
-                                管理员：<a onclick="$('select[name=\\'role\\']').val('ADMIN');$.table.search()"><span class="label label-warning" id="adminCount">0</span></a>
-                            </li>
-                            <li>
-                                受限禁言：<a onclick="$('select[name=\\'isMuted\\']').val('1');$.table.search()"><span class="label label-info" id="mutedCount">0</span></a>
-                            </li>
-                            <li class="pull-right">
                                 <label class="input-label">群组ID：</label><input type="text" name="groupId" placeholder="请输入群组ID"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">用户昵称：</label><input type="text" name="userNickname" placeholder="请输入用户昵称"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">角色：</label><select name="role">
                                     <option value="">所有</option>
                                     <option value="OWNER">群主</option>
@@ -37,12 +103,16 @@
                                     <option value="MEMBER">普通成员</option>
                                 </select>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">是否禁言：</label><select name="isMuted">
                                     <option value="">所有</option>
                                     <option value="0">否</option>
                                     <option value="1">是</option>
                                 </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -85,7 +155,6 @@
         var prefix = ctx + "im/member";
 
         $(function() {
-            loadStatistics();
 
             var options = {
                 url: prefix + "/list",
@@ -210,6 +279,7 @@
                 }
             };
             $.table.init(options);
+            loadStatistics();
         });
 
         function loadStatistics() {

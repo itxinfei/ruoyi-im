@@ -1,43 +1,57 @@
 // Design Tokens - DingTalk Style
 :root {
   // === Brand Colors ===
-  --dt-brand-color: #1890FF;
-  --dt-brand-hover: #40A9FF;
-  --dt-brand-active: #096DD9;
-  --dt-brand-bg: #E6F7FF;
-  --dt-brand-light: rgba(24, 144, 255, 0.1);
+  // 更新为 stitch_im 设计的颜色
+  --dt-brand-color: #1677ff;
+  --dt-brand-hover: #4096ff;
+  --dt-brand-active: #0958d9;
+  --dt-brand-bg: #e6f4ff;
+  --dt-brand-light: rgba(22, 119, 255, 0.1);
 
   // === Semantic Colors ===
-  --dt-success-color: #52C41A;
-  --dt-warning-color: #FAAD14;
-  --dt-error-color: #FF4D4F;
-  --dt-danger-color: #F5222D;
-  --dt-badge-color: #F5222D;
+  --dt-success-color: #52c41a;
+  --dt-warning-color: #faad14;
+  --dt-error-color: #ff4d4f;
+  --dt-danger-color: #f5222d;
+  --dt-badge-color: #f5222d;
 
-  // === Background Colors ===
-  --dt-bg-body: #FFFFFF;
-  --dt-bg-sidebar: #FFFFFF;
-  --dt-bg-session-list: #FFFFFF;
-  --dt-bg-chat: #F5F7FA;
-  --dt-bg-session-hover: #F2F3F5;
-  --dt-bg-session-active: #EBF4FF;
-  --dt-bg-input: #FFFFFF;
+  // === Background Colors (亮色模式) ===
+  --dt-bg-body: #f4f7f9;
+  --dt-bg-sidebar: #1677ff;
+  --dt-bg-sidebar-item: transparent;
+  --dt-bg-sidebar-item-hover: rgba(255, 255, 255, 0.1);
+  --dt-bg-sidebar-item-active: rgba(255, 255, 255, 0.2);
+  --dt-bg-session-list: #ffffff;
+  --dt-bg-chat: #f5f7fa;
+  --dt-bg-session-hover: #f2f3f5;
+  --dt-bg-session-active: #ebf4ff;
+  --dt-bg-input: #ffffff;
+  --dt-bg-card: #ffffff;
 
   // === Text Colors ===
-  --dt-text-primary: #1A1A1A;
-  --dt-text-secondary: #595959;
-  --dt-text-tertiary: #8C8C8C;
-  --dt-text-placeholder: #BFBFBF;
-  --dt-text-disabled: #D9D9D9;
+  --dt-text-primary: #0f172a;
+  --dt-text-secondary: #475569;
+  --dt-text-tertiary: #94a3b8;
+  --dt-text-placeholder: #bfbfbf;
+  --dt-text-disabled: #d9d9d9;
+
+  // 暗色模式变量
+  --dt-bg-body-dark: #0f172a;
+  --dt-bg-sidebar-dark: #1e293b;
+  --dt-bg-card-dark: #1e293b;
+  --dt-bg-input-dark: #334155;
+  --dt-text-primary-dark: #f1f5f9;
+  --dt-text-secondary-dark: #cbd5e1;
+  --dt-border-dark: #334155;
 
   // === Border Colors ===
-  --dt-border-color: #E5E5E5;
-  --dt-border-light: #F0F0F0;
-  --dt-border-dark: #D9D9D9;
+  --dt-border-color: #e5e7eb;
+  --dt-border-light: #f0f0f0;
+  --dt-border-dark: #d9d9d9;
 
   // === Typography ===
-  --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 
-                   'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 
+  --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                   'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
                    'Helvetica Neue', Helvetica, Arial, sans-serif;
   --dt-font-size-xs: 11px;
   --dt-font-size-sm: 12px;
@@ -64,7 +78,7 @@
   --dt-space-xxxl: 48px;
 
   // === Layout Dimensions ===
-  --dt-nav-sidebar-width: 64px;
+  --dt-nav-sidebar-width: 80px;
   --dt-session-panel-width: 280px;
   --dt-header-height: 48px;
   --dt-chat-header-height: 56px;
@@ -104,4 +118,23 @@
   --dt-z-popover: 1050;
   --dt-z-tooltip: 1060;
   --dt-z-notification: 1070;
+}
+
+// 暗色模式覆盖
+.dark {
+  --dt-bg-body: var(--dt-bg-body-dark);
+  --dt-bg-sidebar: var(--dt-bg-sidebar-dark);
+  --dt-bg-session-list: var(--dt-bg-card-dark);
+  --dt-bg-chat: var(--dt-bg-body-dark);
+  --dt-bg-session-hover: rgba(255, 255, 255, 0.05);
+  --dt-bg-session-active: rgba(22, 119, 255, 0.15);
+  --dt-bg-input: var(--dt-bg-input-dark);
+  --dt-bg-card: var(--dt-bg-card-dark);
+
+  --dt-text-primary: var(--dt-text-primary-dark);
+  --dt-text-secondary: var(--dt-text-secondary-dark);
+  --dt-text-placeholder: #64748b;
+
+  --dt-border-color: var(--dt-border-dark);
+  --dt-border-light: #1e293b;
 }
