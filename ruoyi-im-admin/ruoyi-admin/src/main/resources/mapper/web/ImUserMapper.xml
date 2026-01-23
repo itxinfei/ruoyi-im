@@ -204,7 +204,8 @@
         SELECT 
             COUNT(*) as totalCount,
             SUM(CASE WHEN last_online_time >= DATE_SUB(NOW(), INTERVAL 5 MINUTE) THEN 1 ELSE 0 END) as onlineCount,
-            SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as disabledCount
+            SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as disabledCount,
+            SUM(CASE WHEN DATE(create_time) = CURDATE() THEN 1 ELSE 0 END) as todayCount
         FROM im_user
     </select>
 

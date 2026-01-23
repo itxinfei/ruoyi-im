@@ -5,113 +5,70 @@
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
-    <div class="container-div">
-        <div class="row" style="padding-top: 6px;">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12">
-                <div class="row">
-                    <div class="col-sm-2-4">
-                        <div class="stat-box stat-box-primary">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">总回执数</div>
-                            <i class="fa fa-file-text stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-2-4">
-                        <div class="stat-box stat-box-success">
-                            <div class="stat-number" id="readCount">0</div>
-                            <div class="stat-label">已读</div>
-                            <i class="fa fa-eye stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-2-4">
-                        <div class="stat-box stat-box-warning">
-                            <div class="stat-number" id="unreadCount">0</div>
-                            <div class="stat-label">未读</div>
-                            <i class="fa fa-eye-slash stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-2-4">
-                        <div class="stat-box stat-box-info">
-                            <div class="stat-number" id="confirmedCount">0</div>
-                            <div class="stat-label">已确认</div>
-                            <i class="fa fa-check stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-2-4">
-                        <div class="stat-box stat-box-danger">
-                            <div class="stat-number" id="unconfirmedCount">0</div>
-                            <div class="stat-label">未确认</div>
-                            <i class="fa fa-clock-o stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
+    <div class="container-div im-page">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
                 <form id="receipt-form">
                     <div class="select-list">
                         <ul>
                             <li>
+                                总回执数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
+                            </li>
+                            <li>
+                                已读：<a onclick="$('select[name=\\'readStatus\\']').val('read');$.table.search()"><span class="label label-success" id="readCount">0</span></a>
+                            </li>
+                            <li>
+                                未读：<a onclick="$('select[name=\\'readStatus\\']').val('unread');$.table.search()"><span class="label label-warning" id="unreadCount">0</span></a>
+                            </li>
+                            <li>
+                                已确认：<a onclick="$('select[name=\\'confirmed\\']').val('1');$.table.search()"><span class="label label-info" id="confirmedCount">0</span></a>
+                            </li>
+                            <li>
+                                未确认：<a onclick="$('select[name=\\'confirmed\\']').val('0');$.table.search()"><span class="label label-danger" id="unconfirmedCount">0</span></a>
+                            </li>
+                            <li class="pull-right">
                                 <label class="input-label">DING ID：</label><input type="text" name="dingId" placeholder="请输入DING ID"/>
                             </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">接收者名称：</label><input type="text" name="receiverName" placeholder="请输入接收者名称"/>
                             </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">阅读状态：</label><select name="readStatus">
                                     <option value="">所有</option>
                                     <option value="read">已读</option>
                                     <option value="unread">未读</option>
                                 </select>
                             </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">确认状态：</label><select name="confirmed">
                                     <option value="">所有</option>
                                     <option value="1">已确认</option>
                                     <option value="0">未确认</option>
                                 </select>
                             </li>
-                            <li class="select-time">
-                                <label>阅读时间： </label>
+                            <li class="select-time pull-right">
+                                <label>阅读时间：</label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
-                <!-- 批量操作按钮 -->
                 <div class="btn-group-sm" id="toolbar">
                     <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:dingReceipt:export">
                         <i class="fa fa-download"></i> 导出
                     </a>
                 </div>
-
-                <!-- 搜索状态提示 -->
-                <div class="search-status" id="searchStatus" style="display:none;">
-                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
-                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
-                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
-                </div>
-
-                <!-- 数据表格 -->
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                <table id="bootstrap-table"></table>
             </div>
         </div>
     </div>
 
     <th:block th:include="include :: footer" />
-    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var prefix = ctx + "im/dingReceipt";
 
@@ -124,23 +81,18 @@
                 height: 650,
                 exportUrl: prefix + "/export",
                 modalName: "DING回执",
-                // 分页配置
                 pagination: true,
                 pageSize: 20,
                 pageList: [10, 20, 50, 100],
                 sidePagination: "server",
-                // 固定列配置
                 fixedColumns: true,
                 fixedNumber: 1,
                 fixedRightNumber: 1,
-                // 列显示/隐藏配置
                 showColumns: true,
                 showColumnsToggleAll: true,
-                // 记住列选择
                 cookie: true,
                 cookieIdTable: 'im_dingReceipt_table',
                 cookieExpire: '30d',
-                // 导出配置
                 showExport: true,
                 exportDataType: 'selected',
                 exportTypes: ['excel'],
@@ -220,71 +172,42 @@
                     field: 'createTime',
                     title: '创建时间',
                     width: '160',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
+                    sortable: true
                 }, {
                     title: '操作',
                     align: 'center',
                     width: '100',
                     formatter: function(value, row, index) {
-                        var menuItems = [];
-
-                        var mainAction = {
-                            text: '详情',
-                            icon: 'fa-eye',
-                            action: 'viewDetail(\'' + row.id + '\')',
-                            btnClass: 'btn-info'
-                        };
-
-                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
+                        var actions = [];
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewDetail(\'' + row.id + '\')"><i class="fa fa-eye"></i>详情</a> ');
+                        return actions.join('');
                     }
                 }],
                 responseHandler: function(res) {
-                    ImCommon.hideLoading();
-                    return ImCommon.handleTableResponse(res, '暂无回执数据', '#bootstrap-table');
-                },
-                onLoadError: function(status) {
-                    ImCommon.hideLoading();
-                    $.modal.msgError("数据加载失败，请稍后重试");
-                },
-                onLoadSuccess: function() {
-                    ImCommon.removeEmptyData('#bootstrap-table');
-                },
-                ajaxOptions: {
-                    beforeSend: function() {
-                        ImCommon.showLoading('.select-table');
-                    },
-                    complete: function() {
-                        ImCommon.hideLoading();
+                    $.modal.closeLoading();
+                    if (res.code === 0) {
+                        return { rows: res.rows, total: res.total };
+                    } else {
+                        $.modal.alertWarning(res.msg);
+                        return { rows: [], total: 0 };
                     }
                 }
             };
             $.table.init(options);
         });
 
-        /**
-         * 加载统计数据
-         */
         function loadStatistics() {
-            ImCommon.loadStatisticsWithCache(
-                prefix + "/statistics",
-                function(data) {
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#readCount").text(data.readCount || 0);
-                    $("#unreadCount").text(data.unreadCount || 0);
-                    $("#confirmedCount").text(data.confirmedCount || 0);
-                    $("#unconfirmedCount").text(data.unconfirmedCount || 0);
-                },
-                'dingReceipt_statistics',
-                5
-            );
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code === 0) {
+                    $("#totalCount").text(result.data.totalCount || 0);
+                    $("#readCount").text(result.data.readCount || 0);
+                    $("#unreadCount").text(result.data.unreadCount || 0);
+                    $("#confirmedCount").text(result.data.confirmedCount || 0);
+                    $("#unconfirmedCount").text(result.data.unconfirmedCount || 0);
+                }
+            });
         }
 
-        /**
-         * 查看详情
-         */
         function viewDetail(id) {
             $.get(prefix + "/" + id, function(result) {
                 if (result.code == 0) {
@@ -306,23 +229,6 @@
                     });
                 }
             });
-        }
-
-        /**
-         * 清空搜索条件
-         */
-        function clearSearch() {
-            $.form.reset();
-            $('#searchStatus').hide();
-            $.table.search();
-        }
-
-        /**
-         * 执行搜索
-         */
-        function doSearch() {
-            ImCommon.showSearchConditions('#receipt-form', '#searchStatus', 'clearSearch()');
-            $.table.search();
         }
     </script>
 </body>

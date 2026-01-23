@@ -5,54 +5,28 @@
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
-    <div class="container-div">
-        <div class="row" style="padding-top: 6px;">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-primary">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">设备总数</div>
-                            <i class="fa fa-mobile stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-success">
-                            <div class="stat-number" id="onlineCount">0</div>
-                            <div class="stat-label">在线设备</div>
-                            <i class="fa fa-circle stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-warning">
-                            <div class="stat-number" id="offlineCount">0</div>
-                            <div class="stat-label">离线设备</div>
-                            <i class="fa fa-circle-o stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-danger">
-                            <div class="stat-number" id="onlineUserCount">0</div>
-                            <div class="stat-label">在线用户</div>
-                            <i class="fa fa-users stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
+    <div class="container-div im-page">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
                 <form id="userDevice-form">
                     <div class="select-list">
                         <ul>
                             <li>
+                                设备总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
+                            </li>
+                            <li>
+                                在线设备：<a onclick="$.table.search()"><span class="label label-success" id="onlineCount">0</span></a>
+                            </li>
+                            <li>
+                                离线设备：<a onclick="$('select[name=\\'status\\']').val('OFFLINE');$.table.search()"><span class="label label-warning" id="offlineCount">0</span></a>
+                            </li>
+                            <li>
+                                在线用户：<a onclick="$.table.search()"><span class="label label-danger" id="onlineUserCount">0</span></a>
+                            </li>
+                            <li class="pull-right">
                                 <label class="input-label">用户名：</label><input type="text" name="username" placeholder="请输入用户名"/>
                             </li>
-                            <li>
-                                <label class="input-label">昵称：</label><input type="text" name="nickname" placeholder="请输入昵称"/>
-                            </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">设备类型：</label><select name="deviceType">
                                     <option value="">所有</option>
                                     <option value="PC">PC端</option>
@@ -60,31 +34,25 @@
                                     <option value="WEB">Web端</option>
                                 </select>
                             </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">状态：</label><select name="status">
                                     <option value="">所有</option>
                                     <option value="ONLINE">在线</option>
                                     <option value="OFFLINE">离线</option>
                                 </select>
                             </li>
-                            <li class="select-time">
+                            <li class="select-time pull-right">
                                 <label>活跃时间：</label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
-                <!-- 批量操作按钮 -->
                 <div class="btn-group-sm" id="toolbar">
                     <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:userDevice:add">
                         <i class="fa fa-plus"></i> 新增
@@ -102,16 +70,7 @@
                         <i class="fa fa-download"></i> 导出
                     </a>
                 </div>
-
-                <!-- 搜索状态提示 -->
-                <div class="search-status" id="searchStatus" style="display:none;">
-                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
-                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
-                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
-                </div>
-
-                <!-- 数据表格 -->
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                <table id="bootstrap-table"></table>
             </div>
         </div>
     </div>
@@ -149,7 +108,6 @@
 
     <th:block th:include="include :: footer" />
     <th:block th:include="include :: bootstrap-table-export-js" />
-    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:userDevice:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:userDevice:remove')}]];
@@ -167,23 +125,18 @@
                 removeUrl: prefix + "/remove/{id}",
                 exportUrl: prefix + "/export",
                 modalName: "用户设备",
-                // 分页配置
                 pagination: true,
                 pageSize: 20,
                 pageList: [10, 20, 50, 100],
                 sidePagination: "server",
-                // 固定列配置
                 fixedColumns: true,
                 fixedNumber: 1,
                 fixedRightNumber: 1,
-                // 列显示/隐藏配置
                 showColumns: true,
                 showColumnsToggleAll: true,
-                // 记住列选择
                 cookie: true,
                 cookieIdTable: 'im_user_device_table',
                 cookieExpire: '30d',
-                // 导出配置
                 showExport: true,
                 exportDataType: 'selected',
                 exportTypes: ['excel'],
@@ -259,118 +212,62 @@
                     width: '90',
                     formatter: function(value, row, index) {
                         if (value === 'ONLINE') {
-                            return '<span class="badge badge-success"><span class="status-indicator status-online"></span>在线</span>';
+                            return '<span class="badge badge-success">在线</span>';
                         }
-                        return '<span class="badge badge-default"><span class="status-indicator status-offline"></span>离线</span>';
+                        return '<span class="badge badge-default">离线</span>';
                     }
                 }, {
                     field: 'lastActiveTime',
                     title: '最后活跃',
                     width: '160',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
+                    sortable: true
                 }, {
                     field: 'createTime',
                     title: '首次登录',
                     width: '160',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
+                    sortable: true
                 }, {
                     title: '操作',
                     align: 'center',
-                    width: '120',
+                    width: '150',
                     formatter: function(value, row, index) {
-                        var menuItems = [];
-
-                        // 根据状态添加不同的菜单项
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
                         if (row.status === 'ONLINE') {
-                            menuItems.push({ text: '强制下线', icon: 'fa-sign-out', action: 'forceOfflineOne(' + row.id + ')', permissionClass: editFlag });
-                            menuItems.push({ divider: true });
+                            actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="forceOfflineOne(' + row.id + ')"><i class="fa fa-sign-out"></i>下线</a> ');
                         }
-                        menuItems.push({ text: '删除', icon: 'fa-remove', action: '$.operate.remove(\'' + row.id + '\')', permissionClass: removeFlag });
-
-                        var mainAction = {
-                            text: '修改',
-                            icon: 'fa-edit',
-                            action: '$.operate.edit(' + row.id + ')',
-                            permissionClass: editFlag,
-                            btnClass: 'btn-success'
-                        };
-
-                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
                     }
                 }],
                 responseHandler: function(res) {
-                    ImCommon.hideLoading();
-                    return ImCommon.handleTableResponse(res, '暂无设备数据', '#bootstrap-table');
-                },
-                onLoadError: function(status) {
-                    ImCommon.hideLoading();
-                    $.modal.msgError("数据加载失败，请稍后重试");
-                },
-                onLoadSuccess: function() {
-                    ImCommon.removeEmptyData('#bootstrap-table');
-                },
-                ajaxOptions: {
-                    beforeSend: function() {
-                        ImCommon.showLoading('.select-table');
-                    },
-                    complete: function() {
-                        ImCommon.hideLoading();
+                    $.modal.closeLoading();
+                    if (res.code === 0) {
+                        return { rows: res.rows, total: res.total };
+                    } else {
+                        $.modal.alertWarning(res.msg);
+                        return { rows: [], total: 0 };
                     }
                 }
             };
             $.table.init(options);
         });
 
-        /**
-         * 加载统计数据
-         */
         function loadStatistics() {
-            ImCommon.loadStatisticsWithCache(
-                prefix + "/statistics",
-                function(data) {
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#onlineCount").text(data.onlineCount || 0);
-                    $("#offlineCount").text(data.offlineCount || 0);
-                    $("#onlineUserCount").text(data.onlineUserCount || 0);
-                },
-                'user_device_statistics',
-                5
-            );
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code === 0) {
+                    $("#totalCount").text(result.data.totalCount || 0);
+                    $("#onlineCount").text(result.data.onlineCount || 0);
+                    $("#offlineCount").text(result.data.offlineCount || 0);
+                    $("#onlineUserCount").text(result.data.onlineUserCount || 0);
+                }
+            });
         }
 
-        /**
-         * 清空搜索条件
-         */
-        function clearSearch() {
-            $.form.reset();
-            $('#searchStatus').hide();
-            $.table.search();
-        }
-
-        /**
-         * 执行搜索
-         */
-        function doSearch() {
-            ImCommon.showSearchConditions('#userDevice-form', '#searchStatus', 'clearSearch()');
-            $.table.search();
-        }
-
-        /**
-         * 显示清理弹窗
-         */
         function showCleanModal() {
             $("#cleanModal").modal('show');
         }
 
-        /**
-         * 执行清理
-         */
         function doClean() {
             var days = $("#cleanDays").val();
             $("#cleanModal").modal('hide');
@@ -390,9 +287,6 @@
             });
         }
 
-        /**
-         * 强制下线
-         */
         function forceOffline() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
@@ -419,7 +313,7 @@
                         return;
                     }
 
-                    forceOfflineOne(rows[completed], function() {
+                    forceOfflineOneById(rows[completed], function() {
                         completed++;
                         forceNext();
                     });
@@ -429,35 +323,28 @@
             });
         }
 
-        /**
-         * 强制单个设备下线
-         */
-        function forceOfflineOne(id, callback) {
+        function forceOfflineOne(id) {
+            $.modal.confirm("确定要强制下线该设备吗？", function() {
+                forceOfflineOneById(id, function() {
+                    $.modal.msgSuccess("设备已下线");
+                    $.table.refresh();
+                    loadStatistics();
+                });
+            });
+        }
+
+        function forceOfflineOneById(id, callback) {
             $.ajax({
                 url: prefix + "/offline/" + id,
                 type: 'put',
                 success: function(result) {
-                    if (result.code == 0) {
-                        if (callback) {
-                            callback();
-                        } else {
-                            $.modal.msgSuccess("设备已下线");
-                            $.table.refresh();
-                            loadStatistics();
-                        }
-                    } else {
-                        if (callback) {
-                            callback();
-                        } else {
-                            $.modal.alertError(result.msg || "操作失败");
-                        }
+                    if (callback) {
+                        callback();
                     }
                 },
                 error: function() {
                     if (callback) {
                         callback();
-                    } else {
-                        $.modal.alertError("操作失败");
                     }
                 }
             });

@@ -4,6 +4,7 @@ import com.ruoyi.web.domain.ImSensitiveWord;
 import com.ruoyi.web.mapper.ImSensitiveWordMapper;
 import com.ruoyi.web.service.ImSensitiveWordService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,11 @@ public class ImSensitiveWordServiceImpl implements ImSensitiveWordService {
 
     @Autowired
     private ImSensitiveWordMapper imSensitiveWordMapper;
+
+    @Autowired(required = false)
+    private StringRedisTemplate redisTemplate;
+
+    private static final String RELOAD_CHANNEL = "im:sensitive:reload";
 
     @Override
     public ImSensitiveWord selectImSensitiveWordById(Long id) {
@@ -42,22 +48,38 @@ public class ImSensitiveWordServiceImpl implements ImSensitiveWordService {
 
     @Override
     public int insertImSensitiveWord(ImSensitiveWord imSensitiveWord) {
-        return imSensitiveWordMapper.insertImSensitiveWord(imSensitiveWord);
+        int rows = imSensitiveWordMapper.insertImSensitiveWord(imSensitiveWord);
+        if (rows > 0) {
+            publishReloadEvent();
+        }
+        return rows;
     }
 
     @Override
     public int updateImSensitiveWord(ImSensitiveWord imSensitiveWord) {
-        return imSensitiveWordMapper.updateImSensitiveWord(imSensitiveWord);
+        int rows = imSensitiveWordMapper.updateImSensitiveWord(imSensitiveWord);
+        if (rows > 0) {
+            publishReloadEvent();
+        }
+        return rows;
     }
 
     @Override
     public int deleteImSensitiveWordByIds(Long[] ids) {
-        return imSensitiveWordMapper.deleteImSensitiveWordByIds(ids);
+        int rows = imSensitiveWordMapper.deleteImSensitiveWordByIds(ids);
+        if (rows > 0) {
+            publishReloadEvent();
+        }
+        return rows;
     }
 
     @Override
     public int deleteImSensitiveWordById(Long id) {
-        return imSensitiveWordMapper.deleteImSensitiveWordById(id);
+        int rows = imSensitiveWordMapper.deleteImSensitiveWordById(id);
+        if (rows > 0) {
+            publishReloadEvent();
+        }
+        return rows;
     }
 
     @Override
@@ -67,16 +89,38 @@ public class ImSensitiveWordServiceImpl implements ImSensitiveWordService {
             return 0;
         }
         word.setIsEnabled(word.getIsEnabled() == 1 ? 0 : 1);
-        return imSensitiveWordMapper.updateImSensitiveWord(word);
+        int rows = imSensitiveWordMapper.updateImSensitiveWord(word);
+        if (rows > 0) {
+            publishReloadEvent();
+        }
+        return rows;
     }
 
     @Override
     public int batchImportWords(List<String> words) {
-        return imSensitiveWordMapper.batchInsertWords(words);
+        int rows = imSensitiveWordMapper.batchInsertWords(words);
+        if (rows > 0) {
+            publishReloadEvent();
+        }
+        return rows;
     }
 
     @Override
     public Map<String, Object> getSensitiveWordStatistics() {
         return imSensitiveWordMapper.getSensitiveWordStatistics();
+    }
+
+    /**
+     * 发布重载事件
+     */
+    private void publishReloadEvent() {
+        if (redisTemplate != null) {
+            try {
+                redisTemplate.convertAndSend(RELOAD_CHANNEL, "reload");
+            } catch (Exception e) {
+                // Redis不可用时不影响主业务
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -5,57 +5,31 @@
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
-    <div class="container-div">
-        <div class="row" style="padding-top: 6px;">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-primary">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">设置总数</div>
-                            <i class="fa fa-cog stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-success">
-                            <div class="stat-number" id="userCount">0</div>
-                            <div class="stat-label">有设置用户</div>
-                            <i class="fa fa-users stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-warning">
-                            <div class="stat-number" id="notificationCount">0</div>
-                            <div class="stat-label">通知设置</div>
-                            <i class="fa fa-bell stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-danger">
-                            <div class="stat-number" id="privacyCount">0</div>
-                            <div class="stat-label">隐私设置</div>
-                            <i class="fa fa-lock stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
+    <div class="container-div im-page">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
                 <form id="userSetting-form">
                     <div class="select-list">
                         <ul>
                             <li>
+                                设置总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
+                            </li>
+                            <li>
+                                有设置用户：<a onclick="$.table.search()"><span class="label label-success" id="userCount">0</span></a>
+                            </li>
+                            <li>
+                                通知设置：<a onclick="$('select[name=\\'settingType\\']').val('NOTIFICATION');$.table.search()"><span class="label label-info" id="notificationCount">0</span></a>
+                            </li>
+                            <li>
+                                隐私设置：<a onclick="$('select[name=\\'settingType\\']').val('PRIVACY');$.table.search()"><span class="label label-warning" id="privacyCount">0</span></a>
+                            </li>
+                            <li class="pull-right">
                                 <label class="input-label">用户名：</label><input type="text" name="username" placeholder="请输入用户名"/>
                             </li>
-                            <li>
-                                <label class="input-label">昵称：</label><input type="text" name="nickname" placeholder="请输入昵称"/>
-                            </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">设置键：</label><input type="text" name="settingKey" placeholder="请输入设置键"/>
                             </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">设置类型：</label><select name="settingType">
                                     <option value="">所有</option>
                                     <option value="NOTIFICATION">通知设置</option>
@@ -63,18 +37,12 @@
                                     <option value="DISPLAY">显示设置</option>
                                 </select>
                             </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                            </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
-                <!-- 批量操作按钮 -->
                 <div class="btn-group-sm" id="toolbar">
                     <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:userSetting:add">
                         <i class="fa fa-plus"></i> 新增
@@ -92,23 +60,13 @@
                         <i class="fa fa-download"></i> 导出
                     </a>
                 </div>
-
-                <!-- 搜索状态提示 -->
-                <div class="search-status" id="searchStatus" style="display:none;">
-                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
-                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
-                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
-                </div>
-
-                <!-- 数据表格 -->
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                <table id="bootstrap-table"></table>
             </div>
         </div>
     </div>
 
     <th:block th:include="include :: footer" />
     <th:block th:include="include :: bootstrap-table-export-js" />
-    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:userSetting:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:userSetting:remove')}]];
@@ -126,23 +84,18 @@
                 removeUrl: prefix + "/remove/{id}",
                 exportUrl: prefix + "/export",
                 modalName: "用户设置",
-                // 分页配置
                 pagination: true,
                 pageSize: 20,
                 pageList: [10, 20, 50, 100],
                 sidePagination: "server",
-                // 固定列配置
                 fixedColumns: true,
                 fixedNumber: 1,
                 fixedRightNumber: 1,
-                // 列显示/隐藏配置
                 showColumns: true,
                 showColumnsToggleAll: true,
-                // 记住列选择
                 cookie: true,
                 cookieIdTable: 'im_user_setting_table',
                 cookieExpire: '30d',
-                // 导出配置
                 showExport: true,
                 exportDataType: 'selected',
                 exportTypes: ['excel'],
@@ -198,167 +151,70 @@
                     field: 'updateTime',
                     title: '更新时间',
                     width: '160',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
+                    sortable: true
                 }, {
                     field: 'createTime',
                     title: '创建时间',
                     width: '160',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
+                    sortable: true
                 }, {
                     title: '操作',
                     align: 'center',
                     width: '150',
                     formatter: function(value, row, index) {
-                        var menuItems = [
-                            { text: '重置', icon: 'fa-refresh', action: 'resetOne(' + row.userId + ')', permissionClass: editFlag },
-                            { divider: true },
-                            { text: '删除', icon: 'fa-remove', action: '$.operate.remove(\'' + row.id + '\')', permissionClass: removeFlag }
-                        ];
-
-                        var mainAction = {
-                            text: '修改',
-                            icon: 'fa-edit',
-                            action: '$.operate.edit(' + row.id + ')',
-                            permissionClass: editFlag,
-                            btnClass: 'btn-success'
-                        };
-
-                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
+                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="resetOne(' + row.userId + ')"><i class="fa fa-refresh"></i>重置</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
                     }
                 }],
                 responseHandler: function(res) {
-                    ImCommon.hideLoading();
-                    return ImCommon.handleTableResponse(res, '暂无设置数据', '#bootstrap-table');
-                },
-                onLoadError: function(status) {
-                    ImCommon.hideLoading();
-                    $.modal.msgError("数据加载失败，请稍后重试");
-                },
-                onLoadSuccess: function() {
-                    ImCommon.removeEmptyData('#bootstrap-table');
-                },
-                ajaxOptions: {
-                    beforeSend: function() {
-                        ImCommon.showLoading('.select-table');
-                    },
-                    complete: function() {
-                        ImCommon.hideLoading();
+                    $.modal.closeLoading();
+                    if (res.code === 0) {
+                        return { rows: res.rows, total: res.total };
+                    } else {
+                        $.modal.alertWarning(res.msg);
+                        return { rows: [], total: 0 };
                     }
                 }
             };
             $.table.init(options);
         });
 
-        /**
-         * 加载统计数据
-         */
         function loadStatistics() {
-            ImCommon.loadStatisticsWithCache(
-                prefix + "/statistics",
-                function(data) {
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#userCount").text(data.userCount || 0);
-                    $("#notificationCount").text(data.notificationCount || 0);
-                    $("#privacyCount").text(data.privacyCount || 0);
-                },
-                'user_setting_statistics',
-                5
-            );
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code === 0) {
+                    $("#totalCount").text(result.data.totalCount || 0);
+                    $("#userCount").text(result.data.userCount || 0);
+                    $("#notificationCount").text(result.data.notificationCount || 0);
+                    $("#privacyCount").text(result.data.privacyCount || 0);
+                }
+            });
         }
 
-        /**
-         * 清空搜索条件
-         */
-        function clearSearch() {
-            $.form.reset();
-            $('#searchStatus').hide();
-            $.table.search();
-        }
-
-        /**
-         * 执行搜索
-         */
-        function doSearch() {
-            ImCommon.showSearchConditions('#userSetting-form', '#searchStatus', 'clearSearch()');
-            $.table.search();
-        }
-
-        /**
-         * 批量重置用户设置
-         */
         function resetUserSettings() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
                 $.modal.alertWarning("请至少选择一条记录");
                 return;
             }
-
-            $.modal.confirm("确定要重置选中的" + rows.length + "个用户的所有设置吗？此操作将恢复默认设置。", function() {
-                var completed = 0;
-                var total = rows.length;
-                var successCount = 0;
-                var errorCount = 0;
-
-                function resetNext() {
-                    if (completed >= total) {
-                        var msg = "批量重置完成！成功: " + successCount + "，失败: " + errorCount;
-                        if (errorCount === 0) {
-                            $.modal.msgSuccess(msg);
-                        } else {
-                            $.modal.msgWarning(msg);
-                        }
-                        $.table.refresh();
-                        loadStatistics();
-                        return;
-                    }
-
-                    var table = $('#bootstrap-table').bootstrapTable();
-                    var row = table.bootstrapTable('getRowByUniqueId', rows[completed]);
-                    resetOne(row.userId, function() {
-                        completed++;
-                        resetNext();
-                    });
-                }
-
-                resetNext();
+            $.modal.confirm("确定要重置选中的" + rows.length + "个用户的所有设置吗？", function() {
+                resetOne(rows[0]);
             });
         }
 
-        /**
-         * 重置单个用户设置
-         */
-        function resetOne(userId, callback) {
+        function resetOne(userId) {
             $.ajax({
                 url: prefix + "/reset/" + userId,
                 type: 'put',
                 success: function(result) {
                     if (result.code == 0) {
-                        if (callback) {
-                            callback();
-                        } else {
-                            $.modal.msgSuccess("重置成功");
-                            $.table.refresh();
-                            loadStatistics();
-                        }
+                        $.modal.msgSuccess("重置成功");
+                        $.table.refresh();
+                        loadStatistics();
                     } else {
-                        if (callback) {
-                            callback();
-                        } else {
-                            $.modal.alertError(result.msg || "重置失败");
-                        }
-                    }
-                },
-                error: function() {
-                    if (callback) {
-                        callback();
-                    } else {
-                        $.modal.alertError("重置失败");
+                        $.modal.alertError(result.msg || "重置失败");
                     }
                 }
             });

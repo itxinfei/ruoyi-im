@@ -1,56 +1,22 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
-    <th:block th:include="include :: header('审计日志管理')" />
+    <th:block th:include="include :: header('审计日志')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
-    <div class="container-div">
-        <div class="row" style="padding-top: 6px;">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-primary" onclick="filterByResult('')">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">日志总数</div>
-                            <i class="fa fa-file-text stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-success" onclick="filterByResult('SUCCESS')">
-                            <div class="stat-number" id="successCount">0</div>
-                            <div class="stat-label">成功操作</div>
-                            <i class="fa fa-check-circle stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-danger" onclick="filterByResult('FAILED')">
-                            <div class="stat-number" id="failedCount">0</div>
-                            <div class="stat-label">失败操作</div>
-                            <i class="fa fa-times-circle stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-warning" onclick="filterByToday()">
-                            <div class="stat-number" id="todayCount">0</div>
-                            <div class="stat-label">今日操作</div>
-                            <i class="fa fa-calendar stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
+    <div class="container-div im-page">
+        <div class="row">
+            <!-- 搜索表单 -->
+            <div class="col-sm-12 search-collapse">
                 <form id="auditLog-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="input-label">用户名：</label><input type="text" name="username" placeholder="请输入用户名"/>
+                                用户名：<input type="text" name="username" placeholder="请输入用户名"/>
                             </li>
                             <li>
-                                <label class="input-label">操作类型：</label><select name="operationType">
+                                操作类型：<select name="operationType">
                                     <option value="">所有</option>
                                     <option value="LOGIN">登录</option>
                                     <option value="LOGOUT">登出</option>
@@ -62,7 +28,7 @@
                                 </select>
                             </li>
                             <li>
-                                <label class="input-label">目标类型：</label><select name="targetType">
+                                目标类型：<select name="targetType">
                                     <option value="">所有</option>
                                     <option value="USER">用户</option>
                                     <option value="MESSAGE">消息</option>
@@ -73,47 +39,39 @@
                                 </select>
                             </li>
                             <li>
-                                <label class="input-label">操作结果：</label><select name="operationResult">
+                                操作结果：<select name="operationResult">
                                     <option value="">所有</option>
                                     <option value="SUCCESS">成功</option>
                                     <option value="FAILED">失败</option>
                                 </select>
                             </li>
                             <li class="select-time">
-                                <label>操作时间：</label>
+                                <label>操作时间： </label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索 <span class="keyboard-hint">Ctrl+F</span></a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <!-- 数据展示区域 -->
+            <!-- 工具栏 -->
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-warning" onclick="showCleanModal()" shiro:hasPermission="im:auditLog:remove">
+                    <i class="fa fa-trash"></i> 清理旧日志
+                </a>
+                <a class="btn btn-primary" onclick="$.table.exportExcel()" shiro:hasPermission="im:auditLog:export">
+                    <i class="fa fa-download"></i> 导出
+                </a>
+            </div>
+
+            <!-- 数据表格 -->
             <div class="col-sm-12 select-table table-striped">
-                <!-- 批量操作按钮 -->
-                <div class="btn-group-sm" id="toolbar">
-                    <a class="btn btn-warning" onclick="showCleanModal()" shiro:hasPermission="im:auditLog:remove">
-                        <i class="fa fa-trash"></i> 清理旧日志
-                    </a>
-                    <a class="btn btn-primary" onclick="$.table.exportExcel()" shiro:hasPermission="im:auditLog:export">
-                        <i class="fa fa-download"></i> 导出
-                    </a>
-                </div>
-
-                <!-- 搜索状态提示 -->
-                <div class="search-status" id="searchStatus" style="display:none;">
-                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
-                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
-                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
-                </div>
-
-                <!-- 数据表格 -->
                 <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
@@ -151,51 +109,18 @@
     </div>
 
     <th:block th:include="include :: footer" />
-    <th:block th:include="include :: bootstrap-table-export-js" />
-    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var exportFlag = [[${@permission.hasPermi('im:auditLog:export')}]];
         var prefix = ctx + "im/auditLog";
 
         $(function() {
-            // 初始化页面增强功能
-            ImCommon.initPage({
-                searchCollapse: true,
-                keyboardShortcuts: true,
-                tableId: '#bootstrap-table'
-            });
-
-            loadStatistics();
-
             var options = {
                 url: prefix + "/list",
-                toolbar: "toolbar",
-                height: 650,
                 exportUrl: prefix + "/export",
                 modalName: "审计日志",
-                // 分页配置
-                pagination: true,
-                pageSize: 20,
-                pageList: [10, 20, 50, 100],
-                sidePagination: "server",
-                // 固定列配置
-                fixedColumns: true,
-                fixedNumber: 1,
-                fixedRightNumber: 1,
-                // 列显示/隐藏配置
                 showColumns: true,
-                showColumnsToggleAll: true,
-                // 记住列选择
-                cookie: true,
-                cookieIdTable: 'im_audit_log_table',
-                cookieExpire: '30d',
-                // 导出配置
-                showExport: true,
-                exportDataType: 'selected',
-                exportTypes: ['excel'],
-                exportOptions: {
-                    fileName: '审计日志'
-                },
+                showRefresh: true,
+                rememberSelected: true,
                 columns: [{
                     checkbox: true
                 }, {
@@ -206,7 +131,7 @@
                     field: 'username',
                     title: '操作用户',
                     sortable: true,
-                    formatter: function(value, row, index) {
+                    formatter: function(value, row) {
                         var name = value || '-';
                         if (row.nickname) {
                             return name + ' (' + row.nickname + ')';
@@ -217,32 +142,29 @@
                     field: 'operationType',
                     title: '操作类型',
                     align: 'center',
-                    width: '140',
-                    formatter: function(value, row, index) {
+                    width: 140,
+                    formatter: function(value) {
                         var typeMap = {
-                            'LOGIN': '<span class="badge badge-primary"><i class="fa fa-sign-in"></i> 登录</span>',
-                            'LOGOUT': '<span class="badge badge-default"><i class="fa fa-sign-out"></i> 登出</span>',
-                            'SEND_MESSAGE': '<span class="badge badge-info"><i class="fa fa-comment"></i> 发送消息</span>',
-                            'DELETE_MESSAGE': '<span class="badge badge-warning"><i class="fa fa-trash"></i> 删除消息</span>',
-                            'CREATE_GROUP': '<span class="badge badge-success"><i class="fa fa-group"></i> 创建群组</span>',
-                            'JOIN_GROUP': '<span class="badge badge-success"><i class="fa fa-user-plus"></i> 加入群组</span>',
-                            'LEAVE_GROUP': '<span class="badge badge-warning"><i class="fa fa-user-times"></i> 退出群组</span>',
-                            'ADD_FRIEND': '<span class="badge badge-info"><i class="fa fa-user-plus"></i> 添加好友</span>',
-                            'DELETE_FRIEND': '<span class="badge badge-danger"><i class="fa fa-user-times"></i> 删除好友</span>',
-                            'UPLOAD_FILE': '<span class="badge badge-primary"><i class="fa fa-upload"></i> 上传文件</span>',
-                            'DOWNLOAD_FILE': '<span class="badge badge-info"><i class="fa fa-download"></i> 下载文件</span>',
-                            'SUBMIT_APPROVAL': '<span class="badge badge-primary"><i class="fa fa-check-square"></i> 提交审批</span>',
-                            'APPROVE_APPROVAL': '<span class="badge badge-success"><i class="fa fa-check"></i> 审批通过</span>',
-                            'REJECT_APPROVAL': '<span class="badge badge-danger"><i class="fa fa-times"></i> 审批拒绝</span>'
+                            'LOGIN': '<span class="label label-primary">登录</span>',
+                            'LOGOUT': '<span class="label label-default">登出</span>',
+                            'SEND_MESSAGE': '<span class="label label-info">发送消息</span>',
+                            'DELETE_MESSAGE': '<span class="label label-warning">删除消息</span>',
+                            'CREATE_GROUP': '<span class="label label-success">创建群组</span>',
+                            'JOIN_GROUP': '<span class="label label-success">加入群组</span>',
+                            'LEAVE_GROUP': '<span class="label label-warning">退出群组</span>',
+                            'ADD_FRIEND': '<span class="label label-info">添加好友</span>',
+                            'DELETE_FRIEND': '<span class="label label-danger">删除好友</span>',
+                            'UPLOAD_FILE': '<span class="label label-primary">上传文件</span>',
+                            'DOWNLOAD_FILE': '<span class="label label-info">下载文件</span>'
                         };
-                        return typeMap[value] || '<span class="badge badge-default">' + (value || '-') + '</span>';
+                        return typeMap[value] || '<span class="label label-default">' + (value || '-') + '</span>';
                     }
                 }, {
                     field: 'targetType',
                     title: '目标类型',
                     align: 'center',
-                    width: '90',
-                    formatter: function(value, row, index) {
+                    width: 90,
+                    formatter: function(value) {
                         if (!value) return '-';
                         var typeMap = {
                             'USER': '<span class="label label-primary">用户</span>',
@@ -250,217 +172,90 @@
                             'GROUP': '<span class="label label-success">群组</span>',
                             'CONVERSATION': '<span class="label label-warning">会话</span>',
                             'FRIEND': '<span class="label label-info">好友</span>',
-                            'FILE': '<span class="label label-primary">文件</span>',
-                            'APPROVAL': '<span class="label label-warning">审批</span>'
+                            'FILE': '<span class="label label-primary">文件</span>'
                         };
                         return typeMap[value] || '<span class="label label-default">' + value + '</span>';
                     }
                 }, {
                     field: 'targetId',
                     title: '目标ID',
-                    width: '90',
-                    formatter: function(value, row, index) {
+                    width: 90,
+                    formatter: function(value) {
                         return value || '-';
                     }
                 }, {
                     field: 'operationResult',
                     title: '结果',
                     align: 'center',
-                    width: '90',
-                    formatter: function(value, row, index) {
+                    width: 90,
+                    formatter: function(value) {
                         if (value === 'SUCCESS') {
-                            return '<span class="badge badge-success"><i class="fa fa-check"></i> 成功</span>';
+                            return '<span class="label label-success"><i class="fa fa-check"></i> 成功</span>';
                         }
-                        return '<span class="badge badge-danger"><i class="fa fa-times"></i> 失败</span>';
+                        return '<span class="label label-danger"><i class="fa fa-times"></i> 失败</span>';
                     }
                 }, {
                     field: 'errorMessage',
                     title: '错误信息',
-                    width: '200',
-                    formatter: function(value, row, index) {
+                    width: 200,
+                    formatter: function(value) {
                         if (!value) return '-';
                         if (value.length > 30) {
-                            return '<span title="' + value + '">' + value.substring(0, 30) + '...</span>';
+                            return $.table.tooltip(value, 30);
                         }
                         return '<span class="text-danger">' + value + '</span>';
                     }
                 }, {
                     field: 'ipAddress',
                     title: 'IP地址',
-                    width: '130',
-                    formatter: function(value, row, index) {
+                    width: 130,
+                    formatter: function(value) {
                         return '<code>' + (value || '-') + '</code>';
-                    }
-                }, {
-                    field: 'userAgent',
-                    title: '客户端',
-                    width: '150',
-                    formatter: function(value, row, index) {
-                        if (!value) return '-';
-                        var ua = value;
-                        if (ua.indexOf('iPhone') > -1) return '<i class="fa fa-mobile"></i> iPhone';
-                        if (ua.indexOf('Android') > -1) return '<i class="fa fa-mobile"></i> Android';
-                        if (ua.indexOf('Windows') > -1) return '<i class="fa fa-desktop"></i> Windows';
-                        if (ua.indexOf('Mac') > -1) return '<i class="fa fa-desktop"></i> macOS';
-                        if (ua.length > 20) return ua.substring(0, 20) + '...';
-                        return ua;
                     }
                 }, {
                     field: 'createTime',
                     title: '操作时间',
-                    width: '160',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
+                    width: 160,
+                    sortable: true
                 }, {
                     title: '操作',
                     align: 'center',
-                    width: '100',
-                    formatter: function(value, row, index) {
-                        var menuItems = [];
-
-                        var mainAction = {
-                            text: '详情',
-                            icon: 'fa-search',
-                            action: 'detail(' + row.id + ')',
-                            btnClass: 'btn-info'
-                        };
-
-                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
+                    width: 80,
+                    formatter: function(value, row) {
+                        return '<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="detail(' + row.id + ')"><i class="fa fa-search"></i>详情</a>';
                     }
-                }],
-                responseHandler: function(res) {
-                    ImCommon.hideLoading();
-                    return ImCommon.handleTableResponse(res, '暂无审计日志', '#bootstrap-table');
-                },
-                onLoadError: function(status) {
-                    ImCommon.hideLoading();
-                    $.modal.msgError("数据加载失败，请稍后重试");
-                },
-                onLoadSuccess: function() {
-                    ImCommon.removeEmptyData('#bootstrap-table');
-                },
-                ajaxOptions: {
-                    beforeSend: function() {
-                        ImCommon.showLoading('.select-table');
-                    },
-                    complete: function() {
-                        ImCommon.hideLoading();
-                    }
-                }
+                }]
             };
             $.table.init(options);
         });
 
-        /**
-         * 加载统计数据（带动画）
-         */
-        function loadStatistics() {
-            ImCommon.loadStatisticsWithCache(
-                prefix + "/statistics",
-                function(data) {
-                    // 使用数字滚动动画更新统计
-                    ImCommon.animateStatistics({
-                        '#totalCount': data.totalCount || 0,
-                        '#successCount': data.successCount || 0,
-                        '#failedCount': data.failedCount || 0,
-                        '#todayCount': data.todayCount || 0
-                    }, 800);
-                },
-                'audit_log_statistics',
-                5
-            );
-        }
-
-        /**
-         * 根据操作结果筛选（统计卡片点击）
-         * @param result 操作结果：空=全部，SUCCESS=成功，FAILED=失败
-         */
-        function filterByResult(result) {
-            $('select[name="operationResult"]').val(result);
-            doSearch();
-        }
-
-        /**
-         * 筛选今日日志
-         */
-        function filterByToday() {
-            // 设置今日时间范围
-            var today = new Date();
-            var yyyy = today.getFullYear();
-            var mm = String(today.getMonth() + 1).padStart(2, '0');
-            var dd = String(today.getDate()).padStart(2, '0');
-            var todayStr = yyyy + '-' + mm + '-' + dd;
-
-            $('#startTime').val(todayStr + ' 00:00:00');
-            $('#endTime').val(todayStr + ' 23:59:59');
-            doSearch();
-        }
-
-        /**
-         * 清空搜索条件
-         */
-        function clearSearch() {
-            $.form.reset();
-            $('#searchStatus').hide();
-            $.table.search();
-        }
-
-        /**
-         * 执行搜索
-         */
-        function doSearch() {
-            ImCommon.showSearchConditions('#auditLog-form', '#searchStatus', 'clearSearch()');
-            $.table.search();
-        }
-
-        /**
-         * 显示清理弹窗
-         */
         function showCleanModal() {
             $("#cleanModal").modal('show');
         }
 
-        /**
-         * 执行清理（带进度提示）
-         */
         function doClean() {
             var days = $("#cleanDays").val();
             $("#cleanModal").modal('hide');
-
-            // 显示进度
-            ImCommon.BatchProgress.show('#toolbar', {
-                total: 1,
-                current: 0,
-                text: '正在清理日志...'
-            });
-
-            $.ajax({
-                url: prefix + "/clean",
-                type: 'post',
-                data: { days: days },
-                success: function(result) {
-                    if (result.code == 0) {
-                        ImCommon.BatchProgress.complete('#toolbar', '清理完成');
-                        ImCommon.toast('已清理 ' + days + ' 天前的日志记录', 'success');
-                        $.table.refresh();
-                        loadStatistics();
-                    } else {
-                        ImCommon.BatchProgress.hide('#toolbar');
-                        $.modal.alertError(result.msg || "清理失败");
+            $.modal.confirm('确定要清理 ' + days + ' 天前的日志记录吗？', function() {
+                $.ajax({
+                    url: prefix + "/clean",
+                    type: 'post',
+                    data: { days: days },
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("清理完成");
+                            $.table.refresh();
+                        } else {
+                            $.modal.alertError(result.msg || "清理失败");
+                        }
+                    },
+                    error: function() {
+                        $.modal.alertError("清理失败，请稍后重试");
                     }
-                },
-                error: function() {
-                    ImCommon.BatchProgress.hide('#toolbar');
-                    $.modal.alertError("清理失败，请稍后重试");
-                }
+                });
             });
         }
 
-        /**
-         * 查看详情
-         */
         function detail(id) {
             $.ajax({
                 url: prefix + "/" + id,
@@ -476,7 +271,6 @@
                         html += '<tr><th>操作结果</th><td>' + (data.operationResult || '-') + '</td></tr>';
                         html += '<tr><th>错误信息</th><td>' + (data.errorMessage || '-') + '</td></tr>';
                         html += '<tr><th>IP地址</th><td>' + (data.ipAddress || '-') + '</td></tr>';
-                        html += '<tr><th>用户代理</th><td>' + (data.userAgent || '-') + '</td></tr>';
                         html += '<tr><th>操作时间</th><td>' + (data.createTime || '-') + '</td></tr>';
                         html += '</table>';
                         top.layer.open({

@@ -172,52 +172,28 @@
     <div class="wrapper wrapper-content animated fadeInRight">
         <!-- 统计卡片区域 -->
         <div class="row">
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins">
-                    <div class="ibox-title">
-                        <span class="label label-success pull-right">总</span>
-                        <h5>群组总数</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <h2 class="no-margins text-success" id="totalCount">-</h2>
-                        <small>系统群组总数</small>
-                    </div>
+            <div class="col-sm-3 compact-ibox">
+                <div class="ibox-content" style="text-align: center; cursor: pointer; border-top-color: #1ab394;" onclick="filterByType('')">
+                    <h1 class="no-margins" id="totalCount">0</h1>
+                    <div class="stat-percent font-bold text-navy">群组总数</div>
                 </div>
             </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins">
-                    <div class="ibox-title">
-                        <span class="label label-info pull-right">今</span>
-                        <h5>今日新建</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <h2 class="no-margins text-info" id="todayCount">-</h2>
-                        <small>今日创建群组</small>
-                    </div>
+            <div class="col-sm-3 compact-ibox">
+                <div class="ibox-content" style="text-align: center; cursor: pointer; border-top-color: #f8ac59;" onclick="filterByMuted()">
+                    <h1 class="no-margins text-warning" id="mutedCount">0</h1>
+                    <div class="stat-percent font-bold text-warning">禁言群组</div>
                 </div>
             </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins">
-                    <div class="ibox-title">
-                        <span class="label label-primary pull-right">活</span>
-                        <h5>活跃群组</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <h2 class="no-margins text-navy" id="activeCount">-</h2>
-                        <small>近7天有消息</small>
-                    </div>
+            <div class="col-sm-3 compact-ibox">
+                <div class="ibox-content" style="text-align: center; cursor: pointer; border-top-color: #ed5565;" onclick="filterByLarge()">
+                    <h1 class="no-margins text-danger" id="largeCount">0</h1>
+                    <div class="stat-percent font-bold text-danger">大规模群</div>
                 </div>
             </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins">
-                    <div class="ibox-title">
-                        <span class="label label-warning pull-right">员</span>
-                        <h5>成员总数</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <h2 class="no-margins text-warning" id="memberCount">-</h2>
-                        <small>群组成员总数</small>
-                    </div>
+            <div class="col-sm-3 compact-ibox">
+                <div class="ibox-content" style="text-align: center; border-top-color: #1c84c6;">
+                    <h1 class="no-margins text-primary" id="todayCreate">0</h1>
+                    <div class="stat-percent font-bold text-primary">今日新增</div>
                 </div>
             </div>
         </div>
@@ -313,20 +289,13 @@
             initTable();
         });
 
-        /**
-         * 加载群组统计数据
-         */
         function loadStatistics() {
-            $.ajax({
-                url: prefix + "/statistics",
-                type: "GET",
-                success: function(result) {
-                    if (result.code == 0 && result.data) {
-                        $("#totalCount").text(result.data.totalCount || 0);
-                        $("#todayCount").text(result.data.todayCount || 0);
-                        $("#activeCount").text(result.data.activeCount || 0);
-                        $("#memberCount").text(result.data.memberCount || 0);
-                    }
+            $.get(ctx + 'im/dashboard/group-statistics', function (res) {
+                if (res.code === 0) {
+                    $('#totalCount').text(res.data.totalGroups || 0);
+                    $('#mutedCount').text(res.data.mutedGroups || 0);
+                    $('#largeCount').text(res.data.largeGroups || 0);
+                    $('#todayCreate').text(res.data.todayCreatedGroups || 0);
                 }
             });
         }

@@ -5,70 +5,28 @@
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
-    <div class="container-div">
-        <div class="row" style="padding-top: 6px;">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-primary">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">考勤记录总数</div>
-                            <i class="fa fa-calendar stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-success">
-                            <div class="stat-number" id="normalCount">0</div>
-                            <div class="stat-label">正常打卡</div>
-                            <i class="fa fa-check-circle stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-warning">
-                            <div class="stat-number" id="lateCount">0</div>
-                            <div class="stat-label">迟到/早退</div>
-                            <i class="fa fa-clock-o stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-danger">
-                            <div class="stat-number" id="absentCount">0</div>
-                            <div class="stat-label">缺卡</div>
-                            <i class="fa fa-exclamation-circle stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
+    <div class="container-div im-page">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
                 <form id="attendance-form">
                     <div class="select-list">
                         <ul>
                             <li>
+                                考勤记录总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
+                            </li>
+                            <li>
+                                正常打卡：<a onclick="$('select[name=\\'checkInStatus\\']').val('NORMAL');$.table.search()"><span class="label label-success" id="normalCount">0</span></a>
+                            </li>
+                            <li>
+                                迟到/早退：<a onclick="$('select[name=\\'checkInStatus\\']').val('LATE');$.table.search()"><span class="label label-warning" id="lateCount">0</span></a>
+                            </li>
+                            <li>
+                                缺卡：<a onclick="$('select[name=\\'checkInStatus\\']').val('ABSENT');$.table.search()"><span class="label label-danger" id="absentCount">0</span></a>
+                            </li>
+                            <li class="pull-right">
                                 <label class="input-label">用户名称：</label><input type="text" name="userName" placeholder="请输入用户名称"/>
                             </li>
-                            <li>
-                                <label class="input-label">打卡日期：</label><input type="text" name="attendanceDate" class="time-input" placeholder="请选择日期"/>
-                            </li>
-                            <li>
-                                <label class="input-label">上班状态：</label><select name="checkInStatus">
-                                    <option value="">所有</option>
-                                    <option value="NORMAL">正常</option>
-                                    <option value="LATE">迟到</option>
-                                    <option value="ABSENT">缺卡</option>
-                                </select>
-                            </li>
-                            <li>
-                                <label class="input-label">下班状态：</label><select name="checkOutStatus">
-                                    <option value="">所有</option>
-                                    <option value="NORMAL">正常</option>
-                                    <option value="EARLY">早退</option>
-                                    <option value="ABSENT">缺卡</option>
-                                </select>
-                            </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">审批状态：</label><select name="approveStatus">
                                     <option value="">所有</option>
                                     <option value="PENDING">待审批</option>
@@ -76,24 +34,19 @@
                                     <option value="REJECTED">已拒绝</option>
                                 </select>
                             </li>
-                            <li class="select-time">
+                            <li class="select-time pull-right">
                                 <label>打卡日期范围：</label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始日期" name="params[beginDate]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束日期" name="params[endDate]"/>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <!-- 数据展示区域 -->
+            <!-- 数据表格区域 -->
             <div class="col-sm-12 select-table table-striped">
-                <!-- 批量操作按钮 -->
                 <div class="btn-group-sm" id="toolbar">
                     <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:attendance:add">
                         <i class="fa fa-plus"></i> 新增
@@ -108,23 +61,13 @@
                         <i class="fa fa-download"></i> 导出
                     </a>
                 </div>
-
-                <!-- 搜索状态提示 -->
-                <div class="search-status" id="searchStatus" style="display:none;">
-                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
-                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
-                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
-                </div>
-
-                <!-- 数据表格 -->
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                <table id="bootstrap-table"></table>
             </div>
         </div>
     </div>
 
     <th:block th:include="include :: footer" />
     <th:block th:include="include :: bootstrap-table-export-js" />
-    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:attendance:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:attendance:remove')}]];
@@ -254,10 +197,7 @@
                     field: 'createTime',
                     title: '创建时间',
                     width: '160',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
+                    sortable: true
                 }, {
                     title: '操作',
                     align: 'center',
@@ -270,22 +210,12 @@
                     }
                 }],
                 responseHandler: function(res) {
-                    ImCommon.hideLoading();
-                    return ImCommon.handleTableResponse(res, '暂无考勤记录', '#bootstrap-table');
-                },
-                onLoadError: function(status) {
-                    ImCommon.hideLoading();
-                    $.modal.msgError("数据加载失败，请稍后重试");
-                },
-                onLoadSuccess: function() {
-                    ImCommon.removeEmptyData('#bootstrap-table');
-                },
-                ajaxOptions: {
-                    beforeSend: function() {
-                        ImCommon.showLoading('.select-table');
-                    },
-                    complete: function() {
-                        ImCommon.hideLoading();
+                    $.modal.closeLoading();
+                    if (res.code === 0) {
+                        return { rows: res.rows, total: res.total };
+                    } else {
+                        $.modal.alertWarning(res.msg);
+                        return { rows: [], total: 0 };
                     }
                 }
             };
@@ -296,34 +226,14 @@
          * 加载统计数据
          */
         function loadStatistics() {
-            ImCommon.loadStatisticsWithCache(
-                prefix + "/statistics",
-                function(data) {
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#normalCount").text(data.normalCount || 0);
-                    $("#lateCount").text(data.lateCount || 0);
-                    $("#absentCount").text(data.absentCount || 0);
-                },
-                'attendance_statistics',
-                5
-            );
-        }
-
-        /**
-         * 清空搜索条件
-         */
-        function clearSearch() {
-            $.form.reset();
-            $('#searchStatus').hide();
-            $.table.search();
-        }
-
-        /**
-         * 执行搜索
-         */
-        function doSearch() {
-            ImCommon.showSearchConditions('#attendance-form', '#searchStatus', 'clearSearch()');
-            $.table.search();
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code === 0) {
+                    $("#totalCount").text(result.data.totalCount || 0);
+                    $("#normalCount").text(result.data.normalCount || 0);
+                    $("#lateCount").text(result.data.lateCount || 0);
+                    $("#absentCount").text(result.data.absentCount || 0);
+                }
+            });
         }
     </script>
 </body>

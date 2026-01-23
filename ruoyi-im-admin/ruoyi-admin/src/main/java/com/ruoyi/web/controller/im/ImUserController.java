@@ -14,7 +14,6 @@ import com.ruoyi.common.utils.security.PasswordPolicyValidator;
 import com.ruoyi.web.domain.ImUser;
 import com.ruoyi.web.domain.dto.*;
 import com.ruoyi.web.domain.vo.*;
-import com.ruoyi.web.mapper.ImUserMapper;
 import com.ruoyi.web.service.ImBatchSelectionService;
 import com.ruoyi.web.service.ImUserService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -28,13 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * IM用户管理控制器（管理后台）
@@ -61,9 +56,6 @@ public class ImUserController extends BaseController {
 
     @Autowired
     private ImUserService imUserService;
-
-    @Autowired
-    private ImUserMapper userMapper;
 
     @Autowired
     private ImBatchSelectionService batchSelectionService;
@@ -130,6 +122,7 @@ public class ImUserController extends BaseController {
             return AjaxResult.error("密码长度不能超过20位");
         }
 
+        // 调用 Service 层的简化版重置密码方法
         int result = imUserService.resetPasswordSimple(userId, password);
         if (result > 0) {
             return AjaxResult.success("密码重置成功");

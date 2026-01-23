@@ -178,6 +178,7 @@ public class ImUserServiceImpl implements ImUserService {
             stats.put("totalCount", 0);
             stats.put("onlineCount", 0);
             stats.put("disabledCount", 0);
+            stats.put("todayCount", 0);
         }
         
         // 3. 计算离线人数及处理类型转换

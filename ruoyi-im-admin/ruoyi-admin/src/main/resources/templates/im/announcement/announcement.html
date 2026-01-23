@@ -3,56 +3,111 @@
 <head>
     <th:block th:include="include :: header('群公告管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+    <style>
+        /* 搜索栏紧凑优化 */
+        .select-list ul li {
+            margin: 0px 10px 5px 0px !important;
+        }
+        .select-list ul li input {
+            width: 140px !important;
+        }
+        .select-list ul li select {
+            width: 140px !important;
+        }
+        
+        /* 统计卡片样式微调 */
+        .announcement-stat-card {
+            margin-bottom: 10px;
+        }
+        .ibox-content {
+            padding: 10px 15px;
+        }
+        .ibox-title {
+            padding: 10px 15px;
+            min-height: 40px;
+        }
+    </style>
 </head>
 <body class="gray-bg">
-    <div class="container-div">
-        <div class="row" style="padding-top: 6px;">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12">
+    <div class="container-div im-page">
+        <div class="row">
+            <!-- 统计卡片区域 - 使用RuoYi原生 ibox 样式 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="stat-box stat-box-primary">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">公告总数</div>
-                            <i class="fa fa-bullhorn stat-icon"></i>
+                        <div class="ibox float-e-margins announcement-stat-card">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>公告总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCountCard">0</h2>
+                                <small>全部公告数量</small>
+                            </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="stat-box stat-box-success">
-                            <div class="stat-number" id="pinnedCount">0</div>
-                            <div class="stat-label">已置顶</div>
-                            <i class="fa fa-thumb-tack stat-icon"></i>
+                        <div class="ibox float-e-margins announcement-stat-card">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">今</span>
+                                <h5>今日公告</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="todayCount">0</h2>
+                                <small>今日新增公告</small>
+                            </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="stat-box stat-box-warning">
-                            <div class="stat-number" id="systemCount">0</div>
-                            <div class="stat-label">系统公告</div>
-                            <i class="fa fa-cog stat-icon"></i>
+                        <div class="ibox float-e-margins announcement-stat-card">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">发</span>
+                                <h5>已发布公告</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="publishedCount">0</h2>
+                                <small>已发布状态</small>
+                            </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="stat-box stat-box-danger">
-                            <div class="stat-number" id="activityCount">0</div>
-                            <div class="stat-label">活动通知</div>
-                            <i class="fa fa-calendar stat-icon"></i>
+                        <div class="ibox float-e-margins announcement-stat-card">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">草</span>
+                                <h5>草稿公告</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="draftCount">0</h2>
+                                <small>草稿状态</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
+            <div class="col-sm-12 search-collapse">
                 <form id="announcement-form">
                     <div class="select-list">
                         <ul>
                             <li>
+                                公告总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCountLabel">0</span></a>
+                            </li>
+                            <li>
+                                已置顶：<a onclick="$('select[name=\\'isPinned\\']').val('1');$.table.search()"><span class="label label-success" id="pinnedCount">0</span></a>
+                            </li>
+                            <li>
+                                系统公告：<a onclick="$('select[name=\\'type\\']').val('2');$.table.search()"><span class="label label-warning" id="systemCount">0</span></a>
+                            </li>
+                            <li>
+                                活动通知：<a onclick="$('select[name=\\'type\\']').val('3');$.table.search()"><span class="label label-info" id="activityCount">0</span></a>
+                            </li>
+                            <li class="pull-right">
                                 <label class="input-label">群组ID：</label><input type="text" name="groupId" placeholder="请输入群组ID"/>
                             </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">群组名称：</label><input type="text" name="groupName" placeholder="请输入群组名称"/>
                             </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">公告类型：</label><select name="type">
                                     <option value="">所有</option>
                                     <option value="1">普通公告</option>
@@ -60,7 +115,7 @@
                                     <option value="3">活动通知</option>
                                 </select>
                             </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">发布状态：</label><select name="status">
                                     <option value="">所有</option>
                                     <option value="0">草稿</option>
@@ -68,25 +123,19 @@
                                     <option value="2">已撤回</option>
                                 </select>
                             </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">是否置顶：</label><select name="isPinned">
                                     <option value="">所有</option>
                                     <option value="0">否</option>
                                     <option value="1">是</option>
                                 </select>
                             </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                            </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
-                <!-- 批量操作按钮 -->
                 <div class="btn-group-sm" id="toolbar">
                     <a class="btn btn-success" onclick="addAnnouncement()" shiro:hasPermission="im:announcement:add">
                         <i class="fa fa-plus"></i> 新增
@@ -104,23 +153,12 @@
                         <i class="fa fa-download"></i> 导出
                     </a>
                 </div>
-
-                <!-- 搜索状态提示 -->
-                <div class="search-status" id="searchStatus" style="display:none;">
-                    <i class="fa fa-filter" style="color:#1c84c6;"></i>
-                    搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
-                    <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
-                </div>
-
-                <!-- 数据表格 -->
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                <table id="bootstrap-table"></table>
             </div>
         </div>
     </div>
 
     <th:block th:include="include :: footer" />
-    <th:block th:include="include :: bootstrap-table-export-js" />
-    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var editFlag = [[${@permission.hasPermi('im:announcement:edit')}]];
         var removeFlag = [[${@permission.hasPermi('im:announcement:remove')}]];
@@ -144,23 +182,18 @@
                 removeUrl: prefix + "/remove",
                 exportUrl: prefix + "/export",
                 modalName: "群公告",
-                // 分页配置
                 pagination: true,
                 pageSize: 20,
                 pageList: [10, 20, 50, 100],
                 sidePagination: "server",
-                // 固定列配置
                 fixedColumns: true,
                 fixedNumber: 1,
                 fixedRightNumber: 1,
-                // 列显示/隐藏配置
                 showColumns: true,
                 showColumnsToggleAll: true,
-                // 记住列选择
                 cookie: true,
                 cookieIdTable: 'im_announcement_table',
                 cookieExpire: '30d',
-                // 导出配置
                 showExport: true,
                 exportDataType: 'selected',
                 exportTypes: ['excel'],
@@ -240,220 +273,60 @@
                 }, {
                     field: 'expireTime',
                     title: '过期时间',
-                    width: '180',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
+                    width: '160',
+                    sortable: true
                 }, {
                     field: 'createTime',
                     title: '发布时间',
-                    width: '180',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
+                    width: '160',
+                    sortable: true
                 }, {
                     title: '操作',
                     align: 'center',
                     width: '250',
                     formatter: function(value, row, index) {
-                        var menuItems = [
-                            { text: '查看详情', icon: 'fa-eye', action: 'viewContent(row.id)' },
-                            { divider: true }
-                        ];
+                        var actions = [];
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewContent(' + row.id + ')"><i class="fa fa-eye"></i>详情</a> ');
 
-                        // 根据状态添加不同操作
                         if (row.status == 0) {
-                            menuItems.push({ text: '发布公告', icon: 'fa-paper-plane', action: 'publishAnnouncement(row.id)', permissionClass: editFlag });
+                            actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="publishAnnouncement(' + row.id + ')"><i class="fa fa-paper-plane"></i>发布</a> ');
                         } else if (row.status == 1) {
-                            menuItems.push({ text: '撤回公告', icon: 'fa-undo', action: 'recallAnnouncement(row.id)', permissionClass: editFlag });
+                            actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="recallAnnouncement(' + row.id + ')"><i class="fa fa-undo"></i>撤回</a> ');
                         }
 
-                        menuItems.push(
-                            { text: '修改', icon: 'fa-edit', action: 'editAnnouncement(row.id)', permissionClass: editFlag },
-                            { divider: true },
-                            { text: '删除', icon: 'fa-remove', action: '$.operate.remove(row.id)', permissionClass: removeFlag }
-                        );
-
-                        var mainAction = {
-                            text: '编辑',
-                            icon: 'fa-edit',
-                            action: 'editAnnouncement(row.id)',
-                            permissionClass: editFlag,
-                            btnClass: 'btn-success'
-                        };
-
-                        return ImCommon.buildActionDropdown(row, menuItems, mainAction);
+                        actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="editAnnouncement(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
                     }
                 }],
                 responseHandler: function(res) {
-                    ImCommon.hideLoading();
-                    return ImCommon.handleTableResponse(res, '暂无公告数据', '#bootstrap-table');
-                },
-                onLoadError: function(status) {
-                    ImCommon.hideLoading();
-                    $.modal.msgError("数据加载失败，请稍后重试");
-                },
-                onLoadSuccess: function() {
-                    ImCommon.removeEmptyData('#bootstrap-table');
-                },
-                ajaxOptions: {
-                    beforeSend: function() {
-                        ImCommon.showLoading('.select-table');
-                    },
-                    complete: function() {
-                        ImCommon.hideLoading();
+                    $.modal.closeLoading();
+                    if (res.code === 0) {
+                        return { rows: res.rows, total: res.total };
+                    } else {
+                        $.modal.alertWarning(res.msg);
+                        return { rows: [], total: 0 };
                     }
                 }
             };
             $.table.init(options);
         });
 
-        /**
-         * 加载统计数据
-         */
+        /* 加载统计数据 */
         function loadStatistics() {
-            ImCommon.loadStatisticsWithCache(
-                prefix + "/statistics",
-                function(data) {
-                    $("#totalCount").text(data.totalCount || 0);
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code === 0) {
+                    var data = result.data;
+                    // 更新统计卡片
+                    $("#totalCountCard").text(data.totalCount || 0);
+                    $("#todayCount").text(data.todayCount || 0);
+                    $("#publishedCount").text(data.publishedCount || 0);
+                    $("#draftCount").text(data.draftCount || 0);
+                    // 更新搜索栏标签
+                    $("#totalCountLabel").text(data.totalCount || 0);
                     $("#pinnedCount").text(data.pinnedCount || 0);
                     $("#systemCount").text(data.systemCount || 0);
                     $("#activityCount").text(data.activityCount || 0);
-                },
-                'announcement_statistics',
-                5
-            );
-        }
-
-        /**
-         * 清空搜索条件
-         */
-        function clearSearch() {
-            $.form.reset();
-            $('#searchStatus').hide();
-            $.table.search();
-        }
-
-        /**
-         * 执行搜索
-         */
-        function doSearch() {
-            ImCommon.showSearchConditions('#announcement-form', '#searchStatus', 'clearSearch()');
-            $.table.search();
-        }
-
-        /**
-         * 自定义新增函数，支持 groupId 参数
-         */
-        function addAnnouncement() {
-            var url = prefix + "/add";
-            if (currentGroupId) {
-                url += "?groupId=" + currentGroupId;
-            }
-            $.modal.open("新增群公告", url, '1000', '650');
-        }
-
-        /**
-         * 编辑公告（带 groupId 参数）
-         */
-        function editAnnouncement(id) {
-            var url = prefix + "/edit/" + id;
-            if (currentGroupId) {
-                url += "?groupId=" + currentGroupId;
-            }
-            $.modal.open("修改群公告", url, '1000', '650');
-        }
-
-        /**
-         * 查看公告内容
-         */
-        function viewContent(id) {
-            $.get(prefix + "/info/" + id, function(result) {
-                if (result.code == 0) {
-                    var content = result.data.content || '无内容';
-                    var attachment = result.data.attachmentUrl ? '<br><br><strong>附件：</strong><a href="' + result.data.attachmentUrl + '" target="_blank">查看附件</a>' : '';
-                    var html = '<div style="padding: 20px;">' + content + attachment + '</div>';
-                    top.layer.open({
-                        type: 1,
-                        title: '公告详情',
-                        area: ['900px', 'auto'],
-                        content: html
-                    });
                 }
             });
         }
-
-        /**
-         * 置顶/取消置顶
-         */
-        function togglePin() {
-            var rows = $.table.selectFirstColumns();
-            if (rows.length == 0) {
-                $.modal.alertWarning("请至少选择一条记录");
-                return;
-            }
-            var row = $.table.selectFirstRows()[0];
-            var newPinStatus = row.isPinned == 1 ? 0 : 1;
-            $.modal.confirm("确定要" + (newPinStatus == 1 ? "置顶" : "取消置顶") + "该公告吗？", function() {
-                $.ajax({
-                    url: prefix + "/pin",
-                    type: 'put',
-                    data: {id: row.id, isPinned: newPinStatus},
-                    success: function(result) {
-                        if (result.code == 0) {
-                            $.modal.msgSuccess("操作成功");
-                            $.table.refresh();
-                        } else {
-                            $.modal.alertError(result.msg || "操作失败");
-                        }
-                    }
-                });
-            });
-        }
-
-        /**
-         * 发布公告
-         */
-        function publishAnnouncement(id) {
-            $.modal.confirm("确定要发布该公告吗？", function() {
-                $.ajax({
-                    url: prefix + "/edit",
-                    type: 'post',
-                    data: {id: id, status: 1},
-                    success: function(result) {
-                        if (result.code == 0) {
-                            $.modal.msgSuccess("发布成功");
-                            $.table.refresh();
-                        } else {
-                            $.modal.alertError(result.msg || "发布失败");
-                        }
-                    }
-                });
-            });
-        }
-
-        /**
-         * 撤回公告
-         */
-        function recallAnnouncement(id) {
-            $.modal.confirm("确定要撤回该公告吗？撤回后成员将无法查看。", function() {
-                $.ajax({
-                    url: prefix + "/edit",
-                    type: 'post',
-                    data: {id: id, status: 2},
-                    success: function(result) {
-                        if (result.code == 0) {
-                            $.modal.msgSuccess("撤回成功");
-                            $.table.refresh();
-                        } else {
-                            $.modal.alertError(result.msg || "撤回失败");
-                        }
-                    }
-                });
-            });
-        }
-    </script>
-</body>
-</html>

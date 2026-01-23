@@ -3,23 +3,13 @@
 <head>
     <th:block th:include="include :: header('群组操作日志')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-    <style>
-        /* 操作类型徽章 */
-        .badge-create { background-color: #5cb85c; }
-        .badge-update { background-color: #5bc0de; }
-        .badge-delete { background-color: #d9534f; }
-        .badge-join { background-color: #f0ad4e; }
-        .badge-leave { background-color: #777; }
-        .badge-muted { background-color: #d9534f; }
-        .badge-unmuted { background-color: #5cb85c; }
-    </style>
 </head>
 <body class="gray-bg">
-    <div class="container-div">
-        <div class="row" style="padding-top: 6px;">
+    <div class="container-div im-page">
+        <div class="row">
             <!-- 日志头部信息 -->
-            <div class="col-sm-12" th:if="${group != null}" style="padding-bottom: 6px;">
-                <div class="alert alert-info" style="margin-bottom: 0; padding: 10px 15px;">
+            <div class="col-sm-12" th:if="${group != null}">
+                <div class="alert alert-info" style="margin-bottom: 10px; padding: 10px 15px;">
                     <i class="fa fa-list-alt"></i>
                     <strong>群组：</strong><span th:text="${group.name}"></span>
                     <span style="margin: 0 10px;">|</span>
@@ -27,46 +17,23 @@
                 </div>
             </div>
 
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12" th:if="${group != null}">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-primary">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">总日志数</div>
-                            <i class="fa fa-list stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-success">
-                            <div class="stat-number" id="todayCount">0</div>
-                            <div class="stat-label">今日操作</div>
-                            <i class="fa fa-calendar stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-danger">
-                            <div class="stat-number" id="createCount">0</div>
-                            <div class="stat-label">创建操作</div>
-                            <i class="fa fa-plus stat-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="stat-box stat-box-warning">
-                            <div class="stat-number" id="deleteCount">0</div>
-                            <div class="stat-label">删除操作</div>
-                            <i class="fa fa-trash stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 搜索区域 -->
-            <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
+            <div class="col-sm-12 search-collapse">
                 <form id="log-form">
                     <div class="select-list">
                         <ul>
-                            <li>
+                            <li th:if="${group != null}">
+                                总日志数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
+                            </li>
+                            <li th:if="${group != null}">
+                                今日操作：<a onclick="$.table.search()"><span class="label label-success" id="todayCount">0</span></a>
+                            </li>
+                            <li th:if="${group != null}">
+                                创建操作：<a onclick="$('select[name=\\'operationType\\']').val('CREATE');$.table.search()"><span class="label label-danger" id="createCount">0</span></a>
+                            </li>
+                            <li th:if="${group != null}">
+                                删除操作：<a onclick="$('select[name=\\'operationType\\']').val('DELETE');$.table.search()"><span class="label label-warning" id="deleteCount">0</span></a>
+                            </li>
+                            <li class="pull-right">
                                 <label class="input-label">操作类型：</label>
                                 <select name="operationType">
                                     <option value="">所有</option>
@@ -79,43 +46,28 @@
                                     <option value="UNMUTE">解除禁言</option>
                                 </select>
                             </li>
-                            <li>
+                            <li class="pull-right">
                                 <label class="input-label">操作人ID：</label>
                                 <input type="text" name="operatorId" placeholder="请输入操作人ID"/>
                             </li>
-                            <li class="select-time">
+                            <li class="select-time pull-right">
                                 <label>操作时间：</label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <!-- 搜索状态提示 -->
-            <div class="col-sm-12" id="searchStatus" style="display:none; padding: 5px 0;">
-                <i class="fa fa-filter" style="color:#1c84c6;"></i>
-                搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
-                <a href="javascript:void(0)" onclick="clearSearch()" style="margin-left:10px; color:#1c84c6;">清除</a>
-            </div>
-
-            <!-- 数据展示区域 -->
             <div class="col-sm-12 select-table table-striped">
-                <!-- 数据表格 -->
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                <table id="bootstrap-table"></table>
             </div>
         </div>
     </div>
 
     <th:block th:include="include :: footer" />
-    <th:block th:include="include :: bootstrap-table-export-js" />
-    <script th:src="@{/js/im-common.js}"></script>
     <script th:inline="javascript">
         var prefix = ctx + "im/group";
         var groupId = [[${group != null ? group.id : groupId}]];
@@ -144,8 +96,6 @@
                 showColumns: true,
                 showColumnsToggleAll: true,
                 showRefresh: true,
-                cardView: false,
-                detailView: false,
                 columns: [{
                     checkbox: true
                 }, {
@@ -162,13 +112,13 @@
                     align: 'center',
                     width: '100',
                     formatter: function(value, row, index) {
-                        if (value === 'CREATE') { return '<span class="badge badge-create">创建</span>'; }
-                        if (value === 'UPDATE') { return '<span class="badge badge-update">更新</span>'; }
-                        if (value === 'DELETE') { return '<span class="badge badge-delete">删除</span>'; }
-                        if (value === 'JOIN') { return '<span class="badge badge-join">加入</span>'; }
-                        if (value === 'LEAVE') { return '<span class="badge badge-leave">退出</span>'; }
-                        if (value === 'MUTE') { return '<span class="badge badge-muted">禁言</span>'; }
-                        if (value === 'UNMUTE') { return '<span class="badge badge-unmuted">解除禁言</span>'; }
+                        if (value === 'CREATE') { return '<span class="badge badge-primary">创建</span>'; }
+                        if (value === 'UPDATE') { return '<span class="badge badge-info">更新</span>'; }
+                        if (value === 'DELETE') { return '<span class="badge badge-danger">删除</span>'; }
+                        if (value === 'JOIN') { return '<span class="badge badge-success">加入</span>'; }
+                        if (value === 'LEAVE') { return '<span class="badge badge-warning">退出</span>'; }
+                        if (value === 'MUTE') { return '<span class="badge badge-warning">禁言</span>'; }
+                        if (value === 'UNMUTE') { return '<span class="badge badge-success">解除禁言</span>'; }
                         return '<span class="badge badge-default">' + (value || '-') + '</span>';
                     }
                 }, {
@@ -205,37 +155,21 @@
                     field: 'createTime',
                     title: '操作时间',
                     width: '160',
-                    sortable: true,
-                    formatter: function(value, row, index) {
-                        return ImCommon.formatDateTimeWithRelative(value);
-                    }
+                    sortable: true
                 }],
                 responseHandler: function(res) {
-                    ImCommon.hideLoading();
-                    return ImCommon.handleTableResponse(res, '暂无日志数据', '#bootstrap-table');
-                },
-                onLoadError: function(status) {
-                    ImCommon.hideLoading();
-                    $.modal.msgError("数据加载失败，请稍后重试");
-                },
-                onLoadSuccess: function() {
-                    ImCommon.removeEmptyData('#bootstrap-table');
-                },
-                ajaxOptions: {
-                    beforeSend: function() {
-                        ImCommon.showLoading('.select-table');
-                    },
-                    complete: function() {
-                        ImCommon.hideLoading();
+                    $.modal.closeLoading();
+                    if (res.code === 0) {
+                        return { rows: res.rows, total: res.total };
+                    } else {
+                        $.modal.alertWarning(res.msg);
+                        return { rows: [], total: 0 };
                     }
                 }
             };
             $.table.init(options);
         }
 
-        /**
-         * HTML转义函数，防止XSS攻击
-         */
         function escapeHtml(text) {
             if (!text) return text;
             return text.toString()
@@ -246,40 +180,17 @@
                 .replace(/'/g, "&#039;");
         }
 
-        /**
-         * 加载统计数据
-         */
         function loadStatistics() {
             if (!groupId) return;
 
-            ImCommon.loadStatisticsWithCache(
-                prefix + "/log/statistics/" + groupId,
-                function(result) {
+            $.get(prefix + "/log/statistics/" + groupId, function(result) {
+                if (result.code === 0) {
                     $("#totalCount").text(result.data.totalCount || 0);
                     $("#todayCount").text(result.data.todayCount || 0);
                     $("#createCount").text(result.data.createCount || 0);
                     $("#deleteCount").text(result.data.deleteCount || 0);
-                },
-                'group_log_statistics_' + groupId,
-                5
-            );
-        }
-
-        /**
-         * 清空搜索条件
-         */
-        function clearSearch() {
-            $.form.reset();
-            $('#searchStatus').hide();
-            $.table.search();
-        }
-
-        /**
-         * 执行搜索
-         */
-        function doSearch() {
-            ImCommon.showSearchConditions('#log-form', '#searchStatus', 'clearSearch()');
-            $.table.search();
+                }
+            });
         }
     </script>
 </body>

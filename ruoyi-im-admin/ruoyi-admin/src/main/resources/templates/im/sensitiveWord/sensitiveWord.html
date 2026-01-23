@@ -1,297 +1,189 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-
 <head>
     <th:block th:include="include :: header('敏感词管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet" />
+    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
 </head>
-
 <body class="gray-bg">
-    <div class="container-div">
-        <div class="row" style="padding-top: 6px;">
-            <div class="row pt-5">
-                <!-- 1. 统计面板 (Premium Minimalist) -->
-                <div class="col-sm-12">
-                    <div class="im-stat-group">
-                        <div class="im-stat-item" onclick="$.table.search()">
-                            <div class="stat-header">
-                                <span class="stat-label">敏感词总库</span>
-                                <div class="stat-icon-box"><i class="fa fa-warning"></i></div>
-                            </div>
-                            <div class="stat-number" id="totalCount">-</div>
-                            <div class="stat-footer text-muted">包含违禁、营销与纠纷词汇</div>
-                        </div>
-                        <div class="im-stat-item" onclick="$('select[name=\'level\']').val('HIGH');doSearch()">
-                            <div class="stat-header">
-                                <span class="stat-label">高风险拦截</span>
-                                <div class="stat-icon-box" style="background: #fef2f2; color: #ef4444;"><i
-                                        class="fa fa-exclamation-circle"></i></div>
-                            </div>
-                            <div class="stat-number" id="highLevelCount">-</div>
-                            <div class="stat-footer text-muted">触发即阻断通信的高危指标</div>
-                        </div>
-                        <div class="im-stat-item" onclick="$('select[name=\'level\']').val('MEDIUM');doSearch()">
-                            <div class="stat-header">
-                                <span class="stat-label">中级风险</span>
-                                <div class="stat-icon-box" style="background: #fff7ed; color: #f59e0b;"><i
-                                        class="fa fa-exclamation-triangle"></i></div>
-                            </div>
-                            <div class="stat-number" id="mediumLevelCount">-</div>
-                            <div class="stat-footer text-muted">需人工审计或降权处理的词汇</div>
-                        </div>
-                        <div class="im-stat-item" onclick="$('select[name=\'status\']').val('1');doSearch()">
-                            <div class="stat-header">
-                                <span class="stat-label">实时生效中</span>
-                                <div class="stat-icon-box" style="background: #ecfdf5; color: #10b981;"><i
-                                        class="fa fa-check-circle"></i></div>
-                            </div>
-                            <div class="stat-number" id="enabledCount">-</div>
-                            <div class="stat-footer text-muted">当前算法策略正在应用的过滤项</div>
-                        </div>
+    <div class="container-div im-page">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="sensitiveWord-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                敏感词总库：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
+                            </li>
+                            <li>
+                                高风险拦截：<a onclick="$('select[name=\\'level\\']').val('HIGH');$.table.search()"><span class="label label-danger" id="highLevelCount">0</span></a>
+                            </li>
+                            <li>
+                                中级风险：<a onclick="$('select[name=\\'level\\']').val('MEDIUM');$.table.search()"><span class="label label-warning" id="mediumLevelCount">0</span></a>
+                            </li>
+                            <li>
+                                实时生效中：<a onclick="$('select[name=\\'status\\']').val('1');$.table.search()"><span class="label label-success" id="enabledCount">0</span></a>
+                            </li>
+                            <li class="pull-right">
+                                <label class="input-label">敏感词：</label><input type="text" name="word" placeholder="请输入敏感词"/>
+                            </li>
+                            <li class="pull-right">
+                                <label class="input-label">级别：</label><select name="level">
+                                    <option value="">所有</option>
+                                    <option value="LOW">低级</option>
+                                    <option value="MEDIUM">中级</option>
+                                    <option value="HIGH">高级</option>
+                                </select>
+                            </li>
+                            <li class="pull-right">
+                                <label class="input-label">状态：</label><select name="status">
+                                    <option value="">所有</option>
+                                    <option value="1">启用</option>
+                                    <option value="0">禁用</option>
+                                </select>
+                            </li>
+                        </ul>
                     </div>
+                </form>
+            </div>
+
+            <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:sensitiveWord:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:sensitiveWord:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:sensitiveWord:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:sensitiveWord:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
                 </div>
-
-                <!-- 搜索区域 -->
-                <div class="col-sm-12 search-collapse" style="padding-top: 6px;">
-                    <form id="sensitiveWord-form">
-                        <div class="select-list">
-                            <ul>
-                                <li>
-                                    <label class="input-label">敏感词：</label><input type="text" name="word"
-                                        placeholder="请输入敏感词" />
-                                </li>
-                                <li>
-                                    <label class="input-label">级别：</label><select name="level">
-                                        <option value="">所有</option>
-                                        <option value="LOW">低级</option>
-                                        <option value="MEDIUM">中级</option>
-                                        <option value="HIGH">高级</option>
-                                    </select>
-                                </li>
-                                <li>
-                                    <label class="input-label">状态：</label><select name="status">
-                                        <option value="">所有</option>
-                                        <option value="1">启用</option>
-                                        <option value="0">禁用</option>
-                                    </select>
-                                </li>
-                                <li>
-                                    <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i
-                                            class="fa fa-search"></i>&nbsp;搜索</a>
-                                    <a class="btn btn-warning btn-rounded btn-sm" onclick="clearSearch()"><i
-                                            class="fa fa-refresh"></i>&nbsp;重置</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- 数据展示区域 -->
-                <div class="col-sm-12 select-table table-striped">
-                    <!-- 批量操作按钮 -->
-                    <div class="btn-group-sm" id="toolbar">
-                        <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:sensitiveWord:add">
-                            <i class="fa fa-plus"></i> 新增
-                        </a>
-                        <a class="btn btn-primary single disabled" onclick="$.operate.edit()"
-                            shiro:hasPermission="im:sensitiveWord:edit">
-                            <i class="fa fa-edit"></i> 修改
-                        </a>
-                        <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
-                            shiro:hasPermission="im:sensitiveWord:remove">
-                            <i class="fa fa-remove"></i> 删除
-                        </a>
-                        <a class="btn btn-warning" onclick="$.table.exportExcel()"
-                            shiro:hasPermission="im:sensitiveWord:export">
-                            <i class="fa fa-download"></i> 导出
-                        </a>
-                    </div>
-
-                    <!-- 搜索状态提示 -->
-                    <div class="search-status" id="searchStatus" style="display:none;">
-                        <i class="fa fa-filter" style="color:#1c84c6;"></i>
-                        搜索条件：<span class="search-conditions" style="color:#1c84c6; font-weight:500;"></span>
-                        <a href="javascript:void(0)" onclick="clearSearch()"
-                            style="margin-left:10px; color:#1c84c6;">清除</a>
-                    </div>
-
-                    <!-- 数据表格 -->
-                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
-                </div>
+                <table id="bootstrap-table"></table>
             </div>
         </div>
+    </div>
 
-        <th:block th:include="include :: footer" />
-        <th:block th:include="include :: bootstrap-table-export-js" />
-        <script th:src="@{/js/im-common.js}"></script>
-        <script th:inline="javascript">
-            var editFlag = [[${@permission.hasPermi('im:sensitiveWord:edit') }]];
-            var removeFlag = [[${@permission.hasPermi('im:sensitiveWord:remove') }]];
-            var prefix = ctx + "im/sensitiveWord";
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('im:sensitiveWord:edit') }]];
+        var removeFlag = [[${@permission.hasPermi('im:sensitiveWord:remove') }]];
+        var prefix = ctx + "im/sensitiveWord";
 
-            $(function () {
-                loadStatistics();
+        $(function () {
+            loadStatistics();
 
-                var options = {
-                    url: prefix + "/list",
-                    toolbar: "toolbar",
-                    height: 650,
-                    createUrl: prefix + "/add",
-                    updateUrl: prefix + "/edit/{id}",
-                    removeUrl: prefix + "/remove/{id}",
-                    exportUrl: prefix + "/export",
-                    modalName: "敏感词",
-                    // 默认调大添加/编辑弹窗
-                    onLoadSuccess: function () {
-                        $.operate.add = function (id) {
-                            $.modal.open("添加" + $.table._option.modalName, $.operate.addUrl(id), 800, 600);
-                        };
-                        $.operate.edit = function (id) {
-                            $.modal.open("修改" + $.table._option.modalName, $.operate.editUrl(id), 800, 600);
-                        };
-                        ImCommon.removeEmptyData('#bootstrap-table');
-                    },
-                    // 分页配置
-                    pagination: true,
-                    pageSize: 20,
-                    pageList: [10, 20, 50, 100],
-                    sidePagination: "server",
-                    // 固定列配置
-                    fixedColumns: true,
-                    fixedNumber: 1,
-                    fixedRightNumber: 1,
-                    // 列显示/隐藏配置
-                    showColumns: true,
-                    showColumnsToggleAll: true,
-                    // 记住列选择
-                    cookie: true,
-                    cookieIdTable: 'im_sensitive_word_table',
-                    cookieExpire: '30d',
-                    // 导出配置
-                    showExport: true,
-                    exportDataType: 'selected',
-                    exportTypes: ['excel'],
-                    exportOptions: {
-                        fileName: '敏感词数据'
-                    },
-                    columns: [{
-                        checkbox: true
-                    }, {
-                        field: 'id',
-                        title: 'ID',
-                        visible: false
-                    }, {
-                        field: 'word',
-                        title: '敏感词',
-                        width: '200',
-                        sortable: true
-                    }, {
-                        field: 'level',
-                        title: '级别',
-                        align: 'center',
-                        width: '100',
-                        formatter: function (value, row, index) {
-                            if (value === 'HIGH') { return '<span class="badge badge-danger">高级</span>'; }
-                            if (value === 'MEDIUM') { return '<span class="badge badge-warning">中级</span>'; }
-                            if (value === 'LOW') { return '<span class="badge badge-primary">低级</span>'; }
-                            return '<span class="badge badge-default">-</span>';
-                        }
-                    }, {
-                        field: 'replacement',
-                        title: '替换词',
-                        width: '150',
-                        formatter: function (value, row, index) {
-                            return value || '<span class="text-muted">***</span>';
-                        }
-                    }, {
-                        field: 'status',
-                        title: '状态',
-                        align: 'center',
-                        width: '80',
-                        formatter: function (value, row, index) {
-                            if (value == 1) { return '<span class="badge badge-success">启用</span>'; }
-                            return '<span class="badge badge-danger">禁用</span>';
-                        }
-                    }, {
-                        field: 'creatorName',
-                        title: '创建者',
-                        width: '120'
-                    }, {
-                        field: 'createTime',
-                        title: '创建时间',
-                        width: '160',
-                        sortable: true,
-                        formatter: function (value, row, index) {
-                            return ImCommon.formatDateTimeWithRelative(value);
-                        }
-                    }, {
-                        title: '操作',
-                        align: 'center',
-                        width: '150',
-                        formatter: function (value, row, index) {
-                            var actions = [];
-                            actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
-                            actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
-                            return actions.join('');
-                        }
-                    }],
-                    responseHandler: function (res) {
-                        ImCommon.hideLoading();
-                        return ImCommon.handleTableResponse(res, '暂无敏感词数据', '#bootstrap-table');
-                    },
-                    onLoadError: function (status) {
-                        ImCommon.hideLoading();
-                        $.modal.msgError("数据加载失败，请稍后重试");
-                    },
-                    onLoadSuccess: function () {
-                        ImCommon.removeEmptyData('#bootstrap-table');
-                    },
-                    ajaxOptions: {
-                        beforeSend: function () {
-                            ImCommon.showLoading('.select-table');
-                        },
-                        complete: function () {
-                            ImCommon.hideLoading();
-                        }
+            var options = {
+                url: prefix + "/list",
+                toolbar: "toolbar",
+                height: 650,
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove/{id}",
+                exportUrl: prefix + "/export",
+                modalName: "敏感词",
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
+                fixedColumns: true,
+                fixedNumber: 1,
+                fixedRightNumber: 1,
+                showColumns: true,
+                showColumnsToggleAll: true,
+                cookie: true,
+                cookieIdTable: 'im_sensitive_word_table',
+                cookieExpire: '30d',
+                showExport: true,
+                exportDataType: 'selected',
+                exportTypes: ['excel'],
+                exportOptions: {
+                    fileName: '敏感词数据'
+                },
+                columns: [{
+                    checkbox: true
+                }, {
+                    field: 'id',
+                    title: 'ID',
+                    visible: false
+                }, {
+                    field: 'word',
+                    title: '敏感词',
+                    width: '200',
+                    sortable: true
+                }, {
+                    field: 'level',
+                    title: '级别',
+                    align: 'center',
+                    width: '100',
+                    formatter: function (value, row, index) {
+                        if (value === 'HIGH') { return '<span class="badge badge-danger">高级</span>'; }
+                        if (value === 'MEDIUM') { return '<span class="badge badge-warning">中级</span>'; }
+                        if (value === 'LOW') { return '<span class="badge badge-primary">低级</span>'; }
+                        return '<span class="badge badge-default">-</span>';
                     }
-                };
-                $.table.init(options);
+                }, {
+                    field: 'replacement',
+                    title: '替换词',
+                    width: '150',
+                    formatter: function (value, row, index) {
+                        return value || '<span class="text-muted">***</span>';
+                    }
+                }, {
+                    field: 'status',
+                    title: '状态',
+                    align: 'center',
+                    width: '80',
+                    formatter: function (value, row, index) {
+                        if (value == 1) { return '<span class="badge badge-success">启用</span>'; }
+                        return '<span class="badge badge-danger">禁用</span>';
+                    }
+                }, {
+                    field: 'creatorName',
+                    title: '创建者',
+                    width: '120'
+                }, {
+                    field: 'createTime',
+                    title: '创建时间',
+                    width: '160',
+                    sortable: true
+                }, {
+                    title: '操作',
+                    align: 'center',
+                    width: '150',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }],
+                responseHandler: function (res) {
+                    $.modal.closeLoading();
+                    if (res.code === 0) {
+                        return { rows: res.rows, total: res.total };
+                    } else {
+                        $.modal.alertWarning(res.msg);
+                        return { rows: [], total: 0 };
+                    }
+                }
+            };
+            $.table.init(options);
+        });
+
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code === 0) {
+                    $("#totalCount").text(result.data.totalCount || 0);
+                    $("#highLevelCount").text(result.data.highLevelCount || 0);
+                    $("#mediumLevelCount").text(result.data.mediumLevelCount || 0);
+                    $("#enabledCount").text(result.data.enabledCount || 0);
+                }
             });
-
-            /**
-             * 加载统计数据
-             */
-            function loadStatistics() {
-                ImCommon.loadStatisticsWithCache(
-                    prefix + "/statistics",
-                    function (data) {
-                        $("#totalCount").text(data.totalCount || 0);
-                        $("#highLevelCount").text(data.highLevelCount || 0);
-                        $("#mediumLevelCount").text(data.mediumLevelCount || 0);
-                        $("#enabledCount").text(data.enabledCount || 0);
-                    },
-                    'sensitive_word_statistics',
-                    5
-                );
-            }
-
-            /**
-             * 清空搜索条件
-             */
-            function clearSearch() {
-                $.form.reset();
-                $('#searchStatus').hide();
-                $.table.search();
-            }
-
-            /**
-             * 执行搜索
-             */
-            function doSearch() {
-                ImCommon.showSearchConditions('#sensitiveWord-form', '#searchStatus', 'clearSearch()');
-                $.table.search();
-            }
-        </script>
+        }
+    </script>
 </body>
-
 </html>
