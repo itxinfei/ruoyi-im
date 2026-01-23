@@ -3,66 +3,71 @@
 <head>
     <th:block th:include="include :: header('日程管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <link th:href="@{/ajax/libs/datapicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
-
     <style>
-        .scheduleevent-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        .select-list ul li { margin: 0px 10px 5px 0px !important; }
+        .select-list ul li input { width: 140px !important; }
+        .select-list ul li select { width: 80px !important; }
+        .time-input { width: 100px !important; }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
-            <!-- 统计卡片区域 -->
+            <!-- 统计卡片区域 - 增强样式 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins scheduleevent-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>日程总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">日程总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部日程</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部日程</div>
+                                <i class="fa fa-calendar stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins scheduleevent-stat-card" onclick="filterByStatus('SCHEDULED')" style="cursor: pointer;" title="点击查看已安排">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByStatus('SCHEDULED')">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">排</span>
-                                <h5>已安排</h5>
+                                <span class="stat-badge pull-right">排</span>
+                                <h5 style="color: #fff; margin: 0;">已安排</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="scheduledCount">0</h2>
-                                <small>已安排日程</small>
+                                <div class="stat-number" id="scheduledCount">0</div>
+                                <div class="stat-label">已安排日程</div>
+                                <i class="fa fa-calendar-check-o stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins scheduleevent-stat-card" onclick="filterByStatus('COMPLETED')" style="cursor: pointer;" title="点击查看已完成">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByStatus('COMPLETED')">
                             <div class="ibox-title">
-                                <span class="label label-info pull-right">完</span>
-                                <h5>已完成</h5>
+                                <span class="stat-badge pull-right">完</span>
+                                <h5 style="color: #fff; margin: 0;">已完成</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-info" id="completedCount">0</h2>
-                                <small>已完成日程</small>
+                                <div class="stat-number" id="completedCount">0</div>
+                                <div class="stat-label">已完成日程</div>
+                                <i class="fa fa-check-circle stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins scheduleevent-stat-card" onclick="filterByToday()" style="cursor: pointer;" title="点击查看今日">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByToday()">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">今</span>
-                                <h5>今日日程</h5>
+                                <span class="stat-badge pull-right">今</span>
+                                <h5 style="color: #fff; margin: 0;">今日日程</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="todayCount">0</h2>
-                                <small>今日安排</small>
+                                <div class="stat-number" id="todayCount">0</div>
+                                <div class="stat-label">今日安排</div>
+                                <i class="fa fa-sun-o stat-icon"></i>
                             </div>
                         </div>
                     </div>
@@ -74,21 +79,21 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="input-label">日程标题：</label><input type="text" name="title" placeholder="请输入日程标题"/>
+                                <label class="search-label label-4">日程标题</label><input type="text" name="title" placeholder="请输入"/>
                             </li>
                             <li>
-                                <label class="input-label">状态：</label><select name="status">
-                                    <option value="">所有</option>
+                                <label class="search-label label-2">状态</label><select name="status">
+                                    <option value="">全部</option>
                                     <option value="SCHEDULED">已安排</option>
                                     <option value="COMPLETED">已完成</option>
                                     <option value="CANCELLED">已取消</option>
                                 </select>
                             </li>
                             <li class="select-time">
-                                <label>开始时间：</label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                                <label class="search-label label-4">开始时间</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
                                 <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
                             </li>
                             <li>
                                 <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
@@ -309,25 +314,48 @@
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
                     var data = result.data || {};
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#scheduledCount").text(data.scheduledCount || 0);
-                    $("#completedCount").text(data.completedCount || 0);
-                    $("#todayCount").text(data.todayCount || 0);
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('scheduledCount', data.scheduledCount || 0);
+                    animateNumber('completedCount', data.completedCount || 0);
+                    animateNumber('todayCount', data.todayCount || 0);
                 }
             });
         }
 
-        /**
-         * 重置筛选
-         */
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /* 重置筛选 */
         function filterReset() {
             $.form.reset();
             $.table.search();
         }
 
-        /**
-         * 按状态筛选
-         */
+        /* 按状态筛选 */
         function filterByStatus(status) {
             if (status) {
                 $('select[name="status"]').val(status);
@@ -337,9 +365,7 @@
             $.table.search();
         }
 
-        /**
-         * 筛选今日数据
-         */
+        /* 筛选今日数据 */
         function filterByToday() {
             var today = new Date();
             var todayStr = today.getFullYear() + '-' +

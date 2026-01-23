@@ -1,0 +1,445 @@
+/**
+ * IM管理后台 - 统一紧凑布局样式
+ * 用于所有IM管理页面，保持一致的视觉效果
+ */
+
+/* ==================== 整体布局 ==================== */
+.im-page {
+    padding: 0 !important;
+}
+
+.im-page .container-div {
+    padding: 0 !important;
+}
+
+/* 移除所有区域的间隙 */
+.im-page .row {
+    margin: 0 !important;
+}
+
+.im-page .col-sm-12 {
+    padding: 0 0 8px 0 !important;
+}
+
+/* 统计卡片区域 */
+.im-page .stat-card-section {
+    padding: 8px 8px 0 8px !important;
+}
+
+.im-page .stat-card-section .row {
+    margin: 0 !important;
+}
+
+.im-page .stat-card-section .col-sm-3 {
+    padding: 0 4px 8px 4px !important;
+}
+
+/* 搜索区域 */
+.im-page .search-section {
+    padding: 0 8px 8px 8px !important;
+}
+
+/* 表格区域 */
+.im-page .table-section {
+    padding: 0 8px 8px 8px !important;
+}
+
+/* ==================== 统一字体大小 ==================== */
+.im-page h1, .im-page h2, .im-page h3, .im-page h4, .im-page h5 {
+    margin: 0;
+    font-weight: 500;
+}
+
+.im-page .stat-number {
+    font-size: 28px !important;
+    font-weight: 700;
+}
+
+.im-page .stat-label {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+/* ==================== 搜索区域紧凑样式 ==================== */
+.search-collapse .select-list {
+    padding: 10px 15px;
+    margin: 0;
+}
+
+.search-collapse .select-list ul {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.search-collapse .select-list ul li {
+    margin: 0 !important;
+    display: inline-flex;
+    align-items: center;
+}
+
+.search-collapse .select-list ul li input,
+.search-collapse .select-list ul li select {
+    height: 32px;
+    padding: 4px 10px;
+    font-size: 13px;
+    border-radius: 4px;
+    border: 1px solid #dcdfe6;
+}
+
+.search-collapse .select-list ul li input:focus,
+.search-collapse .select-list ul li select:focus {
+    border-color: #409eff;
+    outline: none;
+}
+
+.search-collapse .select-list ul li .btn {
+    height: 32px;
+    padding: 4px 15px;
+    font-size: 13px;
+    border-radius: 4px;
+}
+
+/* ==================== 搜索标签样式 ==================== */
+.search-label {
+    display: inline-block;
+    min-width: 50px;
+    font-size: 13px;
+    color: #606266;
+    margin-right: 6px;
+    font-weight: 500;
+    text-align: right;
+}
+
+.search-label.label-2 {
+    min-width: 40px;
+}
+
+.search-label.label-4 {
+    min-width: 60px;
+}
+
+/* ==================== 工具栏按钮样式 ==================== */
+.im-toolbar {
+    padding: 10px 15px;
+    background: #fff;
+    border: 1px solid #e7eaec;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.im-toolbar .btn {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 4px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.im-toolbar .btn i {
+    font-size: 12px;
+}
+
+/* 批量操作按钮组 */
+.im-batch-actions {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.im-batch-actions .btn {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 3px;
+    height: 28px;
+}
+
+/* ==================== 表格容器样式 ==================== */
+.im-table-container {
+    background: #fff;
+    border: 1px solid #e7eaec;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
+}
+
+.im-table-container .fixed-table-container {
+    padding: 0;
+}
+
+/* ==================== 表格样式 ==================== */
+.im-page .table {
+    margin: 0;
+    font-size: 13px;
+}
+
+.im-page .table > thead > tr > th {
+    background: #f5f7fa;
+    color: #606266;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 10px 8px;
+    border-bottom: 1px solid #e7eaec;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.im-page .table > tbody > tr > td {
+    padding: 8px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+    color: #606266;
+}
+
+.im-page .table > tbody > tr:hover > td {
+    background: #f5f7fa;
+}
+
+.im-page .table > tbody > tr > td,
+.im-page .table > thead > tr > th {
+    /* 确保操作列不换行 */
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 操作列样式 */
+.im-page .table .action-cell {
+    min-width: 150px;
+    text-align: center;
+}
+
+.im-page .table .action-cell .btn {
+    padding: 3px 8px;
+    font-size: 11px;
+    border-radius: 3px;
+    height: 24px;
+    line-height: 1;
+    margin: 0 1px;
+}
+
+.im-page .table .action-cell .btn i {
+    font-size: 10px;
+}
+
+/* ==================== 列操作下拉菜单 ==================== */
+.im-action-dropdown {
+    display: inline-block;
+}
+
+.im-action-dropdown .dropdown-menu {
+    min-width: 120px;
+    font-size: 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+
+.im-action-dropdown .dropdown-menu li > a {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.im-action-dropdown .dropdown-menu li > a i {
+    margin-right: 6px;
+    width: 12px;
+    text-align: center;
+}
+
+/* ==================== 紧凑卡片面板 ==================== */
+.im-panel {
+    background: #fff;
+    border: 1px solid #e7eaec;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.im-panel .im-panel-heading {
+    padding: 10px 15px;
+    background: #f5f7fa;
+    border-bottom: 1px solid #e7eaec;
+    font-weight: 600;
+    font-size: 13px;
+    color: #606266;
+}
+
+.im-panel .im-panel-body {
+    padding: 10px 15px;
+}
+
+/* ==================== 分页样式 ==================== */
+.im-page .fixed-table-pagination {
+    padding: 10px 15px;
+    margin: 0;
+    border-top: 1px solid #e7eaec;
+}
+
+.im-page .pagination-detail {
+    font-size: 12px;
+    color: #606266;
+}
+
+.im-page .page-list {
+    margin: 0 2px;
+}
+
+.im-page .page-list .btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 3px;
+    height: 28px;
+    line-height: 1.5;
+}
+
+/* ==================== 响应式适配 ==================== */
+@media (max-width: 1200px) {
+    .search-collapse .select-list ul li {
+        margin-bottom: 5px;
+    }
+}
+
+@media (max-width: 768px) {
+    .im-page .stat-number {
+        font-size: 24px !important;
+    }
+
+    .im-toolbar {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .im-toolbar .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ==================== 统一颜色 ==================== */
+.im-primary { color: #409eff; }
+.im-success { color: #67c23a; }
+.im-info { color: #909399; }
+.im-warning { color: #e6a23c; }
+.im-danger { color: #f56c6c; }
+
+.im-bg-primary { background: #409eff; color: #fff; }
+.im-bg-success { background: #67c23a; color: #fff; }
+.im-bg-info { background: #909399; color: #fff; }
+.im-bg-warning { background: #e6a23c; color: #fff; }
+.im-bg-danger { background: #f56c6c; color: #fff; }
+
+/* ==================== 工具提示 ==================== */
+.im-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.im-tooltip[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background: rgba(0,0,0,0.8);
+    color: #fff;
+    font-size: 11px;
+    border-radius: 3px;
+    white-space: nowrap;
+    z-index: 9999;
+    margin-bottom: 4px;
+}
+
+/* ==================== 状态标签统一样式 ==================== */
+.im-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    border-radius: 3px;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.im-badge-success { background: #f0f9ff; color: #67c23a; }
+.im-badge-primary { background: #ecf5ff; color: #409eff; }
+.im-badge-info { background: #f4f4f5; color: #909399; }
+.im-badge-warning { background: #fdf6ec; color: #e6a23c; }
+.im-badge-danger { background: #fef0f0; color: #f56c6c; }
+
+/* ==================== 空状态样式 ==================== */
+.im-empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: #909399;
+}
+
+.im-empty-state i {
+    font-size: 48px;
+    color: #c0c4cc;
+    margin-bottom: 10px;
+}
+
+.im-empty-state p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* ==================== 加载状态 ==================== */
+.im-loading {
+    padding: 40px;
+    text-align: center;
+}
+
+.im-loading-spinner {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #409eff;
+    border-radius: 50%;
+    animation: im-spin 1s linear infinite;
+}
+
+@keyframes im-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==================== 批量选择状态 ==================== */
+.im-batch-mode .im-table-container {
+    border-left: 3px solid #409eff;
+}
+
+.im-batch-mode .table > tbody > tr.selected > td {
+    background: #ecf5ff;
+}
+
+/* ==================== 固定列样式优化 ==================== */
+.fixed-table-container .table td,
+.fixed-table-container .table th {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.fixed-table-container .bs-checkbox {
+    margin: 0;
+}
+
+/* ==================== 统一间距 ==================== */
+.im-mt-0 { margin-top: 0 !important; }
+.im-mt-4 { margin-top: 4px !important; }
+.im-mt-8 { margin-top: 8px !important; }
+.im-mt-12 { margin-top: 12px !important; }
+
+.im-mb-0 { margin-bottom: 0 !important; }
+.im-mb-4 { margin-bottom: 4px !important; }
+.im-mb-8 { margin-bottom: 8px !important; }
+.im-mb-12 { margin-bottom: 12px !important; }
+
+.im-p-8 { padding: 8px !important; }
+.im-p-12 { padding: 12px !important; }
+.im-p-16 { padding: 16px !important; }

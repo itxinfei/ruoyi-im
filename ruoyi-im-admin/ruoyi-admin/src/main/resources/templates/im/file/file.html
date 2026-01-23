@@ -3,65 +3,70 @@
 <head>
     <th:block th:include="include :: header('文件管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <style>
-        .file-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        .select-list ul li { margin: 0px 10px 5px 0px !important; }
+        .select-list ul li input { width: 140px !important; }
+        .select-list ul li select { width: 80px !important; }
+        .time-input { width: 100px !important; }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
-            <!-- 统计卡片区域 -->
+            <!-- 统计卡片区域 - 增强样式 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins file-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>文件总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">文件总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部文件</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部文件</div>
+                                <i class="fa fa-files-o stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins file-stat-card" onclick="filterByToday()" style="cursor: pointer;" title="点击查看今日上传">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByToday()">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">今</span>
-                                <h5>今日上传</h5>
+                                <span class="stat-badge pull-right">今</span>
+                                <h5 style="color: #fff; margin: 0;">今日上传</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="todayCount">0</h2>
-                                <small>今日上传文件</small>
+                                <div class="stat-number" id="todayCount">0</div>
+                                <div class="stat-label">今日上传文件</div>
+                                <i class="fa fa-cloud-upload stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins file-stat-card" style="cursor: default;">
+                        <div class="ibox float-e-margins im-stat-card stat-card-cyan">
                             <div class="ibox-title">
-                                <span class="label label-info pull-right">大</span>
-                                <h5>总大小</h5>
+                                <span class="stat-badge pull-right">大</span>
+                                <h5 style="color: #fff; margin: 0;">总大小</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-info" id="totalSize">0MB</h2>
-                                <small>文件总大小</small>
+                                <div class="stat-number" id="totalSize">0MB</div>
+                                <div class="stat-label">文件总大小</div>
+                                <i class="fa fa-database stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins file-stat-card" onclick="filterByType('IMAGE')" style="cursor: pointer;" title="点击查看图片">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByType('IMAGE')">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">图</span>
-                                <h5>图片文件</h5>
+                                <span class="stat-badge pull-right">图</span>
+                                <h5 style="color: #fff; margin: 0;">图片文件</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="imageCount">0</h2>
-                                <small>图片数量</small>
+                                <div class="stat-number" id="imageCount">0</div>
+                                <div class="stat-label">图片数量</div>
+                                <i class="fa fa-image stat-icon"></i>
                             </div>
                         </div>
                     </div>
@@ -74,11 +79,11 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                文件名：<input type="text" name="fileName" placeholder="请输入文件名"/>
+                                <label class="search-label label-2">文件名</label><input type="text" name="fileName" placeholder="请输入"/>
                             </li>
                             <li>
-                                文件类型：<select name="fileType">
-                                    <option value="">所有</option>
+                                <label class="search-label label-4">文件类型</label><select name="fileType">
+                                    <option value="">全部</option>
                                     <option value="IMAGE">图片</option>
                                     <option value="VIDEO">视频</option>
                                     <option value="AUDIO">音频</option>
@@ -87,13 +92,13 @@
                                 </select>
                             </li>
                             <li>
-                                上传者：<input type="text" name="uploaderId" placeholder="请输入上传者ID"/>
+                                <label class="search-label label-2">上传者</label><input type="text" name="uploaderId" placeholder="请输入ID"/>
                             </li>
                             <li class="select-time">
-                                <label>上传时间： </label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                                <label class="search-label label-4">上传时间</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
                                 <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
                             </li>
                             <li>
                                 <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
@@ -210,12 +215,39 @@
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
                     var data = result.data || {};
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#todayCount").text(data.todayCount || 0);
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('todayCount', data.todayCount || 0);
                     $("#totalSize").text(formatFileSize(data.totalSize || 0));
-                    $("#imageCount").text(data.imageCount || 0);
+                    animateNumber('imageCount', data.imageCount || 0);
                 }
             });
+        }
+
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
         }
 
         function formatFileSize(bytes) {
@@ -225,17 +257,13 @@
             return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
         }
 
-        /**
-         * 重置筛选
-         */
+        /* 重置筛选 */
         function filterReset() {
             $.form.reset();
             $.table.search();
         }
 
-        /**
-         * 筛选今日数据
-         */
+        /* 筛选今日数据 */
         function filterByToday() {
             var today = new Date();
             var todayStr = today.getFullYear() + '-' +
@@ -246,9 +274,7 @@
             $.table.search();
         }
 
-        /**
-         * 按文件类型筛选
-         */
+        /* 按文件类型筛选 */
         function filterByType(fileType) {
             if (fileType) {
                 $('select[name="fileType"]').val(fileType);

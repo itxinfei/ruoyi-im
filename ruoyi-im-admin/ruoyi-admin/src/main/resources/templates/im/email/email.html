@@ -3,65 +3,70 @@
 <head>
     <th:block th:include="include :: header('邮件管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <style>
-        .email-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        .select-list ul li { margin: 0px 10px 5px 0px !important; }
+        .select-list ul li input { width: 140px !important; }
+        .select-list ul li select { width: 80px !important; }
+        .time-input { width: 100px !important; }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
-            <!-- 统计卡片区域 -->
+            <!-- 统计卡片区域 - 增强样式 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins email-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>邮件总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">邮件总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部邮件</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部邮件</div>
+                                <i class="fa fa-envelope stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins email-stat-card" onclick="filterByFolder('SENT')" style="cursor: pointer;" title="点击查看已发送">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByFolder('SENT')">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">发</span>
-                                <h5>已发送</h5>
+                                <span class="stat-badge pull-right">发</span>
+                                <h5 style="color: #fff; margin: 0;">已发送</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="sentCount">0</h2>
-                                <small>已发送邮件</small>
+                                <div class="stat-number" id="sentCount">0</div>
+                                <div class="stat-label">已发送邮件</div>
+                                <i class="fa fa-send stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins email-stat-card" onclick="filterByFolder('INBOX')" style="cursor: pointer;" title="点击查看收件箱">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByFolder('INBOX')">
                             <div class="ibox-title">
-                                <span class="label label-info pull-right">收</span>
-                                <h5>已接收</h5>
+                                <span class="stat-badge pull-right">收</span>
+                                <h5 style="color: #fff; margin: 0;">已接收</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-info" id="receivedCount">0</h2>
-                                <small>接收邮件</small>
+                                <div class="stat-number" id="receivedCount">0</div>
+                                <div class="stat-label">接收邮件</div>
+                                <i class="fa fa-inbox stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins email-stat-card" onclick="filterByReadStatus('0')" style="cursor: pointer;" title="点击查看未读">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByReadStatus('0')">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">未</span>
-                                <h5>未读邮件</h5>
+                                <span class="stat-badge pull-right">未</span>
+                                <h5 style="color: #fff; margin: 0;">未读邮件</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="unreadCount">0</h2>
-                                <small>未读邮件</small>
+                                <div class="stat-number" id="unreadCount">0</div>
+                                <div class="stat-label">未读邮件</div>
+                                <i class="fa fa-envelope-o stat-icon"></i>
                             </div>
                         </div>
                     </div>
@@ -73,14 +78,14 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="input-label">邮件主题：</label><input type="text" name="subject" placeholder="请输入邮件主题"/>
+                                <label class="search-label label-4">邮件主题</label><input type="text" name="subject" placeholder="请输入"/>
                             </li>
                             <li>
-                                <label class="input-label">发送者：</label><input type="text" name="senderEmail" placeholder="请输入发送者邮箱"/>
+                                <label class="search-label label-2">发件人</label><input type="text" name="senderEmail" placeholder="请输入"/>
                             </li>
                             <li>
-                                <label class="input-label">文件夹：</label><select name="folder">
-                                    <option value="">所有</option>
+                                <label class="search-label label-2">文件夹</label><select name="folder">
+                                    <option value="">全部</option>
                                     <option value="INBOX">收件箱</option>
                                     <option value="SENT">已发送</option>
                                     <option value="DRAFTS">草稿箱</option>
@@ -88,17 +93,17 @@
                                 </select>
                             </li>
                             <li>
-                                <label class="input-label">状态：</label><select name="isRead">
-                                    <option value="">所有</option>
+                                <label class="search-label label-2">状态</label><select name="isRead">
+                                    <option value="">全部</option>
                                     <option value="0">未读</option>
                                     <option value="1">已读</option>
                                 </select>
                             </li>
                             <li class="select-time">
-                                <label>接收时间：</label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                                <label class="search-label label-4">接收时间</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
                                 <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
                             </li>
                             <li>
                                 <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
@@ -249,25 +254,48 @@
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
                     var data = result.data || {};
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#sentCount").text(data.sentCount || 0);
-                    $("#receivedCount").text(data.receivedCount || 0);
-                    $("#unreadCount").text(data.unreadCount || 0);
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('sentCount', data.sentCount || 0);
+                    animateNumber('receivedCount', data.receivedCount || 0);
+                    animateNumber('unreadCount', data.unreadCount || 0);
                 }
             });
         }
 
-        /**
-         * 重置筛选
-         */
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /* 重置筛选 */
         function filterReset() {
             $.form.reset();
             $.table.search();
         }
 
-        /**
-         * 按文件夹筛选
-         */
+        /* 按文件夹筛选 */
         function filterByFolder(folder) {
             if (folder) {
                 $('select[name="folder"]').val(folder);
@@ -277,9 +305,7 @@
             $.table.search();
         }
 
-        /**
-         * 按已读状态筛选
-         */
+        /* 按已读状态筛选 */
         function filterByReadStatus(isRead) {
             if (isRead !== undefined && isRead !== '') {
                 $('select[name="isRead"]').val(isRead);

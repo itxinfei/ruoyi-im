@@ -3,125 +3,143 @@
 <head>
     <th:block th:include="include :: header('DING消息管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <style>
-        .ding-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        body { padding: 10px !important; }
+        .gray-bg { background-color: #f3f3f4 !important; }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
-        <div class="row">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12" style="margin-top: 10px;">
+        <!-- 统计卡片区域 -->
+        <div class="row stat-card-section">
+            <div class="col-sm-12">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins ding-stat-card" onclick="filterByStatus('')" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>DING总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">DING总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部DING消息</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部DING消息</div>
+                                <i class="fa fa-bell stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins ding-stat-card" onclick="filterByToday()" style="cursor: pointer;" title="点击查看今日">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByToday()">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">今</span>
-                                <h5>今日DING</h5>
+                                <span class="stat-badge pull-right">今</span>
+                                <h5 style="color: #fff; margin: 0;">今日DING</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="todayCount">0</h2>
-                                <small>今日发送的DING</small>
+                                <div class="stat-number" id="todayCount">0</div>
+                                <div class="stat-label">今日发送的DING</div>
+                                <i class="fa fa-calendar stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins ding-stat-card" onclick="filterByReadStatus('READ')" style="cursor: pointer;" title="点击查看已读">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByStatus('SENT')">
                             <div class="ibox-title">
-                                <span class="label label-info pull-right">读</span>
-                                <h5>已读数量</h5>
+                                <span class="stat-badge pull-right">读</span>
+                                <h5 style="color: #fff; margin: 0;">已读数量</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-info" id="readCount">0</h2>
-                                <small>已读DING数量</small>
+                                <div class="stat-number" id="readCount">0</div>
+                                <div class="stat-label">已读DING数量</div>
+                                <i class="fa fa-check-circle stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins ding-stat-card" onclick="filterByReadStatus('UNREAD')" style="cursor: pointer;" title="点击查看未读">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByStatus('SENT')">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">未</span>
-                                <h5>未读数量</h5>
+                                <span class="stat-badge pull-right">未</span>
+                                <h5 style="color: #fff; margin: 0;">未读数量</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="unreadCount">0</h2>
-                                <small>未读DING数量</small>
+                                <div class="stat-number" id="unreadCount">0</div>
+                                <div class="stat-label">未读DING数量</div>
+                                <i class="fa fa-clock-o stat-icon"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="col-sm-12 search-collapse">
-                <form id="ding-form">
-                    <div class="select-list">
-                        <ul>
-                            <li>
-                                <label class="input-label">消息内容：</label><input type="text" name="content" placeholder="请输入消息内容"/>
-                            </li>
-                            <li>
-                                <label class="input-label">DING类型：</label><select name="dingType">
-                                    <option value="">所有</option>
-                                    <option value="APP">应用</option>
-                                    <option value="SMS">短信</option>
-                                    <option value="PHONE">电话</option>
-                                </select>
-                            </li>
-                            <li>
-                                <label class="input-label">状态：</label><select name="status">
-                                    <option value="">所有</option>
-                                    <option value="DRAFT">草稿</option>
-                                    <option value="SENDING">发送中</option>
-                                    <option value="SENT">已发送</option>
-                                </select>
-                            </li>
-                            <li class="select-time">
-                                <label>发送时间：</label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
-                                <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                            </li>
-                        </ul>
+        <!-- 搜索区域 -->
+        <div class="row search-section">
+            <div class="col-sm-12">
+                <div class="im-panel">
+                    <div class="im-panel-body">
+                        <form id="ding-form">
+                            <div class="select-list">
+                                <ul>
+                                    <li>
+                                        <label class="search-label label-4">消息内容</label><input type="text" name="content" placeholder="请输入"/>
+                                    </li>
+                                    <li>
+                                        <label class="search-label label-4">DING类型</label><select name="dingType">
+                                            <option value="">全部</option>
+                                            <option value="APP">应用</option>
+                                            <option value="SMS">短信</option>
+                                            <option value="PHONE">电话</option>
+                                        </select>
+                                    </li>
+                                    <li>
+                                        <label class="search-label label-2">状态</label><select name="status">
+                                            <option value="">全部</option>
+                                            <option value="DRAFT">草稿</option>
+                                            <option value="SENDING">发送中</option>
+                                            <option value="SENT">已发送</option>
+                                        </select>
+                                    </li>
+                                    <li class="select-time">
+                                        <label class="search-label label-4">发送时间</label>
+                                        <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
+                                        <span>-</span>
+                                        <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
+                                    </li>
+                                    <li>
+                                        <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                        <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </form>
                     </div>
-                </form>
-            </div>
-
-            <div class="col-sm-12 select-table table-striped">
-                <div class="btn-group-sm" id="toolbar">
-                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:ding:add">
-                        <i class="fa fa-plus"></i> 发送DING
-                    </a>
-                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:ding:edit">
-                        <i class="fa fa-edit"></i> 修改
-                    </a>
-                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:ding:remove">
-                        <i class="fa fa-remove"></i> 删除
-                    </a>
-                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:ding:export">
-                        <i class="fa fa-download"></i> 导出
-                    </a>
                 </div>
-                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+
+        <!-- 表格区域 -->
+        <div class="row table-section">
+            <div class="col-sm-12">
+                <div class="im-table-container">
+                    <!-- 工具栏 -->
+                    <div class="im-toolbar" id="toolbar">
+                        <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:ding:add">
+                            <i class="fa fa-plus"></i> 发送DING
+                        </a>
+                        <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:ding:edit">
+                            <i class="fa fa-edit"></i> 修改
+                        </a>
+                        <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:ding:remove">
+                            <i class="fa fa-remove"></i> 删除
+                        </a>
+                        <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:ding:export">
+                            <i class="fa fa-download"></i> 导出
+                        </a>
+                    </div>
+
+                    <!-- 数据表格 -->
+                    <table id="bootstrap-table"></table>
+                </div>
             </div>
         </div>
     </div>
@@ -169,6 +187,18 @@
                     field: 'id',
                     title: 'ID',
                     visible: false
+                }, {
+                    field: 'senderId',
+                    title: '发送者ID',
+                    width: '80',
+                    visible: false
+                }, {
+                    field: 'senderName',
+                    title: '发送者',
+                    width: '100',
+                    formatter: function(value, row, index) {
+                        return value || '-';
+                    }
                 }, {
                     field: 'content',
                     title: '消息内容',
@@ -259,12 +289,48 @@
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
                     var data = result.data || {};
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#todayCount").text(data.todayCount || 0);
-                    $("#readCount").text(data.readCount || 0);
-                    $("#unreadCount").text(data.unreadCount || 0);
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('todayCount', data.todayCount || 0);
+                    animateNumber('readCount', data.readCount || 0);
+                    animateNumber('unreadCount', data.unreadCount || 0);
                 }
             });
+        }
+
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $('select[name="status"]').val('');
+            $('select[name="dingType"]').val('');
+            $.table.search();
         }
 
         /**
@@ -289,16 +355,6 @@
                           String(today.getDate()).padStart(2, '0');
             $('#startTime').val(todayStr + ' 00:00:00');
             $('#endTime').val(todayStr + ' 23:59:59');
-            $.table.search();
-        }
-
-        /**
-         * 按已读/未读状态筛选
-         */
-        function filterByReadStatus(readStatus) {
-            // 这里需要后端支持 readStatus 参数
-            // 暂时使用现有字段模拟
-            $('select[name="status"]').val('SENT');
             $.table.search();
         }
     </script>

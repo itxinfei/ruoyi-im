@@ -3,65 +3,70 @@
 <head>
     <th:block th:include="include :: header('好友请求管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <style>
-        .friendrequest-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        .select-list ul li { margin: 0px 10px 5px 0px !important; }
+        .select-list ul li input { width: 140px !important; }
+        .select-list ul li select { width: 80px !important; }
+        .time-input { width: 100px !important; }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
-            <!-- 统计卡片区域 -->
+            <!-- 统计卡片区域 - 增强样式 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins friendrequest-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>请求总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">请求总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部好友请求</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部好友请求</div>
+                                <i class="fa fa-users stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins friendrequest-stat-card" onclick="filterByStatus('PENDING')" style="cursor: pointer;" title="点击查看待处理">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByStatus('PENDING')">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">待</span>
-                                <h5>待处理</h5>
+                                <span class="stat-badge pull-right">待</span>
+                                <h5 style="color: #fff; margin: 0;">待处理</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="pendingCount">0</h2>
-                                <small>等待处理</small>
+                                <div class="stat-number" id="pendingCount">0</div>
+                                <div class="stat-label">等待处理</div>
+                                <i class="fa fa-clock-o stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins friendrequest-stat-card" onclick="filterByStatus('APPROVED')" style="cursor: pointer;" title="点击查看已同意">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByStatus('APPROVED')">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">同</span>
-                                <h5>已同意</h5>
+                                <span class="stat-badge pull-right">同</span>
+                                <h5 style="color: #fff; margin: 0;">已同意</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="approvedCount">0</h2>
-                                <small>已同意请求</small>
+                                <div class="stat-number" id="approvedCount">0</div>
+                                <div class="stat-label">已同意请求</div>
+                                <i class="fa fa-check stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins friendrequest-stat-card" onclick="filterByStatus('REJECTED')" style="cursor: pointer;" title="点击查看已拒绝">
+                        <div class="ibox float-e-margins im-stat-card stat-card-danger" onclick="filterByStatus('REJECTED')">
                             <div class="ibox-title">
-                                <span class="label label-danger pull-right">拒</span>
-                                <h5>已拒绝</h5>
+                                <span class="stat-badge pull-right">拒</span>
+                                <h5 style="color: #fff; margin: 0;">已拒绝</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-danger" id="rejectedCount">0</h2>
-                                <small>已拒绝请求</small>
+                                <div class="stat-number" id="rejectedCount">0</div>
+                                <div class="stat-label">已拒绝请求</div>
+                                <i class="fa fa-times stat-icon"></i>
                             </div>
                         </div>
                     </div>
@@ -73,21 +78,21 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="input-label">申请人：</label><input type="text" name="fromUserId" placeholder="请输入申请人ID"/>
+                                <label class="search-label label-2">申请人</label><input type="text" name="fromUserId" placeholder="请输入ID"/>
                             </li>
                             <li>
-                                <label class="input-label">状态：</label><select name="status">
-                                    <option value="">所有</option>
+                                <label class="search-label label-2">状态</label><select name="status">
+                                    <option value="">全部</option>
                                     <option value="PENDING">待处理</option>
                                     <option value="APPROVED">已同意</option>
                                     <option value="REJECTED">已拒绝</option>
                                 </select>
                             </li>
                             <li class="select-time">
-                                <label>申请时间：</label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                                <label class="search-label label-4">申请时间</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
                                 <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
                             </li>
                             <li>
                                 <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
@@ -234,25 +239,48 @@
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
                     var data = result.data || {};
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#pendingCount").text(data.pendingCount || 0);
-                    $("#approvedCount").text(data.approvedCount || 0);
-                    $("#rejectedCount").text(data.rejectedCount || 0);
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('pendingCount', data.pendingCount || 0);
+                    animateNumber('approvedCount', data.approvedCount || 0);
+                    animateNumber('rejectedCount', data.rejectedCount || 0);
                 }
             });
         }
 
-        /**
-         * 重置筛选
-         */
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /* 重置筛选 */
         function filterReset() {
             $.form.reset();
             $.table.search();
         }
 
-        /**
-         * 按状态筛选
-         */
+        /* 按状态筛选 */
         function filterByStatus(status) {
             if (status) {
                 $('select[name="status"]').val(status);

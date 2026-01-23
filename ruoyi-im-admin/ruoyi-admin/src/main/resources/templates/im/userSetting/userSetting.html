@@ -3,87 +3,99 @@
 <head>
     <th:block th:include="include :: header('用户设置管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <style>
-        .usersetting-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        /* 搜索栏紧凑优化 */
+        .select-list ul li {
+            margin: 0px 10px 5px 0px !important;
+        }
+        .select-list ul li input {
+            width: 140px !important;
+        }
+        .select-list ul li select {
+            width: 90px !important;
+        }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
-            <!-- 统计卡片区域 -->
+            <!-- 统计卡片区域 - 增强样式 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins usersetting-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>设置总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">设置总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部用户设置</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部用户设置</div>
+                                <i class="fa fa-cog stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins usersetting-stat-card" style="cursor: default;">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" style="cursor: default;">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">户</span>
-                                <h5>有设置用户</h5>
+                                <span class="stat-badge pull-right">户</span>
+                                <h5 style="color: #fff; margin: 0;">有设置用户</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="userCount">0</h2>
-                                <small>已设置用户</small>
+                                <div class="stat-number" id="userCount">0</div>
+                                <div class="stat-label">已设置用户</div>
+                                <i class="fa fa-users stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins usersetting-stat-card" onclick="filterByType('NOTIFICATION')" style="cursor: pointer;" title="点击查看通知设置">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByType('NOTIFICATION')">
                             <div class="ibox-title">
-                                <span class="label label-info pull-right">通</span>
-                                <h5>通知设置</h5>
+                                <span class="stat-badge pull-right">通</span>
+                                <h5 style="color: #fff; margin: 0;">通知设置</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-info" id="notificationCount">0</h2>
-                                <small>通知相关设置</small>
+                                <div class="stat-number" id="notificationCount">0</div>
+                                <div class="stat-label">通知相关设置</div>
+                                <i class="fa fa-bell stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins usersetting-stat-card" onclick="filterByType('PRIVACY')" style="cursor: pointer;" title="点击查看隐私设置">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByType('PRIVACY')">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">隐</span>
-                                <h5>隐私设置</h5>
+                                <span class="stat-badge pull-right">隐</span>
+                                <h5 style="color: #fff; margin: 0;">隐私设置</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="privacyCount">0</h2>
-                                <small>隐私相关设置</small>
+                                <div class="stat-number" id="privacyCount">0</div>
+                                <div class="stat-label">隐私相关设置</div>
+                                <i class="fa fa-lock stat-icon"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- 搜索表单 -->
             <div class="col-sm-12 search-collapse">
                 <form id="userSetting-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="input-label">用户名：</label><input type="text" name="username" placeholder="请输入用户名"/>
+                                <label class="search-label label-2">账号</label><input type="text" name="username" placeholder="请输入"/>
                             </li>
                             <li>
-                                <label class="input-label">设置键：</label><input type="text" name="settingKey" placeholder="请输入设置键"/>
+                                <label class="search-label label-2">键名</label><input type="text" name="settingKey" placeholder="请输入"/>
                             </li>
                             <li>
-                                <label class="input-label">设置类型：</label><select name="settingType">
-                                    <option value="">所有</option>
-                                    <option value="NOTIFICATION">通知设置</option>
-                                    <option value="PRIVACY">隐私设置</option>
-                                    <option value="DISPLAY">显示设置</option>
+                                <label class="search-label label-2">类型</label><select name="settingType">
+                                    <option value="">全部</option>
+                                    <option value="NOTIFICATION">通知</option>
+                                    <option value="PRIVACY">隐私</option>
+                                    <option value="DISPLAY">显示</option>
                                 </select>
                             </li>
                             <li>
@@ -239,19 +251,48 @@
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
                     var data = result.data || {};
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#userCount").text(data.userCount || 0);
-                    $("#notificationCount").text(data.notificationCount || 0);
-                    $("#privacyCount").text(data.privacyCount || 0);
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('userCount', data.userCount || 0);
+                    animateNumber('notificationCount', data.notificationCount || 0);
+                    animateNumber('privacyCount', data.privacyCount || 0);
                 }
             });
+        }
+
+        /**
+         * 数字动画效果
+         */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
         }
 
         /**
          * 重置筛选
          */
         function filterReset() {
-            $.form.reset();
+            $('select[name="settingType"]').val('');
             $.table.search();
         }
 

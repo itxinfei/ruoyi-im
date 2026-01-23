@@ -688,66 +688,92 @@ const selectEmoji = (char) => {
 <style scoped lang="scss">
 .emoji-picker {
   width: 320px;
-  background: #fff;
-  border: 1px solid #e8e8e8;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: 12px;
+  box-shadow: var(--dt-shadow-lg);
   overflow: hidden;
   position: absolute;
-  bottom: 70px;
+  bottom: 100%;
   left: 0;
-  z-index: 1000;
+  margin-bottom: 10px;
+  z-index: var(--dt-z-dropdown);
+  animation: slideUp 0.2s ease-out;
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
   .emoji-tabs {
     display: flex;
-    border-bottom: 1px solid #f0f0f0;
-    padding: 4px;
+    background-color: var(--dt-bg-body);
+    padding: 6px;
+    gap: 4px;
 
     .emoji-tab {
       flex: 1;
       text-align: center;
-      padding: 8px 0;
+      padding: 6px 0;
       cursor: pointer;
-      border-radius: 4px;
-      font-size: 20px;
-      transition: all 0.2s ease;
+      border-radius: 8px;
+      font-size: 18px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
       &:hover {
-        background: #f5f5f5;
+        background: rgba(0, 0, 0, 0.05);
       }
 
       &.active {
-        background: #e6f7ff;
-        color: #0089ff;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        color: var(--dt-brand-color);
       }
     }
   }
 
   .emoji-grid {
-    max-height: 240px;
+    height: 240px;
     overflow-y: auto;
-    padding: 8px;
+    padding: 12px;
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    gap: 4px;
+    gap: 8px;
+    
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
     .emoji-item {
-      width: 32px;
-      height: 32px;
+      aspect-ratio: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 22px;
       cursor: pointer;
-      border-radius: 4px;
-      transition: all 0.2s ease;
+      border-radius: 8px;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
 
       &:hover {
-        background: #f5f5f5;
-        transform: scale(1.2);
+        background: var(--dt-bg-session-hover);
+        transform: scale(1.25);
+        z-index: 10;
+      }
+      
+      &:active {
+        transform: scale(0.9);
       }
     }
+  }
+}
+
+.dark .emoji-picker {
+  .emoji-tabs {
+    background-color: #1e293b;
+    .emoji-tab.active { background-color: #334155; }
   }
 }
 </style>

@@ -4,155 +4,159 @@
     <th:block th:include="include :: header('消息管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
     <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <style>
-        /* 搜索栏紧凑优化 */
-        .select-list ul li {
-            margin: 0px 10px 5px 0px !important;
-        }
-        .select-list ul li input {
-            width: 120px !important;
-        }
-        .select-list ul li select {
-            width: 80px !important;
-        }
-        .time-input {
-            width: 100px !important;
-        }
+        body { padding: 10px !important; }
+        .gray-bg { background-color: #f3f3f4 !important; }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
-        <div class="row">
-
-            <!-- 统计卡片区域 - 增强样式 -->
-            <div class="col-sm-12" style="margin-top: 10px;">
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterReset()">
-                            <div class="ibox-title">
-                                <span class="stat-badge pull-right">总</span>
-                                <h5 style="color: #fff; margin: 0;">消息总数</h5>
-                            </div>
-                            <div class="ibox-content">
-                                <div class="stat-number" id="totalCount">0</div>
-                                <div class="stat-label">系统消息总量</div>
-                                <i class="fa fa-comments stat-icon"></i>
-                            </div>
-                        </div>
+        <!-- 统计卡片区域 -->
+        <div class="row stat-card-section">
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterReset()">
+                    <div class="ibox-title">
+                        <span class="stat-badge pull-right">总</span>
+                        <h5 style="color: #fff; margin: 0;">消息总数</h5>
                     </div>
-                    <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByToday()">
-                            <div class="ibox-title">
-                                <span class="stat-badge pull-right">日</span>
-                                <h5 style="color: #fff; margin: 0;">今日消息</h5>
-                            </div>
-                            <div class="ibox-content">
-                                <div class="stat-number" id="todayCount">0</div>
-                                <div class="stat-label">今日发送消息</div>
-                                <i class="fa fa-calendar stat-icon"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterByType('TEXT')">
-                            <div class="ibox-title">
-                                <span class="stat-badge pull-right">文</span>
-                                <h5 style="color: #fff; margin: 0;">文本消息</h5>
-                            </div>
-                            <div class="ibox-content">
-                                <div class="stat-number" id="textCount">0</div>
-                                <div class="stat-label">文本类型消息</div>
-                                <i class="fa fa-font stat-icon"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterBySensitive()">
-                            <div class="ibox-title">
-                                <span class="stat-badge pull-right">警</span>
-                                <h5 style="color: #fff; margin: 0;">敏感消息</h5>
-                            </div>
-                            <div class="ibox-content">
-                                <div class="stat-number" id="sensitiveCount">0</div>
-                                <div class="stat-label">敏感级别消息</div>
-                                <i class="fa fa-exclamation-triangle stat-icon"></i>
-                            </div>
-                        </div>
+                    <div class="ibox-content">
+                        <div class="stat-number" id="totalCount">0</div>
+                        <div class="stat-label">系统消息总量</div>
+                        <i class="fa fa-comments stat-icon"></i>
                     </div>
                 </div>
             </div>
-
-            <!-- 搜索表单 -->
-            <div class="col-sm-12 search-collapse">
-                <form id="message-form">
-                    <div class="select-list">
-                        <ul>
-                            <li>
-                                <label class="search-label label-2">发件</label><input type="text" name="senderId" placeholder="请输入ID"/>
-                            </li>
-                            <li>
-                                <label class="search-label label-2">收件</label><input type="text" name="receiverId" placeholder="请输入ID"/>
-                            </li>
-                            <li>
-                                <label class="search-label label-2">会话</label><input type="text" name="conversationId" placeholder="请输入ID"/>
-                            </li>
-                            <li>
-                                <label class="search-label label-2">类型</label><select name="messageType">
-                                    <option value="">全部</option>
-                                    <option value="TEXT">文本</option>
-                                    <option value="IMAGE">图片</option>
-                                    <option value="FILE">文件</option>
-                                    <option value="VOICE">语音</option>
-                                    <option value="VIDEO">视频</option>
-                                </select>
-                            </li>
-                            <li>
-                                <label class="search-label label-2">状态</label><select name="sendStatus">
-                                    <option value="">全部</option>
-                                    <option value="SENT">发送</option>
-                                    <option value="DELIVERED">送达</option>
-                                    <option value="FAILED">失败</option>
-                                </select>
-                            </li>
-                            <li>
-                                <label class="search-label label-2">敏感</label><select name="sensitiveLevel">
-                                    <option value="">全部</option>
-                                    <option value="NORMAL">普通</option>
-                                    <option value="SENSITIVE">敏感</option>
-                                    <option value="HIGH">高级</option>
-                                </select>
-                            </li>
-                            <li class="select-time">
-                                <label class="search-label label-4">发送时间</label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
-                                <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                            </li>
-                        </ul>
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByToday()">
+                    <div class="ibox-title">
+                        <span class="stat-badge pull-right">日</span>
+                        <h5 style="color: #fff; margin: 0;">今日消息</h5>
                     </div>
-                </form>
+                    <div class="ibox-content">
+                        <div class="stat-number" id="todayCount">0</div>
+                        <div class="stat-label">今日发送消息</div>
+                        <i class="fa fa-calendar stat-icon"></i>
+                    </div>
+                </div>
             </div>
-
-            <!-- 工具栏 -->
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-warning multiple disabled" onclick="batchRevoke()" shiro:hasPermission="im:message:revoke">
-                    <i class="fa fa-undo"></i> 撤回
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:message:remove">
-                    <i class="fa fa-trash"></i> 删除
-                </a>
-                <a class="btn btn-default" onclick="exportExcel()" shiro:hasPermission="im:message:export">
-                    <i class="fa fa-download"></i> 导出
-                </a>
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterByType('TEXT')">
+                    <div class="ibox-title">
+                        <span class="stat-badge pull-right">文</span>
+                        <h5 style="color: #fff; margin: 0;">文本消息</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="stat-number" id="textCount">0</div>
+                        <div class="stat-label">文本类型消息</div>
+                        <i class="fa fa-font stat-icon"></i>
+                    </div>
+                </div>
             </div>
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterBySensitive()">
+                    <div class="ibox-title">
+                        <span class="stat-badge pull-right">警</span>
+                        <h5 style="color: #fff; margin: 0;">敏感消息</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="stat-number" id="sensitiveCount">0</div>
+                        <div class="stat-label">敏感级别消息</div>
+                        <i class="fa fa-exclamation-triangle stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <!-- 数据表格 -->
-            <div class="col-sm-12 select-table table-striped">
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        <!-- 搜索表单 -->
+        <div class="row search-section">
+            <div class="col-sm-12">
+                <div class="im-panel">
+                    <form id="message-form">
+                        <div class="select-list">
+                            <ul>
+                                <li>
+                                    <label class="search-label label-2">发件</label><input type="text" name="senderId" placeholder="用户ID"/>
+                                </li>
+                                <li>
+                                    <label class="search-label label-2">收件</label><input type="text" name="receiverId" placeholder="用户ID"/>
+                                </li>
+                                <li>
+                                    <label class="search-label label-2">会话</label><input type="text" name="conversationId" placeholder="会话ID"/>
+                                </li>
+                                <li>
+                                    <label class="search-label label-2">类型</label><select name="messageType">
+                                        <option value="">全部</option>
+                                        <option value="TEXT">文本</option>
+                                        <option value="IMAGE">图片</option>
+                                        <option value="FILE">文件</option>
+                                        <option value="VOICE">语音</option>
+                                        <option value="VIDEO">视频</option>
+                                    </select>
+                                </li>
+                                <li>
+                                    <label class="search-label label-2">状态</label><select name="sendStatus">
+                                        <option value="">全部</option>
+                                        <option value="SENT">发送</option>
+                                        <option value="DELIVERED">送达</option>
+                                        <option value="FAILED">失败</option>
+                                    </select>
+                                </li>
+                                <li>
+                                    <label class="search-label label-2">敏感</label><select name="sensitiveLevel">
+                                        <option value="">全部</option>
+                                        <option value="NORMAL">普通</option>
+                                        <option value="SENSITIVE">敏感</option>
+                                        <option value="HIGH">高级</option>
+                                    </select>
+                                </li>
+                                <li class="select-time">
+                                    <label class="search-label label-4">发送时间</label>
+                                    <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
+                                    <span>-</span>
+                                    <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
+                                </li>
+                                <li>
+                                    <a class="btn btn-primary btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                    <a class="btn btn-default btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 工具栏 + 表格 -->
+        <div class="row table-section">
+            <div class="col-sm-12">
+                <!-- 批量操作按钮 -->
+                <div class="im-toolbar">
+                    <div class="im-batch-actions">
+                        <a class="btn btn-warning" onclick="batchRevoke()" shiro:hasPermission="im:message:revoke">
+                            <i class="fa fa-undo"></i> 批量撤回
+                        </a>
+                        <a class="btn btn-danger" onclick="$.operate.removeAll()" shiro:hasPermission="im:message:remove">
+                            <i class="fa fa-trash"></i> 批量删除
+                        </a>
+                        <a class="btn btn-info" onclick="batchMarkSensitive()" shiro:hasPermission="im:message:edit">
+                            <i class="fa fa-flag"></i> 标记敏感
+                        </a>
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-default btn-sm" onclick="$.table.refresh()">
+                            <i class="fa fa-refresh"></i> 刷新
+                        </a>
+                        <a class="btn btn-default btn-sm" onclick="$.table.exportExcel()" shiro:hasPermission="im:message:export">
+                            <i class="fa fa-download"></i> 导出
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 数据表格 -->
+                <div class="im-table-container">
+                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                </div>
             </div>
         </div>
     </div>
@@ -163,9 +167,6 @@
         var prefix = ctx + "im/message";
 
         $(function() {
-            // 加载统计数据
-            loadStatistics();
-
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -176,34 +177,45 @@
                 sortOrder: "desc",
                 modalName: "消息",
                 showColumns: true,
-                showRefresh: true,
+                showRefresh: false,
+                showToggle: false,
+                clickToSelect: true,
                 rememberSelected: true,
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
                 columns: [{
-                    checkbox: true
+                    checkbox: true,
+                    width: 40,
+                    align: 'center'
                 }, {
                     field: 'id',
-                    visible: false
+                    title: 'ID',
+                    visible: false,
+                    width: 60
                 }, {
                     field: 'senderId',
                     title: '发送人',
-                    width: 80,
+                    width: 90,
                     formatter: function(value) {
-                        return '<span class="label label-primary">#' + value + '</span>';
+                        return '<span class="im-badge im-badge-primary">#' + value + '</span>';
                     }
                 }, {
                     field: 'receiverId',
                     title: '接收人',
-                    width: 80,
+                    width: 90,
                     formatter: function(value) {
-                        if (!value) return '<span class="text-muted">群聊</span>';
-                        return '<span class="label label-primary">#' + value + '</span>';
+                        if (!value) return '<span class="im-badge im-badge-info">群聊</span>';
+                        return '<span class="im-badge im-badge-primary">#' + value + '</span>';
                     }
                 }, {
                     field: 'conversationId',
                     title: '会话ID',
-                    width: 100,
+                    width: 120,
                     formatter: function(value) {
-                        return $.table.tooltip(value, 20);
+                        if (!value) return '-';
+                        return '<span title="' + value + '">' + (value.length > 15 ? value.substring(0, 15) + '...' : value) + '</span>';
                     }
                 }, {
                     field: 'messageType',
@@ -211,19 +223,21 @@
                     width: 70,
                     align: 'center',
                     formatter: function(value) {
-                        if (value === 'TEXT') return '<span class="label label-primary">文本</span>';
-                        if (value === 'IMAGE') return '<span class="label label-success">图片</span>';
-                        if (value === 'FILE') return '<span class="label label-warning">文件</span>';
-                        if (value === 'VOICE') return '<span class="label label-info">语音</span>';
-                        if (value === 'VIDEO') return '<span class="label label-purple">视频</span>';
-                        return '<span class="label label-default">' + value + '</span>';
+                        if (value === 'TEXT') return '<span class="im-badge im-badge-primary">文本</span>';
+                        if (value === 'IMAGE') return '<span class="im-badge im-badge-success">图片</span>';
+                        if (value === 'FILE') return '<span class="im-badge im-badge-warning">文件</span>';
+                        if (value === 'VOICE') return '<span class="im-badge im-badge-info">语音</span>';
+                        if (value === 'VIDEO') return '<span class="im-badge im-badge-danger">视频</span>';
+                        return '<span class="im-badge im-badge-info">' + value + '</span>';
                     }
                 }, {
                     field: 'content',
                     title: '内容',
                     formatter: function(value, row) {
                         if (row.messageType === 'TEXT') {
-                            return $.table.tooltip(value, 50);
+                            if (!value) return '-';
+                            var display = value.length > 50 ? value.substring(0, 50) + '...' : value;
+                            return '<span title="' + value + '">' + display + '</span>';
                         }
                         return '[' + row.messageType + ']';
                     }
@@ -233,9 +247,9 @@
                     width: 70,
                     align: 'center',
                     formatter: function(value) {
-                        if (value === 'SENSITIVE') return '<span class="label label-warning">敏感</span>';
-                        if (value === 'HIGH') return '<span class="label label-danger">高级</span>';
-                        return '<span class="label label-default">普通</span>';
+                        if (value === 'SENSITIVE') return '<span class="im-badge im-badge-warning">敏感</span>';
+                        if (value === 'HIGH') return '<span class="im-badge im-badge-danger">高级</span>';
+                        return '<span class="im-badge im-badge-info">普通</span>';
                     }
                 }, {
                     field: 'sendStatus',
@@ -243,10 +257,10 @@
                     width: 70,
                     align: 'center',
                     formatter: function(value) {
-                        if (value === 'SENT') return '<span class="label label-info">发送</span>';
-                        if (value === 'DELIVERED') return '<span class="label label-success">送达</span>';
-                        if (value === 'FAILED') return '<span class="label label-danger">失败</span>';
-                        return '<span class="label label-default">-</span>';
+                        if (value === 'SENT') return '<span class="im-badge im-badge-info">发送</span>';
+                        if (value === 'DELIVERED') return '<span class="im-badge im-badge-success">送达</span>';
+                        if (value === 'FAILED') return '<span class="im-badge im-badge-danger">失败</span>';
+                        return '<span class="im-badge im-badge-info">-</span>';
                     }
                 }, {
                     field: 'isRevoked',
@@ -254,33 +268,56 @@
                     width: 60,
                     align: 'center',
                     formatter: function(value) {
-                        return value == 1 ? '<i class="fa fa-undo text-warning"></i>' : '-';
+                        return value == 1 ? '<i class="fa fa-undo im-warning"></i>' : '-';
+                    }
+                }, {
+                    field: 'isEdited',
+                    title: '编辑',
+                    width: 60,
+                    align: 'center',
+                    formatter: function(value) {
+                        return value == 1 ? '<i class="fa fa-pencil im-info"></i>' : '-';
+                    }
+                }, {
+                    field: 'replyToMessageId',
+                    title: '回复',
+                    width: 80,
+                    align: 'center',
+                    formatter: function(value) {
+                        return value ? '<i class="fa fa-reply im-primary"></i>' : '-';
                     }
                 }, {
                     field: 'createTime',
                     title: '发送时间',
-                    width: 160,
+                    width: 155,
                     sortable: true
+                }, {
+                    field: 'updateTime',
+                    title: '更新时间',
+                    width: 155,
+                    sortable: true,
+                    visible: false
                 }, {
                     title: '操作',
                     align: 'center',
-                    width: 100,
+                    width: 150,
+                    class: 'action-cell',
                     formatter: function(value, row) {
                         var actions = [];
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewDetail(\'' + row.id + '\')" title="查看"><i class="fa fa-eye"></i></a> ');
                         if (row.isRevoked != 1) {
-                            actions.push('<a class="btn btn-warning btn-xs" href="javascript:void(0)" onclick="revokeMessage(\'' + row.id + '\')"><i class="fa fa-undo"></i></a> ');
+                            actions.push('<a class="btn btn-warning btn-xs" href="javascript:void(0)" onclick="revokeMessage(\'' + row.id + '\')" title="撤回"><i class="fa fa-undo"></i></a> ');
                         }
-                        actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-trash"></i></a>');
+                        actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')" title="删除"><i class="fa fa-trash"></i></a>');
                         return actions.join('');
                     }
                 }]
             };
             $.table.init(options);
+            loadStatistics();
         });
 
-        /**
-         * 加载统计数据
-         */
+        /* 加载统计数据 */
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code == 0) {
@@ -351,33 +388,81 @@
             $.table.search();
         }
 
+        /* 查看消息详情 */
+        function viewDetail(id) {
+            $.get(prefix + "/detail/" + id, function(result) {
+                if (result.code == 0) {
+                    var data = result.data;
+                    var html = '<div class="row">';
+                    html += '<div class="col-sm-6"><label class="control-label">消息ID：</label>' + (data.id || '-') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">发送人：</label>' + (data.senderId || '-') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">接收人：</label>' + (data.receiverId || '群聊') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">会话ID：</label>' + (data.conversationId || '-') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">消息类型：</label>' + (data.messageType || '-') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">发送状态：</label>' + (data.sendStatus || '-') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">敏感级别：</label>' + (data.sensitiveLevel || '-') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">是否撤回：</label>' + (data.isRevoked == 1 ? '是' : '否') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">是否编辑：</label>' + (data.isEdited == 1 ? '是' : '否') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">发送时间：</label>' + (data.createTime || '-') + '</div>';
+                    html += '<div class="col-sm-12"><label class="control-label">消息内容：</label><br/>' + (data.content || '-') + '</div>';
+                    html += '</div>';
+                    $.modal.openOptions({
+                        title: '消息详情',
+                        width: "700",
+                        btn: ['关闭'],
+                        content: html
+                    });
+                }
+            });
+        }
+
+        /* 撤回消息 */
         function revokeMessage(id) {
             $.modal.confirm('确定要撤回这条消息吗？', function() {
                 $.operate.post(prefix + "/revoke/" + id, {}, function(res) {
                     if (res.code == 0) {
+                        $.modal.msgSuccess("撤回成功");
                         $.table.refresh();
+                        loadStatistics();
                     }
                 });
             });
         }
 
+        /* 批量撤回 */
         function batchRevoke() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
                 $.modal.alertWarning("请至少选择一条记录");
                 return;
             }
-            $.modal.confirm('确定要批量撤回选中的消息吗？', function() {
+            $.modal.confirm('确定要批量撤回选中的 ' + rows.length + ' 条消息吗？', function() {
                 $.operate.post(prefix + "/batchRevoke", { messageIds: rows.join() }, function(res) {
                     if (res.code == 0) {
+                        $.modal.msgSuccess("批量撤回成功");
                         $.table.refresh();
+                        loadStatistics();
                     }
                 });
             });
         }
 
-        function exportExcel() {
-            $.table.exportExcel();
+        /* 批量标记敏感 */
+        function batchMarkSensitive() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm('确定要将选中的 ' + rows.length + ' 条消息标记为敏感吗？', function() {
+                $.operate.post(prefix + "/batchMarkSensitive", { messageIds: rows.join(), sensitiveLevel: 'SENSITIVE' }, function(res) {
+                    if (res.code == 0) {
+                        $.modal.msgSuccess("标记成功");
+                        $.table.refresh();
+                        loadStatistics();
+                    }
+                });
+            });
         }
     </script>
 </body>

@@ -3,104 +3,118 @@
 <head>
     <th:block th:include="include :: header('消息@记录管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <style>
-        .mention-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        /* 搜索栏紧凑优化 */
+        .select-list ul li {
+            margin: 0px 10px 5px 0px !important;
+        }
+        .select-list ul li input {
+            width: 120px !important;
+        }
+        .select-list ul li select {
+            width: 80px !important;
+        }
+        .time-input {
+            width: 100px !important;
+        }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row" style="padding-top: 6px;">
-            <!-- 统计卡片区域 -->
+            <!-- 统计卡片区域 - 增强样式 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins mention-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">@</span>
-                                <h5>总@数</h5>
+                                <span class="stat-badge pull-right">@</span>
+                                <h5 style="color: #fff; margin: 0;">总@数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部@记录</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部@记录</div>
+                                <i class="fa fa-at stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins mention-stat-card" onclick="filterByRead('1')" style="cursor: pointer;" title="点击查看已读">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterByRead('1')">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">读</span>
-                                <h5>已读数</h5>
+                                <span class="stat-badge pull-right">读</span>
+                                <h5 style="color: #fff; margin: 0;">已读数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="readCount">0</h2>
-                                <small>已读@记录</small>
+                                <div class="stat-number" id="readCount">0</div>
+                                <div class="stat-label">已读@记录</div>
+                                <i class="fa fa-check stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins mention-stat-card" onclick="filterByRead('0')" style="cursor: pointer;" title="点击查看未读">
+                        <div class="ibox float-e-margins im-stat-card stat-card-danger" onclick="filterByRead('0')">
                             <div class="ibox-title">
-                                <span class="label label-danger pull-right">未</span>
-                                <h5>未读数</h5>
+                                <span class="stat-badge pull-right">未</span>
+                                <h5 style="color: #fff; margin: 0;">未读数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-danger" id="unreadCount">0</h2>
-                                <small>未读@记录</small>
+                                <div class="stat-number" id="unreadCount">0</div>
+                                <div class="stat-label">未读@记录</div>
+                                <i class="fa fa-envelope stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins mention-stat-card" onclick="filterByType('ALL')" style="cursor: pointer;" title="点击查看@所有人">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByType('ALL')">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">众</span>
-                                <h5>@所有人次数</h5>
+                                <span class="stat-badge pull-right">众</span>
+                                <h5 style="color: #fff; margin: 0;">@所有人</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="mentionAllCount">0</h2>
-                                <small>@所有人记录</small>
+                                <div class="stat-number" id="mentionAllCount">0</div>
+                                <div class="stat-label">@所有人记录</div>
+                                <i class="fa fa-users stat-icon"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 搜索区域 -->
+            <!-- 搜索表单 -->
             <div class="col-sm-12 search-collapse">
                 <form id="mention-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="input-label">消息ID：</label><input type="text" name="messageId" placeholder="请输入消息ID"/>
+                                <label class="search-label label-4">消息ID</label><input type="text" name="messageId" placeholder="请输入"/>
                             </li>
                             <li>
-                                <label class="input-label">被@用户ID：</label><input type="text" name="mentionedUserId" placeholder="请输入被@用户ID"/>
+                                <label class="search-label label-4">被@用户ID</label><input type="text" name="mentionedUserId" placeholder="请输入"/>
                             </li>
                             <li>
-                                <label class="input-label">操作者ID：</label><input type="text" name="mentionedBy" placeholder="请输入操作者ID"/>
+                                <label class="search-label label-4">操作者ID</label><input type="text" name="mentionedBy" placeholder="请输入"/>
                             </li>
                             <li>
-                                <label class="input-label">提及类型：</label><select name="mentionType">
-                                    <option value="">所有</option>
+                                <label class="search-label label-2">类型</label><select name="mentionType">
+                                    <option value="">全部</option>
                                     <option value="USER">用户</option>
                                     <option value="ALL">所有人</option>
                                 </select>
                             </li>
                             <li>
-                                <label class="input-label">已读状态：</label><select name="isRead">
-                                    <option value="">所有</option>
+                                <label class="search-label label-2">状态</label><select name="isRead">
+                                    <option value="">全部</option>
                                     <option value="0">未读</option>
                                     <option value="1">已读</option>
                                 </select>
                             </li>
                             <li>
-                                <label class="input-label">创建时间：</label>
-                                <input type="text" class="time-input" placeholder="开始时间" name="params[beginTime]"/>
+                                <label class="search-label label-4">创建时间</label>
+                                <input type="text" class="time-input" placeholder="开始" name="params[beginTime]"/>
                                 <span>-</span>
-                                <input type="text" class="time-input" placeholder="结束时间" name="params[endTime]"/>
+                                <input type="text" class="time-input" placeholder="结束" name="params[endTime]"/>
                             </li>
                             <li>
                                 <a class="btn btn-primary btn-rounded btn-sm" onclick="doSearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
@@ -297,17 +311,44 @@
          * 加载统计数据
          */
         function loadStatistics() {
-            ImCommon.loadStatisticsWithCache(
-                prefix + "/statistics",
-                function(data) {
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#readCount").text(data.readCount || 0);
-                    $("#unreadCount").text(data.unreadCount || 0);
-                    $("#mentionAllCount").text(data.mentionAllCount || 0);
-                },
-                'mention_statistics',
-                5
-            );
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code === 0) {
+                    var data = result.data || {};
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('readCount', data.readCount || 0);
+                    animateNumber('unreadCount', data.unreadCount || 0);
+                    animateNumber('mentionAllCount', data.mentionAllCount || 0);
+                }
+            });
+        }
+
+        /**
+         * 数字动画效果
+         */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
         }
 
         /**

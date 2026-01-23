@@ -3,117 +3,135 @@
 <head>
     <th:block th:include="include :: header('DING回执管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <style>
-        .dingreceipt-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        body { padding: 10px !important; }
+        .gray-bg { background-color: #f3f3f4 !important; }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
-        <div class="row">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12" style="margin-top: 10px;">
+        <!-- 统计卡片区域 -->
+        <div class="row stat-card-section">
+            <div class="col-sm-12">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins dingreceipt-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>回执总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">回执总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部DING回执</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部DING回执</div>
+                                <i class="fa fa-list-alt stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins dingreceipt-stat-card" onclick="filterByReadStatus('read')" style="cursor: pointer;" title="点击查看已读">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByReadStatus('read')">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">读</span>
-                                <h5>已回执</h5>
+                                <span class="stat-badge pull-right">读</span>
+                                <h5 style="color: #fff; margin: 0;">已回执</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="readCount">0</h2>
-                                <small>已读回执数量</small>
+                                <div class="stat-number" id="readCount">0</div>
+                                <div class="stat-label">已读回执数量</div>
+                                <i class="fa fa-check-square stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins dingreceipt-stat-card" onclick="filterByReadStatus('unread')" style="cursor: pointer;" title="点击查看未读">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByReadStatus('unread')">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">未</span>
-                                <h5>未回执</h5>
+                                <span class="stat-badge pull-right">未</span>
+                                <h5 style="color: #fff; margin: 0;">未回执</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="unreadCount">0</h2>
-                                <small>未读回执数量</small>
+                                <div class="stat-number" id="unreadCount">0</div>
+                                <div class="stat-label">未读回执数量</div>
+                                <i class="fa fa-clock-o stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins dingreceipt-stat-card" onclick="filterByConfirmed('1')" style="cursor: pointer;" title="点击查看回执率">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByConfirmed('1')">
                             <div class="ibox-title">
-                                <span class="label label-info pull-right">率</span>
-                                <h5>回执率</h5>
+                                <span class="stat-badge pull-right">率</span>
+                                <h5 style="color: #fff; margin: 0;">回执率</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-info" id="receiptRate">0%</h2>
-                                <small>已读占比统计</small>
+                                <div class="stat-number" id="receiptRate">0%</div>
+                                <div class="stat-label">已读占比统计</div>
+                                <i class="fa fa-percent stat-icon"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="col-sm-12 search-collapse">
-                <form id="receipt-form">
-                    <div class="select-list">
-                        <ul>
-                            <li>
-                                <label class="input-label">DING ID：</label><input type="text" name="dingId" placeholder="请输入DING ID"/>
-                            </li>
-                            <li>
-                                <label class="input-label">接收者名称：</label><input type="text" name="receiverName" placeholder="请输入接收者名称"/>
-                            </li>
-                            <li>
-                                <label class="input-label">阅读状态：</label><select name="readStatus">
-                                    <option value="">所有</option>
-                                    <option value="read">已读</option>
-                                    <option value="unread">未读</option>
-                                </select>
-                            </li>
-                            <li>
-                                <label class="input-label">确认状态：</label><select name="confirmed">
-                                    <option value="">所有</option>
-                                    <option value="1">已确认</option>
-                                    <option value="0">未确认</option>
-                                </select>
-                            </li>
-                            <li class="select-time">
-                                <label>阅读时间：</label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
-                                <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                            </li>
-                        </ul>
+        <!-- 搜索区域 -->
+        <div class="row search-section">
+            <div class="col-sm-12">
+                <div class="im-panel">
+                    <div class="im-panel-body">
+                        <form id="receipt-form">
+                            <div class="select-list">
+                                <ul>
+                                    <li>
+                                        <label class="search-label label-4">DING ID</label><input type="text" name="dingId" placeholder="请输入"/>
+                                    </li>
+                                    <li>
+                                        <label class="search-label label-4">接收者名称</label><input type="text" name="receiverName" placeholder="请输入"/>
+                                    </li>
+                                    <li>
+                                        <label class="search-label label-4">阅读状态</label><select name="readStatus">
+                                            <option value="">全部</option>
+                                            <option value="read">已读</option>
+                                            <option value="unread">未读</option>
+                                        </select>
+                                    </li>
+                                    <li>
+                                        <label class="search-label label-4">确认状态</label><select name="confirmed">
+                                            <option value="">全部</option>
+                                            <option value="1">已确认</option>
+                                            <option value="0">未确认</option>
+                                        </select>
+                                    </li>
+                                    <li class="select-time">
+                                        <label class="search-label label-4">阅读时间</label>
+                                        <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
+                                        <span>-</span>
+                                        <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
+                                    </li>
+                                    <li>
+                                        <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                        <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </form>
                     </div>
-                </form>
-            </div>
-
-            <div class="col-sm-12 select-table table-striped">
-                <div class="btn-group-sm" id="toolbar">
-                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:dingReceipt:export">
-                        <i class="fa fa-download"></i> 导出
-                    </a>
                 </div>
-                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+
+        <!-- 表格区域 -->
+        <div class="row table-section">
+            <div class="col-sm-12">
+                <div class="im-table-container">
+                    <!-- 工具栏 -->
+                    <div class="im-toolbar" id="toolbar">
+                        <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:dingReceipt:export">
+                            <i class="fa fa-download"></i> 导出
+                        </a>
+                    </div>
+
+                    <!-- 数据表格 -->
+                    <table id="bootstrap-table"></table>
+                </div>
             </div>
         </div>
     </div>

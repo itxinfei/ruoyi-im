@@ -3,126 +3,144 @@
 <head>
     <th:block th:include="include :: header('DING模板管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <style>
-        .dingtemplate-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        body { padding: 10px !important; }
+        .gray-bg { background-color: #f3f3f4 !important; }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
-        <div class="row">
-            <!-- 统计卡片区域 -->
-            <div class="col-sm-12" style="margin-top: 10px;">
+        <!-- 统计卡片区域 -->
+        <div class="row stat-card-section">
+            <div class="col-sm-12">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins dingtemplate-stat-card" onclick="filterByCategory('')" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>模板总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">模板总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部DING模板</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部DING模板</div>
+                                <i class="fa fa-file-text stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins dingtemplate-stat-card" onclick="filterBySystem('1')" style="cursor: pointer;" title="点击查看系统模板">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterBySystem('1')">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">系</span>
-                                <h5>系统模板</h5>
+                                <span class="stat-badge pull-right">系</span>
+                                <h5 style="color: #fff; margin: 0;">系统模板</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="systemCount">0</h2>
-                                <small>系统预置模板</small>
+                                <div class="stat-number" id="systemCount">0</div>
+                                <div class="stat-label">系统预置模板</div>
+                                <i class="fa fa-cog stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins dingtemplate-stat-card" onclick="filterBySystem('0')" style="cursor: pointer;" title="点击查看自定义模板">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterBySystem('0')">
                             <div class="ibox-title">
-                                <span class="label label-info pull-right">自</span>
-                                <h5>自定义模板</h5>
+                                <span class="stat-badge pull-right">自</span>
+                                <h5 style="color: #fff; margin: 0;">自定义模板</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-info" id="customCount">0</h2>
-                                <small>用户自定义模板</small>
+                                <div class="stat-number" id="customCount">0</div>
+                                <div class="stat-label">用户自定义模板</div>
+                                <i class="fa fa-user stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins dingtemplate-stat-card" onclick="filterByStatus('ACTIVE')" style="cursor: pointer;" title="点击查看启用模板">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByStatus('ACTIVE')">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">用</span>
-                                <h5>今日使用</h5>
+                                <span class="stat-badge pull-right">用</span>
+                                <h5 style="color: #fff; margin: 0;">今日使用</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="todayUseCount">0</h2>
-                                <small>今日使用次数</small>
+                                <div class="stat-number" id="todayUseCount">0</div>
+                                <div class="stat-label">今日使用次数</div>
+                                <i class="fa fa-star stat-icon"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="col-sm-12 search-collapse">
-                <form id="template-form">
-                    <div class="select-list">
-                        <ul>
-                            <li>
-                                <label class="input-label">模板名称：</label><input type="text" name="name" placeholder="请输入模板名称"/>
-                            </li>
-                            <li>
-                                <label class="input-label">分类：</label><select name="category">
-                                    <option value="">所有</option>
-                                    <option value="MEETING">会议</option>
-                                    <option value="WORK">工作</option>
-                                    <option value="NOTICE">通知</option>
-                                    <option value="REMIND">提醒</option>
-                                </select>
-                            </li>
-                            <li>
-                                <label class="input-label">状态：</label><select name="status">
-                                    <option value="">所有</option>
-                                    <option value="ACTIVE">启用</option>
-                                    <option value="DISABLED">停用</option>
-                                </select>
-                            </li>
-                            <li>
-                                <label class="input-label">是否系统：</label><select name="isSystem">
-                                    <option value="">所有</option>
-                                    <option value="0">否</option>
-                                    <option value="1">是</option>
-                                </select>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                            </li>
-                        </ul>
+        <!-- 搜索区域 -->
+        <div class="row search-section">
+            <div class="col-sm-12">
+                <div class="im-panel">
+                    <div class="im-panel-body">
+                        <form id="template-form">
+                            <div class="select-list">
+                                <ul>
+                                    <li>
+                                        <label class="search-label label-4">模板名称</label><input type="text" name="name" placeholder="请输入"/>
+                                    </li>
+                                    <li>
+                                        <label class="search-label label-2">分类</label><select name="category">
+                                            <option value="">全部</option>
+                                            <option value="MEETING">会议</option>
+                                            <option value="WORK">工作</option>
+                                            <option value="NOTICE">通知</option>
+                                            <option value="REMIND">提醒</option>
+                                        </select>
+                                    </li>
+                                    <li>
+                                        <label class="search-label label-2">状态</label><select name="status">
+                                            <option value="">全部</option>
+                                            <option value="ACTIVE">启用</option>
+                                            <option value="DISABLED">停用</option>
+                                        </select>
+                                    </li>
+                                    <li>
+                                        <label class="search-label label-4">系统模板</label><select name="isSystem">
+                                            <option value="">全部</option>
+                                            <option value="0">否</option>
+                                            <option value="1">是</option>
+                                        </select>
+                                    </li>
+                                    <li>
+                                        <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                        <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </form>
                     </div>
-                </form>
-            </div>
-
-            <div class="col-sm-12 select-table table-striped">
-                <div class="btn-group-sm" id="toolbar">
-                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:dingTemplate:add">
-                        <i class="fa fa-plus"></i> 新增
-                    </a>
-                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:dingTemplate:edit">
-                        <i class="fa fa-edit"></i> 修改
-                    </a>
-                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:dingTemplate:remove">
-                        <i class="fa fa-remove"></i> 删除
-                    </a>
-                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:dingTemplate:export">
-                        <i class="fa fa-download"></i> 导出
-                    </a>
                 </div>
-                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+
+        <!-- 表格区域 -->
+        <div class="row table-section">
+            <div class="col-sm-12">
+                <div class="im-table-container">
+                    <!-- 工具栏 -->
+                    <div class="im-toolbar" id="toolbar">
+                        <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:dingTemplate:add">
+                            <i class="fa fa-plus"></i> 新增
+                        </a>
+                        <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:dingTemplate:edit">
+                            <i class="fa fa-edit"></i> 修改
+                        </a>
+                        <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:dingTemplate:remove">
+                            <i class="fa fa-remove"></i> 删除
+                        </a>
+                        <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:dingTemplate:export">
+                            <i class="fa fa-download"></i> 导出
+                        </a>
+                    </div>
+
+                    <!-- 数据表格 -->
+                    <table id="bootstrap-table"></table>
+                </div>
             </div>
         </div>
     </div>
@@ -258,12 +276,49 @@
             $.get(prefix + "/statistics", function(result) {
                 if (result.code == 0) {
                     var data = result.data || {};
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#systemCount").text(data.systemCount || 0);
-                    $("#customCount").text(data.customCount || 0);
-                    $("#todayUseCount").text(data.todayUseCount || 0);
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('systemCount', data.systemCount || 0);
+                    animateNumber('customCount', data.customCount || 0);
+                    animateNumber('todayUseCount', data.todayUseCount || 0);
                 }
             });
+        }
+
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $('select[name="category"]').val('');
+            $('select[name="status"]').val('');
+            $('select[name="isSystem"]').val('');
+            $.table.search();
         }
 
         /**

@@ -3,95 +3,110 @@
 <head>
     <th:block th:include="include :: header('用户设备管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
 
     <style>
-        .userdevice-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        .select-list ul li {
+            margin: 0px 10px 5px 0px !important;
+        }
+        .select-list ul li input {
+            width: 140px !important;
+        }
+        .select-list ul li select {
+            width: 80px !important;
+        }
+        .time-input {
+            width: 100px !important;
+        }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
-            <!-- 统计卡片区域 -->
+            <!-- 统计卡片区域 - 增强样式 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins userdevice-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()" title="点击查看全部">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>设备总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">设备总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部设备</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部设备</div>
+                                <i class="fa fa-desktop stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins userdevice-stat-card" onclick="filterByStatus('ONLINE')" style="cursor: pointer;" title="点击查看在线">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByStatus('ONLINE')" title="点击查看在线">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">在</span>
-                                <h5>在线设备</h5>
+                                <span class="stat-badge pull-right">在</span>
+                                <h5 style="color: #fff; margin: 0;">在线设备</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="onlineCount">0</h2>
-                                <small>当前在线</small>
+                                <div class="stat-number" id="onlineCount">0</div>
+                                <div class="stat-label">当前在线</div>
+                                <i class="fa fa-circle stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins userdevice-stat-card" onclick="filterByType('PC')" style="cursor: pointer;" title="点击查看PC端">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByType('PC')" title="点击查看PC端">
                             <div class="ibox-title">
-                                <span class="label label-info pull-right">PC</span>
-                                <h5>PC端设备</h5>
+                                <span class="stat-badge pull-right">PC</span>
+                                <h5 style="color: #fff; margin: 0;">PC端设备</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-info" id="pcCount">0</h2>
-                                <small>电脑端登录</small>
+                                <div class="stat-number" id="pcCount">0</div>
+                                <div class="stat-label">电脑端登录</div>
+                                <i class="fa fa-laptop stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins userdevice-stat-card" onclick="filterByType('MOBILE')" style="cursor: pointer;" title="点击查看移动端">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByType('MOBILE')" title="点击查看移动端">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">移</span>
-                                <h5>移动端设备</h5>
+                                <span class="stat-badge pull-right">移</span>
+                                <h5 style="color: #fff; margin: 0;">移动端设备</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="mobileCount">0</h2>
-                                <small>手机端登录</small>
+                                <div class="stat-number" id="mobileCount">0</div>
+                                <div class="stat-label">手机端登录</div>
+                                <i class="fa fa-mobile stat-icon"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- 搜索表单 -->
             <div class="col-sm-12 search-collapse">
                 <form id="userDevice-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="input-label">用户名：</label><input type="text" name="username" placeholder="请输入用户名"/>
+                                <label class="search-label label-2">用户名</label><input type="text" name="username" placeholder="请输入"/>
                             </li>
                             <li>
-                                <label class="input-label">设备类型：</label><select name="deviceType">
-                                    <option value="">所有</option>
+                                <label class="search-label label-2">类型</label><select name="deviceType">
+                                    <option value="">全部</option>
                                     <option value="PC">PC端</option>
                                     <option value="MOBILE">移动端</option>
                                     <option value="WEB">Web端</option>
                                 </select>
                             </li>
                             <li>
-                                <label class="input-label">状态：</label><select name="status">
-                                    <option value="">所有</option>
+                                <label class="search-label label-2">状态</label><select name="status">
+                                    <option value="">全部</option>
                                     <option value="ONLINE">在线</option>
                                     <option value="OFFLINE">离线</option>
                                 </select>
                             </li>
                             <li class="select-time">
-                                <label>活跃时间：</label>
+                                <label class="search-label label-4">活跃时间</label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
@@ -310,12 +325,41 @@
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
                     var data = result.data || {};
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#onlineCount").text(data.onlineCount || 0);
-                    $("#pcCount").text(data.pcCount || 0);
-                    $("#mobileCount").text(data.mobileCount || 0);
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('onlineCount', data.onlineCount || 0);
+                    animateNumber('pcCount', data.pcCount || 0);
+                    animateNumber('mobileCount', data.mobileCount || 0);
                 }
             });
+        }
+
+        /**
+         * 数字动画效果
+         */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
         }
 
         /**

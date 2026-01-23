@@ -3,12 +3,21 @@
 <head>
     <th:block th:include="include :: header('群组操作日志')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
     <style>
-        .grouplog-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        /* 搜索栏紧凑优化 */
+        .select-list ul li {
+            margin: 0px 10px 5px 0px !important;
+        }
+        .select-list ul li input {
+            width: 120px !important;
+        }
+        .select-list ul li select {
+            width: 80px !important;
+        }
+        .time-input {
+            width: 100px !important;
+        }
     </style>
 </head>
 <body class="gray-bg">
@@ -24,86 +33,95 @@
                 </div>
             </div>
 
-            <!-- 统计卡片区域 -->
+            <!-- 统计卡片区域 - 增强样式 -->
             <div class="col-sm-12" th:if="${group != null}" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins grouplog-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>日志总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">日志总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部操作日志</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部操作日志</div>
+                                <i class="fa fa-list-alt stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins grouplog-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看今日">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByToday()">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">今</span>
-                                <h5>今日操作</h5>
+                                <span class="stat-badge pull-right">今</span>
+                                <h5 style="color: #fff; margin: 0;">今日操作</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="todayCount">0</h2>
-                                <small>今日操作数</small>
+                                <div class="stat-number" id="todayCount">0</div>
+                                <div class="stat-label">今日操作数</div>
+                                <i class="fa fa-calendar stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins grouplog-stat-card" onclick="filterByType('CREATE')" style="cursor: pointer;" title="点击查看创建操作">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterByType('CREATE')">
                             <div class="ibox-title">
-                                <span class="label label-danger pull-right">建</span>
-                                <h5>创建操作</h5>
+                                <span class="stat-badge pull-right">建</span>
+                                <h5 style="color: #fff; margin: 0;">创建操作</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-danger" id="createCount">0</h2>
-                                <small>创建相关操作</small>
+                                <div class="stat-number" id="createCount">0</div>
+                                <div class="stat-label">创建相关操作</div>
+                                <i class="fa fa-plus stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins grouplog-stat-card" onclick="filterByType('DELETE')" style="cursor: pointer;" title="点击查看删除操作">
+                        <div class="ibox float-e-margins im-stat-card stat-card-danger" onclick="filterByType('DELETE')">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">删</span>
-                                <h5>删除操作</h5>
+                                <span class="stat-badge pull-right">删</span>
+                                <h5 style="color: #fff; margin: 0;">删除操作</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="deleteCount">0</h2>
-                                <small>删除相关操作</small>
+                                <div class="stat-number" id="deleteCount">0</div>
+                                <div class="stat-label">删除相关操作</div>
+                                <i class="fa fa-trash stat-icon"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- 搜索表单 -->
             <div class="col-sm-12 search-collapse">
                 <form id="log-form">
                     <div class="select-list">
                         <ul>
                             <li class="pull-right">
-                                <label class="input-label">操作类型：</label>
+                                <label class="search-label label-2">类型</label>
                                 <select name="operationType">
-                                    <option value="">所有</option>
+                                    <option value="">全部</option>
                                     <option value="CREATE">创建</option>
                                     <option value="UPDATE">更新</option>
                                     <option value="DELETE">删除</option>
                                     <option value="JOIN">加入</option>
                                     <option value="LEAVE">退出</option>
                                     <option value="MUTE">禁言</option>
-                                    <option value="UNMUTE">解除禁言</option>
+                                    <option value="UNMUTE">解禁</option>
                                 </select>
                             </li>
                             <li class="pull-right">
-                                <label class="input-label">操作人ID：</label>
-                                <input type="text" name="operatorId" placeholder="请输入操作人ID"/>
+                                <label class="search-label label-4">操作人ID</label>
+                                <input type="text" name="operatorId" placeholder="请输入"/>
                             </li>
                             <li class="select-time pull-right">
-                                <label>操作时间：</label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                                <label class="search-label label-4">操作时间</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
                                 <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="filterReset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -234,18 +252,65 @@
 
             $.get(prefix + "/log/statistics/" + groupId, function(result) {
                 if (result.code === 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#todayCount").text(result.data.todayCount || 0);
-                    $("#createCount").text(result.data.createCount || 0);
-                    $("#deleteCount").text(result.data.deleteCount || 0);
+                    var data = result.data || {};
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('todayCount', data.todayCount || 0);
+                    animateNumber('createCount', data.createCount || 0);
+                    animateNumber('deleteCount', data.deleteCount || 0);
                 }
             });
+        }
+
+        /**
+         * 数字动画效果
+         */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
         }
 
         /**
          * 重置筛选
          */
         function filterReset() {
+            $('select[name="operationType"]').val('');
+            $('input[name="operatorId"]').val('');
+            $('input[name="params[beginTime]"]').val('');
+            $('input[name="params[endTime]"]').val('');
+            $.table.search();
+        }
+
+        /**
+         * 按今日筛选
+         */
+        function filterByToday() {
+            var today = new Date();
+            var todayStr = today.getFullYear() + '-' +
+                          String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                          String(today.getDate()).padStart(2, '0');
+            $('input[name="params[beginTime]"]').val(todayStr + ' 00:00:00');
+            $('input[name="params[endTime]"]').val(todayStr + ' 23:59:59');
             $('select[name="operationType"]').val('');
             $.table.search();
         }

@@ -3,65 +3,70 @@
 <head>
     <th:block th:include="include :: header('文件分享管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <style>
-        .fileshare-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        .select-list ul li { margin: 0px 10px 5px 0px !important; }
+        .select-list ul li input { width: 140px !important; }
+        .select-list ul li select { width: 80px !important; }
+        .time-input { width: 100px !important; }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
-            <!-- 统计卡片区域 -->
+            <!-- 统计卡片区域 - 增强样式 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins fileshare-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>分享总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">分享总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部文件分享</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部文件分享</div>
+                                <i class="fa fa-share-alt stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins fileshare-stat-card" onclick="filterByPermission('1')" style="cursor: pointer;" title="点击查看公开分享">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByPermission('1')">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">公</span>
-                                <h5>公开分享</h5>
+                                <span class="stat-badge pull-right">公</span>
+                                <h5 style="color: #fff; margin: 0;">公开分享</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="publicCount">0</h2>
-                                <small>公开链接分享</small>
+                                <div class="stat-number" id="publicCount">0</div>
+                                <div class="stat-label">公开链接分享</div>
+                                <i class="fa fa-unlock stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins fileshare-stat-card" style="cursor: default;">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info">
                             <div class="ibox-title">
-                                <span class="label label-info pull-right">访</span>
-                                <h5>总访问量</h5>
+                                <span class="stat-badge pull-right">访</span>
+                                <h5 style="color: #fff; margin: 0;">总访问量</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-info" id="totalAccessCount">0</h2>
-                                <small>累计访问次数</small>
+                                <div class="stat-number" id="totalAccessCount">0</div>
+                                <div class="stat-label">累计访问次数</div>
+                                <i class="fa fa-eye stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins fileshare-stat-card" onclick="filterByExpired()" style="cursor: pointer;" title="点击查看过期">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByExpired()">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">过</span>
-                                <h5>已过期</h5>
+                                <span class="stat-badge pull-right">过</span>
+                                <h5 style="color: #fff; margin: 0;">已过期</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="expiredCount">0</h2>
-                                <small>过期分享</small>
+                                <div class="stat-number" id="expiredCount">0</div>
+                                <div class="stat-label">过期分享</div>
+                                <i class="fa fa-clock-o stat-icon"></i>
                             </div>
                         </div>
                     </div>
@@ -73,14 +78,14 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="input-label">分享者：</label><input type="text" name="sharerName" placeholder="请输入分享者名称"/>
+                                <label class="search-label label-2">分享者</label><input type="text" name="sharerName" placeholder="请输入"/>
                             </li>
                             <li>
-                                <label class="input-label">文件名：</label><input type="text" name="fileName" placeholder="请输入文件名"/>
+                                <label class="search-label label-2">文件名</label><input type="text" name="fileName" placeholder="请输入"/>
                             </li>
                             <li>
-                                <label class="input-label">分享权限：</label><select name="permission">
-                                    <option value="">所有</option>
+                                <label class="search-label label-4">分享权限</label><select name="permission">
+                                    <option value="">全部</option>
                                     <option value="1">公开</option>
                                     <option value="2">指定人</option>
                                     <option value="3">密码保护</option>
@@ -300,25 +305,48 @@
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
                     var data = result.data || {};
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#publicCount").text(data.publicCount || 0);
-                    $("#totalAccessCount").text(data.totalAccessCount || 0);
-                    $("#expiredCount").text(data.expiredCount || 0);
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('publicCount', data.publicCount || 0);
+                    animateNumber('totalAccessCount', data.totalAccessCount || 0);
+                    animateNumber('expiredCount', data.expiredCount || 0);
                 }
             });
         }
 
-        /**
-         * 重置筛选
-         */
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /* 重置筛选 */
         function filterReset() {
             $.form.reset();
             $.table.search();
         }
 
-        /**
-         * 按权限筛选
-         */
+        /* 按权限筛选 */
         function filterByPermission(permission) {
             if (permission !== undefined && permission !== '') {
                 $('select[name="permission"]').val(permission);
@@ -328,11 +356,8 @@
             $.table.search();
         }
 
-        /**
-         * 筛选过期数据
-         */
+        /* 筛选过期数据 */
         function filterByExpired() {
-            // 筛选已过期的分享（需要后端支持）
             $.table.search();
         }
 

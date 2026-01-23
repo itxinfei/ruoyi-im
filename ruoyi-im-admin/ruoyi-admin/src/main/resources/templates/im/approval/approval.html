@@ -3,64 +3,143 @@
 <head>
     <th:block th:include="include :: header('审批管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
+    <style>
+        body { padding: 10px !important; }
+        .gray-bg { background-color: #f3f3f4 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
-        <div class="row">
-            <!-- 搜索表单 -->
-            <div class="col-sm-12 search-collapse">
-                <form id="approval-form">
-                    <div class="select-list">
-                        <ul>
-                            <li>
-                                审批标题：<input type="text" name="title" placeholder="请输入审批标题"/>
-                            </li>
-                            <li>
-                                发起人：<input type="text" name="applicantName" placeholder="请输入发起人"/>
-                            </li>
-                            <li>
-                                审批状态：<select name="status">
-                                    <option value="">所有</option>
-                                    <option value="PENDING">待审批</option>
-                                    <option value="APPROVED">已通过</option>
-                                    <option value="REJECTED">已驳回</option>
-                                    <option value="CANCELLED">已撤销</option>
-                                </select>
-                            </li>
-                            <li class="select-time">
-                                <label>创建时间： </label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
-                                <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                            </li>
-                        </ul>
+        <!-- 统计卡片区域 -->
+        <div class="row stat-card-section">
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
+                    <div class="ibox-title">
+                        <span class="stat-badge pull-right">总</span>
+                        <h5 style="color: #fff; margin: 0;">审批总数</h5>
                     </div>
-                </form>
+                    <div class="ibox-content">
+                        <div class="stat-number" id="totalCount">0</div>
+                        <div class="stat-label">全部审批记录</div>
+                        <i class="fa fa-list-alt stat-icon"></i>
+                    </div>
+                </div>
             </div>
-
-            <!-- 工具栏 -->
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:approval:add">
-                    <i class="fa fa-plus"></i> 新增
-                </a>
-                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:approval:edit">
-                    <i class="fa fa-edit"></i> 修改
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:approval:remove">
-                    <i class="fa fa-remove"></i> 删除
-                </a>
-                <a class="btn btn-default" onclick="$.table.exportExcel()" shiro:hasPermission="im:approval:export">
-                    <i class="fa fa-download"></i> 导出
-                </a>
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins im-stat-card stat-card-warning pulse" onclick="filterByStatus('PENDING')">
+                    <div class="ibox-title">
+                        <span class="stat-badge pull-right">待</span>
+                        <h5 style="color: #fff; margin: 0;">待审批</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="stat-number" id="pendingCount">0</div>
+                        <div class="stat-label">等待处理审批</div>
+                        <i class="fa fa-clock-o stat-icon"></i>
+                    </div>
+                </div>
             </div>
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByStatus('APPROVED')">
+                    <div class="ibox-title">
+                        <span class="stat-badge pull-right">过</span>
+                        <h5 style="color: #fff; margin: 0;">已通过</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="stat-number" id="approvedCount">0</div>
+                        <div class="stat-label">已审批通过</div>
+                        <i class="fa fa-check stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins im-stat-card stat-card-danger" onclick="filterByStatus('REJECTED')">
+                    <div class="ibox-title">
+                        <span class="stat-badge pull-right">驳</span>
+                        <h5 style="color: #fff; margin: 0;">已驳回</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="stat-number" id="rejectedCount">0</div>
+                        <div class="stat-label">已驳回审批</div>
+                        <i class="fa fa-times stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <!-- 数据表格 -->
-            <div class="col-sm-12 select-table table-striped">
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        <!-- 搜索表单 -->
+        <div class="row search-section">
+            <div class="col-sm-12">
+                <div class="im-panel">
+                    <form id="approval-form">
+                        <div class="select-list">
+                            <ul>
+                                <li>
+                                    <label class="search-label label-4">审批标题</label><input type="text" name="title" placeholder="请输入审批标题"/>
+                                </li>
+                                <li>
+                                    <label class="search-label label-2">发起人</label><input type="text" name="applicantName" placeholder="请输入发起人"/>
+                                </li>
+                                <li>
+                                    <label class="search-label label-4">审批状态</label><select name="status">
+                                        <option value="">所有</option>
+                                        <option value="PENDING">待审批</option>
+                                        <option value="APPROVED">已通过</option>
+                                        <option value="REJECTED">已驳回</option>
+                                        <option value="CANCELLED">已撤销</option>
+                                    </select>
+                                </li>
+                                <li class="select-time">
+                                    <label class="search-label label-4">创建时间</label>
+                                    <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                                    <span>-</span>
+                                    <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                                </li>
+                                <li>
+                                    <a class="btn btn-primary btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                    <a class="btn btn-default btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 工具栏 + 表格 -->
+        <div class="row table-section">
+            <div class="col-sm-12">
+                <!-- 批量操作按钮 -->
+                <div class="im-toolbar">
+                    <div class="im-batch-actions">
+                        <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:approval:add">
+                            <i class="fa fa-plus"></i> 新增
+                        </a>
+                        <a class="btn btn-primary" onclick="batchApprove()" shiro:hasPermission="im:approval:edit">
+                            <i class="fa fa-check"></i> 批量通过
+                        </a>
+                        <a class="btn btn-warning" onclick="batchReject()" shiro:hasPermission="im:approval:edit">
+                            <i class="fa fa-times"></i> 批量驳回
+                        </a>
+                        <a class="btn btn-danger" onclick="$.operate.removeAll()" shiro:hasPermission="im:approval:remove">
+                            <i class="fa fa-trash"></i> 批量删除
+                        </a>
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-default btn-sm" onclick="$.table.refresh()">
+                            <i class="fa fa-refresh"></i> 刷新
+                        </a>
+                        <a class="btn btn-default btn-sm" onclick="$.table.exportExcel()" shiro:hasPermission="im:approval:export">
+                            <i class="fa fa-download"></i> 导出
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 数据表格 -->
+                <div class="im-table-container">
+                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                </div>
             </div>
         </div>
     </div>
@@ -73,6 +152,9 @@
         var prefix = ctx + "im/approval";
 
         $(function() {
+            // 加载统计数据
+            loadStatistics();
+
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -81,10 +163,12 @@
                 exportUrl: prefix + "/export",
                 modalName: "审批",
                 showColumns: true,
-                showRefresh: true,
+                showRefresh: false,
                 rememberSelected: true,
                 columns: [{
-                    checkbox: true
+                    checkbox: true,
+                    width: 40,
+                    align: 'center'
                 }, {
                     field: 'id',
                     title: 'ID',
@@ -93,13 +177,35 @@
                     field: 'title',
                     title: '审批标题',
                     sortable: true,
-                    width: 200,
+                    width: 180,
                     formatter: function(value) {
-                        return $.table.tooltip(value, 50);
+                        return $.table.tooltip(value, 30);
+                    }
+                }, {
+                    field: 'approvalType',
+                    title: '审批类型',
+                    align: 'center',
+                    width: 100,
+                    formatter: function(value) {
+                        if (!value) return '-';
+                        var typeMap = {
+                            'LEAVE': '<span class="im-badge im-badge-primary">请假</span>',
+                            'EXPENSE': '<span class="im-badge im-badge-success">报销</span>',
+                            'PURCHASE': '<span class="im-badge im-badge-info">采购</span>',
+                            'OTHER': '<span class="im-badge im-badge-default">其他</span>'
+                        };
+                        return typeMap[value] || value;
                     }
                 }, {
                     field: 'applicantName',
                     title: '发起人',
+                    width: 100,
+                    formatter: function(value) {
+                        return value || '-';
+                    }
+                }, {
+                    field: 'applicantDept',
+                    title: '发起部门',
                     width: 120,
                     formatter: function(value) {
                         return value || '-';
@@ -110,41 +216,254 @@
                     align: 'center',
                     width: 90,
                     formatter: function(value) {
-                        if (value === 'PENDING') return '<span class="label label-warning">待审批</span>';
-                        if (value === 'APPROVED') return '<span class="label label-success">已通过</span>';
-                        if (value === 'REJECTED') return '<span class="label label-danger">已驳回</span>';
-                        if (value === 'CANCELLED') return '<span class="label label-default">已撤销</span>';
+                        if (value === 'PENDING') return '<span class="im-badge im-badge-warning">待审批</span>';
+                        if (value === 'APPROVED') return '<span class="im-badge im-badge-success">已通过</span>';
+                        if (value === 'REJECTED') return '<span class="im-badge im-badge-danger">已驳回</span>';
+                        if (value === 'CANCELLED') return '<span class="im-badge im-badge-info">已撤销</span>';
                         return value;
                     }
                 }, {
-                    field: 'currentTime',
+                    field: 'currentNode',
                     title: '当前节点',
                     align: 'center',
                     width: 100
                 }, {
+                    field: 'currentApprover',
+                    title: '当前审批人',
+                    width: 100,
+                    formatter: function(value) {
+                        return value || '-';
+                    }
+                }, {
+                    field: 'priority',
+                    title: '优先级',
+                    align: 'center',
+                    width: 80,
+                    formatter: function(value) {
+                        if (value === 'HIGH') return '<span class="im-badge im-badge-danger">高</span>';
+                        if (value === 'MEDIUM') return '<span class="im-badge im-badge-warning">中</span>';
+                        if (value === 'LOW') return '<span class="im-badge im-badge-info">低</span>';
+                        return '<span class="im-badge im-badge-default">-</span>';
+                    }
+                }, {
                     field: 'createTime',
                     title: '创建时间',
-                    width: 160,
+                    width: 140,
                     sortable: true
                 }, {
                     field: 'finishTime',
                     title: '完成时间',
-                    width: 160,
-                    sortable: true
+                    width: 140,
+                    sortable: true,
+                    formatter: function(value) {
+                        return value || '-';
+                    }
+                }, {
+                    field: 'remark',
+                    title: '备注',
+                    width: 120,
+                    formatter: function(value) {
+                        if (!value) return '-';
+                        if (value.length > 20) {
+                            return '<span title="' + value + '">' + value.substring(0, 20) + '...</span>';
+                        }
+                        return value;
+                    }
                 }, {
                     title: '操作',
                     align: 'center',
-                    width: 120,
+                    width: 180,
+                    class: 'action-cell',
                     formatter: function(value, row) {
                         var actions = [];
-                        actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>编辑</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        if (row.status === 'PENDING') {
+                            actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="approveOne(' + row.id + ')" title="通过"><i class="fa fa-check"></i></a> ');
+                            actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="rejectOne(' + row.id + ')" title="驳回"><i class="fa fa-times"></i></a> ');
+                        }
+                        actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')" title="编辑"><i class="fa fa-edit"></i></a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')" title="删除"><i class="fa fa-trash"></i></a>');
                         return actions.join('');
                     }
                 }]
             };
             $.table.init(options);
         });
+
+        /* 加载统计数据 */
+        function loadStatistics() {
+            $.ajax({
+                url: prefix + "/statistics",
+                type: 'GET',
+                success: function(result) {
+                    if (result.code == 0 || result.code == 200) {
+                        var data = result.data;
+                        animateNumber('totalCount', data.totalCount || 0);
+                        animateNumber('pendingCount', data.pendingCount || 0);
+                        animateNumber('approvedCount', data.approvedCount || 0);
+                        animateNumber('rejectedCount', data.rejectedCount || 0);
+                    }
+                },
+                error: function() {
+                    $('#totalCount').text('-');
+                    $('#pendingCount').text('-');
+                    $('#approvedCount').text('-');
+                    $('#rejectedCount').text('-');
+                }
+            });
+        }
+
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /* 重置筛选 */
+        function filterReset() {
+            $('select[name="status"]').val('');
+            $('input[name="title"]').val('');
+            $('input[name="applicantName"]').val('');
+            $('input[name="params[beginTime]"]').val('');
+            $('input[name="params[endTime]"]').val('');
+            $.table.search();
+        }
+
+        /* 按状态筛选 */
+        function filterByStatus(status) {
+            $('select[name="status"]').val(status);
+            $.table.search();
+        }
+
+        /**
+         * 批量通过
+         */
+        function batchApprove() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm("确定要批量通过选中的 " + rows.length + " 个审批吗？", function() {
+                $.ajax({
+                    url: prefix + "/batchApprove",
+                    type: 'post',
+                    data: {ids: rows.join(',')},
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("批量通过成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    },
+                    error: function() {
+                        $.modal.alertError("操作失败");
+                    }
+                });
+            });
+        }
+
+        /**
+         * 批量驳回
+         */
+        function batchReject() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm("确定要批量驳回选中的 " + rows.length + " 个审批吗？", function() {
+                $.ajax({
+                    url: prefix + "/batchReject",
+                    type: 'post',
+                    data: {ids: rows.join(',')},
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("批量驳回成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    },
+                    error: function() {
+                        $.modal.alertError("操作失败");
+                    }
+                });
+            });
+        }
+
+        /**
+         * 单个通过
+         */
+        function approveOne(id) {
+            $.modal.confirm("确定要通过该审批吗？", function() {
+                $.ajax({
+                    url: prefix + "/approve",
+                    type: 'post',
+                    data: {id: id},
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("审批通过成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    },
+                    error: function() {
+                        $.modal.alertError("操作失败");
+                    }
+                });
+            });
+        }
+
+        /**
+         * 单个驳回
+         */
+        function rejectOne(id) {
+            $.modal.confirm("确定要驳回该审批吗？", function() {
+                $.ajax({
+                    url: prefix + "/reject",
+                    type: 'post',
+                    data: {id: id},
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("审批驳回成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    },
+                    error: function() {
+                        $.modal.alertError("操作失败");
+                    }
+                });
+            });
+        }
     </script>
 </body>
 </html>

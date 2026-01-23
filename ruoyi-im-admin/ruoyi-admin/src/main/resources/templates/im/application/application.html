@@ -1,84 +1,90 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
-        <style>
-        .application-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-    </style>
-    
     <th:block th:include="include :: header('应用管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
+    <style>
+        body { padding: 10px !important; }
+        .gray-bg { background-color: #f3f3f4 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
-        <div class="row">
-            <!-- 统计卡片区域 - 使用RuoYi原生 ibox 样式 -->
-            <div class="col-sm-12" style="margin-top: 10px;">
+        <!-- 统计卡片区域 -->
+        <div class="row stat-card-section">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins application-stat-card">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>应用总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">应用总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-primary" id="totalCount">0</h2>
-                                <small>系统应用数量</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">系统应用数量</div>
+                                <i class="fa fa-cube stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins application-stat-card">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByVisibility('true')">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">启</span>
-                                <h5>已启用</h5>
+                                <span class="stat-badge pull-right">启</span>
+                                <h5 style="color: #fff; margin: 0;">已启用</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="enabledCount">0</h2>
-                                <small>可见应用数量</small>
+                                <div class="stat-number" id="enabledCount">0</div>
+                                <div class="stat-label">可见应用数量</div>
+                                <i class="fa fa-eye stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins application-stat-card">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByVisibility('false')">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">禁</span>
-                                <h5>已禁用</h5>
+                                <span class="stat-badge pull-right">禁</span>
+                                <h5 style="color: #fff; margin: 0;">已禁用</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="disabledCount">0</h2>
-                                <small>隐藏应用数量</small>
+                                <div class="stat-number" id="disabledCount">0</div>
+                                <div class="stat-label">隐藏应用数量</div>
+                                <i class="fa fa-eye-slash stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins application-stat-card">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterBySystem('true')">
                             <div class="ibox-title">
-                                <span class="label label-info pull-right">访</span>
-                                <h5>今日访问</h5>
+                                <span class="stat-badge pull-right">系</span>
+                                <h5 style="color: #fff; margin: 0;">系统应用</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-info" id="todayVisitCount">0</h2>
-                                <small>今日访问次数</small>
+                                <div class="stat-number" id="systemCount">0</div>
+                                <div class="stat-label">系统内置应用</div>
+                                <i class="fa fa-cogs stat-icon"></i>
                             </div>
                         </div>
                     </div>
                 </div>
         </div>
-            <!-- 搜索表单 -->
-            <div class="col-sm-12 search-collapse">
-                <form id="application-form">
-                    <div class="select-list">
-                        <ul>
+
+        <!-- 搜索表单 -->
+        <div class="row search-section">
+            <div class="col-sm-12">
+                <div class="im-panel">
+                    <form id="application-form">
+                        <div class="select-list">
+                            <ul>
                             <li>
-                                应用名称：<input type="text" name="name" placeholder="请输入应用名称"/>
+                                <label class="search-label label-4">应用名称</label><input type="text" name="name" placeholder="请输入应用名称"/>
                             </li>
                             <li>
-                                应用编码：<input type="text" name="code" placeholder="请输入应用编码"/>
+                                <label class="search-label label-4">应用编码</label><input type="text" name="code" placeholder="请输入应用编码"/>
                             </li>
                             <li>
-                                分类：<select name="category">
+                                <label class="search-label label-2">分类</label><select name="category">
                                     <option value="">所有</option>
                                     <option value="OFFICE">办公</option>
                                     <option value="DATA">数据</option>
@@ -87,7 +93,7 @@
                                 </select>
                             </li>
                             <li>
-                                类型：<select name="appType">
+                                <label class="search-label label-2">类型</label><select name="appType">
                                     <option value="">所有</option>
                                     <option value="ROUTE">路由</option>
                                     <option value="IFRAME">嵌入</option>
@@ -95,14 +101,14 @@
                                 </select>
                             </li>
                             <li>
-                                可见状态：<select name="isVisible">
+                                <label class="search-label label-4">可见状态</label><select name="isVisible">
                                     <option value="">所有</option>
                                     <option value="true">可见</option>
                                     <option value="false">隐藏</option>
                                 </select>
                             </li>
                             <li>
-                                系统应用：<select name="isSystem">
+                                <label class="search-label label-4">系统应用</label><select name="isSystem">
                                     <option value="">所有</option>
                                     <option value="true">是</option>
                                     <option value="false">否</option>
@@ -115,30 +121,43 @@
                         </ul>
                     </div>
                 </form>
+                </div>
             </div>
+        </div>
 
-            <!-- 工具栏 -->
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:app:add">
-                    <i class="fa fa-plus"></i> 新增
-                </a>
-                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:app:edit">
-                    <i class="fa fa-edit"></i> 修改
-                </a>
-                <a class="btn btn-warning single disabled" onclick="toggleVisibility()" shiro:hasPermission="im:app:edit">
-                    <i class="fa fa-eye-slash"></i> 显示/隐藏
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:app:remove">
-                    <i class="fa fa-remove"></i> 删除
-                </a>
-                <a class="btn btn-default" onclick="$.table.exportExcel()" shiro:hasPermission="im:app:export">
-                    <i class="fa fa-download"></i> 导出
-                </a>
-            </div>
+        <!-- 工具栏 + 表格 -->
+        <div class="row table-section">
+            <div class="col-sm-12">
+                <!-- 批量操作按钮 -->
+                <div class="im-toolbar">
+                    <div class="im-batch-actions">
+                        <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:app:add">
+                            <i class="fa fa-plus"></i> 新增
+                        </a>
+                        <a class="btn btn-primary" onclick="$.operate.edit()" shiro:hasPermission="im:app:edit">
+                            <i class="fa fa-edit"></i> 修改
+                        </a>
+                        <a class="btn btn-warning" onclick="batchToggleVisibility()" shiro:hasPermission="im:app:edit">
+                            <i class="fa fa-eye-slash"></i> 显示/隐藏
+                        </a>
+                        <a class="btn btn-danger" onclick="$.operate.removeAll()" shiro:hasPermission="im:app:remove">
+                            <i class="fa fa-trash"></i> 批量删除
+                        </a>
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-default btn-sm" onclick="$.table.refresh()">
+                            <i class="fa fa-refresh"></i> 刷新
+                        </a>
+                        <a class="btn btn-default btn-sm" onclick="$.table.exportExcel()" shiro:hasPermission="im:app:export">
+                            <i class="fa fa-download"></i> 导出
+                        </a>
+                    </div>
+                </div>
 
-            <!-- 数据表格 -->
-            <div class="col-sm-12 select-table table-striped">
-                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                <!-- 数据表格 -->
+                <div class="im-table-container">
+                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
+                </div>
             </div>
         </div>
     </div>
@@ -284,21 +303,74 @@
                 success: function(result) {
                     if (result.code == 0 || result.code == 200) {
                         var data = result.data;
-                        $('#totalCount').text(data.totalCount || 0);
-                        $('#enabledCount').text(data.enabledCount || 0);
-                        $('#disabledCount').text(data.disabledCount || 0);
-                        $('#todayVisitCount').text(data.todayVisitCount || 0);
+                        animateNumber('totalCount', data.totalCount || 0);
+                        animateNumber('enabledCount', data.enabledCount || 0);
+                        animateNumber('disabledCount', data.disabledCount || 0);
+                        // 使用 systemCount 替代 todayVisitCount（如果没有系统应用统计，则使用 0）
+                        var systemCount = data.systemCount || 0;
+                        animateNumber('systemCount', systemCount);
                     }
                 },
                 error: function() {
                     $('#totalCount').text('-');
                     $('#enabledCount').text('-');
                     $('#disabledCount').text('-');
-                    $('#todayVisitCount').text('-');
+                    $('#systemCount').text('-');
                 }
             });
         }
-        function toggleVisibility() {
+
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /* 重置筛选 */
+        function filterReset() {
+            $('select[name="isVisible"]').val('');
+            $('select[name="isSystem"]').val('');
+            $('select[name="category"]').val('');
+            $('select[name="appType"]').val('');
+            $.table.search();
+        }
+
+        /* 按可见状态筛选 */
+        function filterByVisibility(isVisible) {
+            $('select[name="isVisible"]').val(isVisible);
+            $.table.search();
+        }
+
+        /* 按系统应用筛选 */
+        function filterBySystem(isSystem) {
+            $('select[name="isSystem"]').val(isSystem);
+            $.table.search();
+        }
+        /**
+         * 批量切换可见状态
+         */
+        function batchToggleVisibility() {
             var rows = $.table.selectFirstColumns();
             if (rows.length == 0) {
                 $.modal.alertWarning("请至少选择一条记录");

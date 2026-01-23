@@ -3,89 +3,101 @@
 <head>
     <th:block th:include="include :: header('敏感词管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
 
     <style>
-        .sensitiveword-stat-card { margin-bottom: 10px; }
-        .ibox-content { padding: 10px 15px; }
-        .ibox-title { padding: 10px 15px; min-height: 40px; }
-        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+        .select-list ul li {
+            margin: 0px 10px 5px 0px !important;
+        }
+        .select-list ul li input {
+            width: 140px !important;
+        }
+        .select-list ul li select {
+            width: 80px !important;
+        }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
-            <!-- 统计卡片区域 -->
+            <!-- 统计卡片区域 - 增强样式 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins sensitiveword-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()" title="点击查看全部">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">总</span>
-                                <h5>敏感词总数</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">敏感词总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
-                                <small>全部敏感词</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部敏感词</div>
+                                <i class="fa fa-shield stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins sensitiveword-stat-card" onclick="filterByLevel('HIGH')" style="cursor: pointer;" title="点击查看高风险">
+                        <div class="ibox float-e-margins im-stat-card stat-card-danger" onclick="filterByLevel('HIGH')" title="点击查看高风险">
                             <div class="ibox-title">
-                                <span class="label label-danger pull-right">高</span>
-                                <h5>高风险词</h5>
+                                <span class="stat-badge pull-right">高</span>
+                                <h5 style="color: #fff; margin: 0;">高风险词</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-danger" id="highLevelCount">0</h2>
-                                <small>高级敏感词</small>
+                                <div class="stat-number" id="highLevelCount">0</div>
+                                <div class="stat-label">高级敏感词</div>
+                                <i class="fa fa-exclamation-triangle stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins sensitiveword-stat-card" onclick="filterByLevel('MEDIUM')" style="cursor: pointer;" title="点击查看中级风险">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByLevel('MEDIUM')" title="点击查看中级风险">
                             <div class="ibox-title">
-                                <span class="label label-warning pull-right">中</span>
-                                <h5>中级风险词</h5>
+                                <span class="stat-badge pull-right">中</span>
+                                <h5 style="color: #fff; margin: 0;">中级风险词</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-warning" id="mediumLevelCount">0</h2>
-                                <small>中级敏感词</small>
+                                <div class="stat-number" id="mediumLevelCount">0</div>
+                                <div class="stat-label">中级敏感词</div>
+                                <i class="fa fa-exclamation-circle stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins sensitiveword-stat-card" onclick="filterByStatus('1')" style="cursor: pointer;" title="点击查看启用">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByStatus('1')" title="点击查看拦截">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">用</span>
-                                <h5>拦截次数</h5>
+                                <span class="stat-badge pull-right">拦</span>
+                                <h5 style="color: #fff; margin: 0;">拦截次数</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="blockCount">0</h2>
-                                <small>今日拦截次数</small>
+                                <div class="stat-number" id="blockCount">0</div>
+                                <div class="stat-label">今日拦截次数</div>
+                                <i class="fa fa-ban stat-icon"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- 搜索表单 -->
             <div class="col-sm-12 search-collapse">
                 <form id="sensitiveWord-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="input-label">敏感词：</label><input type="text" name="word" placeholder="请输入敏感词"/>
+                                <label class="search-label label-2">敏感词</label><input type="text" name="word" placeholder="请输入"/>
                             </li>
                             <li>
-                                <label class="input-label">级别：</label><select name="level">
-                                    <option value="">所有</option>
+                                <label class="search-label label-2">级别</label><select name="level">
+                                    <option value="">全部</option>
                                     <option value="LOW">低级</option>
                                     <option value="MEDIUM">中级</option>
                                     <option value="HIGH">高级</option>
                                 </select>
                             </li>
                             <li>
-                                <label class="input-label">状态：</label><select name="status">
-                                    <option value="">所有</option>
+                                <label class="search-label label-2">状态</label><select name="status">
+                                    <option value="">全部</option>
                                     <option value="1">启用</option>
                                     <option value="0">禁用</option>
                                 </select>
@@ -231,12 +243,41 @@
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
                     var data = result.data || {};
-                    $("#totalCount").text(data.totalCount || 0);
-                    $("#highLevelCount").text(data.highLevelCount || 0);
-                    $("#mediumLevelCount").text(data.mediumLevelCount || 0);
-                    $("#blockCount").text(data.blockCount || 0);
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('highLevelCount', data.highLevelCount || 0);
+                    animateNumber('mediumLevelCount', data.mediumLevelCount || 0);
+                    animateNumber('blockCount', data.blockCount || 0);
                 }
             });
+        }
+
+        /**
+         * 数字动画效果
+         */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
         }
 
         /**

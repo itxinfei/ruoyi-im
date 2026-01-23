@@ -17,39 +17,61 @@
             <span class="reply-content">{{ msg.replyTo.content }}</span>
           </div>
 
-          <el-dropdown trigger="contextmenu" @command="(cmd) => handleCommand(cmd, msg)">
-            <div class="bubble" :class="msg.type">
-              <span v-if="msg.type === 'TEXT'">{{ msg.content }}</span>
-              <img v-else-if="msg.type === 'IMAGE'" 
-                   :src="parseContent(msg).imageUrl" 
-                   class="msg-image" 
-                   @click="previewImage(parseContent(msg).imageUrl)" />
-              <div v-else-if="msg.type === 'FILE'" class="msg-file" @click="downloadFile(parseContent(msg))">
-                <el-icon><Document /></el-icon>
-                <div class="file-info">
-                  <span class="file-name">{{ parseContent(msg).fileName }}</span>
-                  <span class="file-size">{{ formatSize(parseContent(msg).size) }}</span>
-                </div>
-              </div>
-              <div v-else-if="msg.type === 'VIDEO'" class="msg-video">
-                <video :src="parseContent(msg).videoUrl" controls class="video-preview"></video>
-              </div>
-              <span v-else>[未知消息类型]</span>
+          <div class="message-content-main relative">
+            <!-- 悬停快捷按钮 -->
+            <div class="message-actions">
+              <button class="action-btn" @click="$emit('reply', msg)" title="回复">
+                <el-icon><ChatLineSquare /></el-icon>
+              </button>
+              <button class="action-btn" @click="handleReaction(msg, '👍')" title="点赞">
+                <span>👍</span>
+              </button>
+              <button class="action-btn" title="更多">
+                <el-icon><MoreFilled /></el-icon>
+              </button>
             </div>
-            <el-image-viewer 
-              v-if="showImageViewer" 
-              :url-list="[previewUrl]" 
-              @close="showImageViewer = false" 
-            />
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="reply">回复</el-dropdown-item>
-                <el-dropdown-item command="copy" v-if="msg.type === 'TEXT'">复制</el-dropdown-item>
-                <el-dropdown-item command="recall" v-if="msg.isOwn && canRecall(msg)">撤回</el-dropdown-item>
-                <el-dropdown-item command="delete" v-if="msg.isOwn">删除</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+
+            <el-dropdown trigger="contextmenu" @command="(cmd) => handleCommand(cmd, msg)" popper-class="message-context-menu">
+              <div class="bubble" :class="msg.type">
+                <span v-if="msg.type === 'TEXT'">{{ msg.content }}</span>
+                <img v-else-if="msg.type === 'IMAGE'" 
+                     :src="parseContent(msg).imageUrl" 
+                     class="msg-image" 
+                     @click="previewImage(parseContent(msg).imageUrl)" />
+                <div v-else-if="msg.type === 'FILE'" class="msg-file" @click="downloadFile(parseContent(msg))">
+                  <el-icon><Document /></el-icon>
+                  <div class="file-info">
+                    <span class="file-name">{{ parseContent(msg).fileName }}</span>
+                    <span class="file-size">{{ formatSize(parseContent(msg).size) }}</span>
+                  </div>
+                </div>
+                <div v-else-if="msg.type === 'VIDEO'" class="msg-video">
+                  <video :src="parseContent(msg).videoUrl" controls class="video-preview"></video>
+                </div>
+                <span v-else>[未知消息类型]</span>
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="reply">
+                    <el-icon><ChatLineSquare /></el-icon> <span>回复</span>
+                  </el-dropdown-item>
+                  <el-dropdown-item command="copy" v-if="msg.type === 'TEXT'">
+                    <el-icon><CopyDocument /></el-icon> <span>复制</span>
+                  </el-dropdown-item>
+                  <el-dropdown-item command="forward">
+                    <el-icon><Share /></el-icon> <span>转发</span>
+                  </el-dropdown-item>
+                  <div class="menu-divider"></div>
+                  <el-dropdown-item command="recall" v-if="msg.isOwn && canRecall(msg)">
+                    <el-icon><RefreshLeft /></el-icon> <span>撤回</span>
+                  </el-dropdown-item>
+                  <el-dropdown-item command="delete" v-if="msg.isOwn" class="danger">
+                    <el-icon><Delete /></el-icon> <span>删除</span>
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
           
           <div class="message-footer">
             <div v-if="msg.isOwn" class="read-status">
@@ -86,7 +108,7 @@
 
 <script setup>
 import { computed, ref, nextTick, watch, onMounted } from 'vue'
-import { Document, Loading } from '@element-plus/icons-vue'
+import { Document, Loading, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, MoreFilled } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMessageReadUsers } from '@/api/im/message'
 
@@ -242,6 +264,10 @@ const handleCommand = (cmd, msg) => {
    }
  }
 
+const handleReaction = (msg, reaction) => {
+  ElMessage.success(`你对消息做出了 ${reaction} 反应`)
+}
+
 const scrollToMsg = (id) => {
   const el = listRef.value?.querySelector(`[data-id="${id}"]`)
   if (el) {
@@ -328,6 +354,57 @@ defineExpose({ scrollToBottom, maintainScroll })
 .is-own .sender-name {
   text-align: right;
   padding-right: 4px;
+}
+.message-content-main {
+  position: relative;
+  
+  &:hover {
+    .message-actions {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.message-actions {
+  position: absolute;
+  top: -32px;
+  left: 0;
+  display: flex;
+  background: #fff;
+  border: 1px solid var(--dt-border-light);
+  border-radius: 20px;
+  padding: 2px 8px;
+  box-shadow: var(--dt-shadow-md);
+  opacity: 0;
+  transform: translateY(5px);
+  transition: all 0.2s ease-in-out;
+  z-index: 10;
+  gap: 4px;
+
+  .action-btn {
+    background: transparent;
+    border: none;
+    padding: 2px 6px;
+    color: var(--dt-text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    
+    &:hover {
+      background-color: var(--dt-bg-session-hover);
+      color: var(--dt-brand-color);
+    }
+    
+    span { font-size: 14px; }
+  }
+}
+
+.is-own .message-actions {
+  left: auto;
+  right: 0;
 }
 .bubble {
   background: #fff;
@@ -482,5 +559,51 @@ defineExpose({ scrollToBottom, maintainScroll })
 .is-own .reply-wrapper {
   background: rgba(0, 0, 0, 0.05);
   align-self: flex-end;
+}
+</style>
+
+<style lang="scss">
+.message-context-menu {
+  padding: 4px 0 !important;
+  border-radius: 8px !important;
+  box-shadow: var(--dt-shadow-lg) !important;
+  border: 1px solid var(--dt-border-light) !important;
+
+  .el-dropdown-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    color: var(--dt-text-secondary) !important;
+
+    .el-icon {
+      font-size: 16px;
+      color: var(--dt-text-tertiary);
+    }
+
+    &:hover {
+      background-color: var(--dt-bg-session-hover) !important;
+      color: var(--dt-brand-color) !important;
+      .el-icon { color: var(--dt-brand-color); }
+    }
+
+    &.danger {
+      color: var(--dt-error-color) !important;
+      &:hover { background-color: #fff1f0 !important; }
+      .el-icon { color: var(--dt-error-color); }
+    }
+  }
+
+  .menu-divider {
+    height: 1px;
+    background-color: var(--dt-border-light);
+    margin: 4px 0;
+  }
+}
+
+.dark .message-actions {
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-border-dark);
 }
 </style>
