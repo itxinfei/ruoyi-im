@@ -7,7 +7,9 @@ import com.ruoyi.web.service.ImDingTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DING模板Service实现
@@ -90,5 +92,34 @@ public class ImDingTemplateServiceImpl implements ImDingTemplateService {
             return "1";
         }
         return "0";
+    }
+
+    /**
+     * 获取模板统计数据
+     *
+     * @return 统计数据
+     */
+    @Override
+    public Map<String, Object> getTemplateStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+        // 模板总数
+        ImDingTemplate query = new ImDingTemplate();
+        int totalCount = dingTemplateMapper.selectImDingTemplateList(query).size();
+        stats.put("totalCount", totalCount);
+
+        // 系统模板数
+        query.setIsSystem(1);
+        int systemCount = dingTemplateMapper.selectImDingTemplateList(query).size();
+        stats.put("systemCount", systemCount);
+
+        // 自定义模板数
+        query.setIsSystem(0);
+        int customCount = dingTemplateMapper.selectImDingTemplateList(query).size();
+        stats.put("customCount", customCount);
+
+        // 今日使用次数（简化处理，这里返回模板总数作为默认值）
+        stats.put("todayUseCount", 0);
+
+        return stats;
     }
 }

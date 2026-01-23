@@ -3,39 +3,66 @@
 <head>
     <th:block th:include="include :: header('消息@记录管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+
+    <style>
+        .mention-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row" style="padding-top: 6px;">
             <!-- 统计卡片区域 -->
-            <div class="col-sm-12">
+            <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="stat-box stat-box-primary">
-                            <div class="stat-number" id="totalCount">0</div>
-                            <div class="stat-label">总@数</div>
-                            <i class="fa fa-at stat-icon"></i>
+                        <div class="ibox float-e-margins mention-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">@</span>
+                                <h5>总@数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部@记录</small>
+                            </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="stat-box stat-box-success">
-                            <div class="stat-number" id="readCount">0</div>
-                            <div class="stat-label">已读数</div>
-                            <i class="fa fa-check-circle stat-icon"></i>
+                        <div class="ibox float-e-margins mention-stat-card" onclick="filterByRead('1')" style="cursor: pointer;" title="点击查看已读">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">读</span>
+                                <h5>已读数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="readCount">0</h2>
+                                <small>已读@记录</small>
+                            </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="stat-box stat-box-danger">
-                            <div class="stat-number" id="unreadCount">0</div>
-                            <div class="stat-label">未读数</div>
-                            <i class="fa fa-times-circle stat-icon"></i>
+                        <div class="ibox float-e-margins mention-stat-card" onclick="filterByRead('0')" style="cursor: pointer;" title="点击查看未读">
+                            <div class="ibox-title">
+                                <span class="label label-danger pull-right">未</span>
+                                <h5>未读数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-danger" id="unreadCount">0</h2>
+                                <small>未读@记录</small>
+                            </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="stat-box stat-box-warning">
-                            <div class="stat-number" id="mentionAllCount">0</div>
-                            <div class="stat-label">@所有人次数</div>
-                            <i class="fa fa-users stat-icon"></i>
+                        <div class="ibox float-e-margins mention-stat-card" onclick="filterByType('ALL')" style="cursor: pointer;" title="点击查看@所有人">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">众</span>
+                                <h5>@所有人次数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="mentionAllCount">0</h2>
+                                <small>@所有人记录</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -339,6 +366,33 @@
          */
         function doSearch() {
             ImCommon.showSearchConditions('#mention-form', '#searchStatus', 'clearSearch()');
+            $.table.search();
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $('select[name="isRead"]').val('');
+            $('select[name="mentionType"]').val('');
+            clearSearch();
+        }
+
+        /**
+         * 按已读状态筛选
+         */
+        function filterByRead(isRead) {
+            $('select[name="isRead"]').val(isRead);
+            $('select[name="mentionType"]').val('');
+            $.table.search();
+        }
+
+        /**
+         * 按提及类型筛选
+         */
+        function filterByType(mentionType) {
+            $('select[name="mentionType"]').val(mentionType);
+            $('select[name="isRead"]').val('');
             $.table.search();
         }
     </script>

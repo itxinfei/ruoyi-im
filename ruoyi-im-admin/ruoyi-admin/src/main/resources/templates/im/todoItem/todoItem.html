@@ -4,30 +4,79 @@
     <th:block th:include="include :: header('待办事项管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
     <link th:href="@{/ajax/libs/datapicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
+
+    <style>
+        .todoitem-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins todoitem-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>待办总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部待办事项</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins todoitem-stat-card" onclick="filterByStatus('PENDING')" style="cursor: pointer;" title="点击查看待处理">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">待</span>
+                                <h5>待处理</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="pendingCount">0</h2>
+                                <small>等待处理</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins todoitem-stat-card" onclick="filterByStatus('IN_PROGRESS')" style="cursor: pointer;" title="点击查看进行中">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">行</span>
+                                <h5>进行中</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="inProgressCount">0</h2>
+                                <small>正在处理</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins todoitem-stat-card" onclick="filterByStatus('COMPLETED')" style="cursor: pointer;" title="点击查看已完成">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">完</span>
+                                <h5>已完成</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="completedCount">0</h2>
+                                <small>已完成事项</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="todoItem-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                待办总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
-                            </li>
-                            <li>
-                                待处理：<a onclick="$('select[name=\\'status\\']').val('PENDING');$.table.search()"><span class="label label-warning" id="pendingCount">0</span></a>
-                            </li>
-                            <li>
-                                进行中：<a onclick="$('select[name=\\'status\\']').val('IN_PROGRESS');$.table.search()"><span class="label label-info" id="inProgressCount">0</span></a>
-                            </li>
-                            <li>
-                                已逾期：<a onclick="$.table.search()"><span class="label label-danger" id="overdueCount">0</span></a>
-                            </li>
-                            <li class="pull-right">
                                 <label class="input-label">用户名：</label><input type="text" name="username" placeholder="请输入用户名"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">优先级：</label><select name="priority">
                                     <option value="">所有</option>
                                     <option value="1">低</option>
@@ -35,7 +84,7 @@
                                     <option value="3">高</option>
                                 </select>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">状态：</label><select name="status">
                                     <option value="">所有</option>
                                     <option value="PENDING">待办</option>
@@ -44,11 +93,15 @@
                                     <option value="CANCELLED">已取消</option>
                                 </select>
                             </li>
-                            <li class="select-time pull-right">
+                            <li class="select-time">
                                 <label>截止时间：</label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -244,12 +297,33 @@
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#pendingCount").text(result.data.pendingCount || 0);
-                    $("#inProgressCount").text(result.data.inProgressCount || 0);
-                    $("#overdueCount").text(result.data.overdueCount || 0);
+                    var data = result.data || {};
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#pendingCount").text(data.pendingCount || 0);
+                    $("#inProgressCount").text(data.inProgressCount || 0);
+                    $("#completedCount").text(data.completedCount || 0);
                 }
             });
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $.form.reset();
+            $.table.search();
+        }
+
+        /**
+         * 按状态筛选
+         */
+        function filterByStatus(status) {
+            if (status) {
+                $('select[name="status"]').val(status);
+            } else {
+                $('select[name="status"]').val('');
+            }
+            $.table.search();
         }
 
         function initDatePicker() {

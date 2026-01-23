@@ -1,0 +1,10 @@
+    <style>
+        /* 搜索栏紧凑优化 */
+        .select-list ul li { margin: 0px 10px 5px 0px !important; }
+        .select-list ul li input { width: 140px !important; }
+        .select-list ul li select { width: 140px !important; }
+        .time-input { width: 100px !important; }
+        .approval-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+    </style>

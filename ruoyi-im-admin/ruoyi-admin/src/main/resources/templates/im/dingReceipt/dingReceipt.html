@@ -3,54 +3,104 @@
 <head>
     <th:block th:include="include :: header('DING回执管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+
+    <style>
+        .dingreceipt-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins dingreceipt-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>回执总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部DING回执</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins dingreceipt-stat-card" onclick="filterByReadStatus('read')" style="cursor: pointer;" title="点击查看已读">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">读</span>
+                                <h5>已回执</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="readCount">0</h2>
+                                <small>已读回执数量</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins dingreceipt-stat-card" onclick="filterByReadStatus('unread')" style="cursor: pointer;" title="点击查看未读">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">未</span>
+                                <h5>未回执</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="unreadCount">0</h2>
+                                <small>未读回执数量</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins dingreceipt-stat-card" onclick="filterByConfirmed('1')" style="cursor: pointer;" title="点击查看回执率">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">率</span>
+                                <h5>回执率</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="receiptRate">0%</h2>
+                                <small>已读占比统计</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="receipt-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                总回执数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
-                            </li>
-                            <li>
-                                已读：<a onclick="$('select[name=\\'readStatus\\']').val('read');$.table.search()"><span class="label label-success" id="readCount">0</span></a>
-                            </li>
-                            <li>
-                                未读：<a onclick="$('select[name=\\'readStatus\\']').val('unread');$.table.search()"><span class="label label-warning" id="unreadCount">0</span></a>
-                            </li>
-                            <li>
-                                已确认：<a onclick="$('select[name=\\'confirmed\\']').val('1');$.table.search()"><span class="label label-info" id="confirmedCount">0</span></a>
-                            </li>
-                            <li>
-                                未确认：<a onclick="$('select[name=\\'confirmed\\']').val('0');$.table.search()"><span class="label label-danger" id="unconfirmedCount">0</span></a>
-                            </li>
-                            <li class="pull-right">
                                 <label class="input-label">DING ID：</label><input type="text" name="dingId" placeholder="请输入DING ID"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">接收者名称：</label><input type="text" name="receiverName" placeholder="请输入接收者名称"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">阅读状态：</label><select name="readStatus">
                                     <option value="">所有</option>
                                     <option value="read">已读</option>
                                     <option value="unread">未读</option>
                                 </select>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">确认状态：</label><select name="confirmed">
                                     <option value="">所有</option>
                                     <option value="1">已确认</option>
                                     <option value="0">未确认</option>
                                 </select>
                             </li>
-                            <li class="select-time pull-right">
+                            <li class="select-time">
                                 <label>阅读时间：</label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -199,13 +249,49 @@
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#readCount").text(result.data.readCount || 0);
-                    $("#unreadCount").text(result.data.unreadCount || 0);
-                    $("#confirmedCount").text(result.data.confirmedCount || 0);
-                    $("#unconfirmedCount").text(result.data.unconfirmedCount || 0);
+                    var data = result.data || {};
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#readCount").text(data.readCount || 0);
+                    $("#unreadCount").text(data.unreadCount || 0);
+                    // 计算回执率
+                    var total = (data.totalCount || 0);
+                    var read = (data.readCount || 0);
+                    var rate = total > 0 ? Math.round(read / total * 100) : 0;
+                    $("#receiptRate").text(rate + '%');
                 }
             });
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $.form.reset();
+            $.table.search();
+        }
+
+        /**
+         * 按阅读状态筛选
+         */
+        function filterByReadStatus(readStatus) {
+            if (readStatus) {
+                $('select[name="readStatus"]').val(readStatus);
+            } else {
+                $('select[name="readStatus"]').val('');
+            }
+            $.table.search();
+        }
+
+        /**
+         * 按确认状态筛选
+         */
+        function filterByConfirmed(confirmed) {
+            if (confirmed !== undefined && confirmed !== '') {
+                $('select[name="confirmed"]').val(confirmed);
+            } else {
+                $('select[name="confirmed"]').val('');
+            }
+            $.table.search();
         }
 
         function viewDetail(id) {

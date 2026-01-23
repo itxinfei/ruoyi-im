@@ -1,0 +1,13 @@
+
+        /* 加载统计数据 */
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code == 0) {
+                    var stats = result.data;
+                    $("#totalCount").text(stats.totalCount || 0);
+                    $("#pendingCount").text(stats.pendingCount || 0);
+                    $("#approvedCount").text(stats.approvedCount || 0);
+                    $("#rejectedCount").text(stats.rejectedCount || 0);
+                }
+            });
+        }

@@ -4,35 +4,88 @@
     <th:block th:include="include :: header('部门管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
     <th:block th:include="include :: bootstrap-tree-table-css" />
+
+    <style>
+        .department-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins department-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>部门总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部部门</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins department-stat-card" onclick="filterByStatus('0')" style="cursor: pointer;" title="点击查看正常部门">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">常</span>
+                                <h5>正常部门</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="activeCount">0</h2>
+                                <small>正常使用中</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins department-stat-card" onclick="filterByStatus('1')" style="cursor: pointer;" title="点击查看停用部门">
+                            <div class="ibox-title">
+                                <span class="label label-danger pull-right">停</span>
+                                <h5>停用部门</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-danger" id="disabledCount">0</h2>
+                                <small>已停用</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins department-stat-card" style="cursor: default;">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">根</span>
+                                <h5>根部门</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="rootCount">0</h2>
+                                <small>顶级部门数</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="department-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                部门总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
-                            </li>
-                            <li>
-                                正常使用：<a onclick="$('select[name=\\'status\\']').val('0');$.table.search()"><span class="label label-success" id="activeCount">0</span></a>
-                            </li>
-                            <li>
-                                已停用：<a onclick="$('select[name=\\'status\\']').val('1');$.table.search()"><span class="label label-danger" id="disabledCount">0</span></a>
-                            </li>
-                            <li>
-                                根部门：<a onclick="$.table.search()"><span class="label label-warning" id="rootCount">0</span></a>
-                            </li>
-                            <li class="pull-right">
                                 <label class="input-label">部门名称：</label><input type="text" name="name" placeholder="请输入部门名称"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">状态：</label><select name="status">
                                     <option value="">所有</option>
                                     <option value="0">正常</option>
                                     <option value="1">停用</option>
                                 </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -170,12 +223,33 @@
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#activeCount").text(result.data.activeCount || 0);
-                    $("#disabledCount").text(result.data.disabledCount || 0);
-                    $("#rootCount").text(result.data.rootCount || 0);
+                    var data = result.data || {};
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#activeCount").text(data.activeCount || 0);
+                    $("#disabledCount").text(data.disabledCount || 0);
+                    $("#rootCount").text(data.rootCount || 0);
                 }
             });
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $.form.reset();
+            $.table.search();
+        }
+
+        /**
+         * 按状态筛选
+         */
+        function filterByStatus(status) {
+            if (status !== undefined && status !== '') {
+                $('select[name="status"]').val(status);
+            } else {
+                $('select[name="status"]').val('');
+            }
+            $.table.search();
         }
 
         function addChild(parentId, parentName) {

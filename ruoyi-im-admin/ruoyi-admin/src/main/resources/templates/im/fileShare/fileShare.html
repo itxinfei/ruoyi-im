@@ -3,39 +3,92 @@
 <head>
     <th:block th:include="include :: header('文件分享管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+
+    <style>
+        .fileshare-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins fileshare-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>分享总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部文件分享</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins fileshare-stat-card" onclick="filterByPermission('1')" style="cursor: pointer;" title="点击查看公开分享">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">公</span>
+                                <h5>公开分享</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="publicCount">0</h2>
+                                <small>公开链接分享</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins fileshare-stat-card" style="cursor: default;">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">访</span>
+                                <h5>总访问量</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="totalAccessCount">0</h2>
+                                <small>累计访问次数</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins fileshare-stat-card" onclick="filterByExpired()" style="cursor: pointer;" title="点击查看过期">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">过</span>
+                                <h5>已过期</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="expiredCount">0</h2>
+                                <small>过期分享</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="fileShare-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                分享总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
-                            </li>
-                            <li>
-                                公开分享：<a onclick="$('select[name=\\'permission\\']').val('1');$.table.search()"><span class="label label-success" id="publicCount">0</span></a>
-                            </li>
-                            <li>
-                                总访问次数：<a onclick="$.table.search()"><span class="label label-info" id="totalAccessCount">0</span></a>
-                            </li>
-                            <li>
-                                已过期：<a onclick="$.table.search()"><span class="label label-warning" id="expiredCount">0</span></a>
-                            </li>
-                            <li class="pull-right">
                                 <label class="input-label">分享者：</label><input type="text" name="sharerName" placeholder="请输入分享者名称"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">文件名：</label><input type="text" name="fileName" placeholder="请输入文件名"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">分享权限：</label><select name="permission">
                                     <option value="">所有</option>
                                     <option value="1">公开</option>
                                     <option value="2">指定人</option>
                                     <option value="3">密码保护</option>
                                 </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -246,12 +299,41 @@
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#publicCount").text(result.data.publicCount || 0);
-                    $("#totalAccessCount").text(result.data.totalAccessCount || 0);
-                    $("#expiredCount").text(result.data.expiredCount || 0);
+                    var data = result.data || {};
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#publicCount").text(data.publicCount || 0);
+                    $("#totalAccessCount").text(data.totalAccessCount || 0);
+                    $("#expiredCount").text(data.expiredCount || 0);
                 }
             });
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $.form.reset();
+            $.table.search();
+        }
+
+        /**
+         * 按权限筛选
+         */
+        function filterByPermission(permission) {
+            if (permission !== undefined && permission !== '') {
+                $('select[name="permission"]').val(permission);
+            } else {
+                $('select[name="permission"]').val('');
+            }
+            $.table.search();
+        }
+
+        /**
+         * 筛选过期数据
+         */
+        function filterByExpired() {
+            // 筛选已过期的分享（需要后端支持）
+            $.table.search();
         }
 
         function showCleanModal() {

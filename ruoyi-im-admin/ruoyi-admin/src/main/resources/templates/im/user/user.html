@@ -3,6 +3,7 @@
 <head>
     <th:block th:include="include :: header('IM用户管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
     <style>
         /* 搜索栏紧凑优化 */
         .select-list ul li {
@@ -12,76 +13,68 @@
             width: 140px !important;
         }
         .select-list ul li select {
-            width: 140px !important;
+            width: 80px !important;
         }
         .time-input {
             width: 100px !important;
-        }
-
-        /* 统计卡片样式微调 */
-        .user-stat-card {
-            margin-bottom: 10px;
-        }
-        .ibox-content {
-            padding: 10px 15px;
-        }
-        .ibox-title {
-            padding: 10px 15px;
-            min-height: 40px;
         }
     </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
-            <!-- 统计卡片区域 - 使用RuoYi原生 ibox 样式 -->
+            <!-- 统计卡片区域 - 增强样式 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins user-stat-card">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterReset()">
                             <div class="ibox-title">
-                                <span class="label label-success pull-right">总</span>
-                                <h5>用户总量</h5>
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">用户总量</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-success" id="totalCount">0</h2>
-                                <small>系统注册用户</small>
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">系统注册用户</div>
+                                <i class="fa fa-users stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins user-stat-card">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterByStatus('1')">
                             <div class="ibox-title">
-                                <span class="label label-primary pull-right">线</span>
-                                <h5>当前在线</h5>
+                                <span class="stat-badge pull-right">线</span>
+                                <h5 style="color: #fff; margin: 0;">当前在线</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-navy" id="onlineCount">0</h2>
-                                <small>实时在线人数</small>
+                                <div class="stat-number" id="onlineCount">0</div>
+                                <div class="stat-label">实时在线人数</div>
+                                <i class="fa fa-circle stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins user-stat-card">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByToday()">
                             <div class="ibox-title">
-                                <span class="label label-info pull-right">今</span>
-                                <h5>今日新增</h5>
+                                <span class="stat-badge pull-right">今</span>
+                                <h5 style="color: #fff; margin: 0;">今日新增</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-info" id="todayCount">0</h2>
-                                <small>今日注册用户</small>
+                                <div class="stat-number" id="todayCount">0</div>
+                                <div class="stat-label">今日注册用户</div>
+                                <i class="fa fa-user-plus stat-icon"></i>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins user-stat-card">
+                        <div class="ibox float-e-margins im-stat-card stat-card-danger" onclick="filterByStatus('0')">
                             <div class="ibox-title">
-                                <span class="label label-danger pull-right">停</span>
-                                <h5>停用账户</h5>
+                                <span class="stat-badge pull-right">停</span>
+                                <h5 style="color: #fff; margin: 0;">停用账户</h5>
                             </div>
                             <div class="ibox-content">
-                                <h2 class="no-margins text-danger" id="disabledCount">0</h2>
-                                <small>已停用用户数</small>
+                                <div class="stat-number" id="disabledCount">0</div>
+                                <div class="stat-label">已停用用户数</div>
+                                <i class="fa fa-ban stat-icon"></i>
                             </div>
                         </div>
                     </div>
@@ -94,23 +87,31 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                用户名：<input type="text" name="keyword" placeholder="请输入用户名"/>
+                                <label class="search-label label-2">账号</label><input type="text" name="keyword" placeholder="请输入"/>
                             </li>
                             <li>
-                                手机号：<input type="text" name="mobile" placeholder="请输入手机号"/>
+                                <label class="search-label label-2">手机</label><input type="text" name="mobile" placeholder="请输入"/>
                             </li>
                             <li>
-                                状态：<select name="status">
+                                <label class="search-label label-2">状态</label><select name="status">
                                     <option value="">全部</option>
                                     <option value="1">正常</option>
                                     <option value="0">停用</option>
                                 </select>
                             </li>
+                            <li>
+                                <label class="search-label label-2">性别</label><select name="sex">
+                                    <option value="">全部</option>
+                                    <option value="0">男</option>
+                                    <option value="1">女</option>
+                                    <option value="2">未知</option>
+                                </select>
+                            </li>
                             <li class="select-time">
-                                <label>注册时间： </label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                                <label class="search-label label-4">注册时间</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
                                 <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
                             </li>
                             <li>
                                 <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
@@ -262,12 +263,63 @@
             $.get(prefix + "/statistics", function(result) {
                 if (result.code == 0) {
                     var stats = result.data;
-                    $('#totalCount').text(stats.totalCount || 0);
-                    $('#onlineCount').text(stats.onlineCount || 0);
-                    $('#todayCount').text(stats.todayCount || 0);
-                    $('#disabledCount').text(stats.disabledCount || 0);
+                    animateNumber('totalCount', stats.totalCount || 0);
+                    animateNumber('onlineCount', stats.onlineCount || 0);
+                    animateNumber('todayCount', stats.todayCount || 0);
+                    animateNumber('disabledCount', stats.disabledCount || 0);
                 }
             });
+        }
+
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /* 重置筛选 */
+        function filterReset() {
+            $('select[name="status"]').val('');
+            $('select[name="sex"]').val('');
+            $.table.search();
+        }
+
+        /* 按状态筛选 */
+        function filterByStatus(status) {
+            $('select[name="status"]').val(status);
+            $.table.search();
+        }
+
+        /* 按今日筛选 */
+        function filterByToday() {
+            var today = new Date();
+            var todayStr = today.getFullYear() + '-' +
+                          String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                          String(today.getDate()).padStart(2, '0');
+            $('input[name="params[beginTime]"]').val(todayStr + ' 00:00:00');
+            $('input[name="params[endTime]"]').val(todayStr + ' 23:59:59');
+            $.table.search();
         }
 
         /* 重置密码 */

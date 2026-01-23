@@ -4,33 +4,79 @@
     <th:block th:include="include :: header('日程管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
     <link th:href="@{/ajax/libs/datapicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
+
+    <style>
+        .scheduleevent-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins scheduleevent-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>日程总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部日程</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins scheduleevent-stat-card" onclick="filterByStatus('SCHEDULED')" style="cursor: pointer;" title="点击查看已安排">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">排</span>
+                                <h5>已安排</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="scheduledCount">0</h2>
+                                <small>已安排日程</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins scheduleevent-stat-card" onclick="filterByStatus('COMPLETED')" style="cursor: pointer;" title="点击查看已完成">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">完</span>
+                                <h5>已完成</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="completedCount">0</h2>
+                                <small>已完成日程</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins scheduleevent-stat-card" onclick="filterByToday()" style="cursor: pointer;" title="点击查看今日">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">今</span>
+                                <h5>今日日程</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="todayCount">0</h2>
+                                <small>今日安排</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="scheduleEvent-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                日程总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
-                            </li>
-                            <li>
-                                已安排：<a onclick="$('select[name=\\'status\\']').val('SCHEDULED');$.table.search()"><span class="label label-success" id="scheduledCount">0</span></a>
-                            </li>
-                            <li>
-                                已完成：<a onclick="$('select[name=\\'status\\']').val('COMPLETED');$.table.search()"><span class="label label-info" id="completedCount">0</span></a>
-                            </li>
-                            <li>
-                                今日日程：<a onclick="$.table.search()"><span class="label label-warning" id="todayCount">0</span></a>
-                            </li>
-                            <li class="pull-right">
-                                <label class="input-label">用户名：</label><input type="text" name="username" placeholder="请输入用户名"/>
-                            </li>
-                            <li class="pull-right">
                                 <label class="input-label">日程标题：</label><input type="text" name="title" placeholder="请输入日程标题"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">状态：</label><select name="status">
                                     <option value="">所有</option>
                                     <option value="SCHEDULED">已安排</option>
@@ -38,11 +84,15 @@
                                     <option value="CANCELLED">已取消</option>
                                 </select>
                             </li>
-                            <li class="select-time pull-right">
+                            <li class="select-time">
                                 <label>开始时间：</label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -240,6 +290,7 @@
                 }
             };
             $.table.init(options);
+            loadStatistics();
         });
 
         function initDatePicker() {
@@ -257,12 +308,46 @@
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#scheduledCount").text(result.data.scheduledCount || 0);
-                    $("#completedCount").text(result.data.completedCount || 0);
-                    $("#todayCount").text(result.data.todayCount || 0);
+                    var data = result.data || {};
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#scheduledCount").text(data.scheduledCount || 0);
+                    $("#completedCount").text(data.completedCount || 0);
+                    $("#todayCount").text(data.todayCount || 0);
                 }
             });
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $.form.reset();
+            $.table.search();
+        }
+
+        /**
+         * 按状态筛选
+         */
+        function filterByStatus(status) {
+            if (status) {
+                $('select[name="status"]').val(status);
+            } else {
+                $('select[name="status"]').val('');
+            }
+            $.table.search();
+        }
+
+        /**
+         * 筛选今日数据
+         */
+        function filterByToday() {
+            var today = new Date();
+            var todayStr = today.getFullYear() + '-' +
+                          String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                          String(today.getDate()).padStart(2, '0');
+            $('#startTime').val(todayStr + ' 00:00:00');
+            $('#endTime').val(todayStr + ' 23:59:59');
+            $.table.search();
         }
 
         function completeEvent() {

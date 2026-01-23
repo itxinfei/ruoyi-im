@@ -1,11 +1,11 @@
 <template>
   <div class="session-panel">
     <div class="panel-header">
-      <h3>消息</h3>
+      <h1 class="text-xl font-bold dark:text-white">消息</h1>
       <el-dropdown trigger="click" @command="handleCommand">
-        <el-tooltip content="新建会话">
-          <el-button :icon="Plus" text circle size="small" />
-        </el-tooltip>
+        <button class="text-slate-500 hover:text-primary transition-colors">
+          <el-icon class="text-xl"><Plus /></el-icon>
+        </button>
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item command="group">
@@ -36,26 +36,38 @@
         v-for="session in sortedSessions"
         :key="session.id"
         class="session-item"
-        :class="{ active: isActiveSession(session), pinned: session.isPinned }"
+        :class="{ active: isActiveSession(session) }"
         @click="handleSessionClick(session)"
         @contextmenu.prevent="handleContextMenu($event, session)"
       >
-        <div v-if="session.isPinned" class="pinned-tag"></div>
-        <el-badge :value="session.unreadCount" :hidden="session.unreadCount === 0" :max="99">
-          <el-avatar :size="40" :src="session.avatar">
+        <div class="relative avatar-wrapper">
+          <el-avatar 
+            :size="48" 
+            :src="session.avatar" 
+            shape="square" 
+            class="session-avatar"
+            :class="getAvatarBgClass(session)"
+          >
             {{ session.name?.charAt(0) }}
           </el-avatar>
-        </el-badge>
+          <span 
+            v-if="session.unreadCount > 0" 
+            class="unread-badge"
+          >
+            {{ session.unreadCount > 99 ? '99+' : session.unreadCount }}
+          </span>
+        </div>
         
         <div class="session-info">
           <div class="session-top">
             <div class="session-name-wrapper">
-              <span class="session-name">{{ session.name }}</span>
+              <span class="session-name">{{ session.name }} {{ session.isPinned ? '⭐' : '' }}</span>
               <el-icon v-if="session.isMuted" class="muted-icon"><Mute /></el-icon>
             </div>
             <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
           </div>
           <div class="session-preview">
+            <span v-if="session.lastSenderNickname" class="sender-name">{{ session.lastSenderNickname }}: </span>
             {{ session.lastMessage || '暂无消息' }}
           </div>
         </div>
@@ -228,6 +240,14 @@ const handleDeleteSession = () => {
 // 使用 getter 中的排序会话
 const sortedSessions = computed(() => store.getters['im/sortedSessions'])
 
+// 辅助方法：获取头像背景色
+const getAvatarBgClass = (session) => {
+  if (session.type === 'GROUP') return 'bg-primary';
+  const colors = ['bg-blue-500', 'bg-orange-500', 'bg-emerald-500', 'bg-purple-500'];
+  const id = session.id || 0;
+  return colors[id % colors.length];
+}
+
 onMounted(() => {
   // 确保会话加载
   if (sessions.value.length === 0) {
@@ -279,43 +299,60 @@ onUnmounted(() => {
     .session-item {
       display: flex;
       align-items: center;
-      height: 64px;
-      padding: 0 12px;
+      padding: 12px 16px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
       position: relative;
+      border-left: 4px solid transparent;
+      
       &:hover {
-        background: rgba(0, 0, 0, 0.04);
+        background: var(--dt-bg-session-hover);
       }
       
       &.active {
-        background: rgba(0, 137, 255, 0.1);
+        background: var(--dt-bg-session-active);
+        border-left-color: var(--dt-brand-color);
       }
 
-      &.pinned {
-        background: #fcfcfc;
+      .avatar-wrapper {
+        flex-shrink: 0;
       }
-      
-      .pinned-tag {
+
+      .session-avatar {
+        border-radius: 8px !important;
+        font-weight: 500;
+        color: #fff;
+      }
+
+      .unread-badge {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 0;
-        height: 0;
-        border-top: 6px solid #0089ff;
-        border-right: 6px solid transparent;
+        top: -4px;
+        right: -4px;
+        background-color: var(--dt-badge-color);
+        color: white;
+        font-size: 10px;
+        min-width: 18px;
+        height: 18px;
+        line-height: 14px;
+        border: 2px solid #fff;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+        z-index: 10;
       }
       
       .session-info {
         flex: 1;
         min-width: 0;
-        margin-left: 10px;
+        margin-left: 12px;
         
         .session-top {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
           
           .session-name-wrapper {
             display: flex;
@@ -326,7 +363,7 @@ onUnmounted(() => {
             .session-name {
               font-size: 14px;
               font-weight: 500;
-              color: #262626;
+              color: var(--dt-text-primary);
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
@@ -340,18 +377,23 @@ onUnmounted(() => {
           }
           
           .session-time {
-            font-size: 12px;
-            color: #8c8c8c;
+            font-size: 11px;
+            color: var(--dt-text-tertiary);
             flex-shrink: 0;
+            margin-left: 8px;
           }
         }
         
         .session-preview {
           font-size: 12px;
-          color: #8c8c8c;
+          color: var(--dt-text-secondary);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+
+          .sender-name {
+            color: var(--dt-text-tertiary);
+          }
         }
       }
     }

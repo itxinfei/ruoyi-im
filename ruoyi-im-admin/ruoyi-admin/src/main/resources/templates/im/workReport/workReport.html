@@ -4,30 +4,79 @@
     <th:block th:include="include :: header('工作报告管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
     <link th:href="@{/ajax/libs/datapicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
+
+    <style>
+        .workreport-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins workreport-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>报告总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部工作报告</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins workreport-stat-card" onclick="filterByType('DAILY')" style="cursor: pointer;" title="点击查看日报">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">日</span>
+                                <h5>日报数量</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="dailyCount">0</h2>
+                                <small>日报统计</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins workreport-stat-card" onclick="filterByType('WEEKLY')" style="cursor: pointer;" title="点击查看周报">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">周</span>
+                                <h5>周报数量</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="weeklyCount">0</h2>
+                                <small>周报统计</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins workreport-stat-card" onclick="filterByReviewStatus('PENDING')" style="cursor: pointer;" title="点击查看待审阅">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">审</span>
+                                <h5>待审阅</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="pendingReviewCount">0</h2>
+                                <small>等待审阅</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="workReport-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                报告总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
-                            </li>
-                            <li>
-                                日报：<a onclick="$('select[name=\\'reportType\\']').val('DAILY');$.table.search()"><span class="label label-success" id="dailyCount">0</span></a>
-                            </li>
-                            <li>
-                                周报：<a onclick="$('select[name=\\'reportType\\']').val('WEEKLY');$.table.search()"><span class="label label-info" id="weeklyCount">0</span></a>
-                            </li>
-                            <li>
-                                已审批：<a onclick="$('select[name=\\'status\\']').val('APPROVED');$.table.search()"><span class="label label-warning" id="approvedCount">0</span></a>
-                            </li>
-                            <li class="pull-right">
                                 <label class="input-label">用户名：</label><input type="text" name="username" placeholder="请输入用户名"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">报告类型：</label><select name="reportType">
                                     <option value="">所有</option>
                                     <option value="DAILY">日报</option>
@@ -35,7 +84,7 @@
                                     <option value="MONTHLY">月报</option>
                                 </select>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">完成状态：</label><select name="completionStatus">
                                     <option value="">所有</option>
                                     <option value="COMPLETED">已完成</option>
@@ -43,11 +92,15 @@
                                     <option value="PENDING">待处理</option>
                                 </select>
                             </li>
-                            <li class="select-time pull-right">
+                            <li class="select-time">
                                 <label>报告日期：</label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -239,12 +292,45 @@
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#dailyCount").text(result.data.dailyCount || 0);
-                    $("#weeklyCount").text(result.data.weeklyCount || 0);
-                    $("#approvedCount").text(result.data.approvedCount || 0);
+                    var data = result.data || {};
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#dailyCount").text(data.dailyCount || 0);
+                    $("#weeklyCount").text(data.weeklyCount || 0);
+                    $("#pendingReviewCount").text(data.pendingReviewCount || 0);
                 }
             });
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $.form.reset();
+            $.table.search();
+        }
+
+        /**
+         * 按报告类型筛选
+         */
+        function filterByType(reportType) {
+            if (reportType) {
+                $('select[name="reportType"]').val(reportType);
+            } else {
+                $('select[name="reportType"]').val('');
+            }
+            $.table.search();
+        }
+
+        /**
+         * 按审阅状态筛选
+         */
+        function filterByReviewStatus(reviewStatus) {
+            if (reviewStatus) {
+                $('select[name="reviewStatus"]').val(reviewStatus);
+            } else {
+                $('select[name="reviewStatus"]').val('');
+            }
+            $.table.search();
         }
     </script>
 </body>

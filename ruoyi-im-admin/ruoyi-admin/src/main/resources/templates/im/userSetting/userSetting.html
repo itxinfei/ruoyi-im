@@ -3,39 +3,92 @@
 <head>
     <th:block th:include="include :: header('用户设置管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+
+    <style>
+        .usersetting-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins usersetting-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>设置总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部用户设置</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins usersetting-stat-card" style="cursor: default;">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">户</span>
+                                <h5>有设置用户</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="userCount">0</h2>
+                                <small>已设置用户</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins usersetting-stat-card" onclick="filterByType('NOTIFICATION')" style="cursor: pointer;" title="点击查看通知设置">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">通</span>
+                                <h5>通知设置</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="notificationCount">0</h2>
+                                <small>通知相关设置</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins usersetting-stat-card" onclick="filterByType('PRIVACY')" style="cursor: pointer;" title="点击查看隐私设置">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">隐</span>
+                                <h5>隐私设置</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="privacyCount">0</h2>
+                                <small>隐私相关设置</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="userSetting-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                设置总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
-                            </li>
-                            <li>
-                                有设置用户：<a onclick="$.table.search()"><span class="label label-success" id="userCount">0</span></a>
-                            </li>
-                            <li>
-                                通知设置：<a onclick="$('select[name=\\'settingType\\']').val('NOTIFICATION');$.table.search()"><span class="label label-info" id="notificationCount">0</span></a>
-                            </li>
-                            <li>
-                                隐私设置：<a onclick="$('select[name=\\'settingType\\']').val('PRIVACY');$.table.search()"><span class="label label-warning" id="privacyCount">0</span></a>
-                            </li>
-                            <li class="pull-right">
                                 <label class="input-label">用户名：</label><input type="text" name="username" placeholder="请输入用户名"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">设置键：</label><input type="text" name="settingKey" placeholder="请输入设置键"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">设置类型：</label><select name="settingType">
                                     <option value="">所有</option>
                                     <option value="NOTIFICATION">通知设置</option>
                                     <option value="PRIVACY">隐私设置</option>
                                     <option value="DISPLAY">显示设置</option>
                                 </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -185,12 +238,33 @@
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#userCount").text(result.data.userCount || 0);
-                    $("#notificationCount").text(result.data.notificationCount || 0);
-                    $("#privacyCount").text(result.data.privacyCount || 0);
+                    var data = result.data || {};
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#userCount").text(data.userCount || 0);
+                    $("#notificationCount").text(data.notificationCount || 0);
+                    $("#privacyCount").text(data.privacyCount || 0);
                 }
             });
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $.form.reset();
+            $.table.search();
+        }
+
+        /**
+         * 按设置类型筛选
+         */
+        function filterByType(settingType) {
+            if (settingType) {
+                $('select[name="settingType"]').val(settingType);
+            } else {
+                $('select[name="settingType"]').val('');
+            }
+            $.table.search();
         }
 
         function resetUserSettings() {

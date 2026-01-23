@@ -1,0 +1,53 @@
+            <!-- 统计卡片区域 - 使用RuoYi原生 ibox 样式 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins approval-stat-card">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">总</span>
+                                <h5>审批总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="totalCount">0</h2>
+                                <small>全部审批记录</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins approval-stat-card">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">待</span>
+                                <h5>待审批</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="pendingCount">0</h2>
+                                <small>等待处理审批</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins approval-stat-card">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">过</span>
+                                <h5>已通过</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="approvedCount">0</h2>
+                                <small>审批通过数量</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins approval-stat-card">
+                            <div class="ibox-title">
+                                <span class="label label-danger pull-right">拒</span>
+                                <h5>已拒绝</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-danger" id="rejectedCount">0</h2>
+                                <small>审批拒绝数量</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>

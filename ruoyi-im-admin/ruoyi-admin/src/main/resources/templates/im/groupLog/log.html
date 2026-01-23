@@ -3,26 +3,75 @@
 <head>
     <th:block th:include="include :: header('群组管理日志')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+
+    <style>
+        .grouplog-manage-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins grouplog-manage-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>日志总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部管理日志</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins grouplog-manage-stat-card" onclick="filterByType('ADD_MEMBER')" style="cursor: pointer;" title="点击查看添加成员">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">加</span>
+                                <h5>添加成员</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="addCount">0</h2>
+                                <small>添加成员操作</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins grouplog-manage-stat-card" onclick="filterByType('REMOVE_MEMBER')" style="cursor: pointer;" title="点击查看移除成员">
+                            <div class="ibox-title">
+                                <span class="label label-danger pull-right">减</span>
+                                <h5>移除成员</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-danger" id="removeCount">0</h2>
+                                <small>移除成员操作</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins grouplog-manage-stat-card" onclick="filterByType('CHANGE_ROLE')" style="cursor: pointer;" title="点击查看修改角色">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">改</span>
+                                <h5>修改角色</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="changeCount">0</h2>
+                                <small>修改角色操作</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="log-form">
                     <div class="select-list">
                         <ul>
-                            <li>
-                                日志总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
-                            </li>
-                            <li>
-                                添加成员：<a onclick="$('select[name=\\'operationType\\']').val('ADD_MEMBER');$.table.search()"><span class="label label-success" id="addCount">0</span></a>
-                            </li>
-                            <li>
-                                移除成员：<a onclick="$('select[name=\\'operationType\\']').val('REMOVE_MEMBER');$.table.search()"><span class="label label-danger" id="removeCount">0</span></a>
-                            </li>
-                            <li>
-                                修改角色：<a onclick="$('select[name=\\'operationType\\']').val('CHANGE_ROLE');$.table.search()"><span class="label label-warning" id="changeCount">0</span></a>
-                            </li>
                             <li class="pull-right">
                                 <label class="input-label">群组ID：</label><input type="text" name="groupId" placeholder="请输入群组ID"/>
                             </li>
@@ -192,6 +241,26 @@
                     $("#changeCount").text(result.data.changeCount || 0);
                 }
             });
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $('select[name="operationType"]').val('');
+            $.table.search();
+        }
+
+        /**
+         * 按操作类型筛选
+         */
+        function filterByType(operationType) {
+            if (operationType) {
+                $('select[name="operationType"]').val(operationType);
+            } else {
+                $('select[name="operationType"]').val('');
+            }
+            $.table.search();
         }
 
         function exportData() {

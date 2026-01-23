@@ -123,21 +123,33 @@ const handleSend = () => {
 
 <style scoped>
 .chat-input-container {
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--dt-border-light);
   background: #fff;
-  padding: 12px 16px 16px;
+  padding: 12px 20px 20px;
+  flex-shrink: 0;
 }
 
 .input-toolbar {
   display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
 }
 
 .toolbar-btn {
   font-size: 20px;
-  padding: 6px;
-  color: #666;
+  padding: 4px;
+  color: var(--dt-text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+  
+  &:hover {
+    color: var(--dt-brand-color);
+  }
 }
 
 .emoji-picker-wrapper {
@@ -156,10 +168,15 @@ const handleSend = () => {
 
 .custom-textarea :deep(.el-textarea__inner) {
   box-shadow: none;
-  background: #f5f5f5;
-  border-radius: 8px;
-  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  padding: 0;
   resize: none;
+  font-size: 14px;
+  color: var(--dt-text-primary);
+  &::placeholder {
+    color: var(--dt-text-placeholder);
+  }
 }
 
 .send-btn-wrapper {

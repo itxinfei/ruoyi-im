@@ -3,10 +3,71 @@
 <head>
     <th:block th:include="include :: header('邮件管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+
+    <style>
+        .email-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins email-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>邮件总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部邮件</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins email-stat-card" onclick="filterByFolder('SENT')" style="cursor: pointer;" title="点击查看已发送">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">发</span>
+                                <h5>已发送</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="sentCount">0</h2>
+                                <small>已发送邮件</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins email-stat-card" onclick="filterByFolder('INBOX')" style="cursor: pointer;" title="点击查看收件箱">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">收</span>
+                                <h5>已接收</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="receivedCount">0</h2>
+                                <small>接收邮件</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins email-stat-card" onclick="filterByReadStatus('0')" style="cursor: pointer;" title="点击查看未读">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">未</span>
+                                <h5>未读邮件</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="unreadCount">0</h2>
+                                <small>未读邮件</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="email-form">
                     <div class="select-list">
@@ -38,6 +99,10 @@
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -177,7 +242,52 @@
                 }
             };
             $.table.init(options);
+            loadStatistics();
         });
+
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code === 0) {
+                    var data = result.data || {};
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#sentCount").text(data.sentCount || 0);
+                    $("#receivedCount").text(data.receivedCount || 0);
+                    $("#unreadCount").text(data.unreadCount || 0);
+                }
+            });
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $.form.reset();
+            $.table.search();
+        }
+
+        /**
+         * 按文件夹筛选
+         */
+        function filterByFolder(folder) {
+            if (folder) {
+                $('select[name="folder"]').val(folder);
+            } else {
+                $('select[name="folder"]').val('');
+            }
+            $.table.search();
+        }
+
+        /**
+         * 按已读状态筛选
+         */
+        function filterByReadStatus(isRead) {
+            if (isRead !== undefined && isRead !== '') {
+                $('select[name="isRead"]').val(isRead);
+            } else {
+                $('select[name="isRead"]').val('');
+            }
+            $.table.search();
+        }
     </script>
 </body>
 </html>

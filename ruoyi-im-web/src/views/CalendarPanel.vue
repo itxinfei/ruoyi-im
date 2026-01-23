@@ -86,6 +86,43 @@
         </div>
       </div>
       
+      <!-- Month View Grid -->
+      <div v-else-if="currentView === '月'" class="month-view">
+        <div class="month-grid-header">
+           <div v-for="day in ['一', '二', '三', '四', '五', '六', '日']" :key="day" class="weekday-label">
+             {{ day }}
+           </div>
+        </div>
+        <div class="month-grid">
+           <div 
+             v-for="(day, index) in monthDays" 
+             :key="index" 
+             class="month-day-cell"
+             :class="{ 
+               'not-current-month': !day.isCurrentMonth,
+               'is-today': isToday(day.date),
+               'is-selected': isSameDay(day.date, selectedDate)
+             }"
+             @click="selectedDate = day.date"
+           >
+             <div class="cell-top">
+                <span class="day-num">{{ day.date.getDate() }}</span>
+                <span v-if="isToday(day.date)" class="today-label">今</span>
+             </div>
+             <div class="day-events">
+               <div 
+                 v-for="event in getEventsForDay(day.date)" 
+                 :key="event.id"
+                 class="mini-event"
+                 :class="`event-bg-${event.color}`"
+               >
+                 {{ event.title }}
+               </div>
+             </div>
+           </div>
+        </div>
+      </div>
+      
       <div v-else class="view-placeholder">
         暂未实现 {{ currentView }} 视图
       </div>
@@ -323,6 +360,42 @@ const selectedDateEvents = computed(() => {
   })
 })
 
+const monthDays = computed(() => {
+  const year = currentDate.value.getFullYear()
+  const month = currentDate.value.getMonth()
+  
+  // First day of the month
+  const firstDay = new Date(year, month, 1)
+  // Day of week (0 is Sunday)
+  let startDay = firstDay.getDay()
+  // Monday start: Sun->7, Mon->1, Tue->2...
+  startDay = startDay === 0 ? 7 : startDay
+  
+  const days = []
+  
+  // Previous month padding
+  for (let i = startDay - 1; i > 0; i--) {
+    const d = new Date(year, month, 1 - i)
+    days.push({ date: d, isCurrentMonth: false })
+  }
+  
+  // Current month days
+  const lastDay = new Date(year, month + 1, 0).getDate()
+  for (let i = 1; i <= lastDay; i++) {
+    const d = new Date(year, month, i)
+    days.push({ date: d, isCurrentMonth: true })
+  }
+  
+  // Next month padding to fill 6 weeks (42 cells)
+  const remaining = 42 - days.length
+  for (let i = 1; i <= remaining; i++) {
+    const d = new Date(year, month + 1, i)
+    days.push({ date: d, isCurrentMonth: false })
+  }
+  
+  return days
+})
+
 // --- Methods ---
 const parseTime = (timeStr) => {
   const [hours, minutes] = timeStr.split(':').map(Number);
@@ -340,6 +413,12 @@ const isToday = (date) => {
   return date.getDate() === today.getDate() &&
          date.getMonth() === today.getMonth() &&
          date.getFullYear() === today.getFullYear()
+}
+
+const isSameDay = (d1, d2) => {
+  return d1.getFullYear() === d2.getFullYear() &&
+         d1.getMonth() === d2.getMonth() &&
+         d1.getDate() === d2.getDate()
 }
 
 const getEventsForDay = (date) => {
@@ -682,6 +761,111 @@ onUnmounted(() => {
   
   .dot { width: 8px; height: 8px; border-radius: 50%; background-color: #ef4444; margin-left: -4px; }
   .line { flex: 1; height: 2px; background-color: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+}
+
+/* Month View */
+.month-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  overflow: hidden;
+}
+
+.month-grid-header {
+  display: flex;
+  background-color: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  .weekday-label {
+    flex: 1;
+    padding: 10px 0;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+  }
+}
+
+.month-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  background-color: #e2e8f0;
+  gap: 1px;
+  overflow: auto;
+}
+
+.month-day-cell {
+  background-color: #fff;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover { background-color: #f8fafc; }
+  
+  &.not-current-month {
+    background-color: #fdfdfd;
+    .day-num { color: #cbd5e1; }
+  }
+  
+  &.is-selected {
+    background-color: #eff6ff;
+  }
+  
+  &.is-today {
+    .day-num {
+      color: #1677ff;
+      font-weight: bold;
+    }
+  }
+}
+
+.cell-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.day-num {
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.today-label {
+  font-size: 11px;
+  background-color: #1677ff;
+  color: #fff;
+  padding: 0 4px;
+  border-radius: 10px;
+}
+
+.day-events {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.mini-event {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  &.event-bg-blue { background-color: #dbeafe; color: #1e40af; border-left: 2px solid #3b82f6; }
+  &.event-bg-orange { background-color: #ffedd5; color: #9a3412; border-left: 2px solid #f97316; }
+  &.event-bg-purple { background-color: #f3e8ff; color: #6b21a8; border-left: 2px solid #a855f7; }
+  &.event-bg-emerald { background-color: #d1fae5; color: #065f46; border-left: 2px solid #10b981; }
+  &.event-bg-slate { background-color: #f1f5f9; color: #334155; border-left: 2px solid #94a3b8; }
 }
 
 /* Right Sidebar */

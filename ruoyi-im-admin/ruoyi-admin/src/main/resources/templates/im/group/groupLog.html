@@ -3,6 +3,13 @@
 <head>
     <th:block th:include="include :: header('群组操作日志')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+
+    <style>
+        .grouplog-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
@@ -17,22 +24,64 @@
                 </div>
             </div>
 
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" th:if="${group != null}" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins grouplog-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>日志总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部操作日志</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins grouplog-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看今日">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">今</span>
+                                <h5>今日操作</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="todayCount">0</h2>
+                                <small>今日操作数</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins grouplog-stat-card" onclick="filterByType('CREATE')" style="cursor: pointer;" title="点击查看创建操作">
+                            <div class="ibox-title">
+                                <span class="label label-danger pull-right">建</span>
+                                <h5>创建操作</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-danger" id="createCount">0</h2>
+                                <small>创建相关操作</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins grouplog-stat-card" onclick="filterByType('DELETE')" style="cursor: pointer;" title="点击查看删除操作">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">删</span>
+                                <h5>删除操作</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="deleteCount">0</h2>
+                                <small>删除相关操作</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="log-form">
                     <div class="select-list">
                         <ul>
-                            <li th:if="${group != null}">
-                                总日志数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
-                            </li>
-                            <li th:if="${group != null}">
-                                今日操作：<a onclick="$.table.search()"><span class="label label-success" id="todayCount">0</span></a>
-                            </li>
-                            <li th:if="${group != null}">
-                                创建操作：<a onclick="$('select[name=\\'operationType\\']').val('CREATE');$.table.search()"><span class="label label-danger" id="createCount">0</span></a>
-                            </li>
-                            <li th:if="${group != null}">
-                                删除操作：<a onclick="$('select[name=\\'operationType\\']').val('DELETE');$.table.search()"><span class="label label-warning" id="deleteCount">0</span></a>
-                            </li>
                             <li class="pull-right">
                                 <label class="input-label">操作类型：</label>
                                 <select name="operationType">
@@ -191,6 +240,26 @@
                     $("#deleteCount").text(result.data.deleteCount || 0);
                 }
             });
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $('select[name="operationType"]').val('');
+            $.table.search();
+        }
+
+        /**
+         * 按操作类型筛选
+         */
+        function filterByType(operationType) {
+            if (operationType) {
+                $('select[name="operationType"]').val(operationType);
+            } else {
+                $('select[name="operationType"]').val('');
+            }
+            $.table.search();
         }
     </script>
 </body>

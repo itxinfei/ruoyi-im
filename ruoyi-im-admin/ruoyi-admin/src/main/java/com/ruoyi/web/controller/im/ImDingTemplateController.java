@@ -89,6 +89,15 @@ public class ImDingTemplateController extends BaseController {
     }
 
     /**
+     * 获取统计数据
+     */
+    @GetMapping("/statistics")
+    @ResponseBody
+    public AjaxResult getStatistics() {
+        return AjaxResult.success(dingTemplateService.getTemplateStatistics());
+    }
+
+    /**
      * 获取DING模板详细信息
      */
     @RequiresPermissions("im:dingTemplate:query")

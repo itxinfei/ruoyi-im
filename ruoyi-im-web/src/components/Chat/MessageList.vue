@@ -6,7 +6,7 @@
     <div v-for="msg in messagesWithDividers" :key="msg.id || msg.timeText" :data-id="msg.id" class="message-wrapper">
       <div v-if="msg.isTimeDivider" class="time-divider">{{ msg.timeText }}</div>
       <div v-else class="message-item" :class="{ 'is-own': msg.isOwn }">
-        <el-avatar class="avatar" :size="36" :src="msg.senderAvatar">
+        <el-avatar class="avatar" :size="36" :src="msg.senderAvatar" shape="square" :class="getAvatarBgClass(msg)">
           {{ (msg.senderName || '?').charAt(0) }}
         </el-avatar>
         <div class="content-wrapper">
@@ -120,6 +120,12 @@ const fetchReadUsers = async (msg) => {
   } finally {
     loadingReadUsers.value[msg.id] = false
   }
+}
+
+const getAvatarBgClass = (msg) => {
+  if (msg.isOwn) return 'bg-blue-600'
+  const colors = ['bg-blue-500', 'bg-orange-500', 'bg-emerald-500', 'bg-purple-500']
+  return colors[(msg.senderId || 0) % colors.length]
 }
 
 const parseContent = (msg) => {
@@ -298,10 +304,16 @@ defineExpose({ scrollToBottom, maintainScroll })
   flex-direction: row-reverse;
 }
 .avatar {
-  margin: 0 10px;
-  background: #409eff;
+  margin: 0 12px;
+  border-radius: 8px !important;
   flex-shrink: 0;
+  font-weight: 500;
 }
+.bg-blue-600 { background-color: #2563eb; }
+.bg-blue-500 { background-color: #3b82f6; }
+.bg-orange-500 { background-color: #f97316; }
+.bg-emerald-500 { background-color: #10b981; }
+.bg-purple-500 { background-color: #a855f7; }
 .content-wrapper {
   max-width: 70%;
   display: flex;
@@ -325,11 +337,27 @@ defineExpose({ scrollToBottom, maintainScroll })
   font-size: 14px;
   word-break: break-all;
   line-height: 1.5;
-  color: #262626;
+  color: var(--dt-text-primary);
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 12px;
+    border-width: 6px 6px 6px 0;
+    border-color: transparent white transparent transparent;
+  }
 }
 .is-own .bubble {
-  background: #0089ff;
+  background: var(--dt-brand-color);
   color: #ffffff;
+  &::after {
+    left: auto;
+    right: -6px;
+    border-width: 6px 0 6px 6px;
+    border-color: transparent transparent transparent var(--dt-brand-color);
+  }
 }
 .msg-image {
   max-width: 100%;

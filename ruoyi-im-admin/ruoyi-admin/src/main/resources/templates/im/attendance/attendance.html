@@ -6,22 +6,74 @@
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
+        <!-- 统计卡片区域 -->
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-info pull-right">实时</span>
+                        <h5>打卡总数</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins text-center" id="totalCount">0</h1>
+                        <small class="text-center text-muted block">全部考勤记录</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-success pull-right">今日</span>
+                        <h5>今日打卡</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins text-center text-success" id="todayCount">0</h1>
+                        <small class="text-center text-muted block">今日已打卡人数</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-warning pull-right">异常</span>
+                        <h5>迟到次数</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins text-center text-warning" id="lateCount">0</h1>
+                        <small class="text-center text-muted block">迟到/早退记录</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-danger pull-right">缺卡</span>
+                        <h5>缺卡次数</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins text-center text-danger" id="absentCount">0</h1>
+                        <small class="text-center text-muted block">未打卡记录</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-sm-12 search-collapse">
                 <form id="attendance-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                考勤记录总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
+                                考勤记录总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCountBadge">0</span></a>
                             </li>
                             <li>
-                                正常打卡：<a onclick="$('select[name=\\'checkInStatus\\']').val('NORMAL');$.table.search()"><span class="label label-success" id="normalCount">0</span></a>
+                                正常打卡：<a onclick="$('select[name=\\'checkInStatus\\']').val('NORMAL');$.table.search()"><span class="label label-success" id="normalCountBadge">0</span></a>
                             </li>
                             <li>
-                                迟到/早退：<a onclick="$('select[name=\\'checkInStatus\\']').val('LATE');$.table.search()"><span class="label label-warning" id="lateCount">0</span></a>
+                                迟到/早退：<a onclick="$('select[name=\\'checkInStatus\\']').val('LATE');$.table.search()"><span class="label label-warning" id="lateCountBadge">0</span></a>
                             </li>
                             <li>
-                                缺卡：<a onclick="$('select[name=\\'checkInStatus\\']').val('ABSENT');$.table.search()"><span class="label label-danger" id="absentCount">0</span></a>
+                                缺卡：<a onclick="$('select[name=\\'checkInStatus\\']').val('ABSENT');$.table.search()"><span class="label label-danger" id="absentCountBadge">0</span></a>
                             </li>
                             <li class="pull-right">
                                 <label class="input-label">用户名称：</label><input type="text" name="userName" placeholder="请输入用户名称"/>
@@ -228,10 +280,17 @@
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
+                    // 更新统计卡片
                     $("#totalCount").text(result.data.totalCount || 0);
-                    $("#normalCount").text(result.data.normalCount || 0);
+                    $("#todayCount").text(result.data.todayCount || 0);
                     $("#lateCount").text(result.data.lateCount || 0);
                     $("#absentCount").text(result.data.absentCount || 0);
+                    
+                    // 同步更新搜索栏徽章
+                    $("#totalCountBadge").text(result.data.totalCount || 0);
+                    $("#normalCountBadge").text(result.data.normalCount || 0);
+                    $("#lateCountBadge").text(result.data.lateCount || 0);
+                    $("#absentCountBadge").text(result.data.absentCount || 0);
                 }
             });
         }

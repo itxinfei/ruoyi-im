@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('审计日志')" />
@@ -7,6 +7,60 @@
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+
+            <!-- 统计卡片区域 - 使用RuoYi原生 ibox 样式 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">总</span>
+                                <h5>日志总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="totalCount">0</h2>
+                                <small>系统日志总量</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">今</span>
+                                <h5>今日日志</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="todayCount">0</h2>
+                                <small>今日产生日志</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">类</span>
+                                <h5>操作类型</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="operationCount">0</h2>
+                                <small>操作类型数量</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <span class="label label-danger pull-right">异</span>
+                                <h5>异常操作</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-danger" id="errorCount">0</h2>
+                                <small>失败操作记录</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- 搜索表单 -->
             <div class="col-sm-12 search-collapse">
                 <form id="auditLog-form">
@@ -227,7 +281,21 @@
                 }]
             };
             $.table.init(options);
+            loadStatistics();
         });
+        /* 加载统计数据 */
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code == 0) {
+                    var stats = result.data;
+                    $("#totalCount").text(stats.totalCount || 0);
+                    $("#todayCount").text(stats.todayCount || 0);
+                    $("#operationCount").text(stats.operationCount || 0);
+                    $("#errorCount").text(stats.errorCount || 0);
+                }
+            });
+        }
+
 
         function showCleanModal() {
             $("#cleanModal").modal('show');

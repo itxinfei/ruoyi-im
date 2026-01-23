@@ -3,6 +3,7 @@ package com.ruoyi.web.service;
 import com.ruoyi.web.domain.ImDingTemplate;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * DING模板Service接口
@@ -59,4 +60,11 @@ public interface ImDingTemplateService {
      * @return 结果
      */
     String checkTemplateNameUnique(ImDingTemplate imDingTemplate);
+
+    /**
+     * 获取模板统计数据
+     *
+     * @return 统计数据
+     */
+    Map<String, Object> getTemplateStatistics();
 }

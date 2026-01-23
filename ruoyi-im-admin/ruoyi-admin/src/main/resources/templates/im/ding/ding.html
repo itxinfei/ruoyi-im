@@ -3,30 +3,79 @@
 <head>
     <th:block th:include="include :: header('DING消息管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+
+    <style>
+        .ding-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins ding-stat-card" onclick="filterByStatus('')" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>DING总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部DING消息</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins ding-stat-card" onclick="filterByToday()" style="cursor: pointer;" title="点击查看今日">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">今</span>
+                                <h5>今日DING</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="todayCount">0</h2>
+                                <small>今日发送的DING</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins ding-stat-card" onclick="filterByReadStatus('READ')" style="cursor: pointer;" title="点击查看已读">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">读</span>
+                                <h5>已读数量</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="readCount">0</h2>
+                                <small>已读DING数量</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins ding-stat-card" onclick="filterByReadStatus('UNREAD')" style="cursor: pointer;" title="点击查看未读">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">未</span>
+                                <h5>未读数量</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="unreadCount">0</h2>
+                                <small>未读DING数量</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-12 search-collapse">
                 <form id="ding-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                DING总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
-                            </li>
-                            <li>
-                                已发送：<a onclick="$('select[name=\\'status\\']').val('SENT');$.table.search()"><span class="label label-success" id="sentCount">0</span></a>
-                            </li>
-                            <li>
-                                草稿/待发：<a onclick="$('select[name=\\'status\\']').val('DRAFT');$.table.search()"><span class="label label-warning" id="pendingCount">0</span></a>
-                            </li>
-                            <li>
-                                紧急消息：<a onclick="$.table.search()"><span class="label label-danger" id="urgentCount">0</span></a>
-                            </li>
-                            <li class="pull-right">
                                 <label class="input-label">消息内容：</label><input type="text" name="content" placeholder="请输入消息内容"/>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">DING类型：</label><select name="dingType">
                                     <option value="">所有</option>
                                     <option value="APP">应用</option>
@@ -34,7 +83,7 @@
                                     <option value="PHONE">电话</option>
                                 </select>
                             </li>
-                            <li class="pull-right">
+                            <li>
                                 <label class="input-label">状态：</label><select name="status">
                                     <option value="">所有</option>
                                     <option value="DRAFT">草稿</option>
@@ -42,11 +91,15 @@
                                     <option value="SENT">已发送</option>
                                 </select>
                             </li>
-                            <li class="select-time pull-right">
+                            <li class="select-time">
                                 <label>发送时间：</label>
                                 <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
                                 <span>-</span>
                                 <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -205,12 +258,48 @@
         function loadStatistics() {
             $.get(prefix + "/statistics", function(result) {
                 if (result.code === 0) {
-                    $("#totalCount").text(result.data.totalCount || 0);
-                    $("#sentCount").text(result.data.sentCount || 0);
-                    $("#pendingCount").text(result.data.pendingCount || 0);
-                    $("#urgentCount").text(result.data.urgentCount || 0);
+                    var data = result.data || {};
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#todayCount").text(data.todayCount || 0);
+                    $("#readCount").text(data.readCount || 0);
+                    $("#unreadCount").text(data.unreadCount || 0);
                 }
             });
+        }
+
+        /**
+         * 按状态筛选
+         */
+        function filterByStatus(status) {
+            if (status) {
+                $('select[name="status"]').val(status);
+            } else {
+                $('select[name="status"]').val('');
+            }
+            $.table.search();
+        }
+
+        /**
+         * 筛选今日数据
+         */
+        function filterByToday() {
+            var today = new Date();
+            var todayStr = today.getFullYear() + '-' +
+                          String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                          String(today.getDate()).padStart(2, '0');
+            $('#startTime').val(todayStr + ' 00:00:00');
+            $('#endTime').val(todayStr + ' 23:59:59');
+            $.table.search();
+        }
+
+        /**
+         * 按已读/未读状态筛选
+         */
+        function filterByReadStatus(readStatus) {
+            // 这里需要后端支持 readStatus 参数
+            // 暂时使用现有字段模拟
+            $('select[name="status"]').val('SENT');
+            $.table.search();
         }
     </script>
 </body>

@@ -3,10 +3,71 @@
 <head>
     <th:block th:include="include :: header('文件管理')" />
     <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
+
+    <style>
+        .file-stat-card { margin-bottom: 10px; }
+        .ibox-content { padding: 10px 15px; }
+        .ibox-title { padding: 10px 15px; min-height: 40px; }
+        .no-margins { margin-top: 0 !important; margin-bottom: 0 !important; }
+    </style>
 </head>
 <body class="gray-bg">
     <div class="container-div im-page">
         <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins file-stat-card" onclick="filterReset()" style="cursor: pointer;" title="点击查看全部">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">总</span>
+                                <h5>文件总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="totalCount">0</h2>
+                                <small>全部文件</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins file-stat-card" onclick="filterByToday()" style="cursor: pointer;" title="点击查看今日上传">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">今</span>
+                                <h5>今日上传</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="todayCount">0</h2>
+                                <small>今日上传文件</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins file-stat-card" style="cursor: default;">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">大</span>
+                                <h5>总大小</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="totalSize">0MB</h2>
+                                <small>文件总大小</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins file-stat-card" onclick="filterByType('IMAGE')" style="cursor: pointer;" title="点击查看图片">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">图</span>
+                                <h5>图片文件</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="imageCount">0</h2>
+                                <small>图片数量</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 搜索表单 -->
             <div class="col-sm-12 search-collapse">
                 <form id="file-form">
@@ -142,7 +203,60 @@
                 }]
             };
             $.table.init(options);
+            loadStatistics();
         });
+
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code === 0) {
+                    var data = result.data || {};
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#todayCount").text(data.todayCount || 0);
+                    $("#totalSize").text(formatFileSize(data.totalSize || 0));
+                    $("#imageCount").text(data.imageCount || 0);
+                }
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes || bytes == 0) return '0MB';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $.form.reset();
+            $.table.search();
+        }
+
+        /**
+         * 筛选今日数据
+         */
+        function filterByToday() {
+            var today = new Date();
+            var todayStr = today.getFullYear() + '-' +
+                          String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                          String(today.getDate()).padStart(2, '0');
+            $('#startTime').val(todayStr + ' 00:00:00');
+            $('#endTime').val(todayStr + ' 23:59:59');
+            $.table.search();
+        }
+
+        /**
+         * 按文件类型筛选
+         */
+        function filterByType(fileType) {
+            if (fileType) {
+                $('select[name="fileType"]').val(fileType);
+            } else {
+                $('select[name="fileType"]').val('');
+            }
+            $.table.search();
+        }
 
         function getFileIcon(fileType) {
             if (fileType === 'IMAGE') return '<i class="fa fa-image text-info"></i>';
