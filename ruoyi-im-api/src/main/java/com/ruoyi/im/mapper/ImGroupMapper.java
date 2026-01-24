@@ -1,8 +1,12 @@
 package com.ruoyi.im.mapper;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.domain.ImGroup;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 群组Mapper接口
@@ -66,4 +70,13 @@ public interface ImGroupMapper {
      * @return 结果
      */
     int deleteImGroupMemberByGroupIds(Long[] groupIds);
+
+    /**
+     * 分页查询群组列表（管理员用）
+     *
+     * @param page 分页参数
+     * @param keyword 搜索关键词
+     * @return 群组分页列表
+     */
+    IPage<ImGroup> selectGroupPage(Page<ImGroup> page, @Param("keyword") String keyword);
 }

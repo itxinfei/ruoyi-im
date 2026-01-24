@@ -253,6 +253,18 @@ export default {
             lastMessage: session.lastMessage ? formatMessagePreviewFromObject(session.lastMessage) : '[暂无消息]'
           }))
           commit('SET_SESSIONS', sessions)
+
+          // 同步所有私聊用户的在线状态
+          const userStatusMap = {}
+          sessions.forEach(session => {
+            if (session.type === 'PRIVATE' && session.targetId && session.peerOnline !== undefined) {
+              userStatusMap[session.targetId] = session.peerOnline ? 'online' : 'offline'
+            }
+          })
+
+          if (Object.keys(userStatusMap).length > 0) {
+            commit('SET_ALL_USER_STATUS', userStatusMap)
+          }
         }
       } finally {
         commit('SET_LOADING', { key: 'sessions', value: false })

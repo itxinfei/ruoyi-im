@@ -1,5 +1,8 @@
 package com.ruoyi.im.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ruoyi.im.domain.ImGroup;
 import com.ruoyi.im.dto.group.ImGroupCreateRequest;
 import com.ruoyi.im.dto.group.ImGroupQueryRequest;
 import com.ruoyi.im.dto.group.ImGroupUpdateRequest;
@@ -121,4 +124,13 @@ public interface ImGroupService {
      * @param operatorId 操作者ID
      */
     void transferOwner(Long groupId, Long newOwnerId, Long operatorId);
+
+    /**
+     * 分页查询群组列表（管理员用）
+     *
+     * @param page 分页参数
+     * @param keyword 搜索关键词
+     * @return 群组分页列表
+     */
+    IPage<ImGroup> getGroupPage(Page<ImGroup> page, String keyword);
 }

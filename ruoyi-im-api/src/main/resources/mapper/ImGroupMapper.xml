@@ -91,4 +91,19 @@
             #{id}
         </foreach>
     </delete>
+
+    <select id="selectGroupPage" resultMap="ImGroupResult">
+        select g.id, g.name, g.owner_id, g.avatar, g.description, g.max_members, g.all_muted,
+               g.is_deleted, g.create_time, g.update_time,
+               u.nick_name as owner_name
+        from im_group g
+        left join im_user u on g.owner_id = u.id
+        <where>
+            g.is_deleted = 0
+            <if test="keyword != null and keyword != ''">
+                and g.name like concat('%', #{keyword}, '%')
+            </if>
+        </where>
+        order by g.create_time desc
+    </select>
 </mapper>

@@ -22,9 +22,10 @@ export function formatMessagePreview(type, content) {
         case 'FILE':
             try {
                 const fileInfo = typeof content === 'string' ? JSON.parse(content) : content
-                const fileName = fileInfo.fileName || fileInfo.name || '未知文件'
+                const fileName = fileInfo.fileName || fileInfo.name || fileInfo.file_name || '未知文件'
                 return `[文件] ${fileName}`
             } catch (e) {
+                console.warn('解析文件消息失败:', e, content)
                 return '[文件]'
             }
 
@@ -45,7 +46,7 @@ export function formatMessagePreview(type, content) {
             return content || '[系统消息]'
 
         default:
-            return '[未知消息]'
+            return type ? `[${type}]` : '[未知消息]'
     }
 }
 
@@ -57,46 +58,105 @@ export function formatMessagePreview(type, content) {
 export function formatMessagePreviewFromObject(message) {
     if (!message) return '[空消息]'
     
-    const type = message.type
+    // 处理消息类型，兼容可能的字段名差异
+    const type = message.type || message.messageType || message.message_type
+    
+    // 检查是否为撤回消息
+    if (message.isRevoked === 1 || message.is_revoked === 1 || type === 'RECALLED') {
+        // 钉钉风格：根据发送者显示不同的撤回提示
+        if (message.isSelf) {
+            return '你撤回了一条消息'
+        } else {
+            return `${message.senderName || '对方'}撤回了一条消息`
+        }
+    }
+    
     const content = message.content
     
-    if (!content && type !== 'RECALLED') return '[空消息]'
+    // 如果内容为空且不是撤回消息
+    if (!content) {
+        switch (type) {
+            case 'TEXT': return '[空消息]'
+            case 'IMAGE': return '[图片]'
+            case 'FILE': return '[文件]'
+            case 'VIDEO': return '[视频]'
+            case 'VOICE':
+            case 'AUDIO': return '[语音]'
+            case 'SYSTEM': return content || '[系统消息]'
+            default: return type ? `[${type}]` : '[未知消息]'
+        }
+    }
 
     switch (type) {
         case 'TEXT':
             const text = String(content)
+            // 钉钉风格：文本消息直接显示，支持表情
             return text.length > 30 ? text.substring(0, 30) + '...' : text
 
         case 'IMAGE':
+            // 钉钉风格：显示"[图片]"，不显示文件名
             return '[图片]'
 
         case 'FILE':
             try {
                 const fileInfo = typeof content === 'string' ? JSON.parse(content) : content
-                const fileName = fileInfo.fileName || fileInfo.name || '未知文件'
-                return `[文件] ${fileName}`
+                const fileName = fileInfo.fileName || fileInfo.name || fileInfo.file_name || '未知文件'
+                // 钉钉风格：显示文件名
+                return fileName
             } catch (e) {
+                console.warn('解析文件消息失败:', e, content)
                 return '[文件]'
             }
 
         case 'VIDEO':
+            // 钉钉风格：显示"[视频]"
             return '[视频]'
 
         case 'VOICE':
         case 'AUDIO':
+            // 钉钉风格：显示"[语音]"
             return '[语音]'
 
         case 'LOCATION':
-            return '[位置]'
-
-        case 'RECALLED':
-            return '[消息已撤回]'
+            // 钉钉风格：显示位置信息
+            try {
+                const locationInfo = typeof content === 'string' ? JSON.parse(content) : content
+                const address = locationInfo.address || locationInfo.name || '位置'
+                return address === '位置' ? '[位置]' : address
+            } catch (e) {
+                return '[位置]'
+            }
 
         case 'SYSTEM':
             return content || '[系统消息]'
 
         default:
-            return '[未知消息]'
+            // 尝试识别常见格式
+            if (typeof content === 'string') {
+                // 如果是JSON，尝试提取文件名
+                try {
+                    const parsed = JSON.parse(content)
+                    if (parsed.fileName || parsed.name || parsed.file_name) {
+                        const fileName = parsed.fileName || parsed.name || parsed.file_name
+                        return type === 'IMAGE' ? '[图片]' : fileName
+                    }
+                    if (parsed.imageUrl || parsed.fileUrl || parsed.url) {
+                        return type === 'IMAGE' ? '[图片]' : '[文件]'
+                    }
+                } catch (e) {
+                    // 忽略解析错误
+                }
+            }
+            
+            // 根据类型返回提示
+            switch (type) {
+                case 'IMAGE': return '[图片]'
+                case 'FILE': return '[文件]'
+                case 'VIDEO': return '[视频]'
+                case 'VOICE':
+                case 'AUDIO': return '[语音]'
+                default: return type || '[未知消息]'
+            }
     }
 }
 

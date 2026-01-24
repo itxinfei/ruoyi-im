@@ -1,8 +1,10 @@
 package com.ruoyi.im.mapper;
 
 import com.ruoyi.im.domain.ImGroupMember;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 群组成员Mapper接口
@@ -83,4 +85,37 @@ public interface ImGroupMemberMapper {
      * @return 结果
      */
     int deleteImGroupMemberByGroupIds(Long[] groupIds);
+
+    /**
+     * 统计群组成员数量
+     *
+     * @param groupId 群组ID
+     * @return 成员数量
+     */
+    Integer countMembersByGroupId(@Param("groupId") Long groupId);
+
+    /**
+     * 查询群组成员列表（带用户信息）
+     *
+     * @param groupId 群组ID
+     * @return 成员列表
+     */
+    List<Map<String, Object>> selectMembersByGroupId(@Param("groupId") Long groupId);
+
+    /**
+     * 根据群组ID和用户ID删除成员
+     *
+     * @param groupId 群组ID
+     * @param userId 用户ID
+     * @return 结果
+     */
+    int deleteByGroupIdAndUserId(@Param("groupId") Long groupId, @Param("userId") Long userId);
+
+    /**
+     * 批量删除群组成员（根据群组ID列表）
+     *
+     * @param groupIds 群组ID列表
+     * @return 结果
+     */
+    int deleteByGroupIds(@Param("groupIds") List<Long> groupIds);
 }

@@ -62,7 +62,8 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, inject } from 'vue'
+import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import UserDetailDrawer from './UserDetailDrawer.vue'
 
@@ -75,10 +76,20 @@ const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'search', '
 // 用户详情抽屉显示状态
 const showUserDetail = ref(false)
 
-// 模拟在线状态（实际应从后端获取）
+// 获取在线状态
+const store = useStore()
 const isOnline = computed(() => {
+  // 群组不显示在线状态
   if (props.session?.type === 'GROUP') return false
-  return Math.random() > 0.3  // 70%概率在线
+  
+  // 优先使用store中的实时状态（WebSocket推送）
+  const userId = props.session?.targetId
+  if (userId && store.state.im.userStatus[userId]) {
+    return store.state.im.userStatus[userId] === 'online'
+  }
+  
+  // 回退到session中的peerOnline字段（后端初始值）
+  return props.session?.peerOnline ?? false
 })
 
 const getAvatarBgClass = (session) => {

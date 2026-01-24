@@ -81,6 +81,173 @@ export function getUserStats() {
   })
 }
 
+// ==================== 群组管理 ====================
+
+/**
+ * 获取群组列表（分页）
+ * @param {Object} params - 查询参数 { keyword, pageNum, pageSize }
+ * @returns {Promise}
+ */
+export function getGroupList(params) {
+  return request({
+    url: '/api/admin/groups',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取群组详情
+ * @param {Number} id - 群组ID
+ * @returns {Promise}
+ */
+export function getGroupDetail(id) {
+  return request({
+    url: `/api/admin/groups/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 更新群组信息
+ * @param {Number} id - 群组ID
+ * @param {Object} data - 群组信息
+ * @returns {Promise}
+ */
+export function updateGroup(id, data) {
+  return request({
+    url: `/api/admin/groups/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 解散群组
+ * @param {Number} id - 群组ID
+ * @returns {Promise}
+ */
+export function deleteGroup(id) {
+  return request({
+    url: `/api/admin/groups/${id}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 批量解散群组
+ * @param {Array} ids - 群组ID列表
+ * @returns {Promise}
+ */
+export function batchDeleteGroups(ids) {
+  return request({
+    url: '/api/admin/groups/batch',
+    method: 'delete',
+    data: ids
+  })
+}
+
+/**
+ * 获取群组统计
+ * @returns {Promise}
+ */
+export function getGroupStats() {
+  return request({
+    url: '/api/admin/groups/stats',
+    method: 'get'
+  })
+}
+
+/**
+ * 获取群组成员列表
+ * @param {Number} id - 群组ID
+ * @returns {Promise}
+ */
+export function getGroupMembers(id) {
+  return request({
+    url: `/api/admin/groups/${id}/members`,
+    method: 'get'
+  })
+}
+
+/**
+ * 移除群组成员
+ * @param {Number} groupId - 群组ID
+ * @param {Number} userId - 用户ID
+ * @returns {Promise}
+ */
+export function removeGroupMember(groupId, userId) {
+  return request({
+    url: `/api/admin/groups/${groupId}/members/${userId}`,
+    method: 'delete'
+  })
+}
+
+// ==================== 消息管理 ====================
+
+/**
+ * 搜索消息列表（分页）
+ * @param {Object} params - 查询参数 { keyword, messageType, senderId, conversationId, startTime, endTime, pageNum, pageSize }
+ * @returns {Promise}
+ */
+export function searchMessages(params) {
+  return request({
+    url: '/api/admin/messages',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取消息详情
+ * @param {Number} id - 消息ID
+ * @returns {Promise}
+ */
+export function getMessageDetail(id) {
+  return request({
+    url: `/api/admin/messages/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 删除消息
+ * @param {Number} id - 消息ID
+ * @returns {Promise}
+ */
+export function deleteMessage(id) {
+  return request({
+    url: `/api/admin/messages/${id}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 批量删除消息
+ * @param {Array} ids - 消息ID列表
+ * @returns {Promise}
+ */
+export function batchDeleteMessages(ids) {
+  return request({
+    url: '/api/admin/messages/batch',
+    method: 'delete',
+    data: ids
+  })
+}
+
+/**
+ * 获取消息统计
+ * @param {Object} params - { startTime, endTime }
+ * @returns {Promise}
+ */
+export function getMessageAdminStats(params) {
+  return request({
+    url: '/api/admin/messages/stats',
+    method: 'get',
+    params
+  })
+}
+
 // ==================== 数据统计 ====================
 
 /**

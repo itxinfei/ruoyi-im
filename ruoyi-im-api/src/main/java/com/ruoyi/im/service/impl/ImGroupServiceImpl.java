@@ -1,5 +1,7 @@
 package com.ruoyi.im.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImGroup;
@@ -500,5 +502,10 @@ public class ImGroupServiceImpl implements ImGroupService {
         member.setCreateTime(LocalDateTime.now());
         member.setUpdateTime(LocalDateTime.now());
         imConversationMemberMapper.insertImConversationMember(member);
+    }
+
+    @Override
+    public IPage<ImGroup> getGroupPage(Page<ImGroup> page, String keyword) {
+        return imGroupMapper.selectGroupPage(page, keyword);
     }
 }

@@ -208,6 +208,8 @@ const handleCommand = (cmd, msg) => {
   if (cmd === 'copy') {
     navigator.clipboard.writeText(msg.content)
     ElMessage.success('已复制')
+  } else if (cmd === 'at') {
+    emit('at', msg)
   } else {
     emit('command', cmd, msg)
   }
@@ -222,7 +224,11 @@ const handleReaction = (msg, reaction) => {
 const scrollToMsg = (id) => {
   const el = listRef.value?.querySelector(`[data-id="${id}"]`)
   if (el) {
-    el.scrollIntoView({ behavior: 'smooth' })
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    el.classList.add('highlight-msg')
+    setTimeout(() => {
+      el.classList.remove('highlight-msg')
+    }, 2000)
   }
 }
 
@@ -360,34 +366,60 @@ defineExpose({ scrollToBottom, maintainScroll })
 </style>
 
 <style lang="scss">
+@keyframes highlight-pulse {
+  0% { background-color: transparent; }
+  15% { background-color: rgba(0, 137, 255, 0.15); }
+  85% { background-color: rgba(0, 137, 255, 0.15); }
+  100% { background-color: transparent; }
+}
+
+.highlight-msg {
+  animation: highlight-pulse 2s ease-in-out forwards;
+  border-radius: 8px;
+}
 /* 全局样式用于气泡右键菜单 */
 .message-context-menu {
   padding: 4px 0 !important;
-  border-radius: 8px !important;
-  box-shadow: var(--dt-shadow-lg) !important;
-  border: 1px solid var(--dt-border-light) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid #f0f0f0 !important;
+  background: #fff !important;
 
   .el-dropdown-menu__item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px !important;
-    font-size: 13px !important;
-    color: var(--dt-text-secondary) !important;
+    gap: 12px;
+    padding: 10px 20px !important;
+    font-size: 14px !important;
+    color: #1f2329 !important;
+    min-width: 140px;
+    transition: all 0.2s;
 
-    .el-icon { font-size: 16px; color: var(--dt-text-tertiary); }
+    .el-icon { 
+      font-size: 18px; 
+      color: #8f959e; 
+      margin-right: 4px;
+    }
 
     &:hover {
-      background-color: var(--dt-brand-bg) !important;
-      color: var(--dt-brand-color) !important;
-      .el-icon { color: var(--dt-brand-color); }
+      background-color: #f2f3f5 !important;
+      color: #0089ff !important;
+      .el-icon { color: #0089ff; }
     }
 
     &.danger {
-      color: var(--dt-error-color) !important;
-      &:hover { background-color: #fff1f0 !important; }
-      .el-icon { color: var(--dt-error-color); }
+      color: #f54a45 !important;
+      &:hover {
+        background-color: #fff0f0 !important;
+        .el-icon { color: #f54a45; }
+      }
     }
+  }
+
+  .menu-divider {
+    height: 1px;
+    background-color: #f2f3f5;
+    margin: 4px 0;
   }
 }
 </style>

@@ -115,4 +115,44 @@
         update im_group_member set is_deleted = 1, deleted_time = now()
         where group_id = #{groupId} and user_id = #{userId}
     </update>
+
+    <!-- 统计群组成员数量 -->
+    <select id="countMembersByGroupId" parameterType="Long" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM im_group_member
+        WHERE group_id = #{groupId}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 查询群组成员列表（带用户信息） -->
+    <select id="selectMembersByGroupId" parameterType="Long" resultType="java.util.Map">
+        SELECT gm.id,
+               gm.group_id,
+               gm.user_id,
+               gm.role,
+               gm.is_muted,
+               gm.joined_time,
+               u.nick_name as nickname,
+               u.avatar as avatar
+        FROM im_group_member gm
+        LEFT JOIN im_user u ON gm.user_id = u.id
+        WHERE gm.group_id = #{groupId}
+          AND gm.is_deleted = 0
+        ORDER BY gm.joined_time ASC
+    </select>
+
+    <!-- 根据群组ID和用户ID删除成员 -->
+    <delete id="deleteByGroupIdAndUserId">
+        DELETE FROM im_group_member
+        WHERE group_id = #{groupId} AND user_id = #{userId}
+    </delete>
+
+    <!-- 批量删除群组成员（根据群组ID列表） -->
+    <delete id="deleteByGroupIds">
+        DELETE FROM im_group_member
+        WHERE group_id IN
+        <foreach item="id" collection="groupIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>

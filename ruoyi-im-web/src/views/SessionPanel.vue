@@ -100,6 +100,8 @@
               <span v-if="session.hasMention" class="mention-tag">[有人@我]</span>
               <span v-if="session.isPinned && !isActiveSession(session)" class="pin-tag">[置顶]</span>
               <span v-if="session.lastSenderNickname && session.type === 'GROUP'" class="sender-name">{{ session.lastSenderNickname }}: </span>
+              <!-- 使用预定义的消息预览格式，如果显示[未知消息]则使用更友好的提示 -->
+              <!-- 直接显示消息预览 -->
               {{ session.lastMessage || '暂无消息' }}
             </div>
           </div>
