@@ -2,6 +2,7 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImMessageFavoriteService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.favorite.FavoriteMessageVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,11 +35,8 @@ public class ImMessageFavoriteController {
             @PathVariable Long messageId,
             @RequestParam(required = false) Long conversationId,
             @RequestParam(required = false) String remark,
-            @RequestParam(required = false) String tags,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @RequestParam(required = false) String tags) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long favoriteId = messageFavoriteService.addFavorite(messageId, conversationId, userId, remark, tags);
         return Result.success("收藏成功", favoriteId);
     }
@@ -49,11 +47,8 @@ public class ImMessageFavoriteController {
     @Operation(summary = "取消收藏")
     @DeleteMapping("/{messageId}")
     public Result<Void> removeFavorite(
-            @PathVariable Long messageId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @PathVariable Long messageId) {
+        Long userId = SecurityUtils.getLoginUserId();
         messageFavoriteService.removeFavorite(messageId, userId);
         return Result.success("取消收藏成功");
     }
@@ -64,11 +59,8 @@ public class ImMessageFavoriteController {
     @Operation(summary = "检查消息是否已收藏")
     @GetMapping("/{messageId}/check")
     public Result<Boolean> isFavorited(
-            @PathVariable Long messageId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @PathVariable Long messageId) {
+        Long userId = SecurityUtils.getLoginUserId();
         boolean favorited = messageFavoriteService.isFavorited(messageId, userId);
         return Result.success(favorited);
     }
@@ -78,11 +70,8 @@ public class ImMessageFavoriteController {
      */
     @Operation(summary = "获取用户收藏的消息列表")
     @GetMapping("/list")
-    public Result<List<FavoriteMessageVO>> getUserFavorites(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<FavoriteMessageVO>> getUserFavorites() {
+        Long userId = SecurityUtils.getLoginUserId();
         List<FavoriteMessageVO> favorites = messageFavoriteService.getUserFavorites(userId);
         return Result.success(favorites);
     }
@@ -93,11 +82,8 @@ public class ImMessageFavoriteController {
     @Operation(summary = "获取会话中收藏的消息列表")
     @GetMapping("/conversation/{conversationId}")
     public Result<List<FavoriteMessageVO>> getConversationFavorites(
-            @PathVariable Long conversationId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @PathVariable Long conversationId) {
+        Long userId = SecurityUtils.getLoginUserId();
         List<FavoriteMessageVO> favorites = messageFavoriteService.getConversationFavorites(conversationId, userId);
         return Result.success(favorites);
     }
@@ -108,11 +94,8 @@ public class ImMessageFavoriteController {
     @Operation(summary = "根据标签获取收藏消息")
     @GetMapping("/tag/{tag}")
     public Result<List<FavoriteMessageVO>> getFavoritesByTag(
-            @PathVariable String tag,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @PathVariable String tag) {
+        Long userId = SecurityUtils.getLoginUserId();
         List<FavoriteMessageVO> favorites = messageFavoriteService.getFavoritesByTag(userId, tag);
         return Result.success(favorites);
     }
@@ -125,11 +108,8 @@ public class ImMessageFavoriteController {
     public Result<Void> updateFavorite(
             @PathVariable Long messageId,
             @RequestParam(required = false) String remark,
-            @RequestParam(required = false) String tags,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @RequestParam(required = false) String tags) {
+        Long userId = SecurityUtils.getLoginUserId();
         messageFavoriteService.updateFavorite(messageId, userId, remark, tags);
         return Result.success("更新成功");
     }

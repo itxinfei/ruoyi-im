@@ -4,6 +4,7 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.conversation.ImConversationCreateRequest;
 import com.ruoyi.im.dto.conversation.ImConversationUpdateRequest;
 import com.ruoyi.im.service.ImConversationService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.conversation.ImConversationVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,10 +38,8 @@ public class ImConversationController {
      */
     @Operation(summary = "获取会话列表", description = "查询当前用户的所有会话，包括单聊和群聊")
     @GetMapping("/list")
-    public Result<List<ImConversationVO>> getUserConversations(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<List<ImConversationVO>> getUserConversations() {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImConversationVO> list = imConversationService.getUserConversations(userId);
         return Result.success(list);
     }
@@ -56,11 +55,8 @@ public class ImConversationController {
      */
     @Operation(summary = "获取会话详情", description = "查询指定会话的详细信息")
     @GetMapping("/{id}")
-    public Result<ImConversationVO> getConversationById(@PathVariable Long id,
-                                                      @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<ImConversationVO> getConversationById(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         ImConversationVO vo = imConversationService.getConversationById(id, userId);
         return Result.success(vo);
     }
@@ -76,11 +72,8 @@ public class ImConversationController {
      */
     @Operation(summary = "创建会话", description = "创建一个新的会话，支持单聊和群聊")
     @PostMapping("/create")
-    public Result<Long> createConversation(@Valid @RequestBody ImConversationCreateRequest request,
-                                         @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<Long> createConversation(@Valid @RequestBody ImConversationCreateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long conversationId = imConversationService.createConversation(request, userId);
         return Result.success("创建成功", conversationId);
     }
@@ -98,11 +91,8 @@ public class ImConversationController {
     @Operation(summary = "更新会话设置", description = "更新会话的置顶、免打扰等设置")
     @PutMapping("/{id}")
     public Result<Void> updateConversation(@PathVariable Long id,
-                                         @Valid @RequestBody ImConversationUpdateRequest request,
-                                         @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+                                         @Valid @RequestBody ImConversationUpdateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         imConversationService.updateConversation(id, request, userId);
         return Result.success("更新成功");
     }
@@ -118,11 +108,8 @@ public class ImConversationController {
      */
     @Operation(summary = "删除会话", description = "从会话列表中删除指定会话（非物理删除）")
     @DeleteMapping("/{id}")
-    public Result<Void> deleteConversation(@PathVariable Long id,
-                                         @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<Void> deleteConversation(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         imConversationService.deleteConversation(id, userId);
         return Result.success("删除成功");
     }
@@ -139,11 +126,8 @@ public class ImConversationController {
     @Operation(summary = "置顶/取消置顶会话", description = "设置会话置顶状态")
     @PutMapping("/{id}/pinned")
     public Result<Void> setPinned(@PathVariable Long id,
-                                @RequestParam Boolean pinned,
-                                @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+                                @RequestParam Boolean pinned) {
+        Long userId = SecurityUtils.getLoginUserId();
         imConversationService.setPinned(id, pinned, userId);
         return Result.success(pinned ? "置顶成功" : "取消置顶成功");
     }
@@ -160,11 +144,8 @@ public class ImConversationController {
     @Operation(summary = "设置免打扰", description = "设置会话免打扰状态")
     @PutMapping("/{id}/muted")
     public Result<Void> setMuted(@PathVariable Long id,
-                               @RequestParam Boolean muted,
-                               @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+                               @RequestParam Boolean muted) {
+        Long userId = SecurityUtils.getLoginUserId();
         imConversationService.setMuted(id, muted, userId);
         return Result.success(muted ? "免打扰设置成功" : "免打扰取消成功");
     }
@@ -180,11 +161,8 @@ public class ImConversationController {
      */
     @Operation(summary = "搜索会话", description = "根据关键词搜索会话")
     @GetMapping("/search")
-    public Result<List<ImConversationVO>> search(@RequestParam String keyword,
-                                               @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<List<ImConversationVO>> search(@RequestParam String keyword) {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImConversationVO> list = imConversationService.searchConversations(keyword, userId);
         return Result.success(list);
     }
@@ -200,11 +178,8 @@ public class ImConversationController {
      */
     @Operation(summary = "标记会话为已读", description = "将指定会话的所有未读消息标记为已读")
     @PutMapping("/{id}/markAsRead")
-    public Result<Void> markAsRead(@PathVariable Long id,
-                                 @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<Void> markAsRead(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         imConversationService.markAsRead(userId, id);
         return Result.success("标记已读成功");
     }
@@ -219,10 +194,8 @@ public class ImConversationController {
      */
     @Operation(summary = "获取未读消息总数", description = "统计当前用户所有会话的未读消息总数")
     @GetMapping("/unreadCount")
-    public Result<Integer> getTotalUnreadCount(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<Integer> getTotalUnreadCount() {
+        Long userId = SecurityUtils.getLoginUserId();
         Integer count = imConversationService.getTotalUnreadCount(userId);
         return Result.success(count);
     }

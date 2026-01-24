@@ -5,8 +5,8 @@
         <div class="logo">
           <div class="logo-icon">钉</div>
         </div>
-        <h1 class="title">RuoYi IM</h1>
-        <p class="subtitle">企业级即时通讯平台</p>
+        <h1 class="title">IM即时通讯</h1>
+        <p class="subtitle">IM即时通讯</p>
       </div>
 
       <el-form
@@ -58,7 +58,7 @@
       </el-form>
 
       <div class="login-footer">
-        <p>© 2026 RuoYi IM. All rights reserved.</p>
+        <p>© 2026  IM. All rights reserved.</p>
       </div>
     </div>
   </div>

@@ -4,6 +4,7 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.dto.conversation.ImConversationMemberUpdateRequest;
 import com.ruoyi.im.service.ImConversationMemberService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +40,7 @@ public class ImConversationMemberController {
      */
     @GetMapping("/myList")
     public Result<List<ImConversationMemberVO>> getMyConversationList() {
-        Long userId = 1L;
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImConversationMemberVO> list = conversationMemberService.getConversationMemberList(userId);
         return Result.success(list);
     }
@@ -49,7 +50,7 @@ public class ImConversationMemberController {
      */
     @GetMapping(value = "/{conversationId}")
     public Result<ImConversationMemberVO> getInfo(@PathVariable("conversationId") Long conversationId) {
-        Long userId = 1L;
+        Long userId = SecurityUtils.getLoginUserId();
         ImConversationMemberVO vo = conversationMemberService.getConversationMember(conversationId, userId);
         return Result.success(vo);
     }
@@ -60,7 +61,7 @@ public class ImConversationMemberController {
     @PutMapping("/{conversationId}")
     public Result<Void> edit(@PathVariable Long conversationId,
             @RequestBody ImConversationMemberUpdateRequest request) {
-        Long userId = 1L;
+        Long userId = SecurityUtils.getLoginUserId();
         conversationMemberService.updateConversationMember(conversationId, userId, request);
         return Result.success();
     }
@@ -70,7 +71,7 @@ public class ImConversationMemberController {
      */
     @DeleteMapping("/{conversationId}")
     public Result<Void> remove(@PathVariable Long conversationId) {
-        Long userId = 1L;
+        Long userId = SecurityUtils.getLoginUserId();
         conversationMemberService.deleteConversationMember(conversationId, userId);
         return Result.success();
     }
@@ -80,7 +81,7 @@ public class ImConversationMemberController {
      */
     @PutMapping("/{conversationId}/clearUnread")
     public Result<Void> clearUnread(@PathVariable Long conversationId) {
-        Long userId = 1L;
+        Long userId = SecurityUtils.getLoginUserId();
         conversationMemberService.clearUnread(conversationId, userId);
         return Result.success();
     }
@@ -90,7 +91,7 @@ public class ImConversationMemberController {
      */
     @PutMapping("/{conversationId}/togglePin")
     public Result<Void> togglePin(@PathVariable Long conversationId, @RequestParam Integer pinned) {
-        Long userId = 1L;
+        Long userId = SecurityUtils.getLoginUserId();
         conversationMemberService.togglePin(conversationId, userId, pinned);
         return Result.success();
     }
@@ -100,7 +101,7 @@ public class ImConversationMemberController {
      */
     @PutMapping("/{conversationId}/toggleMute")
     public Result<Void> toggleMute(@PathVariable Long conversationId, @RequestParam Integer muted) {
-        Long userId = 1L;
+        Long userId = SecurityUtils.getLoginUserId();
         conversationMemberService.toggleMute(conversationId, userId, muted);
         return Result.success();
     }

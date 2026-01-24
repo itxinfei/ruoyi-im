@@ -40,9 +40,7 @@ public class ImGroupFileController {
     @PostMapping
     public Result<Long> uploadFile(
             @Valid @RequestBody ImGroupFileUploadRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         Long fileId = groupFileService.uploadFile(request, userId);
         return Result.success("文件上传成功", fileId);
@@ -59,9 +57,7 @@ public class ImGroupFileController {
     @PostMapping("/list")
     public Result<IPage<ImGroupFileVO>> getFileList(
             @RequestBody ImGroupFileQueryRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         IPage<ImGroupFileVO> page = groupFileService.getFileList(request, userId);
         return Result.success(page);
@@ -78,9 +74,7 @@ public class ImGroupFileController {
     @GetMapping("/statistics/{groupId}")
     public Result<ImGroupFileStatisticsVO> getStatistics(
             @PathVariable Long groupId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         ImGroupFileStatisticsVO statistics = groupFileService.getStatistics(groupId, userId);
         return Result.success(statistics);
@@ -97,9 +91,7 @@ public class ImGroupFileController {
     @GetMapping("/categories/{groupId}")
     public Result<List<String>> getCategories(
             @PathVariable Long groupId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         List<String> categories = groupFileService.getCategories(groupId, userId);
         return Result.success(categories);
@@ -118,9 +110,7 @@ public class ImGroupFileController {
     public Result<Void> updateFile(
             @PathVariable Long groupFileId,
             @Valid @RequestBody ImGroupFileUpdateRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         groupFileService.updateFile(groupFileId, request, userId);
         return Result.success("文件信息更新成功");
@@ -137,9 +127,7 @@ public class ImGroupFileController {
     @DeleteMapping("/{groupFileId}")
     public Result<Void> deleteFile(
             @PathVariable Long groupFileId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         groupFileService.deleteFile(groupFileId, userId);
         return Result.success("文件删除成功");
@@ -156,9 +144,7 @@ public class ImGroupFileController {
     @DeleteMapping("/batch")
     public Result<Void> batchDeleteFiles(
             @RequestBody List<Long> groupFileIds,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         groupFileService.batchDeleteFiles(groupFileIds, userId);
         return Result.success("批量删除成功");
@@ -175,9 +161,7 @@ public class ImGroupFileController {
     @GetMapping("/download/{groupFileId}")
     public Result<String> downloadFile(
             @PathVariable Long groupFileId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         String fileUrl = groupFileService.downloadFile(groupFileId, userId);
         return Result.success(fileUrl);
@@ -196,9 +180,7 @@ public class ImGroupFileController {
     public Result<Void> moveFile(
             @PathVariable Long groupFileId,
             @RequestParam String category,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         groupFileService.moveFile(groupFileId, category, userId);
         return Result.success("文件移动成功");

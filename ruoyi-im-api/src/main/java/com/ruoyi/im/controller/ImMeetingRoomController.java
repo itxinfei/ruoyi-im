@@ -44,9 +44,7 @@ public class ImMeetingRoomController {
     @Operation(summary = "创建会议室", description = "创建新的会议室")
     @PostMapping("/create")
     public Result<Long> createRoom(@Valid @RequestBody ImMeetingRoomCreateRequest request,
-                                    @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                    ) {
         }
         Long roomId = meetingRoomService.createRoom(request, userId);
         return Result.success("创建成功", roomId);
@@ -63,9 +61,7 @@ public class ImMeetingRoomController {
     @Operation(summary = "更新会议室", description = "更新会议室信息")
     @PutMapping
     public Result<Void> updateRoom(@Valid @RequestBody ImMeetingRoomUpdateRequest request,
-                                    @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                    ) {
         }
         meetingRoomService.updateRoom(request, userId);
         return Result.success("更新成功");
@@ -82,9 +78,7 @@ public class ImMeetingRoomController {
     @Operation(summary = "删除会议室", description = "删除指定会议室")
     @DeleteMapping("/{roomId}")
     public Result<Void> deleteRoom(@PathVariable Long roomId,
-                                    @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                    ) {
         }
         meetingRoomService.deleteRoom(roomId, userId);
         return Result.success("删除成功");
@@ -142,9 +136,7 @@ public class ImMeetingRoomController {
     @Operation(summary = "预订会议室", description = "预订指定的会议室")
     @PostMapping("/book")
     public Result<Long> bookRoom(@Valid @RequestBody ImMeetingBookingRequest request,
-                                  @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                  ) {
         }
         Long bookingId = meetingRoomService.bookRoom(request, userId);
         return Result.success("预订成功", bookingId);
@@ -161,9 +153,7 @@ public class ImMeetingRoomController {
     @Operation(summary = "取消预订", description = "取消指定的预订")
     @PostMapping("/booking/{bookingId}/cancel")
     public Result<Void> cancelBooking(@PathVariable Long bookingId,
-                                       @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                       ) {
         }
         meetingRoomService.cancelBooking(bookingId, userId);
         return Result.success("取消成功");
@@ -180,9 +170,7 @@ public class ImMeetingRoomController {
     @Operation(summary = "确认预订", description = "确认待确认的预订")
     @PostMapping("/booking/{bookingId}/confirm")
     public Result<Void> confirmBooking(@PathVariable Long bookingId,
-                                        @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                        ) {
         }
         meetingRoomService.confirmBooking(bookingId, userId);
         return Result.success("确认成功");
@@ -199,9 +187,7 @@ public class ImMeetingRoomController {
     @Operation(summary = "签到", description = "会议开始时签到")
     @PostMapping("/booking/{bookingId}/check-in")
     public Result<Void> checkIn(@PathVariable Long bookingId,
-                                 @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                 ) {
         }
         meetingRoomService.checkIn(bookingId, userId);
         return Result.success("签到成功");
@@ -218,9 +204,7 @@ public class ImMeetingRoomController {
     @Operation(summary = "签退", description = "会议结束时签退")
     @PostMapping("/booking/{bookingId}/check-out")
     public Result<Void> checkOut(@PathVariable Long bookingId,
-                                  @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                  ) {
         }
         meetingRoomService.checkOut(bookingId, userId);
         return Result.success("签退成功");
@@ -237,9 +221,7 @@ public class ImMeetingRoomController {
     @Operation(summary = "获取预订详情", description = "查询指定预订的详细信息")
     @GetMapping("/booking/{bookingId}")
     public Result<ImMeetingBookingVO> getBookingDetail(@PathVariable Long bookingId,
-                                                        @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                                        ) {
         }
         ImMeetingBookingVO detail = meetingRoomService.getBookingDetail(bookingId, userId);
         return Result.success(detail);
@@ -255,9 +237,7 @@ public class ImMeetingRoomController {
     @Operation(summary = "获取用户的预订列表", description = "查询当前用户的所有预订")
     @GetMapping("/booking/my")
     public Result<List<ImMeetingBookingVO>> getMyBookings(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         List<ImMeetingBookingVO> list = meetingRoomService.getUserBookings(userId);
         return Result.success(list);
@@ -316,9 +296,7 @@ public class ImMeetingRoomController {
     public Result<Void> submitFeedback(@PathVariable Long bookingId,
                                         @RequestParam String feedback,
                                         @RequestParam Integer rating,
-                                        @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                        ) {
         }
         meetingRoomService.submitFeedback(bookingId, feedback, rating, userId);
         return Result.success("提交成功");
@@ -334,9 +312,7 @@ public class ImMeetingRoomController {
     @Operation(summary = "获取会议室统计数据", description = "获取当前用户的会议室预订统计")
     @GetMapping("/statistics")
     public Result<Map<String, Object>> getStatistics(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         Map<String, Object> stats = meetingRoomService.getStatistics(userId);
         return Result.success(stats);

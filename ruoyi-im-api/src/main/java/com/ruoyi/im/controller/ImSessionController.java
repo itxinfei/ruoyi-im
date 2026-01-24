@@ -4,6 +4,7 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.conversation.ImConversationMemberUpdateRequest;
 import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.service.ImConversationService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
 import com.ruoyi.im.vo.conversation.ImConversationVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +39,8 @@ public class ImSessionController {
      * @apiNote 每个会话包含最后一条消息、未读消息数、会话名称、会话头像等信息
      */
     @GetMapping("/list")
-    public Result<List<ImConversationVO>> getList(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<ImConversationVO>> getList() {
+        Long userId = SecurityUtils.getLoginUserId();
         // 使用conversationService获取包含名称和头像的完整会话信息
         List<ImConversationVO> list = conversationService.getUserConversations(userId);
         return Result.success(list);
@@ -59,11 +57,8 @@ public class ImSessionController {
      * @throws BusinessException 当会话ID无效或用户不在会话中时抛出业务异常
      */
     @GetMapping("/{id}")
-    public Result<ImConversationVO> getById(@PathVariable Long id,
-                                                    @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<ImConversationVO> getById(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         ImConversationVO vo = conversationService.getConversationById(id, userId);
         return Result.success(vo);
     }
@@ -81,11 +76,8 @@ public class ImSessionController {
      */
     @PutMapping("/{id}")
     public Result<Void> update(@PathVariable Long id,
-                              @Valid @RequestBody ImConversationMemberUpdateRequest request,
-                              @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                              @Valid @RequestBody ImConversationMemberUpdateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         conversationMemberService.updateConversationMember(id, userId, request);
         return Result.success("更新成功");
     }
@@ -101,11 +93,8 @@ public class ImSessionController {
      * @throws BusinessException 当会话不存在或不属于当前用户时抛出业务异常
      */
     @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable Long id,
-                               @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> delete(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         conversationMemberService.deleteConversationMember(id, userId);
         return Result.success("删除成功");
     }
@@ -121,11 +110,8 @@ public class ImSessionController {
      * @throws BusinessException 当会话不存在或不属于当前用户时抛出业务异常
      */
     @PutMapping("/{id}/read")
-    public Result<Void> clearUnread(@PathVariable Long id,
-                                   @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> clearUnread(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         conversationMemberService.clearUnread(id, userId);
         return Result.success("已清空未读消息");
     }
@@ -143,11 +129,8 @@ public class ImSessionController {
      */
     @PutMapping("/{id}/pin")
     public Result<Void> togglePin(@PathVariable Long id,
-                                 @RequestParam Integer pinned,
-                                 @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                 @RequestParam Integer pinned) {
+        Long userId = SecurityUtils.getLoginUserId();
         conversationMemberService.togglePin(id, userId, pinned);
         return Result.success(pinned == 1 ? "已置顶" : "已取消置顶");
     }
@@ -164,11 +147,8 @@ public class ImSessionController {
      */
     @PutMapping("/{id}/mute")
     public Result<Void> toggleMute(@PathVariable Long id,
-                                   @RequestParam Integer muted,
-                                   @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                   @RequestParam Integer muted) {
+        Long userId = SecurityUtils.getLoginUserId();
         conversationMemberService.toggleMute(id, userId, muted);
         return Result.success(muted == 1 ? "已设为免打扰" : "已取消免打扰");
     }

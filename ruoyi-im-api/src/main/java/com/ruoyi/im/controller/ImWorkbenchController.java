@@ -6,6 +6,7 @@ import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImNoticeService;
 import com.ruoyi.im.service.ImTodoItemService;
+import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,15 +43,12 @@ public class ImWorkbenchController {
      * 获取工作台数据概览
      * 返回用户相关的各种统计数据
      *
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 工作台概览数据
      */
     @Operation(summary = "获取工作台数据概览", description = "获取用户相关的统计数据，如待办数量、消息数量等")
     @GetMapping("/overview")
-    public Result<Map<String, Object>> getOverview(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<Map<String, Object>> getOverview() {
+        Long userId = SecurityUtils.getLoginUserId();
         Map<String, Object> overview = new HashMap<>();
 
         // 待办数量
@@ -123,15 +121,12 @@ public class ImWorkbenchController {
      * 获取待办列表
      * 返回用户的待办事项列表
      *
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 待办事项列表
      */
     @Operation(summary = "获取待办列表", description = "获取用户的待办事项列表")
     @GetMapping("/todos")
-    public Result<List<ImTodoItem>> getTodos(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<List<ImTodoItem>> getTodos() {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImTodoItem> todos = todoItemService.getUserTodos(userId);
         return Result.success(todos);
     }
@@ -145,7 +140,6 @@ public class ImWorkbenchController {
      * @param type 待办类型
      * @param relatedId 关联ID
      * @param priority 优先级（1=低, 2=中, 3=高）
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 创建结果，包含待办ID
      */
     @Operation(summary = "创建待办", description = "创建新的待办事项，支持优先级")
@@ -154,11 +148,8 @@ public class ImWorkbenchController {
                                    @RequestParam(required = false) String description,
                                    @RequestParam(required = false, defaultValue = "TASK") String type,
                                    @RequestParam(required = false) Long relatedId,
-                                   @RequestParam(required = false) Integer priority,
-                                   @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+                                   @RequestParam(required = false) Integer priority) {
+        Long userId = SecurityUtils.getLoginUserId();
         // 如果提供了优先级参数，使用带优先级的方法
         Long todoId;
         if (priority != null) {
@@ -174,16 +165,12 @@ public class ImWorkbenchController {
      * 将待办事项标记为已完成
      *
      * @param id 待办ID
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
     @Operation(summary = "完成待办", description = "将待办事项标记为已完成")
     @PutMapping("/todos/{id}/complete")
-    public Result<Void> completeTodo(@PathVariable Long id,
-                                    @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<Void> completeTodo(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         todoItemService.markAsCompleted(id, userId);
         return Result.success("已完成");
     }
@@ -193,16 +180,12 @@ public class ImWorkbenchController {
      * 删除指定的待办事项
      *
      * @param id 待办ID
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
     @Operation(summary = "删除待办", description = "删除指定的待办事项")
     @DeleteMapping("/todos/{id}")
-    public Result<Void> deleteTodo(@PathVariable Long id,
-                                  @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<Void> deleteTodo(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         todoItemService.deleteTodo(id, userId);
         return Result.success("删除成功");
     }
@@ -214,18 +197,14 @@ public class ImWorkbenchController {
      * @param id 待办ID
      * @param title 待办标题
      * @param description 待办描述
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
     @Operation(summary = "更新待办", description = "更新待办事项的标题和描述")
     @PutMapping("/todos/{id}")
     public Result<Void> updateTodo(@PathVariable Long id,
                                   @RequestParam String title,
-                                  @RequestParam(required = false) String description,
-                                  @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+                                  @RequestParam(required = false) String description) {
+        Long userId = SecurityUtils.getLoginUserId();
         todoItemService.updateTodo(id, title, description, userId);
         return Result.success("更新成功");
     }

@@ -6,6 +6,7 @@ import com.ruoyi.im.dto.announcement.ImAnnouncementCreateRequest;
 import com.ruoyi.im.dto.announcement.ImAnnouncementQueryRequest;
 import com.ruoyi.im.dto.announcement.ImAnnouncementUpdateRequest;
 import com.ruoyi.im.service.ImAnnouncementService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO;
 import com.ruoyi.im.vo.announcement.ImAnnouncementVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,11 +43,8 @@ public class ImAnnouncementController {
      */
     @Operation(summary = "创建公告", description = "创建新的公告（保存为草稿）")
     @PostMapping("/create")
-    public Result<Long> createAnnouncement(@Valid @RequestBody ImAnnouncementCreateRequest request,
-                                           @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Long> createAnnouncement(@Valid @RequestBody ImAnnouncementCreateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long announcementId = announcementService.createAnnouncement(request, userId);
         return Result.success("创建成功", announcementId);
     }
@@ -62,11 +60,8 @@ public class ImAnnouncementController {
      */
     @Operation(summary = "更新公告", description = "更新公告信息")
     @PutMapping
-    public Result<Void> updateAnnouncement(@Valid @RequestBody ImAnnouncementUpdateRequest request,
-                                           @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> updateAnnouncement(@Valid @RequestBody ImAnnouncementUpdateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         announcementService.updateAnnouncement(request, userId);
         return Result.success("更新成功");
     }
@@ -82,11 +77,8 @@ public class ImAnnouncementController {
      */
     @Operation(summary = "删除公告", description = "删除指定公告")
     @DeleteMapping("/{announcementId}")
-    public Result<Void> deleteAnnouncement(@PathVariable Long announcementId,
-                                           @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> deleteAnnouncement(@PathVariable Long announcementId) {
+        Long userId = SecurityUtils.getLoginUserId();
         announcementService.deleteAnnouncement(announcementId, userId);
         return Result.success("删除成功");
     }
@@ -102,11 +94,8 @@ public class ImAnnouncementController {
      */
     @Operation(summary = "获取公告详情", description = "查询指定公告的详细信息")
     @GetMapping("/{announcementId}")
-    public Result<ImAnnouncementDetailVO> getAnnouncementDetail(@PathVariable Long announcementId,
-                                                             @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<ImAnnouncementDetailVO> getAnnouncementDetail(@PathVariable Long announcementId) {
+        Long userId = SecurityUtils.getLoginUserId();
         ImAnnouncementDetailVO detail = announcementService.getAnnouncementDetail(announcementId, userId);
         return Result.success(detail);
     }
@@ -122,11 +111,8 @@ public class ImAnnouncementController {
      */
     @Operation(summary = "分页查询公告列表", description = "按条件分页查询公告列表")
     @PostMapping("/page")
-    public Result<IPage<ImAnnouncementVO>> getAnnouncementPage(@RequestBody ImAnnouncementQueryRequest request,
-                                                              @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<IPage<ImAnnouncementVO>> getAnnouncementPage(@RequestBody ImAnnouncementQueryRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         IPage<ImAnnouncementVO> page = announcementService.getAnnouncementPage(request, userId);
         return Result.success(page);
     }
@@ -169,11 +155,8 @@ public class ImAnnouncementController {
      */
     @Operation(summary = "发布公告", description = "将草稿状态的公告正式发布")
     @PostMapping("/{announcementId}/publish")
-    public Result<Void> publishAnnouncement(@PathVariable Long announcementId,
-                                           @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> publishAnnouncement(@PathVariable Long announcementId) {
+        Long userId = SecurityUtils.getLoginUserId();
         announcementService.publishAnnouncement(announcementId, userId);
         return Result.success("发布成功");
     }
@@ -189,11 +172,8 @@ public class ImAnnouncementController {
      */
     @Operation(summary = "撤回公告", description = "撤回已发布的公告")
     @PostMapping("/{announcementId}/withdraw")
-    public Result<Void> withdrawAnnouncement(@PathVariable Long announcementId,
-                                             @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> withdrawAnnouncement(@PathVariable Long announcementId) {
+        Long userId = SecurityUtils.getLoginUserId();
         announcementService.withdrawAnnouncement(announcementId, userId);
         return Result.success("撤回成功");
     }
@@ -208,11 +188,8 @@ public class ImAnnouncementController {
      */
     @Operation(summary = "标记公告为已读", description = "标记指定公告为已读状态")
     @PostMapping("/{announcementId}/read")
-    public Result<Void> markAsRead(@PathVariable Long announcementId,
-                                   @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> markAsRead(@PathVariable Long announcementId) {
+        Long userId = SecurityUtils.getLoginUserId();
         announcementService.markAsRead(announcementId, userId);
         return Result.success("标记已读成功");
     }
@@ -226,10 +203,8 @@ public class ImAnnouncementController {
      */
     @Operation(summary = "全部标记为已读", description = "将所有未读公告标记为已读")
     @PostMapping("/read-all")
-    public Result<Void> markAllAsRead(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> markAllAsRead() {
+        Long userId = SecurityUtils.getLoginUserId();
         announcementService.markAllAsRead(userId);
         return Result.success("全部标记已读成功");
     }
@@ -244,11 +219,8 @@ public class ImAnnouncementController {
      */
     @Operation(summary = "点赞/取消点赞公告", description = "切换公告的点赞状态")
     @PostMapping("/{announcementId}/like")
-    public Result<Void> toggleLike(@PathVariable Long announcementId,
-                                  @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> toggleLike(@PathVariable Long announcementId) {
+        Long userId = SecurityUtils.getLoginUserId();
         announcementService.toggleLike(announcementId, userId);
         return Result.success("操作成功");
     }
@@ -265,11 +237,8 @@ public class ImAnnouncementController {
     @Operation(summary = "添加公告评论", description = "为指定公告添加评论")
     @PostMapping("/{announcementId}/comment")
     public Result<Long> addComment(@PathVariable Long announcementId,
-                                  @RequestParam String content,
-                                  @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                  @RequestParam String content) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long commentId = announcementService.addComment(announcementId, content, userId);
         return Result.success("评论成功", commentId);
     }
@@ -283,10 +252,8 @@ public class ImAnnouncementController {
      */
     @Operation(summary = "获取公告统计信息", description = "获取当前用户的公告统计数据")
     @GetMapping("/statistics")
-    public Result<Map<String, Object>> getStatistics(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Map<String, Object>> getStatistics() {
+        Long userId = SecurityUtils.getLoginUserId();
         Map<String, Object> stats = announcementService.getAnnouncementStatistics(userId);
         return Result.success(stats);
     }
@@ -331,11 +298,8 @@ public class ImAnnouncementController {
     @Operation(summary = "置顶/取消置顶公告", description = "设置公告的置顶状态")
     @PutMapping("/{announcementId}/pinned")
     public Result<Void> setPinned(@PathVariable Long announcementId,
-                                  @RequestParam Boolean pinned,
-                                  @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                  @RequestParam Boolean pinned) {
+        Long userId = SecurityUtils.getLoginUserId();
         announcementService.setPinned(announcementId, pinned, userId);
         return Result.success(pinned ? "置顶成功" : "取消置顶成功");
     }

@@ -36,9 +36,7 @@ public class ImGroupMuteController {
     public Result<Void> setAllMuted(
             @PathVariable Long groupId,
             @RequestParam Boolean allMuted,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         groupMuteService.setAllMuted(groupId, allMuted, userId);
         return Result.success(allMuted ? "已开启全员禁言" : "已关闭全员禁言");
@@ -59,9 +57,7 @@ public class ImGroupMuteController {
             @PathVariable Long groupId,
             @PathVariable Long targetUserId,
             @RequestParam Integer muteDuration,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         groupMuteService.muteMember(groupId, targetUserId, muteDuration, userId);
         return Result.success("成员已禁言");
@@ -80,9 +76,7 @@ public class ImGroupMuteController {
     public Result<Void> unmuteMember(
             @PathVariable Long groupId,
             @PathVariable Long targetUserId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         groupMuteService.unmuteMember(groupId, targetUserId, userId);
         return Result.success("已解除禁言");
@@ -103,9 +97,7 @@ public class ImGroupMuteController {
             @PathVariable Long groupId,
             @RequestBody List<Long> userIds,
             @RequestParam Integer muteDuration,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         groupMuteService.batchMuteMembers(groupId, userIds, muteDuration, userId);
         return Result.success("批量禁言成功");
@@ -124,9 +116,7 @@ public class ImGroupMuteController {
     public Result<Boolean> isUserMuted(
             @PathVariable Long groupId,
             @PathVariable Long checkUserId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         boolean isMuted = groupMuteService.isUserMuted(groupId, checkUserId);
         return Result.success(isMuted);
@@ -145,9 +135,7 @@ public class ImGroupMuteController {
     public Result<LocalDateTime> getMuteEndTime(
             @PathVariable Long groupId,
             @PathVariable Long checkUserId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         LocalDateTime endTime = groupMuteService.getMuteEndTime(groupId, checkUserId);
         return Result.success(endTime);
@@ -164,9 +152,7 @@ public class ImGroupMuteController {
     @GetMapping("/all/{groupId}")
     public Result<Boolean> isAllMuted(
             @PathVariable Long groupId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         boolean allMuted = groupMuteService.isAllMuted(groupId);
         return Result.success(allMuted);

@@ -49,12 +49,22 @@
         </template>
       </el-dropdown>
     </div>
+    
+    <!-- 用户详情抽屉 -->
+    <UserDetailDrawer
+      v-model="showUserDetail"
+      :session="session"
+      @send-message="handleSendMessage"
+      @voice-call="handleVoiceCall"
+      @video-call="handleVideoCall"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import UserDetailDrawer from './UserDetailDrawer.vue'
 
 const props = defineProps({
   session: Object
@@ -77,7 +87,14 @@ const getAvatarBgClass = (session) => {
 
 // 显示详情
 const handleShowDetail = () => {
+  showUserDetail.value = true
   emit('show-detail', props.session)
+}
+
+// 发送消息(从抽屉触发)
+const handleSendMessage = () => {
+  // 抽屉会自动关闭,这里不需要额外处理
+  ElMessage.success('已切换到聊天')
 }
 
 // 语音通话

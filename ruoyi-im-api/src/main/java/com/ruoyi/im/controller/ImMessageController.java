@@ -15,6 +15,7 @@ import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImMessageReactionService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import com.ruoyi.im.vo.reaction.ImMessageReactionVO;
@@ -44,7 +45,6 @@ import java.util.Map;
 public class ImMessageController {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageController.class);
-    private static final Long DEFAULT_USER_ID = 1L;
 
     private final ImMessageService imMessageService;
     private final ImMessageReactionService reactionService;
@@ -69,43 +69,33 @@ public class ImMessageController {
     }
 
     @PostMapping("/send")
-    public Result<ImMessageVO> send(@Valid @RequestBody ImMessageSendRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        userId = getUserIdOrDefault(userId);
+    public Result<ImMessageVO> send(@Valid @RequestBody ImMessageSendRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         ImMessageVO messageVO = imMessageService.sendMessage(request, userId);
         return Result.success(messageVO);
-    }
-
-    private Long getUserIdOrDefault(Long userId) {
-        return userId != null ? userId : DEFAULT_USER_ID;
     }
 
     @GetMapping("/list/{conversationId}")
     public Result<List<ImMessageVO>> getMessages(
             @PathVariable Long conversationId,
             @RequestParam(required = false) Long lastId,
-            @RequestParam(required = false, defaultValue = "20") Integer limit,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        // 调试日志：记录接收到的请求头 userId
-        log.info("getMessages API - 收到请求 header userId={}, 原始值={}, conversationId={}", userId, userId, conversationId);
-        userId = getUserIdOrDefault(userId);
-        log.info("getMessages API - 使用 userId={}", userId);
+            @RequestParam(required = false, defaultValue = "20") Integer limit) {
+        Long userId = SecurityUtils.getLoginUserId();
+        log.info("getMessages API - 当前登录用户 userId={}, conversationId={}", userId, conversationId);
         List<ImMessageVO> list = imMessageService.getMessages(conversationId, userId, lastId, limit);
         return Result.success(list);
     }
 
     @DeleteMapping("/{messageId}/recall")
-    public Result<Void> recall(@PathVariable Long messageId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        userId = getUserIdOrDefault(userId);
+    public Result<Void> recall(@PathVariable Long messageId) {
+        Long userId = SecurityUtils.getLoginUserId();
         imMessageService.recallMessage(messageId, userId);
         return Result.success("消息已撤回");
     }
 
     @DeleteMapping("/{messageId}")
-    public Result<Void> deleteMessage(@PathVariable Long messageId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        userId = getUserIdOrDefault(userId);
+    public Result<Void> deleteMessage(@PathVariable Long messageId) {
+        Long userId = SecurityUtils.getLoginUserId();
         imMessageService.deleteMessage(messageId, userId);
         return Result.success("消息已删除");
     }
@@ -113,9 +103,8 @@ public class ImMessageController {
     @PutMapping("/{messageId}/edit")
     public Result<Void> edit(
             @PathVariable Long messageId,
-            @RequestBody MessageEditRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        userId = getUserIdOrDefault(userId);
+            @RequestBody MessageEditRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         imMessageService.editMessage(messageId, request.getNewContent(), userId);
         return Result.success("消息已编辑");
     }
@@ -124,19 +113,15 @@ public class ImMessageController {
      * 标记消息已读
      * 批量标记指定消息为已读状态，并更新会话未读消息数
      *
-     * @param data   包含conversationId和messageIds的请求数据
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param data 包含conversationId和messageIds的请求数据
      * @return 标记结果
      * @apiNote 标记已读后会更新会话的未读消息数，并通过WebSocket推送已读回执给发送方
      * @throws BusinessException 当消息不存在或会话不存在时抛出业务异常
      */
     @Operation(summary = "标记消息已读", description = "批量标记指定消息为已读状态")
     @PutMapping("/mark-read")
-    public Result<Void> markAsRead(@RequestBody java.util.Map<String, Object> data,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> markAsRead(@RequestBody java.util.Map<String, Object> data) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long conversationId = data.get("conversationId") != null ? Long.valueOf(data.get("conversationId").toString())
                 : null;
         @SuppressWarnings("unchecked")
@@ -151,18 +136,14 @@ public class ImMessageController {
      *
      * @param conversationId    会话ID
      * @param lastReadMessageId 最后已读消息ID（该消息之前的所有消息都标记为已读）
-     * @param userId            当前登录用户ID
      * @return 操作结果
      */
     @Operation(summary = "标记会话已读", description = "将会话中指定消息之前的所有消息标记为已读")
     @PutMapping("/read")
     public Result<Void> markConversationRead(
             @RequestParam Long conversationId,
-            @RequestParam(required = false) Long lastReadMessageId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @RequestParam(required = false) Long lastReadMessageId) {
+        Long userId = SecurityUtils.getLoginUserId();
         // 更新会话成员的最后已读消息ID
         ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
         if (member != null) {
@@ -186,17 +167,13 @@ public class ImMessageController {
      * 将消息转发到其他会话或用户
      *
      * @param request 转发请求参数，包含原消息ID、目标会话ID、目标用户ID等
-     * @param userId  当前登录用户ID，从请求头中获取
      * @return 转发结果，包含新消息ID
      * @apiNote 转发时会创建新消息，原消息内容会被复制到新消息中
      */
     @Operation(summary = "转发消息", description = "将消息转发到其他会话或用户")
     @PostMapping("/forward")
-    public Result<Long> forward(@Valid @RequestBody ImMessageForwardRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Long> forward(@Valid @RequestBody ImMessageForwardRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long newMessageId = imMessageService.forwardMessage(
                 request.getMessageId(),
                 request.getToConversationId(),
@@ -211,17 +188,13 @@ public class ImMessageController {
      * 引用原消息进行回复
      *
      * @param request 回复请求参数，包含原消息ID和回复内容
-     * @param userId  当前登录用户ID，从请求头中获取
      * @return 回复结果，包含新消息ID
      * @apiNote 回复消息会关联原消息ID，通过parentId字段建立消息引用关系
      */
     @Operation(summary = "回复消息", description = "引用原消息进行回复")
     @PostMapping("/reply")
-    public Result<Long> reply(@Valid @RequestBody ImMessageReplyRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Long> reply(@Valid @RequestBody ImMessageReplyRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long newMessageId = imMessageService.replyMessage(
                 request.getMessageId(),
                 request.getContent(),
@@ -235,7 +208,6 @@ public class ImMessageController {
      * 再次使用相同表情会取消反应
      *
      * @param request 反应请求参数
-     * @param userId  当前登录用户ID
      * @return 反应结果
      * @apiNote 支持多个用户对同一条消息添加不同表情反应
      */
@@ -243,11 +215,8 @@ public class ImMessageController {
     @PostMapping("/{messageId}/reaction")
     public Result<ImMessageReactionVO> addReaction(
             @PathVariable Long messageId,
-            @Valid @RequestBody ImMessageReactionAddRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @Valid @RequestBody ImMessageReactionAddRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         request.setMessageId(messageId);
         ImMessageReactionVO result = reactionService.addReaction(request, userId);
 
@@ -258,9 +227,8 @@ public class ImMessageController {
         // 通过WebSocket推送反应更新通知
         ImMessage message = imMessageMapper.selectImMessageById(messageId);
         if (message != null) {
-            // TODO: Implement broadcastReactionUpdate method
-            // broadcastReactionUpdate(message.getConversationId(), messageId, userId,
-            // request.getEmoji(), "add");
+            broadcastReactionUpdate(message.getConversationId(), messageId, userId,
+                    request.getEmoji(), "add");
         }
 
         return Result.success("反应成功", result);
@@ -271,25 +239,18 @@ public class ImMessageController {
      * 取消对消息的emoji表情反应
      *
      * @param messageId 消息ID
-     * @param userId    当前登录用户ID
      * @return 删除结果
      */
     @Operation(summary = "删除表情反应", description = "取消对消息的emoji表情反应")
     @DeleteMapping("/{messageId}/reaction")
-    public Result<Void> removeReaction(
-            @PathVariable Long messageId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> removeReaction(@PathVariable Long messageId) {
+        Long userId = SecurityUtils.getLoginUserId();
         reactionService.removeReaction(messageId, userId);
 
         // 通过WebSocket推送反应更新通知
         ImMessage message = imMessageMapper.selectImMessageById(messageId);
         if (message != null) {
-            // TODO: Implement broadcastReactionUpdate method
-            // broadcastReactionUpdate(message.getConversationId(), messageId, userId, null,
-            // "remove");
+            broadcastReactionUpdate(message.getConversationId(), messageId, userId, null, "remove");
         }
 
         return Result.success("已取消反应");
@@ -300,17 +261,12 @@ public class ImMessageController {
      * 获取指定消息的所有表情反应
      *
      * @param messageId 消息ID
-     * @param userId    当前登录用户ID
      * @return 反应列表
      */
     @Operation(summary = "获取表情反应列表", description = "获取消息的所有表情反应")
     @GetMapping("/{messageId}/reactions")
-    public Result<List<ImMessageReactionVO>> getMessageReactions(
-            @PathVariable Long messageId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<ImMessageReactionVO>> getMessageReactions(@PathVariable Long messageId) {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImMessageReactionVO> reactions = reactionService.getMessageReactions(messageId, userId);
         return Result.success(reactions);
     }
@@ -320,17 +276,12 @@ public class ImMessageController {
      * 获取消息的表情反应统计信息
      *
      * @param messageId 消息ID
-     * @param userId    当前登录用户ID
      * @return 反应统计列表
      */
     @Operation(summary = "获取表情反应统计", description = "获取消息的表情反应统计")
     @GetMapping("/{messageId}/reactions/stats")
-    public Result<List<ImMessageReactionVO>> getReactionStats(
-            @PathVariable Long messageId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<ImMessageReactionVO>> getReactionStats(@PathVariable Long messageId) {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImMessageReactionVO> stats = reactionService.getReactionStats(messageId, userId);
         return Result.success(stats);
     }
@@ -341,17 +292,13 @@ public class ImMessageController {
      * 获取用户未读的@提及列表
      * 查询当前用户被@的所有未读消息
      *
-     * @param userId 当前登录用户ID
      * @return 未读@提及列表
      * @apiNote 返回包含消息详情、@发送者信息的列表
      */
     @Operation(summary = "获取未读@提及", description = "获取当前用户被@的所有未读消息")
     @GetMapping("/mention/unread")
-    public Result<List<ImMessageMention>> getUnreadMentions(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<ImMessageMention>> getUnreadMentions() {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImMessageMention> mentions = mentionService.getUnreadMentions(userId);
         return Result.success(mentions);
     }
@@ -360,17 +307,13 @@ public class ImMessageController {
      * 获取用户未读的@提及数量
      * 获取当前用户被@的未读消息总数
      *
-     * @param userId 当前登录用户ID
      * @return 未读数量
      * @apiNote 用于在界面上显示@提醒角标
      */
     @Operation(summary = "获取未读@提及数量", description = "获取当前用户被@的未读消息总数")
     @GetMapping("/mention/unread/count")
-    public Result<Integer> getUnreadMentionCount(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Integer> getUnreadMentionCount() {
+        Long userId = SecurityUtils.getLoginUserId();
         int count = mentionService.getUnreadMentionCount(userId);
         return Result.success(count);
     }
@@ -380,18 +323,13 @@ public class ImMessageController {
      * 标记指定消息的@提及为已读状态
      *
      * @param messageId 消息ID
-     * @param userId    当前登录用户ID
      * @return 标记结果
      * @apiNote 标记已读后该消息不会在未读@提及列表中显示
      */
     @Operation(summary = "标记@提及已读", description = "标记指定消息的@提及为已读状态")
     @PutMapping("/{messageId}/mention/read")
-    public Result<Void> markMentionAsRead(
-            @PathVariable Long messageId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> markMentionAsRead(@PathVariable Long messageId) {
+        Long userId = SecurityUtils.getLoginUserId();
         mentionService.markAsRead(messageId, userId);
         return Result.success("已标记为已读");
     }
@@ -406,8 +344,7 @@ public class ImMessageController {
      */
     @Operation(summary = "批量标记@提及已读", description = "批量标记多条@提及记录为已读状态")
     @PutMapping("/mention/read/batch")
-    public Result<Void> batchMarkMentionsAsRead(
-            @RequestBody List<Long> mentionIds) {
+    public Result<Void> batchMarkMentionsAsRead(@RequestBody List<Long> mentionIds) {
         mentionService.batchMarkAsRead(mentionIds);
         return Result.success("已批量标记为已读");
     }
@@ -419,18 +356,14 @@ public class ImMessageController {
      * 支持关键词搜索、时间范围筛选、消息类型筛选等多种搜索方式
      *
      * @param request 搜索请求参数
-     * @param userId  当前登录用户ID
      * @return 搜索结果
      * @apiNote 支持模糊搜索、精确匹配、时间范围过滤等功能
      */
     @Operation(summary = "搜索消息", description = "支持关键词搜索、时间范围筛选、消息类型筛选等")
     @PostMapping("/search")
     public Result<ImMessageSearchResultVO> searchMessages(
-            @RequestBody ImMessageSearchRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @RequestBody ImMessageSearchRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         ImMessageSearchResultVO result = imMessageService.searchMessages(
                 request.getConversationId(),
                 request.getKeyword(),
@@ -449,30 +382,15 @@ public class ImMessageController {
     // ==================== 消息已读回执功能 ====================
 
     /**
-     * 标记会话消息已读
-     * 将会话中指定消息之前的所有消息标记为已读
-     *
-     * @param conversationId    会话ID
-     * @param lastReadMessageId 最后已读消息ID（该消息之前的所有消息都标记为已读）
-     * @param userId            当前登录用户ID
-     * @return 操作结果
-     */
-
-    /**
      * 获取会话未读消息数
      *
      * @param conversationId 会话ID
-     * @param userId         当前登录用户ID
      * @return 未读消息数
      */
     @Operation(summary = "获取会话未读消息数", description = "获取指定会话中当前用户的未读消息数量")
     @GetMapping("/unread/count/{conversationId}")
-    public Result<Integer> getUnreadCount(
-            @PathVariable Long conversationId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Integer> getUnreadCount(@PathVariable Long conversationId) {
+        Long userId = SecurityUtils.getLoginUserId();
 
         try {
             // 获取用户在会话中的信息
@@ -499,18 +417,14 @@ public class ImMessageController {
      *
      * @param conversationId 会话ID
      * @param messageId      消息ID
-     * @param userId         当前登录用户ID
      * @return 已读用户列表
      */
     @Operation(summary = "获取消息已读状态", description = "获取指定消息的已读用户列表")
     @GetMapping("/read/status/{conversationId}/{messageId}")
     public Result<List<Map<String, Object>>> getReadStatus(
             @PathVariable Long conversationId,
-            @PathVariable Long messageId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @PathVariable Long messageId) {
+        Long userId = SecurityUtils.getLoginUserId();
 
         try {
             // 获取会话所有成员
@@ -536,7 +450,65 @@ public class ImMessageController {
     }
 
     /**
+     * 广播表情反应更新
+     * 通过WebSocket向会话成员推送表情反应变化通知
+     *
+     * @param conversationId 会话ID
+     * @param messageId      消息ID
+     * @param userId         操作用户ID
+     * @param emoji          表情
+     * @param action         操作类型（add/remove）
+     */
+    private void broadcastReactionUpdate(Long conversationId, Long messageId, Long userId,
+                                         String emoji, String action) {
+        try {
+            // 获取会话中的所有成员
+            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            if (members == null || members.isEmpty()) {
+                return;
+            }
+
+            // 构建WebSocket消息
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> reactionUpdate = new HashMap<>();
+            reactionUpdate.put("type", "reaction");
+            reactionUpdate.put("conversationId", conversationId);
+            reactionUpdate.put("messageId", messageId);
+            reactionUpdate.put("userId", userId);
+            reactionUpdate.put("emoji", emoji);
+            reactionUpdate.put("action", action);
+            reactionUpdate.put("timestamp", System.currentTimeMillis());
+
+            String messageJson = mapper.writeValueAsString(reactionUpdate);
+
+            // 从 WebSocket 端点获取在线用户集合
+            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+
+            // 向会话中的每个在线用户发送反应更新通知
+            for (ImConversationMember member : members) {
+                Long targetUserId = member.getUserId();
+
+                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
+                if (targetSession != null && targetSession.isOpen()) {
+                    try {
+                        targetSession.getBasicRemote().sendText(messageJson);
+                        log.debug("反应更新已推送给用户: userId={}, action={}", targetUserId, action);
+                    } catch (Exception e) {
+                        log.error("发送反应更新给用户失败: userId={}", targetUserId, e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("广播反应更新异常: conversationId={}", conversationId, e);
+        }
+    }
+
+    /**
      * 广播已读回执给会话中的其他用户
+     *
+     * @param conversationId    会话ID
+     * @param lastReadMessageId 最后已读消息ID
+     * @param userId            操作用户ID
      */
     private void broadcastReadReceipt(Long conversationId, Long lastReadMessageId, Long userId) {
         try {

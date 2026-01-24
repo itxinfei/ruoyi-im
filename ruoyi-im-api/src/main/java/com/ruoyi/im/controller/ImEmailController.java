@@ -30,9 +30,7 @@ public class ImEmailController {
     @GetMapping("/list")
     public Result<List<?>> getEmailList(
             @RequestParam(defaultValue = "INBOX") String folder,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -49,9 +47,7 @@ public class ImEmailController {
     @GetMapping("/{emailId}")
     public Result<?> getEmailDetail(
             @PathVariable Long emailId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -68,9 +64,7 @@ public class ImEmailController {
     @PostMapping("/send")
     public Result<Long> sendEmail(
             @RequestBody Map<String, Object> params,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -93,9 +87,7 @@ public class ImEmailController {
     @PostMapping("/draft")
     public Result<Long> saveDraft(
             @RequestBody Map<String, String> params,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -116,9 +108,7 @@ public class ImEmailController {
     @PutMapping("/{emailId}/read")
     public Result<Void> markAsRead(
             @PathVariable Long emailId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -137,9 +127,7 @@ public class ImEmailController {
     public Result<Void> markAsStarred(
             @PathVariable Long emailId,
             @RequestParam boolean starred,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -157,9 +145,7 @@ public class ImEmailController {
     @PutMapping("/{emailId}/trash")
     public Result<Void> moveToTrash(
             @PathVariable Long emailId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -177,9 +163,7 @@ public class ImEmailController {
     @DeleteMapping("/{emailId}")
     public Result<Void> permanentlyDelete(
             @PathVariable Long emailId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -195,9 +179,7 @@ public class ImEmailController {
      */
     @Operation(summary = "获取未读数量", description = "获取未读邮件数量")
     @GetMapping("/unread/count")
-    public Result<Integer> getUnreadCount(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+    public Result<Integer> getUnreadCount() {
         }
 
         try {
@@ -216,9 +198,7 @@ public class ImEmailController {
     public Result<Long> replyEmail(
             @PathVariable Long emailId,
             @RequestBody Map<String, String> params,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -238,9 +218,7 @@ public class ImEmailController {
     public Result<Long> forwardEmail(
             @PathVariable Long emailId,
             @RequestBody Map<String, Object> params,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -263,9 +241,7 @@ public class ImEmailController {
     public Result<Void> moveToFolder(
             @PathVariable Long emailId,
             @RequestParam String folder,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -283,9 +259,7 @@ public class ImEmailController {
     @PutMapping("/batch/read")
     public Result<Integer> batchMarkAsRead(
             @RequestBody Map<String, List<Long>> params,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -304,9 +278,7 @@ public class ImEmailController {
     @PutMapping("/batch/trash")
     public Result<Integer> batchMoveToTrash(
             @RequestBody Map<String, List<Long>> params,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {
@@ -325,9 +297,7 @@ public class ImEmailController {
     @GetMapping("/search")
     public Result<List<?>> searchEmails(
             @RequestParam String keyword,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
 
         try {

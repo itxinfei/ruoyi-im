@@ -34,9 +34,7 @@ public class ImConfigController {
     @Operation(summary = "获取通知设置", description = "获取当前用户的通知配置")
     @GetMapping("/notification")
     public Result<Map<String, Object>> getNotificationSettings(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         Map<String, Object> settings = imConfigService.getNotificationSettings(userId);
         return Result.success(settings);
@@ -55,9 +53,7 @@ public class ImConfigController {
     @PutMapping("/notification")
     public Result<Void> updateNotificationSettings(
             @RequestBody Map<String, Object> settings,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         imConfigService.updateNotificationSettings(userId, settings);
         return Result.success("更新成功");
@@ -74,9 +70,7 @@ public class ImConfigController {
     @Operation(summary = "获取隐私设置", description = "获取当前用户的隐私配置")
     @GetMapping("/privacy")
     public Result<Map<String, Object>> getPrivacySettings(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         Map<String, Object> settings = imConfigService.getPrivacySettings(userId);
         return Result.success(settings);
@@ -95,9 +89,7 @@ public class ImConfigController {
     @PutMapping("/privacy")
     public Result<Void> updatePrivacySettings(
             @RequestBody Map<String, Object> settings,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         imConfigService.updatePrivacySettings(userId, settings);
         return Result.success("更新成功");
@@ -114,9 +106,7 @@ public class ImConfigController {
     @Operation(summary = "获取通用设置", description = "获取当前用户的通用配置")
     @GetMapping
     public Result<Map<String, Object>> getGeneralSettings(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         Map<String, Object> settings = imConfigService.getGeneralSettings(userId);
         return Result.success(settings);
@@ -135,9 +125,7 @@ public class ImConfigController {
     @PutMapping
     public Result<Void> updateGeneralSettings(
             @RequestBody Map<String, Object> settings,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         imConfigService.updateGeneralSettings(userId, settings);
         return Result.success("更新成功");
@@ -154,9 +142,7 @@ public class ImConfigController {
     @Operation(summary = "获取黑名单", description = "获取当前用户的黑名单列表")
     @GetMapping("/blocked")
     public Result<java.util.List<Map<String, Object>>> getBlockedUsers(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         java.util.List<Map<String, Object>> blockedUsers = imConfigService.getBlockedUsers(userId);
         return Result.success(blockedUsers);
@@ -175,9 +161,7 @@ public class ImConfigController {
     @PostMapping("/blocked/{targetUserId}")
     public Result<Void> blockUser(
             @PathVariable Long targetUserId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         imConfigService.blockUser(userId, targetUserId);
         return Result.success("已拉黑");
@@ -196,9 +180,7 @@ public class ImConfigController {
     @DeleteMapping("/blocked/{targetUserId}")
     public Result<Void> unblockUser(
             @PathVariable Long targetUserId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         imConfigService.unblockUser(userId, targetUserId);
         return Result.success("已解除拉黑");

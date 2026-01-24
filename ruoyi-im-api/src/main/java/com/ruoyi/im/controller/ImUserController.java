@@ -7,6 +7,7 @@ import com.ruoyi.im.dto.user.ImUserUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImFriendService;
 import com.ruoyi.im.service.ImUserService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.contact.ImFriendVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -122,52 +123,18 @@ public class ImUserController {
 
     /**
      * 获取当前用户信息
-     * 根据请求头中的用户ID获取当前登录用户的详细信息
+     * 从 SecurityContext 获取当前登录用户的详细信息
      *
-     * @param userId 用户ID，从请求头中获取（优先级高于Token解析）
      * @return 用户详细信息，包含用户基本信息和在线状态
-     * @apiNote 当前版本从请求头获取userId，后续应从JWT Token中解析
+     * @apiNote 从 SecurityContext 中获取已认证的用户信息
      * @throws BusinessException 当用户不存在时抛出业务异常
      */
     @Operation(summary = "获取当前用户信息", description = "获取当前登录用户的详细信息")
     @GetMapping("/info")
-    public Result<ImUserVO> getUserInfo(@RequestHeader(value = "userId", required = false) Long userId) {
-        try {
-            // 尝试通过多种方式获取当前用户ID
-            // 1. 如果请求头显式传递了 userId (通常是开发/调试环境)
-            if (userId != null) {
-                ImUserVO vo = imUserService.getUserById(userId);
-                if (vo != null)
-                    return Result.success(vo);
-            }
-
-            // 2. 从 Spring Security 上下文中获取 (经过 JwtAuthenticationTokenFilter 验证的)
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.getPrincipal() instanceof ImUser) {
-                ImUser currentUser = (ImUser) authentication.getPrincipal();
-                ImUserVO vo = imUserService.getUserById(currentUser.getId());
-                if (vo != null)
-                    return Result.success(vo);
-            }
-
-            // 3. 默认用户兜底 (若依 IM 系统演示环境默认 ID 为 1 的用户)
-            ImUserVO defaultUser = imUserService.getUserById(1L);
-            if (defaultUser != null) {
-                return Result.success(defaultUser);
-            }
-        } catch (Exception e) {
-            // 记录异常，但不阻断流程，继续往下走兜底逻辑
-        }
-
-        // 4. 终极兜底：静态返回，确保界面能出来
-        ImUserVO fallback = new ImUserVO();
-        fallback.setId(1L);
-        fallback.setUsername("admin");
-        fallback.setNickname("管理员 (系统自愈)");
-        fallback.setOnline(true);
-        fallback.setAvatar("/avatar/default.png");
-        fallback.setStatus(1);
-        return Result.success("演示模式: 使用静态兜底信息", fallback);
+    public Result<ImUserVO> getUserInfo() {
+        Long userId = SecurityUtils.getLoginUserId();
+        ImUserVO vo = imUserService.getUserById(userId);
+        return Result.success(vo);
     }
 
     /**
@@ -207,17 +174,12 @@ public class ImUserController {
      * 修改用户状态
      * 修改用户状态（启用/禁用）
      *
-     * @param user       用户信息
-     * @param operatorId 操作员ID，从请求头中获取
+     * @param user 用户信息
      * @return 修改结果
      */
     @Operation(summary = "修改用户状态", description = "修改用户状态（启用/禁用）")
     @PutMapping("/changeStatus")
-    public Result<Void> changeStatus(@RequestBody com.ruoyi.im.domain.ImUser user,
-            @RequestHeader(value = "userId", required = false) Long operatorId) {
-        if (operatorId == null) {
-            operatorId = 1L;
-        }
+    public Result<Void> changeStatus(@RequestBody com.ruoyi.im.domain.ImUser user) {
         imUserService.updateStatus(user.getId(), user.getStatus());
         return Result.success("状态修改成功");
     }
@@ -264,19 +226,15 @@ public class ImUserController {
      * 上传用户头像
      * 上传用户头像图片并更新用户头像字段
      *
-     * @param file   头像文件，支持jpg、png、gif等图片格式
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param file 头像文件，支持jpg、png、gif等图片格式
      * @return 头像URL
      * @apiNote 上传成功后自动更新用户头像字段，返回头像访问URL
      * @throws BusinessException 当用户不存在或文件上传失败时抛出业务异常
      */
     @Operation(summary = "上传用户头像", description = "上传用户头像图片并更新用户头像字段")
     @PostMapping("/avatar")
-    public Result<String> uploadAvatar(@RequestParam("avatarfile") MultipartFile file,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<String> uploadAvatar(@RequestParam("avatarfile") MultipartFile file) {
+        Long userId = SecurityUtils.getLoginUserId();
         String avatarUrl = imUserService.uploadAvatar(userId, file);
         return Result.success("头像上传成功", avatarUrl);
     }

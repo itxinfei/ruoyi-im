@@ -44,9 +44,7 @@ public class ImDocumentController {
     @Operation(summary = "创建文档", description = "创建新的在线文档")
     @PostMapping("/create")
     public Result<Long> createDocument(@Valid @RequestBody ImDocumentCreateRequest request,
-                                       @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                       ) {
         }
         Long documentId = documentService.createDocument(request, userId);
         return Result.success("创建成功", documentId);
@@ -62,9 +60,7 @@ public class ImDocumentController {
     @Operation(summary = "更新文档", description = "更新文档内容和标题")
     @PutMapping("/update")
     public Result<Void> updateDocument(@Valid @RequestBody ImDocumentUpdateRequest request,
-                                       @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                       ) {
         }
         documentService.updateDocument(request, userId);
         return Result.success("更新成功");
@@ -80,9 +76,7 @@ public class ImDocumentController {
     @Operation(summary = "删除文档", description = "将文档移到回收站")
     @DeleteMapping("/{documentId}")
     public Result<Void> deleteDocument(@PathVariable Long documentId,
-                                      @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                      ) {
         }
         documentService.deleteDocument(documentId, userId);
         return Result.success("删除成功");
@@ -98,9 +92,7 @@ public class ImDocumentController {
     @Operation(summary = "永久删除文档", description = "从回收站永久删除文档")
     @DeleteMapping("/{documentId}/permanent")
     public Result<Void> permanentlyDeleteDocument(@PathVariable Long documentId,
-                                                  @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                                  ) {
         }
         documentService.permanentlyDeleteDocument(documentId, userId);
         return Result.success("永久删除成功");
@@ -116,9 +108,7 @@ public class ImDocumentController {
     @Operation(summary = "恢复文档", description = "从回收站恢复文档")
     @PostMapping("/{documentId}/restore")
     public Result<Void> restoreDocument(@PathVariable Long documentId,
-                                       @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                       ) {
         }
         documentService.restoreDocument(documentId, userId);
         return Result.success("恢复成功");
@@ -134,9 +124,7 @@ public class ImDocumentController {
     @Operation(summary = "获取文档详情", description = "获取文档的详细信息")
     @GetMapping("/{documentId}")
     public Result<ImDocumentVO> getDocument(@PathVariable Long documentId,
-                                           @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                           ) {
         }
         ImDocumentVO document = documentService.getDocument(documentId, userId);
         return Result.success(document);
@@ -153,9 +141,7 @@ public class ImDocumentController {
     @GetMapping("/list")
     public Result<List<ImDocumentVO>> getDocuments(
             @RequestParam(defaultValue = "all") String type,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         List<ImDocumentVO> documents = documentService.getUserDocuments(userId, type);
         return Result.success(documents);
@@ -172,9 +158,7 @@ public class ImDocumentController {
     @GetMapping("/search")
     public Result<List<ImDocumentVO>> searchDocuments(
             @RequestParam String keyword,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         List<ImDocumentVO> documents = documentService.searchDocuments(userId, keyword);
         return Result.success(documents);
@@ -192,9 +176,7 @@ public class ImDocumentController {
     @PostMapping("/{documentId}/star")
     public Result<Void> toggleStar(@PathVariable Long documentId,
                                     @RequestParam Boolean starred,
-                                    @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                    ) {
         }
         documentService.toggleStar(documentId, userId, starred);
         return Result.success(starred ? "收藏成功" : "取消收藏成功");
@@ -210,9 +192,7 @@ public class ImDocumentController {
     @Operation(summary = "分享文档", description = "分享文档给其他用户")
     @PostMapping("/share")
     public Result<Void> shareDocument(@Valid @RequestBody ImDocumentShareRequest request,
-                                      @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                      ) {
         }
         documentService.shareDocument(request, userId);
         return Result.success("分享成功");
@@ -230,9 +210,7 @@ public class ImDocumentController {
     @DeleteMapping("/share/{documentId}/{targetUserId}")
     public Result<Void> unshareDocument(@PathVariable Long documentId,
                                          @PathVariable Long targetUserId,
-                                         @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                         ) {
         }
         documentService.unshareDocument(documentId, targetUserId, userId);
         return Result.success("取消分享成功");
@@ -248,9 +226,7 @@ public class ImDocumentController {
     @Operation(summary = "添加评论", description = "给文档添加评论")
     @PostMapping("/comment")
     public Result<Long> addComment(@Valid @RequestBody ImDocumentCommentRequest request,
-                                    @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                    ) {
         }
         Long commentId = documentService.addComment(request, userId);
         return Result.success("评论成功", commentId);
@@ -266,9 +242,7 @@ public class ImDocumentController {
     @Operation(summary = "删除评论", description = "删除文档评论")
     @DeleteMapping("/comment/{commentId}")
     public Result<Void> deleteComment(@PathVariable Long commentId,
-                                      @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                      ) {
         }
         documentService.deleteComment(commentId, userId);
         return Result.success("删除成功");
@@ -285,9 +259,7 @@ public class ImDocumentController {
     @GetMapping("/{documentId}/comments")
     public Result<List<ImDocumentCommentVO>> getDocumentComments(
             @PathVariable Long documentId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         List<ImDocumentCommentVO> comments = documentService.getDocumentComments(documentId, userId);
         return Result.success(comments);
@@ -304,9 +276,7 @@ public class ImDocumentController {
     @GetMapping("/{documentId}/versions")
     public Result<List<ImDocumentVersionVO>> getDocumentVersions(
             @PathVariable Long documentId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         List<ImDocumentVersionVO> versions = documentService.getDocumentVersions(documentId, userId);
         return Result.success(versions);
@@ -324,9 +294,7 @@ public class ImDocumentController {
     @PostMapping("/{documentId}/versions/{versionId}/restore")
     public Result<Void> restoreVersion(@PathVariable Long documentId,
                                        @PathVariable Long versionId,
-                                       @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+                                       ) {
         }
         documentService.restoreVersion(documentId, versionId, userId);
         return Result.success("版本恢复成功");

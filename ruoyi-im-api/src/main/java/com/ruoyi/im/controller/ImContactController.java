@@ -5,6 +5,7 @@ import com.ruoyi.im.domain.ImFriendRequest;
 import com.ruoyi.im.dto.contact.ImFriendAddRequest;
 import com.ruoyi.im.dto.contact.ImFriendUpdateRequest;
 import com.ruoyi.im.service.ImFriendService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.contact.ImContactGroupVO;
 import com.ruoyi.im.vo.contact.ImFriendVO;
 import com.ruoyi.im.vo.user.ImUserVO;
@@ -42,11 +43,8 @@ public class ImContactController {
      */
     @Operation(summary = "搜索用户", description = "根据关键词搜索用户，支持用户名、昵称、手机号搜索")
     @GetMapping("/search")
-    public Result<List<ImUserVO>> search(@RequestParam String keyword,
-                                         @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<ImUserVO>> search(@RequestParam String keyword) {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImUserVO> list = imFriendService.searchUsers(keyword, userId);
         return Result.success(list);
     }
@@ -63,11 +61,8 @@ public class ImContactController {
      */
     @Operation(summary = "发送好友申请", description = "向指定用户发送好友申请")
     @PostMapping("/request/send")
-    public Result<Long> sendRequest(@Valid @RequestBody ImFriendAddRequest request,
-                                     @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Long> sendRequest(@Valid @RequestBody ImFriendAddRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long requestId = imFriendService.sendFriendRequest(request, userId);
         return Result.success("发送成功", requestId);
     }
@@ -82,10 +77,8 @@ public class ImContactController {
      */
     @Operation(summary = "获取收到的好友申请", description = "查询当前用户收到的好友申请列表")
     @GetMapping("/request/received")
-    public Result<List<ImFriendRequest>> getReceivedRequests(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<ImFriendRequest>> getReceivedRequests() {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImFriendRequest> list = imFriendService.getReceivedRequests(userId);
         return Result.success(list);
     }
@@ -100,10 +93,8 @@ public class ImContactController {
      */
     @Operation(summary = "获取发送的好友申请", description = "查询当前用户发送的好友申请列表")
     @GetMapping("/request/sent")
-    public Result<List<ImFriendRequest>> getSentRequests(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<ImFriendRequest>> getSentRequests() {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImFriendRequest> list = imFriendService.getSentRequests(userId);
         return Result.success(list);
     }
@@ -122,11 +113,8 @@ public class ImContactController {
     @Operation(summary = "处理好友申请", description = "同意或拒绝好友申请")
     @PostMapping("/request/{id}/handle")
     public Result<Void> handleRequest(@PathVariable Long id,
-                                      @RequestParam Boolean approved,
-                                      @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                      @RequestParam Boolean approved) {
+        Long userId = SecurityUtils.getLoginUserId();
         imFriendService.handleFriendRequest(id, approved, userId);
         return Result.success(approved ? "已同意" : "已拒绝");
     }
@@ -141,10 +129,8 @@ public class ImContactController {
      */
     @Operation(summary = "获取好友列表", description = "查询当前用户的所有好友")
     @GetMapping("/list")
-    public Result<List<ImFriendVO>> getFriendList(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<ImFriendVO>> getFriendList() {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImFriendVO> list = imFriendService.getFriendList(userId);
         return Result.success(list);
     }
@@ -159,10 +145,8 @@ public class ImContactController {
      */
     @Operation(summary = "获取分组好友列表", description = "查询当前用户的好友，按分组进行组织")
     @GetMapping("/grouped")
-    public Result<List<ImContactGroupVO>> getGroupedFriendList(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<ImContactGroupVO>> getGroupedFriendList() {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImContactGroupVO> list = imFriendService.getGroupedFriendList(userId);
         return Result.success(list);
     }
@@ -179,11 +163,8 @@ public class ImContactController {
      */
     @Operation(summary = "获取好友详情", description = "查询指定好友的详细信息")
     @GetMapping("/{id}")
-    public Result<ImFriendVO> getFriendById(@PathVariable Long id,
-                                            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<ImFriendVO> getFriendById(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         ImFriendVO vo = imFriendService.getFriendById(id, userId);
         return Result.success(vo);
     }
@@ -202,11 +183,8 @@ public class ImContactController {
     @Operation(summary = "更新好友信息", description = "更新好友的备注名、分组等信息")
     @PutMapping("/{id}")
     public Result<Void> updateFriend(@PathVariable Long id,
-                                     @Valid @RequestBody ImFriendUpdateRequest request,
-                                     @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                     @Valid @RequestBody ImFriendUpdateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         imFriendService.updateFriend(id, request, userId);
         return Result.success("更新成功");
     }
@@ -223,11 +201,8 @@ public class ImContactController {
      */
     @Operation(summary = "删除好友", description = "删除指定好友关系")
     @DeleteMapping("/{id}")
-    public Result<Void> deleteFriend(@PathVariable Long id,
-                                     @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> deleteFriend(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         imFriendService.deleteFriend(id, userId);
         return Result.success("删除成功");
     }
@@ -246,11 +221,8 @@ public class ImContactController {
     @Operation(summary = "拉黑/解除拉黑好友", description = "拉黑好友后无法接收其消息")
     @PutMapping("/{id}/block")
     public Result<Void> blockFriend(@PathVariable Long id,
-                                    @RequestParam Boolean blocked,
-                                    @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                    @RequestParam Boolean blocked) {
+        Long userId = SecurityUtils.getLoginUserId();
         imFriendService.blockFriend(id, blocked, userId);
         return Result.success(blocked ? "已拉黑" : "已解除拉黑");
     }
@@ -265,10 +237,8 @@ public class ImContactController {
      */
     @Operation(summary = "获取好友分组列表", description = "查询当前用户使用的所有好友分组")
     @GetMapping("/group/list")
-    public Result<java.util.List<String>> getGroupList(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<java.util.List<String>> getGroupList() {
+        Long userId = SecurityUtils.getLoginUserId();
         java.util.List<String> list = imFriendService.getGroupNames(userId);
         return Result.success(list);
     }
@@ -287,11 +257,8 @@ public class ImContactController {
     @Operation(summary = "重命名好友分组", description = "将指定的分组名称重命名为新名称")
     @PutMapping("/group/{oldName}")
     public Result<Void> renameGroup(@PathVariable String oldName,
-                                     @RequestBody GroupRenameRequest request,
-                                     @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                     @RequestBody GroupRenameRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             String decodedName = java.net.URLDecoder.decode(oldName, "UTF-8");
             imFriendService.renameGroup(userId, decodedName, request.getNewName());
@@ -314,11 +281,8 @@ public class ImContactController {
      */
     @Operation(summary = "删除好友分组", description = "删除指定分组，好友移至默认分组")
     @DeleteMapping("/group/{groupName}")
-    public Result<Void> deleteGroup(@PathVariable String groupName,
-                                     @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> deleteGroup(@PathVariable String groupName) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             String decodedName = java.net.URLDecoder.decode(groupName, "UTF-8");
             imFriendService.deleteGroup(userId, decodedName);
@@ -341,11 +305,8 @@ public class ImContactController {
      */
     @Operation(summary = "移动好友到分组", description = "批量移动好友到指定分组")
     @PutMapping("/group/move")
-    public Result<Void> moveFriendToGroup(@RequestBody MoveToGroupRequest request,
-                                           @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> moveFriendToGroup(@RequestBody MoveToGroupRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         imFriendService.moveFriendsToGroup(userId, request.getFriendIds(), request.getGroupName());
         return Result.success("移动成功");
     }

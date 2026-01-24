@@ -1,10 +1,17 @@
 import request from '../request'
 
 /**
- * 获取当前用户信息
+ * 获取用户信息
+ * @param {string|number} userId - 可选,用户ID。不传则获取当前用户信息
  * @returns {Promise}
  */
-export function getUserInfo() {
+export function getUserInfo(userId) {
+  if (userId) {
+    return request({
+      url: `/api/im/user/${userId}`,
+      method: 'get'
+    })
+  }
   return request({
     url: '/api/im/user/info',
     method: 'get'

@@ -33,9 +33,7 @@ public class ImDingMessageController {
     @PostMapping("/send")
     public Result<Long> sendDing(
             @Valid @RequestBody DingSendRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         Long dingId = dingMessageService.sendDing(request, userId);
         return Result.success("DING发送成功", dingId);
@@ -47,9 +45,7 @@ public class ImDingMessageController {
     @Operation(summary = "获取接收的DING列表")
     @GetMapping("/received")
     public Result<List<ImDingMessage>> getReceivedDingList(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         List<ImDingMessage> list = dingMessageService.getReceivedDingList(userId);
         return Result.success(list);
@@ -61,9 +57,7 @@ public class ImDingMessageController {
     @Operation(summary = "获取发送的DING列表")
     @GetMapping("/sent")
     public Result<List<ImDingMessage>> getSentDingList(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         List<ImDingMessage> list = dingMessageService.getSentDingList(userId);
         return Result.success(list);
@@ -76,9 +70,7 @@ public class ImDingMessageController {
     @GetMapping("/{dingId}")
     public Result<DingDetailVO> getDingDetail(
             @PathVariable Long dingId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         DingDetailVO detail = dingMessageService.getDingDetail(dingId, userId);
         return Result.success(detail);
@@ -91,9 +83,7 @@ public class ImDingMessageController {
     @PutMapping("/{dingId}/read")
     public Result<Void> readDing(
             @PathVariable Long dingId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         dingMessageService.readDing(dingId, userId);
         return Result.success("已标记为已读");
@@ -107,9 +97,7 @@ public class ImDingMessageController {
     public Result<Void> confirmDing(
             @PathVariable Long dingId,
             @RequestParam(required = false) String remark,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         dingMessageService.confirmDing(dingId, userId, remark);
         return Result.success("确认成功");
@@ -122,9 +110,7 @@ public class ImDingMessageController {
     @GetMapping("/{dingId}/receipts")
     public Result<List<DingReceiptVO>> getDingReceipts(
             @PathVariable Long dingId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         List<DingReceiptVO> receipts = dingMessageService.getDingReceipts(dingId, userId);
         return Result.success(receipts);
@@ -137,9 +123,7 @@ public class ImDingMessageController {
     @PutMapping("/{dingId}/cancel")
     public Result<Void> cancelScheduledDing(
             @PathVariable Long dingId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         dingMessageService.cancelScheduledDing(dingId, userId);
         return Result.success("已取消");
@@ -164,9 +148,7 @@ public class ImDingMessageController {
     public Result<Long> createFromTemplate(
             @PathVariable Long templateId,
             @RequestParam String params,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         Long dingId = dingMessageService.createFromTemplate(templateId, params, userId);
         return Result.success("创建成功", dingId);

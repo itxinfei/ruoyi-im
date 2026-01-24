@@ -83,6 +83,9 @@
                   <el-dropdown-item command="delete" v-if="msg.isOwn" class="danger">
                     <el-icon><Delete /></el-icon> <span>删除</span>
                   </el-dropdown-item>
+                  <el-dropdown-item command="edit" v-if="msg.isOwn && msg.type === 'TEXT'">
+                    <el-icon><Edit /></el-icon> <span>编辑</span>
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -131,7 +134,7 @@
 
 <script setup>
 import { computed, ref, nextTick, watch,  onMounted } from 'vue'
-import { Document, Loading, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, MoreFilled, ArrowDown } from '@element-plus/icons-vue'
+import { Document, Loading, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, MoreFilled, ArrowDown, Edit } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMessageReadUsers } from '@/api/im/message'
 import { addTokenToUrl } from '@/utils/file'
@@ -143,7 +146,7 @@ const props = defineProps({
   sessionId: [String, Number]
 })
 
-const emit = defineEmits(['delete', 'recall', 'reply', 'load-more'])
+const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit'])
 
 const listRef = ref(null)
 const showImageViewer = ref(false)
@@ -291,6 +294,8 @@ const handleCommand = (cmd, msg) => {
      }).then(() => {
        emit('delete', msg.id)
      })
+   } else if (cmd === 'edit') {
+     emit('edit', msg)
    }
  }
 

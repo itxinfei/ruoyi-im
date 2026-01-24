@@ -147,7 +147,14 @@ export default {
       if (!state.messages[sessionId]) {
         state.messages[sessionId] = []
       }
-      state.messages[sessionId].push(message)
+      // 避免重复添加 (通过消息ID判断)
+      const index = state.messages[sessionId].findIndex(m => m.id === message.id)
+      if (index === -1) {
+        state.messages[sessionId].push(message)
+      } else {
+        // 如果已存在，则更新 (比如编辑后)
+        state.messages[sessionId][index] = { ...state.messages[sessionId][index], ...message }
+      }
     },
 
     // 更新消息
@@ -278,6 +285,29 @@ export default {
         return res.data
       }
       throw new Error('发送消息失败')
+    },
+
+    async editMessage({ commit, state }, { messageId, content }) {
+      const res = await apiEditMessage(messageId, { content })
+      if (res.code === 200) {
+        // 查找该消息在哪个会话中 (通常是当前会话)
+        const sessionId = state.currentSession?.id
+        if (sessionId && state.messages[sessionId]) {
+          const editedMsg = { ...state.messages[sessionId].find(m => m.id === messageId), content, isEdited: true }
+          commit('UPDATE_MESSAGE', { sessionId, message: editedMsg })
+
+          // 如果是最后一条消息，更新会话列表
+          const session = state.sessions.find(s => s.id === sessionId)
+          if (session && session.lastMessageId === messageId) {
+            commit('UPDATE_SESSION', {
+              id: sessionId,
+              lastMessage: formatMessagePreview('TEXT', content)
+            })
+          }
+        }
+        return res
+      }
+      throw new Error('编辑消息失败')
     },
 
     async markMessageAsRead({ commit }, { conversationId, messageId }) {

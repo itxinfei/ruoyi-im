@@ -41,9 +41,7 @@ public class ImApprovalController {
     public Result<Long> createApproval(@RequestParam Long templateId,
                                       @RequestParam String title,
                                       @RequestBody Map<String, Object> formData,
-                                      @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+                                      ) {
         }
         Long approvalId = approvalService.createApproval(templateId, title, formData, userId);
         return Result.success("提交成功", approvalId);
@@ -72,9 +70,7 @@ public class ImApprovalController {
      */
     @Operation(summary = "获取待我审批列表", description = "获取需要当前用户审批的审批列表")
     @GetMapping("/pending")
-    public Result<List<ImApproval>> getPendingApprovals(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+    public Result<List<ImApproval>> getPendingApprovals() {
         }
         List<ImApproval> list = approvalService.getPendingApprovals(userId);
         return Result.success(list);
@@ -89,9 +85,7 @@ public class ImApprovalController {
      */
     @Operation(summary = "获取我发起的审批列表", description = "获取当前用户发起的审批列表")
     @GetMapping("/my")
-    public Result<List<ImApproval>> getMyApprovals(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+    public Result<List<ImApproval>> getMyApprovals() {
         }
         List<ImApproval> list = approvalService.getMyApprovals(userId);
         return Result.success(list);
@@ -106,9 +100,7 @@ public class ImApprovalController {
      */
     @Operation(summary = "获取我已审批列表", description = "获取当前用户已经审批的审批列表")
     @GetMapping("/processed")
-    public Result<List<ImApproval>> getProcessedApprovals(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+    public Result<List<ImApproval>> getProcessedApprovals() {
         }
         List<ImApproval> list = approvalService.getProcessedApprovals(userId);
         return Result.success(list);
@@ -127,9 +119,7 @@ public class ImApprovalController {
     @PostMapping("/{id}/approve")
     public Result<Void> approve(@PathVariable Long id,
                                @RequestParam(required = false) String comment,
-                               @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+                               ) {
         }
         approvalService.processApproval(id, "APPROVE", comment, userId);
         return Result.success("已通过");
@@ -148,9 +138,7 @@ public class ImApprovalController {
     @PostMapping("/{id}/reject")
     public Result<Void> reject(@PathVariable Long id,
                               @RequestParam String comment,
-                              @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+                              ) {
         }
         approvalService.processApproval(id, "REJECT", comment, userId);
         return Result.success("已驳回");
@@ -167,9 +155,7 @@ public class ImApprovalController {
     @Operation(summary = "撤回审批", description = "撤回当前用户发起的审批申请")
     @PostMapping("/{id}/cancel")
     public Result<Void> cancel(@PathVariable Long id,
-                              @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+                              ) {
         }
         approvalService.cancelApproval(id, userId);
         return Result.success("已撤回");
@@ -188,9 +174,7 @@ public class ImApprovalController {
     @PostMapping("/{id}/transfer")
     public Result<Void> transfer(@PathVariable Long id,
                                  @RequestParam Long toUserId,
-                                 @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+                                 ) {
         }
         approvalService.transferApproval(id, toUserId, userId);
         return Result.success("已转交");
@@ -209,9 +193,7 @@ public class ImApprovalController {
     @PostMapping("/{id}/delegate")
     public Result<Void> delegate(@PathVariable Long id,
                                 @RequestParam Long toUserId,
-                                @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+                                ) {
         }
         approvalService.delegateApproval(id, toUserId, userId);
         return Result.success("已委托");

@@ -38,9 +38,7 @@ public class ImGroupAnnouncementController {
     @PostMapping
     public Result<Long> createAnnouncement(
             @Valid @RequestBody ImGroupAnnouncementCreateRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         // 计算过期时间：如果设置了过期分钟数，则转换为LocalDateTime
         LocalDateTime expireTime = null;
@@ -71,9 +69,7 @@ public class ImGroupAnnouncementController {
     @GetMapping("/list/{groupId}")
     public Result<List<ImGroupAnnouncement>> getAnnouncements(
             @PathVariable Long groupId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         List<ImGroupAnnouncement> announcements = groupAnnouncementService.getAnnouncements(groupId, userId);
         return Result.success(announcements);
@@ -90,9 +86,7 @@ public class ImGroupAnnouncementController {
     @GetMapping("/valid/{groupId}")
     public Result<List<ImGroupAnnouncement>> getValidAnnouncements(
             @PathVariable Long groupId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         List<ImGroupAnnouncement> announcements = groupAnnouncementService.getValidAnnouncements(groupId, userId);
         return Result.success(announcements);
@@ -109,9 +103,7 @@ public class ImGroupAnnouncementController {
     @GetMapping("/pinned/{groupId}")
     public Result<List<ImGroupAnnouncement>> getPinnedAnnouncements(
             @PathVariable Long groupId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         List<ImGroupAnnouncement> announcements = groupAnnouncementService.getPinnedAnnouncements(groupId, userId);
         return Result.success(announcements);
@@ -128,9 +120,7 @@ public class ImGroupAnnouncementController {
     @GetMapping("/latest/{groupId}")
     public Result<ImGroupAnnouncement> getLatestAnnouncement(
             @PathVariable Long groupId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         ImGroupAnnouncement announcement = groupAnnouncementService.getLatestAnnouncement(groupId, userId);
         return Result.success(announcement);
@@ -149,9 +139,7 @@ public class ImGroupAnnouncementController {
     public Result<Void> updateAnnouncement(
             @PathVariable Long announcementId,
             @RequestParam String content,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         groupAnnouncementService.updateAnnouncement(announcementId, content, userId);
         return Result.success("公告编辑成功");
@@ -168,9 +156,7 @@ public class ImGroupAnnouncementController {
     @DeleteMapping("/{announcementId}")
     public Result<Void> deleteAnnouncement(
             @PathVariable Long announcementId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         groupAnnouncementService.deleteAnnouncement(announcementId, userId);
         return Result.success("公告删除成功");
@@ -187,9 +173,7 @@ public class ImGroupAnnouncementController {
     @PutMapping("/recall/{announcementId}")
     public Result<Void> recallAnnouncement(
             @PathVariable Long announcementId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         groupAnnouncementService.recallAnnouncement(announcementId, userId);
         return Result.success("公告已撤回");
@@ -208,9 +192,7 @@ public class ImGroupAnnouncementController {
     public Result<Void> setPinned(
             @PathVariable Long announcementId,
             @RequestParam Integer isPinned,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         groupAnnouncementService.setPinned(announcementId, isPinned, userId);
         return Result.success(isPinned == 1 ? "公告已置顶" : "已取消置顶");

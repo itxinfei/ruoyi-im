@@ -15,13 +15,17 @@
         @recall="handleRecall"
         @reply="handleReply"
         @load-more="handleLoadMore"
+        @edit="handleEdit"
       />
       <MessageInput
         :session="session"
         :sending="sending"
         :replying-message="replyingMessage"
+        :editing-message="editingMessage"
         @send="handleSend"
         @cancel-reply="handleCancelReply"
+        @cancel-edit="handleCancelEdit"
+        @edit-confirm="handleEditConfirm"
         @start-call="handleStartCall"
         @start-video="handleStartVideo"
       />
@@ -49,6 +53,7 @@ const loading = ref(false)
 const sending = ref(false)
 const noMore = ref(false)
 const replyingMessage = computed(() => store.state.im.replyingMessage)
+const editingMessage = ref(null)
 const msgListRef = ref(null)
 
 const { onMessage } = useImWebSocket()
@@ -159,8 +164,26 @@ const handleSend = async (content) => {
 // Websocket handling
 onMessage((msg) => {
   if (msg.conversationId === props.session?.id) {
-    messages.value.push(transformMsg(msg))
+    const transformedMsg = transformMsg(msg)
+    messages.value.push(transformedMsg)
     msgListRef.value?.scrollToBottom()
+    
+    // 新消息提醒
+    if (!transformedMsg.isOwn) {
+      // 动态导入提醒工具,避免循环依赖
+      import('@/utils/messageNotification').then(({ showMessageNotification, shouldNotify }) => {
+        if (shouldNotify(msg, currentUser.value, props.session)) {
+          showMessageNotification({
+            title: msg.senderName || '新消息',
+            body: msg.content || '[消息]',
+            icon: msg.senderAvatar || '',
+            sound: true,
+            notification: true,
+            titleFlash: true
+          })
+        }
+      })
+    }
   }
 })
 
@@ -200,6 +223,37 @@ const handleReply = (message) => {
   store.commit('im/SET_REPLYING_MESSAGE', message)
 }
 
+const handleEdit = (message) => {
+  editingMessage.value = message
+}
+
+const handleCancelEdit = () => {
+  editingMessage.value = null
+}
+
+const handleEditConfirm = async (content) => {
+  if (!editingMessage.value) return
+  
+  try {
+    await store.dispatch('im/editMessage', {
+      messageId: editingMessage.value.id,
+      content: content
+    })
+    
+    // 更新本地消息列表
+    const index = messages.value.findIndex(m => m.id === editingMessage.value.id)
+    if (index !== -1) {
+      messages.value[index].content = content
+      messages.value[index].isEdited = true // 标记已编辑
+    }
+    
+    editingMessage.value = null
+    ElMessage.success('已编辑')
+  } catch (error) {
+    console.error('编辑失败', error)
+  }
+}
+
 const handleCancelReply = () => {
   store.commit('im/SET_REPLYING_MESSAGE', null)
 }
@@ -217,6 +271,17 @@ const handleStartVideo = () => {
 
 onMounted(() => {
   if (props.session) loadHistory()
+  
+  // 请求浏览器通知权限
+  import('@/utils/messageNotification').then(({ requestNotificationPermission }) => {
+    requestNotificationPermission().then(permission => {
+      if (permission === 'granted') {
+        console.log('[消息提醒] 通知权限已授予')
+      } else if (permission === 'denied') {
+        console.warn('[消息提醒] 通知权限被拒绝')
+      }
+    })
+  })
 })
 </script>
 

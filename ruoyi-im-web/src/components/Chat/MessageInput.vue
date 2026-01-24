@@ -1,5 +1,28 @@
 <template>
-  <div class="chat-input-container">
+  <div class="chat-input-container" :style="{ height: containerHeight + 'px' }">
+    <!-- 拖拽手柄 -->
+    <div 
+      class="resize-handle" 
+      @mousedown="startResize"
+      @dblclick="resetHeight"
+      title="拖拽调整高度，双击重置"
+    >
+      <div class="resize-indicator"></div>
+    </div>
+    <!-- 编辑预览 -->
+    <div v-if="editingMessage" class="edit-preview" role="region" aria-label="编辑消息预览">
+      <div class="edit-indicator"></div>
+      <div class="edit-content">
+        <div class="edit-header">
+          <span class="edit-label">正在编辑消息</span>
+        </div>
+        <div class="edit-text">{{ editingMessage.content }}</div>
+      </div>
+      <button class="close-btn" @click="$emit('cancel-edit')" aria-label="取消编辑">
+        <span class="material-icons-outlined" aria-hidden="true">close</span>
+      </button>
+    </div>
+
     <!-- 回复预览 -->
     <div v-if="replyingMessage" class="reply-preview" role="region" aria-label="回复消息预览">
       <div class="reply-indicator"></div>
@@ -50,23 +73,7 @@
         title="@成员"
       >
         <span class="material-icons-outlined" aria-hidden="true">alternate_email</span>
-      </button>
-      <div class="toolbar-spacer"></div>
-      <button
-        class="toolbar-btn"
-        @click="$emit('start-call')"
-        aria-label="语音通话"
-        title="语音通话"
-      >
-        <span class="material-icons-outlined" aria-hidden="true">phone</span>
-      </button>
-      <button
-        class="toolbar-btn"
-        @click="$emit('start-video')"
-        aria-label="视频通话"
-        title="视频通话"
-      >
-        <span class="material-icons-outlined" aria-hidden="true">videocam</span>
+   
       </button>
     </div>
 
@@ -101,11 +108,6 @@
       </button>
     </div>
 
-    <!-- 底部提示 -->
-    <div v-if="isFocused" class="input-hint">
-      按 Enter 发送，Shift + Enter 换行，↑↓ 浏览历史
-    </div>
-
     <!-- Emoji选择器 -->
     <EmojiPicker
       v-if="showEmojiPicker"
@@ -131,7 +133,8 @@ import AtMemberPicker from './AtMemberPicker.vue'
 const props = defineProps({
   session: Object,
   sending: Boolean,
-  replyingMessage: Object
+  replyingMessage: Object,
+  editingMessage: Object
 })
 
 const emit = defineEmits([
@@ -139,6 +142,8 @@ const emit = defineEmits([
   'upload-image',
   'upload-file',
   'cancel-reply',
+  'cancel-edit',
+  'edit-confirm',
   'start-call',
   'start-video'
 ])
@@ -149,6 +154,80 @@ const textareaRef = ref(null)
 const atMemberPickerRef = ref(null)
 const emojiPickerRef = ref(null)
 const isFocused = ref(false)
+
+// 容器高度管理
+const containerHeight = ref(180)  // 默认180px
+const minHeight = 140  // 最小高度
+const maxHeight = 400  // 最大高度
+let isResizing = false
+let startY = 0
+let startHeight = 0
+
+// 加载保存的高度
+const loadSavedHeight = () => {
+  try {
+    const saved = localStorage.getItem('im_input_container_height')
+    if (saved) {
+      const height = parseInt(saved)
+      if (height >= minHeight && height <= maxHeight) {
+        containerHeight.value = height
+      }
+    }
+  } catch (e) {
+    console.warn('加载输入区高度失败', e)
+  }
+}
+
+// 保存高度
+const saveHeight = (height) => {
+  try {
+    localStorage.setItem('im_input_container_height', height)
+  } catch (e) {
+    console.warn('保存输入区高度失败', e)
+  }
+}
+
+// 开始拖拽调整大小
+const startResize = (e) => {
+  isResizing = true
+  startY = e.clientY
+  startHeight = containerHeight.value
+  
+  document.addEventListener('mousemove', handleResize)
+  document.addEventListener('mouseup', stopResize)
+  document.body.style.cursor = 'ns-resize'
+  document.body.style.userSelect = 'none'
+}
+
+// 处理拖拽
+const handleResize = (e) => {
+  if (!isResizing) return
+  
+  const deltaY = startY - e.clientY  // 向上为正
+  const newHeight = startHeight + deltaY
+  
+  if (newHeight >= minHeight && newHeight <= maxHeight) {
+    containerHeight.value = newHeight
+  }
+}
+
+// 停止拖拽
+const stopResize = () => {
+  if (isResizing) {
+    isResizing = false
+    saveHeight(containerHeight.value)
+    document.removeEventListener('mousemove', handleResize)
+    document.removeEventListener('mouseup', stopResize)
+    document.body.style.cursor = ''
+    document.body.style.userSelect = ''
+  }
+}
+
+// 重置高度
+const resetHeight = () => {
+  containerHeight.value = 180
+  saveHeight(180)
+}
 
 // 发送历史记录
 const sendHistory = ref([])
@@ -182,6 +261,17 @@ const saveSendHistory = (text) => {
 
 // 是否可以发送
 const canSend = computed(() => message.value.trim().length > 0)
+
+// 监听编辑消息变化，填充内容
+watch(() => props.editingMessage, (msg) => {
+  if (msg) {
+    message.value = msg.content
+    nextTick(() => {
+      autoResize()
+      textareaRef.value?.focus()
+    })
+  }
+})
 
 // 监听会话变化，恢复草稿
 watch(() => props.session?.id, (newId, oldId) => {
@@ -298,14 +388,12 @@ const formatReplyTime = (timestamp) => {
   return `${date.getMonth() + 1}/${date.getDate()}`
 }
 
-// 自动调整输入框高度
+// 自动调整输入框高度（已废弃，高度由 chat-input-container 拖拽控制）
 const autoResize = () => {
   const textarea = textareaRef.value
   if (!textarea) return
 
-  textarea.style.height = 'auto'
-  const newHeight = Math.min(Math.max(textarea.scrollHeight, 56), 160)
-  textarea.style.height = newHeight + 'px'
+  textarea.scrollTop = textarea.scrollHeight
 }
 
 // 处理输入
@@ -339,6 +427,8 @@ const handleKeydown = (e) => {
       showEmojiPicker.value = false
     } else if (props.replyingMessage) {
       emit('cancel-reply')
+    } else if (props.editingMessage) {
+      emit('cancel-edit')
     }
   } else if (e.key === '@' && props.session?.type === 'GROUP' && !e.ctrlKey && !e.metaKey) {
     setTimeout(() => {
@@ -381,7 +471,12 @@ const handleSend = () => {
   // 重置历史索引
   historyIndex = -1
   
-  emit('send', text)
+  if (props.editingMessage) {
+    emit('edit-confirm', text)
+  } else {
+    emit('send', text)
+  }
+  
   message.value = ''
   
   // 清除草稿
@@ -404,6 +499,7 @@ const handleSend = () => {
 // 组件挂载时加载历史
 onMounted(() => {
   loadSendHistory()
+  loadSavedHeight()  // 加载保存的输入区高度
 })
 
 // 点击外部关闭表情选择器
@@ -433,8 +529,66 @@ onUnmounted(() => {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  padding: 16px 20px 20px;  /* 增加padding使界面更宽敞 */
-  border-top: 1px solid #e6e6e6;  /* 添加顶部边框分隔 */
+  padding: 16px 20px 20px;
+  border-top: 1px solid #e6e6e6;
+  position: relative;  /* 为拖拽手柄定位 */
+  transition: none;  /* 禁用过渡以流畅调整大小 */
+}
+
+/* 拖拽手柄 */
+.resize-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12px;  /* 增加拖拽区域高度 */
+  cursor: ns-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  user-select: none;
+  transition: background 0.2s ease;  /* 添加背景过渡效果 */
+}
+
+.resize-handle:hover {
+  background: rgba(22, 119, 255, 0.08);  /* 增加悬停背景 */
+}
+
+.resize-handle:active {
+  background: rgba(22, 119, 255, 0.12);  /* 拖拽时背景更深 */
+}
+
+.resize-indicator {
+  width: 48px;  /* 增加指示器宽度 */
+  height: 4px;  /* 增加指示器高度 */
+  background: #d9d9d9;
+  border-radius: 3px;  /* 增加圆角 */
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.resize-handle:hover .resize-indicator {
+  background: #1677ff;  /* 悬停时指示器变色 */
+  width: 56px;  /* 悬停时指示器变宽 */
+  height: 5px;  /* 悬停时指示器变高 */
+}
+
+.resize-handle:active .resize-indicator {
+  background: #0958d9;  /* 拖拽时指示器颜色更深 */
+  width: 60px;  /* 拖拽时指示器更宽 */
+}
+
+:global(.dark) .resize-indicator {
+  background: #475569;  /* 深色模式指示器颜色 */
+}
+
+:global(.dark) .resize-handle:hover .resize-indicator {
+  background: #60a5fa;  /* 深色模式悬停颜色 */
+}
+
+:global(.dark) .resize-handle:active .resize-indicator {
+  background: #3b82f6;  /* 深色模式拖拽颜色 */
 }
 
 :global(.dark) .chat-input-container {
@@ -528,11 +682,94 @@ onUnmounted(() => {
   font-size: 18px;
 }
 
+/* 编辑预览区域 */
+.edit-preview {
+  display: flex;
+  align-items: stretch;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+:global(.dark) .edit-preview {
+  background: rgba(51, 65, 85, 0.4);
+}
+
+.edit-preview .edit-indicator {
+  width: 3px;
+  background: linear-gradient(180deg, #52c41a 0%, #95de64 100%);
+  flex-shrink: 0;
+}
+
+.edit-preview .edit-content {
+  flex: 1;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.edit-preview .edit-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.edit-preview .edit-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #52c41a;
+}
+
+:global(.dark) .edit-preview .edit-label {
+  color: #95de64;
+}
+
+.edit-preview .edit-text {
+  font-size: 13px;
+  color: #595959;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:global(.dark) .edit-preview .edit-text {
+  color: #cbd5e1;
+}
+
+.edit-preview .close-btn {
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.edit-preview .close-btn:hover {
+  color: #595959;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+:global(.dark) .edit-preview .close-btn:hover {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.edit-preview .close-btn .material-icons-outlined {
+  font-size: 18px;
+}
+
 /* 工具栏 */
 .input-toolbar {
   display: flex;
   align-items: center;
-  padding: 8px 0 12px;  /* 增加上下padding */
+  margin: 0;  /* 边距设置为0 */
+  gap: 4px;  /* 使用gap替代margin-right */
 }
 
 .input-toolbar .toolbar-btn {
@@ -547,12 +784,17 @@ onUnmounted(() => {
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s ease;
-  margin-right: 6px;  /* 增加按钮间距 */
+  position: relative;  /* 为tooltip定位 */
 }
 
 .input-toolbar .toolbar-btn:hover {
   background: #f1f5f9;
   color: #1677ff;
+  transform: scale(1.05);  /* 轻微放大效果 */
+}
+
+.input-toolbar .toolbar-btn:active {
+  transform: scale(0.95);  /* 点击缩小效果 */
 }
 
 :global(.dark) .input-toolbar .toolbar-btn:hover {
@@ -581,26 +823,48 @@ onUnmounted(() => {
 /* 输入区域 */
 .input-area {
   display: flex;
+  margin: 0;  /* 边距设置为0 */
+  border: 1px solid #e6e6e6;  /* 添加边框 */
+  border-radius: 8px;  /* 增加圆角 */
+  overflow: hidden;  /* 防止内容溢出 */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;  /* 添加阴影过渡 */
   align-items: flex-end;
   gap: 8px;
   position: relative;
+  background: #fff;  /* 添加背景色 */
+}
+
+.input-area:focus-within {
+  border-color: #1677ff;  /* 聚焦时边框颜色 */
+  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);  /* 聚焦时添加阴影 */
+}
+
+:global(.dark) .input-area {
+  border-color: #475569;  /* 深色模式边框颜色 */
+  background: rgba(255, 255, 255, 0.03);  /* 深色模式背景 */
+}
+
+:global(.dark) .input-area:focus-within {
+  border-color: #60a5fa;  /* 深色模式聚焦边框颜色 */
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);  /* 深色模式聚焦阴影 */
 }
 
 .message-input {
   flex: 1;
-  min-height: 64px;  /* 增加最小高度从56px到64px */
-  max-height: 200px;  /* 增加最大高度从160px到200px */
+  height: 100%;  /* 填满父容器高度 */
   padding: 16px 18px;  /* 增加padding */
-  background: #f8f9fa;
-  border: 1px solid transparent;
-  border-radius: 8px;
+  background: transparent;  /* 背景透明，使用父容器背景 */
+  border: none;  /* 移除边框，使用父容器边框 */
+  border-radius: 0;  /* 移除圆角，使用父容器圆角 */
   resize: none;
   font-size: 15px;
   color: #262626;
   outline: none;
   font-family: inherit;
   line-height: 1.6;  /* 增加行高 */
-  transition: all 0.2s ease;
+  overflow-y: auto;  /* 允许垂直滚动 */
+  overflow-x: hidden;  /* 隐藏水平滚动 */
+  transition: none;  /* 移除过渡，使用父容器过渡 */
 }
 
 .message-input::placeholder {
@@ -608,19 +872,19 @@ onUnmounted(() => {
 }
 
 .message-input:focus {
-  background: #fff;
-  border-color: #1677ff;
-  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.08);
+  background: transparent;  /* 聚焦时保持透明背景 */
+  border: none;  /* 聚焦时无边框 */
+  box-shadow: none;  /* 聚焦时无阴影 */
 }
 
 :global(.dark) .message-input:focus {
-  background: #0f172a;
-  border-color: #1677ff;
-  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.15);
+  background: transparent;  /* 深色模式聚焦时保持透明 */
+  border: none;
+  box-shadow: none;
 }
 
 :global(.dark) .message-input {
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;  /* 深色模式背景透明 */
   color: #f1f5f9;
 }
 
@@ -633,50 +897,65 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 40px;
+  min-width: 48px;  /* 增加最小宽度 */
   height: 40px;
-  padding: 0 12px;
+  padding: 0 16px;  /* 调整内边距 */
   background: #1677ff;
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;  /* 调整圆角 */
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);  /* 使用更平滑的过渡 */
   flex-shrink: 0;
+  font-weight: 500;  /* 增加字体粗细 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);  /* 添加轻微阴影 */
 }
 
 .send-btn:not(.disabled):hover {
   background: #4096ff;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.35);
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);  /* 增强悬停阴影 */
 }
 
 .send-btn:not(.disabled):active {
   transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(22, 119, 255, 0.2);  /* 按下时阴影减弱 */
 }
 
 .send-btn.disabled {
   background: transparent;
   color: #94a3b8;
   cursor: default;
+  box-shadow: none;
+}
+
+.send-btn.disabled:hover {
+  background: rgba(0, 0, 0, 0.04);  /* 禁用状态悬停背景 */
+  transform: none;
 }
 
 :global(.dark) .send-btn.disabled {
   color: #475569;
 }
 
+:global(.dark) .send-btn.disabled:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .send-btn.with-text {
   padding: 0 20px;
+  min-width: 80px;  /* 有文字时增加最小宽度 */
 }
 
 .send-btn .send-text {
   font-size: 15px;
   font-weight: 500;
   white-space: nowrap;
+  letter-spacing: 0.3px;  /* 增加字间距 */
 }
 
 .send-btn .send-icon {
-  font-size: 26px;
+  font-size: 24px;  /* 调整图标大小 */
 }
 
 :global(.dark) .send-btn.disabled .send-icon {
@@ -704,5 +983,108 @@ onUnmounted(() => {
   left: 0;
   margin-bottom: 8px;
   z-index: 100;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .input-toolbar .toolbar-btn {
+    width: 32px;  /* 移动端减小按钮尺寸 */
+    height: 32px;
+    margin-right: 4px;  /* 减小按钮间距 */
+  }
+
+  .input-toolbar .toolbar-btn .material-icons-outlined {
+    font-size: 20px;  /* 减小图标尺寸 */
+  }
+
+  .message-input {
+    min-height: 56px;  /* 移动端减小最小高度 */
+    max-height: 160px;  /* 移动端减小最大高度 */
+    padding: 12px 14px;  /* 减小内边距 */
+    font-size: 14px;  /* 减小字体大小 */
+  }
+
+  .send-btn {
+    min-width: 40px;  /* 移动端减小发送按钮最小宽度 */
+    height: 36px;  /* 减小高度 */
+    padding: 0 12px;  /* 减小内边距 */
+  }
+
+  .send-btn.with-text {
+    min-width: 64px;  /* 有文字时减小最小宽度 */
+    padding: 0 16px;
+  }
+
+  .send-btn .send-text {
+    font-size: 14px;  /* 减小文字大小 */
+  }
+
+  .send-btn .send-icon {
+    font-size: 22px;  /* 减小图标大小 */
+  }
+
+  .input-area {
+    gap: 6px;  /* 减小元素间距 */
+  }
+
+  .resize-handle {
+    height: 10px;  /* 移动端减小拖拽手柄高度 */
+  }
+
+  .resize-indicator {
+    width: 40px;  /* 移动端减小指示器宽度 */
+    height: 3px;  /* 移动端减小指示器高度 */
+  }
+
+  .resize-handle:hover .resize-indicator {
+    width: 44px;  /* 移动端悬停时指示器宽度 */
+    height: 4px;
+  }
+
+  .resize-handle:active .resize-indicator {
+    width: 48px;  /* 移动端拖拽时指示器宽度 */
+  }
+}
+
+@media (max-width: 480px) {
+  .input-toolbar .toolbar-btn {
+    width: 30px;  /* 小屏幕进一步减小按钮尺寸 */
+    height: 30px;
+    margin-right: 3px;
+  }
+
+  .input-toolbar .toolbar-btn .material-icons-outlined {
+    font-size: 18px;
+  }
+
+  .message-input {
+    min-height: 48px;
+    max-height: 140px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .send-btn {
+    min-width: 36px;
+    height: 32px;
+    padding: 0 10px;
+  }
+
+  .send-btn.with-text {
+    min-width: 56px;
+    padding: 0 12px;
+  }
+
+  .send-btn .send-text {
+    font-size: 13px;
+  }
+
+  .send-btn .send-icon {
+    font-size: 20px;
+  }
+
+  .input-area {
+    gap: 4px;
+  }
 }
 </style>

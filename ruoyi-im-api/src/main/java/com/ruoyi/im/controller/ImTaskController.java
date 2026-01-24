@@ -6,6 +6,7 @@ import com.ruoyi.im.dto.task.ImTaskCreateRequest;
 import com.ruoyi.im.dto.task.ImTaskQueryRequest;
 import com.ruoyi.im.dto.task.ImTaskUpdateRequest;
 import com.ruoyi.im.service.ImTaskService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.task.ImTaskDetailVO;
 import com.ruoyi.im.vo.task.ImTaskVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,11 +43,8 @@ public class ImTaskController {
      */
     @Operation(summary = "创建任务", description = "创建新的任务，可分配给指定成员")
     @PostMapping("/create")
-    public Result<Long> createTask(@Valid @RequestBody ImTaskCreateRequest request,
-                                   @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Long> createTask(@Valid @RequestBody ImTaskCreateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long taskId = taskService.createTask(request, userId);
         return Result.success("创建成功", taskId);
     }
@@ -62,11 +60,8 @@ public class ImTaskController {
      */
     @Operation(summary = "更新任务", description = "更新任务的基本信息和状态")
     @PutMapping
-    public Result<Void> updateTask(@Valid @RequestBody ImTaskUpdateRequest request,
-                                   @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> updateTask(@Valid @RequestBody ImTaskUpdateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         taskService.updateTask(request, userId);
         return Result.success("更新成功");
     }
@@ -82,11 +77,8 @@ public class ImTaskController {
      */
     @Operation(summary = "删除任务", description = "删除指定任务及其子任务")
     @DeleteMapping("/{taskId}")
-    public Result<Void> deleteTask(@PathVariable Long taskId,
-                                   @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> deleteTask(@PathVariable Long taskId) {
+        Long userId = SecurityUtils.getLoginUserId();
         taskService.deleteTask(taskId, userId);
         return Result.success("删除成功");
     }
@@ -102,11 +94,8 @@ public class ImTaskController {
      */
     @Operation(summary = "获取任务详情", description = "查询指定任务的详细信息")
     @GetMapping("/{taskId}")
-    public Result<ImTaskDetailVO> getTaskDetail(@PathVariable Long taskId,
-                                               @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<ImTaskDetailVO> getTaskDetail(@PathVariable Long taskId) {
+        Long userId = SecurityUtils.getLoginUserId();
         ImTaskDetailVO detail = taskService.getTaskDetail(taskId, userId);
         return Result.success(detail);
     }
@@ -122,11 +111,8 @@ public class ImTaskController {
      */
     @Operation(summary = "分页查询任务列表", description = "按条件分页查询任务列表")
     @PostMapping("/page")
-    public Result<IPage<ImTaskVO>> getTaskPage(@RequestBody ImTaskQueryRequest request,
-                                               @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<IPage<ImTaskVO>> getTaskPage(@RequestBody ImTaskQueryRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         IPage<ImTaskVO> page = taskService.getTaskPage(request, userId);
         return Result.success(page);
     }
@@ -142,11 +128,8 @@ public class ImTaskController {
      */
     @Operation(summary = "获取我的任务列表", description = "查询分配给当前用户的任务列表")
     @GetMapping("/my")
-    public Result<List<ImTaskVO>> getMyTasks(@RequestParam(required = false) String status,
-                                             @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<ImTaskVO>> getMyTasks(@RequestParam(required = false) String status) {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImTaskVO> list = taskService.getMyTasks(userId, status);
         return Result.success(list);
     }
@@ -160,10 +143,8 @@ public class ImTaskController {
      */
     @Operation(summary = "获取我创建的任务列表", description = "查询当前用户创建的任务列表")
     @GetMapping("/created")
-    public Result<List<ImTaskVO>> getMyCreatedTasks(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<ImTaskVO>> getMyCreatedTasks() {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImTaskVO> list = taskService.getMyCreatedTasks(userId);
         return Result.success(list);
     }
@@ -181,11 +162,8 @@ public class ImTaskController {
     @Operation(summary = "分配任务", description = "将任务分配给指定成员")
     @PutMapping("/{taskId}/assign")
     public Result<Void> assignTask(@PathVariable Long taskId,
-                                   @RequestParam Long assigneeId,
-                                   @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                   @RequestParam Long assigneeId) {
+        Long userId = SecurityUtils.getLoginUserId();
         taskService.assignTask(taskId, assigneeId, userId);
         return Result.success("分配成功");
     }
@@ -202,11 +180,8 @@ public class ImTaskController {
     @Operation(summary = "更新任务状态", description = "更新任务的状态")
     @PutMapping("/{taskId}/status")
     public Result<Void> updateStatus(@PathVariable Long taskId,
-                                    @RequestParam String status,
-                                    @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                    @RequestParam String status) {
+        Long userId = SecurityUtils.getLoginUserId();
         taskService.updateTaskStatus(taskId, status, userId);
         return Result.success("状态更新成功");
     }
@@ -223,11 +198,8 @@ public class ImTaskController {
     @Operation(summary = "更新任务进度", description = "更新任务的完成进度")
     @PutMapping("/{taskId}/progress")
     public Result<Void> updateProgress(@PathVariable Long taskId,
-                                      @RequestParam Integer percent,
-                                      @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                      @RequestParam Integer percent) {
+        Long userId = SecurityUtils.getLoginUserId();
         taskService.updateProgress(taskId, percent, userId);
         return Result.success("进度更新成功");
     }
@@ -242,11 +214,8 @@ public class ImTaskController {
      */
     @Operation(summary = "关注/取消关注任务", description = "切换任务的关注状态")
     @PutMapping("/{taskId}/follow")
-    public Result<Void> toggleFollow(@PathVariable Long taskId,
-                                     @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> toggleFollow(@PathVariable Long taskId) {
+        Long userId = SecurityUtils.getLoginUserId();
         taskService.toggleFollow(taskId, userId);
         return Result.success("操作成功");
     }
@@ -265,11 +234,8 @@ public class ImTaskController {
     @PostMapping("/{taskId}/comment")
     public Result<Long> addComment(@PathVariable Long taskId,
                                   @RequestParam String content,
-                                  @RequestParam(required = false) Long replyToId,
-                                  @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                  @RequestParam(required = false) Long replyToId) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long commentId = taskService.addComment(taskId, content, replyToId, userId);
         return Result.success("评论成功", commentId);
     }
@@ -298,10 +264,8 @@ public class ImTaskController {
      */
     @Operation(summary = "获取任务统计信息", description = "获取当前用户的任务统计数据")
     @GetMapping("/statistics")
-    public Result<Map<String, Object>> getStatistics(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Map<String, Object>> getStatistics() {
+        Long userId = SecurityUtils.getLoginUserId();
         Map<String, Object> stats = taskService.getTaskStatistics(userId);
         return Result.success(stats);
     }
@@ -316,11 +280,8 @@ public class ImTaskController {
      */
     @Operation(summary = "批量删除任务", description = "批量删除多个任务")
     @DeleteMapping("/batch")
-    public Result<Void> batchDelete(@RequestBody List<Long> taskIds,
-                                    @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> batchDelete(@RequestBody List<Long> taskIds) {
+        Long userId = SecurityUtils.getLoginUserId();
         taskService.batchDelete(taskIds, userId);
         return Result.success("批量删除成功");
     }
@@ -337,11 +298,8 @@ public class ImTaskController {
     @Operation(summary = "批量更新任务状态", description = "批量更新多个任务的状态")
     @PutMapping("/batch/status")
     public Result<Void> batchUpdateStatus(@RequestBody List<Long> taskIds,
-                                         @RequestParam String status,
-                                         @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+                                         @RequestParam String status) {
+        Long userId = SecurityUtils.getLoginUserId();
         taskService.batchUpdateStatus(taskIds, status, userId);
         return Result.success("批量更新成功");
     }
@@ -356,11 +314,8 @@ public class ImTaskController {
      */
     @Operation(summary = "获取子任务列表", description = "查询指定任务的子任务列表")
     @GetMapping("/subtasks/{parentId}")
-    public Result<List<ImTaskVO>> getSubtasks(@PathVariable Long parentId,
-                                             @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<List<ImTaskVO>> getSubtasks(@PathVariable Long parentId) {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImTaskVO> list = taskService.getSubtasks(parentId, userId);
         return Result.success(list);
     }
@@ -375,11 +330,8 @@ public class ImTaskController {
      */
     @Operation(summary = "复制任务", description = "复制指定任务创建副本")
     @PostMapping("/{taskId}/copy")
-    public Result<Long> copyTask(@PathVariable Long taskId,
-                                @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Long> copyTask(@PathVariable Long taskId) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long newTaskId = taskService.copyTask(taskId, userId);
         return Result.success("复制成功", newTaskId);
     }

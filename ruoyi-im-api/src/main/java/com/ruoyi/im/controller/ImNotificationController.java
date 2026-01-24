@@ -2,6 +2,7 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImSystemNotificationService;
+import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,18 +28,14 @@ public class ImNotificationController {
      * 获取通知列表
      * 查询用户的通知列表，支持按类型筛选
      *
-     * @param userId 当前登录用户ID，从请求头中获取
      * @param type 通知类型筛选（可选），SYSTEM/APPROVAL/MESSAGE/REMINDER
      * @return 通知列表
      */
     @Operation(summary = "获取通知列表", description = "查询用户的通知列表，支持按类型筛选")
     @GetMapping("/list")
     public Result<List<com.ruoyi.im.domain.ImSystemNotification>> getNotifications(
-            @RequestParam(required = false) String type,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+            @RequestParam(required = false) String type) {
+        Long userId = SecurityUtils.getLoginUserId();
         List<com.ruoyi.im.domain.ImSystemNotification> list = notificationService.getUserNotifications(userId, type);
         return Result.success(list);
     }
@@ -48,17 +45,13 @@ public class ImNotificationController {
      * 查询指定通知的详细信息
      *
      * @param id 通知ID
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 通知详情
      */
     @Operation(summary = "获取通知详情", description = "查询指定通知的详细信息")
     @GetMapping("/{id}")
     public Result<com.ruoyi.im.domain.ImSystemNotification> getNotificationById(
-            @PathVariable Long id,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         com.ruoyi.im.domain.ImSystemNotification notification = notificationService.getNotificationById(id);
         return Result.success(notification);
     }
@@ -67,15 +60,12 @@ public class ImNotificationController {
      * 获取未读通知数量
      * 统计当前用户的未读通知数量
      *
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 未读通知数量
      */
     @Operation(summary = "获取未读通知数量", description = "统计当前用户的未读通知数量")
     @GetMapping("/unread/count")
-    public Result<Integer> getUnreadCount(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Integer> getUnreadCount() {
+        Long userId = SecurityUtils.getLoginUserId();
         Integer count = notificationService.getUnreadCount(userId);
         return Result.success(count);
     }
@@ -85,17 +75,13 @@ public class ImNotificationController {
      * 将指定通知标记为已读
      *
      * @param id 通知ID
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
     @Operation(summary = "标记通知为已读", description = "将指定通知标记为已读")
     @PutMapping("/{id}/read")
     public Result<Void> markAsRead(
-            @PathVariable Long id,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         notificationService.markAsRead(id, userId);
         return Result.success("标记已读成功");
     }
@@ -104,15 +90,12 @@ public class ImNotificationController {
      * 标记所有通知为已读
      * 将当前用户的所有未读通知标记为已读
      *
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
     @Operation(summary = "标记所有通知为已读", description = "将当前用户的所有未读通知标记为已读")
     @PutMapping("/read/all")
-    public Result<Void> markAllAsRead(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> markAllAsRead() {
+        Long userId = SecurityUtils.getLoginUserId();
         notificationService.markAllAsRead(userId);
         return Result.success("全部标记已读成功");
     }
@@ -122,17 +105,13 @@ public class ImNotificationController {
      * 删除指定的通知
      *
      * @param id 通知ID
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
     @Operation(summary = "删除通知", description = "删除指定的通知")
     @DeleteMapping("/{id}")
     public Result<Void> deleteNotification(
-            @PathVariable Long id,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         notificationService.deleteNotification(id, userId);
         return Result.success("删除成功");
     }
@@ -142,17 +121,13 @@ public class ImNotificationController {
      * 批量删除多条通知
      *
      * @param ids 通知ID列表
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
     @Operation(summary = "批量删除通知", description = "批量删除多条通知")
     @DeleteMapping("/batch")
     public Result<Void> batchDeleteNotifications(
-            @RequestBody List<Long> ids,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @RequestBody List<Long> ids) {
+        Long userId = SecurityUtils.getLoginUserId();
         for (Long id : ids) {
             notificationService.deleteNotification(id, userId);
         }
@@ -163,15 +138,12 @@ public class ImNotificationController {
      * 清空所有通知
      * 清空当前用户的所有通知
      *
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
     @Operation(summary = "清空所有通知", description = "清空当前用户的所有通知")
     @DeleteMapping("/clear")
-    public Result<Void> clearAllNotifications(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Void> clearAllNotifications() {
+        Long userId = SecurityUtils.getLoginUserId();
         notificationService.clearAllNotifications(userId);
         return Result.success("清空成功");
     }

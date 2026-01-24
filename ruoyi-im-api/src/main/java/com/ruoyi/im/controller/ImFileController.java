@@ -4,6 +4,7 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.file.ImFileUploadRequest;
 import com.ruoyi.im.service.ImFileService;
 import com.ruoyi.im.util.FileUtils;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.file.ImFileStatisticsVO;
 import com.ruoyi.im.vo.file.ImFileVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,20 +41,16 @@ public class ImFileController {
      * 上传文件到服务器并返回文件信息
      *
      * @param file 上传的文件
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 上传结果，包含文件信息
      */
     @Operation(summary = "上传文件", description = "上传文件到服务器")
     @PostMapping("/upload")
-    public Result<ImFileVO> uploadFile(@RequestParam("file") MultipartFile file,
-                                      @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<ImFileVO> uploadFile(@RequestParam("file") MultipartFile file) {
+        Long userId = SecurityUtils.getLoginUserId();
         if (file == null || file.isEmpty()) {
             return Result.fail("文件不能为空");
         }
-        
+
         ImFileVO fileVO = imFileService.uploadFile(file, userId);
         return Result.success("上传成功", fileVO);
     }
@@ -63,20 +60,16 @@ public class ImFileController {
      * 批量上传多个文件
      *
      * @param files 上传的文件列表
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 上传结果，包含文件信息列表
      */
     @Operation(summary = "批量上传文件", description = "批量上传多个文件")
     @PostMapping("/upload/batch")
-    public Result<List<ImFileVO>> uploadFiles(@RequestParam("files") List<MultipartFile> files,
-                                              @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
+    public Result<List<ImFileVO>> uploadFiles(@RequestParam("files") List<MultipartFile> files) {
+        Long userId = SecurityUtils.getLoginUserId();
         if (files == null || files.isEmpty()) {
             return Result.fail("文件列表不能为空");
         }
-        
+
         List<ImFileVO> fileVOList = imFileService.uploadFiles(files, userId);
         return Result.success("批量上传成功", fileVOList);
     }
@@ -86,18 +79,14 @@ public class ImFileController {
      * 根据文件ID下载文件
      *
      * @param fileId 文件ID
-     * @param userId 当前登录用户ID，从请求头中获取
      * @param response HTTP响应对象
      */
     @Operation(summary = "下载文件", description = "根据文件ID下载文件")
     @GetMapping("/download/{fileId}")
     public void downloadFile(@PathVariable Long fileId,
-                            @RequestHeader(value = "userId", required = false) Long userId,
                             HttpServletResponse response) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
-        
+        Long userId = SecurityUtils.getLoginUserId();
+
         imFileService.downloadFile(fileId, userId);
         // 这里需要根据具体实现来处理文件下载
         // 例如：读取文件、设置响应头、输出到response等
@@ -108,22 +97,18 @@ public class ImFileController {
      * 根据文件ID获取文件预览URL
      *
      * @param fileId 文件ID
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 文件预览URL
      */
     @Operation(summary = "获取文件预览URL", description = "获取文件预览URL")
     @GetMapping("/preview/{fileId}")
-    public Result<String> getFilePreviewUrl(@PathVariable Long fileId,
-                                           @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
-        
+    public Result<String> getFilePreviewUrl(@PathVariable Long fileId) {
+        Long userId = SecurityUtils.getLoginUserId();
+
         ImFileVO fileVO = imFileService.getFileById(fileId);
         if (fileVO == null) {
             return Result.fail("文件不存在");
         }
-        
+
         return Result.success(fileVO.getFileUrl());
     }
 
@@ -146,17 +131,13 @@ public class ImFileController {
      * 删除指定的文件
      *
      * @param fileId 文件ID
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 删除结果
      */
     @Operation(summary = "删除文件", description = "删除指定的文件")
     @DeleteMapping("/{fileId}")
-    public Result<Void> deleteFile(@PathVariable Long fileId,
-                                  @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
-        
+    public Result<Void> deleteFile(@PathVariable Long fileId) {
+        Long userId = SecurityUtils.getLoginUserId();
+
         imFileService.deleteFile(fileId, userId);
         return Result.success("删除成功");
     }
@@ -166,17 +147,13 @@ public class ImFileController {
      * 批量删除多个文件
      *
      * @param fileIds 文件ID列表
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 删除结果
      */
     @Operation(summary = "批量删除文件", description = "批量删除多个文件")
     @DeleteMapping("/batch")
-    public Result<Void> batchDeleteFiles(@RequestBody List<Long> fileIds,
-                                        @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
-        
+    public Result<Void> batchDeleteFiles(@RequestBody List<Long> fileIds) {
+        Long userId = SecurityUtils.getLoginUserId();
+
         for (Long fileId : fileIds) {
             imFileService.deleteFile(fileId, userId);
         }
@@ -187,18 +164,14 @@ public class ImFileController {
      * 获取用户文件列表
      * 获取当前用户的文件列表
      *
-     * @param userId 当前登录用户ID，从请求头中获取
      * @param fileType 文件类型
      * @return 文件列表
      */
     @Operation(summary = "获取用户文件列表", description = "获取当前用户的文件列表")
     @GetMapping("/list")
-    public Result<List<ImFileVO>> getFileList(@RequestHeader(value = "userId", required = false) Long userId,
-                                             @RequestParam(required = false) String fileType) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
-        }
-        
+    public Result<List<ImFileVO>> getFileList(@RequestParam(required = false) String fileType) {
+        Long userId = SecurityUtils.getLoginUserId();
+
         List<ImFileVO> fileVOList = imFileService.getFileList(userId, fileType);
         return Result.success(fileVOList);
     }

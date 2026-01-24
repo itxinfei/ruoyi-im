@@ -40,9 +40,7 @@ public class ImFileChunkUploadController {
     @PostMapping("/init")
     public Result<ImFileChunkUploadInitVO> initChunkUpload(
             @Valid @RequestBody ImFileChunkUploadInitRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         ImFileChunkUploadInitVO result = chunkUploadService.initChunkUpload(request, userId);
         return Result.success(result);
@@ -65,9 +63,7 @@ public class ImFileChunkUploadController {
             @RequestParam("uploadId") String uploadId,
             @RequestParam("chunkNumber") Integer chunkNumber,
             @RequestParam("file") MultipartFile file,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         Boolean result = chunkUploadService.uploadChunk(uploadId, chunkNumber, file, userId);
         return Result.success("分片上传成功", result);
@@ -86,9 +82,7 @@ public class ImFileChunkUploadController {
     @PostMapping("/merge")
     public Result<ImFileVO> mergeChunks(
             @Valid @RequestBody ImFileChunkMergeRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         ImFileVO result = chunkUploadService.mergeChunks(request, userId);
         return Result.success("文件合并成功", result);
@@ -106,9 +100,7 @@ public class ImFileChunkUploadController {
     @DeleteMapping("/cancel/{uploadId}")
     public Result<Void> cancelChunkUpload(
             @PathVariable String uploadId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         chunkUploadService.cancelChunkUpload(uploadId, userId);
         return Result.success("上传已取消");
@@ -125,9 +117,7 @@ public class ImFileChunkUploadController {
     @PutMapping("/pause/{uploadId}")
     public Result<Void> pauseChunkUpload(
             @PathVariable String uploadId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         chunkUploadService.pauseChunkUpload(uploadId, userId);
         return Result.success("上传已暂停");
@@ -145,9 +135,7 @@ public class ImFileChunkUploadController {
     @PostMapping("/resume/{uploadId}")
     public Result<ImFileChunkUploadInitVO> resumeChunkUpload(
             @PathVariable String uploadId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         ImFileChunkUploadInitVO result = chunkUploadService.resumeChunkUpload(uploadId, userId);
         return Result.success(result);
@@ -164,9 +152,7 @@ public class ImFileChunkUploadController {
     @GetMapping("/progress/{uploadId}")
     public Result<Integer> getUploadProgress(
             @PathVariable String uploadId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         Integer progress = chunkUploadService.getUploadProgress(uploadId, userId);
         return Result.success(progress);

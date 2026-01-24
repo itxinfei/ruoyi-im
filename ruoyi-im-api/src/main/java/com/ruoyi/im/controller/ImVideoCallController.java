@@ -2,6 +2,7 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImVideoCallService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,11 +36,8 @@ public class ImVideoCallController {
     public Result<Long> initiateCall(
             @RequestParam Long calleeId,
             @RequestParam(required = false) Long conversationId,
-            @RequestParam(defaultValue = "VIDEO") String callType,
-            @RequestHeader(value = "userId", required = false) Long callerId) {
-        if (callerId == null) {
-            callerId = 1L;
-        }
+            @RequestParam(defaultValue = "VIDEO") String callType) {
+        Long callerId = SecurityUtils.getLoginUserId();
 
         try {
             Long callId = videoCallService.initiateCall(callerId, calleeId, conversationId, callType);
@@ -60,11 +58,8 @@ public class ImVideoCallController {
     @Operation(summary = "接听通话", description = "接听来电")
     @PostMapping("/{callId}/accept")
     public Result<Void> acceptCall(
-            @PathVariable Long callId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @PathVariable Long callId) {
+        Long userId = SecurityUtils.getLoginUserId();
 
         try {
             videoCallService.acceptCall(callId, userId);
@@ -82,11 +77,8 @@ public class ImVideoCallController {
     @PostMapping("/{callId}/reject")
     public Result<Void> rejectCall(
             @PathVariable Long callId,
-            @RequestParam(required = false) String reason,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @RequestParam(required = false) String reason) {
+        Long userId = SecurityUtils.getLoginUserId();
 
         try {
             videoCallService.rejectCall(callId, userId, reason);
@@ -103,11 +95,8 @@ public class ImVideoCallController {
     @Operation(summary = "结束通话", description = "结束当前通话")
     @PostMapping("/{callId}/end")
     public Result<Void> endCall(
-            @PathVariable Long callId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @PathVariable Long callId) {
+        Long userId = SecurityUtils.getLoginUserId();
 
         try {
             videoCallService.endCall(callId, userId);
@@ -141,10 +130,8 @@ public class ImVideoCallController {
      */
     @Operation(summary = "获取用户通话状态", description = "获取用户当前正在进行的通话")
     @GetMapping("/active")
-    public Result<Object> getUserActiveCall(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+    public Result<Object> getUserActiveCall() {
+        Long userId = SecurityUtils.getLoginUserId();
 
         try {
             Object callInfo = videoCallService.getUserActiveCall(userId);
@@ -164,11 +151,8 @@ public class ImVideoCallController {
     public Result<Void> sendSignal(
             @RequestParam Long callId,
             @RequestParam String signalType,
-            @RequestBody String signalData,
-            @RequestHeader(value = "userId", required = false) Long fromUserId) {
-        if (fromUserId == null) {
-            fromUserId = 1L;
-        }
+            @RequestBody String signalData) {
+        Long fromUserId = SecurityUtils.getLoginUserId();
 
         try {
             // 通过WebSocket转发信令消息
@@ -186,11 +170,8 @@ public class ImVideoCallController {
     @Operation(summary = "获取通话历史", description = "获取用户通话历史记录")
     @GetMapping("/history")
     public Result<?> getCallHistory(
-            @RequestParam(defaultValue = "20") Integer limit,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
-        }
+            @RequestParam(defaultValue = "20") Integer limit) {
+        Long userId = SecurityUtils.getLoginUserId();
 
         try {
             return Result.success(videoCallService.getCallHistory(userId, limit));

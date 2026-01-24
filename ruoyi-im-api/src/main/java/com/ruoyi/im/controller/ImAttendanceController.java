@@ -39,9 +39,7 @@ public class ImAttendanceController {
     @PostMapping("/checkIn")
     public Result<ImAttendance> checkIn(@RequestParam(required = false) String location,
                                         @RequestParam(required = false) String deviceInfo,
-                                        @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+                                        ) {
         }
         ImAttendance attendance = attendanceService.checkIn(userId, location, deviceInfo);
         return Result.success("上班打卡成功", attendance);
@@ -59,9 +57,7 @@ public class ImAttendanceController {
     @PostMapping("/checkOut")
     public Result<ImAttendance> checkOut(@RequestParam(required = false) String location,
                                          @RequestParam(required = false) String deviceInfo,
-                                         @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+                                         ) {
         }
         ImAttendance attendance = attendanceService.checkOut(userId, location, deviceInfo);
         return Result.success("下班打卡成功", attendance);
@@ -75,9 +71,7 @@ public class ImAttendanceController {
      */
     @Operation(summary = "获取今日打卡状态", description = "获取用户今日的打卡状态")
     @GetMapping("/today")
-    public Result<ImAttendance> getTodayStatus(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+    public Result<ImAttendance> getTodayStatus() {
         }
         ImAttendance attendance = attendanceService.getTodayAttendance(userId);
         if (attendance == null) {
@@ -111,9 +105,7 @@ public class ImAttendanceController {
     @GetMapping("/list")
     public Result<List<ImAttendance>> getList(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
                                               @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
-                                              @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+                                              ) {
         }
         List<ImAttendance> list = attendanceService.getAttendanceList(userId, startDate, endDate);
         return Result.success(list);
@@ -131,9 +123,7 @@ public class ImAttendanceController {
     @GetMapping("/statistics")
     public Result<Map<String, Object>> getStatistics(@RequestParam int year,
                                                      @RequestParam int month,
-                                                     @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+                                                     ) {
         }
         Map<String, Object> statistics = attendanceService.getMonthlyStatistics(userId, year, month);
         return Result.success(statistics);
@@ -151,9 +141,7 @@ public class ImAttendanceController {
     @PostMapping("/{id}/supplement")
     public Result<Void> applySupplement(@PathVariable Long id,
                                         @RequestParam String reason,
-                                        @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+                                        ) {
         }
         attendanceService.applySupplement(id, reason, userId);
         return Result.success("补卡申请已提交");
@@ -191,9 +179,7 @@ public class ImAttendanceController {
     @Operation(summary = "删除打卡记录", description = "删除指定的打卡记录")
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id,
-                               @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L; // 开发环境默认用户
+                               ) {
         }
         attendanceService.deleteAttendance(id, userId);
         return Result.success("删除成功");

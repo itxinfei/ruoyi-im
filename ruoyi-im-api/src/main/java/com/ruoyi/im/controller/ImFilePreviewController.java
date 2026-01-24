@@ -34,9 +34,7 @@ public class ImFilePreviewController {
     @GetMapping("/info/{fileId}")
     public Result<ImFilePreviewInfoVO> getPreviewInfo(
             @PathVariable Long fileId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         ImFilePreviewInfoVO previewInfo = filePreviewService.getPreviewInfo(fileId, userId);
         return Result.success(previewInfo);
@@ -59,9 +57,7 @@ public class ImFilePreviewController {
             @PathVariable Long fileId,
             @RequestParam(required = false, defaultValue = "200") Integer width,
             @RequestParam(required = false, defaultValue = "200") Integer height,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         String thumbnailUrl = filePreviewService.generateThumbnail(fileId, width, height, userId);
         return Result.success(thumbnailUrl);
@@ -81,9 +77,7 @@ public class ImFilePreviewController {
     public Result<String> getPreviewUrl(
             @PathVariable Long fileId,
             @RequestParam(defaultValue = "image") String format,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 1L;
+            ) {
         }
         String previewUrl = filePreviewService.getPreviewUrl(fileId, format, userId);
         return Result.success(previewUrl);
