@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImAnnouncementCommentMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.im.domain.ImAnnouncementComment">
+        <id column="id" property="id"/>
+        <result column="announcement_id" property="announcementId"/>
+        <result column="user_id" property="userId"/>
+        <result column="content" property="content"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="reply_to_user_id" property="replyToUserId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="user_nickname" property="userNickname"/>
+        <result column="user_avatar" property="userAvatar"/>
+        <result column="reply_to_user_nickname" property="replyToUserNickname"/>
+    </resultMap>
+
+    <select id="selectByAnnouncementId" resultMap="BaseResultMap">
+        SELECT c.*,
+               u.nick_name as user_nickname,
+               u.avatar as user_avatar,
+               ru.nick_name as reply_to_user_nickname
+        FROM im_announcement_comment c
+        LEFT JOIN sys_user u ON c.user_id = u.user_id
+        LEFT JOIN sys_user ru ON c.reply_to_user_id = ru.user_id
+        WHERE c.announcement_id = #{announcementId}
+          AND c.is_deleted = 0
+        ORDER BY c.create_time ASC
+    </select>
+
+    <select id="selectRootCommentsByAnnouncementId" resultMap="BaseResultMap">
+        SELECT c.*,
+               u.nick_name as user_nickname,
+               u.avatar as user_avatar
+        FROM im_announcement_comment c
+        LEFT JOIN sys_user u ON c.user_id = u.user_id
+        WHERE c.announcement_id = #{announcementId}
+          AND c.parent_id = 0
+          AND c.is_deleted = 0
+        ORDER BY c.create_time ASC
+    </select>
+
+    <select id="selectByParentIds" resultMap="BaseResultMap">
+        SELECT c.*,
+               u.nick_name as user_nickname,
+               u.avatar as user_avatar,
+               ru.nick_name as reply_to_user_nickname
+        FROM im_announcement_comment c
+        LEFT JOIN sys_user u ON c.user_id = u.user_id
+        LEFT JOIN sys_user ru ON c.reply_to_user_id = ru.user_id
+        WHERE c.parent_id IN
+        <foreach collection="parentIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+          AND c.is_deleted = 0
+        ORDER BY c.create_time ASC
+    </select>
+
+    <select id="countByAnnouncementId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM im_announcement_comment
+        WHERE announcement_id = #{announcementId}
+          AND is_deleted = 0
+    </select>
+
+</mapper>

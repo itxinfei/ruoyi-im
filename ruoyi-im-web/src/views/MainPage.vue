@@ -75,6 +75,20 @@ onMessage((msg) => {
   store.dispatch('im/receiveMessage', msg)
 })
 
+const { onOnline, onOffline } = useImWebSocket()
+
+onOnline((data) => {
+  if (data.userId) {
+    store.commit('im/SET_USER_STATUS', { userId: data.userId, status: 'online' })
+  }
+})
+
+onOffline((data) => {
+  if (data.userId) {
+    store.commit('im/SET_USER_STATUS', { userId: data.userId, status: 'offline' })
+  }
+})
+
 onMounted(async () => {
   try {
     await store.dispatch('user/getUserInfo')

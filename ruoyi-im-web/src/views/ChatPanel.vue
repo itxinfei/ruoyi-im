@@ -11,13 +11,13 @@
         :messages="messages" 
         :loading="loading" 
         :current-user="currentUser" 
-        @delete="handleDelete"
-        @recall="handleRecall"
-        @reply="handleReply"
+        :session-type="session?.type"
+        @command="handleCommand"
+        @at="handleAt"
         @load-more="handleLoadMore"
-        @edit="handleEdit"
       />
       <MessageInput
+        ref="messageInputRef"
         :session="session"
         :sending="sending"
         :replying-message="replyingMessage"
@@ -28,6 +28,24 @@
         @edit-confirm="handleEditConfirm"
         @start-call="handleStartCall"
         @start-video="handleStartVideo"
+        @upload-image="triggerImageUpload"
+        @upload-file="triggerFileUpload"
+      />
+
+      <!-- 隐藏的文件上传 input -->
+      <input type="file" ref="fileInputRef" style="display: none" @change="onFileChange" />
+      <input type="file" ref="imageInputRef" style="display: none" accept="image/*" @change="onImageChange" />
+
+      <!-- 转发对话框 -->
+      <ForwardDialog
+        ref="forwardDialogRef"
+        @forward="handleForwardConfirm"
+      />
+
+      <!-- 通话对话框 -->
+      <CallDialog
+        ref="callDialogRef"
+        :session="session"
       />
     </template>
   </div>
@@ -39,7 +57,10 @@ import { useStore } from 'vuex'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInput.vue'
+import ForwardDialog from '@/components/ForwardDialog/index.vue'
+import CallDialog from '@/components/Chat/CallDialog.vue'
 import { getMessages } from '@/api/im/message'
+import { uploadFile, uploadImage } from '@/api/im/file'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 
 const props = defineProps({
@@ -55,6 +76,11 @@ const noMore = ref(false)
 const replyingMessage = computed(() => store.state.im.replyingMessage)
 const editingMessage = ref(null)
 const msgListRef = ref(null)
+const forwardDialogRef = ref(null)
+const callDialogRef = ref(null)
+const fileInputRef = ref(null)
+const imageInputRef = ref(null)
+const messageInputRef = ref(null)
 
 const { onMessage } = useImWebSocket()
 
@@ -219,12 +245,47 @@ const handleRecall = async (messageId) => {
   }
 }
 
+// 处理菜单命令
+const handleCommand = (cmd, msg) => {
+  if (cmd === 'forward') {
+    forwardDialogRef.value?.open(msg)
+  } else if (cmd === 'reply') {
+    handleReply(msg)
+  } else if (cmd === 'recall') {
+    handleRecall(msg.id)
+  } else if (cmd === 'delete') {
+    handleDelete(msg.id)
+  } else if (cmd === 'edit') {
+    handleEdit(msg)
+  }
+}
+
+// 处理转发确认
+const handleForwardConfirm = async ({ message, targetSessionId }) => {
+  try {
+    await store.dispatch('im/forwardMessage', {
+      messageId: message.id,
+      targetConversationId: targetSessionId
+    })
+    ElMessage.success('转发成功')
+  } catch (error) {
+    ElMessage.error('转发失败')
+    console.error(error)
+  }
+}
+
 const handleReply = (message) => {
   store.commit('im/SET_REPLYING_MESSAGE', message)
 }
 
 const handleEdit = (message) => {
   editingMessage.value = message
+}
+
+// 处理 @ 提及
+const handleAt = (message) => {
+  if (!message) return
+  messageInputRef.value?.insertAt(message.senderName)
 }
 
 const handleCancelEdit = () => {
@@ -258,15 +319,75 @@ const handleCancelReply = () => {
   store.commit('im/SET_REPLYING_MESSAGE', null)
 }
 
-// 通话功能（待实现）
+// 通话功能
 const handleStartCall = () => {
-  console.log('语音通话功能开发中...')
-  // TODO: 实现语音通话
+  callDialogRef.value?.open('voice')
 }
 
 const handleStartVideo = () => {
-  console.log('视频通话功能开发中...')
-  // TODO: 实现视频通话
+  callDialogRef.value?.open('video')
+}
+
+// 文件上传相关
+const triggerFileUpload = () => fileInputRef.value?.click()
+const triggerImageUpload = () => imageInputRef.value?.click()
+
+const onFileChange = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  
+  const formData = new FormData()
+  formData.append('file', file)
+  
+  try {
+    const res = await uploadFile(formData)
+    if (res.code === 200) {
+      const msg = await store.dispatch('im/sendMessage', {
+        sessionId: props.session.id,
+        type: 'FILE',
+        content: JSON.stringify({
+          fileId: res.data.id,
+          fileName: file.name,
+          size: file.size,
+          fileUrl: res.data.url
+        })
+      })
+      messages.value.push(transformMsg(msg))
+    }
+  } catch (error) {
+    ElMessage.error('上传失败')
+  } finally {
+    e.target.value = ''
+    msgListRef.value?.scrollToBottom()
+  }
+}
+
+const onImageChange = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  
+  const formData = new FormData()
+  formData.append('file', file) // 后端字段通常是 file
+  
+  try {
+    const res = await uploadImage(formData)
+    if (res.code === 200) {
+      const msg = await store.dispatch('im/sendMessage', {
+        sessionId: props.session.id,
+        type: 'IMAGE',
+        content: JSON.stringify({
+          fileId: res.data.id,
+          imageUrl: res.data.url
+        })
+      })
+      messages.value.push(transformMsg(msg))
+    }
+  } catch (error) {
+    ElMessage.error('图片获取失败')
+  } finally {
+    e.target.value = ''
+    msgListRef.value?.scrollToBottom()
+  }
 }
 
 onMounted(() => {

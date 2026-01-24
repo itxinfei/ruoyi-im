@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImAnnouncementReadMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.im.domain.ImAnnouncementRead">
+        <id column="id" property="id"/>
+        <result column="announcement_id" property="announcementId"/>
+        <result column="user_id" property="userId"/>
+        <result column="read_time" property="readTime"/>
+        <result column="user_nickname" property="userNickname"/>
+        <result column="user_avatar" property="userAvatar"/>
+    </resultMap>
+
+    <select id="selectByAnnouncementId" resultMap="BaseResultMap">
+        SELECT ar.*,
+               u.nick_name as user_nickname,
+               u.avatar as user_avatar
+        FROM im_announcement_read ar
+        LEFT JOIN sys_user u ON ar.user_id = u.user_id
+        WHERE ar.announcement_id = #{announcementId}
+        ORDER BY ar.read_time DESC
+    </select>
+
+    <select id="selectReadAnnouncementIdsByUserId" resultType="java.lang.Long">
+        SELECT announcement_id
+        FROM im_announcement_read
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectByAnnouncementIdAndUserId" resultMap="BaseResultMap">
+        SELECT *
+        FROM im_announcement_read
+        WHERE announcement_id = #{announcementId}
+          AND user_id = #{userId}
+        LIMIT 1
+    </select>
+
+</mapper>

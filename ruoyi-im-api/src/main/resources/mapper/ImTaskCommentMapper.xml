@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImTaskCommentMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.im.domain.ImTaskComment">
+        <id column="id" property="id"/>
+        <result column="task_id" property="taskId"/>
+        <result column="user_id" property="userId"/>
+        <result column="content" property="content"/>
+        <result column="reply_to_user_id" property="replyToUserId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="user_nickname" property="userNickname"/>
+        <result column="user_avatar" property="userAvatar"/>
+        <result column="reply_to_user_nickname" property="replyToUserNickname"/>
+    </resultMap>
+
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        SELECT c.*,
+               u.nick_name as user_nickname,
+               u.avatar as user_avatar,
+               ru.nick_name as reply_to_user_nickname
+        FROM im_task_comment c
+        LEFT JOIN sys_user u ON c.user_id = u.user_id
+        LEFT JOIN sys_user ru ON c.reply_to_user_id = ru.user_id
+        WHERE c.task_id = #{taskId}
+          AND c.is_deleted = 0
+        ORDER BY c.create_time ASC
+    </select>
+
+    <select id="countByTaskId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM im_task_comment
+        WHERE task_id = #{taskId}
+          AND is_deleted = 0
+    </select>
+
+    <update id="softDelete">
+        UPDATE im_task_comment
+        SET is_deleted = 1
+        WHERE id = #{commentId}
+          AND user_id = #{userId}
+    </update>
+
+</mapper>

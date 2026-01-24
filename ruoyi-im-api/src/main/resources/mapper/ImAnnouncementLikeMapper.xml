@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImAnnouncementLikeMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.im.domain.ImAnnouncementLike">
+        <id column="id" property="id"/>
+        <result column="announcement_id" property="announcementId"/>
+        <result column="user_id" property="userId"/>
+        <result column="like_time" property="likeTime"/>
+        <result column="user_nickname" property="userNickname"/>
+        <result column="user_avatar" property="userAvatar"/>
+    </resultMap>
+
+    <select id="selectByAnnouncementId" resultMap="BaseResultMap">
+        SELECT al.*,
+               u.nick_name as user_nickname,
+               u.avatar as user_avatar
+        FROM im_announcement_like al
+        LEFT JOIN sys_user u ON al.user_id = u.user_id
+        WHERE al.announcement_id = #{announcementId}
+        ORDER BY al.like_time DESC
+    </select>
+
+    <select id="selectLikedAnnouncementIdsByUserId" resultType="java.lang.Long">
+        SELECT announcement_id
+        FROM im_announcement_like
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectByAnnouncementIdAndUserId" resultMap="BaseResultMap">
+        SELECT *
+        FROM im_announcement_like
+        WHERE announcement_id = #{announcementId}
+          AND user_id = #{userId}
+        LIMIT 1
+    </select>
+
+    <select id="countByAnnouncementId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM im_announcement_like
+        WHERE announcement_id = #{announcementId}
+    </select>
+
+</mapper>

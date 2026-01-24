@@ -155,9 +155,9 @@ const atMemberPickerRef = ref(null)
 const emojiPickerRef = ref(null)
 const isFocused = ref(false)
 
-// 容器高度管理
-const containerHeight = ref(180)  // 默认180px
-const minHeight = 140  // 最小高度
+// 容器高度管理 - 参考钉钉设计
+const containerHeight = ref(200)  // 默认200px，钉钉风格高度
+const minHeight = 160  // 最小高度，保证输入舒适
 const maxHeight = 400  // 最大高度
 let isResizing = false
 let startY = 0
@@ -169,8 +169,13 @@ const loadSavedHeight = () => {
     const saved = localStorage.getItem('im_input_container_height')
     if (saved) {
       const height = parseInt(saved)
-      if (height >= minHeight && height <= maxHeight) {
+      // 如果保存的高度小于最小值（可能是异常值），则使用默认高度
+      if (height >= minHeight && height <= maxHeight && height >= 150) {
         containerHeight.value = height
+      } else {
+        // 清除异常值，使用默认高度
+        localStorage.removeItem('im_input_container_height')
+        containerHeight.value = 180
       }
     }
   } catch (e) {
@@ -225,8 +230,8 @@ const stopResize = () => {
 
 // 重置高度
 const resetHeight = () => {
-  containerHeight.value = 180
-  saveHeight(180)
+  containerHeight.value = 200  // 钉钉风格重置高度
+  saveHeight(200)
 }
 
 // 发送历史记录
@@ -529,10 +534,11 @@ onUnmounted(() => {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  padding: 16px 20px 20px;
+  padding: 12px 20px 16px;  /* 钉钉风格的padding - 上边距较小，左右适中 */
   border-top: 1px solid #e6e6e6;
   position: relative;  /* 为拖拽手柄定位 */
   transition: none;  /* 禁用过渡以流畅调整大小 */
+  min-height: inherit;  /* 继承最小高度设置 */
 }
 
 /* 拖拽手柄 */
@@ -768,8 +774,8 @@ onUnmounted(() => {
 .input-toolbar {
   display: flex;
   align-items: center;
-  margin: 0;  /* 边距设置为0 */
-  gap: 4px;  /* 使用gap替代margin-right */
+  margin: 0 0 12px 0;  /* 底部间距12px，与钉钉一致 */
+  gap: 8px;  /* 增加按钮间距，更接近钉钉 */
 }
 
 .input-toolbar .toolbar-btn {
@@ -852,7 +858,7 @@ onUnmounted(() => {
 .message-input {
   flex: 1;
   height: 100%;  /* 填满父容器高度 */
-  padding: 16px 18px;  /* 增加padding */
+  padding: 20px 22px;  /* 增加padding，让输入更舒适 */
   background: transparent;  /* 背景透明，使用父容器背景 */
   border: none;  /* 移除边框，使用父容器边框 */
   border-radius: 0;  /* 移除圆角，使用父容器圆角 */
@@ -865,6 +871,7 @@ onUnmounted(() => {
   overflow-y: auto;  /* 允许垂直滚动 */
   overflow-x: hidden;  /* 隐藏水平滚动 */
   transition: none;  /* 移除过渡，使用父容器过渡 */
+  min-height: 120px;  /* 设置textarea最小高度，确保输入区不会太小 */
 }
 
 .message-input::placeholder {
@@ -998,9 +1005,9 @@ onUnmounted(() => {
   }
 
   .message-input {
-    min-height: 56px;  /* 移动端减小最小高度 */
-    max-height: 160px;  /* 移动端减小最大高度 */
-    padding: 12px 14px;  /* 减小内边距 */
+    min-height: 80px;  /* 移动端保持足够的最小高度 */
+    max-height: 180px;  /* 移动端适当减小最大高度 */
+    padding: 16px 18px;  /* 保持适当的内边距 */
     font-size: 14px;  /* 减小字体大小 */
   }
 
@@ -1058,9 +1065,9 @@ onUnmounted(() => {
   }
 
   .message-input {
-    min-height: 48px;
+    min-height: 70px;  /* 小屏幕保持足够的最小高度 */
     max-height: 140px;
-    padding: 10px 12px;
+    padding: 14px 16px;  /* 保持适当的内边距 */
     font-size: 13px;
   }
 

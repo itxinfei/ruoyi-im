@@ -35,7 +35,7 @@
         @click="handleNavClick('profile')"
       >
         <div class="avatar-content">
-          <img v-if="currentUser.avatar" :src="currentUser.avatar" class="avatar-img" />
+          <img v-if="currentUser.avatar" :src="currentUserAvatar" class="avatar-img" />
           <span v-else class="avatar-text">{{ (currentUser.nickname || currentUser.username || '我').charAt(0) }}</span>
         </div>
       </div>
@@ -72,6 +72,12 @@ const store = useStore()
 const navWidth = ref(64)
 const unreadCount = computed(() => store.state.im.totalUnreadCount)
 const currentUser = computed(() => store.getters['user/currentUser'])
+
+// 当前用户头像（带 token）
+const currentUserAvatar = computed(() => {
+  if (!currentUser.value.avatar) return ''
+  return addTokenToUrl(currentUser.value.avatar)
+})
 
 const navModules = ref([
   {

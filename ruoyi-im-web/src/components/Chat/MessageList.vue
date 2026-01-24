@@ -24,12 +24,15 @@
           @reaction="handleReaction"
           @command="handleCommand"
           @scroll-to="scrollToMsg"
+          @at="$emit('at', $event)"
         >
           <!-- 消息气泡内容插槽 -->
           <template #bubble>
             <MessageBubble 
               :message="msg" 
+              :session-type="sessionType"
               @command="handleCommand($event, msg)"
+              @at="$emit('at', msg)"
               @preview="previewImage"
               @download="downloadFile"
             />
@@ -90,10 +93,14 @@ const props = defineProps({
   },
   currentUser: Object,
   loading: Boolean,
-  sessionId: [String, Number]
+  sessionId: [String, Number],
+  sessionType: {
+    type: String,
+    default: 'PRIVATE'
+  }
 })
 
-const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit'])
+const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at'])
 
 const listRef = ref(null)
 const readUsersMap = ref({})
@@ -201,18 +208,8 @@ const handleCommand = (cmd, msg) => {
   if (cmd === 'copy') {
     navigator.clipboard.writeText(msg.content)
     ElMessage.success('已复制')
-  } else if (cmd === 'reply') {
-    emit('reply', msg)
-  } else if (cmd === 'recall') {
-    emit('recall', msg.id)
-  } else if (cmd === 'delete') {
-    ElMessageBox.confirm('确定删除这条消息吗？', '提示', {
-      type: 'warning'
-    }).then(() => {
-      emit('delete', msg.id)
-    })
-  } else if (cmd === 'edit') {
-    emit('edit', msg)
+  } else {
+    emit('command', cmd, msg)
   }
 }
 

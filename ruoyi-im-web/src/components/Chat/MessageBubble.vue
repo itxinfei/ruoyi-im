@@ -49,6 +49,9 @@
     <!-- 右键菜单 -->
     <template #dropdown>
       <el-dropdown-menu>
+        <el-dropdown-item command="at" v-if="!message.isOwn && sessionType === 'GROUP'">
+          <el-icon><InfoFilled /></el-icon> <span>@ 提及</span>
+        </el-dropdown-item>
         <el-dropdown-item command="reply">
           <el-icon><ChatLineSquare /></el-icon> <span>回复</span>
         </el-dropdown-item>
@@ -75,16 +78,20 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit } from '@element-plus/icons-vue'
+import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled } from '@element-plus/icons-vue'
 
 const props = defineProps({
   message: {
     type: Object,
     required: true
+  },
+  sessionType: {
+    type: String,
+    default: 'PRIVATE'
   }
 })
 
-defineEmits(['command', 'preview', 'download'])
+defineEmits(['command', 'preview', 'download', 'at'])
 
 const parsedContent = computed(() => {
   try {

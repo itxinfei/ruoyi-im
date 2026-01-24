@@ -5,11 +5,17 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.domain.ImAnnouncement;
+import com.ruoyi.im.domain.ImAnnouncementComment;
+import com.ruoyi.im.domain.ImAnnouncementLike;
+import com.ruoyi.im.domain.ImAnnouncementRead;
 import com.ruoyi.im.dto.announcement.ImAnnouncementCreateRequest;
 import com.ruoyi.im.dto.announcement.ImAnnouncementQueryRequest;
 import com.ruoyi.im.dto.announcement.ImAnnouncementUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
+import com.ruoyi.im.mapper.ImAnnouncementCommentMapper;
+import com.ruoyi.im.mapper.ImAnnouncementLikeMapper;
 import com.ruoyi.im.mapper.ImAnnouncementMapper;
+import com.ruoyi.im.mapper.ImAnnouncementReadMapper;
 import com.ruoyi.im.service.ImAnnouncementService;
 import com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO;
 import com.ruoyi.im.vo.announcement.ImAnnouncementVO;
@@ -36,6 +42,15 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
 
     @Autowired
     private ImAnnouncementMapper announcementMapper;
+
+    @Autowired
+    private ImAnnouncementReadMapper announcementReadMapper;
+
+    @Autowired
+    private ImAnnouncementLikeMapper announcementLikeMapper;
+
+    @Autowired
+    private ImAnnouncementCommentMapper announcementCommentMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -137,8 +152,19 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         announcement.setViewCount(announcement.getViewCount() + 1);
         announcementMapper.updateById(announcement);
 
-        // 标记为已读
-        // TODO: 记录用户已读状态
+        // 记录用户已读状态
+        ImAnnouncementRead existRead = announcementReadMapper.selectByAnnouncementIdAndUserId(announcementId, userId);
+        if (existRead == null) {
+            ImAnnouncementRead announcementRead = new ImAnnouncementRead();
+            announcementRead.setAnnouncementId(announcementId);
+            announcementRead.setUserId(userId);
+            announcementRead.setReadTime(LocalDateTime.now());
+            announcementReadMapper.insert(announcementRead);
+
+            // 更新公告的已读人数
+            announcement.setReadCount(announcement.getReadCount() + 1);
+            announcementMapper.updateById(announcement);
+        }
 
         return convertToDetailVO(announcement, userId);
     }
@@ -216,7 +242,19 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void markAsRead(Long announcementId, Long userId) {
-        // TODO: 记录用户已读状态到数据库
+        // 检查是否已读
+        ImAnnouncementRead existRead = announcementReadMapper.selectByAnnouncementIdAndUserId(announcementId, userId);
+        if (existRead != null) {
+            return; // 已读，无需重复处理
+        }
+
+        // 记录已读状态
+        ImAnnouncementRead announcementRead = new ImAnnouncementRead();
+        announcementRead.setAnnouncementId(announcementId);
+        announcementRead.setUserId(userId);
+        announcementRead.setReadTime(LocalDateTime.now());
+        announcementReadMapper.insert(announcementRead);
+
         // 更新公告的已读人数
         ImAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement != null) {
@@ -229,8 +267,27 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void markAllAsRead(Long userId) {
-        // TODO: 批量标记用户所有未读公告为已读
-        log.info("标记所有公告已读: userId={}", userId);
+        // 查询所有已发布的公告
+        LambdaQueryWrapper<ImAnnouncement> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ImAnnouncement::getStatus, "PUBLISHED");
+        List<ImAnnouncement> announcements = announcementMapper.selectList(queryWrapper);
+
+        // 批量插入已读记录
+        List<Long> readAnnouncementIds = announcementReadMapper.selectReadAnnouncementIdsByUserId(userId);
+        for (ImAnnouncement announcement : announcements) {
+            if (!readAnnouncementIds.contains(announcement.getId())) {
+                ImAnnouncementRead announcementRead = new ImAnnouncementRead();
+                announcementRead.setAnnouncementId(announcement.getId());
+                announcementRead.setUserId(userId);
+                announcementRead.setReadTime(LocalDateTime.now());
+                announcementReadMapper.insert(announcementRead);
+
+                // 更新公告的已读人数
+                announcement.setReadCount(announcement.getReadCount() + 1);
+                announcementMapper.updateById(announcement);
+            }
+        }
+        log.info("标记所有公告已读: userId={}, count={}", userId, announcements.size());
     }
 
     @Override
@@ -241,25 +298,87 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
             throw new BusinessException("公告不存在");
         }
 
-        // TODO: 检查用户是否已点赞，然后添加或取消点赞
-        // 临时实现：直接增加点赞数
-        announcement.setLikeCount(announcement.getLikeCount() + 1);
-        announcementMapper.updateById(announcement);
-        log.info("点赞公告: announcementId={}, userId={}", announcementId, userId);
+        // 检查是否已点赞
+        ImAnnouncementLike existLike = announcementLikeMapper.selectByAnnouncementIdAndUserId(announcementId, userId);
+        if (existLike != null) {
+            // 已点赞，取消点赞
+            announcementLikeMapper.deleteById(existLike.getId());
+            announcement.setLikeCount(Math.max(0, announcement.getLikeCount() - 1));
+            announcementMapper.updateById(announcement);
+            log.info("取消点赞公告: announcementId={}, userId={}", announcementId, userId);
+        } else {
+            // 未点赞，添加点赞
+            ImAnnouncementLike announcementLike = new ImAnnouncementLike();
+            announcementLike.setAnnouncementId(announcementId);
+            announcementLike.setUserId(userId);
+            announcementLike.setLikeTime(LocalDateTime.now());
+            announcementLikeMapper.insert(announcementLike);
+
+            announcement.setLikeCount(announcement.getLikeCount() + 1);
+            announcementMapper.updateById(announcement);
+            log.info("点赞公告: announcementId={}, userId={}", announcementId, userId);
+        }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long addComment(Long announcementId, String content, Long userId) {
-        // TODO: 实现评论添加功能
+        // 检查公告是否存在
+        ImAnnouncement announcement = announcementMapper.selectById(announcementId);
+        if (announcement == null) {
+            throw new BusinessException("公告不存在");
+        }
+
+        // 检查是否允许评论
+        if (announcement.getAllowComment() != null && !announcement.getAllowComment()) {
+            throw new BusinessException("该公告不允许评论");
+        }
+
+        // 创建评论
+        ImAnnouncementComment comment = new ImAnnouncementComment();
+        comment.setAnnouncementId(announcementId);
+        comment.setUserId(userId);
+        comment.setContent(content);
+        comment.setParentId(0L); // 一级评论
+        comment.setCreateTime(LocalDateTime.now());
+        comment.setIsDeleted(0);
+        announcementCommentMapper.insert(comment);
+
+        // 更新公告的评论数
+        announcement.setCommentCount(announcement.getCommentCount() + 1);
+        announcementMapper.updateById(announcement);
+
         log.info("添加公告评论: announcementId={}, content={}, userId={}", announcementId, content, userId);
-        return System.currentTimeMillis();
+        return comment.getId();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteComment(Long commentId, Long userId) {
-        // TODO: 实现评论删除功能
+        // 查询评论
+        ImAnnouncementComment comment = announcementCommentMapper.selectById(commentId);
+        if (comment == null) {
+            throw new BusinessException("评论不存在");
+        }
+
+        // 只有评论作者或公告发布人可以删除评论
+        ImAnnouncement announcement = announcementMapper.selectById(comment.getAnnouncementId());
+        if (announcement == null) {
+            throw new BusinessException("公告不存在");
+        }
+
+        if (!comment.getUserId().equals(userId) && !announcement.getPublisherId().equals(userId)) {
+            throw new BusinessException("只有评论作者或公告发布人可以删除评论");
+        }
+
+        // 软删除评论
+        comment.setIsDeleted(1);
+        announcementCommentMapper.updateById(comment);
+
+        // 更新公告的评论数
+        announcement.setCommentCount(Math.max(0, announcement.getCommentCount() - 1));
+        announcementMapper.updateById(announcement);
+
         log.info("删除公告评论: commentId={}, userId={}", commentId, userId);
     }
 
@@ -292,14 +411,32 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
 
     @Override
     public List<Map<String, Object>> getReadUsers(Long announcementId) {
-        // TODO: 实现已读用户列表查询
-        return new ArrayList<>();
+        List<ImAnnouncementRead> readRecords = announcementReadMapper.selectByAnnouncementId(announcementId);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (ImAnnouncementRead record : readRecords) {
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("userId", record.getUserId());
+            userMap.put("userNickname", record.getUserNickname());
+            userMap.put("userAvatar", record.getUserAvatar());
+            userMap.put("readTime", record.getReadTime());
+            result.add(userMap);
+        }
+        return result;
     }
 
     @Override
     public List<Map<String, Object>> getLikedUsers(Long announcementId) {
-        // TODO: 实现点赞用户列表查询
-        return new ArrayList<>();
+        List<ImAnnouncementLike> likeRecords = announcementLikeMapper.selectByAnnouncementId(announcementId);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (ImAnnouncementLike record : likeRecords) {
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("userId", record.getUserId());
+            userMap.put("userNickname", record.getUserNickname());
+            userMap.put("userAvatar", record.getUserAvatar());
+            userMap.put("likeTime", record.getLikeTime());
+            result.add(userMap);
+        }
+        return result;
     }
 
     @Override
@@ -341,9 +478,19 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
             vo.setIsExpired(false);
         }
 
-        // TODO: 设置点赞和已读状态
-        vo.setIsLiked(false);
-        vo.setIsRead(false);
+        // 设置点赞和已读状态
+        if (userId != null) {
+            // 检查是否已点赞
+            ImAnnouncementLike likeRecord = announcementLikeMapper.selectByAnnouncementIdAndUserId(announcement.getId(), userId);
+            vo.setIsLiked(likeRecord != null);
+
+            // 检查是否已读
+            ImAnnouncementRead readRecord = announcementReadMapper.selectByAnnouncementIdAndUserId(announcement.getId(), userId);
+            vo.setIsRead(readRecord != null);
+        } else {
+            vo.setIsLiked(false);
+            vo.setIsRead(false);
+        }
 
         return vo;
     }
@@ -385,10 +532,50 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
             vo.setIsExpired(false);
         }
 
-        // TODO: 设置评论列表、已读用户列表、点赞用户列表
-        vo.setComments(new ArrayList<>());
-        vo.setReadUsers(new ArrayList<>());
-        vo.setLikedUsers(new ArrayList<>());
+        // 设置评论列表、已读用户列表、点赞用户列表
+        // 获取评论列表
+        List<ImAnnouncementComment> comments = announcementCommentMapper.selectByAnnouncementId(announcement.getId());
+        List<Map<String, Object>> commentList = new ArrayList<>();
+        for (ImAnnouncementComment comment : comments) {
+            Map<String, Object> commentMap = new HashMap<>();
+            commentMap.put("id", comment.getId());
+            commentMap.put("content", comment.getContent());
+            commentMap.put("userId", comment.getUserId());
+            commentMap.put("userNickname", comment.getUserNickname());
+            commentMap.put("userAvatar", comment.getUserAvatar());
+            commentMap.put("parentId", comment.getParentId());
+            commentMap.put("replyToUserId", comment.getReplyToUserId());
+            commentMap.put("replyToUserNickname", comment.getReplyToUserNickname());
+            commentMap.put("createTime", comment.getCreateTime());
+            commentList.add(commentMap);
+        }
+        vo.setComments(commentList);
+
+        // 获取已读用户列表（限制前100个）
+        List<ImAnnouncementRead> readRecords = announcementReadMapper.selectByAnnouncementId(announcement.getId());
+        List<Map<String, Object>> readUserList = new ArrayList<>();
+        for (ImAnnouncementRead record : readRecords) {
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("userId", record.getUserId());
+            userMap.put("userNickname", record.getUserNickname());
+            userMap.put("userAvatar", record.getUserAvatar());
+            userMap.put("readTime", record.getReadTime());
+            readUserList.add(userMap);
+        }
+        vo.setReadUsers(readUserList);
+
+        // 获取点赞用户列表（限制前100个）
+        List<ImAnnouncementLike> likeRecords = announcementLikeMapper.selectByAnnouncementId(announcement.getId());
+        List<Map<String, Object>> likedUserList = new ArrayList<>();
+        for (ImAnnouncementLike record : likeRecords) {
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("userId", record.getUserId());
+            userMap.put("userNickname", record.getUserNickname());
+            userMap.put("userAvatar", record.getUserAvatar());
+            userMap.put("likeTime", record.getLikeTime());
+            likedUserList.add(userMap);
+        }
+        vo.setLikedUsers(likedUserList);
 
         return vo;
     }

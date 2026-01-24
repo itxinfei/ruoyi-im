@@ -9,14 +9,14 @@
     aria-label="主导航"
   >
     <!-- Logo 区域 -->
-    <div class="shrink-0 pt-4 pb-3 w-full flex justify-center">
+    <div class="shrink-0 pt-2 pb-2 w-full flex justify-center">
       <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
         <span class="text-white font-bold text-2xl leading-none tracking-tight">IM</span>
       </div>
     </div>
 
     <!-- 导航项 -->
-    <div class="flex flex-col gap-2 flex-1 w-full px-2 overflow-y-auto overflow-x-hidden" role="menubar">
+    <div class="flex flex-col gap-1 flex-1 w-full px-2 overflow-y-auto overflow-x-hidden" role="menubar">
       <el-tooltip
         v-for="item in navModules"
         :key="item.key"
@@ -42,7 +42,7 @@
     </div>
 
     <!-- 底部操作区 -->
-    <div class="flex flex-col gap-2 w-full px-2 pb-4 shrink-0">
+    <div class="flex flex-col gap-1 w-full px-2 pb-2 shrink-0">
       <!-- 主题切换按钮 -->
       <el-tooltip :content="isDark ? '切换到浅色模式' : '切换到深色模式'" placement="right" :show-after="500">
         <button
@@ -178,7 +178,7 @@ function handleHelp() {
 .nav-item {
   position: relative;
   width: 100%;
-  height: 48px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -190,7 +190,7 @@ function handleHelp() {
   }
 
   .material-icons-outlined {
-    font-size: 24px;
+    font-size: 22px;
   }
 }
 

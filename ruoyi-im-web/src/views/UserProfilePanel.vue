@@ -7,7 +7,7 @@
         <div class="profile-header">
           <div class="avatar-section">
             <div class="avatar" v-if="currentUser.avatar">
-              <img :src="currentUser.avatar" alt="Avatar" />
+              <img :src="currentUserAvatar" alt="Avatar" />
             </div>
             <div class="avatar placeholder" v-else>
               <span class="avatar-text">{{ (currentUser.nickname || currentUser.username || '?').charAt(0) }}</span>
@@ -119,12 +119,19 @@ import {
   Calendar
 } from '@element-plus/icons-vue'
 import EditProfileDialog from '@/components/EditProfileDialog/index.vue'
+import { addTokenToUrl } from '@/utils/file'
 
 const store = useStore()
 const showEditDialog = ref(false)
 
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 const isOnline = computed(() => store.state.user.online)
+
+// 当前用户头像（带 token）
+const currentUserAvatar = computed(() => {
+  if (!currentUser.value.avatar) return ''
+  return addTokenToUrl(currentUser.value.avatar)
+})
 
 onMounted(async () => {
   await store.dispatch('user/getUserInfo')

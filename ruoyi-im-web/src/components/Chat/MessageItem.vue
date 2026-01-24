@@ -4,15 +4,21 @@
     :class="{ 'is-own': message.isOwn }"
   >
     <!-- 头像 -->
-    <el-avatar 
-      class="avatar" 
-      :size="36" 
-      :src="avatarUrl" 
-      shape="square" 
-      :class="avatarBgClass"
+    <div 
+      class="avatar-container" 
+      @contextmenu.prevent="$emit('at', message)"
+      title="右键 @提及"
     >
-      {{ (message.senderName || '?').charAt(0).toUpperCase() }}
-    </el-avatar>
+      <el-avatar 
+        class="avatar" 
+        :size="36" 
+        :src="avatarUrl" 
+        shape="square" 
+        :class="avatarBgClass"
+      >
+        {{ (message.senderName || '?').charAt(0).toUpperCase() }}
+      </el-avatar>
+    </div>
 
     <div class="content-wrapper">
       <!-- 发送者姓名 -->
@@ -73,7 +79,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['reply', 'reaction', 'command', 'scroll-to'])
+defineEmits(['reply', 'reaction', 'command', 'scroll-to', 'at'])
 
 const avatarUrl = computed(() => addTokenToUrl(props.message.senderAvatar))
 

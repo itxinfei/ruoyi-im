@@ -100,6 +100,7 @@ import {
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { updateContactRemark, deleteContact } from '@/api/im/contact'
 import { createConversation } from '@/api/im/conversation'
+import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
   contact: Object
@@ -115,7 +116,8 @@ const getName = computed(() => {
 
 const getAvatar = computed(() => {
   if (!props.contact) return ''
-  return props.contact.isGroup ? props.contact.avatar : props.contact.friendAvatar
+  const avatar = props.contact.isGroup ? props.contact.avatar : props.contact.friendAvatar
+  return addTokenToUrl(avatar)
 })
 
 const startChat = async () => {

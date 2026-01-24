@@ -5,11 +5,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.domain.ImTask;
+import com.ruoyi.im.domain.ImTaskComment;
+import com.ruoyi.im.domain.ImTaskAttachment;
 import com.ruoyi.im.dto.task.ImTaskCreateRequest;
 import com.ruoyi.im.dto.task.ImTaskQueryRequest;
 import com.ruoyi.im.dto.task.ImTaskUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImTaskMapper;
+import com.ruoyi.im.mapper.ImTaskCommentMapper;
+import com.ruoyi.im.mapper.ImTaskAttachmentMapper;
 import com.ruoyi.im.service.ImTaskService;
 import com.ruoyi.im.vo.task.ImTaskDetailVO;
 import com.ruoyi.im.vo.task.ImTaskVO;
@@ -39,6 +43,12 @@ public class ImTaskServiceImpl implements ImTaskService {
 
     @Autowired
     private ImTaskMapper taskMapper;
+
+    @Autowired
+    private ImTaskCommentMapper taskCommentMapper;
+
+    @Autowired
+    private ImTaskAttachmentMapper taskAttachmentMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -202,7 +212,8 @@ public class ImTaskServiceImpl implements ImTaskService {
         detailVO.setComments(convertToCommentVO(comments));
 
         // 获取附件
-        // TODO: 实现附件查询
+        List<ImTaskAttachment> attachments = taskAttachmentMapper.selectByTaskId(taskId);
+        detailVO.setAttachments(convertToAttachmentVO(attachments));
 
         return detailVO;
     }
@@ -319,37 +330,96 @@ public class ImTaskServiceImpl implements ImTaskService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long addComment(Long taskId, String content, Long replyToId, Long userId) {
-        // TODO: 实现评论添加功能
-        log.info("添加任务评论: taskId={}, content={}, userId={}", taskId, content, userId);
-        return System.currentTimeMillis();
+        ImTask task = taskMapper.selectById(taskId);
+        if (task == null) {
+            throw new BusinessException("任务不存在");
+        }
+
+        ImTaskComment comment = new ImTaskComment();
+        comment.setTaskId(taskId);
+        comment.setUserId(userId);
+        comment.setContent(content);
+        comment.setReplyToUserId(replyToId);
+        comment.setCreateTime(LocalDateTime.now());
+        comment.setIsDeleted(0);
+
+        taskCommentMapper.insert(comment);
+        log.info("添加任务评论成功: commentId={}, taskId={}, userId={}", comment.getId(), taskId, userId);
+        return comment.getId();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteComment(Long commentId, Long userId) {
-        // TODO: 实现评论删除功能
-        log.info("删除任务评论: commentId={}, userId={}", commentId, userId);
+        ImTaskComment comment = taskCommentMapper.selectById(commentId);
+        if (comment == null) {
+            throw new BusinessException("评论不存在");
+        }
+
+        // 只有评论作者可以删除
+        if (!comment.getUserId().equals(userId)) {
+            throw new BusinessException("无权限删除此评论");
+        }
+
+        taskCommentMapper.softDelete(commentId, userId);
+        log.info("删除任务评论成功: commentId={}, userId={}", commentId, userId);
     }
 
     @Override
     public List<Map<String, Object>> getComments(Long taskId) {
-        // TODO: 实现评论查询功能
-        return new ArrayList<>();
+        List<ImTaskComment> comments = taskCommentMapper.selectByTaskId(taskId);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (ImTaskComment comment : comments) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", comment.getId());
+            map.put("content", comment.getContent());
+            map.put("commentatorId", comment.getUserId());
+            map.put("commentatorName", comment.getUserNickname());
+            map.put("commentatorAvatar", comment.getUserAvatar());
+            map.put("replyToUserId", comment.getReplyToUserId());
+            map.put("replyToUserNickname", comment.getReplyToUserNickname());
+            map.put("commentTime", comment.getCreateTime());
+            result.add(map);
+        }
+        return result;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long addAttachment(Long taskId, String fileName, String fileUrl, Long fileSize, Long userId) {
-        // TODO: 实现附件添加功能
-        log.info("添加任务附件: taskId={}, fileName={}", taskId, fileName);
-        return System.currentTimeMillis();
+        ImTask task = taskMapper.selectById(taskId);
+        if (task == null) {
+            throw new BusinessException("任务不存在");
+        }
+
+        ImTaskAttachment attachment = new ImTaskAttachment();
+        attachment.setTaskId(taskId);
+        attachment.setFileName(fileName);
+        attachment.setFileUrl(fileUrl);
+        attachment.setFileSize(fileSize);
+        attachment.setUploadUserId(userId);
+        attachment.setUploadTime(LocalDateTime.now());
+
+        taskAttachmentMapper.insert(attachment);
+        log.info("添加任务附件成功: attachmentId={}, taskId={}, fileName={}", attachment.getId(), taskId, fileName);
+        return attachment.getId();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteAttachment(Long attachmentId, Long userId) {
-        // TODO: 实现附件删除功能
-        log.info("删除任务附件: attachmentId={}, userId={}", attachmentId, userId);
+        ImTaskAttachment attachment = taskAttachmentMapper.selectById(attachmentId);
+        if (attachment == null) {
+            throw new BusinessException("附件不存在");
+        }
+
+        // 只有上传者可以删除
+        if (!attachment.getUploadUserId().equals(userId)) {
+            throw new BusinessException("无权限删除此附件");
+        }
+
+        taskAttachmentMapper.deleteById(attachmentId);
+        log.info("删除任务附件成功: attachmentId={}, userId={}", attachmentId, userId);
     }
 
     @Override
@@ -482,8 +552,8 @@ public class ImTaskServiceImpl implements ImTaskService {
             vo.setCompletedSubtaskCount((int) completedCount);
         }
 
-        vo.setCommentCount(0); // TODO: 查询评论数量
-        vo.setAttachmentCount(0); // TODO: 查询附件数量
+        vo.setCommentCount(taskCommentMapper.countByTaskId(task.getId()));
+        vo.setAttachmentCount(taskAttachmentMapper.countByTaskId(task.getId()));
 
         return vo;
     }
@@ -531,8 +601,8 @@ public class ImTaskServiceImpl implements ImTaskService {
             vo.setCompletedSubtaskCount((int) completedCount);
         }
 
-        vo.setCommentCount(0); // TODO: 查询评论数量
-        vo.setAttachmentCount(0); // TODO: 查询附件数量
+        vo.setCommentCount(taskCommentMapper.countByTaskId(task.getId()));
+        vo.setAttachmentCount(taskAttachmentMapper.countByTaskId(task.getId()));
 
         return vo;
     }
@@ -549,6 +619,24 @@ public class ImTaskServiceImpl implements ImTaskService {
             commentVO.setCommentatorName((String) comment.get("commentatorName"));
             commentVO.setCommentTime((LocalDateTime) comment.get("commentTime"));
             return commentVO;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 转换为附件VO
+     */
+    private List<ImTaskDetailVO.TaskAttachment> convertToAttachmentVO(List<ImTaskAttachment> attachments) {
+        return attachments.stream().map(attachment -> {
+            ImTaskDetailVO.TaskAttachment attachmentVO = new ImTaskDetailVO.TaskAttachment();
+            attachmentVO.setId(attachment.getId());
+            attachmentVO.setName(attachment.getFileName());
+            attachmentVO.setUrl(attachment.getFileUrl());
+            attachmentVO.setSize(attachment.getFileSize());
+            attachmentVO.setFileType(attachment.getFileType());
+            attachmentVO.setUploaderId(attachment.getUploadUserId());
+            attachmentVO.setUploadTime(attachment.getUploadTime());
+            attachmentVO.setUploaderName(attachment.getUploaderName());
+            return attachmentVO;
         }).collect(Collectors.toList());
     }
 

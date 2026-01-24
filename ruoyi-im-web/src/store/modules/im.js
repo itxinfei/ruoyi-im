@@ -68,7 +68,10 @@ export default {
     },
 
     // 当前正在回复的消息
-    replyingMessage: null
+    replyingMessage: null,
+
+    // 用户在线状态 { userId: 'online' | 'offline' }
+    userStatus: {}
   }),
 
   getters: {
@@ -211,9 +214,19 @@ export default {
       state.loading[key] = value
     },
 
-    // 设置正在回复的消息
+    // 设置回复的消息
     SET_REPLYING_MESSAGE(state, message) {
       state.replyingMessage = message
+    },
+
+    // 更新用户状态
+    SET_USER_STATUS(state, { userId, status }) {
+      state.userStatus = { ...state.userStatus, [userId]: status }
+    },
+
+    // 批量设置用户状态
+    SET_ALL_USER_STATUS(state, statusMap) {
+      state.userStatus = { ...state.userStatus, ...statusMap }
     },
 
     // 清空状态
@@ -225,6 +238,7 @@ export default {
       state.groups = []
       state.replyingMessage = null
       state.totalUnreadCount = 0
+      state.userStatus = {}
     }
   },
 
@@ -310,6 +324,20 @@ export default {
       throw new Error('编辑消息失败')
     },
 
+    async forwardMessage({ commit }, { messageId, targetConversationId }) {
+      const res = await apiForwardMessage({ messageId, targetConversationId })
+      if (res.code === 200 && res.data) {
+        commit('UPDATE_SESSION', {
+          id: targetConversationId,
+          lastMessage: formatMessagePreviewFromObject(res.data),
+          lastMessageTime: res.data.timestamp,
+          lastMessageType: res.data.type
+        })
+        return res.data
+      }
+      throw new Error('转发消息失败')
+    },
+
     async markMessageAsRead({ commit }, { conversationId, messageId }) {
       await markAsRead({ conversationId, messageId })
       commit('UPDATE_SESSION', {
@@ -364,13 +392,17 @@ export default {
       const isCurrentSession = state.currentSession && state.currentSession.id === sessionId
       const session = state.sessions.find(s => s.id === sessionId)
 
+      // 检查是否有 @ 我
+      const hasMention = message.atUserIds && message.atUserIds.includes(state.currentUser.id)
+
       commit('UPDATE_SESSION', {
         id: sessionId,
         lastMessage: formatMessagePreview(message.type, message.content),
         lastMessageTime: message.timestamp,
         lastMessageType: message.type,
         lastSenderNickname: message.senderName,
-        unreadCount: isCurrentSession ? 0 : ((session?.unreadCount || 0) + 1)
+        unreadCount: isCurrentSession ? 0 : ((session?.unreadCount || 0) + 1),
+        hasMention: hasMention || (isCurrentSession ? false : session?.hasMention)
       })
     },
 

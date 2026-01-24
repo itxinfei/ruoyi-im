@@ -7,16 +7,21 @@ import com.ruoyi.im.util.FileUtils;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.file.ImFileStatisticsVO;
 import com.ruoyi.im.vo.file.ImFileVO;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -30,11 +35,16 @@ import java.util.List;
 @RequestMapping("/api/im/file")
 public class ImFileController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImFileController.class);
+
     @Autowired
     private ImFileService imFileService;
 
     @Value("${file.upload.path}")
     private String uploadPath;
+
+    @Value("${im.jwt-secret}")
+    private String jwtSecret;
 
     /**
      * 上传文件
@@ -116,6 +126,79 @@ public class ImFileController {
 
         // 更新下载次数
         imFileService.downloadFile(fileId, userId);
+
+        // 输出文件到响应流
+        try (FileInputStream fis = new FileInputStream(file);
+             OutputStream os = response.getOutputStream()) {
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            os.flush();
+        } catch (IOException e) {
+            LOGGER.error("文件下载失败", e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 按路径下载文件
+     * 支持头像等直接路径访问，如: /api/im/file/download/avatar/2026/01/24/xxx.png
+     *
+     * @param fileType 文件类型目录，如avatar、document等
+     * @param year 年份
+     * @param month 月份
+     * @param day 日期
+     * @param fileName 文件名
+     * @param token JWT token用于认证
+     * @param response HTTP响应对象
+     */
+    @Operation(summary = "按路径下载文件", description = "支持头像等直接路径访问")
+    @GetMapping("/download/{fileType}/{year}/{month}/{day}/{fileName}")
+    public void downloadFileByPath(@PathVariable String fileType,
+                                  @PathVariable String year,
+                                  @PathVariable String month,
+                                  @PathVariable String day,
+                                  @PathVariable String fileName,
+                                  @RequestParam(required = false) String token,
+                                  HttpServletResponse response) {
+        // 验证token
+        Long userId;
+        if (token != null && !token.isEmpty()) {
+            userId = getUserIdFromToken(token);
+        } else {
+            // 如果没有token，尝试从SecurityContext获取
+            try {
+                userId = SecurityUtils.getLoginUserId();
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+        }
+
+        // 构建文件路径
+        String relativePath = "/" + fileType + "/" + year + "/" + month + "/" + day + "/" + fileName;
+        String filePath = uploadPath + relativePath;
+        File file = new File(filePath);
+        
+        if (!file.exists()) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        // 设置响应头
+        String contentType = getContentType(fileName);
+        response.setContentType(contentType);
+        
+        // 如果是图片文件，设置为内联显示；其他文件设置为下载
+        if (isImageFile(fileName)) {
+            response.setHeader("Content-Disposition", "inline; filename=\"" + fileName + "\"");
+        } else {
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        }
+        
+        response.setContentLengthLong(file.length());
 
         // 输出文件到响应流
         try (FileInputStream fis = new FileInputStream(file);
@@ -227,5 +310,100 @@ public class ImFileController {
     public Result<ImFileStatisticsVO> getStatistics() {
         ImFileStatisticsVO statistics = imFileService.getStorageStatistics();
         return Result.success(statistics);
+    }
+
+    /**
+     * 从JWT token中解析用户ID
+     *
+     * @param token JWT token
+     * @return 用户ID
+     */
+    private Long getUserIdFromToken(String token) {
+        try {
+            // 移除Bearer前缀（如果存在）
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+            
+            Claims claims = Jwts.parser()
+                    .setSigningKey(jwtSecret)
+                    .parseClaimsJws(token)
+                    .getBody();
+            
+            return Long.valueOf(claims.get("userId").toString());
+        } catch (Exception e) {
+            LOGGER.error("解析JWT token失败", e);
+            throw new RuntimeException("无效的token");
+        }
+    }
+
+    /**
+     * 根据文件扩展名获取Content-Type
+     *
+     * @param fileName 文件名
+     * @return Content-Type
+     */
+    private String getContentType(String fileName) {
+        try {
+            String contentType = Files.probeContentType(Paths.get(fileName));
+            if (contentType != null) {
+                return contentType;
+            }
+        } catch (IOException e) {
+            LOGGER.warn("无法识别文件类型: {}", fileName);
+        }
+        
+        // 默认根据扩展名判断
+        String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+        switch (extension) {
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+            case "png":
+                return "image/png";
+            case "gif":
+                return "image/gif";
+            case "webp":
+                return "image/webp";
+            case "pdf":
+                return "application/pdf";
+            case "doc":
+                return "application/msword";
+            case "docx":
+                return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            case "xls":
+                return "application/vnd.ms-excel";
+            case "xlsx":
+                return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case "ppt":
+                return "application/vnd.ms-powerpoint";
+            case "pptx":
+                return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+            case "txt":
+                return "text/plain";
+            case "zip":
+                return "application/zip";
+            case "rar":
+                return "application/x-rar-compressed";
+            case "mp4":
+                return "video/mp4";
+            case "mp3":
+                return "audio/mpeg";
+            default:
+                return "application/octet-stream";
+        }
+    }
+
+    /**
+     * 判断是否为图片文件
+     *
+     * @param fileName 文件名
+     * @return 是否为图片
+     */
+    private boolean isImageFile(String fileName) {
+        String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+        return extension.equals("jpg") || extension.equals("jpeg") 
+                || extension.equals("png") || extension.equals("gif") 
+                || extension.equals("webp") || extension.equals("bmp");
     }
 }
