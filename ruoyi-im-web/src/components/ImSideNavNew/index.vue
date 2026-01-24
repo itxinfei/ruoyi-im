@@ -75,7 +75,7 @@
           :class="activeModule === 'settings' ? 'nav-item-active' : 'nav-item-default'"
           aria-label="设置"
         >
-          <span class="material-icons-outlined" aria-hidden="true">settings</span>
+          <span :class="['material-icons-outlined', { 'loaded': isFontLoaded }]" aria-hidden="true">settings</span>
         </button>
       </el-tooltip>
 
@@ -88,15 +88,14 @@
           :aria-label="`个人资料: ${currentUser.nickname || currentUser.username || '我'}`"
         >
           <div class="avatar-inner">
-            <img
-              v-if="currentUser.avatar"
-              :src="currentUserAvatar"
-              class="w-full h-full object-cover"
-              :alt="`${currentUser.nickname || currentUser.username || '用户'}的头像`"
+            <DingtalkAvatar
+              :src="currentUser.avatar"
+              :name="currentUser.nickname || currentUser.username || '我'"
+              :user-id="currentUser.id"
+              :size="48"
+              shape="circle"
+              custom-class="nav-new-avatar"
             />
-            <span v-else class="text-white font-semibold text-lg" aria-hidden="true">
-              {{ (currentUser.nickname || currentUser.username || '我').charAt(0).toUpperCase() }}
-            </span>
           </div>
           <!-- 在线状态点 -->
           <span class="status-dot"></span>
@@ -110,7 +109,7 @@
 import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useTheme } from '@/composables/useTheme'
-import { addTokenToUrl } from '@/utils/file'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
   activeModule: {
@@ -132,12 +131,6 @@ const unreadCount = computed(() => store.state.im?.totalUnreadCount || 0)
 
 // 当前用户
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
-
-// 当前用户头像（带 token）
-const currentUserAvatar = computed(() => {
-  if (!currentUser.value.avatar) return ''
-  return addTokenToUrl(currentUser.value.avatar)
-})
 
 // 导航模块配置 - 使用 Material Icons Outlined 图标名称
 const navModules = ref([
@@ -233,7 +226,6 @@ function handleHelp() {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   border: 2px solid rgba(255, 255, 255, 0.3);
   overflow: hidden;
   display: flex;

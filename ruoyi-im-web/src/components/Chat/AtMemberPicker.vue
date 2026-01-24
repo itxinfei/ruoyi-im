@@ -29,9 +29,13 @@
         class="member-item"
         @click="handleSelect(member)"
       >
-        <el-avatar :size="32" :src="addTokenToUrl(member.avatar)">
-          {{ member.nickname?.charAt(0) || member.username?.charAt(0) }}
-        </el-avatar>
+        <DingtalkAvatar
+          :src="member.avatar"
+          :name="member.nickname || member.username"
+          :user-id="member.userId || member.id"
+          :size="32"
+          shape="circle"
+        />
         <span class="name">{{ member.nickname || member.username }}</span>
       </div>
       
@@ -44,7 +48,7 @@
 import { ref, computed } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { getGroupMembers } from '@/api/im/group'
-import { addTokenToUrl } from '@/utils/file'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
   sessionId: [String, Number]

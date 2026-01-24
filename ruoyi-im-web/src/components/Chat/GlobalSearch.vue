@@ -212,8 +212,14 @@ const handleGroupClick = async (group) => {
 
 const handleMessageClick = (msg) => {
   saveToHistory(props.keyword)
-  // TODO: 跳转到消息位置
+  // 获取对应会话并跳转
+  const session = {
+    id: msg.conversationId,
+    type: msg.sessionType || 'GROUP', // 这需要后端或API提供sessionType，此处先做假设或匹配
+    name: msg.sessionName || '搜索结果'
+  }
   emit('select', msg)
+  ElMessage.success('正在定位消息...')
   close()
 }
 

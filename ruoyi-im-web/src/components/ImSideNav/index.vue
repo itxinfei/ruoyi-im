@@ -34,10 +34,14 @@
         :class="{ active: activeModule === 'profile' }"
         @click="handleNavClick('profile')"
       >
-        <div class="avatar-content">
-          <img v-if="currentUser.avatar" :src="currentUserAvatar" class="avatar-img" />
-          <span v-else class="avatar-text">{{ (currentUser.nickname || currentUser.username || '我').charAt(0) }}</span>
-        </div>
+        <DingtalkAvatar
+          :src="currentUser.avatar"
+          :name="currentUser.nickname || currentUser.username || '我'"
+          :user-id="currentUser.id"
+          :size="40"
+          shape="circle"
+          custom-class="nav-avatar"
+        />
       </div>
     </div>
   </aside>
@@ -58,7 +62,7 @@ import {
   ChatLineSquare,
   MagicStick
 } from '@element-plus/icons-vue'
-import { addTokenToUrl } from '@/utils/file'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
   activeModule: {
@@ -72,12 +76,6 @@ const store = useStore()
 const navWidth = ref(64)
 const unreadCount = computed(() => store.state.im.totalUnreadCount)
 const currentUser = computed(() => store.getters['user/currentUser'])
-
-// 当前用户头像（带 token）
-const currentUserAvatar = computed(() => {
-  if (!currentUser.value.avatar) return ''
-  return addTokenToUrl(currentUser.value.avatar)
-})
 
 const navModules = ref([
   {
@@ -272,30 +270,8 @@ const handleNavClick = (moduleKey) => {
   }
 }
 
-.avatar-text {
-  font-size: 14px;
-  font-weight: 500;
-  color: #ffffff;
-  transition: all 0.2s ease;
-}
-
-.avatar-content {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border-radius: 50%;
-}
-
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-avatar.active .avatar-text {
+/* 导航头像组件样式覆盖 */
+.user-avatar.active :deep(.nav-avatar .avatar-text) {
   color: #0089ff;
 }
 </style>

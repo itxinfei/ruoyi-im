@@ -53,7 +53,7 @@
               </template>
               <div v-loading="loadingReadUsers[msg.id]" class="read-users-list">
                 <div v-for="user in readUsersMap[msg.id]" :key="user.id" class="read-user-item">
-                  <el-avatar :size="24" :src="addTokenToUrl(user.avatar)">{{ (user.name?.charAt(0) || '?').toUpperCase() }}</el-avatar>
+                  <DingtalkAvatar :src="user.avatar" :name="user.name" :user-id="user.id" :size="24" shape="circle" />
                   <span>{{ user.name }}</span>
                 </div>
                 <div v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)" class="empty">
@@ -84,7 +84,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMessageReadUsers } from '@/api/im/message'
 import MessageItem from './MessageItem.vue'
 import MessageBubble from './MessageBubble.vue'
-import { addTokenToUrl } from '@/utils/file'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
   messages: {
@@ -232,30 +232,46 @@ const scrollToMsg = (id) => {
   }
 }
 
-// 监听滚动事件
-const handleScroll = () => {
-  if (!listRef.value || props.loading) return
+const observer = ref(null)
+
+// 初始化已读上报监听
+const initReadObserver = () => {
+  if (observer.value) observer.value.disconnect()
   
-  const { scrollTop, clientHeight, scrollHeight } = listRef.value
-  
-  // 滚动到顶部加载更多
-  if (scrollTop === 0) {
-    emit('load-more')
-  }
-  
-  // 检测是否接近底部
-  const distanceFromBottom = scrollHeight - scrollTop - clientHeight
-  showScrollToBottom.value = distanceFromBottom > 300
+  observer.value = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const msgId = entry.target.getAttribute('data-id')
+        const msg = props.messages.find(m => m.id == msgId)
+        // 如果消息未读且不是自己发的
+        if (msg && !msg.isOwn && !msg.isRead) {
+          emit('command', 'mark-read', msg)
+        }
+      }
+    })
+  }, { threshold: 0.5 })
 }
 
-// 保持滚动偏移（用于加载更多）
-const maintainScroll = (oldHeight) => {
+const updateObserver = () => {
   nextTick(() => {
-    if (listRef.value) {
-      listRef.value.scrollTop = listRef.value.scrollHeight - oldHeight
-    }
+    const items = listRef.value?.querySelectorAll('.message-wrapper[data-id]')
+    items?.forEach(el => observer.value?.observe(el))
   })
 }
+
+watch(() => props.messages.length, () => {
+  scrollToBottom()
+  updateObserver()
+})
+
+onMounted(() => {
+  initReadObserver()
+  updateObserver()
+})
+
+onUnmounted(() => {
+  if (observer.value) observer.value.disconnect()
+})
 
 defineExpose({ scrollToBottom, maintainScroll })
 </script>

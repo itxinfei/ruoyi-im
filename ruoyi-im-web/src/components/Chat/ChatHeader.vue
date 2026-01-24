@@ -1,8 +1,20 @@
 <template>
   <div class="chat-header">
     <div class="header-left" @click="handleShowDetail" role="button" tabindex="0">
-      <div class="header-avatar" :class="getAvatarBgClass(session)">
-        {{ (session?.name?.charAt(0) || '?').toUpperCase() }}
+      <div class="header-avatar-wrapper">
+        <!-- 群组使用图标，单聊使用钉钉风格头像 -->
+        <div v-if="session?.type === 'GROUP'" class="header-avatar group-avatar">
+          <span class="material-icons-outlined">groups</span>
+        </div>
+        <DingtalkAvatar
+          v-else
+          :src="session?.avatar"
+          :name="session?.name"
+          :user-id="session?.targetId"
+          :size="40"
+          shape="square"
+          custom-class="header-avatar"
+        />
         <span v-if="session?.type !== 'GROUP' && isOnline" class="online-indicator"></span>
       </div>
       <div class="header-info">
@@ -48,6 +60,9 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
+      <button class="action-btn" @click="$emit('toggle-sidebar')" title="详情">
+        <span class="material-icons-outlined">info</span>
+      </button>
     </div>
     
     <!-- 用户详情抽屉 -->
@@ -65,13 +80,14 @@
 import { computed, ref, inject } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import UserDetailDrawer from './UserDetailDrawer.vue'
 
 const props = defineProps({
   session: Object
 })
 
-const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'search', 'pin', 'mute', 'clear'])
+const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'search', 'pin', 'mute', 'clear', 'toggle-sidebar'])
 
 // 用户详情抽屉显示状态
 const showUserDetail = ref(false)
@@ -91,13 +107,6 @@ const isOnline = computed(() => {
   // 回退到session中的peerOnline字段（后端初始值）
   return props.session?.peerOnline ?? false
 })
-
-const getAvatarBgClass = (session) => {
-  if (!session) return 'bg-primary'
-  if (session.type === 'GROUP') return 'bg-primary'
-  const colors = ['bg-blue-500', 'bg-orange-500', 'bg-emerald-500', 'bg-purple-500']
-  return colors[(session.id || 0) % colors.length]
-}
 
 // 显示详情
 const handleShowDetail = () => {
@@ -163,7 +172,21 @@ const handleMenuCommand = (command) => {
   gap: 12px;
 }
 
+.header-avatar-wrapper {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.header-avatar-wrapper:hover {
+  transform: scale(1.05);
+}
+
 .header-avatar {
+  border-radius: 8px;
+}
+
+.group-avatar {
   width: 40px;
   height: 40px;
   border-radius: 8px;
@@ -172,15 +195,6 @@ const handleMenuCommand = (command) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 16px;
-  position: relative;  /* 为在线指示器定位 */
-  cursor: pointer;  /* 可点击 */
-  transition: transform 0.2s;
-}
-
-.header-avatar:hover {
-  transform: scale(1.05);
 }
 
 /* 在线状态指示器 */
@@ -193,13 +207,8 @@ const handleMenuCommand = (command) => {
   background: #52c41a;
   border: 2px solid #fff;
   border-radius: 50%;
+  z-index: 1;
 }
-
-.bg-primary { background-color: #1677ff; }
-.bg-blue-500 { background-color: #3b82f6; }
-.bg-orange-500 { background-color: #f97316; }
-.bg-emerald-500 { background-color: #10b981; }
-.bg-purple-500 { background-color: #a855f7; }
 
 .header-info {
   display: flex;

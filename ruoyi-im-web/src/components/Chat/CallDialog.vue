@@ -10,9 +10,19 @@
   >
     <div class="call-content">
       <div class="user-info">
-        <el-avatar :size="80" :src="avatarUrl" class="call-avatar">
-          {{ (session?.name?.charAt(0) || '?').toUpperCase() }}
-        </el-avatar>
+        <!-- 群组使用图标，单聊使用钉钉风格头像 -->
+        <div v-if="session?.type === 'GROUP'" class="call-avatar group-avatar">
+          <span class="material-icons-outlined">groups</span>
+        </div>
+        <DingtalkAvatar
+          v-else
+          :src="session?.avatar"
+          :name="session?.name"
+          :user-id="session?.targetId || session?.targetUserId"
+          :size="80"
+          shape="circle"
+          custom-class="call-avatar"
+        />
         <h3 class="call-name">{{ session?.name }}</h3>
         <p class="call-status">{{ statusText }}</p>
       </div>
@@ -55,7 +65,7 @@
 
 <script setup>
 import { ref, computed, onUnmounted } from 'vue'
-import { addTokenToUrl } from '@/utils/file'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
   session: Object
@@ -68,8 +78,6 @@ const duration = ref(0)
 let timer = null
 
 const title = computed(() => type.value === 'voice' ? '语音通话' : '视频通话')
-
-const avatarUrl = computed(() => addTokenToUrl(props.session?.avatar))
 
 const statusText = computed(() => {
   switch (status.value) {
@@ -153,20 +161,32 @@ defineExpose({ open, close })
 
 .user-info {
   text-align: center;
-  
+
   .call-avatar {
     margin-bottom: 16px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    background-color: #1677ff;
   }
-  
+
+  .group-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #1677ff;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 16px;
+  }
+
   .call-name {
     font-size: 20px;
     font-weight: 600;
     margin: 8px 0;
     color: #1f2329;
   }
-  
+
   .call-status {
     font-size: 14px;
     color: #8f959e;

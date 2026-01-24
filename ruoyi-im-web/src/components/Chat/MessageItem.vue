@@ -1,29 +1,28 @@
 <template>
-  <div 
-    class="message-item message-enter" 
+  <div
+    class="message-item message-enter"
     :class="{ 'is-own': message.isOwn }"
   >
     <!-- 头像 -->
-    <div 
-      class="avatar-container" 
+    <div
+      class="avatar-container"
       @contextmenu.prevent="$emit('at', message)"
       title="右键 @提及"
     >
-      <el-avatar 
-        class="avatar" 
-        :size="36" 
-        :src="avatarUrl" 
-        shape="square" 
-        :class="avatarBgClass"
-      >
-        {{ (message.senderName || '?').charAt(0).toUpperCase() }}
-      </el-avatar>
+      <DingtalkAvatar
+        :src="avatarUrl"
+        :name="message.senderName"
+        :user-id="message.senderId"
+        :size="36"
+        shape="square"
+        custom-class="message-avatar"
+      />
     </div>
 
     <div class="content-wrapper">
       <!-- 发送者姓名 -->
       <div v-if="!message.isOwn" class="sender-name">{{ message.senderName }}</div>
-      
+
       <!-- 回复消息预览 -->
       <div v-if="message.replyTo" class="reply-wrapper" @click="$emit('scroll-to', message.replyTo.id)">
         <span class="reply-sender">{{ message.replyTo.senderName }}: </span>
@@ -55,7 +54,7 @@
         <!-- 消息气泡组件 -->
         <slot name="bubble"></slot>
       </div>
-      
+
       <!-- 消息页脚 (状态与时间) -->
       <div class="message-footer">
         <div v-if="message.isOwn" class="read-status">
@@ -71,6 +70,7 @@
 import { computed } from 'vue'
 import { ChatLineSquare, MoreFilled, Share, CopyDocument } from '@element-plus/icons-vue'
 import { addTokenToUrl } from '@/utils/file'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
   message: {
@@ -83,12 +83,6 @@ defineEmits(['reply', 'reaction', 'command', 'scroll-to', 'at'])
 
 const avatarUrl = computed(() => addTokenToUrl(props.message.senderAvatar))
 
-const avatarBgClass = computed(() => {
-  if (props.message.isOwn) return 'bg-blue-600'
-  const colors = ['bg-blue-500', 'bg-orange-500', 'bg-emerald-500', 'bg-purple-500']
-  return colors[(props.message.senderId || 0) % colors.length]
-})
-
 const formattedTime = computed(() => {
   if (!props.message.timestamp) return ''
   return new Date(props.message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -98,25 +92,21 @@ const formattedTime = computed(() => {
 <style scoped lang="scss">
 .message-item {
   display: flex;
-  margin-bottom: 20px;
-  
+  margin-bottom: 24px;
+  position: relative;
+
   &.is-own {
     flex-direction: row-reverse;
   }
 }
 
-.avatar {
-  margin: 0 12px;
-  border-radius: 8px !important;
+.avatar-container {
+  margin: 0 8px;
   flex-shrink: 0;
-  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s;
+  &:hover { transform: scale(1.05); }
 }
-
-.bg-blue-600 { background-color: #2563eb; }
-.bg-blue-500 { background-color: #3b82f6; }
-.bg-orange-500 { background-color: #f97316; }
-.bg-emerald-500 { background-color: #10b981; }
-.bg-purple-500 { background-color: #a855f7; }
 
 .content-wrapper {
   max-width: 70%;
@@ -171,12 +161,12 @@ const formattedTime = computed(() => {
     display: flex;
     align-items: center;
     border-radius: 10px;
-    
+
     &:hover {
       background-color: var(--dt-bg-session-hover);
       color: var(--dt-brand-color);
     }
-    
+
     span { font-size: 14px; }
   }
 }
@@ -215,7 +205,7 @@ const formattedTime = computed(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  
+
   .reply-sender {
     color: #434343;
     font-weight: 500;
@@ -243,24 +233,24 @@ const formattedTime = computed(() => {
 }
 
 @keyframes bounceInRight {
-  0% { 
-    opacity: 0; 
-    transform: scale(0.8); 
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
   }
-  100% { 
-    opacity: 1; 
-    transform: scale(1); 
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
 @keyframes slideInLeft {
-  from { 
-    opacity: 0; 
-    transform: translateX(-20px); 
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateX(0); 
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 

@@ -221,17 +221,17 @@ onMounted(() => {
   flex-direction: column;
   position: relative;
   border-top: 1px solid #f0f0f0;
-  padding: 0 20px 12px;
-  height: auto; /* 关键：交给 minHeight 控制 */
+  padding: 0 16px 12px;
+  min-height: 160px;
 }
 
 .resize-handle {
-  position: absolute; top: 0; left: 0; right: 0; height: 4px; cursor: ns-resize;
-  &:hover { background: rgba(24, 144, 255, 0.2); }
+  position: absolute; top: 0; left: 0; right: 0; height: 3px; cursor: ns-resize;
+  z-index: 10; transition: background 0.2s;
+  &:hover { background: rgba(0, 137, 255, 0.4); }
 }
 
 .input-toolbar {
-  height: 48px; display: flex; align-items: center; justify-content: space-between;
   .toolbar-left, .toolbar-right { display: flex; align-items: center; gap: 4px; }
   .toolbar-btn {
     background: none; border: none; padding: 8px; cursor: pointer; color: #646a73;

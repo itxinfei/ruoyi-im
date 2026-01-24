@@ -10,9 +10,19 @@
       <!-- 用户头像和基本信息 -->
       <div class="user-header">
         <div class="avatar-container">
-          <div class="avatar-large" :class="getAvatarBgClass()">
-            {{ getAvatarText }}
+          <!-- 群组使用图标，单聊使用钉钉风格头像 -->
+          <div v-if="isGroup" class="avatar-large group-avatar">
+            <span class="material-icons-outlined">groups</span>
           </div>
+          <DingtalkAvatar
+            v-else
+            :src="userInfo?.avatar"
+            :name="userName"
+            :user-id="session?.targetId || session?.targetUserId"
+            :size="72"
+            shape="square"
+            custom-class="avatar-large"
+          />
           <span v-if="!isGroup && userInfo.online" class="online-badge">在线</span>
         </div>
         
@@ -126,6 +136,7 @@
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { ChatDotRound, Phone, VideoCamera, Suitcase, Message, Document } from '@element-plus/icons-vue'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { getUserInfo } from '@/api/im/user'
 
 const props = defineProps({
@@ -157,17 +168,6 @@ const userName = computed(() => {
   if (!userInfo.value) return ''
   return isGroup.value ? userInfo.value.name : userInfo.value.nickname || userInfo.value.username
 })
-
-const getAvatarText = computed(() => {
-  return userName.value ? userName.value.charAt(0).toUpperCase() : '?'
-})
-
-const getAvatarBgClass = () => {
-  if (isGroup.value) return 'bg-primary'
-  const colors = ['bg-blue', 'bg-orange', 'bg-emerald', 'bg-purple']
-  const index = (props.session?.id || 0) % colors.length
-  return colors[index]
-}
 
 const loadUserInfo = async () => {
   if (!props.session) return
@@ -245,20 +245,19 @@ const handleViewProfile = () => {
 }
 
 .avatar-large {
+  border-radius: 12px;
+}
+
+.group-avatar {
   width: 72px;
   height: 72px;
   border-radius: 12px;
+  background: #1677ff;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  font-weight: 600;
-  color: #fff;
-  &.bg-primary { background: #1677ff; }
-  &.bg-blue { background: #3b82f6; }
-  &.bg-orange { background: #f97316; }
-  &.bg-emerald { background: #10b981; }
-  &.bg-purple { background: #a855f7; }
+  font-size: 32px;
 }
 
 .online-badge {

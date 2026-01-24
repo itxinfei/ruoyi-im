@@ -20,10 +20,14 @@
         <ApprovalPanel v-if="activeModule === 'approval'" />
         <MailPanel v-if="activeModule === 'mail'" />
         <AssistantPanel v-if="activeModule === 'assistant'" />
-        <SettingsPanel v-if="activeModule === 'settings'" />
-        <UserProfilePanel v-if="activeModule === 'profile'" />
+        
+        <!-- 核心聊天面板 -->
         <ChatPanel v-if="activeModule === 'chat' && currentSession" :session="currentSession" />
       </main>
+
+      <!-- 全局交互弹窗 (对齐钉钉模式) -->
+      <PersonalProfileDialog v-model="showProfile" />
+      <SystemSettingsDialog v-model="showSettings" />
     </div>
   </div>
 </template>
@@ -43,9 +47,11 @@ import TodoPanel from './TodoPanel.vue'
 import ApprovalPanel from './ApprovalPanel.vue'
 import MailPanel from './MailPanel.vue'
 import AssistantPanel from './AssistantPanel.vue'
-import SettingsPanel from './SettingsPanel.vue'
-import UserProfilePanel from './UserProfilePanel.vue'
 import ChatPanel from './ChatPanel.vue'
+
+// 新增弹窗组件
+import PersonalProfileDialog from '@/components/Common/PersonalProfileDialog.vue'
+import SystemSettingsDialog from '@/components/Common/SystemSettingsDialog.vue'
 
 const store = useStore()
 const activeModule = ref('chat')
@@ -53,10 +59,20 @@ const isSidebarCollapsed = ref(false)
 const currentSession = computed(() => store.state.im.currentSession)
 const { isDark } = useTheme()
 
+// 弹窗状态控制
+const showProfile = ref(false)
+const showSettings = ref(false)
+
 const { connect, onMessage, isConnected } = useImWebSocket()
 
 const handleSwitchModule = (module) => {
-  activeModule.value = module
+  if (module === 'profile') {
+    showProfile.value = true
+  } else if (module === 'settings') {
+    showSettings.value = true
+  } else {
+    activeModule.value = module
+  }
 }
 
 const handleSelectSession = (session) => {

@@ -117,27 +117,77 @@ const formatSize = (bytes) => {
 .bubble {
   background: #fff;
   padding: 10px 14px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border-radius: 4px 12px 12px 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
   font-size: 14px;
   word-break: break-word;
-  line-height: 1.6;
+  line-height: 1.5;
   color: #1f2329;
   position: relative;
-  max-width: 460px;
+  max-width: 520px;
+  transition: all 0.2s;
   
   &.is-own {
-    background: linear-gradient(135deg, #1677ff 0%, #1890ff 100%);
+    background: #0089ff;
     color: #ffffff;
+    border-radius: 12px 4px 12px 12px;
+    box-shadow: 0 2px 6px rgba(0, 137, 255, 0.2);
+  }
+
+  /* 不同类型消息的特殊样式 */
+  &.IMAGE { padding: 4px; border-radius: 8px; background: #fff !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  &.VIDEO { padding: 4px; border-radius: 8px; background: #000 !important; }
+}
+
+.msg-image { 
+  max-width: 320px; 
+  max-height: 400px; 
+  border-radius: 6px; 
+  display: block;
+  cursor: zoom-in;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.9; }
+}
+
+.msg-file {
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+  background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.05);
+  transition: background 0.2s;
+  &:hover { background: rgba(0,0,0,0.05); }
+  
+  .el-icon { font-size: 32px; color: #1677ff; }
+  .file-info { 
+    display: flex; flex-direction: column; overflow: hidden; 
+    .file-name { font-weight: 500; font-size: 14px; color: #1f2329; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-size { font-size: 12px; color: #8f959e; margin-top: 2px; }
   }
 }
 
-.msg-image { max-width: 100%; border-radius: 4px; cursor: pointer; }
-.msg-file {
-  display: flex; align-items: center; gap: 12px; cursor: pointer;
-  background: rgba(0,0,0,0.02); padding: 8px; border-radius: 4px;
-  .file-info { display: flex; flex-direction: column; overflow: hidden; .file-name { font-weight: 500; } }
+.is-own .msg-file {
+  background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);
+  &:hover { background: rgba(255,255,255,0.2); }
+  .el-icon { color: #fff; }
+  .file-name { color: #fff; }
+  .file-size { color: rgba(255,255,255,0.7); }
 }
+
 .msg-video { max-width: 300px; .video-preview { width: 100%; border-radius: 4px; } }
-.msg-recalled { display: flex; align-items: center; gap: 6px; color: #8c8c8c; font-size: 13px; }
+.msg-recalled { display: flex; align-items: center; gap: 6px; color: #8f959e; font-size: 13px; font-style: italic; }
+
+:global(.dark) {
+  .bubble {
+    background: #2d3748;
+    color: #e2e8f0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    &.is-own {
+      background: #3182ce;
+      box-shadow: 0 2px 6px rgba(49, 130, 206, 0.3);
+    }
+  }
+  .msg-file {
+    background: rgba(255,255,255,0.05);
+    .file-name { color: #e2e8f0; }
+  }
+}
 </style>

@@ -4,33 +4,51 @@
       <el-empty description="选择一个会话开始聊天" />
     </div>
     <template v-else>
-      <ChatHeader :session="session" />
-      <MessageList 
-        ref="msgListRef"
-        :session-id="session?.id"
-        :messages="messages" 
-        :loading="loading" 
-        :current-user="currentUser" 
-        :session-type="session?.type"
-        @command="handleCommand"
-        @at="handleAt"
-        @load-more="handleLoadMore"
-      />
-      <MessageInput
-        ref="messageInputRef"
-        :session="session"
-        :sending="sending"
-        :replying-message="replyingMessage"
-        :editing-message="editingMessage"
-        @send="handleSend"
-        @cancel-reply="handleCancelReply"
-        @cancel-edit="handleCancelEdit"
-        @edit-confirm="handleEditConfirm"
-        @start-call="handleStartCall"
-        @start-video="handleStartVideo"
-        @upload-image="triggerImageUpload"
-        @upload-file="triggerFileUpload"
-      />
+      <div class="main-container">
+        <!-- 左侧聊天主体 -->
+        <div class="chat-viewport">
+          <ChatHeader 
+            :session="session" 
+            @toggle-sidebar="handleToggleSidebar" 
+          />
+          <MessageList 
+            ref="msgListRef"
+            :session-id="session?.id"
+            :messages="messages" 
+            :loading="loading" 
+            :current-user="currentUser" 
+            :session-type="session?.type"
+            @command="handleCommand"
+            @at="handleAt"
+            @load-more="handleLoadMore"
+          />
+          <MessageInput
+            ref="messageInputRef"
+            :session="session"
+            :sending="sending"
+            :replying-message="replyingMessage"
+            :editing-message="editingMessage"
+            @send="handleSend"
+            @cancel-reply="handleCancelReply"
+            @cancel-edit="handleCancelEdit"
+            @edit-confirm="handleEditConfirm"
+            @start-call="handleStartCall"
+            @start-video="handleStartVideo"
+            @upload-image="triggerImageUpload"
+            @upload-file="triggerFileUpload"
+          />
+        </div>
+
+        <!-- 右侧详情侧边栏 -->
+        <Transition name="slide-right">
+          <ChatSidebar 
+            v-if="showSidebar" 
+            :session="session" 
+            @close="showSidebar = false"
+            @member-click="handleMemberClick"
+          />
+        </Transition>
+      </div>
 
       <!-- 隐藏的文件上传 input -->
       <input type="file" ref="fileInputRef" style="display: none" @change="onFileChange" />
@@ -59,9 +77,11 @@ import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInput.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
+import ChatSidebar from '@/components/Chat/ChatSidebar.vue'
 import { getMessages } from '@/api/im/message'
 import { uploadFile, uploadImage } from '@/api/im/file'
 import { useImWebSocket } from '@/composables/useImWebSocket'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   session: Object
@@ -257,7 +277,32 @@ const handleCommand = (cmd, msg) => {
     handleDelete(msg.id)
   } else if (cmd === 'edit') {
     handleEdit(msg)
+  } else if (cmd === 'mark-read') {
+    handleMarkRead(msg)
   }
+}
+
+// 处理已读上报
+const handleMarkRead = async (msg) => {
+  try {
+    await store.dispatch('im/markMessageAsRead', {
+      conversationId: props.session.id,
+      messageId: msg.id
+    })
+    // 本地标记已读，避免重复触发
+    msg.isRead = true
+  } catch (e) {
+    console.warn('上报已读状态失败', e)
+  }
+}
+
+const handleToggleSidebar = () => {
+  showSidebar.value = !showSidebar.value
+}
+
+const handleMemberClick = (member) => {
+  // 可以在此调用 UserProfileDialog 或者简单的信息提示
+  ElMessage.info(`查看成员: ${member.name}`)
 }
 
 // 处理转发确认
@@ -406,7 +451,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .chat-panel {
   display: flex;
   flex-direction: column;
@@ -418,6 +463,32 @@ onMounted(() => {
   .dark & {
     background: #0f172a;
   }
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+  height: 0;
+  overflow: hidden;
+}
+
+.chat-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #fff;
+  
+  .dark & { background: #1e293b; }
+}
+
+/* 侧边栏平滑滑入动画 */
+.slide-right-enter-active, .slide-right-leave-active {
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+.slide-right-enter-from, .slide-right-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
 }
 
 .empty-placeholder {

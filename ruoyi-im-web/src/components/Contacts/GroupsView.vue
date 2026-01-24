@@ -74,6 +74,8 @@ const handleSelectGroup = (group) => {
   emit('select-group', group)
 }
 
+defineExpose({ loadGroups })
+
 onMounted(() => {
   loadGroups()
 })

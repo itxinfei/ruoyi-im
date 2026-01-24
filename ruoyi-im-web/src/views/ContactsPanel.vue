@@ -153,7 +153,7 @@
 
       <!-- 我的群组视图 -->
       <template v-else-if="view === 'groups'">
-        <GroupsView @select-group="handleGroupSelect" />
+        <GroupsView ref="groupsViewRef" @select-group="handleGroupSelect" />
       </template>
 
       <!-- 默认空状态 -->
@@ -167,6 +167,19 @@
 
     <!-- Dialogs -->
     <AddContactDialog v-model:visible="showAddDialog" />
+    
+    <!-- 好友详情弹窗 -->
+    <UserProfileDialog 
+      v-model="showUserDialog" 
+      :user-id="selectedUserId" 
+    />
+    
+    <!-- 群组详情弹窗 -->
+    <GroupProfileDialog 
+      v-model="showGroupDialog" 
+      :group-id="selectedGroupId"
+      @refresh="loadGroups"
+    />
   </div>
 </template>
 
@@ -178,6 +191,8 @@ import AddContactDialog from '@/components/Contacts/AddContactDialog.vue'
 import OrganizationTree from '@/components/Contacts/OrganizationTree.vue'
 import NewFriendsView from '@/components/Contacts/NewFriendsView.vue'
 import GroupsView from '@/components/Contacts/GroupsView.vue'
+import UserProfileDialog from '@/components/Contacts/UserProfileDialog.vue'
+import GroupProfileDialog from '@/components/Contacts/GroupProfileDialog.vue'
 
 const view = ref('department') // department | new-friends | groups
 const selectedDept = ref(null)
@@ -185,6 +200,12 @@ const searchQuery = ref('')
 const showAddDialog = ref(false)
 const showAddMember = ref(false)
 const requestCount = ref(0)
+
+// 详情弹窗控制
+const showUserDialog = ref(false)
+const selectedUserId = ref(null)
+const showGroupDialog = ref(false)
+const selectedGroupId = ref(null)
 
 const deptMembers = ref([])
 
@@ -208,12 +229,13 @@ const handleDeptSelect = async (dept) => {
 }
 
 const handleMemberClick = (member) => {
-  // 打开聊天窗口或查看详情
-  console.log('Member clicked:', member)
+  selectedUserId.value = member.id || member.userId
+  showUserDialog.value = true
 }
 
 const handleGroupSelect = (group) => {
-  console.log('Group selected:', group)
+  selectedGroupId.value = group.id
+  showGroupDialog.value = true
 }
 
 const handleBack = () => {
@@ -258,6 +280,11 @@ const checkRequests = async () => {
   } catch (e) {
     console.error(e)
   }
+}
+
+const groupsViewRef = ref(null)
+const loadGroups = () => {
+  groupsViewRef.value?.loadGroups?.()
 }
 
 onMounted(() => {

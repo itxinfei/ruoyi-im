@@ -62,17 +62,22 @@
         @contextmenu.prevent="handleContextMenu($event, session)"
       >
         <div class="avatar-wrapper">
-          <div
-            class="session-avatar"
-            :class="getAvatarBgClass(session)"
-          >
-            <template v-if="session.type === 'GROUP'">
+          <!-- 群组显示图标，单聊使用钉钉风格头像 -->
+          <template v-if="session.type === 'GROUP'">
+            <div
+              class="session-avatar group-avatar"
+            >
               <span class="material-icons-outlined text-xl">groups</span>
-            </template>
-            <template v-else>
-              {{ (session.name?.charAt(0) || '?').toUpperCase() }}
-            </template>
-          </div>
+            </div>
+          </template>
+          <DingtalkAvatar
+            v-else
+            :name="session.name"
+            :user-id="session.targetId"
+            :size="44"
+            shape="square"
+            custom-class="session-avatar-item"
+          />
           <!-- 在线状态点 (仅单聊显示) -->
           <span
             v-if="session.type === 'PRIVATE'"
@@ -100,8 +105,6 @@
               <span v-if="session.hasMention" class="mention-tag">[有人@我]</span>
               <span v-if="session.isPinned && !isActiveSession(session)" class="pin-tag">[置顶]</span>
               <span v-if="session.lastSenderNickname && session.type === 'GROUP'" class="sender-name">{{ session.lastSenderNickname }}: </span>
-              <!-- 使用预定义的消息预览格式，如果显示[未知消息]则使用更友好的提示 -->
-              <!-- 直接显示消息预览 -->
               {{ session.lastMessage || '暂无消息' }}
             </div>
           </div>
@@ -140,6 +143,7 @@ import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
   currentSession: {
@@ -151,7 +155,6 @@ const props = defineProps({
 const emit = defineEmits(['select-session'])
 const store = useStore()
 
-const term = ref('')
 const searchKeyword = ref('')
 const showCreateGroupDialog = ref(false)
 const showGlobalSearch = ref(false)
@@ -189,8 +192,6 @@ const handleSearchSelect = (item) => {
   if (typeof item === 'string') {
     searchKeyword.value = item
   } else if (item.id) {
-    // 如果是消息，可能需要滚动到消息位置
-    // 目前简单处理，如果是会话直接打开
     if (item.conversationId) {
       const session = sessions.value.find(s => s.id === item.conversationId)
       if (session) emit('select-session', session)
@@ -217,19 +218,15 @@ const formatTime = (timestamp) => {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const yesterday = new Date(today.getTime() - 86400000)
 
-  // 今天
   if (date >= today) {
     return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
   }
-  // 昨天
   if (date >= yesterday) {
     return '昨天'
   }
-  // 今年
   if (date.getFullYear() === now.getFullYear()) {
     return `${date.getMonth() + 1}/${date.getDate()}`
   }
-  // 更早
   return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
 }
 
@@ -296,16 +293,7 @@ const handleDeleteSession = () => {
 // 使用 getter 中的排序会话
 const sortedSessions = computed(() => store.getters['im/sortedSessions'])
 
-// 辅助方法：获取头像背景色
-const getAvatarBgClass = (session) => {
-  if (session.type === 'GROUP') return 'bg-primary';
-  const colors = ['bg-blue-500', 'bg-orange-500', 'bg-emerald-500', 'bg-purple-500'];
-  const id = session.id || 0;
-  return colors[id % colors.length];
-}
-
 onMounted(() => {
-  // 确保会话加载
   if (sessions.value.length === 0) {
     store.dispatch('im/loadSessions')
   }
@@ -323,373 +311,113 @@ onUnmounted(() => {
   flex-direction: column;
   width: 280px;
   flex-shrink: 0;
-  border-right: 1px solid #e8e8e8;
+  border-right: 1px solid #f0f0f0;
   background: #fff;
   height: 100%;
-
-  .dark & {
-    background: #1e293b;
-    border-right-color: #334155;
-  }
 
   .panel-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 16px 8px;
+    padding: 14px 16px 10px;
     flex-shrink: 0;
-
-    h1 {
-      font-size: 18px;
-      font-weight: 600;
-      color: #1f2329;
-
-      .dark & {
-        color: #f1f5f9;
-      }
+    
+    h1 { font-size: 18px; font-weight: 600; color: #1f2329; }
+    .plus-btn { 
+      background: none; border: none; padding: 4px; color: #646a73; cursor: pointer; border-radius: 4px;
+      display: flex; align-items: center;
+      &:hover { background: #f2f3f5; color: #1677ff; }
     }
   }
 
   .search-section {
     padding: 8px 16px 12px;
-    flex-shrink: 0;
-
     .search-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-      background: #f2f3f5;
-      border-radius: 18px;
-      padding: 0 12px;
-      height: 32px;
-      transition: all 0.2s;
-
-      .dark & {
-        background: #0f172a;
-      }
-
-      &:focus-within {
-        background: #fff;
-        box-shadow: 0 0 0 1px #0089ff;
-        
-        .dark & {
-          background: #1e293b;
-        }
-      }
-
-      .search-icon {
-        font-size: 16px;
-        color: #8f959e;
-        margin-right: 8px;
-      }
-
-      .search-input {
-        flex: 1;
-        background: transparent;
-        border: none;
-        outline: none;
-        font-size: 13px;
-        color: #1f2329;
-        
-        &::placeholder {
-          color: #8f959e;
-        }
-
-        .dark & {
-          color: #f1f5f9;
-        }
-      }
+      position: relative; height: 32px; background: #f2f3f5; border-radius: 4px; padding: 0 10px;
+      display: flex; align-items: center; gap: 8px;
+      .search-icon { font-size: 16px; color: #8f959e; }
+      .search-input { flex: 1; border: none; background: transparent; outline: none; font-size: 13px; color: #1f2329; }
     }
   }
 
   .session-list {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 20px;
-
+    flex: 1; overflow-y: auto;
     .session-item {
-      display: flex;
-      align-items: center;
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: background-color 0.15s;
-      position: relative;
-
-      &:hover {
-        background: #f5f6f7;
-
-        .dark & {
-          background: rgba(255, 255, 255, 0.05);
-        }
-      }
-
-      &.active {
-        background: #e1f0ff;
-
-        .dark & {
-          background: rgba(0, 137, 255, 0.15);
-        }
-      }
-
-      &.pinned {
-        background: #f8f9fa;
-
-        .dark & {
-          background: rgba(255, 255, 255, 0.02);
-        }
-
-        &.active {
-          background: #e1f0ff;
-        }
-      }
+      display: flex; padding: 12px 16px; cursor: pointer; position: relative; gap: 12px;
+      transition: background 0.15s;
+      
+      &:hover { background: #f5f6f7; }
+      &.active { background: #e8f3ff; .session-name { color: #1677ff; } }
+      &.pinned { background: #f8fafc; &.active { background: #e8f3ff; } }
 
       .avatar-wrapper {
-        position: relative;
-        flex-shrink: 0;
-
+        position: relative; flex-shrink: 0;
+        .session-avatar { width: 44px; height: 44px; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .group-avatar { background: linear-gradient(135deg, #1677ff, #00d2ff); color: #fff; }
+        
         .status-dot {
-          position: absolute;
-          bottom: 0;
-          right: 0;
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          border: 2px solid #fff;
-          z-index: 2;
-
-          &.online {
-            background-color: #52c41a;
-          }
-
-          &.offline {
-            background-color: #8f959e;
-          }
-
-          .dark & {
-            border-color: #1e293b;
-          }
+          position: absolute; bottom: -1px; right: -1px; width: 12px; height: 12px; border: 2px solid #fff; border-radius: 50%;
+          &.online { background: #52c41a; }
+          &.offline { background: #8f959e; }
         }
-      }
-
-      .session-avatar {
-        width: 44px;
-        height: 44px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 500;
-        font-size: 16px;
-        color: #fff;
-        overflow: hidden;
-      }
-
-      .unread-badge {
-        position: absolute;
-        top: -4px;
-        right: -6px;
-        background-color: #f54a45;
-        color: white;
-        font-size: 11px;
-        font-weight: 600;
-        min-width: 18px;
-        height: 18px;
-        line-height: 14px;
-        border: 2px solid #fff;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 4px;
-        z-index: 10;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-
-        &.badge-dot {
-          min-width: 10px;
-          height: 10px;
-          padding: 0;
-          top: -2px;
-          right: -2px;
-        }
-
-        .dark & {
-          border-color: #1e293b;
+        
+        .unread-badge {
+          position: absolute; top: -4px; right: -6px; padding: 0 5px; height: 18px; min-width: 18px;
+          background: #f54a45; color: #fff; font-size: 11px; border-radius: 9px;
+          display: flex; align-items: center; justify-content: center; font-weight: 600; border: 2px solid #fff;
+          z-index: 5;
+          &.badge-dot { width: 10px; height: 10px; min-width: 10px; top: -2px; right: -2px; padding: 0; }
         }
       }
 
       .session-info {
-        flex: 1;
-        min-width: 0;
-        margin-left: 12px;
-
+        flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 4px;
         .session-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 4px;
-
-          .session-name-group {
-            display: flex;
-            align-items: center;
-            flex: 1;
-            min-width: 0;
-
-            .session-name {
-              font-size: 14px;
-              font-weight: 500;
-              color: #1f2329;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-
-              .dark & {
-                color: #f1f5f9;
-              }
-            }
-
-            .mute-icon {
-              font-size: 14px;
-              color: #8f959e;
-              margin-left: 4px;
-              flex-shrink: 0;
-            }
-          }
-
-          .session-time {
-            font-size: 11px;
-            color: #8f959e;
-            flex-shrink: 0;
-            margin-left: 8px;
-          }
+          display: flex; justify-content: space-between; align-items: center;
+          .session-name { font-size: 14px; font-weight: 500; color: #1f2329; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+          .session-time { font-size: 11px; color: #8f959e; }
         }
-
         .session-bottom {
-          display: flex;
-          align-items: center;
-          
-          .session-preview {
-            font-size: 12px;
-            color: #8f959e;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1.4;
-
-            .pin-tag, .mention-tag {
-              margin-right: 4px;
-            }
-
-            .mention-tag {
-              color: #f54a45;
-              font-weight: 500;
-            }
-
-            .pin-tag {
-              color: #0089ff;
-            }
-
-            .sender-name {
-              color: #646a73;
-              
-              .dark & {
-                color: #94a3b8;
-              }
-            }
-          }
+          display: flex; align-items: center; gap: 4px;
+          .session-preview { font-size: 12px; color: #8f959e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; }
+          .mention-tag { color: #f54a45; font-size: 12px; flex-shrink: 0; }
+          .pin-tag { color: #1677ff; font-size: 12px; flex-shrink: 0; }
+          .mute-icon { font-size: 13px; color: #8f959e; flex-shrink: 0; }
         }
       }
-    }
-
-    .context-menu {
-      position: fixed;
-      background: #fff;
-      border: 1px solid #e8e8e8;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-      z-index: 2000;
-      padding: 4px 0;
-      min-width: 160px;
-
-      .dark & {
-        background: #1e293b;
-        border-color: #334155;
-      }
-
-      .menu-item {
-        padding: 10px 16px;
-        font-size: 13px;
-        color: #1f2329;
-        cursor: pointer;
-        transition: background-color 0.15s;
-
-        .dark & {
-          color: #cbd5e1;
-        }
-
-        &:hover {
-          background: #f5f6f7;
-          color: #0089ff;
-
-          .dark & {
-            background: #334155;
-            color: #60a5fa;
-          }
-        }
-
-        &.danger {
-          color: #f54a45;
-
-          &:hover {
-            background: #fff0f0;
-
-            .dark & {
-              background: rgba(245, 74, 69, 0.1);
-            }
-          }
-        }
-      }
-
-      .menu-divider {
-        height: 1px;
-        background: #f2f3f5;
-        margin: 4px 0;
-
-        .dark & {
-          background: #334155;
-        }
-      }
-    }
-
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      padding: 40px 20px;
     }
   }
 }
 
-/* 滚动条样式优化 */
-.session-list::-webkit-scrollbar {
-  width: 5px;
-}
-
-.session-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.session-list::-webkit-scrollbar-thumb {
-  background: transparent;
-  border-radius: 10px;
-}
-
-.session-list:hover::-webkit-scrollbar-thumb {
-  background: rgba(31, 35, 41, 0.15);
-  
-  .dark & {
-    background: rgba(255, 255, 255, 0.15);
+.context-menu {
+  position: fixed; background: #fff; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); padding: 5px 0; min-width: 140px; z-index: 2000;
+  .menu-item {
+    padding: 8px 16px; font-size: 13px; color: #1f2329; cursor: pointer;
+    &:hover { background: #f2f3f5; color: #1677ff; }
+    &.danger { color: #f54a45; &:hover { background: #fff1f0; } }
   }
+  .menu-divider { height: 1px; background: #f0f0f0; margin: 4px 0; }
 }
+
+:global(.dark) {
+  .session-panel {
+    background: #1e293b; border-color: #334155;
+    .session-item {
+      &:hover { background: #334155; }
+      &.active { background: #1e3a5f; }
+      &.pinned { background: rgba(255,255,255,0.02); &.active { background: #1e3a5f; } }
+      .avatar-wrapper .status-dot, .unread-badge { border-color: #1e293b; }
+    }
+    .panel-header h1, .session-name { color: #f1f5f9; }
+    .search-section .search-container { background: #0f172a; .search-input { color: #f1f5f9; } }
+  }
+  .context-menu { background: #2d3748; border: 1px solid #4a5568; .menu-item { color: #e2e8f0; &:hover { background: #4a5568; } } }
+}
+
+/* 滚动条 */
+.session-list::-webkit-scrollbar { width: 4px; }
+.session-list::-webkit-scrollbar-track { background: transparent; }
+.session-list::-webkit-scrollbar-thumb { background: transparent; border-radius: 2px; }
+.session-list:hover::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
+:global(.dark) .session-list:hover::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
 </style>
