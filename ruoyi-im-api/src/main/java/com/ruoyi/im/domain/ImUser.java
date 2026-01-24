@@ -52,6 +52,9 @@ public class ImUser extends BaseEntity implements Serializable {
     /** 状态: 0=禁用, 1=启用 */
     private Integer status;
 
+    /** 用户角色: USER=普通用户, ADMIN=管理员, SUPER_ADMIN=超级管理员 */
+    private String role;
+
     /** 签名,用户个人简介或个性签名 */
     private String signature;
 
