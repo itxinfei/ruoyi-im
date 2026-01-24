@@ -1,4 +1,5 @@
-  <nav 
+<template>
+  <nav
     :class="[
       'bg-primary flex flex-col items-center py-6 gap-6 z-20 shrink-0 shadow-lg transition-all duration-300',
       collapsed ? 'w-16' : 'w-20'
