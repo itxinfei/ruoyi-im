@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>新增邮件</title>
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+</head>
+<body class="white-bg">
+    <form class="form-horizontal m" id="form-email-add">
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">发送者ID：</label>
+            <div class="col-sm-8">
+                <input name="senderId" placeholder="请输入发送者用户ID" class="form-control" type="number" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">发送者名称：</label>
+            <div class="col-sm-8">
+                <input name="senderName" placeholder="请输入发送者名称" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">发送者邮箱：</label>
+            <div class="col-sm-8">
+                <input name="senderEmail" placeholder="请输入发送者邮箱地址" class="form-control" type="email" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">接收者ID：</label>
+            <div class="col-sm-8">
+                <input name="receiverId" placeholder="请输入接收者用户ID" class="form-control" type="number">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">邮件主题：</label>
+            <div class="col-sm-8">
+                <input name="subject" placeholder="请输入邮件主题" class="form-control" type="text" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">纯文本内容：</label>
+            <div class="col-sm-8">
+                <textarea name="textContent" class="form-control" rows="4" placeholder="请输入纯文本内容"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">HTML内容：</label>
+            <div class="col-sm-8">
+                <textarea name="htmlContent" class="form-control" rows="6" placeholder="请输入HTML格式内容"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">邮件文件夹：</label>
+            <div class="col-sm-8">
+                <select name="folder" class="form-control">
+                    <option value="INBOX">收件箱</option>
+                    <option value="SENT">已发送</option>
+                    <option value="DRAFTS">草稿箱</option>
+                    <option value="SPAM">垃圾邮件</option>
+                    <option value="TRASH">已删除</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">是否已读：</label>
+            <div class="col-sm-8">
+                <select name="isRead" class="form-control">
+                    <option value="0">未读</option>
+                    <option value="1">已读</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">是否星标：</label>
+            <div class="col-sm-8">
+                <select name="isStarred" class="form-control">
+                    <option value="0">否</option>
+                    <option value="1">是</option>
+                </select>
+            </div>
+        </div>
+    </form>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/email";
+        $("#form-email-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-email-add').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImFileAssetMapper">
+    
+    <resultMap type="com.ruoyi.web.domain.ImFileAsset" id="ImFileAssetResult">
+        <id property="id" column="id"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileType" column="file_type"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="fileExtension" column="file_ext"/>
+        <result property="filePath" column="file_path"/>
+        <result property="md5" column="md5"/>
+        <result property="uploaderId" column="uploader_id"/>
+        <result property="uploaderName" column="uploader_name"/>
+        <result property="uploadTime" column="create_time"/>
+        <result property="downloadCount" column="download_count"/>
+        <result property="downloadExpireTime" column="download_expire_time"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <select id="selectImFileAssetList" parameterType="com.ruoyi.web.domain.ImFileAsset" resultMap="ImFileAssetResult">
+        select f.id, f.file_name, f.file_type, f.file_size, f.file_path, f.file_ext, f.md5,
+               f.uploader_id, f.download_count, f.download_expire_time, f.status, f.create_time,
+               u.nickname as uploader_name
+        from im_file_asset f
+        left join im_user u on f.uploader_id = u.id
+        <where>
+            f.status = 'ACTIVE'
+            <if test="fileName != null and fileName != ''"> and f.file_name like concat('%', #{fileName}, '%') </if>
+            <if test="fileType != null and fileType != ''"> and f.file_type = #{fileType} </if>
+            <if test="uploaderId != null"> and f.uploader_id = #{uploaderId} </if>
+            <if test="params.beginTime != null and params.beginTime != ''"> and date_format(f.create_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d') </if>
+            <if test="params.endTime != null and params.endTime != ''"> and date_format(f.create_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d') </if>
+        </where>
+        order by f.create_time desc
+    </select>
+
+    <select id="selectImFileAssetById" parameterType="Long" resultMap="ImFileAssetResult">
+        select f.id, f.file_name, f.file_type, f.file_size, f.file_path, f.file_ext, f.md5,
+               f.uploader_id, f.download_count, f.download_expire_time, f.status, f.create_time,
+               u.nickname as uploader_name
+        from im_file_asset f
+        left join im_user u on f.uploader_id = u.id
+        where f.id = #{id}
+    </select>
+
+    <insert id="insertImFileAsset" parameterType="com.ruoyi.web.domain.ImFileAsset" useGeneratedKeys="true" keyProperty="id">
+        insert into im_file_asset (
+            file_name, file_type, file_size, file_ext, file_path, md5,
+            uploader_id, download_count, download_expire_time, status, create_time
+        ) values (
+            #{fileName}, #{fileType}, #{fileSize}, #{fileExtension}, #{filePath}, #{md5},
+            #{uploaderId}, #{downloadCount}, #{downloadExpireTime}, #{status}, NOW()
+        )
+    </insert>
+
+    <update id="updateImFileAsset" parameterType="com.ruoyi.web.domain.ImFileAsset">
+        update im_file_asset
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fileName != null and fileName != ''">file_name = #{fileName},</if>
+            <if test="fileType != null and fileType != ''">file_type = #{fileType},</if>
+            <if test="fileSize != null">file_size = #{fileSize},</if>
+            <if test="fileExtension != null and fileExtension != ''">file_ext = #{fileExtension},</if>
+            <if test="filePath != null and filePath != ''">file_path = #{filePath},</if>
+            <if test="md5 != null">md5 = #{md5},</if>
+            <if test="uploaderId != null">uploader_id = #{uploaderId},</if>
+            <if test="downloadCount != null">download_count = #{downloadCount},</if>
+            <if test="downloadExpireTime != null">download_expire_time = #{downloadExpireTime},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="deleteImFileAssetById" parameterType="Long">
+        update im_file_asset set status = 'DELETED' where id = #{id}
+    </update>
+
+    <update id="deleteImFileAssetByIds" parameterType="Long[]">
+        update im_file_asset set status = 'DELETED' where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="countTotalFiles" parameterType="com.ruoyi.web.domain.ImFileAsset" resultType="java.lang.Integer">
+        select count(*) from im_file_asset where status = 'ACTIVE'
+        <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>
+    </select>
+
+    <select id="countTodayUploads" parameterType="com.ruoyi.web.domain.ImFileAsset" resultType="java.lang.Integer">
+        select count(*) from im_file_asset
+        where date(create_time) = curdate() and status = 'ACTIVE'
+        <if test="uploaderId != null"> and uploader_id = #{uploaderId} </if>
+    </select>
+
+    <select id="countTotalStorage" resultType="java.lang.Long">
+        select IFNULL(sum(file_size), 0) from im_file_asset where status = 'ACTIVE'
+    </select>
+
+    <update id="cleanInvalidFiles">
+        update im_file_asset set status = 'DELETED' where file_path is null or file_path = ''
+    </update>
+
+    <select id="getFileStatistics" resultType="java.util.Map">
+        select
+            IFNULL(count(*), 0) as totalCount,
+            IFNULL(count(case when file_type = 'image' then 1 end), 0) as imageCount,
+            IFNULL(count(case when file_type = 'video' then 1 end), 0) as videoCount,
+            IFNULL(count(case when file_type = 'document' then 1 end), 0) as docCount,
+            IFNULL(count(case when file_type = 'audio' then 1 end), 0) as audioCount,
+            IFNULL(count(case when file_type = 'other' then 1 end), 0) as otherCount,
+            IFNULL(sum(file_size), 0) as totalStorage,
+            IFNULL(count(case when date(create_time) = curdate() then 1 end), 0) as todayUploads
+        from im_file_asset
+        where status = 'ACTIVE'
+    </select>
+
+    <update id="incrementDownloadCount" parameterType="Long">
+        update im_file_asset
+        set download_count = IFNULL(download_count, 0) + 1
+        where id = #{id} and status = 'ACTIVE'
+    </update>
+</mapper>

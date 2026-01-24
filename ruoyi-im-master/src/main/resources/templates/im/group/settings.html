@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>群组设置</title>
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
+    <style>
+        body {
+            background-color: #f5f7fa;
+        }
+        .wrapper-wrapper-content {
+            padding: 20px;
+        }
+        .settings-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0;
+        }
+        .settings-section {
+            background: #fff;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #667eea;
+        }
+        .settings-section:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            transition: all 0.3s ease;
+        }
+        .settings-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            color: #333;
+        }
+        .settings-title i {
+            margin-right: 8px;
+            color: #667eea;
+            font-size: 18px;
+        }
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            margin-right: 15px;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+        .avatar-preview:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+        .radio-box label {
+            margin-right: 20px;
+            font-weight: normal;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        .radio-box label:hover {
+            background-color: #f0f0f0;
+        }
+        .radio-box input[type="radio"] {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        .help-block {
+            margin-top: 8px;
+            color: #999;
+            font-size: 12px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* 表单输入框焦点效果 */
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        /* 按钮hover效果 */
+        .btn {
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* 必填字段 */
+        .is-required::after {
+            content: " *";
+            color: #f56c6c;
+            font-size: 16px;
+            margin-left: 4px;
+        }
+
+        /* 链接样式 */
+        a[href="javascript:void(0)"] {
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* 文件输入框样式 */
+        .file-input {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content">
+        <div class="settings-container">
+            <form class="form-horizontal" id="form-group-settings" th:object="${group}">
+                <input name="id" th:field="*{id}" type="hidden">
+
+                <!-- 基本信息 -->
+                <div class="settings-section">
+                    <div class="settings-title">
+                        <i class="fa fa-info-circle"></i>基本信息
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">群组头像：</label>
+                        <div class="col-sm-9">
+                            <div class="file-input">
+                                <input id="avatarInput" name="avatar" type="hidden" th:field="*{avatar}">
+                                <img id="avatarPreview" th:src="${group.avatar}" class="avatar-preview" src="/img/profile.jpg" onerror="this.src='/img/profile.jpg'">
+                                <button type="button" class="btn btn-sm btn-info" onclick="changeAvatar()">
+                                    <i class="fa fa-upload"></i>更换头像
+                                </button>
+                            </div>
+                            <span class="help-block">建议尺寸：200x200像素，支持JPG、PNG格式</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label is-required">群组名称：</label>
+                        <div class="col-sm-9">
+                            <input name="name" th:field="*{name}" class="form-control" type="text" required maxlength="50" placeholder="请输入群组名称（必须包含中文）">
+                            <span class="help-block">群组名称必须包含中文字符，中文字符占比不低于10%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">群组简介：</label>
+                        <div class="col-sm-9">
+                            <textarea name="description" th:field="*{description}" class="form-control" rows="3" maxlength="500" placeholder="请输入群组简介（建议包含中文）"></textarea>
+                            <span class="help-block">群组简介不能超过500个字符</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 成员管理 -->
+                <div class="settings-section">
+                    <div class="settings-title">
+                        <i class="fa fa-users"></i>成员管理
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">最大成员数：</label>
+                        <div class="col-sm-9">
+                            <input name="maxMembers" th:field="*{maxMembers}" class="form-control" type="number" min="2" max="500" placeholder="请输入最大成员数（2-500）">
+                            <span class="help-block">建议设置：普通群100人，大群500人</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">全员禁言：</label>
+                        <div class="col-sm-9">
+                            <div class="radio-box">
+                                <label>
+                                    <input type="radio" name="allMuted" value="0" th:checked="${group.allMuted == null or group.allMuted == 0}">
+                                    否
+                                </label>
+                                <label style="margin-left: 20px;">
+                                    <input type="radio" name="allMuted" value="1" th:checked="${group.allMuted == 1}">
+                                    是
+                                </label>
+                            </div>
+                            <span class="help-block">开启后，普通成员将无法发送消息</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 高级设置 -->
+                <div class="settings-section">
+                    <div class="settings-title">
+                        <i class="fa fa-cog"></i>高级设置
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">群组成员：</label>
+                        <div class="col-sm-9">
+                            <button type="button" class="btn btn-sm btn-primary" onclick="viewMembers()">
+                                <i class="fa fa-users"></i>查看成员
+                            </button>
+                            <span class="help-block">管理群组成员、设置角色、移除成员</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">群组公告：</label>
+                        <div class="col-sm-9">
+                            <button type="button" class="btn btn-sm btn-success" onclick="manageAnnouncement()">
+                                <i class="fa fa-bullhorn"></i>管理公告
+                            </button>
+                            <span class="help-block">发布和管理群组公告</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">操作日志：</label>
+                        <div class="col-sm-9">
+                            <button type="button" class="btn btn-sm btn-warning" onclick="viewLogs()">
+                                <i class="fa fa-list"></i>查看日志
+                            </button>
+                            <span class="help-block">查看群组操作日志记录</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="form-group">
+                    <div class="col-sm-offset-3 col-sm-9">
+                        <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                            <i class="fa fa-save"></i>保存设置
+                        </button>
+                        <button type="button" class="btn btn-default" onclick="$.modal.close()">
+                            <i class="fa fa-reply"></i>返回
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div th:include="include :: footer"></div>
+    <script th:src="@{/ruoyi/js/common.js}"></script>
+    <script th:src="@{/ruoyi/js/ry-ui.js}"></script>
+    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
+    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/jquery.validate.min.js}"></script>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/group";
+        var groupId = [[${group.id}]];
+
+        // 中文正则表达式
+        var CHINESE_PATTERN = /[\u4e00-\u9fa5]/;
+
+        /**
+         * 校验内容是否包含中文字符
+         * @param {string} content - 待校验的内容
+         * @param {string} fieldName - 字段名称
+         * @returns {boolean} 是否通过校验
+         */
+        function validateChineseContent(content, fieldName) {
+            if (!content || content.trim().length === 0) {
+                return true; // 空值由required校验
+            }
+
+            // 检查是否包含中文字符
+            if (!CHINESE_PATTERN.test(content)) {
+                $.modal.alertWarning(fieldName + "必须包含中文字符");
+                return false;
+            }
+
+            // 检查中文字符占比（至少10%）
+            var chineseCharCount = 0;
+            var totalCharCount = 0;
+
+            for (var i = 0; i < content.length; i++) {
+                var c = content.charAt(i);
+                if (CHINESE_PATTERN.test(c)) {
+                    chineseCharCount++;
+                }
+                if (!/\s/.test(c)) {
+                    totalCharCount++;
+                }
+            }
+
+            if (totalCharCount > 0) {
+                var chineseRatio = chineseCharCount / totalCharCount;
+                if (chineseRatio < 0.1) {
+                    $.modal.alertWarning(fieldName + "中文字符占比不能低于10%");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * 表单验证
+         */
+        $("#form-group-settings").validate({
+            focusCleanup: true,
+            rules: {
+                name: {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 50
+                },
+                avatar: {
+                    maxlength: 500,
+                    url: true
+                },
+                description: {
+                    maxlength: 500
+                },
+                maxMembers: {
+                    digits: true,
+                    min: 2,
+                    max: 500
+                }
+            },
+            messages: {
+                name: {
+                    required: "请输入群组名称",
+                    minlength: "群组名称长度不能少于2个字符",
+                    maxlength: "群组名称长度不能超过50个字符"
+                },
+                avatar: {
+                    maxlength: "头像URL长度不能超过500个字符",
+                    url: "请输入有效的URL地址"
+                },
+                description: {
+                    maxlength: "群组简介不能超过500个字符"
+                },
+                maxMembers: {
+                    digits: "最大成员数必须是整数",
+                    min: "最大成员数不能少于2人",
+                    max: "最大成员数不能超过500人"
+                }
+            }
+        });
+
+        /**
+         * 保存设置
+         */
+        function saveSettings() {
+            if ($.validate.form()) {
+                // 校验群组名称是否包含中文
+                var groupName = $('input[name="name"]').val();
+                if (!validateChineseContent(groupName, "群组名称")) {
+                    return;
+                }
+
+                // 校验群组简介（如果填写了）
+                var description = $('textarea[name="description"]').val();
+                if (description && description.trim().length > 0) {
+                    if (!validateChineseContent(description, "群组简介")) {
+                        return;
+                    }
+                }
+
+                $.operate.save(prefix + "/edit", $('#form-group-settings').serialize());
+            }
+        }
+
+        /**
+         * 更换头像
+         */
+        function changeAvatar() {
+            $.modal.open("更换头像", ctx + "common/upload", '95%', '90%');
+        }
+
+        /**
+         * 查看成员
+         */
+        function viewMembers() {
+            var url = ctx + "im/member/group/" + groupId + "/view";
+            $.modal.openOptions({
+                title: "群组成员管理",
+                url: url,
+                width: '95%',
+                height: '90%'
+            });
+        }
+
+        /**
+         * 管理公告
+         */
+        function manageAnnouncement() {
+            var url = prefix + "/announcement?groupId=" + groupId;
+            $.modal.openOptions({
+                title: "群组公告管理",
+                url: url,
+                width: '95%',
+                height: '90%'
+            });
+        }
+
+        /**
+         * 查看日志
+         */
+        function viewLogs() {
+            // 临时使用alert提示，后续需要创建日志管理页面
+            $.modal.alertWarning("群组日志管理页面正在开发中，敬请期待！");
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImUserDeviceMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImUserDevice" id="ImUserDeviceResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="nickname" column="nickname"/>
+        <result property="deviceType" column="device_type"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="deviceName" column="device_name"/>
+        <result property="osVersion" column="os_version"/>
+        <result property="appVersion" column="app_version"/>
+        <result property="ipAddress" column="ip_address"/>
+        <result property="location" column="location"/>
+        <result property="status" column="status"/>
+        <result property="lastActiveTime" column="last_active_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImUserDeviceVo">
+        SELECT d.id, d.user_id, d.device_type, d.device_id, d.device_name,
+               d.os_version, d.app_version, d.ip_address, d.location,
+               d.status, d.last_active_time, d.create_time, d.update_time,
+               u.username, u.nickname
+        FROM im_user_device d
+        LEFT JOIN im_user u ON d.user_id = u.id
+    </sql>
+
+    <select id="selectImUserDeviceById" parameterType="Long" resultMap="ImUserDeviceResult">
+        <include refid="selectImUserDeviceVo"/>
+        WHERE d.id = #{id}
+    </select>
+
+    <select id="selectByUserIdAndDeviceId" resultMap="ImUserDeviceResult">
+        <include refid="selectImUserDeviceVo"/>
+        WHERE d.user_id = #{userId} AND d.device_id = #{deviceId}
+    </select>
+
+    <select id="selectImUserDeviceList" parameterType="com.ruoyi.web.domain.ImUserDevice" resultMap="ImUserDeviceResult">
+        <include refid="selectImUserDeviceVo"/>
+        <where>
+            <if test="userId != null">and d.user_id = #{userId}</if>
+            <if test="username != null and username != ''">and u.username like concat('%', #{username}, '%')</if>
+            <if test="nickname != null and nickname != ''">and u.nickname like concat('%', #{nickname}, '%')</if>
+            <if test="deviceType != null and deviceType != ''">and d.device_type = #{deviceType}</if>
+            <if test="deviceId != null and deviceId != ''">and d.device_id like concat('%', #{deviceId}, '%')</if>
+            <if test="ipAddress != null and ipAddress != ''">and d.ip_address like concat('%', #{ipAddress}, '%')</if>
+            <if test="status != null and status != ''">and d.status = #{status}</if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                AND date_format(d.last_active_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                AND date_format(d.last_active_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d')
+            </if>
+        </where>
+        ORDER BY d.last_active_time DESC
+    </select>
+
+    <select id="selectDevicesByUserId" parameterType="Long" resultMap="ImUserDeviceResult">
+        <include refid="selectImUserDeviceVo"/>
+        WHERE d.user_id = #{userId}
+        ORDER BY d.last_active_time DESC
+    </select>
+
+    <insert id="insertImUserDevice" parameterType="com.ruoyi.web.domain.ImUserDevice" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO im_user_device
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="deviceType != null">device_type,</if>
+            <if test="deviceId != null">device_id,</if>
+            <if test="deviceName != null">device_name,</if>
+            <if test="osVersion != null">os_version,</if>
+            <if test="appVersion != null">app_version,</if>
+            <if test="ipAddress != null">ip_address,</if>
+            <if test="location != null">location,</if>
+            <if test="status != null">status,</if>
+            <if test="lastActiveTime != null">last_active_time,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="deviceType != null">#{deviceType},</if>
+            <if test="deviceId != null">#{deviceId},</if>
+            <if test="deviceName != null">#{deviceName},</if>
+            <if test="osVersion != null">#{osVersion},</if>
+            <if test="appVersion != null">#{appVersion},</if>
+            <if test="ipAddress != null">#{ipAddress},</if>
+            <if test="location != null">#{location},</if>
+            <if test="status != null">#{status},</if>
+            <if test="lastActiveTime != null">#{lastActiveTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+        ON DUPLICATE KEY UPDATE
+            last_active_time = VALUES(last_active_time),
+            status = VALUES(status),
+            update_time = NOW()
+    </insert>
+
+    <update id="updateImUserDevice" parameterType="com.ruoyi.web.domain.ImUserDevice">
+        UPDATE im_user_device
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deviceName != null">device_name = #{deviceName},</if>
+            <if test="osVersion != null">os_version = #{osVersion},</if>
+            <if test="appVersion != null">app_version = #{appVersion},</if>
+            <if test="ipAddress != null">ip_address = #{ipAddress},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="lastActiveTime != null">last_active_time = #{lastActiveTime},</if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateDeviceStatus">
+        UPDATE im_user_device
+        SET status = #{status}, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteImUserDeviceById" parameterType="Long">
+        DELETE FROM im_user_device WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteImUserDeviceByIds" parameterType="Long[]">
+        DELETE FROM im_user_device WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 获取设备统计数据 -->
+    <select id="getDeviceStatistics" resultType="map">
+        SELECT
+            (SELECT COUNT(*) FROM im_user_device) AS totalCount,
+            (SELECT COUNT(*) FROM im_user_device WHERE status = 'ONLINE') AS onlineCount,
+            (SELECT COUNT(*) FROM im_user_device WHERE status = 'OFFLINE') AS offlineCount,
+            (SELECT COUNT(*) FROM im_user_device WHERE device_type = 'PC') AS pcCount,
+            (SELECT COUNT(*) FROM im_user_device WHERE device_type = 'MOBILE') AS mobileCount,
+            (SELECT COUNT(*) FROM im_user_device WHERE device_type = 'WEB') AS webCount,
+            (SELECT COUNT(DISTINCT user_id) FROM im_user_device WHERE status = 'ONLINE') AS onlineUserCount
+    </select>
+
+    <!-- 清理离线设备 -->
+    <delete id="cleanOfflineDevices">
+        DELETE FROM im_user_device
+        WHERE status = 'OFFLINE'
+        AND last_active_time &lt; DATE_SUB(NOW(), INTERVAL #{days} DAY)
+    </delete>
+
+</mapper>

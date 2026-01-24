@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImStatisticsMapper">
+    
+    <select id="getSystemStatistics" resultType="java.util.Map">
+        select 
+            (select count(*) from im_user) as total_users,
+            (select count(*) from im_user where status = 'online') as online_users,
+            (select count(*) from im_group) as total_groups,
+            (select count(*) from im_message) as total_messages,
+            (select count(*) from im_conversation) as total_conversations
+    </select>
+
+    <select id="getUserStatistics" resultType="java.util.Map">
+        select 
+            count(*) as sent_messages,
+            sum(case when message_type = 'text' then 1 else 0 end) as text_messages,
+            sum(case when message_type = 'image' then 1 else 0 end) as image_messages
+        from im_message
+        where sender_id = #{userId}
+        <if test="startTime != null and startTime != ''"> and create_time >= #{startTime} </if>
+        <if test="endTime != null and endTime != ''"> and create_time &lt;= #{endTime} </if>
+    </select>
+
+    <select id="getGroupStatistics" resultType="java.util.Map">
+        select 
+            (select count(*) from im_group_member where group_id = #{groupId}) as member_count,
+            (select count(*) from im_message where conversation_id in (
+                select id from im_conversation where type = 'group' and related_id = #{groupId}
+            )) as message_count
+    </select>
+
+    <select id="getMessageStatistics" resultType="java.util.Map">
+        select 
+            count(*) as total,
+            count(distinct sender_id) as unique_senders,
+            date_format(create_time, '%Y-%m-%d') as date_group
+        from im_message
+        <where>
+            <if test="conversationId != null"> and conversation_id = #{conversationId} </if>
+            <if test="startTime != null and startTime != ''"> and create_time >= #{startTime} </if>
+            <if test="endTime != null and endTime != ''"> and create_time &lt;= #{endTime} </if>
+        </where>
+        group by date_group
+    </select>
+
+    <select id="getFileStatistics" resultType="java.util.Map">
+        select 
+            count(*) as total_files,
+            coalesce(sum(file_size), 0) as total_size,
+            count(distinct uploader_id) as unique_uploaders
+        from im_file_asset
+    </select>
+
+    <select id="getActiveRanking" resultType="java.util.Map">
+        select 
+            u.id, u.username, u.nickname,
+            count(m.id) as message_count
+        from im_user u
+        left join im_message m on u.id = m.sender_id
+            and m.create_time >= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+        group by u.id, u.username, u.nickname
+        order by message_count desc
+        limit 20
+    </select>
+
+    <select id="getOnlineStatistics" resultType="java.util.Map">
+        select
+            count(*) as online_count,
+            (select count(*) from im_session where status = 'active') as active_sessions
+        from im_user where status = 'online'
+    </select>
+
+    <!-- ==================== Dashboard数据可视化查询 ==================== -->
+
+    <!-- 1. 时间序列查询（5个） -->
+
+    <!-- 用户注册趋势 -->
+    <select id="getUserRegistrationTrend" resultType="java.util.Map">
+        select
+            date_format(create_time, #{dateFormat}) as date_label,
+            count(*) as count
+        from im_user
+        where create_time >= #{startTime}
+        group by date_label
+        order by date_label
+    </select>
+
+    <!-- 消息发送趋势 -->
+    <select id="getMessageSendingTrend" resultType="java.util.Map">
+        select
+            date_format(create_time, #{dateFormat}) as date_label,
+            count(*) as count
+        from im_message
+        where create_time >= #{startTime}
+        group by date_label
+        order by date_label
+    </select>
+
+    <!-- 群组创建趋势 -->
+    <select id="getGroupCreationTrend" resultType="java.util.Map">
+        select
+            date_format(create_time, #{dateFormat}) as date_label,
+            count(*) as count
+        from im_group
+        where create_time >= #{startTime}
+        group by date_label
+        order by date_label
+    </select>
+
+    <!-- 每小时活跃度趋势 -->
+    <select id="getHourlyActivityTrend" resultType="java.util.Map">
+        select
+            hour(create_time) as hour_label,
+            count(*) as count
+        from im_message
+        where create_time >= #{startTime}
+        group by hour_label
+        order by hour_label
+    </select>
+
+    <!-- 每日活跃用户 -->
+    <select id="getDailyActiveUsers" resultType="java.util.Map">
+        select
+            date_format(create_time, #{dateFormat}) as date_label,
+            count(distinct sender_id) as count
+        from im_message
+        where create_time >= #{startTime}
+        group by date_label
+        order by date_label
+    </select>
+
+    <!-- 2. 分类统计查询（3个） -->
+
+    <!-- 消息类型分布 -->
+    <select id="getMessageTypeDistribution" resultType="java.util.Map">
+        select
+            message_type as type_label,
+            count(*) as count
+        from im_message
+        <where>
+            <if test="startTime != null and startTime != ''"> and create_time >= #{startTime} </if>
+        </where>
+        group by message_type
+        order by count desc
+    </select>
+
+    <!-- 文件类型分布 -->
+    <select id="getFileTypeDistribution" resultType="java.util.Map">
+        select
+            file_type as type_label,
+            count(*) as count,
+            coalesce(sum(file_size), 0) as total_size
+        from im_file_asset
+        <where>
+            <if test="startTime != null and startTime != ''"> and create_time >= #{startTime} </if>
+        </where>
+        group by file_type
+        order by count desc
+    </select>
+
+    <!-- 用户活跃度分布 -->
+    <select id="getUserActivityDistribution" resultType="java.util.Map">
+        select
+            case
+                when message_count = 0 then '不活跃'
+                when message_count &lt; 10 then '低活跃'
+                when message_count &lt; 50 then '中等活跃'
+                when message_count &lt; 100 then '高活跃'
+                else '超高活跃'
+            end as activity_label,
+            count(*) as count
+        from (
+            select u.id, count(m.id) as message_count
+            from im_user u
+            left join im_message m on u.id = m.sender_id
+                and m.create_time >= #{startTime}
+            group by u.id
+        ) user_stats
+        group by activity_label
+        order by
+            case activity_label
+                when '超高活跃' then 1
+                when '高活跃' then 2
+                when '中等活跃' then 3
+                when '低活跃' then 4
+                else 5
+            end
+    </select>
+
+    <!-- 3. 对比分析查询（3个） -->
+
+    <!-- 周对比（本周vs上周） -->
+    <select id="getWeeklyComparison" resultType="java.util.Map">
+        select
+            '本周' as period_label,
+            count(*) as count
+        from im_message
+        where create_time >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        union all
+        select
+            '上周' as period_label,
+            count(*) as count
+        from im_message
+        where create_time >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+            and create_time &lt; DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+    </select>
+
+    <!-- 月对比（本月vs上月） -->
+    <select id="getMonthlyComparison" resultType="java.util.Map">
+        select
+            '本月' as period_label,
+            count(*) as count
+        from im_message
+        where create_time >= DATE_FORMAT(NOW(), '%Y-%m-01')
+        union all
+        select
+            '上月' as period_label,
+            count(*) as count
+        from im_message
+        where create_time >= DATE_SUB(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 1 MONTH)
+            and create_time &lt; DATE_FORMAT(NOW(), '%Y-%m-01')
+    </select>
+
+    <!-- 每小时对比（今天vs昨天） -->
+    <select id="getHourlyComparison" resultType="java.util.Map">
+        select
+            hour(create_time) as hour_label,
+            '今天' as period_label,
+            count(*) as count
+        from im_message
+        where date(create_time) = CURDATE()
+        group by hour_label
+        union all
+        select
+            hour(create_time) as hour_label,
+            '昨天' as period_label,
+            count(*) as count
+        from im_message
+        where date(create_time) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+        group by hour_label
+        order by hour_label, period_label
+    </select>
+
+    <!-- 4. 排行榜查询（3个） -->
+
+    <!-- 最活跃用户排行 -->
+    <select id="getTopActiveUsers" resultType="java.util.Map">
+        select
+            u.id,
+            u.username,
+            u.nickname,
+            count(m.id) as message_count
+        from im_user u
+        inner join im_message m on u.id = m.sender_id
+            and m.create_time >= #{startTime}
+        group by u.id, u.username, u.nickname
+        order by message_count desc
+        limit #{limit}
+    </select>
+
+    <!-- 最活跃群组排行 -->
+    <select id="getTopActiveGroups" resultType="java.util.Map">
+        select
+            g.id,
+            g.group_name,
+            count(m.id) as message_count
+        from im_group g
+        inner join im_conversation c on g.id = c.related_id and c.type = 'GROUP'
+        inner join im_message m on c.id = m.conversation_id
+            and m.create_time >= #{startTime}
+        group by g.id, g.group_name
+        order by message_count desc
+        limit #{limit}
+    </select>
+
+    <!-- 消息发送排行 -->
+    <select id="getTopMessageSenders" resultType="java.util.Map">
+        select
+            u.id,
+            u.username,
+            u.nickname,
+            count(m.id) as message_count,
+            count(distinct m.conversation_id) as conversation_count
+        from im_user u
+        inner join im_message m on u.id = m.sender_id
+            and m.create_time >= #{startTime}
+        group by u.id, u.username, u.nickname
+        order by message_count desc
+        limit #{limit}
+    </select>
+
+    <!-- 5. 实时监控查询（2个） -->
+
+    <!-- 实时在线用户数 -->
+    <select id="getRealtimeOnlineCount" resultType="java.lang.Long">
+        select count(*)
+        from im_user
+        where status = 'online'
+    </select>
+
+    <!-- 实时消息流量（最近N分钟） -->
+    <select id="getRealtimeMessageFlow" resultType="java.util.Map">
+        select
+            date_format(create_time, '%Y-%m-%d %H:%i') as time_label,
+            count(*) as count
+        from im_message
+        where create_time >= DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+        group by time_label
+        order by time_label
+    </select>
+
+    <!-- 辅助查询：获取指定时间段的消息总数 -->
+    <select id="getMessageCountByPeriod" resultType="java.lang.Long">
+        select count(*)
+        from im_message
+        <where>
+            <if test="startTime != null and startTime != ''"> and create_time >= #{startTime} </if>
+            <if test="endTime != null and endTime != ''"> and create_time &lt;= #{endTime} </if>
+        </where>
+    </select>
+
+    <!-- 辅助查询：获取指定时间段的用户注册数 -->
+    <select id="getUserCountByPeriod" resultType="java.lang.Long">
+        select count(*)
+        from im_user
+        <where>
+            <if test="startTime != null and startTime != ''"> and create_time >= #{startTime} </if>
+            <if test="endTime != null and endTime != ''"> and create_time &lt;= #{endTime} </if>
+        </where>
+    </select>
+
+    <!-- 辅助查询：获取指定时间段的群组创建数 -->
+    <select id="getGroupCountByPeriod" resultType="java.lang.Long">
+        select count(*)
+        from im_group
+        <where>
+            <if test="startTime != null and startTime != ''"> and create_time >= #{startTime} </if>
+            <if test="endTime != null and endTime != ''"> and create_time &lt;= #{endTime} </if>
+        </where>
+    </select>
+
+    <!-- 辅助查询：获取会话类型分布 -->
+    <select id="getConversationTypeDistribution" resultType="java.util.Map">
+        select
+            type as type_label,
+            count(*) as count
+        from im_conversation
+        group by type
+        order by count desc
+    </select>
+
+</mapper>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('日程管理')" />
+    <link th:href="@{/ajax/libs/datapicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
+    <style>
+        .select-list ul li { margin: 0px 10px 5px 0px !important; }
+        .select-list ul li input { width: 140px !important; }
+        .select-list ul li select { width: 80px !important; }
+        .time-input { width: 100px !important; }
+    </style>
+</head>
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row">
+            <!-- 统计卡片区域 - 增强样式 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
+                            <div class="ibox-title">
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">日程总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部日程</div>
+                                <i class="fa fa-calendar stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByStatus('SCHEDULED')">
+                            <div class="ibox-title">
+                                <span class="stat-badge pull-right">排</span>
+                                <h5 style="color: #fff; margin: 0;">已安排</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="stat-number" id="scheduledCount">0</div>
+                                <div class="stat-label">已安排日程</div>
+                                <i class="fa fa-calendar-check-o stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByStatus('COMPLETED')">
+                            <div class="ibox-title">
+                                <span class="stat-badge pull-right">完</span>
+                                <h5 style="color: #fff; margin: 0;">已完成</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="stat-number" id="completedCount">0</div>
+                                <div class="stat-label">已完成日程</div>
+                                <i class="fa fa-check-circle stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByToday()">
+                            <div class="ibox-title">
+                                <span class="stat-badge pull-right">今</span>
+                                <h5 style="color: #fff; margin: 0;">今日日程</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="stat-number" id="todayCount">0</div>
+                                <div class="stat-label">今日安排</div>
+                                <i class="fa fa-sun-o stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-12 search-collapse">
+                <form id="scheduleEvent-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label class="search-label label-4">日程标题</label><input type="text" name="title" placeholder="请输入"/>
+                            </li>
+                            <li>
+                                <label class="search-label label-2">状态</label><select name="status">
+                                    <option value="">全部</option>
+                                    <option value="SCHEDULED">已安排</option>
+                                    <option value="COMPLETED">已完成</option>
+                                    <option value="CANCELLED">已取消</option>
+                                </select>
+                            </li>
+                            <li class="select-time">
+                                <label class="search-label label-4">开始时间</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:scheduleEvent:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:scheduleEvent:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-info single disabled" onclick="completeEvent()" shiro:hasPermission="im:scheduleEvent:edit">
+                        <i class="fa fa-check"></i> 标记完成
+                    </a>
+                    <a class="btn btn-warning single disabled" onclick="cancelEvent()" shiro:hasPermission="im:scheduleEvent:edit">
+                        <i class="fa fa-times"></i> 取消日程
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:scheduleEvent:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:scheduleEvent:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
+                </div>
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
+    <script th:src="@{/ajax/libs/datapicker/bootstrap-datetimepicker.min.js}"></script>
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('im:scheduleEvent:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('im:scheduleEvent:remove')}]];
+        var prefix = ctx + "im/scheduleEvent";
+
+        $(function() {
+            loadStatistics();
+            initDatePicker();
+
+            var options = {
+                url: prefix + "/list",
+                toolbar: "toolbar",
+                height: 650,
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove/{id}",
+                exportUrl: prefix + "/export",
+                modalName: "日程事件",
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
+                fixedColumns: true,
+                fixedNumber: 1,
+                fixedRightNumber: 1,
+                showColumns: true,
+                showColumnsToggleAll: true,
+                cookie: true,
+                cookieIdTable: 'im_schedule_event_table',
+                cookieExpire: '30d',
+                showExport: true,
+                exportDataType: 'selected',
+                exportTypes: ['excel'],
+                exportOptions: {
+                    fileName: '日程事件数据'
+                },
+                columns: [{
+                    checkbox: true
+                }, {
+                    field: 'id',
+                    title: 'ID',
+                    visible: false
+                }, {
+                    field: 'username',
+                    title: '创建人',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        var name = value || '-';
+                        if (row.nickname) {
+                            return name + ' (' + row.nickname + ')';
+                        }
+                        return name;
+                    }
+                }, {
+                    field: 'title',
+                    title: '日程标题',
+                    width: '200',
+                    formatter: function(value, row, index) {
+                        var indicator = '';
+                        if (row.color) {
+                            indicator = '<span class="color-indicator" style="background-color: ' + row.color + '; display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:middle;"></span>';
+                        }
+                        return indicator + '<strong>' + (value || '-') + '</strong>';
+                    }
+                }, {
+                    field: 'location',
+                    title: '地点',
+                    width: '120',
+                    formatter: function(value, row, index) {
+                        return value ? '<i class="fa fa-map-marker"></i> ' + value : '-';
+                    }
+                }, {
+                    field: 'startTime',
+                    title: '开始时间',
+                    width: '160',
+                    sortable: true
+                }, {
+                    field: 'endTime',
+                    title: '结束时间',
+                    width: '160'
+                }, {
+                    field: 'isAllDay',
+                    title: '全天',
+                    align: 'center',
+                    width: '60',
+                    formatter: function(value, row, index) {
+                        if (value) {
+                            return '<span class="badge badge-info">是</span>';
+                        }
+                        return '<span class="badge badge-default">否</span>';
+                    }
+                }, {
+                    field: 'recurrenceType',
+                    title: '重复',
+                    align: 'center',
+                    width: '80',
+                    formatter: function(value, row, index) {
+                        if (!value || value === 'NONE') return '-';
+                        var typeMap = {
+                            'DAILY': '<span class="label label-primary">每天</span>',
+                            'WEEKLY': '<span class="label label-success">每周</span>',
+                            'MONTHLY': '<span class="label label-warning">每月</span>',
+                            'CUSTOM': '<span class="label label-info">自定义</span>'
+                        };
+                        return typeMap[value] || value;
+                    }
+                }, {
+                    field: 'visibility',
+                    title: '可见性',
+                    align: 'center',
+                    width: '80',
+                    formatter: function(value, row, index) {
+                        if (value === 'PRIVATE') { return '<span class="badge badge-default">私有</span>'; }
+                        if (value === 'DEPARTMENT') { return '<span class="badge badge-info">部门</span>'; }
+                        if (value === 'PUBLIC') { return '<span class="badge badge-success">公开</span>'; }
+                        return '<span class="badge badge-default">' + (value || '-') + '</span>';
+                    }
+                }, {
+                    field: 'status',
+                    title: '状态',
+                    align: 'center',
+                    width: '80',
+                    formatter: function(value, row, index) {
+                        if (value === 'SCHEDULED') { return '<span class="badge badge-primary">已安排</span>'; }
+                        if (value === 'COMPLETED') { return '<span class="badge badge-success">已完成</span>'; }
+                        if (value === 'CANCELLED') { return '<span class="badge badge-warning">已取消</span>'; }
+                        return '<span class="badge badge-default">' + (value || '-') + '</span>';
+                    }
+                }, {
+                    field: 'reminderMinutes',
+                    title: '提醒',
+                    align: 'center',
+                    width: '80',
+                    formatter: function(value, row, index) {
+                        return value ? '<span class="label label-info">' + value + '分钟</span>' : '-';
+                    }
+                }, {
+                    title: '操作',
+                    align: 'center',
+                    width: '180',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>编辑</a> ');
+                        if (row.status === 'SCHEDULED') {
+                            actions.push('<a class="btn btn-info btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="completeOne(' + row.id + ')"><i class="fa fa-check"></i>完成</a> ');
+                            actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="cancelOne(' + row.id + ')"><i class="fa fa-times"></i>取消</a> ');
+                        }
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }],
+                responseHandler: function(res) {
+                    $.modal.closeLoading();
+                    if (res.code === 0) {
+                        return { rows: res.rows, total: res.total };
+                    } else {
+                        $.modal.alertWarning(res.msg);
+                        return { rows: [], total: 0 };
+                    }
+                }
+            };
+            $.table.init(options);
+            loadStatistics();
+        });
+
+        function initDatePicker() {
+            var options = {
+                showSeconds: true,
+                showYesterday: true,
+                showToday: true,
+                showClear: true,
+                minView: "month"
+            };
+            $("#startTime").datetimepicker(options);
+            $("#endTime").datetimepicker(options);
+        }
+
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code === 0) {
+                    var data = result.data || {};
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('scheduledCount', data.scheduledCount || 0);
+                    animateNumber('completedCount', data.completedCount || 0);
+                    animateNumber('todayCount', data.todayCount || 0);
+                }
+            });
+        }
+
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /* 重置筛选 */
+        function filterReset() {
+            $.form.reset();
+            $.table.search();
+        }
+
+        /* 按状态筛选 */
+        function filterByStatus(status) {
+            if (status) {
+                $('select[name="status"]').val(status);
+            } else {
+                $('select[name="status"]').val('');
+            }
+            $.table.search();
+        }
+
+        /* 筛选今日数据 */
+        function filterByToday() {
+            var today = new Date();
+            var todayStr = today.getFullYear() + '-' +
+                          String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                          String(today.getDate()).padStart(2, '0');
+            $('#startTime').val(todayStr + ' 00:00:00');
+            $('#endTime').val(todayStr + ' 23:59:59');
+            $.table.search();
+        }
+
+        function completeEvent() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            completeOne(rows[0]);
+        }
+
+        function completeOne(id) {
+            $.modal.confirm("确定要标记该日程为已完成吗？", function() {
+                $.ajax({
+                    url: prefix + "/complete/" + id,
+                    type: 'put',
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("操作成功");
+                            $.table.refresh();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    }
+                });
+            });
+        }
+
+        function cancelEvent() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            cancelOne(rows[0]);
+        }
+
+        function cancelOne(id) {
+            $.modal.confirm("确定要取消该日程吗？", function() {
+                $.ajax({
+                    url: prefix + "/cancel/" + id,
+                    type: 'put',
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("操作成功");
+                            $.table.refresh();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

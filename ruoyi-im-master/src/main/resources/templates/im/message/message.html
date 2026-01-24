@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<head>
+    <th:block th:include="include :: header('消息管理')" />
+    <link th:href="@{/css/im-common.css}" rel="stylesheet" />
+</head>
+
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12 stat-container">
+                <div class="row">
+                    <div class="col-sm-3 stat-col animated fadeInUp">
+                        <div class="ibox float-e-margins stat-card stat-card-primary" onclick="filterReset()">
+                            <div class="ibox-title">
+                                <span class="label pull-right">总</span>
+                                <h5>消息总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins" id="totalCount">0</h2>
+                                <small>系统消息总量</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 stat-col animated fadeInUp" style="animation-delay: 0.1s;">
+                        <div class="ibox float-e-margins stat-card stat-card-success" onclick="filterByToday()">
+                            <div class="ibox-title">
+                                <span class="label pull-right">日</span>
+                                <h5>今日消息</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins" id="todayCount">0</h2>
+                                <small>今日发送消息</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 stat-col animated fadeInUp" style="animation-delay: 0.2s;">
+                        <div class="ibox float-e-margins stat-card stat-card-info" onclick="filterByType('TEXT')">
+                            <div class="ibox-title">
+                                <span class="label pull-right">文</span>
+                                <h5>文本消息</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins" id="textCount">0</h2>
+                                <small>文本类型消息</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 stat-col animated fadeInUp" style="animation-delay: 0.3s;">
+                        <div class="ibox float-e-margins stat-card stat-card-danger" onclick="filterBySensitive()">
+                            <div class="ibox-title">
+                                <span class="label pull-right">警</span>
+                                <h5>敏感消息</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins" id="sensitiveCount">0</h2>
+                                <small>敏感级别消息</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 搜索表单 -->
+            <div class="col-sm-12 search-collapse">
+                <form id="message-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                发件人：<input type="text" name="senderId" placeholder="用户ID" />
+                            </li>
+                            <li>
+                                收件人：<input type="text" name="receiverId" placeholder="用户ID" />
+                            </li>
+                            <li>
+                                会话：<input type="text" name="conversationId" placeholder="会话ID" />
+                            </li>
+                            <li>
+                                类型：<select name="messageType">
+                                    <option value="">全部</option>
+                                    <option value="TEXT">文本</option>
+                                    <option value="IMAGE">图片</option>
+                                    <option value="FILE">文件</option>
+                                    <option value="VOICE">语音</option>
+                                    <option value="VIDEO">视频</option>
+                                </select>
+                            </li>
+                            <li>
+                                状态：<select name="sendStatus">
+                                    <option value="">全部</option>
+                                    <option value="SENT">发送</option>
+                                    <option value="DELIVERED">送达</option>
+                                    <option value="FAILED">失败</option>
+                                </select>
+                            </li>
+                            <li>
+                                敏感：<select name="sensitiveLevel">
+                                    <option value="">全部</option>
+                                    <option value="NORMAL">普通</option>
+                                    <option value="SENSITIVE">敏感</option>
+                                    <option value="HIGH">高级</option>
+                                </select>
+                            </li>
+                            <li class="select-time">
+                                <label>发送时间：</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始"
+                                    name="params[beginTime]" />
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束"
+                                    name="params[endTime]" />
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                        class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                        class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 工具栏 + 表格 -->
+            <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-warning multiple disabled" onclick="batchRevoke()"
+                        shiro:hasPermission="im:message:revoke">
+                        <i class="fa fa-undo"></i> 撤回
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                        shiro:hasPermission="im:message:remove">
+                        <i class="fa fa-trash"></i> 删除
+                    </a>
+                    <a class="btn btn-info multiple disabled" onclick="batchMarkSensitive()"
+                        shiro:hasPermission="im:message:edit">
+                        <i class="fa fa-flag"></i> 敏感标记
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:message:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
+                </div>
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
+    <script th:inline="javascript">
+        var prefix = ctx + "im/message";
+
+        $(function () {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove/{id}",
+                exportUrl: prefix + "/export",
+                sortName: "createTime",
+                sortOrder: "desc",
+                modalName: "消息",
+                showColumns: true,
+                showRefresh: false,
+                showToggle: false,
+                clickToSelect: true,
+                rememberSelected: true,
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
+                columns: [{
+                    checkbox: true,
+                    width: 40,
+                    align: 'center'
+                }, {
+                    field: 'id',
+                    title: 'ID',
+                    visible: false,
+                    width: 60
+                }, {
+                    field: 'senderId',
+                    title: '发送人',
+                    width: 90,
+                    formatter: function (value) {
+                        return '<span class="im-badge im-badge-primary">#' + value + '</span>';
+                    }
+                }, {
+                    field: 'receiverId',
+                    title: '接收人',
+                    width: 90,
+                    formatter: function (value) {
+                        if (!value) return '<span class="im-badge im-badge-info">群聊</span>';
+                        return '<span class="im-badge im-badge-primary">#' + value + '</span>';
+                    }
+                }, {
+                    field: 'conversationId',
+                    title: '会话ID',
+                    width: 120,
+                    formatter: function (value) {
+                        if (!value) return '-';
+                        return '<span title="' + value + '">' + (value.length > 15 ? value.substring(0, 15) + '...' : value) + '</span>';
+                    }
+                }, {
+                    field: 'messageType',
+                    title: '类型',
+                    width: 70,
+                    align: 'center',
+                    formatter: function (value) {
+                        if (value === 'TEXT') return '<span class="im-badge im-badge-primary">文本</span>';
+                        if (value === 'IMAGE') return '<span class="im-badge im-badge-success">图片</span>';
+                        if (value === 'FILE') return '<span class="im-badge im-badge-warning">文件</span>';
+                        if (value === 'VOICE') return '<span class="im-badge im-badge-info">语音</span>';
+                        if (value === 'VIDEO') return '<span class="im-badge im-badge-danger">视频</span>';
+                        return '<span class="im-badge im-badge-info">' + value + '</span>';
+                    }
+                }, {
+                    field: 'content',
+                    title: '内容',
+                    formatter: function (value, row) {
+                        if (row.messageType === 'TEXT') {
+                            if (!value) return '-';
+                            var display = value.length > 50 ? value.substring(0, 50) + '...' : value;
+                            return '<span title="' + value + '">' + display + '</span>';
+                        }
+                        return '[' + row.messageType + ']';
+                    }
+                }, {
+                    field: 'sensitiveLevel',
+                    title: '敏感',
+                    width: 70,
+                    align: 'center',
+                    formatter: function (value) {
+                        if (value === 'SENSITIVE') return '<span class="im-badge im-badge-warning">敏感</span>';
+                        if (value === 'HIGH') return '<span class="im-badge im-badge-danger">高级</span>';
+                        return '<span class="im-badge im-badge-info">普通</span>';
+                    }
+                }, {
+                    field: 'sendStatus',
+                    title: '状态',
+                    width: 70,
+                    align: 'center',
+                    formatter: function (value) {
+                        if (value === 'SENT') return '<span class="im-badge im-badge-info">发送</span>';
+                        if (value === 'DELIVERED') return '<span class="im-badge im-badge-success">送达</span>';
+                        if (value === 'FAILED') return '<span class="im-badge im-badge-danger">失败</span>';
+                        return '<span class="im-badge im-badge-info">-</span>';
+                    }
+                }, {
+                    field: 'isRevoked',
+                    title: '撤回',
+                    width: 60,
+                    align: 'center',
+                    formatter: function (value) {
+                        return value == 1 ? '<i class="fa fa-undo im-warning"></i>' : '-';
+                    }
+                }, {
+                    field: 'isEdited',
+                    title: '编辑',
+                    width: 60,
+                    align: 'center',
+                    formatter: function (value) {
+                        return value == 1 ? '<i class="fa fa-pencil im-info"></i>' : '-';
+                    }
+                }, {
+                    field: 'replyToMessageId',
+                    title: '回复',
+                    width: 80,
+                    align: 'center',
+                    formatter: function (value) {
+                        return value ? '<i class="fa fa-reply im-primary"></i>' : '-';
+                    }
+                }, {
+                    field: 'createTime',
+                    title: '发送时间',
+                    width: 155,
+                    sortable: true
+                }, {
+                    field: 'updateTime',
+                    title: '更新时间',
+                    width: 155,
+                    sortable: true,
+                    visible: false
+                }, {
+                    title: '操作',
+                    align: 'center',
+                    width: 150,
+                    class: 'action-cell',
+                    formatter: function (value, row) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewDetail(\'' + row.id + '\')" title="查看"><i class="fa fa-eye"></i></a> ');
+                        if (row.isRevoked != 1) {
+                            actions.push('<a class="btn btn-warning btn-xs" href="javascript:void(0)" onclick="revokeMessage(\'' + row.id + '\')" title="撤回"><i class="fa fa-undo"></i></a> ');
+                        }
+                        actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')" title="删除"><i class="fa fa-trash"></i></a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+            loadStatistics();
+        });
+
+        /* 加载统计数据 */
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function (result) {
+                if (result.code == 0) {
+                    var stats = result.data;
+                    animateNumber('totalCount', stats.totalCount || 0);
+                    animateNumber('todayCount', stats.todayCount || 0);
+                    animateNumber('textCount', stats.textCount || 0);
+                    animateNumber('sensitiveCount', stats.sensitiveCount || 0);
+                }
+            });
+        }
+
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function () {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function () {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /* 重置筛选 */
+        function filterReset() {
+            $('select[name="messageType"]').val('');
+            $('select[name="sendStatus"]').val('');
+            $('select[name="sensitiveLevel"]').val('');
+            $.table.search();
+        }
+
+        /* 按消息类型筛选 */
+        function filterByType(messageType) {
+            $('select[name="messageType"]').val(messageType);
+            $.table.search();
+        }
+
+        /* 按今日筛选 */
+        function filterByToday() {
+            var today = new Date();
+            var todayStr = today.getFullYear() + '-' +
+                String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                String(today.getDate()).padStart(2, '0');
+            $('input[name="params[beginTime]"]').val(todayStr + ' 00:00:00');
+            $('input[name="params[endTime]"]').val(todayStr + ' 23:59:59');
+            $.table.search();
+        }
+
+        /* 按敏感级别筛选 */
+        function filterBySensitive() {
+            $('select[name="sensitiveLevel"]').val('SENSITIVE');
+            $.table.search();
+        }
+
+        /* 查看消息详情 */
+        function viewDetail(id) {
+            $.get(prefix + "/detail/" + id, function (result) {
+                if (result.code == 0) {
+                    var data = result.data;
+                    var html = '<div class="row">';
+                    html += '<div class="col-sm-6"><label class="control-label">消息ID：</label>' + (data.id || '-') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">发送人：</label>' + (data.senderId || '-') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">接收人：</label>' + (data.receiverId || '群聊') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">会话ID：</label>' + (data.conversationId || '-') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">消息类型：</label>' + (data.messageType || '-') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">发送状态：</label>' + (data.sendStatus || '-') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">敏感级别：</label>' + (data.sensitiveLevel || '-') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">是否撤回：</label>' + (data.isRevoked == 1 ? '是' : '否') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">是否编辑：</label>' + (data.isEdited == 1 ? '是' : '否') + '</div>';
+                    html += '<div class="col-sm-6"><label class="control-label">发送时间：</label>' + (data.createTime || '-') + '</div>';
+                    html += '<div class="col-sm-12"><label class="control-label">消息内容：</label><br/>' + (data.content || '-') + '</div>';
+                    html += '</div>';
+                    $.modal.openOptions({
+                        title: '消息详情',
+                        width: "700",
+                        btn: ['关闭'],
+                        content: html
+                    });
+                }
+            });
+        }
+
+        /* 撤回消息 */
+        function revokeMessage(id) {
+            $.modal.confirm('确定要撤回这条消息吗？', function () {
+                $.operate.post(prefix + "/revoke/" + id, {}, function (res) {
+                    if (res.code == 0) {
+                        $.modal.msgSuccess("撤回成功");
+                        $.table.refresh();
+                        loadStatistics();
+                    }
+                });
+            });
+        }
+
+        /* 批量撤回 */
+        function batchRevoke() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm('确定要批量撤回选中的 ' + rows.length + ' 条消息吗？', function () {
+                $.operate.post(prefix + "/batchRevoke", { messageIds: rows.join() }, function (res) {
+                    if (res.code == 0) {
+                        $.modal.msgSuccess("批量撤回成功");
+                        $.table.refresh();
+                        loadStatistics();
+                    }
+                });
+            });
+        }
+
+        /* 批量标记敏感 */
+        function batchMarkSensitive() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm('确定要将选中的 ' + rows.length + ' 条消息标记为敏感吗？', function () {
+                $.operate.post(prefix + "/batchMarkSensitive", { messageIds: rows.join(), sensitiveLevel: 'SENSITIVE' }, function (res) {
+                    if (res.code == 0) {
+                        $.modal.msgSuccess("标记成功");
+                        $.table.refresh();
+                        loadStatistics();
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

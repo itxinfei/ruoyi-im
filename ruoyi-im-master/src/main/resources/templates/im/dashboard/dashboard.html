@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<head>
+    <th:block th:include="include :: header('IM管理工作台')" />
+    <script th:src="@{/ajax/libs/report/echarts/echarts-all.min.js}"></script>
+    <style>
+        /* 核心样式 - 简化版 */
+        .stat-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-card-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .stat-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .stat-card-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+
+        .stat-card-footer {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .trend-up {
+            color: #10b981;
+        }
+
+        .trend-down {
+            color: #ef4444;
+        }
+
+        .chart-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .chart-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .chart-container {
+            height: 150px;
+            width: 100%;
+        }
+
+        .quick-action-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .quick-action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .quick-action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin: 0 auto 10px auto;
+        }
+
+        .quick-action-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .quick-action-desc {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .recent-activity-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .recent-activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .recent-activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .activity-title {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body class="gray-bg">
+    <div class="container-div" style="padding: 15px;">
+        <!-- 页面头部 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5><i class="fa fa-dashboard"></i> IM 管理工作台</h5>
+                        <div class="ibox-tools">
+                            <a class="btn btn-primary btn-xs" onclick="broadcastMsg()">
+                                <i class="fa fa-bullhorn"></i> 系统公告
+                            </a>
+                            <a class="btn btn-default btn-xs" onclick="refreshAllData()">
+                                <i class="fa fa-refresh"></i> 刷新
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 核心指标卡片 -->
+        <div class="row" style="margin-bottom: 24px;">
+            <div class="col-sm-3">
+                <div class="stat-card" onclick="openPage('im/user')">
+                    <div class="stat-card-header">
+                        <span class="stat-card-label">总用户规模</span>
+                        <div class="stat-card-icon" style="background: #eff6ff; color: #2563eb;">
+                            <i class="fa fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card-value" id="totalUsers">-</div>
+                    <div class="stat-card-footer">
+                        <span class="stat-card-trend" id="userTrend">
+                            <i class="fa fa-caret-up"></i> --
+                        </span>
+                        <span>较昨日新增</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="stat-card" onclick="openPage('im/user?isOnline=1')">
+                    <div class="stat-card-header">
+                        <span class="stat-card-label">当前活跃在线</span>
+                        <div class="stat-card-icon" style="background: #ecfdf5; color: #10b981;">
+                            <i class="fa fa-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card-value" id="onlineUsers">-</div>
+                    <div class="stat-card-footer">
+                        <span
+                            style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+                        <span>实时在线连接</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="stat-card" onclick="openPage('im/group')">
+                    <div class="stat-card-header">
+                        <span class="stat-card-label">群组与频道</span>
+                        <div class="stat-card-icon" style="background: #fff7ed; color: #f59e0b;">
+                            <i class="fa fa-comments"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card-value" id="totalGroups">-</div>
+                    <div class="stat-card-footer">
+                        <span>包含私聊会话与公开群组</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="stat-card" onclick="openPage('im/message')">
+                    <div class="stat-card-header">
+                        <span class="stat-card-label">今日消息流</span>
+                        <div class="stat-card-icon" style="background: #fef2f2; color: #ef4444;">
+                            <i class="fa fa-line-chart"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card-value" id="todayMessages">-</div>
+                    <div class="stat-card-footer">
+                        <span>敏感词拦截: <span id="sensitiveCount">0</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="row" style="margin-bottom: 24px;">
+            <div class="col-md-8">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <span class="chart-card-title">消息趋势</span>
+                        <div class="chart-card-actions">
+                            <button class="active" onclick="changeTrendType('message', this, 7)">7天</button>
+                            <button onclick="changeTrendType('message', this, 30)">30天</button>
+                            <button onclick="changeTrendType('message', this, 90)">90天</button>
+                        </div>
+                    </div>
+                    <div id="messageTrendChart" class="chart-container"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <span class="chart-card-title">消息类型分布</span>
+                        <div class="chart-card-actions">
+                            <button class="active" onclick="changeDistributionType('msgType', this)">类型</button>
+                            <button onclick="changeDistributionType('fileType', this)">文件</button>
+                        </div>
+                    </div>
+                    <div id="messageTypeChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 24px;">
+            <div class="col-md-8">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <span class="chart-card-title">用户活跃度</span>
+                        <div class="chart-card-actions">
+                            <button class="active" onclick="changeTrendType('user', this, 7)">7天</button>
+                            <button onclick="changeTrendType('user', this, 30)">30天</button>
+                            <button onclick="changeTrendType('user', this, 90)">90天</button>
+                        </div>
+                    </div>
+                    <div id="userActivityChart" class="chart-container"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <span class="chart-card-title">最活跃用户</span>
+                        <div class="chart-card-actions">
+                            <button class="active" onclick="changeRankingType('users', this, 7)">7天</button>
+                            <button onclick="changeRankingType('users', this, 30)">30天</button>
+                        </div>
+                    </div>
+                    <div id="userRankingChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快捷操作和最近活动 -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <span class="chart-card-title">快捷操作</span>
+                    </div>
+                    <div class="quick-actions-grid">
+                        <div class="quick-action-card" onclick="openPage('im/user/add')">
+                            <div class="quick-action-icon">
+                                <i class="fa fa-user-plus"></i>
+                            </div>
+                            <div class="quick-action-title">新增用户</div>
+                            <div class="quick-action-desc">快速创建IM账号</div>
+                        </div>
+                        <div class="quick-action-card" onclick="openPage('im/group/add')">
+                            <div class="quick-action-icon" style="background: #ecfdf5; color: #10b981;">
+                                <i class="fa fa-plus-square"></i>
+                            </div>
+                            <div class="quick-action-title">创建群组</div>
+                            <div class="quick-action-desc">建立工作协作群</div>
+                        </div>
+                        <div class="quick-action-card" onclick="openPage('im/announcement/add')">
+                            <div class="quick-action-icon" style="background: #fff7ed; color: #f59e0b;">
+                                <i class="fa fa-bullhorn"></i>
+                            </div>
+                            <div class="quick-action-title">发布公告</div>
+                            <div class="quick-action-desc">系统通知推送</div>
+                        </div>
+                        <div class="quick-action-card" onclick="openPage('im/sensitiveWord')">
+                            <div class="quick-action-icon" style="background: #fef2f2; color: #ef4444;">
+                                <i class="fa fa-shield"></i>
+                            </div>
+                            <div class="quick-action-title">敏感词管理</div>
+                            <div class="quick-action-desc">内容风控配置</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <span class="chart-card-title">最近活动</span>
+                        <button
+                            style="padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; color: #64748b; font-size: 13px; cursor: pointer;"
+                            onclick="openPage('monitor/operlog')">
+                            查看全部
+                        </button>
+                    </div>
+                    <ul class="recent-activity-list" id="recentActivityList">
+                        <li class="recent-activity-item">
+                            <div class="activity-icon" style="background: #eff6ff; color: #2563eb;">
+                                <i class="fa fa-user-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">新用户注册：张三</div>
+                                <div class="activity-time">2分钟前</div>
+                            </div>
+                        </li>
+                        <li class="recent-activity-item">
+                            <div class="activity-icon" style="background: #ecfdf5; color: #10b981;">
+                                <i class="fa fa-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">创建群组：技术交流群</div>
+                                <div class="activity-time">5分钟前</div>
+                            </div>
+                        </li>
+                        <li class="recent-activity-item">
+                            <div class="activity-icon" style="background: #fff7ed; color: #f59e0b;">
+                                <i class="fa fa-shield"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">敏感词拦截：检测到违规内容</div>
+                                <div class="activity-time">8分钟前</div>
+                            </div>
+                        </li>
+                        <li class="recent-activity-item">
+                            <div class="activity-icon" style="background: #fef2f2; color: #ef4444;">
+                                <i class="fa fa-ban"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">用户被封禁：李四 (违规操作)</div>
+                                <div class="activity-time">12分钟前</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var ctx = [[@{/}]];
+        var messageTrendChart = null;
+        var messageTypeChart = null;
+        var userActivityChart = null;
+        var userRankingChart = null;
+
+        $(function () {
+            initCharts();
+            loadStatistics();
+            loadRecentActivity();
+        });
+
+        function initCharts() {
+            // 消息趋势图
+            messageTrendChart = echarts.init(document.getElementById('messageTrendChart'));
+            renderMessageTrendChart([]);
+
+            // 消息类型分布图
+            messageTypeChart = echarts.init(document.getElementById('messageTypeChart'));
+            renderMessageTypeChart([]);
+
+            // 用户活跃度图
+            userActivityChart = echarts.init(document.getElementById('userActivityChart'));
+            renderUserActivityChart([]);
+
+            // 用户排行榜
+            userRankingChart = echarts.init(document.getElementById('userRankingChart'));
+            renderUserRankingChart([]);
+
+            // 窗口大小变化时重绘图表
+            window.addEventListener('resize', function () {
+                messageTrendChart.resize();
+                messageTypeChart.resize();
+                userActivityChart.resize();
+                userRankingChart.resize();
+            });
+        }
+
+        function loadStatistics() {
+            $.get(ctx + 'im/dashboard/statistics', function (res) {
+                if (res.code === 0) {
+                    $('#totalUsers').text(res.data.totalUsers || 0);
+                    $('#onlineUsers').text(res.data.onlineUsers || 0);
+                    $('#totalGroups').text(res.data.totalGroups || 0);
+                    $('#todayMessages').text(res.data.todayMessages || 0);
+                    $('#sensitiveCount').text(res.data.sensitiveMessages || 0);
+
+                    // 模拟趋势数据
+                    $('#userTrend').html('<i class="fa fa-caret-up"></i> ' + (res.data.todayRegister || 0));
+                }
+            });
+
+            // 加载趋势数据
+            loadTrendData('message', 7);
+            loadDistributionData('msgType');
+            loadTrendData('user', 7);
+            loadRankingData('users', 7);
+        }
+
+        function loadTrendData(type, days) {
+            $.get(ctx + 'im/dashboard/trend', { type: type, days: days }, function (res) {
+                if (res.code === 0) {
+                    if (type === 'message') {
+                        renderMessageTrendChart(res.data);
+                    } else if (type === 'user') {
+                        renderUserActivityChart(res.data);
+                    }
+                }
+            });
+        }
+
+        function loadDistributionData(type) {
+            $.get(ctx + 'im/dashboard/distribution', { type: type }, function (res) {
+                if (res.code === 0) {
+                    renderMessageTypeChart(res.data);
+                }
+            });
+        }
+
+        function loadRankingData(type, days) {
+            $.get(ctx + 'im/dashboard/ranking', { type: type, days: days }, function (res) {
+                if (res.code === 0) {
+                    renderUserRankingChart(res.data);
+                }
+            });
+        }
+
+        function renderMessageTrendChart(data) {
+            var option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'cross' }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [{
+                    name: '消息数',
+                    type: 'line',
+                    smooth: true,
+                    data: [120, 132, 101, 134, 90, 230, 210],
+                    areaStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [{
+                                offset: 0, color: 'rgba(37, 99, 235, 0.3)'
+                            }, {
+                                offset: 1, color: 'rgba(37, 99, 235, 0.05)'
+                            }]
+                        }
+                    },
+                    lineStyle: { color: '#2563eb' },
+                    itemStyle: { color: '#2563eb' }
+                }]
+            };
+            messageTrendChart.setOption(option);
+        }
+
+        function renderMessageTypeChart(data) {
+            var option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left'
+                },
+                series: [{
+                    name: '消息类型',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: false,
+                        position: 'center'
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: 20,
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labelLine: {
+                        show: false
+                    },
+                    data: [
+                        { value: 1048, name: '文本', itemStyle: { color: '#2563eb' } },
+                        { value: 735, name: '图片', itemStyle: { color: '#10b981' } },
+                        { value: 580, name: '文件', itemStyle: { color: '#f59e0b' } },
+                        { value: 484, name: '语音', itemStyle: { color: '#ef4444' } }
+                    ]
+                }]
+            };
+            messageTypeChart.setOption(option);
+        }
+
+        function renderUserActivityChart(data) {
+            var option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [{
+                    name: '活跃用户',
+                    type: 'bar',
+                    data: [120, 200, 150, 80, 70, 110, 130],
+                    itemStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [{
+                                offset: 0, color: '#2563eb'
+                            }, {
+                                offset: 1, color: '#60a5fa'
+                            }]
+                        },
+                        borderRadius: [4, 4, 0, 0]
+                    }
+                }]
+            };
+            userActivityChart.setOption(option);
+        }
+
+        function renderUserRankingChart(data) {
+            var option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value'
+                },
+                yAxis: {
+                    type: 'category',
+                    data: ['张三', '李四', '王五', '赵六', '孙七']
+                },
+                series: [{
+                    name: '消息数',
+                    type: 'bar',
+                    data: [1823, 2341, 2901, 1049, 1317],
+                    itemStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0, y: 0, x2: 1, y2: 0,
+                            colorStops: [{
+                                offset: 0, color: '#2563eb'
+                            }, {
+                                offset: 1, color: '#60a5fa'
+                            }]
+                        },
+                        borderRadius: [0, 4, 4, 0]
+                    }
+                }]
+            };
+            userRankingChart.setOption(option);
+        }
+
+        function changeTrendType(type, btn, days) {
+            $(btn).siblings().removeClass('active');
+            $(btn).addClass('active');
+            loadTrendData(type, days);
+        }
+
+        function changeDistributionType(type, btn) {
+            $(btn).siblings().removeClass('active');
+            $(btn).addClass('active');
+            loadDistributionData(type);
+        }
+
+        function changeRankingType(type, btn, days) {
+            $(btn).siblings().removeClass('active');
+            $(btn).addClass('active');
+            loadRankingData(type, days);
+        }
+
+        function loadRecentActivity() {
+            // 加载最近活动数据
+            // 这里可以从后端 API 获取
+        }
+
+        function refreshAllData() {
+            loadStatistics();
+            loadRecentActivity();
+            $.modal.msgSuccess("数据已刷新");
+        }
+
+        function broadcastMsg() {
+            $.modal.open("发布系统公告", ctx + "im/announcement/add", 800, 600);
+        }
+
+        function openPage(url) {
+            window.location.href = ctx + url;
+        }
+    </script>
+</body>
+
+</html>

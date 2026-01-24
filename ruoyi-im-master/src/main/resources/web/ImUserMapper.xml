@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImUserMapper">
+    
+    <resultMap type="com.ruoyi.web.domain.ImUser" id="ImUserResult">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="nickname" column="nickname"/>
+        <result property="email" column="email"/>
+        <result property="mobile" column="mobile"/>
+        <result property="avatar" column="avatar"/>
+        <result property="status" column="status"/>
+        <result property="gender" column="gender"/>
+        <result property="signature" column="signature"/>
+        <result property="lastOnlineTime" column="last_online_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="isOnline" column="is_online"/>
+    </resultMap>
+
+    <sql id="selectImUserVo">
+        select id, username, password, nickname, email,
+               mobile, avatar, status, gender, signature,
+               last_online_time,
+               create_time, update_time,
+               CASE WHEN last_online_time >= DATE_SUB(NOW(), INTERVAL 5 MINUTE) THEN 1 ELSE 0 END as is_online
+        from im_user
+    </sql>
+
+    <select id="selectImUserById" parameterType="Long" resultMap="ImUserResult">
+        <include refid="selectImUserVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectImUserByIds" parameterType="Long" resultMap="ImUserResult">
+        <include refid="selectImUserVo"/>
+        where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectImUserList" parameterType="com.ruoyi.web.domain.ImUser" resultMap="ImUserResult">
+        <include refid="selectImUserVo"/>
+        <where>
+            <!-- 关键词搜索：用户名/昵称/手机号/邮箱 -->
+            <if test="keyword != null and keyword != ''">
+                and (username like concat('%', #{keyword}, '%')
+                or nickname like concat('%', #{keyword}, '%')
+                or mobile like concat('%', #{keyword}, '%')
+                or email like concat('%', #{keyword}, '%'))
+            </if>
+            <if test="username != null and username != ''"> and username like concat('%', #{username}, '%') </if>
+            <if test="nickname != null and nickname != ''"> and nickname like concat('%', #{nickname}, '%') </if>
+            <if test="email != null and email != ''"> and email like concat('%', #{email}, '%') </if>
+            <if test="mobile != null and mobile != ''"> and mobile like concat('%', #{mobile}, '%') </if>
+            <if test="status != null"> and status = #{status} </if>
+            <if test="gender != null"> and gender = #{gender} </if>
+            <if test="isOnline != null">
+                <choose>
+                    <when test="isOnline == 1"> and last_online_time >= DATE_SUB(NOW(), INTERVAL 5 MINUTE) </when>
+                    <otherwise> and (last_online_time &lt; DATE_SUB(NOW(), INTERVAL 5 MINUTE) or last_online_time is null) </otherwise>
+                </choose>
+            </if>
+            <!-- 注册时间范围 -->
+            <if test="params != null and params.beginTime != null and params.beginTime != ''">
+                and date(create_time) &gt;= #{params.beginTime}
+            </if>
+            <if test="params != null and params.endTime != null and params.endTime != ''">
+                and date(create_time) &lt;= #{params.endTime}
+            </if>
+            <!-- 最后登录时间范围 -->
+            <if test="params != null and params.lastLoginBegin != null and params.lastLoginBegin != ''">
+                and date(last_online_time) &gt;= #{params.lastLoginBegin}
+            </if>
+            <if test="params != null and params.lastLoginEnd != null and params.lastLoginEnd != ''">
+                and date(last_online_time) &lt;= #{params.lastLoginEnd}
+            </if>
+            <!-- 是否有头像 -->
+            <if test="hasAvatar != null">
+                <choose>
+                    <when test="hasAvatar == 1"> and avatar is not null and avatar != '' </when>
+                    <otherwise> and (avatar is null or avatar = '') </otherwise>
+                </choose>
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <insert id="insertImUser" parameterType="com.ruoyi.web.domain.ImUser" useGeneratedKeys="true" keyProperty="id">
+        insert into im_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="username != null">username,</if>
+            <if test="password != null">password,</if>
+            <if test="nickname != null">nickname,</if>
+            <if test="email != null">email,</if>
+            <if test="mobile != null">mobile,</if>
+            <if test="avatar != null">avatar,</if>
+            <if test="status != null">status,</if>
+            <if test="gender != null">gender,</if>
+            <if test="signature != null">signature,</if>
+            <if test="lastOnlineTime != null">last_online_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="username != null">#{username},</if>
+            <if test="password != null">#{password},</if>
+            <if test="nickname != null">#{nickname},</if>
+            <if test="email != null">#{email},</if>
+            <if test="mobile != null">#{mobile},</if>
+            <if test="avatar != null">#{avatar},</if>
+            <if test="status != null">#{status},</if>
+            <if test="gender != null">#{gender},</if>
+            <if test="signature != null">#{signature},</if>
+            <if test="lastOnlineTime != null">#{lastOnlineTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImUser" parameterType="com.ruoyi.web.domain.ImUser">
+        update im_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="nickname != null and nickname != ''">nickname = #{nickname},</if>
+            <if test="email != null and email != ''">email = #{email},</if>
+            <if test="mobile != null and mobile != ''">mobile = #{mobile},</if>
+            <if test="avatar != null and avatar != ''">avatar = #{avatar},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="signature != null">signature = #{signature},</if>
+            <if test="lastOnlineTime != null">last_online_time = #{lastOnlineTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImUserById" parameterType="Long">
+        delete from im_user where id = #{id}
+    </delete>
+
+    <delete id="deleteImUserByIds" parameterType="Long[]">
+        delete from im_user where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <update id="resetPassword">
+        update im_user set password = #{password} where id = #{id}
+    </update>
+
+    <update id="changeStatus">
+        update im_user set status = #{status} where id = #{id}
+    </update>
+
+    <select id="countOnlineUsers" resultType="java.lang.Integer">
+        select count(*) from im_user where last_online_time >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+    </select>
+
+    <select id="checkUsernameUnique" parameterType="String" resultType="java.lang.Boolean">
+        select case when count(*) > 0 then true else false end
+        from im_user
+        where username = #{username}
+    </select>
+
+    <select id="searchUsers" parameterType="String" resultMap="ImUserResult">
+        <include refid="selectImUserVo"/>
+        <where>
+            (username like concat('%', #{keyword}, '%')
+            or nickname like concat('%', #{keyword}, '%')
+            or mobile like concat('%', #{keyword}, '%'))
+        </where>
+        limit 20
+    </select>
+
+    <!-- 统计用户总数 -->
+    <select id="countTotalUsers" resultType="java.lang.Integer">
+        select count(*) from im_user
+    </select>
+
+    <!-- 统计活跃用户数（7天内登录） -->
+    <select id="countActiveUsers" resultType="java.lang.Integer">
+        select count(*) from im_user
+        where last_online_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    </select>
+
+    <!-- 统计今日注册用户数 -->
+    <select id="countTodayRegister" resultType="java.lang.Integer">
+        select count(*) from im_user
+        where DATE(create_time) = CURDATE()
+    </select>
+
+    <!-- 统计禁用用户数 -->
+    <select id="countDisabledUsers" resultType="java.lang.Integer">
+        select count(*) from im_user where status = 0
+    </select>
+
+    <!-- 获取用户统计信息（聚合查询） -->
+    <select id="selectUserStatistics" resultType="java.util.Map">
+        SELECT 
+            COUNT(*) as totalCount,
+            SUM(CASE WHEN last_online_time >= DATE_SUB(NOW(), INTERVAL 5 MINUTE) THEN 1 ELSE 0 END) as onlineCount,
+            SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as disabledCount,
+            SUM(CASE WHEN DATE(create_time) = CURDATE() THEN 1 ELSE 0 END) as todayCount
+        FROM im_user
+    </select>
+
+    <!-- 检查用户是否有关联数据 -->
+    <select id="checkUserRelations" resultType="java.lang.Integer">
+        select count(*) from (
+            select 1 from im_conversation_member where user_id = #{userId} limit 1
+            UNION ALL
+            select 1 from im_group_member where user_id = #{userId} and is_deleted = 0 limit 1
+            UNION ALL
+            select 1 from im_friend where user_id = #{userId} and is_deleted = 0 limit 1
+            UNION ALL
+            select 1 from im_friend where friend_id = #{userId} and is_deleted = 0 limit 1
+        ) as t
+    </select>
+</mapper>

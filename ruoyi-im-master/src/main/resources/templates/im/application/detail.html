@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>应用详情</title>
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+    <style>
+        .detail-section {
+            margin-bottom: 20px;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+            width: 120px;
+            display: inline-block;
+        }
+        .detail-value {
+            color: #333;
+        }
+        .app-icon-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .badge-custom {
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>应用基本信息</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="row">
+                            <div class="col-sm-2 text-center">
+                                <div th:if="${application.icon != null and application.icon != ''}">
+                                    <div th:if="${#strings.contains(application.icon, 'fa-')}">
+                                        <i th:class="${application.icon} + ' fa-5x text-gray'"></i>
+                                    </div>
+                                    <div th:if="${not #strings.contains(application.icon, 'fa-')}">
+                                        <img th:src="${application.icon}" class="app-icon-large" onerror="this.src='/img/profile.jpg'" alt="应用图标">
+                                    </div>
+                                </div>
+                                <div th:if="${application.icon == null or application.icon == ''}">
+                                    <i class="fa fa-cube fa-5x text-gray"></i>
+                                </div>
+                            </div>
+                            <div class="col-sm-10">
+                                <div class="detail-section">
+                                    <span class="detail-label">应用名称：</span>
+                                    <span class="detail-value" th:text="${application.name != null ? application.name : '-'}"></span>
+                                </div>
+                                <div class="detail-section">
+                                    <span class="detail-label">应用编码：</span>
+                                    <span class="detail-value" th:text="${application.code != null ? application.code : '-'}"></span>
+                                </div>
+                                <div class="detail-section">
+                                    <span class="detail-label">应用分类：</span>
+                                    <span class="badge badge-primary badge-custom" th:if="${application.category != null and application.category == 'OFFICE'}">办公</span>
+                                    <span class="badge badge-info badge-custom" th:if="${application.category != null and application.category == 'DATA'}">数据</span>
+                                    <span class="badge badge-warning badge-custom" th:if="${application.category != null and application.category == 'TOOLS'}">工具</span>
+                                    <span class="badge badge-default badge-custom" th:if="${application.category == null or application.category == '' or application.category == 'CUSTOM'}">自定义</span>
+                                </div>
+                                <div class="detail-section">
+                                    <span class="detail-label">应用类型：</span>
+                                    <span class="badge badge-success badge-custom" th:if="${application.appType != null and application.appType == 'ROUTE'}">路由</span>
+                                    <span class="badge badge-info badge-custom" th:if="${application.appType != null and application.appType == 'IFRAME'}">嵌入</span>
+                                    <span class="badge badge-primary badge-custom" th:if="${application.appType == null or application.appType == '' or application.appType == 'LINK'}">外部链接</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>应用属性</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="detail-section">
+                            <span class="detail-label">应用地址：</span>
+                            <span class="detail-value" th:text="${application.appUrl != null ? application.appUrl : '-'}"></span>
+                        </div>
+                        <div class="detail-section">
+                            <span class="detail-label">排序：</span>
+                            <span class="detail-value" th:text="${application.sortOrder != null ? application.sortOrder : '0'}"></span>
+                        </div>
+                        <div class="detail-section">
+                            <span class="detail-label">系统应用：</span>
+                            <span class="badge badge-danger badge-custom" th:if="${application.isSystem != null and application.isSystem}">是</span>
+                            <span class="badge badge-default badge-custom" th:if="${application.isSystem == null or not application.isSystem}">否</span>
+                        </div>
+                        <div class="detail-section">
+                            <span class="detail-label">可见状态：</span>
+                            <span class="badge badge-success badge-custom" th:if="${application.isVisible != null and application.isVisible}">可见</span>
+                            <span class="badge badge-warning badge-custom" th:if="${application.isVisible == null or not application.isVisible}">隐藏</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>应用描述</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="detail-section">
+                            <span class="detail-value" th:text="${application.description != null ? application.description : '暂无描述'}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" th:if="${application.permissions != null and application.permissions != ''}">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>权限配置</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <pre class="detail-value" style="white-space: pre-wrap; word-wrap: break-word;" th:text="${application.permissions}"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>创建信息</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="detail-section">
+                            <span class="detail-label">创建者：</span>
+                            <span class="detail-value" th:text="${application.createBy != null ? application.createBy : '-'}"></span>
+                        </div>
+                        <div class="detail-section">
+                            <span class="detail-label">创建时间：</span>
+                            <span class="detail-value" th:text="${application.createTime != null ? #dates.format(application.createTime, 'yyyy-MM-dd HH:mm:ss') : '-'}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>更新信息</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="detail-section">
+                            <span class="detail-label">更新者：</span>
+                            <span class="detail-value" th:text="${application.updateBy != null ? application.updateBy : '-'}"></span>
+                        </div>
+                        <div class="detail-section">
+                            <span class="detail-label">更新时间：</span>
+                            <span class="detail-value" th:text="${application.updateTime != null ? #dates.format(application.updateTime, 'yyyy-MM-dd HH:mm:ss') : '-'}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-5 col-sm-10">
+                <button type="button" class="btn btn-success" onclick="$.modal.close()">
+                    <i class="fa fa-check"></i> 关闭
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

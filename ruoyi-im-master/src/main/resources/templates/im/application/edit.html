@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>修改应用</title>
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+</head>
+<body class="white-bg">
+    <form class="form-horizontal m" id="form-application-edit" th:object="${application}">
+        <input name="id" th:field="*{id}" type="hidden">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">应用名称：</label>
+            <div class="col-sm-8">
+                <input name="name" th:field="*{name}" placeholder="请输入应用名称" class="form-control" type="text" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">应用编码：</label>
+            <div class="col-sm-8">
+                <input name="code" th:field="*{code}" placeholder="请输入应用编码" class="form-control" type="text" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">应用图标：</label>
+            <div class="col-sm-8">
+                <input name="icon" th:field="*{icon}" placeholder="请输入图标URL或图标类名" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">分类：</label>
+            <div class="col-sm-8">
+                <select name="category" class="form-control" th:field="*{category}">
+                    <option value="OFFICE">办公</option>
+                    <option value="DATA">数据</option>
+                    <option value="TOOLS">工具</option>
+                    <option value="CUSTOM">自定义</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">应用类型：</label>
+            <div class="col-sm-8">
+                <select name="appType" class="form-control" th:field="*{appType}">
+                    <option value="ROUTE">路由</option>
+                    <option value="IFRAME">嵌入</option>
+                    <option value="LINK">外部链接</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">应用地址：</label>
+            <div class="col-sm-8">
+                <input name="appUrl" th:field="*{appUrl}" placeholder="请输入应用访问地址" class="form-control" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">应用描述：</label>
+            <div class="col-sm-8">
+                <textarea name="description" th:field="*{description}" class="form-control" rows="3" placeholder="请输入应用描述"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">排序：</label>
+            <div class="col-sm-8">
+                <input name="sortOrder" th:field="*{sortOrder}" placeholder="请输入排序号" class="form-control" type="number">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">是否系统应用：</label>
+            <div class="col-sm-8">
+                <select name="isSystem" class="form-control">
+                    <option value="0" th:selected="${application.isSystem == null or not application.isSystem}">否</option>
+                    <option value="1" th:selected="${application.isSystem != null and application.isSystem}">是</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">是否可见：</label>
+            <div class="col-sm-8">
+                <select name="isVisible" class="form-control">
+                    <option value="1" th:selected="${application.isVisible != null and application.isVisible}">是</option>
+                    <option value="0" th:selected="${application.isVisible == null or not application.isVisible}">否</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">所需权限：</label>
+            <div class="col-sm-8">
+                <textarea name="permissions" th:field="*{permissions}" class="form-control" rows="2" placeholder='JSON格式的权限配置'></textarea>
+            </div>
+        </div>
+    </form>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/application";
+        $("#form-application-edit").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/edit", $('#form-application-edit').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

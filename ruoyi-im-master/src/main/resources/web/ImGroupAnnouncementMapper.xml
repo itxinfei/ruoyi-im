@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImGroupAnnouncementMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImGroupAnnouncement" id="ImGroupAnnouncementResult">
+        <id property="id" column="id"/>
+        <result property="groupId" column="group_id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="content" column="content"/>
+        <result property="type" column="type"/>
+        <result property="attachmentUrl" column="attachment_url"/>
+        <result property="isPinned" column="is_pinned"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="expireTime" column="expire_time"/>
+        <!-- 关联字段 -->
+        <result property="senderName" column="sender_name"/>
+        <result property="groupName" column="group_name"/>
+    </resultMap>
+
+    <sql id="selectImGroupAnnouncementVo">
+        select ga.id, ga.group_id, ga.sender_id, ga.content, ga.type,
+               ga.attachment_url, ga.is_pinned, ga.status,
+               ga.create_time, ga.update_time, ga.expire_time
+        from im_group_announcement ga
+    </sql>
+
+    <sql id="selectImGroupAnnouncementWithUserVo">
+        select ga.id, ga.group_id, ga.sender_id, ga.content, ga.type,
+               ga.attachment_url, ga.is_pinned, ga.status,
+               ga.create_time, ga.update_time, ga.expire_time,
+               u.nickname as sender_name, g.name as group_name
+        from im_group_announcement ga
+        left join im_user u on ga.sender_id = u.id
+        left join im_group g on ga.group_id = g.id
+    </sql>
+
+    <select id="selectImGroupAnnouncementById" parameterType="Long" resultMap="ImGroupAnnouncementResult">
+        <include refid="selectImGroupAnnouncementWithUserVo"/>
+        where ga.id = #{id}
+    </select>
+
+    <select id="selectImGroupAnnouncementList" parameterType="com.ruoyi.web.domain.ImGroupAnnouncement" resultMap="ImGroupAnnouncementResult">
+        <include refid="selectImGroupAnnouncementWithUserVo"/>
+        <where>
+            ga.status = 1
+            <if test="groupId != null">and ga.group_id = #{groupId}</if>
+            <if test="senderId != null">and ga.sender_id = #{senderId}</if>
+            <if test="type != null">and ga.type = #{type}</if>
+            <if test="isPinned != null">and ga.is_pinned = #{isPinned}</if>
+        </where>
+        order by ga.is_pinned desc, ga.create_time desc
+    </select>
+
+    <select id="selectAnnouncementsByGroupId" parameterType="Long" resultMap="ImGroupAnnouncementResult">
+        <include refid="selectImGroupAnnouncementWithUserVo"/>
+        where ga.group_id = #{groupId} and ga.status = 1
+        and (ga.expire_time is null or ga.expire_time > now())
+        order by ga.is_pinned desc, ga.create_time desc
+    </select>
+
+    <select id="selectPinnedAnnouncementsByGroupId" parameterType="Long" resultMap="ImGroupAnnouncementResult">
+        <include refid="selectImGroupAnnouncementWithUserVo"/>
+        where ga.group_id = #{groupId} and ga.is_pinned = 1 and ga.status = 1
+        order by ga.create_time desc
+    </select>
+
+    <select id="countAnnouncementsByGroupId" parameterType="Long" resultType="java.lang.Integer">
+        select count(*) from im_group_announcement
+        where group_id = #{groupId} and status = 1
+    </select>
+
+    <insert id="insertImGroupAnnouncement" parameterType="com.ruoyi.web.domain.ImGroupAnnouncement" useGeneratedKeys="true" keyProperty="id">
+        insert into im_group_announcement
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="groupId != null">group_id,</if>
+            <if test="senderId != null">sender_id,</if>
+            <if test="content != null">content,</if>
+            <if test="type != null">type,</if>
+            <if test="attachmentUrl != null">attachment_url,</if>
+            <if test="isPinned != null">is_pinned,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="expireTime != null">expire_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="groupId != null">#{groupId},</if>
+            <if test="senderId != null">#{senderId},</if>
+            <if test="content != null">#{content},</if>
+            <if test="type != null">#{type},</if>
+            <if test="attachmentUrl != null">#{attachmentUrl},</if>
+            <if test="isPinned != null">#{isPinned},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="expireTime != null">#{expireTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImGroupAnnouncement" parameterType="com.ruoyi.web.domain.ImGroupAnnouncement">
+        update im_group_announcement
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="content != null">content = #{content},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="attachmentUrl != null">attachment_url = #{attachmentUrl},</if>
+            <if test="isPinned != null">is_pinned = #{isPinned},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updatePinnedStatus" parameterType="map">
+        update im_group_announcement set is_pinned = #{isPinned}, update_time = now()
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImGroupAnnouncementById" parameterType="Long">
+        update im_group_announcement set status = 0, update_time = now() where id = #{id}
+    </delete>
+
+    <delete id="deleteImGroupAnnouncementByIds" parameterType="Long[]">
+        update im_group_announcement set status = 0, update_time = now() where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAnnouncementsByGroupId" parameterType="Long">
+        update im_group_announcement set status = 0, update_time = now()
+        where group_id = #{groupId}
+    </delete>
+
+    <!-- 获取群公告统计数据 -->
+    <select id="getAnnouncementStatistics" resultType="java.util.HashMap">
+        select
+            count(*) as totalCount,
+            sum(case when is_pinned = 1 then 1 else 0 end) as pinnedCount,
+            sum(case when type = 2 then 1 else 0 end) as systemCount,
+            sum(case when type = 3 then 1 else 0 end) as activityCount
+        from im_group_announcement
+        where status = 1
+    </select>
+
+</mapper>

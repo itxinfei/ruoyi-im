@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImSensitiveWordMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImSensitiveWord" id="ImSensitiveWordResult">
+        <id property="id" column="id"/>
+        <result property="word" column="word"/>
+        <result property="wordType" column="word_type"/>
+        <result property="level" column="level"/>
+        <result property="action" column="action"/>
+        <result property="replacement" column="replacement"/>
+        <result property="isEnabled" column="is_enabled"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImSensitiveWordVo">
+        select id, word, word_type, level, action, replacement, is_enabled, create_time, update_time
+        from im_sensitive_word
+    </sql>
+
+    <select id="selectImSensitiveWordById" parameterType="Long" resultMap="ImSensitiveWordResult">
+        <include refid="selectImSensitiveWordVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectImSensitiveWordByWord" parameterType="String" resultMap="ImSensitiveWordResult">
+        <include refid="selectImSensitiveWordVo"/>
+        where word = #{word}
+    </select>
+
+    <select id="selectImSensitiveWordList" parameterType="com.ruoyi.web.domain.ImSensitiveWord" resultMap="ImSensitiveWordResult">
+        <include refid="selectImSensitiveWordVo"/>
+        <where>
+            <if test="word != null and word != ''">and word like concat('%', #{word}, '%')</if>
+            <if test="wordType != null and wordType != ''">and word_type = #{wordType}</if>
+            <if test="level != null">and level = #{level}</if>
+            <if test="action != null and action != ''">and action = #{action}</if>
+            <if test="isEnabled != null">and is_enabled = #{isEnabled}</if>
+        </where>
+        order by level desc, id asc
+    </select>
+
+    <select id="selectEnabledWords" resultMap="ImSensitiveWordResult">
+        <include refid="selectImSensitiveWordVo"/>
+        where is_enabled = 1
+        order by level desc
+    </select>
+
+    <insert id="insertImSensitiveWord" parameterType="com.ruoyi.web.domain.ImSensitiveWord" useGeneratedKeys="true" keyProperty="id">
+        insert into im_sensitive_word
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="word != null">word,</if>
+            <if test="wordType != null">word_type,</if>
+            <if test="level != null">level,</if>
+            <if test="action != null">action,</if>
+            <if test="replacement != null">replacement,</if>
+            <if test="isEnabled != null">is_enabled,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="word != null">#{word},</if>
+            <if test="wordType != null">#{wordType},</if>
+            <if test="level != null">#{level},</if>
+            <if test="action != null">#{action},</if>
+            <if test="replacement != null">#{replacement},</if>
+            <if test="isEnabled != null">#{isEnabled},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImSensitiveWord" parameterType="com.ruoyi.web.domain.ImSensitiveWord">
+        update im_sensitive_word
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="word != null">word = #{word},</if>
+            <if test="wordType != null">word_type = #{wordType},</if>
+            <if test="level != null">level = #{level},</if>
+            <if test="action != null">action = #{action},</if>
+            <if test="replacement != null">replacement = #{replacement},</if>
+            <if test="isEnabled != null">is_enabled = #{isEnabled},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImSensitiveWordById" parameterType="Long">
+        delete from im_sensitive_word where id = #{id}
+    </delete>
+
+    <delete id="deleteImSensitiveWordByIds" parameterType="Long[]">
+        delete from im_sensitive_word where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 批量导入敏感词 -->
+    <insert id="batchInsertWords">
+        insert into im_sensitive_word (word, word_type, level, action, replacement, is_enabled, create_time)
+        values
+        <foreach collection="list" item="word" separator=",">
+            (#{word}, 'OTHER', 1, 'REPLACE', '***', 1, NOW())
+        </foreach>
+        ON DUPLICATE KEY UPDATE update_time = NOW()
+    </insert>
+
+    <!-- 统计敏感词总数 -->
+    <select id="countTotalWords" resultType="java.lang.Integer">
+        select count(*) from im_sensitive_word
+    </select>
+
+    <!-- 统计启用敏感词数 -->
+    <select id="countEnabledWords" resultType="java.lang.Integer">
+        select count(*) from im_sensitive_word where is_enabled = 1
+    </select>
+
+    <!-- 统计禁用敏感词数 -->
+    <select id="countDisabledWords" resultType="java.lang.Integer">
+        select count(*) from im_sensitive_word where is_enabled = 0
+    </select>
+
+    <!-- 获取敏感词统计数据 -->
+    <select id="getSensitiveWordStatistics" resultType="map">
+        select
+            (select count(*) from im_sensitive_word) as totalCount,
+            (select count(*) from im_sensitive_word where is_enabled = 1) as enabledCount,
+            (select count(*) from im_sensitive_word where is_enabled = 0) as disabledCount,
+            (select count(*) from im_sensitive_word where word_type = 'POLITICAL') as politicalCount,
+            (select count(*) from im_sensitive_word where word_type = 'VULGAR') as vulgarCount,
+            (select count(*) from im_sensitive_word where word_type = 'VIOLENCE') as violenceCount,
+            (select count(*) from im_sensitive_word where word_type = 'AD') as adCount,
+            (select count(*) from im_sensitive_word where word_type = 'OTHER') as otherCount
+    </select>
+
+</mapper>

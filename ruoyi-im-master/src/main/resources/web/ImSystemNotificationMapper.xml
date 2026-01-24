@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImSystemNotificationMapper">
+    
+    <resultMap type="com.ruoyi.web.domain.ImSystemNotification" id="ImSystemNotificationResult">
+        <id property="id" column="id"/>
+        <result property="receiverId" column="receiver_id"/>
+        <result property="type" column="type"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="isRead" column="is_read"/>
+        <result property="relatedId" column="related_id"/>
+        <result property="relatedType" column="related_type"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="selectNotificationList" parameterType="com.ruoyi.web.domain.ImSystemNotification" resultMap="ImSystemNotificationResult">
+        select * from im_system_notification
+        <where>
+            <if test="receiverId != null"> and receiver_id = #{receiverId} </if>
+            <if test="type != null and type != ''"> and type = #{type} </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="getUserNotifications" resultMap="ImSystemNotificationResult">
+        select * from im_system_notification
+        where receiver_id = #{userId}
+        <if test="type != null and type != ''"> and type = #{type} </if>
+        order by create_time desc
+    </select>
+
+    <select id="selectNotificationById" parameterType="Long" resultMap="ImSystemNotificationResult">
+        select * from im_system_notification where id = #{id}
+    </select>
+
+    <select id="getUnreadCount" parameterType="Long" resultType="java.lang.Integer">
+        select count(*) from im_system_notification
+        where receiver_id = #{userId} and is_read = 0
+    </select>
+
+    <insert id="insertNotification" parameterType="com.ruoyi.web.domain.ImSystemNotification" useGeneratedKeys="true" keyProperty="id">
+        insert into im_system_notification (receiver_id, type, title, content, related_id, related_type, is_read, create_time)
+        values (#{receiverId}, #{type}, #{title}, #{content}, #{relatedId}, #{relatedType}, 0, NOW())
+    </insert>
+
+    <update id="markAsRead" parameterType="Long">
+        update im_system_notification set is_read = 1 where id = #{id}
+    </update>
+
+    <update id="markAllAsRead" parameterType="Long">
+        update im_system_notification set is_read = 1 where receiver_id = #{userId} and is_read = 0
+    </update>
+
+    <delete id="deleteNotificationById" parameterType="Long">
+        delete from im_system_notification where id = #{id}
+    </delete>
+
+    <delete id="clearUserNotifications" parameterType="Long">
+        delete from im_system_notification where receiver_id = #{userId}
+    </delete>
+</mapper>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('群组成员管理')" />
+</head>
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="member-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                成员总数：<a onclick="$.table.search()"><span class="label label-primary" id="totalCount">0</span></a>
+                            </li>
+                            <li>
+                                群主：<a onclick="$('select[name=\\'role\\']').val('OWNER');$.table.search()"><span class="label label-danger" id="ownerCount">0</span></a>
+                            </li>
+                            <li>
+                                管理员：<a onclick="$('select[name=\\'role\\']').val('ADMIN');$.table.search()"><span class="label label-warning" id="adminCount">0</span></a>
+                            </li>
+                            <li>
+                                受限禁言：<a onclick="$('select[name=\\'isMuted\\']').val('1');$.table.search()"><span class="label label-info" id="mutedCount">0</span></a>
+                            </li>
+                            <li class="pull-right">
+                                <label class="input-label">群组ID：</label><input type="text" name="groupId" placeholder="请输入群组ID"/>
+                            </li>
+                            <li class="pull-right">
+                                <label class="input-label">用户昵称：</label><input type="text" name="userNickname" placeholder="请输入用户昵称"/>
+                            </li>
+                            <li class="pull-right">
+                                <label class="input-label">角色：</label><select name="role">
+                                    <option value="">所有</option>
+                                    <option value="OWNER">群主</option>
+                                    <option value="ADMIN">管理员</option>
+                                    <option value="MEMBER">普通成员</option>
+                                </select>
+                            </li>
+                            <li class="pull-right">
+                                <label class="input-label">是否禁言：</label><select name="isMuted">
+                                    <option value="">所有</option>
+                                    <option value="0">否</option>
+                                    <option value="1">是</option>
+                                </select>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar">
+                    <a class="btn btn-success" onclick="addMember()" shiro:hasPermission="im:group:member:add">
+                        <i class="fa fa-plus"></i> 添加成员
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="editRole()" shiro:hasPermission="im:group:member:edit">
+                        <i class="fa fa-edit"></i> 修改角色
+                    </a>
+                    <a class="btn btn-warning single disabled" onclick="toggleMute()" shiro:hasPermission="im:group:member:edit">
+                        <i class="fa fa-ban"></i> 禁言/解禁
+                    </a>
+                    <a class="btn btn-info multiple disabled" onclick="batchMute()" shiro:hasPermission="im:group:member:edit">
+                        <i class="fa fa-ban"></i> 批量禁言
+                    </a>
+                    <a class="btn btn-success multiple disabled" onclick="batchUnmute()" shiro:hasPermission="im:group:member:edit">
+                        <i class="fa fa-check-circle"></i> 批量解禁
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:group:member:remove">
+                        <i class="fa fa-remove"></i> 移除成员
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:group:member:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
+                </div>
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:include="include :: footer" />

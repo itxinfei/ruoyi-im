@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImConversationMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImConversation" id="ImConversationResult">
+        <id property="id" column="id"/>
+        <result property="type" column="type"/>
+        <result property="targetId" column="target_id"/>
+        <result property="name" column="name"/>
+        <result property="avatar" column="avatar"/>
+        <result property="lastMessageId" column="last_message_id"/>
+        <result property="lastMessageTime" column="last_message_time"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <!-- 关联字段 -->
+        <result property="memberCount" column="member_count"/>
+        <result property="totalUnreadCount" column="total_unread_count"/>
+        <result property="targetName" column="target_name"/>
+    </resultMap>
+
+    <sql id="selectImConversationVo">
+        select id, type, target_id, name, avatar, last_message_id, last_message_time,
+               is_deleted, deleted_time, create_time, update_time
+        from im_conversation
+    </sql>
+
+    <select id="selectImConversationById" parameterType="Long" resultMap="ImConversationResult">
+        <include refid="selectImConversationVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectImConversationList" parameterType="com.ruoyi.web.domain.ImConversation" resultMap="ImConversationResult">
+        select c.*,
+               IFNULL(cm.member_count, 0) as member_count,
+               IFNULL(cm.total_unread_count, 0) as total_unread_count,
+               IFNULL(CASE WHEN c.type = 'PRIVATE' THEN u.nickname ELSE g.name END, '') as target_name
+        from im_conversation c
+        left join (
+            select conversation_id,
+                   COUNT(*) as member_count,
+                   SUM(unread_count) as total_unread_count
+            from im_conversation_member
+            where is_deleted = 0
+            group by conversation_id
+        ) cm on c.id = cm.conversation_id
+        left join im_user u on c.type = 'PRIVATE' and c.target_id = u.id
+        left join im_group g on c.type = 'GROUP' and c.target_id = g.id
+        <where>
+            c.is_deleted = 0
+            <if test="type != null and type != ''">and c.type = #{type}</if>
+            <if test="targetId != null">and c.target_id = #{targetId}</if>
+            <if test="name != null and name != ''">and c.name like concat('%', #{name}, '%')</if>
+            <if test="params.beginTime != null and params.beginTime != ''">and date_format(c.create_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d')</if>
+            <if test="params.endTime != null and params.endTime != ''">and date_format(c.create_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d')</if>
+        </where>
+        order by c.last_message_time desc
+    </select>
+
+    <insert id="insertImConversation" parameterType="com.ruoyi.web.domain.ImConversation" useGeneratedKeys="true" keyProperty="id">
+        insert into im_conversation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="type != null">type,</if>
+            <if test="targetId != null">target_id,</if>
+            <if test="name != null">name,</if>
+            <if test="avatar != null">avatar,</if>
+            <if test="lastMessageId != null">last_message_id,</if>
+            <if test="lastMessageTime != null">last_message_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            create_time,
+            update_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="type != null">#{type},</if>
+            <if test="targetId != null">#{targetId},</if>
+            <if test="name != null">#{name},</if>
+            <if test="avatar != null">#{avatar},</if>
+            <if test="lastMessageId != null">#{lastMessageId},</if>
+            <if test="lastMessageTime != null">#{lastMessageTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            NOW(),
+            NOW()
+        </trim>
+    </insert>
+
+    <update id="updateImConversation" parameterType="com.ruoyi.web.domain.ImConversation">
+        update im_conversation
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="lastMessageId != null">last_message_id = #{lastMessageId},</if>
+            <if test="lastMessageTime != null">last_message_time = #{lastMessageTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            update_time = NOW(),
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="deleteImConversationById" parameterType="Long">
+        update im_conversation set is_deleted = 1, deleted_time = now() where id = #{id}
+    </update>
+
+    <update id="deleteImConversationByIds" parameterType="Long[]">
+        update im_conversation set is_deleted = 1, deleted_time = now() where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- 会话统计 -->
+    <select id="getConversationStatistics" resultType="java.util.Map">
+        select
+            IFNULL((SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0), 0) as totalCount,
+            IFNULL((SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 and type = 'PRIVATE'), 0) as privateCount,
+            IFNULL((SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 and type = 'GROUP'), 0) as groupCount,
+            IFNULL((SELECT COUNT(*) FROM im_conversation WHERE is_deleted = 0 AND DATE(last_message_time) = CURDATE()), 0) as activeCount
+        from dual
+    </select>
+
+    <!-- 获取活跃会话列表 -->
+    <select id="getActiveConversations" resultMap="ImConversationResult">
+        select c.*,
+               IFNULL(cm.member_count, 0) as member_count,
+               IFNULL(cm.total_unread_count, 0) as total_unread_count,
+               IFNULL(CASE WHEN c.type = 'PRIVATE' THEN u.nickname ELSE g.name END, '') as target_name
+        from im_conversation c
+        left join (
+            select conversation_id,
+                   COUNT(*) as member_count,
+                   SUM(unread_count) as total_unread_count
+            from im_conversation_member
+            where is_deleted = 0
+            group by conversation_id
+        ) cm on c.id = cm.conversation_id
+        left join im_user u on c.type = 'PRIVATE' and c.target_id = u.id
+        left join im_group g on c.type = 'GROUP' and c.target_id = g.id
+        where c.is_deleted = 0
+        order by c.last_message_time desc
+        limit #{arg0}
+    </select>
+
+</mapper>

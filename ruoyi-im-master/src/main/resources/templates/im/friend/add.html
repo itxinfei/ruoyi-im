@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>新增好友关系</title>
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css}" rel="stylesheet"/>
+    <style>
+        /* 页面容器 */
+        .wrapper {
+            padding: 25px;
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        /* 卡片容器 */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px 35px;
+            border-top: 3px solid #10b981;
+        }
+
+        /* 标题样式 */
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .page-title i {
+            color: #10b981;
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        /* 表单样式 */
+        .form-horizontal .form-group {
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            font-weight: 500;
+            font-size: 14px;
+            color: #555;
+            padding-top: 12px;
+        }
+
+        .control-label.is-required::after {
+            content: " *";
+            color: #f56c6c;
+            font-size: 16px;
+            margin-left: 4px;
+        }
+
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            outline: none;
+        }
+
+        select.form-control {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2310b981' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            padding-right: 40px;
+            appearance: none;
+        }
+
+        /* 按钮组 */
+        .form-btn-group {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+        .btn {
+            padding: 10px 30px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+        }
+        .btn-default {
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #666;
+        }
+        .btn-default:hover {
+            background: #f8f9fa;
+            color: #333;
+            border-color: #ccc;
+        }
+
+        /* 输入提示 */
+        .input-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        .input-hint i {
+            margin-right: 3px;
+        }
+    </style>
+</head>
+<body class="white-bg">
+    <div class="wrapper">
+        <div class="card">
+            <div class="page-title">
+                <i class="fa fa-user-plus"></i> 新增好友关系
+            </div>
+
+            <form class="form-horizontal m" id="form-friend-add">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label is-required">用户ID</label>
+                    <div class="col-sm-9">
+                        <input name="userId" placeholder="请输入当前用户ID" class="form-control" type="number" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label is-required">好友ID</label>
+                    <div class="col-sm-9">
+                        <input name="friendId" placeholder="请输入对方用户ID" class="form-control" type="number" required>
+                        <div class="input-hint"><i class="fa fa-info-circle"></i> 双向好友关系需要双方各自添加</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">备注名</label>
+                    <div class="col-sm-9">
+                        <input name="remark" placeholder="给好友设置一个易记的备注名" class="form-control" type="text">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">分组名</label>
+                    <div class="col-sm-9">
+                        <input name="groupName" placeholder="如：我的好友、家人、同事" class="form-control" type="text" value="我的好友">
+                    </div>
+                </div>
+
+                <!-- 按钮组 -->
+                <div class="form-btn-group">
+                    <button type="button" class="btn btn-primary" onclick="submitHandler()">
+                        <i class="fa fa-save"></i> 立即添加
+                    </button>
+                    <button type="button" class="btn btn-default" onclick="$.modal.close()">
+                        <i class="fa fa-reply"></i> 取消
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <th:block th:include="include :: footer"></th:block>
+    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/friend";
+        $("#form-friend-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-friend-add').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

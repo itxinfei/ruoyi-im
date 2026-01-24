@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImDingMessageMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImDingMessage" id="ImDingMessageResult">
+        <id property="id" column="id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="senderName" column="sender_name"/>
+        <result property="content" column="content"/>
+        <result property="dingType" column="ding_type"/>
+        <result property="isUrgent" column="is_urgent"/>
+        <result property="scheduleTime" column="schedule_time"/>
+        <result property="sendTime" column="send_time"/>
+        <result property="status" column="status"/>
+        <result property="receiptRequired" column="receipt_required"/>
+        <result property="totalCount" column="total_count"/>
+        <result property="readCount" column="read_count"/>
+        <result property="confirmedCount" column="confirmed_count"/>
+        <result property="attachment" column="attachment"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImDingMessageVo">
+        select d.id, d.sender_id, d.content, d.ding_type, d.is_urgent,
+               d.schedule_time, d.send_time, d.status, d.receipt_required,
+               d.total_count, d.read_count, d.confirmed_count, d.attachment,
+               d.create_time, d.update_time,
+               u.nickname as sender_name
+        from im_ding_message d
+        left join im_user u on d.sender_id = u.id
+    </sql>
+
+    <select id="selectImDingMessageList" parameterType="com.ruoyi.web.domain.ImDingMessage" resultMap="ImDingMessageResult">
+        <include refid="selectImDingMessageVo"/>
+        <where>
+            1=1
+            <if test="senderId != null">and d.sender_id = #{senderId}</if>
+            <if test="dingType != null and dingType != ''">and d.ding_type = #{dingType}</if>
+            <if test="status != null and status != ''">and d.status = #{status}</if>
+            <if test="content != null and content != ''">and d.content like concat('%', #{content}, '%')</if>
+            <if test="params.beginTime != null and params.beginTime != ''">and date_format(d.send_time,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d')</if>
+            <if test="params.endTime != null and params.endTime != ''">and date_format(d.send_time,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d')</if>
+        </where>
+        order by d.send_time desc
+    </select>
+
+    <select id="selectImDingMessageById" parameterType="Long" resultMap="ImDingMessageResult">
+        <include refid="selectImDingMessageVo"/>
+        where d.id = #{id}
+    </select>
+
+    <insert id="insertImDingMessage" parameterType="com.ruoyi.web.domain.ImDingMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into im_ding_message
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="senderId != null">sender_id,</if>
+            <if test="content != null">content,</if>
+            <if test="dingType != null">ding_type,</if>
+            <if test="isUrgent != null">is_urgent,</if>
+            <if test="scheduleTime != null">schedule_time,</if>
+            <if test="sendTime != null">send_time,</if>
+            <if test="status != null">status,</if>
+            <if test="receiptRequired != null">receipt_required,</if>
+            <if test="totalCount != null">total_count,</if>
+            <if test="readCount != null">read_count,</if>
+            <if test="confirmedCount != null">confirmed_count,</if>
+            <if test="attachment != null">attachment,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="senderId != null">#{senderId},</if>
+            <if test="content != null">#{content},</if>
+            <if test="dingType != null">#{dingType},</if>
+            <if test="isUrgent != null">#{isUrgent},</if>
+            <if test="scheduleTime != null">#{scheduleTime},</if>
+            <if test="sendTime != null">#{sendTime},</if>
+            <if test="status != null">#{status},</if>
+            <if test="receiptRequired != null">#{receiptRequired},</if>
+            <if test="totalCount != null">#{totalCount},</if>
+            <if test="readCount != null">#{readCount},</if>
+            <if test="confirmedCount != null">#{confirmedCount},</if>
+            <if test="attachment != null">#{attachment},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImDingMessage" parameterType="com.ruoyi.web.domain.ImDingMessage">
+        update im_ding_message
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="content != null">content = #{content},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="readCount != null">read_count = #{readCount},</if>
+            <if test="confirmedCount != null">confirmed_count = #{confirmedCount},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImDingMessageByIds" parameterType="Long">
+        delete from im_ding_message where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getDingStatistics" resultType="java.util.Map">
+        select
+            (SELECT COUNT(*) FROM im_ding_message) as totalCount,
+            (SELECT COUNT(*) FROM im_ding_message WHERE status = 'SENT') as sentCount,
+            (SELECT COUNT(*) FROM im_ding_message WHERE status = 'PENDING') as pendingCount,
+            (SELECT COUNT(*) FROM im_ding_message WHERE is_urgent = 1) as urgentCount
+        from dual
+    </select>
+
+    <select id="getDingReceipts" parameterType="Long" resultType="java.util.Map">
+        select r.receiver_id, u.nickname as receiver_name, r.read_time, r.confirmed, r.confirm_time, r.remark
+        from im_ding_receipt r
+        left join im_user u on r.receiver_id = u.id
+        where r.ding_id = #{dingId}
+        order by r.read_time, r.confirm_time
+    </select>
+
+    <select id="getReceiptStatistics" parameterType="Long" resultType="java.util.Map">
+        select
+            m.total_count as totalCount,
+            m.read_count as readCount,
+            m.confirmed_count as confirmedCount,
+            (m.total_count - m.read_count) as unreadCount,
+            (m.total_count - m.confirmed_count) as unconfirmedCount
+        from im_ding_message m
+        where m.id = #{dingId}
+    </select>
+</mapper>

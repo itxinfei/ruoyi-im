@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImFriendRequestMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImFriendRequest" id="ImFriendRequestResult">
+        <id property="id" column="id"/>
+        <result property="fromUserId" column="from_user_id"/>
+        <result property="toUserId" column="to_user_id"/>
+        <result property="message" column="message"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="handledTime" column="handled_time"/>
+        <!-- 关联字段 -->
+        <result property="fromUsername" column="from_username"/>
+        <result property="fromNickname" column="from_nickname"/>
+        <result property="fromAvatar" column="from_avatar"/>
+        <result property="toUsername" column="to_username"/>
+        <result property="toNickname" column="to_nickname"/>
+    </resultMap>
+
+    <sql id="selectImFriendRequestVo">
+        select r.id, r.from_user_id, r.to_user_id, r.message, r.status,
+               r.create_time, r.handled_time
+        from im_friend_request r
+    </sql>
+
+    <sql id="selectImFriendRequestWithUserVo">
+        select r.id, r.from_user_id, r.to_user_id, r.message, r.status,
+               r.create_time, r.handled_time,
+               u1.username as from_username, u1.nickname as from_nickname, u1.avatar as from_avatar,
+               u2.username as to_username, u2.nickname as to_nickname
+        from im_friend_request r
+        left join im_user u1 on r.from_user_id = u1.id
+        left join im_user u2 on r.to_user_id = u2.id
+    </sql>
+
+    <select id="selectImFriendRequestById" parameterType="Long" resultMap="ImFriendRequestResult">
+        <include refid="selectImFriendRequestWithUserVo"/>
+        where r.id = #{id}
+    </select>
+
+    <select id="selectImFriendRequestList" parameterType="com.ruoyi.web.domain.ImFriendRequest" resultMap="ImFriendRequestResult">
+        <include refid="selectImFriendRequestWithUserVo"/>
+        <where>
+            <if test="fromUserId != null">and r.from_user_id = #{fromUserId}</if>
+            <if test="toUserId != null">and r.to_user_id = #{toUserId}</if>
+            <if test="status != null and status != ''">and r.status = #{status}</if>
+            <if test="message != null and message != ''">and r.message like concat('%', #{message}, '%')</if>
+        </where>
+        order by r.create_time desc
+    </select>
+
+    <insert id="insertImFriendRequest" parameterType="com.ruoyi.web.domain.ImFriendRequest" useGeneratedKeys="true" keyProperty="id">
+        insert into im_friend_request
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="fromUserId != null">from_user_id,</if>
+            <if test="toUserId != null">to_user_id,</if>
+            <if test="message != null">message,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="handledTime != null">handled_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="fromUserId != null">#{fromUserId},</if>
+            <if test="toUserId != null">#{toUserId},</if>
+            <if test="message != null">#{message},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="handledTime != null">#{handledTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImFriendRequest" parameterType="com.ruoyi.web.domain.ImFriendRequest">
+        update im_friend_request
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="status != null">status = #{status},</if>
+            <if test="handledTime != null">handled_time = #{handledTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImFriendRequestById" parameterType="Long">
+        delete from im_friend_request where id = #{id}
+    </delete>
+
+    <delete id="deleteImFriendRequestByIds" parameterType="Long[]">
+        delete from im_friend_request where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 统计好友申请总数 -->
+    <select id="countTotalRequests" resultType="java.lang.Integer">
+        select count(*) from im_friend_request
+    </select>
+
+    <!-- 统计待处理申请数 -->
+    <select id="countPendingRequests" resultType="java.lang.Integer">
+        select count(*) from im_friend_request where status = 'PENDING'
+    </select>
+
+    <!-- 统计已同意申请数 -->
+    <select id="countApprovedRequests" resultType="java.lang.Integer">
+        select count(*) from im_friend_request where status = 'APPROVED'
+    </select>
+
+    <!-- 统计已拒绝申请数 -->
+    <select id="countRejectedRequests" resultType="java.lang.Integer">
+        select count(*) from im_friend_request where status = 'REJECTED'
+    </select>
+
+    <!-- 获取好友申请统计数据 -->
+    <select id="getFriendRequestStatistics" resultType="java.util.Map">
+        SELECT 
+            COUNT(*) as totalCount,
+            SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) as pendingCount,
+            SUM(CASE WHEN status = 'APPROVED' THEN 1 ELSE 0 END) as approvedCount,
+            SUM(CASE WHEN status = 'REJECTED' THEN 1 ELSE 0 END) as rejectedCount
+        FROM im_friend_request
+    </select>
+
+</mapper>

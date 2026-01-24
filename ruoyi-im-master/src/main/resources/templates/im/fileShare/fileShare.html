@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('文件分享管理')" />
+    <style>
+        .select-list ul li { margin: 0px 10px 5px 0px !important; }
+        .select-list ul li input { width: 140px !important; }
+        .select-list ul li select { width: 80px !important; }
+        .time-input { width: 100px !important; }
+    </style>
+</head>
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row">
+            <!-- 统计卡片区域 - 增强样式 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
+                            <div class="ibox-title">
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">分享总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部文件分享</div>
+                                <i class="fa fa-share-alt stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByPermission('1')">
+                            <div class="ibox-title">
+                                <span class="stat-badge pull-right">公</span>
+                                <h5 style="color: #fff; margin: 0;">公开分享</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="stat-number" id="publicCount">0</div>
+                                <div class="stat-label">公开链接分享</div>
+                                <i class="fa fa-unlock stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info">
+                            <div class="ibox-title">
+                                <span class="stat-badge pull-right">访</span>
+                                <h5 style="color: #fff; margin: 0;">总访问量</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="stat-number" id="totalAccessCount">0</div>
+                                <div class="stat-label">累计访问次数</div>
+                                <i class="fa fa-eye stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByExpired()">
+                            <div class="ibox-title">
+                                <span class="stat-badge pull-right">过</span>
+                                <h5 style="color: #fff; margin: 0;">已过期</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="stat-number" id="expiredCount">0</div>
+                                <div class="stat-label">过期分享</div>
+                                <i class="fa fa-clock-o stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-12 search-collapse">
+                <form id="fileShare-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label class="search-label label-2">分享者</label><input type="text" name="sharerName" placeholder="请输入"/>
+                            </li>
+                            <li>
+                                <label class="search-label label-2">文件名</label><input type="text" name="fileName" placeholder="请输入"/>
+                            </li>
+                            <li>
+                                <label class="search-label label-4">分享权限</label><select name="permission">
+                                    <option value="">全部</option>
+                                    <option value="1">公开</option>
+                                    <option value="2">指定人</option>
+                                    <option value="3">密码保护</option>
+                                </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:fileShare:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:fileShare:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-info" onclick="showCleanModal()" shiro:hasPermission="im:fileShare:remove">
+                        <i class="fa fa-trash"></i> 清理过期
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:fileShare:remove">
+                        <i class="fa fa-remove"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:fileShare:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
+                </div>
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 清理过期分享弹窗 -->
+    <div class="modal fade" id="cleanModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">清理过期分享</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fa fa-info-circle"></i> 此操作将删除所有已过期的文件分享记录，请谨慎操作！
+                    </div>
+                    <p>确定要清理吗？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="doClean()">确认清理</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('im:fileShare:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('im:fileShare:remove')}]];
+        var prefix = ctx + "im/fileShare";
+
+        $(function() {
+            loadStatistics();
+
+            var options = {
+                url: prefix + "/list",
+                toolbar: "toolbar",
+                height: 650,
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove/{id}",
+                exportUrl: prefix + "/export",
+                modalName: "文件分享",
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
+                fixedColumns: true,
+                fixedNumber: 1,
+                fixedRightNumber: 1,
+                showColumns: true,
+                showColumnsToggleAll: true,
+                cookie: true,
+                cookieIdTable: 'im_fileShare_table',
+                cookieExpire: '30d',
+                showExport: true,
+                exportDataType: 'selected',
+                exportTypes: ['excel'],
+                exportOptions: {
+                    fileName: '文件分享数据'
+                },
+                columns: [{
+                    checkbox: true
+                }, {
+                    field: 'id',
+                    title: 'ID',
+                    visible: false
+                }, {
+                    field: 'fileName',
+                    title: '文件名',
+                    width: '250',
+                    formatter: function(value, row, index) {
+                        return '<i class="fa fa-file file-icon"></i> <strong>' + (value || '-') + '</strong>';
+                    }
+                }, {
+                    field: 'fileSize',
+                    title: '文件大小',
+                    align: 'center',
+                    width: '100',
+                    formatter: function(value, row, index) {
+                        if (!value) return '-';
+                        return formatFileSize(value);
+                    }
+                }, {
+                    field: 'sharerName',
+                    title: '分享者',
+                    width: '120',
+                    formatter: function(value, row, index) {
+                        return '<i class="fa fa-user"></i> ' + (value || '-');
+                    }
+                }, {
+                    field: 'permission',
+                    title: '分享权限',
+                    align: 'center',
+                    width: '100',
+                    formatter: function(value, row, index) {
+                        if (value == 1) return '<span class="badge badge-success">公开</span>';
+                        if (value == 2) return '<span class="badge badge-info">指定人</span>';
+                        if (value == 3) return '<span class="badge badge-warning"><i class="fa fa-lock"></i> 密码</span>';
+                        return '<span class="badge badge-default">' + (value || '-') + '</span>';
+                    }
+                }, {
+                    field: 'accessPassword',
+                    title: '访问密码',
+                    align: 'center',
+                    width: '100',
+                    formatter: function(value, row, index) {
+                        return value ? '<code>***</code>' : '-';
+                    }
+                }, {
+                    field: 'allowDownload',
+                    title: '允许下载',
+                    align: 'center',
+                    width: '80',
+                    formatter: function(value, row, index) {
+                        if (value) return '<span class="badge badge-success"><i class="fa fa-check"></i></span>';
+                        return '<span class="badge badge-default"><i class="fa fa-times"></i></span>';
+                    }
+                }, {
+                    field: 'allowPreview',
+                    title: '允许预览',
+                    align: 'center',
+                    width: '80',
+                    formatter: function(value, row, index) {
+                        if (value) return '<span class="badge badge-success"><i class="fa fa-check"></i></span>';
+                        return '<span class="badge badge-default"><i class="fa fa-times"></i></span>';
+                    }
+                }, {
+                    field: 'expireTime',
+                    title: '过期时间',
+                    align: 'center',
+                    width: '160',
+                    formatter: function(value, row, index) {
+                        if (!value) return '<span class="text-muted">永久</span>';
+                        return value;
+                    }
+                }, {
+                    field: 'accessCount',
+                    title: '访问次数',
+                    align: 'center',
+                    width: '80',
+                    formatter: function(value, row, index) {
+                        return '<i class="fa fa-eye"></i> ' + (value || 0);
+                    }
+                }, {
+                    field: 'downloadCount',
+                    title: '下载次数',
+                    align: 'center',
+                    width: '80',
+                    formatter: function(value, row, index) {
+                        return '<i class="fa fa-download"></i> ' + (value || 0);
+                    }
+                }, {
+                    field: 'createTime',
+                    title: '创建时间',
+                    width: '160',
+                    sortable: true
+                }, {
+                    title: '操作',
+                    align: 'center',
+                    width: '120',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>修改</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="removeOne(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }],
+                responseHandler: function(res) {
+                    $.modal.closeLoading();
+                    if (res.code === 0) {
+                        return { rows: res.rows, total: res.total };
+                    } else {
+                        $.modal.alertWarning(res.msg);
+                        return { rows: [], total: 0 };
+                    }
+                }
+            };
+            $.table.init(options);
+        });
+
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code === 0) {
+                    var data = result.data || {};
+                    animateNumber('totalCount', data.totalCount || 0);
+                    animateNumber('publicCount', data.publicCount || 0);
+                    animateNumber('totalAccessCount', data.totalAccessCount || 0);
+                    animateNumber('expiredCount', data.expiredCount || 0);
+                }
+            });
+        }
+
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function() {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function() {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /* 重置筛选 */
+        function filterReset() {
+            $.form.reset();
+            $.table.search();
+        }
+
+        /* 按权限筛选 */
+        function filterByPermission(permission) {
+            if (permission !== undefined && permission !== '') {
+                $('select[name="permission"]').val(permission);
+            } else {
+                $('select[name="permission"]').val('');
+            }
+            $.table.search();
+        }
+
+        /* 筛选过期数据 */
+        function filterByExpired() {
+            $.table.search();
+        }
+
+        function showCleanModal() {
+            $("#cleanModal").modal('show');
+        }
+
+        function doClean() {
+            $("#cleanModal").modal('hide');
+            $.ajax({
+                url: prefix + "/clean",
+                type: 'post',
+                success: function(result) {
+                    if (result.code == 0) {
+                        $.modal.msgSuccess(result.msg || "清理完成");
+                        $.table.refresh();
+                        loadStatistics();
+                    } else {
+                        $.modal.alertError(result.msg || "清理失败");
+                    }
+                }
+            });
+        }
+
+        function removeOne(id) {
+            $.modal.confirm("确定要删除该分享记录吗？", function() {
+                $.ajax({
+                    url: prefix + "/remove/" + id,
+                    type: 'delete',
+                    success: function(result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("删除成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.msgError(result.msg || "删除失败");
+                        }
+                    }
+                });
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes) return '-';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+        }
+    </script>
+</body>
+</html>

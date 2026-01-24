@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('群组操作日志')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!-- 头部区 -->
+        <h3 class="title-tm">成员管理</h3>
+        <div class="header-actions">
+            <button class="btn-im-outline" onclick="ImModal.goBack()">
+                <i class="fa fa-arrow-left"></i> 返回
+            </button>
+            <button class="btn-im-outline" onclick="refreshData()">
+                <i class="fa fa-refresh"></i> 刷新
+            </button>
+        </div>
+    </div>
+
+    <!-- 统计卡片区域 -->
+    <div class="col-sm-12">
+        <div class="row" style="padding-top: 6px;">
+            <div class="col-sm-3">
+                <div class="stat-box stat-box-primary">
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label">日志总数</div>
+                    <i class="fa fa-list-alt stat-icon"></i>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="stat-box stat-box-success">
+                    <div class="stat-number" id="addCount">0</div>
+                    <div class="stat-label">添加成员</div>
+                    <i class="fa fa-user-plus stat-icon"></i>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="stat-box stat-box-danger">
+                    <div class="stat-number" id="removeCount">0</div>
+                    <div class="stat-label">移除成员</div>
+                    <i class="fa fa-user-times stat-icon"></i>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="stat-box stat-box-warning">
+                    <div class="stat-number" id="changeCount">0</div>
+                    <div class="stat-label">修改角色</div>
+                    <i class="fa fa-exchange stat-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="search-collapse">
+        <select class="form-im-control toolbar-select" id="operationType">
+            <option value="">所有操作类型</option>
+            <option value="ADD_MEMBER">添加成员</option>
+            <option value="REMOVE_MEMBER">移除成员</option>
+            <option value="CHANGE_ROLE">修改角色</option>
+            <option value="MUTE_MEMBER">禁言成员</option>
+            <option value="UNMUTE_MEMBER">解除禁言</option>
+            <option value="DISMISS_GROUP">解散群组</option>
+            <option value="CHANGE_OWNER">转让群主</option>
+            <option value="UPDATE_INFO">修改群信息</option>
+        </select>
+        <button class="btn-im-default" onclick="resetData()">
+            <i class="fa fa-refresh"></i> 重置
+        </button>
+        <div class="toolbar-stats">
+            总数: <strong id="totalCount">0</strong> |
+            添加: <strong id="addCount">0</strong> |
+            移除: <strong id="removeCount">0</strong> |
+            变更: <strong id="changeCount">0</strong>
+        </div>
+    </div>
+
+    <!-- 表格区 -->
+    <div class="col-sm-12 select-table table-striped">
+        <table id="bootstrap-table" data-mobile-responsive="true"></table>
+    </div>
+
+    <th:block th:include="include :: footer" />
+    <script th:src="@{/js/im-common.js}"></script>
+    <script th:inline="javascript">
+        var groupId = [[${groupId}]];
+        var prefix = ctx + "im/group/log";
+
+        $(function() {
+            loadGroupInfo();
+            loadStatistics();
+            initTable();
+            initFilters();
+        });
+
+        // 加载群组基本信息
+        function loadGroupInfo() {
+            ImModal.requestData({
+                url: ctx + "im/group/info/" + groupId,
+                success: function(result) {
+                    if (result.code == 0 && result.data) {
+                        var data = result.data;
+                        $("#groupId").text(data.id || '-');
+                        $("#groupName").text(data.name || '-');
+                    } else {
+                        layer.msg('加载群组信息失败', {icon: 2});
+                    }
+                }
+            });
+        }
+
+        // 加载统计数据
+        function loadStatistics() {
+            ImModal.requestData({
+                url: prefix + "/statistics",
+                data: {groupId: groupId},
+                success: function(result) {
+                    if (result.code == 0) {
+                        $("#totalCount").text(result.data.totalCount || 0);
+                        $("#addCount").text(result.data.addCount || 0);
+                        $("#removeCount").text(result.data.removeCount || 0);
+                        $("#changeCount").text(result.data.changeCount || 0);
+                    }
+                }
+            });
+        }
+
+        // 初始化表格
+        function initTable() {
+            ImModal.initTable({
+                method: 'post',
+                sidePagination: 'server',
+                url: prefix + "/list",
+                columns: [{
+                    field: 'id',
+                    title: 'ID',
+                    width: '60',
+                    visible: false
+                }, {
+                    field: 'operatorName',
+                    title: '操作者',
+                    width: '120',
+                    formatter: function(value, row, index) {
+                        return '<span class="text-info"><i class="fa fa-user"></i> ' + (value || '-') + '</span>';
+                    }
+                }, {
+                    field: 'operationType',
+                    title: '操作类型',
+                    align: 'center',
+                    width: '140',
+                    formatter: function(value, row, index) {
+                        var typeMap = {
+                            'ADD_MEMBER': '<span class="badge-im badge-im-success"><i class="fa fa-plus"></i> 添加成员</span>',
+                            'REMOVE_MEMBER': '<span class="badge-im badge-im-danger"><i class="fa fa-minus"></i> 移除成员</span>',
+                            'CHANGE_ROLE': '<span class="badge-im badge-im-info"><i class="fa fa-exchange"></i> 修改角色</span>',
+                            'MUTE_MEMBER': '<span class="badge-im badge-im-warning"><i class="fa fa-ban"></i> 禁言成员</span>',
+                            'UNMUTE_MEMBER': '<span class="badge-im badge-im-primary"><i class="fa fa-unlock"></i> 解除禁言</span>',
+                            'DISMISS_GROUP': '<span class="badge-im badge-im-danger"><i class="fa fa-trash"></i> 解散群组</span>',
+                            'CHANGE_OWNER': '<span class="badge-im badge-im-warning"><i class="fa fa-share"></i> 转让群主</span>',
+                            'UPDATE_INFO': '<span class="badge-im badge-im-info"><i class="fa fa-edit"></i> 修改群信息</span>'
+                        };
+                        return typeMap[value] || (value || '-');
+                    }
+                }, {
+                    field: 'operationDesc',
+                    title: '操作描述',
+                    width: '400',
+                    formatter: function(value, row, index) {
+                        var desc = value || '-';
+                        if (row.targetUserName) {
+                            desc += ' <span class="text-muted">（目标：' + row.targetUserName + '）</span>';
+                        }
+                        if (desc.length > 50) {
+                            return '<span title="' + desc + '">' + desc.substring(0, 50) + '...</span>';
+                        }
+                        return desc;
+                    }
+                }, {
+                    field: 'targetUserName',
+                    title: '目标用户',
+                    width: '100',
+                    formatter: function(value, row, index) {
+                        return value ? '<span class="text-muted"><i class="fa fa-user"></i> ' + value + '</span>' : '-';
+                    }
+                }, {
+                    field: 'createTime',
+                    title: '操作时间',
+                    width: '160',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        return ImCommon.formatDateTimeWithRelative(value);
+                    }
+                }],
+                responseHandler: function(res) {
+                    if (res.code === 0 || res.rows) {
+                        return res.rows || [];
+                    }
+                    return [];
+                },
+                queryParams: function(params) {
+                    return {
+                        pageNum: params.pageNumber || 1,
+                        pageSize: params.pageSize || 20,
+                        groupId: groupId,
+                        operationType: $("#operationType").val()
+                    };
+                }
+            });
+        }
+
+        // 初始化筛选器
+        function initFilters() {
+            $('#operationType').on('change', function() {
+                $('#bootstrap-table').bootstrapTable('refresh');
+            });
+        }
+
+        // 重置数据
+        function resetData() {
+            $("#operationType").val("");
+            $('#bootstrap-table').bootstrapTable('refresh');
+        }
+
+        // 刷新数据
+        function refreshData() {
+            ImModal.refresh(function() {
+                $('#bootstrap-table').bootstrapTable('refresh');
+                loadStatistics();
+            });
+        }
+    </script>
+</body>
+</html>

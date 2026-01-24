@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('会话成员管理')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <!-- 头部区 -->
+        <h3 class="title-tm">成员管理</h3>
+        <div class="header-actions">
+            <button class="btn-im-outline" onclick="ImModal.goBack()">
+                <i class="fa fa-arrow-left"></i> 返回
+            </button>
+            <button class="btn-im-outline" onclick="refreshData()">
+                <i class="fa fa-refresh"></i> 刷新
+            </button>
+        </div>
+    </div>
+
+    <!-- 统计卡片区域 -->
+    <div class="col-sm-12">
+        <div class="row" style="padding-top: 6px;">
+            <div class="col-sm-3">
+                <div class="stat-box stat-box-primary">
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label">成员总数</div>
+                    <i class="fa fa-users stat-icon"></i>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="stat-box stat-box-success">
+                    <div class="stat-number" id="ownerCount">0</div>
+                    <div class="stat-label">群主</div>
+                    <i class="fa fa-user-plus stat-icon"></i>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="stat-box stat-box-info">
+                    <div class="stat-number" id="adminCount">0</div>
+                    <div class="stat-label">管理员</div>
+                    <i class="fa fa-user stat-icon"></i>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="stat-box stat-box-warning">
+                    <div class="stat-number" id="memberCount">0</div>
+                    <div class="stat-label">普通成员</div>
+                    <i class="fa fa-user stat-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="search-collapse" style="padding-top: 6px;">
+        <input type="text" class="form-im-control toolbar-input" id="searchInput" placeholder="搜索昵称或用户名"/>
+        <select class="form-im-control toolbar-select" id="roleFilter">
+            <option value="">全部角色</option>
+            <option value="OWNER">群主</option>
+            <option value="ADMIN">管理员</option>
+            <option value="MEMBER">普通成员</option>
+        </select>
+        <select class="form-im-control toolbar-select" id="statusFilter">
+            <option value="">全部状态</option>
+            <option value="pinned">已置顶</option>
+            <option value="muted">已免打扰</option>
+            <option value="unread">有未读</option>
+        </select>
+        <button class="btn-im-default" onclick="resetData()">
+            <i class="fa fa-refresh"></i> 重置
+        </button>
+        <div class="toolbar-stats">
+            总数: <strong id="totalCount">0</strong> |
+            群主: <strong id="ownerCount">0</strong> |
+            管理: <strong id="adminCount">0</strong> |
+            成员: <strong id="memberCount">0</strong>
+        </div>
+    </div>
+
+    <!-- 表格区 -->
+    <div class="col-sm-12 select-table table-striped">
+        <table id="bootstrap-table" data-mobile-responsive="true"></table>
+    </div>
+
+    <th:block th:include="include :: footer" />
+    <script th:src="@{/js/im-common.js}"></script>
+    <script th:inline="javascript">
+        var conversationId = [[${conversationId}]];
+        var hasEditPermission = [[${@permission.hasPermi('im:conversation:edit')}]];
+        var prefix = ctx + "im/conversation";
+        var allMembers = [];
+
+        $(function() {
+            loadConversationInfo();
+            initTable();
+            initSearch();
+        });
+
+        // 加载会话基本信息
+        function loadConversationInfo() {
+            ImModal.requestData({
+                url: prefix + "/info/" + conversationId,
+                success: function(result) {
+                    if (result.code == 0 && result.data) {
+                        var data = result.data;
+                        $("#conversationId").text(data.id || '-');
+                        $("#conversationName").text(data.name || '-');
+
+                        var typeText = data.type === 'PRIVATE' ? '私聊' : (data.type === 'GROUP' ? '群聊' : '-');
+                        $("#conversationType").text(typeText);
+
+                        $("#createTime").text(ImCommon.formatDateTimeWithRelative(data.createTime));
+                    }
+                }
+            });
+        }
+
+        // 初始化表格
+        function initTable() {
+            ImModal.initTable({
+                columns: [{
+                    field: 'userId',
+                    title: '用户ID',
+                    width: '80',
+                    visible: false
+                }, {
+                    field: 'avatar',
+                    title: '头像',
+                    width: '60',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        return ImModal.formatAvatar(value);
+                    }
+                }, {
+                    field: 'nickname',
+                    title: '昵称',
+                    width: '180',
+                    formatter: function(value, row, index) {
+                        var nickname = value || row.userName || '-';
+                        var html = '<span style="font-weight:500;">' + nickname + '</span>';
+                        if (row.userName && row.userName !== value) {
+                            html += '<br><span class="text-muted" style="font-size:11px">@' + row.userName + '</span>';
+                        }
+                        return html;
+                    }
+                }, {
+                    field: 'role',
+                    title: '角色',
+                    align: 'center',
+                    width: '100',
+                    formatter: function(value, row, index) {
+                        return ImModal.formatRole(value);
+                    }
+                }, {
+                    field: 'unreadCount',
+                    title: '未读消息',
+                    align: 'center',
+                    width: '100',
+                    formatter: function(value, row, index) {
+                        var count = value || 0;
+                        if (count > 0) {
+                            return '<span class="badge-im badge-im-danger">' + count + '</span>';
+                        }
+                        return '<span class="text-muted">0</span>';
+                    }
+                }, {
+                    field: 'isPinned',
+                    title: '置顶',
+                    align: 'center',
+                    width: '80',
+                    formatter: function(value, row, index) {
+                        return ImModal.formatStatus(value, 'yesno')
+                            .replace('是', '<i class="fa fa-thumb-tack text-success"></i>')
+                            .replace('否', '<i class="fa fa-thumb-tack text-muted"></i>');
+                    }
+                }, {
+                    field: 'isMuted',
+                    title: '免打扰',
+                    align: 'center',
+                    width: '90',
+                    formatter: function(value, row, index) {
+                        return ImModal.formatStatus(value, 'yesno')
+                            .replace('是', '<span class="badge-im badge-im-warning">已开启</span>')
+                            .replace('否', '<span class="badge-im badge-im-light">未开启</span>');
+                    }
+                }, {
+                    field: 'joinTime',
+                    title: '加入时间',
+                    width: '160',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        return ImCommon.formatDateTimeWithRelative(value);
+                    }
+                }, {
+                    field: 'operate',
+                    title: '操作',
+                    align: 'center',
+                    width: '150',
+                    formatter: function(value, row, index) {
+                        if (hasEditPermission) {
+                            return '<a class="btn-im-info btn-im-xs" href="javascript:void(0)" onclick="viewMemberDetail(' + row.userId + ', \'' + (row.nickname || row.userName || '') + '\')" title="查看详情"><i class="fa fa-info-circle"></i></a>';
+                        } else {
+                            return '<span class="text-muted" style="font-size:12px;">无权限</span>';
+                        }
+                    }
+                }],
+                responseHandler: function(res) {
+                    if (res.code === 0) {
+                        allMembers = res.data || [];
+                        updateStats(allMembers);
+                        return allMembers;
+                    }
+                    return [];
+                }
+            });
+
+            loadMembers();
+        }
+
+        // 加载成员数据
+        function loadMembers() {
+            ImModal.requestData({
+                url: prefix + "/" + conversationId + "/members/data",
+                success: function(result) {
+                    if (result.code === 0) {
+                        allMembers = result.data || [];
+                        ImModal.loadTableData(allMembers);
+                        updateStats(allMembers);
+                    } else {
+                        $.modal.msgError(result.msg || "加载成员数据失败");
+                    }
+                }
+            });
+        }
+
+        // 初始化搜索
+        function initSearch() {
+            ImModal.initSearch(searchMembers);
+            ImModal.initFilters(searchMembers);
+        }
+
+        // 搜索成员
+        function searchMembers() {
+            var keyword = $('#searchInput').val();
+            var role = $('#roleFilter').val();
+            var status = $('#statusFilter').val();
+
+            var filtered = ImModal.filterData(allMembers, {
+                keyword: keyword,
+                role: role,
+                status: status
+            });
+
+            ImModal.loadTableData(filtered);
+        }
+
+        // 重置数据
+        function resetData() {
+            ImModal.resetFilters(function() {
+                searchMembers();
+            });
+        }
+
+        // 刷新数据
+        function refreshData() {
+            ImModal.refresh(function() {
+                return ImModal.requestData({
+                    url: prefix + "/" + conversationId + "/members/data",
+                    success: function(result) {
+                        if (result.code === 0) {
+                            allMembers = result.data || [];
+                            ImModal.loadTableData(allMembers);
+                            updateStats(allMembers);
+                        }
+                    }
+                });
+            });
+        }
+
+        // 更新统计
+        function updateStats(members) {
+            ImModal.updateStatistics(members, {
+                groups: {
+                    ownerCount: 'OWNER',
+                    adminCount: 'ADMIN',
+                    memberCount: 'MEMBER'
+                }
+            });
+        }
+
+        // 查看成员详情
+        function viewMemberDetail(userId, nickname) {
+            var member = allMembers.find(m => m.userId == userId);
+            if (!member) return;
+
+            var content = '<div style="padding:20px;">' +
+                '<table class="table table-im table-bordered">' +
+                '<tr><td style="width:100px;"><strong>用户ID:</strong></td><td>' + userId + '</td></tr>' +
+                '<tr><td><strong>昵称:</strong></td><td>' + nickname + '</td></tr>' +
+                '<tr><td><strong>角色:</strong></td><td>' + (member.role === 'OWNER' ? '群主' : (member.role === 'ADMIN' ? '管理员' : '普通成员')) + '</td></tr>' +
+                '<tr><td><strong>未读消息:</strong></td><td>' + (member.unreadCount || 0) + '</td></tr>' +
+                '<tr><td><strong>置顶:</strong></td><td>' + (member.isPinned == 1 ? '是' : '否') + '</td></tr>' +
+                '<tr><td><strong>免打扰:</strong></td><td>' + (member.isMuted == 1 ? '是' : '否') + '</td></tr>' +
+                '<tr><td><strong>加入时间:</strong></td><td>' + ImCommon.formatDateTimeWithRelative(member.joinTime) + '</td></tr>' +
+                '<tr><td><strong>操作:</strong></td><td>' +
+                '<button class="btn-im-default" onclick="$.modal.close()"><i class="fa fa-close"></i> 关闭</button>' +
+                '</td></tr>' +
+                '</table>' +
+                '</div>';
+
+            layer.open({
+                type: 1,
+                title: '成员详情 - ' + nickname,
+                area: ['95%', '90%'],
+                content: content
+            });
+        }
+    </script>
+</body>
+</html>

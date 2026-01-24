@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImTodoItemMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImTodoItem" id="ImTodoItemResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="nickname" column="nickname"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="priority" column="priority"/>
+        <result property="status" column="status"/>
+        <result property="dueDate" column="due_date"/>
+        <result property="completedTime" column="completed_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="countTodos" resultType="java.lang.Integer">
+        select count(*) from im_todo_item
+        <where>
+            <if test="userId != null"> and user_id = #{userId} </if>
+            <if test="completed != null">
+                <if test="completed"> and status = 'COMPLETED' </if>
+                <if test="!completed"> and status in ('PENDING', 'IN_PROGRESS') </if>
+            </if>
+        </where>
+    </select>
+
+    <select id="countRecentMessages" resultType="java.lang.Integer">
+        select count(*) from im_message
+        where create_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    </select>
+
+    <select id="countPendingApprovals" resultType="java.lang.Integer">
+        select count(distinct a.id) from im_approval a
+        inner join im_approval_node n on a.template_id = n.template_id
+        where a.status = 'PENDING'
+        <if test="userId != null">
+            and n.approvers like concat('%', #{userId}, '%')
+        </if>
+    </select>
+
+    <select id="countUnreadNotices" resultType="java.lang.Integer">
+        select count(*) from im_system_notification
+        <where>
+            <if test="userId != null"> and receiver_id = #{userId} </if>
+            and is_read = 0
+        </where>
+    </select>
+
+    <select id="getTodosForAdmin" resultMap="ImTodoItemResult">
+        select id, user_id, title, description, priority, status, due_date, completed_time, create_time, update_time
+        from im_todo_item
+        <where>
+            <if test="userId != null"> and user_id = #{userId} </if>
+            <if test="completed != null">
+                <if test="completed"> and status = 'COMPLETED' </if>
+                <if test="!completed"> and status in ('PENDING', 'IN_PROGRESS') </if>
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <insert id="insertTodo" parameterType="com.ruoyi.web.domain.ImTodoItem" useGeneratedKeys="true" keyProperty="id">
+        insert into im_todo_item (user_id, title, description, priority, due_date, status, create_time, update_time)
+        values (#{userId}, #{title}, #{description}, 2, #{dueDate}, 'PENDING', NOW(), NOW())
+    </insert>
+
+    <update id="markAsCompleted" parameterType="Long">
+        update im_todo_item set status = 'COMPLETED', completed_time = NOW(), update_time = NOW() where id = #{id}
+    </update>
+
+    <delete id="deleteTodoById" parameterType="Long">
+        delete from im_todo_item where id = #{id}
+    </delete>
+
+    <select id="getRecentMessages" resultType="java.util.Map">
+        select id, conversation_id as conversationId, sender_id as senderId, content, message_type as messageType, create_time as createTime
+        from im_message
+        <where>
+            <if test="userId != null"> and sender_id = #{userId} </if>
+        </where>
+        order by create_time desc
+        <if test="limit != null"> limit #{limit} </if>
+    </select>
+
+    <select id="getPendingApprovals" resultType="java.util.Map">
+        select a.id, a.title, a.applicant_id as applicantId, a.status, a.apply_time as applyTime
+        from im_approval a
+        inner join im_approval_node n on a.template_id = n.template_id
+        where a.status = 'PENDING'
+        <if test="userId != null">
+            and n.approvers like concat('%', #{userId}, '%')
+        </if>
+        order by a.apply_time desc
+    </select>
+
+    <select id="getUnreadNotices" resultType="java.util.Map">
+        select id, title, content, type, is_read as isRead, create_time as createTime
+        from im_system_notification
+        <where>
+            <if test="userId != null"> and receiver_id = #{userId} </if>
+            and is_read = 0
+        </where>
+        order by create_time desc
+    </select>
+
+    <!-- ========== 新增管理后台CRUD方法 ========== -->
+
+    <sql id="selectImTodoItemVo">
+        SELECT t.id, t.user_id, t.title, t.description, t.priority,
+               t.status, t.due_date, t.completed_time, t.create_time, t.update_time,
+               u.username, u.nickname
+        FROM im_todo_item t
+        LEFT JOIN im_user u ON t.user_id = u.id
+    </sql>
+
+    <select id="selectImTodoItemById" parameterType="Long" resultMap="ImTodoItemResult">
+        <include refid="selectImTodoItemVo"/>
+        WHERE t.id = #{id}
+    </select>
+
+    <select id="selectImTodoItemList" parameterType="com.ruoyi.web.domain.ImTodoItem" resultMap="ImTodoItemResult">
+        <include refid="selectImTodoItemVo"/>
+        <where>
+            <if test="userId != null">and t.user_id = #{userId}</if>
+            <if test="title != null and title != ''">and t.title like concat('%', #{title}, '%')</if>
+            <if test="priority != null">and t.priority = #{priority}</if>
+            <if test="status != null and status != ''">and t.status = #{status}</if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                AND date_format(t.due_date,'%Y-%m-%d') &gt;= date_format(#{params.beginTime},'%Y-%m-%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                AND date_format(t.due_date,'%Y-%m-%d') &lt;= date_format(#{params.endTime},'%Y-%m-%d')
+            </if>
+        </where>
+        ORDER BY t.priority DESC, t.due_date ASC
+    </select>
+
+    <update id="updateImTodoItem" parameterType="com.ruoyi.web.domain.ImTodoItem">
+        UPDATE im_todo_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="status != null">
+                status = #{status},
+                <if test="status == 'COMPLETED'">completed_time = NOW(),</if>
+            </if>
+            <if test="dueDate != null">due_date = #{dueDate},</if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteImTodoItemByIds" parameterType="Long[]">
+        DELETE FROM im_todo_item WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateItemStatus">
+        UPDATE im_todo_item
+        SET status = #{status},
+            <if test="status == 'COMPLETED'">completed_time = NOW(),</if>
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 获取待办统计数据 -->
+    <select id="getTodoStatistics" resultType="map">
+        SELECT
+            (SELECT COUNT(*) FROM im_todo_item) AS totalCount,
+            (SELECT COUNT(*) FROM im_todo_item WHERE status = 'PENDING') AS pendingCount,
+            (SELECT COUNT(*) FROM im_todo_item WHERE status = 'IN_PROGRESS') AS inProgressCount,
+            (SELECT COUNT(*) FROM im_todo_item WHERE status = 'COMPLETED') AS completedCount,
+            (SELECT COUNT(*) FROM im_todo_item WHERE status = 'CANCELLED') AS cancelledCount,
+            (SELECT COUNT(*) FROM im_todo_item WHERE status IN ('PENDING', 'IN_PROGRESS') AND due_date &lt; CURDATE()) AS overdueCount,
+            (SELECT COUNT(*) FROM im_todo_item WHERE status IN ('PENDING', 'IN_PROGRESS') AND due_date = CURDATE()) AS todayDueCount
+    </select>
+
+    <select id="selectOverdueItems" resultMap="ImTodoItemResult">
+        <include refid="selectImTodoItemVo"/>
+        WHERE t.status IN ('PENDING', 'IN_PROGRESS')
+        AND t.due_date &lt; CURDATE()
+        ORDER BY t.due_date ASC
+    </select>
+
+    <select id="selectTodayDueItems" resultMap="ImTodoItemResult">
+        <include refid="selectImTodoItemVo"/>
+        WHERE t.status IN ('PENDING', 'IN_PROGRESS')
+        AND t.due_date = CURDATE()
+        ORDER BY t.priority DESC
+    </select>
+
+    <delete id="cleanCompletedItems">
+        DELETE FROM im_todo_item
+        WHERE status = 'COMPLETED'
+        AND completed_time &lt; DATE_SUB(NOW(), INTERVAL #{days} DAY)
+    </delete>
+
+</mapper>

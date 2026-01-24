@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>修改群公告</title>
+    <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
+    <link href="/ajax/libs/wangeditor/wangEditor.min.css" th:href="@{/ajax/libs/wangeditor/wangEditor.min.css}" rel="stylesheet"/>
+    <!-- datetimepicker 日期时间选择器 -->
+    <th:block th:include="include :: datetimepicker-css" />
+    <style>
+        .form-horizontal .form-group {
+            margin-bottom: 20px;
+        }
+        .control-label {
+            font-weight: 600;
+            color: #333;
+        }
+        .form-control:focus {
+            border-color: #1ab394;
+            box-shadow: 0 0 0 0.2rem rgba(26, 179, 148, 0.25);
+        }
+        textarea.form-control {
+            resize: vertical;
+            min-height: 150px;
+        }
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        .char-count.warning {
+            color: #f0ad4e;
+        }
+        .char-count.danger {
+            color: #d9534f;
+        }
+        .required-mark {
+            color: #d9534f;
+            margin-left: 3px;
+        }
+        .help-block {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        .input-group .input-group-addon {
+            background-color: #f5f5f5;
+            border-color: #e5e6e7;
+        }
+        .readonly-field {
+            background-color: #f5f5f5;
+        }
+        .editor-container {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .editor-container .w-e-text-container {
+            height: 350px !important;
+        }
+    </style>
+</head>
+<body class="white-bg">
+    <form class="form-horizontal m" id="form-announcement-edit" th:object="${announcement}">
+        <input name="id" th:field="*{id}" type="hidden">
+        <input id="hiddenGroupId" type="hidden">
+        
+        <div class="form-group">
+            <label class="col-sm-3 control-label">群组ID<span class="required-mark">*</span>：</label>
+            <div class="col-sm-8">
+                <input name="groupId" id="groupIdInput" th:value="*{groupId}" placeholder="请输入群组ID" class="form-control" type="number" required>
+                <span class="help-block">群组ID不可修改</span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="col-sm-3 control-label">发送者ID<span class="required-mark">*</span>：</label>
+            <div class="col-sm-8">
+                <input name="senderId" th:field="*{senderId}" placeholder="请输入发送者用户ID" class="form-control" type="number" required readonly>
+                <span class="help-block">发送者ID不可修改</span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="col-sm-3 control-label">公告类型<span class="required-mark">*</span>：</label>
+            <div class="col-sm-8">
+                <select name="type" class="form-control" th:field="*{type}" required>
+                    <option value="">请选择公告类型</option>
+                    <option value="1">普通公告</option>
+                    <option value="2">系统公告</option>
+                    <option value="3">活动通知</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="col-sm-3 control-label">公告内容<span class="required-mark">*</span>：</label>
+            <div class="col-sm-8">
+                <div id="editor" class="editor-container" style="height: 400px;"></div>
+                <input type="hidden" name="content" id="content" required>
+                <div class="char-count"><span id="charCount">0</span>/500</div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="col-sm-3 control-label">附件URL：</label>
+            <div class="col-sm-8">
+                <input name="attachmentUrl" th:field="*{attachmentUrl}" placeholder="请输入附件URL（图片、文件等）" class="form-control" type="text">
+                <span class="help-block">支持图片、文档等附件链接</span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="col-sm-3 control-label">是否置顶：</label>
+            <div class="col-sm-8">
+                <select name="isPinned" class="form-control" th:field="*{isPinned}">
+                    <option value="0">否</option>
+                    <option value="1">是</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="col-sm-3 control-label">状态：</label>
+            <div class="col-sm-8">
+                <select name="status" class="form-control" th:field="*{status}">
+                    <option value="0">草稿</option>
+                    <option value="1">正常</option>
+                    <option value="2">已撤回</option>
+                </select>
+                <span class="help-block">草稿状态下成员无法查看</span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="col-sm-3 control-label">过期时间：</label>
+            <div class="col-sm-8">
+                <div class="input-group date">
+                    <input name="expireTime" th:value="${announcement.expireTime != null ? #temporals.format(announcement.expireTime, 'yyyy-MM-dd HH:mm:ss') : ''}" placeholder="请选择过期时间（可选）" class="form-control" type="text">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                </div>
+                <span class="help-block">留空表示永久有效</span>
+            </div>
+        </div>
+    </form>
+    <div th:include="include :: footer"></div>
+    <th:block th:include="include :: datetimepicker-js" />
+    <script th:src="@{/ajax/libs/wangeditor/wangEditor.min.js}"></script>
+    <script th:inline="javascript"> var ctx = [[@{/}]]; </script>
+    <script th:inline="javascript">
+        var prefix = ctx + "im/group/announcement";
+        var editor; // 编辑器实例
+
+        $(function() {
+            // 初始化富文本编辑器
+            const E = window.wangEditor;
+            editor = new E('#editor');
+
+            // 配置编辑器
+            editor.config.zIndex = 100;
+            editor.config.height = 400;
+            editor.config.focus = true;
+            editor.config.uploadImgShowBase64 = true;
+            editor.config.uploadFileName = 'file';
+            editor.config.uploadImgHeaders = {
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+            editor.config.uploadImgParams = {
+                token: $.table.token()
+            };
+
+            // 监听内容变化，更新字数统计和隐藏input
+            editor.config.onchange = function(newHtml) {
+                // 去除HTML标签获取纯文本长度
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = newHtml;
+                var textContent = tempDiv.textContent || tempDiv.innerText || '';
+                var currentLength = textContent.length;
+
+                // 更新隐藏input的值
+                $('#content').val(newHtml);
+
+                // 更新字数统计样式
+                $('#charCount').text(currentLength);
+                $('#charCount').removeClass('warning danger');
+                if (currentLength >= 500) {
+                    $('#charCount').addClass('danger');
+                } else if (currentLength >= 450) {
+                    $('#charCount').addClass('warning');
+                }
+            };
+
+            // 创建编辑器
+            editor.create();
+
+            // 加载现有内容到编辑器
+            var existingContent = /*[[${announcement.content}]]*/ '';
+            if (existingContent) {
+                editor.txt.html(existingContent);
+                // 初始化隐藏input的值
+                $('#content').val(existingContent);
+                // 初始化字数统计
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = existingContent;
+                var textContent = tempDiv.textContent || tempDiv.innerText || '';
+                var currentLength = textContent.length || 0;
+                $('#charCount').text(currentLength);
+                if (currentLength >= 500) {
+                    $('#charCount').addClass('danger');
+                } else if (currentLength >= 450) {
+                    $('#charCount').addClass('warning');
+                }
+            }
+            // 从 URL 参数获取 groupId
+            function getQueryParam(name) {
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+                var r = window.location.search.substr(1).match(reg);
+                if (r != null) return decodeURIComponent(r[2]);
+                return null;
+            }
+
+            var urlGroupId = getQueryParam('groupId');
+            if (urlGroupId) {
+                $("#hiddenGroupId").val(urlGroupId);
+                // 如果 groupId 参数存在，禁用 groupId 输入框
+                $("#groupIdInput").attr('readonly', true).val(urlGroupId);
+            }
+
+            // 初始化日期时间选择器
+            $("input[name='expireTime']").parent(".input-group.date").datetimepicker({
+                format: "yyyy-mm-dd hh:ii:ss",
+                minView: "month",
+                autoclose: true,
+                todayBtn: true,
+                startDate: new Date()
+            });
+        });
+
+        $("#form-announcement-edit").validate({
+            focusCleanup: true,
+            rules: {
+                groupId: {
+                    required: true,
+                    digits: true,
+                    min: 1
+                },
+                senderId: {
+                    required: true,
+                    digits: true,
+                    min: 1
+                },
+                type: {
+                    required: true
+                },
+                content: {
+                    required: true,
+                    maxlength: 500,
+                    minlength: 1
+                }
+            },
+            messages: {
+                groupId: {
+                    required: "请输入群组ID",
+                    digits: "群组ID必须是数字",
+                    min: "群组ID必须大于0"
+                },
+                senderId: {
+                    required: "请输入发送者ID",
+                    digits: "发送者ID必须是数字",
+                    min: "发送者ID必须大于0"
+                },
+                type: {
+                    required: "请选择公告类型"
+                },
+                content: {
+                    required: "请输入公告内容",
+                    maxlength: "公告内容不能超过500字",
+                    minlength: "公告内容不能为空"
+                }
+            }
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                // 确保 groupId 有值
+                var groupId = $("#groupIdInput").val();
+                if (!groupId && $("#hiddenGroupId").val()) {
+                    $("#groupIdInput").val($("#hiddenGroupId").val());
+                }
+
+                // 确保编辑器内容同步到隐藏input
+                if (editor) {
+                    $('#content').val(editor.txt.html());
+                }
+
+                $.operate.save(prefix + "/edit", $('#form-announcement-edit').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

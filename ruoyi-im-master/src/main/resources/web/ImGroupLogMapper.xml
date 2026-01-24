@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.ImGroupLogMapper">
+
+    <resultMap type="com.ruoyi.web.domain.ImGroupLog" id="ImGroupLogResult">
+        <id property="id" column="id"/>
+        <result property="groupId" column="group_id"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="operationType" column="operation_type"/>
+        <result property="operationDesc" column="operation_desc"/>
+        <result property="targetUserId" column="target_user_id"/>
+        <result property="targetUserName" column="target_user_name"/>
+        <result property="createTime" column="create_time"/>
+        <result property="groupName" column="group_name"/>
+    </resultMap>
+
+    <sql id="selectImGroupLogVo">
+        select id, group_id, operator_id, operator_name, operation_type,
+               operation_desc, target_user_id, target_user_name, create_time
+        from im_group_log
+    </sql>
+
+    <sql id="selectImGroupLogWithGroupVo">
+        select gl.id, gl.group_id, gl.operator_id, gl.operator_name,
+               gl.operation_type, gl.operation_desc, gl.target_user_id,
+               gl.target_user_name, gl.create_time, g.name as group_name
+        from im_group_log gl
+        left join im_group g on gl.group_id = g.id
+    </sql>
+
+    <select id="selectImGroupLogById" parameterType="Long" resultMap="ImGroupLogResult">
+        <include refid="selectImGroupLogWithGroupVo"/>
+        where gl.id = #{id}
+    </select>
+
+    <select id="selectImGroupLogList" parameterType="com.ruoyi.web.domain.ImGroupLog" resultMap="ImGroupLogResult">
+        <include refid="selectImGroupLogWithGroupVo"/>
+        <where>
+            <if test="groupId != null">and gl.group_id = #{groupId}</if>
+            <if test="operatorId != null">and gl.operator_id = #{operatorId}</if>
+            <if test="operationType != null and operationType != ''">and gl.operation_type = #{operationType}</if>
+            <if test="targetUserId != null">and gl.target_user_id = #{targetUserId}</if>
+        </where>
+        order by gl.create_time desc
+    </select>
+
+    <select id="selectLogsByGroupId" parameterType="Long" resultMap="ImGroupLogResult">
+        <include refid="selectImGroupLogWithGroupVo"/>
+        where gl.group_id = #{groupId}
+        order by gl.create_time desc
+    </select>
+
+    <select id="selectLogsByOperatorId" parameterType="Long" resultMap="ImGroupLogResult">
+        <include refid="selectImGroupLogWithGroupVo"/>
+        where gl.operator_id = #{operatorId}
+        order by gl.create_time desc
+    </select>
+
+    <select id="countLogsByGroupId" parameterType="Long" resultType="java.lang.Integer">
+        select count(*) from im_group_log
+        where group_id = #{groupId}
+    </select>
+
+    <insert id="insertImGroupLog" parameterType="com.ruoyi.web.domain.ImGroupLog" useGeneratedKeys="true" keyProperty="id">
+        insert into im_group_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="groupId != null">group_id,</if>
+            <if test="operatorId != null">operator_id,</if>
+            <if test="operatorName != null">operator_name,</if>
+            <if test="operationType != null">operation_type,</if>
+            <if test="operationDesc != null">operation_desc,</if>
+            <if test="targetUserId != null">target_user_id,</if>
+            <if test="targetUserName != null">target_user_name,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="groupId != null">#{groupId},</if>
+            <if test="operatorId != null">#{operatorId},</if>
+            <if test="operatorName != null">#{operatorName},</if>
+            <if test="operationType != null">#{operationType},</if>
+            <if test="operationDesc != null">#{operationDesc},</if>
+            <if test="targetUserId != null">#{targetUserId},</if>
+            <if test="targetUserName != null">#{targetUserName},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImGroupLog" parameterType="com.ruoyi.web.domain.ImGroupLog">
+        update im_group_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="groupId != null">group_id = #{groupId},</if>
+            <if test="operatorId != null">operator_id = #{operatorId},</if>
+            <if test="operatorName != null">operator_name = #{operatorName},</if>
+            <if test="operationType != null">operation_type = #{operationType},</if>
+            <if test="operationDesc != null">operation_desc = #{operationDesc},</if>
+            <if test="targetUserId != null">target_user_id = #{targetUserId},</if>
+            <if test="targetUserName != null">target_user_name = #{targetUserName},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteImGroupLogById" parameterType="Long">
+        delete from im_group_log where id = #{id}
+    </delete>
+
+    <delete id="deleteImGroupLogByIds" parameterType="Long[]">
+        delete from im_group_log where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteLogsByGroupId" parameterType="Long">
+        delete from im_group_log where group_id = #{groupId}
+    </delete>
+
+    <!-- 获取群组日志统计数据 -->
+    <select id="getLogStatistics" parameterType="Long" resultType="java.util.Map">
+        select
+            COUNT(*) as totalCount,
+            COUNT(CASE WHEN DATE(create_time) = CURDATE() THEN 1 END) as todayCount,
+            COUNT(CASE WHEN operation_type = 'CREATE' THEN 1 END) as createCount,
+            COUNT(CASE WHEN operation_type = 'DELETE' THEN 1 END) as deleteCount
+        from im_group_log
+        where group_id = #{groupId}
+    </select>
+
+</mapper>

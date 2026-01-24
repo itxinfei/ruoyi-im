@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<head>
+    <th:block th:include="include :: header('考勤管理')" />
+</head>
+
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins" onclick="filterReset()" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">总</span>
+                                <h5>打卡总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="totalCount">0</h2>
+                                <small>全部考勤记录</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins" onclick="filterByStatus('NORMAL')" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">正</span>
+                                <h5>今日打卡</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="todayCount">0</h2>
+                                <small>今日正常人数</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins" onclick="filterByStatus('LATE')" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">迟</span>
+                                <h5>迟到异常</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="lateCount">0</h2>
+                                <small>迟到/早退次数</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins" onclick="filterByStatus('ABSENT')" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-danger pull-right">缺</span>
+                                <h5>未打卡</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-danger" id="absentCount">0</h2>
+                                <small>缺勤记录统计</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 搜索表单 -->
+            <div class="col-sm-12 search-collapse">
+                <form id="attendance-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                用户名称：<input type="text" name="userName" placeholder="请输入" />
+                            </li>
+                            <li>
+                                审批状态：<select name="approveStatus">
+                                    <option value="">所有</option>
+                                    <option value="PENDING">待审批</option>
+                                    <option value="APPROVED">已通过</option>
+                                    <option value="REJECTED">已拒绝</option>
+                                </select>
+                            </li>
+                            <li class="select-time">
+                                <label>打卡日期：</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始"
+                                    name="params[beginDate]" />
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束"
+                                    name="params[endDate]" />
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                        class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                        class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 工具栏 + 表格 -->
+            <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:attendance:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary multiple disabled" onclick="batchApprove()"
+                        shiro:hasPermission="im:attendance:edit">
+                        <i class="fa fa-check"></i> 批量通过
+                    </a>
+                    <a class="btn btn-warning multiple disabled" onclick="batchReject()"
+                        shiro:hasPermission="im:attendance:edit">
+                        <i class="fa fa-times"></i> 批量拒绝
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                        shiro:hasPermission="im:attendance:remove">
+                        <i class="fa fa-trash"></i> 删除
+                    </a>
+                    <a class="btn btn-info" onclick="$.table.exportExcel()" shiro:hasPermission="im:attendance:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
+                </div>
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-table-export-js" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('im:attendance:edit') }]];
+        var removeFlag = [[${@permission.hasPermi('im:attendance:remove') }]];
+        var prefix = ctx + "im/attendance";
+
+        $(function () {
+            loadStatistics();
+
+            var options = {
+                url: prefix + "/list",
+                toolbar: "toolbar",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove/{id}",
+                exportUrl: prefix + "/export",
+                modalName: "考勤记录",
+                showColumns: true,
+                showRefresh: false,
+                rememberSelected: true,
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
+                fixedColumns: true,
+                fixedNumber: 1,
+                fixedRightNumber: 1,
+                columns: [{
+                    checkbox: true,
+                    width: 40,
+                    align: 'center'
+                }, {
+                    field: 'id',
+                    title: 'ID',
+                    visible: false
+                }, {
+                    field: 'userId',
+                    title: '用户ID',
+                    width: '80',
+                    visible: false
+                }, {
+                    field: 'avatar',
+                    title: '头像',
+                    align: 'center',
+                    width: 50,
+                    formatter: function (value, row, index) {
+                        var img = value ? value : ctx + 'img/profile.jpg';
+                        return '<img src="' + img + '" class="img-circle img-xs" style="width:24px;height:24px;" onerror="this.src=\'' + ctx + 'img/profile.jpg\'">';
+                    }
+                }, {
+                    field: 'userName',
+                    title: '用户名称',
+                    sortable: true,
+                    width: 100
+                }, {
+                    field: 'userNickname',
+                    title: '用户昵称',
+                    width: 100,
+                    formatter: function (value) {
+                        return value || '-';
+                    }
+                }, {
+                    field: 'attendanceDate',
+                    title: '打卡日期',
+                    width: 110,
+                    sortable: true
+                }, {
+                    field: 'checkInTime',
+                    title: '上班打卡',
+                    width: 140,
+                    formatter: function (value, row) {
+                        var time = value || '-';
+                        var status = row.checkInStatus || 'NORMAL';
+                        var statusLabel = '';
+                        if (status === 'LATE') statusLabel = ' <span class="im-badge im-badge-warning">迟到</span>';
+                        else if (status === 'ABSENT') statusLabel = ' <span class="im-badge im-badge-danger">缺卡</span>';
+                        else if (status === 'NORMAL') statusLabel = ' <span class="im-badge im-badge-success">正常</span>';
+                        return time + statusLabel;
+                    }
+                }, {
+                    field: 'checkOutTime',
+                    title: '下班打卡',
+                    width: 140,
+                    formatter: function (value, row) {
+                        var time = value || '-';
+                        var status = row.checkOutStatus || 'NORMAL';
+                        var statusLabel = '';
+                        if (status === 'EARLY') statusLabel = ' <span class="im-badge im-badge-warning">早退</span>';
+                        else if (status === 'ABSENT') statusLabel = ' <span class="im-badge im-badge-danger">缺卡</span>';
+                        else if (status === 'NORMAL') statusLabel = ' <span class="im-badge im-badge-success">正常</span>';
+                        return time + statusLabel;
+                    }
+                }, {
+                    field: 'workMinutes',
+                    title: '工作时长',
+                    align: 'right',
+                    width: 90,
+                    formatter: function (value) {
+                        if (!value) return '-';
+                        var hours = Math.floor(value / 60);
+                        var minutes = value % 60;
+                        return hours + 'h ' + minutes + 'm';
+                    }
+                }, {
+                    field: 'attendanceType',
+                    title: '类型',
+                    align: 'center',
+                    width: 90,
+                    formatter: function (value) {
+                        if (value === 'WORK') { return '<span class="im-badge im-badge-primary">工作日</span>'; }
+                        if (value === 'OVERTIME') { return '<span class="im-badge im-badge-info">加班</span>'; }
+                        if (value === 'WEEKEND') { return '<span class="im-badge im-badge-warning">周末</span>'; }
+                        return value || '-';
+                    }
+                }, {
+                    field: 'approveStatus',
+                    title: '审批状态',
+                    align: 'center',
+                    width: 90,
+                    formatter: function (value) {
+                        if (value === 'PENDING') { return '<span class="im-badge im-badge-warning">待审批</span>'; }
+                        if (value === 'APPROVED') { return '<span class="im-badge im-badge-success">已通过</span>'; }
+                        if (value === 'REJECTED') { return '<span class="im-badge im-badge-danger">已拒绝</span>'; }
+                        return '<span class="im-badge im-badge-default">-</span>';
+                    }
+                }, {
+                    field: 'approveBy',
+                    title: '审批人',
+                    width: 100,
+                    formatter: function (value) {
+                        return value || '-';
+                    }
+                }, {
+                    field: 'approveTime',
+                    title: '审批时间',
+                    width: 140,
+                    formatter: function (value) {
+                        return value || '-';
+                    }
+                }, {
+                    field: 'remark',
+                    title: '备注',
+                    width: 120,
+                    formatter: function (value) {
+                        if (!value) return '-';
+                        if (value.length > 15) {
+                            return '<span title="' + value + '">' + value.substring(0, 15) + '...</span>';
+                        }
+                        return value;
+                    }
+                }, {
+                    field: 'createTime',
+                    title: '创建时间',
+                    width: 140,
+                    sortable: true
+                }, {
+                    title: '操作',
+                    align: 'center',
+                    width: 180,
+                    class: 'action-cell',
+                    formatter: function (value, row) {
+                        var actions = [];
+                        if (row.approveStatus === 'PENDING') {
+                            actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="approveOne(' + row.id + ')" title="通过"><i class="fa fa-check"></i></a> ');
+                            actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="rejectOne(' + row.id + ')" title="拒绝"><i class="fa fa-times"></i></a> ');
+                        }
+                        actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')" title="编辑"><i class="fa fa-edit"></i></a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')" title="删除"><i class="fa fa-trash"></i></a>');
+                        return actions.join('');
+                    }
+                }],
+                responseHandler: function (res) {
+                    $.modal.closeLoading();
+                    if (res.code === 0) {
+                        return { rows: res.rows, total: res.total };
+                    } else {
+                        $.modal.alertWarning(res.msg);
+                        return { rows: [], total: 0 };
+                    }
+                }
+            };
+            $.table.init(options);
+        });
+
+        /**
+         * 加载统计数据
+         */
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function (result) {
+                if (result.code === 0) {
+                    animateNumber('totalCount', result.data.totalCount || 0);
+                    animateNumber('todayCount', result.data.todayCount || 0);
+                    animateNumber('lateCount', result.data.lateCount || 0);
+                    animateNumber('absentCount', result.data.absentCount || 0);
+                }
+            });
+        }
+
+        /* 数字动画效果 */
+        function animateNumber(elementId, targetValue) {
+            var $element = $('#' + elementId);
+            var currentValue = parseInt($element.text()) || 0;
+            var diff = targetValue - currentValue;
+            var duration = 500;
+            var steps = 20;
+            var stepValue = diff / steps;
+            var stepDuration = duration / steps;
+            var currentStep = 0;
+
+            $element.addClass('animate');
+
+            var timer = setInterval(function () {
+                currentStep++;
+                currentValue = Math.round(currentValue + stepValue);
+                if (currentStep >= steps) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                    setTimeout(function () {
+                        $element.removeClass('animate');
+                    }, 200);
+                }
+                $element.text(currentValue);
+            }, stepDuration);
+        }
+
+        /* 重置筛选 */
+        function filterReset() {
+            $('select[name="approveStatus"]').val('');
+            $('input[name="userName"]').val('');
+            $('input[name="params[beginDate]"]').val('');
+            $('input[name="params[endDate]"]').val('');
+            $.table.search();
+        }
+
+        /* 按状态筛选 */
+        function filterByStatus(status) {
+            $('select[name="checkInStatus"]').val(status);
+            $.table.search();
+        }
+
+        /**
+         * 批量通过
+         */
+        function batchApprove() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm("确定要批量通过选中的 " + rows.length + " 条考勤记录吗？", function () {
+                $.ajax({
+                    url: prefix + "/batchApprove",
+                    type: 'post',
+                    data: { ids: rows.join(',') },
+                    success: function (result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("批量通过成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    },
+                    error: function () {
+                        $.modal.alertError("操作失败");
+                    }
+                });
+            });
+        }
+
+        /**
+         * 批量拒绝
+         */
+        function batchReject() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm("确定要批量拒绝选中的 " + rows.length + " 条考勤记录吗？", function () {
+                $.ajax({
+                    url: prefix + "/batchReject",
+                    type: 'post',
+                    data: { ids: rows.join(',') },
+                    success: function (result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("批量拒绝成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    },
+                    error: function () {
+                        $.modal.alertError("操作失败");
+                    }
+                });
+            });
+        }
+
+        /**
+         * 单个通过
+         */
+        function approveOne(id) {
+            $.modal.confirm("确定要通过该考勤记录吗？", function () {
+                $.ajax({
+                    url: prefix + "/approve",
+                    type: 'post',
+                    data: { id: id },
+                    success: function (result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("审批通过成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    },
+                    error: function () {
+                        $.modal.alertError("操作失败");
+                    }
+                });
+            });
+        }
+
+        /**
+         * 单个拒绝
+         */
+        function rejectOne(id) {
+            $.modal.confirm("确定要拒绝该考勤记录吗？", function () {
+                $.ajax({
+                    url: prefix + "/reject",
+                    type: 'post',
+                    data: { id: id },
+                    success: function (result) {
+                        if (result.code == 0) {
+                            $.modal.msgSuccess("审批拒绝成功");
+                            $.table.refresh();
+                            loadStatistics();
+                        } else {
+                            $.modal.alertError(result.msg || "操作失败");
+                        }
+                    },
+                    error: function () {
+                        $.modal.alertError("操作失败");
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('DING回执管理')" />
+</head>
+<body class="gray-bg">
+    <div class="container-div">
+        <!-- 统计卡片区域 -->
+        <div class="row stat-card-section">
+            <div class="col-sm-12">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
+                            <div class="ibox-title">
+                                <span class="stat-badge pull-right">总</span>
+                                <h5 style="color: #fff; margin: 0;">回执总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="stat-number" id="totalCount">0</div>
+                                <div class="stat-label">全部DING回执</div>
+                                <i class="fa fa-list-alt stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByReadStatus('read')">
+                            <div class="ibox-title">
+                                <span class="stat-badge pull-right">读</span>
+                                <h5 style="color: #fff; margin: 0;">已回执</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="stat-number" id="readCount">0</div>
+                                <div class="stat-label">已读回执数量</div>
+                                <i class="fa fa-check-square stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByReadStatus('unread')">
+                            <div class="ibox-title">
+                                <span class="stat-badge pull-right">未</span>
+                                <h5 style="color: #fff; margin: 0;">未回执</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="stat-number" id="unreadCount">0</div>
+                                <div class="stat-label">未读回执数量</div>
+                                <i class="fa fa-clock-o stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByConfirmed('1')">
+                            <div class="ibox-title">
+                                <span class="stat-badge pull-right">率</span>
+                                <h5 style="color: #fff; margin: 0;">回执率</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="stat-number" id="receiptRate">0%</div>
+                                <div class="stat-label">已读占比统计</div>
+                                <i class="fa fa-percent stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 搜索区域 -->
+        <div class="row search-section">
+            <div class="col-sm-12">
+                <div class="im-panel">
+                    <div class="im-panel-body">
+                        <form id="receipt-form">
+                            <div class="select-list">
+                                <ul>
+                                    <li>
+                                        <label class="search-label label-4">DING ID</label><input type="text" name="dingId" placeholder="请输入"/>
+                                    </li>
+                                    <li>
+                                        <label class="search-label label-4">接收者名称</label><input type="text" name="receiverName" placeholder="请输入"/>
+                                    </li>
+                                    <li>
+                                        <label class="search-label label-4">阅读状态</label><select name="readStatus">
+                                            <option value="">全部</option>
+                                            <option value="read">已读</option>
+                                            <option value="unread">未读</option>
+                                        </select>
+                                    </li>
+                                    <li>
+                                        <label class="search-label label-4">确认状态</label><select name="confirmed">
+                                            <option value="">全部</option>
+                                            <option value="1">已确认</option>
+                                            <option value="0">未确认</option>
+                                        </select>
+                                    </li>
+                                    <li class="select-time">
+                                        <label class="search-label label-4">阅读时间</label>
+                                        <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
+                                        <span>-</span>
+                                        <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
+                                    </li>
+                                    <li>
+                                        <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                        <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 表格区域 -->
+        <div class="row table-section">
+            <div class="col-sm-12">
+                <div class="im-table-container">
+                    <!-- 工具栏 -->
+                    <div class="im-toolbar" id="toolbar">
+                        <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:dingReceipt:export">
+                            <i class="fa fa-download"></i> 导出
+                        </a>
+                    </div>
+
+                    <!-- 数据表格 -->
+                    <table id="bootstrap-table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var prefix = ctx + "im/dingReceipt";
+
+        $(function() {
+            loadStatistics();
+
+            var options = {
+                url: prefix + "/list",
+                toolbar: "toolbar",
+                height: 650,
+                exportUrl: prefix + "/export",
+                modalName: "DING回执",
+                pagination: true,
+                pageSize: 20,
+                pageList: [10, 20, 50, 100],
+                sidePagination: "server",
+                fixedColumns: true,
+                fixedNumber: 1,
+                fixedRightNumber: 1,
+                showColumns: true,
+                showColumnsToggleAll: true,
+                cookie: true,
+                cookieIdTable: 'im_dingReceipt_table',
+                cookieExpire: '30d',
+                showExport: true,
+                exportDataType: 'selected',
+                exportTypes: ['excel'],
+                exportOptions: {
+                    fileName: 'DING回执数据'
+                },
+                columns: [{
+                    checkbox: true
+                }, {
+                    field: 'id',
+                    title: 'ID',
+                    visible: false
+                }, {
+                    field: 'dingId',
+                    title: 'DING ID',
+                    width: '80'
+                }, {
+                    field: 'dingTitle',
+                    title: 'DING标题',
+                    width: '200',
+                    formatter: function(value, row, index) {
+                        return value || '-';
+                    }
+                }, {
+                    field: 'receiverId',
+                    title: '接收者ID',
+                    width: '80',
+                    visible: false
+                }, {
+                    field: 'receiverName',
+                    title: '接收者',
+                    width: '100'
+                }, {
+                    field: 'receiverNickname',
+                    title: '昵称',
+                    width: '100',
+                    formatter: function(value, row, index) {
+                        return value || '-';
+                    }
+                }, {
+                    field: 'readTime',
+                    title: '阅读时间',
+                    width: '160',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        return value || '<span class="text-muted">未读</span>';
+                    }
+                }, {
+                    field: 'confirmed',
+                    title: '确认状态',
+                    align: 'center',
+                    width: '90',
+                    formatter: function(value, row, index) {
+                        if (value == 1) return '<span class="badge badge-success">已确认</span>';
+                        return '<span class="badge badge-default">未确认</span>';
+                    }
+                }, {
+                    field: 'confirmTime',
+                    title: '确认时间',
+                    width: '160',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        return value || '-';
+                    }
+                }, {
+                    field: 'remark',
+                    title: '备注',
+                    width: '200',
+                    formatter: function(value, row, index) {
+                        if (!value) return '-';
+                        if (value.length > 30) {
+                            return value.substring(0, 30) + '...';
+                        }
+                        return value;
+                    }
+                }, {
+                    field: 'createTime',
+                    title: '创建时间',
+                    width: '160',
+                    sortable: true
+                }, {
+                    title: '操作',
+                    align: 'center',
+                    width: '100',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewDetail(\'' + row.id + '\')"><i class="fa fa-eye"></i>详情</a> ');
+                        return actions.join('');
+                    }
+                }],
+                responseHandler: function(res) {
+                    $.modal.closeLoading();
+                    if (res.code === 0) {
+                        return { rows: res.rows, total: res.total };
+                    } else {
+                        $.modal.alertWarning(res.msg);
+                        return { rows: [], total: 0 };
+                    }
+                }
+            };
+            $.table.init(options);
+        });
+
+        function loadStatistics() {
+            $.get(prefix + "/statistics", function(result) {
+                if (result.code === 0) {
+                    var data = result.data || {};
+                    $("#totalCount").text(data.totalCount || 0);
+                    $("#readCount").text(data.readCount || 0);
+                    $("#unreadCount").text(data.unreadCount || 0);
+                    // 计算回执率
+                    var total = (data.totalCount || 0);
+                    var read = (data.readCount || 0);
+                    var rate = total > 0 ? Math.round(read / total * 100) : 0;
+                    $("#receiptRate").text(rate + '%');
+                }
+            });
+        }
+
+        /**
+         * 重置筛选
+         */
+        function filterReset() {
+            $.form.reset();
+            $.table.search();
+        }
+
+        /**
+         * 按阅读状态筛选
+         */
+        function filterByReadStatus(readStatus) {
+            if (readStatus) {
+                $('select[name="readStatus"]').val(readStatus);
+            } else {
+                $('select[name="readStatus"]').val('');
+            }
+            $.table.search();
+        }
+
+        /**
+         * 按确认状态筛选
+         */
+        function filterByConfirmed(confirmed) {
+            if (confirmed !== undefined && confirmed !== '') {
+                $('select[name="confirmed"]').val(confirmed);
+            } else {
+                $('select[name="confirmed"]').val('');
+            }
+            $.table.search();
+        }
+
+        function viewDetail(id) {
+            $.get(prefix + "/" + id, function(result) {
+                if (result.code == 0) {
+                    var receipt = result.data;
+                    var content = '<table class="table table-bordered">';
+                    content += '<tr><th width="130">回执ID</th><td>' + (receipt.id || '-') + '</td></tr>';
+                    content += '<tr><th>DING ID</th><td>' + (receipt.dingId || '-') + '</td></tr>';
+                    content += '<tr><th>DING标题</th><td>' + (receipt.dingTitle || '-') + '</td></tr>';
+                    content += '<tr><th>接收者</th><td>' + (receipt.receiverName || '-') + ' (' + (receipt.receiverNickname || '-') + ')</td></tr>';
+                    content += '<tr><th>阅读时间</th><td>' + (receipt.readTime || '<span class="text-muted">未读</span>') + '</td></tr>';
+                    content += '<tr><th>确认状态</th><td>' + (receipt.confirmed == 1 ? '已确认' : '未确认') + '</td></tr>';
+                    content += '<tr><th>确认时间</th><td>' + (receipt.confirmTime || '-') + '</td></tr>';
+                    content += '<tr><th>备注</th><td>' + (receipt.remark || '-') + '</td></tr>';
+                    content += '<tr><th>创建时间</th><td>' + (receipt.createTime || '-') + '</td></tr>';
+                    content += '</table>';
+                    $.modal.open({
+                        title: '回执详情',
+                        content: content
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

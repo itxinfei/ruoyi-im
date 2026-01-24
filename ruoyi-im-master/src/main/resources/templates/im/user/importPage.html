@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:include="include :: header('导入用户数据')" />
+    <style>
+        body {
+            padding: 0 !important;
+            background-color: #fff;
+        }
+
+        .import-container {
+            padding: 20px 30px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #1ab394;
+            background-color: #f8f9fa;
+        }
+
+        .upload-area p {
+            margin: 10px 0 0 0;
+            color: #666;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            color: #1ab394;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body class="white-bg">
+    <div class="import-container">
+        <div class="upload-area" onclick="$('#importFile').click()">
+            <span style="font-size: 40px; color: #ccc;">📁</span>
+            <p>点击选择Excel文件，或拖拽文件到此区域</p>
+            <p class="file-name" id="fileName"></p>
+        </div>
+
+        <input type="file" id="importFile" accept=".xls,.xlsx" style="display: none;" onchange="handleFileSelect(this)">
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="updateSupport"> 如果用户名已存在，则更新该用户信息
+            </label>
+        </div>
+
+        <div class="text-center" style="margin-top: 15px;">
+            <button type="button" class="btn btn-primary" onclick="submitImport()">开始导入</button>
+            <button type="button" class="btn btn-default" onclick="downloadTemplate()">下载模板</button>
+        </div>
+
+        <div class="alert alert-info" style="margin-top: 15px;">
+            <strong>提示：</strong>
+            <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+                <li>仅支持 .xls 和 .xlsx 格式的Excel文件</li>
+                <li>请先下载模板，按模板格式填写数据后再导入</li>
+                <li>用户名为必填项，重复的用户名将无法导入（除非勾选更新选项）</li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="display:none;">
+        <th:block th:include="include :: footer" />
+    </div>
+
+    <script th:inline="javascript">
+        var prefix = ctx + "im/user";
+        var selectedFile = null;
+
+        /* 选择文件 */
+        function handleFileSelect(input) {
+            if (input.files && input.files[0]) {
+                selectedFile = input.files[0];
+                $('#fileName').text('已选择: ' + selectedFile.name);
+            }
+        }
+
+        /* 下载导入模板 */
+        function downloadTemplate() {
+            window.location.href = prefix + "/importTemplate";
+        }
+
+        /* 提交导入 */
+        function submitImport() {
+            if (!selectedFile) {
+                $.modal.alertWarning("请先选择要导入的文件");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append("file", selectedFile);
+            formData.append("updateSupported", $('#updateSupport').is(':checked'));
+
+            $.modal.loading("正在导入数据，请稍候...");
+
+            $.ajax({
+                url: prefix + "/importData",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (result) {
+                    $.modal.closeLoading();
+                    if (result.code == 0) {
+                        var data = result.data || result;
+                        var msg = "导入完成！";
+                        if (data.successCount !== undefined) {
+                            msg += " 成功: " + data.successCount + " 条";
+                        }
+                        if (data.failCount !== undefined && data.failCount > 0) {
+                            msg += "，失败: " + data.failCount + " 条";
+                        }
+                        $.modal.msgSuccess(msg);
+
+                        // 关闭弹窗并刷新父页面
+                        if (parent && parent.$.table) {
+                            parent.$.table.refresh();
+                        }
+                        $.modal.close();
+                    } else {
+                        $.modal.alertError(result.msg || "导入失败");
+                    }
+                },
+                error: function () {
+                    $.modal.closeLoading();
+                    $.modal.alertError("导入失败，请检查文件格式是否正确");
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
