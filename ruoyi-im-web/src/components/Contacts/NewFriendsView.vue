@@ -25,7 +25,7 @@
           class="request-item"
         >
           <div class="request-avatar">
-            <img v-if="request.avatar" :src="request.avatar" :alt="`${request.nickname || request.username} 的头像`" />
+            <img v-if="request.avatar" :src="addTokenToUrl(request.avatar)" :alt="`${request.nickname || request.username} 的头像`" />
             <span v-else>{{ (request.nickname || request.username || '?').charAt(0).toUpperCase() }}</span>
           </div>
           <div class="request-info">
@@ -52,6 +52,7 @@ import { ref, onMounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { getFriendRequests, handleFriendRequest } from '@/api/im/contact'
 import { ElMessage } from 'element-plus'
+import { addTokenToUrl } from '@/utils/file'
 
 const emit = defineEmits(['back'])
 

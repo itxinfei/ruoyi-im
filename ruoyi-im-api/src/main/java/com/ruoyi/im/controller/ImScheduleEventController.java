@@ -5,6 +5,7 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.schedule.ScheduleEventCreateRequest;
 import com.ruoyi.im.dto.schedule.ScheduleEventQueryRequest;
 import com.ruoyi.im.service.ImScheduleEventService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.schedule.ScheduleEventDetailVO;
 import com.ruoyi.im.vo.schedule.ScheduleParticipantVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,11 +35,8 @@ public class ImScheduleEventController {
     @Operation(summary = "创建日程")
     @PostMapping
     public Result<Long> createEvent(
-            @Valid @RequestBody ScheduleEventCreateRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @Valid @RequestBody ScheduleEventCreateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long eventId = scheduleEventService.createEvent(request, userId);
         return Result.success("创建成功", eventId);
     }
@@ -50,11 +48,8 @@ public class ImScheduleEventController {
     @PutMapping("/{eventId}")
     public Result<Void> updateEvent(
             @PathVariable Long eventId,
-            @Valid @RequestBody ScheduleEventCreateRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @Valid @RequestBody ScheduleEventCreateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         scheduleEventService.updateEvent(eventId, request, userId);
         return Result.success("更新成功");
     }
@@ -65,11 +60,8 @@ public class ImScheduleEventController {
     @Operation(summary = "删除日程")
     @DeleteMapping("/{eventId}")
     public Result<Void> deleteEvent(
-            @PathVariable Long eventId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @PathVariable Long eventId) {
+        Long userId = SecurityUtils.getLoginUserId();
         scheduleEventService.deleteEvent(eventId, userId);
         return Result.success("删除成功");
     }
@@ -80,11 +72,8 @@ public class ImScheduleEventController {
     @Operation(summary = "获取日程详情")
     @GetMapping("/{eventId}")
     public Result<ScheduleEventDetailVO> getEventDetail(
-            @PathVariable Long eventId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @PathVariable Long eventId) {
+        Long userId = SecurityUtils.getLoginUserId();
         ScheduleEventDetailVO detail = scheduleEventService.getEventDetail(eventId, userId);
         return Result.success(detail);
     }
@@ -95,11 +84,8 @@ public class ImScheduleEventController {
     @Operation(summary = "分页查询日程列表")
     @PostMapping("/page")
     public Result<IPage<ScheduleEventDetailVO>> getEventPage(
-            @RequestBody ScheduleEventQueryRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @RequestBody ScheduleEventQueryRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         IPage<ScheduleEventDetailVO> page = scheduleEventService.getEventPage(request, userId);
         return Result.success(page);
     }
@@ -111,11 +97,8 @@ public class ImScheduleEventController {
     @GetMapping("/range")
     public Result<List<ScheduleEventDetailVO>> getEventsByTimeRange(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ScheduleEventDetailVO> events = scheduleEventService.getEventsByTimeRange(startTime, endTime, userId);
         return Result.success(events);
     }
@@ -127,11 +110,8 @@ public class ImScheduleEventController {
     @PutMapping("/{eventId}/respond")
     public Result<Void> respondToInvite(
             @PathVariable Long eventId,
-            @RequestParam Boolean accepted,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @RequestParam Boolean accepted) {
+        Long userId = SecurityUtils.getLoginUserId();
         scheduleEventService.respondToInvite(eventId, userId, accepted);
         return Result.success(accepted ? "已接受" : "已拒绝");
     }
@@ -152,11 +132,8 @@ public class ImScheduleEventController {
     @Operation(summary = "取消日程")
     @PutMapping("/{eventId}/cancel")
     public Result<Void> cancelEvent(
-            @PathVariable Long eventId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @PathVariable Long eventId) {
+        Long userId = SecurityUtils.getLoginUserId();
         scheduleEventService.cancelEvent(eventId, userId);
         return Result.success("已取消");
     }

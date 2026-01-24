@@ -47,7 +47,7 @@
             :class="{ active: selectedSessionId === session.id }"
             @click="selectSession(session)"
           >
-            <el-avatar :size="40" :src="session.avatar">
+            <el-avatar :size="40" :src="addTokenToUrl(session.avatar)">
               {{ session.name?.charAt(0) }}
             </el-avatar>
             <div class="session-info">
@@ -77,6 +77,7 @@ import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Document } from '@element-plus/icons-vue'
 import { useStore } from 'vuex'
+import { addTokenToUrl } from '@/utils/file'
 
 const store = useStore()
 

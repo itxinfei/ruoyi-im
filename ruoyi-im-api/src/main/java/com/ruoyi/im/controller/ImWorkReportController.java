@@ -5,6 +5,7 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.workreport.WorkReportCreateRequest;
 import com.ruoyi.im.dto.workreport.WorkReportQueryRequest;
 import com.ruoyi.im.service.ImWorkReportService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.workreport.WorkReportCommentVO;
 import com.ruoyi.im.vo.workreport.WorkReportDetailVO;
 import com.ruoyi.im.vo.workreport.WorkReportLikeUserVO;
@@ -33,11 +34,8 @@ public class ImWorkReportController {
     @Operation(summary = "创建工作日志")
     @PostMapping
     public Result<Long> createReport(
-            @Valid @RequestBody WorkReportCreateRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @Valid @RequestBody WorkReportCreateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long reportId = workReportService.createReport(request, userId);
         return Result.success("创建成功", reportId);
     }
@@ -49,11 +47,8 @@ public class ImWorkReportController {
     @PutMapping("/{reportId}")
     public Result<Void> updateReport(
             @PathVariable Long reportId,
-            @Valid @RequestBody WorkReportCreateRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @Valid @RequestBody WorkReportCreateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         workReportService.updateReport(reportId, request, userId);
         return Result.success("更新成功");
     }
@@ -64,11 +59,8 @@ public class ImWorkReportController {
     @Operation(summary = "删除工作日志")
     @DeleteMapping("/{reportId}")
     public Result<Void> deleteReport(
-            @PathVariable Long reportId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @PathVariable Long reportId) {
+        Long userId = SecurityUtils.getLoginUserId();
         workReportService.deleteReport(reportId, userId);
         return Result.success("删除成功");
     }
@@ -79,11 +71,8 @@ public class ImWorkReportController {
     @Operation(summary = "提交工作日志")
     @PutMapping("/{reportId}/submit")
     public Result<Void> submitReport(
-            @PathVariable Long reportId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @PathVariable Long reportId) {
+        Long userId = SecurityUtils.getLoginUserId();
         workReportService.submitReport(reportId, userId);
         return Result.success("提交成功");
     }
@@ -94,11 +83,8 @@ public class ImWorkReportController {
     @Operation(summary = "获取工作日志详情")
     @GetMapping("/{reportId}")
     public Result<WorkReportDetailVO> getReportDetail(
-            @PathVariable Long reportId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @PathVariable Long reportId) {
+        Long userId = SecurityUtils.getLoginUserId();
         WorkReportDetailVO detail = workReportService.getReportDetail(reportId, userId);
         return Result.success(detail);
     }
@@ -109,11 +95,8 @@ public class ImWorkReportController {
     @Operation(summary = "分页查询工作日志列表")
     @PostMapping("/page")
     public Result<IPage<WorkReportDetailVO>> getReportPage(
-            @RequestBody WorkReportQueryRequest request,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @RequestBody WorkReportQueryRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         IPage<WorkReportDetailVO> page = workReportService.getReportPage(request, userId);
         return Result.success(page);
     }
@@ -123,11 +106,8 @@ public class ImWorkReportController {
      */
     @Operation(summary = "获取我的日志列表")
     @GetMapping("/my")
-    public Result<List<WorkReportDetailVO>> getMyReports(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+    public Result<List<WorkReportDetailVO>> getMyReports() {
+        Long userId = SecurityUtils.getLoginUserId();
         List<WorkReportDetailVO> list = workReportService.getMyReports(userId);
         return Result.success(list);
     }
@@ -140,11 +120,8 @@ public class ImWorkReportController {
     public Result<Long> addComment(
             @PathVariable Long reportId,
             @RequestParam String content,
-            @RequestParam(required = false) Long parentId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @RequestParam(required = false) Long parentId) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long commentId = workReportService.addComment(reportId, content, parentId, userId);
         return Result.success("评论成功", commentId);
     }
@@ -155,11 +132,8 @@ public class ImWorkReportController {
     @Operation(summary = "删除评论")
     @DeleteMapping("/comment/{commentId}")
     public Result<Void> deleteComment(
-            @PathVariable Long commentId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @PathVariable Long commentId) {
+        Long userId = SecurityUtils.getLoginUserId();
         workReportService.deleteComment(commentId, userId);
         return Result.success("删除成功");
     }
@@ -180,11 +154,8 @@ public class ImWorkReportController {
     @Operation(summary = "点赞/取消点赞")
     @PostMapping("/{reportId}/like")
     public Result<Boolean> toggleLike(
-            @PathVariable Long reportId,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @PathVariable Long reportId) {
+        Long userId = SecurityUtils.getLoginUserId();
         boolean isLiked = workReportService.toggleLike(reportId, userId);
         return Result.success(isLiked ? "点赞成功" : "取消点赞", isLiked);
     }
@@ -207,11 +178,8 @@ public class ImWorkReportController {
     public Result<Void> approveReport(
             @PathVariable Long reportId,
             @RequestParam Boolean approved,
-            @RequestParam(required = false) String remark,
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+            @RequestParam(required = false) String remark) {
+        Long userId = SecurityUtils.getLoginUserId();
         workReportService.approveReport(reportId, userId, approved, remark);
         return Result.success(approved ? "已通过" : "已退回");
     }
@@ -221,11 +189,8 @@ public class ImWorkReportController {
      */
     @Operation(summary = "获取统计信息")
     @GetMapping("/statistics")
-    public Result<Object> getStatistics(
-            @RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            userId = 2L;
-        }
+    public Result<Object> getStatistics() {
+        Long userId = SecurityUtils.getLoginUserId();
         Object stats = workReportService.getStatistics(userId);
         return Result.success(stats);
     }

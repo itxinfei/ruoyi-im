@@ -3,6 +3,7 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImAttendance;
 import com.ruoyi.im.service.ImAttendanceService;
+import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +33,13 @@ public class ImAttendanceController {
      *
      * @param location 打卡位置（JSON格式：{"latitude": 0, "longitude": 0, "address": ""}）
      * @param deviceInfo 设备信息
-     * @param userId 当前登录用户ID
      * @return 打卡结果
      */
     @Operation(summary = "上班打卡", description = "进行上班打卡操作")
     @PostMapping("/checkIn")
     public Result<ImAttendance> checkIn(@RequestParam(required = false) String location,
-                                        @RequestParam(required = false) String deviceInfo,
-                                        ) {
-        }
+                                        @RequestParam(required = false) String deviceInfo) {
+        Long userId = SecurityUtils.getLoginUserId();
         ImAttendance attendance = attendanceService.checkIn(userId, location, deviceInfo);
         return Result.success("上班打卡成功", attendance);
     }
@@ -50,15 +49,13 @@ public class ImAttendanceController {
      *
      * @param location 打卡位置（JSON格式）
      * @param deviceInfo 设备信息
-     * @param userId 当前登录用户ID
      * @return 打卡结果
      */
     @Operation(summary = "下班打卡", description = "进行下班打卡操作")
     @PostMapping("/checkOut")
     public Result<ImAttendance> checkOut(@RequestParam(required = false) String location,
-                                         @RequestParam(required = false) String deviceInfo,
-                                         ) {
-        }
+                                         @RequestParam(required = false) String deviceInfo) {
+        Long userId = SecurityUtils.getLoginUserId();
         ImAttendance attendance = attendanceService.checkOut(userId, location, deviceInfo);
         return Result.success("下班打卡成功", attendance);
     }
@@ -66,13 +63,12 @@ public class ImAttendanceController {
     /**
      * 获取今日打卡状态
      *
-     * @param userId 当前登录用户ID
      * @return 今日打卡记录
      */
     @Operation(summary = "获取今日打卡状态", description = "获取用户今日的打卡状态")
     @GetMapping("/today")
     public Result<ImAttendance> getTodayStatus() {
-        }
+        Long userId = SecurityUtils.getLoginUserId();
         ImAttendance attendance = attendanceService.getTodayAttendance(userId);
         if (attendance == null) {
             attendance = new ImAttendance();
@@ -98,15 +94,13 @@ public class ImAttendanceController {
      *
      * @param startDate 开始日期
      * @param endDate 结束日期
-     * @param userId 当前登录用户ID
      * @return 打卡记录列表
      */
     @Operation(summary = "获取打卡记录列表", description = "获取指定日期范围内的打卡记录")
     @GetMapping("/list")
     public Result<List<ImAttendance>> getList(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
-                                              @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
-                                              ) {
-        }
+                                              @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImAttendance> list = attendanceService.getAttendanceList(userId, startDate, endDate);
         return Result.success(list);
     }
@@ -116,15 +110,13 @@ public class ImAttendanceController {
      *
      * @param year 年份
      * @param month 月份
-     * @param userId 当前登录用户ID
      * @return 统计数据
      */
     @Operation(summary = "获取月度统计", description = "获取指定月份的考勤统计数据")
     @GetMapping("/statistics")
     public Result<Map<String, Object>> getStatistics(@RequestParam int year,
-                                                     @RequestParam int month,
-                                                     ) {
-        }
+                                                     @RequestParam int month) {
+        Long userId = SecurityUtils.getLoginUserId();
         Map<String, Object> statistics = attendanceService.getMonthlyStatistics(userId, year, month);
         return Result.success(statistics);
     }
@@ -134,15 +126,13 @@ public class ImAttendanceController {
      *
      * @param id 打卡ID
      * @param reason 补卡原因
-     * @param userId 当前登录用户ID
      * @return 操作结果
      */
     @Operation(summary = "补卡申请", description = "申请补卡，需要审批")
     @PostMapping("/{id}/supplement")
     public Result<Void> applySupplement(@PathVariable Long id,
-                                        @RequestParam String reason,
-                                        ) {
-        }
+                                        @RequestParam String reason) {
+        Long userId = SecurityUtils.getLoginUserId();
         attendanceService.applySupplement(id, reason, userId);
         return Result.success("补卡申请已提交");
     }
@@ -163,7 +153,7 @@ public class ImAttendanceController {
                                           @RequestParam(required = false) String comment,
                                           @RequestHeader(value = "approverId", required = false) Long approverId) {
         if (approverId == null) {
-            approverId = 2L; // 开发环境默认审批人
+            approverId = SecurityUtils.getLoginUserId();
         }
         attendanceService.approveSupplement(id, approverId, approved, comment);
         return Result.success(approved ? "已通过" : "已拒绝");
@@ -173,14 +163,12 @@ public class ImAttendanceController {
      * 删除打卡记录
      *
      * @param id 打卡ID
-     * @param userId 当前登录用户ID
      * @return 操作结果
      */
     @Operation(summary = "删除打卡记录", description = "删除指定的打卡记录")
     @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable Long id,
-                               ) {
-        }
+    public Result<Void> delete(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
         attendanceService.deleteAttendance(id, userId);
         return Result.success("删除成功");
     }

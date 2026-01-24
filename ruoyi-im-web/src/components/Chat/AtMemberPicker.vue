@@ -29,7 +29,7 @@
         class="member-item"
         @click="handleSelect(member)"
       >
-        <el-avatar :size="32" :src="member.avatar">
+        <el-avatar :size="32" :src="addTokenToUrl(member.avatar)">
           {{ member.nickname?.charAt(0) || member.username?.charAt(0) }}
         </el-avatar>
         <span class="name">{{ member.nickname || member.username }}</span>
@@ -44,6 +44,7 @@
 import { ref, computed } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { getGroupMembers } from '@/api/im/group'
+import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
   sessionId: [String, Number]

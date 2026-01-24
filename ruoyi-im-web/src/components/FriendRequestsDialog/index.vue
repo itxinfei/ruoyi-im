@@ -10,7 +10,7 @@
                 :key="request.id"
                 class="request-item"
               >
-                <el-avatar :size="48" :src="request.avatar">
+                <el-avatar :size="48" :src="addTokenToUrl(request.avatar)">
                   {{ request.name?.charAt(0) }}
                 </el-avatar>
                 <div class="request-info">
@@ -53,7 +53,7 @@
                 :key="request.id"
                 class="request-item"
               >
-                <el-avatar :size="48" :src="request.avatar">
+                <el-avatar :size="48" :src="addTokenToUrl(request.avatar)">
                   {{ request.name?.charAt(0) }}
                 </el-avatar>
                 <div class="request-info">
@@ -96,7 +96,7 @@
                 :key="request.id"
                 class="request-item"
               >
-                <el-avatar :size="48" :src="request.avatar">
+                <el-avatar :size="48" :src="addTokenToUrl(request.avatar)">
                   {{ request.name?.charAt(0) }}
                 </el-avatar>
                 <div class="request-info">
@@ -172,6 +172,7 @@
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getFriendRequests, handleFriendRequest } from '@/api/im/contact'
+import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
   modelValue: {

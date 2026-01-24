@@ -6,6 +6,7 @@ import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.util.JwtUtils;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -89,10 +90,8 @@ public class ImAuthController {
      */
     @Operation(summary = "获取用户信息", description = "获取当前登录用户的信息")
     @GetMapping("/getInfo")
-    public Result<ImLoginVO> getInfo(@RequestHeader(value = "userId", required = false) Long userId) {
-        if (userId == null) {
-            throw new BusinessException("用户未认证");
-        }
+    public Result<ImLoginVO> getInfo() {
+        Long userId = SecurityUtils.getLoginUserId();
 
         ImUserVO userVO = imUserService.getUserById(userId);
         if (userVO == null) {
@@ -126,7 +125,8 @@ public class ImAuthController {
      */
     @Operation(summary = "退出登录", description = "用户退出登录")
     @PostMapping("/logout")
-    public Result<Void> logout(@RequestHeader(value = "userId", required = false) Long userId) {
+    public Result<Void> logout() {
+        Long userId = SecurityUtils.getLoginUserId();
         // 实际应用中可以在这里做一些清理工作，如：
         // 1. 从Redis中移除用户token
         // 2. 通知WebSocket断开连接等

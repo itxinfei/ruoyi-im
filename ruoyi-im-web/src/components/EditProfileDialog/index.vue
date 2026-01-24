@@ -8,7 +8,7 @@
     <el-form :model="form" label-width="80px" :rules="rules" ref="formRef">
       <el-form-item label="头像">
         <div class="avatar-uploader" @click="triggerFileUpload">
-          <img v-if="form.avatar" :src="form.avatar" class="avatar" />
+          <img v-if="form.avatar" :src="addTokenToUrl(form.avatar)" class="avatar" />
           <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           <div class="upload-mask">
             <el-icon><Camera /></el-icon>
@@ -66,6 +66,7 @@ import { ref, watch } from 'vue'
 import { Plus, Camera } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { uploadAvatar } from '@/api/im/user'
+import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
   visible: Boolean,

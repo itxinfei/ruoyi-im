@@ -47,7 +47,7 @@
             :class="{ active: currentContact?.id === group.id && currentContact?.isGroup }"
             @click="handleGroupClick(group)"
           >
-            <el-avatar :size="36" :src="group.avatar" class="avatar">
+            <el-avatar :size="36" :src="addTokenToUrl(group.avatar)" class="avatar">
               {{ (group.name?.charAt(0) || '?').toUpperCase() }}
             </el-avatar>
             <div class="info">
@@ -90,6 +90,7 @@ import { Search, OfficeBuilding, User } from '@element-plus/icons-vue'
 import { getContacts } from '@/api/im/contact'
 import { getOrgTree } from '@/api/im/organization'
 import { getGroups } from '@/api/im/group'
+import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
   currentContact: Object
@@ -139,7 +140,7 @@ const handleNodeClick = (data) => {
       id: data.id,
       friendId: data.id,
       friendName: data.name,
-      friendAvatar: data.avatar,
+      friendAvatar: addTokenToUrl(data.avatar),
       isOrgNode: true
     })
   }

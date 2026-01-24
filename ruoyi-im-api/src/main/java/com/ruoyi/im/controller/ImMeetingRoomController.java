@@ -7,6 +7,7 @@ import com.ruoyi.im.dto.meeting.ImMeetingRoomCreateRequest;
 import com.ruoyi.im.dto.meeting.ImMeetingRoomQueryRequest;
 import com.ruoyi.im.dto.meeting.ImMeetingRoomUpdateRequest;
 import com.ruoyi.im.service.ImMeetingRoomService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.meeting.ImMeetingBookingVO;
 import com.ruoyi.im.vo.meeting.ImMeetingRoomScheduleVO;
 import com.ruoyi.im.vo.meeting.ImMeetingRoomVO;
@@ -38,14 +39,12 @@ public class ImMeetingRoomController {
      * 创建新的会议室
      *
      * @param request 创建请求
-     * @param userId 当前登录用户ID
      * @return 会议室ID
      */
     @Operation(summary = "创建会议室", description = "创建新的会议室")
     @PostMapping("/create")
-    public Result<Long> createRoom(@Valid @RequestBody ImMeetingRoomCreateRequest request,
-                                    ) {
-        }
+    public Result<Long> createRoom(@Valid @RequestBody ImMeetingRoomCreateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long roomId = meetingRoomService.createRoom(request, userId);
         return Result.success("创建成功", roomId);
     }
@@ -55,14 +54,12 @@ public class ImMeetingRoomController {
      * 更新会议室信息
      *
      * @param request 更新请求
-     * @param userId 当前登录用户ID
      * @return 操作结果
      */
     @Operation(summary = "更新会议室", description = "更新会议室信息")
     @PutMapping
-    public Result<Void> updateRoom(@Valid @RequestBody ImMeetingRoomUpdateRequest request,
-                                    ) {
-        }
+    public Result<Void> updateRoom(@Valid @RequestBody ImMeetingRoomUpdateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         meetingRoomService.updateRoom(request, userId);
         return Result.success("更新成功");
     }
@@ -72,14 +69,12 @@ public class ImMeetingRoomController {
      * 删除指定会议室
      *
      * @param roomId 会议室ID
-     * @param userId 当前登录用户ID
      * @return 操作结果
      */
     @Operation(summary = "删除会议室", description = "删除指定会议室")
     @DeleteMapping("/{roomId}")
-    public Result<Void> deleteRoom(@PathVariable Long roomId,
-                                    ) {
-        }
+    public Result<Void> deleteRoom(@PathVariable Long roomId) {
+        Long userId = SecurityUtils.getLoginUserId();
         meetingRoomService.deleteRoom(roomId, userId);
         return Result.success("删除成功");
     }
@@ -130,14 +125,12 @@ public class ImMeetingRoomController {
      * 预订指定的会议室
      *
      * @param request 预订请求
-     * @param userId 当前登录用户ID
      * @return 预订ID
      */
     @Operation(summary = "预订会议室", description = "预订指定的会议室")
     @PostMapping("/book")
-    public Result<Long> bookRoom(@Valid @RequestBody ImMeetingBookingRequest request,
-                                  ) {
-        }
+    public Result<Long> bookRoom(@Valid @RequestBody ImMeetingBookingRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
         Long bookingId = meetingRoomService.bookRoom(request, userId);
         return Result.success("预订成功", bookingId);
     }
@@ -147,14 +140,12 @@ public class ImMeetingRoomController {
      * 取消指定的预订
      *
      * @param bookingId 预订ID
-     * @param userId 当前登录用户ID
      * @return 操作结果
      */
     @Operation(summary = "取消预订", description = "取消指定的预订")
     @PostMapping("/booking/{bookingId}/cancel")
-    public Result<Void> cancelBooking(@PathVariable Long bookingId,
-                                       ) {
-        }
+    public Result<Void> cancelBooking(@PathVariable Long bookingId) {
+        Long userId = SecurityUtils.getLoginUserId();
         meetingRoomService.cancelBooking(bookingId, userId);
         return Result.success("取消成功");
     }
@@ -164,14 +155,12 @@ public class ImMeetingRoomController {
      * 确认待确认的预订
      *
      * @param bookingId 预订ID
-     * @param userId 当前登录用户ID
      * @return 操作结果
      */
     @Operation(summary = "确认预订", description = "确认待确认的预订")
     @PostMapping("/booking/{bookingId}/confirm")
-    public Result<Void> confirmBooking(@PathVariable Long bookingId,
-                                        ) {
-        }
+    public Result<Void> confirmBooking(@PathVariable Long bookingId) {
+        Long userId = SecurityUtils.getLoginUserId();
         meetingRoomService.confirmBooking(bookingId, userId);
         return Result.success("确认成功");
     }
@@ -181,14 +170,12 @@ public class ImMeetingRoomController {
      * 会议开始时签到
      *
      * @param bookingId 预订ID
-     * @param userId 当前登录用户ID
      * @return 操作结果
      */
     @Operation(summary = "签到", description = "会议开始时签到")
     @PostMapping("/booking/{bookingId}/check-in")
-    public Result<Void> checkIn(@PathVariable Long bookingId,
-                                 ) {
-        }
+    public Result<Void> checkIn(@PathVariable Long bookingId) {
+        Long userId = SecurityUtils.getLoginUserId();
         meetingRoomService.checkIn(bookingId, userId);
         return Result.success("签到成功");
     }
@@ -198,14 +185,12 @@ public class ImMeetingRoomController {
      * 会议结束时签退
      *
      * @param bookingId 预订ID
-     * @param userId 当前登录用户ID
      * @return 操作结果
      */
     @Operation(summary = "签退", description = "会议结束时签退")
     @PostMapping("/booking/{bookingId}/check-out")
-    public Result<Void> checkOut(@PathVariable Long bookingId,
-                                  ) {
-        }
+    public Result<Void> checkOut(@PathVariable Long bookingId) {
+        Long userId = SecurityUtils.getLoginUserId();
         meetingRoomService.checkOut(bookingId, userId);
         return Result.success("签退成功");
     }
@@ -215,14 +200,12 @@ public class ImMeetingRoomController {
      * 查询指定预订的详细信息
      *
      * @param bookingId 预订ID
-     * @param userId 当前登录用户ID
      * @return 预订详情
      */
     @Operation(summary = "获取预订详情", description = "查询指定预订的详细信息")
     @GetMapping("/booking/{bookingId}")
-    public Result<ImMeetingBookingVO> getBookingDetail(@PathVariable Long bookingId,
-                                                        ) {
-        }
+    public Result<ImMeetingBookingVO> getBookingDetail(@PathVariable Long bookingId) {
+        Long userId = SecurityUtils.getLoginUserId();
         ImMeetingBookingVO detail = meetingRoomService.getBookingDetail(bookingId, userId);
         return Result.success(detail);
     }
@@ -231,14 +214,12 @@ public class ImMeetingRoomController {
      * 获取用户的预订列表
      * 查询当前用户的所有预订
      *
-     * @param userId 当前登录用户ID
      * @return 预订列表
      */
     @Operation(summary = "获取用户的预订列表", description = "查询当前用户的所有预订")
     @GetMapping("/booking/my")
-    public Result<List<ImMeetingBookingVO>> getMyBookings(
-            ) {
-        }
+    public Result<List<ImMeetingBookingVO>> getMyBookings() {
+        Long userId = SecurityUtils.getLoginUserId();
         List<ImMeetingBookingVO> list = meetingRoomService.getUserBookings(userId);
         return Result.success(list);
     }
@@ -288,16 +269,14 @@ public class ImMeetingRoomController {
      * @param bookingId 预订ID
      * @param feedback 反馈内容
      * @param rating 评分（1-5分）
-     * @param userId 当前登录用户ID
      * @return 操作结果
      */
     @Operation(summary = "提交会议反馈", description = "提交会议后的反馈和评分")
     @PostMapping("/booking/{bookingId}/feedback")
     public Result<Void> submitFeedback(@PathVariable Long bookingId,
                                         @RequestParam String feedback,
-                                        @RequestParam Integer rating,
-                                        ) {
-        }
+                                        @RequestParam Integer rating) {
+        Long userId = SecurityUtils.getLoginUserId();
         meetingRoomService.submitFeedback(bookingId, feedback, rating, userId);
         return Result.success("提交成功");
     }
@@ -306,14 +285,12 @@ public class ImMeetingRoomController {
      * 获取会议室统计数据
      * 获取当前用户的会议室预订统计
      *
-     * @param userId 当前登录用户ID
      * @return 统计数据
      */
     @Operation(summary = "获取会议室统计数据", description = "获取当前用户的会议室预订统计")
     @GetMapping("/statistics")
-    public Result<Map<String, Object>> getStatistics(
-            ) {
-        }
+    public Result<Map<String, Object>> getStatistics() {
+        Long userId = SecurityUtils.getLoginUserId();
         Map<String, Object> stats = meetingRoomService.getStatistics(userId);
         return Result.success(stats);
     }

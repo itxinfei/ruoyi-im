@@ -28,7 +28,7 @@
             :show-file-list="false"
             :before-upload="beforeAvatarUpload"
           >
-            <img v-if="form.avatar" :src="form.avatar" class="avatar" />
+            <img v-if="form.avatar" :src="addTokenToUrl(form.avatar)" class="avatar" />
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
         </el-form-item>
@@ -59,7 +59,7 @@
               :value="contact.id"
             >
               <div class="contact-option">
-                <el-avatar :size="24" :src="contact.avatar">
+                <el-avatar :size="24" :src="addTokenToUrl(contact.avatar)">
                   {{ contact.name?.charAt(0) }}
                 </el-avatar>
                 <span>{{ contact.name }}</span>
@@ -86,6 +86,7 @@ import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { createGroup } from '@/api/im/group'
 import { getContacts } from '@/api/im/contact'
+import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
   modelValue: {

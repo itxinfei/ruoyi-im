@@ -145,99 +145,126 @@ if (rememberedUsername) {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  // 使用生成的背景图
+  background: url('@/assets/images/login-bg.png') no-repeat center center;
+  background-size: cover;
+  padding: 24px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.4); // 遮罩层
+    z-index: 1;
+  }
 }
 
 .login-box {
   width: 100%;
-  max-width: 420px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  padding: 36px 32px 32px;
+  max-width: 440px;
+  background: rgba(255, 255, 255, 0.7); // 玻璃拟态基础色
+  backdrop-filter: blur(12px); // 高斯模糊
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 40px;
+  z-index: 10;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.35);
+    background: rgba(255, 255, 255, 0.75);
+  }
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 
   .logo {
     display: flex;
     justify-content: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 
     .logo-icon {
-      width: 56px;
-      height: 56px;
-      background: linear-gradient(135deg, #0089ff, #0066cc);
-      border-radius: 12px;
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #1677ff, #0958d9);
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #ffffff;
-      font-size: 26px;
+      font-size: 30px;
       font-weight: bold;
-      box-shadow: 0 8px 16px rgba(0, 137, 255, 0.3);
+      box-shadow: 0 10px 20px rgba(22, 119, 255, 0.3);
     }
   }
 
   .title {
-    font-size: 26px;
-    font-weight: 600;
-    color: #262626;
-    margin: 0 0 6px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
   }
 
   .subtitle {
-    font-size: 13px;
-    color: #8c8c8c;
+    font-size: 14px;
+    color: #64748b;
     margin: 0;
+    font-weight: 400;
   }
 }
 
 .login-form {
   :deep(.el-form-item) {
-    margin-bottom: 18px;
+    margin-bottom: 20px;
   }
 
   :deep(.el-input__wrapper) {
     padding: 12px 16px;
-    border-radius: 8px;
-    box-shadow: 0 0 0 1px #e8e8e8 inset;
-    transition: all 0.3s ease;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
 
     &:hover {
-      box-shadow: 0 0 0 1px #0089ff inset;
+      border-color: #1677ff;
     }
 
     &.is-focus {
-      box-shadow: 0 0 0 2px #0089ff inset;
+      border-color: #1677ff;
+      border-width: 2px;
     }
   }
 
   :deep(.el-checkbox) {
     .el-checkbox__label {
-      color: #595959;
+      color: #475569;
       font-size: 14px;
     }
   }
 
   .login-button {
     width: 100%;
-    height: 48px;
+    height: 52px;
     font-size: 16px;
-    font-weight: 500;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #0089ff, #0066cc);
+    font-weight: 600;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1677ff, #0958d9);
     border: none;
-    box-shadow: 0 4px 12px rgba(0, 137, 255, 0.3);
-    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px -5px rgba(22, 119, 255, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 1px;
 
     &:hover {
-      background: linear-gradient(135deg, #0066cc, #0052a3);
-      box-shadow: 0 6px 16px rgba(0, 137, 255, 0.4);
       transform: translateY(-2px);
+      box-shadow: 0 15px 30px -5px rgba(22, 119, 255, 0.5);
+      background: linear-gradient(135deg, #4096ff, #1677ff);
     }
 
     &:active {
@@ -247,13 +274,24 @@ if (rememberedUsername) {
 }
 
 .login-footer {
-  margin-top: 20px;
+  margin-top: 32px;
   text-align: center;
 
   p {
     font-size: 12px;
-    color: #bfbfbf;
+    color: #94a3b8;
     margin: 0;
+  }
+}
+
+// 适配移动端
+@media (max-width: 480px) {
+  .login-box {
+    padding: 32px 24px;
+    border-radius: 16px;
+  }
+  .login-header .title {
+    font-size: 24px;
   }
 }
 </style>

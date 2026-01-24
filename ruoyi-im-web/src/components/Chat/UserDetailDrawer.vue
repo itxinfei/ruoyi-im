@@ -35,79 +35,77 @@
         <el-button :icon="Phone" @click="handleVoiceCall">
           语音通话
         </el-button>
-        <el-button :icon="Videocam" @click="handleVideoCall">
+        <el-button :icon="VideoCamera" @click="handleVideoCall">
           视频通话
         </el-button>
       </div>
 
       <el-divider />
 
-      <!-- 详细信息 -->
-      <div class="detail-info">
-        <template v-if="isGroup">
-          <!-- 群组信息 -->
-          <div class="info-section">
-            <h3 class="section-title">群信息</h3>
-            <div class="info-item">
-              <span class="info-label">群公告</span>
-              <span class="info-value">{{ userInfo.notice || '暂无公告' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">群描述</span>
-              <span class="info-value">{{ userInfo.description || '暂无描述' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">群主</span>
-              <span class="info-value">{{ userInfo.ownerName || '-' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">创建时间</span>
-              <span class="info-value">{{ formatDate(userInfo.createTime) }}</span>
-            </div>
+      <!-- Tab 页签内容 -->
+      <el-tabs v-model="activeTab" class="detail-tabs">
+        <el-tab-pane label="详情" name="info">
+          <div class="detail-info">
+            <template v-if="isGroup">
+              <div class="info-section">
+                <h3 class="section-title">群公告</h3>
+                <p class="notice-box">{{ userInfo.notice || '暂无公告' }}</p>
+              </div>
+              <div class="info-section">
+                <h3 class="section-title">群设置</h3>
+                <div class="settings-list">
+                  <div class="setting-row">
+                    <span>允许成员邀请好友</span>
+                    <el-switch size="small" :model-value="true" disabled />
+                  </div>
+                </div>
+              </div>
+            </template>
+            <template v-else>
+              <div class="info-section">
+                <h3 class="section-title">个人信息</h3>
+                <div class="info-item">
+                  <span class="info-label"><el-icon><Phone /></el-icon> 手机号</span>
+                  <span class="info-value">{{ userInfo.phone || '-' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label"><el-icon><Message /></el-icon> 邮箱</span>
+                  <span class="info-value">{{ userInfo.email || '-' }}</span>
+                </div>
+              </div>
+              <div class="info-section">
+                <h3 class="section-title">个性签名</h3>
+                <p class="signature">{{ userInfo.signature || '这个人很懒，什么都没留下' }}</p>
+              </div>
+            </template>
           </div>
-        </template>
-        <template v-else>
-          <!-- 个人信息 -->
-          <div class="info-section">
-            <h3 class="section-title">个人信息</h3>
-            <div class="info-item">
-              <span class="info-label">
-                <span class="material-icons-outlined">phone</span>
-                手机号
-              </span>
-              <span class="info-value">{{ userInfo.phone || '-' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">
-                <span class="material-icons-outlined">email</span>
-                邮箱
-              </span>
-              <span class="info-value">{{ userInfo.email || '-' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">
-                <span class="material-icons-outlined">work</span>
-                部门
-              </span>
-              <span class="info-value">{{ userInfo.department || '-' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">
-                <span class="material-icons-outlined">badge</span>
-                工号
-              </span>
-              <span class="info-value">{{ userInfo.employeeId || '-' }}</span>
-            </div>
-          </div>
+        </el-tab-pane>
 
-          <el-divider />
-
-          <div class="info-section">
-            <h3 class="section-title">个性签名</h3>
-            <p class="signature">{{ userInfo.signature || '这个人很懒,什么都没留下' }}</p>
+        <el-tab-pane v-if="isGroup" label="成员" name="members">
+          <div class="member-list">
+            <div v-for="i in 5" :key="i" class="member-item">
+              <el-avatar :size="32" shape="square">{{ '成员'.charAt(0) }}</el-avatar>
+              <div class="member-info">
+                <span class="member-name">群成员 {{ i }}</span>
+                <span v-if="i === 1" class="owner-tag">群主</span>
+              </div>
+            </div>
+            <el-button class="view-all-btn" text>查看全部成员</el-button>
           </div>
-        </template>
-      </div>
+        </el-tab-pane>
+
+        <el-tab-pane label="文件" name="files">
+          <div class="file-list">
+            <div v-for="i in 3" :key="i" class="file-item">
+              <el-icon class="file-icon"><Document /></el-icon>
+              <div class="file-info">
+                <span class="file-name">项目文档_v{{ i }}.pdf</span>
+                <span class="file-meta">2.4 MB · 2026-01-24</span>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
 
       <!-- 更多操作 -->
       <div class="more-actions">
@@ -127,7 +125,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { ChatDotRound, Phone, Videocam } from '@element-plus/icons-vue'
+import { ChatDotRound, Phone, VideoCamera, Suitcase, Message, Document } from '@element-plus/icons-vue'
 import { getUserInfo } from '@/api/im/user'
 
 const props = defineProps({
@@ -150,25 +148,20 @@ const visible = computed({
 
 const userInfo = ref(null)
 const loading = ref(false)
+const activeTab = ref('info')
 
-// 判断是否为群组
 const isGroup = computed(() => props.session?.type === 'GROUP')
-
-// 抽屉标题
 const drawerTitle = computed(() => isGroup.value ? '群详情' : '用户详情')
 
-// 用户名称
 const userName = computed(() => {
   if (!userInfo.value) return ''
   return isGroup.value ? userInfo.value.name : userInfo.value.nickname || userInfo.value.username
 })
 
-// 头像文字
 const getAvatarText = computed(() => {
   return userName.value ? userName.value.charAt(0).toUpperCase() : '?'
 })
 
-// 头像背景色
 const getAvatarBgClass = () => {
   if (isGroup.value) return 'bg-primary'
   const colors = ['bg-blue', 'bg-orange', 'bg-emerald', 'bg-purple']
@@ -176,49 +169,21 @@ const getAvatarBgClass = () => {
   return colors[index]
 }
 
-// 格式化日期
-const formatDate = (timestamp) => {
-  if (!timestamp) return '-'
-  const date = new Date(timestamp)
-  return date.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  })
-}
-
-// 加载用户信息
 const loadUserInfo = async () => {
   if (!props.session) return
-  
   loading.value = true
   try {
-    // 根据会话类型获取不同的信息
     if (isGroup.value) {
-      // 群组信息(这里需要调用群组API)
-      // const res = await getGroupInfo(props.session.id)
-      // 临时使用会话信息
-      userInfo.value = {
-        ...props.session,
-        online: false
-      }
+      userInfo.value = { ...props.session, online: false }
     } else {
-      // 获取用户信息
       const targetUserId = props.session.targetUserId || props.session.userId
       if (targetUserId) {
         const res = await getUserInfo(targetUserId)
         if (res.code === 200) {
-          userInfo.value = {
-            ...res.data,
-            online: Math.random() > 0.3 // 临时模拟在线状态
-          }
+          userInfo.value = { ...res.data, online: Math.random() > 0.3 }
         }
       } else {
-        // 使用会话信息
-        userInfo.value = {
-          ...props.session,
-          online: false
-        }
+        userInfo.value = { ...props.session, online: false }
       }
     }
   } catch (error) {
@@ -229,45 +194,33 @@ const loadUserInfo = async () => {
   }
 }
 
-// 监听会话变化
-watch(() => props.session, (newSession) => {
-  if (newSession && props.modelValue) {
-    loadUserInfo()
-  }
-}, { immediate: true })
-
-// 监听抽屉打开
 watch(() => props.modelValue, (isOpen) => {
   if (isOpen && props.session) {
     loadUserInfo()
+    activeTab.value = 'info'
   }
 })
 
-// 关闭抽屉
 const handleClose = () => {
   visible.value = false
   userInfo.value = null
 }
 
-// 发送消息
 const handleSendMessage = () => {
   emit('send-message', props.session)
   handleClose()
 }
 
-// 语音通话
 const handleVoiceCall = () => {
   emit('voice-call', props.session)
   ElMessage.info('语音通话功能开发中')
 }
 
-// 视频通话
 const handleVideoCall = () => {
   emit('video-call', props.session)
   ElMessage.info('视频通话功能开发中')
 }
 
-// 查看完整资料
 const handleViewProfile = () => {
   ElMessage.info('查看完整资料功能开发中')
 }
@@ -282,7 +235,7 @@ const handleViewProfile = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px 0;
+  padding: 20px 0;
   text-align: center;
 }
 
@@ -292,16 +245,15 @@ const handleViewProfile = () => {
 }
 
 .avatar-large {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   color: #fff;
-  
   &.bg-primary { background: #1677ff; }
   &.bg-blue { background: #3b82f6; }
   &.bg-orange { background: #f97316; }
@@ -315,27 +267,22 @@ const handleViewProfile = () => {
   right: -4px;
   background: #52c41a;
   color: #fff;
-  font-size: 11px;
-  padding: 2px 8px;
+  font-size: 10px;
+  padding: 2px 6px;
   border-radius: 10px;
   border: 2px solid #fff;
 }
 
-.user-basic-info {
-  width: 100%;
-}
-
 .user-name {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
-  color: #262626;
-  margin: 0 0 8px 0;
+  color: #1e293b;
+  margin: 0 0 4px 0;
 }
 
-.user-position,
-.member-count {
+.user-position, .member-count {
   font-size: 13px;
-  color: #8c8c8c;
+  color: #64748b;
   margin: 0;
 }
 
@@ -343,14 +290,12 @@ const handleViewProfile = () => {
   display: flex;
   gap: 8px;
   margin-bottom: 16px;
-  
-  .el-button {
-    flex: 1;
-  }
+  .el-button { flex: 1; height: 36px; }
 }
 
-.detail-info {
-  margin-top: 16px;
+.detail-tabs {
+  :deep(.el-tabs__header) { margin-bottom: 16px; }
+  :deep(.el-tabs__nav-wrap::after) { height: 1px; }
 }
 
 .info-section {
@@ -358,22 +303,20 @@ const handleViewProfile = () => {
 }
 
 .section-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #262626;
+  color: #94a3b8;
   margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .info-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
-  
-  &:last-child {
-    border-bottom: none;
-  }
+  border-bottom: 1px solid #f1f5f9;
+  &:last-child { border-bottom: none; }
 }
 
 .info-label {
@@ -381,80 +324,70 @@ const handleViewProfile = () => {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #8c8c8c;
-  
-  .material-icons-outlined {
-    font-size: 18px;
-  }
+  color: #64748b;
+  .el-icon { font-size: 16px; }
 }
 
-.info-value {
+.info-value { font-size: 13px; color: #1e293b; font-weight: 500; }
+
+.notice-box {
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 8px;
   font-size: 13px;
-  color: #262626;
-  text-align: right;
-  max-width: 60%;
-  word-break: break-all;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
 }
 
 .signature {
   font-size: 13px;
-  color: #595959;
-  line-height: 1.6;
-  margin: 0;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  color: #64748b;
+  font-style: italic;
+  padding-left: 8px;
+  border-left: 2px solid #e2e8f0;
+}
+
+.member-list {
+  .member-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .member-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
+  .member-name { font-size: 14px; color: #1e293b; }
+  .owner-tag { font-size: 10px; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; }
+  .view-all-btn { width: 100%; margin-top: 8px; }
+}
+
+.file-list {
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .file-icon { font-size: 24px; color: #3b82f6; }
+  .file-info { display: flex; flex-direction: column; }
+  .file-name { font-size: 13px; color: #1e293b; font-weight: 500; margin-bottom: 2px; }
+  .file-meta { font-size: 11px; color: #94a3b8; }
 }
 
 .more-actions {
-  margin-top: 16px;
-  
-  .el-button {
-    width: 100%;
-    justify-content: flex-start;
-    color: #1677ff;
-    
-    .material-icons-outlined {
-      margin-right: 8px;
-      font-size: 20px;
-    }
-  }
+  margin-top: 24px;
+  .el-button { width: 100%; justify-content: flex-start; color: #1677ff; }
 }
 
-.loading-state {
-  padding: 24px;
-}
+.loading-state { padding: 40px; text-align: center; }
 
-/* 深色模式 */
+/* 暗色模式适配 */
 :deep(.dark) {
-  .user-name {
-    color: #f1f5f9;
-  }
-  
-  .user-position,
-  .member-count {
-    color: #94a3b8;
-  }
-  
-  .section-title {
-    color: #f1f5f9;
-  }
-  
-  .info-label {
-    color: #94a3b8;
-  }
-  
-  .info-value {
-    color: #e2e8f0;
-  }
-  
-  .info-item {
-    border-color: #334155;
-  }
-  
-  .signature {
-    background: rgba(51, 65, 85, 0.4);
-    color: #cbd5e1;
-  }
+  .user-name, .info-value, .member-name, .file-name { color: #f1f5f9; }
+  .notice-box { background: rgba(30, 41, 59, 0.5); color: #cbd5e1; }
+  .info-item, .member-item, .file-item { border-color: #334155; }
+  .signature { border-color: #334155; color: #94a3b8; }
 }
 </style>

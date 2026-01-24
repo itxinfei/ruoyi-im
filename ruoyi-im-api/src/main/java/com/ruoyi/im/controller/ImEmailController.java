@@ -2,6 +2,7 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImEmailService;
+import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +30,8 @@ public class ImEmailController {
     @Operation(summary = "获取邮件列表", description = "获取指定文件夹的邮件列表")
     @GetMapping("/list")
     public Result<List<?>> getEmailList(
-            @RequestParam(defaultValue = "INBOX") String folder,
-            ) {
-        }
-
+            @RequestParam(defaultValue = "INBOX") String folder) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             return Result.success(emailService.getEmailList(userId, folder));
         } catch (Exception e) {
@@ -46,10 +45,8 @@ public class ImEmailController {
     @Operation(summary = "获取邮件详情", description = "获取邮件详细内容")
     @GetMapping("/{emailId}")
     public Result<?> getEmailDetail(
-            @PathVariable Long emailId,
-            ) {
-        }
-
+            @PathVariable Long emailId) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             return Result.success(emailService.getEmailDetail(emailId, userId));
         } catch (Exception e) {
@@ -63,10 +60,8 @@ public class ImEmailController {
     @Operation(summary = "发送邮件", description = "发送邮件给指定用户")
     @PostMapping("/send")
     public Result<Long> sendEmail(
-            @RequestBody Map<String, Object> params,
-            ) {
-        }
-
+            @RequestBody Map<String, Object> params) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             @SuppressWarnings("unchecked")
             List<Long> toIds = (List<Long>) params.get("toIds");
@@ -86,10 +81,8 @@ public class ImEmailController {
     @Operation(summary = "保存草稿", description = "保存邮件草稿")
     @PostMapping("/draft")
     public Result<Long> saveDraft(
-            @RequestBody Map<String, String> params,
-            ) {
-        }
-
+            @RequestBody Map<String, String> params) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             String subject = params.get("subject");
             String content = params.get("content");
@@ -107,10 +100,8 @@ public class ImEmailController {
     @Operation(summary = "标记已读", description = "将邮件标记为已读")
     @PutMapping("/{emailId}/read")
     public Result<Void> markAsRead(
-            @PathVariable Long emailId,
-            ) {
-        }
-
+            @PathVariable Long emailId) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             emailService.markAsRead(emailId, userId);
             return Result.success("标记成功");
@@ -126,10 +117,8 @@ public class ImEmailController {
     @PutMapping("/{emailId}/star")
     public Result<Void> markAsStarred(
             @PathVariable Long emailId,
-            @RequestParam boolean starred,
-            ) {
-        }
-
+            @RequestParam boolean starred) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             emailService.markAsStarred(emailId, userId, starred);
             return Result.success("操作成功");
@@ -144,10 +133,8 @@ public class ImEmailController {
     @Operation(summary = "移至垃圾箱", description = "将邮件移至垃圾箱")
     @PutMapping("/{emailId}/trash")
     public Result<Void> moveToTrash(
-            @PathVariable Long emailId,
-            ) {
-        }
-
+            @PathVariable Long emailId) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             emailService.moveToTrash(emailId, userId);
             return Result.success("操作成功");
@@ -162,10 +149,8 @@ public class ImEmailController {
     @Operation(summary = "永久删除", description = "永久删除邮件")
     @DeleteMapping("/{emailId}")
     public Result<Void> permanentlyDelete(
-            @PathVariable Long emailId,
-            ) {
-        }
-
+            @PathVariable Long emailId) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             emailService.permanentlyDelete(emailId, userId);
             return Result.success("删除成功");
@@ -180,8 +165,7 @@ public class ImEmailController {
     @Operation(summary = "获取未读数量", description = "获取未读邮件数量")
     @GetMapping("/unread/count")
     public Result<Integer> getUnreadCount() {
-        }
-
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             int count = emailService.getUnreadCount(userId);
             return Result.success(count);
@@ -197,10 +181,8 @@ public class ImEmailController {
     @PostMapping("/{emailId}/reply")
     public Result<Long> replyEmail(
             @PathVariable Long emailId,
-            @RequestBody Map<String, String> params,
-            ) {
-        }
-
+            @RequestBody Map<String, String> params) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             String content = params.get("content");
             Long newEmailId = emailService.replyEmail(emailId, content, userId);
@@ -217,10 +199,8 @@ public class ImEmailController {
     @PostMapping("/{emailId}/forward")
     public Result<Long> forwardEmail(
             @PathVariable Long emailId,
-            @RequestBody Map<String, Object> params,
-            ) {
-        }
-
+            @RequestBody Map<String, Object> params) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             @SuppressWarnings("unchecked")
             List<Long> toIds = (List<Long>) params.get("toIds");
@@ -240,10 +220,8 @@ public class ImEmailController {
     @PutMapping("/{emailId}/move")
     public Result<Void> moveToFolder(
             @PathVariable Long emailId,
-            @RequestParam String folder,
-            ) {
-        }
-
+            @RequestParam String folder) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             emailService.moveToFolder(emailId, folder, userId);
             return Result.success("移动成功");
@@ -258,10 +236,8 @@ public class ImEmailController {
     @Operation(summary = "批量标记已读", description = "批量将邮件标记为已读")
     @PutMapping("/batch/read")
     public Result<Integer> batchMarkAsRead(
-            @RequestBody Map<String, List<Long>> params,
-            ) {
-        }
-
+            @RequestBody Map<String, List<Long>> params) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             List<Long> emailIds = params.get("emailIds");
             int count = emailService.batchMarkAsRead(emailIds, userId);
@@ -277,10 +253,8 @@ public class ImEmailController {
     @Operation(summary = "批量删除", description = "批量将邮件移至垃圾箱")
     @PutMapping("/batch/trash")
     public Result<Integer> batchMoveToTrash(
-            @RequestBody Map<String, List<Long>> params,
-            ) {
-        }
-
+            @RequestBody Map<String, List<Long>> params) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             List<Long> emailIds = params.get("emailIds");
             int count = emailService.batchMoveToTrash(emailIds, userId);
@@ -296,10 +270,8 @@ public class ImEmailController {
     @Operation(summary = "搜索邮件", description = "根据关键词搜索邮件")
     @GetMapping("/search")
     public Result<List<?>> searchEmails(
-            @RequestParam String keyword,
-            ) {
-        }
-
+            @RequestParam String keyword) {
+        Long userId = SecurityUtils.getLoginUserId();
         try {
             return Result.success(emailService.searchEmails(userId, keyword));
         } catch (Exception e) {

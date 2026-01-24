@@ -58,6 +58,7 @@ import {
   ChatLineSquare,
   MagicStick
 } from '@element-plus/icons-vue'
+import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
   activeModule: {

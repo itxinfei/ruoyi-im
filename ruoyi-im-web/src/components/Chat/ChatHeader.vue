@@ -72,6 +72,9 @@ const props = defineProps({
 
 const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'search', 'pin', 'mute', 'clear'])
 
+// 用户详情抽屉显示状态
+const showUserDetail = ref(false)
+
 // 模拟在线状态（实际应从后端获取）
 const isOnline = computed(() => {
   if (props.session?.type === 'GROUP') return false

@@ -84,12 +84,52 @@ public class ImFileController {
     @Operation(summary = "下载文件", description = "根据文件ID下载文件")
     @GetMapping("/download/{fileId}")
     public void downloadFile(@PathVariable Long fileId,
+                            @RequestParam(required = false) String token,
                             HttpServletResponse response) {
-        Long userId = SecurityUtils.getLoginUserId();
+        // 从token参数中获取用户信息（用于文件下载时的JWT验证）
+        Long userId;
+        if (token != null && !token.isEmpty()) {
+            userId = getUserIdFromToken(token);
+        } else {
+            userId = SecurityUtils.getLoginUserId();
+        }
 
+        ImFileVO fileVO = imFileService.getFileById(fileId);
+        if (fileVO == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        // 构建文件完整路径
+        String filePath = uploadPath + fileVO.getFilePath();
+        File file = new File(filePath);
+        
+        if (!file.exists()) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        // 设置响应头
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileVO.getOriginalFileName() + "\"");
+        response.setContentLengthLong(file.length());
+
+        // 更新下载次数
         imFileService.downloadFile(fileId, userId);
-        // 这里需要根据具体实现来处理文件下载
-        // 例如：读取文件、设置响应头、输出到response等
+
+        // 输出文件到响应流
+        try (FileInputStream fis = new FileInputStream(file);
+             OutputStream os = response.getOutputStream()) {
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            os.flush();
+        } catch (IOException e) {
+            LOGGER.error("文件下载失败", e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**

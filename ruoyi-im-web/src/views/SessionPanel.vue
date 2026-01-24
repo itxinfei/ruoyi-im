@@ -21,13 +21,13 @@
       </el-dropdown>
     </div>
 
-    <div class="search-bar">
-      <div class="relative">
-        <span class="material-icons-outlined absolute left-3 top-2.5 text-slate-400 text-sm">search</span>
+    <div class="search-section">
+      <div class="search-container">
+        <span class="material-icons-outlined search-icon">search</span>
         <input
           v-model="searchKeyword"
-          class="w-full bg-slate-100 dark:bg-slate-900 border-none rounded-md py-1.5 pl-9 pr-4 text-sm focus:ring-1 focus:ring-primary dark:text-slate-200 placeholder-slate-400"
-          placeholder="搜索..."
+          class="search-input"
+          placeholder="搜索"
           type="text"
         />
       </div>
@@ -38,36 +38,48 @@
         v-for="session in sortedSessions"
         :key="session.id"
         class="session-item"
-        :class="{ active: isActiveSession(session) }"
+        :class="{
+          active: isActiveSession(session),
+          pinned: session.isPinned
+        }"
         @click="handleSessionClick(session)"
         @contextmenu.prevent="handleContextMenu($event, session)"
       >
-        <div class="relative avatar-wrapper">
+        <div class="avatar-wrapper">
           <div
             class="session-avatar"
             :class="getAvatarBgClass(session)"
           >
-            {{ (session.name?.charAt(0) || '?').toUpperCase() }}
+            <template v-if="session.type === 'GROUP'">
+              <span class="material-icons-outlined text-xl">groups</span>
+            </template>
+            <template v-else>
+              {{ (session.name?.charAt(0) || '?').toUpperCase() }}
+            </template>
           </div>
           <span
             v-if="session.unreadCount > 0"
             class="unread-badge"
+            :class="{ 'badge-dot': session.isMuted }"
           >
-            {{ session.unreadCount > 99 ? '99+' : session.unreadCount }}
+            {{ session.isMuted ? '' : (session.unreadCount > 99 ? '99+' : session.unreadCount) }}
           </span>
         </div>
 
         <div class="session-info">
-          <div class="session-top">
-            <div class="session-name-wrapper">
-              <span class="session-name">{{ session.name }} {{ session.isPinned ? '⭐' : '' }}</span>
-              <span v-if="session.isMuted" class="material-icons-outlined text-xs text-slate-400 ml-1">notifications_off</span>
+          <div class="session-header">
+            <div class="session-name-group">
+              <span class="session-name">{{ session.name }}</span>
+              <span v-if="session.isMuted" class="material-icons-outlined mute-icon">notifications_off</span>
             </div>
             <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
           </div>
-          <div class="session-preview">
-            <span v-if="session.lastSenderNickname" class="sender-name">{{ session.lastSenderNickname }}: </span>
-            {{ session.lastMessage || '暂无消息' }}
+          <div class="session-bottom">
+            <div class="session-preview">
+              <span v-if="session.isPinned && !isActiveSession(session)" class="pin-tag">[置顶]</span>
+              <span v-if="session.lastSenderNickname && session.type === 'GROUP'" class="sender-name">{{ session.lastSenderNickname }}: </span>
+              {{ session.lastMessage || '暂无消息' }}
+            </div>
           </div>
         </div>
       </div>
@@ -151,17 +163,23 @@ const formatTime = (timestamp) => {
 
   const date = new Date(timestamp)
   const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const yesterday = new Date(today.getTime() - 86400000)
 
-  // 检查是否是今天
-  if (date.toDateString() === now.toDateString()) {
+  // 今天
+  if (date >= today) {
     return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
   }
-
-  const diff = now - date
-  if (diff < 86400000 * 2) return '昨天'
-  if (diff < 86400000 * 7) return `${Math.floor(diff / 86400000)}天前`
-
-  return `${date.getMonth() + 1}/${date.getDate()}`
+  // 昨天
+  if (date >= yesterday) {
+    return '昨天'
+  }
+  // 今年
+  if (date.getFullYear() === now.getFullYear()) {
+    return `${date.getMonth() + 1}/${date.getDate()}`
+  }
+  // 更早
+  return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
 }
 
 // 右键菜单状态
@@ -252,9 +270,9 @@ onUnmounted(() => {
 .session-panel {
   display: flex;
   flex-direction: column;
-  width: 280px;
-  min-width: 280px;
-  max-width: 280px;
+  width: 25%;
+  min-width: 260px;
+  max-width: 320px;
   flex-shrink: 0;
   border-right: 1px solid #e8e8e8;
   background: #fff;
@@ -300,6 +318,7 @@ onUnmounted(() => {
       transition: background-color 0.15s;
       position: relative;
       border-left: 3px solid transparent;
+      animation: slideInUp 0.3s ease-out both;
 
       &:hover {
         background: #f2f3f5;
@@ -481,6 +500,25 @@ onUnmounted(() => {
       height: 100%;
       padding: 40px 20px;
     }
+  }
+}
+
+/* 会话列表进入动画 */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 支持无障碍访问 - 禁用动画 */
+@media (prefers-reduced-motion: reduce) {
+  .session-item {
+    animation: none !important;
   }
 }
 </style>

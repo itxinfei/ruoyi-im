@@ -26,7 +26,7 @@
           @click="handleSelectGroup(group)"
         >
           <div class="group-avatar">
-            <img v-if="group.avatar" :src="group.avatar" :alt="`${group.name} 的群头像`" />
+            <img v-if="group.avatar" :src="addTokenToUrl(group.avatar)" :alt="`${group.name} 的群头像`" />
             <span v-else class="material-icons-outlined" aria-hidden="true">group</span>
           </div>
           <div class="group-info">
@@ -49,6 +49,7 @@
 import { ref, onMounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { getGroups } from '@/api/im/group'
+import { addTokenToUrl } from '@/utils/file'
 
 const emit = defineEmits(['back', 'select-group'])
 

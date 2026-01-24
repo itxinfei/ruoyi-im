@@ -51,7 +51,7 @@
 
       <el-dropdown trigger="click" placement="bottom-end" @command="handleCommand">
         <div class="header-user">
-          <el-avatar :size="32" :src="currentUser?.avatar">
+          <el-avatar :size="32" :src="currentUserAvatar">
             {{ currentUser?.name?.charAt(0) }}
           </el-avatar>
           <span class="header-username">{{ currentUser?.name }}</span>
@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -83,6 +83,7 @@ import {
   ChatDotRound
 } from '@element-plus/icons-vue'
 import { logout } from '@/api/im/auth'
+import { addTokenToUrl } from '@/utils/file'
 
 const router = useRouter()
 const searchKeyword = ref('')
@@ -90,6 +91,12 @@ const currentUser = ref({
   id: null,
   name: '用户',
   avatar: ''
+})
+
+// 当前用户头像（带 token）
+const currentUserAvatar = computed(() => {
+  if (!currentUser.value.avatar) return ''
+  return addTokenToUrl(currentUser.value.avatar)
 })
 
 // 从 localStorage 加载用户信息

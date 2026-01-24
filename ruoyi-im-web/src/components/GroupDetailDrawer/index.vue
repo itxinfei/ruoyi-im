@@ -9,7 +9,7 @@
     <div v-if="groupInfo" v-loading="loading" class="group-detail">
       <!-- 群组基本信息 -->
       <div class="group-header">
-        <el-avatar :size="80" :src="groupInfo.avatar">
+        <el-avatar :size="80" :src="addTokenToUrl(groupInfo.avatar)">
           {{ groupInfo.name?.charAt(0) }}
         </el-avatar>
         <h2 class="group-name">{{ groupInfo.name }}</h2>
@@ -55,7 +55,7 @@
             :key="member.id"
             class="member-item"
           >
-            <el-avatar :size="48" :src="member.avatar">
+            <el-avatar :size="48" :src="addTokenToUrl(member.avatar)">
               {{ member.name?.charAt(0) }}
             </el-avatar>
             <div class="member-name">{{ member.name }}</div>
@@ -119,7 +119,7 @@
           :key="member.id"
           class="member-list-item"
         >
-          <el-avatar :size="40" :src="member.avatar">
+          <el-avatar :size="40" :src="addTokenToUrl(member.avatar)">
             {{ member.name?.charAt(0) }}
           </el-avatar>
           <div class="member-info">
@@ -174,6 +174,7 @@ import {
   updateGroup,
   setGroupMute
 } from '@/api/im/group'
+import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
   modelValue: {

@@ -28,7 +28,7 @@
         class="user-item"
       >
         <div class="user-avatar">
-          <img v-if="user.avatar" :src="user.avatar" />
+          <img v-if="user.avatar" :src="addTokenToUrl(user.avatar)" />
           <div v-else class="avatar-placeholder">
             {{ (user.nickname || user.username || '?').charAt(0) }}
           </div>
@@ -88,6 +88,7 @@ import { Search } from '@element-plus/icons-vue'
 import { searchUsers } from '@/api/im/user'
 import { sendFriendRequest } from '@/api/im/contact'
 import { ElMessage } from 'element-plus'
+import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
   visible: Boolean
