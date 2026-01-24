@@ -40,6 +40,9 @@ public class ImUserVO implements Serializable {
     /** 状态: 0=正常, 1=禁用 */
     private Integer status;
 
+    /** 用户角色 */
+    private String role;
+
     /** 签名 */
     private String signature;
 

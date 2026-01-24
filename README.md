@@ -6,6 +6,13 @@
 
 基于 RuoYi 框架二次开发即时通讯系统，核心定位为企业级内部即时沟通平台，支持私聊、群聊、文件传输等核心功能，满足企业内部高效协同沟通需求。采用前后端分离架构，保障系统可扩展性、可维护性，适配企业级权限管控与业务集成需求。
 
+## 1.2 统一架构升级
+
+2025-01-24 完成架构升级，移除独立的管理系统，实现前后端统一架构设计：
+- **后端统一**：管理功能集成到 ruoyi-im-api，通过路径隔离和角色权限控制
+- **前端统一**：根据用户权限动态渲染用户端或管理端界面
+- **权限统一**：复用 Spring Security 角色权限体系，简化认证流程
+
 ## 1.2 核心约束
 
 - 技术栈约束：前端固定为 Vue 3 + Vite + Element Plus，后端基于 Spring Boot 2.7，通信核心采用 WebSocket/Netty，确保实时性；数据持久化使用 MySQL，缓存与消息队列采用 Redis
@@ -16,14 +23,25 @@
 
 - 性能约束：支持单频道并发在线用户≥500人，消息推送延迟≤300ms，文件传输支持最大100MB单文件，消息存储保留90天
 
-# 二、项目结构
+# 二、统一架构设计
+
+## 2.1 架构概述
+
+移除独立的 ruoyi-im-admin 管理系统，将管理功能集成到 ruoyi-im-api 中，前端复用 ruoyi-im-web，根据用户权限动态展示用户端或管理端界面。
+
+**核心设计原则**：
+- **单一后端**：仅需部署 ruoyi-im-api 服务，简化运维
+- **统一前端**：根据角色权限动态渲染不同界面
+- **路径隔离**：`/api/im/*` 面向普通用户，`/api/admin/*` 面向管理员
+- **注解权限**：使用 Spring Security `@PreAuthorize` 细粒度控制访问
+
+## 2.2 项目结构
 
 |模块|说明|技术栈|默认端口|核心职责|
 |---|---|---|---|---|
-|ruoyi-im-api|核心后端 API 服务|Spring Boot 2.7, WebSocket, Netty, MyBatis Plus|8080|用户认证、消息收发、好友/群组管理、文件传输核心逻辑|
-|ruoyi-im-admin|后台管理系统|RuoYi (Spring Boot), Thymeleaf|8081|用户管理、群组审核、消息审计、敏感词配置、系统参数设置|
-|ruoyi-im-web|前端 Web 聊天界面|Vue 3, Vite, Element Plus, Vuex, Axios|5173 (Dev)|用户登录、聊天界面展示、消息收发交互、文件/图片上传、个人信息管理|
-|im.sql|数据库初始化脚本|MySQL|-|创建用户、消息、好友、群组等核心表结构，初始化基础数据|
+|ruoyi-im-api|核心后端 API 服务|Spring Boot 2.7, WebSocket, Netty, MyBatis Plus|8080|用户认证、消息收发、好友/群组管理、文件传输核心逻辑、管理后台接口|
+|ruoyi-im-web|前端 Web 聊天界面|Vue 3, Vite, Element Plus, Vuex, Axios|5173 (Dev)|用户登录、聊天界面展示、消息收发交互、文件/图片上传、个人信息管理、管理后台界面|
+|sql/im.sql|数据库初始化脚本|MySQL|-|创建用户、消息、好友、群组等核心表结构，初始化基础数据|
 # 三、技术栈详情
 
 ## 3.1 后端技术栈
@@ -135,11 +153,13 @@ mysql -u root -p im < im.sql`或通过 Navicat 等工具，右键数据库选择
 
 4. 启动服务：运行 `com.ruoyi.im.ImApplication` 类的 main 方法，控制台输出“Started ImApplication in XXX seconds”即为启动成功
 
-### 4.3.1 后台管理模块启动（可选）
+### 4.3.1 管理后台访问
 
-1. 导入 ruoyi-im-admin 模块，修改 `ruoyi-im-admin/src/main/resources/application.yml` 中 MySQL 和 Redis 配置（同 ruoyi-im-api）
+登录成功后，系统会根据用户角色自动跳转：
+- **普通用户**：进入聊天界面
+- **管理员**：显示侧边栏管理菜单，可访问用户管理、群组管理、数据统计等功能
 
-2. 运行 `com.ruoyi.RuoYiApplication` 类的 main 方法，默认运行在 8081 端口，启动成功后访问 http://localhost:8081 可进入管理后台登录页（默认账号 admin/123456）
+**默认管理员账号**：admin/123456（需在数据库中设置 role 字段为 ADMIN）
 
 ## 4.4 前端启动（ruoyi-im-web）
 
@@ -162,15 +182,22 @@ npm run dev
 
 ### 4.4.1 前端配置修改（对接后端）
 
-若后端服务地址/端口非默认，修改 `ruoyi-im-web/src/utils/request.js` 中的 baseURL：
-`// 原配置
+若后端服务地址/端口非默认，修改以下配置：
+
+1. **API 地址**：修改 `ruoyi-im-web/src/utils/request.js` 中的 baseURL
+```javascript
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080', // 后端 API 地址
   timeout: 5000
 })
+```
 
-// WebSocket 连接地址修改（src/views/chat/index.vue）
-const ws = new WebSocket(`ws://localhost:8080/im/websocket/${userId}`)`
+2. **WebSocket 地址**：修改 `ruoyi-im-web/src/views/chat/index.vue` 中的连接地址
+```javascript
+const ws = new WebSocket(`ws://localhost:8080/im/websocket/${userId}`)
+```
+
+3. **管理界面路由**：`ruoyi-im-web/src/router/index.js` 中已配置权限守卫，无需额外修改`
 
 # 五、核心功能特性
 

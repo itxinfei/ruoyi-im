@@ -88,7 +88,8 @@ public class ImUserServiceImpl implements ImUserService {
 
         logger.info("密码验证成功 - 用户名: {}, 用户ID: {}", request.getUsername(), user.getId());
 
-        String token = jwtUtils.generateToken(user.getUsername(), user.getId());
+        String token = jwtUtils.generateToken(user.getUsername(), user.getId(),
+            user.getRole() != null ? user.getRole() : "USER");
 
         user.setLastOnlineTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);

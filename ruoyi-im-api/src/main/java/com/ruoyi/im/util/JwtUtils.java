@@ -65,6 +65,28 @@ public class JwtUtils {
     }
 
     /**
+     * 生成JWT令牌（带角色）
+     *
+     * @param username 用户名
+     * @param userId 用户ID
+     * @param role 用户角色
+     * @return JWT令牌
+     */
+    public String generateToken(String username, Long userId, String role) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expiration);
+
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("userId", userId)
+                .claim("role", role != null ? role : "USER")
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    /**
      * 从JWT令牌中获取用户名
      * 如果token无效或已过期，返回null
      *
@@ -114,6 +136,33 @@ public class JwtUtils {
             return null;
         } catch (Exception e) {
             LOGGER.error("解析JWT token获取用户ID失败: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 从JWT令牌中获取用户角色
+     * 如果token无效或已过期，返回默认角色USER
+     *
+     * @param token JWT令牌
+     * @return 用户角色，解析失败时返回USER
+     */
+    public String getRoleFromToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.get("role", String.class);
+        } catch (ExpiredJwtException e) {
+            LOGGER.warn("JWT token已过期: {}", e.getMessage());
+            return null;
+        } catch (MalformedJwtException | SignatureException | UnsupportedJwtException e) {
+            LOGGER.warn("JWT token格式错误: {}", e.getMessage());
+            return null;
+        } catch (Exception e) {
+            LOGGER.error("解析JWT token获取角色失败: {}", e.getMessage());
             return null;
         }
     }

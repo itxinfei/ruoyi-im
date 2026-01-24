@@ -308,11 +308,10 @@ RuoYi-IM 是一个**内网环境部署**的企业级即时通讯系统，采用 
 
 ### 架构分工
 
-| 模块 | 端口 | 定位 | 要求 |
+| 模块 | 端口 | 定位 | 说明 |
 |------|------|------|------|
-| **ruoyi-im-admin** | 8081 | 后台管理系统 | 管理功能好用、页面使用方便，要求相对较低 |
-| **ruoyi-im-api** | 8080 | 核心通讯服务 | 高性能、高可靠的 IM 核心服务（独立项目不合ruoyi-im-admin关联偶合） |
-| **ruoyi-im-web** | 5173 | 用户聊天界面 | **高要求**，钉钉风格 UI，用户体验优先 |
+| **ruoyi-im-api** | 8080 | 核心 API 服务 | 提供 IM 核心功能和管理后台 API |
+| **ruoyi-im-web** | 5173 | 用户界面 | 聊天界面 + 管理后台（根据角色动态展示） |
 
 ---
 
@@ -321,9 +320,9 @@ RuoYi-IM 是一个**内网环境部署**的企业级即时通讯系统，采用 
 ```
 im/
 ├── ruoyi-im-api/          # 核心 API 服务 (Spring Boot 2.7.18, 端口 8080)
-├── ruoyi-im-admin/        # 后台管理系统 (RuoYi v4.8.0, 端口 8081)
 ├── ruoyi-im-web/          # 前端 Web 界面 (Vue 3 + Vite, 端口 5173)
 ├── sql/                   # 数据库初始化脚本
+│   └── migrations/        # 数据库迁移脚本
 ├── docs/                  # 项目文档
 └── pom.xml               # 父级 Maven POM
 ```
@@ -333,15 +332,13 @@ im/
 **ruoyi-im-api** - 核心 API 服务，处理 WebSocket/REST 通信
 - 入口类: `com.ruoyi.im.ImApplication`
 - WebSocket 端点: `/ws/im`
-- REST API 基础路径: `/api/im`
+- 用户 API: `/api/im/*`
+- 管理 API: `/api/admin/*`
 - 技术栈: Spring Boot 2.7、WebSocket、MyBatis-Plus 3.5.2、Spring Security、Redis、MySQL
 
-**ruoyi-im-admin** - 后台管理系统 (多模块 Maven 项目)
-- 子模块: ruoyi-admin、ruoyi-framework、ruoyi-system、ruoyi-generator、ruoyi-common
-- 入口类: `com.ruoyi.RuoYiApplication`
-- 技术栈: RuoYi v4.8.0、Apache Shiro、Thymeleaf
-
-**ruoyi-im-web** - 前端聊天界面
+**ruoyi-im-web** - 前端界面
+- 用户聊天界面：钉钉风格 UI
+- 管理后台：根据用户角色 (ADMIN/SUPER_ADMIN) 动态展示
 - 技术栈: Vue 3 (Composition API)、Vite 5.0、Element Plus、Vuex、Vue Router、Axios
 
 ---
@@ -354,13 +351,6 @@ cd ruoyi-im-api
 mvn clean package           # 构建 JAR 包
 mvn clean install          # 安装到本地仓库
 # 运行 ImApplication.java 的 main 方法 (端口 8080)
-```
-
-### 后端 (ruoyi-im-admin)
-```bash
-cd ruoyi-im-admin/ruoyi-admin
-mvn clean package
-# 运行 RuoYiApplication.java 的 main 方法 (端口 8081)
 ```
 
 ### 前端

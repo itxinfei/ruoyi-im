@@ -51,4 +51,7 @@ public class ImUserUpdateRequest implements Serializable {
     /** 职位 */
     @Size(max = 100, message = "职位长度不能超过100")
     private String position;
+
+    /** 用户角色: USER/ADMIN/SUPER_ADMIN */
+    private String role;
 }
