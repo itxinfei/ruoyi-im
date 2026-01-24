@@ -71,6 +71,10 @@ public class SecurityConfig {
                         "/api/im/auth/login", "/api/im/auth/register", "/ws/**", "/websocket/**", "/public/**",
                         "/error", "/test/**")
                 .permitAll()
+                // 管理员接口需要 ADMIN 或 SUPER_ADMIN 角色
+                .antMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPER_ADMIN")
+                // 用户接口需要认证后的任意角色
+                .antMatchers("/api/im/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN", "ROLE_SUPER_ADMIN")
                 // 静态资源访问
                 .antMatchers("/avatar/**", "/uploads/**", "/profile/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/**/*.html", "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg",
