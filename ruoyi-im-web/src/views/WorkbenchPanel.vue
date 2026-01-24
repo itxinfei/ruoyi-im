@@ -309,310 +309,187 @@ onMounted(() => {
 
 /* 顶部欢迎区 */
 .workbench-header {
-  background: #fff;
-  border-bottom: 1px solid #e6e6e6;
-  padding: 24px 32px;
+  background: linear-gradient(120deg, #e3f2fd 0%, #f0f7ff 100%);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  padding: 32px 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+
+  /* 装饰背景 */
+  &::before {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: -40px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(22, 119, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
 }
 
 .greeting-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
-  color: #262626;
+  color: #171a1d;
   margin: 0;
+  letter-spacing: -0.5px;
 }
 
 .greeting-date {
   font-size: 14px;
-  color: #8c8c8c;
-  margin: 4px 0 0 0;
+  color: #646a73;
+  margin: 6px 0 0 0;
+  font-weight: 500;
 }
 
-.header-actions {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
-
-.search-box {
-  position: relative;
-}
-
-.search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #bfbfbf;
-  font-size: 16px;
-}
+/* ... existing code ... */
 
 .search-input {
-  width: 256px;
-  background: #f5f5f5;
-  border: none;
+  width: 280px;
+  background: #fff;
+  border: 1px solid transparent;
   border-radius: 8px;
-  padding: 10px 12px 10px 36px;
+  padding: 10px 12px 10px 38px;
   font-size: 14px;
   color: #262626;
   outline: none;
   transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .search-input:focus {
   background: #fff;
-  box-shadow: 0 0 0 1px #1677ff inset;
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
 }
 
-.search-input::placeholder {
-  color: #bfbfbf;
-}
-
-.custom-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: #1677ff;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.custom-btn:hover {
-  background: #4096ff;
-}
-
-/* 主内容区 */
-.workbench-content {
-  flex: 1;
-  padding: 32px;
-  overflow-y: auto;
-}
-
-.apps-section {
-  margin-bottom: 32px;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #262626;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.title-indicator {
-  width: 4px;
-  height: 20px;
-  border-radius: 2px;
-}
-
-.title-indicator.primary {
-  background: #1677ff;
-}
-
-.title-indicator.secondary {
-  background: #d9d9d9;
-}
-
-.manage-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  color: #8c8c8c;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.manage-btn:hover {
-  color: #1677ff;
-}
-
-/* 常用应用网格 */
-.common-apps-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-}
-
-@media (max-width: 1200px) {
-  .common-apps-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .common-apps-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+/* ... existing code ... */
 
 .app-card {
   background: #fff;
-  border-radius: 12px;
-  border: 1px solid #f0f0f0;
-  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  height: 128px;
+  gap: 14px;
+  height: 140px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
 
 .app-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  border-color: transparent;
+  z-index: 10;
 }
 
 .app-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s;
+  transition: transform 0.3s;
 }
 
 .app-card:hover .app-icon {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .app-icon .material-icons-outlined {
   font-size: 28px;
 }
 
-/* 应用图标颜色 */
-.icon-orange { background: #fff7e6; color: #fa8c16; }
-.icon-blue { background: #e6f7ff; color: #1677ff; }
-.icon-green { background: #f6ffed; color: #52c41a; }
-.icon-purple { background: #f9f0ff; color: #722ed1; }
-.icon-pink { background: #fff0f6; color: #eb2f96; }
-.icon-teal { background: #e6fffb; color: #13c2c2; }
-.icon-indigo { background: #f0f5ff; color: #597ef7; }
-.icon-amber { background: #fffbe6; color: #faad14; }
-.icon-rose { background: #fff1f0; color: #f5222d; }
-.icon-cyan { background: #e6f7ff; color: #13c2c2; }
-
-.app-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #595959;
-  transition: color 0.2s;
-}
-
-.app-card:hover .app-label {
-  color: #1677ff;
-}
-
-.app-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #ff4d4f;
-  color: #fff;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 10px;
-  border: 2px solid #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-/* 内容卡片网格 */
-.content-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-@media (max-width: 1024px) {
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-}
+/* ... existing code ... */
 
 .content-card {
   background: #fff;
-  border-radius: 12px;
-  border: 1px solid #e6e6e6;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
   overflow: hidden;
+  transition: all 0.2s;
+  
+  &:hover { box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
 }
 
 .card-header {
-  padding: 16px 24px;
-  border-bottom: 1px solid #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  /* ... */
 }
 
-.card-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #262626;
-  margin: 0;
-}
-
-.view-all-link {
-  color: #1677ff;
-  font-size: 14px;
-  text-decoration: none;
-}
-
-.view-all-link:hover {
-  text-decoration: underline;
-}
-
-.card-body {
-  padding: 8px;
-}
-
-/* 待办事项列表 */
-.todo-list {
-  display: flex;
-  flex-direction: column;
-}
+/* ... existing code ... */
 
 .todo-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 14px 16px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  margin-bottom: 4px;
 }
 
 .todo-item:hover {
-  background: #fafafa;
+  background: #f7f8fa;
+}
+
+/* 暗色模式适配 */
+:deep(.dark) {
+  .workbench-header {
+    background: linear-gradient(120deg, #1e293b 0%, #0f172a 100%);
+    border-bottom-color: rgba(255,255,255,0.05);
+    
+    &::before {
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+    }
+
+    .greeting-title { color: #f1f5f9; }
+    .greeting-date { color: #94a3b8; }
+    
+    .search-input { 
+      background: #1e293b; color: #f1f5f9; box-shadow: none;
+      &:focus { border-color: #38bdf8; background: #1e293b; }
+    }
+  }
+
+  .app-card, .content-card {
+    background: #1e293b;
+    border-color: rgba(255,255,255,0.05);
+    box-shadow: none;
+    
+    &:hover {
+      background: #2b3648;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+    }
+  }
+
+  .app-label { color: #cbd5e1; }
+  .card-title { color: #f1f5f9; }
+  .todo-item:hover { background: #334155; }
+  .todo-title { color: #e2e8f0; }
+  .announcement-title { color: #e2e8f0; }
+  .section-title { color: #e2e8f0; }
+  
+  .app-icon.icon-orange { background: rgba(250, 140, 22, 0.15); color: #fdba74; }
+  .app-icon.icon-blue { background: rgba(22, 119, 255, 0.15); color: #7dd3fc; }
+  .app-icon.icon-green { background: rgba(82, 196, 26, 0.15); color: #86efac; }
+  /* ... add other colors if needed, or rely onopacity */
 }
 
 .todo-priority {

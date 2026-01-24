@@ -169,10 +169,13 @@ watch(visible, (val) => {
 }
 
 .settings-aside {
-  width: 160px;
+  width: 170px;
   background: #f8fafc;
   border-right: 1px solid #f2f3f5;
-  padding: 12px 0;
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   
   .dark & { background: #0f172a; border-right-color: #334155; }
 
@@ -180,24 +183,25 @@ watch(visible, (val) => {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 20px;
+    padding: 10px 16px;
     font-size: 14px;
-    color: #1f2329;
+    color: #4b5563;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 8px;
     
-    .dark & { color: #cbd5e1; }
+    .dark & { color: #94a3b8; }
 
-    .menu-icon { font-size: 20px; color: #646a73; }
+    .menu-icon { font-size: 20px; color: #64748b; transition: color 0.2s; }
     
-    &:hover { background: #f2f3f5; .dark & { background: #1e293b; } }
+    &:hover { background: rgba(0,0,0,0.04); .dark & { background: rgba(255,255,255,0.05); } }
     
     &.active {
-      background: #e1f0ff;
+      background: #eff6ff;
       color: #0089ff;
       font-weight: 500;
       .menu-icon { color: #0089ff; }
-      .dark & { background: rgba(0, 137, 255, 0.15); }
+      .dark & { background: rgba(0, 137, 255, 0.15); color: #38bdf8; .menu-icon { color: #38bdf8; } }
     }
   }
 }

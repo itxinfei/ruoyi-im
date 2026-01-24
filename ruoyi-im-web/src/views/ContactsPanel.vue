@@ -70,7 +70,10 @@
       <template v-if="view === 'department' && selectedDept">
         <header class="main-header">
           <div class="header-left">
-            <h2 class="header-title">{{ selectedDept.name }}</h2>
+            <el-breadcrumb separator="/">
+              <el-breadcrumb-item>通讯录</el-breadcrumb-item>
+              <el-breadcrumb-item>{{ selectedDept.name }}</el-breadcrumb-item>
+            </el-breadcrumb>
             <span class="member-count">{{ selectedDept.memberCount || 0 }} 人</span>
           </div>
           <div class="header-right">
@@ -115,12 +118,13 @@
                 >
                   <td class="info-col">
                     <div class="member-info">
-                      <div
-                        class="member-avatar"
-                        :style="{ backgroundColor: member.color }"
-                      >
-                        {{ member.name?.charAt(0) }}
-                      </div>
+                      <DingtalkAvatar
+                        :name="member.name"
+                        :user-id="member.id"
+                        :size="40"
+                        shape="square"
+                        custom-class="member-avatar-item"
+                      />
                       <div>
                         <div class="member-name">{{ member.name }}</div>
                         <div class="member-position-mobile">{{ member.position }}</div>
@@ -193,6 +197,7 @@ import NewFriendsView from '@/components/Contacts/NewFriendsView.vue'
 import GroupsView from '@/components/Contacts/GroupsView.vue'
 import UserProfileDialog from '@/components/Contacts/UserProfileDialog.vue'
 import GroupProfileDialog from '@/components/Contacts/GroupProfileDialog.vue'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const view = ref('department') // department | new-friends | groups
 const selectedDept = ref(null)
@@ -582,8 +587,8 @@ onMounted(() => {
 .members-table {
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e6e6e6;
+  /* box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); */
+  /* border: 1px solid #e6e6e6; */
   overflow: hidden;
 }
 
@@ -593,52 +598,40 @@ onMounted(() => {
 }
 
 .table thead {
-  background: #fafafa;
-  border-bottom: 1px solid #e6e6e6;
+  background: #f7f9fb;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .table th {
-  padding: 16px 24px;
+  padding: 12px 24px;
   text-align: left;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  color: #8c8c8c;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #646a73;
+  /* text-transform: uppercase; */
+  /* letter-spacing: 0.5px; */
 }
 
-.table th.contact-col {
-  display: none;
-}
-
-.table th.status-col {
-  text-align: right;
-}
+/* ... existing code ... */
 
 .table tbody tr {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f5f6f7;
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .table tbody tr:hover {
-  background: #fafafa;
+  background: #f5f6f7;
 }
 
-.table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.table td {
-  padding: 16px 24px;
-}
+/* ... existing code ... */
 
 .member-row {
   transition: all 0.2s;
 }
 
 .info-col {
-  width: 33.33%;
+  width: 40%;
 }
 
 .member-info {
@@ -647,17 +640,8 @@ onMounted(() => {
   gap: 12px;
 }
 
-.member-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+:deep(.member-avatar-item) {
+  border-radius: 12px !important;
 }
 
 .member-name {
@@ -755,14 +739,18 @@ onMounted(() => {
 
 /* 暗色模式 */
 :deep(.dark) .contacts-sidebar,
-:deep(.dark) .main-header,
-:deep(.dark) .members-table {
+:deep(.dark) .main-header {
   background: #1e293b;
   border-color: #334155;
 }
 
+:deep(.dark) .members-table {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: none;
+}
+
 :deep(.dark) .sidebar-title,
-:deep(.dark) .header-title,
 :deep(.dark) .member-name {
   color: #f1f5f9;
 }
@@ -782,7 +770,7 @@ onMounted(() => {
 
 :deep(.dark) .table thead {
   background: rgba(15, 23, 42, 0.5);
-  border-color: #334155;
+  border-bottom: 1px solid #334155;
 }
 
 :deep(.dark) .table th {
@@ -791,11 +779,6 @@ onMounted(() => {
 
 :deep(.dark) .table tbody tr:hover {
   background: rgba(51, 65, 85, 0.3);
-}
-
-:deep(.dark) .position-tag {
-  background: rgba(30, 58, 138, 0.3);
-  color: #60a5fa;
 }
 
 :deep(.dark) .status-indicator.offline .status-dot {

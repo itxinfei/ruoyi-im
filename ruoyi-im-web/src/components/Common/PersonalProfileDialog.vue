@@ -170,19 +170,27 @@ watch(visible, (val) => {
 }
 
 .profile-cover {
-  height: 100px;
-  background: linear-gradient(135deg, #0089ff 0%, #00d2ff 100%);
+  height: 120px;
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
   position: relative;
+  
+  .dark & { background: linear-gradient(135deg, #1e40af 0%, #0e7490 100%); }
 
   .close-btn {
     position: absolute;
     top: 12px;
     right: 12px;
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.2);
     border: none;
     color: #fff;
+    width: 32px;
+    height: 32px;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+    
     &:hover {
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.4);
+      transform: rotate(90deg);
     }
   }
 }
@@ -193,108 +201,46 @@ watch(visible, (val) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 
   .avatar-wrapper {
     position: relative;
     margin-bottom: 12px;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    
     :deep(.user-avatar) {
       border: 4px solid #fff;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      border-radius: 16px;
+      border-radius: 20px;
       .dark & { border-color: #1e293b; }
     }
   }
-
-  .user-main {
-    text-align: center;
-    .name-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      .nickname {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 600;
-        color: #1f2329;
-        .dark & { color: #f1f5f9; }
-      }
-      .gender-icon {
-        font-size: 16px;
-        &.male { color: #0089ff; }
-        &.female { color: #ff4d4f; }
-      }
-      .status-tag {
-        border-radius: 4px;
-        padding: 0 4px;
-      }
-    }
-    .account {
-      margin: 4px 0 0;
-      font-size: 13px;
-      color: #8f959e;
-    }
-  }
+  /* ... rest ... */
 }
 
-.profile-details {
-  padding: 0 24px;
-  margin-bottom: 24px;
-  
-  .detail-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid #f2f3f5;
-    font-size: 14px;
-    
-    .dark & { border-color: #334155; }
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .label {
-      color: #8f959e;
-      flex-shrink: 0;
-    }
-    
-    .value {
-      color: #1f2329;
-      text-align: right;
-      word-break: break-all;
-      .dark & { color: #f1f5f9; }
-    }
-    
-    &.signature {
-      flex-direction: column;
-      .value {
-        text-align: left;
-        margin-top: 6px;
-        color: #646a73;
-        font-style: italic;
-        .dark & { color: #94a3b8; }
-      }
-    }
-  }
-}
+/* ... existing code ... */
 
 .profile-actions {
-  padding: 0 24px 24px;
+  padding: 0 24px 28px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   
   .action-btn {
-    height: 40px;
+    height: 42px;
     width: 100%;
     font-weight: 500;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.2s;
+    &:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2); }
   }
   
   .logout-btn {
-    height: 40px;
+    height: 42px;
     width: 100%;
+    border-radius: 8px;
+    font-size: 15px;
+    &:hover { background: #fee2e2; border-color: #ef4444; color: #ef4444; .dark & { background: rgba(239, 68, 68, 0.1); } }
   }
 }
 </style>

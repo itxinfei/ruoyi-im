@@ -11,33 +11,30 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
   // 头像URL
   src: String,
-  // 用户名/昵称（用于生成首字母）
+  // ... (keeping other props matching original, but defineProps is reactive anyway)
   name: {
     type: String,
     default: ''
   },
-  // 用户ID（用于计算背景色）
   userId: [String, Number],
-  // 头像尺寸
   size: {
     type: Number,
     default: 36
   },
-  // 头像形状：circle=圆形, square=方形
   shape: {
     type: String,
     default: 'circle'
   },
-  // 自定义样式类
   customClass: String
 })
 
 const imageError = ref(false)
-const imageUrl = computed(() => props.src)
+const imageUrl = computed(() => addTokenToUrl(props.src))
 const displayName = computed(() => {
   const name = props.name || '?'
   return name.charAt(0).toUpperCase()

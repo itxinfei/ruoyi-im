@@ -78,7 +78,7 @@
 </template>
 
 <script setup>
-import { computed, ref, nextTick, watch } from 'vue'
+import { computed, ref, nextTick, watch, onMounted, onUnmounted } from 'vue'
 import { Loading, ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMessageReadUsers } from '@/api/im/message'
@@ -230,6 +230,31 @@ const scrollToMsg = (id) => {
       el.classList.remove('highlight-msg')
     }, 2000)
   }
+}
+
+// 监听滚动事件
+const handleScroll = () => {
+  if (!listRef.value || props.loading) return
+  
+  const { scrollTop, clientHeight, scrollHeight } = listRef.value
+  
+  // 滚动到顶部加载更多
+  if (scrollTop === 0) {
+    emit('load-more')
+  }
+  
+  // 检测是否接近底部
+  const distanceFromBottom = scrollHeight - scrollTop - clientHeight
+  showScrollToBottom.value = distanceFromBottom > 300
+}
+
+// 保持滚动偏移（用于加载更多）
+const maintainScroll = (oldHeight) => {
+  nextTick(() => {
+    if (listRef.value) {
+      listRef.value.scrollTop = listRef.value.scrollHeight - oldHeight
+    }
+  })
 }
 
 const observer = ref(null)

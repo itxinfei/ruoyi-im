@@ -28,6 +28,7 @@
       <!-- 全局交互弹窗 (对齐钉钉模式) -->
       <PersonalProfileDialog v-model="showProfile" />
       <SystemSettingsDialog v-model="showSettings" />
+      <HelpFeedbackDialog v-model="showHelp" />
     </div>
   </div>
 </template>
@@ -52,6 +53,7 @@ import ChatPanel from './ChatPanel.vue'
 // 新增弹窗组件
 import PersonalProfileDialog from '@/components/Common/PersonalProfileDialog.vue'
 import SystemSettingsDialog from '@/components/Common/SystemSettingsDialog.vue'
+import HelpFeedbackDialog from '@/components/Common/HelpFeedbackDialog.vue'
 
 const store = useStore()
 const activeModule = ref('chat')
@@ -62,6 +64,7 @@ const { isDark } = useTheme()
 // 弹窗状态控制
 const showProfile = ref(false)
 const showSettings = ref(false)
+const showHelp = ref(false)
 
 const { connect, onMessage, isConnected } = useImWebSocket()
 
@@ -70,6 +73,8 @@ const handleSwitchModule = (module) => {
     showProfile.value = true
   } else if (module === 'settings') {
     showSettings.value = true
+  } else if (module === 'help') {
+    showHelp.value = true
   } else {
     activeModule.value = module
   }

@@ -157,7 +157,7 @@ function handleSwitch(key) {
  * 处理帮助与反馈
  */
 function handleHelp() {
-  window.open('https://github.com/itxinfei/ruoyi-im', '_blank')
+  handleSwitch('help')
 }
 </script>
 

@@ -95,11 +95,33 @@ body {
   font-size: 14px;
   color: #262626;
   background-color: #f5f5f5;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #app {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  background-color: #f5f5f5;
+  transition: background-color 0.3s ease;
+}
+
+/* 全局深色模式过渡 */
+.dark body {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+.dark #app {
+  background-color: #0f172a;
+}
+
+/* 优化常见组件的过渡体验 */
+.el-dialog, .el-card, .el-drawer, .el-menu {
+  transition: background-color 0.3s ease, border-color 0.3s ease !important;
+}
+
+.dingtalk-app {
+  transition: all 0.3s ease;
 }
 </style>

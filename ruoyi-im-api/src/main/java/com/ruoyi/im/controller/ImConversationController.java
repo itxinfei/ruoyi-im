@@ -72,10 +72,11 @@ public class ImConversationController {
      */
     @Operation(summary = "创建会话", description = "创建一个新的会话，支持单聊和群聊")
     @PostMapping("/create")
-    public Result<Long> createConversation(@Valid @RequestBody ImConversationCreateRequest request) {
+    public Result<ImConversationVO> createConversation(@Valid @RequestBody ImConversationCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         Long conversationId = imConversationService.createConversation(request, userId);
-        return Result.success("创建成功", conversationId);
+        ImConversationVO vo = imConversationService.getConversationById(conversationId, userId);
+        return Result.success("创建成功", vo);
     }
 
     /**
