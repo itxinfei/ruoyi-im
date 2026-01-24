@@ -50,7 +50,22 @@ class ImWebSocket {
 
     this.token = token
     const wsBaseUrl = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8080'
-    this.url = `${wsBaseUrl}/ws/im?token=${token}`
+
+    // 从 localStorage 获取 userId
+    let userId = ''
+    try {
+      const userInfo = localStorage.getItem('im_user_info')
+      if (userInfo) {
+        const user = JSON.parse(userInfo)
+        userId = user.id || ''
+        console.log('[ImWebSocket] 用户ID:', userId)
+      }
+    } catch (e) {
+      console.warn('[ImWebSocket] 获取用户ID失败:', e)
+    }
+
+    // 同时发送 token 和 userId
+    this.url = `${wsBaseUrl}/ws/im?token=${token}&userId=${userId}`
 
     try {
       console.log('[ImWebSocket] 正在连接...', this.url)

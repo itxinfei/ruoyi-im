@@ -213,6 +213,10 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     @Override
     public List<ImMessageVO> getMessages(Long conversationId, Long userId, Long lastId, Integer limit) {
+        // 调试日志：记录接收到的 userId
+        log.info("getMessages 被调用 - conversationId={}, userId={}, lastId={}, limit={}",
+                conversationId, userId, lastId, limit);
+
         List<ImMessageVO> voList = new ArrayList<>();
 
         // 参数校验和默认值
@@ -292,7 +296,11 @@ public class ImMessageServiceImpl implements ImMessageService {
                 vo.setSenderAvatar(sender.getAvatar());
             }
 
-            vo.setIsSelf(message.getSenderId().equals(userId));
+            // 设置 isSelf 并记录调试日志
+            boolean isSelf = message.getSenderId().equals(userId);
+            vo.setIsSelf(isSelf);
+            log.debug("消息 isSelf 判断 - messageId={}, senderId={}, userId={}, isSelf={}, senderName={}",
+                    message.getId(), message.getSenderId(), userId, isSelf, vo.getSenderName());
 
             // 处理引用消息（回复）
             if (message.getReplyToMessageId() != null && message.getReplyToMessageId() > 0) {

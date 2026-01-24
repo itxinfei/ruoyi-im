@@ -16,9 +16,13 @@
         <ContactsPanel v-if="activeModule === 'contacts'" />
         <DocumentsPanel v-if="activeModule === 'drive'" />
         <CalendarPanel v-if="activeModule === 'calendar'" />
+        <TodoPanel v-if="activeModule === 'todo'" />
+        <ApprovalPanel v-if="activeModule === 'approval'" />
+        <MailPanel v-if="activeModule === 'mail'" />
+        <AssistantPanel v-if="activeModule === 'assistant'" />
         <SettingsPanel v-if="activeModule === 'settings'" />
         <UserProfilePanel v-if="activeModule === 'profile'" />
-        <ChatPanel v-if="currentSession" :session="currentSession" />
+        <ChatPanel v-if="activeModule === 'chat' && currentSession" :session="currentSession" />
       </main>
     </div>
   </div>
@@ -35,6 +39,10 @@ import WorkbenchPanel from './WorkbenchPanel.vue'
 import ContactsPanel from './ContactsPanel.vue'
 import DocumentsPanel from './DocumentsPanel.vue'
 import CalendarPanel from './CalendarPanel.vue'
+import TodoPanel from './TodoPanel.vue'
+import ApprovalPanel from './ApprovalPanel.vue'
+import MailPanel from './MailPanel.vue'
+import AssistantPanel from './AssistantPanel.vue'
 import SettingsPanel from './SettingsPanel.vue'
 import UserProfilePanel from './UserProfilePanel.vue'
 import ChatPanel from './ChatPanel.vue'

@@ -86,7 +86,10 @@ public class ImMessageController {
             @RequestParam(required = false) Long lastId,
             @RequestParam(required = false, defaultValue = "20") Integer limit,
             @RequestHeader(value = "userId", required = false) Long userId) {
+        // 调试日志：记录接收到的请求头 userId
+        log.info("getMessages API - 收到请求 header userId={}, 原始值={}, conversationId={}", userId, userId, conversationId);
         userId = getUserIdOrDefault(userId);
+        log.info("getMessages API - 使用 userId={}", userId);
         List<ImMessageVO> list = imMessageService.getMessages(conversationId, userId, lastId, limit);
         return Result.success(list);
     }

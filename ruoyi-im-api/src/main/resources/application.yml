@@ -156,7 +156,7 @@ im:
 # 文件上传配置
 file:
   upload:
-    path: ${user.home}/uploads/  # 文件上传路径
+    path: uploads/  # 文件上传路径（项目根目录下的uploads文件夹）
     url-prefix: /api/im/file/download/  # 文件URL前缀
 
 # 日志配置

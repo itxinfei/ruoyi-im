@@ -19,6 +19,27 @@ service.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
     }
+
+    // 从 localStorage 获取用户信息并发送 userId
+    const userInfo = localStorage.getItem('im_user_info')
+    if (userInfo) {
+      try {
+        const user = JSON.parse(userInfo)
+        // 调试日志
+        console.log('请求拦截器 - 用户信息:', user)
+        if (user.id) {
+          config.headers['userId'] = String(user.id) // 确保是字符串类型
+          console.log('请求拦截器 - 设置 userId header:', user.id, 'URL:', config.url)
+        } else {
+          console.warn('请求拦截器 - 用户信息中没有 id 字段:', user)
+        }
+      } catch (e) {
+        console.warn('解析用户信息失败:', e)
+      }
+    } else {
+      console.warn('请求拦截器 - localStorage 中没有 im_user_info')
+    }
+
     return config
   },
   error => {

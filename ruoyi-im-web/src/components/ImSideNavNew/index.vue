@@ -138,6 +138,7 @@ function handleSwitch(key) {
   width: 72px;
 }
 
+/* 所有导航项统一样式 */
 .nav-item {
   position: relative;
   width: 100%;
@@ -157,26 +158,9 @@ function handleSwitch(key) {
   }
 }
 
-/* 底部小按钮（主题、设置） */
-.nav-item-small {
-  position: relative;
-  width: 100%;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-  }
-}
-
 /* 减少动画效果以尊重用户偏好 */
 @media (prefers-reduced-motion: reduce) {
-  .nav-item,
-  .nav-item-small {
+  .nav-item {
     transition: none;
   }
 }
@@ -190,7 +174,7 @@ function handleSwitch(key) {
   color: rgba(255, 255, 255, 0.7);
 }
 
-/* 滚动条样式 - 更细更美观 */
+/* 滚动条样式 */
 div[class*="overflow-y-auto"]::-webkit-scrollbar {
   width: 4px;
 }

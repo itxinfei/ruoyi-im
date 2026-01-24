@@ -4,9 +4,11 @@
     <div v-else-if="messages.length === 0" class="empty">暂无消息</div>
     
     <div v-for="msg in messagesWithDividers" :key="msg.id || msg.timeText" :data-id="msg.id" class="message-wrapper">
-      <div v-if="msg.isTimeDivider" class="time-divider">{{ msg.timeText }}</div>
+      <div v-if="msg.isTimeDivider" class="time-divider">
+        <span class="time-text">{{ msg.timeText }}</span>
+      </div>
       <div v-else class="message-item" :class="{ 'is-own': msg.isOwn }">
-        <el-avatar class="avatar" :size="36" :src="msg.senderAvatar" shape="square" :class="getAvatarBgClass(msg)">
+        <el-avatar class="avatar" :size="36" :src="addTokenToUrl(msg.senderAvatar)" shape="square" :class="getAvatarBgClass(msg)">
           {{ (msg.senderName || '?').charAt(0).toUpperCase() }}
         </el-avatar>
         <div class="content-wrapper">
@@ -48,7 +50,20 @@
                 <div v-else-if="msg.type === 'VIDEO'" class="msg-video">
                   <video :src="parseContent(msg).videoUrl" controls class="video-preview"></video>
                 </div>
-                <span v-else>[未知消息类型]</span>
+                <div v-else-if="msg.type === 'VOICE' || msg.type === 'AUDIO'" class="msg-audio">
+                  <audio :src="parseContent(msg).audioUrl || parseContent(msg).voiceUrl" controls></audio>
+                </div>
+                <div v-else-if="msg.type === 'SYSTEM'" class="msg-system">
+                  {{ msg.content }}
+                </div>
+                <div v-else-if="msg.type === 'RECALLED'" class="msg-recalled">
+                  <span class="material-icons-outlined">block</span>
+                  <span>{{ msg.isOwn ? '你撤回了一条消息' : `${msg.senderName}撤回了一条消息` }}</span>
+                </div>
+                <span v-else>
+                  [未知消息类型: {{ msg.type || '无type字段' }}]
+                  <span v-if="!msg.type" class="debug-info">请查看控制台日志</span>
+                </span>
               </div>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -103,14 +118,23 @@
         </div>
       </div>
     </div>
+
+    <!-- 回到底部按钮 -->
+    <Transition name="fade">
+      <div v-if="showScrollToBottom" class="scroll-to-bottom-btn" @click="scrollToBottom()">
+        <el-icon><ArrowDown /></el-icon>
+        <span>回到最新</span>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, nextTick, watch, onMounted } from 'vue'
-import { Document, Loading, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, MoreFilled } from '@element-plus/icons-vue'
+import { computed, ref, nextTick, watch,  onMounted } from 'vue'
+import { Document, Loading, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, MoreFilled, ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMessageReadUsers } from '@/api/im/message'
+import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
   messages: Array,
@@ -127,6 +151,7 @@ const previewUrl = ref('')
 
 const readUsersMap = ref({})
 const loadingReadUsers = ref({})
+const showScrollToBottom = ref(false)
 
 const fetchReadUsers = async (msg) => {
   if (readUsersMap.value[msg.id] || loadingReadUsers.value[msg.id]) return
@@ -232,9 +257,14 @@ const messagesWithDividers = computed(() => {
   return res
 })
 
-const scrollToBottom = () => {
+const scrollToBottom = (smooth = true) => {
   nextTick(() => {
-    if (listRef.value) listRef.value.scrollTop = listRef.value.scrollHeight
+    if (listRef.value) {
+      listRef.value.scrollTo({
+        top: listRef.value.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto'
+      })
+    }
   })
 }
 
@@ -276,9 +306,18 @@ const scrollToMsg = (id) => {
 }
 
 const handleScroll = () => {
-  if (listRef.value.scrollTop === 0 && !props.loading) {
+  if (!listRef.value || props.loading) return
+  
+  const { scrollTop, clientHeight, scrollHeight } = listRef.value
+  
+  // 滚动到顶部加载更多
+  if (scrollTop === 0) {
     emit('load-more')
   }
+  
+  // 检测是否接近底部（显示"回到底部"按钮）
+  const distanceFromBottom = scrollHeight - scrollTop - clientHeight
+  showScrollToBottom.value = distanceFromBottom > 300
 }
 
 // 保持滚动距离（用于向上加载时）
@@ -301,25 +340,17 @@ defineExpose({ scrollToBottom, maintainScroll })
   background: #f7f8fa;
 }
 .time-divider {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 16px 0;
-  
-  &::before, &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: rgba(0, 0, 0, 0.04);
-    margin: 0 12px;
-  }
+  text-align: center;
+  margin: 20px 0;
+  color: #b3b3b3;
+  font-size: 12px;
+  line-height: 1;
   
   .time-text {
-    background: rgba(0, 0, 0, 0.04);
-    padding: 2px 10px;
-    border-radius: 4px;
-    font-size: 11px;
-    color: #bfbfbf;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 4px 12px;
+    border-radius: 10px;
+    display: inline-block;
   }
 }
 .message-item {
@@ -409,31 +440,36 @@ defineExpose({ scrollToBottom, maintainScroll })
 .bubble {
   background: #fff;
   padding: 10px 14px;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   font-size: 14px;
-  word-break: break-all;
-  line-height: 1.5;
+  word-break: break-word;
+  line-height: 1.6;
   color: var(--dt-text-primary);
   position: relative;
+  max-width: 460px;
   
-  &::after {
+  &::before {
     content: '';
     position: absolute;
-    left: -6px;
-    top: 12px;
-    border-width: 6px 6px 6px 0;
-    border-color: transparent white transparent transparent;
+    left: -8px;
+    top: 14px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 6px 8px 6px 0;
+    border-color: transparent #fff transparent transparent;
   }
 }
 .is-own .bubble {
-  background: var(--dt-brand-color);
+  background: linear-gradient(135deg, #1677ff 0%, #1890ff 100%);
   color: #ffffff;
-  &::after {
+  
+  &::before {
     left: auto;
-    right: -6px;
-    border-width: 6px 0 6px 6px;
-    border-color: transparent transparent transparent var(--dt-brand-color);
+    right: -8px;
+    border-width: 6px 0 6px 8px;
+    border-color: transparent transparent transparent #1677ff;
   }
 }
 .msg-image {
@@ -559,6 +595,96 @@ defineExpose({ scrollToBottom, maintainScroll })
 .is-own .reply-wrapper {
   background: rgba(0, 0, 0, 0.05);
   align-self: flex-end;
+}
+
+/* 语音消息样式 */
+.msg-audio {
+  padding: 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.02);
+  
+  audio {
+    width: 200px;
+    height: 32px;
+  }
+}
+
+/* 系统消息样式 */
+.msg-system {
+  color: #8c8c8c;
+  font-size: 12px;
+  text-align: center;
+  padding: 4px 12px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 10px;
+}
+
+/* 撤回消息样式 */
+.msg-recalled {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #8c8c8c;
+  font-size: 13px;
+  font-style: italic;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+  
+  .material-icons-outlined {
+    font-size: 16px;
+    color: #bfbfbf;
+  }
+}
+
+/* 调试信息样式 */
+.debug-info {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 11px;
+  color: #ff4d4f;
+  padding: 2px 6px;
+  background: #fff1f0;
+  border-radius: 4px;
+}
+
+/* 回到底部按钮 */
+.scroll-to-bottom-btn {
+  position: absolute;
+  right: 20px;
+  bottom: 80px;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 20px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  font-size: 13px;
+  color: #595959;
+  z-index: 10;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #f5f5f5;
+    border-color: #1677ff;
+    color: #1677ff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  
+  .el-icon {
+    font-size: 14px;
+  }
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s, transform 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
 }
 </style>
 

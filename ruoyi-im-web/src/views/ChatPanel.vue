@@ -16,19 +16,15 @@
         @reply="handleReply"
         @load-more="handleLoadMore"
       />
-      <MessageInput 
+      <MessageInput
         :session="session"
-        :sending="sending" 
+        :sending="sending"
         :replying-message="replyingMessage"
-        @send="handleSend" 
-        @upload-file="triggerFile" 
-        @upload-image="triggerImage" 
+        @send="handleSend"
         @cancel-reply="handleCancelReply"
+        @start-call="handleStartCall"
+        @start-video="handleStartVideo"
       />
-      
-      <!-- Hidden Uploads -->
-      <FileUpload ref="fileRef" type="file" @success="handleFileSuccess" />
-      <FileUpload ref="imgRef" type="image" @success="handleImgSuccess" />
     </template>
   </div>
 </template>
@@ -39,7 +35,6 @@ import { useStore } from 'vuex'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInput.vue'
-import FileUpload from '@/components/FileUpload/index.vue'
 import { getMessages } from '@/api/im/message'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 
@@ -55,8 +50,6 @@ const sending = ref(false)
 const noMore = ref(false)
 const replyingMessage = computed(() => store.state.im.replyingMessage)
 const msgListRef = ref(null)
-const fileRef = ref(null)
-const imgRef = ref(null)
 
 const { onMessage } = useImWebSocket()
 
@@ -69,7 +62,26 @@ const loadHistory = async () => {
       sessionId: props.session.id,
       pageSize: 50
     })
-    messages.value = res || []
+    console.log('===== ChatPanel loadHistory 开始 =====')
+    console.log('ChatPanel - 当前登录用户:', currentUser.value)
+    console.log('ChatPanel - 会话ID:', props.session.id)
+    console.log('ChatPanel - 原始消息数量:', res?.length)
+
+    messages.value = (res || []).map(m => {
+      const transformed = transformMsg(m)
+      console.log('消息详情:', {
+        id: m.id,
+        content: m.content,
+        senderId: m.senderId,
+        senderName: m.senderName,
+        后端isSelf: m.isSelf,
+        前端isOwn: transformed.isOwn,
+        当前userId: currentUser.value?.id,
+        匹配结果: m.senderId === currentUser.value?.id
+      })
+      return transformed
+    })
+    console.log('===== ChatPanel loadHistory 结束 =====')
   } finally {
     loading.value = false
     msgListRef.value?.scrollToBottom()
@@ -104,11 +116,28 @@ const handleLoadMore = async () => {
   }
 }
 
-const transformMsg = (m) => ({
-  ...m,
-  isOwn: m.senderId === currentUser.value.id,
-  timestamp: m.createTime || m.timestamp
-})
+const transformMsg = (m) => {
+  // 优先使用后端返回的 isSelf 字段，后端根据 userId header 判断
+  // 如果后端返回了 isSelf（布尔值），直接使用；否则回退到前端判断
+  const isOwn = m.isSelf === true || m.isSelf === false
+    ? m.isSelf  // 后端已明确返回 isSelf 值
+    : m.senderId === currentUser.value?.id  // 前端回退判断
+
+  // 确保消息类型存在，默认为TEXT
+  const messageType = m.type || m.messageType || 'TEXT'
+  
+  // 调试日志：查看消息原始数据
+  if (!m.type) {
+    console.warn('[ChatPanel] 消息缺少type字段:', m)
+  }
+
+  return {
+    ...m,
+    type: messageType,  // 确保type字段存在
+    isOwn,
+    timestamp: m.sendTime || m.createTime || m.timestamp
+  }
+}
 
 const handleSend = async (content) => {
   sending.value = true
@@ -139,47 +168,6 @@ watch(() => props.session, () => {
   messages.value = []
   loadHistory()
 })
-
-const triggerFile = () => fileRef.value?.triggerUpload()
-const triggerImage = () => imgRef.value?.triggerUpload()
-
-const handleFileSuccess = async ({ data }) => {
-  sending.value = true
-  try {
-    const msg = await store.dispatch('im/sendMessage', {
-      sessionId: props.session.id,
-      type: 'FILE',
-      content: JSON.stringify({
-        fileName: data.fileName,
-        fileSize: data.fileSize,
-        fileUrl: data.fileUrl
-      })
-    })
-    messages.value.push(transformMsg(msg))
-  } finally {
-    sending.value = false
-    msgListRef.value?.scrollToBottom()
-  }
-}
-
-const handleImgSuccess = async ({ data }) => {
-  sending.value = true
-  try {
-    const msg = await store.dispatch('im/sendMessage', {
-      sessionId: props.session.id,
-      type: 'IMAGE',
-      content: JSON.stringify({
-        imageUrl: data.fileUrl,
-        width: data.width,
-        height: data.height
-      })
-    })
-    messages.value.push(transformMsg(msg))
-  } finally {
-    sending.value = false
-    msgListRef.value?.scrollToBottom()
-  }
-}
 
 const handleDelete = async (messageId) => {
   try {
@@ -214,6 +202,17 @@ const handleReply = (message) => {
 
 const handleCancelReply = () => {
   store.commit('im/SET_REPLYING_MESSAGE', null)
+}
+
+// 通话功能（待实现）
+const handleStartCall = () => {
+  console.log('语音通话功能开发中...')
+  // TODO: 实现语音通话
+}
+
+const handleStartVideo = () => {
+  console.log('视频通话功能开发中...')
+  // TODO: 实现视频通话
 }
 
 onMounted(() => {

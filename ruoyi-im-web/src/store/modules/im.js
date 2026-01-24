@@ -16,6 +16,7 @@ import {
   deleteConversation as apiDeleteConversation,
   markConversationAsRead
 } from '@/api/im'
+import { formatMessagePreview, formatMessagePreviewFromObject } from '@/utils/message'
 
 // 简单UUID生成
 function generateUUID() {
@@ -226,7 +227,11 @@ export default {
       try {
         const res = await getConversations()
         if (res.code === 200 && res.data) {
-          commit('SET_SESSIONS', res.data)
+          const sessions = res.data.map(session => ({
+            ...session,
+            lastMessage: session.lastMessage ? formatMessagePreviewFromObject(session.lastMessage) : '[暂无消息]'
+          }))
+          commit('SET_SESSIONS', sessions)
         }
       } finally {
         commit('SET_LOADING', { key: 'sessions', value: false })
@@ -236,7 +241,7 @@ export default {
     async loadMessages({ commit }, { sessionId, lastMessageId = null, pageSize = 20, isLoadMore = false }) {
       commit('SET_LOADING', { key: 'messages', value: true })
       try {
-        const res = await getMessages({ conversationId: sessionId, lastId: lastMessageId, pageSize })
+        const res = await getMessages(sessionId, { lastId: lastMessageId, pageSize })
         if (res.code === 200 && res.data) {
           // 后端返回是按时间倒序的 (newest first)，前端需要 newest at bottom
           const transformed = res.data.reverse()
@@ -266,8 +271,9 @@ export default {
         commit('ADD_MESSAGE', { sessionId, message: res.data })
         commit('UPDATE_SESSION', {
           id: sessionId,
-          lastMessage: content,
-          lastMessageTime: res.data.timestamp
+          lastMessage: formatMessagePreviewFromObject(res.data),
+          lastMessageTime: res.data.timestamp,
+          lastMessageType: type
         })
         return res.data
       }
@@ -330,8 +336,10 @@ export default {
 
       commit('UPDATE_SESSION', {
         id: sessionId,
-        lastMessage: message.content,
+        lastMessage: formatMessagePreview(message.type, message.content),
         lastMessageTime: message.timestamp,
+        lastMessageType: message.type,
+        lastSenderNickname: message.senderName,
         unreadCount: isCurrentSession ? 0 : ((session?.unreadCount || 0) + 1)
       })
     },
