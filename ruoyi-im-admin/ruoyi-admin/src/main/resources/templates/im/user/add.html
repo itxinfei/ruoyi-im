@@ -1,23 +1,41 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <th:block th:include="include :: header('新增IM用户')" />
     <style>
-        /* 针对弹窗页面的特殊微调 */
-        body { padding: 0 !important; overflow-x: hidden; }
-        .wrapper-content { padding: 15px 25px !important; } /* 左右增加留白，更像弹窗 */
+        body {
+            padding: 0 !important;
+            overflow-x: hidden;
+            background-color: #fff;
+        }
+
+        .wrapper-content {
+            padding: 20px 30px !important;
+        }
+
+        .form-header {
+            font-size: 15px;
+            font-weight: 600;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+            color: #333;
+        }
     </style>
 </head>
+
 <body class="white-bg">
     <div class="wrapper wrapper-content animated fadeInRight ibox-content" style="border: none; box-shadow: none;">
         <form class="form-horizontal m" id="form-user-add">
-            <h4 class="form-header h4">基本信息</h4>
+            <h4 class="form-header h4"><i class="fa fa-user"></i> 基本信息</h4>
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label class="col-sm-3 control-label is-required">用户名：</label>
                         <div class="col-sm-9">
-                            <input id="username" name="username" class="form-control" type="text" placeholder="请输入用户名" required>
+                            <input id="username" name="username" class="form-control" type="text" placeholder="请输入用户名"
+                                required>
                         </div>
                     </div>
                 </div>
@@ -25,7 +43,8 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label is-required">昵称：</label>
                         <div class="col-sm-9">
-                            <input id="nickname" name="nickname" class="form-control" type="text" placeholder="请输入昵称" required>
+                            <input id="nickname" name="nickname" class="form-control" type="text" placeholder="请输入昵称"
+                                required>
                         </div>
                     </div>
                 </div>
@@ -35,7 +54,8 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label is-required">密码：</label>
                         <div class="col-sm-9">
-                            <input id="password" name="password" class="form-control" type="password" placeholder="请输入密码" required>
+                            <input id="password" name="password" class="form-control" type="password"
+                                placeholder="请输入密码" required>
                         </div>
                     </div>
                 </div>
@@ -43,15 +63,17 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label">性别：</label>
                         <div class="col-sm-9">
-                            <select name="gender" class="form-control m-b" th:with="type=${@dict.getType('sys_user_sex')}">
+                            <select name="gender" class="form-control m-b"
+                                th:with="type=${@dict.getType('sys_user_sex')}">
                                 <option value="">所有</option>
-                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}"></option>
                             </select>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <h4 class="form-header h4">联系信息</h4>
             <div class="row">
                 <div class="col-sm-6">
@@ -71,7 +93,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <h4 class="form-header h4">其他信息</h4>
             <div class="row">
                 <div class="col-sm-6">
@@ -79,7 +101,8 @@
                         <label class="col-sm-3 control-label">用户状态：</label>
                         <div class="col-sm-9">
                             <div class="radio-box" th:each="dict : ${@dict.getType('sys_normal_disable')}">
-                                <input type="radio" th:id="${dict.dictCode}" name="status" th:value="${dict.dictValue}" th:checked="${dict.default}">
+                                <input type="radio" th:id="${dict.dictCode}" name="status" th:value="${dict.dictValue}"
+                                    th:checked="${dict.default}">
                                 <label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>
                             </div>
                         </div>
@@ -89,7 +112,8 @@
             <div class="row">
                 <div class="col-sm-12">
                     <div class="form-group">
-                        <label class="col-sm-1 control-label" style="width: 12.5%;">个性签名：</label> <!-- 特殊处理全宽行的 Label 宽度 (1/8) -->
+                        <label class="col-sm-1 control-label" style="width: 12.5%;">个性签名：</label>
+                        <!-- 特殊处理全宽行的 Label 宽度 (1/8) -->
                         <div class="col-sm-11" style="width: 87.5%;">
                             <textarea name="signature" class="form-control" rows="3"></textarea>
                         </div>
@@ -98,18 +122,18 @@
             </div>
         </form>
     </div>
-    
+
     <!-- 引入底部脚本，但隐藏其容器以防万一 -->
     <div style="display:none;">
         <th:block th:include="include :: footer" />
     </div>
-    
+
     <script type="text/javascript">
         var prefix = ctx + "im/user";
         $("#form-user-add").validate({
             onkeyup: false,
-            rules:{
-                username:{
+            rules: {
+                username: {
                     minlength: 2,
                     maxlength: 20,
                     remote: {
@@ -117,7 +141,7 @@
                         type: "post",
                         dataType: "json",
                         data: {
-                            "username": function() {
+                            "username": function () {
                                 return $.common.trim($("#username").val());
                             }
                         }
@@ -131,7 +155,7 @@
             },
             focusCleanup: true
         });
-        
+
         function submitHandler() {
             if ($.validate.form()) {
                 $.operate.save(prefix + "/add", $('#form-user-add').serialize());
@@ -139,4 +163,5 @@
         }
     </script>
 </body>
+
 </html>

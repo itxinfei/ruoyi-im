@@ -1,164 +1,205 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head>
     <th:block th:include="include :: header('IM用户管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <style>
-        body { padding: 10px !important; }
-        .gray-bg { background-color: #f3f3f4 !important; }
+        /* 统计卡片精确 10px 间距 */
+        .stat-container {
+            margin-left: -5px;
+            margin-right: -5px;
+            margin-top: 15px;
+        }
+
+        .stat-col {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .ibox.stat-card {
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .ibox.stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .ibox-content h2 {
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        /* 搜索区域模块化设计 */
+        .search-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #1ab394;
+        }
+
+        .select-list ul li {
+            margin-right: 20px !important;
+            margin-bottom: 10px;
+        }
+
+        .select-list ul li label {
+            width: 70px !important;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .select-list ul li input,
+        .select-list ul li select {
+            border-radius: 4px !important;
+            border: 1px solid #e5e6e7 !important;
+            transition: border-color 0.2s;
+        }
+
+        .select-list ul li input:focus,
+        .select-list ul li select:focus {
+            border-color: #1ab394 !important;
+        }
     </style>
 </head>
-<body class="gray-bg">
-    <div class="container-div im-page">
-        <!-- 统计卡片区域 -->
-        <div class="row stat-card-section">
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterReset()">
-                    <div class="ibox-title">
-                        <span class="stat-badge pull-right">总</span>
-                        <h5 style="color: #fff; margin: 0;">用户总量</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="stat-number" id="totalCount">0</div>
-                        <div class="stat-label">系统注册用户</div>
-                        <i class="fa fa-users stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterByStatus('1')">
-                    <div class="ibox-title">
-                        <span class="stat-badge pull-right">线</span>
-                        <h5 style="color: #fff; margin: 0;">当前在线</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="stat-number" id="onlineCount">0</div>
-                        <div class="stat-label">实时在线人数</div>
-                        <i class="fa fa-circle stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByToday()">
-                    <div class="ibox-title">
-                        <span class="stat-badge pull-right">今</span>
-                        <h5 style="color: #fff; margin: 0;">今日新增</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="stat-number" id="todayCount">0</div>
-                        <div class="stat-label">今日注册用户</div>
-                        <i class="fa fa-user-plus stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins im-stat-card stat-card-danger" onclick="filterByStatus('0')">
-                    <div class="ibox-title">
-                        <span class="stat-badge pull-right">停</span>
-                        <h5 style="color: #fff; margin: 0;">停用账户</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="stat-number" id="disabledCount">0</div>
-                        <div class="stat-label">已停用用户数</div>
-                        <i class="fa fa-ban stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- 搜索表单 -->
-        <div class="row search-section">
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12 stat-container">
+                <div class="row">
+                    <div class="col-sm-3 stat-col animated fadeInUp">
+                        <div class="ibox float-e-margins stat-card" onclick="filterReset()" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">总</span>
+                                <h5>用户总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="totalCount">0</h2>
+                                <small>系统注册用户总量</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 stat-col animated fadeInUp" style="animation-delay: 0.1s;">
+                        <div class="ibox float-e-margins stat-card" onclick="filterByOnline('1')"
+                            style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">网</span>
+                                <h5>在线活跃</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="onlineCount">0</h2>
+                                <small>当前实时在线连接</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 stat-col animated fadeInUp" style="animation-delay: 0.2s;">
+                        <div class="ibox float-e-margins stat-card" onclick="filterByToday()" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">新</span>
+                                <h5>今日新增</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="todayCount">0</h2>
+                                <small>今日新注册用户数</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 stat-col animated fadeInUp" style="animation-delay: 0.3s;">
+                        <div class="ibox float-e-margins stat-card" onclick="filterByStatus('0')"
+                            style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-danger pull-right">停</span>
+                                <h5>已停用</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-danger" id="disabledCount">0</h2>
+                                <small>账号异常/停用数量</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 搜索表单 (卡片式布局) -->
             <div class="col-sm-12">
-                <div class="im-panel">
+                <div class="search-card animated fadeInDown">
                     <form id="user-form">
                         <div class="select-list">
                             <ul>
                                 <li>
-                                    <label class="search-label label-2">账号</label><input type="text" name="keyword" placeholder="请输入"/>
+                                    <label>关键词</label>
+                                    <input type="text" name="keyword" placeholder="账号/昵称" />
                                 </li>
                                 <li>
-                                    <label class="search-label label-2">手机</label><input type="text" name="mobile" placeholder="请输入"/>
+                                    <label>手机号码</label>
+                                    <input type="text" name="mobile" placeholder="手机号" />
                                 </li>
                                 <li>
-                                    <label class="search-label label-2">邮箱</label><input type="text" name="email" placeholder="请输入"/>
+                                    <label>邮箱</label>
+                                    <input type="text" name="email" placeholder="邮箱" />
                                 </li>
                                 <li>
-                                    <label class="search-label label-2">状态</label><select name="status">
-                                        <option value="">全部</option>
+                                    <label>状态</label>
+                                    <select name="status">
+                                        <option value="">所有</option>
                                         <option value="1">正常</option>
                                         <option value="0">停用</option>
                                     </select>
                                 </li>
                                 <li>
-                                    <label class="search-label label-2">性别</label><select name="sex">
-                                        <option value="">全部</option>
-                                        <option value="0">男</option>
-                                        <option value="1">女</option>
-                                        <option value="2">未知</option>
-                                    </select>
-                                </li>
-                                <li>
-                                    <label class="search-label label-2">在线</label><select name="isOnline">
-                                        <option value="">全部</option>
+                                    <label>在线</label>
+                                    <select name="isOnline">
+                                        <option value="">所有</option>
                                         <option value="1">在线</option>
                                         <option value="0">离线</option>
                                     </select>
                                 </li>
                                 <li class="select-time">
-                                    <label class="search-label label-4">注册时间</label>
-                                    <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
+                                    <label>注册时间</label>
+                                    <input type="text" class="time-input" id="startTime" placeholder="开始"
+                                        name="params[beginTime]" />
                                     <span>-</span>
-                                    <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
+                                    <input type="text" class="time-input" id="endTime" placeholder="结束"
+                                        name="params[endTime]" />
                                 </li>
-                                <li>
-                                    <a class="btn btn-primary btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                    <a class="btn btn-default btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <li style="margin-left: 10px;">
+                                    <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                            class="fa fa-search"></i>&nbsp;搜索</a>
+                                    <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                            class="fa fa-refresh"></i>&nbsp;重置</a>
                                 </li>
                             </ul>
                         </div>
                     </form>
                 </div>
             </div>
-        </div>
 
-        <!-- 工具栏 + 表格 -->
-        <div class="row table-section">
-            <div class="col-sm-12">
-                <!-- 批量操作按钮 -->
-                <div class="im-toolbar">
-                    <div class="im-batch-actions">
-                        <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:user:add">
-                            <i class="fa fa-plus"></i> 新增
-                        </a>
-                        <a class="btn btn-primary" onclick="batchEdit()" shiro:hasPermission="im:user:edit">
-                            <i class="fa fa-edit"></i> 批量修改
-                        </a>
-                        <a class="btn btn-warning" onclick="batchEnable()" shiro:hasPermission="im:user:edit">
-                            <i class="fa fa-check"></i> 批量启用
-                        </a>
-                        <a class="btn btn-danger" onclick="batchDisable()" shiro:hasPermission="im:user:edit">
-                            <i class="fa fa-ban"></i> 批量停用
-                        </a>
-                        <a class="btn btn-danger" onclick="$.operate.removeAll()" shiro:hasPermission="im:user:remove">
-                            <i class="fa fa-trash"></i> 批量删除
-                        </a>
-                    </div>
-                    <div class="pull-right">
-                        <a class="btn btn-default btn-sm" onclick="$.table.refresh()">
-                            <i class="fa fa-refresh"></i> 刷新
-                        </a>
-                        <a class="btn btn-default btn-sm" onclick="$.table.exportExcel()" shiro:hasPermission="im:user:export">
-                            <i class="fa fa-download"></i> 导出
-                        </a>
-                    </div>
+            <!-- 工具栏 + 表格 -->
+            <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:user:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()"
+                        shiro:hasPermission="im:user:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                        shiro:hasPermission="im:user:remove">
+                        <i class="fa fa-trash"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:user:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
                 </div>
-
-                <!-- 数据表格 -->
-                <div class="im-table-container">
-                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
-                </div>
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
@@ -166,12 +207,12 @@
     <th:block th:include="include :: footer" />
     <th:block th:include="include :: bootstrap-table-export-js" />
     <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('im:user:edit')}]];
-        var removeFlag = [[${@permission.hasPermi('im:user:remove')}]];
-        var resetPwdFlag = [[${@permission.hasPermi('im:user:resetPwd')}]];
+        var editFlag = [[${@permission.hasPermi('im:user:edit') }]];
+        var removeFlag = [[${@permission.hasPermi('im:user:remove') }]];
+        var resetPwdFlag = [[${@permission.hasPermi('im:user:resetPwd') }]];
         var prefix = ctx + "im/user";
 
-        $(function() {
+        $(function () {
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -187,7 +228,7 @@
                 clickToSelect: true,
                 rememberSelected: true,
                 pagination: true,
-                pageSize: 20,
+                pageSize: 10,
                 pageList: [10, 20, 50, 100],
                 sidePagination: "server",
                 columns: [{
@@ -197,136 +238,82 @@
                 }, {
                     field: 'id',
                     title: 'ID',
-                    visible: false,
-                    width: 60
+                    visible: false
                 }, {
                     field: 'avatar',
                     title: '头像',
                     align: 'center',
-                    width: 50,
-                    formatter: function(value, row, index) {
+                    width: 60,
+                    formatter: function (value, row, index) {
                         var img = value ? value : ctx + 'img/profile.jpg';
-                        return '<img src="' + img + '" class="img-circle img-xs" style="width:24px;height:24px;" onerror="this.src=\'' + ctx + 'img/profile.jpg\'">';
+                        return '<img src="' + img + '" class="img-circle" style="width:30px;height:30px;border:1px solid #ddd;" onerror="this.src=\'' + ctx + 'img/profile.jpg\'">';
                     }
                 }, {
                     field: 'username',
                     title: '用户名',
-                    width: 100,
-                    sortable: true
+                    sortable: true,
+                    formatter: function (value) {
+                        return '<span class="text-navy" style="font-weight:600">' + value + '</span>';
+                    }
                 }, {
                     field: 'nickname',
                     title: '昵称',
-                    width: 100,
-                    formatter: function(value) {
-                        return value || '-';
-                    }
-                }, {
-                    field: 'realName',
-                    title: '真实姓名',
-                    width: 80,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return value || '-';
                     }
                 }, {
                     field: 'mobile',
                     title: '手机号',
-                    width: 110,
-                    formatter: function(value) {
+                    width: 120,
+                    formatter: function (value) {
                         return value || '-';
-                    }
-                }, {
-                    field: 'email',
-                    title: '邮箱',
-                    width: 140,
-                    formatter: function(value) {
-                        if (!value) return '-';
-                        if (value.length > 20) {
-                            return '<span title="' + value + '">' + value.substring(0, 20) + '...</span>';
-                        }
-                        return value;
                     }
                 }, {
                     field: 'sex',
                     title: '性别',
                     align: 'center',
-                    width: 50,
-                    formatter: function(value) {
-                        if (value == 0) return '<span class="im-badge im-badge-primary">男</span>';
-                        if (value == 1) return '<span class="im-badge im-badge-danger">女</span>';
-                        return '<span class="im-badge im-badge-info">未知</span>';
+                    formatter: function (value) {
+                        if (value == 0) return '<span class="label label-primary">男</span>';
+                        if (value == 1) return '<span class="label label-danger">女</span>';
+                        return '<span class="label label-default">未知</span>';
                     }
                 }, {
                     field: 'status',
                     title: '状态',
                     align: 'center',
-                    width: 60,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (value == 1) {
-                            return '<span class="im-badge im-badge-success">正常</span>';
+                            return '<span class="label label-success">正常</span>';
                         } else {
-                            return '<span class="im-badge im-badge-danger">停用</span>';
+                            return '<span class="label label-danger">停用</span>';
                         }
                     }
                 }, {
                     field: 'isOnline',
                     title: '在线',
                     align: 'center',
-                    width: 60,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (value == 1) {
-                            return '<span class="im-badge im-badge-success">在线</span>';
+                            return '<span class="badge badge-primary">在线</span>';
                         } else {
-                            return '<span class="im-badge im-badge-info">离线</span>';
+                            return '<span class="badge badge-default">离线</span>';
                         }
-                    }
-                }, {
-                    field: 'deptName',
-                    title: '部门',
-                    width: 100,
-                    formatter: function(value) {
-                        return value || '-';
-                    }
-                }, {
-                    field: 'lastLoginTime',
-                    title: '最后登录',
-                    width: 140,
-                    sortable: true,
-                    formatter: function(value) {
-                        return value || '-';
                     }
                 }, {
                     field: 'createTime',
                     title: '注册时间',
-                    width: 140,
+                    width: 160,
                     sortable: true
-                }, {
-                    field: 'updateTime',
-                    title: '更新时间',
-                    width: 140,
-                    sortable: true,
-                    visible: false
-                }, {
-                    field: 'remark',
-                    title: '备注',
-                    width: 100,
-                    formatter: function(value) {
-                        if (!value) return '-';
-                        if (value.length > 15) {
-                            return '<span title="' + value + '">' + value.substring(0, 15) + '...</span>';
-                        }
-                        return value;
-                    }
                 }, {
                     title: '操作',
                     align: 'center',
-                    width: 180,
-                    class: 'action-cell',
-                    formatter: function(value, row, index) {
+                    width: 240,
+                    formatter: function (value, row, index) {
                         var actions = [];
-                        actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="viewDetail(\'' + row.id + '\')" title="查看"><i class="fa fa-eye"></i></a> ');
-                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')" title="编辑"><i class="fa fa-edit"></i></a> ');
-                        actions.push('<a class="btn btn-warning btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="resetPwd(\'' + row.id + '\')" title="重置密码"><i class="fa fa-key"></i></a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')" title="删除"><i class="fa fa-trash"></i></a>');
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewDetail(\'' + row.id + '\')"><i class="fa fa-eye"></i> 详情</a> ');
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i> 修改</a> ');
+                        actions.push('<a class="btn btn-warning btn-xs ' + resetPwdFlag + '" href="javascript:void(0)" onclick="resetPwd(\'' + row.id + '\')"><i class="fa fa-key"></i> 重置</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-trash"></i> 删除</a>');
                         return actions.join('');
                     }
                 }]
@@ -337,7 +324,7 @@
 
         /* 加载统计数据 */
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
+            $.get(prefix + "/statistics", function (result) {
                 if (result.code == 0) {
                     var stats = result.data;
                     animateNumber('totalCount', stats.totalCount || 0);
@@ -359,17 +346,12 @@
             var stepDuration = duration / steps;
             var currentStep = 0;
 
-            $element.addClass('animate');
-
-            var timer = setInterval(function() {
+            var timer = setInterval(function () {
                 currentStep++;
                 currentValue = Math.round(currentValue + stepValue);
                 if (currentStep >= steps) {
                     currentValue = targetValue;
                     clearInterval(timer);
-                    setTimeout(function() {
-                        $element.removeClass('animate');
-                    }, 200);
                 }
                 $element.text(currentValue);
             }, stepDuration);
@@ -377,9 +359,7 @@
 
         /* 重置筛选 */
         function filterReset() {
-            $('select[name="status"]').val('');
-            $('select[name="sex"]').val('');
-            $('select[name="isOnline"]').val('');
+            $.form.reset();
             $.table.search();
         }
 
@@ -389,12 +369,18 @@
             $.table.search();
         }
 
+        /* 按在线状态筛选 */
+        function filterByOnline(online) {
+            $('select[name="isOnline"]').val(online);
+            $.table.search();
+        }
+
         /* 按今日筛选 */
         function filterByToday() {
             var today = new Date();
             var todayStr = today.getFullYear() + '-' +
-                          String(today.getMonth() + 1).padStart(2, '0') + '-' +
-                          String(today.getDate()).padStart(2, '0');
+                String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                String(today.getDate()).padStart(2, '0');
             $('input[name="params[beginTime]"]').val(todayStr + ' 00:00:00');
             $('input[name="params[endTime]"]').val(todayStr + ' 23:59:59');
             $.table.search();
@@ -402,76 +388,23 @@
 
         /* 查看详情 */
         function viewDetail(id) {
-            $.get(prefix + "/detail/" + id, function(result) {
+            $.get(prefix + "/info/" + id, function (result) {
                 if (result.code == 0) {
                     var data = result.data;
-                    var html = '<div class="row">';
-                    html += '<div class="col-sm-6"><label class="control-label">用户ID：</label>' + (data.id || '-') + '</div>';
-                    html += '<div class="col-sm-6"><label class="control-label">用户名：</label>' + (data.username || '-') + '</div>';
-                    html += '<div class="col-sm-6"><label class="control-label">昵称：</label>' + (data.nickname || '-') + '</div>';
-                    html += '<div class="col-sm-6"><label class="control-label">真实姓名：</label>' + (data.realName || '-') + '</div>';
-                    html += '<div class="col-sm-6"><label class="control-label">手机号：</label>' + (data.mobile || '-') + '</div>';
-                    html += '<div class="col-sm-6"><label class="control-label">邮箱：</label>' + (data.email || '-') + '</div>';
-                    html += '<div class="col-sm-6"><label class="control-label">性别：</label>' + (data.sex == 0 ? '男' : data.sex == 1 ? '女' : '未知') + '</div>';
-                    html += '<div class="col-sm-6"><label class="control-label">状态：</label>' + (data.status == 1 ? '正常' : '停用') + '</div>';
-                    html += '<div class="col-sm-6"><label class="control-label">部门：</label>' + (data.deptName || '-') + '</div>';
-                    html += '<div class="col-sm-6"><label class="control-label">注册时间：</label>' + (data.createTime || '-') + '</div>';
-                    html += '<div class="col-sm-6"><label class="control-label">最后登录：</label>' + (data.lastLoginTime || '-') + '</div>';
-                    html += '<div class="col-sm-12"><label class="control-label">备注：</label>' + (data.remark || '-') + '</div>';
-                    html += '</div>';
-                    $.modal.openOptions({
+                    var html = '<table class="table table-bordered">';
+                    html += '<tr><th width="120">用户名</th><td>' + (data.username || '-') + '</td><th width="120">昵称</th><td>' + (data.nickname || '-') + '</td></tr>';
+                    html += '<tr><th>手机号</th><td>' + (data.mobile || '-') + '</td><th>邮箱</th><td>' + (data.email || '-') + '</td></tr>';
+                    html += '<tr><th>性别</th><td>' + (data.sex == 0 ? '男' : data.sex == 1 ? '女' : '未知') + '</td><th>状态</th><td>' + (data.status == 1 ? '正常' : '停用') + '</td></tr>';
+                    html += '<tr><th>在线状态</th><td>' + (data.isOnline == 1 ? '在线' : '离线') + '</td><th>注册时间</th><td>' + (data.createTime || '-') + '</td></tr>';
+                    html += '<tr><th>最后登录</th><td>' + (data.lastLoginTime || '-') + '</td><th>备注</th><td>' + (data.remark || '-') + '</td></tr>';
+                    html += '</table>';
+                    top.layer.open({
+                        type: 1,
                         title: '用户详情',
-                        width: "700",
-                        btn: ['关闭'],
+                        area: ['700px', '450px'],
                         content: html
                     });
                 }
-            });
-        }
-
-        /* 批量修改 */
-        function batchEdit() {
-            var rows = $.table.selectFirstColumns();
-            if (rows.length == 0) {
-                $.modal.alertWarning("请至少选择一条记录");
-                return;
-            }
-            $.modal.open("批量修改用户", prefix + "/batchEdit", 800, 500);
-        }
-
-        /* 批量启用 */
-        function batchEnable() {
-            var rows = $.table.selectFirstColumns();
-            if (rows.length == 0) {
-                $.modal.alertWarning("请至少选择一条记录");
-                return;
-            }
-            $.modal.confirm("确定要批量启用选中的 " + rows.length + " 个用户吗？", function() {
-                $.operate.post(prefix + "/batchUpdateStatus", { userIds: rows.join(), status: 1 }, function(result) {
-                    if (result.code == 0) {
-                        $.modal.msgSuccess("批量启用成功");
-                        $.table.refresh();
-                        loadStatistics();
-                    }
-                });
-            });
-        }
-
-        /* 批量停用 */
-        function batchDisable() {
-            var rows = $.table.selectFirstColumns();
-            if (rows.length == 0) {
-                $.modal.alertWarning("请至少选择一条记录");
-                return;
-            }
-            $.modal.confirm("确定要批量停用选中的 " + rows.length + " 个用户吗？", function() {
-                $.operate.post(prefix + "/batchUpdateStatus", { userIds: rows.join(), status: 0 }, function(result) {
-                    if (result.code == 0) {
-                        $.modal.msgSuccess("批量停用成功");
-                        $.table.refresh();
-                        loadStatistics();
-                    }
-                });
             });
         }
 
@@ -482,4 +415,5 @@
         }
     </script>
 </body>
+
 </html>

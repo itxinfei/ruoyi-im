@@ -1,157 +1,127 @@
 ﻿<!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head>
     <th:block th:include="include :: header('审计日志')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
-    <style>
-        body { padding: 10px !important; }
-        .gray-bg { background-color: #f3f3f4 !important; }
-    </style>
 </head>
-<body class="gray-bg">
-    <div class="container-div im-page">
-        <!-- 统计卡片区域 -->
-        <div class="row stat-card-section">
 
-            <div class="col-sm-12">
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterReset()">
+                        <div class="ibox float-e-margins" onclick="filterReset()" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">总</span>
-                                <h5 style="color: #fff; margin: 0;">日志总数</h5>
+                                <span class="label label-success pull-right">总</span>
+                                <h5>日志总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="totalCount">0</div>
-                                <div class="stat-label">系统日志总量</div>
-                                <i class="fa fa-file-text stat-icon"></i>
+                                <h2 class="no-margins text-success" id="totalCount">0</h2>
+                                <small>系统历史记录总量</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterByToday()">
+                        <div class="ibox float-e-margins" onclick="filterByToday()" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">今</span>
-                                <h5 style="color: #fff; margin: 0;">今日日志</h5>
+                                <span class="label label-info pull-right">今</span>
+                                <h5>今日日志</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="todayCount">0</div>
-                                <div class="stat-label">今日产生日志</div>
-                                <i class="fa fa-calendar stat-icon"></i>
+                                <h2 class="no-margins text-info" id="todayCount">0</h2>
+                                <small>今日产生操作记录</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByResult('')">
+                        <div class="ibox float-e-margins" onclick="filterByResult('')" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">类</span>
-                                <h5 style="color: #fff; margin: 0;">操作类型</h5>
+                                <span class="label label-primary pull-right">类</span>
+                                <h5>操作类型</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="operationCount">0</div>
-                                <div class="stat-label">操作类型数量</div>
-                                <i class="fa fa-tags stat-icon"></i>
+                                <h2 class="no-margins text-navy" id="operationCount">0</h2>
+                                <small>涉及业务操作类型</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-danger" onclick="filterByResult('FAILED')">
+                        <div class="ibox float-e-margins" onclick="filterByResult('FAILED')" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">异</span>
-                                <h5 style="color: #fff; margin: 0;">异常操作</h5>
+                                <span class="label label-danger pull-right">异</span>
+                                <h5>异常日志</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="errorCount">0</div>
-                                <div class="stat-label">失败操作记录</div>
-                                <i class="fa fa-exclamation-triangle stat-icon"></i>
+                                <h2 class="no-margins text-danger" id="errorCount">0</h2>
+                                <small>操作失败/报错记录</small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 搜索区域 -->
-        <div class="row search-section">
-            <div class="col-sm-12">
-                <div class="im-panel">
-                    <div class="im-panel-body">
-                        <form id="auditLog-form">
-                            <div class="select-list">
-                                <ul>
-                                    <li>
-                                        <label class="search-label label-2">用户</label><input type="text" name="username" placeholder="请输入"/>
-                                    </li>
-                                    <li>
-                                        <label class="search-label label-4">操作类型</label><select name="operationType">
-                                            <option value="">全部</option>
-                                            <option value="LOGIN">登录</option>
-                                            <option value="LOGOUT">登出</option>
-                                            <option value="SEND_MESSAGE">发送消息</option>
-                                            <option value="DELETE_MESSAGE">删除消息</option>
-                                            <option value="CREATE_GROUP">创建群组</option>
-                                            <option value="ADD_FRIEND">添加好友</option>
-                                            <option value="UPLOAD_FILE">上传文件</option>
-                                        </select>
-                                    </li>
-                                    <li>
-                                        <label class="search-label label-4">目标类型</label><select name="targetType">
-                                            <option value="">全部</option>
-                                            <option value="USER">用户</option>
-                                            <option value="MESSAGE">消息</option>
-                                            <option value="GROUP">群组</option>
-                                            <option value="CONVERSATION">会话</option>
-                                            <option value="FRIEND">好友</option>
-                                            <option value="FILE">文件</option>
-                                        </select>
-                                    </li>
-                                    <li>
-                                        <label class="search-label label-4">操作结果</label><select name="operationResult">
-                                            <option value="">全部</option>
-                                            <option value="SUCCESS">成功</option>
-                                            <option value="FAILED">失败</option>
-                                        </select>
-                                    </li>
-                                    <li class="select-time">
-                                        <label class="search-label label-4">操作时间</label>
-                                        <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
-                                        <span>-</span>
-                                        <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
-                                    </li>
-                                    <li>
-                                        <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                        <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </form>
+            <!-- 搜索区域 -->
+            <div class="col-sm-12 search-collapse">
+                <form id="auditLog-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                操作用户：<input type="text" name="username" placeholder="请输入" />
+                            </li>
+                            <li>
+                                操作类型：<select name="operationType">
+                                    <option value="">全部</option>
+                                    <option value="LOGIN">登录</option>
+                                    <option value="LOGOUT">登出</option>
+                                    <option value="SEND_MESSAGE">发送消息</option>
+                                    <option value="DELETE_MESSAGE">删除消息</option>
+                                    <option value="CREATE_GROUP">创建群组</option>
+                                    <option value="ADD_FRIEND">添加好友</option>
+                                    <option value="UPLOAD_FILE">上传文件</option>
+                                </select>
+                            </li>
+                            <li>
+                                结果：<select name="operationResult">
+                                    <option value="">全部</option>
+                                    <option value="SUCCESS">成功</option>
+                                    <option value="FAILED">失败</option>
+                                </select>
+                            </li>
+                            <li class="select-time">
+                                <label>操作时间：</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始"
+                                    name="params[beginTime]" />
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束"
+                                    name="params[endTime]" />
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                        class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                        class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
                     </div>
+                </form>
+            </div>
+
+            <!-- 工具栏 + 表格 -->
+            <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-warning" onclick="showCleanModal()" shiro:hasPermission="im:auditLog:remove">
+                        <i class="fa fa-trash"></i> 清理日志
+                    </a>
+                    <a class="btn btn-info" onclick="$.table.exportExcel()" shiro:hasPermission="im:auditLog:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
                 </div>
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
-
-        <!-- 表格区域 -->
-        <div class="row table-section">
-            <div class="col-sm-12">
-                <div class="im-table-container">
-
-                    <!-- 工具栏 -->
-                    <div class="im-toolbar" id="toolbar" role="group">
-                        <a class="btn btn-warning" onclick="showCleanModal()" shiro:hasPermission="im:auditLog:remove">
-                            <i class="fa fa-trash"></i> 清理旧日志
-                        </a>
-                        <a class="btn btn-primary" onclick="$.table.exportExcel()" shiro:hasPermission="im:auditLog:export">
-                            <i class="fa fa-download"></i> 导出
-                        </a>
-                    </div>
-
-                    <!-- 数据表格 -->
-                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
-                </div>
-            </div>
-        </div>
+    </div>
     </div>
 
     <!-- 清理旧日志弹窗 -->
@@ -187,10 +157,10 @@
 
     <th:block th:include="include :: footer" />
     <script th:inline="javascript">
-        var exportFlag = [[${@permission.hasPermi('im:auditLog:export')}]];
+        var exportFlag = [[${@permission.hasPermi('im:auditLog:export') }]];
         var prefix = ctx + "im/auditLog";
 
-        $(function() {
+        $(function () {
             var options = {
                 url: prefix + "/list",
                 exportUrl: prefix + "/export",
@@ -208,7 +178,7 @@
                     field: 'username',
                     title: '操作用户',
                     sortable: true,
-                    formatter: function(value, row) {
+                    formatter: function (value, row) {
                         var name = value || '-';
                         if (row.nickname) {
                             return name + ' (' + row.nickname + ')';
@@ -220,7 +190,7 @@
                     title: '操作类型',
                     align: 'center',
                     width: 140,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         var typeMap = {
                             'LOGIN': '<span class="label label-primary">登录</span>',
                             'LOGOUT': '<span class="label label-default">登出</span>',
@@ -241,7 +211,7 @@
                     title: '目标类型',
                     align: 'center',
                     width: 90,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (!value) return '-';
                         var typeMap = {
                             'USER': '<span class="label label-primary">用户</span>',
@@ -257,7 +227,7 @@
                     field: 'targetId',
                     title: '目标ID',
                     width: 90,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return value || '-';
                     }
                 }, {
@@ -265,7 +235,7 @@
                     title: '结果',
                     align: 'center',
                     width: 90,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (value === 'SUCCESS') {
                             return '<span class="label label-success"><i class="fa fa-check"></i> 成功</span>';
                         }
@@ -275,7 +245,7 @@
                     field: 'errorMessage',
                     title: '错误信息',
                     width: 200,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (!value) return '-';
                         if (value.length > 30) {
                             return $.table.tooltip(value, 30);
@@ -286,7 +256,7 @@
                     field: 'ipAddress',
                     title: 'IP地址',
                     width: 130,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return '<code>' + (value || '-') + '</code>';
                     }
                 }, {
@@ -298,7 +268,7 @@
                     title: '操作',
                     align: 'center',
                     width: 80,
-                    formatter: function(value, row) {
+                    formatter: function (value, row) {
                         return '<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="detail(' + row.id + ')"><i class="fa fa-search"></i>详情</a>';
                     }
                 }]
@@ -308,7 +278,7 @@
         });
         /* 加载统计数据 */
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
+            $.get(prefix + "/statistics", function (result) {
                 if (result.code == 0) {
                     var stats = result.data;
                     animateNumber('totalCount', stats.totalCount || 0);
@@ -332,13 +302,13 @@
 
             $element.addClass('animate');
 
-            var timer = setInterval(function() {
+            var timer = setInterval(function () {
                 currentStep++;
                 currentValue = Math.round(currentValue + stepValue);
                 if (currentStep >= steps) {
                     currentValue = targetValue;
                     clearInterval(timer);
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $element.removeClass('animate');
                     }, 200);
                 }
@@ -368,8 +338,8 @@
         function filterByToday() {
             var today = new Date();
             var todayStr = today.getFullYear() + '-' +
-                          String(today.getMonth() + 1).padStart(2, '0') + '-' +
-                          String(today.getDate()).padStart(2, '0');
+                String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                String(today.getDate()).padStart(2, '0');
             $('input[name="params[beginTime]"]').val(todayStr + ' 00:00:00');
             $('input[name="params[endTime]"]').val(todayStr + ' 23:59:59');
             $.table.search();
@@ -383,12 +353,12 @@
         function doClean() {
             var days = $("#cleanDays").val();
             $("#cleanModal").modal('hide');
-            $.modal.confirm('确定要清理 ' + days + ' 天前的日志记录吗？', function() {
+            $.modal.confirm('确定要清理 ' + days + ' 天前的日志记录吗？', function () {
                 $.ajax({
                     url: prefix + "/clean",
                     type: 'post',
                     data: { days: days },
-                    success: function(result) {
+                    success: function (result) {
                         if (result.code == 0) {
                             $.modal.msgSuccess("清理完成");
                             $.table.refresh();
@@ -396,7 +366,7 @@
                             $.modal.alertError(result.msg || "清理失败");
                         }
                     },
-                    error: function() {
+                    error: function () {
                         $.modal.alertError("清理失败，请稍后重试");
                     }
                 });
@@ -407,7 +377,7 @@
             $.ajax({
                 url: prefix + "/" + id,
                 type: 'get',
-                success: function(result) {
+                success: function (result) {
                     if (result.code == 0) {
                         var data = result.data;
                         var html = '<table class="table table-bordered">';
@@ -434,4 +404,5 @@
         }
     </script>
 </body>
+
 </html>

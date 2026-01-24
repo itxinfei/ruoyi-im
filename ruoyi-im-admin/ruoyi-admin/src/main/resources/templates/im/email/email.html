@@ -1,71 +1,78 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head>
     <th:block th:include="include :: header('邮件管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
     <style>
-        .select-list ul li { margin: 0px 10px 5px 0px !important; }
-        .select-list ul li input { width: 140px !important; }
-        .select-list ul li select { width: 80px !important; }
-        .time-input { width: 100px !important; }
+        .select-list ul li {
+            margin: 0px 10px 5px 0px !important;
+        }
+
+        .select-list ul li input {
+            width: 140px !important;
+        }
+
+        .select-list ul li select {
+            width: 80px !important;
+        }
+
+        .time-input {
+            width: 100px !important;
+        }
     </style>
 </head>
+
 <body class="gray-bg">
-    <div class="container-div im-page">
+    <div class="container-div">
         <div class="row">
-            <!-- 统计卡片区域 - 增强样式 -->
+            <!-- 统计卡片区域 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
+                        <div class="ibox float-e-margins" onclick="filterReset()" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">总</span>
-                                <h5 style="color: #fff; margin: 0;">邮件总数</h5>
+                                <span class="label label-success pull-right">总</span>
+                                <h5>邮件总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="totalCount">0</div>
-                                <div class="stat-label">全部邮件</div>
-                                <i class="fa fa-envelope stat-icon"></i>
+                                <h2 class="no-margins text-success" id="totalCount">0</h2>
+                                <small>全部邮件记录</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByFolder('SENT')">
+                        <div class="ibox float-e-margins" onclick="filterByFolder('SENT')" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">发</span>
-                                <h5 style="color: #fff; margin: 0;">已发送</h5>
+                                <span class="label label-info pull-right">发</span>
+                                <h5>已发送</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="sentCount">0</div>
-                                <div class="stat-label">已发送邮件</div>
-                                <i class="fa fa-send stat-icon"></i>
+                                <h2 class="no-margins text-info" id="sentCount">0</h2>
+                                <small>成功投递邮件数</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByFolder('INBOX')">
+                        <div class="ibox float-e-margins" onclick="filterByFolder('INBOX')" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">收</span>
-                                <h5 style="color: #fff; margin: 0;">已接收</h5>
+                                <span class="label label-primary pull-right">收</span>
+                                <h5>已接收</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="receivedCount">0</div>
-                                <div class="stat-label">接收邮件</div>
-                                <i class="fa fa-inbox stat-icon"></i>
+                                <h2 class="no-margins text-navy" id="receivedCount">0</h2>
+                                <small>接收邮件记录</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByReadStatus('0')">
+                        <div class="ibox float-e-margins" onclick="filterByReadStatus('0')" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">未</span>
-                                <h5 style="color: #fff; margin: 0;">未读邮件</h5>
+                                <span class="label label-warning pull-right">未</span>
+                                <h5>未读邮件</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="unreadCount">0</div>
-                                <div class="stat-label">未读邮件</div>
-                                <i class="fa fa-envelope-o stat-icon"></i>
+                                <h2 class="no-margins text-warning" id="unreadCount">0</h2>
+                                <small>当前未处理邮件</small>
                             </div>
                         </div>
                     </div>
@@ -77,13 +84,13 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="search-label label-4">邮件主题</label><input type="text" name="subject" placeholder="请输入"/>
+                                邮件主题：<input type="text" name="subject" placeholder="请输入" />
                             </li>
                             <li>
-                                <label class="search-label label-2">发件人</label><input type="text" name="senderEmail" placeholder="请输入"/>
+                                发件人：<input type="text" name="senderEmail" placeholder="请输入" />
                             </li>
                             <li>
-                                <label class="search-label label-2">文件夹</label><select name="folder">
+                                文件夹：<select name="folder">
                                     <option value="">全部</option>
                                     <option value="INBOX">收件箱</option>
                                     <option value="SENT">已发送</option>
@@ -92,21 +99,25 @@
                                 </select>
                             </li>
                             <li>
-                                <label class="search-label label-2">状态</label><select name="isRead">
+                                状态：<select name="isRead">
                                     <option value="">全部</option>
                                     <option value="0">未读</option>
                                     <option value="1">已读</option>
                                 </select>
                             </li>
                             <li class="select-time">
-                                <label class="search-label label-4">接收时间</label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
+                                <label>接收时间：</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始"
+                                    name="params[beginTime]" />
                                 <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束"
+                                    name="params[endTime]" />
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                        class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                        class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
@@ -114,32 +125,36 @@
             </div>
 
             <div class="col-sm-12 select-table table-striped">
-                <div class="btn-group-sm" id="toolbar">
+                <div class="btn-group-sm" id="toolbar" role="group">
                     <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:email:add">
                         <i class="fa fa-plus"></i> 新增
                     </a>
-                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:email:edit">
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()"
+                        shiro:hasPermission="im:email:edit">
                         <i class="fa fa-edit"></i> 修改
                     </a>
-                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:email:remove">
-                        <i class="fa fa-remove"></i> 删除
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                        shiro:hasPermission="im:email:remove">
+                        <i class="fa fa-trash"></i> 删除
                     </a>
-                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:email:export">
+                    <a class="btn btn-info" onclick="$.table.exportExcel()" shiro:hasPermission="im:email:export">
                         <i class="fa fa-download"></i> 导出
                     </a>
                 </div>
-                <table id="bootstrap-table"></table>
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
+    </div>
+    </div>
     </div>
 
     <th:block th:include="include :: footer" />
     <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('im:email:edit')}]];
-        var removeFlag = [[${@permission.hasPermi('im:email:remove')}]];
+        var editFlag = [[${@permission.hasPermi('im:email:edit') }]];
+        var removeFlag = [[${@permission.hasPermi('im:email:remove') }]];
         var prefix = ctx + "im/email";
 
-        $(function() {
+        $(function () {
             var options = {
                 url: prefix + "/list",
                 toolbar: "toolbar",
@@ -177,14 +192,14 @@
                     field: 'senderEmail',
                     title: '发送者',
                     width: '180',
-                    formatter: function(value, row, index) {
+                    formatter: function (value, row, index) {
                         return value || '<span class="text-muted">系统通知</span>';
                     }
                 }, {
                     field: 'subject',
                     title: '主题',
                     width: '250',
-                    formatter: function(value, row, index) {
+                    formatter: function (value, row, index) {
                         var style = row.isRead == 0 ? 'font-weight:bold;' : '';
                         var attachmentIcon = row.hasAttachment ? '<i class="fa fa-paperclip text-warning"></i> ' : '';
                         return attachmentIcon + '<span style="' + style + '">' + (value || '(无主题)') + '</span>';
@@ -194,7 +209,7 @@
                     title: '文件夹',
                     align: 'center',
                     width: '90',
-                    formatter: function(value, row, index) {
+                    formatter: function (value, row, index) {
                         if (value === 'INBOX') { return '<span class="badge badge-primary">收件箱</span>'; }
                         if (value === 'SENT') { return '<span class="badge badge-success">已发送</span>'; }
                         if (value === 'DRAFTS') { return '<span class="badge badge-default">草稿箱</span>'; }
@@ -206,7 +221,7 @@
                     title: '状态',
                     align: 'center',
                     width: '70',
-                    formatter: function(value, row, index) {
+                    formatter: function (value, row, index) {
                         if (value == 0) return '<span class="badge badge-info">未读</span>';
                         return '<span class="badge badge-default">已读</span>';
                     }
@@ -215,7 +230,7 @@
                     title: '星标',
                     align: 'center',
                     width: '60',
-                    formatter: function(value, row, index) {
+                    formatter: function (value, row, index) {
                         if (value == 1) return '<i class="fa fa-star text-warning"></i>';
                         return '<i class="fa fa-star-o text-gray"></i>';
                     }
@@ -228,14 +243,14 @@
                     title: '操作',
                     align: 'center',
                     width: '120',
-                    formatter: function(value, row, index) {
+                    formatter: function (value, row, index) {
                         var actions = [];
                         actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(' + row.id + ')"><i class="fa fa-edit"></i>编辑</a> ');
                         actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
                 }],
-                responseHandler: function(res) {
+                responseHandler: function (res) {
                     $.modal.closeLoading();
                     if (res.code === 0) {
                         return { rows: res.rows, total: res.total };
@@ -250,7 +265,7 @@
         });
 
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
+            $.get(prefix + "/statistics", function (result) {
                 if (result.code === 0) {
                     var data = result.data || {};
                     animateNumber('totalCount', data.totalCount || 0);
@@ -274,13 +289,13 @@
 
             $element.addClass('animate');
 
-            var timer = setInterval(function() {
+            var timer = setInterval(function () {
                 currentStep++;
                 currentValue = Math.round(currentValue + stepValue);
                 if (currentStep >= steps) {
                     currentValue = targetValue;
                     clearInterval(timer);
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $element.removeClass('animate');
                     }, 200);
                 }
@@ -315,4 +330,5 @@
         }
     </script>
 </body>
+
 </html>

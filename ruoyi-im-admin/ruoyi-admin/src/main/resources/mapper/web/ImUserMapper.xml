@@ -212,8 +212,13 @@
     <!-- 检查用户是否有关联数据 -->
     <select id="checkUserRelations" resultType="java.lang.Integer">
         select count(*) from (
-            select 1 from im_conversation_member where user_id = #{userId}
-            limit 1
+            select 1 from im_conversation_member where user_id = #{userId} limit 1
+            UNION ALL
+            select 1 from im_group_member where user_id = #{userId} and is_deleted = 0 limit 1
+            UNION ALL
+            select 1 from im_friend where user_id = #{userId} and is_deleted = 0 limit 1
+            UNION ALL
+            select 1 from im_friend where friend_id = #{userId} and is_deleted = 0 limit 1
         ) as t
     </select>
 </mapper>

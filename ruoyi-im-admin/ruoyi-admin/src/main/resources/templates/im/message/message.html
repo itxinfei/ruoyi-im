@@ -1,162 +1,146 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head>
     <th:block th:include="include :: header('消息管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
-    <style>
-        body { padding: 10px !important; }
-        .gray-bg { background-color: #f3f3f4 !important; }
-    </style>
 </head>
+
 <body class="gray-bg">
-    <div class="container-div im-page">
-        <!-- 统计卡片区域 -->
-        <div class="row stat-card-section">
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterReset()">
-                    <div class="ibox-title">
-                        <span class="stat-badge pull-right">总</span>
-                        <h5 style="color: #fff; margin: 0;">消息总数</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="stat-number" id="totalCount">0</div>
-                        <div class="stat-label">系统消息总量</div>
-                        <i class="fa fa-comments stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins im-stat-card stat-card-info" onclick="filterByToday()">
-                    <div class="ibox-title">
-                        <span class="stat-badge pull-right">日</span>
-                        <h5 style="color: #fff; margin: 0;">今日消息</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="stat-number" id="todayCount">0</div>
-                        <div class="stat-label">今日发送消息</div>
-                        <i class="fa fa-calendar stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterByType('TEXT')">
-                    <div class="ibox-title">
-                        <span class="stat-badge pull-right">文</span>
-                        <h5 style="color: #fff; margin: 0;">文本消息</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="stat-number" id="textCount">0</div>
-                        <div class="stat-label">文本类型消息</div>
-                        <i class="fa fa-font stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterBySensitive()">
-                    <div class="ibox-title">
-                        <span class="stat-badge pull-right">警</span>
-                        <h5 style="color: #fff; margin: 0;">敏感消息</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="stat-number" id="sensitiveCount">0</div>
-                        <div class="stat-label">敏感级别消息</div>
-                        <i class="fa fa-exclamation-triangle stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 搜索表单 -->
-        <div class="row search-section">
-            <div class="col-sm-12">
-                <div class="im-panel">
-                    <form id="message-form">
-                        <div class="select-list">
-                            <ul>
-                                <li>
-                                    <label class="search-label label-2">发件</label><input type="text" name="senderId" placeholder="用户ID"/>
-                                </li>
-                                <li>
-                                    <label class="search-label label-2">收件</label><input type="text" name="receiverId" placeholder="用户ID"/>
-                                </li>
-                                <li>
-                                    <label class="search-label label-2">会话</label><input type="text" name="conversationId" placeholder="会话ID"/>
-                                </li>
-                                <li>
-                                    <label class="search-label label-2">类型</label><select name="messageType">
-                                        <option value="">全部</option>
-                                        <option value="TEXT">文本</option>
-                                        <option value="IMAGE">图片</option>
-                                        <option value="FILE">文件</option>
-                                        <option value="VOICE">语音</option>
-                                        <option value="VIDEO">视频</option>
-                                    </select>
-                                </li>
-                                <li>
-                                    <label class="search-label label-2">状态</label><select name="sendStatus">
-                                        <option value="">全部</option>
-                                        <option value="SENT">发送</option>
-                                        <option value="DELIVERED">送达</option>
-                                        <option value="FAILED">失败</option>
-                                    </select>
-                                </li>
-                                <li>
-                                    <label class="search-label label-2">敏感</label><select name="sensitiveLevel">
-                                        <option value="">全部</option>
-                                        <option value="NORMAL">普通</option>
-                                        <option value="SENSITIVE">敏感</option>
-                                        <option value="HIGH">高级</option>
-                                    </select>
-                                </li>
-                                <li class="select-time">
-                                    <label class="search-label label-4">发送时间</label>
-                                    <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
-                                    <span>-</span>
-                                    <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
-                                </li>
-                                <li>
-                                    <a class="btn btn-primary btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                    <a class="btn btn-default btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                                </li>
-                            </ul>
+    <div class="container-div">
+        <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins" onclick="filterReset()" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">总</span>
+                                <h5>消息总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="totalCount">0</h2>
+                                <small>系统消息总量</small>
+                            </div>
                         </div>
-                    </form>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins" onclick="filterByToday()" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-info pull-right">日</span>
+                                <h5>今日消息</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-info" id="todayCount">0</h2>
+                                <small>今日发送消息</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins" onclick="filterByType('TEXT')" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">文</span>
+                                <h5>文本消息</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="textCount">0</h2>
+                                <small>文本类型消息</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins" onclick="filterBySensitive()" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">警</span>
+                                <h5>敏感消息</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="sensitiveCount">0</h2>
+                                <small>敏感级别消息</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 工具栏 + 表格 -->
-        <div class="row table-section">
-            <div class="col-sm-12">
-                <!-- 批量操作按钮 -->
-                <div class="im-toolbar">
-                    <div class="im-batch-actions">
-                        <a class="btn btn-warning" onclick="batchRevoke()" shiro:hasPermission="im:message:revoke">
-                            <i class="fa fa-undo"></i> 批量撤回
-                        </a>
-                        <a class="btn btn-danger" onclick="$.operate.removeAll()" shiro:hasPermission="im:message:remove">
-                            <i class="fa fa-trash"></i> 批量删除
-                        </a>
-                        <a class="btn btn-info" onclick="batchMarkSensitive()" shiro:hasPermission="im:message:edit">
-                            <i class="fa fa-flag"></i> 标记敏感
-                        </a>
+            <!-- 搜索表单 -->
+            <div class="col-sm-12 search-collapse">
+                <form id="message-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                发件人：<input type="text" name="senderId" placeholder="用户ID" />
+                            </li>
+                            <li>
+                                收件人：<input type="text" name="receiverId" placeholder="用户ID" />
+                            </li>
+                            <li>
+                                会话：<input type="text" name="conversationId" placeholder="会话ID" />
+                            </li>
+                            <li>
+                                类型：<select name="messageType">
+                                    <option value="">全部</option>
+                                    <option value="TEXT">文本</option>
+                                    <option value="IMAGE">图片</option>
+                                    <option value="FILE">文件</option>
+                                    <option value="VOICE">语音</option>
+                                    <option value="VIDEO">视频</option>
+                                </select>
+                            </li>
+                            <li>
+                                状态：<select name="sendStatus">
+                                    <option value="">全部</option>
+                                    <option value="SENT">发送</option>
+                                    <option value="DELIVERED">送达</option>
+                                    <option value="FAILED">失败</option>
+                                </select>
+                            </li>
+                            <li>
+                                敏感：<select name="sensitiveLevel">
+                                    <option value="">全部</option>
+                                    <option value="NORMAL">普通</option>
+                                    <option value="SENSITIVE">敏感</option>
+                                    <option value="HIGH">高级</option>
+                                </select>
+                            </li>
+                            <li class="select-time">
+                                <label>发送时间：</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始"
+                                    name="params[beginTime]" />
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束"
+                                    name="params[endTime]" />
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                        class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                        class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="pull-right">
-                        <a class="btn btn-default btn-sm" onclick="$.table.refresh()">
-                            <i class="fa fa-refresh"></i> 刷新
-                        </a>
-                        <a class="btn btn-default btn-sm" onclick="$.table.exportExcel()" shiro:hasPermission="im:message:export">
-                            <i class="fa fa-download"></i> 导出
-                        </a>
-                    </div>
-                </div>
+                </form>
+            </div>
 
-                <!-- 数据表格 -->
-                <div class="im-table-container">
-                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            <!-- 工具栏 + 表格 -->
+            <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-warning multiple disabled" onclick="batchRevoke()"
+                        shiro:hasPermission="im:message:revoke">
+                        <i class="fa fa-undo"></i> 撤回
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                        shiro:hasPermission="im:message:remove">
+                        <i class="fa fa-trash"></i> 删除
+                    </a>
+                    <a class="btn btn-info multiple disabled" onclick="batchMarkSensitive()"
+                        shiro:hasPermission="im:message:edit">
+                        <i class="fa fa-flag"></i> 敏感标记
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:message:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
                 </div>
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
@@ -166,7 +150,7 @@
     <script th:inline="javascript">
         var prefix = ctx + "im/message";
 
-        $(function() {
+        $(function () {
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -198,14 +182,14 @@
                     field: 'senderId',
                     title: '发送人',
                     width: 90,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return '<span class="im-badge im-badge-primary">#' + value + '</span>';
                     }
                 }, {
                     field: 'receiverId',
                     title: '接收人',
                     width: 90,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (!value) return '<span class="im-badge im-badge-info">群聊</span>';
                         return '<span class="im-badge im-badge-primary">#' + value + '</span>';
                     }
@@ -213,7 +197,7 @@
                     field: 'conversationId',
                     title: '会话ID',
                     width: 120,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (!value) return '-';
                         return '<span title="' + value + '">' + (value.length > 15 ? value.substring(0, 15) + '...' : value) + '</span>';
                     }
@@ -222,7 +206,7 @@
                     title: '类型',
                     width: 70,
                     align: 'center',
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (value === 'TEXT') return '<span class="im-badge im-badge-primary">文本</span>';
                         if (value === 'IMAGE') return '<span class="im-badge im-badge-success">图片</span>';
                         if (value === 'FILE') return '<span class="im-badge im-badge-warning">文件</span>';
@@ -233,7 +217,7 @@
                 }, {
                     field: 'content',
                     title: '内容',
-                    formatter: function(value, row) {
+                    formatter: function (value, row) {
                         if (row.messageType === 'TEXT') {
                             if (!value) return '-';
                             var display = value.length > 50 ? value.substring(0, 50) + '...' : value;
@@ -246,7 +230,7 @@
                     title: '敏感',
                     width: 70,
                     align: 'center',
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (value === 'SENSITIVE') return '<span class="im-badge im-badge-warning">敏感</span>';
                         if (value === 'HIGH') return '<span class="im-badge im-badge-danger">高级</span>';
                         return '<span class="im-badge im-badge-info">普通</span>';
@@ -256,7 +240,7 @@
                     title: '状态',
                     width: 70,
                     align: 'center',
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (value === 'SENT') return '<span class="im-badge im-badge-info">发送</span>';
                         if (value === 'DELIVERED') return '<span class="im-badge im-badge-success">送达</span>';
                         if (value === 'FAILED') return '<span class="im-badge im-badge-danger">失败</span>';
@@ -267,7 +251,7 @@
                     title: '撤回',
                     width: 60,
                     align: 'center',
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return value == 1 ? '<i class="fa fa-undo im-warning"></i>' : '-';
                     }
                 }, {
@@ -275,7 +259,7 @@
                     title: '编辑',
                     width: 60,
                     align: 'center',
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return value == 1 ? '<i class="fa fa-pencil im-info"></i>' : '-';
                     }
                 }, {
@@ -283,7 +267,7 @@
                     title: '回复',
                     width: 80,
                     align: 'center',
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return value ? '<i class="fa fa-reply im-primary"></i>' : '-';
                     }
                 }, {
@@ -302,7 +286,7 @@
                     align: 'center',
                     width: 150,
                     class: 'action-cell',
-                    formatter: function(value, row) {
+                    formatter: function (value, row) {
                         var actions = [];
                         actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="viewDetail(\'' + row.id + '\')" title="查看"><i class="fa fa-eye"></i></a> ');
                         if (row.isRevoked != 1) {
@@ -319,7 +303,7 @@
 
         /* 加载统计数据 */
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
+            $.get(prefix + "/statistics", function (result) {
                 if (result.code == 0) {
                     var stats = result.data;
                     animateNumber('totalCount', stats.totalCount || 0);
@@ -343,13 +327,13 @@
 
             $element.addClass('animate');
 
-            var timer = setInterval(function() {
+            var timer = setInterval(function () {
                 currentStep++;
                 currentValue = Math.round(currentValue + stepValue);
                 if (currentStep >= steps) {
                     currentValue = targetValue;
                     clearInterval(timer);
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $element.removeClass('animate');
                     }, 200);
                 }
@@ -375,8 +359,8 @@
         function filterByToday() {
             var today = new Date();
             var todayStr = today.getFullYear() + '-' +
-                          String(today.getMonth() + 1).padStart(2, '0') + '-' +
-                          String(today.getDate()).padStart(2, '0');
+                String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                String(today.getDate()).padStart(2, '0');
             $('input[name="params[beginTime]"]').val(todayStr + ' 00:00:00');
             $('input[name="params[endTime]"]').val(todayStr + ' 23:59:59');
             $.table.search();
@@ -390,7 +374,7 @@
 
         /* 查看消息详情 */
         function viewDetail(id) {
-            $.get(prefix + "/detail/" + id, function(result) {
+            $.get(prefix + "/detail/" + id, function (result) {
                 if (result.code == 0) {
                     var data = result.data;
                     var html = '<div class="row">';
@@ -418,8 +402,8 @@
 
         /* 撤回消息 */
         function revokeMessage(id) {
-            $.modal.confirm('确定要撤回这条消息吗？', function() {
-                $.operate.post(prefix + "/revoke/" + id, {}, function(res) {
+            $.modal.confirm('确定要撤回这条消息吗？', function () {
+                $.operate.post(prefix + "/revoke/" + id, {}, function (res) {
                     if (res.code == 0) {
                         $.modal.msgSuccess("撤回成功");
                         $.table.refresh();
@@ -436,8 +420,8 @@
                 $.modal.alertWarning("请至少选择一条记录");
                 return;
             }
-            $.modal.confirm('确定要批量撤回选中的 ' + rows.length + ' 条消息吗？', function() {
-                $.operate.post(prefix + "/batchRevoke", { messageIds: rows.join() }, function(res) {
+            $.modal.confirm('确定要批量撤回选中的 ' + rows.length + ' 条消息吗？', function () {
+                $.operate.post(prefix + "/batchRevoke", { messageIds: rows.join() }, function (res) {
                     if (res.code == 0) {
                         $.modal.msgSuccess("批量撤回成功");
                         $.table.refresh();
@@ -454,8 +438,8 @@
                 $.modal.alertWarning("请至少选择一条记录");
                 return;
             }
-            $.modal.confirm('确定要将选中的 ' + rows.length + ' 条消息标记为敏感吗？', function() {
-                $.operate.post(prefix + "/batchMarkSensitive", { messageIds: rows.join(), sensitiveLevel: 'SENSITIVE' }, function(res) {
+            $.modal.confirm('确定要将选中的 ' + rows.length + ' 条消息标记为敏感吗？', function () {
+                $.operate.post(prefix + "/batchMarkSensitive", { messageIds: rows.join(), sensitiveLevel: 'SENSITIVE' }, function (res) {
                     if (res.code == 0) {
                         $.modal.msgSuccess("标记成功");
                         $.table.refresh();
@@ -466,4 +450,5 @@
         }
     </script>
 </body>
+
 </html>

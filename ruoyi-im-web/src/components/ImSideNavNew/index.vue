@@ -1,8 +1,17 @@
-<template>
-  <nav class="w-20 bg-primary flex flex-col items-center py-6 gap-6 z-20 shrink-0 shadow-lg">
-    <!-- Logo 区域 -->
-    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center cursor-pointer mb-2 shrink-0">
-      <span class="text-white font-bold text-xl italic">若</span>
+  <nav 
+    :class="[
+      'bg-primary flex flex-col items-center py-6 gap-6 z-20 shrink-0 shadow-lg transition-all duration-300',
+      collapsed ? 'w-16' : 'w-20'
+    ]"
+  >
+    <!-- Logo 区域与折叠按钮 -->
+    <div class="flex flex-col items-center gap-4 mb-2 shrink-0">
+      <div 
+        class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center cursor-pointer backdrop-blur-sm"
+        @click="$emit('toggle-collapse')"
+      >
+        <span class="text-white font-bold text-xl italic leading-none">{{ collapsed ? '若' : '若依' }}</span>
+      </div>
     </div>
 
     <!-- 导航项 -->
@@ -17,16 +26,20 @@
         ]"
         :title="item.label"
       >
-        <el-icon class="text-2xl">
+        <el-icon class="text-2xl transition-transform duration-300" :class="{ 'scale-110': collapsed }">
           <component :is="item.icon" />
         </el-icon>
-        <span class="text-[11px] font-medium tracking-wide">{{ item.label }}</span>
+        <span v-if="!collapsed" class="text-[11px] font-medium tracking-wide animate-fade-in">{{ item.label }}</span>
+        
         <!-- 未读红点 -->
         <span
           v-if="item.key === 'chat' && unreadCount > 0"
-          class="absolute top-1 right-1 min-w-[14px] h-[14px] flex items-center justify-center bg-red-500 text-white text-[10px] rounded-full px-1"
+          :class="[
+            'absolute bg-red-500 text-white text-[10px] rounded-full px-1 border border-primary flex items-center justify-center',
+            collapsed ? 'top-1 right-2 min-w-[12px] h-[12px]' : 'top-1 right-1 min-w-[14px] h-[14px]'
+          ]"
         >
-          {{ unreadCount > 99 ? '99+' : unreadCount }}
+          <template v-if="!collapsed">{{ unreadCount > 99 ? '99+' : unreadCount }}</template>
         </span>
       </button>
     </div>
@@ -100,10 +113,14 @@ const props = defineProps({
   activeModule: {
     type: String,
     default: 'chat'
+  },
+  collapsed: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['switch-module'])
+const emit = defineEmits(['switch-module', 'toggle-collapse'])
 const store = useStore()
 const { isDark, toggleDark: toggleDarkMode } = useTheme()
 
@@ -138,4 +155,41 @@ function handleSwitch(key) {
 <style scoped>
 /* 添加 Material Symbols Outlined 字体支持（如果使用的话） */
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.nav-item {
+  position: relative;
+  width: 100%;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 12px;
+  transition: all 0.3s;
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.nav-item-active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-item-default {
+  color: rgba(255, 255, 255, 0.7);
+}
 </style>

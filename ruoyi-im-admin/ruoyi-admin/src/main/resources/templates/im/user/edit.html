@@ -1,17 +1,35 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <th:block th:include="include :: header('修改IM用户')" />
     <style>
-        body { padding: 0 !important; overflow-x: hidden; }
-        .wrapper-content { padding: 15px 25px !important; }
+        body {
+            padding: 0 !important;
+            overflow-x: hidden;
+            background-color: #fff;
+        }
+
+        .wrapper-content {
+            padding: 20px 30px !important;
+        }
+
+        .form-header {
+            font-size: 15px;
+            font-weight: 600;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+            color: #333;
+        }
     </style>
 </head>
+
 <body class="white-bg">
     <div class="wrapper wrapper-content animated fadeInRight ibox-content" style="border: none; box-shadow: none;">
         <form class="form-horizontal m" id="form-user-edit" th:object="${user}">
             <input name="id" th:field="*{id}" type="hidden">
-            <h4 class="form-header h4">基本信息</h4>
+            <h4 class="form-header h4"><i class="fa fa-edit"></i> 基本信息</h4>
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
@@ -35,9 +53,11 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label">性别：</label>
                         <div class="col-sm-9">
-                            <select name="gender" class="form-control m-b" th:with="type=${@dict.getType('sys_user_sex')}">
+                            <select name="gender" class="form-control m-b"
+                                th:with="type=${@dict.getType('sys_user_sex')}">
                                 <option value="">所有</option>
-                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{gender}"></option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                    th:value="${dict.dictValue}" th:field="*{gender}"></option>
                             </select>
                         </div>
                     </div>
@@ -47,14 +67,15 @@
                         <label class="col-sm-3 control-label">用户状态：</label>
                         <div class="col-sm-9">
                             <div class="radio-box" th:each="dict : ${@dict.getType('sys_normal_disable')}">
-                                <input type="radio" th:id="${dict.dictCode}" name="status" th:value="${dict.dictValue}" th:field="*{status}">
+                                <input type="radio" th:id="${dict.dictCode}" name="status" th:value="${dict.dictValue}"
+                                    th:field="*{status}">
                                 <label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <h4 class="form-header h4">联系信息</h4>
             <div class="row">
                 <div class="col-sm-6">
@@ -74,7 +95,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <h4 class="form-header h4">其他信息</h4>
             <div class="row">
                 <div class="col-sm-12">
@@ -88,11 +109,11 @@
             </div>
         </form>
     </div>
-    
+
     <div style="display:none;">
         <th:block th:include="include :: footer" />
     </div>
-    
+
     <script th:inline="javascript">
         var prefix = ctx + "im/user";
         $("#form-user-edit").validate({
@@ -106,4 +127,5 @@
         }
     </script>
 </body>
+
 </html>

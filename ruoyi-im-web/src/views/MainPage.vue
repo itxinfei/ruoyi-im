@@ -2,7 +2,12 @@
   <div :class="['dingtalk-app', isDark ? 'dark' : '']">
     <div class="flex h-screen bg-background-light dark:bg-background-dark">
       <!-- 新侧边导航 -->
-      <ImSideNavNew :active-module="activeModule" @switch-module="handleSwitchModule" />
+      <ImSideNavNew 
+        :active-module="activeModule" 
+        :collapsed="isSidebarCollapsed"
+        @switch-module="handleSwitchModule" 
+        @toggle-collapse="isSidebarCollapsed = !isSidebarCollapsed"
+      />
 
       <!-- 主内容区 -->
       <main class="flex-1 overflow-hidden flex">
@@ -36,6 +41,7 @@ import ChatPanel from './ChatPanel.vue'
 
 const store = useStore()
 const activeModule = ref('chat')
+const isSidebarCollapsed = ref(false)
 const currentSession = computed(() => store.state.im.currentSession)
 const { isDark } = useTheme()
 

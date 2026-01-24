@@ -2,18 +2,10 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('部门管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
     <th:block th:include="include :: bootstrap-tree-table-css" />
-
-    <style>
-        body { padding: 10px !important; }
-        .gray-bg { background-color: #f3f3f4 !important; }
-    </style>
 </head>
 <body class="gray-bg">
-    <div class="container-div im-page">
+    <div class="container-div">
         <!-- 统计卡片区域 -->
         <div class="row stat-card-section">
             <div class="col-sm-12">

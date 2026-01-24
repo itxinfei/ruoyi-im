@@ -141,7 +141,6 @@
             (SELECT COUNT(*) FROM im_friend_request WHERE status = 'PENDING') as pendingCount,
             (SELECT COUNT(DISTINCT group_name) FROM im_friend WHERE is_deleted = 0 AND group_name IS NOT NULL AND group_name != '') as groupCount,
             (SELECT COUNT(*) FROM im_friend WHERE is_deleted = 0 AND DATE(create_time) = CURDATE()) as todayCount
-        from dual
     </select>
 
     <!-- 统计待处理好友申请数 -->

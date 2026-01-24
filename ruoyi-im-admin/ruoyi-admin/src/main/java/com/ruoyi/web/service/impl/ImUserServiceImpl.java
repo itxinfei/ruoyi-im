@@ -537,12 +537,12 @@ public class ImUserServiceImpl implements ImUserService {
         // 密码重置操作检查
         if ("resetPassword".equals(operationDTO.getOperation())) {
             String newPassword = operationDTO.getNewPassword();
-            if (newPassword == null || newPassword.trim().isEmpty()) {
-                errors.add("新密码不能为空");
-            } else if (newPassword.length() < 6) {
-                errors.add("密码长度不能少于6位");
-            } else if (newPassword.length() > 20) {
-                errors.add("密码长度不能超过20位");
+            // 使用统一的密码策略验证器
+            com.ruoyi.common.utils.security.PasswordPolicyValidator.PasswordValidationResult validation = 
+                com.ruoyi.common.utils.security.PasswordPolicyValidator.validatePassword(newPassword);
+            
+            if (!validation.isValid()) {
+                errors.add(validation.getErrorMessage());
             }
             
             String adminPassword = operationDTO.getAdminPassword();

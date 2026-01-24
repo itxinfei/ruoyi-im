@@ -1,77 +1,75 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head>
     <th:block th:include="include :: header('敏感词管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
 
     <style>
         .select-list ul li {
             margin: 0px 10px 5px 0px !important;
         }
+
         .select-list ul li input {
             width: 140px !important;
         }
+
         .select-list ul li select {
             width: 80px !important;
         }
     </style>
 </head>
+
 <body class="gray-bg">
-    <div class="container-div im-page">
+    <div class="container-div">
         <div class="row">
-            <!-- 统计卡片区域 - 增强样式 -->
+            <!-- 统计卡片区域 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()" title="点击查看全部">
+                        <div class="ibox float-e-margins" onclick="filterReset()" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">总</span>
-                                <h5 style="color: #fff; margin: 0;">敏感词总数</h5>
+                                <span class="label label-success pull-right">总</span>
+                                <h5>敏感词总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="totalCount">0</div>
-                                <div class="stat-label">全部敏感词</div>
-                                <i class="fa fa-shield stat-icon"></i>
+                                <h2 class="no-margins text-success" id="totalCount">0</h2>
+                                <small>全部敏感词</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-danger" onclick="filterByLevel('HIGH')" title="点击查看高风险">
+                        <div class="ibox float-e-margins" onclick="filterByLevel('HIGH')" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">高</span>
-                                <h5 style="color: #fff; margin: 0;">高风险词</h5>
+                                <span class="label label-danger pull-right">高</span>
+                                <h5>高风险词</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="highLevelCount">0</div>
-                                <div class="stat-label">高级敏感词</div>
-                                <i class="fa fa-exclamation-triangle stat-icon"></i>
+                                <h2 class="no-margins text-danger" id="highLevelCount">0</h2>
+                                <small>高度敏感词汇</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByLevel('MEDIUM')" title="点击查看中级风险">
+                        <div class="ibox float-e-margins" onclick="filterByLevel('MEDIUM')" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">中</span>
-                                <h5 style="color: #fff; margin: 0;">中级风险词</h5>
+                                <span class="label label-warning pull-right">中</span>
+                                <h5>中级风险词</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="mediumLevelCount">0</div>
-                                <div class="stat-label">中级敏感词</div>
-                                <i class="fa fa-exclamation-circle stat-icon"></i>
+                                <h2 class="no-margins text-warning" id="mediumLevelCount">0</h2>
+                                <small>中度敏感词汇</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByStatus('1')" title="点击查看拦截">
+                        <div class="ibox float-e-margins" onclick="filterByStatus('1')" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">拦</span>
-                                <h5 style="color: #fff; margin: 0;">拦截次数</h5>
+                                <span class="label label-info pull-right">拦</span>
+                                <h5>今日拦截</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="blockCount">0</div>
-                                <div class="stat-label">今日拦截次数</div>
-                                <i class="fa fa-ban stat-icon"></i>
+                                <h2 class="no-margins text-info" id="blockCount">0</h2>
+                                <small>今日触发表数</small>
                             </div>
                         </div>
                     </div>
@@ -84,10 +82,10 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="search-label label-2">敏感词</label><input type="text" name="word" placeholder="请输入"/>
+                                敏感词：<input type="text" name="word" placeholder="请输入" />
                             </li>
                             <li>
-                                <label class="search-label label-2">级别</label><select name="level">
+                                级别：<select name="level">
                                     <option value="">全部</option>
                                     <option value="LOW">低级</option>
                                     <option value="MEDIUM">中级</option>
@@ -95,39 +93,47 @@
                                 </select>
                             </li>
                             <li>
-                                <label class="search-label label-2">状态</label><select name="status">
+                                状态：<select name="status">
                                     <option value="">全部</option>
                                     <option value="1">启用</option>
                                     <option value="0">禁用</option>
                                 </select>
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                        class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                        class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
+            <!-- 工具栏 + 表格 -->
             <div class="col-sm-12 select-table table-striped">
-                <div class="btn-group-sm" id="toolbar">
+                <div class="btn-group-sm" id="toolbar" role="group">
                     <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:sensitiveWord:add">
                         <i class="fa fa-plus"></i> 新增
                     </a>
-                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:sensitiveWord:edit">
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()"
+                        shiro:hasPermission="im:sensitiveWord:edit">
                         <i class="fa fa-edit"></i> 修改
                     </a>
-                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:sensitiveWord:remove">
-                        <i class="fa fa-remove"></i> 删除
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                        shiro:hasPermission="im:sensitiveWord:remove">
+                        <i class="fa fa-trash"></i> 删除
                     </a>
-                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:sensitiveWord:export">
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()"
+                        shiro:hasPermission="im:sensitiveWord:export">
                         <i class="fa fa-download"></i> 导出
                     </a>
                 </div>
-                <table id="bootstrap-table"></table>
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
+    </div>
+    </div>
     </div>
 
     <th:block th:include="include :: footer" />
@@ -239,7 +245,7 @@
         });
 
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
+            $.get(prefix + "/statistics", function (result) {
                 if (result.code === 0) {
                     var data = result.data || {};
                     animateNumber('totalCount', data.totalCount || 0);
@@ -265,13 +271,13 @@
 
             $element.addClass('animate');
 
-            var timer = setInterval(function() {
+            var timer = setInterval(function () {
                 currentStep++;
                 currentValue = Math.round(currentValue + stepValue);
                 if (currentStep >= steps) {
                     currentValue = targetValue;
                     clearInterval(timer);
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $element.removeClass('animate');
                     }, 200);
                 }
@@ -312,4 +318,5 @@
         }
     </script>
 </body>
+
 </html>

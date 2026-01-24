@@ -1,71 +1,78 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head>
     <th:block th:include="include :: header('文件管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
     <style>
-        .select-list ul li { margin: 0px 10px 5px 0px !important; }
-        .select-list ul li input { width: 140px !important; }
-        .select-list ul li select { width: 80px !important; }
-        .time-input { width: 100px !important; }
+        .select-list ul li {
+            margin: 0px 10px 5px 0px !important;
+        }
+
+        .select-list ul li input {
+            width: 140px !important;
+        }
+
+        .select-list ul li select {
+            width: 80px !important;
+        }
+
+        .time-input {
+            width: 100px !important;
+        }
     </style>
 </head>
+
 <body class="gray-bg">
-    <div class="container-div im-page">
+    <div class="container-div">
         <div class="row">
-            <!-- 统计卡片区域 - 增强样式 -->
+            <!-- 统计卡片区域 -->
             <div class="col-sm-12" style="margin-top: 10px;">
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
+                        <div class="ibox float-e-margins" onclick="filterReset()" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">总</span>
-                                <h5 style="color: #fff; margin: 0;">文件总数</h5>
+                                <span class="label label-success pull-right">总</span>
+                                <h5>文件总数</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="totalCount">0</div>
-                                <div class="stat-label">全部文件</div>
-                                <i class="fa fa-files-o stat-icon"></i>
+                                <h2 class="no-margins text-success" id="totalCount">0</h2>
+                                <small>全部文件数量</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByToday()">
+                        <div class="ibox float-e-margins" onclick="filterByToday()" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">今</span>
-                                <h5 style="color: #fff; margin: 0;">今日上传</h5>
+                                <span class="label label-info pull-right">今</span>
+                                <h5>今日上传</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="todayCount">0</div>
-                                <div class="stat-label">今日上传文件</div>
-                                <i class="fa fa-cloud-upload stat-icon"></i>
+                                <h2 class="no-margins text-info" id="todayCount">0</h2>
+                                <small>今日上传文件</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-cyan">
+                        <div class="ibox float-e-margins" style="cursor: default;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">大</span>
-                                <h5 style="color: #fff; margin: 0;">总大小</h5>
+                                <span class="label label-primary pull-right">大</span>
+                                <h5>总占用空间</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="totalSize">0MB</div>
-                                <div class="stat-label">文件总大小</div>
-                                <i class="fa fa-database stat-icon"></i>
+                                <h2 class="no-margins text-navy" id="totalSize">0MB</h2>
+                                <small>存储总占用</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="ibox float-e-margins im-stat-card stat-card-warning" onclick="filterByType('IMAGE')">
+                        <div class="ibox float-e-margins" onclick="filterByType('IMAGE')" style="cursor: pointer;">
                             <div class="ibox-title">
-                                <span class="stat-badge pull-right">图</span>
-                                <h5 style="color: #fff; margin: 0;">图片文件</h5>
+                                <span class="label label-warning pull-right">图</span>
+                                <h5>图片文件</h5>
                             </div>
                             <div class="ibox-content">
-                                <div class="stat-number" id="imageCount">0</div>
-                                <div class="stat-label">图片数量</div>
-                                <i class="fa fa-image stat-icon"></i>
+                                <h2 class="no-margins text-warning" id="imageCount">0</h2>
+                                <small>系统内图片数</small>
                             </div>
                         </div>
                     </div>
@@ -78,10 +85,10 @@
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label class="search-label label-2">文件名</label><input type="text" name="fileName" placeholder="请输入"/>
+                                文件名：<input type="text" name="fileName" placeholder="请输入" />
                             </li>
                             <li>
-                                <label class="search-label label-4">文件类型</label><select name="fileType">
+                                文件类型：<select name="fileType">
                                     <option value="">全部</option>
                                     <option value="IMAGE">图片</option>
                                     <option value="VIDEO">视频</option>
@@ -91,53 +98,59 @@
                                 </select>
                             </li>
                             <li>
-                                <label class="search-label label-2">上传者</label><input type="text" name="uploaderId" placeholder="请输入ID"/>
+                                上传者ID：<input type="text" name="uploaderId" placeholder="请输入" />
                             </li>
                             <li class="select-time">
-                                <label class="search-label label-4">上传时间</label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始" name="params[beginTime]"/>
+                                <label>上传时间：</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始"
+                                    name="params[beginTime]" />
                                 <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束" name="params[endTime]"/>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束"
+                                    name="params[endTime]" />
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                        class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                        class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
                     </div>
                 </form>
             </div>
 
-            <!-- 工具栏 -->
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:file:add">
-                    <i class="fa fa-plus"></i> 新增
-                </a>
-                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="im:file:edit">
-                    <i class="fa fa-edit"></i> 修改
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="im:file:remove">
-                    <i class="fa fa-remove"></i> 删除
-                </a>
-                <a class="btn btn-default" onclick="$.table.exportExcel()" shiro:hasPermission="im:file:export">
-                    <i class="fa fa-download"></i> 导出
-                </a>
-            </div>
-
-            <!-- 数据表格 -->
+            <!-- 工具栏 + 表格 -->
             <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:file:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary single disabled" onclick="$.operate.edit()"
+                        shiro:hasPermission="im:file:edit">
+                        <i class="fa fa-edit"></i> 修改
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                        shiro:hasPermission="im:file:remove">
+                        <i class="fa fa-trash"></i> 删除
+                    </a>
+                    <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="im:file:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
+                </div>
                 <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
+    </div>
+    </div>
 
     <th:block th:include="include :: footer" />
     <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('im:file:edit')}]];
-        var removeFlag = [[${@permission.hasPermi('im:file:remove')}]];
+        var editFlag = [[${@permission.hasPermi('im:file:edit') }]];
+        var removeFlag = [[${@permission.hasPermi('im:file:remove') }]];
         var prefix = ctx + "im/file";
 
-        $(function() {
+        $(function () {
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
@@ -157,7 +170,7 @@
                 }, {
                     field: 'fileName',
                     title: '文件名',
-                    formatter: function(value, row) {
+                    formatter: function (value, row) {
                         var icon = getFileIcon(row.fileType);
                         return icon + ' ' + (value || '-');
                     }
@@ -166,7 +179,7 @@
                     title: '文件类型',
                     align: 'center',
                     width: 100,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (value === 'IMAGE') return '<span class="label label-info">图片</span>';
                         if (value === 'VIDEO') return '<span class="label label-warning">视频</span>';
                         if (value === 'AUDIO') return '<span class="label label-success">音频</span>';
@@ -178,7 +191,7 @@
                     title: '文件大小',
                     align: 'right',
                     width: 100,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (!value || value == 0) return '-';
                         if (value < 1024) return value + ' B';
                         if (value < 1024 * 1024) return (value / 1024).toFixed(2) + ' KB';
@@ -198,7 +211,7 @@
                     title: '操作',
                     align: 'center',
                     width: 120,
-                    formatter: function(value, row) {
+                    formatter: function (value, row) {
                         var actions = [];
                         actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
                         actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-trash"></i>删除</a>');
@@ -211,7 +224,7 @@
         });
 
         function loadStatistics() {
-            $.get(prefix + "/statistics", function(result) {
+            $.get(prefix + "/statistics", function (result) {
                 if (result.code === 0) {
                     var data = result.data || {};
                     animateNumber('totalCount', data.totalCount || 0);
@@ -235,13 +248,13 @@
 
             $element.addClass('animate');
 
-            var timer = setInterval(function() {
+            var timer = setInterval(function () {
                 currentStep++;
                 currentValue = Math.round(currentValue + stepValue);
                 if (currentStep >= steps) {
                     currentValue = targetValue;
                     clearInterval(timer);
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $element.removeClass('animate');
                     }, 200);
                 }
@@ -266,8 +279,8 @@
         function filterByToday() {
             var today = new Date();
             var todayStr = today.getFullYear() + '-' +
-                          String(today.getMonth() + 1).padStart(2, '0') + '-' +
-                          String(today.getDate()).padStart(2, '0');
+                String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                String(today.getDate()).padStart(2, '0');
             $('#startTime').val(todayStr + ' 00:00:00');
             $('#endTime').val(todayStr + ' 23:59:59');
             $.table.search();
@@ -292,4 +305,5 @@
         }
     </script>
 </body>
+
 </html>

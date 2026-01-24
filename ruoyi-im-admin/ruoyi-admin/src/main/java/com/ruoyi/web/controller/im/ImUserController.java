@@ -112,14 +112,9 @@ public class ImUserController extends BaseController {
     @PostMapping("/resetPassword")
     @ResponseBody
     public AjaxResult resetPasswordByForm(@RequestParam("userId") Long userId, @RequestParam("password") String password) {
-        if (password == null || password.trim().isEmpty()) {
-            return AjaxResult.error("新密码不能为空");
-        }
-        if (password.length() < 5) {
-            return AjaxResult.error("密码长度不能少于5位");
-        }
-        if (password.length() > 20) {
-            return AjaxResult.error("密码长度不能超过20位");
+        PasswordPolicyValidator.PasswordValidationResult validation = PasswordPolicyValidator.validatePassword(password);
+        if (!validation.isValid()) {
+            return AjaxResult.error(validation.getErrorMessage());
         }
 
         // 调用 Service 层的简化版重置密码方法

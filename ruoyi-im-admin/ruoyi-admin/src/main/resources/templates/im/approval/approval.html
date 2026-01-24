@@ -1,145 +1,129 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head>
     <th:block th:include="include :: header('审批管理')" />
-    <link th:href="@{/css/im-admin.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-stat-cards.css}" rel="stylesheet"/>
-    <link th:href="@{/css/im-compact-layout.css}" rel="stylesheet"/>
-    <style>
-        body { padding: 10px !important; }
-        .gray-bg { background-color: #f3f3f4 !important; }
-    </style>
 </head>
+
 <body class="gray-bg">
-    <div class="container-div im-page">
-        <!-- 统计卡片区域 -->
-        <div class="row stat-card-section">
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins im-stat-card stat-card-primary" onclick="filterReset()">
-                    <div class="ibox-title">
-                        <span class="stat-badge pull-right">总</span>
-                        <h5 style="color: #fff; margin: 0;">审批总数</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="stat-number" id="totalCount">0</div>
-                        <div class="stat-label">全部审批记录</div>
-                        <i class="fa fa-list-alt stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins im-stat-card stat-card-warning pulse" onclick="filterByStatus('PENDING')">
-                    <div class="ibox-title">
-                        <span class="stat-badge pull-right">待</span>
-                        <h5 style="color: #fff; margin: 0;">待审批</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="stat-number" id="pendingCount">0</div>
-                        <div class="stat-label">等待处理审批</div>
-                        <i class="fa fa-clock-o stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins im-stat-card stat-card-success" onclick="filterByStatus('APPROVED')">
-                    <div class="ibox-title">
-                        <span class="stat-badge pull-right">过</span>
-                        <h5 style="color: #fff; margin: 0;">已通过</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="stat-number" id="approvedCount">0</div>
-                        <div class="stat-label">已审批通过</div>
-                        <i class="fa fa-check stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins im-stat-card stat-card-danger" onclick="filterByStatus('REJECTED')">
-                    <div class="ibox-title">
-                        <span class="stat-badge pull-right">驳</span>
-                        <h5 style="color: #fff; margin: 0;">已驳回</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="stat-number" id="rejectedCount">0</div>
-                        <div class="stat-label">已驳回审批</div>
-                        <i class="fa fa-times stat-icon"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 搜索表单 -->
-        <div class="row search-section">
-            <div class="col-sm-12">
-                <div class="im-panel">
-                    <form id="approval-form">
-                        <div class="select-list">
-                            <ul>
-                                <li>
-                                    <label class="search-label label-4">审批标题</label><input type="text" name="title" placeholder="请输入审批标题"/>
-                                </li>
-                                <li>
-                                    <label class="search-label label-2">发起人</label><input type="text" name="applicantName" placeholder="请输入发起人"/>
-                                </li>
-                                <li>
-                                    <label class="search-label label-4">审批状态</label><select name="status">
-                                        <option value="">所有</option>
-                                        <option value="PENDING">待审批</option>
-                                        <option value="APPROVED">已通过</option>
-                                        <option value="REJECTED">已驳回</option>
-                                        <option value="CANCELLED">已撤销</option>
-                                    </select>
-                                </li>
-                                <li class="select-time">
-                                    <label class="search-label label-4">创建时间</label>
-                                    <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
-                                    <span>-</span>
-                                    <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
-                                </li>
-                                <li>
-                                    <a class="btn btn-primary btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                    <a class="btn btn-default btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                                </li>
-                            </ul>
+    <div class="container-div">
+        <div class="row">
+            <!-- 统计卡片区域 -->
+            <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins" onclick="filterReset()" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-success pull-right">总</span>
+                                <h5>审批总数</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-success" id="totalCount">0</h2>
+                                <small>全部审批记录</small>
+                            </div>
                         </div>
-                    </form>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins" onclick="filterByStatus('PENDING')" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-warning pull-right">待</span>
+                                <h5>待审批</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-warning" id="pendingCount">0</h2>
+                                <small>当前待处理数</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins" onclick="filterByStatus('APPROVED')" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-primary pull-right">过</span>
+                                <h5>已通过</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-navy" id="approvedCount">0</h2>
+                                <small>已审批通过数</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ibox float-e-margins" onclick="filterByStatus('REJECTED')" style="cursor: pointer;">
+                            <div class="ibox-title">
+                                <span class="label label-danger pull-right">驳</span>
+                                <h5>已驳回</h5>
+                            </div>
+                            <div class="ibox-content">
+                                <h2 class="no-margins text-danger" id="rejectedCount">0</h2>
+                                <small>已驳回申请数</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 工具栏 + 表格 -->
-        <div class="row table-section">
-            <div class="col-sm-12">
-                <!-- 批量操作按钮 -->
-                <div class="im-toolbar">
-                    <div class="im-batch-actions">
-                        <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:approval:add">
-                            <i class="fa fa-plus"></i> 新增
-                        </a>
-                        <a class="btn btn-primary" onclick="batchApprove()" shiro:hasPermission="im:approval:edit">
-                            <i class="fa fa-check"></i> 批量通过
-                        </a>
-                        <a class="btn btn-warning" onclick="batchReject()" shiro:hasPermission="im:approval:edit">
-                            <i class="fa fa-times"></i> 批量驳回
-                        </a>
-                        <a class="btn btn-danger" onclick="$.operate.removeAll()" shiro:hasPermission="im:approval:remove">
-                            <i class="fa fa-trash"></i> 批量删除
-                        </a>
+            <!-- 搜索表单 -->
+            <div class="col-sm-12 search-collapse">
+                <form id="approval-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                标题：<input type="text" name="title" placeholder="请输入标题" />
+                            </li>
+                            <li>
+                                发起人：<input type="text" name="applicantName" placeholder="请输入发起人" />
+                            </li>
+                            <li>
+                                状态：<select name="status">
+                                    <option value="">所有</option>
+                                    <option value="PENDING">待审批</option>
+                                    <option value="APPROVED">已通过</option>
+                                    <option value="REJECTED">已驳回</option>
+                                    <option value="CANCELLED">已撤销</option>
+                                </select>
+                            </li>
+                            <li class="select-time">
+                                <label>创建时间：</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始"
+                                    name="params[beginTime]" />
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束"
+                                    name="params[endTime]" />
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                        class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                        class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="pull-right">
-                        <a class="btn btn-default btn-sm" onclick="$.table.refresh()">
-                            <i class="fa fa-refresh"></i> 刷新
-                        </a>
-                        <a class="btn btn-default btn-sm" onclick="$.table.exportExcel()" shiro:hasPermission="im:approval:export">
-                            <i class="fa fa-download"></i> 导出
-                        </a>
-                    </div>
-                </div>
+                </form>
+            </div>
 
-                <!-- 数据表格 -->
-                <div class="im-table-container">
-                    <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            <!-- 工具栏 + 表格 -->
+            <div class="col-sm-12 select-table table-striped">
+                <div class="btn-group-sm" id="toolbar" role="group">
+                    <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="im:approval:add">
+                        <i class="fa fa-plus"></i> 新增
+                    </a>
+                    <a class="btn btn-primary multiple disabled" onclick="batchApprove()"
+                        shiro:hasPermission="im:approval:edit">
+                        <i class="fa fa-check"></i> 批量通过
+                    </a>
+                    <a class="btn btn-warning multiple disabled" onclick="batchReject()"
+                        shiro:hasPermission="im:approval:edit">
+                        <i class="fa fa-times"></i> 批量驳回
+                    </a>
+                    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+                        shiro:hasPermission="im:approval:remove">
+                        <i class="fa fa-trash"></i> 删除
+                    </a>
+                    <a class="btn btn-info" onclick="$.table.exportExcel()" shiro:hasPermission="im:approval:export">
+                        <i class="fa fa-download"></i> 导出
+                    </a>
                 </div>
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
             </div>
         </div>
     </div>
@@ -147,11 +131,11 @@
     <th:block th:include="include :: footer" />
     <th:block th:include="include :: bootstrap-table-export-js" />
     <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('im:approval:edit')}]];
-        var removeFlag = [[${@permission.hasPermi('im:approval:remove')}]];
+        var editFlag = [[${@permission.hasPermi('im:approval:edit') }]];
+        var removeFlag = [[${@permission.hasPermi('im:approval:remove') }]];
         var prefix = ctx + "im/approval";
 
-        $(function() {
+        $(function () {
             // 加载统计数据
             loadStatistics();
 
@@ -178,7 +162,7 @@
                     title: '审批标题',
                     sortable: true,
                     width: 180,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return $.table.tooltip(value, 30);
                     }
                 }, {
@@ -186,7 +170,7 @@
                     title: '审批类型',
                     align: 'center',
                     width: 100,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (!value) return '-';
                         var typeMap = {
                             'LEAVE': '<span class="im-badge im-badge-primary">请假</span>',
@@ -200,14 +184,14 @@
                     field: 'applicantName',
                     title: '发起人',
                     width: 100,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return value || '-';
                     }
                 }, {
                     field: 'applicantDept',
                     title: '发起部门',
                     width: 120,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return value || '-';
                     }
                 }, {
@@ -215,7 +199,7 @@
                     title: '状态',
                     align: 'center',
                     width: 90,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (value === 'PENDING') return '<span class="im-badge im-badge-warning">待审批</span>';
                         if (value === 'APPROVED') return '<span class="im-badge im-badge-success">已通过</span>';
                         if (value === 'REJECTED') return '<span class="im-badge im-badge-danger">已驳回</span>';
@@ -231,7 +215,7 @@
                     field: 'currentApprover',
                     title: '当前审批人',
                     width: 100,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return value || '-';
                     }
                 }, {
@@ -239,7 +223,7 @@
                     title: '优先级',
                     align: 'center',
                     width: 80,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (value === 'HIGH') return '<span class="im-badge im-badge-danger">高</span>';
                         if (value === 'MEDIUM') return '<span class="im-badge im-badge-warning">中</span>';
                         if (value === 'LOW') return '<span class="im-badge im-badge-info">低</span>';
@@ -255,14 +239,14 @@
                     title: '完成时间',
                     width: 140,
                     sortable: true,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         return value || '-';
                     }
                 }, {
                     field: 'remark',
                     title: '备注',
                     width: 120,
-                    formatter: function(value) {
+                    formatter: function (value) {
                         if (!value) return '-';
                         if (value.length > 20) {
                             return '<span title="' + value + '">' + value.substring(0, 20) + '...</span>';
@@ -274,7 +258,7 @@
                     align: 'center',
                     width: 180,
                     class: 'action-cell',
-                    formatter: function(value, row) {
+                    formatter: function (value, row) {
                         var actions = [];
                         if (row.status === 'PENDING') {
                             actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="approveOne(' + row.id + ')" title="通过"><i class="fa fa-check"></i></a> ');
@@ -294,7 +278,7 @@
             $.ajax({
                 url: prefix + "/statistics",
                 type: 'GET',
-                success: function(result) {
+                success: function (result) {
                     if (result.code == 0 || result.code == 200) {
                         var data = result.data;
                         animateNumber('totalCount', data.totalCount || 0);
@@ -303,7 +287,7 @@
                         animateNumber('rejectedCount', data.rejectedCount || 0);
                     }
                 },
-                error: function() {
+                error: function () {
                     $('#totalCount').text('-');
                     $('#pendingCount').text('-');
                     $('#approvedCount').text('-');
@@ -325,13 +309,13 @@
 
             $element.addClass('animate');
 
-            var timer = setInterval(function() {
+            var timer = setInterval(function () {
                 currentStep++;
                 currentValue = Math.round(currentValue + stepValue);
                 if (currentStep >= steps) {
                     currentValue = targetValue;
                     clearInterval(timer);
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $element.removeClass('animate');
                     }, 200);
                 }
@@ -364,12 +348,12 @@
                 $.modal.alertWarning("请至少选择一条记录");
                 return;
             }
-            $.modal.confirm("确定要批量通过选中的 " + rows.length + " 个审批吗？", function() {
+            $.modal.confirm("确定要批量通过选中的 " + rows.length + " 个审批吗？", function () {
                 $.ajax({
                     url: prefix + "/batchApprove",
                     type: 'post',
-                    data: {ids: rows.join(',')},
-                    success: function(result) {
+                    data: { ids: rows.join(',') },
+                    success: function (result) {
                         if (result.code == 0) {
                             $.modal.msgSuccess("批量通过成功");
                             $.table.refresh();
@@ -378,7 +362,7 @@
                             $.modal.alertError(result.msg || "操作失败");
                         }
                     },
-                    error: function() {
+                    error: function () {
                         $.modal.alertError("操作失败");
                     }
                 });
@@ -394,12 +378,12 @@
                 $.modal.alertWarning("请至少选择一条记录");
                 return;
             }
-            $.modal.confirm("确定要批量驳回选中的 " + rows.length + " 个审批吗？", function() {
+            $.modal.confirm("确定要批量驳回选中的 " + rows.length + " 个审批吗？", function () {
                 $.ajax({
                     url: prefix + "/batchReject",
                     type: 'post',
-                    data: {ids: rows.join(',')},
-                    success: function(result) {
+                    data: { ids: rows.join(',') },
+                    success: function (result) {
                         if (result.code == 0) {
                             $.modal.msgSuccess("批量驳回成功");
                             $.table.refresh();
@@ -408,7 +392,7 @@
                             $.modal.alertError(result.msg || "操作失败");
                         }
                     },
-                    error: function() {
+                    error: function () {
                         $.modal.alertError("操作失败");
                     }
                 });
@@ -419,12 +403,12 @@
          * 单个通过
          */
         function approveOne(id) {
-            $.modal.confirm("确定要通过该审批吗？", function() {
+            $.modal.confirm("确定要通过该审批吗？", function () {
                 $.ajax({
                     url: prefix + "/approve",
                     type: 'post',
-                    data: {id: id},
-                    success: function(result) {
+                    data: { id: id },
+                    success: function (result) {
                         if (result.code == 0) {
                             $.modal.msgSuccess("审批通过成功");
                             $.table.refresh();
@@ -433,7 +417,7 @@
                             $.modal.alertError(result.msg || "操作失败");
                         }
                     },
-                    error: function() {
+                    error: function () {
                         $.modal.alertError("操作失败");
                     }
                 });
@@ -444,12 +428,12 @@
          * 单个驳回
          */
         function rejectOne(id) {
-            $.modal.confirm("确定要驳回该审批吗？", function() {
+            $.modal.confirm("确定要驳回该审批吗？", function () {
                 $.ajax({
                     url: prefix + "/reject",
                     type: 'post',
-                    data: {id: id},
-                    success: function(result) {
+                    data: { id: id },
+                    success: function (result) {
                         if (result.code == 0) {
                             $.modal.msgSuccess("审批驳回成功");
                             $.table.refresh();
@@ -458,7 +442,7 @@
                             $.modal.alertError(result.msg || "操作失败");
                         }
                     },
-                    error: function() {
+                    error: function () {
                         $.modal.alertError("操作失败");
                     }
                 });
@@ -466,4 +450,5 @@
         }
     </script>
 </body>
+
 </html>
