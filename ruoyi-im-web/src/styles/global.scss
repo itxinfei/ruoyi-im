@@ -4,8 +4,8 @@
 @tailwind utilities;
 
 // Global Base Styles
-@import './design-tokens.scss';
-@import './tailwind-overrides.scss';
+@use './design-tokens.scss' as *;
+@use './tailwind-overrides.scss' as *;
 
 html,
 body {
