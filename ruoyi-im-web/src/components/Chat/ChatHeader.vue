@@ -1,37 +1,29 @@
 <template>
   <div class="chat-header">
     <div class="header-left">
-      <el-avatar :size="40" :src="session?.avatar" shape="square" class="header-avatar" :class="getAvatarBgClass(session)">
-        {{ session?.name?.charAt(0) }}
-      </el-avatar>
+      <div class="header-avatar" :class="getAvatarBgClass(session)" aria-hidden="true">
+        {{ session?.name?.charAt(0) || '?' }}
+      </div>
       <div class="header-info">
-        <div class="header-name-wrapper">
-          <h2 class="header-name">{{ session?.name }}</h2>
-          <span v-if="session?.type === 'GROUP'" class="member-count">{{ session?.memberCount || 0 }}人</span>
-        </div>
-        <div class="header-status">
-          <span class="status-dot" :class="{ online: session?.isOnline }"></span>
-          {{ session?.isOnline ? '在线' : '离线' }}
-        </div>
+        <h2 class="header-name">{{ session?.name }}</h2>
+        <span v-if="session?.type === 'GROUP'" class="member-count" aria-label="群组成员数量">{{ session?.memberCount || 0 }}人</span>
       </div>
     </div>
     <div class="header-actions">
-      <button class="action-btn" title="语音通话">
-        <el-icon><Phone /></el-icon>
+      <button class="action-btn" aria-label="语音通话" title="语音通话">
+        <span class="material-icons-outlined" aria-hidden="true">phone</span>
       </button>
-      <button class="action-btn" title="视频通话">
-        <el-icon><VideoCamera /></el-icon>
+      <button class="action-btn" aria-label="视频通话" title="视频通话">
+        <span class="material-icons-outlined" aria-hidden="true">videocam</span>
       </button>
-      <button class="action-btn" title="更多">
-        <el-icon><MoreFilled /></el-icon>
+      <button class="action-btn" aria-label="更多选项" title="更多">
+        <span class="material-icons-outlined" aria-hidden="true">more_horiz</span>
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { Phone, VideoCamera, MoreFilled } from '@element-plus/icons-vue'
-
 defineProps({
   session: Object
 })
@@ -46,8 +38,8 @@ const getAvatarBgClass = (session) => {
 
 <style scoped>
 .chat-header {
-  height: var(--dt-chat-header-height);
-  border-bottom: 1px solid var(--dt-border-light);
+  height: 64px;
+  border-bottom: 1px solid #e6e6e6;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -59,60 +51,45 @@ const getAvatarBgClass = (session) => {
 .header-left {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
 
 .header-avatar {
-  border-radius: 8px !important;
-  font-weight: bold;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #1677ff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
 }
 
-.bg-primary { background-color: var(--dt-brand-color); }
+.bg-primary { background-color: #1677ff; }
 .bg-blue-500 { background-color: #3b82f6; }
 .bg-orange-500 { background-color: #f97316; }
 .bg-emerald-500 { background-color: #10b981; }
 .bg-purple-500 { background-color: #a855f7; }
 
 .header-info {
-  margin-left: 12px;
-}
-
-.header-name-wrapper {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .header-name {
   font-size: 16px;
   font-weight: 600;
-  color: var(--dt-text-primary);
+  color: #262626;
   margin: 0;
   line-height: 1.2;
 }
 
 .member-count {
-  font-size: 11px;
-  color: var(--dt-text-tertiary);
-}
-
-.header-status {
-  font-size: 11px;
-  color: var(--dt-text-tertiary);
-  display: flex;
-  align-items: center;
-  margin-top: 2px;
-}
-
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  margin-right: 4px;
-  background-color: #cbd5e1;
-}
-
-.status-dot.online {
-  background-color: #52c41a;
+  font-size: 10px;
+  color: #8c8c8c;
 }
 
 .header-actions {
@@ -125,18 +102,40 @@ const getAvatarBgClass = (session) => {
   background: transparent;
   border: none;
   padding: 4px;
-  color: var(--dt-text-secondary);
+  color: #8c8c8c;
   cursor: pointer;
   display: flex;
   align-items: center;
   transition: color 0.2s;
-  
-  &:hover {
-    color: var(--dt-brand-color);
-  }
-  
-  .el-icon {
-    font-size: 20px;
-  }
+}
+
+.action-btn:hover {
+  color: #1677ff;
+}
+
+.action-btn .material-icons-outlined {
+  font-size: 20px;
+}
+
+/* 暗色模式 */
+:deep(.dark) .chat-header {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+:deep(.dark) .header-name {
+  color: #f1f5f9;
+}
+
+:deep(.dark) .member-count {
+  color: #64748b;
+}
+
+:deep(.dark) .action-btn {
+  color: #64748b;
+}
+
+:deep(.dark) .action-btn:hover {
+  color: #60a5fa;
 }
 </style>

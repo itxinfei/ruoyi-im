@@ -1,610 +1,594 @@
 <template>
   <div class="documents-panel">
-    <div class="docs-sidebar">
+    <!-- 左侧边栏 -->
+    <aside class="docs-sidebar">
       <div class="sidebar-header">
-        <h2 class="sidebar-title">文档</h2>
-        <el-button type="primary" class="upload-btn">
-          <el-icon><Upload /></el-icon>
-          上传文件
-        </el-button>
+        <h1 class="sidebar-title">
+          <span class="material-icons-outlined title-icon">cloud</span>
+          云文档
+        </h1>
       </div>
 
-      <div class="sidebar-body">
+      <div class="sidebar-content">
         <div class="nav-section">
           <div
-            v-for="nav in navItems"
+            v-for="nav in mainNavItems"
             :key="nav.id"
             class="nav-item"
             :class="{ active: activeNav === nav.id }"
             @click="activeNav = nav.id"
           >
-            <el-icon><component :is="nav.icon" /></el-icon>
-            <span>{{ nav.label }}</span>
+            <span class="material-icons-outlined nav-icon">{{ nav.icon }}</span>
+            <span class="nav-label">{{ nav.label }}</span>
           </div>
         </div>
 
-        <div class="folders-section">
-          <div class="folders-header">
-            <span class="folders-title">文件夹</span>
-            <el-button text class="folder-add-btn">
-              <el-icon><FolderAdd /></el-icon>
-            </el-button>
-          </div>
-          <div class="folders-list">
-            <div
-              v-for="folder in folders"
-              :key="folder.id"
-              class="folder-item"
-              @click="handleFolderClick(folder)"
-            >
-              <div class="folder-icon" :class="folder.colorClass">
-                <el-icon><Folder /></el-icon>
-              </div>
-              <div class="folder-info">
-                <p class="folder-name">{{ folder.name }}</p>
-                <p class="folder-count">{{ folder.count }}个文件</p>
-              </div>
-            </div>
+        <div class="nav-divider"></div>
+
+        <div class="nav-section-label">存储位置</div>
+
+        <div class="nav-section">
+          <div
+            v-for="nav in storageNavItems"
+            :key="nav.id"
+            class="nav-item"
+            :class="{ active: activeNav === nav.id }"
+            @click="activeNav = nav.id"
+          >
+            <span class="material-icons-outlined nav-icon">{{ nav.icon }}</span>
+            <span class="nav-label">{{ nav.label }}</span>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="docs-main">
-      <div class="docs-header">
+      <div class="sidebar-footer">
+        <div class="storage-info">
+          <div class="storage-header">
+            <span class="storage-label">存储空间</span>
+            <span class="storage-percent">85%</span>
+          </div>
+          <div class="storage-bar">
+            <div class="storage-fill" style="width: 85%"></div>
+          </div>
+          <div class="storage-text">85GB / 100GB</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="docs-main">
+      <header class="docs-header">
         <div class="header-left">
-          <h3 class="header-title">我的文档</h3>
+          <h2 class="header-title">{{ currentViewTitle }}</h2>
+          <div class="header-divider"></div>
           <div class="search-box">
-            <el-icon class="search-icon"><Search /></el-icon>
-            <el-input
+            <span class="material-icons-outlined search-icon">search</span>
+            <input
               v-model="searchQuery"
-              placeholder="搜索文档"
               class="search-input"
-              clearable
+              placeholder="搜索文件"
+              type="text"
             />
           </div>
         </div>
         <div class="header-right">
-          <el-button text class="more-btn">
-            <el-icon><MoreFilled /></el-icon>
-          </el-button>
+          <div class="view-toggle">
+            <button
+              class="toggle-btn"
+              :class="{ active: viewMode === 'list' }"
+              @click="viewMode = 'list'"
+            >
+              <span class="material-icons-outlined">list</span>
+            </button>
+            <button
+              class="toggle-btn"
+              :class="{ active: viewMode === 'grid' }"
+              @click="viewMode = 'grid'"
+            >
+              <span class="material-icons-outlined">grid_view</span>
+            </button>
+          </div>
+          <button class="new-btn">
+            <span class="material-icons-outlined">add</span>
+            新建
+          </button>
         </div>
-      </div>
-
-      <div class="view-tabs">
-        <div
-          class="tab-item"
-          :class="{ active: viewMode === 'list' }"
-          @click="viewMode = 'list'"
-        >
-          列表视图
-        </div>
-        <div
-          class="tab-item"
-          :class="{ active: viewMode === 'grid' }"
-          @click="viewMode = 'grid'"
-        >
-          网格视图
-        </div>
-      </div>
+      </header>
 
       <div class="docs-content">
-        <div class="docs-table">
-          <table class="table">
+        <div class="files-table-wrapper">
+          <table class="files-table">
             <thead>
               <tr>
-                <th>文件名</th>
-                <th>大小</th>
-                <th>更新时间</th>
-                <th>更新人</th>
-                <th>操作</th>
+                <th class="name-col">名称</th>
+                <th>所有者</th>
+                <th>修改时间</th>
+                <th class="actions-col">操作</th>
               </tr>
             </thead>
             <tbody>
               <tr
-                v-for="doc in documents"
-                :key="doc.id"
-                class="doc-row"
-                @click="handleDocClick(doc)"
+                v-for="file in files"
+                :key="file.id"
+                class="file-row"
+                @click="handleFileClick(file)"
               >
-                <td>
-                  <div class="doc-name-cell">
-                    <div class="doc-icon" :class="getDocIconClass(doc.type)">
-                      <el-icon><component :is="getDocIcon(doc.type)" /></el-icon>
+                <td class="name-col">
+                  <div class="file-info">
+                    <div class="file-icon" :class="file.iconClass">
+                      <span class="material-icons-outlined">{{ file.icon }}</span>
                     </div>
-                    <div class="doc-name-row">
-                      <span class="doc-name">{{ doc.name }}</span>
-                      <el-icon v-if="doc.isStarred" class="doc-star"><Star /></el-icon>
+                    <div>
+                      <div class="file-name">{{ file.name }}</div>
+                      <div class="file-meta">{{ file.meta }}</div>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <span class="doc-size">{{ doc.size }}</span>
-                </td>
-                <td>
-                  <span class="doc-time">{{ doc.updatedAt }}</span>
-                </td>
-                <td>
-                  <div class="doc-updater">
-                    <div class="updater-avatar">{{ doc.updatedBy[0] }}</div>
-                    <span class="updater-name">{{ doc.updatedBy }}</span>
+                  <div class="owner-info">
+                    <div class="owner-avatar" :style="{ background: file.ownerColor }">
+                      {{ file.owner.charAt(0) }}
+                    </div>
+                    <span>{{ file.owner }}</span>
                   </div>
                 </td>
                 <td>
-                  <div class="doc-actions" @click.stop>
-                    <el-button text class="action-btn">
-                      <el-icon><Star /></el-icon>
-                    </el-button>
-                    <el-button text class="action-btn">
-                      <el-icon><MoreFilled /></el-icon>
-                    </el-button>
-                  </div>
+                  <span class="file-time">{{ file.modifiedTime }}</span>
+                </td>
+                <td class="actions-col">
+                  <button class="action-btn" @click.stop="handleFileMenu(file)">
+                    <span class="material-icons-outlined">more_vert</span>
+                  </button>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+
+        <div class="pagination">
+          <span>共 {{ files.length }} 个文件</span>
+          <div class="page-buttons">
+            <button class="page-btn" disabled>上一页</button>
+            <span class="page-divider">|</span>
+            <button class="page-btn">下一页</button>
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import {
-  Clock,
-  Document,
-  User,
-  Star,
-  Upload,
-  FolderAdd,
-  Folder,
-  Search,
-  MoreFilled,
-  Picture,
-  Files
-} from '@element-plus/icons-vue'
+import { ref, computed } from 'vue'
+import { ElMessage } from 'element-plus'
 
-const activeNav = ref('my-docs')
+const activeNav = ref('recent')
 const viewMode = ref('list')
 const searchQuery = ref('')
 
-const navItems = ref([
-  { id: 'recent', label: '最近使用', icon: Clock },
-  { id: 'my-docs', label: '我的文档', icon: Document },
-  { id: 'shared', label: '共享文档', icon: User },
-  { id: 'starred', label: '星标文档', icon: Star }
+const mainNavItems = ref([
+  { id: 'recent', label: '最近使用', icon: 'schedule' },
+  { id: 'my-created', label: '我创建的', icon: 'folder_special' },
+  { id: 'shared', label: '分享给我', icon: 'share' },
+  { id: 'starred', label: '收藏夹', icon: 'star_border' }
 ])
 
-const folders = ref([
-  { id: '1', name: '产品文档', count: 25, colorClass: 'folder-blue' },
-  { id: '2', name: '设计资源', count: 48, colorClass: 'folder-purple' },
-  { id: '3', name: '开发文档', count: 32, colorClass: 'folder-green' },
-  { id: '4', name: '项目资料', count: 18, colorClass: 'folder-orange' }
+const storageNavItems = ref([
+  { id: 'enterprise', label: '企业空间', icon: 'corporate_fare' },
+  { id: 'personal', label: '个人空间', icon: 'person_outline' },
+  { id: 'trash', label: '回收站', icon: 'delete_outline' }
 ])
 
-const documents = ref([
+const files = ref([
   {
-    id: '1',
-    name: '产品需求文档V2.0.docx',
-    type: 'doc',
-    size: '2.3 MB',
-    updatedAt: '2小时前',
-    updatedBy: '张伟',
-    isStarred: true
+    id: 1,
+    name: '2023年度项目资料',
+    icon: 'folder',
+    iconClass: 'icon-folder',
+    meta: '3 个文件',
+    owner: '我',
+    ownerColor: '#3b82f6',
+    modifiedTime: '2023-11-01 14:20'
   },
   {
-    id: '2',
-    name: 'UI设计规范.pdf',
-    type: 'doc',
-    size: '5.7 MB',
-    updatedAt: '5小时前',
-    updatedBy: '李明',
-    isStarred: true
+    id: 2,
+    name: 'RuoYi-IM 产品需求规格说明书 v2.0.docx',
+    icon: 'description',
+    iconClass: 'icon-doc',
+    meta: '2.4 MB',
+    owner: '李明',
+    ownerColor: '#6366f1',
+    modifiedTime: '2023-10-28 09:15'
   },
   {
-    id: '3',
-    name: '项目进度表.xlsx',
-    type: 'file',
-    size: '1.2 MB',
-    updatedAt: '昨天',
-    updatedBy: '王芳',
-    isStarred: false
+    id: 3,
+    name: 'Q4 研发部预算表.xlsx',
+    icon: 'table_view',
+    iconClass: 'icon-sheet',
+    meta: '1.1 MB',
+    owner: '张伟',
+    ownerColor: '#ec4899',
+    modifiedTime: '2023-10-27 16:45'
   },
   {
-    id: '4',
-    name: '产品原型图.fig',
-    type: 'image',
-    size: '8.4 MB',
-    updatedAt: '昨天',
-    updatedBy: '李明',
-    isStarred: false
+    id: 4,
+    name: '系统架构设计图_Final.pdf',
+    icon: 'picture_as_pdf',
+    iconClass: 'icon-pdf',
+    meta: '5.8 MB',
+    owner: '王芳',
+    ownerColor: '#f97316',
+    modifiedTime: '2023-10-25 11:30'
   },
   {
-    id: '5',
-    name: 'Q1季度总结报告.pptx',
-    type: 'doc',
-    size: '12.5 MB',
-    updatedAt: '2天前',
-    updatedBy: '刘洋',
-    isStarred: false
-  },
-  {
-    id: '6',
-    name: '技术架构图.png',
-    type: 'image',
-    size: '3.1 MB',
-    updatedAt: '3天前',
-    updatedBy: '刘洋',
-    isStarred: false
-  },
-  {
-    id: '7',
-    name: '用户调研报告.docx',
-    type: 'doc',
-    size: '4.6 MB',
-    updatedAt: '3天前',
-    updatedBy: '陈晨',
-    isStarred: false
-  },
-  {
-    id: '8',
-    name: '竞品分析.pdf',
-    type: 'doc',
-    size: '6.8 MB',
-    updatedAt: '星期一',
-    updatedBy: '张伟',
-    isStarred: false
+    id: 5,
+    name: '登录页UI_v3.png',
+    icon: 'image',
+    iconClass: 'icon-image',
+    meta: '856 KB',
+    owner: '刘洋',
+    ownerColor: '#06b6d4',
+    modifiedTime: '2023-10-24 15:10'
   }
 ])
 
-const getDocIcon = (type) => {
-  switch (type) {
-    case 'doc':
-      return Document
-    case 'image':
-      return Picture
-    default:
-      return Files
-  }
+const currentViewTitle = computed(() => {
+  const item = [...mainNavItems.value, ...storageNavItems.value]
+    .find(item => item.id === activeNav.value)
+  return item?.label || '最近使用'
+})
+
+const handleFileClick = (file) => {
+  ElMessage.info(`打开文件: ${file.name}`)
 }
 
-const getDocIconClass = (type) => {
-  switch (type) {
-    case 'doc':
-      return 'icon-blue'
-    case 'image':
-      return 'icon-purple'
-    default:
-      return 'icon-gray'
-  }
-}
-
-const handleFolderClick = (folder) => {
-  console.log('Folder clicked:', folder)
-}
-
-const handleDocClick = (doc) => {
-  console.log('Doc clicked:', doc)
+const handleFileMenu = (file) => {
+  ElMessage.info(`文件操作: ${file.name}`)
 }
 </script>
 
 <style scoped>
 .documents-panel {
-  flex: 1;
   display: flex;
-  background: #fff;
-  overflow: hidden;
+  height: 100%;
+  flex: 1;
+  min-width: 0;
+  background: #f4f7f9;
 }
 
+/* 左侧边栏 */
 .docs-sidebar {
   width: 256px;
-  border-right: 1px solid #e8e8e8;
+  background: #fff;
+  border-right: 1px solid #e6e6e6;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 }
 
 .sidebar-header {
-  padding: 16px;
+  padding: 20px;
   border-bottom: 1px solid #f0f0f0;
-
-  .sidebar-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #262626;
-    margin: 0 0 12px 0;
-  }
-
-  .upload-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
 }
 
-.sidebar-body {
+.sidebar-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #262626;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-icon {
+  color: #1677ff;
+}
+
+.sidebar-content {
   flex: 1;
+  padding: 16px 12px;
   overflow-y: auto;
 }
 
 .nav-section {
-  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-size: 14px;
   color: #595959;
-
-  &:hover {
-    background-color: #f5f5f5;
-  }
-
-  &.active {
-    background-color: #e6f7ff;
-    color: #1890ff;
-  }
-
-  .el-icon {
-    font-size: 16px;
-  }
+  transition: all 0.2s;
 }
 
-.folders-section {
+.nav-item:hover {
+  background: #f5f5f5;
+}
+
+.nav-item.active {
+  background: #e6f7ff;
+  color: #1677ff;
+  font-weight: 500;
+}
+
+.nav-icon {
+  font-size: 20px;
+}
+
+.nav-label {
+  font-size: 14px;
+}
+
+.nav-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 16px 0;
+}
+
+.nav-section-label {
+  padding: 0 12px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8c8c8c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-footer {
   padding: 16px;
   border-top: 1px solid #f0f0f0;
 }
 
-.folders-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-
-  .folders-title {
-    font-size: 14px;
-    color: #595959;
-  }
-
-  .folder-add-btn {
-    padding: 4px;
-
-    .el-icon {
-      font-size: 16px;
-      color: #8c8c8c;
-    }
-  }
-}
-
-.folders-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.folder-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
+.storage-info {
+  background: #fafafa;
   border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #f5f5f5;
-  }
-
-  .folder-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-
-    .el-icon {
-      font-size: 16px;
-      color: #fff;
-    }
-
-    &.folder-blue {
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-    }
-
-    &.folder-purple {
-      background: linear-gradient(135deg, #a855f7, #9333ea);
-    }
-
-    &.folder-green {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-    }
-
-    &.folder-orange {
-      background: linear-gradient(135deg, #f97316, #ea580c);
-    }
-  }
-
-  .folder-info {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .folder-name {
-    font-size: 14px;
-    color: #262626;
-    margin: 0 0 2px 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .folder-count {
-    font-size: 12px;
-    color: #8c8c8c;
-    margin: 0;
-  }
+  padding: 12px;
 }
 
+.storage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.storage-label {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.storage-percent {
+  font-size: 12px;
+  color: #1677ff;
+  font-weight: 500;
+}
+
+.storage-bar {
+  width: 100%;
+  height: 6px;
+  background: #e6e6e6;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.storage-fill {
+  height: 100%;
+  background: #1677ff;
+  border-radius: 3px;
+}
+
+.storage-text {
+  margin-top: 8px;
+  font-size: 10px;
+  color: #bfbfbf;
+  text-align: right;
+}
+
+/* 主内容区 */
 .docs-main {
   flex: 1;
-  background-color: #f7f8fa;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
 .docs-header {
+  height: 64px;
+  padding: 0 32px;
   background: #fff;
-  padding: 16px 24px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e6e6e6;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .header-left {
   display: flex;
   align-items: center;
   gap: 16px;
-  flex: 1;
 }
 
 .header-title {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: 600;
   color: #262626;
   margin: 0;
 }
 
+.header-divider {
+  width: 1px;
+  height: 16px;
+  background: #d9d9d9;
+  margin: 0 8px;
+}
+
 .search-box {
   position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #bfbfbf;
+  font-size: 18px;
+}
+
+.search-input {
   width: 256px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px 8px 34px;
+  font-size: 14px;
+  color: #262626;
+  outline: none;
+  transition: all 0.2s;
+}
 
-  .search-icon {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-    color: #8c8c8c;
-  }
+.search-input:focus {
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+}
 
-  .search-input {
-    width: 100%;
-
-    :deep(.el-input__wrapper) {
-      background-color: #f5f5f5;
-      border: none;
-      padding-left: 36px;
-      box-shadow: none;
-    }
-  }
+.search-input::placeholder {
+  color: #bfbfbf;
 }
 
 .header-right {
-  .more-btn {
-    .el-icon {
-      font-size: 16px;
-    }
-  }
-}
-
-.view-tabs {
-  background: #fff;
-  padding: 0 24px;
-  border-bottom: 1px solid #f0f0f0;
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 16px;
 }
 
-.tab-item {
-  padding: 12px 16px;
-  font-size: 14px;
-  color: #595959;
+.view-toggle {
+  display: flex;
+  align-items: center;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.toggle-btn {
+  padding: 6px;
+  color: #bfbfbf;
+  background: none;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
+}
 
-  &:hover {
-    color: #1890ff;
-  }
+.toggle-btn:hover {
+  color: #595959;
+}
 
-  &.active {
-    color: #1890ff;
-    border-bottom-color: #1890ff;
-  }
+.toggle-btn.active {
+  background: #fff;
+  color: #595959;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.new-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #1677ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.2);
+}
+
+.new-btn:hover {
+  background: #4096ff;
+}
+
+.new-btn:active {
+  transform: scale(0.98);
 }
 
 .docs-content {
   flex: 1;
-  padding: 24px;
+  padding: 32px;
   overflow-y: auto;
 }
 
-.docs-table {
+.files-table-wrapper {
   background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
+  border-radius: 12px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e6e6e6;
+  overflow: hidden;
 }
 
-.table {
+.files-table {
   width: 100%;
   border-collapse: collapse;
-
-  thead {
-    background-color: #f5f5f5;
-
-    th {
-      text-align: left;
-      padding: 12px 16px;
-      font-size: 12px;
-      font-weight: 500;
-      color: #595959;
-      border-bottom: 1px solid #f0f0f0;
-    }
-  }
-
-  tbody {
-    tr {
-      border-bottom: 1px solid #f0f0f0;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-
-      &:hover {
-        background-color: #f5f5f5;
-      }
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      td {
-        padding: 12px 16px;
-      }
-    }
-  }
 }
 
-.doc-name-cell {
+.files-table thead {
+  background: #fafafa;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.files-table th {
+  padding: 16px 24px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8c8c8c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.files-table th.actions-col {
+  text-align: right;
+}
+
+.files-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.files-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.files-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.files-table td {
+  padding: 16px 24px;
+}
+
+.name-col {
+  width: 50%;
+}
+
+.file-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.doc-icon {
+.file-icon {
   width: 40px;
   height: 40px;
   border-radius: 8px;
@@ -612,85 +596,167 @@ const handleDocClick = (doc) => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-
-  .el-icon {
-    font-size: 20px;
-  }
-
-  &.icon-blue {
-    background-color: #e6f7ff;
-    color: #1890ff;
-  }
-
-  &.icon-purple {
-    background-color: #f9f0ff;
-    color: #722ed1;
-  }
-
-  &.icon-gray {
-    background-color: #f5f5f5;
-    color: #8c8c8c;
-  }
 }
 
-.doc-name-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
+.icon-folder { background: #fef3c7; color: #f59e0b; }
+.icon-doc { background: #dbeafe; color: #2563eb; }
+.icon-sheet { background: #d1fae5; color: #059669; }
+.icon-pdf { background: #fee2e2; color: #ef4444; }
+.icon-image { background: #f3e8ff; color: #a855f7; }
 
-.doc-name {
+.file-name {
   font-size: 14px;
+  font-weight: 500;
   color: #262626;
 }
 
-.doc-star {
-  font-size: 16px;
-  color: #faad14;
+.file-meta {
+  font-size: 10px;
+  color: #bfbfbf;
+  margin-top: 2px;
 }
 
-.doc-size,
-.doc-time {
+.owner-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 14px;
   color: #595959;
 }
 
-.doc-updater {
+.owner-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.file-time {
+  font-size: 14px;
+  color: #8c8c8c;
+}
+
+.actions-col {
+  text-align: right;
+}
+
+.action-btn {
+  opacity: 0;
+  background: none;
+  border: none;
+  color: #bfbfbf;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.file-row:hover .action-btn {
+  opacity: 1;
+}
+
+.action-btn:hover {
+  color: #1677ff;
+}
+
+.pagination {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.page-buttons {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.updater-avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.page-btn {
+  background: none;
+  border: none;
+  color: #8c8c8c;
+  cursor: pointer;
+  padding: 4px 8px;
   font-size: 12px;
-  font-weight: 500;
-  flex-shrink: 0;
+  transition: color 0.2s;
 }
 
-.updater-name {
-  font-size: 14px;
-  color: #595959;
+.page-btn:hover:not([disabled]) {
+  color: #1677ff;
 }
 
-.doc-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
+.page-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-  .action-btn {
-    .el-icon {
-      font-size: 16px;
-      color: #8c8c8c;
-    }
-  }
+.page-divider {
+  color: #d9d9d9;
+}
+
+/* 暗色模式 */
+:deep(.dark) .docs-sidebar,
+:deep(.dark) .docs-header,
+:deep(.dark) .files-table-wrapper {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+:deep(.dark) .sidebar-title,
+:deep(.dark) .header-title,
+:deep(.dark) .file-name {
+  color: #f1f5f9;
+}
+
+:deep(.dark) .nav-item {
+  color: #94a3b8;
+}
+
+:deep(.dark) .nav-item:hover {
+  background: rgba(51, 65, 85, 0.5);
+}
+
+:deep(.dark) .nav-item.active {
+  background: rgba(30, 58, 138, 0.3);
+  color: #60a5fa;
+}
+
+:deep(.dark) .search-input {
+  background: #0f172a;
+  color: #cbd5e1;
+}
+
+:deep(.dark) .storage-info {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+:deep(.dark) .files-table thead {
+  background: rgba(15, 23, 42, 0.5);
+  border-color: #334155;
+}
+
+:deep(.dark) .files-table th {
+  color: #64748b;
+}
+
+:deep(.dark) .files-table tbody tr:hover {
+  background: rgba(51, 65, 85, 0.3);
+}
+
+:deep(.dark) .file-time {
+  color: #64748b;
+}
+
+:deep(.dark) .owner-info {
+  color: #94a3b8;
 }
 </style>

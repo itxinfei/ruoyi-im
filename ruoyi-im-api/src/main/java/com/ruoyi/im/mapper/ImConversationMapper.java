@@ -79,4 +79,12 @@ public interface ImConversationMapper extends BaseMapper<ImConversation> {
      * @return 未读消息总数
      */
     Integer getTotalUnreadCount(@Param("userId") Long userId);
+
+    /**
+     * 查询会话列表
+     *
+     * @param imConversation 查询条件
+     * @return 会话列表
+     */
+    List<ImConversation> selectImConversationList(ImConversation imConversation);
 }

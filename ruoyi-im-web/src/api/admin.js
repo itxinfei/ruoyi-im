@@ -12,7 +12,7 @@ import request from './request'
  */
 export function getUserList(params) {
   return request({
-    url: '/admin/users',
+    url: '/api/admin/users',
     method: 'get',
     params
   })
@@ -25,7 +25,7 @@ export function getUserList(params) {
  */
 export function getUserDetail(id) {
   return request({
-    url: `/admin/users/${id}`,
+    url: `/api/admin/users/${id}`,
     method: 'get'
   })
 }
@@ -38,7 +38,7 @@ export function getUserDetail(id) {
  */
 export function updateUserStatus(id, status) {
   return request({
-    url: `/admin/users/${id}/status`,
+    url: `/api/admin/users/${id}/status`,
     method: 'put',
     params: { status }
   })
@@ -52,7 +52,7 @@ export function updateUserStatus(id, status) {
  */
 export function updateUserRole(id, role) {
   return request({
-    url: `/admin/users/${id}/role`,
+    url: `/api/admin/users/${id}/role`,
     method: 'put',
     params: { role }
   })
@@ -65,7 +65,7 @@ export function updateUserRole(id, role) {
  */
 export function deleteUser(id) {
   return request({
-    url: `/admin/users/${id}`,
+    url: `/api/admin/users/${id}`,
     method: 'delete'
   })
 }
@@ -76,7 +76,7 @@ export function deleteUser(id) {
  */
 export function getUserStats() {
   return request({
-    url: '/admin/users/stats',
+    url: '/api/admin/users/stats',
     method: 'get'
   })
 }
@@ -89,7 +89,7 @@ export function getUserStats() {
  */
 export function getOverview() {
   return request({
-    url: '/admin/stats/overview',
+    url: '/api/admin/stats/overview',
     method: 'get'
   })
 }
@@ -101,7 +101,7 @@ export function getOverview() {
  */
 export function getUserActiveStats(days = 7) {
   return request({
-    url: '/admin/stats/users/active',
+    url: '/api/admin/stats/users/active',
     method: 'get',
     params: { days }
   })
@@ -114,7 +114,7 @@ export function getUserActiveStats(days = 7) {
  */
 export function getGroupActiveStats(days = 7) {
   return request({
-    url: '/admin/stats/groups/active',
+    url: '/api/admin/stats/groups/active',
     method: 'get',
     params: { days }
   })
@@ -127,7 +127,7 @@ export function getGroupActiveStats(days = 7) {
  */
 export function getMessageStats(params) {
   return request({
-    url: '/admin/stats/messages',
+    url: '/api/admin/stats/messages',
     method: 'get',
     params
   })

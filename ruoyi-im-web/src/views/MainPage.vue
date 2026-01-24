@@ -1,16 +1,16 @@
 <template>
   <div :class="['dingtalk-app', isDark ? 'dark' : '']">
-    <div class="flex h-screen bg-background-light dark:bg-background-dark">
+    <div class="flex h-screen bg-background-light dark:bg-background-dark overflow-hidden">
       <!-- 新侧边导航 -->
-      <ImSideNavNew 
-        :active-module="activeModule" 
+      <ImSideNavNew
+        :active-module="activeModule"
         :collapsed="isSidebarCollapsed"
-        @switch-module="handleSwitchModule" 
+        @switch-module="handleSwitchModule"
         @toggle-collapse="isSidebarCollapsed = !isSidebarCollapsed"
       />
 
       <!-- 主内容区 -->
-      <main class="flex-1 overflow-hidden flex">
+      <main class="flex-1 min-w-0 overflow-hidden flex">
         <SessionPanel v-if="activeModule === 'chat'" @select-session="handleSelectSession" />
         <WorkbenchPanel v-if="activeModule === 'workbench'" />
         <ContactsPanel v-if="activeModule === 'contacts'" />

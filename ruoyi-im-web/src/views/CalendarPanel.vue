@@ -7,24 +7,24 @@
           <div class="date-range">
             <h2 class="range-title">{{ weekRangeString }}</h2>
             <button class="expand-btn">
-              <el-icon><ArrowDown /></el-icon>
+              <span class="material-icons-outlined">expand_more</span>
             </button>
           </div>
-          
+
           <div class="nav-controls">
             <button class="nav-btn" @click="previousWeek" title="上一周">
-               <el-icon><ArrowLeft /></el-icon>
+               <span class="material-icons-outlined text-lg">chevron_left</span>
             </button>
             <button class="today-btn" @click="goToToday">今天</button>
             <button class="nav-btn" @click="nextWeek" title="下一周">
-               <el-icon><ArrowRight /></el-icon>
+               <span class="material-icons-outlined text-lg">chevron_right</span>
             </button>
           </div>
         </div>
 
         <div class="view-switcher">
-          <button 
-            v-for="view in ['月', '周', '日', '日程']" 
+          <button
+            v-for="view in ['月', '周', '日', '日程']"
             :key="view"
             class="switch-btn"
             :class="{ active: currentView === view }"
@@ -34,13 +34,13 @@
           </button>
         </div>
       </header>
-      
+
       <!-- Week View Grid -->
       <div v-if="currentView === '周'" class="week-view">
         <div class="week-header">
           <div class="time-column-header"></div>
-          <div 
-            v-for="(day, index) in weekHeaders" 
+          <div
+            v-for="(day, index) in weekHeaders"
             :key="index"
             class="day-header"
             :class="{ 'is-today': isToday(day.date) }"
@@ -60,10 +60,10 @@
 
             <div class="day-columns">
               <div class="time-column-spacer"></div>
-              <div v-for="(day, index) in weekHeaders" :key="index" class="day-column">
+              <div v-for="(day, index) in weekHeaders" :key="index" class="day-column" :class="{ 'is-today': isToday(day.date) }">
                  <!-- Events -->
-                 <div 
-                    v-for="event in getEventsForDay(day.date)" 
+                 <div
+                    v-for="event in getEventsForDay(day.date)"
                     :key="event.id"
                     class="event-block"
                     :class="`event-${event.color}`"
@@ -85,7 +85,7 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Month View Grid -->
       <div v-else-if="currentView === '月'" class="month-view">
         <div class="month-grid-header">
@@ -94,11 +94,11 @@
            </div>
         </div>
         <div class="month-grid">
-           <div 
-             v-for="(day, index) in monthDays" 
-             :key="index" 
+           <div
+             v-for="(day, index) in monthDays"
+             :key="index"
              class="month-day-cell"
-             :class="{ 
+             :class="{
                'not-current-month': !day.isCurrentMonth,
                'is-today': isToday(day.date),
                'is-selected': isSameDay(day.date, selectedDate)
@@ -110,8 +110,8 @@
                 <span v-if="isToday(day.date)" class="today-label">今</span>
              </div>
              <div class="day-events">
-               <div 
-                 v-for="event in getEventsForDay(day.date)" 
+               <div
+                 v-for="event in getEventsForDay(day.date)"
                  :key="event.id"
                  class="mini-event"
                  :class="`event-bg-${event.color}`"
@@ -122,7 +122,7 @@
            </div>
         </div>
       </div>
-      
+
       <div v-else class="view-placeholder">
         暂未实现 {{ currentView }} 视图
       </div>
@@ -140,20 +140,20 @@
             {{ selectedDate.getDate() }}
           </div>
         </div>
-        
+
         <button class="add-btn" @click="handleAddSchedule">
-          <el-icon><Plus /></el-icon>
+          <span class="material-icons-outlined">add</span>
           新建日程
         </button>
       </div>
 
       <div class="panel-content">
         <h4 class="section-title">今日日程</h4>
-        
+
         <div v-if="selectedDateEvents.length > 0" class="schedule-list">
-          <div 
-            v-for="event in selectedDateEvents" 
-            :key="event.id" 
+          <div
+            v-for="event in selectedDateEvents"
+            :key="event.id"
             class="schedule-item"
             @click="handleEventClick(event)"
           >
@@ -161,7 +161,7 @@
               <div class="dot" :class="`dot-${event.color}`"></div>
               <div class="line"></div>
             </div>
-            
+
             <div class="event-card">
               <div class="card-header">
                 <span class="card-title">{{ event.title }}</span>
@@ -169,16 +169,16 @@
               <div class="card-time">
                 <span class="time-tag">{{ event.startTime }} - {{ event.endTime }}</span>
               </div>
-              
+
               <div v-if="event.location" class="card-location">
-                <el-icon><Location /></el-icon>
+                <span class="material-icons-outlined text-[14px]">location_on</span>
                 {{ event.location }}
               </div>
-              
+
               <div v-if="event.attendees && event.attendees.length" class="attendees">
-                <div 
-                  v-for="(person, idx) in event.attendees.slice(0, 3)" 
-                  :key="idx" 
+                <div
+                  v-for="(person, idx) in event.attendees.slice(0, 3)"
+                  :key="idx"
                   class="avatar"
                   :class="getAvatarClass(idx)"
                 >
@@ -209,13 +209,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowDown,
-  Plus,
-  Location
-} from '@element-plus/icons-vue'
 
 // --- State ---
 const currentDate = ref(new Date())
@@ -235,7 +228,7 @@ const allEvents = ref([
     title: '部门周会',
     startTime: '09:00',
     endTime: '10:30',
-    date: '', // Set on init
+    date: '',
     color: 'blue',
     location: '会议室 A302',
     attendees: [{name: '李'}, {name: '王'}, {name: '+'}]
@@ -245,7 +238,7 @@ const allEvents = ref([
     title: '产品需求评审',
     startTime: '10:00',
     endTime: '11:30',
-    date: '', 
+    date: '',
     color: 'blue',
     location: '会议室 A302',
     attendees: [{name: '张'}, {name: '陈'}]
@@ -255,7 +248,7 @@ const allEvents = ref([
     title: '技术分享会',
     startTime: '11:00',
     endTime: '12:00',
-    date: '', 
+    date: '',
     color: 'emerald',
     location: null,
     attendees: []
@@ -285,7 +278,7 @@ const allEvents = ref([
     title: '提交周报',
     startTime: '17:00',
     endTime: '17:30',
-    date: '', 
+    date: '',
     color: 'slate',
     location: null,
     attendees: []
@@ -307,17 +300,17 @@ const initMockData = () => {
       const day = String(d.getDate()).padStart(2, '0');
       return `${y}-${m}-${day}`;
   }
-  
+
   const d1 = new Date(today); d1.setDate(today.getDate() - 1);
-  const d2 = new Date(today); 
+  const d2 = new Date(today);
   const d3 = new Date(today); d3.setDate(today.getDate() + 2);
-  
-  allEvents.value[0].date = fmt(d1); 
-  allEvents.value[1].date = fmt(d2); 
+
+  allEvents.value[0].date = fmt(d1);
+  allEvents.value[1].date = fmt(d2);
   allEvents.value[2].date = fmt(d2);
   allEvents.value[3].date = fmt(d2);
   allEvents.value[4].date = fmt(d2);
-  allEvents.value[5].date = fmt(d3); 
+  allEvents.value[5].date = fmt(d3);
 }
 initMockData();
 
@@ -326,12 +319,12 @@ const weekHeaders = computed(() => {
   const curr = new Date(currentDate.value)
   const day = curr.getDay()
   const diff = curr.getDate() - day + (day === 0 ? -6 : 1) // Monday start
-  
+
   const monday = new Date(curr.setDate(diff))
   const days = []
-  
+
   const displayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-  
+
   for (let i = 0; i < 7; i++) {
     const d = new Date(monday)
     d.setDate(monday.getDate() + i)
@@ -363,36 +356,36 @@ const selectedDateEvents = computed(() => {
 const monthDays = computed(() => {
   const year = currentDate.value.getFullYear()
   const month = currentDate.value.getMonth()
-  
+
   // First day of the month
   const firstDay = new Date(year, month, 1)
   // Day of week (0 is Sunday)
   let startDay = firstDay.getDay()
   // Monday start: Sun->7, Mon->1, Tue->2...
   startDay = startDay === 0 ? 7 : startDay
-  
+
   const days = []
-  
+
   // Previous month padding
   for (let i = startDay - 1; i > 0; i--) {
     const d = new Date(year, month, 1 - i)
     days.push({ date: d, isCurrentMonth: false })
   }
-  
+
   // Current month days
   const lastDay = new Date(year, month + 1, 0).getDate()
   for (let i = 1; i <= lastDay; i++) {
     const d = new Date(year, month, i)
     days.push({ date: d, isCurrentMonth: true })
   }
-  
+
   // Next month padding to fill 6 weeks (42 cells)
   const remaining = 42 - days.length
   for (let i = 1; i <= remaining; i++) {
     const d = new Date(year, month + 1, i)
     days.push({ date: d, isCurrentMonth: false })
   }
-  
+
   return days
 })
 
@@ -491,7 +484,8 @@ onUnmounted(() => {
 .calendar-panel {
   display: flex;
   height: 100%;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   background-color: #fff;
 }
@@ -542,7 +536,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   transition: color 0.2s;
-  
+
   &:hover { color: #1677ff; }
 }
 
@@ -562,7 +556,7 @@ onUnmounted(() => {
   border-radius: 6px;
   cursor: pointer;
   display: flex;
-  align-items: center;
+  align-items: centers;
   &:hover { background-color: #fff; }
 }
 
@@ -592,7 +586,7 @@ onUnmounted(() => {
   background: transparent;
   border-radius: 6px;
   cursor: pointer;
-  
+
   &.active {
     background-color: #fff;
     color: #1677ff;
@@ -640,9 +634,9 @@ onUnmounted(() => {
   justify-content: center;
   padding: 12px 0;
   border-right: 1px solid #e2e8f0;
-  
+
   &:last-child { border-right: none; }
-  
+
   &.is-today {
     background-color: rgba(22, 119, 255, 0.05);
     .day-name, .day-date { color: #1677ff; }
@@ -667,7 +661,7 @@ onUnmounted(() => {
   flex: 1;
   overflow-y: auto;
   position: relative;
-  
+
   &::-webkit-scrollbar { width: 6px; height: 6px; }
   &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 }
@@ -719,13 +713,14 @@ onUnmounted(() => {
   flex: 1;
   position: relative;
   border-right: 1px solid #f1f5f9;
+
   &:last-child { border-right: none; }
 }
 
 .event-block {
   position: absolute;
   left: 4px; right: 4px;
-  border-radius: 4px;
+  border-radius: 8px;
   padding: 8px;
   font-size: 12px;
   cursor: pointer;
@@ -734,7 +729,7 @@ onUnmounted(() => {
   overflow: hidden;
   box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
   z-index: 10;
-  
+
   &:hover {
     z-index: 20;
     opacity: 0.95;
@@ -758,9 +753,9 @@ onUnmounted(() => {
   left: 0; right: 0;
   display: flex; align-items: center;
   z-index: 30; pointer-events: none;
-  
+
   .dot { width: 8px; height: 8px; border-radius: 50%; background-color: #ef4444; margin-left: -4px; }
-  .line { flex: 1; height: 2px; background-color: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+  .line { flex: 1; height: 2px; background-color: #ef4444; box-shadow: 0 0 8px rgba(239,68,68, 0.5); }
 }
 
 /* Month View */
@@ -776,6 +771,7 @@ onUnmounted(() => {
   display: flex;
   background-color: #fff;
   border-bottom: 1px solid #e2e8f0;
+
   .weekday-label {
     flex: 1;
     padding: 10px 0;
@@ -805,18 +801,18 @@ onUnmounted(() => {
   min-height: 0;
   cursor: pointer;
   transition: background-color 0.2s;
-  
+
   &:hover { background-color: #f8fafc; }
-  
+
   &.not-current-month {
     background-color: #fdfdfd;
     .day-num { color: #cbd5e1; }
   }
-  
+
   &.is-selected {
     background-color: #eff6ff;
   }
-  
+
   &.is-today {
     .day-num {
       color: #1677ff;
@@ -856,11 +852,11 @@ onUnmounted(() => {
 .mini-event {
   font-size: 11px;
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  
+
   &.event-bg-blue { background-color: #dbeafe; color: #1e40af; border-left: 2px solid #3b82f6; }
   &.event-bg-orange { background-color: #ffedd5; color: #9a3412; border-left: 2px solid #f97316; }
   &.event-bg-purple { background-color: #f3e8ff; color: #6b21a8; border-left: 2px solid #a855f7; }
@@ -887,6 +883,7 @@ onUnmounted(() => {
 .date-info {
   display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;
 }
+
 .date-title { font-size: 20px; font-weight: 700; color: #1e293b; margin: 0; }
 .date-subtitle { font-size: 14px; color: #64748b; margin-top: 4px; }
 
@@ -905,7 +902,7 @@ onUnmounted(() => {
   border-radius: 8px;
   display: flex; align-items: center; justify-content: center; gap: 8px;
   font-weight: 500; cursor: pointer;
-  
+
   &:hover { background-color: #2563eb; transform: translateY(-2px); }
 }
 
@@ -929,7 +926,7 @@ onUnmounted(() => {
   .dot-purple { background-color: #a855f7; box-shadow: 0 0 0 4px #f3e8ff; }
   .dot-emerald { background-color: #10b981; box-shadow: 0 0 0 4px #ecfdf5; }
   .dot-slate { background-color: #94a3b8; box-shadow: 0 0 0 4px #f1f5f9; }
-  
+
   .line { flex: 1; width: 2px; background-color: #e2e8f0; margin: 4px 0; }
   .schedule-item:last-child .line { display: none; }
 }
@@ -965,4 +962,24 @@ onUnmounted(() => {
 .todo-checkbox { width: 16px; height: 16px; border-radius: 4px; accent-color: #1677ff; cursor: pointer; }
 .todo-text { font-size: 14px; color: #475569; }
 .empty-state { font-size: 14px; color: #94a3b8; text-align: center; padding: 20px 0; }
+
+/* Dark Mode */
+.dark .calendar-panel { background-color: #0f172a; }
+.dark .calendar-header { background-color: #1e293b; border-bottom-color: #334155; }
+.dark .range-title { color: #f1f5f9; }
+.dark .week-header { background-color: #1e293b; border-bottom-color: #334155; }
+.dark .day-header { border-right-color: #334155; }
+.dark .time-column-header { border-right-color: #334155; }
+.dark .time-column-spacer { background-color: #0f172a; border-right-color: #334155; }
+.dark .day-column { border-right-color: #1e293b; }
+.dark .time-row { border-bottom-color: #334155; }
+.dark .month-view { background-color: #0f172a; }
+.dark .month-grid-header { background-color: #1e293b; border-bottom-color: #334155; }
+.dark .weekday-label { color: #94a3b8; }
+.dark .month-grid { background-color: #334155; gap: 1px; }
+.dark .month-day-cell { background-color: #1e293b; }
+.dark .right-panel { background-color: #1e293b; border-left-color: #334155; }
+.dark .panel-header { background-color: #0f172a; }
+.dark .date-title { color: #f1f5f9; }
+.dark .event-card { background-color: rgba(22, 119, 255, 0.1); border-color: rgba(22, 119, 255, 0.2); }
 </style>

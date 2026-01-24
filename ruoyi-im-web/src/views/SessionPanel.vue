@@ -4,16 +4,16 @@
       <h1 class="text-xl font-bold dark:text-white">消息</h1>
       <el-dropdown trigger="click" @command="handleCommand">
         <button class="text-slate-500 hover:text-primary transition-colors">
-          <el-icon class="text-xl"><Plus /></el-icon>
+          <span class="material-icons-outlined text-xl">add</span>
         </button>
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item command="group">
-              <el-icon><UserFilled /></el-icon>
+              <span class="material-icons-outlined text-sm mr-2">group</span>
               创建群组
             </el-dropdown-item>
             <el-dropdown-item command="chat">
-              <el-icon><ChatDotRound /></el-icon>
+              <span class="material-icons-outlined text-sm mr-2">chat</span>
               发起单聊
             </el-dropdown-item>
           </el-dropdown-menu>
@@ -22,13 +22,15 @@
     </div>
 
     <div class="search-bar">
-      <el-input
-        v-model="searchKeyword"
-        placeholder="搜索会话..."
-        :prefix-icon="Search"
-        clearable
-        size="small"
-      />
+      <div class="relative">
+        <span class="material-icons-outlined absolute left-3 top-2.5 text-slate-400 text-sm">search</span>
+        <input
+          v-model="searchKeyword"
+          class="w-full bg-slate-100 dark:bg-slate-900 border-none rounded-md py-1.5 pl-9 pr-4 text-sm focus:ring-1 focus:ring-primary dark:text-slate-200 placeholder-slate-400"
+          placeholder="搜索..."
+          type="text"
+        />
+      </div>
     </div>
 
     <div v-loading="loading" class="session-list">
@@ -41,28 +43,25 @@
         @contextmenu.prevent="handleContextMenu($event, session)"
       >
         <div class="relative avatar-wrapper">
-          <el-avatar 
-            :size="48" 
-            :src="session.avatar" 
-            shape="square" 
+          <div
             class="session-avatar"
             :class="getAvatarBgClass(session)"
           >
             {{ session.name?.charAt(0) }}
-          </el-avatar>
-          <span 
-            v-if="session.unreadCount > 0" 
+          </div>
+          <span
+            v-if="session.unreadCount > 0"
             class="unread-badge"
           >
             {{ session.unreadCount > 99 ? '99+' : session.unreadCount }}
           </span>
         </div>
-        
+
         <div class="session-info">
           <div class="session-top">
             <div class="session-name-wrapper">
               <span class="session-name">{{ session.name }} {{ session.isPinned ? '⭐' : '' }}</span>
-              <el-icon v-if="session.isMuted" class="muted-icon"><Mute /></el-icon>
+              <span v-if="session.isMuted" class="material-icons-outlined text-xs text-slate-400 ml-1">notifications_off</span>
             </div>
             <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
           </div>
@@ -103,7 +102,6 @@
 import { ref, computed, onMounted, reactive, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Plus, UserFilled, ChatDotRound, Mute } from '@element-plus/icons-vue'
 import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
 
 const props = defineProps({
@@ -137,17 +135,6 @@ const handleGroupCreated = (groupData) => {
   store.dispatch('im/loadSessions')
 }
 
-// 过滤会话列表
-const filteredSessions = computed(() => {
-  const keyword = searchKeyword.value.toLowerCase()
-  if (!keyword) return sessions.value
-  
-  return sessions.value.filter(session => 
-    (session.name && session.name.toLowerCase().includes(keyword)) ||
-    (session.lastMessage && session.lastMessage.toLowerCase().includes(keyword))
-  )
-})
-
 // 判断是否为当前会话
 const isActiveSession = (session) => {
   return props.currentSession?.id === session.id
@@ -161,19 +148,19 @@ const handleSessionClick = (session) => {
 // 格式化时间
 const formatTime = (timestamp) => {
   if (!timestamp) return ''
-  
+
   const date = new Date(timestamp)
   const now = new Date()
-  
+
   // 检查是否是今天
   if (date.toDateString() === now.toDateString()) {
     return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
   }
-  
+
   const diff = now - date
   if (diff < 86400000 * 2) return '昨天'
   if (diff < 86400000 * 7) return `${Math.floor(diff / 86400000)}天前`
-  
+
   return `${date.getMonth() + 1}/${date.getDate()}`
 }
 
@@ -267,51 +254,68 @@ onUnmounted(() => {
   flex-direction: column;
   width: 280px;
   min-width: 280px;
+  max-width: 280px;
   flex-shrink: 0;
   border-right: 1px solid #e8e8e8;
   background: #fff;
   height: 100%;
-  
+
+  .dark & {
+    background: #1e293b;
+    border-right-color: #334155;
+  }
+
   .panel-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
+    padding: 10px 14px;
     border-bottom: 1px solid #f0f0f0;
-    
-    h3 {
-      margin: 0;
-      font-size: 15px;
-      font-weight: 600;
-      color: #262626;
+    flex-shrink: 0;
+
+    .dark & {
+      border-bottom-color: #334155;
     }
   }
 
   .search-bar {
-    padding: 10px 12px;
+    padding: 8px 12px;
     border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+
+    .dark & {
+      border-bottom-color: #334155;
+    }
   }
 
   .session-list {
     flex: 1;
     overflow-y: auto;
-    
+
     .session-item {
       display: flex;
       align-items: center;
-      padding: 12px 16px;
+      padding: 10px 14px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background-color 0.15s;
       position: relative;
-      border-left: 4px solid transparent;
-      
+      border-left: 3px solid transparent;
+
       &:hover {
-        background: var(--dt-bg-session-hover);
+        background: #f2f3f5;
+
+        .dark & {
+          background: rgba(255, 255, 255, 0.05);
+        }
       }
-      
+
       &.active {
-        background: var(--dt-bg-session-active);
-        border-left-color: var(--dt-brand-color);
+        background: #ebf4ff;
+        border-left-color: #1677ff;
+
+        .dark & {
+          background: rgba(22, 119, 255, 0.15);
+        }
       }
 
       .avatar-wrapper {
@@ -319,80 +323,88 @@ onUnmounted(() => {
       }
 
       .session-avatar {
-        border-radius: 8px !important;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-weight: 500;
+        font-size: 16px;
         color: #fff;
       }
 
       .unread-badge {
         position: absolute;
-        top: -4px;
-        right: -4px;
-        background-color: var(--dt-badge-color);
+        top: 6px;
+        left: 42px;
+        background-color: #ef4444;
         color: white;
         font-size: 10px;
-        min-width: 18px;
-        height: 18px;
-        line-height: 14px;
+        min-width: 16px;
+        height: 16px;
+        line-height: 12px;
         border: 2px solid #fff;
-        border-radius: 9px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 0 4px;
+        padding: 0 3px;
         z-index: 10;
       }
-      
+
       .session-info {
         flex: 1;
         min-width: 0;
-        margin-left: 12px;
-        
+        margin-left: 10px;
+
         .session-top {
           display: flex;
           justify-content: space-between;
           align-items: center;
           margin-bottom: 2px;
-          
+
           .session-name-wrapper {
             display: flex;
             align-items: center;
             flex: 1;
             min-width: 0;
-            
+
             .session-name {
               font-size: 14px;
               font-weight: 500;
-              color: var(--dt-text-primary);
+              color: #0f172a;
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
-            }
 
-            .muted-icon {
-              margin-left: 4px;
-              font-size: 12px;
-              color: #bfbfbf;
+              .dark & {
+                color: #f1f5f9;
+              }
             }
           }
-          
+
           .session-time {
             font-size: 11px;
-            color: var(--dt-text-tertiary);
+            color: #94a3b8;
             flex-shrink: 0;
-            margin-left: 8px;
+            margin-left: 6px;
           }
         }
-        
+
         .session-preview {
           font-size: 12px;
-          color: var(--dt-text-secondary);
+          color: #475569;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
 
+          .dark & {
+            color: #94a3b8;
+          }
+
           .sender-name {
-            color: var(--dt-text-tertiary);
+            color: #94a3b8;
           }
         }
       }
@@ -402,36 +414,63 @@ onUnmounted(() => {
       position: fixed;
       background: #fff;
       border: 1px solid #e8e8e8;
-      border-radius: 4px;
+      border-radius: 8px;
       box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
       z-index: 2000;
       padding: 4px 0;
       min-width: 120px;
-      
+
+      .dark & {
+        background: #1e293b;
+        border-color: #334155;
+      }
+
       .menu-item {
-        padding: 8px 16px;
+        padding: 8px 14px;
         font-size: 13px;
         color: #595959;
         cursor: pointer;
-        transition: all 0.2s;
-        
+        transition: background-color 0.15s;
+
+        .dark & {
+          color: #cbd5e1;
+        }
+
         &:hover {
           background: #f5f5f5;
-          color: #0089ff;
+          color: #1677ff;
+
+          .dark & {
+            background: #334155;
+            color: #60a5fa;
+          }
         }
-        
+
         &.danger {
-          color: #ff4d4f;
+          color: #ef4444;
+
+          .dark & {
+            color: #f87171;
+          }
+
           &:hover {
-            background: #fff1f0;
+            background: #fef2f2;
+
+            .dark & {
+              background: rgba(239, 68, 68, 0.1);
+            }
           }
         }
       }
-      
+
       .menu-divider {
         height: 1px;
         background: #f0f0f0;
         margin: 4px 0;
+
+        .dark & {
+          background: #334155;
+        }
       }
     }
 

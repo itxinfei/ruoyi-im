@@ -284,14 +284,19 @@ const handleSettingClick = (setting) => {
 <style scoped>
 .settings-panel {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   background-color: #f7f8fa;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .settings-content {
   max-width: 896px;
+  width: 100%;
   margin: 0 auto;
   padding: 24px;
+  overflow-y: auto;
 }
 
 .settings-header {

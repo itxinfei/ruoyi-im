@@ -7,6 +7,7 @@ export default {
     state: () => ({
         token: localStorage.getItem('im_token') || '',
         userInfo: JSON.parse(localStorage.getItem('im_user_info') || '{}'),
+        role: localStorage.getItem('im_user_role') || 'USER',
         online: false
     }),
 
@@ -18,13 +19,24 @@ export default {
         SET_USER_INFO(state, userInfo) {
             state.userInfo = userInfo
             localStorage.setItem('im_user_info', JSON.stringify(userInfo))
+            // 保存用户角色
+            if (userInfo.role) {
+                state.role = userInfo.role
+                localStorage.setItem('im_user_role', userInfo.role)
+            }
+        },
+        SET_ROLE(state, role) {
+            state.role = role
+            localStorage.setItem('im_user_role', role)
         },
         CLEAR_USER(state) {
             state.token = ''
             state.userInfo = {}
+            state.role = 'USER'
             state.online = false
             localStorage.removeItem('im_token')
             localStorage.removeItem('im_user_info')
+            localStorage.removeItem('im_user_role')
         },
         SET_ONLINE_STATUS(state, status) {
             state.online = status
@@ -92,6 +104,8 @@ export default {
     getters: {
         isLoggedIn: state => !!state.token,
         currentUser: state => state.userInfo,
+        userRole: state => state.role || 'USER',
+        isAdmin: state => state.role === 'ADMIN' || state.role === 'SUPER_ADMIN',
         userAvatar: state => state.userInfo.avatar || '',
         userName: state => state.userInfo.nickname || state.userInfo.username || 'User'
     }

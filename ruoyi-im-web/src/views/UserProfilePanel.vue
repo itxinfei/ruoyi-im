@@ -154,18 +154,23 @@ const handleSaveProfile = async (formData) => {
 <style scoped>
 .user-profile-panel {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   background-color: #f7f8fa;
-  overflow-y: auto;
-  padding-bottom: 40px;
+  overflow: hidden;
 }
 
 .profile-content {
   max-width: 800px;
+  width: 100%;
   margin: 0 auto;
+  overflow-y: auto;
+  padding: 0 20px 40px;
 }
 
 .cover-image {
-  height: 160px;
+  height: 120px;
   background: linear-gradient(135deg, #60a5fa, #3b82f6, #2563eb);
 }
 
@@ -173,7 +178,7 @@ const handleSaveProfile = async (formData) => {
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  margin: -40px 20px 0;
+  margin: -30px 0 0;
   position: relative;
   padding: 24px;
 }
@@ -185,7 +190,7 @@ const handleSaveProfile = async (formData) => {
 
 .avatar-section {
   position: relative;
-  margin-top: -48px; 
+  margin-top: -36px;
 }
 
 .avatar {

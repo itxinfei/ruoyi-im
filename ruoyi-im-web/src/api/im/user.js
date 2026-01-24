@@ -6,20 +6,20 @@ import request from '../request'
  */
 export function getUserInfo() {
   return request({
-    url: '/api/im/user/profile',
+    url: '/api/im/user/info',
     method: 'get'
   })
 }
 
 /**
  * 更新用户信息
- * @param {string|number} userId - 用户ID (Note: API usually takes ID from token or path, or body)
+ * @param {string|number} userId - 用户ID
  * @param {Object} data - 用户数据
  * @returns {Promise}
  */
 export function updateUser(userId, data) {
   return request({
-    url: '/api/im/user/profile',
+    url: `/api/im/user/${userId}`,
     method: 'put',
     data
   })
@@ -54,12 +54,12 @@ export function getUserDetail(userId) {
 
 /**
  * 上传用户头像
- * @param {FormData} data - 包含 avatarFile 的 FormData
+ * @param {FormData} data - 包含 avatarfile 的 FormData
  * @returns {Promise}
  */
 export function uploadAvatar(data) {
   return request({
-    url: '/api/im/user/profile/avatar',
+    url: '/api/im/user/avatar',
     method: 'post',
     data,
     headers: {

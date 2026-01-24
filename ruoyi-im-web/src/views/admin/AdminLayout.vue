@@ -104,6 +104,24 @@ const logout = () => {
   background-color: #002140;
 }
 
+/* 紧凑菜单样式 */
+:deep(.el-menu) {
+  --el-menu-item-height: 40px;
+}
+
+:deep(.el-menu-item) {
+  margin: 4px 8px;
+  border-radius: 4px;
+}
+
+:deep(.el-menu-item:hover) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+:deep(.el-menu-item.is-active) {
+  background-color: #1890ff;
+}
+
 .admin-header {
   background-color: #fff;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
@@ -133,5 +151,16 @@ const logout = () => {
 .admin-main {
   background-color: #f0f2f5;
   padding: 20px;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  :deep(.el-menu) {
+    --el-menu-item-height: 36px;
+  }
+  
+  :deep(.el-menu-item) {
+    margin: 2px 4px;
+  }
 }
 </style>

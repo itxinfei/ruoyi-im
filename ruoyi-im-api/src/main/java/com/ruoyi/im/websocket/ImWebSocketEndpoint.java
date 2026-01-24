@@ -254,7 +254,15 @@ public class ImWebSocketEndpoint {
                 });
                 String type = (String) messageMap.get("type");
                 if ("auth".equals(type)) {
-                    handleAuthMessage(session, messageMap);
+                    // 传入 data 字段的内容，而不是整个 messageMap
+                    Object payload = messageMap.get("data");
+                    if (payload instanceof Map) {
+                        //noinspection unchecked
+                        Map<String, Object> authData = (Map<String, Object>) payload;
+                        handleAuthMessage(session, authData);
+                    } else {
+                        sendMessage(session, buildStatusMessage("error", null, "认证消息格式错误"));
+                    }
                 } else {
                     sendMessage(session, buildStatusMessage("error", null, "请先认证"));
                 }
@@ -273,7 +281,14 @@ public class ImWebSocketEndpoint {
             switch (type) {
                 case "auth":
                     // 处理认证消息（允许重新认证）
-                    handleAuthMessage(session, messageMap);
+                    // 注意：payload 是 data 字段的内容，包含 token、userId 等认证信息
+                    if (payload instanceof Map) {
+                        //noinspection unchecked
+                        Map<String, Object> authData = (Map<String, Object>) payload;
+                        handleAuthMessage(session, authData);
+                    } else {
+                        sendMessage(session, buildStatusMessage("error", null, "认证消息格式错误"));
+                    }
                     break;
                 case "message":
                     // 处理聊天消息

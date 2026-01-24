@@ -77,4 +77,19 @@
         WHERE user_id = #{userId} AND is_deleted = 0
     </select>
 
+    <select id="selectImConversationList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM im_conversation
+        <where>
+            is_deleted = 0
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="targetId != null">
+                AND target_id = #{targetId}
+            </if>
+        </where>
+        ORDER BY update_time DESC
+    </select>
+
 </mapper>

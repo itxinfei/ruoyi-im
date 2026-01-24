@@ -138,3 +138,28 @@
   --dt-border-color: var(--dt-border-dark);
   --dt-border-light: #1e293b;
 }
+
+// === Accessibility: Reduced Motion Support ===
+// 尊重用户的动画偏好设置，减少动画以防止晕动症或注意力分散
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// === Focus Visible for Better Keyboard Navigation ===
+// 改善键盘导航的焦点指示器
+:focus-visible {
+  outline: 2px solid var(--dt-brand-color);
+  outline-offset: 2px;
+}
+
+// 仅在键盘导航时显示焦点样式
+:focus:not(:focus-visible) {
+  outline: none;
+}

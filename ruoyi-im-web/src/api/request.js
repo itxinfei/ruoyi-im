@@ -7,7 +7,7 @@ import { ElMessage } from 'element-plus'
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api', // API基础路径，统一使用 /api/im/* 前缀
+  baseURL: import.meta.env.VITE_API_BASE_URL || '', // 使用环境变量或空字符串
   timeout: 15000 // 请求超时时间
 })
 
@@ -52,11 +52,14 @@ service.interceptors.response.use(
     console.error('响应错误:', error)
 
     if (error.response) {
-      const { status } = error.response
+      const { status, data } = error.response
+
+      // 打印更详细的错误信息
+      console.log('错误详情:', data)
 
       switch (status) {
         case 400:
-          ElMessage.error('请求参数错误')
+          ElMessage.error(data?.msg || '请求参数错误')
           break
         case 401:
           ElMessage.error('未授权，请重新登录')

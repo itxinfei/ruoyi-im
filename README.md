@@ -1,23 +1,23 @@
-# RuoYi-IM 即时通讯系统需求文档
+# IM 即时通讯系统需求文档
 
 # 一、项目概述
 
 ## 1.1 项目目标
 
-基于 RuoYi 框架二次开发即时通讯系统，核心定位为企业级内部即时沟通平台，支持私聊、群聊、文件传输等核心功能，满足企业内部高效协同沟通需求。采用前后端分离架构，保障系统可扩展性、可维护性，适配企业级权限管控与业务集成需求。
+基于 Spring Boot + Vue 3 框架开发即时通讯系统，核心定位为企业级内部即时沟通平台，支持私聊、群聊、文件传输等核心功能，满足企业内部高效协同沟通需求。采用前后端分离架构，保障系统可扩展性、可维护性，适配企业级权限管控与业务集成需求。
 
 ## 1.2 统一架构升级
 
 2025-01-24 完成架构升级，移除独立的管理系统，实现前后端统一架构设计：
-- **后端统一**：管理功能集成到 ruoyi-im-api，通过路径隔离和角色权限控制
+- **后端统一**：管理功能集成到 im-api，通过路径隔离和角色权限控制
 - **前端统一**：根据用户权限动态渲染用户端或管理端界面
-- **权限统一**：复用 Spring Security 角色权限体系，简化认证流程
+- **权限统一**：使用 Spring Security 角色权限体系，简化认证流程
 
-## 1.2 核心约束
+## 1.3 核心约束
 
 - 技术栈约束：前端固定为 Vue 3 + Vite + Element Plus，后端基于 Spring Boot 2.7，通信核心采用 WebSocket/Netty，确保实时性；数据持久化使用 MySQL，缓存与消息队列采用 Redis
 
-- 权限约束：复用 RuoYi 框架用户/角色/菜单权限体系，实现管理员与普通用户的差异化功能权限（如管理员拥有消息审计、用户封禁权限）
+- 权限约束：使用 Spring Security 实现用户/角色/菜单权限体系，实现管理员与普通用户的差异化功能权限（如管理员拥有消息审计、用户封禁权限）
 
 - 规范约束：全栈开发严格遵守《阿里巴巴Java开发手册》（最新版）、《阿里巴巴前端开发手册》（Vue专项）、《阿里巴巴数据库设计规范》，确保代码可读性、可维护性、安全性
 
@@ -27,10 +27,10 @@
 
 ## 2.1 架构概述
 
-移除独立的 ruoyi-im-admin 管理系统，将管理功能集成到 ruoyi-im-api 中，前端复用 ruoyi-im-web，根据用户权限动态展示用户端或管理端界面。
+移除独立的管理系统，将管理功能集成到 im-api 中，前端复用 im-web，根据用户权限动态展示用户端或管理端界面。
 
 **核心设计原则**：
-- **单一后端**：仅需部署 ruoyi-im-api 服务，简化运维
+- **单一后端**：仅需部署 im-api 服务，简化运维
 - **统一前端**：根据角色权限动态渲染不同界面
 - **路径隔离**：`/api/im/*` 面向普通用户，`/api/admin/*` 面向管理员
 - **注解权限**：使用 Spring Security `@PreAuthorize` 细粒度控制访问
@@ -39,9 +39,10 @@
 
 |模块|说明|技术栈|默认端口|核心职责|
 |---|---|---|---|---|
-|ruoyi-im-api|核心后端 API 服务|Spring Boot 2.7, WebSocket, Netty, MyBatis Plus|8080|用户认证、消息收发、好友/群组管理、文件传输核心逻辑、管理后台接口|
-|ruoyi-im-web|前端 Web 聊天界面|Vue 3, Vite, Element Plus, Vuex, Axios|5173 (Dev)|用户登录、聊天界面展示、消息收发交互、文件/图片上传、个人信息管理、管理后台界面|
+|im-api|核心后端 API 服务|Spring Boot 2.7, WebSocket, Netty, MyBatis Plus|8080|用户认证、消息收发、好友/群组管理、文件传输核心逻辑、管理后台接口|
+|im-web|前端 Web 聊天界面|Vue 3, Vite, Element Plus, Vuex, Axios|5173 (Dev)|用户登录、聊天界面展示、消息收发交互、文件/图片上传、个人信息管理、管理后台界面|
 |sql/im.sql|数据库初始化脚本|MySQL|-|创建用户、消息、好友、群组等核心表结构，初始化基础数据|
+
 # 三、技术栈详情
 
 ## 3.1 后端技术栈
@@ -56,13 +57,13 @@
 
 - 数据库：MySQL 5.7/8.0（数据持久化）
 
-- 安全框架：Spring Security（复用 RuoYi 权限认证）
+- 安全框架：Spring Security（实现权限认证）
 
 - 文件存储：本地文件系统（基础版）
 
 - 日志框架：SLF4J + Logback（日志记录与审计）
 
-- 工具：hutool（日期时间处理、加密解密、文件操作等）Lombok 
+- 工具：hutool（日期时间处理、加密解密、文件操作等）、Lombok
 
 ## 3.2 前端技术栈
 
@@ -79,6 +80,8 @@
 - 文件上传：vue-upload-component（大文件分片上传）
 
 - 富文本编辑：wangeditor（支持消息格式化）
+
+- 图标系统：Material Icons Outlined（Google Material Design 风格图标）
 
 ## 3.3 中间件与依赖
 
@@ -124,15 +127,15 @@ npm -v
 
 2. 导入项目根目录下的 `im.sql` 脚本（两种方式）：
         `# 命令行导入
-mysql -u root -p im < im.sql`或通过 Navicat 等工具，右键数据库选择“运行 SQL 文件”，选择 im.sql 执行
+mysql -u root -p im < im.sql`或通过 Navicat 等工具，右键数据库选择"运行 SQL 文件"，选择 im.sql 执行
 
 3. 验证：导入完成后，检查是否生成 user（用户）、friend（好友）、group（群组）、message（消息）等核心表，确保无报错
 
-## 4.3 后端启动（ruoyi-im-api）
+## 4.3 后端启动（im-api）
 
-1. 打开 IDE（IDEA/Eclipse），导入 ruoyi-im-api 模块
+1. 打开 IDE（IDEA/Eclipse），导入 im-api 模块
 
-2. 配置数据源：修改 `ruoyi-im-api/src/main/resources/application.yml` 中以下配置：
+2. 配置数据源：修改 `im-api/src/main/resources/application.yml` 中以下配置：
         `spring:
     datasource:
     url: jdbc:mysql://localhost:3306/im?useUnicode=true&characterEncoding=utf8mb4&useSSL=false&serverTimezone=Asia/Shanghai
@@ -151,7 +154,7 @@ mysql -u root -p im < im.sql`或通过 Navicat 等工具，右键数据库选择
     netty:
     port: 8888  # Netty 服务端口（高性能通信备用）`
 
-4. 启动服务：运行 `com.ruoyi.im.ImApplication` 类的 main 方法，控制台输出“Started ImApplication in XXX seconds”即为启动成功
+4. 启动服务：运行 `com.im.ImApplication` 类的 main 方法，控制台输出"Started ImApplication in XXX seconds"即为启动成功
 
 ### 4.3.1 管理后台访问
 
@@ -161,12 +164,12 @@ mysql -u root -p im < im.sql`或通过 Navicat 等工具，右键数据库选择
 
 **默认管理员账号**：admin/123456（需在数据库中设置 role 字段为 ADMIN）
 
-## 4.4 前端启动（ruoyi-im-web）
+## 4.4 前端启动（im-web）
 
 ```bash
 
 # 进入前端项目目录
-cd ruoyi-im-web
+cd im-web
 
 # 安装依赖（推荐使用 npm，避免依赖冲突）
 npm install
@@ -184,7 +187,7 @@ npm run dev
 
 若后端服务地址/端口非默认，修改以下配置：
 
-1. **API 地址**：修改 `ruoyi-im-web/src/utils/request.js` 中的 baseURL
+1. **API 地址**：修改 `im-web/src/utils/request.js` 中的 baseURL
 ```javascript
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080', // 后端 API 地址
@@ -192,18 +195,18 @@ const service = axios.create({
 })
 ```
 
-2. **WebSocket 地址**：修改 `ruoyi-im-web/src/views/chat/index.vue` 中的连接地址
+2. **WebSocket 地址**：修改 `im-web/src/views/chat/index.vue` 中的连接地址
 ```javascript
 const ws = new WebSocket(`ws://localhost:8080/im/websocket/${userId}`)
 ```
 
-3. **管理界面路由**：`ruoyi-im-web/src/router/index.js` 中已配置权限守卫，无需额外修改`
+3. **管理界面路由**：`im-web/src/router/index.js` 中已配置权限守卫，无需额外修改
 
 # 五、核心功能特性
 
 ## 5.1 用户体系
 
-- 登录认证：复用 RuoYi 登录逻辑，支持账号密码登录、验证码登录，登录成功后生成 Token 并缓存至 Redis
+- 登录认证：使用 JWT Token 认证，支持账号密码登录、验证码登录，登录成功后生成 Token 并缓存至 Redis
 
 - 注册功能：支持手机号注册（需短信验证码，可集成阿里云短信服务），注册后默认分配普通用户角色
 
@@ -237,7 +240,7 @@ const ws = new WebSocket(`ws://localhost:8080/im/websocket/${userId}`)
 
 ### 5.3.3 消息操作
 
-- 消息撤回：支持 2 分钟内撤回已发送消息，撤回后对方显示“对方撤回一条消息”
+- 消息撤回：支持 2 分钟内撤回已发送消息，撤回后对方显示"对方撤回一条消息"
 
 - 消息漫游：历史消息存储至数据库，支持分页加载（默认每页 20 条），可查看 90 天内历史消息
 
@@ -267,30 +270,29 @@ const ws = new WebSocket(`ws://localhost:8080/im/websocket/${userId}`)
 
 ### 6.1.1 开发环境部署（本地）
 
-参考“快速开始”章节，完成环境准备、数据库初始化、前后端启动即可，核心用于开发调试
+参考"快速开始"章节，完成环境准备、数据库初始化、前后端启动即可，核心用于开发调试
 
 ### 6.1.2 测试环境部署（服务器）
 
 1. 后端部署：
-        `# 打包 ruoyi-im-api 模块（IDEA 中执行 mvn clean package 或命令行）
-cd ruoyi-im-api
+        `# 打包 im-api 模块（IDEA 中执行 mvn clean package 或命令行）
+cd im-api
 mvn clean package -Dmaven.test.skip=true
 
-# 上传 jar 包至服务器 /usr/local/ruoyi-im/api 目录
-scp target/ruoyi-im-api.jar root@服务器IP:/usr/local/ruoyi-im/api
+# 上传 jar 包至服务器 /usr/local/im/api 目录
+scp target/im-api.jar root@服务器IP:/usr/local/im/api
 
 # 启动服务（后台运行）
-cd /usr/local/ruoyi-im/api
-nohup java -jar ruoyi-im-api.jar --spring.profiles.active=test > im-api.log 2>&1 `&
-      
+cd /usr/local/im/api
+nohup java -jar im-api.jar --spring.profiles.active=test > im-api.log 2>&1 `&      
 
 2. 前端部署：
 `# 构建生产环境包
-cd ruoyi-im-web
+cd im-web
 npm run build
 
 # 上传 dist 目录至服务器 Nginx 静态资源目录
-scp -r dist root@服务器IP:/usr/local/nginx/html/ruoyi-im
+scp -r dist root@服务器IP:/usr/local/nginx/html/im
 
 # 配置 Nginx（/usr/local/nginx/conf/nginx.conf）
 server {
@@ -298,7 +300,7 @@ server {
   server_name 测试服务器IP;
 
   location / {
-    root /usr/local/nginx/html/ruoyi-im;
+    root /usr/local/nginx/html/im;
     index index.html;
   }
 
@@ -327,7 +329,7 @@ nginx -s reload`
 
 - 前端部署：构建 dist 后上传至 OSS，配置 CDN 加速，Nginx 配置 HTTPS（安装 SSL 证书）
 
-- 数据库部署：主从复制架构，主库负责写入，从库负责读取，配置读写分离（复用 RuoYi DynamicDataSource）
+- 数据库部署：主从复制架构，主库负责写入，从库负责读取，配置读写分离
 
 - 监控配置：部署 Prometheus + Grafana，监控应用服务器 CPU、内存、接口响应时间、WebSocket 连接数，配置告警规则（如连接数＞1000 告警）
 
@@ -350,14 +352,14 @@ nginx -s reload`
 
 ## 6.3 运维监控规范
 
-- 日志管理：后端日志存储在 /usr/local/ruoyi-im/logs 目录，按天分割（如 im-api-20240520.log），保留 30 天；前端日志通过 Sentry 收集，监控前端报错
+- 日志管理：后端日志存储在 /usr/local/im/logs 目录，按天分割（如 im-api-20240520.log），保留 30 天；前端日志通过 Sentry 收集，监控前端报错
 
 - 日志查看命令：
         `# 实时查看后端日志
-tail -f /usr/local/ruoyi-im/logs/im-api.log
+tail -f /usr/local/im/logs/im-api.log
 
 # 查看错误日志
-grep "ERROR" /usr/local/ruoyi-im/logs/im-api.log`
+grep "ERROR" /usr/local/im/logs/im-api.log`
 
 - 核心指标监控：
         
@@ -366,6 +368,63 @@ grep "ERROR" /usr/local/ruoyi-im/logs/im-api.log`
 
     - 前端：页面加载时间（≤2s）、资源加载成功率（≥99%）、消息发送成功率（≥99.9%）
 
-# 七、许可证
+# 七、设计系统规范
+
+## 7.1 颜色系统
+
+```scss
+// 主色调
+--dt-brand-color: #1677ff
+--dt-brand-hover: #4096ff
+--dt-brand-active: #0958d9
+--dt-brand-bg: #e6f4ff
+
+// 背景色
+--dt-bg-body: #f4f7f9
+--dt-bg-sidebar: #1677ff
+--dt-bg-card: #ffffff
+
+// 暗色模式
+--dt-bg-body-dark: #0f172a
+--dt-bg-sidebar-dark: #1e293b
+```
+
+## 7.2 尺寸规范
+
+- 侧边栏宽度：80px（w-20）
+- 会话面板宽度：280px（w-72）
+- 圆角：8px（默认）、12px（xl）、16px（2xl）
+- 滚动条宽度：6px
+
+## 7.3 图标使用
+
+项目使用 **Material Icons Outlined** 图标系统：
+
+```html
+<!-- 使用方式 -->
+<span class="material-icons-outlined">icon_name</span>
+```
+
+**常用图标映射**：
+- 消息：`chat_bubble`
+- 通讯录：`group`
+- 工作台：`grid_view`
+- 电话：`phone_in_talk`
+- 文档：`description`
+- 日历：`calendar_today`
+- 搜索：`search`
+- 添加：`add`
+- 设置：`settings`
+- 更多：`more_vert`
+- 发送：`send`
+
+## 7.4 字体引用
+
+在 `index.html` 中已自动引入：
+```html
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+```
+
+# 八、许可证
 
 MIT License

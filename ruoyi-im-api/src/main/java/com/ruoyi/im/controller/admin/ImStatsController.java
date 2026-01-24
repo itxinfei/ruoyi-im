@@ -2,9 +2,11 @@ package com.ruoyi.im.controller.admin;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImGroup;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
@@ -42,6 +44,9 @@ public class ImStatsController {
 
     @Autowired
     private ImMessageMapper imMessageMapper;
+
+    @Autowired
+    private ImConversationMapper imConversationMapper;
 
     /**
      * 获取系统概览数据
@@ -129,13 +134,11 @@ public class ImStatsController {
 
         LocalDateTime since = LocalDateTime.now().minusDays(days);
 
-        // 活跃群组数（有新消息的群组）
-        List<ImMessage> allMessages = imMessageMapper.selectImMessageList(new ImMessage());
-        long activeGroups = allMessages.stream()
-                .filter(m -> m.getCreateTime() != null && !m.getCreateTime().isBefore(since))
-                .filter(m -> m.getGroupId() != null)
-                .map(ImMessage::getGroupId)
-                .distinct()
+        // 活跃群组数（通过会话表查询群组类型的会话，且有最近消息的）
+        List<ImConversation> allConversations = imConversationMapper.selectImConversationList(new ImConversation());
+        long activeGroups = allConversations.stream()
+                .filter(c -> "GROUP".equals(c.getType()))
+                .filter(c -> c.getLastMessageTime() != null && !c.getLastMessageTime().isBefore(since))
                 .count();
 
         // 新建群组数

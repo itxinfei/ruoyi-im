@@ -226,11 +226,20 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
+  flex: 1;
+  min-width: 0;
+  background: #f5f7fa;
+
+  .dark & {
+    background: #0f172a;
+  }
 }
+
 .empty-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
+  flex: 1;
 }
 </style>

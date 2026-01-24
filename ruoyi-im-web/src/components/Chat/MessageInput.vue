@@ -1,60 +1,63 @@
 <template>
   <div class="chat-input-container">
-    <div v-if="replyingMessage" class="reply-preview">
+    <!-- 回复预览 -->
+    <div v-if="replyingMessage" class="reply-preview" role="region" aria-label="回复消息预览">
       <div class="reply-content">
         <span class="reply-user">{{ replyingMessage.senderName }}:</span>
         <span class="reply-text">{{ replyingMessage.content }}</span>
       </div>
-      <el-icon class="close-icon" @click="$emit('cancel-reply')"><Close /></el-icon>
-    </div>
-    <div class="input-toolbar">
-      <div class="emoji-picker-wrapper">
-        <el-tooltip content="表情">
-          <el-button :icon="ChatDotRound" text class="toolbar-btn" @click.stop="toggleEmojiPicker" />
-        </el-tooltip>
-        <EmojiPicker
-          v-if="showEmojiPicker"
-          @select="selectEmoji"
-          @click.stop
-        />
-      </div>
-      <el-tooltip content="上传文件">
-        <el-button :icon="Folder" text class="toolbar-btn" @click="$emit('upload-file')" />
-      </el-tooltip>
-      <el-tooltip content="上传图片">
-        <el-button :icon="Picture" text class="toolbar-btn" @click="$emit('upload-image')" />
-      </el-tooltip>
-      <el-tooltip v-if="session?.type === 'GROUP'" content="@成员">
-        <el-button text class="toolbar-btn" @click="handleAtMember">@</el-button>
-      </el-tooltip>
-      <el-tooltip content="语音通话">
-        <el-button :icon="Phone" text class="toolbar-btn" @click="$emit('voice-call')" />
-      </el-tooltip>
-      <el-tooltip content="视频通话">
-        <el-button :icon="VideoCamera" text class="toolbar-btn" @click="$emit('video-call')" />
-      </el-tooltip>
-      <el-tooltip content="截图">
-        <el-button :icon="Scissor" text class="toolbar-btn" />
-      </el-tooltip>
-      <el-tooltip content="历史记录">
-        <el-button :icon="Clock" text class="toolbar-btn" />
-      </el-tooltip>
+      <button class="close-icon" @click="$emit('cancel-reply')" aria-label="取消回复">
+        <span class="material-icons-outlined" aria-hidden="true">close</span>
+      </button>
     </div>
 
-    <div class="input-area">
-      <el-input
-        v-model="message"
-        type="textarea"
-        :autosize="{ minRows: 1, maxRows: 5 }"
-        placeholder="输入消息... Enter发送"
-        class="custom-textarea"
-        @keydown="handleKeydown"
+    <!-- 工具栏 -->
+    <div class="input-toolbar" role="toolbar" aria-label="消息输入工具栏">
+      <button class="toolbar-btn" @click.stop="toggleEmojiPicker" aria-label="插入表情" title="表情">
+        <span class="material-icons-outlined" aria-hidden="true">sentiment_satisfied</span>
+      </button>
+      <button class="toolbar-btn" @click="$emit('upload-file')" aria-label="上传附件" title="附件">
+        <span class="material-icons-outlined" aria-hidden="true">attachment</span>
+      </button>
+      <button class="toolbar-btn" @click="$emit('upload-image')" aria-label="上传图片" title="图片">
+        <span class="material-icons-outlined" aria-hidden="true">image</span>
+      </button>
+      <button class="toolbar-btn" aria-label="语音输入" title="语音">
+        <span class="material-icons-outlined" aria-hidden="true">mic</span>
+      </button>
+
+      <!-- Emoji选择器 -->
+      <EmojiPicker
+        v-if="showEmojiPicker"
+        @select="selectEmoji"
+        @click.stop
       />
-      <div class="send-btn-wrapper">
-        <el-button type="primary" :disabled="!message.trim()" :loading="sending" @click="handleSend">
-          发送
-        </el-button>
-      </div>
+    </div>
+
+    <!-- 输入区域 -->
+    <div class="input-area">
+      <textarea
+        v-model="message"
+        class="message-input"
+        placeholder="输入消息..."
+        rows="3"
+        @keydown="handleKeydown"
+        :aria-label="session?.type === 'GROUP' ? '输入群消息' : '输入消息'"
+      ></textarea>
+    </div>
+
+    <!-- 发送按钮 -->
+    <div class="send-btn-wrapper">
+      <button
+        class="send-btn"
+        :disabled="!message.trim() || sending"
+        :class="{ sending }"
+        @click="handleSend"
+        :aria-label="sending ? '发送中...' : '发送消息'"
+      >
+        <span class="material-icons-outlined send-icon" aria-hidden="true">send</span>
+        <span class="send-text">发送</span>
+      </button>
     </div>
 
     <!-- @成员选择器 -->
@@ -68,7 +71,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import { ChatDotRound, Folder, Picture, Close, Phone, VideoCamera, Scissor, Clock } from '@element-plus/icons-vue'
 import EmojiPicker from '@/components/EmojiPicker/index.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
 
@@ -78,7 +80,7 @@ const props = defineProps({
   replyingMessage: Object
 })
 
-const emit = defineEmits(['send', 'upload-file', 'upload-image', 'cancel-reply', 'voice-call', 'video-call'])
+const emit = defineEmits(['send', 'upload-file', 'upload-image', 'cancel-reply'])
 
 const message = ref('')
 const showEmojiPicker = ref(false)
@@ -107,7 +109,6 @@ const handleKeydown = (e) => {
     e.preventDefault()
     handleSend()
   } else if (e.key === '@' && props.session?.type === 'GROUP') {
-    // 延迟打开，避免在输入框还没输入@就打开
     setTimeout(() => {
       handleAtMember()
     }, 100)
@@ -123,12 +124,52 @@ const handleSend = () => {
 
 <style scoped>
 .chat-input-container {
-  border-top: 1px solid var(--dt-border-light);
   background: #fff;
-  padding: 12px 20px 20px;
+  padding: 16px 24px;
   flex-shrink: 0;
+  border-top: 1px solid #e6e6e6;
 }
 
+/* 回复预览 */
+.reply-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f5f5f5;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.reply-content {
+  font-size: 12px;
+  color: #595959;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reply-user {
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.close-icon {
+  background: none;
+  border: none;
+  color: #bfbfbf;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.close-icon:hover {
+  color: #595959;
+}
+
+/* 工具栏 */
 .input-toolbar {
   display: flex;
   align-items: center;
@@ -139,82 +180,112 @@ const handleSend = () => {
 .toolbar-btn {
   font-size: 20px;
   padding: 4px;
-  color: var(--dt-text-secondary);
+  color: #8c8c8c;
   background: transparent;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   transition: color 0.2s;
-  
-  &:hover {
-    color: var(--dt-brand-color);
-  }
 }
 
-.emoji-picker-wrapper {
+.toolbar-btn:hover {
+  color: #1677ff;
+}
+
+/* 输入区域 */
+.input-area {
   position: relative;
 }
 
-.input-area {
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
-}
-
-.custom-textarea {
-  flex: 1;
-}
-
-.custom-textarea :deep(.el-textarea__inner) {
-  box-shadow: none;
-  background: transparent;
+.message-input {
+  width: 100%;
   border: none;
-  padding: 0;
+  background: transparent;
   resize: none;
   font-size: 14px;
-  color: var(--dt-text-primary);
-  &::placeholder {
-    color: var(--dt-text-placeholder);
-  }
+  color: #262626;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.5;
 }
 
+.message-input::placeholder {
+  color: #bfbfbf;
+}
+
+/* 发送按钮区域 */
 .send-btn-wrapper {
-  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
-.send-btn-wrapper .el-button {
-  height: 36px;
-  padding: 0 20px;
-}
-
-.reply-preview {
+.send-btn {
   display: flex;
   align-items: center;
-  background: #f0f0f0;
-  padding: 8px 12px;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  justify-content: space-between;
-  
-  .reply-content {
-    font-size: 12px;
-    color: #8c8c8c;
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    
-    .reply-user {
-      font-weight: bold;
-      margin-right: 4px;
-    }
-  }
-  
-  .close-icon {
-    cursor: pointer;
-    color: #bfbfbf;
-    &:hover { color: #8c8c8c; }
-  }
+  gap: 8px;
+  padding: 8px 20px;
+  background: #1677ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.2);
+}
+
+.send-btn:hover:not(:disabled) {
+  background: #4096ff;
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.send-btn.sending {
+  opacity: 0.7;
+}
+
+.send-icon {
+  font-size: 14px;
+}
+
+/* 暗色模式 */
+:deep(.dark) .chat-input-container {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+:deep(.dark) .reply-preview {
+  background: rgba(51, 65, 85, 0.5);
+}
+
+:deep(.dark) .reply-content,
+:deep(.dark) .close-icon {
+  color: #94a3b8;
+}
+
+:deep(.dark) .toolbar-btn {
+  color: #64748b;
+}
+
+:deep(.dark) .toolbar-btn:hover {
+  color: #60a5fa;
+}
+
+:deep(.dark) .message-input {
+  color: #f1f5f9;
+}
+
+:deep(.dark) .message-input::placeholder {
+  color: #475569;
+}
+
+:deep(.dark) .send-btn {
+  background: #1677ff;
 }
 </style>
