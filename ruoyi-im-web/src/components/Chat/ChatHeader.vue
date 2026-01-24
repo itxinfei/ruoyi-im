@@ -2,7 +2,7 @@
   <div class="chat-header">
     <div class="header-left">
       <div class="header-avatar" :class="getAvatarBgClass(session)" aria-hidden="true">
-        {{ session?.name?.charAt(0) || '?' }}
+        {{ (session?.name?.charAt(0) || '?').toUpperCase() }}
       </div>
       <div class="header-info">
         <h2 class="header-name">{{ session?.name }}</h2>

@@ -26,7 +26,7 @@
         >
           <div class="request-avatar">
             <img v-if="request.avatar" :src="request.avatar" :alt="`${request.nickname || request.username} 的头像`" />
-            <span v-else>{{ (request.nickname || request.username || '?').charAt(0) }}</span>
+            <span v-else>{{ (request.nickname || request.username || '?').charAt(0).toUpperCase() }}</span>
           </div>
           <div class="request-info">
             <div class="request-name">{{ request.nickname || request.username }}</div>

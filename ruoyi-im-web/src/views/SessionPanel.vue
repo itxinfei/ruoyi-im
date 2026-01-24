@@ -47,7 +47,7 @@
             class="session-avatar"
             :class="getAvatarBgClass(session)"
           >
-            {{ session.name?.charAt(0) }}
+            {{ (session.name?.charAt(0) || '?').toUpperCase() }}
           </div>
           <span
             v-if="session.unreadCount > 0"

@@ -48,7 +48,7 @@
             @click="handleGroupClick(group)"
           >
             <el-avatar :size="36" :src="group.avatar" class="avatar">
-              {{ group.name?.charAt(0) }}
+              {{ (group.name?.charAt(0) || '?').toUpperCase() }}
             </el-avatar>
             <div class="info">
               <div class="name">{{ group.name }}</div>
@@ -69,7 +69,7 @@
             <div class="avatar">
               <img v-if="contact.friendAvatar" :src="contact.friendAvatar" />
               <div v-else class="avatar-text">
-                {{ (contact.friendName || '?').charAt(0) }}
+                {{ (contact.friendName || '?').charAt(0).toUpperCase() }}
               </div>
             </div>
             <div class="info">

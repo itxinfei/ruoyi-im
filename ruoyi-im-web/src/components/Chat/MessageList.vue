@@ -7,7 +7,7 @@
       <div v-if="msg.isTimeDivider" class="time-divider">{{ msg.timeText }}</div>
       <div v-else class="message-item" :class="{ 'is-own': msg.isOwn }">
         <el-avatar class="avatar" :size="36" :src="msg.senderAvatar" shape="square" :class="getAvatarBgClass(msg)">
-          {{ (msg.senderName || '?').charAt(0) }}
+          {{ (msg.senderName || '?').charAt(0).toUpperCase() }}
         </el-avatar>
         <div class="content-wrapper">
           <div v-if="!msg.isOwn" class="sender-name">{{ msg.senderName }}</div>
@@ -88,7 +88,7 @@
                 </template>
                 <div v-loading="loadingReadUsers[msg.id]" class="read-users-list">
                   <div v-for="user in readUsersMap[msg.id]" :key="user.id" class="read-user-item">
-                    <el-avatar :size="24" :src="user.avatar">{{ user.name?.charAt(0) }}</el-avatar>
+                    <el-avatar :size="24" :src="user.avatar">{{ (user.name?.charAt(0) || '?').toUpperCase() }}</el-avatar>
                     <span>{{ user.name }}</span>
                   </div>
                   <div v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)" class="empty">
