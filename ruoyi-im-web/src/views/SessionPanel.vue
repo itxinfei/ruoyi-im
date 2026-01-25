@@ -162,9 +162,9 @@ const searchKeyword = ref('')
 const showCreateGroupDialog = ref(false)
 const showGlobalSearch = ref(false)
 
-const sessions = computed(() => store.state.im.sessions || [])
-const loading = computed(() => store.state.im.loading.sessions)
-const userStatus = computed(() => store.state.im.userStatus || {})
+const sessions = computed(() => store.state.im.session?.sessions || [])
+const loading = computed(() => store.state.im.session?.loading || false)
+const userStatus = computed(() => store.state.im.contact?.userStatus || {})
 
 // 判断用户是否在线
 const isUserOnline = (userId) => {
@@ -198,7 +198,7 @@ const handleCommand = (command) => {
 // 群组创建成功
 const handleGroupCreated = (groupData) => {
   ElMessage.success('群组创建成功')
-  store.dispatch('im/loadSessions')
+  store.dispatch('im/session/loadSessions')
 }
 
 // 处理搜索选择
@@ -271,14 +271,14 @@ const hideContextMenu = () => {
 // 会话操作
 const handleMarkAsRead = async () => {
   if (!contextMenu.session) return
-  await store.dispatch('im/markSessionAsRead', contextMenu.session.id)
+  await store.dispatch('im/session/markSessionAsRead', contextMenu.session.id)
   hideContextMenu()
 }
 
 const handleTogglePin = async () => {
   if (!contextMenu.session) return
   const pinned = !contextMenu.session.isPinned
-  await store.dispatch('im/pinSession', { sessionId: contextMenu.session.id, pinned })
+  await store.dispatch('im/session/pinSession', { sessionId: contextMenu.session.id, pinned })
   ElMessage.success(pinned ? '已置顶' : '已取消置顶')
   hideContextMenu()
 }
@@ -286,7 +286,7 @@ const handleTogglePin = async () => {
 const handleToggleMute = async () => {
   if (!contextMenu.session) return
   const muted = !contextMenu.session.isMuted
-  await store.dispatch('im/muteSession', { sessionId: contextMenu.session.id, muted })
+  await store.dispatch('im/session/muteSession', { sessionId: contextMenu.session.id, muted })
   ElMessage.success(muted ? '已开启免打扰' : '已关闭免打扰')
   hideContextMenu()
 }
@@ -298,7 +298,7 @@ const handleDeleteSession = () => {
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async () => {
-    await store.dispatch('im/deleteSession', contextMenu.session.id)
+    await store.dispatch('im/session/deleteSession', contextMenu.session.id)
     ElMessage.success('已删除')
     hideContextMenu()
   }).catch(() => {})
@@ -309,7 +309,7 @@ const sortedSessions = computed(() => store.getters['im/sortedSessions'])
 
 onMounted(() => {
   if (sessions.value.length === 0) {
-    store.dispatch('im/loadSessions')
+    store.dispatch('im/session/loadSessions')
   }
   window.addEventListener('click', hideContextMenu)
 })

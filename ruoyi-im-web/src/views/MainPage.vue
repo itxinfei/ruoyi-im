@@ -93,7 +93,7 @@ const handleSwitchModule = (module) => {
 }
 
 const handleSelectSession = (session) => {
-  store.dispatch('im/selectSession', session)
+  store.dispatch('im/session/selectSession', session)
 }
 
 const handleShowUser = (userId) => {
@@ -115,20 +115,20 @@ watch(currentSession, (sess) => {
 
 // Global WebSocket Message Handler
 onMessage((msg) => {
-  store.dispatch('im/receiveMessage', msg)
+  store.dispatch('im/message/receiveMessage', msg)
 })
 
 const { onOnline, onOffline } = useImWebSocket()
 
 onOnline((data) => {
   if (data.userId) {
-    store.commit('im/SET_USER_STATUS', { userId: data.userId, status: 'online' })
+    store.commit('im/contact/SET_USER_STATUS', { userId: data.userId, status: 'online' })
   }
 })
 
 onOffline((data) => {
   if (data.userId) {
-    store.commit('im/SET_USER_STATUS', { userId: data.userId, status: 'offline' })
+    store.commit('im/contact/SET_USER_STATUS', { userId: data.userId, status: 'offline' })
   }
 })
 
@@ -140,7 +140,7 @@ onMounted(async () => {
   }
 
   try {
-    await store.dispatch('im/loadSessions')
+    await store.dispatch('im/session/loadSessions')
   } catch (error) {
     console.warn('加载会话列表失败', error)
   }

@@ -99,7 +99,14 @@ import { useImWebSocket } from '@/composables/useImWebSocket'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps({
-  session: Object
+  session: {
+    type: Object,
+    default: null,
+    validator: (value) => {
+      if (value === null) return true
+      return typeof value.id === 'string' || typeof value.id === 'number'
+    }
+  }
 })
 
 const store = useStore()
@@ -109,7 +116,7 @@ const loading = ref(false)
 const sending = ref(false)
 const noMore = ref(false)
 const showGroupDetail = ref(false)
-const replyingMessage = computed(() => store.state.im.replyingMessage)
+const replyingMessage = computed(() => store.state.im.message.replyingMessage)
 const editingMessage = ref(null)
 const msgListRef = ref(null)
 const forwardDialogRef = ref(null)
@@ -127,7 +134,7 @@ const loadHistory = async () => {
   loading.value = true
   noMore.value = false
   try {
-    const res = await store.dispatch('im/loadMessages', {
+    const res = await store.dispatch('im/message/loadMessages', {
       sessionId: props.session.id,
       pageSize: 50
     })
@@ -167,7 +174,7 @@ const handleLoadMore = async () => {
   const oldHeight = msgListRef.value?.$refs.listRef.scrollHeight
   
   try {
-    const newMsgs = await store.dispatch('im/loadMessages', {
+    const newMsgs = await store.dispatch('im/message/loadMessages', {
       sessionId: props.session.id,
       lastMessageId: firstMsg.id,
       pageSize: 20,
@@ -232,11 +239,11 @@ const handleSend = async (content) => {
   }
   
   messages.value.push(tempMsg)
-  store.commit('im/SET_REPLYING_MESSAGE', null)
+  store.commit('im/message/SET_REPLYING_MESSAGE', null)
   msgListRef.value?.scrollToBottom()
 
   try {
-    const msg = await store.dispatch('im/sendMessage', {
+    const msg = await store.dispatch('im/message/sendMessage', {
       sessionId: props.session.id,
       type: 'TEXT',
       content,
@@ -300,7 +307,7 @@ watch(() => props.session, () => {
 
 const handleDelete = async (messageId) => {
   try {
-    await store.dispatch('im/deleteMessage', messageId)
+    await store.dispatch('im/message/deleteMessage', messageId)
     // 移除本地消息
     const index = messages.value.findIndex(m => m.id === messageId)
     if (index !== -1) {
@@ -313,7 +320,7 @@ const handleDelete = async (messageId) => {
 
 const handleRecall = async (messageId) => {
   try {
-    await store.dispatch('im/recallMessage', messageId)
+    await store.dispatch('im/message/recallMessage', messageId)
     // 更新本地消息状态
     const index = messages.value.findIndex(m => m.id === messageId)
     if (index !== -1) {
@@ -370,7 +377,7 @@ const handleMultiSelect = (msg) => {
 // 处理已读上报
 const handleMarkRead = async (msg) => {
   try {
-    await store.dispatch('im/markMessageAsRead', {
+    await store.dispatch('im/message/markMessageAsRead', {
       conversationId: props.session.id,
       messageId: msg.id
     })
@@ -390,7 +397,7 @@ const handleToggleDetail = () => {
 }
 
 const handleCancelReply = () => {
-  store.commit('im/SET_REPLYING_MESSAGE', null)
+  store.commit('im/message/SET_REPLYING_MESSAGE', null)
 }
 
 const handleCancelEdit = () => {
@@ -404,7 +411,7 @@ const handleRetry = async (msg) => {
   msg.status = 'sending'
   
   try {
-    const res = await store.dispatch('im/sendMessage', {
+    const res = await store.dispatch('im/message/sendMessage', {
       sessionId: props.session.id,
       type: msg.type,
       content: typeof msg.content === 'object' ? JSON.stringify(msg.content) : msg.content
@@ -426,7 +433,7 @@ const handleMemberClick = (member) => {
 // 处理转发确认
 const handleForwardConfirm = async ({ message, targetSessionId }) => {
   try {
-    await store.dispatch('im/forwardMessage', {
+    await store.dispatch('im/message/forwardMessage', {
       messageId: message.id,
       targetConversationId: targetSessionId
     })
@@ -438,7 +445,7 @@ const handleForwardConfirm = async ({ message, targetSessionId }) => {
 }
 
 const handleReply = (message) => {
-  store.commit('im/SET_REPLYING_MESSAGE', message)
+  store.commit('im/message/SET_REPLYING_MESSAGE', message)
 }
 
 const handleEdit = (message) => {
@@ -454,7 +461,7 @@ const handleEditConfirm = async (content) => {
   if (!editingMessage.value) return
   
   try {
-    await store.dispatch('im/editMessage', {
+    await store.dispatch('im/message/editMessage', {
       messageId: editingMessage.value.id,
       content: content
     })
@@ -525,7 +532,7 @@ const handleFileUpload = async (payload) => {
     const res = await uploadFile(formData)
     if (res.code === 200) {
       // 3. 发送消息
-      const msg = await store.dispatch('im/sendMessage', {
+      const msg = await store.dispatch('im/message/sendMessage', {
         sessionId: props.session.id,
         type: 'FILE',
         content: JSON.stringify({
@@ -589,7 +596,7 @@ const handleImageUpload = async (payload) => {
   try {
     const res = await uploadImage(formData)
     if (res.code === 200) {
-      const msg = await store.dispatch('im/sendMessage', {
+      const msg = await store.dispatch('im/message/sendMessage', {
         sessionId: props.session.id,
         type: 'IMAGE',
         content: JSON.stringify({

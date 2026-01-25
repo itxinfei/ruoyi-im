@@ -189,7 +189,7 @@ const handleUserClick = async (user) => {
   try {
     const res = await createConversation({ type: 'PRIVATE', targetId: user.id })
     if (res.code === 200) {
-      store.dispatch('im/selectSession', res.data)
+      store.dispatch('im/session/selectSession', res.data)
       close()
     }
   } catch (e) {
@@ -202,7 +202,7 @@ const handleGroupClick = async (group) => {
   try {
     const res = await createConversation({ type: 'GROUP', targetId: group.id })
     if (res.code === 200) {
-      store.dispatch('im/selectSession', res.data)
+      store.dispatch('im/session/selectSession', res.data)
       close()
     }
   } catch (e) {
@@ -236,8 +236,8 @@ const formatTime = (ts) => {
 
 onMounted(() => {
   loadHistory()
-  if (contacts.value.length === 0) store.dispatch('im/loadContacts')
-  if (groups.value.length === 0) store.dispatch('im/loadGroups')
+  if (contacts.value.length === 0) store.dispatch('im/contact/loadContacts')
+  if (groups.value.length === 0) store.dispatch('im/contact/loadGroups')
 })
 </script>
 

@@ -130,7 +130,7 @@ const startChat = async () => {
     const res = await createConversation({ type, targetId })
     if (res.code === 200) {
       const conv = res.data
-      store.commit('im/SET_CURRENT_SESSION', conv)
+      store.commit('im/session/SET_CURRENT_SESSION', conv)
       // Signal parent or use router to switch to Chat tab
       ElMessage.success('已发起聊天')
       // NOTE: We usually emit an event or use a global event bus to switch tabs

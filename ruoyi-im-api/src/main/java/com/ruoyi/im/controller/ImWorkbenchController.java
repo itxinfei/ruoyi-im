@@ -29,6 +29,7 @@ public class ImWorkbenchController {
     private final ImTodoItemService todoItemService;
     private final ImMessageService messageService;
     private final ImConversationService conversationService;
+    private final ImNoticeService noticeService;
 
     /**
      * 构造器注入依赖
@@ -36,13 +37,16 @@ public class ImWorkbenchController {
      * @param todoItemService 待办事项服务
      * @param messageService 消息服务
      * @param conversationService 会话服务
+     * @param noticeService 通知服务
      */
     public ImWorkbenchController(ImTodoItemService todoItemService,
                                   ImMessageService messageService,
-                                  ImConversationService conversationService) {
+                                  ImConversationService conversationService,
+                                  ImNoticeService noticeService) {
         this.todoItemService = todoItemService;
         this.messageService = messageService;
         this.conversationService = conversationService;
+        this.noticeService = noticeService;
     }
 
     /**
@@ -90,12 +94,10 @@ public class ImWorkbenchController {
 
         // 未读通知数量
         int noticeCount = 0;
-        if (noticeService != null) {
-            try {
-                noticeCount = noticeService.getUnreadCount(userId);
-            } catch (Exception e) {
-                // 如果获取失败，使用0
-            }
+        try {
+            noticeCount = noticeService.getUnreadCount(userId);
+        } catch (Exception e) {
+            // 如果获取失败，使用0
         }
         overview.put("noticeCount", noticeCount);
 

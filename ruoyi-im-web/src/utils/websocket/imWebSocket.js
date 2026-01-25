@@ -2,6 +2,7 @@
  * IM WebSocket 客户端
  * 提供 WebSocket 连接管理、消息收发、心跳保活、断线重连等功能
  */
+import { debug, info, warn, error } from '../logger.js'
 
 // WebSocket 连接状态
 export const WS_STATUS = {
@@ -44,7 +45,7 @@ class ImWebSocket {
    */
   connect(token) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      console.warn('[ImWebSocket] WebSocket 已连接')
+      warn('ImWebSocket', 'WebSocket 已连接')
       return
     }
 
@@ -58,17 +59,17 @@ class ImWebSocket {
       if (userInfo) {
         const user = JSON.parse(userInfo)
         userId = user.id || ''
-        console.log('[ImWebSocket] 用户ID:', userId)
+        debug('ImWebSocket', '用户ID:', userId)
       }
     } catch (e) {
-      console.warn('[ImWebSocket] 获取用户ID失败:', e)
+      warn('ImWebSocket', '获取用户ID失败:', e)
     }
 
     // 同时发送 token 和 userId
     this.url = `${wsBaseUrl}/ws/im?token=${token}&userId=${userId}`
 
     try {
-      console.log('[ImWebSocket] 正在连接...', this.url)
+      debug('ImWebSocket', '正在连接...', this.url)
       this.ws = new WebSocket(this.url)
 
       // 绑定事件
@@ -77,7 +78,7 @@ class ImWebSocket {
       this.ws.onerror = this.onError.bind(this)
       this.ws.onclose = this.onClose.bind(this)
     } catch (error) {
-      console.error('[ImWebSocket] 连接失败:', error)
+      error('ImWebSocket', '连接失败:', error)
       this.handleReconnect()
     }
   }
@@ -86,7 +87,7 @@ class ImWebSocket {
    * 连接成功
    */
   onOpen() {
-    console.log('[ImWebSocket] 连接成功')
+    info('ImWebSocket', '连接成功')
     this.reconnectAttempts = 0
 
     // 发送认证消息
@@ -105,14 +106,14 @@ class ImWebSocket {
   onMessage(event) {
     try {
       const data = JSON.parse(event.data)
-      console.log('[ImWebSocket] 收到消息:', data)
+      debug('ImWebSocket', '收到消息:', data)
 
       const { type, data: payload } = data
 
       switch (type) {
         case MESSAGE_TYPE.PONG:
           // 心跳响应
-          console.log('[ImWebSocket] 收到心跳响应')
+          debug('ImWebSocket', '收到心跳响应')
           break
         case MESSAGE_TYPE.MESSAGE:
           // 聊天消息
@@ -139,10 +140,10 @@ class ImWebSocket {
           this.emit('call', payload)
           break
         default:
-          console.warn('[ImWebSocket] 未知消息类型:', type)
+          warn('ImWebSocket', '未知消息类型:', type)
       }
     } catch (error) {
-      console.error('[ImWebSocket] 解析消息失败:', error)
+      error('ImWebSocket', '解析消息失败:', error)
     }
   }
 
@@ -150,7 +151,7 @@ class ImWebSocket {
    * 连接错误
    */
   onError(error) {
-    console.error('[ImWebSocket] 连接错误:', error)
+    error('ImWebSocket', '连接错误:', error)
     this.emit('error', error)
   }
 
@@ -158,7 +159,7 @@ class ImWebSocket {
    * 连接关闭
    */
   onClose(event) {
-    console.log('[ImWebSocket] 连接关闭:', event.code, event.reason)
+    info('ImWebSocket', '连接关闭:', event.code, event.reason)
 
     // 停止心跳
     this.stopHeartbeat()
@@ -191,17 +192,17 @@ class ImWebSocket {
    */
   send(message) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.error('[ImWebSocket] WebSocket 未连接')
+      error('ImWebSocket', 'WebSocket 未连接')
       return false
     }
 
     try {
       const data = typeof message === 'string' ? message : JSON.stringify(message)
       this.ws.send(data)
-      console.log('[ImWebSocket] 发送消息:', message)
+      debug('ImWebSocket', '发送消息:', message)
       return true
     } catch (error) {
-      console.error('[ImWebSocket] 发送消息失败:', error)
+      error('ImWebSocket', '发送消息失败:', error)
       return false
     }
   }
@@ -236,13 +237,13 @@ class ImWebSocket {
    */
   handleReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('[ImWebSocket] 达到最大重连次数，停止重连')
+      error('ImWebSocket', '达到最大重连次数，停止重连')
       this.emit('reconnect-failed')
       return
     }
 
     this.reconnectAttempts++
-    console.log(`[ImWebSocket] 尝试重连 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
+    info('ImWebSocket', `尝试重连 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
 
     this.reconnectTimer = setTimeout(() => {
       this.connect(this.token)
@@ -253,7 +254,7 @@ class ImWebSocket {
    * 关闭连接
    */
   close() {
-    console.log('[ImWebSocket] 主动关闭连接')
+    info('ImWebSocket', '主动关闭连接')
 
     // 清除定时器
     if (this.reconnectTimer) {
@@ -270,6 +271,17 @@ class ImWebSocket {
 
     // 重置重连次数
     this.reconnectAttempts = 0
+  }
+
+  /**
+   * 完全销毁 WebSocket 实例（登出时调用）
+   * 关闭连接并清空所有事件监听器
+   */
+  destroy() {
+    this.close()
+    this.removeAllListeners()
+    this.token = ''
+    this.url = ''
   }
 
   /**
@@ -301,6 +313,19 @@ class ImWebSocket {
   }
 
   /**
+   * 移除指定事件的所有监听器或全部监听器
+   * @param {string} [event] - 事件名称，不传则清空所有监听器
+   */
+  removeAllListeners(event) {
+    if (event) {
+      this.eventHandlers.delete(event)
+    } else {
+      // 如果没有指定事件，清空所有监听器
+      this.eventHandlers.clear()
+    }
+  }
+
+  /**
    * 触发事件
    * @param {string} event - 事件名称
    * @param {*} data - 事件数据
@@ -314,7 +339,7 @@ class ImWebSocket {
       try {
         handler(data)
       } catch (error) {
-        console.error(`[ImWebSocket] 事件处理器执行失败 (${event}):`, error)
+        error('ImWebSocket', `事件处理器执行失败 (${event}):`, error)
       }
     })
   }

@@ -535,4 +535,58 @@ public class ImRedisUtil {
         }
         return sb.toString();
     }
+
+    // ==================== 有序集合操作 ====================
+    /**
+     * 向有序集合添加成员
+     *
+     * @param key 有序集合的key
+     * @param value 成员值
+     * @param score 分数
+     */
+    public void zAdd(String key, String value, long score) {
+        if (redisTemplate == null) {
+            return;
+        }
+        redisTemplate.opsForZSet().add(buildSimpleKey(key), value, score);
+    }
+
+    /**
+     * 获取有序集合指定范围内的成员（按分数降序）
+     *
+     * @param key 有序集合的key
+     * @param start 起始位置
+     * @param end 结束位置
+     * @return 成员集合
+     */
+    public java.util.Set<String> zReverseRange(String key, long start, long end) {
+        if (redisTemplate == null) {
+            return new java.util.HashSet<>();
+        }
+        Set<Object> members = redisTemplate.opsForZSet().reverseRange(buildSimpleKey(key), start, end);
+        Set<String> result = new java.util.HashSet<>();
+        if (members != null) {
+            for (Object member : members) {
+                if (member != null) {
+                    result.add(member.toString());
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 移除有序集合指定排名范围内的成员
+     *
+     * @param key 有序集合的key
+     * @param start 起始位置
+     * @param end 结束位置
+     * @return 移除的成员数量
+     */
+    public Long zRemoveRange(String key, long start, long end) {
+        if (redisTemplate == null) {
+            return 0L;
+        }
+        return redisTemplate.opsForZSet().removeRange(buildSimpleKey(key), start, end);
+    }
 }

@@ -123,7 +123,7 @@ const handleStartChat = async () => {
       targetId: props.userId
     })
     if (res.code === 200) {
-      store.commit('im/SET_CURRENT_SESSION', res.data)
+      store.commit('im/session/SET_CURRENT_SESSION', res.data)
       window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'chat' }))
       handleClose()
     }

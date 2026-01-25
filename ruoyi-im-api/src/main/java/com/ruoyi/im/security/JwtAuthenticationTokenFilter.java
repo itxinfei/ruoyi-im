@@ -41,9 +41,16 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         // 从请求头中获取token
         String authHeader = request.getHeader("Authorization");
+        String token = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+            token = authHeader.substring(7);
+        } else {
+            // 如果请求头中没有token，尝试从URL参数中获取（用于文件下载等场景）
+            token = request.getParameter("token");
+        }
+
+        if (token != null) {
             String username = jwtUtils.getUsernameFromToken(token);
 
             // 验证token且当前安全上下文中没有认证信息

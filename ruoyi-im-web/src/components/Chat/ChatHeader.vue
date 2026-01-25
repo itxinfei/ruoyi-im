@@ -84,7 +84,18 @@ import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import UserDetailDrawer from './UserDetailDrawer.vue'
 
 const props = defineProps({
-  session: Object
+  session: {
+    type: Object,
+    default: null,
+    validator: (value) => {
+      // 如果有值，必须包含必要的字段
+      if (value === null) return true
+      return (
+        typeof value.id === 'string' ||
+        typeof value.id === 'number'
+      )
+    }
+  }
 })
 
 const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'search', 'pin', 'mute', 'clear', 'toggle-sidebar'])
@@ -100,8 +111,8 @@ const isOnline = computed(() => {
   
   // 优先使用store中的实时状态（WebSocket推送）
   const userId = props.session?.targetId
-  if (userId && store.state.im.userStatus[userId]) {
-    return store.state.im.userStatus[userId] === 'online'
+  if (userId && store.state.im.contact.userStatus[userId]) {
+    return store.state.im.contact.userStatus[userId] === 'online'
   }
   
   // 回退到session中的peerOnline字段（后端初始值）
