@@ -10,10 +10,12 @@ import com.ruoyi.im.dto.document.ImDocumentCommentRequest;
 import com.ruoyi.im.dto.document.ImDocumentCreateRequest;
 import com.ruoyi.im.dto.document.ImDocumentShareRequest;
 import com.ruoyi.im.dto.document.ImDocumentUpdateRequest;
+import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.mapper.ImDocumentCommentMapper;
 import com.ruoyi.im.mapper.ImDocumentMapper;
 import com.ruoyi.im.mapper.ImDocumentShareMapper;
 import com.ruoyi.im.mapper.ImDocumentVersionMapper;
+import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImDocumentService;
 import com.ruoyi.im.vo.document.ImDocumentCommentVO;
 import com.ruoyi.im.vo.document.ImDocumentVersionVO;
@@ -21,7 +23,6 @@ import com.ruoyi.im.vo.document.ImDocumentVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,17 +41,26 @@ public class ImDocumentServiceImpl implements ImDocumentService {
 
     private static final Logger log = LoggerFactory.getLogger(ImDocumentServiceImpl.class);
 
-    @Autowired
-    private ImDocumentMapper documentMapper;
+    private final ImDocumentMapper documentMapper;
+    private final ImDocumentShareMapper documentShareMapper;
+    private final ImDocumentCommentMapper documentCommentMapper;
+    private final ImDocumentVersionMapper documentVersionMapper;
+    private final ImUserMapper imUserMapper;
 
-    @Autowired
-    private ImDocumentShareMapper documentShareMapper;
-
-    @Autowired
-    private ImDocumentCommentMapper documentCommentMapper;
-
-    @Autowired
-    private ImDocumentVersionMapper documentVersionMapper;
+    /**
+     * 构造器注入依赖
+     */
+    public ImDocumentServiceImpl(ImDocumentMapper documentMapper,
+                                  ImDocumentShareMapper documentShareMapper,
+                                  ImDocumentCommentMapper documentCommentMapper,
+                                  ImDocumentVersionMapper documentVersionMapper,
+                                  ImUserMapper imUserMapper) {
+        this.documentMapper = documentMapper;
+        this.documentShareMapper = documentShareMapper;
+        this.documentCommentMapper = documentCommentMapper;
+        this.documentVersionMapper = documentVersionMapper;
+        this.imUserMapper = imUserMapper;
+    }
 
     @Override
     @Transactional
@@ -414,19 +424,52 @@ public class ImDocumentServiceImpl implements ImDocumentService {
                 .orderByDesc(ImDocumentComment::getCreateTime)
         );
 
+        // 批量获取评论用户ID
+        java.util.Set<Long> userIds = comments.stream()
+            .map(ImDocumentComment::getUserId)
+            .collect(Collectors.toSet());
+
+        // 获取回复的评论
+        List<ImDocumentComment> allReplies = documentCommentMapper.selectList(
+            new LambdaQueryWrapper<ImDocumentComment>()
+                .in(ImDocumentComment::getParentId,
+                    comments.stream().map(ImDocumentComment::getId).collect(Collectors.toList()))
+        );
+        allReplies.forEach(reply -> userIds.add(reply.getUserId()));
+
+        // 批量查询用户信息
+        java.util.Map<Long, ImUser> userMap = new java.util.HashMap<>();
+        if (!userIds.isEmpty()) {
+            List<ImUser> users = imUserMapper.selectImUserListByIds(new ArrayList<>(userIds));
+            users.forEach(user -> userMap.put(user.getId(), user));
+        }
+
+        java.util.Map<Long, List<ImDocumentComment>> repliesMap = allReplies.stream()
+            .collect(Collectors.groupingBy(ImDocumentComment::getParentId));
+
         return comments.stream()
             .map(comment -> {
                 ImDocumentCommentVO vo = new ImDocumentCommentVO();
                 BeanUtils.copyProperties(comment, vo);
-                vo.setUserName("用户" + comment.getUserId()); // TODO: 从用户表获取
+                ImUser user = userMap.get(comment.getUserId());
+                vo.setUserName(user != null ? user.getNickname() : "用户" + comment.getUserId());
+                vo.setUserAvatar(user != null ? user.getAvatar() : null);
                 vo.setCanDelete(comment.getUserId().equals(userId));
 
-                // 获取回复
-                List<ImDocumentComment> replies = documentCommentMapper.selectList(
-                    new LambdaQueryWrapper<ImDocumentComment>()
-                        .eq(ImDocumentComment::getParentId, comment.getId())
-                );
-                // TODO: 转换回复为VO
+                // 转换回复为VO
+                List<ImDocumentComment> replies = repliesMap.getOrDefault(comment.getId(), new ArrayList<>());
+                List<ImDocumentCommentVO.ReplyVO> replyVOs = replies.stream()
+                    .map(reply -> {
+                        ImDocumentCommentVO.ReplyVO replyVO = new ImDocumentCommentVO.ReplyVO();
+                        replyVO.setId(reply.getId());
+                        ImUser replyUser = userMap.get(reply.getUserId());
+                        replyVO.setUserName(replyUser != null ? replyUser.getNickname() : "用户" + reply.getUserId());
+                        replyVO.setContent(reply.getContent());
+                        replyVO.setCreateTime(reply.getCreateTime());
+                        return replyVO;
+                    })
+                    .collect(Collectors.toList());
+                vo.setReplies(replyVOs);
 
                 return vo;
             })
@@ -488,13 +531,17 @@ public class ImDocumentServiceImpl implements ImDocumentService {
         Integer latestVersion = documentVersionMapper.selectLatestVersion(documentId);
         int newVersion = (latestVersion != null ? latestVersion : 0) + 1;
 
+        // 获取用户信息
+        ImUser user = imUserMapper.selectImUserById(userId);
+        String userName = user != null ? user.getNickname() : "用户" + userId;
+
         ImDocumentVersion version = new ImDocumentVersion();
         version.setDocumentId(documentId);
         version.setVersion(newVersion);
         version.setContent(content);
         version.setTitleSnapshot(titleSnapshot);
         version.setModifiedBy(userId);
-        version.setModifiedByName("用户" + userId); // TODO: 从用户表获取
+        version.setModifiedByName(userName);
         version.setChangeDescription(description);
         version.setFileSize(fileSize != null ? fileSize : calculateContentSize(content));
         version.setCreateTime(LocalDateTime.now());

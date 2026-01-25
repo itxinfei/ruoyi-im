@@ -24,7 +24,6 @@ import com.ruoyi.im.vo.message.ImMessageVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,41 +36,47 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageServiceImpl.class);
 
-    @Autowired
-    private ImMessageMapper imMessageMapper;
+    private final ImMessageMapper imMessageMapper;
+    private final ImUserMapper imUserMapper;
+    private final ImConversationMapper imConversationMapper;
+    private final ImConversationMemberMapper imConversationMemberMapper;
+    private final ImConversationService imConversationService;
+    private final MessageEncryptionUtil encryptionUtil;
+    private final ImMessageMentionService messageMentionService;
+    private final ImMessageEditHistoryMapper editHistoryMapper;
+    private final com.ruoyi.im.util.ImDistributedLock distributedLock;
+    private final com.ruoyi.im.util.ImRedisUtil redisUtil;
+    private final com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService;
+    private final ImSystemConfigService systemConfigService;
 
-    @Autowired
-    private ImUserMapper imUserMapper;
-
-    @Autowired
-    private ImConversationMapper imConversationMapper;
-
-    @Autowired
-    private ImConversationMemberMapper imConversationMemberMapper;
-
-    @Autowired
-    private ImConversationService imConversationService;
-
-    @Autowired
-    private MessageEncryptionUtil encryptionUtil;
-
-    @Autowired
-    private ImMessageMentionService messageMentionService;
-
-    @Autowired
-    private ImMessageEditHistoryMapper editHistoryMapper;
-
-    @Autowired
-    private com.ruoyi.im.util.ImDistributedLock distributedLock;
-
-    @Autowired
-    private com.ruoyi.im.util.ImRedisUtil redisUtil;
-
-    @Autowired
-    private com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService;
-
-    @Autowired
-    private ImSystemConfigService systemConfigService;
+    /**
+     * 构造器注入依赖
+     */
+    public ImMessageServiceImpl(ImMessageMapper imMessageMapper,
+                                 ImUserMapper imUserMapper,
+                                 ImConversationMapper imConversationMapper,
+                                 ImConversationMemberMapper imConversationMemberMapper,
+                                 ImConversationService imConversationService,
+                                 MessageEncryptionUtil encryptionUtil,
+                                 ImMessageMentionService messageMentionService,
+                                 ImMessageEditHistoryMapper editHistoryMapper,
+                                 com.ruoyi.im.util.ImDistributedLock distributedLock,
+                                 com.ruoyi.im.util.ImRedisUtil redisUtil,
+                                 com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService,
+                                 ImSystemConfigService systemConfigService) {
+        this.imMessageMapper = imMessageMapper;
+        this.imUserMapper = imUserMapper;
+        this.imConversationMapper = imConversationMapper;
+        this.imConversationMemberMapper = imConversationMemberMapper;
+        this.imConversationService = imConversationService;
+        this.encryptionUtil = encryptionUtil;
+        this.messageMentionService = messageMentionService;
+        this.editHistoryMapper = editHistoryMapper;
+        this.distributedLock = distributedLock;
+        this.redisUtil = redisUtil;
+        this.broadcastService = broadcastService;
+        this.systemConfigService = systemConfigService;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

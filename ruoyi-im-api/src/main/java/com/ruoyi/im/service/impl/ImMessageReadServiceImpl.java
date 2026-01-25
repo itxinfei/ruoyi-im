@@ -142,9 +142,22 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
             throw new BusinessException("用户不是会话成员");
         }
 
+        // 如果未指定消息ID，获取会话最新消息ID
+        Long actualUpToMessageId = upToMessageId;
+        if (actualUpToMessageId == null) {
+            LambdaQueryWrapper<ImMessage> queryWrapper = new LambdaQueryWrapper<ImMessage>()
+                    .eq(ImMessage::getConversationId, conversationId)
+                    .orderByDesc(ImMessage::getId)
+                    .last("1");
+            ImMessage latestMessage = messageMapper.selectOne(queryWrapper);
+            if (latestMessage != null) {
+                actualUpToMessageId = latestMessage.getId();
+            }
+        }
+
         // 获取需要标记为已读的消息列表
         // 查询该会话中最后已读消息ID之后、直到upToMessageId的所有消息
-        List<ImMessage> messagesToMark = getMessagesToMarkAsRead(conversationId, userId, upToMessageId);
+        List<ImMessage> messagesToMark = getMessagesToMarkAsRead(conversationId, userId, actualUpToMessageId);
 
         for (ImMessage message : messagesToMark) {
             try {

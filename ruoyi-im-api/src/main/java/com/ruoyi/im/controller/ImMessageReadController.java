@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,8 +25,16 @@ public class ImMessageReadController {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageReadController.class);
 
-    @Autowired
-    private ImMessageReadService messageReadService;
+    private final ImMessageReadService messageReadService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param messageReadService 消息已读服务
+     */
+    public ImMessageReadController(ImMessageReadService messageReadService) {
+        this.messageReadService = messageReadService;
+    }
 
     /**
      * 标记单条消息为已读

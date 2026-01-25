@@ -6,7 +6,6 @@ import com.ruoyi.im.service.ImAttendanceService;
 import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +24,16 @@ import java.util.Map;
 @RequestMapping("/api/im/attendance")
 public class ImAttendanceController {
 
-    @Autowired
-    private ImAttendanceService attendanceService;
+    private final ImAttendanceService attendanceService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param attendanceService 考勤服务
+     */
+    public ImAttendanceController(ImAttendanceService attendanceService) {
+        this.attendanceService = attendanceService;
+    }
 
     /**
      * 上班打卡

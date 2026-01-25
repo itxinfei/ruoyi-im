@@ -11,7 +11,6 @@ import com.ruoyi.im.vo.contact.ImFriendVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -28,8 +27,16 @@ import java.util.List;
 @RequestMapping("/api/im/contact")
 public class ImContactController {
 
-    @Autowired
-    private ImFriendService imFriendService;
+    private final ImFriendService imFriendService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param imFriendService 好友服务
+     */
+    public ImContactController(ImFriendService imFriendService) {
+        this.imFriendService = imFriendService;
+    }
 
     /**
      * 搜索用户

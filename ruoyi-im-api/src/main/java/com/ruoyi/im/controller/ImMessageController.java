@@ -11,10 +11,10 @@ import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.dto.message.ImMessageSearchRequest;
 import com.ruoyi.im.dto.message.MessageEditRequest;
 import com.ruoyi.im.dto.reaction.ImMessageReactionAddRequest;
-import com.ruoyi.im.service.ImMessageMentionService;
-import com.ruoyi.im.service.ImMessageReactionService;
-import com.ruoyi.im.service.ImMessageService;
-import com.ruoyi.im.service.ImWebSocketBroadcastService;
+import com.ruoyi.im.exception.BusinessException;
+import com.ruoyi.im.mapper.ImConversationMemberMapper;
+import com.ruoyi.im.mapper.ImMessageMapper;
+import com.ruoyi.im.service.*;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
@@ -50,25 +50,23 @@ public class ImMessageController {
     private final ImMessageReactionService reactionService;
     private final ImMessageMentionService mentionService;
     private final ImWebSocketBroadcastService broadcastService;
-
-    @Autowired
-    private com.ruoyi.im.mapper.ImConversationMemberMapper conversationMemberMapper;
-
-    @Autowired
-    private com.ruoyi.im.mapper.ImMessageMapper imMessageMapper;
-
-    @Autowired
-    private com.ruoyi.im.service.ImMessageReadService messageReadService;
+    private final ImMessageReadService messageReadService;
+    private final ImMessageMapper imMessageMapper;
+    private final ImConversationMemberMapper imConversationMemberMapper;
 
     public ImMessageController(
             ImMessageService imMessageService,
             ImMessageReactionService reactionService,
             ImMessageMentionService mentionService,
-            ImWebSocketBroadcastService broadcastService) {
+            ImWebSocketBroadcastService broadcastService,
+            ImMessageReadService messageReadService, ImMessageMapper imMessageMapper, ImConversationMemberMapper imConversationMemberMapper) {
         this.imMessageService = imMessageService;
         this.reactionService = reactionService;
         this.mentionService = mentionService;
         this.broadcastService = broadcastService;
+        this.messageReadService = messageReadService;
+        this.imMessageMapper = imMessageMapper;
+        this.imConversationMemberMapper = imConversationMemberMapper;
     }
 
     @PostMapping("/send")
@@ -147,21 +145,8 @@ public class ImMessageController {
             @RequestParam Long conversationId,
             @RequestParam(required = false) Long lastReadMessageId) {
         Long userId = SecurityUtils.getLoginUserId();
-        // 更新会话成员的最后已读消息ID
-        ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
-        if (member != null) {
-            if (lastReadMessageId != null) {
-                member.setLastReadMessageId(lastReadMessageId);
-            } else {
-                // 获取会话最新消息ID
-                List<ImMessageVO> messages = imMessageService.getMessages(conversationId, userId, null, 1);
-                if (messages != null && !messages.isEmpty()) {
-                    member.setLastReadMessageId(messages.get(0).getId());
-                }
-            }
-            member.setLastReadTime(LocalDateTime.now());
-            conversationMemberMapper.updateById(member);
-        }
+        // 通过 Service 层处理会话已读标记，符合分层架构
+        messageReadService.markConversationAsRead(conversationId, lastReadMessageId, userId);
         return Result.success("已标记为已读");
     }
 
@@ -397,7 +382,7 @@ public class ImMessageController {
 
         try {
             // 获取用户在会话中的信息
-            ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId,
+            ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
                     userId);
 
             if (member == null || member.getLastReadMessageId() == null) {
@@ -431,7 +416,7 @@ public class ImMessageController {
 
         try {
             // 获取会话所有成员
-            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            List<ImConversationMember> members = imConversationMemberMapper.selectByConversationId(conversationId);
             List<Map<String, Object>> readUsers = new java.util.ArrayList<>();
 
             for (ImConversationMember member : members) {
@@ -506,7 +491,7 @@ public class ImMessageController {
                                          String emoji, String action) {
         try {
             // 获取会话中的所有成员
-            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            List<ImConversationMember> members = imConversationMemberMapper.selectByConversationId(conversationId);
             if (members == null || members.isEmpty()) {
                 return;
             }
@@ -556,7 +541,7 @@ public class ImMessageController {
     private void broadcastReadReceipt(Long conversationId, Long lastReadMessageId, Long userId) {
         try {
             // 获取会话中的所有成员
-            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            List<ImConversationMember> members = imConversationMemberMapper.selectByConversationId(conversationId);
             if (members == null || members.isEmpty()) {
                 return;
             }

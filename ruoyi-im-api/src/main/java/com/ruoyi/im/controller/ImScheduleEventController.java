@@ -10,7 +10,6 @@ import com.ruoyi.im.vo.schedule.ScheduleEventDetailVO;
 import com.ruoyi.im.vo.schedule.ScheduleParticipantVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +25,16 @@ import java.util.List;
 @RequestMapping("/api/im/schedule")
 public class ImScheduleEventController {
 
-    @Autowired
-    private ImScheduleEventService scheduleEventService;
+    private final ImScheduleEventService scheduleEventService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param scheduleEventService 日程服务
+     */
+    public ImScheduleEventController(ImScheduleEventService scheduleEventService) {
+        this.scheduleEventService = scheduleEventService;
+    }
 
     /**
      * 创建日程

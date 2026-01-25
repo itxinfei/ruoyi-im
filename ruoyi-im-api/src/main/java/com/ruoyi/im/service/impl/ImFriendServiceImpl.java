@@ -18,7 +18,6 @@ import com.ruoyi.im.vo.user.ImUserVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,23 +38,29 @@ public class ImFriendServiceImpl implements ImFriendService {
 
     private static final Logger log = LoggerFactory.getLogger(ImFriendServiceImpl.class);
 
-    @Autowired
-    private ImFriendMapper imFriendMapper;
+    private final ImFriendMapper imFriendMapper;
+    private final ImFriendRequestMapper imFriendRequestMapper;
+    private final ImUserMapper imUserMapper;
+    private final ImConversationService imConversationService;
+    private final com.ruoyi.im.util.ImDistributedLock distributedLock;
+    private final com.ruoyi.im.util.ImRedisUtil imRedisUtil;
 
-    @Autowired
-    private ImFriendRequestMapper imFriendRequestMapper;
-
-    @Autowired
-    private ImUserMapper imUserMapper;
-
-    @Autowired
-    private ImConversationService imConversationService;
-
-    @Autowired
-    private com.ruoyi.im.util.ImDistributedLock distributedLock;
-
-    @Autowired
-    private com.ruoyi.im.util.ImRedisUtil imRedisUtil;
+    /**
+     * 构造器注入依赖
+     */
+    public ImFriendServiceImpl(ImFriendMapper imFriendMapper,
+                                ImFriendRequestMapper imFriendRequestMapper,
+                                ImUserMapper imUserMapper,
+                                ImConversationService imConversationService,
+                                com.ruoyi.im.util.ImDistributedLock distributedLock,
+                                com.ruoyi.im.util.ImRedisUtil imRedisUtil) {
+        this.imFriendMapper = imFriendMapper;
+        this.imFriendRequestMapper = imFriendRequestMapper;
+        this.imUserMapper = imUserMapper;
+        this.imConversationService = imConversationService;
+        this.distributedLock = distributedLock;
+        this.imRedisUtil = imRedisUtil;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

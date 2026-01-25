@@ -7,7 +7,6 @@ import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
 import com.ruoyi.im.vo.conversation.ImConversationVO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -24,11 +23,20 @@ import java.util.List;
 @RequestMapping("/api/im/session")
 public class ImSessionController {
 
-    @Autowired
-    private ImConversationMemberService conversationMemberService;
+    private final ImConversationMemberService conversationMemberService;
+    private final ImConversationService conversationService;
 
-    @Autowired
-    private ImConversationService conversationService;
+    /**
+     * 构造器注入依赖
+     *
+     * @param conversationMemberService 会话成员服务
+     * @param conversationService 会话服务
+     */
+    public ImSessionController(ImConversationMemberService conversationMemberService,
+                                ImConversationService conversationService) {
+        this.conversationMemberService = conversationMemberService;
+        this.conversationService = conversationService;
+    }
 
     /**
      * 获取当前用户会话列表

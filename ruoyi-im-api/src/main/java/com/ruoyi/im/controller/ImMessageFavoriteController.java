@@ -6,7 +6,6 @@ import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.favorite.FavoriteMessageVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotBlank;
@@ -23,8 +22,16 @@ import java.util.List;
 @RequestMapping("/api/im/message/favorite")
 public class ImMessageFavoriteController {
 
-    @Autowired
-    private ImMessageFavoriteService messageFavoriteService;
+    private final ImMessageFavoriteService messageFavoriteService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param messageFavoriteService 消息收藏服务
+     */
+    public ImMessageFavoriteController(ImMessageFavoriteService messageFavoriteService) {
+        this.messageFavoriteService = messageFavoriteService;
+    }
 
     /**
      * 收藏消息

@@ -106,4 +106,15 @@
         </where>
         order by g.create_time desc
     </select>
+
+    <!-- 批量获取群组信息 - 用于N+1查询优化 -->
+    <select id="selectGroupsByIds" resultMap="ImGroupResult">
+        SELECT id, name, owner_id, avatar, description
+        FROM im_group
+        WHERE id IN
+        <foreach collection="groupIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND is_deleted = 0
+    </select>
 </mapper>

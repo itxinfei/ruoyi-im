@@ -92,3 +92,20 @@ export function getTemplates() {
         method: 'get'
     })
 }
+
+/**
+ * 处理审批（通过或拒绝）
+ * @param {Object} data - { approvalId, action, comment }
+ * @param {string} data.approvalId - 审批ID
+ * @param {string} data.action - 操作类型: APPROVE 或 REJECT
+ * @param {string} data.comment - 审批意见
+ */
+export function handleApproval(data) {
+    return request({
+        url: `/api/im/approval/${data.approvalId}/${data.action.toLowerCase()}`,
+        method: 'post',
+        data: {
+            comment: data.comment
+        }
+    })
+}

@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -27,8 +26,16 @@ public class ImGlobalSearchController {
 
     private static final Logger log = LoggerFactory.getLogger(ImGlobalSearchController.class);
 
-    @Autowired
-    private ImGlobalSearchService globalSearchService;
+    private final ImGlobalSearchService globalSearchService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param globalSearchService 全局搜索服务
+     */
+    public ImGlobalSearchController(ImGlobalSearchService globalSearchService) {
+        this.globalSearchService = globalSearchService;
+    }
 
     /**
      * 全局搜索
@@ -48,7 +55,7 @@ public class ImGlobalSearchController {
             log.info("全局搜索: userId={}, keyword={}, type={}",
                 userId, request.getKeyword(), request.getSearchType());
 
-            GlobalSearchResultVO result = globalSearchService.globalSearch(request);
+            GlobalSearchResultVO result = globalSearchService.globalSearch(request, userId);
             return Result.success(result);
         } catch (Exception e) {
             log.error("全局搜索失败: keyword={}", request.getKeyword(), e);
@@ -173,8 +180,7 @@ public class ImGlobalSearchController {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
-            // TODO: 从Redis或数据库获取用户最近搜索的关键词
-            java.util.List<String> hotKeywords = new java.util.ArrayList<>();
+            java.util.List<String> hotKeywords = globalSearchService.getHotKeywords(userId);
             return Result.success(hotKeywords);
         } catch (Exception e) {
             log.error("获取热门搜索失败: userId={}", userId, e);

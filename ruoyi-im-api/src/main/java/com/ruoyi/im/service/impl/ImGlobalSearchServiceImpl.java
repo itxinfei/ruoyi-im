@@ -5,11 +5,11 @@ import com.ruoyi.im.dto.search.GlobalSearchRequest;
 import com.ruoyi.im.domain.*;
 import com.ruoyi.im.mapper.*;
 import com.ruoyi.im.service.ImGlobalSearchService;
+import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.vo.search.GlobalSearchResultVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -31,45 +31,56 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
     private static final Logger log = LoggerFactory.getLogger(ImGlobalSearchServiceImpl.class);
 
     private static final int MAX_RESULTS_PER_TYPE = 20;
+    private static final String SEARCH_KEYWORDS_KEY = "search:keywords:";
+    private static final int MAX_KEYWORDS_COUNT = 10;
 
-    @Autowired
-    private ImMessageMapper messageMapper;
+    private final ImMessageMapper messageMapper;
+    private final ImUserMapper userMapper;
+    private final ImFriendMapper friendMapper;
+    private final ImGroupMapper groupMapper;
+    private final ImGroupMemberMapper groupMemberMapper;
+    private final ImFileAssetMapper fileAssetMapper;
+    private final ImTodoItemMapper todoItemMapper;
+    private final ImTaskMapper taskMapper;
+    private final ImDocumentMapper documentMapper;
+    private final ImScheduleEventMapper scheduleEventMapper;
+    private final ImConversationMapper conversationMapper;
+    private final MessageEncryptionUtil encryptionUtil;
+    private final ImRedisUtil redisUtil;
 
-    @Autowired
-    private ImUserMapper userMapper;
-
-    @Autowired
-    private ImFriendMapper friendMapper;
-
-    @Autowired
-    private ImGroupMapper groupMapper;
-
-    @Autowired
-    private ImGroupMemberMapper groupMemberMapper;
-
-    @Autowired
-    private ImFileAssetMapper fileAssetMapper;
-
-    @Autowired
-    private ImTodoItemMapper todoItemMapper;
-
-    @Autowired
-    private ImTaskMapper taskMapper;
-
-    @Autowired
-    private ImDocumentMapper documentMapper;
-
-    @Autowired
-    private ImScheduleEventMapper scheduleEventMapper;
-
-    @Autowired
-    private ImConversationMapper conversationMapper;
-
-    @Autowired
-    private MessageEncryptionUtil encryptionUtil;
+    /**
+     * 构造器注入依赖
+     */
+    public ImGlobalSearchServiceImpl(ImMessageMapper messageMapper,
+                                      ImUserMapper userMapper,
+                                      ImFriendMapper friendMapper,
+                                      ImGroupMapper groupMapper,
+                                      ImGroupMemberMapper groupMemberMapper,
+                                      ImFileAssetMapper fileAssetMapper,
+                                      ImTodoItemMapper todoItemMapper,
+                                      ImTaskMapper taskMapper,
+                                      ImDocumentMapper documentMapper,
+                                      ImScheduleEventMapper scheduleEventMapper,
+                                      ImConversationMapper conversationMapper,
+                                      MessageEncryptionUtil encryptionUtil,
+                                      ImRedisUtil redisUtil) {
+        this.messageMapper = messageMapper;
+        this.userMapper = userMapper;
+        this.friendMapper = friendMapper;
+        this.groupMapper = groupMapper;
+        this.groupMemberMapper = groupMemberMapper;
+        this.fileAssetMapper = fileAssetMapper;
+        this.todoItemMapper = todoItemMapper;
+        this.taskMapper = taskMapper;
+        this.documentMapper = documentMapper;
+        this.scheduleEventMapper = scheduleEventMapper;
+        this.conversationMapper = conversationMapper;
+        this.encryptionUtil = encryptionUtil;
+        this.redisUtil = redisUtil;
+    }
 
     @Override
-    public GlobalSearchResultVO globalSearch(GlobalSearchRequest request) {
+    public GlobalSearchResultVO globalSearch(GlobalSearchRequest request, Long userId) {
         if (!StringUtils.hasText(request.getKeyword())) {
             return new GlobalSearchResultVO();
         }
@@ -77,6 +88,9 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
         String keyword = request.getKeyword().trim();
         GlobalSearchResultVO result = new GlobalSearchResultVO();
         result.setKeyword(keyword);
+
+        // 保存搜索关键词
+        saveSearchKeyword(keyword, userId);
 
         // 根据搜索类型决定搜索哪些内容
         String searchType = request.getSearchType();
@@ -534,5 +548,36 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
             return "";
         }
         return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    }
+
+    @Override
+    public java.util.List<String> getHotKeywords(Long userId) {
+        if (redisUtil == null) {
+            return new java.util.ArrayList<>();
+        }
+        try {
+            String key = SEARCH_KEYWORDS_KEY + userId;
+            java.util.Set<String> keywords = redisUtil.zReverseRange(key, 0, MAX_KEYWORDS_COUNT - 1);
+            return keywords != null ? new java.util.ArrayList<>(keywords) : new java.util.ArrayList<>();
+        } catch (Exception e) {
+            log.error("获取热门搜索关键词失败: userId={}", userId, e);
+            return new java.util.ArrayList<>();
+        }
+    }
+
+    @Override
+    public void saveSearchKeyword(String keyword, Long userId) {
+        if (redisUtil == null || !StringUtils.hasText(keyword)) {
+            return;
+        }
+        try {
+            String key = SEARCH_KEYWORDS_KEY + userId;
+            // 使用有序集合存储，分数为时间戳
+            redisUtil.zAdd(key, keyword, System.currentTimeMillis());
+            // 保持最新的N个关键词
+            redisUtil.zRemoveRange(key, 0, -(MAX_KEYWORDS_COUNT + 1));
+        } catch (Exception e) {
+            log.error("保存搜索关键词失败: userId={}, keyword={}", userId, keyword, e);
+        }
     }
 }

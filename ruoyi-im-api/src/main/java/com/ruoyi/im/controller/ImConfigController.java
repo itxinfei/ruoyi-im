@@ -5,7 +5,6 @@ import com.ruoyi.im.service.ImConfigService;
 import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -21,8 +20,16 @@ import java.util.Map;
 @RequestMapping("/api/im/config")
 public class ImConfigController {
 
-    @Autowired
-    private ImConfigService imConfigService;
+    private final ImConfigService imConfigService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param imConfigService 配置服务
+     */
+    public ImConfigController(ImConfigService imConfigService) {
+        this.imConfigService = imConfigService;
+    }
 
     /**
      * 获取通知设置

@@ -10,7 +10,6 @@ import com.ruoyi.im.vo.ding.DingDetailVO;
 import com.ruoyi.im.vo.ding.DingReceiptVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -24,8 +23,16 @@ import java.util.List;
 @RequestMapping("/api/im/ding")
 public class ImDingMessageController {
 
-    @Autowired
-    private ImDingMessageService dingMessageService;
+    private final ImDingMessageService dingMessageService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param dingMessageService DING消息服务
+     */
+    public ImDingMessageController(ImDingMessageService dingMessageService) {
+        this.dingMessageService = dingMessageService;
+    }
 
     /**
      * 发送DING消息

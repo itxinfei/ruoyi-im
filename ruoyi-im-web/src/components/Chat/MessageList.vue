@@ -149,11 +149,13 @@ const formatTimeDivider = (timestamp) => {
 
   const timeStr = date.toLocaleTimeString('zh-CN', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    hour12: false
   })
 
-  if (diffDays === 0) return `今天 ${timeStr}`
+  if (diffDays === 0) return timeStr
   if (diffDays === 1) return `昨天 ${timeStr}`
+  if (diffDays === 2) return `前天 ${timeStr}`
   if (diffDays < 7) {
     const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
     return `${weekDays[date.getDay()]} ${timeStr}`
@@ -227,10 +229,12 @@ const scrollToMsg = (id) => {
   const el = listRef.value?.querySelector(`[data-id="${id}"]`)
   if (el) {
     el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    el.classList.add('highlight-msg')
+    el.classList.add('highlight-msg-active')
     setTimeout(() => {
-      el.classList.remove('highlight-msg')
+      el.classList.remove('highlight-msg-active')
     }, 2000)
+  } else {
+    ElMessage.warning('消息时间过久，请向上翻阅查找')
   }
 }
 
@@ -308,7 +312,7 @@ defineExpose({ scrollToBottom, maintainScroll })
   flex: 1;
   overflow-y: auto;
   padding: 16px;
-  background: #f7f8fa;
+  background: var(--dt-bg-chat);
   position: relative;
 }
 

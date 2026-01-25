@@ -114,7 +114,19 @@ export function useTheme() {
    */
   const toggleTheme = () => {
     const modes = ['light', 'dark', 'auto']
-    const nextIdx = (modes.indexOf(themeMode.value) + 1) % modes.length
+    let nextIdx = (modes.indexOf(themeMode.value) + 1) % modes.length
+
+    // 智能跳过视觉上无变化的模式
+    const getPreviewIsDark = (mode) => {
+      if (mode === 'auto') return getSystemIsDark()
+      return mode === 'dark'
+    }
+
+    // 如果下一个模式的视觉效果与当前一致，则再跳一步（确保点击即反馈）
+    if (getPreviewIsDark(modes[nextIdx]) === isDark.value) {
+      nextIdx = (nextIdx + 1) % modes.length
+    }
+
     themeMode.value = modes[nextIdx]
   }
 

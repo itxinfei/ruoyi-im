@@ -214,18 +214,26 @@ const updateSetting = (key, value) => {
 // 为了不修改大规模模板，我们使用一个监听器同步
 const localSettings = reactive(JSON.parse(JSON.stringify(settings.value)))
 
+// 核心同步逻辑：本地修改同步到 Store
 watch(localSettings, (newVal) => {
-  store.commit('im/UPDATE_SETTINGS', newVal)
+  // 只有当本地值与 Store 值不一致时才提交，防止死循环
+  if (JSON.stringify(newVal) !== JSON.stringify(settings.value)) {
+    store.commit('im/UPDATE_SETTINGS', JSON.parse(JSON.stringify(newVal)))
+  }
 }, { deep: true })
 
-// 监听远端/Store变化同步回本地
+// 远端/Store 变化同步回本地
 watch(() => settings.value, (newVal) => {
-  Object.assign(localSettings, JSON.parse(JSON.stringify(newVal)))
+  if (JSON.stringify(newVal) !== JSON.stringify(localSettings)) {
+    Object.assign(localSettings, JSON.parse(JSON.stringify(newVal)))
+  }
 }, { deep: true })
 
 // 同步主题设置到 Hook
 watch(() => localSettings.general.theme, (val) => {
-  setThemeMode(val)
+  if (val !== themeMode.value) {
+    setThemeMode(val)
+  }
 }, { immediate: true })
 
 // 移除本地冗余逻辑，由 Vuex 统一管理

@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="写邮件"
+    :title="dialogTitle"
     width="700px"
     :close-on-click-modal="false"
     @close="handleClose"
@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { sendMail } from '@/api/im/mail'
 
@@ -79,6 +79,10 @@ const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false
+  },
+  replyTo: {
+    type: Object,
+    default: null
   }
 })
 
@@ -88,6 +92,13 @@ const visible = ref(false)
 const formRef = ref(null)
 const submitting = ref(false)
 const fileList = ref([])
+
+// 对话框标题
+const dialogTitle = computed(() => {
+  if (props.replyTo?.isReply) return '回复邮件'
+  if (props.replyTo?.isForward) return '转发邮件'
+  return '写邮件'
+})
 
 // 表单数据
 const form = reactive({
@@ -113,6 +124,17 @@ const rules = {
 // 监听 modelValue 变化
 watch(() => props.modelValue, (val) => {
   visible.value = val
+  if (val && props.replyTo) {
+    // 回复/转发模式：填充表单
+    if (props.replyTo.isReply) {
+      form.to = props.replyTo.to || ''
+      form.subject = props.replyTo.subject || ''
+      form.content = '\n\n---------- 原始邮件 ----------\n'
+    } else if (props.replyTo.isForward) {
+      form.subject = props.replyTo.subject || ''
+      form.content = props.replyTo.content || ''
+    }
+  }
 })
 
 watch(visible, (val) => {

@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,8 +25,16 @@ public class ImMentionController {
 
     private static final Logger log = LoggerFactory.getLogger(ImMentionController.class);
 
-    @Autowired
-    private ImMessageMentionService mentionService;
+    private final ImMessageMentionService mentionService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param mentionService 提及服务
+     */
+    public ImMentionController(ImMessageMentionService mentionService) {
+        this.mentionService = mentionService;
+    }
 
     /**
      * 获取会话中可以@的用户列表

@@ -8,7 +8,6 @@ import com.ruoyi.im.service.ImExternalContactService;
 import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -22,8 +21,16 @@ import java.util.List;
 @RequestMapping("/api/im/external-contact")
 public class ImExternalContactController {
 
-    @Autowired
-    private ImExternalContactService externalContactService;
+    private final ImExternalContactService externalContactService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param externalContactService 外部联系人服务
+     */
+    public ImExternalContactController(ImExternalContactService externalContactService) {
+        this.externalContactService = externalContactService;
+    }
 
     // ==================== 联系人管理 ====================
 

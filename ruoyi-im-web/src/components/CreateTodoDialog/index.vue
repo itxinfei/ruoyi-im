@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="新建待办"
+    :title="isEdit ? '编辑待办' : '新建待办'"
     width="500px"
     :close-on-click-modal="false"
     @close="handleClose"
@@ -57,7 +57,7 @@
       <span class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>
         <el-button type="primary" :loading="submitting" @click="handleSubmit">
-          确定
+          {{ isEdit ? '保存' : '确定' }}
         </el-button>
       </span>
     </template>
@@ -65,14 +65,18 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
-import { createTodo } from '@/api/im/workbench'
+import { createTodo, updateTodo } from '@/api/im/workbench'
 
 const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false
+  },
+  todo: {
+    type: Object,
+    default: null
   }
 })
 
@@ -81,6 +85,9 @@ const emit = defineEmits(['update:modelValue', 'success'])
 const visible = ref(false)
 const formRef = ref(null)
 const submitting = ref(false)
+
+// 判断是否为编辑模式
+const isEdit = computed(() => !!props.todo)
 
 // 表单数据
 const form = reactive({
@@ -107,6 +114,13 @@ const rules = {
 // 监听 modelValue 变化
 watch(() => props.modelValue, (val) => {
   visible.value = val
+  if (val && props.todo) {
+    // 编辑模式：填充表单
+    form.title = props.todo.title || ''
+    form.content = props.todo.content || ''
+    form.priority = props.todo.priority || 'medium'
+    form.dueDate = props.todo.dueDate || ''
+  }
 })
 
 watch(visible, (val) => {
@@ -122,18 +136,33 @@ const handleSubmit = async () => {
     await formRef.value.validate()
     submitting.value = true
 
-    const res = await createTodo(form)
+    let res
+    if (isEdit.value) {
+      // 编辑模式
+      res = await updateTodo(props.todo.id, form)
+      if (res.code === 200) {
+        ElMessage.success('保存成功')
+      } else {
+        ElMessage.error(res.msg || '保存失败')
+      }
+    } else {
+      // 新建模式
+      res = await createTodo(form)
+      if (res.code === 200) {
+        ElMessage.success('创建成功')
+      } else {
+        ElMessage.error(res.msg || '创建失败')
+      }
+    }
+
     if (res.code === 200) {
-      ElMessage.success('创建成功')
       emit('success', res.data)
       handleClose()
-    } else {
-      ElMessage.error(res.msg || '创建失败')
     }
   } catch (error) {
     if (error !== false) { // 表单验证失败时 error 为 false
-      console.error('创建待办失败', error)
-      ElMessage.error('创建失败，请稍后重试')
+      console.error(isEdit.value ? '更新待办失败' : '创建待办失败', error)
+      ElMessage.error(isEdit.value ? '保存失败，请稍后重试' : '创建失败，请稍后重试')
     }
   } finally {
     submitting.value = false

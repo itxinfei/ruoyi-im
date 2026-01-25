@@ -16,9 +16,10 @@ public interface ImGlobalSearchService {
      * 根据关键词搜索消息、联系人、群组、文件、工作台内容
      *
      * @param request 搜索请求
+     * @param userId  用户ID
      * @return 搜索结果
      */
-    GlobalSearchResultVO globalSearch(GlobalSearchRequest request);
+    GlobalSearchResultVO globalSearch(GlobalSearchRequest request, Long userId);
 
     /**
      * 搜索消息
@@ -64,4 +65,20 @@ public interface ImGlobalSearchService {
      * @return 搜索结果
      */
     GlobalSearchResultVO searchWorkbench(String keyword, Long userId);
+
+    /**
+     * 获取用户最近搜索的关键词
+     *
+     * @param userId 用户ID
+     * @return 最近搜索的关键词列表
+     */
+    java.util.List<String> getHotKeywords(Long userId);
+
+    /**
+     * 保存用户搜索关键词
+     *
+     * @param keyword 关键词
+     * @param userId  用户ID
+     */
+    void saveSearchKeyword(String keyword, Long userId);
 }

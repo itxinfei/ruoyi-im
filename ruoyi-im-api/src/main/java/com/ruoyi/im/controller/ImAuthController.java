@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -31,11 +30,19 @@ public class ImAuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(ImAuthController.class);
 
-    @Autowired
-    private ImUserService imUserService;
+    private final ImUserService imUserService;
+    private final JwtUtils jwtUtils;
 
-    @Autowired
-    private JwtUtils jwtUtils;
+    /**
+     * 构造器注入依赖
+     *
+     * @param imUserService 用户服务
+     * @param jwtUtils JWT工具类
+     */
+    public ImAuthController(ImUserService imUserService, JwtUtils jwtUtils) {
+        this.imUserService = imUserService;
+        this.jwtUtils = jwtUtils;
+    }
 
     /**
      * 用户登录

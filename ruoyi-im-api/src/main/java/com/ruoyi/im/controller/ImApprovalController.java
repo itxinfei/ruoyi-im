@@ -7,7 +7,6 @@ import com.ruoyi.im.service.ImApprovalService;
 import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +23,16 @@ import java.util.Map;
 @RequestMapping("/api/im/approval")
 public class ImApprovalController {
 
-    @Autowired
-    private ImApprovalService approvalService;
+    private final ImApprovalService approvalService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param approvalService 审批服务
+     */
+    public ImApprovalController(ImApprovalService approvalService) {
+        this.approvalService = approvalService;
+    }
 
     /**
      * 发起审批

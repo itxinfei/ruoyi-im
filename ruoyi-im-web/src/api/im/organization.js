@@ -9,7 +9,7 @@ import request from '../request'
  */
 export function getOrgTree() {
     return request({
-        url: '/api/im/organization/tree',
+        url: '/api/im/organization/department/tree',
         method: 'get'
     })
 }

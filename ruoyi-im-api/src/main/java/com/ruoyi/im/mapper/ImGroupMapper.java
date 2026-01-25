@@ -82,4 +82,12 @@ public interface ImGroupMapper extends BaseMapper<ImGroup> {
      * @return 群组分页列表
      */
     IPage<ImGroup> selectGroupPage(Page<ImGroup> page, @Param("keyword") String keyword);
+
+    /**
+     * 根据群组ID列表批量查询群组 - 用于N+1查询优化
+     *
+     * @param groupIds 群组ID列表
+     * @return 群组列表
+     */
+    List<ImGroup> selectGroupsByIds(@Param("groupIds") List<Long> groupIds);
 }

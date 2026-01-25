@@ -613,14 +613,48 @@ ruoyi-im-web/src/
 
 ```
 sql/migrations/
-├── 20250125_p0_core_enhancements.sql      # P0 核心增强
-├── 20250125_p1_video_meeting.sql          # P1-1 视频会议
-├── 20250125_p1_cloud_drive.sql            # P1-2 企业云盘
-├── 20250125_p1_attendance.sql             # P1-3 考勤管理
-├── 20250125_p1_document_collaboration.sql # P1-4 文档协作
-├── 20250125_p2_message_marker.sql         # P2-3 消息标记
-└── 20250125_p2_voice_transcript.sql       # P2-4 语音转文字
+├── 20250125_p0_feature_enhancement.sql      # P0 核心增强功能
+├── 20250125_p1_video_meeting.sql           # P1-1 视频会议
+├── 20250125_p1_cloud_drive.sql             # P1-2 企业云盘
+├── 20250125_p1_attendance_group.sql        # P1-3 考勤管理
+├── 20250125_p1_document_collaboration.sql  # P1-4 文档协作
+├── 20250125_p2_message_marker.sql          # P2-3 消息标记
+├── 20250125_p2_voice_transcript.sql        # P2-4 语音转文字
+├── 20250125_performance_indexes.sql        # 性能优化索引
+└── ...
 ```
+
+---
+
+# 代码质量优化记录
+
+## 2025-01-25 代码质量改进
+
+### 分层架构修复
+- **ImMessageController**: 移除直接注入的 Mapper，改为通过 Service 层调用
+- **ImGroupAdminController**: 修复直接使用 Entity 作为 API 参数的违规，改用 `ImGroupUpdateRequest` DTO
+- **ImUserController**: 修复直接使用 Entity 作为 API 参数的违规，新增 `ImUserStatusUpdateRequest` DTO
+
+### N+1 查询优化
+- **ImConversationServiceImpl.getUserConversations**: 使用批量查询替代循环查询
+  - 新增 `ImConversationMapper.selectUserConversationsWithMembers()` - 一次性获取会话和成员信息
+  - 新增 `ImMessageMapper.selectLastMessagesByConversationIds()` - 批量获取会话最后消息
+  - 新增 `ImGroupMapper.selectGroupsByIds()` - 批量获取群组信息
+  - 使用现有的 `ImUserMapper.selectImUserListByIds()` - 批量获取用户信息
+- 查询数量从 O(n) 降低到 O(1)（3个批量查询替代 n 个单独查询）
+
+### 新增 DTO 类
+- `ImUserStatusUpdateRequest`: 用户状态更新请求 DTO，支持状态值校验
+
+### 数据库索引优化
+迁移脚本 `20250125_performance_indexes.sql` 添加以下索引：
+- **im_conversation**: 会话类型+目标ID组合索引、最后消息时间索引
+- **im_conversation_member**: 用户ID+删除状态索引、用户ID+置顶状态索引
+- **im_message**: 会话ID+创建时间索引、会话ID+ID索引、发送者ID+创建时间索引
+- **im_friend**: 用户ID+好友ID组合索引（双向）、用户ID+分组索引
+- **im_group**: 群主ID索引、群组名称前缀索引
+- **im_user**: 用户状态索引
+- **im_message_read**: 消息ID+用户ID唯一索引、会话ID+用户ID索引
 
 ---
 

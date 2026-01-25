@@ -19,7 +19,6 @@ import com.ruoyi.im.service.ImGroupService;
 import com.ruoyi.im.vo.group.ImGroupMemberVO;
 import com.ruoyi.im.vo.group.ImGroupVO;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,23 +34,29 @@ import java.util.List;
 @Service
 public class ImGroupServiceImpl implements ImGroupService {
 
-    @Autowired
-    private ImGroupMapper imGroupMapper;
+    private final ImGroupMapper imGroupMapper;
+    private final ImGroupMemberMapper imGroupMemberMapper;
+    private final ImUserMapper imUserMapper;
+    private final ImConversationMapper imConversationMapper;
+    private final com.ruoyi.im.util.ImRedisUtil imRedisUtil;
+    private final ImConversationMemberMapper imConversationMemberMapper;
 
-    @Autowired
-    private ImGroupMemberMapper imGroupMemberMapper;
-
-    @Autowired
-    private ImUserMapper imUserMapper;
-
-    @Autowired
-    private ImConversationMapper imConversationMapper;
-
-    @Autowired
-    private com.ruoyi.im.util.ImRedisUtil imRedisUtil;
-
-    @Autowired
-    private ImConversationMemberMapper imConversationMemberMapper;
+    /**
+     * 构造器注入依赖
+     */
+    public ImGroupServiceImpl(ImGroupMapper imGroupMapper,
+                              ImGroupMemberMapper imGroupMemberMapper,
+                              ImUserMapper imUserMapper,
+                              ImConversationMapper imConversationMapper,
+                              com.ruoyi.im.util.ImRedisUtil imRedisUtil,
+                              ImConversationMemberMapper imConversationMemberMapper) {
+        this.imGroupMapper = imGroupMapper;
+        this.imGroupMemberMapper = imGroupMemberMapper;
+        this.imUserMapper = imUserMapper;
+        this.imConversationMapper = imConversationMapper;
+        this.imRedisUtil = imRedisUtil;
+        this.imConversationMemberMapper = imConversationMemberMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

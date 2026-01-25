@@ -125,7 +125,7 @@ const handleImageError = () => {
 }
 
 .avatar-square {
-  border-radius: 8px;
+  border-radius: 16%; /* 钉钉标准的圆角 */
 }
 
 .avatar-img {

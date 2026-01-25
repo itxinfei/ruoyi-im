@@ -5,7 +5,6 @@ import com.ruoyi.im.service.ImEmailService;
 import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +20,16 @@ import java.util.Map;
 @RequestMapping("/api/im/email")
 public class ImEmailController {
 
-    @Autowired
-    private ImEmailService emailService;
+    private final ImEmailService emailService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param emailService 邮件服务
+     */
+    public ImEmailController(ImEmailService emailService) {
+        this.emailService = emailService;
+    }
 
     /**
      * 获取邮件列表

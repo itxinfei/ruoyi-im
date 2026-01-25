@@ -11,7 +11,6 @@ import com.ruoyi.im.vo.task.ImTaskDetailVO;
 import com.ruoyi.im.vo.task.ImTaskVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -29,8 +28,16 @@ import java.util.Map;
 @RequestMapping("/api/im/task")
 public class ImTaskController {
 
-    @Autowired
-    private ImTaskService taskService;
+    private final ImTaskService taskService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param taskService 任务服务
+     */
+    public ImTaskController(ImTaskService taskService) {
+        this.taskService = taskService;
+    }
 
     /**
      * 创建任务

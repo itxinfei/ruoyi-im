@@ -1,606 +1,324 @@
 <template>
-  <el-drawer
+  <el-dialog
     v-model="visible"
-    title="群组详情"
-    size="400px"
-    :close-on-click-modal="false"
-    @close="handleClose"
+    title="群组信息"
+    width="520px"
+    class="group-detail-dialog"
+    destroy-on-close
+    append-to-body
   >
-    <div v-if="groupInfo" v-loading="loading" class="group-detail">
-      <!-- 群组基本信息 -->
-      <div class="group-header">
-        <el-avatar :size="80" :src="addTokenToUrl(groupInfo.avatar)">
-          {{ groupInfo.name?.charAt(0) }}
-        </el-avatar>
-        <h2 class="group-name">{{ groupInfo.name }}</h2>
-        <p class="group-id">群号: {{ groupInfo.id }}</p>
+    <div v-if="groupInfo" v-loading="loading" class="group-detail-container">
+      <!-- 头部卡片 -->
+      <div class="group-hero">
+        <div class="hero-left">
+          <DingtalkAvatar
+            :src="groupInfo.avatar"
+            :name="groupInfo.name"
+            :size="64"
+            shape="square"
+            custom-class="group-hero-avatar"
+          />
+          <div class="hero-info">
+            <h3 class="group-name-text">{{ groupInfo.name }}</h3>
+            <span class="member-tag">{{ members.length }} 人</span>
+          </div>
+        </div>
+        <div class="hero-right">
+          <el-button v-if="isOwnerOrAdmin" text :icon="Edit" @click="handleEditGroupName">修改名称</el-button>
+        </div>
       </div>
 
-      <!-- 群公告 -->
-      <div class="info-section">
-        <div class="section-title">
+      <!-- 公告栏 -->
+      <div class="announcement-section">
+        <div class="section-label">
           <el-icon><Bell /></el-icon>
           <span>群公告</span>
-          <el-button
-            v-if="isOwnerOrAdmin"
-            text
-            size="small"
-            @click="handleEditAnnouncement"
-          >
-            编辑
-          </el-button>
+          <el-button v-if="isOwnerOrAdmin" text type="primary" size="small" @click="handleEditAnnouncement">编辑</el-button>
         </div>
-        <div class="announcement-content">
-          {{ groupInfo.announcement || '暂无公告' }}
+        <div class="announcement-card" :class="{ empty: !groupInfo.announcement }">
+          {{ groupInfo.announcement || '暂无公告...' }}
         </div>
       </div>
 
-      <!-- 群成员 -->
-      <div class="info-section">
-        <div class="section-title">
+      <!-- 成员列表（网格布局） -->
+      <div class="members-section">
+        <div class="section-label">
           <el-icon><User /></el-icon>
-          <span>群成员 ({{ members.length }})</span>
-          <el-button
-            v-if="isOwnerOrAdmin"
-            text
-            size="small"
-            @click="handleAddMembers"
-          >
-            添加
-          </el-button>
+          <span>群成员</span>
+          <span class="count">{{ members.length }}</span>
         </div>
-        <div class="members-grid">
-          <div
-            v-for="member in displayMembers"
-            :key="member.id"
-            class="member-item"
-          >
-            <el-avatar :size="48" :src="addTokenToUrl(member.avatar)">
-              {{ member.name?.charAt(0) }}
-            </el-avatar>
-            <div class="member-name">{{ member.name }}</div>
-            <el-tag v-if="member.role === 'OWNER'" size="small" type="danger">
-              群主
-            </el-tag>
-            <el-tag v-else-if="member.role === 'ADMIN'" size="small" type="warning">
-              管理员
-            </el-tag>
+        
+        <div class="members-grid-new scrollbar-thin">
+          <!-- 添加新成员按钮 -->
+          <div v-if="isOwnerOrAdmin" class="member-cell add-btn" @click="handleAddMembers">
+            <div class="cell-icon-wrap"><el-icon><Plus /></el-icon></div>
+            <span>邀请</span>
           </div>
-          <div v-if="members.length > 9" class="member-item more" @click="showAllMembers = true">
-            <el-icon class="more-icon"><MoreFilled /></el-icon>
-            <div class="member-name">更多</div>
+
+          <div v-for="member in members" :key="member.id" class="member-cell">
+            <DingtalkAvatar
+              :src="member.avatar"
+              :name="member.name"
+              :size="40"
+              shape="square"
+              custom-class="member-avatar-cell"
+            />
+            <span class="cell-name">{{ member.name }}</span>
+            <div v-if="member.role === 'OWNER'" class="role-flag owner">群主</div>
+            <div v-else-if="member.role === 'ADMIN'" class="role-flag admin">管理</div>
           </div>
         </div>
       </div>
 
-      <!-- 群设置 -->
-      <div class="info-section">
-        <div class="section-title">
-          <el-icon><Setting /></el-icon>
-          <span>群设置</span>
+      <!-- 配置项 -->
+      <div class="configs-section">
+        <div class="config-item">
+          <span>消息免打扰</span>
+          <el-switch v-model="groupInfo.isMuted" @change="handleMuteChange" />
         </div>
-        <div class="settings-list">
-          <div class="setting-item">
-            <span>消息免打扰</span>
-            <el-switch v-model="groupInfo.isMuted" @change="handleMuteChange" />
-          </div>
-          <div class="setting-item">
-            <span>置顶聊天</span>
-            <el-switch v-model="groupInfo.isPinned" @change="handlePinChange" />
-          </div>
-          <div v-if="isOwner" class="setting-item">
-            <span>全员禁言</span>
-            <el-switch v-model="groupInfo.isAllMuted" @change="handleAllMuteChange" />
-          </div>
+        <div class="config-item">
+          <span>置顶聊天</span>
+          <el-switch v-model="groupInfo.isPinned" @change="handlePinChange" />
+        </div>
+        <div v-if="isOwner" class="config-item danger-config">
+          <span>全员禁言</span>
+          <el-switch v-model="groupInfo.isAllMuted" @change="handleAllMuteChange" />
         </div>
       </div>
 
-      <!-- 操作按钮 -->
-      <div class="action-buttons">
-        <el-button v-if="isOwner" type="danger" plain @click="handleDismiss">
-          解散群组
-        </el-button>
-        <el-button v-else type="warning" plain @click="handleLeave">
-          退出群组
-        </el-button>
+      <!-- 底部危险操作 -->
+      <div class="danger-actions">
+        <el-button v-if="isOwner" type="danger" plain class="wide-btn" @click="handleDismiss">解散群聊</el-button>
+        <el-button v-else type="danger" plain class="wide-btn" @click="handleLeave">退出群聊</el-button>
       </div>
     </div>
-
-    <!-- 全部成员对话框 -->
-    <el-dialog
-      v-model="showAllMembers"
-      title="全部成员"
-      width="500px"
-      append-to-body
-    >
-      <div class="all-members-list">
-        <div
-          v-for="member in members"
-          :key="member.id"
-          class="member-list-item"
-        >
-          <el-avatar :size="40" :src="addTokenToUrl(member.avatar)">
-            {{ member.name?.charAt(0) }}
-          </el-avatar>
-          <div class="member-info">
-            <div class="member-name">{{ member.name }}</div>
-            <div class="member-role">
-              <el-tag v-if="member.role === 'OWNER'" size="small" type="danger">
-                群主
-              </el-tag>
-              <el-tag v-else-if="member.role === 'ADMIN'" size="small" type="warning">
-                管理员
-              </el-tag>
-              <span v-else class="role-text">成员</span>
-            </div>
-          </div>
-          <el-dropdown v-if="isOwnerOrAdmin && member.role !== 'OWNER'" trigger="click">
-            <el-button text circle>
-              <el-icon><MoreFilled /></el-icon>
-            </el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item v-if="isOwner" @click="handleSetAdmin(member)">
-                  {{ member.role === 'ADMIN' ? '取消管理员' : '设为管理员' }}
-                </el-dropdown-item>
-                <el-dropdown-item @click="handleRemoveMember(member)">
-                  移出群组
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </div>
-    </el-dialog>
-  </el-drawer>
+  </el-dialog>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  Bell,
-  User,
-  Setting,
-  MoreFilled
-} from '@element-plus/icons-vue'
+import { Bell, User, Setting, MoreFilled, Edit, Plus } from '@element-plus/icons-vue'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import {
   getGroup,
   getGroupMembers,
   dismissGroup,
   leaveGroup,
-  removeGroupMember,
-  setGroupAdmin,
   updateGroup,
   setGroupMute
 } from '@/api/im/group'
-import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: false
-  },
-  groupId: {
-    type: [Number, String],
-    default: null
-  }
+  modelValue: { type: Boolean, default: false },
+  groupId: { type: [Number, String], default: null }
 })
 
 const emit = defineEmits(['update:modelValue', 'refresh'])
 
-const visible = ref(false)
+const visible = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val)
+})
+
 const loading = ref(false)
 const groupInfo = ref(null)
 const members = ref([])
-const showAllMembers = ref(false)
-
 const currentUserId = ref(null)
 
-// 加载当前用户ID
 const loadCurrentUser = () => {
-  const userInfoStr = localStorage.getItem('user_info')
-  if (userInfoStr) {
+  const info = localStorage.getItem('user_info')
+  if (info) {
     try {
-      const userInfo = JSON.parse(userInfoStr)
-      currentUserId.value = userInfo.userId || userInfo.id
-    } catch (error) {
-      console.error('解析用户信息失败:', error)
-    }
+      const u = JSON.parse(info)
+      currentUserId.value = u.userId || u.id
+    } catch (e) {}
   }
 }
 
-// 是否为群主
-const isOwner = computed(() => {
-  return groupInfo.value?.ownerId === currentUserId.value
-})
-
-// 是否为管理员或群主
+const isOwner = computed(() => groupInfo.value?.ownerId === currentUserId.value)
 const isOwnerOrAdmin = computed(() => {
   if (isOwner.value) return true
-  const member = members.value.find(m => m.id === currentUserId.value)
-  return member?.role === 'ADMIN'
+  const m = members.value.find(x => x.id === currentUserId.value)
+  return m?.role === 'ADMIN'
 })
 
-// 显示的成员（最多9个）
-const displayMembers = computed(() => {
-  return members.value.slice(0, 9)
-})
-
-// 加载群组详情
 const loadGroupDetail = async () => {
   if (!props.groupId) return
-
   loading.value = true
   try {
-    const [groupRes, membersRes] = await Promise.all([
-      getGroup(props.groupId),
-      getGroupMembers(props.groupId)
-    ])
-
-    if (groupRes && groupRes.data) {
-      groupInfo.value = groupRes.data
-    }
-
-    if (membersRes && membersRes.data) {
-      members.value = membersRes.data.map(item => ({
-        id: item.userId || item.id,
-        name: item.userName || item.name || '未知',
-        avatar: item.avatar || '',
-        role: item.role || 'MEMBER'
+    const [res1, res2] = await Promise.all([getGroup(props.groupId), getGroupMembers(props.groupId)])
+    if (res1.data) groupInfo.value = res1.data
+    if (res2.data) {
+      members.value = res2.data.map(m => ({
+        id: m.userId || m.id,
+        name: m.userName || m.name || '未知',
+        avatar: m.avatar || '',
+        role: m.role || 'MEMBER'
       }))
     }
-  } catch (error) {
-    console.error('加载群组详情失败:', error)
-    ElMessage.error('加载群组详情失败')
+  } catch (e) {
+    ElMessage.error('加载群组信息失败')
   } finally {
     loading.value = false
   }
 }
 
-// 编辑公告
-const handleEditAnnouncement = async () => {
-  const { value } = await ElMessageBox.prompt('请输入群公告', '编辑公告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    inputValue: groupInfo.value.announcement,
-    inputType: 'textarea'
-  })
-
-  try {
-    await updateGroup({
-      groupId: props.groupId,
-      announcement: value
-    })
-    groupInfo.value.announcement = value
-    ElMessage.success('公告更新成功')
-  } catch (error) {
-    console.error('更新公告失败:', error)
-  }
-}
-
-// 添加成员
-const handleAddMembers = () => {
-  ElMessage.info('添加成员功能开发中...')
-  // TODO: 打开添加成员对话框
-}
-
-// 设置管理员
-const handleSetAdmin = async (member) => {
-  const isAdmin = member.role === 'ADMIN'
-  try {
-    await setGroupAdmin({
-      groupId: props.groupId,
-      userId: member.id,
-      isAdmin: !isAdmin
-    })
-    member.role = isAdmin ? 'MEMBER' : 'ADMIN'
-    ElMessage.success(isAdmin ? '已取消管理员' : '已设为管理员')
-  } catch (error) {
-    console.error('设置管理员失败:', error)
-    ElMessage.error('操作失败')
-  }
-}
-
-// 移除成员
-const handleRemoveMember = async (member) => {
-  try {
-    await ElMessageBox.confirm(
-      `确定要将 ${member.name} 移出群组吗？`,
-      '提示',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
-    )
-
-    await removeGroupMember({
-      groupId: props.groupId,
-      userId: member.id
-    })
-
-    members.value = members.value.filter(m => m.id !== member.id)
-    ElMessage.success('已移出群组')
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('移除成员失败:', error)
-      ElMessage.error('操作失败')
-    }
-  }
-}
-
-// 免打扰设置
-const handleMuteChange = async (value) => {
-  try {
-    await setGroupMute({
-      groupId: props.groupId,
-      isMuted: value
-    })
-    ElMessage.success(value ? '已开启免打扰' : '已关闭免打扰')
-  } catch (error) {
-    console.error('设置免打扰失败:', error)
-    groupInfo.value.isMuted = !value
-  }
-}
-
-// 置顶设置
-const handlePinChange = (value) => {
-  ElMessage.success(value ? '已置顶' : '已取消置顶')
-  // TODO: 调用置顶API
-}
-
-// 全员禁言设置
-const handleAllMuteChange = async (value) => {
-  try {
-    await setGroupMute({
-      groupId: props.groupId,
-      isAllMuted: value
-    })
-    ElMessage.success(value ? '已开启全员禁言' : '已关闭全员禁言')
-  } catch (error) {
-    console.error('设置全员禁言失败:', error)
-    groupInfo.value.isAllMuted = !value
-  }
-}
-
-// 解散群组
-const handleDismiss = async () => {
-  try {
-    await ElMessageBox.confirm(
-      '解散后，群组将被永久删除，所有成员将被移出。确定要解散群组吗？',
-      '解散群组',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'error'
-      }
-    )
-
-    await dismissGroup(props.groupId)
-    ElMessage.success('群组已解散')
-    emit('refresh')
-    handleClose()
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('解散群组失败:', error)
-      ElMessage.error('操作失败')
-    }
-  }
-}
-
-// 退出群组
-const handleLeave = async () => {
-  try {
-    await ElMessageBox.confirm(
-      '退出后，将不再接收此群组的消息。确定要退出群组吗？',
-      '退出群组',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
-    )
-
-    await leaveGroup(props.groupId)
-    ElMessage.success('已退出群组')
-    emit('refresh')
-    handleClose()
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('退出群组失败:', error)
-      ElMessage.error('操作失败')
-    }
-  }
-}
-
-// 关闭抽屉
-const handleClose = () => {
-  emit('update:modelValue', false)
-}
-
-// 监听显示状态
 watch(() => props.modelValue, (val) => {
-  visible.value = val
   if (val) {
     loadCurrentUser()
     loadGroupDetail()
   }
 })
 
-watch(visible, (val) => {
-  if (!val) {
-    emit('update:modelValue', false)
-  }
-})
+const handleEditAnnouncement = async () => {
+  const { value } = await ElMessageBox.prompt('编辑群公告', {
+    confirmButtonText: '保存',
+    cancelButtonText: '取消',
+    inputValue: groupInfo.value.announcement,
+    inputType: 'textarea'
+  })
+  try {
+    await updateGroup({ groupId: props.groupId, announcement: value })
+    groupInfo.value.announcement = value
+    ElMessage.success('已更新公告')
+  } catch (e) {}
+}
+
+const handleEditGroupName = async () => {
+  const { value } = await ElMessageBox.prompt('修改群聊名称', {
+    confirmButtonText: '保存',
+    cancelButtonText: '取消',
+    inputValue: groupInfo.value.name
+  })
+  try {
+    await updateGroup({ groupId: props.groupId, name: value })
+    groupInfo.value.name = value
+    ElMessage.success('已重命名')
+    emit('refresh')
+  } catch (e) {}
+}
+
+const handleMuteChange = async (v) => {
+  try {
+    await setGroupMute({ groupId: props.groupId, isMuted: v })
+    ElMessage.success(v ? '已开启免打扰' : '已关闭免打扰')
+  } catch (e) { groupInfo.value.isMuted = !v }
+}
+
+const handlePinChange = (v) => ElMessage.success(v ? '已置顶' : '已取消置顶')
+
+const handleAllMuteChange = async (v) => {
+  try {
+    await setGroupMute({ groupId: props.groupId, isAllMuted: v })
+    ElMessage.success(v ? '禁言成功' : '已取消全员禁言')
+  } catch (e) { groupInfo.value.isAllMuted = !v }
+}
+
+const handleDismiss = () => {
+   ElMessageBox.confirm('确定要解散群组吗？此操作不可逆。', '警告', { type: 'error' }).then(async () => {
+    await dismissGroup(props.groupId)
+    ElMessage.success('群聊已解散')
+    emit('refresh'); visible.value = false
+  }).catch(() => {})
+}
+
+const handleLeave = () => {
+  ElMessageBox.confirm('确定退出群聊吗？', '提示', { type: 'warning' }).then(async () => {
+    await leaveGroup(props.groupId)
+    ElMessage.success('已退出')
+    emit('refresh'); visible.value = false
+  }).catch(() => {})
+}
+
+const handleAddMembers = () => ElMessage.info('邀请功能正在开发中...')
 </script>
 
 <style scoped lang="scss">
-.group-detail {
-  padding: 0 0 20px 0;
+:deep(.group-detail-dialog) {
+  border-radius: 12px;
+  .el-dialog__header { border-bottom: 1px solid #f2f3f5; padding: 16px 20px; }
+  .el-dialog__body { padding: 0; }
 }
 
-.group-header {
-  text-align: center;
-  padding: 20px;
-  border-bottom: 1px solid #f0f0f0;
-
-  .group-name {
-    margin: 12px 0 4px 0;
-    font-size: 20px;
-    font-weight: 500;
-    color: #262626;
-  }
-
-  .group-id {
-    margin: 0;
-    font-size: 12px;
-    color: #8c8c8c;
-  }
+.group-detail-container {
+  background: #fff;
+  .dark & { background: #1e293b; }
 }
 
-.info-section {
-  padding: 20px;
-  border-bottom: 1px solid #f0f0f0;
-
-  .section-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #262626;
-
-    .el-icon {
-      font-size: 16px;
-    }
-
-    span {
-      flex: 1;
-    }
-  }
-
-  .announcement-content {
-    padding: 12px;
-    background: #f5f5f5;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #595959;
-    line-height: 1.6;
-    white-space: pre-wrap;
-  }
-}
-
-.members-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-
-  .member-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: #f5f5f5;
-    }
-
-    &.more {
-      .more-icon {
-        font-size: 24px;
-        color: #8c8c8c;
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px dashed #d9d9d9;
-        border-radius: 50%;
-      }
-    }
-
-    .member-name {
-      font-size: 12px;
-      color: #595959;
-      text-align: center;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .el-tag {
-      margin-top: 2px;
+.group-hero {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 24px 20px; border-bottom: 1px solid #f2f3f5;
+  .dark & { border-color: #334155; }
+  
+  .hero-left {
+    display: flex; align-items: center; gap: 16px;
+    :deep(.group-hero-avatar) { border-radius: 12px; }
+    .hero-info {
+      .group-name-text { font-size: 18px; font-weight: 600; margin: 0; color: #1f2329; .dark & { color: #f1f5f9; } }
+      .member-tag { font-size: 12px; color: #8f959e; margin-top: 4px; display: inline-block; }
     }
   }
 }
 
-.settings-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.section-label {
+  display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; 
+  color: #1f2329; margin-bottom: 12px; .dark & { color: #e2e8f0; }
+  .el-icon { color: #8f959e; }
+  .count { color: #8f959e; font-weight: normal; font-size: 12px; }
+  span { flex: 1; }
+}
 
-  .setting-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px;
-    background: #f5f5f5;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #262626;
+.announcement-section {
+  padding: 20px; border-bottom: 1px solid #f2f3f5; .dark & { border-color: #334155; }
+  .announcement-card {
+    padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 13px; color: #64748b; line-height: 1.6;
+    .dark & { background: rgba(30, 41, 59, 0.5); }
+    &.empty { color: #bbbfc4; font-style: italic; }
   }
 }
 
-.action-buttons {
-  padding: 20px;
-  display: flex;
-  justify-content: center;
+.members-section {
+  padding: 20px; border-bottom: 1px solid #f2f3f5; .dark & { border-color: #334155; }
+  .members-grid-new {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px;
+    max-height: 240px; overflow-y: auto; padding-right: 8px;
 
-  .el-button {
-    width: 100%;
-  }
-}
-
-.all-members-list {
-  max-height: 400px;
-  overflow-y: auto;
-
-  .member-list-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 8px;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: #f5f5f5;
-    }
-
-    .member-info {
-      flex: 1;
-
-      .member-name {
-        font-size: 14px;
-        font-weight: 500;
-        color: #262626;
-        margin-bottom: 4px;
-      }
-
-      .member-role {
-        .role-text {
-          font-size: 12px;
-          color: #8c8c8c;
+    .member-cell {
+      display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;
+      position: relative;
+      :deep(.member-avatar-cell) { border-radius: 12px; transition: opacity 0.2s; }
+      &:hover :deep(.member-avatar-cell) { opacity: 0.8; }
+      .cell-name { font-size: 12px; color: #1f2329; text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; .dark & { color: #94a3b8; } }
+      
+      &.add-btn {
+        .cell-icon-wrap {
+          width: 40px; height: 40px; border: 1px dashed #dcdfe6; border-radius: 12px;
+          display: flex; align-items: center; justify-content: center; color: #8f959e;
+          &:hover { border-color: #1677ff; color: #1677ff; }
         }
+        span { font-size: 12px; color: #8f959e; }
+      }
+
+      .role-flag {
+        position: absolute; top: -4px; right: -4px; font-size: 9px; padding: 1px 4px; border-radius: 4px; color: #fff;
+        &.owner { background: #ff4d4f; }
+        &.admin { background: #faad14; }
       }
     }
   }
+}
+
+.configs-section {
+  padding: 8px 20px; border-bottom: 1px solid #f2f3f5; .dark & { border-color: #334155; }
+  .config-item {
+    display: flex; justify-content: space-between; align-items: center; padding: 12px 0;
+    span { font-size: 14px; color: #1f2329; .dark & { color: #e2e8f0; } }
+  }
+}
+
+.danger-actions {
+  padding: 24px 20px; text-align: center;
+  .wide-btn { width: 100%; }
 }
 </style>

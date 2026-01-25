@@ -9,7 +9,6 @@ import com.ruoyi.im.vo.file.ImFileChunkUploadInitVO;
 import com.ruoyi.im.vo.file.ImFileVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,8 +24,16 @@ import javax.validation.Valid;
 @RequestMapping("/api/im/file/chunk")
 public class ImFileChunkUploadController {
 
-    @Autowired
-    private ImFileChunkUploadService chunkUploadService;
+    private final ImFileChunkUploadService chunkUploadService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param chunkUploadService 分片上传服务
+     */
+    public ImFileChunkUploadController(ImFileChunkUploadService chunkUploadService) {
+        this.chunkUploadService = chunkUploadService;
+    }
 
     /**
      * 初始化分片上传

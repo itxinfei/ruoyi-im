@@ -5,7 +5,6 @@ import com.ruoyi.im.service.ImSystemNotificationService;
 import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +20,16 @@ import java.util.List;
 @RequestMapping("/api/im/notification")
 public class ImNotificationController {
 
-    @Autowired
-    private ImSystemNotificationService notificationService;
+    private final ImSystemNotificationService notificationService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param notificationService 通知服务
+     */
+    public ImNotificationController(ImSystemNotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
 
     /**
      * 获取通知列表

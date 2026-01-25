@@ -1,10 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.ruoyi.im.constant.ImErrorCode;
-import com.ruoyi.im.domain.ImConversation;
-import com.ruoyi.im.domain.ImConversationMember;
-import com.ruoyi.im.domain.ImGroup;
-import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.im.domain.*;
 import com.ruoyi.im.dto.conversation.ImConversationCreateRequest;
 import com.ruoyi.im.dto.conversation.ImConversationUpdateRequest;
 import com.ruoyi.im.dto.conversation.ImGroupConversationCreateRequest;
@@ -21,7 +18,6 @@ import com.ruoyi.im.vo.conversation.ImConversationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,29 +35,45 @@ public class ImConversationServiceImpl implements ImConversationService {
 
     private static final Logger log = LoggerFactory.getLogger(ImConversationServiceImpl.class);
 
-    @Autowired
-    private ImConversationMapper imConversationMapper;
+    private final ImConversationMapper imConversationMapper;
+    private final ImConversationMemberMapper imConversationMemberMapper;
+    private final ImUserMapper imUserMapper;
+    private final ImMessageMapper imMessageMapper;
+    private final ImRedisUtil imRedisUtil;
+    private final ImGroupMapper imGroupMapper;
+    private final com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil;
 
-    @Autowired
-    private ImConversationMemberMapper imConversationMemberMapper;
-
-    @Autowired
-    private ImUserMapper imUserMapper;
-
-    @Autowired
-    private ImMessageMapper imMessageMapper;
-
-    @Autowired
-    private ImRedisUtil imRedisUtil;
-
-    @Autowired
-    private ImGroupMapper imGroupMapper;
-
-    @Autowired
-    private com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil;
+    /**
+     * 构造器注入依赖
+     */
+    public ImConversationServiceImpl(ImConversationMapper imConversationMapper,
+                                      ImConversationMemberMapper imConversationMemberMapper,
+                                      ImUserMapper imUserMapper,
+                                      ImMessageMapper imMessageMapper,
+                                      ImRedisUtil imRedisUtil,
+                                      ImGroupMapper imGroupMapper,
+                                      com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil) {
+        this.imConversationMapper = imConversationMapper;
+        this.imConversationMemberMapper = imConversationMemberMapper;
+        this.imUserMapper = imUserMapper;
+        this.imMessageMapper = imMessageMapper;
+        this.imRedisUtil = imRedisUtil;
+        this.imGroupMapper = imGroupMapper;
+        this.encryptionUtil = encryptionUtil;
+    }
 
     @Override
     public List<ImConversationVO> getUserConversations(Long userId) {
+        return getUserConversationsOptimized(userId);
+    }
+
+    /**
+     * 优化版本的会话列表查询 - 使用批量查询避免N+1问题
+     *
+     * @param userId 用户ID
+     * @return 会话列表
+     */
+    private List<ImConversationVO> getUserConversationsOptimized(Long userId) {
         String cacheKey = "conversation:list:" + userId;
 
         // 尝试从缓存获取
@@ -71,112 +83,126 @@ public class ImConversationServiceImpl implements ImConversationService {
             return cachedList;
         }
 
-        // 查询用户参与的所有会话
-        List<ImConversationMember> memberList = imConversationMemberMapper.selectByUserId(userId);
-        List<ImConversationVO> voList = new ArrayList<>();
+        // 批量查询：一次性获取会话和成员信息
+        List<ImConversationVO> conversations = imConversationMapper.selectUserConversationsWithMembers(userId);
+        if (conversations == null || conversations.isEmpty()) {
+            return new java.util.ArrayList<>();
+        }
 
-        // 用于私聊会话去重的Map，key为对方用户ID，value为会话VO
+        // 收集所有需要批量查询的ID
+        java.util.Set<Long> conversationIds = new java.util.HashSet<>();
+        java.util.Set<Long> userIds = new java.util.HashSet<>();
+        java.util.Set<Long> groupIds = new java.util.HashSet<>();
+
+        for (ImConversationVO vo : conversations) {
+            conversationIds.add(vo.getId());
+            if ("PRIVATE".equalsIgnoreCase(vo.getType()) || "SINGLE".equalsIgnoreCase(vo.getType())) {
+                userIds.add(getPeerUserId(vo.getId(), userId));
+            } else if ("GROUP".equalsIgnoreCase(vo.getType())) {
+                if (vo.getTargetId() != null) {
+                    groupIds.add(vo.getTargetId());
+                }
+            }
+        }
+
+        // 批量查询：一次性获取所有需要的数据（3个查询替代N个查询）
+        java.util.Map<Long, ImMessage> lastMessageMap = new java.util.HashMap<>();
+        if (!conversationIds.isEmpty()) {
+            List<ImMessage> lastMessages = imMessageMapper.selectLastMessagesByConversationIds(new java.util.ArrayList<>(conversationIds));
+            for (ImMessage msg : lastMessages) {
+                lastMessageMap.put(msg.getConversationId(), msg);
+            }
+        }
+
+        java.util.Map<Long, ImUser> userMap = new java.util.HashMap<>();
+        if (!userIds.isEmpty()) {
+            List<ImUser> users = imUserMapper.selectImUserListByIds(new java.util.ArrayList<>(userIds));
+            for (ImUser user : users) {
+                userMap.put(user.getId(), user);
+            }
+        }
+
+        java.util.Map<Long, ImGroup> groupMap = new java.util.HashMap<>();
+        if (!groupIds.isEmpty()) {
+            List<ImGroup> groups = imGroupMapper.selectGroupsByIds(new java.util.ArrayList<>(groupIds));
+            for (ImGroup group : groups) {
+                groupMap.put(group.getId(), group);
+            }
+        }
+
+        // 组装VO数据
+        List<ImConversationVO> voList = new ArrayList<>();
         java.util.Map<Long, ImConversationVO> privateConversationMap = new java.util.HashMap<>();
 
-        for (ImConversationMember member : memberList) {
-            // 跳过已删除的成员记录
-            if (member.getIsDeleted() != null && member.getIsDeleted() == 1) {
-                continue;
-            }
-
-            // 使用BaseMapper的selectById方法
-            ImConversation conversation = imConversationMapper.selectById(member.getConversationId());
-            if (conversation == null || (conversation.getIsDeleted() != null && conversation.getIsDeleted() == 1)) {
-                continue;
-            }
-
-            ImConversationVO vo = new ImConversationVO();
-            BeanUtils.copyProperties(conversation, vo);
-            vo.setUnreadCount(member.getUnreadCount());
-            vo.setIsPinned(member.getIsPinned() != null && member.getIsPinned() == 1);
-            vo.setIsMuted(member.getIsMuted() != null && member.getIsMuted() == 1);
-            vo.setLastReadMessageId(member.getLastReadMessageId());
-
-            // 查询并设置最后一条消息
-            if (conversation.getLastMessageId() != null) {
-                com.ruoyi.im.domain.ImMessage lastMessage = imMessageMapper
-                        .selectImMessageById(conversation.getLastMessageId());
-                if (lastMessage != null) {
-                    com.ruoyi.im.vo.message.ImMessageVO messageVO = new com.ruoyi.im.vo.message.ImMessageVO();
-                    BeanUtils.copyProperties(lastMessage, messageVO);
-                    // 解密消息内容
-                    if (lastMessage.getContent() != null) {
-                        messageVO.setContent(encryptionUtil.decryptMessage(lastMessage.getContent()));
-                    }
-                    vo.setLastMessage(messageVO);
-                    vo.setLastMessageTime(lastMessage.getCreateTime());
+        for (ImConversationVO vo : conversations) {
+            // 设置最后消息
+            ImMessage lastMessage = lastMessageMap.get(vo.getId());
+            if (lastMessage != null) {
+                com.ruoyi.im.vo.message.ImMessageVO messageVO = new com.ruoyi.im.vo.message.ImMessageVO();
+                BeanUtils.copyProperties(lastMessage, messageVO);
+                // 解密消息内容
+                if (lastMessage.getContent() != null) {
+                    messageVO.setContent(encryptionUtil.decryptMessage(lastMessage.getContent()));
                 }
+                vo.setLastMessage(messageVO);
+                vo.setLastMessageTime(lastMessage.getCreateTime());
             }
 
             // 设置会话相关信息
-            // 兼容PRIVATE和SINGLE类型（历史数据可能使用SINGLE）
-            if ("PRIVATE".equalsIgnoreCase(conversation.getType())
-                    || "SINGLE".equalsIgnoreCase(conversation.getType())) {
-                // 私聊会话，获取对方用户信息
-                Long peerUserId = getPeerUserId(conversation.getId(), userId);
+            if ("PRIVATE".equalsIgnoreCase(vo.getType()) || "SINGLE".equalsIgnoreCase(vo.getType())) {
+                // 私聊会话，从Map中获取对方用户信息（已批量查询）
+                Long peerUserId = getPeerUserId(vo.getId(), userId);
                 if (peerUserId != null) {
-                    ImUser peerUser = imUserMapper.selectImUserById(peerUserId);
+                    ImUser peerUser = userMap.get(peerUserId);
                     if (peerUser != null) {
-                        String peerName = peerUser.getNickname() != null ? peerUser.getNickname()
-                                : peerUser.getUsername();
+                        String peerName = peerUser.getNickname() != null ? peerUser.getNickname() : peerUser.getUsername();
                         String peerAvatar = peerUser.getAvatar();
-                        // 设置对方信息
                         vo.setPeerName(peerName);
                         vo.setPeerAvatar(peerAvatar);
-                        // 同时设置name和avatar字段（前端兼容）
                         vo.setName(peerName);
                         vo.setAvatar(peerAvatar);
-                    }
 
-                    // 私聊会话去重：同一个对方用户只保留最后消息时间较新的会话
-                    ImConversationVO existing = privateConversationMap.get(peerUserId);
-                    if (existing == null) {
-                        privateConversationMap.put(peerUserId, vo);
-                    } else {
-                        // 比较最后消息时间，保留较新的
-                        java.time.LocalDateTime existingTime = existing.getLastMessageTime();
-                        java.time.LocalDateTime newTime = vo.getLastMessageTime();
-                        if (newTime != null && (existingTime == null || newTime.isAfter(existingTime))) {
+                        // 私聊会话去重
+                        ImConversationVO existing = privateConversationMap.get(peerUserId);
+                        if (existing == null) {
                             privateConversationMap.put(peerUserId, vo);
+                        } else {
+                            // 比较最后消息时间，保留较新的
+                            if (vo.getLastMessageTime() != null &&
+                                (existing.getLastMessageTime() == null ||
+                                 vo.getLastMessageTime().isAfter(existing.getLastMessageTime()))) {
+                                privateConversationMap.put(peerUserId, vo);
+                            }
                         }
                     }
                 }
-            } else if ("GROUP".equalsIgnoreCase(conversation.getType())) {
-                // 群聊会话，从群组表获取信息
-                ImGroup group = null;
-                if (conversation.getTargetId() != null) {
-                    group = imGroupMapper.selectImGroupById(conversation.getTargetId());
+            } else if ("GROUP".equalsIgnoreCase(vo.getType())) {
+                // 群聊会话，从Map中获取群组信息（已批量查询）
+                Long groupId = vo.getTargetId();
+                if (groupId != null) {
+                    ImGroup group = groupMap.get(groupId);
+                    if (group != null) {
+                        String groupName = group.getName();
+                        String groupAvatar = group.getAvatar();
+                        if (groupAvatar == null || groupAvatar.isEmpty()) {
+                            groupAvatar = "/avatar/group_default.png";
+                        }
+                        vo.setPeerName(groupName);
+                        vo.setPeerAvatar(groupAvatar);
+                        vo.setName(groupName);
+                        vo.setAvatar(groupAvatar);
+                    } else {
+                        // 群组信息获取失败，使用默认值
+                        String groupName = vo.getName();
+                        if (groupName == null || groupName.isEmpty()) {
+                            groupName = "群聊";
+                        }
+                        vo.setPeerName(groupName);
+                        vo.setPeerAvatar("/avatar/group_default.png");
+                        vo.setName(groupName);
+                        vo.setAvatar("/avatar/group_default.png");
+                    }
                 }
-                String groupAvatar;
-                String groupName;
-                if (group != null) {
-                    groupName = group.getName();
-                    groupAvatar = group.getAvatar();
-                    if (groupAvatar == null || groupAvatar.isEmpty()) {
-                        groupAvatar = "/avatar/group_default.png";
-                    }
-                } else {
-                    groupName = conversation.getName();
-                    if (groupName == null || groupName.isEmpty()) {
-                        groupName = "群聊";
-                    }
-                    groupAvatar = conversation.getAvatar();
-                    if (groupAvatar == null || groupAvatar.isEmpty()) {
-                        groupAvatar = "/avatar/group_default.png";
-                    }
-                }
-                // 设置群组信息
-                vo.setPeerName(groupName);
-                vo.setPeerAvatar(groupAvatar);
-                // 同时设置name和avatar字段（前端兼容）
-                vo.setName(groupName);
-                vo.setAvatar(groupAvatar);
-
                 // 群聊会话直接添加到结果列表
                 voList.add(vo);
             }
@@ -187,7 +213,6 @@ public class ImConversationServiceImpl implements ImConversationService {
 
         // 按最后更新时间排序
         voList.sort((a, b) -> {
-            // 优先使用最后消息时间排序
             if (a.getLastMessageTime() != null && b.getLastMessageTime() != null) {
                 return b.getLastMessageTime().compareTo(a.getLastMessageTime());
             }

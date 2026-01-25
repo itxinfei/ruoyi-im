@@ -47,6 +47,32 @@ export function completeTodo(todoId) {
 }
 
 /**
+ * 更新待办
+ * @param {number} todoId - 待办ID
+ * @param {Object} data - 待办数据
+ * @returns {Promise}
+ */
+export function updateTodo(todoId, data) {
+    return request({
+        url: `/api/im/workbench/todo/${todoId}`,
+        method: 'put',
+        data
+    })
+}
+
+/**
+ * 删除待办
+ * @param {number} todoId - 待办ID
+ * @returns {Promise}
+ */
+export function deleteTodo(todoId) {
+    return request({
+        url: `/api/im/workbench/todo/${todoId}`,
+        method: 'delete'
+    })
+}
+
+/**
  * 获取审批列表
  * @param {Object} params - 查询参数
  * @param {string} params.status - 状态 PENDING/APPROVED/REJECTED
@@ -111,7 +137,7 @@ export function getAttendance(params) {
  */
 export function getAnnouncements() {
     return request({
-        url: '/api/im/announcement/list',
+        url: '/api/im/announcement/latest',
         method: 'get'
     })
 }

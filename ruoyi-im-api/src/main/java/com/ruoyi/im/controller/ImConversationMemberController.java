@@ -6,7 +6,6 @@ import com.ruoyi.im.dto.conversation.ImConversationMemberUpdateRequest;
 import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,8 +21,16 @@ import java.util.List;
 @RequestMapping("/api/im/conversationMember")
 public class ImConversationMemberController {
 
-    @Autowired
-    private ImConversationMemberService conversationMemberService;
+    private final ImConversationMemberService conversationMemberService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param conversationMemberService 会话成员服务
+     */
+    public ImConversationMemberController(ImConversationMemberService conversationMemberService) {
+        this.conversationMemberService = conversationMemberService;
+    }
 
     /**
      * 查询会话成员列表

@@ -61,6 +61,13 @@
       v-model="showCreateDialog"
       @success="handleApprovalCreated"
     />
+
+    <!-- 审批详情对话框 -->
+    <ApprovalDetailDialog
+      v-model="showDetailDialog"
+      :approval="selectedApproval"
+      @success="handleApprovalAction"
+    />
   </div>
 </template>
 
@@ -69,10 +76,13 @@ import { ref, computed, watch } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import CreateApprovalDialog from '@/components/CreateApprovalDialog/index.vue'
+import ApprovalDetailDialog from '@/components/ApprovalDetailDialog/index.vue'
 import { getPendingApprovals, getMyApprovals, getProcessedApprovals } from '@/api/im/approval'
 
 const loading = ref(false)
 const showCreateDialog = ref(false)
+const showDetailDialog = ref(false)
+const selectedApproval = ref(null)
 const activeTab = ref('pending')
 const approvals = ref([])
 
@@ -143,6 +153,18 @@ const handleApprovalCreated = () => {
   if (activeTab.value === 'initiated') {
     loadApprovals()
   }
+}
+
+// 查看审批详情
+const handleView = (approval) => {
+  selectedApproval.value = approval
+  showDetailDialog.value = true
+}
+
+// 审批操作成功回调
+const handleApprovalAction = () => {
+  loadApprovals()
+  showDetailDialog.value = false
 }
 
 // 组件加载时初始加载数据

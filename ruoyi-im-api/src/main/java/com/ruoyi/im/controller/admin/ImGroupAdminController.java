@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImGroup;
+import com.ruoyi.im.dto.group.ImGroupUpdateRequest;
 import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.service.ImGroupService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,14 +32,24 @@ import java.util.Map;
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
 public class ImGroupAdminController {
 
-    @Autowired
-    private ImGroupService imGroupService;
+    private final ImGroupService imGroupService;
+    private final ImGroupMapper imGroupMapper;
+    private final ImGroupMemberMapper imGroupMemberMapper;
 
-    @Autowired
-    private ImGroupMapper imGroupMapper;
-
-    @Autowired
-    private ImGroupMemberMapper imGroupMemberMapper;
+    /**
+     * 构造器注入依赖
+     *
+     * @param imGroupService 群组服务
+     * @param imGroupMapper 群组Mapper
+     * @param imGroupMemberMapper 群组成员Mapper
+     */
+    public ImGroupAdminController(ImGroupService imGroupService,
+                                    ImGroupMapper imGroupMapper,
+                                    ImGroupMemberMapper imGroupMemberMapper) {
+        this.imGroupService = imGroupService;
+        this.imGroupMapper = imGroupMapper;
+        this.imGroupMemberMapper = imGroupMemberMapper;
+    }
 
     /**
      * 获取群组列表（分页）
@@ -158,20 +170,22 @@ public class ImGroupAdminController {
      * 更新群组信息
      *
      * @param id 群组ID
-     * @param group 群组信息
+     * @param request 群组更新请求
      * @return 操作结果
      */
     @Operation(summary = "更新群组信息", description = "管理员更新群组信息")
     @PutMapping("/{id}")
-    public Result<Void> update(@PathVariable Long id, @RequestBody ImGroup group) {
+    public Result<Void> update(@PathVariable Long id, @RequestBody ImGroupUpdateRequest request) {
         ImGroup existGroup = imGroupMapper.selectImGroupById(id);
         if (existGroup == null) {
             return Result.fail("群组不存在");
         }
 
-        group.setId(id);
-        group.setUpdateTime(LocalDateTime.now());
-        imGroupMapper.updateImGroup(group);
+        // 将DTO属性复制到Entity
+        BeanUtils.copyProperties(request, existGroup);
+        existGroup.setId(id);
+        existGroup.setUpdateTime(LocalDateTime.now());
+        imGroupMapper.updateImGroup(existGroup);
 
         return Result.success("更新成功");
     }

@@ -8,7 +8,6 @@ import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.conversation.ImConversationVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,8 +24,16 @@ import java.util.List;
 @RequestMapping("/api/im/conversation")
 public class ImConversationController {
 
-    @Autowired
-    private ImConversationService imConversationService;
+    private final ImConversationService imConversationService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param imConversationService 会话服务
+     */
+    public ImConversationController(ImConversationService imConversationService) {
+        this.imConversationService = imConversationService;
+    }
 
     /**
      * 获取会话列表

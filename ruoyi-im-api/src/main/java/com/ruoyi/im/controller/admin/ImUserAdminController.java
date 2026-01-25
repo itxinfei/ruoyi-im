@@ -9,7 +9,6 @@ import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,11 +28,19 @@ import java.util.Map;
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
 public class ImUserAdminController {
 
-    @Autowired
-    private ImUserService imUserService;
+    private final ImUserService imUserService;
+    private final ImUserMapper imUserMapper;
 
-    @Autowired
-    private ImUserMapper imUserMapper;
+    /**
+     * 构造器注入依赖
+     *
+     * @param imUserService 用户服务
+     * @param imUserMapper 用户Mapper
+     */
+    public ImUserAdminController(ImUserService imUserService, ImUserMapper imUserMapper) {
+        this.imUserService = imUserService;
+        this.imUserMapper = imUserMapper;
+    }
 
     /**
      * 获取用户列表（分页）

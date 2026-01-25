@@ -22,11 +22,17 @@
   --dt-bg-sidebar-item-hover: rgba(255, 255, 255, 0.1);
   --dt-bg-sidebar-item-active: rgba(255, 255, 255, 0.2);
   --dt-bg-session-list: #ffffff;
-  --dt-bg-chat: #f5f7fa;
+  --dt-bg-chat: #f2f2f2;
   --dt-bg-session-hover: #f2f3f5;
-  --dt-bg-session-active: #ebf4ff;
+  --dt-bg-session-active: #e6f7ff;
   --dt-bg-input: #ffffff;
   --dt-bg-card: #ffffff;
+
+  // === DingTalk Special ===
+  --dt-bubble-left-bg: #ffffff;
+  --dt-bubble-right-bg: #cce1ff;
+  --dt-unread-color: #1677ff;
+  --dt-read-color: #8f959e;
 
   // === Text Colors ===
   --dt-text-primary: #0f172a;
@@ -51,8 +57,8 @@
 
   // === Typography ===
   --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
-                   'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
-                   'Helvetica Neue', Helvetica, Arial, sans-serif;
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
   --dt-font-size-xs: 11px;
   --dt-font-size-sm: 12px;
   --dt-font-size-base: 14px;
@@ -152,6 +158,7 @@
 // === Accessibility: Reduced Motion Support ===
 // 尊重用户的动画偏好设置，减少动画以防止晕动症或注意力分散
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

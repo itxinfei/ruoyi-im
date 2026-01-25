@@ -9,7 +9,7 @@
         <div class="chat-viewport">
           <ChatHeader 
             :session="session" 
-            @toggle-sidebar="handleToggleSidebar" 
+            @toggle-sidebar="handleToggleDetail" 
           />
           <MessageList 
             ref="msgListRef"
@@ -41,16 +41,15 @@
           />
         </div>
 
-        <!-- 右侧详情侧边栏 -->
-        <Transition name="slide-right">
-          <ChatSidebar 
-            v-if="showSidebar" 
-            :session="session" 
-            @close="showSidebar = false"
-            @member-click="handleMemberClick"
-          />
-        </Transition>
+        <!-- 移除旧的侧边栏，改用全局弹窗 -->
       </div>
+
+      <!-- 群组详情弹窗 -->
+      <GroupDetailDrawer
+        v-model="showGroupDetail"
+        :group-id="session?.targetId"
+        @refresh="$emit('refresh-sessions')"
+      />
 
       <!-- 隐藏的文件上传 input -->
       <input type="file" ref="fileInputRef" style="display: none" @change="handleFileUpload" />
@@ -93,7 +92,7 @@ import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInput.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
-import ChatSidebar from '@/components/Chat/ChatSidebar.vue'
+import GroupDetailDrawer from '@/components/GroupDetailDrawer/index.vue'
 import { getMessages } from '@/api/im/message'
 import { uploadFile, uploadImage } from '@/api/im/file'
 import { useImWebSocket } from '@/composables/useImWebSocket'
@@ -109,6 +108,7 @@ const messages = ref([])
 const loading = ref(false)
 const sending = ref(false)
 const noMore = ref(false)
+const showGroupDetail = ref(false)
 const replyingMessage = computed(() => store.state.im.replyingMessage)
 const editingMessage = ref(null)
 const msgListRef = ref(null)
@@ -186,25 +186,32 @@ const handleLoadMore = async () => {
 }
 
 const transformMsg = (m) => {
-  // 优先使用后端返回的 isSelf 字段，后端根据 userId header 判断
-  // 如果后端返回了 isSelf（布尔值），直接使用；否则回退到前端判断
   const isOwn = m.isSelf === true || m.isSelf === false
-    ? m.isSelf  // 后端已明确返回 isSelf 值
-    : m.senderId === currentUser.value?.id  // 前端回退判断
+    ? m.isSelf 
+    : m.senderId === currentUser.value?.id
 
-  // 确保消息类型存在，默认为TEXT
   const messageType = m.type || m.messageType || 'TEXT'
   
-  // 调试日志：查看消息原始数据
-  if (!m.type) {
-    console.warn('[ChatPanel] 消息缺少type字段:', m)
+  // 处理引用回复的数据结构
+  let replyTo = m.replyTo
+  if (!replyTo && m.replyToMessageId) {
+    // 尝试在本地消息列表中查找被引用的消息
+    const quoted = messages.value.find(msg => msg.id === m.replyToMessageId)
+    if (quoted) {
+      replyTo = {
+        id: quoted.id,
+        senderName: quoted.senderName,
+        content: quoted.content
+      }
+    }
   }
 
   return {
     ...m,
-    type: messageType,  // 确保type字段存在
+    type: messageType,
     isOwn,
-    timestamp: m.sendTime || m.createTime || m.timestamp
+    replyTo: replyTo,
+    timestamp: m.sendTime || m.createTime || m.timestamp || Date.now()
   }
 }
 
@@ -253,34 +260,7 @@ const handleSend = async (content) => {
   }
 }
 
-const handleRetry = async (msg) => {
-  if (msg.status !== 'failed') return
-  
-  // 重置为发送中
-  msg.status = 'sending'
-  // 移动到最新位置 (可选，钉钉一般是不动的，但为了简单我们先不动，或者删掉重发)
-  // 这里我们选择：保留原位置重试
-  
-  try {
-    const res = await store.dispatch('im/sendMessage', {
-      sessionId: props.session.id,
-      type: msg.type, // 支持重试不同类型
-      content: msg.content,
-      // 注意：重试时不再携带 replyTo，除非我们存下来了。简单起见先忽略回复引用
-    })
-    
-    // 更新
-    const realMsg = transformMsg(res)
-    // 查找并替换
-    const index = messages.value.findIndex(m => m.id === msg.id)
-    if (index !== -1) {
-      messages.value.splice(index, 1, { ...realMsg, status: 'success' })
-    }
-  } catch (error) {
-    msg.status = 'failed'
-    ElMessage.error('重试失败')
-  }
-}
+
 
 // Websocket handling
 onMessage((msg) => {
@@ -401,12 +381,42 @@ const handleMarkRead = async (msg) => {
   }
 }
 
-const handleToggleSidebar = () => {
-  showSidebar.value = !showSidebar.value
+const handleToggleDetail = () => {
+  if (props.session.type === 'GROUP') {
+    showGroupDetail.value = true
+  } else {
+    handleShowUser(props.session.targetId)
+  }
 }
 
-const handleShowUser = (userId) => {
-  emit('show-user', userId)
+const handleCancelReply = () => {
+  store.commit('im/SET_REPLYING_MESSAGE', null)
+}
+
+const handleCancelEdit = () => {
+  editingMessage.value = null
+}
+
+const handleRetry = async (msg) => {
+  if (msg.status !== 'failed') return
+  
+  // 重置为发送中
+  msg.status = 'sending'
+  
+  try {
+    const res = await store.dispatch('im/sendMessage', {
+      sessionId: props.session.id,
+      type: msg.type,
+      content: typeof msg.content === 'object' ? JSON.stringify(msg.content) : msg.content
+    })
+    
+    // 更新
+    const realMsg = transformMsg(res)
+    Object.assign(msg, { ...realMsg, status: 'success' })
+  } catch (error) {
+    msg.status = 'failed'
+    ElMessage.error('重试失败')
+  }
 }
 
 const handleMemberClick = (member) => {
@@ -435,14 +445,9 @@ const handleEdit = (message) => {
   editingMessage.value = message
 }
 
-// 处理 @ 提及
 const handleAt = (message) => {
   if (!message) return
   messageInputRef.value?.insertAt(message.senderName)
-}
-
-const handleCancelEdit = () => {
-  editingMessage.value = null
 }
 
 const handleEditConfirm = async (content) => {
@@ -466,10 +471,6 @@ const handleEditConfirm = async (content) => {
   } catch (error) {
     console.error('编辑失败', error)
   }
-}
-
-const handleCancelReply = () => {
-  store.commit('im/SET_REPLYING_MESSAGE', null)
 }
 
 // 通话功能
@@ -638,7 +639,7 @@ onMounted(() => {
   height: 100%;
   flex: 1;
   min-width: 0;
-  background: #f5f7fa;
+  background: var(--dt-bg-chat);
 
   .dark & {
     background: #0f172a;

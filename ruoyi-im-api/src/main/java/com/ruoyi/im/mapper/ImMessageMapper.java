@@ -181,4 +181,13 @@ public interface ImMessageMapper extends BaseMapper<ImMessage> {
      * @return 消息总数
      */
     Long countByConversationId(@Param("conversationId") Long conversationId );
+
+    /**
+     * 批量获取会话的最后消息 - 用于N+1查询优化
+     * 一次性获取多个会话的最后一条消息
+     *
+     * @param conversationIds 会话ID列表
+     * @return 最后消息列表
+     */
+    List<ImMessage> selectLastMessagesByConversationIds(@Param("conversationIds") List<Long> conversationIds);
 }

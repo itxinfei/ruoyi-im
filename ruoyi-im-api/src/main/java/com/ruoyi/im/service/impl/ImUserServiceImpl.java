@@ -18,7 +18,6 @@ import com.ruoyi.im.vo.user.ImUserVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,23 +44,34 @@ public class ImUserServiceImpl implements ImUserService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImUserServiceImpl.class);
 
-    @Autowired
-    private ImUserMapper imUserMapper;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtils jwtUtils;
-
-    @Autowired
-    private ImRedisUtil imRedisUtil;
+    private final ImUserMapper imUserMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
+    private final ImRedisUtil imRedisUtil;
 
     @Value("${file.upload.path}")
     private String uploadPath;
 
     @Value("${file.upload.url-prefix}")
     private String urlPrefix;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param imUserMapper 用户Mapper
+     * @param passwordEncoder 密码加密器
+     * @param jwtUtils JWT工具类
+     * @param imRedisUtil Redis工具类
+     */
+    public ImUserServiceImpl(ImUserMapper imUserMapper,
+                              PasswordEncoder passwordEncoder,
+                              JwtUtils jwtUtils,
+                              ImRedisUtil imRedisUtil) {
+        this.imUserMapper = imUserMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtils = jwtUtils;
+        this.imRedisUtil = imRedisUtil;
+    }
 
     @Override
     public ImLoginVO login(ImLoginRequest request) {

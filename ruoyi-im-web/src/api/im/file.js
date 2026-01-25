@@ -10,7 +10,7 @@ import request from '../request'
  */
 export function uploadImage(formData) {
     return request({
-        url: '/api/im/file/upload/image',
+        url: '/api/im/file/upload',
         method: 'post',
         data: formData,
         headers: {

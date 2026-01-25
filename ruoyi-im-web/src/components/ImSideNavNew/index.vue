@@ -1,7 +1,8 @@
 <template>
   <nav
     :class="[
-      'bg-primary flex flex-col items-center z-20 shrink-0 shadow-lg',
+      'flex flex-col items-center z-20 shrink-0 shadow-lg transition-colors duration-300',
+      isDark ? 'bg-sidebar-dark' : 'bg-primary',
       collapsed ? 'w-16' : 'w-18'
     ]"
     style="height: 100vh;"
@@ -222,6 +223,24 @@ function handleHelp() {
   color: rgba(255, 255, 255, 0.75);
 }
 
+/* 暗色模式下的导航项样式 */
+:global(.dark) .nav-item {
+  color: rgba(255, 255, 255, 0.6);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+:global(.dark) .nav-item-active {
+  background-color: rgba(22, 119, 255, 0.2);
+  color: #fff;
+}
+
+:global(.dark) .nav-item-default {
+  color: rgba(255, 255, 255, 0.6);
+}
+
 .theme-toggle-btn {
   position: relative;
 }
@@ -262,6 +281,11 @@ function handleHelp() {
   }
 }
 
+/* 暗色模式下的头像按钮 */
+:global(.dark) .avatar-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .avatar-inner {
   width: 100%;
   height: 100%;
@@ -283,6 +307,12 @@ function handleHelp() {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
 }
 
+/* 暗色模式下的激活头像 */
+:global(.dark) .avatar-active .avatar-inner {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.3);
+}
+
 /* 在线状态点 */
 .status-dot {
   position: absolute;
@@ -294,6 +324,11 @@ function handleHelp() {
   border: 2px solid #1677ff;
   border-radius: 50%;
   z-index: 1;
+}
+
+/* 暗色模式下的状态点 */
+:global(.dark) .status-dot {
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* 滚动条样式 */
@@ -312,5 +347,14 @@ div[class*="overflow-y-auto"]::-webkit-scrollbar-thumb {
 
 div[class*="overflow-y-auto"]::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.35);
+}
+
+/* 暗色模式下的滚动条 */
+:global(.dark) div[class*="overflow-y-auto"]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+:global(.dark) div[class*="overflow-y-auto"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 </style>

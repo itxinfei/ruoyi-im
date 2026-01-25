@@ -6,7 +6,6 @@ import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.file.ImFilePreviewInfoVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -19,8 +18,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/im/file/preview")
 public class ImFilePreviewController {
 
-    @Autowired
-    private ImFilePreviewService filePreviewService;
+    private final ImFilePreviewService filePreviewService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param filePreviewService 文件预览服务
+     */
+    public ImFilePreviewController(ImFilePreviewService filePreviewService) {
+        this.filePreviewService = filePreviewService;
+    }
 
     /**
      * 获取文件预览信息

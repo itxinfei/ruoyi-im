@@ -7,13 +7,13 @@ import com.ruoyi.im.util.FileUtils;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.file.ImFileStatisticsVO;
 import com.ruoyi.im.vo.file.ImFileVO;
+import com.ruoyi.im.util.JwtUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,14 +37,23 @@ public class ImFileController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImFileController.class);
 
-    @Autowired
-    private ImFileService imFileService;
+    private final ImFileService imFileService;
+
+    private final JwtUtils jwtUtils;
 
     @Value("${file.upload.path}")
     private String uploadPath;
 
-    @Value("${im.jwt.secret}")
-    private String jwtSecret;
+    /**
+     * 构造器注入依赖
+     *
+     * @param imFileService 文件服务
+     * @param jwtUtils      JWT工具类
+     */
+    public ImFileController(ImFileService imFileService, JwtUtils jwtUtils) {
+        this.imFileService = imFileService;
+        this.jwtUtils = jwtUtils;
+    }
 
     /**
      * 上传文件
@@ -88,14 +97,14 @@ public class ImFileController {
      * 下载文件
      * 根据文件ID下载文件
      *
-     * @param fileId 文件ID
+     * @param fileId   文件ID
      * @param response HTTP响应对象
      */
     @Operation(summary = "下载文件", description = "根据文件ID下载文件")
     @GetMapping("/download/{fileId}")
     public void downloadFile(@PathVariable Long fileId,
-                            @RequestParam(required = false) String token,
-                            HttpServletResponse response) {
+            @RequestParam(required = false) String token,
+            HttpServletResponse response) {
         // 从token参数中获取用户信息（用于文件下载时的JWT验证）
         Long userId;
         if (token != null && !token.isEmpty()) {
@@ -113,7 +122,7 @@ public class ImFileController {
         // 构建文件完整路径
         String filePath = uploadPath + fileVO.getFilePath();
         File file = new File(filePath);
-        
+
         if (!file.exists()) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -129,7 +138,7 @@ public class ImFileController {
 
         // 输出文件到响应流
         try (FileInputStream fis = new FileInputStream(file);
-             OutputStream os = response.getOutputStream()) {
+                OutputStream os = response.getOutputStream()) {
             byte[] buffer = new byte[4096];
             int bytesRead;
             while ((bytesRead = fis.read(buffer)) != -1) {
@@ -147,22 +156,22 @@ public class ImFileController {
      * 支持头像等直接路径访问，如: /api/im/file/download/avatar/2026/01/24/xxx.png
      *
      * @param fileType 文件类型目录，如avatar、document等
-     * @param year 年份
-     * @param month 月份
-     * @param day 日期
+     * @param year     年份
+     * @param month    月份
+     * @param day      日期
      * @param fileName 文件名
-     * @param token JWT token用于认证
+     * @param token    JWT token用于认证
      * @param response HTTP响应对象
      */
     @Operation(summary = "按路径下载文件", description = "支持头像等直接路径访问")
     @GetMapping("/download/{fileType}/{year}/{month}/{day}/{fileName}")
     public void downloadFileByPath(@PathVariable String fileType,
-                                  @PathVariable String year,
-                                  @PathVariable String month,
-                                  @PathVariable String day,
-                                  @PathVariable String fileName,
-                                  @RequestParam(required = false) String token,
-                                  HttpServletResponse response) {
+            @PathVariable String year,
+            @PathVariable String month,
+            @PathVariable String day,
+            @PathVariable String fileName,
+            @RequestParam(required = false) String token,
+            HttpServletResponse response) {
         // 验证token
         Long userId;
         if (token != null && !token.isEmpty()) {
@@ -181,7 +190,7 @@ public class ImFileController {
         String relativePath = "/" + fileType + "/" + year + "/" + month + "/" + day + "/" + fileName;
         String filePath = uploadPath + relativePath;
         File file = new File(filePath);
-        
+
         if (!file.exists()) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -190,19 +199,19 @@ public class ImFileController {
         // 设置响应头
         String contentType = getContentType(fileName);
         response.setContentType(contentType);
-        
+
         // 如果是图片文件，设置为内联显示；其他文件设置为下载
         if (isImageFile(fileName)) {
             response.setHeader("Content-Disposition", "inline; filename=\"" + fileName + "\"");
         } else {
             response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
         }
-        
+
         response.setContentLengthLong(file.length());
 
         // 输出文件到响应流
         try (FileInputStream fis = new FileInputStream(file);
-             OutputStream os = response.getOutputStream()) {
+                OutputStream os = response.getOutputStream()) {
             byte[] buffer = new byte[4096];
             int bytesRead;
             while ((bytesRead = fis.read(buffer)) != -1) {
@@ -320,19 +329,13 @@ public class ImFileController {
      */
     private Long getUserIdFromToken(String token) {
         try {
-            // 移除Bearer前缀（如果存在）
-            if (token.startsWith("Bearer ")) {
-                token = token.substring(7);
+            Long userId = jwtUtils.getUserIdFromToken(token);
+            if (userId == null) {
+                throw new RuntimeException("Token解析失败或已过期");
             }
-            
-            Claims claims = Jwts.parser()
-                    .setSigningKey(jwtSecret)
-                    .parseClaimsJws(token)
-                    .getBody();
-            
-            return Long.valueOf(claims.get("userId").toString());
+            return userId;
         } catch (Exception e) {
-            LOGGER.error("解析JWT token失败", e);
+            LOGGER.error("解析JWT token失败: {}", e.getMessage());
             throw new RuntimeException("无效的token");
         }
     }
@@ -352,7 +355,7 @@ public class ImFileController {
         } catch (IOException e) {
             LOGGER.warn("无法识别文件类型: {}", fileName);
         }
-        
+
         // 默认根据扩展名判断
         String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
         switch (extension) {
@@ -402,8 +405,8 @@ public class ImFileController {
      */
     private boolean isImageFile(String fileName) {
         String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-        return extension.equals("jpg") || extension.equals("jpeg") 
-                || extension.equals("png") || extension.equals("gif") 
+        return extension.equals("jpg") || extension.equals("jpeg")
+                || extension.equals("png") || extension.equals("gif")
                 || extension.equals("webp") || extension.equals("bmp");
     }
 }

@@ -12,7 +12,6 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -36,17 +35,28 @@ import java.util.Map;
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
 public class ImStatsController {
 
-    @Autowired
-    private ImUserMapper imUserMapper;
+    private final ImUserMapper imUserMapper;
+    private final ImGroupMapper imGroupMapper;
+    private final ImMessageMapper imMessageMapper;
+    private final ImConversationMapper imConversationMapper;
 
-    @Autowired
-    private ImGroupMapper imGroupMapper;
-
-    @Autowired
-    private ImMessageMapper imMessageMapper;
-
-    @Autowired
-    private ImConversationMapper imConversationMapper;
+    /**
+     * 构造器注入依赖
+     *
+     * @param imUserMapper 用户Mapper
+     * @param imGroupMapper 群组Mapper
+     * @param imMessageMapper 消息Mapper
+     * @param imConversationMapper 会话Mapper
+     */
+    public ImStatsController(ImUserMapper imUserMapper,
+                              ImGroupMapper imGroupMapper,
+                              ImMessageMapper imMessageMapper,
+                              ImConversationMapper imConversationMapper) {
+        this.imUserMapper = imUserMapper;
+        this.imGroupMapper = imGroupMapper;
+        this.imMessageMapper = imMessageMapper;
+        this.imConversationMapper = imConversationMapper;
+    }
 
     /**
      * 获取系统概览数据

@@ -11,7 +11,6 @@ import com.ruoyi.im.vo.workreport.WorkReportDetailVO;
 import com.ruoyi.im.vo.workreport.WorkReportLikeUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,8 +24,16 @@ import java.util.List;
 @RequestMapping("/api/im/work-report")
 public class ImWorkReportController {
 
-    @Autowired
-    private ImWorkReportService workReportService;
+    private final ImWorkReportService workReportService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param workReportService 工作日志服务
+     */
+    public ImWorkReportController(ImWorkReportService workReportService) {
+        this.workReportService = workReportService;
+    }
 
     /**
      * 创建工作日志

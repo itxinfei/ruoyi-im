@@ -9,7 +9,6 @@ import com.ruoyi.im.vo.group.ImGroupMemberVO;
 import com.ruoyi.im.vo.group.ImGroupVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -26,8 +25,16 @@ import java.util.List;
 @RequestMapping("/api/im/group")
 public class ImGroupController {
 
-    @Autowired
-    private ImGroupService imGroupService;
+    private final ImGroupService imGroupService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param imGroupService 群组服务
+     */
+    public ImGroupController(ImGroupService imGroupService) {
+        this.imGroupService = imGroupService;
+    }
 
     /**
      * 创建群组

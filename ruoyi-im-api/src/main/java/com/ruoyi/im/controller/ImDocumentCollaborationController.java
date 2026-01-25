@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,8 +29,16 @@ public class ImDocumentCollaborationController {
 
     private static final Logger log = LoggerFactory.getLogger(ImDocumentCollaborationController.class);
 
-    @Autowired
-    private ImDocumentCollaborationService documentCollaborationService;
+    private final ImDocumentCollaborationService documentCollaborationService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param documentCollaborationService 文档协作服务
+     */
+    public ImDocumentCollaborationController(ImDocumentCollaborationService documentCollaborationService) {
+        this.documentCollaborationService = documentCollaborationService;
+    }
 
     // ==================== 协作者管理 ====================
 

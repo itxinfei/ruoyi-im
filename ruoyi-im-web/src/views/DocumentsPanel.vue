@@ -88,10 +88,25 @@
               <span class="material-icons-outlined">grid_view</span>
             </button>
           </div>
-          <button class="new-btn">
-            <span class="material-icons-outlined">add</span>
-            新建
-          </button>
+          <el-dropdown trigger="click" @command="handleNewCommand">
+            <button class="new-btn">
+              <span class="material-icons-outlined">add</span>
+              新建
+              <span class="material-icons-outlined arrow">expand_more</span>
+            </button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="folder">
+                  <span class="material-icons-outlined">folder</span>
+                  新建文件夹
+                </el-dropdown-item>
+                <el-dropdown-item command="upload">
+                  <span class="material-icons-outlined">upload</span>
+                  上传文件
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </header>
 
@@ -155,16 +170,70 @@
         </div>
       </div>
     </main>
+
+    <!-- 新建文件夹对话框 -->
+    <el-dialog v-model="showFolderDialog" title="新建文件夹" width="400px">
+      <el-input
+        v-model="newFolderName"
+        placeholder="请输入文件夹名称"
+        maxlength="50"
+        show-word-limit
+        @keyup.enter="createFolder"
+      />
+      <template #footer>
+        <el-button @click="showFolderDialog = false">取消</el-button>
+        <el-button type="primary" @click="createFolder">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 文件上传对话框 -->
+    <el-dialog v-model="showUploadDialog" title="上传文件" width="500px">
+      <el-upload
+        ref="uploadRef"
+        class="upload-area"
+        drag
+        action="#"
+        :auto-upload="false"
+        :on-change="handleFileChange"
+        :file-list="uploadFiles"
+        :multiple="true"
+      >
+        <span class="material-icons-outlined upload-icon">cloud_upload</span>
+        <div class="upload-text">将文件拖到此处，或点击上传</div>
+        <div class="upload-hint">支持任意类型文件，单个文件不超过100MB</div>
+      </el-upload>
+      <template #footer>
+        <el-button @click="showUploadDialog = false">取消</el-button>
+        <el-button type="primary" :loading="uploading" @click="handleUploadSubmit">开始上传</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 文件预览对话框 -->
+    <FilePreviewDialog
+      v-model="showPreviewDialog"
+      :file="selectedFile"
+      @download="handleDownload"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import FilePreviewDialog from '@/components/FilePreviewDialog/index.vue'
 
 const activeNav = ref('recent')
 const viewMode = ref('list')
 const searchQuery = ref('')
+
+// 对话框状态
+const showFolderDialog = ref(false)
+const showUploadDialog = ref(false)
+const showPreviewDialog = ref(false)
+const newFolderName = ref('')
+const uploadFiles = ref([])
+const uploading = ref(false)
+const selectedFile = ref(null)
 
 const mainNavItems = ref([
   { id: 'recent', label: '最近使用', icon: 'schedule' },
@@ -239,11 +308,172 @@ const currentViewTitle = computed(() => {
 })
 
 const handleFileClick = (file) => {
-  ElMessage.info(`打开文件: ${file.name}`)
+  if (file.icon === 'folder') {
+    // 文件夹：进入文件夹
+    ElMessage.info(`进入文件夹: ${file.name}`)
+  } else {
+    // 文件：预览
+    selectedFile.value = file
+    showPreviewDialog.value = true
+  }
 }
 
 const handleFileMenu = (file) => {
-  ElMessage.info(`文件操作: ${file.name}`)
+  ElMessageBox({
+    title: file.name,
+    message: '请选择操作',
+    showCancelButton: true,
+    confirmButtonText: '下载',
+    cancelButtonText: '取消',
+    distinguishCancelAndClose: true,
+    showClose: false,
+    closeOnClickModal: false,
+    beforeClose: (action, instance, done) => {
+      if (action === 'confirm') {
+        handleDownload(file)
+        done()
+      } else if (action === 'cancel') {
+        // 显示更多选项
+        ElMessageBox({
+          title: '文件操作',
+            message: '',
+            showCancelButton: true,
+            confirmButtonText: '重命名',
+            cancelButtonText: '删除',
+            distinguishCancelAndClose: true
+          }).then(() => {
+            // 重命名
+            ElMessageBox.prompt('请输入新名称', '重命名', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              inputValue: file.name
+            }).then(({ value }) => {
+              file.name = value
+              ElMessage.success('重命名成功')
+            }).catch(() => {})
+          }).catch(() => {
+            // 删除
+            ElMessageBox.confirm('确定要删除这个文件吗？', '确认删除', {
+              type: 'warning'
+            }).then(() => {
+              files.value = files.value.filter(f => f.id !== file.id)
+              ElMessage.success('删除成功')
+            }).catch(() => {})
+          })
+        done()
+      } else {
+        done()
+      }
+    }
+  })
+}
+
+// 新建命令处理
+const handleNewCommand = (command) => {
+  if (command === 'folder') {
+    newFolderName.value = ''
+    showFolderDialog.value = true
+  } else if (command === 'upload') {
+    uploadFiles.value = []
+    showUploadDialog.value = true
+  }
+}
+
+// 创建文件夹
+const createFolder = () => {
+  if (!newFolderName.value.trim()) {
+    ElMessage.warning('请输入文件夹名称')
+    return
+  }
+
+  const newFolder = {
+    id: Date.now(),
+    name: newFolderName.value,
+    icon: 'folder',
+    iconClass: 'icon-folder',
+    meta: '0 个文件',
+    owner: '我',
+    ownerColor: '#3b82f6',
+    modifiedTime: new Date().toISOString().slice(0, 16).replace('T', ' ')
+  }
+
+  files.value.unshift(newFolder)
+  ElMessage.success('文件夹创建成功')
+  showFolderDialog.value = false
+}
+
+// 文件选择变化
+const handleFileChange = (file, fileList) => {
+  uploadFiles.value = fileList
+}
+
+// 执行上传
+const handleUploadSubmit = async () => {
+  if (uploadFiles.value.length === 0) {
+    ElMessage.warning('请选择要上传的文件')
+    return
+  }
+
+  uploading.value = true
+  try {
+    // 模拟上传
+    for (const file of uploadFiles.value) {
+      const fileExt = file.name.split('.').pop().toLowerCase()
+      let icon, iconClass, color
+
+      const iconMap = {
+        doc: { icon: 'description', iconClass: 'icon-doc' },
+        docx: { icon: 'description', iconClass: 'icon-doc' },
+        xls: { icon: 'table_view', iconClass: 'icon-sheet' },
+        xlsx: { icon: 'table_view', iconClass: 'icon-sheet' },
+        pdf: { icon: 'picture_as_pdf', iconClass: 'icon-pdf' },
+        png: { icon: 'image', iconClass: 'icon-image' },
+        jpg: { icon: 'image', iconClass: 'icon-image' },
+        jpeg: { icon: 'image', iconClass: 'icon-image' },
+        gif: { icon: 'image', iconClass: 'icon-image' }
+      }
+
+      const mapped = iconMap[fileExt] || { icon: 'insert_drive_file', iconClass: 'icon-file' }
+
+      files.value.unshift({
+        id: Date.now() + Math.random(),
+        name: file.name,
+        icon: mapped.icon,
+        iconClass: mapped.iconClass,
+        meta: formatFileSize(file.size),
+        owner: '我',
+        ownerColor: '#3b82f6',
+        modifiedTime: new Date().toISOString().slice(0, 16).replace('T', ' ')
+      })
+    }
+
+    ElMessage.success(`成功上传 ${uploadFiles.value.length} 个文件`)
+    showUploadDialog.value = false
+    uploadFiles.value = []
+  } catch (error) {
+    ElMessage.error('上传失败，请稍后重试')
+  } finally {
+    uploading.value = false
+  }
+}
+
+// 下载文件
+const handleDownload = (file) => {
+  ElMessage.success(`开始下载: ${file.name}`)
+  // 实际项目中这里应该创建一个下载链接
+}
+
+// 格式化文件大小
+const formatFileSize = (bytes) => {
+  if (!bytes || bytes === 0) return '0 B'
+  const units = ['B', 'KB', 'MB', 'GB']
+  let size = bytes
+  let unitIndex = 0
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024
+    unitIndex++
+  }
+  return `${size.toFixed(1)} ${units[unitIndex]}`
 }
 </script>
 
@@ -520,6 +750,41 @@ const handleFileMenu = (file) => {
 
 .new-btn:active {
   transform: scale(0.98);
+}
+
+.new-btn .arrow {
+  font-size: 18px;
+  margin-left: -4px;
+}
+
+/* 上传区域 */
+.upload-area {
+  padding: 40px 20px;
+  border: 2px dashed #e6e6e6;
+  border-radius: 12px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.upload-area:hover {
+  border-color: #1677ff;
+}
+
+.upload-icon {
+  font-size: 48px;
+  color: #1677ff;
+  margin-bottom: 12px;
+}
+
+.upload-text {
+  font-size: 14px;
+  color: #262626;
+  margin-bottom: 4px;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #8c8c8c;
 }
 
 .docs-content {

@@ -7,7 +7,6 @@ import com.ruoyi.im.service.ImGroupAnnouncementService;
 import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -24,8 +23,16 @@ import java.util.List;
 @RequestMapping("/api/im/group/announcement")
 public class ImGroupAnnouncementController {
 
-    @Autowired
-    private ImGroupAnnouncementService groupAnnouncementService;
+    private final ImGroupAnnouncementService groupAnnouncementService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param groupAnnouncementService 群组公告服务
+     */
+    public ImGroupAnnouncementController(ImGroupAnnouncementService groupAnnouncementService) {
+        this.groupAnnouncementService = groupAnnouncementService;
+    }
 
     /**
      * 创建群公告

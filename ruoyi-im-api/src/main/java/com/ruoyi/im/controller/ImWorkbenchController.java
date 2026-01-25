@@ -9,7 +9,6 @@ import com.ruoyi.im.service.ImTodoItemService;
 import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -27,17 +26,24 @@ import java.util.Map;
 @RequestMapping("/api/im/workbench")
 public class ImWorkbenchController {
 
-    @Autowired
-    private ImTodoItemService todoItemService;
+    private final ImTodoItemService todoItemService;
+    private final ImMessageService messageService;
+    private final ImConversationService conversationService;
 
-    @Autowired
-    private ImMessageService messageService;
-
-    @Autowired
-    private ImConversationService conversationService;
-
-    @Autowired(required = false)
-    private ImNoticeService noticeService;
+    /**
+     * 构造器注入依赖
+     *
+     * @param todoItemService 待办事项服务
+     * @param messageService 消息服务
+     * @param conversationService 会话服务
+     */
+    public ImWorkbenchController(ImTodoItemService todoItemService,
+                                  ImMessageService messageService,
+                                  ImConversationService conversationService) {
+        this.todoItemService = todoItemService;
+        this.messageService = messageService;
+        this.conversationService = conversationService;
+    }
 
     /**
      * 获取工作台数据概览

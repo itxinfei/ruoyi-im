@@ -11,7 +11,6 @@ import com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO;
 import com.ruoyi.im.vo.announcement.ImAnnouncementVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -29,8 +28,16 @@ import java.util.Map;
 @RequestMapping("/api/im/announcement")
 public class ImAnnouncementController {
 
-    @Autowired
-    private ImAnnouncementService announcementService;
+    private final ImAnnouncementService announcementService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param announcementService 公告服务
+     */
+    public ImAnnouncementController(ImAnnouncementService announcementService) {
+        this.announcementService = announcementService;
+    }
 
     /**
      * 创建公告

@@ -156,14 +156,15 @@ const handleMenuCommand = (command) => {
 
 <style scoped>
 .chat-header {
-  height: 64px;
-  border-bottom: 1px solid #e6e6e6;
+  height: 60px;
+  border-bottom: 1px solid #f0f1f2;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 16px;
   background: #fff;
   flex-shrink: 0;
+  z-index: 10;
 }
 
 .header-left {

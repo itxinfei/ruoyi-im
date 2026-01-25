@@ -328,4 +328,23 @@
           AND is_revoked = 0
           AND is_deleted = 0
     </select>
+
+    <!-- 批量获取会话的最后消息 - 用于N+1查询优化 -->
+    <select id="selectLastMessagesByConversationIds" resultMap="ImMessageResult">
+        SELECT id, conversation_id, sender_id, content, message_type,
+               create_time, update_time, is_revoked, is_edited
+        FROM im_message
+        WHERE conversation_id IN
+        <foreach collection="conversationIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND id IN (
+            SELECT MAX(id) FROM im_message
+            WHERE conversation_id IN
+            <foreach collection="conversationIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            GROUP BY conversation_id
+        )
+    </select>
 </mapper>

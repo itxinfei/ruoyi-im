@@ -3,6 +3,7 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
+import com.ruoyi.im.dto.user.ImUserStatusUpdateRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImFriendService;
@@ -13,7 +14,6 @@ import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -35,11 +35,19 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/im/user")
 public class ImUserController {
 
-    @Autowired
-    private ImUserService imUserService;
+    private final ImUserService imUserService;
+    private final ImFriendService imFriendService;
 
-    @Autowired
-    private ImFriendService imFriendService;
+    /**
+     * 构造器注入依赖
+     *
+     * @param imUserService 用户服务
+     * @param imFriendService 好友服务
+     */
+    public ImUserController(ImUserService imUserService, ImFriendService imFriendService) {
+        this.imUserService = imUserService;
+        this.imFriendService = imFriendService;
+    }
 
     /**
      * 创建用户
@@ -174,13 +182,14 @@ public class ImUserController {
      * 修改用户状态
      * 修改用户状态（启用/禁用）
      *
-     * @param user 用户信息
+     * @param request 用户状态更新请求
      * @return 修改结果
      */
     @Operation(summary = "修改用户状态", description = "修改用户状态（启用/禁用）")
     @PutMapping("/changeStatus")
-    public Result<Void> changeStatus(@RequestBody com.ruoyi.im.domain.ImUser user) {
-        imUserService.updateStatus(user.getId(), user.getStatus());
+    public Result<Void> changeStatus(@Valid @RequestBody ImUserStatusUpdateRequest request) {
+        Integer status = "ENABLED".equals(request.getStatus()) ? 1 : 0;
+        imUserService.updateStatus(request.getId(), status);
         return Result.success("状态修改成功");
     }
 

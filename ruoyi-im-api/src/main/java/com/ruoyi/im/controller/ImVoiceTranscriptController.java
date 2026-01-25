@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,8 +26,16 @@ public class ImVoiceTranscriptController {
 
     private static final Logger log = LoggerFactory.getLogger(ImVoiceTranscriptController.class);
 
-    @Autowired
-    private ImVoiceTranscriptService voiceTranscriptService;
+    private final ImVoiceTranscriptService voiceTranscriptService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param voiceTranscriptService 语音转文字服务
+     */
+    public ImVoiceTranscriptController(ImVoiceTranscriptService voiceTranscriptService) {
+        this.voiceTranscriptService = voiceTranscriptService;
+    }
 
     /**
      * 创建语音转文字任务

@@ -11,7 +11,6 @@ import com.ruoyi.im.vo.group.ImGroupFileStatisticsVO;
 import com.ruoyi.im.vo.group.ImGroupFileVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -27,8 +26,16 @@ import java.util.List;
 @RequestMapping("/api/im/group/file")
 public class ImGroupFileController {
 
-    @Autowired
-    private ImGroupFileService groupFileService;
+    private final ImGroupFileService groupFileService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param groupFileService 群组文件服务
+     */
+    public ImGroupFileController(ImGroupFileService groupFileService) {
+        this.groupFileService = groupFileService;
+    }
 
     /**
      * 上传群组文件

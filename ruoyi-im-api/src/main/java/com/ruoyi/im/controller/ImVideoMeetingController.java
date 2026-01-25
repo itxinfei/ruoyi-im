@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -32,8 +31,16 @@ public class ImVideoMeetingController {
 
     private static final Logger log = LoggerFactory.getLogger(ImVideoMeetingController.class);
 
-    @Autowired
-    private ImVideoMeetingService videoMeetingService;
+    private final ImVideoMeetingService videoMeetingService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param videoMeetingService 视频会议服务
+     */
+    public ImVideoMeetingController(ImVideoMeetingService videoMeetingService) {
+        this.videoMeetingService = videoMeetingService;
+    }
 
     /**
      * 创建会议

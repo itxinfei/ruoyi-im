@@ -66,7 +66,17 @@
     <!-- 写邮件对话框 -->
     <ComposeMailDialog
       v-model="showComposeDialog"
+      :reply-to="replyToEmail"
       @success="handleMailSent"
+    />
+
+    <!-- 邮件详情对话框 -->
+    <MailDetailDialog
+      v-model="showDetailDialog"
+      :email="selectedEmail"
+      @reply="handleReply"
+      @forward="handleForward"
+      @delete="handleDeleteEmail"
     />
   </div>
 </template>
@@ -74,12 +84,16 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import ComposeMailDialog from '@/components/ComposeMailDialog/index.vue'
-import { getMailList, markAsRead } from '@/api/im/mail'
+import MailDetailDialog from '@/components/MailDetailDialog/index.vue'
+import { getMailList, markAsRead, deleteMail } from '@/api/im/mail'
 
 const loading = ref(false)
 const showComposeDialog = ref(false)
+const showDetailDialog = ref(false)
+const selectedEmail = ref(null)
+const replyToEmail = ref(null)
 const activeFolder = ref('inbox')
 const emails = ref([])
 
@@ -136,6 +150,7 @@ const getRandomColor = () => {
 }
 
 const handleViewEmail = async (email) => {
+  // 标记为已读
   if (!email.read) {
     try {
       const res = await markAsRead(email.id)
@@ -146,11 +161,57 @@ const handleViewEmail = async (email) => {
       console.error('标记已读失败', error)
     }
   }
-  ElMessage.info(`查看邮件: ${email.subject}`)
+  // 显示详情对话框
+  selectedEmail.value = email
+  showDetailDialog.value = true
+}
+
+// 回复邮件
+const handleReply = (email) => {
+  replyToEmail.value = {
+    id: email.id,
+    to: email.sender,
+    subject: `Re: ${email.subject}`,
+    isReply: true
+  }
+  showDetailDialog.value = false
+  showComposeDialog.value = true
+}
+
+// 转发邮件
+const handleForward = (email) => {
+  replyToEmail.value = {
+    id: email.id,
+    subject: `Fwd: ${email.subject}`,
+    content: `\n\n---------- 转发的邮件 ----------\n发件人: ${email.sender}\n时间: ${email.time}\n主题: ${email.subject}\n\n${email.preview || ''}`,
+    isForward: true
+  }
+  showDetailDialog.value = false
+  showComposeDialog.value = true
+}
+
+// 删除邮件
+const handleDeleteEmail = async (email) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这封邮件吗？', '确认删除', {
+      type: 'warning'
+    })
+    const res = await deleteMail(email.id)
+    if (res.code === 200) {
+      emails.value = emails.value.filter(e => e.id !== email.id)
+      ElMessage.success('删除成功')
+      showDetailDialog.value = false
+    } else {
+      ElMessage.error(res.msg || '删除失败')
+    }
+  } catch {
+    // 用户取消
+  }
 }
 
 // 发送邮件成功回调
 const handleMailSent = () => {
+  replyToEmail.value = null
   if (activeFolder.value === 'sent') {
     loadMails()
   } else {

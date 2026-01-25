@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,8 +25,16 @@ public class ImVideoCallController {
 
     private static final Logger log = LoggerFactory.getLogger(ImVideoCallController.class);
 
-    @Autowired
-    private ImVideoCallService videoCallService;
+    private final ImVideoCallService videoCallService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param videoCallService 视频通话服务
+     */
+    public ImVideoCallController(ImVideoCallService videoCallService) {
+        this.videoCallService = videoCallService;
+    }
 
     /**
      * 发起通话

@@ -5,15 +5,18 @@ import request from '../request'
 
 /**
  * 获取邮件列表
- * @param {string} folder - 文件夹类型 inbox/sent/draft/starred/trash
+ * @param {string} folder - 文件夹类型 INBOX/SENT/DRAFT/STARRED/TRASH
  * @param {Object} params - 查询参数
  * @returns {Promise}
  */
 export function getMailList(folder, params) {
   return request({
-    url: `/api/im/mail/${folder}`,
+    url: '/api/im/email/list',
     method: 'get',
-    params
+    params: {
+      ...params,
+      folder: folder?.toUpperCase() || 'INBOX'
+    }
   })
 }
 
@@ -24,7 +27,7 @@ export function getMailList(folder, params) {
  */
 export function getMailDetail(id) {
   return request({
-    url: `/api/im/mail/${id}`,
+    url: `/api/im/email/${id}`,
     method: 'get'
   })
 }
@@ -32,67 +35,57 @@ export function getMailDetail(id) {
 /**
  * 发送邮件
  * @param {Object} data - 邮件数据
- * @param {string} data.to - 收件人（多个用逗号分隔）
- * @param {string} data.subject - 主题
- * @param {string} data.content - 正文
- * @param {Array} data.attachments - 附件列表
  * @returns {Promise}
  */
 export function sendMail(data) {
   return request({
-    url: '/api/im/mail/send',
+    url: '/api/im/email/send',
     method: 'post',
-    data
+    data: {
+      toIds: data.toIds || [], // 后端期待 ID 列表
+      subject: data.subject,
+      content: data.content
+    }
   })
 }
 
 /**
  * 删除邮件
- * @param {number} id - 邮件ID
- * @returns {Promise}
  */
 export function deleteMail(id) {
   return request({
-    url: `/api/im/mail/${id}`,
+    url: `/api/im/email/${id}`,
     method: 'delete'
   })
 }
 
 /**
  * 标记已读
- * @param {number} id - 邮件ID
- * @returns {Promise}
  */
 export function markAsRead(id) {
   return request({
-    url: `/api/im/mail/${id}/read`,
+    url: `/api/im/email/${id}/read`,
     method: 'put'
   })
 }
 
 /**
  * 移动邮件到文件夹
- * @param {number} id - 邮件ID
- * @param {string} folder - 目标文件夹
- * @returns {Promise}
  */
 export function moveToFolder(id, folder) {
   return request({
-    url: `/api/im/mail/${id}/move`,
+    url: `/api/im/email/${id}/move`,
     method: 'put',
-    params: { folder }
+    params: { folder: folder?.toUpperCase() }
   })
 }
 
 /**
  * 星标邮件
- * @param {number} id - 邮件ID
- * @param {boolean} starred - 是否星标
- * @returns {Promise}
  */
 export function starMail(id, starred) {
   return request({
-    url: `/api/im/mail/${id}/star`,
+    url: `/api/im/email/${id}/star`,
     method: 'put',
     params: { starred }
   })

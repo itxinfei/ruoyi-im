@@ -13,7 +13,6 @@ import com.ruoyi.im.vo.meeting.ImMeetingRoomScheduleVO;
 import com.ruoyi.im.vo.meeting.ImMeetingRoomVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -31,8 +30,16 @@ import java.util.Map;
 @RequestMapping("/api/im/meeting-room")
 public class ImMeetingRoomController {
 
-    @Autowired
-    private ImMeetingRoomService meetingRoomService;
+    private final ImMeetingRoomService meetingRoomService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param meetingRoomService 会议室服务
+     */
+    public ImMeetingRoomController(ImMeetingRoomService meetingRoomService) {
+        this.meetingRoomService = meetingRoomService;
+    }
 
     /**
      * 创建会议室

@@ -1,7 +1,7 @@
 <template>
-  <div class="session-panel">
+  <div :class="['session-panel', { 'dark': isDark }]">
     <div class="panel-header">
-      <h1 class="text-xl font-bold dark:text-white">消息</h1>
+      <h1 class="text-xl font-bold">消息</h1>
       <el-dropdown trigger="click" @command="handleCommand">
         <button class="plus-btn transition-colors">
           <span class="material-icons-outlined">add</span>
@@ -141,6 +141,7 @@
 <script setup>
 import { ref, computed, onMounted, reactive, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
+import { useTheme } from '@/composables/useTheme'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
@@ -155,6 +156,7 @@ const props = defineProps({
 
 const emit = defineEmits(['select-session', 'show-user'])
 const store = useStore()
+const { isDark } = useTheme()
 
 const searchKeyword = ref('')
 const showCreateGroupDialog = ref(false)
@@ -381,7 +383,7 @@ onUnmounted(() => {
       &:hover { background: rgba(0,0,0,0.02); }
       
       &.active { 
-        background: #e5f4ff; 
+        background: var(--dt-bg-session-active); 
         
         &::before {
           content: '';
@@ -390,7 +392,7 @@ onUnmounted(() => {
           top: 14px;
           bottom: 14px;
           width: 3px;
-          background: #0089ff;
+          background: var(--dt-brand-color);
           border-radius: 0 4px 4px 0;
         }
 

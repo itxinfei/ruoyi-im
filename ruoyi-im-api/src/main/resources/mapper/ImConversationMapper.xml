@@ -92,4 +92,63 @@
         ORDER BY update_time DESC
     </select>
 
+    <!-- 优化的批量查询：一次性获取用户会话及相关数据 -->
+    <resultMap id="ConversationWithMemberVO" type="com.ruoyi.im.vo.conversation.ImConversationVO" extends="BaseResultMap">
+        <result column="unread_count" property="unreadCount" />
+        <result column="is_pinned" property="isPinned" />
+        <result column="is_muted" property="isMuted" />
+        <result column="last_read_message_id" property="lastReadMessageId" />
+    </resultMap>
+
+    <!-- 批量获取用户的会话（带成员信息） -->
+    <select id="selectUserConversationsWithMembers" resultMap="ConversationWithMemberVO">
+        SELECT
+            c.id, c.type, c.target_id, c.name, c.avatar, c.last_message_id, c.last_message_time,
+            c.is_deleted, c.deleted_time, c.create_time, c.update_time,
+            cm.unread_count, cm.is_pinned, cm.is_muted, cm.last_read_message_id
+        FROM im_conversation c
+        JOIN im_conversation_member cm ON c.id = cm.conversation_id
+        WHERE cm.user_id = #{userId} AND cm.is_deleted = 0 AND c.is_deleted = 0
+        ORDER BY cm.is_pinned DESC, c.last_message_time DESC
+    </select>
+
+    <!-- 批量获取会话的最后消息（一次性获取所有） -->
+    <select id="selectLastMessagesByConversationIds" resultType="com.ruoyi.im.domain.ImMessage">
+        SELECT id, conversation_id, sender_id, content, message_type,
+               create_time, update_time, is_revoked, is_edited
+        FROM im_message
+        WHERE conversation_id IN
+        <foreach collection="conversationIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND id IN (
+            SELECT MAX(id) FROM im_message
+            WHERE conversation_id IN
+            <foreach collection="conversationIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            GROUP BY conversation_id
+        )
+    </select>
+
+    <!-- 批量获取用户信息 -->
+    <select id="selectUsersByIds" resultType="com.ruoyi.im.domain.ImUser">
+        SELECT id, username, nickname, avatar, email, status
+        FROM im_user
+        WHERE id IN
+        <foreach collection="userIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!-- 批量获取群组信息 -->
+    <select id="selectGroupsByIds" resultType="com.ruoyi.im.domain.ImGroup">
+        SELECT id, name, avatar, description
+        FROM im_group
+        WHERE id IN
+        <foreach collection="groupIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>
