@@ -62,128 +62,130 @@
         </div>
 
         <!-- 账号密码登录 -->
-        <el-form
-          v-if="loginType === 'password'"
-          ref="loginFormRef"
-          :model="loginForm"
-          :rules="loginRules"
-          class="login-form"
-          @keyup.enter="handleLogin"
-        >
-          <el-form-item prop="username">
-            <div class="input-wrapper">
-              <span class="material-icons-outlined input-icon">person_outline</span>
-              <el-input
-                v-model="loginForm.username"
-                placeholder="用户名 / 手机号"
-                size="large"
-                clearable
-                @focus="handleFocus('username')"
-                @blur="handleBlur('username')"
-              />
+        <div class="form-content-wrapper">
+          <el-form
+            v-if="loginType === 'password'"
+            ref="loginFormRef"
+            :model="loginForm"
+            :rules="loginRules"
+            class="login-form"
+            @keyup.enter="handleLogin"
+          >
+            <el-form-item prop="username">
+              <div class="input-wrapper">
+                <span class="material-icons-outlined input-icon">person_outline</span>
+                <el-input
+                  v-model="loginForm.username"
+                  placeholder="用户名 / 手机号"
+                  size="large"
+                  clearable
+                  @focus="handleFocus('username')"
+                  @blur="handleBlur('username')"
+                />
+              </div>
+            </el-form-item>
+
+            <el-form-item prop="password">
+              <div class="input-wrapper">
+                <span class="material-icons-outlined input-icon">lock_outline</span>
+                <el-input
+                  v-model="loginForm.password"
+                  type="password"
+                  placeholder="请输入密码"
+                  size="large"
+                  show-password
+                  clearable
+                  @focus="handleFocus('password')"
+                  @blur="handleBlur('password')"
+                />
+              </div>
+            </el-form-item>
+
+            <div class="form-options">
+              <el-checkbox v-model="loginForm.rememberMe">
+                记住密码
+              </el-checkbox>
+              <el-link type="primary" :underline="false" @click="handleForgotPassword">
+                忘记密码？
+              </el-link>
             </div>
-          </el-form-item>
+          </el-form>
 
-          <el-form-item prop="password">
-            <div class="input-wrapper">
-              <span class="material-icons-outlined input-icon">lock_outline</span>
-              <el-input
-                v-model="loginForm.password"
-                type="password"
-                placeholder="请输入密码"
-                size="large"
-                show-password
-                clearable
-                @focus="handleFocus('password')"
-                @blur="handleBlur('password')"
-              />
+          <!-- 短信验证登录 -->
+          <el-form
+            v-else
+            ref="smsFormRef"
+            :model="smsForm"
+            :rules="smsRules"
+            class="login-form"
+            @keyup.enter="handleSMSLogin"
+          >
+            <el-form-item prop="phone">
+              <div class="input-wrapper">
+                <span class="material-icons-outlined input-icon">phone</span>
+                <el-input
+                  v-model="smsForm.phone"
+                  placeholder="请输入手机号"
+                  size="large"
+                  clearable
+                />
+              </div>
+            </el-form-item>
+
+            <el-form-item prop="code">
+              <div class="input-wrapper">
+                <span class="material-icons-outlined input-icon">sms</span>
+                <el-input
+                  v-model="smsForm.code"
+                  placeholder="请输入验证码"
+                  size="large"
+                  clearable
+                >
+                  <template #append>
+                    <el-button
+                      :disabled="smsCountdown > 0"
+                      @click="sendSMSCode"
+                      class="code-btn"
+                    >
+                      {{ smsCountdown > 0 ? `${smsCountdown}s` : '获取验证码' }}
+                    </el-button>
+                  </template>
+                </el-input>
+              </div>
+            </el-form-item>
+          </el-form>
+
+          <!-- 登录按钮 -->
+          <el-button
+            type="primary"
+            size="large"
+            :loading="loading"
+            class="login-button"
+            @click="handleLogin"
+          >
+            <template v-if="!loading">
+              <span class="material-icons-outlined">login</span>
+              {{ loginType === 'password' ? '登录' : '验证登录' }}
+            </template>
+            <span v-else>登录中...</span>
+          </el-button>
+
+          <!-- 第三方登录 -->
+          <div class="third-party-login">
+            <div class="divider">
+              <span>其他登录方式</span>
             </div>
-          </el-form-item>
-
-          <div class="form-options">
-            <el-checkbox v-model="loginForm.rememberMe">
-              记住密码
-            </el-checkbox>
-            <el-link type="primary" :underline="false" @click="handleForgotPassword">
-              忘记密码？
-            </el-link>
-          </div>
-        </el-form>
-
-        <!-- 短信验证登录 -->
-        <el-form
-          v-else
-          ref="smsFormRef"
-          :model="smsForm"
-          :rules="smsRules"
-          class="login-form"
-          @keyup.enter="handleSMSLogin"
-        >
-          <el-form-item prop="phone">
-            <div class="input-wrapper">
-              <span class="material-icons-outlined input-icon">phone</span>
-              <el-input
-                v-model="smsForm.phone"
-                placeholder="请输入手机号"
-                size="large"
-                clearable
-              />
+            <div class="third-party-icons">
+              <el-button circle size="large" class="third-party-btn" title="微信登录">
+                <span class="material-icons-outlined">wechat</span>
+              </el-button>
+              <el-button circle size="large" class="third-party-btn" title="企业微信">
+                <span class="material-icons-outlined">business</span>
+              </el-button>
+              <el-button circle size="large" class="third-party-btn" title="钉钉">
+                <span class="material-icons-outlined">chat_bubble</span>
+              </el-button>
             </div>
-          </el-form-item>
-
-          <el-form-item prop="code">
-            <div class="input-wrapper">
-              <span class="material-icons-outlined input-icon">sms</span>
-              <el-input
-                v-model="smsForm.code"
-                placeholder="请输入验证码"
-                size="large"
-                clearable
-              >
-                <template #append>
-                  <el-button
-                    :disabled="smsCountdown > 0"
-                    @click="sendSMSCode"
-                    class="code-btn"
-                  >
-                    {{ smsCountdown > 0 ? `${smsCountdown}s` : '获取验证码' }}
-                  </el-button>
-                </template>
-              </el-input>
-            </div>
-          </el-form-item>
-        </el-form>
-
-        <!-- 登录按钮 -->
-        <el-button
-          type="primary"
-          size="large"
-          :loading="loading"
-          class="login-button"
-          @click="handleLogin"
-        >
-          <template v-if="!loading">
-            <span class="material-icons-outlined">login</span>
-            {{ loginType === 'password' ? '登录' : '验证登录' }}
-          </template>
-          <span v-else>登录中...</span>
-        </el-button>
-
-        <!-- 第三方登录 -->
-        <div class="third-party-login">
-          <div class="divider">
-            <span>其他登录方式</span>
-          </div>
-          <div class="third-party-icons">
-            <el-button circle size="large" class="third-party-btn" title="微信登录">
-              <span class="material-icons-outlined">wechat</span>
-            </el-button>
-            <el-button circle size="large" class="third-party-btn" title="企业微信">
-              <span class="material-icons-outlined">business</span>
-            </el-button>
-            <el-button circle size="large" class="third-party-btn" title="钉钉">
-              <span class="material-icons-outlined">chat_bubble</span>
-            </el-button>
           </div>
         </div>
 
@@ -428,31 +430,32 @@ onMounted(() => {
     .shape {
       position: absolute;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      animation: float 6s ease-in-out infinite;
+      background: rgba(255, 255, 255, 0.15);
+      filter: blur(40px);
+      animation: float 8s ease-in-out infinite;
       
       &.shape-1 {
-        width: 200px;
-        height: 200px;
-        top: 10%;
-        left: 10%;
-        animation-delay: 0s;
+        width: 300px;
+        height: 300px;
+        top: -50px;
+        left: -50px;
+        background: rgba(22, 119, 255, 0.2);
       }
       
       &.shape-2 {
-        width: 150px;
-        height: 150px;
-        top: 70%;
-        right: 10%;
-        animation-delay: 2s;
+        width: 250px;
+        height: 250px;
+        bottom: -50px;
+        right: -50px;
+        background: rgba(9, 88, 217, 0.2);
       }
       
       &.shape-3 {
-        width: 100px;
-        height: 100px;
-        bottom: 20%;
-        left: 50%;
-        animation-delay: 4s;
+        width: 200px;
+        height: 200px;
+        top: 40%;
+        left: 60%;
+        background: rgba(64, 150, 255, 0.1);
       }
     }
   }
@@ -611,6 +614,12 @@ onMounted(() => {
       }
     }
   }
+
+  .form-content-wrapper {
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+  }
   
   .login-tabs {
     display: flex;
@@ -662,6 +671,7 @@ onMounted(() => {
     
     .input-wrapper {
       position: relative;
+      width: 100%;
       
       .input-icon {
         position: absolute;
@@ -675,19 +685,31 @@ onMounted(() => {
         transition: color 0.3s ease;
       }
       
+      :deep(.el-input) {
+        width: 100%;
+      }
+
       :deep(.el-input__wrapper) {
         padding-left: 48px;
         border-radius: 12px;
-        border: 2px solid #e2e8f0;
-        transition: all 0.3s ease;
+        border: 2px solid #eef2f7;
+        background-color: #f8fafc;
+        box-shadow: none !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         
         &:hover {
-          border-color: #cbd5e1;
+          border-color: #e2e8f0;
+          background-color: #f1f5f9;
         }
         
         &.is-focus {
           border-color: #1677ff;
-          box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+          background-color: #fff;
+          box-shadow: 0 0 0 4px rgba(22, 119, 255, 0.1) !important;
+          
+          & + .input-icon {
+            color: #1677ff;
+          }
         }
         
         .dark-mode & {
@@ -696,6 +718,12 @@ onMounted(() => {
           
           &:hover {
             border-color: #64748b;
+            background: #3d4b5f;
+          }
+
+          &.is-focus {
+            background: #1e293b;
+            border-color: #3b82f6;
           }
         }
       }

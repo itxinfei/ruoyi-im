@@ -16,6 +16,7 @@ import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImMessageService;
+import com.ruoyi.im.service.ImSystemConfigService;
 import com.ruoyi.im.util.AuditLogUtil;
 import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
@@ -68,6 +69,9 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     @Autowired
     private com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService;
+
+    @Autowired
+    private ImSystemConfigService systemConfigService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -398,14 +402,21 @@ public class ImMessageServiceImpl implements ImMessageService {
             throw new BusinessException("消息已撤回");
         }
 
+        // 从系统配置获取撤回时间限制
+        Integer timeLimit = systemConfigService.getMessageRecallTimeLimit();
         LocalDateTime now = LocalDateTime.now();
-        if (message.getCreateTime().plusMinutes(2).isBefore(now)) {
-            throw new BusinessException("消息发送超过2分钟，无法撤回");
+
+        if (timeLimit > 0 && message.getCreateTime().plusMinutes(timeLimit).isBefore(now)) {
+            throw new BusinessException("消息发送超过" + timeLimit + "分钟，无法撤回");
         }
 
         message.setIsRevoked(1);
         message.setRevokedTime(now);
         imMessageMapper.updateImMessage(message);
+
+        // 记录审计日志
+        AuditLogUtil.log("MESSAGE_RECALL", "撤回消息",
+            "messageId=" + messageId + ",conversationId=" + message.getConversationId());
 
         // 广播撤回通知给会话中的其他用户
         broadcastRecallNotification(message.getConversationId(), messageId, userId);

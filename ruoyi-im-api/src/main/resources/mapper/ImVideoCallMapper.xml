@@ -10,16 +10,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="calleeId" column="callee_id"/>
         <result property="conversationId" column="conversation_id"/>
         <result property="callType" column="call_type"/>
+        <result property="callMode" column="call_mode"/>
         <result property="status" column="status"/>
+        <result property="maxParticipants" column="max_participants"/>
+        <result property="currentParticipants" column="current_participants"/>
         <result property="startTime" column="start_time"/>
         <result property="endTime" column="end_time"/>
         <result property="duration" column="duration"/>
         <result property="rejectReason" column="reject_reason"/>
+        <result property="roomId" column="room_id"/>
     </resultMap>
 
     <sql id="selectImVideoCallVo">
-        select id, caller_id, callee_id, conversation_id, call_type, status,
-               start_time, end_time, duration, reject_reason
+        select id, caller_id, callee_id, conversation_id, call_type, call_mode, status,
+               max_participants, current_participants, start_time, end_time, duration,
+               reject_reason, room_id
         from im_video_call
     </sql>
 
@@ -35,22 +40,30 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="calleeId != null">callee_id,</if>
             <if test="conversationId != null">conversation_id,</if>
             <if test="callType != null">call_type,</if>
+            <if test="callMode != null">call_mode,</if>
             <if test="status != null">status,</if>
+            <if test="maxParticipants != null">max_participants,</if>
+            <if test="currentParticipants != null">current_participants,</if>
             <if test="startTime != null">start_time,</if>
             <if test="endTime != null">end_time,</if>
             <if test="duration != null">duration,</if>
             <if test="rejectReason != null">reject_reason,</if>
+            <if test="roomId != null">room_id,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="callerId != null">#{callerId},</if>
             <if test="calleeId != null">#{calleeId},</if>
             <if test="conversationId != null">#{conversationId},</if>
             <if test="callType != null">#{callType},</if>
+            <if test="callMode != null">#{callMode},</if>
             <if test="status != null">#{status},</if>
+            <if test="maxParticipants != null">#{maxParticipants},</if>
+            <if test="currentParticipants != null">#{currentParticipants},</if>
             <if test="startTime != null">#{startTime},</if>
             <if test="endTime != null">#{endTime},</if>
             <if test="duration != null">#{duration},</if>
             <if test="rejectReason != null">#{rejectReason},</if>
+            <if test="roomId != null">#{roomId},</if>
         </trim>
     </insert>
 

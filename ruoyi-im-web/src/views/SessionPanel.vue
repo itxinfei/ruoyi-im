@@ -77,6 +77,7 @@
             :size="44"
             shape="square"
             custom-class="session-avatar-item"
+            @click="handleAvatarClick($event, session)"
           />
           <!-- 在线状态点 (仅单聊显示) -->
           <span
@@ -152,7 +153,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['select-session'])
+const emit = defineEmits(['select-session', 'show-user'])
 const store = useStore()
 
 const searchKeyword = ref('')
@@ -166,6 +167,17 @@ const userStatus = computed(() => store.state.im.userStatus || {})
 // 判断用户是否在线
 const isUserOnline = (userId) => {
   return userStatus.value[userId] === 'online'
+}
+
+// 处理头像点击
+const handleAvatarClick = (e, session) => {
+  e.stopPropagation()
+  if (session.type === 'PRIVATE') {
+    emit('show-user', session.targetId)
+  } else {
+    // 群组点击头像暂不处理或弹出群详情
+    emit('select-session', session)
+  }
 }
 
 // 处理下拉菜单命令

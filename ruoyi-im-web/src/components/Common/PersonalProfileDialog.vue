@@ -34,7 +34,20 @@
             <h2 class="nickname">{{ currentUser.nickname || currentUser.username }}</h2>
             <el-icon v-if="currentUser.gender === 1" class="gender-icon male"><Male /></el-icon>
             <el-icon v-else-if="currentUser.gender === 2" class="gender-icon female"><Female /></el-icon>
-            <el-tag size="small" type="success" class="status-tag">在线</el-tag>
+            
+            <el-dropdown trigger="click" @command="handleStatusChange">
+              <el-tag size="small" :type="statusType" class="status-tag cursor-pointer hover:opacity-80">
+                {{ statusLabel }} <el-icon class="ml-1"><ArrowDown /></el-icon>
+              </el-tag>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="online"><span class="status-indicator online"></span> 在线</el-dropdown-item>
+                  <el-dropdown-item command="busy"><span class="status-indicator busy"></span> 忙碌</el-dropdown-item>
+                  <el-dropdown-item command="away"><span class="status-indicator away"></span> 离开</el-dropdown-item>
+                  <el-dropdown-item command="meeting"><span class="status-indicator meeting"></span> 会议中</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
           <p class="account">账号：{{ currentUser.username }}</p>
         </div>
@@ -70,10 +83,16 @@
           <el-icon><Edit /></el-icon>
           <span>编辑资料</span>
         </el-button>
-        <el-button type="danger" plain class="logout-btn" @click="handleLogout">
-          <el-icon><SwitchButton /></el-icon>
-          <span>退出登录</span>
-        </el-button>
+        <div class="flex gap-2">
+          <el-button class="flex-1 logout-btn" @click="handleChangePassword">
+            <el-icon><Lock /></el-icon>
+            <span>修改密码</span>
+          </el-button>
+          <el-button type="danger" plain class="flex-1 logout-btn" @click="handleLogout">
+            <el-icon><SwitchButton /></el-icon>
+            <span>退出登录</span>
+          </el-button>
+        </div>
       </div>
     </div>
 
@@ -83,6 +102,9 @@
       :user-info="currentUser"
       @save="handleSaveProfile"
     />
+
+    <!-- 修改密码弹窗 -->
+    <ChangePasswordDialog v-model="showChangePassword" />
   </el-dialog>
 </template>
 
@@ -90,10 +112,11 @@
 import { ref, watch, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { Close, Male, Female, Edit, SwitchButton } from '@element-plus/icons-vue'
+import { Close, Male, Female, Edit, SwitchButton, ArrowDown, Lock } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import EditProfileDialog from '@/components/EditProfileDialog/index.vue'
+import ChangePasswordDialog from '@/components/Common/ChangePasswordDialog.vue'
 
 const props = defineProps({
   modelValue: Boolean
@@ -106,8 +129,30 @@ const router = useRouter()
 const visible = ref(false)
 const loading = ref(false)
 const showEditDialog = ref(false)
+const userStatus = ref('online')
 
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
+
+const statusLabel = computed(() => {
+  const map = { online: '在线', busy: '忙碌', away: '离开', meeting: '会议中' }
+  return map[userStatus.value]
+})
+
+const statusType = computed(() => {
+  const map = { online: 'success', busy: 'danger', away: 'warning', meeting: 'info' }
+  return map[userStatus.value]
+})
+
+const showChangePassword = ref(false)
+
+const handleStatusChange = (status) => {
+  userStatus.value = status
+  ElMessage.success(`状态已切换为: ${statusLabel.value}`)
+}
+
+const handleChangePassword = () => {
+  showChangePassword.value = true
+}
 
 const handleClose = () => {
   emit('update:modelValue', false)
@@ -170,57 +215,156 @@ watch(visible, (val) => {
 }
 
 .profile-cover {
-  height: 120px;
-  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  height: 140px;
+  background: linear-gradient(135deg, #0089ff 0%, #00d2ff 100%);
   position: relative;
+  overflow: hidden;
   
-  .dark & { background: linear-gradient(135deg, #1e40af 0%, #0e7490 100%); }
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+  
+  .dark & { background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); }
 
   .close-btn {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(0, 0, 0, 0.2);
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.2);
     border: none;
     color: #fff;
     width: 32px;
     height: 32px;
-    transition: all 0.2s;
-    backdrop-filter: blur(4px);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(8px);
     
     &:hover {
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(255, 255, 255, 0.35);
       transform: rotate(90deg);
     }
   }
 }
 
 .profile-header {
-  padding: 0 24px;
+  padding: 0 32px;
   margin-top: -44px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
 
   .avatar-wrapper {
     position: relative;
-    margin-bottom: 12px;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    margin-bottom: 16px;
     
     :deep(.user-avatar) {
       border: 4px solid #fff;
-      border-radius: 20px;
-      .dark & { border-color: #1e293b; }
+      border-radius: 28px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      transition: transform 0.3s;
+      .dark & { border-color: #1e293b; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    }
+    
+    &:hover :deep(.user-avatar) {
+      transform: scale(1.02);
     }
   }
-  /* ... rest ... */
+
+  .user-main {
+    text-align: center;
+    
+    .name-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      
+      .nickname {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1f2329;
+        margin: 0;
+        .dark & { color: #f1f5f9; }
+      }
+      
+      .gender-icon {
+        font-size: 16px;
+        &.male { color: #0089ff; }
+        &.female { color: #ff4d4f; }
+      }
+    }
+    
+    .account {
+      font-size: 13px;
+      color: #8f959e;
+      margin: 0;
+    }
+  }
 }
 
-/* ... existing code ... */
+.profile-details {
+  padding: 0 32px;
+  margin-bottom: 32px;
+  
+  .detail-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f2f3f5;
+    transition: background 0.2s;
+    .dark & { border-bottom-color: #334155; }
+    
+    &:last-child { border-bottom: none; }
+    
+    .label {
+      width: 60px;
+      font-size: 13px;
+      color: #8f959e;
+      flex-shrink: 0;
+    }
+    
+    .value {
+      flex: 1;
+      font-size: 14px;
+      color: #1f2329;
+      font-weight: 500;
+      word-break: break-all;
+      .dark & { color: #f1f5f9; }
+    }
+    
+    &.signature {
+      align-items: flex-start;
+      .value {
+        color: #64748b;
+        font-weight: normal;
+        line-height: 1.5;
+      }
+    }
+  }
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  &.online { background: #52c41a; }
+  &.busy { background: #f5222d; }
+  &.away { background: #faad14; }
+  &.meeting { background: #1890ff; }
+}
 
 .profile-actions {
-  padding: 0 24px 28px;
+  padding: 0 32px 32px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -228,8 +372,8 @@ watch(visible, (val) => {
   .action-btn {
     height: 42px;
     width: 100%;
-    font-weight: 500;
-    border-radius: 8px;
+    font-weight: 600;
+    border-radius: 10px;
     font-size: 15px;
     transition: all 0.2s;
     &:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2); }
@@ -237,9 +381,9 @@ watch(visible, (val) => {
   
   .logout-btn {
     height: 42px;
-    width: 100%;
-    border-radius: 8px;
-    font-size: 15px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
     &:hover { background: #fee2e2; border-color: #ef4444; color: #ef4444; .dark & { background: rgba(239, 68, 68, 0.1); } }
   }
 }

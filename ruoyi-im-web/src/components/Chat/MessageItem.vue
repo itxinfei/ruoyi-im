@@ -7,7 +7,8 @@
     <div
       class="avatar-container"
       @contextmenu.prevent="$emit('at', message)"
-      title="右键 @提及"
+      @click="$emit('show-user', message.senderId)"
+      title="右键 @提及，左键查看资料"
     >
       <DingtalkAvatar
         :src="avatarUrl"
@@ -55,20 +56,31 @@
         <slot name="bubble"></slot>
       </div>
 
-      <!-- 消息页脚 (状态与时间) -->
-      <div class="message-footer">
-        <div v-if="message.isOwn" class="read-status">
-           <slot name="read-status"></slot>
+        <!-- 消息页脚 (状态与时间) -->
+        <div class="message-footer">
+          <div v-if="message.isOwn" class="status-container">
+            <!-- 发送中 / 上传中 -->
+            <el-icon v-if="['sending', 'uploading'].includes(message.status)" class="is-loading status-icon" :title="message.status === 'uploading' ? '上传中...' : '发送中...'"><Loading /></el-icon>
+            
+            <!-- 发送失败 -->
+            <el-icon v-else-if="message.status === 'failed'" class="status-icon error" title="发送失败，点击重试" @click="$emit('retry', message)">
+              <WarningFilled />
+            </el-icon>
+
+            <!-- 已读状态 (钉钉风格) -->
+            <div v-else class="read-status" :class="{ 'read': message.readCount > 0, 'unread': message.readCount === 0 }">
+              {{ message.readCount > 0 ? '已读' : '未读' }}
+            </div>
+          </div>
+          <div class="time">{{ formattedTime }}</div>
         </div>
-        <div class="time">{{ formattedTime }}</div>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import { ChatLineSquare, MoreFilled, Share, CopyDocument } from '@element-plus/icons-vue'
+import { ChatLineSquare, MoreFilled, Share, CopyDocument, Loading, WarningFilled } from '@element-plus/icons-vue'
 import { addTokenToUrl } from '@/utils/file'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
@@ -79,7 +91,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['reply', 'reaction', 'command', 'scroll-to', 'at'])
+defineEmits(['reply', 'reaction', 'command', 'scroll-to', 'at', 'show-user'])
 
 const avatarUrl = computed(() => addTokenToUrl(props.message.senderAvatar))
 
@@ -182,6 +194,37 @@ const formattedTime = computed(() => {
   gap: 8px;
   margin-top: 4px;
   font-size: 11px;
+  min-height: 16px; 
+}
+
+.read-status {
+  font-size: 11px;
+  cursor: default;
+  user-select: none;
+  
+  &.unread {
+    color: #1677ff;
+    font-weight: 500;
+  }
+  
+  &.read {
+    color: #8f959e;
+  }
+}
+
+.status-container {
+  display: flex;
+  align-items: center;
+}
+
+.status-icon {
+  font-size: 14px;
+  color: #8c8c8c;
+  
+  &.error {
+    color: #ff4d4f;
+    cursor: pointer;
+  }
 }
 
 .is-own .message-footer {
@@ -193,22 +236,34 @@ const formattedTime = computed(() => {
 }
 
 .reply-wrapper {
-  background: #f0f0f0;
+  background: #f4f6f8;
   border-left: 3px solid #0089ff;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: 4px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   font-size: 12px;
-  color: #8c8c8c;
+  color: #64748b;
   cursor: pointer;
   max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.2s;
+  
+  .dark & {
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+  }
+
+  &:hover {
+    background: #ebf4ff;
+    .dark & { background: rgba(255, 255, 255, 0.08); }
+  }
 
   .reply-sender {
-    color: #434343;
-    font-weight: 500;
+    color: #1f2329;
+    font-weight: 600;
+    .dark & { color: #f1f5f9; }
   }
 }
 

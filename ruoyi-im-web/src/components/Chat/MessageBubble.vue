@@ -6,7 +6,10 @@
   >
     <div class="bubble" :class="[message.type, { 'is-own': message.isOwn }]">
       <!-- 文本消息 -->
-      <span v-if="message.type === 'TEXT'">{{ message.content }}</span>
+      <div v-if="message.type === 'TEXT'" class="text-content-wrapper">
+        <span>{{ message.content }}</span>
+        <span v-if="message.isEdited" class="edited-tag">(已编辑)</span>
+      </div>
 
       <!-- 图片消息 -->
       <img v-else-if="message.type === 'IMAGE' && parsedContent.imageUrl" 
@@ -57,6 +60,12 @@
         <el-dropdown-item command="forward">
           <el-icon><Share /></el-icon> <span>转发</span>
         </el-dropdown-item>
+        <el-dropdown-item command="todo">
+          <el-icon><Checked /></el-icon> <span>设为待办</span>
+        </el-dropdown-item>
+        <el-dropdown-item command="multi-select">
+          <el-icon><List /></el-icon> <span>多选</span>
+        </el-dropdown-item>
         
         <el-dropdown-item v-if="message.isOwn && canRecall" command="recall" divided>
           <el-icon><RefreshLeft /></el-icon> <span>撤回</span>
@@ -74,7 +83,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled } from '@element-plus/icons-vue'
+import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, List } from '@element-plus/icons-vue'
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -117,77 +126,129 @@ const formatSize = (bytes) => {
 .bubble {
   background: #fff;
   padding: 10px 14px;
-  border-radius: 4px 12px 12px 12px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  border-radius: 2px 14px 14px 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   font-size: 14px;
   word-break: break-word;
-  line-height: 1.5;
+  line-height: 1.6;
   color: #1f2329;
   position: relative;
   max-width: 520px;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #f0f1f2;
   
-  &.is-own {
+  .is-own {
     background: #0089ff;
     color: #ffffff;
-    border-radius: 12px 4px 12px 12px;
-    box-shadow: 0 2px 6px rgba(0, 137, 255, 0.2);
+    border-radius: 14px 2px 14px 14px;
+    box-shadow: 0 4px 12px rgba(0, 137, 255, 0.2);
+    border: none;
+  }
+
+  .text-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    
+    .edited-tag {
+      font-size: 11px;
+      opacity: 0.7;
+      margin-top: 2px;
+      align-self: flex-end;
+    }
+  }
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    &.is-own { box-shadow: 0 6px 16px rgba(0, 137, 255, 0.3); }
   }
 
   /* 不同类型消息的特殊样式 */
-  &.IMAGE { padding: 4px; border-radius: 8px; background: #fff !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-  &.VIDEO { padding: 4px; border-radius: 8px; background: #000 !important; }
+  &.IMAGE { 
+    padding: 0; 
+    border-radius: 8px; 
+    background: transparent !important; 
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    border: none;
+    overflow: hidden;
+  }
+  
+  &.VIDEO { 
+    padding: 0; 
+    border-radius: 8px; 
+    background: #000 !important; 
+    overflow: hidden;
+  }
 }
 
 .msg-image { 
   max-width: 320px; 
   max-height: 400px; 
-  border-radius: 6px; 
+  border-radius: 8px; 
   display: block;
   cursor: zoom-in;
-  transition: opacity 0.2s;
-  &:hover { opacity: 0.9; }
+  transition: all 0.3s;
+  &:hover { transform: scale(1.02); filter: brightness(0.95); }
 }
 
 .msg-file {
-  display: flex; align-items: center; gap: 12px; cursor: pointer;
-  background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px;
-  border: 1px solid rgba(0,0,0,0.05);
-  transition: background 0.2s;
-  &:hover { background: rgba(0,0,0,0.05); }
+  display: flex; align-items: center; gap: 14px; cursor: pointer;
+  background: #f8fafc; padding: 12px; border-radius: 10px;
+  border: 1px solid #eef2f6;
+  transition: all 0.2s;
+  &:hover { background: #f1f5f9; border-color: #cbd5e1; }
   
-  .el-icon { font-size: 32px; color: #1677ff; }
+  .el-icon { font-size: 36px; color: #1677ff; }
   .file-info { 
     display: flex; flex-direction: column; overflow: hidden; 
-    .file-name { font-weight: 500; font-size: 14px; color: #1f2329; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .file-size { font-size: 12px; color: #8f959e; margin-top: 2px; }
+    .file-name { font-weight: 600; font-size: 14px; color: #1f2329; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-size { font-size: 12px; color: #64748b; margin-top: 4px; }
   }
 }
 
 .is-own .msg-file {
-  background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);
-  &:hover { background: rgba(255,255,255,0.2); }
+  background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2);
+  &:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.3); }
   .el-icon { color: #fff; }
   .file-name { color: #fff; }
-  .file-size { color: rgba(255,255,255,0.7); }
+  .file-size { color: rgba(255,255,255,0.8); }
 }
 
-.msg-video { max-width: 300px; .video-preview { width: 100%; border-radius: 4px; } }
-.msg-recalled { display: flex; align-items: center; gap: 6px; color: #8f959e; font-size: 13px; font-style: italic; }
+.msg-video { 
+  max-width: 300px; 
+  .video-preview { width: 100%; border-radius: 4px; display: block; } 
+}
+
+.msg-recalled { 
+  display: flex; align-items: center; gap: 6px; color: #8f959e; font-size: 13px; font-style: italic; 
+}
+
+.msg-system {
+  font-size: 12px;
+  color: #8f959e;
+  text-align: center;
+  width: 100%;
+}
 
 :global(.dark) {
   .bubble {
-    background: #2d3748;
-    color: #e2e8f0;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    background: #1e293b;
+    color: #f1f5f9;
+    border-color: #334155;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    
     &.is-own {
-      background: #3182ce;
-      box-shadow: 0 2px 6px rgba(49, 130, 206, 0.3);
+      background: #1d4ed8;
+      border-color: transparent;
+      box-shadow: 0 4px 16px rgba(29, 78, 216, 0.4);
     }
   }
+  
   .msg-file {
-    background: rgba(255,255,255,0.05);
-    .file-name { color: #e2e8f0; }
+    background: #0f172a;
+    border-color: #334155;
+    .file-name { color: #f1f5f9; }
+    .file-size { color: #94a3b8; }
+    &:hover { background: #1e293b; border-color: #475569; }
   }
 }
 </style>

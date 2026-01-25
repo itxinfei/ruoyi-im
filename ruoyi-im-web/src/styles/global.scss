@@ -7,17 +7,25 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 html,
 body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  transition: background-color var(--dt-transition-base), color var(--dt-transition-base);
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+// 全局基础颜色过渡 (可选，有助于平滑切换)
+*,
+*::before,
+*::after {
+  // 但要注意不要影响性能和布局相关的 transition
 }
 
 body {
@@ -28,6 +36,7 @@ body {
   background-color: var(--dt-bg-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--dt-transition-base), color var(--dt-transition-base);
 }
 
 a {
@@ -78,7 +87,33 @@ textarea {
   outline-offset: 2px;
 }
 
-// Element Plus Overrides
+// Element Plus Overrides (配合官方 dark/css-vars 使用)
+.dark {
+
+  // 我们系统特定的变量覆盖
+  .el-dialog,
+  .el-drawer,
+  .el-message-box {
+    background-color: var(--dt-bg-card) !important;
+    border-color: var(--dt-border-color);
+  }
+
+  .el-popover.el-popper,
+  .el-select__popper.el-popper {
+    background-color: var(--dt-bg-card) !important;
+    border-color: var(--dt-border-color) !important;
+  }
+
+  // 滚动条暗色适配
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  }
+}
+
 .el-button--primary {
   background-color: var(--dt-brand-color);
   border-color: var(--dt-brand-color);
@@ -168,9 +203,9 @@ textarea {
 }
 
 .u-transition-color {
-  transition: color var(--dt-transition-fast), 
-              background-color var(--dt-transition-fast),
-              border-color var(--dt-transition-fast);
+  transition: color var(--dt-transition-fast),
+    background-color var(--dt-transition-fast),
+    border-color var(--dt-transition-fast);
 }
 
 // Animation utilities
@@ -179,6 +214,7 @@ textarea {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -190,6 +226,7 @@ textarea {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -197,12 +234,16 @@ textarea {
 }
 
 @keyframes typing {
-  0%, 80%, 100% { 
-    transform: scale(0); 
+
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
     opacity: 0.5;
   }
-  40% { 
-    transform: scale(1); 
+
+  40% {
+    transform: scale(1);
     opacity: 1;
   }
 }
@@ -216,19 +257,54 @@ textarea {
 }
 
 // Spacing Utilities
-.mr-5 { margin-right: 5px; }
-.mr-10 { margin-right: 10px; }
-.mr-15 { margin-right: 15px; }
-.mr-20 { margin-right: 20px; }
+.mr-5 {
+  margin-right: 5px;
+}
 
-.ml-5 { margin-left: 5px; }
-.ml-10 { margin-left: 10px; }
+.mr-10 {
+  margin-right: 10px;
+}
 
-.mt-5 { margin-top: 5px; }
-.mt-10 { margin-top: 10px; }
-.mt-15 { margin-top: 15px; }
-.mt-20 { margin-top: 20px; }
+.mr-15 {
+  margin-right: 15px;
+}
 
-.mb-5 { margin-bottom: 5px; }
-.mb-10 { margin-bottom: 10px; }
-.mb-20 { margin-bottom: 20px; }
+.mr-20 {
+  margin-right: 20px;
+}
+
+.ml-5 {
+  margin-left: 5px;
+}
+
+.ml-10 {
+  margin-left: 10px;
+}
+
+.mt-5 {
+  margin-top: 5px;
+}
+
+.mt-10 {
+  margin-top: 10px;
+}
+
+.mt-15 {
+  margin-top: 15px;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.mb-5 {
+  margin-bottom: 5px;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}

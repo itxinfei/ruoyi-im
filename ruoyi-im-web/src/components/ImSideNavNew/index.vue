@@ -44,15 +44,17 @@
     <!-- 底部操作区 -->
     <div class="flex flex-col gap-1 w-full px-2 pb-2 shrink-0">
       <!-- 主题切换按钮 -->
-      <el-tooltip :content="isDark ? '切换到浅色模式' : '切换到深色模式'" placement="right" :show-after="500">
+      <el-tooltip :content="themeTooltip" placement="right" :show-after="500">
         <button
-          @click="toggleDarkMode"
-          class="nav-item nav-item-default"
-          :aria-label="isDark ? '切换到浅色模式' : '切换到深色模式'"
+          @click="handleToggleTheme"
+          class="nav-item nav-item-default theme-toggle-btn"
+          :aria-label="themeTooltip"
         >
           <span class="material-icons-outlined" aria-hidden="true">
-            {{ isDark ? 'light_mode' : 'dark_mode' }}
+            {{ themeIcon }}
           </span>
+          <!-- 模式小标识 -->
+          <span v-if="themeMode === 'auto'" class="auto-badge">A</span>
         </button>
       </el-tooltip>
 
@@ -75,7 +77,7 @@
           :class="activeModule === 'settings' ? 'nav-item-active' : 'nav-item-default'"
           aria-label="设置"
         >
-          <span :class="['material-icons-outlined', { 'loaded': isFontLoaded }]" aria-hidden="true">settings</span>
+          <span class="material-icons-outlined" aria-hidden="true">settings</span>
         </button>
       </el-tooltip>
 
@@ -124,7 +126,17 @@ const props = defineProps({
 
 const emit = defineEmits(['switch-module', 'toggle-collapse'])
 const store = useStore()
-const { isDark, toggleDark: toggleDarkMode } = useTheme()
+const { isDark, themeMode, toggleTheme } = useTheme()
+
+const themeIcon = computed(() => {
+  if (themeMode.value === 'auto') return 'brightness_auto'
+  return themeMode.value === 'dark' ? 'dark_mode' : 'light_mode'
+})
+
+const themeTooltip = computed(() => {
+  const currentLabel = themeMode.value === 'auto' ? '跟随系统' : (themeMode.value === 'dark' ? '深色模式' : '浅色模式')
+  return `外观模式: ${currentLabel} (点击切换)`
+})
 
 // 未读消息数
 const unreadCount = computed(() => store.state.im?.totalUnreadCount || 0)
@@ -132,7 +144,7 @@ const unreadCount = computed(() => store.state.im?.totalUnreadCount || 0)
 // 当前用户
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 
-// 导航模块配置 - 使用 Material Icons Outlined 图标名称
+// 导航模块配置
 const navModules = ref([
   { key: 'chat', label: '消息', icon: 'chat_bubble' },
   { key: 'contacts', label: '通讯录', icon: 'group' },
@@ -144,6 +156,17 @@ const navModules = ref([
   { key: 'mail', label: '邮箱', icon: 'email' },
   { key: 'assistant', label: 'AI助理', icon: 'smart_toy' }
 ])
+
+/**
+ * 处理主题切换并同步 Store
+ */
+function handleToggleTheme() {
+  toggleTheme()
+  const newSettings = { ...store.state.im.settings }
+  if (!newSettings.general) newSettings.general = {}
+  newSettings.general.theme = themeMode.value
+  store.commit('im/UPDATE_SETTINGS', newSettings)
+}
 
 /**
  * 切换模块
@@ -177,6 +200,8 @@ function handleHelp() {
   justify-content: center;
   border-radius: 12px;
   transition: background-color 0.2s ease;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
 
   &:hover {
     background-color: rgba(255, 255, 255, 0.15);
@@ -187,20 +212,34 @@ function handleHelp() {
   }
 }
 
-/* 减少动画效果以尊重用户偏好 */
-@media (prefers-reduced-motion: reduce) {
-  .nav-item {
-    transition: none;
-  }
-}
-
 .nav-item-active {
   background-color: rgba(255, 255, 255, 0.22);
   color: #fff;
+  font-weight: bold;
 }
 
 .nav-item-default {
   color: rgba(255, 255, 255, 0.75);
+}
+
+.theme-toggle-btn {
+  position: relative;
+}
+
+.auto-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 9px;
+  background: #fff;
+  color: var(--dt-brand-color, #1677ff);
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-weight: bold;
 }
 
 /* 用户头像按钮样式 */
@@ -216,6 +255,7 @@ function handleHelp() {
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
 
   &:hover {
     background: rgba(255, 255, 255, 0.15);
@@ -251,7 +291,7 @@ function handleHelp() {
   width: 12px;
   height: 12px;
   background-color: #52c41a;
-  border: 2px solid var(--el-color-primary, #0089ff);
+  border: 2px solid #1677ff;
   border-radius: 50%;
   z-index: 1;
 }

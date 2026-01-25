@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+import 'element-plus/theme-chalk/dark/css-vars.css'
 import './styles/global.scss'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
@@ -13,10 +14,10 @@ const preloadMaterialIcons = () => {
   link.rel = 'preload'
   link.href = 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined'
   link.as = 'style'
-  link.onload = function() {
+  link.onload = function () {
     this.onload = null
     this.rel = 'stylesheet'
-    
+
     // 字体加载完成后的处理
     setTimeout(() => {
       document.querySelectorAll('.material-icons-outlined').forEach(el => {

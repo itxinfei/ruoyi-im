@@ -43,10 +43,10 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
     @Autowired
     private ImFileAssetMapper fileAssetMapper;
 
-    @Value("${im.file.upload.path:uploads/}")
+    @Value("${file.upload.path:uploads/}")
     private String uploadPath;
 
-    @Value("${im.file.upload.url-prefix:/uploads/}")
+    @Value("${file.upload.url-prefix:/uploads/}")
     private String urlPrefix;
 
     /** 上传任务过期时间（小时） */

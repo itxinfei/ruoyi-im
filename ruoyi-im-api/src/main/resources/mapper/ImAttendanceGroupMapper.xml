@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImAttendanceGroupMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImAttendanceGroup" id="ImAttendanceGroupResult">
+        <id property="id" column="id"/>
+        <result property="groupName" column="group_name"/>
+        <result property="managerId" column="manager_id"/>
+        <result property="description" column="description"/>
+        <result property="attendanceType" column="attendance_type"/>
+        <result property="checkMethod" column="check_method"/>
+        <result property="workStartTime" column="work_start_time"/>
+        <result property="workEndTime" column="work_end_time"/>
+        <result property="checkInBefore" column="check_in_before"/>
+        <result property="lateTolerance" column="late_tolerance"/>
+        <result property="earlyTolerance" column="early_tolerance"/>
+        <result property="workDays" column="work_days"/>
+        <result property="needCheckIn" column="need_check_in"/>
+        <result property="allowRemote" column="allow_remote"/>
+        <result property="checkRange" column="check_range"/>
+        <result property="checkLocation" column="check_location"/>
+        <result property="wifiSsid" column="wifi_ssid"/>
+        <result property="autoAttendance" column="auto_attendance"/>
+        <result property="status" column="status"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImAttendanceGroupVo">
+        select id, group_name, manager_id, description, attendance_type, check_method,
+               work_start_time, work_end_time, check_in_before, late_tolerance, early_tolerance,
+               work_days, need_check_in, allow_remote, check_range, check_location, wifi_ssid,
+               auto_attendance, status, creator_id, create_time, update_time
+        from im_attendance_group
+    </sql>
+
+    <select id="selectByUserId" resultMap="ImAttendanceGroupResult">
+        select g.* from im_attendance_group g
+        inner join im_attendance_group_member m on g.id = m.group_id
+        where m.user_id = #{userId}
+        and m.status = 'ACTIVE'
+        and g.status = 'ACTIVE'
+        limit 1
+    </select>
+
+    <select id="selectGroupsByUser" resultMap="ImAttendanceGroupResult">
+        select distinct g.* from im_attendance_group g
+        inner join im_attendance_group_member m on g.id = m.group_id
+        where m.user_id = #{userId}
+        and m.status = 'ACTIVE'
+        and g.status = 'ACTIVE'
+        order by g.create_time desc
+    </select>
+
+    <select id="countMembers" resultType="java.lang.Integer">
+        select count(*) from im_attendance_group_member
+        where group_id = #{groupId} and status = 'ACTIVE'
+    </select>
+
+</mapper>

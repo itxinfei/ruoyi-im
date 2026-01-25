@@ -130,6 +130,7 @@
   --dt-bg-session-active: rgba(22, 119, 255, 0.15);
   --dt-bg-input: var(--dt-bg-input-dark);
   --dt-bg-card: var(--dt-bg-card-dark);
+  --dt-bg-dialog: var(--dt-bg-card-dark);
 
   --dt-text-primary: var(--dt-text-primary-dark);
   --dt-text-secondary: var(--dt-text-secondary-dark);
@@ -137,6 +138,15 @@
 
   --dt-border-color: var(--dt-border-dark);
   --dt-border-light: #1e293b;
+
+  // Element Plus 暗色适配变量 (针对全局同步)
+  --el-bg-color: var(--dt-bg-card-dark);
+  --el-bg-color-overlay: var(--dt-bg-card-dark);
+  --el-text-color-primary: var(--dt-text-primary-dark);
+  --el-text-color-regular: var(--dt-text-secondary-dark);
+  --el-border-color: var(--dt-border-dark);
+  --el-border-color-light: #334155;
+  --el-fill-color-blank: var(--dt-bg-input-dark);
 }
 
 // === Accessibility: Reduced Motion Support ===

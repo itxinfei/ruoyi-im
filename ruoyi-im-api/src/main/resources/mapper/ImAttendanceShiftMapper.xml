@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImAttendanceShiftMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImAttendanceShift" id="ImAttendanceShiftResult">
+        <id property="id" column="id"/>
+        <result property="groupId" column="group_id"/>
+        <result property="shiftName" column="shift_name"/>
+        <result property="shiftType" column="shift_type"/>
+        <result property="workStartTime" column="work_start_time"/>
+        <result property="workEndTime" column="work_end_time"/>
+        <result property="checkInBefore" column="check_in_before"/>
+        <result property="checkOutAfter" column="check_out_after"/>
+        <result property="lateTolerance" column="late_tolerance"/>
+        <result property="earlyTolerance" column="early_tolerance"/>
+        <result property="breakStartTime" column="break_start_time"/>
+        <result property="breakEndTime" column="break_end_time"/>
+        <result property="workMinutes" column="work_minutes"/>
+        <result property="color" column="color"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImAttendanceShiftVo">
+        select id, group_id, shift_name, shift_type, work_start_time, work_end_time,
+               check_in_before, check_out_after, late_tolerance, early_tolerance,
+               break_start_time, break_end_time, work_minutes, color, sort_order,
+               status, create_time, update_time
+        from im_attendance_shift
+    </sql>
+
+    <select id="selectByGroupId" resultMap="ImAttendanceShiftResult">
+        <include refid="selectImAttendanceShiftVo"/>
+        where group_id = #{groupId}
+        order by sort_order asc, create_time asc
+    </select>
+
+</mapper>

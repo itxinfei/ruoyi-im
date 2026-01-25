@@ -6,9 +6,23 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import { useStore } from 'vuex'
+import { useTheme } from '@/composables/useTheme'
+
+const store = useStore()
+const { setThemeMode } = useTheme()
 
 // 处理 Material Icons 字体加载
 onMounted(() => {
+  // 加载本地设置
+  store.commit('im/LOAD_SETTINGS')
+  
+  // 同步主题设置
+  const theme = store.state.im.settings.general.theme
+  if (theme) {
+    setThemeMode(theme)
+  }
+  
   // 方法1: 使用 document.fonts API
   if ('fonts' in document) {
     document.fonts.ready.then(() => {
@@ -84,44 +98,21 @@ onMounted(() => {
   }
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-size: 14px;
-  color: #262626;
-  background-color: #f5f5f5;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
 #app {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background-color: #f5f5f5;
-  transition: background-color 0.3s ease;
-}
-
-/* 全局深色模式过渡 */
-.dark body {
-  background-color: #0f172a;
-  color: #f1f5f9;
-}
-
-.dark #app {
-  background-color: #0f172a;
+  background-color: var(--dt-bg-body);
+  transition: background-color var(--dt-transition-base);
 }
 
 /* 优化常见组件的过渡体验 */
 .el-dialog, .el-card, .el-drawer, .el-menu {
-  transition: background-color 0.3s ease, border-color 0.3s ease !important;
+  transition: background-color var(--dt-transition-base), border-color var(--dt-transition-base) !important;
 }
 
 .dingtalk-app {
-  transition: all 0.3s ease;
+  height: 100%;
+  transition: all var(--dt-transition-base);
 }
 </style>

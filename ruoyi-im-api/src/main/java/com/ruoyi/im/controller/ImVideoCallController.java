@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -177,6 +178,144 @@ public class ImVideoCallController {
             return Result.success(videoCallService.getCallHistory(userId, limit));
         } catch (Exception e) {
             log.error("获取通话历史失败: {}", e.getMessage());
+            return Result.fail(e.getMessage());
+        }
+    }
+
+    // ==================== 群组多人通话接口 ====================
+
+    /**
+     * 发起群组多人通话
+     */
+    @Operation(summary = "发起群组通话", description = "发起群组多人视频/语音通话（最多9人）")
+    @PostMapping("/group/initiate")
+    public Result<Map<String, Object>> initiateGroupCall(
+            @RequestParam Long conversationId,
+            @RequestParam(defaultValue = "VIDEO") String callType,
+            @RequestParam(defaultValue = "9") Integer maxParticipants,
+            @RequestBody List<Long> invitedUserIds) {
+        Long callerId = SecurityUtils.getLoginUserId();
+
+        try {
+            // 验证最大参与者数
+            if (maxParticipants > 9) {
+                return Result.fail("最多支持9人同时通话");
+            }
+            if (invitedUserIds == null || invitedUserIds.isEmpty()) {
+                return Result.fail("请邀请至少一人参与通话");
+            }
+            if (invitedUserIds.size() + 1 > maxParticipants) {
+                return Result.fail("邀请人数超过最大参与者数限制");
+            }
+
+            Long callId = videoCallService.initiateGroupCall(
+                callerId, conversationId, callType, maxParticipants, invitedUserIds);
+
+            // 生成房间信息
+            Map<String, Object> roomInfo = new java.util.HashMap<>();
+            roomInfo.put("callId", callId);
+            roomInfo.put("roomId", "call_" + callId);
+            roomInfo.put("maxParticipants", maxParticipants);
+            roomInfo.put("callType", callType);
+
+            // 通过WebSocket通知所有被邀请用户
+            for (Long userId : invitedUserIds) {
+                ImWebSocketEndpoint.sendGroupCallNotification(userId, callId, callType, callerId);
+            }
+
+            return Result.success("发起成功", roomInfo);
+        } catch (Exception e) {
+            log.error("发起群组通话失败: {}", e.getMessage());
+            return Result.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * 加入群组通话
+     */
+    @Operation(summary = "加入群组通话", description = "加入已发起的群组通话")
+    @PostMapping("/group/{callId}/join")
+    public Result<Void> joinGroupCall(
+            @PathVariable Long callId) {
+        Long userId = SecurityUtils.getLoginUserId();
+
+        try {
+            videoCallService.joinGroupCall(callId, userId);
+            return Result.success("加入成功");
+        } catch (Exception e) {
+            log.error("加入群组通话失败: {}", e.getMessage());
+            return Result.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * 离开群组通话
+     */
+    @Operation(summary = "离开群组通话", description = "离开群组通话（不结束通话）")
+    @PostMapping("/group/{callId}/leave")
+    public Result<Void> leaveGroupCall(
+            @PathVariable Long callId) {
+        Long userId = SecurityUtils.getLoginUserId();
+
+        try {
+            videoCallService.leaveGroupCall(callId, userId);
+            return Result.success("已离开");
+        } catch (Exception e) {
+            log.error("离开群组通话失败: {}", e.getMessage());
+            return Result.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取通话参与者列表
+     */
+    @Operation(summary = "获取参与者列表", description = "获取群组通话的参与者列表")
+    @GetMapping("/group/{callId}/participants")
+    public Result<List<?>> getParticipants(
+            @PathVariable Long callId) {
+        try {
+            List<?> participants = videoCallService.getCallParticipants(callId);
+            return Result.success(participants);
+        } catch (Exception e) {
+            log.error("获取参与者列表失败: {}", e.getMessage());
+            return Result.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * 切换麦克风状态
+     */
+    @Operation(summary = "切换麦克风", description = "开启/关闭麦克风")
+    @PostMapping("/group/{callId}/mute")
+    public Result<Void> toggleMute(
+            @PathVariable Long callId,
+            @RequestParam Boolean muted) {
+        Long userId = SecurityUtils.getLoginUserId();
+
+        try {
+            videoCallService.toggleMute(callId, userId, muted);
+            return Result.success(muted ? "已静音" : "已取消静音");
+        } catch (Exception e) {
+            log.error("切换麦克风状态失败: {}", e.getMessage());
+            return Result.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * 切换摄像头状态
+     */
+    @Operation(summary = "切换摄像头", description = "开启/关闭摄像头")
+    @PostMapping("/group/{callId}/camera")
+    public Result<Void> toggleCamera(
+            @PathVariable Long callId,
+            @RequestParam Boolean cameraOff) {
+        Long userId = SecurityUtils.getLoginUserId();
+
+        try {
+            videoCallService.toggleCamera(callId, userId, cameraOff);
+            return Result.success(cameraOff ? "已关闭摄像头" : "已开启摄像头");
+        } catch (Exception e) {
+            log.error("切换摄像头状态失败: {}", e.getMessage());
             return Result.fail(e.getMessage());
         }
     }

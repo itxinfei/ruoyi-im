@@ -535,45 +535,45 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         // 设置评论列表、已读用户列表、点赞用户列表
         // 获取评论列表
         List<ImAnnouncementComment> comments = announcementCommentMapper.selectByAnnouncementId(announcement.getId());
-        List<Map<String, Object>> commentList = new ArrayList<>();
+        List<com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO.AnnouncementComment> commentList = new ArrayList<>();
         for (ImAnnouncementComment comment : comments) {
-            Map<String, Object> commentMap = new HashMap<>();
-            commentMap.put("id", comment.getId());
-            commentMap.put("content", comment.getContent());
-            commentMap.put("userId", comment.getUserId());
-            commentMap.put("userNickname", comment.getUserNickname());
-            commentMap.put("userAvatar", comment.getUserAvatar());
-            commentMap.put("parentId", comment.getParentId());
-            commentMap.put("replyToUserId", comment.getReplyToUserId());
-            commentMap.put("replyToUserNickname", comment.getReplyToUserNickname());
-            commentMap.put("createTime", comment.getCreateTime());
-            commentList.add(commentMap);
+            com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO.AnnouncementComment commentVO =
+                new com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO.AnnouncementComment();
+            commentVO.setId(comment.getId());
+            commentVO.setContent(comment.getContent());
+            commentVO.setCommentatorId(comment.getUserId());
+            commentVO.setCommentatorName(comment.getUserNickname());
+            commentVO.setCommentatorAvatar(comment.getUserAvatar());
+            commentVO.setCommentTime(comment.getCreateTime());
+            commentList.add(commentVO);
         }
         vo.setComments(commentList);
 
         // 获取已读用户列表（限制前100个）
         List<ImAnnouncementRead> readRecords = announcementReadMapper.selectByAnnouncementId(announcement.getId());
-        List<Map<String, Object>> readUserList = new ArrayList<>();
+        List<com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO.ReadUser> readUserList = new ArrayList<>();
         for (ImAnnouncementRead record : readRecords) {
-            Map<String, Object> userMap = new HashMap<>();
-            userMap.put("userId", record.getUserId());
-            userMap.put("userNickname", record.getUserNickname());
-            userMap.put("userAvatar", record.getUserAvatar());
-            userMap.put("readTime", record.getReadTime());
-            readUserList.add(userMap);
+            com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO.ReadUser readUser =
+                new com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO.ReadUser();
+            readUser.setUserId(record.getUserId());
+            readUser.setUserName(record.getUserNickname());
+            readUser.setUserAvatar(record.getUserAvatar());
+            readUser.setReadTime(record.getReadTime());
+            readUserList.add(readUser);
         }
         vo.setReadUsers(readUserList);
 
         // 获取点赞用户列表（限制前100个）
         List<ImAnnouncementLike> likeRecords = announcementLikeMapper.selectByAnnouncementId(announcement.getId());
-        List<Map<String, Object>> likedUserList = new ArrayList<>();
+        List<com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO.LikedUser> likedUserList = new ArrayList<>();
         for (ImAnnouncementLike record : likeRecords) {
-            Map<String, Object> userMap = new HashMap<>();
-            userMap.put("userId", record.getUserId());
-            userMap.put("userNickname", record.getUserNickname());
-            userMap.put("userAvatar", record.getUserAvatar());
-            userMap.put("likeTime", record.getLikeTime());
-            likedUserList.add(userMap);
+            com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO.LikedUser likedUser =
+                new com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO.LikedUser();
+            likedUser.setUserId(record.getUserId());
+            likedUser.setUserName(record.getUserNickname());
+            likedUser.setUserAvatar(record.getUserAvatar());
+            likedUser.setLikeTime(record.getLikeTime());
+            likedUserList.add(likedUser);
         }
         vo.setLikedUsers(likedUserList);
 

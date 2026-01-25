@@ -11,7 +11,11 @@
 
       <!-- 主内容区 -->
       <main class="flex-1 min-w-0 overflow-hidden flex">
-        <SessionPanel v-if="activeModule === 'chat'" @select-session="handleSelectSession" />
+        <SessionPanel 
+          v-if="activeModule === 'chat'" 
+          @select-session="handleSelectSession" 
+          @show-user="handleShowUser"
+        />
         <WorkbenchPanel v-if="activeModule === 'workbench'" />
         <ContactsPanel v-if="activeModule === 'contacts'" />
         <DocumentsPanel v-if="activeModule === 'drive'" />
@@ -22,13 +26,18 @@
         <AssistantPanel v-if="activeModule === 'assistant'" />
         
         <!-- 核心聊天面板 -->
-        <ChatPanel v-if="activeModule === 'chat' && currentSession" :session="currentSession" />
+        <ChatPanel 
+          v-if="activeModule === 'chat' && currentSession" 
+          :session="currentSession" 
+          @show-user="handleShowUser"
+        />
       </main>
 
       <!-- 全局交互弹窗 (对齐钉钉模式) -->
       <PersonalProfileDialog v-model="showProfile" />
       <SystemSettingsDialog v-model="showSettings" />
       <HelpFeedbackDialog v-model="showHelp" />
+      <UserDetailDrawer v-model="showUserDetail" :session="detailSession" @send-message="handleSelectSession" />
     </div>
   </div>
 </template>
@@ -49,6 +58,7 @@ import ApprovalPanel from './ApprovalPanel.vue'
 import MailPanel from './MailPanel.vue'
 import AssistantPanel from './AssistantPanel.vue'
 import ChatPanel from './ChatPanel.vue'
+import UserDetailDrawer from '@/components/Chat/UserDetailDrawer.vue'
 
 // 新增弹窗组件
 import PersonalProfileDialog from '@/components/Common/PersonalProfileDialog.vue'
@@ -65,6 +75,8 @@ const { isDark } = useTheme()
 const showProfile = ref(false)
 const showSettings = ref(false)
 const showHelp = ref(false)
+const showUserDetail = ref(false)
+const detailSession = ref(null)
 
 const { connect, onMessage, isConnected } = useImWebSocket()
 
@@ -82,6 +94,16 @@ const handleSwitchModule = (module) => {
 
 const handleSelectSession = (session) => {
   store.dispatch('im/selectSession', session)
+}
+
+const handleShowUser = (userId) => {
+  if (!userId) return
+  // 构造简易 session 对象供 UserDetailDrawer 使用
+  detailSession.value = {
+    targetUserId: userId,
+    type: 'PRIVATE'
+  }
+  showUserDetail.value = true
 }
 
 // Watch session change to auto-switch to chat

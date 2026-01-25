@@ -177,6 +177,7 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         ImMessageReadStatusVO status = new ImMessageReadStatusVO();
         status.setMessageId(messageId);
         status.setConversationId(message.getConversationId());
+        status.setCanViewReadStatus(true);
 
         // 获取会话信息以确定总人数
         ImConversation conversation = conversationMapper.selectById(message.getConversationId());
@@ -194,8 +195,11 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
             totalCount = 2;
         }
 
-        // 获取已读人数
-        int readCount = messageReadMapper.countReadUsersByMessageId(messageId);
+        // 获取已读记录
+        List<ImMessageRead> readRecords = messageReadMapper.selectImMessageReadList(
+            new ImMessageRead() {{ setMessageId(messageId); }}
+        );
+        int readCount = readRecords.size();
 
         status.setTotalCount(totalCount);
         status.setReadCount(readCount);
@@ -210,14 +214,10 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         status.setAllRead(readCount >= totalCount);
 
         // 获取最近已读用户名称
-        List<ImMessageRead> recentReads = messageReadMapper.selectImMessageReadList(
-            new ImMessageRead() {{ setMessageId(messageId); }}
-        );
-
-        if (!recentReads.isEmpty()) {
+        if (!readRecords.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             int count = 0;
-            for (ImMessageRead read : recentReads) {
+            for (ImMessageRead read : readRecords) {
                 if (count >= 3) break;
                 ImUser user = userMapper.selectImUserById(read.getUserId());
                 if (user != null) {
@@ -226,11 +226,29 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
                     count++;
                 }
             }
-            if (recentReads.size() > 3) {
-                sb.append("等").append(recentReads.size()).append("人");
+            if (readRecords.size() > 3) {
+                sb.append("等").append(readRecords.size()).append("人");
             }
             status.setRecentReadUsers(sb.toString());
         }
+
+        // 获取已读用户头像列表（最多5个）
+        List<com.ruoyi.im.vo.message.ImMessageReadStatusVO.ReadUserAvatar> avatars = new ArrayList<>();
+        int avatarCount = Math.min(5, readRecords.size());
+        for (int i = 0; i < avatarCount; i++) {
+            ImMessageRead read = readRecords.get(i);
+            ImUser user = userMapper.selectImUserById(read.getUserId());
+            if (user != null) {
+                com.ruoyi.im.vo.message.ImMessageReadStatusVO.ReadUserAvatar avatar =
+                    new com.ruoyi.im.vo.message.ImMessageReadStatusVO.ReadUserAvatar();
+                avatar.setUserId(user.getId());
+                avatar.setUserName(user.getNickname() != null ? user.getNickname() : user.getUsername());
+                avatar.setAvatar(user.getAvatar());
+                avatar.setReadTime(read.getReadTime());
+                avatars.add(avatar);
+            }
+        }
+        status.setReadUserAvatars(avatars);
 
         return status;
     }

@@ -71,7 +71,26 @@ export default {
     replyingMessage: null,
 
     // 用户在线状态 { userId: 'online' | 'offline' }
-    userStatus: {}
+    userStatus: {},
+
+    // 系统实用设置
+    settings: {
+      notifications: {
+        enabled: true,
+        sound: false
+      },
+      privacy: {
+        showStatus: true,
+        readReceipt: true
+      },
+      general: {
+        language: 'zh-CN',
+        theme: 'auto' // 'light' | 'dark' | 'auto'
+      },
+      shortcuts: {
+        send: 'enter' // 'enter' | 'ctrl-enter'
+      }
+    }
   }),
 
   getters: {
@@ -227,6 +246,24 @@ export default {
     // 批量设置用户状态
     SET_ALL_USER_STATUS(state, statusMap) {
       state.userStatus = { ...state.userStatus, ...statusMap }
+    },
+
+    // 更新系统设置
+    UPDATE_SETTINGS(state, settings) {
+      state.settings = { ...state.settings, ...settings }
+      localStorage.setItem('im-system-settings', JSON.stringify(state.settings))
+    },
+
+    // 加载本地设置
+    LOAD_SETTINGS(state) {
+      try {
+        const local = localStorage.getItem('im-system-settings')
+        if (local) {
+          state.settings = { ...state.settings, ...JSON.parse(local) }
+        }
+      } catch (e) {
+        console.warn('加载设置失败', e)
+      }
     },
 
     // 清空状态

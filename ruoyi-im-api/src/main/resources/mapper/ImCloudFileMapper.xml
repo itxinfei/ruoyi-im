@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImCloudFileMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImCloudFile" id="ImCloudFileResult">
+        <id property="id" column="id"/>
+        <result property="fileAssetId" column="file_asset_id"/>
+        <result property="folderId" column="folder_id"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="fileType" column="file_type"/>
+        <result property="fileExt" column="file_ext"/>
+        <result property="mimeType" column="mime_type"/>
+        <result property="uploaderId" column="uploader_id"/>
+        <result property="uploaderName" column="uploader_name"/>
+        <result property="tags" column="tags"/>
+        <result property="description" column="description"/>
+        <result property="downloadCount" column="download_count"/>
+        <result property="previewCount" column="preview_count"/>
+        <result property="accessPermission" column="access_permission"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deleteTime" column="delete_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImCloudFileVo">
+        select id, file_asset_id, folder_id, file_name, file_size, file_type, file_ext,
+               mime_type, uploader_id, uploader_name, tags, description,
+               download_count, preview_count, access_permission,
+               is_deleted, delete_time, create_time, update_time
+        from im_cloud_file
+    </sql>
+
+    <select id="selectByFolderId" resultMap="ImCloudFileResult">
+        <include refid="selectImCloudFileVo"/>
+        where folder_id = #{folderId}
+        and is_deleted = 0
+        and (uploader_id = #{userId} or access_permission in ('PUBLIC', 'DEPARTMENT'))
+        order by create_time desc
+    </select>
+
+    <select id="searchFiles" resultMap="ImCloudFileResult">
+        <include refid="selectImCloudFileVo"/>
+        where uploader_id = #{userId}
+        and is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            and file_name like concat('%', #{keyword}, '%')
+        </if>
+        <if test="fileType != null and fileType != ''">
+            and file_type = #{fileType}
+        </if>
+        order by create_time desc
+    </select>
+
+    <select id="sumUserFileSize" resultType="java.lang.Long">
+        select coalesce(sum(file_size), 0)
+        from im_cloud_file
+        where uploader_id = #{userId} and is_deleted = 0
+    </select>
+
+    <select id="countUserFiles" resultType="java.lang.Integer">
+        select count(*)
+        from im_cloud_file
+        where uploader_id = #{userId} and is_deleted = 0
+    </select>
+
+    <update id="batchUpdateFolder">
+        update im_cloud_file
+        set folder_id = #{targetFolderId},
+            update_time = now()
+        where id in
+        <foreach collection="fileIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="selectRecentFiles" resultMap="ImCloudFileResult">
+        <include refid="selectImCloudFileVo"/>
+        where uploader_id = #{userId}
+        and is_deleted = 0
+        order by create_time desc
+        <if test="limit != null">
+            limit #{limit}
+        </if>
+    </select>
+
+</mapper>

@@ -29,7 +29,7 @@ public class ImVideoCall implements Serializable {
     @TableField("caller_id")
     private Long callerId;
 
-    /** 接收者ID */
+    /** 接收者ID（单聊时使用） */
     @TableField("callee_id")
     private Long calleeId;
 
@@ -40,8 +40,20 @@ public class ImVideoCall implements Serializable {
     /** 通话类型：VIDEO视频, VOICE语音 */
     private String callType;
 
+    /** 通话模式：PRIVATE单聊, GROUP群组多人 */
+    @TableField("call_mode")
+    private String callMode;
+
     /** 通话状态：CALLING呼叫中, CONNECTED通话中, ENDED已结束, REJECTED拒绝, TIMEOUT超时 */
     private String status;
+
+    /** 最大参与者数量 */
+    @TableField("max_participants")
+    private Integer maxParticipants;
+
+    /** 当前参与者数量 */
+    @TableField("current_participants")
+    private Integer currentParticipants;
 
     /** 开始时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -59,4 +71,8 @@ public class ImVideoCall implements Serializable {
     /** 拒绝原因 */
     @TableField("reject_reason")
     private String rejectReason;
+
+    /** 房间号（用于多人视频通话的WebRTC房间标识） */
+    @TableField("room_id")
+    private String roomId;
 }

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImVideoMeetingMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImVideoMeeting" id="ImVideoMeetingResult">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="hostId" column="host_id"/>
+        <result property="hostName" column="host_name"/>
+        <result property="meetingType" column="meeting_type"/>
+        <result property="status" column="status"/>
+        <result property="scheduledStartTime" column="scheduled_start_time"/>
+        <result property="scheduledEndTime" column="scheduled_end_time"/>
+        <result property="actualStartTime" column="actual_start_time"/>
+        <result property="actualEndTime" column="actual_end_time"/>
+        <result property="duration" column="duration"/>
+        <result property="maxParticipants" column="max_participants"/>
+        <result property="currentParticipants" column="current_participants"/>
+        <result property="requirePassword" column="require_password"/>
+        <result property="meetingPassword" column="meeting_password"/>
+        <result property="muteOnJoin" column="mute_on_join"/>
+        <result property="allowScreenShare" column="allow_screen_share"/>
+        <result property="allowRecord" column="allow_record"/>
+        <result property="recordFilePath" column="record_file_path"/>
+        <result property="roomId" column="room_id"/>
+        <result property="meetingLink" column="meeting_link"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImVideoMeetingVo">
+        select id, title, description, host_id, host_name, meeting_type, status,
+               scheduled_start_time, scheduled_end_time, actual_start_time, actual_end_time,
+               duration, max_participants, current_participants, require_password, meeting_password,
+               mute_on_join, allow_screen_share, allow_record, record_file_path,
+               room_id, meeting_link, del_flag, create_time, update_time
+        from im_video_meeting
+    </sql>
+
+    <select id="selectImVideoMeetingById" parameterType="Long" resultMap="ImVideoMeetingResult">
+        <include refid="selectImVideoMeetingVo"/>
+        where id = #{id} and del_flag = 0
+    </select>
+
+    <select id="selectUserMeetings" resultMap="ImVideoMeetingResult">
+        select m.* from im_video_meeting m
+        inner join im_video_meeting_participant p on m.id = p.meeting_id
+        where p.user_id = #{userId}
+        and m.del_flag = 0
+        <if test="status != null and status != ''">
+            and m.status = #{status}
+        </if>
+        order by m.scheduled_start_time desc
+    </select>
+
+    <select id="selectUpcomingMeetings" resultMap="ImVideoMeetingResult">
+        select m.* from im_video_meeting m
+        inner join im_video_meeting_participant p on m.id = p.meeting_id
+        where p.user_id = #{userId}
+        and m.status = 'SCHEDULED'
+        and m.scheduled_start_time > NOW()
+        and m.del_flag = 0
+        order by m.scheduled_start_time asc
+        <if test="limit != null">
+            limit #{limit}
+        </if>
+    </select>
+
+    <select id="selectParticipant" resultType="com.ruoyi.im.domain.ImVideoMeetingParticipant">
+        select p.* from im_video_meeting_participant p
+        where p.meeting_id = #{meetingId} and p.user_id = #{userId}
+    </select>
+
+    <update id="updateStatus">
+        update im_video_meeting
+        set status = #{status},
+            update_time = NOW()
+        where id = #{meetingId}
+    </update>
+
+</mapper>

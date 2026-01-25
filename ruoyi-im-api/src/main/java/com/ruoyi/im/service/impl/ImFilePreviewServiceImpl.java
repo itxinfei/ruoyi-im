@@ -35,13 +35,13 @@ public class ImFilePreviewServiceImpl implements ImFilePreviewService {
     @Autowired
     private ImFileAssetMapper fileAssetMapper;
 
-    @Value("${im.file.upload.path:uploads/}")
+    @Value("${file.upload.path:uploads/}")
     private String uploadPath;
 
-    @Value("${im.file.upload.url-prefix:/uploads/}")
+    @Value("${file.upload.url-prefix:/uploads/}")
     private String urlPrefix;
 
-    @Value("${im.file.preview.thumbnail-dir:thumbnails/}")
+    @Value("${im.security.file.preview.thumbnail-dir:thumbnails/}")
     private String thumbnailDir;
 
     /** 支持预览的图片格式 */

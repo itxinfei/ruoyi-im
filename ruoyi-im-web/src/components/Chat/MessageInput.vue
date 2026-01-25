@@ -82,10 +82,13 @@
         :placeholder="session?.type === 'GROUP' ? '发消息' : '发消息'"
         @input="handleInput"
         @keydown="handleKeydown"
+        @paste="handlePaste"
+        @drop.prevent="handleDrop"
+        @dragover.prevent
       ></textarea>
       
       <div class="input-footer">
-        <span class="hint-text">Enter 发送，Shift+Enter 换行</span>
+        <span class="hint-text">{{ sendShortcutHint }}</span>
         <button 
           class="send-btn" 
           :class="{ active: canSend }" 
@@ -102,6 +105,7 @@
 
 <script setup>
 import { ref, nextTick, computed, onUnmounted, watch, onMounted } from 'vue'
+import { useStore } from 'vuex'
 import { Close, ChatDotRound, Picture, FolderOpened, Scissor, Microphone, Phone, VideoCamera } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import EmojiPicker from '@/components/EmojiPicker/index.vue'
@@ -116,7 +120,12 @@ const props = defineProps({
 
 const emit = defineEmits(['send', 'upload-image', 'upload-file', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video'])
 
+const store = useStore()
 const message = ref('')
+const sendShortcutHint = computed(() => {
+  const shortcut = store.state.im.settings.shortcuts.send
+  return shortcut === 'ctrl-enter' ? 'Ctrl + Enter 发送，Enter 换行' : 'Enter 发送，Shift + Enter 换行'
+})
 const showEmojiPicker = ref(false)
 const textareaRef = ref(null)
 const atMemberPickerRef = ref(null)
@@ -176,7 +185,22 @@ const autoResize = () => {
 const handleInput = (e) => { autoResize(); emit('input', message.value) }
 
 const handleKeydown = (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
+  const sendShortcut = store.state.im.settings.shortcuts.send || 'enter'
+  
+  if (e.key === 'Enter') {
+    if (sendShortcut === 'enter') {
+      if (!e.shiftKey && !e.ctrlKey) {
+        e.preventDefault()
+        handleSend()
+      }
+    } else if (sendShortcut === 'ctrl-enter') {
+      if (e.ctrlKey) {
+        e.preventDefault()
+        handleSend()
+      }
+    }
+  }
+
   if (e.key === '@' && props.session?.type === 'GROUP') {
      setTimeout(() => atMemberPickerRef.value?.open(textareaRef.value.selectionStart), 50)
   }
@@ -188,6 +212,52 @@ const handleSend = () => {
   else emit('send', message.value.trim())
   message.value = ''
   nextTick(() => { textareaRef.value.style.height = 'auto'; textareaRef.value.focus() })
+}
+
+const handlePaste = (e) => {
+  const items = e.clipboardData?.items
+  if (!items) return
+
+  // 优先处理文件/图片
+  let hasFile = false
+  for (const item of items) {
+    if (item.kind === 'file') {
+      const file = item.getAsFile()
+      if (file) {
+        hasFile = true
+        e.preventDefault() // 阻止默认粘贴行为（如粘贴文件名）
+        const type = file.type.startsWith('image/') ? 'IMAGE' : 'FILE'
+        uploadAndSend(file, type)
+      }
+    }
+  }
+  
+  // 如果没有文件，允许默认粘贴（文本）
+}
+
+const handleDrop = (e) => {
+  const files = e.dataTransfer?.files
+  if (!files || files.length === 0) return
+  
+  for (const file of files) {
+    const type = file.type.startsWith('image/') ? 'IMAGE' : 'FILE'
+    uploadAndSend(file, type)
+  }
+}
+
+const uploadAndSend = async (file, type) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  
+  try {
+    if (type === 'IMAGE') {
+      emit('upload-image', formData)
+    } else {
+      emit('upload-file', formData)
+    }
+  } catch (error) {
+    ElMessage.error('上传失败')
+  }
 }
 
 const toggleEmojiPicker = () => { showEmojiPicker.value = !showEmojiPicker.value }

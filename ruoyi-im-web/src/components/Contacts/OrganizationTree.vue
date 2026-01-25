@@ -102,8 +102,8 @@ onMounted(() => {
 .org-node {
   display: flex;
   align-items: center;
-  padding: 8px 10px;
-  border-radius: 6px;
+  padding: 6px 8px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
   color: #595959;

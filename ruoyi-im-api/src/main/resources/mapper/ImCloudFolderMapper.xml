@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImCloudFolderMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImCloudFolder" id="ImCloudFolderResult">
+        <id property="id" column="id"/>
+        <result property="folderName" column="folder_name"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="ownerId" column="owner_id"/>
+        <result property="ownerType" column="owner_type"/>
+        <result property="departmentId" column="department_id"/>
+        <result property="folderPath" column="folder_path"/>
+        <result property="level" column="level"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="accessPermission" column="access_permission"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deleteTime" column="delete_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImCloudFolderVo">
+        select id, folder_name, parent_id, owner_id, owner_type, department_id,
+               folder_path, level, sort_order, access_permission, is_deleted,
+               delete_time, create_time, update_time
+        from im_cloud_folder
+    </sql>
+
+    <select id="selectUserFolders" resultMap="ImCloudFolderResult">
+        <include refid="selectImCloudFolderVo"/>
+        where owner_id = #{userId}
+        and parent_id = #{parentId}
+        and owner_type = #{ownerType}
+        and is_deleted = 0
+        order by sort_order asc, create_time asc
+    </select>
+
+    <select id="selectFolderPath" resultMap="ImCloudFolderResult">
+        with recursive folder_path as (
+            select id, folder_name, parent_id, owner_id, 0 as level
+            from im_cloud_folder
+            where id = #{folderId}
+            union all
+            select f.id, f.folder_name, f.parent_id, f.owner_id, fp.level + 1
+            from im_cloud_folder f
+            inner join folder_path fp on f.id = fp.parent_id
+        )
+        select id, folder_name, parent_id, owner_id, level
+        from folder_path
+        order by level desc
+    </select>
+
+    <select id="countSubFolders" resultType="java.lang.Integer">
+        select count(*) from im_cloud_folder
+        where parent_id = #{parentId} and is_deleted = 0
+    </select>
+
+    <select id="countFilesInFolder" resultType="java.lang.Integer">
+        select count(*) from im_cloud_file
+        where folder_id = #{folderId} and is_deleted = 0
+    </select>
+
+    <select id="selectByNameAndOwner" resultMap="ImCloudFolderResult">
+        <include refid="selectImCloudFolderVo"/>
+        where parent_id = #{parentId}
+        and folder_name = #{folderName}
+        and owner_id = #{ownerId}
+        and is_deleted = 0
+        limit 1
+    </select>
+
+</mapper>

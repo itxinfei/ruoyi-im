@@ -121,7 +121,7 @@
                       <DingtalkAvatar
                         :name="member.name"
                         :user-id="member.id"
-                        :size="40"
+                        :size="32"
                         shape="square"
                         custom-class="member-avatar-item"
                       />
@@ -319,24 +319,24 @@ onMounted(() => {
 }
 
 .sidebar-header {
-  padding: 16px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .sidebar-title {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
   color: #262626;
   margin: 0;
 }
 
 .add-btn {
   color: #8c8c8c;
-  background: #f5f5f5;
-  padding: 6px;
-  border-radius: 6px;
+  background: transparent;
+  padding: 4px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -347,122 +347,42 @@ onMounted(() => {
 
 .add-btn:hover {
   color: #1677ff;
-  background: #e6f4ff;
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .sidebar-search {
-  padding: 0 16px 16px;
+  padding: 0 12px 12px;
 }
 
-.search-input-wrapper {
-  position: relative;
+.search-input {
+  width: 100%;
+  background: #f5f5f5;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 6px 12px 6px 32px;
+  font-size: 13px;
+  color: #262626;
+  outline: none;
+  transition: all 0.2s;
 }
 
 .search-icon {
   position: absolute;
-  left: 12px;
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
   color: #bfbfbf;
   font-size: 16px;
 }
 
-.search-input {
-  width: 100%;
-  background: #f5f5f5;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 12px 10px 36px;
-  font-size: 14px;
-  color: #262626;
-  outline: none;
-  transition: all 0.2s;
-}
-
-.search-input:focus {
-  background: #fff;
-  box-shadow: 0 0 0 1px #1677ff inset;
-}
-
-.search-input::placeholder {
-  color: #bfbfbf;
-}
-
-.sidebar-content {
-  flex: 1;
-  overflow-y: auto;
-}
-
-/* 快捷导航 */
-.quick-nav {
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 16px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #595959;
-  transition: all 0.2s;
-  position: relative;
-}
-
-.nav-item:hover {
-  background: #f5f5f5;
-}
-
-.nav-item.active {
-  background: #e6f7ff;
-  color: #1677ff;
-}
-
-.nav-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.new-friends-icon {
-  background: #fff7e6;
-  color: #fa8c16;
-}
-
-.groups-icon {
-  background: #f6ffed;
-  color: #52c41a;
-}
-
-.nav-label {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.nav-badge {
-  margin-left: auto;
-}
-
-/* 组织架构 */
-.org-section {
-  padding: 0 8px;
-}
+/* ... */
 
 .org-title {
-  padding: 8px 12px 4px;
+  padding: 12px 12px 6px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: #8c8c8c;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  /* text-transform: uppercase; */ /* Remove uppercase for softer look */
 }
 
 .org-tree {
@@ -603,36 +523,25 @@ onMounted(() => {
 }
 
 .table th {
-  padding: 12px 24px;
+  padding: 8px 16px;
   text-align: left;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: #646a73;
-  /* text-transform: uppercase; */
-  /* letter-spacing: 0.5px; */
+  color: #8c8c8c;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-/* ... existing code ... */
-
 .table tbody tr {
-  border-bottom: 1px solid #f5f6f7;
+  border-bottom: 1px solid #f8f8f8;
   cursor: pointer;
   transition: background 0.2s;
 }
 
-.table tbody tr:hover {
-  background: #f5f6f7;
+.table td {
+  padding: 10px 16px;
 }
 
-/* ... existing code ... */
-
-.member-row {
-  transition: all 0.2s;
-}
-
-.info-col {
-  width: 40%;
-}
+/* ... */
 
 .member-info {
   display: flex;
@@ -641,19 +550,21 @@ onMounted(() => {
 }
 
 :deep(.member-avatar-item) {
-  border-radius: 12px !important;
+  border-radius: 6px !important;
 }
 
 .member-name {
   font-size: 14px;
-  font-weight: 500;
   color: #262626;
+  line-height: 1.5;
 }
 
 .member-position-mobile {
   font-size: 12px;
   color: #8c8c8c;
+  line-height: 1.2;
 }
+/* ... */
 
 .position-tag {
   display: inline-flex;

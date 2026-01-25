@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImCloudFileVersionMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImCloudFileVersion" id="ImCloudFileVersionResult">
+        <id property="id" column="id"/>
+        <result property="cloudFileId" column="cloud_file_id"/>
+        <result property="fileAssetId" column="file_asset_id"/>
+        <result property="versionNumber" column="version_number"/>
+        <result property="versionNote" column="version_note"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectImCloudFileVersionVo">
+        select id, cloud_file_id, file_asset_id, version_number, version_note,
+               file_size, operator_id, operator_name, create_time
+        from im_cloud_file_version
+    </sql>
+
+    <select id="selectByCloudFileId" resultMap="ImCloudFileVersionResult">
+        <include refid="selectImCloudFileVersionVo"/>
+        where cloud_file_id = #{cloudFileId}
+        order by version_number desc
+    </select>
+
+    <select id="selectLatestVersion" resultMap="ImCloudFileVersionResult">
+        <include refid="selectImCloudFileVersionVo"/>
+        where cloud_file_id = #{cloudFileId}
+        order by version_number desc
+        limit 1
+    </select>
+
+    <select id="countVersions" resultType="java.lang.Integer">
+        select count(*) from im_cloud_file_version
+        where cloud_file_id = #{cloudFileId}
+    </select>
+
+</mapper>

@@ -1,8 +1,13 @@
 package com.ruoyi.im.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.domain.ImVideoCall;
+import com.ruoyi.im.domain.ImVideoCallParticipant;
 import com.ruoyi.im.exception.BusinessException;
+import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.mapper.ImVideoCallMapper;
+import com.ruoyi.im.mapper.ImVideoCallParticipantMapper;
 import com.ruoyi.im.service.ImVideoCallService;
 import com.ruoyi.im.util.ImRedisUtil;
 import org.slf4j.Logger;
@@ -10,12 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -35,6 +39,12 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
 
     @Autowired
     private ImVideoCallMapper videoCallMapper;
+
+    @Autowired
+    private ImVideoCallParticipantMapper participantMapper;
+
+    @Autowired
+    private ImUserMapper userMapper;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -290,5 +300,224 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         return calls.stream()
                 .map(this::formatCallInfo)
                 .collect(Collectors.toList());
+    }
+
+    // ==================== 群组多人通话方法 ====================
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long initiateGroupCall(Long callerId, Long conversationId, String callType,
+                                   Integer maxParticipants, List<Long> invitedUserIds) {
+        // 验证最大参与者数
+        if (maxParticipants == null || maxParticipants <= 0) {
+            maxParticipants = 9; // 默认9人
+        }
+        if (maxParticipants > 9) {
+            throw new BusinessException("最多支持9人同时通话");
+        }
+
+        if (invitedUserIds == null || invitedUserIds.isEmpty()) {
+            throw new BusinessException("请邀请至少一人参与通话");
+        }
+
+        // 检查邀请人数
+        if (invitedUserIds.size() + 1 > maxParticipants) {
+            throw new BusinessException("邀请人数超过最大参与者数限制");
+        }
+
+        // 检查发起者是否正在通话
+        String callerCallKey = USER_CALL_KEY + callerId;
+        Boolean callerInCall = redisTemplate.hasKey(callerCallKey);
+        if (Boolean.TRUE.equals(callerInCall)) {
+            throw new BusinessException("您正在通话中，请先结束当前通话");
+        }
+
+        // 创建通话记录
+        ImVideoCall call = new ImVideoCall();
+        call.setCallerId(callerId);
+        call.setConversationId(conversationId);
+        call.setCallType(callType);
+        call.setCallMode("GROUP");
+        call.setStatus("CALLING");
+        call.setMaxParticipants(maxParticipants);
+        call.setCurrentParticipants(1); // 发起者自动加入
+        call.setStartTime(LocalDateTime.now());
+        call.setRoomId("call_" + System.currentTimeMillis());
+
+        videoCallMapper.insertImVideoCall(call);
+
+        Long callId = call.getId();
+
+        // 添加发起者作为参与者
+        addParticipant(callId, callerId, "JOINED");
+
+        // 添加被邀请用户（状态为已邀请）
+        for (Long userId : invitedUserIds) {
+            addParticipant(callId, userId, "INVITED");
+        }
+
+        // 缓存通话信息
+        String callKey = CALL_CACHE_KEY + callId;
+        redisTemplate.opsForValue().set(callKey, call, CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+        // 设置发起者通话状态
+        redisTemplate.opsForValue().set(callerCallKey, callId, CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+        log.info("发起群组通话: callId={}, caller={}, conversationId={}, maxParticipants={}",
+            callId, callerId, conversationId, maxParticipants);
+
+        return callId;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void joinGroupCall(Long callId, Long userId) {
+        ImVideoCall call = getCallEntity(callId);
+        if (call == null) {
+            throw new BusinessException("通话不存在或已过期");
+        }
+
+        if (!"GROUP".equals(call.getCallMode())) {
+            throw new BusinessException("该通话不是群组通话");
+        }
+
+        // 检查是否已参与
+        ImVideoCallParticipant existing = participantMapper.selectByCallIdAndUserId(callId, userId);
+        if (existing != null) {
+            if ("JOINED".equals(existing.getStatus())) {
+                throw new BusinessException("您已在通话中");
+            }
+            if ("LEFT".equals(existing.getStatus())) {
+                throw new BusinessException("您已离开该通话");
+            }
+        }
+
+        // 检查人数限制
+        Integer currentCount = participantMapper.countJoinedByCallId(callId);
+        if (currentCount >= call.getMaxParticipants()) {
+            throw new BusinessException("通话人数已满");
+        }
+
+        // 更新或创建参与者记录
+        if (existing != null) {
+            existing.setStatus("JOINED");
+            existing.setJoinTime(LocalDateTime.now());
+            participantMapper.updateById(existing);
+        } else {
+            addParticipant(callId, userId, "JOINED");
+        }
+
+        // 更新当前参与者数
+        call.setCurrentParticipants(currentCount + 1);
+        videoCallMapper.updateImVideoCall(call);
+
+        // 设置用户通话状态
+        redisTemplate.opsForValue().set(USER_CALL_KEY + userId, callId, 3600, TimeUnit.SECONDS);
+
+        log.info("加入群组通话: callId={}, userId={}", callId, userId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void leaveGroupCall(Long callId, Long userId) {
+        ImVideoCall call = getCallEntity(callId);
+        if (call == null) {
+            throw new BusinessException("通话不存在或已过期");
+        }
+
+        if (!"GROUP".equals(call.getCallMode())) {
+            throw new BusinessException("该通话不是群组通话");
+        }
+
+        // 更新参与者状态
+        ImVideoCallParticipant participant = participantMapper.selectByCallIdAndUserId(callId, userId);
+        if (participant != null && "JOINED".equals(participant.getStatus())) {
+            participant.setStatus("LEFT");
+            participant.setLeaveTime(LocalDateTime.now());
+            participantMapper.updateById(participant);
+
+            // 更新当前参与者数
+            Integer currentCount = call.getCurrentParticipants();
+            if (currentCount != null && currentCount > 0) {
+                call.setCurrentParticipants(currentCount - 1);
+                videoCallMapper.updateImVideoCall(call);
+            }
+        }
+
+        // 清除用户通话状态
+        redisTemplate.delete(USER_CALL_KEY + userId);
+
+        log.info("离开群组通话: callId={}, userId={}", callId, userId);
+    }
+
+    @Override
+    public void toggleMute(Long callId, Long userId, Boolean muted) {
+        ImVideoCallParticipant participant = participantMapper.selectByCallIdAndUserId(callId, userId);
+        if (participant == null) {
+            throw new BusinessException("您不在此通话中");
+        }
+
+        participant.setIsMuted(muted);
+        participantMapper.updateById(participant);
+
+        log.info("切换麦克风状态: callId={}, userId={}, muted={}", callId, userId, muted);
+    }
+
+    @Override
+    public void toggleCamera(Long callId, Long userId, Boolean cameraOff) {
+        ImVideoCallParticipant participant = participantMapper.selectByCallIdAndUserId(callId, userId);
+        if (participant == null) {
+            throw new BusinessException("您不在此通话中");
+        }
+
+        participant.setIsCameraOff(cameraOff);
+        participantMapper.updateById(participant);
+
+        log.info("切换摄像头状态: callId={}, userId={}, cameraOff={}", callId, userId, cameraOff);
+    }
+
+    @Override
+    public List<?> getCallParticipants(Long callId) {
+        List<ImVideoCallParticipant> participants = participantMapper.selectByCallId(callId);
+
+        return participants.stream()
+            .map(p -> {
+                Map<String, Object> info = new HashMap<>();
+                info.put("userId", p.getUserId());
+                info.put("userName", p.getUserName());
+                info.put("userAvatar", p.getUserAvatar());
+                info.put("status", p.getStatus());
+                info.put("isMuted", p.getIsMuted());
+                info.put("isCameraOff", p.getIsCameraOff());
+                info.put("joinTime", p.getJoinTime());
+                return info;
+            })
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 添加通话参与者
+     */
+    private void addParticipant(Long callId, Long userId, String status) {
+        ImUser user = userMapper.selectImUserById(userId);
+        if (user == null) {
+            return;
+        }
+
+        ImVideoCallParticipant participant = new ImVideoCallParticipant();
+        participant.setCallId(callId);
+        participant.setUserId(userId);
+        participant.setUserName(user.getNickname() != null ? user.getNickname() : user.getUsername());
+        participant.setUserAvatar(user.getAvatar());
+        participant.setStatus(status);
+        participant.setIsMuted(false);
+        participant.setIsCameraOff(false);
+        participant.setCreateTime(LocalDateTime.now());
+
+        if ("JOINED".equals(status)) {
+            participant.setJoinTime(LocalDateTime.now());
+        }
+
+        participantMapper.insert(participant);
     }
 }

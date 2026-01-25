@@ -24,22 +24,77 @@
 
       <!-- 右侧设置内容 -->
       <div class="settings-main">
-        <template v-if="activeMenu === 'notification'">
+        <template v-if="activeMenu === 'account'">
+          <div class="section-title">账号安全</div>
+          <div class="setting-group">
+            <div class="setting-card">
+              <div class="setting-row">
+                <div class="info">
+                  <div class="label">当前登录账号</div>
+                  <div class="desc">{{ currentUser.username }} (UID: {{ currentUser.id }})</div>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="info">
+                  <div class="label">修改登录密码</div>
+                  <div class="desc">建议定期修改密码以保障账号安全</div>
+                </div>
+                <el-button type="primary" plain size="small" @click="showChangePassword = true">修改密码</el-button>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <template v-else-if="activeMenu === 'notification'">
           <div class="section-title">消息通知</div>
           <div class="setting-group">
-            <div class="setting-row">
-              <div class="info">
-                <div class="label">新消息提醒</div>
-                <div class="desc">在桌面显示新消息通知</div>
+            <div class="setting-card">
+              <div class="setting-row">
+                <div class="info">
+                  <div class="label">新消息提醒</div>
+                  <div class="desc">在桌面显示新消息通知</div>
+                </div>
+                <el-switch v-model="localSettings.notifications.enabled" />
               </div>
-              <el-switch v-model="settings.notifications.enabled" />
+              <div class="setting-row">
+                <div class="info">
+                  <div class="label">声音提醒</div>
+                  <div class="desc">播放新消息提示音</div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <el-button link type="primary" size="small" @click="testSound" v-if="localSettings.notifications.sound">
+                    <el-icon class="mr-1"><VideoPlay /></el-icon>测试音效
+                  </el-button>
+                  <el-switch v-model="localSettings.notifications.sound" />
+                </div>
+              </div>
             </div>
-            <div class="setting-row">
-              <div class="info">
-                <div class="label">声音提醒</div>
-                <div class="desc">播放新消息提示音</div>
+            <div class="section-title mt-6">快捷键</div>
+            <div class="setting-card">
+              <div class="setting-row">
+                <div class="info">
+                  <div class="label">发送消息</div>
+                  <div class="desc">设置发送消息的快捷按键</div>
+                </div>
+                <el-select v-model="localSettings.shortcuts.send" size="small" style="width: 120px">
+                  <el-option label="Enter" value="enter" />
+                  <el-option label="Ctrl + Enter" value="ctrl-enter" />
+                </el-select>
               </div>
-              <el-switch v-model="settings.notifications.sound" />
+              <div class="setting-row">
+                <div class="info">
+                  <div class="label">截图快捷键</div>
+                  <div class="desc">全局唤起截图工具 (模拟)</div>
+                </div>
+                <code class="shortcut-key">Alt + A</code>
+              </div>
+              <div class="setting-row">
+                <div class="info">
+                  <div class="label">快捷唤起</div>
+                  <div class="desc">快速显示/隐藏 IM 窗口</div>
+                </div>
+                <code class="shortcut-key">Alt + Q</code>
+              </div>
             </div>
           </div>
         </template>
@@ -47,19 +102,21 @@
         <template v-else-if="activeMenu === 'privacy'">
           <div class="section-title">隐私与安全</div>
           <div class="setting-group">
-            <div class="setting-row">
-              <div class="info">
-                <div class="label">在线状态</div>
-                <div class="desc">允许他人查看我的在线/离线状态</div>
+            <div class="setting-card">
+              <div class="setting-row">
+                <div class="info">
+                  <div class="label">在线状态</div>
+                  <div class="desc">允许他人查看我的在线/离线状态</div>
+                </div>
+                <el-switch v-model="localSettings.privacy.showStatus" />
               </div>
-              <el-switch v-model="settings.privacy.showStatus" />
-            </div>
-            <div class="setting-row">
-              <div class="info">
-                <div class="label">已读回执</div>
-                <div class="desc">发送消息已读回执给对方</div>
+              <div class="setting-row">
+                <div class="info">
+                  <div class="label">已读回执</div>
+                  <div class="desc">发送消息已读回执给对方</div>
+                </div>
+                <el-switch v-model="localSettings.privacy.readReceipt" />
               </div>
-              <el-switch v-model="settings.privacy.readReceipt" />
             </div>
           </div>
         </template>
@@ -67,27 +124,30 @@
         <template v-else-if="activeMenu === 'general'">
           <div class="section-title">通用设置</div>
           <div class="setting-group">
-            <div class="setting-row">
-              <div class="info">
-                <div class="label">外观主题</div>
-                <div class="desc">切换系统的视觉配色</div>
+            <div class="setting-card">
+              <div class="setting-row">
+                <div class="info">
+                  <div class="label">外观主题</div>
+                  <div class="desc">切换系统的视觉配色</div>
+                </div>
+                <div class="theme-picker">
+                  <el-radio-group v-model="localSettings.general.theme" size="small">
+                    <el-radio-button label="light">浅色</el-radio-button>
+                    <el-radio-button label="dark">深色</el-radio-button>
+                    <el-radio-button label="auto">跟随系统</el-radio-button>
+                  </el-radio-group>
+                </div>
               </div>
-              <div class="theme-picker">
-                <el-radio-group v-model="isDark" size="small" @change="toggleDark">
-                  <el-radio-button :value="false">浅色</el-radio-button>
-                  <el-radio-button :value="true">深色</el-radio-button>
-                </el-radio-group>
+              <div class="setting-row">
+                <div class="info">
+                  <div class="label">多语言</div>
+                  <div class="desc">切换系统显示语言</div>
+                </div>
+                <el-select v-model="localSettings.general.language" style="width: 120px" size="small">
+                  <el-option label="简体中文" value="zh-CN" />
+                  <el-option label="English" value="en-US" />
+                </el-select>
               </div>
-            </div>
-            <div class="setting-row">
-              <div class="info">
-                <div class="label">多语言</div>
-                <div class="desc">切换系统显示语言</div>
-              </div>
-              <el-select v-model="settings.general.language" style="width: 120px" size="small">
-                <el-option label="简体中文" value="zh-CN" />
-                <el-option label="English" value="en-US" />
-              </el-select>
             </div>
           </div>
         </template>
@@ -103,13 +163,17 @@
         </template>
       </div>
     </div>
+    <ChangePasswordDialog v-model="showChangePassword" />
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, watch, reactive } from 'vue'
+import { ref, watch, reactive, computed } from 'vue'
+import { useStore } from 'vuex'
 import { useTheme } from '@/composables/useTheme'
 import { ElMessage } from 'element-plus'
+import { VideoPlay } from '@element-plus/icons-vue'
+import ChangePasswordDialog from '@/components/Common/ChangePasswordDialog.vue'
 
 const props = defineProps({
   modelValue: Boolean
@@ -117,30 +181,60 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
+const store = useStore()
 const visible = ref(false)
-const activeMenu = ref('notification')
-const { isDark, toggleDark } = useTheme()
+const showChangePassword = ref(false)
+const activeMenu = ref('account')
+const { isDark, themeMode, setThemeMode } = useTheme()
+
+// 移除这里的提前调用，移动到下方定义后
+// ...
 
 const menuItems = [
+  { id: 'account', label: '账号安全', icon: 'manage_accounts' },
   { id: 'notification', label: '通知设置', icon: 'notifications' },
   { id: 'privacy', label: '隐私安全', icon: 'security' },
   { id: 'general', label: '通用设置', icon: 'settings' },
   { id: 'about', label: '关于应用', icon: 'info' }
 ]
 
-const settings = reactive({
-  notifications: {
-    enabled: true,
-    sound: false
-  },
-  privacy: {
-    showStatus: true,
-    readReceipt: true
-  },
-  general: {
-    language: 'zh-CN'
-  }
-})
+const currentUser = computed(() => store.getters['user/currentUser'] || {})
+
+// 使用 Store 中的设置
+const settings = computed(() => store.state.im.settings)
+
+// 更新设置的方法
+const updateSetting = (key, value) => {
+  const newSettings = { ...settings.value }
+  newSettings[key] = { ...newSettings[key], ...value }
+  store.commit('im/UPDATE_SETTINGS', newSettings)
+}
+
+// 代理 reactive 对象以保持模板兼容性 (或者直接修改模板中的绑定)
+// 为了不修改大规模模板，我们使用一个监听器同步
+const localSettings = reactive(JSON.parse(JSON.stringify(settings.value)))
+
+watch(localSettings, (newVal) => {
+  store.commit('im/UPDATE_SETTINGS', newVal)
+}, { deep: true })
+
+// 监听远端/Store变化同步回本地
+watch(() => settings.value, (newVal) => {
+  Object.assign(localSettings, JSON.parse(JSON.stringify(newVal)))
+}, { deep: true })
+
+// 同步主题设置到 Hook
+watch(() => localSettings.general.theme, (val) => {
+  setThemeMode(val)
+}, { immediate: true })
+
+// 移除本地冗余逻辑，由 Vuex 统一管理
+// ...
+
+const testSound = () => {
+  ElMessage.success('测试音效播放中...')
+  // 实际项目中可以播放一段短促的提示音
+}
 
 const checkUpdate = () => {
   ElMessage.success('当前已是最新版本')
@@ -169,7 +263,7 @@ watch(visible, (val) => {
 }
 
 .settings-aside {
-  width: 170px;
+  width: 160px;
   background: #f8fafc;
   border-right: 1px solid #f2f3f5;
   padding: 16px 8px;
@@ -182,59 +276,102 @@ watch(visible, (val) => {
   .menu-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
+    gap: 10px;
+    padding: 10px 12px;
     font-size: 14px;
     color: #4b5563;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     border-radius: 8px;
     
     .dark & { color: #94a3b8; }
 
-    .menu-icon { font-size: 20px; color: #64748b; transition: color 0.2s; }
+    .menu-icon { 
+      font-size: 20px; 
+      color: #64748b; 
+      transition: all 0.2s;
+    }
     
-    &:hover { background: rgba(0,0,0,0.04); .dark & { background: rgba(255,255,255,0.05); } }
+    &:hover { 
+      background: rgba(0,0,0,0.04); 
+      color: #1f2329;
+      .dark & { background: rgba(255,255,255,0.06); color: #f1f5f9; } 
+    }
     
     &.active {
       background: #eff6ff;
       color: #0089ff;
-      font-weight: 500;
-      .menu-icon { color: #0089ff; }
-      .dark & { background: rgba(0, 137, 255, 0.15); color: #38bdf8; .menu-icon { color: #38bdf8; } }
+      font-weight: 600;
+      .menu-icon { color: #0089ff; transform: scale(1.1); }
+      .dark & { 
+        background: rgba(0, 137, 255, 0.15); 
+        color: #38bdf8; 
+        .menu-icon { color: #38bdf8; } 
+      }
     }
   }
 }
 
 .settings-main {
   flex: 1;
-  padding: 24px;
+  padding: 32px;
   background: #fff;
   overflow-y: auto;
+  scroll-behavior: smooth;
   
   .dark & { background: #1e293b; color: #f1f5f9; }
 
   .section-title {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: #1f2329;
+    .dark & { color: #f8fafc; }
   }
 }
 
 .setting-group {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
-.setting-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.setting-card {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px 20px;
+  border: 1px solid #f1f5f9;
+  transition: all 0.2s;
   
-  .info {
-    .label { font-size: 14px; font-weight: 500; color: #1f2329; margin-bottom: 2px; .dark & { color: #f1f5f9; } }
-    .desc { font-size: 12px; color: #8f959e; }
+  .dark & { background: #0f172a; border-color: #334155; }
+  
+  &:hover {
+    border-color: #e2e8f0;
+    .dark & { border-color: #475569; }
+  }
+
+  .setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    &:not(:last-child) {
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      .dark & { border-bottom-color: #1e293b; }
+    }
+    
+    .info {
+      .label { 
+        font-size: 14px; 
+        font-weight: 600; 
+        color: #1f2329; 
+        margin-bottom: 4px; 
+        .dark & { color: #f1f5f9; } 
+      }
+      .desc { font-size: 12px; color: #64748b; line-height: 1.4; }
+    }
   }
 }
 
@@ -242,16 +379,30 @@ watch(visible, (val) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 40px;
+  padding: 40px 20px;
+  background: #f8fafc;
+  border-radius: 16px;
+  .dark & { background: #0f172a; }
   
   .logo {
-    width: 80px; height: 80px; background: #0089ff; color: #fff;
-    border-radius: 20px; display: flex; align-items: center; justify-content: center;
-    font-size: 32px; font-weight: bold; margin-bottom: 16px;
-    box-shadow: 0 4px 12px rgba(0, 137, 255, 0.3);
+    width: 72px; height: 72px; background: linear-gradient(135deg, #0089ff 0%, #00d2ff 100%);
+    color: #fff; border-radius: 20px; display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 800; margin-bottom: 20px;
+    box-shadow: 0 8px 20px rgba(0, 137, 255, 0.25);
   }
-  .version { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
-  .copyright { font-size: 12px; color: #8f959e; }
+  .version { font-size: 16px; font-weight: 700; color: #1f2329; margin-bottom: 8px; .dark & { color: #f1f5f9; } }
+  .copyright { font-size: 12px; color: #64748b; }
+}
+
+.shortcut-key {
+  background: #f0f2f5;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #1f2329;
+  border: 1px solid #dcdfe6;
+  .dark & { background: #1e293b; color: #f1f5f9; border-color: #475569; }
 }
 
 .scrollbar-thin::-webkit-scrollbar { width: 4px; }

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImVideoCallParticipantMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImVideoCallParticipant" id="ImVideoCallParticipantResult">
+        <id property="id" column="id"/>
+        <result property="callId" column="call_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userAvatar" column="user_avatar"/>
+        <result property="status" column="status"/>
+        <result property="joinTime" column="join_time"/>
+        <result property="leaveTime" column="leave_time"/>
+        <result property="isMuted" column="is_muted"/>
+        <result property="isCameraOff" column="is_camera_off"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectImVideoCallParticipantVo">
+        select id, call_id, user_id, user_name, user_avatar, status,
+               join_time, leave_time, is_muted, is_camera_off, create_time
+        from im_video_call_participant
+    </sql>
+
+    <select id="selectByCallId" parameterType="Long" resultMap="ImVideoCallParticipantResult">
+        <include refid="selectImVideoCallParticipantVo"/>
+        where call_id = #{callId}
+        order by join_time asc
+    </select>
+
+    <select id="selectByCallIdAndUserId" resultMap="ImVideoCallParticipantResult">
+        <include refid="selectImVideoCallParticipantVo"/>
+        where call_id = #{callId} and user_id = #{userId}
+    </select>
+
+    <select id="countJoinedByCallId" parameterType="Long" resultType="java.lang.Integer">
+        select count(*)
+        from im_video_call_participant
+        where call_id = #{callId} and status = 'JOINED'
+    </select>
+
+    <update id="updateStatus">
+        update im_video_call_participant
+        set status = #{status}
+        where id = #{id}
+    </update>
+
+</mapper>

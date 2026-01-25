@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImAttendanceHolidayMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImAttendanceHoliday" id="ImAttendanceHolidayResult">
+        <id property="id" column="id"/>
+        <result property="holidayName" column="holiday_name"/>
+        <result property="holidayType" column="holiday_type"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="days" column="days"/>
+        <result property="isWorkday" column="is_workday"/>
+        <result property="year" column="year"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImAttendanceHolidayVo">
+        select id, holiday_name, holiday_type, start_date, end_date, days,
+               is_workday, year, remark, create_time, update_time
+        from im_attendance_holiday
+    </sql>
+
+    <select id="selectByYear" resultMap="ImAttendanceHolidayResult">
+        <include refid="selectImAttendanceHolidayVo"/>
+        where year = #{year}
+        order by start_date asc
+    </select>
+
+    <select id="selectByDateRange" resultMap="ImAttendanceHolidayResult">
+        <include refid="selectImAttendanceHolidayVo"/>
+        where start_date &lt;= #{endDate}
+        and end_date &gt;= #{startDate}
+        order by start_date asc
+    </select>
+
+    <select id="selectByDate" resultMap="ImAttendanceHolidayResult">
+        <include refid="selectImAttendanceHolidayVo"/>
+        where start_date &lt;= #{date}
+        and end_date &gt;= #{date}
+        limit 1
+    </select>
+
+</mapper>

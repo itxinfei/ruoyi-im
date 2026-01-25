@@ -198,23 +198,23 @@ export function restoreFavicon() {
     }
 }
 
+import store from '@/store'
+
 /**
  * 综合消息提醒
  * @param {Object} options - 提醒选项
- * @param {string} options.title - 消息标题
- * @param {string} options.body - 消息内容
- * @param {string} options.icon - 消息图标
- * @param {boolean} options.sound - 是否播放提示音,默认true
- * @param {boolean} options.notification - 是否显示浏览器通知,默认true
- * @param {boolean} options.titleFlash - 是否闪烁标题,默认true
- * @param {boolean} options.faviconFlash - 是否闪烁图标,默认false
  */
 export function showMessageNotification(options = {}) {
+    const settings = store.state.im.settings.notifications
+
+    // 如果全局通知已关，则直接返回
+    if (!settings.enabled) return
+
     const {
         title = '新消息',
         body = '',
         icon = '',
-        sound = true,
+        sound = settings.sound, // 优先使用 settings 中的音效设置
         notification = true,
         titleFlash = true,
         faviconFlash = false
@@ -225,11 +225,13 @@ export function showMessageNotification(options = {}) {
 
     // 播放提示音
     if (sound) {
+        console.log('[消息提醒] 尝试播放提示音')
         playNotificationSound()
     }
 
     // 显示浏览器通知(仅在窗口未聚焦时)
     if (notification && !isWindowFocused) {
+        console.log('[消息提醒] 显示浏览器通知:', title)
         showBrowserNotification({ title, body, icon })
     }
 

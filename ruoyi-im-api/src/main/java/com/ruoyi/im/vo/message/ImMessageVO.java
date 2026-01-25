@@ -92,6 +92,63 @@ public class ImMessageVO implements Serializable {
     /** 时间戳（毫秒）- 兼容前端 */
     private Long timestamp;
 
+    /**
+     * 消息已读状态（仅发送者自己的消息包含此信息）
+     */
+    private MessageReadStatus readStatus;
+
+    /**
+     * 消息已读状态内部类
+     * 用于展示群消息已读/未读情况
+     */
+    @Data
+    public static class MessageReadStatus implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * 已读人数
+         */
+        private Integer readCount;
+
+        /**
+         * 总接收人数（群聊中是成员数，私聊中是2人）
+         */
+        private Integer totalCount;
+
+        /**
+         * 未读人数
+         */
+        private Integer unreadCount;
+
+        /**
+         * 已读百分比
+         */
+        private Integer readPercent;
+
+        /**
+         * 是否全部已读
+         */
+        private Boolean allRead;
+
+        /**
+         * 已读用户头像列表（最多5个）
+         */
+        private java.util.List<ReadUserAvatar> readUserAvatars;
+
+        /**
+         * 已读用户头像信息
+         */
+        @Data
+        public static class ReadUserAvatar implements Serializable {
+            private static final long serialVersionUID = 1L;
+
+            private Long userId;
+            private String userName;
+            private String avatar;
+        }
+    }
+
     public Long getTimestamp() {
         if (this.timestamp != null) {
             return this.timestamp;

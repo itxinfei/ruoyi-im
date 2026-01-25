@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImGroup;
-import com.ruoyi.im.dto.group.GroupQueryRequest;
 import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.service.ImGroupService;
@@ -113,7 +112,7 @@ public class ImGroupAdminController {
         imGroupMapper.updateImGroup(group);
 
         // 删除群组成员关系
-        Long[] groupIds = {id};
+        List<Long> groupIds = java.util.Collections.singletonList(id);
         imGroupMemberMapper.deleteByGroupIds(groupIds);
 
         return Result.success("群组已解散");
@@ -145,8 +144,7 @@ public class ImGroupAdminController {
 
         // 删除群组成员关系
         if (!ids.isEmpty()) {
-            Long[] groupIds = ids.toArray(new Long[0]);
-            imGroupMemberMapper.deleteByGroupIds(groupIds);
+            imGroupMemberMapper.deleteByGroupIds(ids);
         }
 
         Map<String, Object> result = new HashMap<>();

@@ -43,7 +43,7 @@ public class ImFileController {
     @Value("${file.upload.path}")
     private String uploadPath;
 
-    @Value("${im.jwt-secret}")
+    @Value("${im.jwt.secret}")
     private String jwtSecret;
 
     /**
@@ -121,7 +121,7 @@ public class ImFileController {
 
         // 设置响应头
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileVO.getOriginalFileName() + "\"");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileVO.getFileName() + "\"");
         response.setContentLengthLong(file.length());
 
         // 更新下载次数

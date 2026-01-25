@@ -25,6 +25,8 @@
           @command="handleCommand"
           @scroll-to="scrollToMsg"
           @at="$emit('at', $event)"
+          @show-user="$emit('show-user', $event)"
+          @retry="$emit('retry', $event)"
         >
           <!-- 消息气泡内容插槽 -->
           <template #bubble>
@@ -100,7 +102,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at'])
+const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry'])
 
 const listRef = ref(null)
 const readUsersMap = ref({})

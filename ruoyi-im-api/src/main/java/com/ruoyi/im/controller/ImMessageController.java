@@ -57,6 +57,9 @@ public class ImMessageController {
     @Autowired
     private com.ruoyi.im.mapper.ImMessageMapper imMessageMapper;
 
+    @Autowired
+    private com.ruoyi.im.service.ImMessageReadService messageReadService;
+
     public ImMessageController(
             ImMessageService imMessageService,
             ImMessageReactionService reactionService,
@@ -446,6 +449,46 @@ public class ImMessageController {
         } catch (Exception e) {
             log.error("获取已读状态失败: conversationId={}, messageId={}", conversationId, messageId, e);
             return Result.fail("获取已读状态失败");
+        }
+    }
+
+    /**
+     * 批量获取消息已读状态
+     * 批量获取多条消息的已读状态，用于在消息列表中展示已读信息
+     *
+     * @param conversationId 会话ID
+     * @param messageIds     消息ID列表
+     * @return 消息已读状态Map，key为消息ID，value为已读状态
+     */
+    @Operation(summary = "批量获取消息已读状态", description = "批量获取多条消息的已读状态")
+    @PostMapping("/read/status/batch")
+    public Result<Map<Long, com.ruoyi.im.vo.message.ImMessageReadStatusVO>> getBatchReadStatus(
+            @RequestParam Long conversationId,
+            @RequestBody List<Long> messageIds) {
+        Long userId = SecurityUtils.getLoginUserId();
+
+        try {
+            if (messageIds == null || messageIds.isEmpty()) {
+                return Result.success(new java.util.HashMap<>());
+            }
+
+            Map<Long, com.ruoyi.im.vo.message.ImMessageReadStatusVO> statusMap = new java.util.HashMap<>();
+
+            for (Long messageId : messageIds) {
+                try {
+                    com.ruoyi.im.vo.message.ImMessageReadStatusVO status =
+                        messageReadService.getMessageReadStatus(messageId, userId);
+                    statusMap.put(messageId, status);
+                } catch (Exception e) {
+                    // 对于无权限或不存在的情况，跳过该消息
+                    log.debug("获取消息已读状态失败: messageId={}", messageId);
+                }
+            }
+
+            return Result.success(statusMap);
+        } catch (Exception e) {
+            log.error("批量获取已读状态失败: conversationId={}", conversationId, e);
+            return Result.fail("批量获取已读状态失败");
         }
     }
 
