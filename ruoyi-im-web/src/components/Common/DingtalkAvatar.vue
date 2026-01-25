@@ -108,7 +108,7 @@ const handleImageError = () => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .dingtalk-avatar {
   display: inline-flex;
   align-items: center;
@@ -118,6 +118,13 @@ const handleImageError = () => {
   flex-shrink: 0;
   overflow: hidden;
   position: relative;
+  box-shadow: var(--dt-shadow-2);
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: var(--dt-shadow-3);
+  }
 }
 
 .avatar-circle {
@@ -125,7 +132,7 @@ const handleImageError = () => {
 }
 
 .avatar-square {
-  border-radius: 16%; /* 钉钉标准的圆角 */
+  border-radius: var(--dt-radius-md); /* 钉钉标准的圆角 */
 }
 
 .avatar-img {
@@ -137,5 +144,6 @@ const handleImageError = () => {
 .avatar-text {
   white-space: nowrap;
   user-select: none;
+  text-transform: uppercase;
 }
 </style>

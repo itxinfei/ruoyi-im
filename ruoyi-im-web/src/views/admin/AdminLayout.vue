@@ -14,7 +14,7 @@
           active-text-color="#1890ff"
         >
           <el-menu-item index="/admin/dashboard">
-            <el-icon><Platform /></el-icon>
+            <el-icon><Monitor /></el-icon>
             <span>数据概览</span>
           </el-menu-item>
           <el-menu-item index="/admin/users">
@@ -58,7 +58,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Platform, User, ChatDotRound, ChatLineSquare } from '@element-plus/icons-vue'
+import { Monitor, User, ChatDotRound, ChatLineSquare } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()

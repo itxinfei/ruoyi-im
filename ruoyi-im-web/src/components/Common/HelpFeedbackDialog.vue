@@ -1,77 +1,129 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="帮助与反馈"
-    width="640px"
+    title=""
+    width="800px"
     class="help-feedback-dialog"
     destroy-on-close
     append-to-body
   >
     <div class="help-container">
-      <!-- 侧边导航 -->
-      <div class="help-aside">
+      <!-- 顶部标签导航 -->
+      <div class="tabs-header">
         <div 
           v-for="item in menuItems" 
           :key="item.id"
-          class="menu-item"
+          class="tab-item"
           :class="{ active: activeMenu === item.id }"
           @click="activeMenu = item.id"
         >
-          <span class="material-icons-outlined menu-icon">{{ item.icon }}</span>
+          <span class="material-icons-outlined tab-icon">{{ item.icon }}</span>
           <span>{{ item.label }}</span>
         </div>
       </div>
 
-      <!-- 右侧内容 -->
-      <div class="help-main scrollbar-thin">
+      <!-- 内容区域 -->
+      <div class="content-area scrollbar-thin">
         <!-- 常见问题 -->
         <template v-if="activeMenu === 'faq'">
-          <div class="header-with-search">
-            <div class="section-title">常见问题</div>
-            <el-input
-              v-model="faqSearchQuery"
-              placeholder="搜索您遇到的问题..."
-              prefix-icon="Search"
-              clearable
-              class="faq-search-input"
-            />
-          </div>
-          <el-collapse v-model="activeCollapse" accordion class="faq-collapse">
-            <el-collapse-item v-for="(faq, index) in filteredFaqs" :key="index" :title="faq.question" :name="index">
-              <div class="faq-answer">{{ faq.answer }}</div>
-            </el-collapse-item>
-            <el-empty v-if="filteredFaqs.length === 0" description="未找到相关问题" />
-          </el-collapse>
-          
-          <div class="support-footer">
-            <span>没找到答案？</span>
-            <el-button link type="primary" @click="handleContactSupport">联系在线客服</el-button>
+          <div class="faq-section">
+            <div class="section-header">
+              <h2 class="section-title">常见问题</h2>
+              <el-input
+                v-model="faqSearchQuery"
+                placeholder="搜索您遇到的问题..."
+                prefix-icon="Search"
+                clearable
+                class="faq-search-input"
+              />
+            </div>
+            <div class="faq-list">
+              <div 
+                v-for="(faq, index) in filteredFaqs" 
+                :key="index" 
+                class="faq-item"
+                @click="toggleFaq(index)"
+              >
+                <div class="faq-question">
+                  <span class="question-text">{{ faq.question }}</span>
+                  <el-icon class="arrow-icon" :class="{ expanded: activeCollapse === index }">
+                    <ArrowDown />
+                  </el-icon>
+                </div>
+                <div class="faq-answer" :class="{ show: activeCollapse === index }">
+                  {{ faq.answer }}
+                </div>
+              </div>
+              <el-empty v-if="filteredFaqs.length === 0" description="未找到相关问题" :image-size="100" />
+            </div>
+            <div class="support-footer">
+              <span>没找到答案？</span>
+              <el-button type="primary" link @click="handleContactSupport">
+                <el-icon><Service /></el-icon>
+                联系在线客服
+              </el-button>
+            </div>
           </div>
         </template>
 
         <!-- 功能介绍 -->
         <template v-else-if="activeMenu === 'features'">
-          <div class="section-title">功能介绍</div>
-          <div class="feature-list">
-            <div class="feature-item card-hover">
-              <div class="feature-icon icon-blue"><el-icon><ChatDotRound /></el-icon></div>
-              <div class="feature-info">
-                <h3>即时沟通</h3>
-                <p>支持单聊、群聊，消息实时同步，沟通更高效。支持引用回复、消息已读回执。</p>
+          <div class="features-section">
+            <h2 class="section-title">功能介绍</h2>
+            <div class="feature-grid">
+              <div class="feature-card">
+                <div class="feature-icon-wrapper chat-bg">
+                  <el-icon><ChatDotRound /></el-icon>
+                </div>
+                <div class="feature-content">
+                  <h3>即时沟通</h3>
+                  <p>支持单聊、群聊，消息实时同步，沟通更高效。支持引用回复、消息已读回执。</p>
+                </div>
               </div>
-            </div>
-            <div class="feature-item card-hover">
-              <div class="feature-icon icon-green"><el-icon><Files /></el-icon></div>
-              <div class="feature-info">
-                <h3>文件传输</h3>
-                <p>支持图片、文件、音频、视频传输，重要资料随时保存。支持 100MB 大文件。</p>
+              <div class="feature-card">
+                <div class="feature-icon-wrapper file-bg">
+                  <el-icon><Files /></el-icon>
+                </div>
+                <div class="feature-content">
+                  <h3>文件传输</h3>
+                  <p>支持图片、文件、音频、视频传输，重要资料随时保存。支持 100MB 大文件。</p>
+                </div>
               </div>
-            </div>
-            <div class="feature-item card-hover">
-              <div class="feature-icon icon-purple"><el-icon><VideoCamera /></el-icon></div>
-              <div class="feature-info">
-                <h3>音视频通话</h3>
-                <p>高清流畅的音视频通话体验，随时随地面对面沟通，支持桌面端屏幕共享。</p>
+              <div class="feature-card">
+                <div class="feature-icon-wrapper video-bg">
+                  <el-icon><VideoCamera /></el-icon>
+                </div>
+                <div class="feature-content">
+                  <h3>音视频通话</h3>
+                  <p>高清流畅的音视频通话体验，随时随地面对面沟通，支持桌面端屏幕共享。</p>
+                </div>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon-wrapper screen-bg">
+                  <el-icon><Monitor /></el-icon>
+                </div>
+                <div class="feature-content">
+                  <h3>屏幕共享</h3>
+                  <p>一键共享屏幕，方便远程协作和演示，提升工作效率。</p>
+                </div>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon-wrapper group-bg">
+                  <el-icon><User /></el-icon>
+                </div>
+                <div class="feature-content">
+                  <h3>群组管理</h3>
+                  <p>创建和管理群组，支持设置群公告、群文件、群成员管理等丰富功能。</p>
+                </div>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon-wrapper cloud-bg">
+                  <el-icon><Cloudy /></el-icon>
+                </div>
+                <div class="feature-content">
+                  <h3>云盘存储</h3>
+                  <p>个人云盘空间，文件随时存储、分享，支持在线预览和下载。</p>
+                </div>
               </div>
             </div>
           </div>
@@ -79,42 +131,64 @@
 
         <!-- 意见反馈 -->
         <template v-else-if="activeMenu === 'feedback'">
-          <div class="section-title">意见反馈</div>
-          <div class="feedback-container">
-            <el-form :model="feedbackForm" label-position="top" :rules="feedbackRules" ref="feedbackFormRef">
-              <el-form-item label="反馈类型" prop="type">
-                <el-radio-group v-model="feedbackForm.type" size="small">
-                  <el-radio-button label="bug">功能异常</el-radio-button>
-                  <el-radio-button label="suggestion">产品建议</el-radio-button>
-                  <el-radio-button label="other">其他</el-radio-button>
-                </el-radio-group>
-              </el-form-item>
-              <el-form-item label="问题描述" prop="content">
-                <el-input 
-                  v-model="feedbackForm.content" 
-                  type="textarea" 
-                  :rows="4" 
-                  placeholder="请详细描述您遇到的问题或建议，我们会认真对待每一份反馈..." 
-                />
-              </el-form-item>
-              <el-form-item label="图片证据 (选填)">
-                <el-upload
-                  action="#"
-                  list-type="picture-card"
-                  :auto-upload="false"
-                  :limit="3"
-                  v-model:file-list="fileList"
-                >
-                  <el-icon><Plus /></el-icon>
-                </el-upload>
-              </el-form-item>
-              <el-form-item label="联系方式 (选填)" prop="contact">
-                <el-input v-model="feedbackForm.contact" placeholder="留下您的手机号或邮箱，方便我们回访" />
-              </el-form-item>
-              <div class="form-footer">
-                <el-button type="primary" class="submit-btn" :loading="submitting" @click="submitFeedback">提交反馈</el-button>
-              </div>
-            </el-form>
+          <div class="feedback-section">
+            <h2 class="section-title">意见反馈</h2>
+            <div class="feedback-card">
+              <el-form :model="feedbackForm" label-position="top" :rules="feedbackRules" ref="feedbackFormRef">
+                <el-form-item label="反馈类型" prop="type">
+                  <el-radio-group v-model="feedbackForm.type" size="large">
+                    <el-radio-button label="bug">
+                      <el-icon><Warning /></el-icon>
+                      功能异常
+                    </el-radio-button>
+                    <el-radio-button label="suggestion">
+                      <el-icon><Lightbulb /></el-icon>
+                      产品建议
+                    </el-radio-button>
+                    <el-radio-button label="other">
+                      <el-icon><ChatDotRound /></el-icon>
+                      其他
+                    </el-radio-button>
+                  </el-radio-group>
+                </el-form-item>
+                <el-form-item label="问题描述" prop="content">
+                  <el-input 
+                    v-model="feedbackForm.content" 
+                    type="textarea" 
+                    :rows="5" 
+                    placeholder="请详细描述您遇到的问题或建议，我们会认真对待每一份反馈..." 
+                    show-word-limit
+                    maxlength="500"
+                  />
+                </el-form-item>
+                <el-form-item label="图片证据 (选填)">
+                  <el-upload
+                    action="#"
+                    list-type="picture-card"
+                    :auto-upload="false"
+                    :limit="3"
+                    v-model:file-list="fileList"
+                    class="feedback-upload"
+                  >
+                    <el-icon><Plus /></el-icon>
+                  </el-upload>
+                  <div class="upload-tip">最多上传 3 张图片，每张不超过 5MB</div>
+                </el-form-item>
+                <el-form-item label="联系方式 (选填)" prop="contact">
+                  <el-input 
+                    v-model="feedbackForm.contact" 
+                    placeholder="留下您的手机号或邮箱，方便我们回访" 
+                    prefix-icon="Message"
+                  />
+                </el-form-item>
+                <div class="form-footer">
+                  <el-button type="primary" class="submit-btn" :loading="submitting" @click="submitFeedback">
+                    <el-icon v-if="!submitting"><Position /></el-icon>
+                    {{ submitting ? '提交中...' : '提交反馈' }}
+                  </el-button>
+                </div>
+              </el-form>
+            </div>
           </div>
         </template>
       </div>
@@ -124,7 +198,21 @@
 
 <script setup>
 import { ref, watch, reactive, computed } from 'vue'
-import { ChatDotRound, Files, VideoCamera, Search, Plus } from '@element-plus/icons-vue'
+import {
+  ChatDotRound,
+  Files,
+  VideoCamera,
+  Search,
+  Plus,
+  ArrowDown,
+  Service,
+  Monitor,
+  User,
+  Cloudy,
+  Warning,
+  Message,
+  Position
+} from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps({
@@ -183,6 +271,14 @@ const handleContactSupport = () => {
   ElMessage.info('正在连接在线客服，请稍候...')
 }
 
+const toggleFaq = (index) => {
+  if (activeCollapse.value === index) {
+    activeCollapse.value = ''
+  } else {
+    activeCollapse.value = index
+  }
+}
+
 const feedbackForm = reactive({
   type: 'bug',
   content: '',
@@ -227,194 +323,509 @@ watch(visible, (val) => {
 </script>
 
 <style scoped lang="scss">
-.help-feedback-dialog :deep(.el-dialog__body) {
-  padding: 0;
-  height: 500px;
+.help-feedback-dialog {
+  :deep(.el-dialog__header) {
+    display: none;
+  }
+  :deep(.el-dialog__body) {
+    padding: 0;
+    height: 600px;
+    overflow: hidden;
+  }
+  :deep(.el-dialog) {
+    border-radius: var(--dt-radius-2xl);
+  }
 }
 
 .help-container {
   display: flex;
+  flex-direction: column;
   height: 100%;
+  background: var(--dt-bg-card);
 }
 
-.help-aside {
-  width: 160px;
-  background: #f8fafc;
-  border-right: 1px solid #f2f3f5;
-  padding: 16px 8px;
+.tabs-header {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  
-  .dark & { background: #0f172a; border-right-color: #334155; }
+  gap: 0;
+  padding: 0 24px;
+  border-bottom: 2px solid var(--dt-border-light);
 
-  .menu-item {
+  .tab-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    font-size: 14px;
-    color: #4b5563;
+    gap: 8px;
+    padding: 18px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--dt-text-secondary);
     cursor: pointer;
-    transition: all 0.2s ease;
-    border-radius: 8px;
-    
-    .dark & { color: #94a3b8; }
+    transition: all var(--dt-transition-fast);
+    position: relative;
 
-    .menu-icon { font-size: 20px; color: #64748b; transition: all 0.2s; }
-    
-    &:hover { 
-      background: rgba(0,0,0,0.04); 
-      color: #1f2329;
-      .dark & { background: rgba(255,255,255,0.06); color: #f1f5f9; }
+    .tab-icon {
+      font-size: 20px;
+      color: var(--dt-text-tertiary);
+      transition: all var(--dt-transition-fast);
     }
-    
+
+    &:hover {
+      color: var(--dt-text-primary);
+
+      .tab-icon {
+        color: var(--dt-brand-color);
+      }
+    }
+
     &.active {
-      background: #eff6ff;
-      color: #0089ff;
+      color: var(--dt-brand-color);
       font-weight: 600;
-      .menu-icon { color: #0089ff; }
-      .dark & { background: rgba(0, 137, 255, 0.15); color: #38bdf8; .menu-icon { color: #38bdf8; } }
+
+      .tab-icon {
+        color: var(--dt-brand-color);
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--dt-brand-color);
+        border-radius: 2px;
+      }
     }
   }
 }
 
-.help-main {
+.content-area {
   flex: 1;
-  padding: 32px;
-  background: #fff;
+  padding: 32px 40px;
   overflow-y: auto;
-  
-  .dark & { background: #1e293b; color: #f1f5f9; }
+}
 
-  .header-with-search {
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--dt-text-primary);
+}
+
+.faq-section {
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 24px;
-    .section-title { margin-bottom: 12px; font-size: 20px; font-weight: 700; }
+    gap: 16px;
+
+    .section-title {
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+
+    .faq-search-input {
+      flex: 1;
+      max-width: 300px;
+
+      :deep(.el-input__wrapper) {
+        border-radius: var(--dt-radius-full);
+        padding-left: 16px;
+        box-shadow: var(--dt-shadow-2);
+        transition: all var(--dt-transition-fast);
+
+        &:hover {
+          box-shadow: var(--dt-shadow-3);
+          border-color: var(--dt-brand-color);
+        }
+
+        &.is-focus {
+          box-shadow: 0 0 0 3px var(--dt-brand-lighter);
+        }
+      }
+    }
   }
 
-  .faq-search-input {
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .faq-item {
+    background: var(--dt-bg-body);
+    border: 1.5px solid var(--dt-border-light);
+    border-radius: var(--dt-radius-lg);
+    overflow: hidden;
+    transition: all var(--dt-transition-fast);
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--dt-brand-color);
+      box-shadow: var(--dt-shadow-3);
+    }
+
+    .faq-question {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--dt-text-primary);
+
+      .question-text {
+        flex: 1;
+        padding-right: 16px;
+      }
+
+      .arrow-icon {
+        font-size: 16px;
+        color: var(--dt-text-tertiary);
+        transition: transform var(--dt-transition-base);
+
+        &.expanded {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      padding: 0 20px;
+      color: var(--dt-text-secondary);
+      line-height: 1.6;
+      font-size: 14px;
+      transition: all var(--dt-transition-base);
+
+      &.show {
+        max-height: 200px;
+        padding: 16px 20px;
+        border-top: 1px solid var(--dt-border-light);
+      }
+    }
+  }
+
+  .support-footer {
+    margin-top: 32px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--dt-text-tertiary);
+    padding: 24px;
+    border-top: 1px dashed var(--dt-border-light);
+    background: var(--dt-bg-body);
+    border-radius: var(--dt-radius-lg);
+  }
+}
+
+.features-section {
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .feature-card {
+    display: flex;
+    gap: 16px;
+    padding: 24px;
+    background: var(--dt-bg-body);
+    border: 1.5px solid var(--dt-border-light);
+    border-radius: var(--dt-radius-xl);
+    transition: all var(--dt-transition-fast);
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--dt-shadow-float);
+      border-color: var(--dt-brand-color);
+    }
+
+    .feature-icon-wrapper {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--dt-radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+      color: #fff;
+      box-shadow: var(--dt-shadow-3);
+
+      &.chat-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      &.file-bg {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      }
+
+      &.video-bg {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      }
+
+      &.screen-bg {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      }
+
+      &.group-bg {
+        background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+      }
+
+      &.cloud-bg {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      }
+    }
+
+    .feature-content {
+      flex: 1;
+
+      h3 {
+        font-size: 17px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+        color: var(--dt-text-primary);
+      }
+
+      p {
+        font-size: 13px;
+        color: var(--dt-text-secondary);
+        margin: 0;
+        line-height: 1.6;
+      }
+    }
+  }
+}
+
+.feedback-section {
+  .feedback-card {
+    background: var(--dt-bg-body);
+    padding: 32px;
+    border-radius: var(--dt-radius-xl);
+    border: 1.5px solid var(--dt-border-light);
+
+    :deep(.el-form-item__label) {
+      font-weight: 500;
+      color: var(--dt-text-primary);
+    }
+
+    :deep(.el-radio-group) {
+      width: 100%;
+
+      .el-radio-button {
+        flex: 1;
+
+        .el-radio-button__inner {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          padding: 12px 16px;
+          font-size: 14px;
+          border-radius: var(--dt-radius-md);
+          transition: all var(--dt-transition-fast);
+
+          .el-icon {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+
+    :deep(.el-textarea__inner) {
+      border-radius: var(--dt-radius-lg);
+      padding: 12px 16px;
+      line-height: 1.6;
+      font-size: 14px;
+      transition: all var(--dt-transition-fast);
+      border: 1.5px solid var(--dt-border-color);
+
+      &:focus {
+        border-color: var(--dt-brand-color);
+        box-shadow: 0 0 0 3px var(--dt-brand-lighter);
+      }
+    }
+
     :deep(.el-input__wrapper) {
-      border-radius: 20px;
-      padding-left: 16px;
+      border-radius: var(--dt-radius-md);
+      transition: all var(--dt-transition-fast);
+      border: 1.5px solid var(--dt-border-color);
+
+      &:hover {
+        border-color: var(--dt-brand-color);
+      }
+
+      &.is-focus {
+        border-color: var(--dt-brand-color);
+        box-shadow: 0 0 0 3px var(--dt-brand-lighter);
+      }
+    }
+
+    .feedback-upload {
+      :deep(.el-upload--picture-card) {
+        width: 100px;
+        height: 100px;
+        border-radius: var(--dt-radius-lg);
+        border: 2px dashed var(--dt-border-color);
+        background: var(--dt-bg-card);
+        transition: all var(--dt-transition-fast);
+
+        &:hover {
+          border-color: var(--dt-brand-color);
+          background: var(--dt-brand-bg);
+        }
+      }
+
+      :deep(.el-upload-list--picture-card .el-upload-list__item) {
+        width: 100px;
+        height: 100px;
+        border-radius: var(--dt-radius-lg);
+      }
+    }
+
+    .upload-tip {
+      font-size: 12px;
+      color: var(--dt-text-tertiary);
+      margin-top: 8px;
+    }
+  }
+
+  .form-footer {
+    margin-top: 24px;
+
+    .submit-btn {
+      width: 100%;
+      height: 48px;
+      border-radius: var(--dt-radius-lg);
+      font-weight: 600;
+      font-size: 16px;
+      background: var(--dt-brand-color);
+      border: none;
+      box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+      transition: all var(--dt-transition-fast);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(22, 119, 255, 0.4);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+// 暗色模式
+.dark .help-feedback-dialog {
+  .help-container {
+    background: var(--dt-bg-card-dark);
+  }
+
+  .tabs-header {
+    border-bottom-color: var(--dt-border-dark);
+
+    .tab-item {
+      color: var(--dt-text-secondary-dark);
+
+      .tab-icon {
+        color: var(--dt-text-tertiary-dark);
+      }
+
+      &:hover {
+        color: var(--dt-text-primary-dark);
+      }
     }
   }
 
   .section-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 24px;
-    color: #1f2329;
-    .dark & { color: #f1f5f9; }
+    color: var(--dt-text-primary-dark);
   }
-}
 
-.faq-collapse {
-  border: none;
-  :deep(.el-collapse-item) {
-    background: #f8fafc;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    padding: 0 16px;
-    border: 1px solid #f1f5f9;
-    .dark & { background: #0f172a; border-color: #334155; }
-    
-    .el-collapse-item__header {
-      background: transparent; border-bottom: none; height: 54px; font-weight: 500;
+  .faq-item {
+    background: var(--dt-bg-hover-dark);
+    border-color: var(--dt-border-dark);
+
+    &:hover {
+      border-color: var(--dt-brand-color);
     }
-    .el-collapse-item__wrap {
-      background: transparent; border-bottom: none;
+
+    .faq-question {
+      color: var(--dt-text-primary-dark);
+    }
+
+    .faq-answer {
+      color: var(--dt-text-secondary-dark);
+
+      &.show {
+        border-top-color: var(--dt-border-dark);
+      }
     }
   }
-}
 
-.support-footer {
-  margin-top: 32px;
-  text-align: center;
-  font-size: 14px;
-  color: #8f959e;
-  padding: 20px;
-  border-top: 1px dashed #f0f0f0;
-  .dark & { border-top-color: #334155; }
-}
-
-.card-hover {
-  transition: all 0.3s;
-  &:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-}
-
-.feedback-container {
-  background: #f8fafc;
-  padding: 24px;
-  border-radius: 16px;
-  .dark & { background: #0f172a; }
-  
-  :deep(.el-upload--picture-card) {
-    width: 80px; height: 80px; border-radius: 8px; line-height: 90px;
-  }
-  :deep(.el-upload-list--picture-card .el-upload-list__item) {
-    width: 80px; height: 80px; border-radius: 8px;
-  }
-}
-
-.form-footer {
-  margin-top: 24px;
-  .submit-btn { width: 100%; height: 44px; border-radius: 8px; font-weight: 600; font-size: 16px; }
-}
-
-.faq-answer {
-  color: #646a73;
-  line-height: 1.6;
-  font-size: 14px;
-  .dark & { color: #94a3b8; }
-}
-
-.feature-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.feature-item {
-  display: flex;
-  gap: 16px;
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 8px;
-  .dark & { background: #0f172a; }
-
-  .feature-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
-    
-    &.icon-blue { background: #e6f7ff; color: #1890ff; .dark & { background: rgba(24, 144, 255, 0.2); } }
-    &.icon-green { background: #f6ffed; color: #52c41a; .dark & { background: rgba(82, 196, 26, 0.2); } }
-    &.icon-purple { background: #f9f0ff; color: #722ed1; .dark & { background: rgba(114, 46, 209, 0.2); } }
+  .support-footer {
+    border-top-color: var(--dt-border-dark);
+    background: var(--dt-bg-hover-dark);
   }
 
-  .feature-info {
-    h3 { font-size: 16px; font-weight: 600; margin: 0 0 4px 0; color: #1f2329; .dark & { color: #f1f5f9; } }
-    p { font-size: 13px; color: #646a73; margin: 0; line-height: 1.5; .dark & { color: #94a3b8; } }
+  .feature-card {
+    background: var(--dt-bg-hover-dark);
+    border-color: var(--dt-border-dark);
+
+    .feature-content h3 {
+      color: var(--dt-text-primary-dark);
+    }
+
+    .feature-content p {
+      color: var(--dt-text-secondary-dark);
+    }
+  }
+
+  .feedback-card {
+    background: var(--dt-bg-hover-dark);
+    border-color: var(--dt-border-dark);
+
+    :deep(.el-form-item__label) {
+      color: var(--dt-text-primary-dark);
+    }
+
+    :deep(.el-textarea__inner) {
+      background: var(--dt-bg-input-dark);
+      border-color: var(--dt-border-dark);
+      color: var(--dt-text-primary-dark);
+    }
+
+    :deep(.el-input__wrapper) {
+      background: var(--dt-bg-input-dark);
+      border-color: var(--dt-border-dark);
+    }
+
+    .feedback-upload :deep(.el-upload--picture-card) {
+      background: var(--dt-bg-card-dark);
+      border-color: var(--dt-border-dark);
+    }
+
+    .upload-tip {
+      color: var(--dt-text-tertiary-dark);
+    }
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
   }
 }
-
-:deep(.el-collapse-item__header) {
-  font-size: 15px;
-  .dark & { background: transparent; color: #e2e8f0; border-bottom-color: #334155; }
-}
-:deep(.el-collapse-item__wrap) {
-  .dark & { background: transparent; border-bottom-color: #334155; }
-}
-:deep(.el-form-item__label) {
-  .dark & { color: #e2e8f0; }
-}
-
-.scrollbar-thin::-webkit-scrollbar { width: 4px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
-.dark .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
 </style>

@@ -171,14 +171,14 @@ const handleApprovalAction = () => {
 loadApprovals()
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .approval-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
   flex: 1;
   min-width: 0;
-  background: #f4f7f9;
+  background: var(--dt-bg-body);
 }
 
 .panel-header {
@@ -186,15 +186,15 @@ loadApprovals()
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  background: #fff;
-  border-bottom: 1px solid #e6e6e6;
+  background: var(--dt-bg-card);
+  border-bottom: 1px solid var(--dt-border-color);
   flex-shrink: 0;
 }
 
 .panel-title {
   font-size: 18px;
   font-weight: 600;
-  color: #262626;
+  color: var(--dt-text-primary);
   margin: 0;
 }
 
@@ -203,18 +203,24 @@ loadApprovals()
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: #1677ff;
+  background: var(--dt-brand-color);
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-fast);
 }
 
 .add-btn:hover {
-  background: #4096ff;
+  background: var(--dt-brand-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
+}
+
+.add-btn:active {
+  transform: translateY(0);
 }
 
 .panel-content {
@@ -227,8 +233,8 @@ loadApprovals()
 .tabs {
   display: flex;
   padding: 0 24px;
-  background: #fff;
-  border-bottom: 1px solid #e6e6e6;
+  background: var(--dt-bg-card);
+  border-bottom: 1px solid var(--dt-border-color);
   flex-shrink: 0;
 }
 
@@ -239,27 +245,29 @@ loadApprovals()
   border: none;
   border-bottom: 2px solid transparent;
   font-size: 14px;
-  color: #595959;
+  color: var(--dt-text-secondary);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-fast);
 }
 
 .tab-item:hover {
-  color: #1677ff;
+  color: var(--dt-brand-color);
 }
 
 .tab-item.active {
-  color: #1677ff;
-  border-bottom-color: #1677ff;
+  color: var(--dt-brand-color);
+  border-bottom-color: var(--dt-brand-color);
+  font-weight: 500;
 }
 
 .tab-count {
   margin-left: 4px;
-  padding: 2px 6px;
-  background: #1677ff;
+  padding: 2px 8px;
+  background: var(--dt-brand-color);
   color: #fff;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-full);
   font-size: 11px;
+  font-weight: 500;
 }
 
 .loading-state,
@@ -269,18 +277,19 @@ loadApprovals()
   align-items: center;
   justify-content: center;
   height: 200px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
 }
 
 .empty-icon {
   font-size: 64px;
   margin-bottom: 16px;
-  color: #d9d9d9;
+  color: var(--dt-border-color);
 }
 
 .empty-text {
   font-size: 14px;
   margin: 0;
+  color: var(--dt-text-secondary);
 }
 
 .approval-list {
@@ -290,24 +299,28 @@ loadApprovals()
 }
 
 .approval-item {
-  background: #fff;
-  border-radius: 12px;
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-xl);
   padding: 16px;
   display: flex;
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-fast);
+  margin-bottom: 8px;
+  border: 1px solid var(--dt-border-light);
 }
 
 .approval-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--dt-shadow-float);
+  transform: translateY(-1px);
+  border-color: var(--dt-brand-color);
 }
 
 .approval-avatar {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   color: #fff;
   display: flex;
   align-items: center;
@@ -325,7 +338,7 @@ loadApprovals()
 .approval-title {
   font-size: 15px;
   font-weight: 500;
-  color: #262626;
+  color: var(--dt-text-primary);
   margin-bottom: 4px;
 }
 
@@ -334,65 +347,78 @@ loadApprovals()
   align-items: center;
   gap: 12px;
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
 }
 
 .approval-type {
-  padding: 2px 8px;
-  background: #f0f0f0;
-  border-radius: 4px;
+  padding: 3px 8px;
+  background: var(--dt-bg-body);
+  border-radius: var(--dt-radius-sm);
+  color: var(--dt-text-secondary);
+  font-weight: 500;
 }
 
 .approval-status {
   font-size: 12px;
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   white-space: nowrap;
+  font-weight: 500;
 }
 
 .approval-status.pending {
-  background: #fff7e6;
-  color: #fa8c16;
+  background: var(--dt-warning-bg);
+  color: var(--dt-warning-color);
 }
 
 .approval-status.approved {
-  background: #f6ffed;
-  color: #52c41a;
+  background: var(--dt-success-bg);
+  color: var(--dt-success-color);
 }
 
 .approval-status.rejected {
-  background: #fff1f0;
-  color: #ff4d4f;
+  background: var(--dt-error-bg);
+  color: var(--dt-error-color);
 }
 
 /* 暗色模式 */
-:deep(.dark) .approval-panel {
-  background: #0f172a;
+.dark .approval-panel {
+  background: var(--dt-bg-body-dark);
 }
 
-:deep(.dark) .panel-header {
-  background: #1e293b;
-  border-color: #334155;
+.dark .panel-header {
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-border-dark);
 }
 
-:deep(.dark) .panel-title {
-  color: #f1f5f9;
+.dark .panel-title {
+  color: var(--dt-text-primary-dark);
 }
 
-:deep(.dark) .tabs,
-:deep(.dark) .approval-item {
-  background: #1e293b;
+.dark .tabs,
+.dark .approval-item {
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-border-dark);
 }
 
-:deep(.dark) .approval-title {
-  color: #f1f5f9;
+.dark .approval-title {
+  color: var(--dt-text-primary-dark);
 }
 
-:deep(.dark) .tab-item {
-  color: #94a3b8;
+.dark .tab-item {
+  color: var(--dt-text-secondary-dark);
 }
 
-:deep(.dark) .tab-item.active {
-  color: #60a5fa;
+.dark .tab-item.active {
+  color: var(--dt-brand-color);
+}
+
+.dark .approval-type {
+  background: var(--dt-bg-hover-dark);
+  color: var(--dt-text-secondary-dark);
+}
+
+.dark .empty-icon {
+  color: var(--dt-border-dark);
 }
 </style>

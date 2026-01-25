@@ -223,14 +223,14 @@ const handleMailSent = () => {
 loadMails()
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .mail-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
   flex: 1;
   min-width: 0;
-  background: #f4f7f9;
+  background: var(--dt-bg-body);
 }
 
 .panel-header {
@@ -238,15 +238,15 @@ loadMails()
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  background: #fff;
-  border-bottom: 1px solid #e6e6e6;
+  background: var(--dt-bg-card);
+  border-bottom: 1px solid var(--dt-border-color);
   flex-shrink: 0;
 }
 
 .panel-title {
   font-size: 18px;
   font-weight: 600;
-  color: #262626;
+  color: var(--dt-text-primary);
   margin: 0;
 }
 
@@ -255,18 +255,24 @@ loadMails()
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: #1677ff;
+  background: var(--dt-brand-color);
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-fast);
 }
 
 .compose-btn:hover {
-  background: #4096ff;
+  background: var(--dt-brand-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
+}
+
+.compose-btn:active {
+  transform: translateY(0);
 }
 
 .panel-content {
@@ -283,10 +289,11 @@ loadMails()
 
 .mail-folders {
   width: 180px;
-  background: #fff;
-  border-radius: 12px;
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-xl);
   padding: 8px;
   flex-shrink: 0;
+  border: 1px solid var(--dt-border-light);
 }
 
 .folder-item {
@@ -294,23 +301,24 @@ loadMails()
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-fast);
 }
 
 .folder-item:hover {
-  background: #f5f5f5;
+  background: var(--dt-bg-hover);
 }
 
 .folder-item.active {
-  background: #e6f7ff;
-  color: #1677ff;
+  background: var(--dt-brand-bg);
+  color: var(--dt-brand-color);
+  font-weight: 500;
 }
 
 .folder-icon {
   font-size: 20px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
 }
 
 .folder-label {
@@ -320,16 +328,21 @@ loadMails()
 
 .folder-count {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
+}
+
+.folder-item.active .folder-count {
+  color: var(--dt-brand-color);
 }
 
 .mail-list {
   flex: 1;
-  background: #fff;
-  border-radius: 12px;
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-xl);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--dt-border-light);
 }
 
 .loading-state,
@@ -339,18 +352,19 @@ loadMails()
   align-items: center;
   justify-content: center;
   height: 200px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
 }
 
 .empty-icon {
   font-size: 64px;
   margin-bottom: 16px;
-  color: #d9d9d9;
+  color: var(--dt-border-color);
 }
 
 .empty-text {
   font-size: 14px;
   margin: 0;
+  color: var(--dt-text-secondary);
 }
 
 .email-list {
@@ -364,22 +378,27 @@ loadMails()
   padding: 14px 16px;
   cursor: pointer;
   position: relative;
-  border-bottom: 1px solid #f0f0f0;
-  transition: background 0.2s;
+  border-bottom: 1px solid var(--dt-border-light);
+  transition: all var(--dt-transition-fast);
 }
 
 .email-item:hover {
-  background: #f9f9f9;
+  background: var(--dt-bg-hover);
 }
 
 .email-item.unread {
-  background: #f0f7ff;
+  background: var(--dt-brand-bg);
+}
+
+.email-item.unread:hover {
+  background: var(--dt-brand-bg);
+  filter: brightness(0.98);
 }
 
 .email-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
   color: #fff;
   display: flex;
   align-items: center;
@@ -397,17 +416,18 @@ loadMails()
 .email-subject {
   font-size: 14px;
   font-weight: 500;
-  color: #262626;
+  color: var(--dt-text-primary);
   margin-bottom: 4px;
 }
 
 .email-item.unread .email-subject {
   font-weight: 600;
+  color: var(--dt-brand-color);
 }
 
 .email-preview {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
   margin-bottom: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -419,55 +439,84 @@ loadMails()
   align-items: center;
   gap: 12px;
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
 }
 
 .unread-dot {
   width: 8px;
   height: 8px;
-  background: #1677ff;
+  background: var(--dt-brand-color);
   border-radius: 50%;
   position: absolute;
   right: 16px;
+  box-shadow: 0 0 0 3px var(--dt-brand-bg);
 }
 
 /* 暗色模式 */
-:deep(.dark) .mail-panel {
-  background: #0f172a;
+.dark .mail-panel {
+  background: var(--dt-bg-body-dark);
 }
 
-:deep(.dark) .panel-header {
-  background: #1e293b;
-  border-color: #334155;
+.dark .panel-header {
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-border-dark);
 }
 
-:deep(.dark) .panel-title {
-  color: #f1f5f9;
+.dark .panel-title {
+  color: var(--dt-text-primary-dark);
 }
 
-:deep(.dark) .mail-folders,
-:deep(.dark) .mail-list {
-  background: #1e293b;
+.dark .mail-folders,
+.dark .mail-list {
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-border-dark);
 }
 
-:deep(.dark) .email-item {
-  border-color: #334155;
+.dark .email-item {
+  border-color: var(--dt-border-dark);
 }
 
-:deep(.dark) .email-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+.dark .email-item:hover {
+  background: var(--dt-bg-hover-dark);
 }
 
-:deep(.dark) .email-item.unread {
-  background: rgba(22, 119, 255, 0.1);
+.dark .email-item.unread {
+  background: var(--dt-brand-bg-dark);
 }
 
-:deep(.dark) .email-subject {
-  color: #f1f5f9;
+.dark .email-subject {
+  color: var(--dt-text-primary-dark);
 }
 
-:deep(.dark) .folder-item.active {
-  background: rgba(22, 119, 255, 0.15);
-  color: #60a5fa;
+.dark .folder-item {
+  color: var(--dt-text-secondary-dark);
+}
+
+.dark .folder-item:hover {
+  background: var(--dt-bg-hover-dark);
+}
+
+.dark .folder-item.active {
+  background: var(--dt-brand-bg-dark);
+  color: var(--dt-brand-color);
+}
+
+.dark .folder-icon,
+.dark .folder-count {
+  color: var(--dt-text-tertiary-dark);
+}
+
+.dark .folder-item.active .folder-icon,
+.dark .folder-item.active .folder-count {
+  color: var(--dt-brand-color);
+}
+
+.dark .empty-icon {
+  color: var(--dt-border-dark);
+}
+
+.dark .email-preview,
+.dark .email-meta {
+  color: var(--dt-text-tertiary-dark);
 }
 </style>

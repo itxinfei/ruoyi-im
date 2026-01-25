@@ -47,12 +47,12 @@ public class ImConversationServiceImpl implements ImConversationService {
      * 构造器注入依赖
      */
     public ImConversationServiceImpl(ImConversationMapper imConversationMapper,
-                                      ImConversationMemberMapper imConversationMemberMapper,
-                                      ImUserMapper imUserMapper,
-                                      ImMessageMapper imMessageMapper,
-                                      ImRedisUtil imRedisUtil,
-                                      ImGroupMapper imGroupMapper,
-                                      com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil) {
+            ImConversationMemberMapper imConversationMemberMapper,
+            ImUserMapper imUserMapper,
+            ImMessageMapper imMessageMapper,
+            ImRedisUtil imRedisUtil,
+            ImGroupMapper imGroupMapper,
+            com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil) {
         this.imConversationMapper = imConversationMapper;
         this.imConversationMemberMapper = imConversationMemberMapper;
         this.imUserMapper = imUserMapper;
@@ -108,7 +108,8 @@ public class ImConversationServiceImpl implements ImConversationService {
         // 批量查询：一次性获取所有需要的数据（3个查询替代N个查询）
         java.util.Map<Long, ImMessage> lastMessageMap = new java.util.HashMap<>();
         if (!conversationIds.isEmpty()) {
-            List<ImMessage> lastMessages = imMessageMapper.selectLastMessagesByConversationIds(new java.util.ArrayList<>(conversationIds));
+            List<ImMessage> lastMessages = imMessageMapper
+                    .selectLastMessagesByConversationIds(new java.util.ArrayList<>(conversationIds));
             for (ImMessage msg : lastMessages) {
                 lastMessageMap.put(msg.getConversationId(), msg);
             }
@@ -142,7 +143,12 @@ public class ImConversationServiceImpl implements ImConversationService {
                 BeanUtils.copyProperties(lastMessage, messageVO);
                 // 解密消息内容
                 if (lastMessage.getContent() != null) {
-                    messageVO.setContent(encryptionUtil.decryptMessage(lastMessage.getContent()));
+                    try {
+                        messageVO.setContent(encryptionUtil.decryptMessage(lastMessage.getContent()));
+                    } catch (Exception e) {
+                        log.warn("消息解密失败: messageId={}, error={}", lastMessage.getId(), e.getMessage());
+                        messageVO.setContent("[加密消息]");
+                    }
                 }
                 vo.setLastMessage(messageVO);
                 vo.setLastMessageTime(lastMessage.getCreateTime());
@@ -155,7 +161,8 @@ public class ImConversationServiceImpl implements ImConversationService {
                 if (peerUserId != null) {
                     ImUser peerUser = userMap.get(peerUserId);
                     if (peerUser != null) {
-                        String peerName = peerUser.getNickname() != null ? peerUser.getNickname() : peerUser.getUsername();
+                        String peerName = peerUser.getNickname() != null ? peerUser.getNickname()
+                                : peerUser.getUsername();
                         String peerAvatar = peerUser.getAvatar();
                         vo.setPeerName(peerName);
                         vo.setPeerAvatar(peerAvatar);
@@ -169,8 +176,8 @@ public class ImConversationServiceImpl implements ImConversationService {
                         } else {
                             // 比较最后消息时间，保留较新的
                             if (vo.getLastMessageTime() != null &&
-                                (existing.getLastMessageTime() == null ||
-                                 vo.getLastMessageTime().isAfter(existing.getLastMessageTime()))) {
+                                    (existing.getLastMessageTime() == null ||
+                                            vo.getLastMessageTime().isAfter(existing.getLastMessageTime()))) {
                                 privateConversationMap.put(peerUserId, vo);
                             }
                         }

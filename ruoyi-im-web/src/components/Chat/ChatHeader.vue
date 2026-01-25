@@ -19,52 +19,67 @@
       </div>
       <div class="header-info">
         <h2 class="header-name">{{ session?.name }}</h2>
-        <span v-if="session?.type === 'GROUP'" class="member-count">
-          {{ session?.memberCount || 0 }}人
+        <span v-if="session?.type === 'GROUP'" class="meta-info">
+          <span class="material-icons-outlined meta-icon">people</span>
+          {{ session?.memberCount || 0 }} 人
         </span>
-        <span v-else class="status-text">
+        <span v-else class="meta-info" :class="{ online: isOnline }">
+          <span class="material-icons-outlined meta-icon">circle</span>
           {{ isOnline ? '在线' : '离线' }}
         </span>
       </div>
     </div>
     <div class="header-actions">
-      <button class="action-btn" @click="handleVoiceCall" title="语音通话">
-        <span class="material-icons-outlined">phone</span>
-      </button>
-      <button class="action-btn" @click="handleVideoCall" title="视频通话">
-        <span class="material-icons-outlined">videocam</span>
-      </button>
-      <el-dropdown trigger="click" @command="handleMenuCommand">
-        <button class="action-btn" title="更多">
+      <el-tooltip content="语音通话" placement="bottom">
+        <button class="action-btn" @click="handleVoiceCall">
+          <span class="material-icons-outlined">phone</span>
+        </button>
+      </el-tooltip>
+      <el-tooltip content="视频通话" placement="bottom">
+        <button class="action-btn" @click="handleVideoCall">
+          <span class="material-icons-outlined">videocam</span>
+        </button>
+      </el-tooltip>
+      <el-dropdown trigger="click" @command="handleMenuCommand" placement="bottom-end">
+        <button class="action-btn">
           <span class="material-icons-outlined">more_horiz</span>
         </button>
         <template #dropdown>
-          <el-dropdown-menu>
+          <el-dropdown-menu class="header-dropdown">
             <el-dropdown-item command="search">
-              <span class="material-icons-outlined">search</span>
+              <span class="material-icons-outlined item-icon">search</span>
               搜索聊天记录
             </el-dropdown-item>
             <el-dropdown-item command="files">
-              <span class="material-icons-outlined">folder</span>
+              <span class="material-icons-outlined item-icon">folder</span>
               查看文件
             </el-dropdown-item>
-            <el-dropdown-item command="pin" :divided="true">
+            <el-dropdown-item divided command="pin">
+              <span class="material-icons-outlined item-icon">
+                {{ session?.isPinned ? 'push_pin' : 'push_pin' }}
+              </span>
               {{ session?.isPinned ? '取消置顶' : '置顶会话' }}
             </el-dropdown-item>
             <el-dropdown-item command="mute">
+              <span class="material-icons-outlined item-icon">
+                {{ session?.isMuted ? 'notifications' : 'notifications_off' }}
+              </span>
               {{ session?.isMuted ? '取消免打扰' : '消息免打扰' }}
             </el-dropdown-item>
-            <el-dropdown-item command="clear" :divided="true">
+            <el-dropdown-item divided command="clear" class="danger-item">
+              <span class="material-icons-outlined item-icon">delete_outline</span>
               清空聊天记录
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <button class="action-btn" @click="$emit('toggle-sidebar')" title="详情">
-        <span class="material-icons-outlined">info</span>
-      </button>
+      <el-tooltip content="详情" placement="bottom">
+        <button class="action-btn info-btn" @click="$emit('toggle-sidebar')">
+          <span class="material-icons-outlined">info</span>
+        </button>
+      </el-tooltip>
     </div>
-    
+
     <!-- 用户详情抽屉 -->
     <UserDetailDrawer
       v-model="showUserDetail"
@@ -77,7 +92,7 @@
 </template>
 
 <script setup>
-import { computed, ref, inject } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
@@ -88,12 +103,8 @@ const props = defineProps({
     type: Object,
     default: null,
     validator: (value) => {
-      // 如果有值，必须包含必要的字段
       if (value === null) return true
-      return (
-        typeof value.id === 'string' ||
-        typeof value.id === 'number'
-      )
+      return typeof value.id === 'string' || typeof value.id === 'number'
     }
   }
 })
@@ -106,16 +117,13 @@ const showUserDetail = ref(false)
 // 获取在线状态
 const store = useStore()
 const isOnline = computed(() => {
-  // 群组不显示在线状态
   if (props.session?.type === 'GROUP') return false
-  
-  // 优先使用store中的实时状态（WebSocket推送）
+
   const userId = props.session?.targetId
   if (userId && store.state.im.contact.userStatus[userId]) {
     return store.state.im.contact.userStatus[userId] === 'online'
   }
-  
-  // 回退到session中的peerOnline字段（后端初始值）
+
   return props.session?.peerOnline ?? false
 })
 
@@ -125,9 +133,8 @@ const handleShowDetail = () => {
   emit('show-detail', props.session)
 }
 
-// 发送消息(从抽屉触发)
+// 发送消息
 const handleSendMessage = () => {
-  // 抽屉会自动关闭,这里不需要额外处理
   ElMessage.success('已切换到聊天')
 }
 
@@ -165,60 +172,89 @@ const handleMenuCommand = (command) => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+// ============================================================================
+// 容器
+// ============================================================================
 .chat-header {
-  height: 60px;
-  border-bottom: 1px solid #f0f1f2;
+  height: var(--dt-chat-header-height);
+  border-bottom: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  background: #fff;
+  background: var(--dt-bg-card);
   flex-shrink: 0;
   z-index: 10;
 }
 
+// ============================================================================
+// 左侧区域
+// ============================================================================
 .header-left {
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  padding: 6px;
+  margin: -6px;
+  border-radius: var(--dt-radius-md);
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    background: var(--dt-bg-body);
+
+    .header-avatar-wrapper {
+      transform: scale(1.05);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--dt-brand-color);
+    outline-offset: 2px;
+  }
 }
 
 .header-avatar-wrapper {
   position: relative;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.header-avatar-wrapper:hover {
-  transform: scale(1.05);
+  transition: transform var(--dt-transition-base);
 }
 
 .header-avatar {
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
+
+  :deep(.dingtalk-avatar) {
+    border-radius: var(--dt-radius-md) !important;
+  }
 }
 
 .group-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
-  background: #1677ff;
+  border-radius: var(--dt-radius-md);
+  background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.2);
+
+  .material-icons-outlined {
+    font-size: 20px;
+  }
 }
 
-/* 在线状态指示器 */
+// 在线状态指示器
 .online-indicator {
   position: absolute;
   bottom: 0;
   right: 0;
   width: 10px;
   height: 10px;
-  background: #52c41a;
-  border: 2px solid #fff;
+  background: var(--dt-success-color);
+  border: 2px solid var(--dt-bg-card);
   border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
   z-index: 1;
 }
 
@@ -229,83 +265,153 @@ const handleMenuCommand = (command) => {
 }
 
 .header-name {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
-  color: #262626;
+  color: var(--dt-text-primary);
   margin: 0;
   line-height: 1.2;
 }
 
-.member-count,
-.status-text {
-  font-size: 11px;
-  color: #8c8c8c;
-  margin-top: 2px;
-}
-
-.status-text {
-  color: #52c41a;  /* 在线状态绿色 */
-}
-
-.header-left {
+.meta-info {
   display: flex;
   align-items: center;
-  gap: 12px;
-  cursor: pointer;  /* 可点击查看详情 */
-  padding: 4px;
-  margin: -4px;
-  border-radius: 8px;
-  transition: background 0.2s;
+  gap: 3px;
+  font-size: 12px;
+  color: var(--dt-text-tertiary);
+  font-weight: 500;
+
+  .meta-icon {
+    font-size: 10px;
+  }
+
+  &.online {
+    color: var(--dt-success-color);
+  }
 }
 
-.header-left:hover {
-  background: rgba(0, 0, 0, 0.03);
-}
-
+// ============================================================================
+// 右侧操作区
+// ============================================================================
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 4px;
 }
 
 .action-btn {
+  width: 36px;
+  height: 36px;
   background: transparent;
   border: none;
-  padding: 4px;
-  color: #8c8c8c;
+  border-radius: var(--dt-radius-md);
+  padding: 0;
+  color: var(--dt-text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: color 0.2s;
+  justify-content: center;
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    background: var(--dt-bg-body);
+    color: var(--dt-brand-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--dt-brand-color);
+    outline-offset: 2px;
+  }
+
+  &.info-btn {
+    color: var(--dt-brand-color);
+    background: var(--dt-brand-bg);
+
+    &:hover {
+      background: var(--dt-brand-light);
+    }
+  }
+
+  .material-icons-outlined {
+    font-size: 20px;
+  }
 }
 
-.action-btn:hover {
-  color: #1677ff;
+// ============================================================================
+// 下拉菜单
+// ============================================================================
+:deep(.header-dropdown) {
+  .el-dropdown-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+
+    .item-icon {
+      font-size: 16px;
+      color: var(--dt-text-secondary);
+    }
+
+    &:hover .item-icon {
+      color: var(--dt-brand-color);
+    }
+
+    &.danger-item {
+      color: var(--dt-error-color);
+
+      .item-icon {
+        color: var(--dt-error-color);
+      }
+
+      &:hover {
+        background: var(--dt-error-bg);
+      }
+    }
+  }
 }
 
-.action-btn .material-icons-outlined {
-  font-size: 20px;
+// ============================================================================
+// 暗色模式
+// ============================================================================
+.dark .chat-header {
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-border-dark);
 }
 
-/* 暗色模式 */
-:deep(.dark) .chat-header {
-  background: #1e293b;
-  border-color: #334155;
+.dark .header-name {
+  color: var(--dt-text-primary-dark);
 }
 
-:deep(.dark) .header-name {
-  color: #f1f5f9;
+.dark .meta-info {
+  color: var(--dt-text-tertiary-dark);
+
+  &.online {
+    color: var(--dt-success-color);
+  }
 }
 
-:deep(.dark) .member-count {
-  color: #64748b;
+.dark .header-left:hover {
+  background: var(--dt-bg-hover-dark);
 }
 
-:deep(.dark) .action-btn {
-  color: #64748b;
+.dark .action-btn {
+  color: var(--dt-text-secondary-dark);
+
+  &:hover {
+    background: var(--dt-bg-hover-dark);
+  }
+
+  &.info-btn {
+    color: var(--dt-brand-color);
+    background: rgba(22, 119, 255, 0.1);
+
+    &:hover {
+      background: rgba(22, 119, 255, 0.2);
+    }
+  }
 }
 
-:deep(.dark) .action-btn:hover {
-  color: #60a5fa;
+.dark .online-indicator {
+  border-color: var(--dt-bg-card-dark);
 }
 </style>

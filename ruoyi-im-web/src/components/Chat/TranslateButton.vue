@@ -1,7 +1,7 @@
 <template>
   <el-dropdown trigger="click" @command="handleTranslate">
     <span class="translate-trigger">
-      <el-icon><Translation /></el-icon>
+      <el-icon><ChatLineRound /></el-icon>
       <span class="translate-text">翻译</span>
     </span>
     <template #dropdown>
@@ -47,7 +47,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Translation } from '@element-plus/icons-vue'
+import { ChatLineRound } from '@element-plus/icons-vue'
 import { translate, getSupportedLanguages } from '@/api/im'
 
 const props = defineProps({

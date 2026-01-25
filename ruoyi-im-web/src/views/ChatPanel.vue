@@ -640,17 +640,16 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+// ============================================================================
+// 容器
+// ============================================================================
 .chat-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
   flex: 1;
   min-width: 0;
-  background: var(--dt-bg-chat);
-
-  .dark & {
-    background: #0f172a;
-  }
+  background: var(--dt-bg-body);
 }
 
 .main-container {
@@ -665,54 +664,190 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: #fff;
-  
-  .dark & { background: #1e293b; }
+  background: var(--dt-bg-card);
 }
 
-/* 侧边栏平滑滑入动画 */
-.slide-right-enter-active, .slide-right-leave-active {
-  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
-}
-.slide-right-enter-from, .slide-right-leave-to {
-  transform: translateX(100%);
-  opacity: 0;
-}
-
+// ============================================================================
+// 空状态
+// ============================================================================
 .empty-placeholder {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
   flex: 1;
+  padding: 60px 20px;
+  text-align: center;
+
+  :deep(.el-empty) {
+    --el-empty-padding: 40px 0;
+  }
+
+  :deep(.el-empty__description p) {
+    color: var(--dt-text-tertiary);
+    font-size: 14px;
+  }
 }
 
-/* 多选工具栏 */
+// ============================================================================
+// 多选工具栏
+// ============================================================================
 .multi-select-toolbar {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 60px;
-  background: #fff;
-  border-top: 1px solid #f0f0f0;
+  height: 64px;
+  background: var(--dt-bg-card);
+  border-top: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  padding: 0 24px;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
   z-index: 100;
-  
-  .dark & { background: #1e293b; border-color: #334155; }
-  
-  .selection-info { font-size: 14px; color: #8f959e; }
-  .actions { display: flex; align-items: center; gap: 12px; }
+
+  .selection-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dt-text-primary);
+
+    &::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--dt-brand-color);
+      border-radius: 50%;
+    }
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .el-button {
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: var(--dt-radius-md);
+      height: 32px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+
+      .el-icon {
+        font-size: 14px;
+      }
+
+      &.el-button--danger.is-plain {
+        &:hover {
+          background: var(--dt-error-bg);
+          border-color: var(--dt-error-color);
+          color: var(--dt-error-color);
+        }
+      }
+
+      &.el-button--primary.is-plain {
+        &:hover {
+          background: var(--dt-brand-bg);
+          border-color: var(--dt-brand-color);
+          color: var(--dt-brand-color);
+        }
+      }
+    }
+
+    .el-divider--vertical {
+      height: 20px;
+      margin: 0 4px;
+      border-color: var(--dt-border-color);
+    }
+
+    .el-button--link {
+      height: 32px;
+      padding: 0 12px;
+      color: var(--dt-text-secondary);
+
+      &:hover {
+        color: var(--dt-brand-color);
+      }
+    }
+  }
 }
 
-.slide-up-enter-active, .slide-up-leave-active {
-  transition: transform 0.3s ease-out;
+// ============================================================================
+// 动画
+// ============================================================================
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all var(--dt-transition-slow);
 }
-.slide-up-enter-from, .slide-up-leave-to {
+
+.slide-up-enter-from,
+.slide-up-leave-to {
   transform: translateY(100%);
+  opacity: 0;
+}
+
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all var(--dt-transition-slow);
+}
+
+.slide-right-enter-from,
+.slide-right-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+// ============================================================================
+// 暗色模式
+// ============================================================================
+.dark .chat-viewport {
+  background: var(--dt-bg-card-dark);
+}
+
+.dark .multi-select-toolbar {
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-border-dark);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+
+  .selection-info {
+    color: var(--dt-text-primary-dark);
+  }
+
+  .actions {
+    .el-button--primary.is-plain {
+      &:hover {
+        background: var(--dt-brand-bg-dark);
+        border-color: var(--dt-brand-color);
+        color: var(--dt-brand-color);
+      }
+    }
+
+    .el-button--danger.is-plain {
+      &:hover {
+        background: var(--dt-error-bg);
+        border-color: var(--dt-error-color);
+        color: var(--dt-error-color);
+      }
+    }
+
+    .el-button--link {
+      color: var(--dt-text-secondary-dark);
+
+      &:hover {
+        color: var(--dt-brand-color);
+      }
+    }
+
+    .el-divider--vertical {
+      border-color: var(--dt-border-dark);
+    }
+  }
 }
 </style>

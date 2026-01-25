@@ -74,7 +74,7 @@
   }
 
   .session-item:hover {
-    @apply bg-slate-50 dark:bg-slate-800/50;
+    @apply bg-slate-50 dark:bg-slate-800 dark:bg-opacity-50;
   }
 
   .session-item-active {
@@ -87,11 +87,11 @@
   }
 
   .nav-item-default {
-    @apply text-white/70;
+    @apply text-white text-opacity-70;
   }
 
   .nav-item-active {
-    @apply bg-white/20 text-white shadow-inner border border-white/10;
+    @apply bg-white bg-opacity-20 text-white shadow-inner border border-white border-opacity-10;
   }
 
   /* 卡片样式 */

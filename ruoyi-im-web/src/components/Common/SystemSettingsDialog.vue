@@ -1,97 +1,132 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="设置"
-    width="600px"
+    title=""
+    width="1000px"
     class="system-settings-dialog"
     destroy-on-close
     append-to-body
   >
-    <div class="settings-container scrollbar-thin">
-      <!-- 侧边导航 (设置分类) -->
-      <div class="settings-aside">
+    <div class="settings-container">
+      <div class="tabs-header">
         <div 
           v-for="item in menuItems" 
           :key="item.id"
-          class="menu-item"
+          class="tab-item"
           :class="{ active: activeMenu === item.id }"
           @click="activeMenu = item.id"
         >
-          <span class="material-icons-outlined menu-icon">{{ item.icon }}</span>
+          <span class="material-icons-outlined tab-icon">{{ item.icon }}</span>
           <span>{{ item.label }}</span>
         </div>
       </div>
 
-      <!-- 右侧设置内容 -->
-      <div class="settings-main">
+      <div class="content-area scrollbar-thin">
         <template v-if="activeMenu === 'account'">
-          <div class="section-title">账号安全</div>
-          <div class="setting-group">
-            <div class="setting-card">
-              <div class="setting-row">
-                <div class="info">
-                  <div class="label">当前登录账号</div>
-                  <div class="desc">{{ currentUser.username }} (UID: {{ currentUser.id }})</div>
+          <div class="account-section">
+            <h2 class="section-title">账号安全</h2>
+            <div class="account-card">
+              <div class="user-info">
+                <div class="avatar-wrapper">
+                  <el-avatar :size="64" :src="currentUser.avatar">
+                    {{ currentUser.nickname?.charAt(0) || currentUser.username?.charAt(0) }}
+                  </el-avatar>
+                  <span class="status-dot"></span>
+                </div>
+                <div class="user-details">
+                  <h3 class="username">{{ currentUser.nickname || currentUser.username }}</h3>
+                  <p class="user-id">UID: {{ currentUser.id }}</p>
+                  <p class="user-email">{{ currentUser.email || '未设置邮箱' }}</p>
                 </div>
               </div>
-              <div class="setting-row">
-                <div class="info">
-                  <div class="label">修改登录密码</div>
-                  <div class="desc">建议定期修改密码以保障账号安全</div>
-                </div>
-                <el-button type="primary" plain size="small" @click="showChangePassword = true">修改密码</el-button>
+              <div class="action-buttons">
+                <el-button type="primary" class="action-btn primary-btn" @click="showChangePassword = true">
+                  <el-icon><Lock /></el-icon>
+                  修改密码
+                </el-button>
+                <el-button class="action-btn" @click="handleEditProfile">
+                  <el-icon><Edit /></el-icon>
+                  编辑资料
+                </el-button>
               </div>
             </div>
           </div>
         </template>
 
         <template v-else-if="activeMenu === 'notification'">
-          <div class="section-title">消息通知</div>
-          <div class="setting-group">
-            <div class="setting-card">
-              <div class="setting-row">
-                <div class="info">
-                  <div class="label">新消息提醒</div>
-                  <div class="desc">在桌面显示新消息通知</div>
+          <div class="notification-section">
+            <h2 class="section-title">消息通知</h2>
+            <div class="settings-grid">
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="icon-wrapper bell-bg">
+                    <el-icon><Bell /></el-icon>
+                  </div>
+                  <div class="setting-info">
+                    <h4>新消息提醒</h4>
+                    <p>在桌面显示新消息通知</p>
+                  </div>
                 </div>
-                <el-switch v-model="localSettings.notifications.enabled" />
+                <el-switch v-model="localSettings.notifications.enabled" size="large" />
               </div>
-              <div class="setting-row">
-                <div class="info">
-                  <div class="label">声音提醒</div>
-                  <div class="desc">播放新消息提示音</div>
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="icon-wrapper sound-bg">
+                    <el-icon><VideoPlay /></el-icon>
+                  </div>
+                  <div class="setting-info">
+                    <h4>声音提醒</h4>
+                    <p>播放新消息提示音</p>
+                  </div>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="setting-controls">
                   <el-button link type="primary" size="small" @click="testSound" v-if="localSettings.notifications.sound">
-                    <el-icon class="mr-1"><VideoPlay /></el-icon>测试音效
+                    <el-icon><VideoPlay /></el-icon>
+                    测试音效
                   </el-button>
-                  <el-switch v-model="localSettings.notifications.sound" />
+                  <el-switch v-model="localSettings.notifications.sound" size="large" />
                 </div>
               </div>
             </div>
-            <div class="section-title mt-6">快捷键</div>
-            <div class="setting-card">
-              <div class="setting-row">
-                <div class="info">
-                  <div class="label">发送消息</div>
-                  <div class="desc">设置发送消息的快捷按键</div>
+
+            <h2 class="section-title mt-6">快捷键</h2>
+            <div class="settings-grid">
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="icon-wrapper keyboard-bg">
+                    <el-icon><Keyboard /></el-icon>
+                  </div>
+                  <div class="setting-info">
+                    <h4>发送消息</h4>
+                    <p>设置发送消息的快捷按键</p>
+                  </div>
                 </div>
-                <el-select v-model="localSettings.shortcuts.send" size="small" style="width: 120px">
+                <el-select v-model="localSettings.shortcuts.send" size="large" style="width: 160px">
                   <el-option label="Enter" value="enter" />
                   <el-option label="Ctrl + Enter" value="ctrl-enter" />
                 </el-select>
               </div>
-              <div class="setting-row">
-                <div class="info">
-                  <div class="label">截图快捷键</div>
-                  <div class="desc">全局唤起截图工具 (模拟)</div>
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="icon-wrapper screenshot-bg">
+                    <el-icon><Camera /></el-icon>
+                  </div>
+                  <div class="setting-info">
+                    <h4>截图快捷键</h4>
+                    <p>全局唤起截图工具 (模拟)</p>
+                  </div>
                 </div>
                 <code class="shortcut-key">Alt + A</code>
               </div>
-              <div class="setting-row">
-                <div class="info">
-                  <div class="label">快捷唤起</div>
-                  <div class="desc">快速显示/隐藏 IM 窗口</div>
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="icon-wrapper quick-bg">
+                    <el-icon><Position /></el-icon>
+                  </div>
+                  <div class="setting-info">
+                    <h4>快捷唤起</h4>
+                    <p>快速显示/隐藏 IM 窗口</p>
+                  </div>
                 </div>
                 <code class="shortcut-key">Alt + Q</code>
               </div>
@@ -100,50 +135,77 @@
         </template>
 
         <template v-else-if="activeMenu === 'privacy'">
-          <div class="section-title">隐私与安全</div>
-          <div class="setting-group">
-            <div class="setting-card">
-              <div class="setting-row">
-                <div class="info">
-                  <div class="label">在线状态</div>
-                  <div class="desc">允许他人查看我的在线/离线状态</div>
+          <div class="privacy-section">
+            <h2 class="section-title">隐私与安全</h2>
+            <div class="settings-grid">
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="icon-wrapper status-bg">
+                    <el-icon><View /></el-icon>
+                  </div>
+                  <div class="setting-info">
+                    <h4>在线状态</h4>
+                    <p>允许他人查看我的在线/离线状态</p>
+                  </div>
                 </div>
-                <el-switch v-model="localSettings.privacy.showStatus" />
+                <el-switch v-model="localSettings.privacy.showStatus" size="large" />
               </div>
-              <div class="setting-row">
-                <div class="info">
-                  <div class="label">已读回执</div>
-                  <div class="desc">发送消息已读回执给对方</div>
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="icon-wrapper receipt-bg">
+                    <el-icon><Document /></el-icon>
+                  </div>
+                  <div class="setting-info">
+                    <h4>已读回执</h4>
+                    <p>发送消息已读回执给对方</p>
+                  </div>
                 </div>
-                <el-switch v-model="localSettings.privacy.readReceipt" />
+                <el-switch v-model="localSettings.privacy.readReceipt" size="large" />
               </div>
             </div>
           </div>
         </template>
 
         <template v-else-if="activeMenu === 'general'">
-          <div class="section-title">通用设置</div>
-          <div class="setting-group">
-            <div class="setting-card">
-              <div class="setting-row">
-                <div class="info">
-                  <div class="label">外观主题</div>
-                  <div class="desc">切换系统的视觉配色</div>
+          <div class="general-section">
+            <h2 class="section-title">通用设置</h2>
+            <div class="settings-grid">
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="icon-wrapper theme-bg">
+                    <el-icon><Sunny /></el-icon>
+                  </div>
+                  <div class="setting-info">
+                    <h4>外观主题</h4>
+                    <p>切换系统的视觉配色</p>
+                  </div>
                 </div>
-                <div class="theme-picker">
-                  <el-radio-group v-model="localSettings.general.theme" size="small">
-                    <el-radio-button label="light">浅色</el-radio-button>
-                    <el-radio-button label="dark">深色</el-radio-button>
-                    <el-radio-button label="auto">跟随系统</el-radio-button>
-                  </el-radio-group>
-                </div>
+                <el-radio-group v-model="localSettings.general.theme" size="large">
+                  <el-radio-button label="light">
+                    <el-icon><Sunny /></el-icon>
+                    浅色
+                  </el-radio-button>
+                  <el-radio-button label="dark">
+                    <el-icon><Moon /></el-icon>
+                    深色
+                  </el-radio-button>
+                  <el-radio-button label="auto">
+                    <el-icon><Monitor /></el-icon>
+                    跟随系统
+                  </el-radio-button>
+                </el-radio-group>
               </div>
-              <div class="setting-row">
-                <div class="info">
-                  <div class="label">多语言</div>
-                  <div class="desc">切换系统显示语言</div>
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="icon-wrapper language-bg">
+                    <el-icon><Position /></el-icon>
+                  </div>
+                  <div class="setting-info">
+                    <h4>多语言</h4>
+                    <p>切换系统显示语言</p>
+                  </div>
                 </div>
-                <el-select v-model="localSettings.general.language" style="width: 120px" size="small">
+                <el-select v-model="localSettings.general.language" style="width: 160px" size="large">
                   <el-option label="简体中文" value="zh-CN" />
                   <el-option label="English" value="en-US" />
                 </el-select>
@@ -153,12 +215,34 @@
         </template>
 
         <template v-else-if="activeMenu === 'about'">
-          <div class="section-title">关于 IM</div>
-          <div class="about-content">
-            <div class="logo">IM</div>
-            <div class="version">版本: v4.1.0</div>
-            <div class="copyright">© 2025 RuoYi-IM Team. All rights reserved.</div>
-            <el-button link type="primary" class="mt-4" @click="checkUpdate">检查更新</el-button>
+          <div class="about-section">
+            <h2 class="section-title">关于 IM</h2>
+            <div class="about-card">
+              <div class="app-logo">
+                <div class="logo-inner">IM</div>
+              </div>
+              <div class="version-info">
+                <div class="version-row">
+                  <span class="label">当前版本</span>
+                  <span class="value">v4.1.0</span>
+                </div>
+                <div class="version-row">
+                  <span class="label">更新日期</span>
+                  <span class="value">2025-01-25</span>
+                </div>
+                <div class="version-row">
+                  <span class="label">开发团队</span>
+                  <span class="value">RuoYi-IM Team</span>
+                </div>
+              </div>
+              <div class="copyright">
+                © 2025 RuoYi-IM Team. All rights reserved.
+              </div>
+              <el-button type="primary" class="check-update-btn" @click="checkUpdate">
+                <el-icon><Refresh /></el-icon>
+                检查更新
+              </el-button>
+            </div>
           </div>
         </template>
       </div>
@@ -172,7 +256,7 @@ import { ref, watch, reactive, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useTheme } from '@/composables/useTheme'
 import { ElMessage } from 'element-plus'
-import { VideoPlay } from '@element-plus/icons-vue'
+import { VideoPlay, Lock, Edit, Bell, Camera, Position, View, Document, Sunny, Moon, Monitor, Refresh } from '@element-plus/icons-vue'
 import ChangePasswordDialog from '@/components/Common/ChangePasswordDialog.vue'
 
 const props = defineProps({
@@ -187,9 +271,6 @@ const showChangePassword = ref(false)
 const activeMenu = ref('account')
 const { isDark, themeMode, setThemeMode } = useTheme()
 
-// 移除这里的提前调用，移动到下方定义后
-// ...
-
 const menuItems = [
   { id: 'account', label: '账号安全', icon: 'manage_accounts' },
   { id: 'notification', label: '通知设置', icon: 'notifications' },
@@ -200,48 +281,34 @@ const menuItems = [
 
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 
-// 使用 Store 中的设置
 const settings = computed(() => store.state.im.settings)
 
-// 更新设置的方法
-const updateSetting = (key, value) => {
-  const newSettings = { ...settings.value }
-  newSettings[key] = { ...newSettings[key], ...value }
-  store.commit('im/UPDATE_SETTINGS', newSettings)
-}
-
-// 代理 reactive 对象以保持模板兼容性 (或者直接修改模板中的绑定)
-// 为了不修改大规模模板，我们使用一个监听器同步
 const localSettings = reactive(JSON.parse(JSON.stringify(settings.value)))
 
-// 核心同步逻辑：本地修改同步到 Store
 watch(localSettings, (newVal) => {
-  // 只有当本地值与 Store 值不一致时才提交，防止死循环
   if (JSON.stringify(newVal) !== JSON.stringify(settings.value)) {
     store.commit('im/UPDATE_SETTINGS', JSON.parse(JSON.stringify(newVal)))
   }
 }, { deep: true })
 
-// 远端/Store 变化同步回本地
 watch(() => settings.value, (newVal) => {
   if (JSON.stringify(newVal) !== JSON.stringify(localSettings)) {
     Object.assign(localSettings, JSON.parse(JSON.stringify(newVal)))
   }
 }, { deep: true })
 
-// 同步主题设置到 Hook
 watch(() => localSettings.general.theme, (val) => {
   if (val !== themeMode.value) {
     setThemeMode(val)
   }
 }, { immediate: true })
 
-// 移除本地冗余逻辑，由 Vuex 统一管理
-// ...
-
 const testSound = () => {
   ElMessage.success('测试音效播放中...')
-  // 实际项目中可以播放一段短促的提示音
+}
+
+const handleEditProfile = () => {
+  ElMessage.info('编辑资料功能开发中...')
 }
 
 const checkUpdate = () => {
@@ -260,159 +327,457 @@ watch(visible, (val) => {
 </script>
 
 <style scoped lang="scss">
-.system-settings-dialog :deep(.el-dialog__body) {
-  padding: 0;
-  height: 480px;
+.system-settings-dialog {
+  :deep(.el-dialog__body) {
+    padding: 0;
+    height: 560px;
+  }
+
+  :deep(.el-dialog__header) {
+    display: none;
+  }
+
+  :deep(.el-dialog) {
+    border-radius: var(--dt-radius-2xl);
+  }
 }
 
 .settings-container {
   display: flex;
+  flex-direction: column;
   height: 100%;
 }
 
-.settings-aside {
-  width: 160px;
-  background: #f8fafc;
-  border-right: 1px solid #f2f3f5;
-  padding: 16px 8px;
+.tabs-header {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  
-  .dark & { background: #0f172a; border-right-color: #334155; }
+  gap: 8px;
+  padding: 20px 24px;
+  background: var(--dt-bg-body);
+  border-bottom: 1px solid var(--dt-border-light);
 
-  .menu-item {
+  .tab-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    font-size: 14px;
-    color: #4b5563;
+    gap: 8px;
+    padding: 16px 24px;
+    font-size: 15px;
+    color: var(--dt-text-secondary);
     cursor: pointer;
-    transition: all 0.2s ease;
-    border-radius: 8px;
-    
-    .dark & { color: #94a3b8; }
+    transition: all var(--dt-transition-fast);
+    border-radius: var(--dt-radius-xl);
+    position: relative;
+    font-weight: 500;
 
-    .menu-icon { 
-      font-size: 20px; 
-      color: #64748b; 
-      transition: all 0.2s;
+    .tab-icon {
+      font-size: 22px;
+      transition: all var(--dt-transition-fast);
     }
-    
-    &:hover { 
-      background: rgba(0,0,0,0.04); 
-      color: #1f2329;
-      .dark & { background: rgba(255,255,255,0.06); color: #f1f5f9; } 
+
+    &:hover {
+      background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: var(--dt-shadow-3);
+
+      .tab-icon {
+        color: #fff;
+      }
     }
-    
+
     &.active {
-      background: #eff6ff;
-      color: #0089ff;
+      background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+      color: #fff;
       font-weight: 600;
-      .menu-icon { color: #0089ff; transform: scale(1.1); }
-      .dark & { 
-        background: rgba(0, 137, 255, 0.15); 
-        color: #38bdf8; 
-        .menu-icon { color: #38bdf8; } 
+      box-shadow: var(--dt-shadow-4);
+      transform: translateY(-2px);
+
+      .tab-icon {
+        color: #fff;
       }
     }
   }
 }
 
-.settings-main {
+.content-area {
   flex: 1;
   padding: 32px;
-  background: #fff;
+  background: var(--dt-bg-card);
   overflow-y: auto;
   scroll-behavior: smooth;
-  
-  .dark & { background: #1e293b; color: #f1f5f9; }
 
   .section-title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     margin-bottom: 24px;
-    color: #1f2329;
-    .dark & { color: #f8fafc; }
+    color: var(--dt-text-primary);
+  }
+
+  .mt-6 {
+    margin-top: 32px;
   }
 }
 
-.setting-group {
-  display: flex;
-  flex-direction: column;
+.account-section {
+  .account-card {
+    background: linear-gradient(135deg, var(--dt-bg-body) 0%, var(--dt-bg-card) 100%);
+    border-radius: var(--dt-radius-2xl);
+    padding: 40px;
+    border: 1.5px solid var(--dt-border-light);
+    box-shadow: var(--dt-shadow-3);
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 32px;
+
+      .avatar-wrapper {
+        position: relative;
+        padding: 4px;
+        background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+        border-radius: 50%;
+        box-shadow: 0 8px 24px rgba(0, 137, 255, 0.3);
+
+        .status-dot {
+          position: absolute;
+          bottom: 4px;
+          right: 4px;
+          width: 16px;
+          height: 16px;
+          background: #22c55e;
+          border: 3px solid #fff;
+          border-radius: 50%;
+          box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+
+          .dark & {
+            border-color: var(--dt-bg-card);
+          }
+        }
+      }
+
+      .user-details {
+        .username {
+          font-size: 22px;
+          font-weight: 700;
+          color: var(--dt-text-primary);
+          margin-bottom: 10px;
+        }
+
+        .user-id {
+          font-size: 14px;
+          color: var(--dt-text-secondary);
+          margin-bottom: 6px;
+        }
+
+        .user-email {
+          font-size: 14px;
+          color: var(--dt-text-tertiary);
+        }
+      }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 16px;
+
+      .action-btn {
+        flex: 1;
+        height: 48px;
+        font-size: 15px;
+        border-radius: var(--dt-radius-xl);
+        transition: all var(--dt-transition-fast);
+        font-weight: 600;
+
+        &.primary-btn {
+          background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+          border: none;
+          color: #fff;
+          box-shadow: var(--dt-shadow-4);
+
+          &:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--dt-shadow-5);
+          }
+        }
+
+        &:not(.primary-btn) {
+          background: var(--dt-bg-card);
+          border: 2px solid var(--dt-border-light);
+          color: var(--dt-text-secondary);
+
+          &:hover {
+            border-color: var(--dt-brand-color);
+            color: var(--dt-brand-color);
+            transform: translateY(-2px);
+            box-shadow: var(--dt-shadow-3);
+          }
+        }
+      }
+    }
+  }
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   gap: 16px;
 }
 
 .setting-card {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 16px 20px;
-  border: 1px solid #f1f5f9;
-  transition: all 0.2s;
-  
-  .dark & { background: #0f172a; border-color: #334155; }
-  
+  background: var(--dt-bg-body);
+  border-radius: var(--dt-radius-xl);
+  padding: 20px;
+  border: 1.5px solid var(--dt-border-light);
+  transition: all var(--dt-transition-fast);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
   &:hover {
-    border-color: #e2e8f0;
-    .dark & { border-color: #475569; }
+    border-color: var(--dt-brand-color);
+    transform: translateY(-2px);
+    box-shadow: var(--dt-shadow-3);
   }
 
-  .setting-row {
+  .setting-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    
-    &:not(:last-child) {
-      margin-bottom: 16px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #f1f5f9;
-      .dark & { border-bottom-color: #1e293b; }
+    gap: 16px;
+    flex: 1;
+
+    .icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--dt-radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #fff;
+      flex-shrink: 0;
+
+      &.bell-bg { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+      &.sound-bg { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
+      &.keyboard-bg { background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); }
+      &.screenshot-bg { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
+      &.quick-bg { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+      &.status-bg { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
+      &.receipt-bg { background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%); }
+      &.theme-bg { background: linear-gradient(135deg, #f97316 0%, #fb923c 100%); }
+      &.language-bg { background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%); }
     }
-    
-    .info {
-      .label { 
-        font-size: 14px; 
-        font-weight: 600; 
-        color: #1f2329; 
-        margin-bottom: 4px; 
-        .dark & { color: #f1f5f9; } 
+
+    .setting-info {
+      h4 {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--dt-text-primary);
+        margin-bottom: 4px;
       }
-      .desc { font-size: 12px; color: #64748b; line-height: 1.4; }
+
+      p {
+        font-size: 13px;
+        color: var(--dt-text-secondary);
+        line-height: 1.4;
+      }
     }
+  }
+
+  .setting-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 }
 
-.about-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 20px;
-  background: #f8fafc;
-  border-radius: 16px;
-  .dark & { background: #0f172a; }
-  
-  .logo {
-    width: 72px; height: 72px; background: linear-gradient(135deg, #0089ff 0%, #00d2ff 100%);
-    color: #fff; border-radius: 20px; display: flex; align-items: center; justify-content: center;
-    font-size: 28px; font-weight: 800; margin-bottom: 20px;
-    box-shadow: 0 8px 20px rgba(0, 137, 255, 0.25);
+.about-section {
+  .about-card {
+    background: var(--dt-bg-body);
+    border-radius: var(--dt-radius-2xl);
+    padding: 48px;
+    text-align: center;
+    border: 1.5px solid var(--dt-border-light);
+
+    .app-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 96px;
+      height: 96px;
+      background: linear-gradient(160deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+      border-radius: var(--dt-radius-2xl);
+      margin-bottom: 24px;
+      box-shadow: 0 12px 32px rgba(22, 119, 255, 0.3);
+
+      .logo-inner {
+        font-size: 36px;
+        font-weight: 800;
+        color: #fff;
+      }
+    }
+
+    .version-info {
+      margin-bottom: 24px;
+
+      .version-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+
+        .label {
+          font-size: 14px;
+          color: var(--dt-text-secondary);
+        }
+
+        .value {
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--dt-text-primary);
+        }
+      }
+    }
+
+    .copyright {
+      font-size: 13px;
+      color: var(--dt-text-tertiary);
+      margin-bottom: 24px;
+    }
+
+    .check-update-btn {
+      background: var(--dt-brand-color);
+      border: none;
+      color: #fff;
+      height: 44px;
+      padding: 0 32px;
+      border-radius: var(--dt-radius-lg);
+      font-size: 15px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+      transition: all var(--dt-transition-fast);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(22, 119, 255, 0.4);
+      }
+    }
   }
-  .version { font-size: 16px; font-weight: 700; color: #1f2329; margin-bottom: 8px; .dark & { color: #f1f5f9; } }
-  .copyright { font-size: 12px; color: #64748b; }
 }
 
 .shortcut-key {
-  background: #f0f2f5;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 13px;
-  color: #1f2329;
-  border: 1px solid #dcdfe6;
-  .dark & { background: #1e293b; color: #f1f5f9; border-color: #475569; }
+  background: var(--dt-bg-card);
+  padding: 8px 16px;
+  border-radius: var(--dt-radius-md);
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dt-text-primary);
+  border: 1px solid var(--dt-border-color);
 }
 
-.scrollbar-thin::-webkit-scrollbar { width: 4px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
+.scrollbar-thin::-webkit-scrollbar { width: 6px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.1);
+  border-radius: 3px;
+}
+
+// 暗色模式
+.dark .system-settings-dialog {
+  .tabs-header {
+    background: var(--dt-bg-hover-dark);
+    border-bottom-color: var(--dt-border-dark);
+
+    .tab-item {
+      color: var(--dt-text-secondary-dark);
+
+      &:hover {
+        background: var(--dt-bg-active-dark);
+      }
+    }
+  }
+
+  .content-area {
+    background: var(--dt-bg-card-dark);
+
+    .section-title {
+      color: var(--dt-text-primary-dark);
+    }
+  }
+
+  .account-card {
+    background: var(--dt-bg-hover-dark);
+    border-color: var(--dt-border-dark);
+
+    .user-details {
+      .username {
+        color: var(--dt-text-primary-dark);
+      }
+
+      .user-id {
+        color: var(--dt-text-secondary-dark);
+      }
+
+      .user-email {
+        color: var(--dt-text-tertiary-dark);
+      }
+    }
+
+    .action-buttons .action-btn:not(.primary-btn) {
+      background: var(--dt-bg-card-dark);
+      border-color: var(--dt-border-dark);
+      color: var(--dt-text-secondary-dark);
+
+      &:hover {
+        border-color: var(--dt-brand-color);
+        color: var(--dt-brand-color);
+      }
+    }
+  }
+
+  .setting-card {
+    background: var(--dt-bg-hover-dark);
+    border-color: var(--dt-border-dark);
+
+    .setting-header .setting-info {
+      h4 {
+        color: var(--dt-text-primary-dark);
+      }
+
+      p {
+        color: var(--dt-text-secondary-dark);
+      }
+    }
+  }
+
+  .about-card {
+    background: var(--dt-bg-hover-dark);
+    border-color: var(--dt-border-dark);
+
+    .version-info .version-row {
+      .label {
+        color: var(--dt-text-secondary-dark);
+      }
+
+      .value {
+        color: var(--dt-text-primary-dark);
+      }
+    }
+
+    .copyright {
+      color: var(--dt-text-tertiary-dark);
+    }
+  }
+
+  .shortcut-key {
+    background: var(--dt-bg-card-dark);
+    color: var(--dt-text-primary-dark);
+    border-color: var(--dt-border-dark);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+  }
+}
 </style>

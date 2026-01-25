@@ -2,48 +2,58 @@
   <div class="contacts-panel">
     <!-- 左侧边栏 -->
     <aside class="contacts-sidebar">
+      <!-- 头部 -->
       <div class="sidebar-header">
-        <h1 class="sidebar-title">通讯录</h1>
-        <button
-          @click="showAddDialog = true"
-          class="add-btn"
-          title="添加联系人/群组"
-        >
-          <span class="material-icons-outlined">add</span>
-        </button>
+        <h1 class="sidebar-title">
+          <span class="material-icons-outlined title-icon">contacts</span>
+          通讯录
+        </h1>
+        <el-tooltip content="添加联系人" placement="right">
+          <button class="add-btn" @click="showAddDialog = true">
+            <span class="material-icons-outlined">person_add</span>
+          </button>
+        </el-tooltip>
       </div>
 
+      <!-- 搜索框 -->
       <div class="sidebar-search">
         <div class="search-input-wrapper">
           <span class="material-icons-outlined search-icon">search</span>
           <input
             v-model="searchQuery"
             class="search-input"
-            placeholder="搜索部门或成员"
+            placeholder="搜索联系人、群组..."
             type="text"
           />
+          <span v-if="searchQuery" class="clear-btn" @click="searchQuery = ''">
+            <span class="material-icons-outlined">close</span>
+          </span>
         </div>
       </div>
 
+      <!-- 快捷导航 -->
       <div class="sidebar-content">
-        <!-- 快捷导航 -->
         <div class="quick-nav">
           <div
             class="nav-item"
             :class="{ active: view === 'new-friends' }"
             @click="handleNav('new-friends')"
           >
+            <div class="nav-indicator"></div>
             <div class="nav-icon new-friends-icon">
               <span class="material-icons-outlined">person_add</span>
             </div>
             <span class="nav-label">新的朋友</span>
-            <el-badge v-if="requestCount > 0" :value="requestCount" class="nav-badge" />
+            <div v-if="requestCount > 0" class="nav-badge">
+              {{ requestCount > 99 ? '99+' : requestCount }}
+            </div>
           </div>
           <div
             class="nav-item"
             :class="{ active: view === 'groups' }"
             @click="handleNav('groups')"
           >
+            <div class="nav-indicator"></div>
             <div class="nav-icon groups-icon">
               <span class="material-icons-outlined">groups</span>
             </div>
@@ -53,7 +63,10 @@
 
         <!-- 组织架构 -->
         <div class="org-section">
-          <div class="org-title">组织架构</div>
+          <div class="org-section-header">
+            <span class="org-title">组织架构</span>
+            <span class="material-icons-outlined org-icon">corporate_fare</span>
+          </div>
           <div class="org-tree">
             <OrganizationTree
               v-model:selected-dept="selectedDept"
@@ -70,11 +83,17 @@
       <template v-if="view === 'department' && selectedDept">
         <header class="main-header">
           <div class="header-left">
-            <el-breadcrumb separator="/">
-              <el-breadcrumb-item>通讯录</el-breadcrumb-item>
+            <el-breadcrumb separator="/" class="header-breadcrumb">
+              <el-breadcrumb-item>
+                <span class="material-icons-outlined breadcrumb-icon">home</span>
+                通讯录
+              </el-breadcrumb-item>
               <el-breadcrumb-item>{{ selectedDept.name }}</el-breadcrumb-item>
             </el-breadcrumb>
-            <span class="member-count">{{ selectedDept.memberCount || 0 }} 人</span>
+            <div class="member-count">
+              <span class="material-icons-outlined count-icon">people</span>
+              {{ selectedDept.memberCount || 0 }} 人
+            </div>
           </div>
           <div class="header-right">
             <div class="avatar-preview">
@@ -83,69 +102,68 @@
                 :key="member.id"
                 class="preview-avatar"
                 :style="{ backgroundColor: member.color }"
+                :title="member.name"
               >
                 {{ member.name?.charAt(0) }}
               </div>
-              <div class="preview-avatar add-more" @click="showAddMember = true">
-                <span class="material-icons-outlined">add</span>
+              <div v-if="deptMembers.length > 3" class="preview-avatar more-count" title="更多成员">
+                +{{ deptMembers.length - 3 }}
               </div>
             </div>
             <div class="divider"></div>
-            <button class="settings-btn">
-              <span class="material-icons-outlined">settings</span>
-              <span>设置</span>
-            </button>
+            <el-tooltip content="部门设置" placement="bottom">
+              <button class="icon-btn">
+                <span class="material-icons-outlined">settings</span>
+              </button>
+            </el-tooltip>
+            <el-tooltip content="刷新" placement="bottom">
+              <button class="icon-btn" @click="loadDeptMembers(selectedDept.id)">
+                <span class="material-icons-outlined">refresh</span>
+              </button>
+            </el-tooltip>
           </div>
         </header>
 
         <div class="main-content">
-          <div class="members-table">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>成员信息</th>
-                  <th>职务</th>
-                  <th class="contact-col">联系方式</th>
-                  <th class="status-col">状态</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="member in deptMembers"
-                  :key="member.id"
-                  class="member-row"
-                  @click="handleMemberClick(member)"
-                >
-                  <td class="info-col">
-                    <div class="member-info">
-                      <DingtalkAvatar
-                        :name="member.name"
-                        :user-id="member.id"
-                        :size="32"
-                        shape="square"
-                        custom-class="member-avatar-item"
-                      />
-                      <div>
-                        <div class="member-name">{{ member.name }}</div>
-                        <div class="member-position-mobile">{{ member.position }}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="position-tag">{{ member.position }}</span>
-                  </td>
-                  <td class="contact-col">
-                    <span class="contact-info">{{ member.phone || member.mobile }}</span>
-                  </td>
-                  <td class="status-col">
-                    <div class="status-indicator" :class="member.online ? 'online' : 'offline'">
-                      <div class="status-dot"></div>
-                      <span class="status-text">{{ member.online ? '在线' : '离线' }}</span>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div v-if="deptMembers.length === 0" class="empty-state">
+            <span class="material-icons-outlined empty-icon">person_off</span>
+            <h3 class="empty-title">暂无成员</h3>
+            <p class="empty-text">该部门还没有成员</p>
+          </div>
+          <div v-else class="members-grid">
+            <div
+              v-for="member in deptMembers"
+              :key="member.id"
+              class="member-card"
+              @click="handleMemberClick(member)"
+            >
+              <div class="member-card-header">
+                <DingtalkAvatar
+                  :name="member.name"
+                  :user-id="member.id"
+                  :size="48"
+                  shape="square"
+                  custom-class="member-avatar"
+                />
+                <div class="online-indicator" :class="{ online: member.online }"></div>
+              </div>
+              <div class="member-card-body">
+                <h4 class="member-name">{{ member.name }}</h4>
+                <p class="member-position">{{ member.position || '员工' }}</p>
+                <div class="member-actions">
+                  <el-tooltip content="发消息" placement="top">
+                    <button class="action-btn" @click.stop="handleChat(member)">
+                      <span class="material-icons-outlined">chat_bubble</span>
+                    </button>
+                  </el-tooltip>
+                  <el-tooltip content="查看详情" placement="top">
+                    <button class="action-btn">
+                      <span class="material-icons-outlined">visibility</span>
+                    </button>
+                  </el-tooltip>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </template>
@@ -162,25 +180,29 @@
 
       <!-- 默认空状态 -->
       <template v-else>
-        <div class="empty-state">
-          <span class="material-icons-outlined empty-icon">group</span>
-          <p class="empty-text">请选择一个部门查看成员</p>
+        <div class="empty-state-large">
+          <div class="empty-illustration">
+            <span class="material-icons-outlined empty-icon">corporate_fare</span>
+            <div class="empty-decoration"></div>
+          </div>
+          <h3 class="empty-title">欢迎使用通讯录</h3>
+          <p class="empty-text">请在左侧选择部门查看成员</p>
         </div>
       </template>
     </main>
 
     <!-- Dialogs -->
     <AddContactDialog v-model:visible="showAddDialog" />
-    
+
     <!-- 好友详情弹窗 -->
-    <UserProfileDialog 
-      v-model="showUserDialog" 
-      :user-id="selectedUserId" 
+    <UserProfileDialog
+      v-model="showUserDialog"
+      :user-id="selectedUserId"
     />
-    
+
     <!-- 群组详情弹窗 -->
-    <GroupProfileDialog 
-      v-model="showGroupDialog" 
+    <GroupProfileDialog
+      v-model="showGroupDialog"
       :group-id="selectedGroupId"
       @refresh="loadGroups"
     />
@@ -189,8 +211,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { getFriendRequests } from '@/api/im/contact'
 import { getDepartmentMembers } from '@/api/im/organization'
+import { createConversation } from '@/api/im/conversation'
 import AddContactDialog from '@/components/Contacts/AddContactDialog.vue'
 import OrganizationTree from '@/components/Contacts/OrganizationTree.vue'
 import NewFriendsView from '@/components/Contacts/NewFriendsView.vue'
@@ -199,11 +224,11 @@ import UserProfileDialog from '@/components/Contacts/UserProfileDialog.vue'
 import GroupProfileDialog from '@/components/Contacts/GroupProfileDialog.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
+const router = useRouter()
 const view = ref('department') // department | new-friends | groups
 const selectedDept = ref(null)
 const searchQuery = ref('')
 const showAddDialog = ref(false)
-const showAddMember = ref(false)
 const requestCount = ref(0)
 
 // 详情弹窗控制
@@ -238,6 +263,25 @@ const handleMemberClick = (member) => {
   showUserDialog.value = true
 }
 
+const handleChat = async (member) => {
+  try {
+    const res = await createConversation({
+      type: 'PRIVATE',
+      targetId: member.id || member.userId
+    })
+    if (res.code === 200) {
+      // 切换到聊天面板
+      window.dispatchEvent(new CustomEvent('switch-to-chat', {
+        detail: { conversation: res.data }
+      }))
+      ElMessage.success('已发起聊天')
+    }
+  } catch (e) {
+    console.error('发起聊天失败', e)
+    ElMessage.error('无法发起聊天')
+  }
+}
+
 const handleGroupSelect = (group) => {
   selectedGroupId.value = group.id
   showGroupDialog.value = true
@@ -264,7 +308,7 @@ const loadDeptMembers = async (deptId) => {
 
 const getAvatarColor = (name) => {
   const colors = [
-    '#2563eb', '#0ea5e9', '#ec4899', '#6366f1',
+    '#1677ff', '#0ea5e9', '#ec4899', '#6366f1',
     '#f97316', '#14b8a6', '#8b5cf6', '#eab308'
   ]
   let hash = 0
@@ -294,102 +338,279 @@ const loadGroups = () => {
 
 onMounted(() => {
   checkRequests()
-  // 默认选中第一个部门
-  // 可以在这里初始化 selectedDept
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+// ============================================================================
+// 容器
+// ============================================================================
 .contacts-panel {
   display: flex;
   height: 100%;
   flex: 1;
   min-width: 0;
-  background: #f4f7f9;
+  background: var(--dt-bg-body);
 }
 
-/* 左侧边栏 */
+// ============================================================================
+// 左侧边栏
+// ============================================================================
 .contacts-sidebar {
-  width: 288px;
-  background: #fff;
-  border-right: 1px solid #e6e6e6;
+  width: 280px;
+  background: var(--dt-bg-card);
+  border-right: 1px solid var(--dt-border-light);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
 }
 
 .sidebar-header {
-  padding: 12px 16px;
+  padding: 16px 16px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .sidebar-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 18px;
   font-weight: 600;
-  color: #262626;
+  color: var(--dt-text-primary);
   margin: 0;
+
+  .title-icon {
+    font-size: 20px;
+    color: var(--dt-brand-color);
+  }
 }
 
 .add-btn {
-  color: #8c8c8c;
-  background: transparent;
-  padding: 4px;
-  border-radius: 4px;
+  width: 36px;
+  height: 36px;
+  color: var(--dt-text-secondary);
+  background: var(--dt-bg-body);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
-  border: none;
   cursor: pointer;
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    color: var(--dt-brand-color);
+    border-color: var(--dt-brand-color);
+    background: var(--dt-brand-bg);
+    transform: scale(1.05);
+  }
+
+  .material-icons-outlined {
+    font-size: 18px;
+  }
 }
 
-.add-btn:hover {
-  color: #1677ff;
-  background: rgba(0, 0, 0, 0.04);
-}
-
+// ============================================================================
+// 搜索框
+// ============================================================================
 .sidebar-search {
   padding: 0 12px 12px;
 }
 
-.search-input {
-  width: 100%;
-  background: #f5f5f5;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  padding: 6px 12px 6px 32px;
-  font-size: 13px;
-  color: #262626;
-  outline: none;
-  transition: all 0.2s;
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .search-icon {
   position: absolute;
   left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #bfbfbf;
-  font-size: 16px;
+  color: var(--dt-text-quaternary);
+  font-size: 18px;
+  pointer-events: none;
 }
 
-/* ... */
+.search-input {
+  width: 100%;
+  height: 38px;
+  background: var(--dt-bg-body);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-md);
+  padding: 0 36px;
+  font-size: 13px;
+  color: var(--dt-text-primary);
+  outline: none;
+  transition: all var(--dt-transition-base);
+
+  &::placeholder {
+    color: var(--dt-text-quaternary);
+  }
+
+  &:focus {
+    border-color: var(--dt-brand-color);
+    background: var(--dt-bg-card);
+    box-shadow: 0 0 0 2px var(--dt-brand-lighter);
+  }
+}
+
+.clear-btn {
+  position: absolute;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  color: var(--dt-text-quaternary);
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    background: var(--dt-border-color);
+    color: var(--dt-text-secondary);
+  }
+
+  .material-icons-outlined {
+    font-size: 14px;
+  }
+}
+
+// ============================================================================
+// 侧边栏内容
+// ============================================================================
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px;
+}
+
+// 快捷导航
+.quick-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--dt-radius-md);
+  cursor: pointer;
+  transition: all var(--dt-transition-base);
+  color: var(--dt-text-secondary);
+
+  &:hover {
+    background: var(--dt-bg-body);
+    color: var(--dt-text-primary);
+
+    .nav-icon {
+      transform: scale(1.05);
+    }
+  }
+
+  &.active {
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
+    font-weight: 500;
+
+    .nav-indicator {
+      opacity: 1;
+    }
+  }
+}
+
+.nav-indicator {
+  position: absolute;
+  left: 8px;
+  width: 3px;
+  height: 16px;
+  background: var(--dt-brand-color);
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity var(--dt-transition-base);
+}
+
+.nav-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--dt-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform var(--dt-transition-base);
+
+  .material-icons-outlined {
+    font-size: 18px;
+  }
+
+  &.new-friends-icon {
+    background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+    color: #fff;
+  }
+
+  &.groups-icon {
+    background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+    color: #fff;
+  }
+}
+
+.nav-label {
+  flex: 1;
+  font-size: 14px;
+}
+
+.nav-badge {
+  padding: 2px 7px;
+  background: var(--dt-error-color);
+  color: #fff;
+  border-radius: var(--dt-radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 18px;
+  text-align: center;
+}
+
+// 组织架构
+.org-section {
+  margin-top: 8px;
+}
+
+.org-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+}
 
 .org-title {
-  padding: 12px 12px 6px;
   font-size: 12px;
-  font-weight: 500;
-  color: #8c8c8c;
-  /* text-transform: uppercase; */ /* Remove uppercase for softer look */
+  font-weight: 600;
+  color: var(--dt-text-quaternary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.org-icon {
+  font-size: 16px;
+  color: var(--dt-text-quaternary);
 }
 
 .org-tree {
   padding: 0 4px;
 }
 
-/* 右侧主内容 */
+// ============================================================================
+// 右侧主内容
+// ============================================================================
 .contacts-main {
   flex: 1;
   display: flex;
@@ -400,8 +621,8 @@ onMounted(() => {
 .main-header {
   height: 64px;
   padding: 0 24px;
-  background: #fff;
-  border-bottom: 1px solid #e6e6e6;
+  background: var(--dt-bg-card);
+  border-bottom: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -411,91 +632,115 @@ onMounted(() => {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
-.header-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #262626;
-  margin: 0;
+.header-breadcrumb {
+  :deep(.el-breadcrumb__item) {
+    .el-breadcrumb__inner {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      color: var(--dt-text-secondary);
+      font-weight: 500;
+    }
+
+    &:last-child .el-breadcrumb__inner {
+      color: var(--dt-text-primary);
+    }
+  }
+}
+
+.breadcrumb-icon {
+  font-size: 16px;
 }
 
 .member-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 10px;
-  background: #f5f5f5;
-  color: #8c8c8c;
-  border-radius: 4px;
+  background: var(--dt-brand-bg);
+  color: var(--dt-brand-color);
+  border-radius: var(--dt-radius-full);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+
+  .count-icon {
+    font-size: 14px;
+  }
 }
 
 .header-right {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #8c8c8c;
 }
 
 .avatar-preview {
   display: flex;
   align-items: center;
-  margin-right: 8px;
 }
 
 .preview-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid #fff;
+  border: 2px solid var(--dt-bg-card);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   margin-left: -8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
+  box-shadow: var(--dt-shadow-2);
+  transition: transform var(--dt-transition-base);
 
-.preview-avatar:first-child {
-  margin-left: 0;
-}
+  &:hover {
+    transform: translateY(-2px);
+    z-index: 10;
+  }
 
-.preview-avatar.add-more {
-  background: #f5f5f5;
-  color: #bfbfbf;
-  cursor: pointer;
-}
+  &:first-child {
+    margin-left: 0;
+  }
 
-.preview-avatar.add-more:hover {
-  background: #e6e6e6;
+  &.more-count {
+    background: var(--dt-bg-body);
+    color: var(--dt-text-secondary);
+    font-size: 10px;
+  }
 }
 
 .divider {
   width: 1px;
-  height: 16px;
-  background: #d9d9d9;
-  margin: 0 8px;
+  height: 20px;
+  background: var(--dt-border-color);
 }
 
-.settings-btn {
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  color: #595959;
-  font-size: 14px;
-  font-weight: 500;
+  justify-content: center;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
+  color: var(--dt-text-secondary);
+  transition: all var(--dt-transition-base);
 
-.settings-btn:hover {
-  color: #1677ff;
+  &:hover {
+    background: var(--dt-bg-body);
+    color: var(--dt-brand-color);
+  }
+
+  .material-icons-outlined {
+    font-size: 18px;
+  }
 }
 
 .main-content {
@@ -504,203 +749,242 @@ onMounted(() => {
   overflow-y: auto;
 }
 
-.members-table {
-  background: #fff;
-  border-radius: 8px;
-  /* box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); */
-  /* border: 1px solid #e6e6e6; */
-  overflow: hidden;
+// ============================================================================
+// 成员网格
+// ============================================================================
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table thead {
-  background: #f7f9fb;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.table th {
-  padding: 8px 16px;
-  text-align: left;
-  font-size: 12px;
-  font-weight: 500;
-  color: #8c8c8c;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.table tbody tr {
-  border-bottom: 1px solid #f8f8f8;
+.member-card {
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-lg);
+  padding: 16px;
+  box-shadow: var(--dt-shadow-card);
+  transition: all var(--dt-transition-base);
   cursor: pointer;
-  transition: background 0.2s;
+  border: 1px solid transparent;
+
+  &:hover {
+    box-shadow: var(--dt-shadow-card-hover);
+    transform: translateY(-2px);
+    border-color: var(--dt-brand-color);
+
+    .member-actions {
+      opacity: 1;
+    }
+  }
 }
 
-.table td {
-  padding: 10px 16px;
-}
-
-/* ... */
-
-.member-info {
+.member-card-header {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  justify-content: center;
+  margin-bottom: 12px;
+
+  :deep(.member-avatar) {
+    border-radius: var(--dt-radius-md) !important;
+  }
 }
 
-:deep(.member-avatar-item) {
-  border-radius: 6px !important;
+.online-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: calc(50% - 20px);
+  width: 12px;
+  height: 12px;
+  background: var(--dt-text-quaternary);
+  border: 2px solid var(--dt-bg-card);
+  border-radius: 50%;
+  transition: all var(--dt-transition-base);
+
+  &.online {
+    background: var(--dt-success-color);
+    box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+  }
+}
+
+.member-card-body {
+  text-align: center;
 }
 
 .member-name {
   font-size: 14px;
-  color: #262626;
-  line-height: 1.5;
+  font-weight: 600;
+  color: var(--dt-text-primary);
+  margin: 0 0 4px 0;
 }
 
-.member-position-mobile {
+.member-position {
   font-size: 12px;
-  color: #8c8c8c;
-  line-height: 1.2;
-}
-/* ... */
-
-.position-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background: #e6f7ff;
-  color: #1677ff;
+  color: var(--dt-text-tertiary);
+  margin: 0 0 12px 0;
 }
 
-.contact-col {
-  display: none;
+.member-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity var(--dt-transition-base);
 }
 
-.contact-info {
-  font-size: 14px;
-  color: #8c8c8c;
-}
-
-.status-indicator {
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--dt-radius-md);
+  background: var(--dt-bg-body);
+  border: none;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--dt-text-secondary);
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    background: var(--dt-brand-color);
+    color: #fff;
+  }
+
+  .material-icons-outlined {
+    font-size: 16px;
+  }
 }
 
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.status-indicator.online .status-dot {
-  background: #22c55e;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
-}
-
-.status-indicator.offline .status-dot {
-  background: #d9d9d9;
-}
-
-.status-indicator.online .status-text {
-  color: #595959;
-}
-
-.status-indicator.offline .status-text {
-  color: #8c8c8c;
-}
-
-.status-text {
-  font-size: 14px;
-}
-
-/* 空状态 */
+// ============================================================================
+// 空状态
+// ============================================================================
 .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty-state-large {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #bfbfbf;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.empty-illustration {
+  position: relative;
+  margin-bottom: 24px;
 }
 
 .empty-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
+  font-size: 80px;
+  color: var(--dt-border-color);
+}
+
+.empty-decoration {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 6px;
+  background: var(--dt-border-color);
+  border-radius: var(--dt-radius-full);
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--dt-text-primary);
+  margin: 0 0 8px 0;
 }
 
 .empty-text {
   font-size: 14px;
+  color: var(--dt-text-tertiary);
   margin: 0;
 }
 
-/* 响应式 */
-@media (min-width: 768px) {
-  .table th.contact-col,
-  .table td.contact-col {
-    display: table-cell;
+// ============================================================================
+// 暗色模式
+// ============================================================================
+.dark .contacts-panel {
+  background: var(--dt-bg-body-dark);
+}
+
+.dark .contacts-sidebar,
+.dark .main-header {
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-border-dark);
+}
+
+.dark .sidebar-title,
+.dark .member-name {
+  color: var(--dt-text-primary-dark);
+}
+
+.dark .nav-item {
+  color: var(--dt-text-secondary-dark);
+
+  &:hover {
+    background: var(--dt-bg-hover-dark);
+  }
+
+  &.active {
+    background: rgba(22, 119, 255, 0.15);
   }
 }
 
-/* 暗色模式 */
-:deep(.dark) .contacts-sidebar,
-:deep(.dark) .main-header {
-  background: #1e293b;
-  border-color: #334155;
+.dark .search-input {
+  background: var(--dt-bg-input-dark);
+  border-color: var(--dt-border-dark);
+  color: var(--dt-text-primary-dark);
 }
 
-:deep(.dark) .members-table {
-  background: #1e293b;
-  border-color: #334155;
-  box-shadow: none;
+.dark .member-card {
+  background: var(--dt-bg-card-dark);
 }
 
-:deep(.dark) .sidebar-title,
-:deep(.dark) .member-name {
-  color: #f1f5f9;
+.dark .icon-btn:hover {
+  background: var(--dt-bg-hover-dark);
 }
 
-:deep(.dark) .nav-item {
-  color: #cbd5e1;
+.dark .empty-icon {
+  color: var(--dt-border-dark);
 }
 
-:deep(.dark) .nav-item:hover {
-  background: rgba(51, 65, 85, 0.5);
+.dark .empty-decoration {
+  background: var(--dt-border-dark);
 }
 
-:deep(.dark) .search-input {
-  background: #0f172a;
-  color: #cbd5e1;
+.dark .online-indicator {
+  border-color: var(--dt-bg-card-dark);
 }
 
-:deep(.dark) .table thead {
-  background: rgba(15, 23, 42, 0.5);
-  border-bottom: 1px solid #334155;
+.dark .online-indicator:not(.online) {
+  background: var(--dt-border-dark);
 }
 
-:deep(.dark) .table th {
-  color: #64748b;
-}
+// ============================================================================
+// 响应式
+// ============================================================================
+@media (max-width: 768px) {
+  .contacts-sidebar {
+    width: 240px;
+  }
 
-:deep(.dark) .table tbody tr:hover {
-  background: rgba(51, 65, 85, 0.3);
-}
+  .members-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
 
-:deep(.dark) .status-indicator.offline .status-dot {
-  background: #475569;
-}
-
-:deep(.dark) .status-indicator.online .status-text {
-  color: #cbd5e1;
-}
-
-:deep(.dark) .status-indicator.offline .status-text {
-  color: #64748b;
+  .header-breadcrumb {
+    display: none;
+  }
 }
 </style>

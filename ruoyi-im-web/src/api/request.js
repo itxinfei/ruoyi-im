@@ -70,6 +70,11 @@ service.interceptors.response.use(
     return res
   },
   error => {
+    // 头像404错误静默处理，不显示错误弹窗
+    if (error.response?.status === 404 && error.config?.url?.includes('/avatar/')) {
+      return Promise.reject(error)
+    }
+
     console.error('响应错误:', error)
 
     if (error.response) {

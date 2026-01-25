@@ -3,6 +3,7 @@ package com.ruoyi.im.vo.conversation;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -11,7 +12,9 @@ import java.time.LocalDateTime;
  * @author ruoyi
  */
 @Data
-public class ImConversationVO {
+public class ImConversationVO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * 会话ID
@@ -90,7 +93,7 @@ public class ImConversationVO {
 
     // 以下为新增的缺失字段
     private Long lastReadMessageId; // 最后已读消息ID
-    private String peerName;        // 对方姓名
-    private String peerAvatar;      // 对方头像
-    private Boolean peerOnline;     // 对方是否在线
+    private String peerName; // 对方姓名
+    private String peerAvatar; // 对方头像
+    private Boolean peerOnline; // 对方是否在线
 }
