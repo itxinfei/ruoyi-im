@@ -78,9 +78,9 @@ public class ImDocumentCollaborationController {
     @Operation(summary = "更新协作者权限", description = "更新协作者的编辑权限")
     @PutMapping("/{documentId}/collaborators/{targetUserId}/permission")
     public Result<Void> updatePermission(
-            @PathVariable Long documentId,
-            @PathVariable Long targetUserId,
-            @RequestParam String permission) {
+            @Parameter(description = "文档ID") @PathVariable Long documentId,
+            @Parameter(description = "协作者用户ID") @PathVariable Long targetUserId,
+            @Parameter(description = "权限：EDIT编辑, COMMENT评论, VIEW查看") @RequestParam String permission) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -98,7 +98,7 @@ public class ImDocumentCollaborationController {
     @Operation(summary = "获取协作者列表", description = "获取文档的协作者列表")
     @GetMapping("/{documentId}/collaborators")
     public Result<List<ImDocumentCollaboratorVO>> getCollaborators(
-            @PathVariable Long documentId) {
+            @Parameter(description = "文档ID") @PathVariable Long documentId) {
         try {
             List<ImDocumentCollaboratorVO> collaborators = documentCollaborationService.getCollaborators(documentId);
             return Result.success(collaborators);
@@ -116,7 +116,7 @@ public class ImDocumentCollaborationController {
     @Operation(summary = "加入文档编辑", description = "用户加入文档在线编辑")
     @PostMapping("/{documentId}/join")
     public Result<Void> joinDocument(
-            @PathVariable Long documentId) {
+            @Parameter(description = "文档ID") @PathVariable Long documentId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -134,7 +134,7 @@ public class ImDocumentCollaborationController {
     @Operation(summary = "离开文档编辑", description = "用户离开文档在线编辑")
     @PostMapping("/{documentId}/leave")
     public Result<Void> leaveDocument(
-            @PathVariable Long documentId) {
+            @Parameter(description = "文档ID") @PathVariable Long documentId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -152,9 +152,9 @@ public class ImDocumentCollaborationController {
     @Operation(summary = "更新光标位置", description = "更新用户在文档中的光标位置")
     @PutMapping("/{documentId}/cursor")
     public Result<Void> updateCursor(
-            @PathVariable Long documentId,
-            @RequestParam String position,
-            @RequestParam(required = false) String selection) {
+            @Parameter(description = "文档ID") @PathVariable Long documentId,
+            @Parameter(description = "光标位置（JSON格式）") @RequestParam String position,
+            @Parameter(description = "选中范围（可选）") @RequestParam(required = false) String selection) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -172,7 +172,7 @@ public class ImDocumentCollaborationController {
     @Operation(summary = "获取在线编辑者", description = "获取当前在线编辑的用户列表")
     @GetMapping("/{documentId}/online")
     public Result<List<ImDocumentCollaboratorVO>> getOnlineEditors(
-            @PathVariable Long documentId) {
+            @Parameter(description = "文档ID") @PathVariable Long documentId) {
         try {
             List<ImDocumentCollaboratorVO> editors = documentCollaborationService.getOnlineEditors(documentId);
             return Result.success(editors);
@@ -188,7 +188,7 @@ public class ImDocumentCollaborationController {
     @Operation(summary = "心跳", description = "保持在线状态")
     @PostMapping("/{documentId}/heartbeat")
     public Result<Void> heartbeat(
-            @PathVariable Long documentId) {
+            @Parameter(description = "文档ID") @PathVariable Long documentId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -208,8 +208,8 @@ public class ImDocumentCollaborationController {
     @Operation(summary = "获取操作日志", description = "获取文档的操作历史日志")
     @GetMapping("/{documentId}/logs")
     public Result<List<ImDocumentOperationLogVO>> getOperationLogs(
-            @PathVariable Long documentId,
-            @RequestParam(defaultValue = "100") Integer limit) {
+            @Parameter(description = "文档ID") @PathVariable Long documentId,
+            @Parameter(description = "返回数量限制") @RequestParam(defaultValue = "100") Integer limit) {
         try {
             List<ImDocumentOperationLogVO> logs = documentCollaborationService.getOperationLogs(documentId, limit);
             return Result.success(logs);

@@ -5,6 +5,7 @@ import com.ruoyi.im.service.ImVoiceTranscriptService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.transcript.ImVoiceTranscriptVO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +36,10 @@ public class ImVoiceTranscriptController {
     @Operation(summary = "创建转写任务", description = "将语音消息转换为文字")
     @PostMapping("/create")
     public Result<Long> createTranscriptTask(
-            @RequestParam Long messageId,
-            @RequestParam String voiceUrl,
-            @RequestParam(required = false) Integer duration,
-            @RequestParam(required = false, defaultValue = "zh-CN") String language) {
+            @Parameter(description = "消息ID") @RequestParam Long messageId,
+            @Parameter(description = "语音文件URL") @RequestParam String voiceUrl,
+            @Parameter(description = "语音时长（秒）") @RequestParam(required = false) Integer duration,
+            @Parameter(description = "语言类型：zh-CN中文, en-US英文") @RequestParam(required = false, defaultValue = "zh-CN") String language) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -56,7 +57,7 @@ public class ImVoiceTranscriptController {
     @Operation(summary = "获取转写结果", description = "获取语音转文字的结果")
     @GetMapping("/result/{messageId}")
     public Result<ImVoiceTranscriptVO> getTranscript(
-            @PathVariable Long messageId) {
+            @Parameter(description = "消息ID") @PathVariable Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -77,7 +78,7 @@ public class ImVoiceTranscriptController {
     @Operation(summary = "重新转写", description = "重新执行语音转文字")
     @PostMapping("/retranscribe/{messageId}")
     public Result<Long> reTranscribe(
-            @PathVariable Long messageId) {
+            @Parameter(description = "消息ID") @PathVariable Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {

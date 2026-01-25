@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -197,7 +198,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
 
             Map<Long, ImUser> userMap = new HashMap<>();
             if (!userIds.isEmpty()) {
-                List<ImUser> users = userMapper.selectImUserListByIds(userIds);
+                List<ImUser> users = userMapper.selectImUserListByIds(new ArrayList<>(userIds));
                 userMap.putAll(users.stream()
                     .collect(Collectors.toMap(ImUser::getId, u -> u)));
             }
@@ -257,13 +258,14 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
             // 获取好友关系
             Set<Long> friendIds = new HashSet<>();
             if (userId != null) {
-                LambdaQueryWrapper<ImFriend> friendQuery = new LambdaQueryWrapper<>();
-                friendQuery.eq(ImFriend::getUserId, userId)
-                    .eq(ImFriend::getIsDeleted, 0)
-                    .select(ImFriend::getFriendId);
-                friendIds = new HashSet<>(friendMapper.selectList(friendQuery).stream()
-                    .map(ImFriend::getFriendId)
-                    .collect(Collectors.toList()));
+                ImFriend friendQuery = new ImFriend();
+                friendQuery.setUserId(userId);
+                friendQuery.setIsDeleted(0);
+                List<ImFriend> friends = friendMapper.selectImFriendList(friendQuery);
+                friendIds = new HashSet<>();
+                for (ImFriend friend : friends) {
+                    friendIds.add(friend.getFriendId());
+                }
             }
 
             Set<Long> finalFriendIds = friendIds;
@@ -294,20 +296,16 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
     private List<GlobalSearchResultVO.GroupResult> searchGroupsList(String keyword, Long userId) {
         try {
             // 搜索群组（按群组名称）
-            LambdaQueryWrapper<ImGroup> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.like(ImGroup::getGroupName, keyword)
-                .eq(ImGroup::getDelFlag, 0)
-                .orderByDesc(ImGroup::getCreateTime)
-                .last("LIMIT " + MAX_RESULTS_PER_TYPE);
-
-            List<ImGroup> groups = groupMapper.selectList(queryWrapper);
+            ImGroup queryWrapper = new ImGroup();
+            queryWrapper.setName(keyword);
+            List<ImGroup> groups = groupMapper.selectImGroupList(queryWrapper);
 
             return groups.stream()
                 .limit(MAX_RESULTS_PER_TYPE)
                 .map(group -> {
                     GlobalSearchResultVO.GroupResult result = new GlobalSearchResultVO.GroupResult();
                     result.setGroupId(group.getId());
-                    result.setGroupName(group.getGroupName());
+                    result.setGroupName(group.getName());
                     result.setAvatar(group.getAvatar());
                     result.setMemberCount(group.getMemberCount());
                     result.setDescription(group.getDescription());
@@ -333,19 +331,6 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
 
             List<ImFileAsset> files = fileAssetMapper.selectList(queryWrapper);
 
-            // 获取会话信息
-            Set<Long> conversationIds = files.stream()
-                .map(ImFileAsset::getConversationId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-            Map<Long, ImConversation> conversationMap = new HashMap<>();
-            if (!conversationIds.isEmpty()) {
-                List<ImConversation> conversations = conversationMapper.selectBatchIds(conversationIds);
-                conversationMap.putAll(conversations.stream()
-                    .collect(Collectors.toMap(ImConversation::getId, c -> c)));
-            }
-
             // 获取用户信息
             Set<Long> uploaderIds = files.stream()
                 .map(ImFileAsset::getUploaderId)
@@ -354,7 +339,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
 
             Map<Long, ImUser> userMap = new HashMap<>();
             if (!uploaderIds.isEmpty()) {
-                List<ImUser> users = userMapper.selectBatchIds(uploaderIds);
+                List<ImUser> users = userMapper.selectImUserListByIds(new ArrayList<>(uploaderIds));
                 userMap.putAll(users.stream()
                     .collect(Collectors.toMap(ImUser::getId, u -> u)));
             }
@@ -363,21 +348,15 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
                 .limit(MAX_RESULTS_PER_TYPE)
                 .map(file -> {
                     GlobalSearchResultVO.FileResult result = new GlobalSearchResultVO.FileResult();
-                    result.setFileId(file.getId());
+                    result.setId(file.getId());
                     result.setFileName(file.getFileName());
                     result.setFileType(file.getFileType());
                     result.setFileSize(file.getFileSize());
                     result.setUploaderId(file.getUploaderId());
-
                     ImUser uploader = userMap.get(file.getUploaderId());
                     result.setUploaderName(uploader != null ?
                         (uploader.getNickname() != null ? uploader.getNickname() : uploader.getUsername()) : "未知");
-
-                    result.setConversationId(file.getConversationId());
-                    ImConversation conv = conversationMap.get(file.getConversationId());
-                    result.setConversationName(conv != null ? conv.getName() : "");
-                    result.setUploadTime(formatTime(file.getCreateTime()));
-                    result.setFileUrl(file.getFileUrl());
+                    result.setCreateTime(formatTime(file.getCreateTime()));
                     return result;
                 })
                 .collect(Collectors.toList());
@@ -395,12 +374,9 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
 
         try {
             // 搜索待办事项
-            LambdaQueryWrapper<ImTodoItem> todoQuery = new LambdaQueryWrapper<>();
-            todoQuery.like(ImTodoItem::getTitle, keyword)
-                .or().like(ImTodoItem::getDescription, keyword)
-                .eq(ImTodoItem::getDelFlag, 0)
-                .last("LIMIT 5");
-            List<ImTodoItem> todos = todoItemMapper.selectList(todoQuery);
+            ImTodoItem todoQuery = new ImTodoItem();
+            todoQuery.setTitle(keyword);
+            List<ImTodoItem> todos = todoItemMapper.selectImTodoItemList(todoQuery);
 
             todos.forEach(todo -> {
                 GlobalSearchResultVO.WorkbenchResult result = new GlobalSearchResultVO.WorkbenchResult();
@@ -410,7 +386,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
                 result.setDescription(todo.getDescription());
                 result.setStatus(todo.getStatus());
                 result.setCreateTime(formatTime(todo.getCreateTime()));
-                result.setDueTime(formatTime(todo.getDueTime()));
+                result.setDueTime(formatTime(todo.getDueDate()));
                 results.add(result);
             });
         } catch (Exception e) {
@@ -419,11 +395,12 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
 
         try {
             // 搜索任务
-            LambdaQueryWrapper<ImTask> taskQuery = new LambdaQueryWrapper<>();
-            taskQuery.like(ImTask::getTitle, keyword)
+            ImTask taskQuery = new ImTask();
+            taskQuery.setTitle(keyword);
+            List<ImTask> tasks = taskMapper.selectList(new LambdaQueryWrapper<ImTask>()
+                .like(ImTask::getTitle, keyword)
                 .or().like(ImTask::getDescription, keyword)
-                .last("LIMIT 5");
-            List<ImTask> tasks = taskMapper.selectList(taskQuery);
+                .last("LIMIT 5"));
 
             tasks.forEach(task -> {
                 GlobalSearchResultVO.WorkbenchResult result = new GlobalSearchResultVO.WorkbenchResult();
@@ -432,9 +409,9 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
                 result.setTitle(highlightKeyword(task.getTitle(), keyword));
                 result.setDescription(task.getDescription());
                 result.setStatus(task.getStatus());
-                result.setPriority(task.getPriority());
+                result.setPriority(task.getPriority() != null ? task.getPriority().toString() : "");
                 result.setCreateTime(formatTime(task.getCreateTime()));
-                result.setDueTime(formatTime(task.getDueTime()));
+                result.setDueTime(formatTime(task.getDueDate()));
                 results.add(result);
             });
         } catch (Exception e) {
@@ -547,5 +524,15 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
             return "";
         }
         return time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    /**
+     * 格式化日期
+     */
+    private String formatTime(LocalDate date) {
+        if (date == null) {
+            return "";
+        }
+        return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 }

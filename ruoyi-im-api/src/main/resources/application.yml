@@ -1,20 +1,17 @@
-# 服务器端口
+# 服务器配置
 server:
   port: 8080
-  address: 0.0.0.0  # 添加这一行，允许从任何IP访问
+  address: 0.0.0.0
 
-# 环境配置
+# 应用配置
 app:
-  # 环境类型：dev开发环境/prod生产环境
   env: prod
-  # 是否启用认证：开发环境可设为false，生产环境必须设为true
   security:
     enabled: false
-  # 开发环境默认用户ID（当security.enabled=false时使用）
   dev:
     user-id: 1
 
-# Spring配置
+# Spring框架配置
 spring:
   # 数据源配置
   datasource:
@@ -24,37 +21,26 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
-      # 连接池配置
       initial-size: 5
       min-idle: 5
       max-active: 20
       max-wait: 60000
-      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接
       time-between-eviction-runs-millis: 60000
-      # 配置一个连接在池中最小生存的时间，单位是毫秒
       min-evictable-idle-time-millis: 300000
-      # 用来检测连接是否有效的sql，要求是一个查询语句
       validation-query: SELECT 1 FROM DUAL
-      # 建议配置为true，不影响性能，并且保证安全性
       test-while-idle: true
-      # 申请连接的时候检测
       test-on-borrow: false
-      # 归还连接的时候检测
       test-on-return: false
-      # 是否缓存preparedStatement，也就是PSCache
       pool-prepared-statements: true
-      # 每个连接上PSCache的大小
       max-pool-prepared-statement-per-connection-size: 20
-      # 配置监控统计拦截的filters
       filters: stat,wall
-      # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
 
   # Redis配置
   redis:
     host: 172.168.20.222
     port: 6379
-    password:  123456
+    password: 123456
     database: 0
     timeout: 2000ms
     lettuce:
@@ -63,11 +49,10 @@ spring:
         max-idle: 10
         min-idle: 0
 
-  # Jackson配置
+  # Jackson序列化配置
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
-    # 忽略 JSON 中不存在的字段，避免前端多传参数导致报错
     deserialization:
       fail-on-unknown-properties: false
 
@@ -83,17 +68,10 @@ spring:
       max-request-size: 50MB
 
 # Swagger配置
-# 注意：此配置项用于控制自定义的 SpringDocConfig 配置类
-# 真正的 SpringDoc 框架配置在下面的 springdoc 部分
 swagger:
-  # 是否开启swagger（控制自定义的 SpringDocConfig 配置类）
-  # true: 启用API文档，可通过 /swagger-ui.html 访问
-  # false: 禁用API文档，节省资源
   enabled: true
 
 # SpringDoc配置（OpenAPI 3.0）
-# 注意：SpringDoc框架不支持 springdoc.enabled 配置项
-# 真正的配置项是 springdoc.api-docs.enabled 和 springdoc.swagger-ui.enabled
 springdoc:
   api-docs:
     enabled: true
@@ -107,33 +85,36 @@ springdoc:
 
 # MyBatis-Plus配置
 mybatis-plus:
-  mapper-locations: classpath*:/mapper/**/*Mapper.xml  # 映射文件位置
+  mapper-locations: classpath*:/mapper/**/*Mapper.xml
   type-aliases-package: com.ruoyi.im.domain
-  type-handlers-package: com.ruoyi.im.config  # 注册类型处理器包
+  type-handlers-package: com.ruoyi.im.config
   global-config:
     db-config:
-      id-type: assign_id  # 使用雪花算法生成ID
-      logic-delete-field: delFlag  # 逻辑删除字段名
-      logic-delete-value: 1  # 逻辑删除值
-      logic-not-delete-value: 0  # 逻辑未删除值
+      id-type: assign_id
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
   configuration:
-    map-underscore-to-camel-case: true  # 开启驼峰命名转换
-    default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler  # 默认枚举类型处理器
+    map-underscore-to-camel-case: true
+    default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
 
 # IM模块配置
 im:
+  # JWT配置
   jwt:
-    secret: "aW1fc2VjcmV0X2tleV8yMDI0X2Zvcl9pbV9zeXN0ZW1fdGhhdF9pc19sb25nX2Vub3VnaF9mb3JfSFMyNTZfYWxnb3JpdGhtX2FuZF9pc19zZWN1cmVfZW5vdWdoX2Zvcl9IUzUxMl9hbGdvcml0aG1fY2hhbmdlZF9mb3Jfc2VjdXJpdHlfcHVycG9zZQ=="  # JWT密钥，Base64编码，长度足够用于HS512算法
-    expiration: 86400000  # JWT过期时间(毫秒)，默认24小时
+    secret: "aW1fc2VjcmV0X2tleV8yMDI0X2Zvcl9pbV9zeXN0ZW1fdGhhdF9pc19sb25nX2Vub3VnaF9mb3JfSFMyNTZfYWxnb3JpdGhtX2FuZF9pc19zZWN1cmVfZW5vdWdoX2Zvcl9IUzUxMl9hbGdvcml0aG1fY2hhbmdlZF9mb3Jfc2VjdXJpdHlfcHVycG9zZQ=="
+    expiration: 86400000
+  # 消息配置
   message:
-    maxLength: 2000  # 消息最大长度
-    expireDays: 30   # 消息过期天数
-    recallWindowSeconds: 120  # 消息撤回时间窗口(秒)
+    maxLength: 2000
+    expireDays: 30
+    recallWindowSeconds: 120
     encryption:
-      enabled: true  # 是否启用消息加密
-      key: "aW1fZW5jcnlwdGlvbl9rZXlfMjAyNF9mb3JfbWVzc2FnZV9lbmNyeXB0aW9u"  # 加密密钥，Base64编码
+      enabled: true
+      key: "aW1fZW5jcnlwdGlvbl9rZXlfMjAyNF9mb3JfbWVzc2FnZV9lbmNyeXB0aW9u"
+  # 文件配置
   file:
-    maxSizeMb: 20  # 文件最大大小(MB)
+    maxSizeMb: 20
     allowExt:
       - pdf
       - docx
@@ -141,23 +122,25 @@ im:
       - png
       - jpg
       - txt
-    downloadExpireMinutes: 60  # 下载链接过期时间(分钟)
+    downloadExpireMinutes: 60
+  # 敏感词配置
   sensitive:
-    enabled: true  # 是否启用敏感词检测
-    onBlock: REJECT  # 敏感词拦截策略: REJECT | MASK | WARN
+    enabled: true
+    onBlock: REJECT
+  # 安全配置
   security:
     corsAllowOrigins: []
-    heartbeatInterval: 30  # WebSocket心跳间隔(秒)
-    maxConnections: 10000  # 最大连接数
+    heartbeatInterval: 30
+    maxConnections: 10000
     file:
       preview:
-        thumbnail-dir: thumbnails/  # 缩略图目录
+        thumbnail-dir: thumbnails/
 
 # 文件上传配置
 file:
   upload:
-    path: uploads/  # 文件上传路径（项目根目录下的uploads文件夹）
-    url-prefix: /api/im/file/download/  # 文件URL前缀
+    path: src/main/resources/uploads/
+    url-prefix: /api/im/file/download/
 
 # 日志配置
 logging:

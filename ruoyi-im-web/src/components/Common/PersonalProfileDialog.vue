@@ -156,15 +156,7 @@ const handleSaveProfile = async (formData) => {
   }
 }
 
-.profile-header.two-column { 
-  display: flex; align-items: center; padding: 12px 32px; gap: 20px; border-bottom: 1px solid #eee;
-}
-.profile-header.two-column .avatar-area { width: 110px; display:flex; flex-direction:column; align-items:center; position:relative; }
-.profile-header.two-column .avatar-area .user-avatar { width: 88px; height: 88px; border-radius: 50%; border:4px solid #fff; box-shadow: 0 8px 20px rgba(0,0,0,.15); }
-.profile-header.two-column .profile-info { flex:1; display:flex; flex-direction:column; }
-.profile-header.two-column .name-row { display:flex; align-items:center; gap:8px; }
-.profile-header.two-column .edit-profile-btn { margin-left:auto; height:28px; border-radius:6px; font-size:12px; }
-.profile-header.two-column .status-dot { position:absolute; bottom:6px; right:6px; width:12px; height:12px; border: 2px solid #fff; border-radius:50%; background:#52c41a; }
+  /* CSS for two-column header moved to style block. See style tag for definitions. */
 const handleLogout = () => {
   ElMessageBox.confirm('确定要退出登录吗？', '提示', {
     confirmButtonText: '确定',
@@ -247,20 +239,7 @@ watch(visible, (val) => {
   }
 }
 
-  .profile-header {
-  .profile-header {
-  padding: 0 32px;
-  margin-top: -44px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 24px;
-  position: relative;
-  z-index: 1;
-
-  /* 新的两列布局已经应用在 Patch 1/2 中，保持向后兼容 */
-  &.two-column { /* 直接覆盖，若未应用则回退 */ }
-}
+  /* profile-header 的二列样式已迁移至 style 标签 */
 
 .profile-details {
   padding: 0 32px;

@@ -5,6 +5,7 @@ import com.ruoyi.im.service.ImMessageMarkerService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.marker.ImMessageMarkerVO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +37,9 @@ public class ImMessageMarkerController {
     @Operation(summary = "标记消息", description = "标记消息（FLAG标记/IMPORTANT重要）")
     @PostMapping("/mark")
     public Result<Long> markMessage(
-            @RequestParam Long messageId,
-            @RequestParam(defaultValue = "FLAG") String markerType,
-            @RequestParam(required = false) String color) {
+            @Parameter(description = "消息ID") @RequestParam Long messageId,
+            @Parameter(description = "标记类型：FLAG标记, IMPORTANT重要") @RequestParam(defaultValue = "FLAG") String markerType,
+            @Parameter(description = "标记颜色（可选）") @RequestParam(required = false) String color) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -56,8 +57,8 @@ public class ImMessageMarkerController {
     @Operation(summary = "取消标记", description = "取消消息标记")
     @DeleteMapping("/unmark")
     public Result<Void> unmarkMessage(
-            @RequestParam Long messageId,
-            @RequestParam(required = false) String markerType) {
+            @Parameter(description = "消息ID") @RequestParam Long messageId,
+            @Parameter(description = "标记类型（不传则取消所有标记）") @RequestParam(required = false) String markerType) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -75,9 +76,9 @@ public class ImMessageMarkerController {
     @Operation(summary = "设置待办", description = "设置消息为待办并设置提醒时间")
     @PostMapping("/todo")
     public Result<Long> setTodoReminder(
-            @RequestParam Long messageId,
-            @RequestParam LocalDateTime remindTime,
-            @RequestParam(required = false) String remark) {
+            @Parameter(description = "消息ID") @RequestParam Long messageId,
+            @Parameter(description = "提醒时间") @RequestParam LocalDateTime remindTime,
+            @Parameter(description = "备注（可选）") @RequestParam(required = false) String remark) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -95,7 +96,7 @@ public class ImMessageMarkerController {
     @Operation(summary = "完成待办", description = "标记待办为已完成")
     @PostMapping("/todo/{markerId}/complete")
     public Result<Void> completeTodo(
-            @PathVariable Long markerId) {
+            @Parameter(description = "标记ID") @PathVariable Long markerId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -113,7 +114,7 @@ public class ImMessageMarkerController {
     @Operation(summary = "重启待办", description = "将已完成的待办重新设为待办")
     @PostMapping("/todo/{markerId}/reopen")
     public Result<Void> reopenTodo(
-            @PathVariable Long markerId) {
+            @Parameter(description = "标记ID") @PathVariable Long markerId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -131,7 +132,7 @@ public class ImMessageMarkerController {
     @Operation(summary = "获取标记列表", description = "获取用户的标记/待办列表")
     @GetMapping("/list")
     public Result<List<ImMessageMarkerVO>> getUserMarkers(
-            @RequestParam(required = false) String markerType) {
+            @Parameter(description = "标记类型筛选：FLAG标记, TODO待办, IMPORTANT重要") @RequestParam(required = false) String markerType) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -149,7 +150,7 @@ public class ImMessageMarkerController {
     @Operation(summary = "获取消息标记", description = "获取消息的所有标记")
     @GetMapping("/message/{messageId}")
     public Result<List<ImMessageMarkerVO>> getMessageMarkers(
-            @PathVariable Long messageId) {
+            @Parameter(description = "消息ID") @PathVariable Long messageId) {
         try {
             List<ImMessageMarkerVO> markers = messageMarkerService.getMessageMarkers(messageId);
             return Result.success(markers);

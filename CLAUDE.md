@@ -448,6 +448,12 @@ redis-cli -h 172.168.20.222 -p 6379 -a 123456 ping
 | `ImMailController` | `/api/im/mail` | 邮件 |
 | `ImDocumentController` | `/api/im/document` | 文档管理 |
 | `ImAnnouncementController` | `/api/im/announcement` | 公告 |
+| `ImVideoMeetingController` | `/api/im/meeting` | 视频会议管理 |
+| `ImCloudDriveController` | `/api/im/cloud` | 企业云盘 |
+| `ImAttendanceGroupController` | `/api/im/attendance/group` | 考勤组管理 |
+| `ImDocumentCollaborationController` | `/api/im/document/collaboration` | 文档协作 |
+| `ImMessageMarkerController` | `/api/im/message/marker` | 消息标记/待办 |
+| `ImVoiceTranscriptController` | `/api/im/voice/transcript` | 语音转文字 |
 
 #### 管理 API (`/api/admin/*`) - 需要 ADMIN/SUPER_ADMIN 角色
 
@@ -504,10 +510,169 @@ ruoyi-im-web/src/
 
 | 模块 | 功能 | 说明 |
 |------|------|------|
-| **即时通讯** | 单聊、群聊、消息撤回、消息编辑、消息转发、引用回复 | 支持文本、图片、文件、语音、视频 |
+| **即时通讯** | 单聊、群聊、消息撤回、消息编辑、消息转发、引用回复、消息已读回执 | 支持文本、图片、文件、语音、视频 |
 | **联系人** | 好友管理、分组、组织架构树、外部联系人 | 支持按部门/职位浏览 |
 | **工作台** | 待办事项、审批流程、邮件、AI 助理、文档、日程 | 企业办公一体化 |
+| **视频会议** | 多人视频会议、屏幕共享、会议管理、参会者管理 | 基于 WebRTC 实现 |
+| **企业云盘** | 文件存储、文件夹管理、文件分享、回收站、版本管理 | 支持个人/部门/公司三种权限 |
+| **考勤管理** | 考勤组、班次管理、排班管理、打卡记录、节假日管理 | 支持多种打卡方式 |
+| **文档协作** | 在线文档编辑、协作者管理、权限控制、操作日志 | 实时光标同步 |
+| **消息标记** | 消息标记（旗标/重要）、待办提醒、待办完成 | 重要消息不错过 |
+| **语音转文字** | 语音消息转文字、多语言支持、转写状态管理 | 支持阿里云/讯飞/腾讯 |
+| **全局搜索** | 消息、联系人、群组、文件全文搜索 | 统一搜索入口 |
 | **管理后台** | 用户管理、群组管理、消息管理、数据统计 | 基于 @PreAuthorize 权限控制 |
+
+---
+
+# 新增功能模块详解
+
+## P0: 核心增强功能
+
+### 1. 消息已读回执
+- `im_message_read_receipt` 表记录已读状态
+- 支持单聊和群聊的已读回执
+- 自动更新会话成员的 `last_read_message_id`
+
+### 2. 消息撤回配置
+- `im_system_config` 表配置撤回时限
+- 支持按消息类型设置不同的撤回时限
+- 默认 2 分钟内可撤回
+
+### 3. 多人视频通话
+- 基于 WebRTC 的 P2P 连接
+- 支持 9 人同时视频通话
+- 集成屏幕共享功能
+
+### 4. 全局搜索
+- 搜索范围: 消息、联系人、群组、文件
+- 使用 Elasticsearch 实现全文检索
+- 支持关键词高亮显示
+
+## P1: 扩展功能
+
+### 1. 视频会议
+- 会议预定和管理
+- 参会者邀请和移除
+- 主持人权限转移
+- 静音/解除静音控制
+- 屏幕共享控制
+- 会议状态: SCHEDULED、IN_PROGRESS、COMPLETED、CANCELLED
+
+### 2. 企业云盘
+- 文件夹层级管理
+- 文件上传/下载/预览
+- 文件分享(内链/外链)
+- 访问密码保护
+- 回收站和永久删除
+- 文件版本历史
+
+### 3. 考勤组管理
+- 考勤组创建和管理
+- 考勤类型: FIXED(固定班次)、FLEXIBLE(弹性班次)、FREE(自由打卡)
+- 打卡方式: FACE(人脸)、LOCATION(地理位置)、WIFI(Wi-Fi)、MIXED(混合)
+- 班次管理和排班
+- 节假日管理
+
+### 4. 文档协作
+- 在线协作者管理
+- 权限: EDIT(编辑)、COMMENT(评论)、VIEW(查看)
+- 实时在线状态
+- 光标位置同步
+- 操作日志记录
+
+## P2: 增强体验功能
+
+### 1. 消息转发
+- 单条消息转发
+- 多条消息批量转发
+- 转发到多个会话
+
+### 2. 引用回复
+- 引用原消息进行回复
+- 显示引用内容预览
+- 支持嵌套引用
+
+### 3. 消息标记/待办
+- 标记类型: FLAG(标记)、IMPORTANT(重要)、TODO(待办)
+- 待办提醒时间设置
+- 待办完成/重启状态
+- 标记颜色自定义
+
+### 4. 语音转文字
+- 语音消息自动转文字
+- 支持中文(zh-CN)、英文(en-US)
+- 第三方服务商: ALIYUN、XUNFEI、TENCENT
+- 转写状态: PENDING、PROCESSING、SUCCESS、FAILED
+- 置信度记录
+
+---
+
+# 数据库迁移脚本
+
+新增功能的数据库迁移脚本位于 `sql/migrations/` 目录:
+
+```
+sql/migrations/
+├── 20250125_p0_core_enhancements.sql      # P0 核心增强
+├── 20250125_p1_video_meeting.sql          # P1-1 视频会议
+├── 20250125_p1_cloud_drive.sql            # P1-2 企业云盘
+├── 20250125_p1_attendance.sql             # P1-3 考勤管理
+├── 20250125_p1_document_collaboration.sql # P1-4 文档协作
+├── 20250125_p2_message_marker.sql         # P2-3 消息标记
+└── 20250125_p2_voice_transcript.sql       # P2-4 语音转文字
+```
+
+---
+
+# 全局异常处理
+
+全局异常处理器位于 `com.ruoyi.im.handler.GlobalExceptionHandler`:
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    // 业务异常
+    @ExceptionHandler(BusinessException.class)
+    public Result<Void> handleBusinessException(...)
+
+    // 参数校验异常
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Result<Void> handleValidationException(...)
+
+    // 权限异常
+    @ExceptionHandler(AccessDeniedException.class)
+    public Result<Void> handleAccessDeniedException(...)
+
+    // 系统异常
+    @ExceptionHandler(Exception.class)
+    public Result<Void> handleException(...)
+}
+```
+
+---
+
+# Swagger 中文注解规范
+
+所有 Controller 接口必须使用中文 Swagger 注解:
+
+```java
+@Tag(name = "视频会议", description = "视频会议管理接口")
+public class ImVideoMeetingController {
+
+    @Operation(summary = "创建会议", description = "创建新的视频会议")
+    @PostMapping("/create")
+    public Result<Long> createMeeting(
+            @Parameter(description = "会议创建请求")
+            @Valid @RequestBody ImVideoMeetingCreateRequest request) {
+        ...
+    }
+}
+```
+
+**注解规范**:
+- `@Tag`: 控制器级别的中文描述
+- `@Operation`: 接口的中文摘要和详细描述
+- `@Parameter`: 参数的中文描述，包括取值范围说明
 
 ---
 
@@ -532,6 +697,52 @@ ruoyi-im-web/src/
 
 **im_friend** - 好友关系表
 - 字段: `user_id`、`friend_id`、`remark` (备注)、`group_name` (分组)、`is_deleted`
+
+**im_video_meeting** - 视频会议表
+- 字段: `title`、`description`、`host_id`、`meeting_type`、`status`、`scheduled_start_time`、`room_id`
+- 状态: SCHEDULED、IN_PROGRESS、COMPLETED、CANCELLED
+
+**im_video_meeting_participant** - 会议参与者表
+- 字段: `meeting_id`、`user_id`、`join_time`、`role`、`is_muted`、`video_enabled`
+
+**im_cloud_folder** - 云盘文件夹表
+- 字段: `folder_name`、`parent_id`、`owner_type`、`owner_id`、`access_permission`、`is_deleted`
+
+**im_cloud_file** - 云盘文件表
+- 字段: `folder_id`、`file_name`、`file_size`、`file_type`、`file_url`、`uploader_id`、`is_deleted`
+
+**im_cloud_file_share** - 文件分享表
+- 字段: `share_type`、`resource_id`、`share_code`、`access_password`、`expire_days`、`share_by`
+
+**im_cloud_file_version** - 文件版本表
+- 字段: `file_id`、`version_number`、`file_url`、`file_size`、`created_by`
+
+**im_attendance_group** - 考勤组表
+- 字段: `group_name`、`description`、`attendance_type`、`check_method`、`work_start_time`、`work_end_time`
+
+**im_attendance_group_member** - 考勤组成员表
+- 字段: `group_id`、`user_id`、`join_time`
+
+**im_attendance_shift** - 考勤班次表
+- 字段: `group_id`、`shift_name`、`work_start_time`、`work_end_time`
+
+**im_attendance_schedule** - 考勤排班表
+- 字段: `user_id`、`group_id`、`shift_id`、`schedule_date`
+
+**im_attendance_holiday** - 节假日表
+- 字段: `holiday_name`、`holiday_date`、`is_workday`
+
+**im_document_collaborator** - 文档协作者表
+- 字段: `document_id`、`user_id`、`permission`、`online_status`、`cursor_position`
+
+**im_document_operation_log** - 文档操作日志表
+- 字段: `document_id`、`user_id`、`operation_type`、`operation_detail`
+
+**im_message_marker** - 消息标记表
+- 字段: `message_id`、`user_id`、`marker_type`、`color`、`is_completed`、`remind_time`
+
+**im_voice_transcript** - 语音转文字表
+- 字段: `message_id`、`voice_url`、`duration`、`status`、`transcript_text`、`language`、`provider`
 
 ### 字段命名规范
 

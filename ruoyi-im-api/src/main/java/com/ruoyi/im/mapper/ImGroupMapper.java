@@ -1,8 +1,10 @@
 package com.ruoyi.im.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.domain.ImGroup;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -13,7 +15,8 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-public interface ImGroupMapper {
+@Mapper
+public interface ImGroupMapper extends BaseMapper<ImGroup> {
 
     /**
      * 查询群组
