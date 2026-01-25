@@ -415,8 +415,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         imMessageMapper.updateImMessage(message);
 
         // 记录审计日志
-        AuditLogUtil.log("MESSAGE_RECALL", "撤回消息",
-            "messageId=" + messageId + ",conversationId=" + message.getConversationId());
+        AuditLogUtil.logRecallMessage(userId, messageId, true);
 
         // 广播撤回通知给会话中的其他用户
         broadcastRecallNotification(message.getConversationId(), messageId, userId);

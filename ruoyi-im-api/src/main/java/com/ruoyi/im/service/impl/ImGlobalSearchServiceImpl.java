@@ -197,7 +197,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
 
             Map<Long, ImUser> userMap = new HashMap<>();
             if (!userIds.isEmpty()) {
-                List<ImUser> users = userMapper.selectBatchIds(userIds);
+                List<ImUser> users = userMapper.selectImUserListByIds(userIds);
                 userMap.putAll(users.stream()
                     .collect(Collectors.toMap(ImUser::getId, u -> u)));
             }
@@ -213,7 +213,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
                     ImConversation conv = conversationMap.get(msg.getConversationId());
                     if (conv != null) {
                         result.setConversationName(conv.getType().equals("GROUP") ?
-                            conv.getGroupName() : getPrivateConversationName(conv, userMap));
+                            conv.getName() : getPrivateConversationName(conv, userMap));
                     }
 
                     result.setSenderId(msg.getSenderId());
@@ -249,11 +249,10 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
                 .or()
                 .like(ImUser::getMobile, keyword)
             )
-            .eq(ImUser::getDelFlag, 0)
             .orderByDesc(ImUser::getCreateTime)
             .last("LIMIT " + MAX_RESULTS_PER_TYPE);
 
-            List<ImUser> users = userMapper.selectList(queryWrapper);
+            List<ImUser> users = userMapper.selectImUserByKeyword(keyword);
 
             // 获取好友关系
             Set<Long> friendIds = new HashSet<>();

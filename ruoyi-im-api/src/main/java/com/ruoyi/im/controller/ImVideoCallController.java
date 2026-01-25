@@ -220,7 +220,7 @@ public class ImVideoCallController {
 
             // 通过WebSocket通知所有被邀请用户
             for (Long userId : invitedUserIds) {
-                ImWebSocketEndpoint.sendGroupCallNotification(userId, callId, callType, callerId);
+                ImWebSocketEndpoint.sendCallNotification(userId, callId, callType, callerId);
             }
 
             return Result.success("发起成功", roomInfo);

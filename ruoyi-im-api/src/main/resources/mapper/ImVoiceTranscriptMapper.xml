@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImVoiceTranscriptMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImVoiceTranscript" id="ImVoiceTranscriptResult">
+        <id property="id" column="id"/>
+        <result property="messageId" column="message_id"/>
+        <result property="voiceUrl" column="voice_url"/>
+        <result property="duration" column="duration"/>
+        <result property="status" column="status"/>
+        <result property="transcriptText" column="transcript_text"/>
+        <result property="language" column="language"/>
+        <result property="confidence" column="confidence"/>
+        <result property="provider" column="provider"/>
+        <result property="requestId" column="request_id"/>
+        <result property="errorCode" column="error_code"/>
+        <result property="errorMsg" column="error_msg"/>
+        <result property="processDuration" column="process_duration"/>
+        <result property="createTime" column="create_time"/>
+        <result property="completeTime" column="complete_time"/>
+    </resultMap>
+
+    <sql id="selectImVoiceTranscriptVo">
+        select id, message_id, voice_url, duration, status, transcript_text, language,
+               confidence, provider, request_id, error_code, error_msg, process_duration,
+               create_time, complete_time
+        from im_voice_transcript
+    </sql>
+
+    <select id="selectByMessageId" resultMap="ImVoiceTranscriptResult">
+        <include refid="selectImVoiceTranscriptVo"/>
+        where message_id = #{messageId}
+        order by create_time desc
+        limit 1
+    </select>
+
+    <select id="selectPending" resultMap="ImVoiceTranscriptResult">
+        <include refid="selectImVoiceTranscriptVo"/>
+        where status in ('PENDING', 'FAILED')
+        order by create_time asc
+        <if test="limit != null">
+            limit #{limit}
+        </if>
+    </select>
+
+    <select id="selectByUserId" resultMap="ImVoiceTranscriptResult">
+        <include refid="selectImVoiceTranscriptVo"/>
+        where message_id in (
+            select id from im_message where sender_id = #{userId}
+        )
+        order by create_time desc
+    </select>
+
+    <select id="countByUserId" resultType="java.lang.Integer">
+        select count(*) from im_voice_transcript
+        where message_id in (
+            select id from im_message where sender_id = #{userId}
+        )
+    </select>
+
+</mapper>

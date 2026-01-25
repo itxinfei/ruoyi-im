@@ -1,7 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.ruoyi.domain.ImUser;
+import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.domain.ImVideoMeeting;
 import com.ruoyi.im.domain.ImVideoMeetingParticipant;
 import com.ruoyi.im.dto.meeting.ImVideoMeetingCreateRequest;
@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 视频会议服务实现
@@ -90,25 +91,25 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         meeting.setRoomId(roomId);
         meeting.setMeetingLink(generateMeetingLink(roomId));
 
-        meetingMapper.insertImVideoCall(meeting);
+        meetingMapper.insert(meeting);
 
         Long meetingId = meeting.getId();
 
         // 添加发起者作为参与者
-        ImVideoMeetingParticipant host = new ImVideoMeetingParticipant();
-        host.setMeetingId(meetingId);
-        host.setUserId(userId);
-        host.setUserName(host.getNickname() != null ? host.getNickname() : host.getUsername());
-        host.setUserAvatar(host.getAvatar());
-        host.setRole("HOST");
-        host.setStatus("JOINED");
-        host.setJoinTime(LocalDateTime.now());
-        host.setIsMuted(false);
-        host.setIsVideoOff(false);
-        host.setIsSharing(false);
-        host.setCreateTime(LocalDateTime.now());
+        ImVideoMeetingParticipant hostParticipant = new ImVideoMeetingParticipant();
+        hostParticipant.setMeetingId(meetingId);
+        hostParticipant.setUserId(userId);
+        hostParticipant.setUserName(host.getNickname() != null ? host.getNickname() : host.getUsername());
+        hostParticipant.setUserAvatar(host.getAvatar());
+        hostParticipant.setRole("HOST");
+        hostParticipant.setStatus("JOINED");
+        hostParticipant.setJoinTime(LocalDateTime.now());
+        hostParticipant.setIsMuted(false);
+        hostParticipant.setIsVideoOff(false);
+        hostParticipant.setIsSharing(false);
+        hostParticipant.setCreateTime(LocalDateTime.now());
 
-        participantMapper.insert(host);
+        participantMapper.insert(hostParticipant);
 
         // 邀请其他用户
         if (request.getInvitedUserIds() != null && !request.getInvitedUserIds().isEmpty()) {
@@ -216,7 +217,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     }
 
     @Override
-    @Transactional(rollbackFor Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public void deleteMeeting(Long meetingId, Long userId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting == null) {
@@ -240,7 +241,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     }
 
     @Override
-    @Transactional(rollbackFor Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public void startMeeting(Long meetingId, Long userId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting == null) {
@@ -457,7 +458,8 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     }
 
     @Override
-    @Transactional(rollbackFor = @SuppressWarnings("all") Exception.class)
+    @SuppressWarnings("all")
+    @Transactional(rollbackFor = Exception.class)
     public void inviteUsers(Long meetingId, List<Long> userIds, Long inviterId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting == null) {
@@ -638,18 +640,6 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         log.info("转移主持人: meetingId={}, oldHost={}, newHost={}", meetingId, operatorId, userId);
     }
 
-    @Override
-    public List<ImVideoMeetingVO> getUpcomingMeetings(Long userId, Integer limit) {
-        if (limit == null || limit <= 0) {
-            limit = 5;
-        }
-
-        List<ImVideoMeeting> meetings = meetingMapper.selectUpcomingMeetings(userId, limit);
-        return meetings.stream()
-            .map(this::formatMeetingVO)
-            .collect(java.util.stream.Collectors.toList());
-    }
-
     // ==================== 私有方法 ====================
 
     /**
@@ -751,7 +741,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         }
 
         // 获取参与者列表
-        List<ImVideoMeetingParticipant> participants = participantMapper.selectByMeetingId(meetingId);
+        List<ImVideoMeetingParticipant> participants = participantMapper.selectByMeetingId(meeting.getId());
         if (participants != null) {
             List<ImVideoMeetingDetailVO.ParticipantInfo> participantInfos = participants.stream()
                 .map(p -> {
@@ -766,7 +756,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
                     info.setIsSharing(p.getIsSharing());
                     return info;
                 })
-                .collect(java.util.Collectors.toList());
+                .collect(Collectors.toList());
             vo.setParticipants(participantInfos);
 
             // 设置当前屏幕共享者

@@ -8,6 +8,7 @@ import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.meeting.ImVideoMeetingDetailVO;
 import com.ruoyi.im.vo.meeting.ImVideoMeetingVO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class ImVideoMeetingController {
     @Operation(summary = "创建会议", description = "创建新的视频会议")
     @PostMapping("/create")
     public Result<Map<String, Object>> createMeeting(
-            @Valid @RequestBody ImVideoMeetingCreateRequest request) {
+            @Parameter(description = "会议创建请求") @Valid @RequestBody ImVideoMeetingCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -67,8 +68,8 @@ public class ImVideoMeetingController {
     @Operation(summary = "更新会议", description = "更新会议信息")
     @PutMapping("/{meetingId}")
     public Result<Void> updateMeeting(
-            @PathVariable Long meetingId,
-            @Valid @RequestBody ImVideoMeetingUpdateRequest request) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId,
+            @Parameter(description = "会议更新请求") @Valid @RequestBody ImVideoMeetingUpdateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -86,7 +87,7 @@ public class ImVideoMeetingController {
     @Operation(summary = "取消会议", description = "取消已预定的会议")
     @PostMapping("/{meetingId}/cancel")
     public Result<Void> cancelMeeting(
-            @PathVariable Long meetingId) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -104,7 +105,7 @@ public class ImVideoMeetingController {
     @Operation(summary = "删除会议", description = "删除已结束的会议")
     @DeleteMapping("/{meetingId}")
     public Result<Void> deleteMeeting(
-            @PathVariable Long meetingId) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -122,7 +123,7 @@ public class ImVideoMeetingController {
     @Operation(summary = "开始会议", description = "开始预定的会议")
     @PostMapping("/{meetingId}/start")
     public Result<Map<String, Object>> startMeeting(
-            @PathVariable Long meetingId) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -143,10 +144,10 @@ public class ImVideoMeetingController {
     /**
      * 结束会议
      */
-    @Operation(summary = "结束会议", description =结束当前进行的会议")
+    @Operation(summary = "结束会议", description = "结束当前进行的会议")
     @PostMapping("/{meetingId}/end")
     public Result<Void> endMeeting(
-            @PathVariable Long meetingId) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -164,8 +165,8 @@ public class ImVideoMeetingController {
     @Operation(summary = "加入会议", description = "加入指定的会议")
     @PostMapping("/{meetingId}/join")
     public Result<ImVideoMeetingDetailVO> joinMeeting(
-            @PathVariable Long meetingId,
-            @RequestParam(required = false) String password) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId,
+            @Parameter(description = "会议密码（如需要）") @RequestParam(required = false) String password) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -183,7 +184,7 @@ public class ImVideoMeetingController {
     @Operation(summary = "离开会议", description = "离开当前会议")
     @PostMapping("/{meetingId}/leave")
     public Result<Void> leaveMeeting(
-            @PathVariable Long meetingId) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -201,7 +202,7 @@ public class ImVideoMeetingController {
     @Operation(summary = "获取会议详情", description = "获取会议详细信息")
     @GetMapping("/{meetingId}")
     public Result<ImVideoMeetingDetailVO> getMeetingDetail(
-            @PathVariable Long meetingId) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId) {
         try {
             ImVideoMeetingDetailVO meeting = videoMeetingService.getMeetingDetail(meetingId);
             if (meeting == null) {
@@ -220,7 +221,7 @@ public class ImVideoMeetingController {
     @Operation(summary = "获取会议列表", description = "获取当前用户的会议列表")
     @GetMapping("/list")
     public Result<List<ImVideoMeetingVO>> getMeetingList(
-            @RequestParam(required = false) String status) {
+            @Parameter(description = "会议状态：SCHEDULED预定中, IN_PROGRESS进行中, COMPLETED已结束, CANCELLED已取消") @RequestParam(required = false) String status) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -238,7 +239,7 @@ public class ImVideoMeetingController {
     @Operation(summary = "获取参与者列表", description = "获取会议的参与者列表")
     @GetMapping("/{meetingId}/participants")
     public Result<List<?>> getParticipants(
-            @PathVariable Long meetingId) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId) {
         try {
             List<?> participants = videoMeetingService.getMeetingParticipants(meetingId);
             return Result.success(participants);
@@ -254,8 +255,8 @@ public class ImVideoMeetingController {
     @Operation(summary = "邀请用户", description = "邀请用户加入会议")
     @PostMapping("/{meetingId}/invite")
     public Result<Void> inviteUsers(
-            @PathVariable Long meetingId,
-            @RequestBody List<Long> userIds) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId,
+            @Parameter(description = "被邀请用户ID列表") @RequestBody List<Long> userIds) {
         Long inviterId = SecurityUtils.getLoginUserId();
 
         try {
@@ -273,8 +274,8 @@ public class ImVideoMeetingController {
     @Operation(summary = "移除参与者", description = "将用户移出会议")
     @PostMapping("/{meetingId}/remove")
     public Result<Void> removeParticipant(
-            @PathVariable Long meetingId,
-            @RequestParam Long userId) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId,
+            @Parameter(description = "被移除的用户ID") @RequestParam Long userId) {
         Long operatorId = SecurityUtils.getLoginUserId();
 
         try {
@@ -282,7 +283,7 @@ public class ImVideoMeetingController {
             return Result.success("已移除");
         } catch (Exception e) {
             log.error("移除参与者失败: meetingId={}, userId={}", meetingId, userId, e);
-            return Result.fail("移除失败: " + + e.getMessage());
+            return Result.fail("移除失败: " + e.getMessage());
         }
     }
 
@@ -292,9 +293,9 @@ public class ImVideoMeetingController {
     @Operation(summary = "静音/取消静音", description = "设置参与者静音状态")
     @PostMapping("/{meetingId}/mute")
     public Result<Void> muteParticipant(
-            @PathVariable Long meetingId,
-            @RequestParam Long userId,
-            @RequestParam Boolean muted) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId,
+            @Parameter(description = "用户ID") @RequestParam Long userId,
+            @Parameter(description = "是否静音：true静音，false取消静音") @RequestParam Boolean muted) {
         try {
             videoMeetingService.muteParticipant(meetingId, userId, muted);
             return Result.success(muted ? "已静音" : "已取消静音");
@@ -310,7 +311,7 @@ public class ImVideoMeetingController {
     @Operation(summary = "开始屏幕共享", description = "开始共享屏幕")
     @PostMapping("/{meetingId}/screen-share/start")
     public Result<Void> startScreenShare(
-            @PathVariable Long meetingId) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -328,7 +329,7 @@ public class ImVideoMeetingController {
     @Operation(summary = "停止屏幕共享", description = "停止共享屏幕")
     @PostMapping("/{meetingId}/screen-share/stop")
     public Result<Void> stopScreenShare(
-            @PathVariable Long meetingId) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -346,8 +347,8 @@ public class ImVideoMeetingController {
     @Operation(summary = "转移主持人", description = "将主持人权限转移给其他用户")
     @PostMapping("/{meetingId}/change-host")
     public Result<Void> changeHost(
-            @PathVariable Long meetingId,
-            @RequestParam Long newHostId) {
+            @Parameter(description = "会议ID") @PathVariable Long meetingId,
+            @Parameter(description = "新主持人用户ID") @RequestParam Long newHostId) {
         Long operatorId = SecurityUtils.getLoginUserId();
 
         try {
@@ -356,24 +357,6 @@ public class ImVideoMeetingController {
         } catch (Exception e) {
             log.error("转移主持人失败: meetingId={}, newHostId={}", meetingId, newHostId, e);
             return Result.fail("转移失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 获取即将开始的会议
-     */
-    @Operation(summary = "即将开始的会议", description = "获取用户即将开始的会议列表")
-    @GetMapping("/upcoming")
-    public Result<List<ImVideoMeetingVO>> getUpcomingMeetings(
-            @RequestParam(defaultValue = "5") Integer limit) {
-        Long userId = SecurityUtils.getLoginUserId();
-
-        try {
-            List<ImVideoMeetingVO> meetings = videoMeetingService.getUpcomingMeetings(userId, limit);
-            return Result.success(meetings);
-        } catch (Exception e) {
-            log.error("获取即将开始的会议失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
         }
     }
 }

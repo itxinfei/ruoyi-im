@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImDocumentCollaboratorMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImDocumentCollaborator" id="ImDocumentCollaboratorResult">
+        <id property="id" column="id"/>
+        <result property="documentId" column="document_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userAvatar" column="user_avatar"/>
+        <result property="permission" column="permission"/>
+        <result property="inviterId" column="inviter_id"/>
+        <result property="joinTime" column="join_time"/>
+        <result property="lastActiveTime" column="last_active_time"/>
+        <result property="onlineStatus" column="online_status"/>
+        <result property="cursorPosition" column="cursor_position"/>
+        <result property="selectionRange" column="selection_range"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImDocumentCollaboratorVo">
+        select id, document_id, user_id, user_name, user_avatar, permission, inviter_id,
+               join_time, last_active_time, online_status, cursor_position, selection_range,
+               create_time, update_time
+        from im_document_collaborator
+    </sql>
+
+    <select id="selectByDocumentId" resultMap="ImDocumentCollaboratorResult">
+        <include refid="selectImDocumentCollaboratorVo"/>
+        where document_id = #{documentId}
+        order by join_time asc
+    </select>
+
+    <select id="selectCollaborativeDocumentIds" resultType="java.lang.Long">
+        select distinct document_id
+        from im_document_collaborator
+        where user_id = #{userId}
+    </select>
+
+    <select id="selectByDocumentAndUser" resultMap="ImDocumentCollaboratorResult">
+        <include refid="selectImDocumentCollaboratorVo"/>
+        where document_id = #{documentId} and user_id = #{userId}
+    </select>
+
+    <update id="updateOnlineStatus">
+        update im_document_collaborator
+        set online_status = #{status},
+            last_active_time = #{activeTime},
+            update_time = now()
+        where document_id = #{documentId} and user_id = #{userId}
+    </update>
+
+    <update id="updateCursor">
+        update im_document_collaborator
+        set cursor_position = #{cursor},
+            selection_range = #{selection},
+            last_active_time = now(),
+            update_time = now()
+        where document_id = #{documentId} and user_id = #{userId}
+    </update>
+
+    <select id="selectOnlineEditors" resultMap="ImDocumentCollaboratorResult">
+        <include refid="selectImDocumentCollaboratorVo"/>
+        where document_id = #{documentId}
+        and online_status = 'ONLINE'
+        and last_active_time > date_sub(now(), interval #{timeout} minute)
+        order by last_active_time desc
+    </select>
+
+</mapper>

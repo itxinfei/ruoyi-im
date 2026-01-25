@@ -16,40 +16,28 @@
         </el-button>
       </div>
 
-      <!-- 用户核心信息 -->
-      <div class="profile-header">
-        <div class="avatar-wrapper">
+      <!-- 用户核心信息（新：两列布局，头像左、信息右） -->
+      <div class="profile-header two-column">
+        <div class="avatar-area" aria-label="用户头像">
           <DingtalkAvatar
             :src="currentUser.avatar"
             :name="currentUser.nickname || currentUser.username"
             :user-id="currentUser.id"
             :size="88"
-            shape="square"
+            shape="circle"
             custom-class="user-avatar"
           />
+          <span class="status-dot" aria-hidden="true"></span>
         </div>
-        
-        <div class="user-main">
-          <div class="name-row">
+        <div class="profile-info">
+          <div class="name-row" style="justify-content:flex-start; align-items:center;">
             <h2 class="nickname">{{ currentUser.nickname || currentUser.username }}</h2>
             <el-icon v-if="currentUser.gender === 1" class="gender-icon male"><Male /></el-icon>
             <el-icon v-else-if="currentUser.gender === 2" class="gender-icon female"><Female /></el-icon>
-            
-            <el-dropdown trigger="click" @command="handleStatusChange">
-              <el-tag size="small" :type="statusType" class="status-tag cursor-pointer hover:opacity-80">
-                {{ statusLabel }} <el-icon class="ml-1"><ArrowDown /></el-icon>
-              </el-tag>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="online"><span class="status-indicator online"></span> 在线</el-dropdown-item>
-                  <el-dropdown-item command="busy"><span class="status-indicator busy"></span> 忙碌</el-dropdown-item>
-                  <el-dropdown-item command="away"><span class="status-indicator away"></span> 离开</el-dropdown-item>
-                  <el-dropdown-item command="meeting"><span class="status-indicator meeting"></span> 会议中</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+            <el-tag size="small" type="success" class="status-tag" style="margin-left:8px;">在线</el-tag>
+            <button class="edit-profile-btn" @click="showEditDialog = true" aria-label="编辑资料">编辑资料</button>
           </div>
-          <p class="account">账号：{{ currentUser.username }}</p>
+          <p class="account" style="margin:4px 0 0;">账号：{{ currentUser.username }}</p>
         </div>
       </div>
 
@@ -168,6 +156,15 @@ const handleSaveProfile = async (formData) => {
   }
 }
 
+.profile-header.two-column { 
+  display: flex; align-items: center; padding: 12px 32px; gap: 20px; border-bottom: 1px solid #eee;
+}
+.profile-header.two-column .avatar-area { width: 110px; display:flex; flex-direction:column; align-items:center; position:relative; }
+.profile-header.two-column .avatar-area .user-avatar { width: 88px; height: 88px; border-radius: 50%; border:4px solid #fff; box-shadow: 0 8px 20px rgba(0,0,0,.15); }
+.profile-header.two-column .profile-info { flex:1; display:flex; flex-direction:column; }
+.profile-header.two-column .name-row { display:flex; align-items:center; gap:8px; }
+.profile-header.two-column .edit-profile-btn { margin-left:auto; height:28px; border-radius:6px; font-size:12px; }
+.profile-header.two-column .status-dot { position:absolute; bottom:6px; right:6px; width:12px; height:12px; border: 2px solid #fff; border-radius:50%; background:#52c41a; }
 const handleLogout = () => {
   ElMessageBox.confirm('确定要退出登录吗？', '提示', {
     confirmButtonText: '确定',
@@ -250,7 +247,8 @@ watch(visible, (val) => {
   }
 }
 
-.profile-header {
+  .profile-header {
+  .profile-header {
   padding: 0 32px;
   margin-top: -44px;
   display: flex;
@@ -260,54 +258,8 @@ watch(visible, (val) => {
   position: relative;
   z-index: 1;
 
-  .avatar-wrapper {
-    position: relative;
-    margin-bottom: 16px;
-    
-    :deep(.user-avatar) {
-      border: 4px solid #fff;
-      border-radius: 28px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-      transition: transform 0.3s;
-      .dark & { border-color: #1e293b; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-    }
-    
-    &:hover :deep(.user-avatar) {
-      transform: scale(1.02);
-    }
-  }
-
-  .user-main {
-    text-align: center;
-    
-    .name-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 6px;
-      
-      .nickname {
-        font-size: 22px;
-        font-weight: 700;
-        color: #1f2329;
-        margin: 0;
-        .dark & { color: #f1f5f9; }
-      }
-      
-      .gender-icon {
-        font-size: 16px;
-        &.male { color: #0089ff; }
-        &.female { color: #ff4d4f; }
-      }
-    }
-    
-    .account {
-      font-size: 13px;
-      color: #8f959e;
-      margin: 0;
-    }
-  }
+  /* 新的两列布局已经应用在 Patch 1/2 中，保持向后兼容 */
+  &.two-column { /* 直接覆盖，若未应用则回退 */ }
 }
 
 .profile-details {

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImDocumentOperationLogMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImDocumentOperationLog" id="ImDocumentOperationLogResult">
+        <id property="id" column="id"/>
+        <result property="documentId" column="document_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="operationType" column="operation_type"/>
+        <result property="position" column="position"/>
+        <result property="content" column="content"/>
+        <result property="contentLength" column="content_length"/>
+        <result property="beforeVersion" column="before_version"/>
+        <result property="afterVersion" column="after_version"/>
+        <result property="changeSummary" column="change_summary"/>
+        <result property="operationTime" column="operation_time"/>
+        <result property="ipAddress" column="ip_address"/>
+        <result property="userAgent" column="user_agent"/>
+    </resultMap>
+
+    <sql id="selectImDocumentOperationLogVo">
+        select id, document_id, user_id, user_name, operation_type, position,
+               content, content_length, before_version, after_version, change_summary,
+               operation_time, ip_address, user_agent
+        from im_document_operation_log
+    </sql>
+
+    <select id="selectByDocumentId" resultMap="ImDocumentOperationLogResult">
+        <include refid="selectImDocumentOperationLogVo"/>
+        where document_id = #{documentId}
+        order by operation_time desc
+        <if test="limit != null">
+            limit #{limit}
+        </if>
+    </select>
+
+    <delete id="deleteOldLogs">
+        delete from im_document_operation_log
+        where operation_time &lt; #{beforeTime}
+    </delete>
+
+    <select id="countByDocumentAndUser" resultType="java.lang.Integer">
+        select count(*) from im_document_operation_log
+        where document_id = #{documentId} and user_id = #{userId}
+    </select>
+
+</mapper>

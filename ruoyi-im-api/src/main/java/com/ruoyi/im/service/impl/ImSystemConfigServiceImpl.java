@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 系统配置服务实现
@@ -47,10 +48,10 @@ public class ImSystemConfigServiceImpl implements ImSystemConfigService {
     public Integer getMessageRecallTimeLimit() {
         try {
             String key = SYSTEM_CONFIG_PREFIX + CONFIG_RECALL_TIME_LIMIT;
-            String value = redisUtil.get(key);
+            Object value = redisUtil.get(key);
             if (value != null) {
                 try {
-                    return Integer.parseInt(value);
+                    return Integer.parseInt(value.toString());
                 } catch (NumberFormatException e) {
                     log.warn("解析撤回时间限制失败: {}", value, e);
                 }
@@ -70,7 +71,7 @@ public class ImSystemConfigServiceImpl implements ImSystemConfigService {
                 throw new IllegalArgumentException("撤回时间限制必须大于等于0");
             }
             String key = SYSTEM_CONFIG_PREFIX + CONFIG_RECALL_TIME_LIMIT;
-            redisUtil.set(key, String.valueOf(minutes));
+            redisUtil.set(key, String.valueOf(minutes), 30, TimeUnit.MINUTES);
             log.info("更新消息撤回时间限制: {} 分钟", minutes);
         } catch (Exception e) {
             log.error("设置消息撤回时间限制失败", e);

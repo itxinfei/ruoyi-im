@@ -7,6 +7,7 @@ import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.attendance.ImAttendanceGroupVO;
 import com.ruoyi.im.vo.attendance.ImAttendanceShiftVO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,7 @@ public class ImAttendanceGroupController {
     @Operation(summary = "创建考勤组", description = "创建新的考勤组")
     @PostMapping("/create")
     public Result<Long> createGroup(
-            @Valid @RequestBody ImAttendanceGroupCreateRequest request) {
+            @Parameter(description = "考勤组创建请求") @Valid @RequestBody ImAttendanceGroupCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -59,8 +60,8 @@ public class ImAttendanceGroupController {
     @Operation(summary = "更新考勤组", description = "更新考勤组信息")
     @PutMapping("/{groupId}")
     public Result<Void> updateGroup(
-            @PathVariable Long groupId,
-            @Valid @RequestBody ImAttendanceGroupCreateRequest request) {
+            @Parameter(description = "考勤组ID") @PathVariable Long groupId,
+            @Parameter(description = "考勤组更新请求") @Valid @RequestBody ImAttendanceGroupCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -78,7 +79,7 @@ public class ImAttendanceGroupController {
     @Operation(summary = "删除考勤组", description = "删除考勤组")
     @DeleteMapping("/{groupId}")
     public Result<Void> deleteGroup(
-            @PathVariable Long groupId) {
+            @Parameter(description = "考勤组ID") @PathVariable Long groupId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -96,7 +97,7 @@ public class ImAttendanceGroupController {
     @Operation(summary = "获取考勤组详情", description = "获取考勤组详细信息")
     @GetMapping("/{groupId}")
     public Result<ImAttendanceGroupVO> getGroupDetail(
-            @PathVariable Long groupId) {
+            @Parameter(description = "考勤组ID") @PathVariable Long groupId) {
         try {
             ImAttendanceGroupVO group = attendanceGroupService.getGroupDetail(groupId);
             return Result.success(group);
@@ -148,8 +149,8 @@ public class ImAttendanceGroupController {
     @Operation(summary = "添加成员", description = "向考勤组添加成员")
     @PostMapping("/{groupId}/members/add")
     public Result<Void> addMembers(
-            @PathVariable Long groupId,
-            @RequestBody List<Long> memberIds) {
+            @Parameter(description = "考勤组ID") @PathVariable Long groupId,
+            @Parameter(description = "成员ID列表") @RequestBody List<Long> memberIds) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -167,8 +168,8 @@ public class ImAttendanceGroupController {
     @Operation(summary = "移除成员", description = "从考勤组移除成员")
     @PostMapping("/{groupId}/members/remove")
     public Result<Void> removeMembers(
-            @PathVariable Long groupId,
-            @RequestBody List<Long> memberIds) {
+            @Parameter(description = "考勤组ID") @PathVariable Long groupId,
+            @Parameter(description = "成员ID列表") @RequestBody List<Long> memberIds) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -186,7 +187,7 @@ public class ImAttendanceGroupController {
     @Operation(summary = "获取成员列表", description = "获取考勤组的成员列表")
     @GetMapping("/{groupId}/members")
     public Result<List<Long>> getGroupMembers(
-            @PathVariable Long groupId) {
+            @Parameter(description = "考勤组ID") @PathVariable Long groupId) {
         try {
             List<Long> members = attendanceGroupService.getGroupMembers(groupId);
             return Result.success(members);
@@ -204,10 +205,10 @@ public class ImAttendanceGroupController {
     @Operation(summary = "创建班次", description = "创建考勤班次")
     @PostMapping("/{groupId}/shift/create")
     public Result<Long> createShift(
-            @PathVariable Long groupId,
-            @RequestParam String shiftName,
-            @RequestParam String workStartTime,
-            @RequestParam String workEndTime) {
+            @Parameter(description = "考勤组ID") @PathVariable Long groupId,
+            @Parameter(description = "班次名称") @RequestParam String shiftName,
+            @Parameter(description = "上班时间（HH:mm:ss）") @RequestParam String workStartTime,
+            @Parameter(description = "下班时间（HH:mm:ss）") @RequestParam String workEndTime) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -225,7 +226,7 @@ public class ImAttendanceGroupController {
     @Operation(summary = "删除班次", description = "删除考勤班次")
     @DeleteMapping("/shift/{shiftId}")
     public Result<Void> deleteShift(
-            @PathVariable Long shiftId) {
+            @Parameter(description = "班次ID") @PathVariable Long shiftId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -243,7 +244,7 @@ public class ImAttendanceGroupController {
     @Operation(summary = "获取班次列表", description = "获取考勤组的班次列表")
     @GetMapping("/{groupId}/shifts")
     public Result<List<ImAttendanceShiftVO>> getShiftList(
-            @PathVariable Long groupId) {
+            @Parameter(description = "考勤组ID") @PathVariable Long groupId) {
         try {
             List<ImAttendanceShiftVO> shifts = attendanceGroupService.getShiftList(groupId);
             return Result.success(shifts);
@@ -261,12 +262,12 @@ public class ImAttendanceGroupController {
     @Operation(summary = "批量排班", description = "为考勤组成员批量排班")
     @PostMapping("/{groupId}/schedule")
     public Result<Void> schedule(
-            @PathVariable Long groupId,
-            @RequestParam Long userId,
-            @RequestParam Long shiftId,
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate,
-            @RequestBody List<Integer> workDays) {
+            @Parameter(description = "考勤组ID") @PathVariable Long groupId,
+            @Parameter(description = "排班用户ID") @RequestParam Long userId,
+            @Parameter(description = "班次ID") @RequestParam Long shiftId,
+            @Parameter(description = "开始日期") @RequestParam LocalDate startDate,
+            @Parameter(description = "结束日期") @RequestParam LocalDate endDate,
+            @Parameter(description = "工作日列表（1-7表示周一到周日）") @RequestBody List<Integer> workDays) {
         Long operatorId = SecurityUtils.getLoginUserId();
 
         try {
@@ -284,8 +285,8 @@ public class ImAttendanceGroupController {
     @Operation(summary = "获取用户排班", description = "获取用户的排班信息")
     @GetMapping("/schedule/my")
     public Result<List<ImAttendanceShiftVO>> getUserSchedule(
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate) {
+            @Parameter(description = "开始日期") @RequestParam LocalDate startDate,
+            @Parameter(description = "结束日期") @RequestParam LocalDate endDate) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {

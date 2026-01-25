@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImMessageMarkerMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImMessageMarker" id="ImMessageMarkerResult">
+        <id property="id" column="id"/>
+        <result property="messageId" column="message_id"/>
+        <result property="conversationId" column="conversation_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="markerType" column="marker_type"/>
+        <result property="color" column="color"/>
+        <result property="remindTime" column="remind_time"/>
+        <result property="todoStatus" column="todo_status"/>
+        <result property="remark" column="remark"/>
+        <result property="doneTime" column="done_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImMessageMarkerVo">
+        select id, message_id, conversation_id, user_id, marker_type, color,
+               remind_time, todo_status, remark, done_time, create_time, update_time
+        from im_message_marker
+    </sql>
+
+    <select id="selectUserMarkers" resultMap="ImMessageMarkerResult">
+        <include refid="selectImMessageMarkerVo"/>
+        where user_id = #{userId}
+        <if test="markerType != null and markerType != ''">
+            and marker_type = #{markerType}
+        </if>
+        order by create_time desc
+    </select>
+
+    <select id="selectByMessageId" resultMap="ImMessageMarkerResult">
+        <include refid="selectImMessageMarkerVo"/>
+        where message_id = #{messageId}
+        order by create_time desc
+    </select>
+
+    <select id="selectByMessageAndUser" resultMap="ImMessageMarkerResult">
+        <include refid="selectImMessageMarkerVo"/>
+        where message_id = #{messageId} and user_id = #{userId}
+        limit 1
+    </select>
+
+    <select id="selectPendingReminders" resultMap="ImMessageMarkerResult">
+        <include refid="selectImMessageMarkerVo"/>
+        where marker_type = 'TODO'
+        and todo_status = 'PENDING'
+        and remind_time &lt;= #{beforeTime}
+        order by remind_time asc
+    </select>
+
+    <select id="countUserTodos" resultType="java.lang.Integer">
+        select count(*) from im_message_marker
+        where user_id = #{userId}
+        and marker_type = 'TODO'
+        and todo_status = 'PENDING'
+    </select>
+
+</mapper>
