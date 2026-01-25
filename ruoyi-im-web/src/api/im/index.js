@@ -8,6 +8,8 @@ export * as groupApi from './group'
 export * as userApi from './user'
 export * as dingApi from './ding'
 export * as botApi from './bot'
+export * as translationApi from './translation'
+export * as aiApi from './ai'
 
 // 直接导出常用方法
 export {
@@ -84,3 +86,18 @@ export {
   deleteBotRule,
   setBotEnabled
 } from './bot'
+
+// 消息翻译相关API
+export {
+  translate,
+  getSupportedLanguages,
+  detectLanguage
+} from './translation'
+
+// AI助手相关API
+export {
+  chat,
+  summarize,
+  clearConversation,
+  getSupportedModels
+} from './ai'

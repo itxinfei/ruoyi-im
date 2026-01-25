@@ -1,164 +1,289 @@
+// ============================================================================
 // Design Tokens - DingTalk Style
+// 钉钉风格设计系统令牌
+// ============================================================================
+
 :root {
-  // === Brand Colors ===
-  // 更新为 stitch_im 设计的颜色
+  // === Brand Colors (品牌色) ===
+  // 钉钉蓝 (#1677ff) 作为主品牌色
   --dt-brand-color: #1677ff;
   --dt-brand-hover: #4096ff;
   --dt-brand-active: #0958d9;
   --dt-brand-bg: #e6f4ff;
   --dt-brand-light: rgba(22, 119, 255, 0.1);
+  --dt-brand-lighter: rgba(22, 119, 255, 0.05);
 
-  // === Semantic Colors ===
+  // === Semantic Colors (语义色) ===
   --dt-success-color: #52c41a;
+  --dt-success-bg: #f6ffed;
+  --dt-success-border: #b7eb8f;
   --dt-warning-color: #faad14;
+  --dt-warning-bg: #fffbe6;
+  --dt-warning-border: #ffe58f;
   --dt-error-color: #ff4d4f;
+  --dt-error-bg: #fff1f0;
+  --dt-error-border: #ffccc7;
   --dt-danger-color: #f5222d;
-  --dt-badge-color: #f5222d;
+  --dt-info-color: #1677ff;
+  --dt-info-bg: #e6f4ff;
+  --dt-info-border: #91caff;
 
   // === Background Colors (亮色模式) ===
-  --dt-bg-body: #f4f7f9;
+  --dt-bg-body: #f5f7fa;
   --dt-bg-sidebar: #1677ff;
+  --dt-bg-sidebar-gradient: linear-gradient(180deg, #1677ff 0%, #0e5fd9 100%);
   --dt-bg-sidebar-item: transparent;
-  --dt-bg-sidebar-item-hover: rgba(255, 255, 255, 0.1);
+  --dt-bg-sidebar-item-hover: rgba(255, 255, 255, 0.12);
   --dt-bg-sidebar-item-active: rgba(255, 255, 255, 0.2);
   --dt-bg-session-list: #ffffff;
-  --dt-bg-chat: #f2f2f2;
-  --dt-bg-session-hover: #f2f3f5;
-  --dt-bg-session-active: #e6f7ff;
+  --dt-bg-chat: #f5f7fa;
+  --dt-bg-session-hover: #f5f6f8;
+  --dt-bg-session-active: #e6f4ff;
   --dt-bg-input: #ffffff;
   --dt-bg-card: #ffffff;
+  --dt-bg-card-hover: #fafbfc;
+  --dt-bg-dropdown: #ffffff;
+  --dt-bg-overlay: rgba(0, 0, 0, 0.45);
+  --dt-bg-mask: rgba(0, 0, 0, 0.6);
 
-  // === DingTalk Special ===
+  // === DingTalk Special (钉钉特殊颜色) ===
   --dt-bubble-left-bg: #ffffff;
-  --dt-bubble-right-bg: #cce1ff;
+  --dt-bubble-right-bg: #d6e4ff;
+  --dt-bubble-right-bg-hover: #c7d9ff;
   --dt-unread-color: #1677ff;
   --dt-read-color: #8f959e;
+  --dt-mention-bg: rgba(22, 119, 255, 0.1);
+  --dt-mention-text: #1677ff;
 
-  // === Text Colors ===
-  --dt-text-primary: #0f172a;
-  --dt-text-secondary: #475569;
-  --dt-text-tertiary: #94a3b8;
-  --dt-text-placeholder: #bfbfbf;
-  --dt-text-disabled: #d9d9d9;
+  // === Text Colors (文本颜色 - 亮色模式) ===
+  --dt-text-primary: #1f2329;       // 主要文本
+  --dt-text-secondary: #646a73;     // 次要文本
+  --dt-text-tertiary: #8f959e;      // 辅助文本
+  --dt-text-quaternary: #c9cdd4;    // 占位符文本
+  --dt-text-disabled: #d9d9d9;      // 禁用文本
+  --dt-text-link: #1677ff;          // 链接文本
+  --dt-text-link-hover: #4096ff;    // 链接悬停
 
-  // 暗色模式变量
-  --dt-bg-body-dark: #0f172a;
-  --dt-bg-sidebar-dark: #1e293b;
-  --dt-bg-card-dark: #1e293b;
-  --dt-bg-input-dark: #334155;
-  --dt-text-primary-dark: #f1f5f9;
-  --dt-text-secondary-dark: #cbd5e1;
-  --dt-border-dark: #334155;
-
-  // === Border Colors ===
-  --dt-border-color: #e5e7eb;
+  // === Border Colors (边框颜色) ===
+  --dt-border-color: #e5e6eb;
   --dt-border-light: #f0f0f0;
+  --dt-border-lighter: #f5f5f5;
   --dt-border-dark: #d9d9d9;
+  --dt-border-divider: #e5e6eb;
+  --dt-border-input: #d9d9d9;
+  --dt-border-input-hover: #1677ff;
+  --dt-border-input-focus: #1677ff;
 
-  // === Typography ===
+  // === Shadow Colors (阴影颜色) ===
+  --dt-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --dt-shadow-2: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --dt-shadow-3: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --dt-shadow-4: 0 6px 12px rgba(0, 0, 0, 0.1);
+  --dt-shadow-5: 0 8px 16px rgba(0, 0, 0, 0.12);
+  --dt-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+  --dt-shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+  --dt-shadow-float: 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+  --dt-shadow-modal: 0 8px 24px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  // === Typography (字体) ===
   --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
     'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
     'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --dt-font-family-code: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code',
+    'Droid Sans Mono', 'Source Code Pro', monospace;
+
+  // 字体大小 (使用类型刻度)
   --dt-font-size-xs: 11px;
   --dt-font-size-sm: 12px;
   --dt-font-size-base: 14px;
   --dt-font-size-md: 15px;
   --dt-font-size-lg: 16px;
   --dt-font-size-xl: 18px;
-  --dt-font-size-xxl: 20px;
+  --dt-font-size-2xl: 20px;
+  --dt-font-size-3xl: 24px;
+  --dt-font-size-4xl: 30px;
+  --dt-font-size-5xl: 36px;
+  --dt-font-size-6xl: 48px;
+
+  // 字重
+  --dt-font-weight-light: 300;
   --dt-font-weight-normal: 400;
   --dt-font-weight-medium: 500;
   --dt-font-weight-semibold: 600;
   --dt-font-weight-bold: 700;
-  --dt-line-height-tight: 1.2;
+
+  // 行高
+  --dt-line-height-tight: 1.25;
+  --dt-line-height-snug: 1.375;
   --dt-line-height-base: 1.5;
+  --dt-line-height-relaxed: 1.625;
   --dt-line-height-loose: 1.75;
 
-  // === Spacing (4px base unit) ===
-  --dt-space-xs: 4px;
-  --dt-space-sm: 8px;
-  --dt-space-md: 12px;
-  --dt-space-lg: 16px;
-  --dt-space-xl: 24px;
-  --dt-space-xxl: 32px;
-  --dt-space-xxxl: 48px;
+  // 字母间距
+  --dt-letter-spacing-tight: -0.02em;
+  --dt-letter-spacing-normal: 0;
+  --dt-letter-spacing-wide: 0.025em;
 
-  // === Layout Dimensions ===
-  --dt-nav-sidebar-width: 80px;
+  // === Spacing (间距 - 4px 基础单位) ===
+  --dt-space-0: 0;
+  --dt-space-1: 4px;
+  --dt-space-2: 8px;
+  --dt-space-3: 12px;
+  --dt-space-4: 16px;
+  --dt-space-5: 20px;
+  --dt-space-6: 24px;
+  --dt-space-8: 32px;
+  --dt-space-10: 40px;
+  --dt-space-12: 48px;
+  --dt-space-16: 64px;
+  --dt-space-20: 80px;
+
+  // === Layout Dimensions (布局尺寸) ===
+  --dt-nav-sidebar-width: 72px;
+  --dt-nav-sidebar-collapsed-width: 64px;
   --dt-session-panel-width: 280px;
+  --dt-session-panel-collapsed-width: 60px;
+  --dt-contact-panel-width: 320px;
   --dt-header-height: 48px;
-  --dt-chat-header-height: 56px;
-  --dt-chat-input-height: 56px;
+  --dt-chat-header-height: 60px;
+  --dt-chat-input-height: 120px;
+  --dt-chat-input-min-height: 80px;
   --dt-nav-item-height: 48px;
-  --dt-session-item-height: 64px;
+  --dt-session-item-height: 72px;
+  --dt-message-max-width: 520px;
 
-  // === Component Sizes ===
+  // === Component Sizes (组件尺寸) ===
+  --dt-avatar-size-xs: 24px;
   --dt-avatar-size-sm: 32px;
+  --dt-avatar-size-md: 40px;
   --dt-avatar-size: 48px;
   --dt-avatar-size-lg: 64px;
-  --dt-btn-height-md: 36px;
-  --dt-btn-height-lg: 40px;
-  --dt-message-max-width: 480px;
+  --dt-avatar-size-xl: 96px;
 
-  // === Border Radius ===
+  --dt-btn-height-sm: 28px;
+  --dt-btn-height-md: 34px;
+  --dt-btn-height-lg: 40px;
+  --dt-btn-height-xl: 48px;
+
+  --dt-input-height-sm: 28px;
+  --dt-input-height-md: 34px;
+  --dt-input-height-lg: 40px;
+
+  // === Border Radius (圆角) ===
+  --dt-radius-none: 0;
   --dt-radius-sm: 4px;
   --dt-radius-md: 8px;
   --dt-radius-lg: 12px;
-  --dt-radius-full: 50%;
+  --dt-radius-xl: 16px;
+  --dt-radius-2xl: 20px;
+  --dt-radius-3xl: 24px;
+  --dt-radius-full: 9999px;
 
-  // === Shadows ===
-  --dt-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --dt-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --dt-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
-
-  // === Transitions ===
-  --dt-transition-fast: 0.15s ease;
-  --dt-transition-base: 0.3s ease;
-  --dt-transition-slow: 0.5s ease;
-
-  // === Z-Index ===
+  // === Z-Index (层级) ===
+  --dt-z-base: 0;
   --dt-z-dropdown: 1000;
   --dt-z-sticky: 1020;
   --dt-z-fixed: 1030;
-  --dt-z-modal: 1040;
-  --dt-z-popover: 1050;
-  --dt-z-tooltip: 1060;
-  --dt-z-notification: 1070;
+  --dt-z-modal-backdrop: 1040;
+  --dt-z-modal: 1050;
+  --dt-z-popover: 1060;
+  --dt-z-tooltip: 1070;
+  --dt-z-notification: 1080;
+  --dt-z-max: 9999;
+
+  // === Transitions (过渡) ===
+  --dt-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --dt-transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --dt-transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --dt-transition-slower: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Easing functions
+  --dt-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --dt-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --dt-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --dt-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  // ============================================================================
+  // 暗色模式变量
+  // ============================================================================
+  --dt-bg-body-dark: #0f172a;
+  --dt-bg-sidebar-dark: #1e293b;
+  --dt-bg-card-dark: #1e293b;
+  --dt-bg-input-dark: #334155;
+  --dt-bg-hover-dark: #334155;
+  --dt-bg-active-dark: rgba(22, 119, 255, 0.15);
+
+  --dt-text-primary-dark: #f1f5f9;
+  --dt-text-secondary-dark: #cbd5e1;
+  --dt-text-tertiary-dark: #94a3b8;
+  --dt-text-disabled-dark: #64748b;
+
+  --dt-border-dark: #334155;
+  --dt-border-light-dark: #1e293b;
+
+  // Element Plus 暗色适配变量
+  --el-bg-color-dark: #1e293b;
+  --el-bg-color-overlay-dark: #0f172a;
+  --el-text-color-primary-dark: #f1f5f9;
+  --el-text-color-regular-dark: #cbd5e1;
+  --el-border-color-dark: #334155;
+  --el-border-color-light-dark: #1e293b;
+  --el-fill-color-blank-dark: #334155;
+  --el-fill-color-light-dark: #1e293b;
+
+  // ============================================================================
+  // 语义化颜色变量 (用于组件)
+  // ============================================================================
+  --dt-color-primary: var(--dt-brand-color);
+  --dt-color-success: var(--dt-success-color);
+  --dt-color-warning: var(--dt-warning-color);
+  --dt-color-danger: var(--dt-error-color);
+  --dt-color-info: var(--dt-info-color);
 }
 
+// ============================================================================
 // 暗色模式覆盖
+// ============================================================================
 .dark {
   --dt-bg-body: var(--dt-bg-body-dark);
   --dt-bg-sidebar: var(--dt-bg-sidebar-dark);
   --dt-bg-session-list: var(--dt-bg-card-dark);
   --dt-bg-chat: var(--dt-bg-body-dark);
-  --dt-bg-session-hover: rgba(255, 255, 255, 0.05);
-  --dt-bg-session-active: rgba(22, 119, 255, 0.15);
+  --dt-bg-session-hover: var(--dt-bg-hover-dark);
+  --dt-bg-session-active: var(--dt-bg-active-dark);
   --dt-bg-input: var(--dt-bg-input-dark);
   --dt-bg-card: var(--dt-bg-card-dark);
-  --dt-bg-dialog: var(--dt-bg-card-dark);
+  --dt-bg-card-hover: var(--dt-bg-hover-dark);
+  --dt-bg-dropdown: var(--dt-bg-card-dark);
 
   --dt-text-primary: var(--dt-text-primary-dark);
   --dt-text-secondary: var(--dt-text-secondary-dark);
-  --dt-text-placeholder: #64748b;
+  --dt-text-tertiary: var(--dt-text-tertiary-dark);
+  --dt-text-disabled: var(--dt-text-disabled-dark);
 
   --dt-border-color: var(--dt-border-dark);
-  --dt-border-light: #1e293b;
+  --dt-border-light: var(--dt-border-light-dark);
+  --dt-border-input: var(--dt-border-dark);
 
-  // Element Plus 暗色适配变量 (针对全局同步)
-  --el-bg-color: var(--dt-bg-card-dark);
-  --el-bg-color-overlay: var(--dt-bg-card-dark);
-  --el-text-color-primary: var(--dt-text-primary-dark);
-  --el-text-color-regular: var(--dt-text-secondary-dark);
-  --el-border-color: var(--dt-border-dark);
-  --el-border-color-light: #334155;
-  --el-fill-color-blank: var(--dt-bg-input-dark);
+  --dt-bubble-left-bg: #1e293b;
+  --dt-bubble-right-bg: #0d4bd1;
+  --dt-bubble-right-bg-hover: #0c3f9f;
+
+  // Element Plus 变量映射
+  --el-bg-color: var(--el-bg-color-dark);
+  --el-bg-color-overlay: var(--el-bg-color-overlay-dark);
+  --el-text-color-primary: var(--el-text-color-primary-dark);
+  --el-text-color-regular: var(--el-text-color-regular-dark);
+  --el-border-color: var(--el-border-color-dark);
+  --el-border-color-light: var(--el-border-color-light-dark);
+  --el-fill-color-blank: var(--el-fill-color-blank-dark);
+  --el-fill-color-light: var(--el-fill-color-light-dark);
 }
 
-// === Accessibility: Reduced Motion Support ===
-// 尊重用户的动画偏好设置，减少动画以防止晕动症或注意力分散
+// ============================================================================
+// Accessibility: Reduced Motion Support (减少动画支持)
+// ============================================================================
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {
@@ -169,14 +294,143 @@
   }
 }
 
-// === Focus Visible for Better Keyboard Navigation ===
-// 改善键盘导航的焦点指示器
+// ============================================================================
+// Focus Visible (键盘导航焦点指示器)
+// ============================================================================
 :focus-visible {
   outline: 2px solid var(--dt-brand-color);
   outline-offset: 2px;
+  border-radius: var(--dt-radius-sm);
 }
 
-// 仅在键盘导航时显示焦点样式
 :focus:not(:focus-visible) {
   outline: none;
+}
+
+// ============================================================================
+// 滚动条样式 (统一滚动条外观)
+// ============================================================================
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: var(--dt-radius-sm);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.25);
+  }
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+// ============================================================================
+// 选择文本样式
+// ============================================================================
+::selection {
+  background: var(--dt-brand-light);
+  color: var(--dt-brand-color);
+}
+
+::-moz-selection {
+  background: var(--dt-brand-light);
+  color: var(--dt-brand-color);
+}
+
+// ============================================================================
+// 通用工具类 (SCSS Mixins)
+// ============================================================================
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-ellipsis-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin card-style {
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-lg);
+  box-shadow: var(--dt-shadow-card);
+  transition: box-shadow var(--dt-transition-base);
+
+  &:hover {
+    box-shadow: var(--dt-shadow-card-hover);
+  }
+}
+
+@mixin button-reset {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+@mixin interactive {
+  cursor: pointer;
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    opacity: 0.85;
+  }
+
+  &:active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+// ============================================================================
+// 响应式断点
+// ============================================================================
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
+
+@mixin respond-to($breakpoint) {
+  @media (min-width: $breakpoint) {
+    @content;
+  }
+}
+
+@mixin respond-below($breakpoint) {
+  @media (max-width: $breakpoint - 1px) {
+    @content;
+  }
 }

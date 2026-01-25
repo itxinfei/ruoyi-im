@@ -54,55 +54,59 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
     @Transactional(rollbackFor = Exception.class)
     public Long sendDing(DingSendRequest request, Long userId) {
         // 验证接收者
-        for (Long receiverId : request.getReceiverIds()) {
-            ImUser user = userMapper.selectImUserById(receiverId);
-            if (user == null) {
-                throw new BusinessException("接收者不存在: " + receiverId);
+        if (request.getReceiverIds() != null) {
+            for (Long receiverId : request.getReceiverIds()) {
+                ImUser user = userMapper.selectImUserById(receiverId);
+                if (user == null) {
+                    throw new BusinessException("接收者不存在: " + receiverId);
+                }
             }
         }
 
         ImDingMessage ding = new ImDingMessage();
+        ding.setConversationId(request.getConversationId());
         ding.setSenderId(userId);
         ding.setContent(request.getContent());
         ding.setDingType(request.getDingType());
-        ding.setIsUrgent(request.getIsUrgent());
-        ding.setScheduleTime(request.getScheduleTime());
-        ding.setReceiptRequired(request.getReceiptRequired() ? 1 : 0);
-        // 强提醒功能暂未启用（数据库字段未创建）
-        // ding.setRemindInterval(request.getRemindInterval());
-        // ding.setMaxRemindCount(request.getMaxRemindCount());
-        // ding.setRemindedCount(0);
-        ding.setAttachment(request.getAttachment());
-        ding.setTotalCount(request.getReceiverIds().length);
-        ding.setReadCount(0);
-        ding.setConfirmedCount(0);
+        ding.setPriority(request.getPriority());
 
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime sendTime = request.getScheduleTime() != null ? request.getScheduleTime() : now;
-
-        ding.setSendTime(sendTime);
-
-        if (request.getScheduleTime() != null) {
-            ding.setStatus("DRAFT"); // 定时发送，状态为草稿
-        } else {
-            ding.setStatus("SENT");
-            ding.setCreateTime(now);
-            ding.setUpdateTime(now);
+        // 处理目标用户列表
+        List<Long> targetList = request.getTargetUsers();
+        if (targetList == null && request.getReceiverIds() != null) {
+            // 兼容旧版字段
+            targetList = Arrays.asList(request.getReceiverIds());
         }
+        if (targetList != null && !targetList.isEmpty()) {
+            ding.setTargetUsers(String.join(",", targetList.stream()
+                    .map(String::valueOf).toArray(String[]::new)));
+        }
+
+        // 设置过期时间
+        LocalDateTime now = LocalDateTime.now();
+        if (request.getExpireHours() != null && request.getExpireHours() > 0) {
+            ding.setExpireTime(now.plusHours(request.getExpireHours()));
+        }
+
+        ding.setReadCount(0);
+        ding.setSendCount(targetList != null ? targetList.size() : 0);
+        ding.setStatus("SENT");
+        ding.setCreateTime(now);
+        ding.setUpdateTime(now);
 
         dingMessageMapper.insert(ding);
 
         // 创建回执记录并推送
-        for (Long receiverId : request.getReceiverIds()) {
-            ImDingReceipt receipt = new ImDingReceipt();
-            receipt.setDingId(ding.getId());
-            receipt.setReceiverId(receiverId);
-            receipt.setConfirmed(0);
-            receipt.setCreateTime(now);
-            dingReceiptMapper.insert(receipt);
+        List<Long> receivers = targetList;
+        if (receivers != null) {
+            for (Long receiverId : receivers) {
+                ImDingReceipt receipt = new ImDingReceipt();
+                receipt.setDingId(ding.getId());
+                receipt.setReceiverId(receiverId);
+                receipt.setConfirmed(0);
+                receipt.setCreateTime(now);
+                dingReceiptMapper.insert(receipt);
 
-            // 如果立即发送，推送WebSocket通知
-            if ("SENT".equals(ding.getStatus())) {
+                // 推送WebSocket通知
                 sendDingNotification(receiverId, ding, userId);
             }
         }
@@ -196,11 +200,6 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
             receipt.setConfirmTime(LocalDateTime.now());
             receipt.setRemark(remark);
             dingReceiptMapper.updateById(receipt);
-
-            // 更新已确认计数
-            ImDingMessage ding = dingMessageMapper.selectById(dingId);
-            ding.setConfirmedCount(ding.getConfirmedCount() + 1);
-            dingMessageMapper.updateById(ding);
         }
     }
 
@@ -318,9 +317,8 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
             payload.put("dingId", ding.getId());
             payload.put("content", ding.getContent());
             payload.put("dingType", ding.getDingType());
-            payload.put("isUrgent", ding.getIsUrgent());
-            payload.put("receiptRequired", ding.getReceiptRequired());
-            payload.put("sendTime", ding.getSendTime() != null ? ding.getSendTime().toString() : LocalDateTime.now().toString());
+            payload.put("priority", ding.getPriority());
+            payload.put("createTime", ding.getCreateTime() != null ? ding.getCreateTime().toString() : LocalDateTime.now().toString());
             payload.put("senderId", senderId);
             payload.put("senderName", senderName);
             payload.put("senderAvatar", senderAvatar);

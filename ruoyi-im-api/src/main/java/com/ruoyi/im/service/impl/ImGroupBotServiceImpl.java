@@ -102,8 +102,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         }
 
         // 2. 验证用户是否是群主或管理员
-        ImGroupMember member = groupMemberMapper.selectByGroupIdAndUserId(request.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getGroupRole()) && !"ADMIN".equals(member.getGroupRole())) {
+        ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(request.getGroupId(), userId);
+        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -146,8 +146,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         }
 
         // 验证权限
-        ImGroupMember member = groupMemberMapper.selectByGroupIdAndUserId(bot.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getGroupRole()) && !"ADMIN".equals(member.getGroupRole())) {
+        ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
+        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -180,8 +180,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         }
 
         // 验证权限
-        ImGroupMember member = groupMemberMapper.selectByGroupIdAndUserId(bot.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getGroupRole()) && !"ADMIN".equals(member.getGroupRole())) {
+        ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
+        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -197,7 +197,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
     @Override
     public List<ImGroupBot> getGroupBots(Long groupId, Long userId) {
         // 验证用户是否是群成员
-        ImGroupMember member = groupMemberMapper.selectByGroupIdAndUserId(groupId, userId);
+        ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (member == null) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
@@ -213,7 +213,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         }
 
         // 验证权限
-        ImGroupMember member = groupMemberMapper.selectByGroupIdAndUserId(bot.getGroupId(), userId);
+        ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
         if (member == null) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
@@ -238,8 +238,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         }
 
         // 验证权限
-        ImGroupMember member = groupMemberMapper.selectByGroupIdAndUserId(bot.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getGroupRole()) && !"ADMIN".equals(member.getGroupRole())) {
+        ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
+        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -259,8 +259,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         // 验证权限
         ImGroupBot bot = groupBotMapper.selectById(rule.getBotId());
         if (bot != null) {
-            ImGroupMember member = groupMemberMapper.selectByGroupIdAndUserId(bot.getGroupId(), userId);
-            if (member == null || !"OWNER".equals(member.getGroupRole()) && !"ADMIN".equals(member.getGroupRole())) {
+            ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
+            if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
                 throw new BusinessException(ImErrorCode.NO_PERMISSION);
             }
         }
@@ -299,8 +299,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         // 验证权限
         ImGroupBot bot = groupBotMapper.selectById(rule.getBotId());
         if (bot != null) {
-            ImGroupMember member = groupMemberMapper.selectByGroupIdAndUserId(bot.getGroupId(), userId);
-            if (member == null || !"OWNER".equals(member.getGroupRole()) && !"ADMIN".equals(member.getGroupRole())) {
+            ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
+            if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
                 throw new BusinessException(ImErrorCode.NO_PERMISSION);
             }
         }
@@ -320,8 +320,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         }
 
         // 验证权限
-        ImGroupMember member = groupMemberMapper.selectByGroupIdAndUserId(bot.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getGroupRole()) && !"ADMIN".equals(member.getGroupRole())) {
+        ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
+        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 

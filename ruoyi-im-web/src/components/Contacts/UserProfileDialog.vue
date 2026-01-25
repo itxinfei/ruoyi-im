@@ -174,6 +174,10 @@ watch(visible, (val) => {
 
 .profile-container {
   background: #fff;
+
+  .dark & {
+    background: #1e293b;
+  }
 }
 
 .profile-cover {
@@ -188,6 +192,8 @@ watch(visible, (val) => {
     background: rgba(0, 0, 0, 0.2);
     border: none;
     color: #fff;
+    transition: all 0.2s;
+
     &:hover {
       background: rgba(0, 0, 0, 0.4);
     }
@@ -201,16 +207,24 @@ watch(visible, (val) => {
   flex-direction: column;
   align-items: center;
   margin-bottom: 24px;
+  position: relative;
+  z-index: 10;
 
   .avatar-wrapper {
     position: relative;
     margin-bottom: 12px;
+
     .user-avatar {
       border: 4px solid #fff;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       background: #f0f2f5;
       font-size: 28px;
+
+      .dark & {
+        border-color: #1e293b;
+      }
     }
+
     .online-status {
       position: absolute;
       right: 4px;
@@ -220,32 +234,54 @@ watch(visible, (val) => {
       background: #52c41a;
       border: 3px solid #fff;
       border-radius: 50%;
+
+      .dark & {
+        border-color: #1e293b;
+      }
     }
   }
 
   .user-main {
     text-align: center;
+
     .name-row {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
+
       .nickname {
         margin: 0;
         font-size: 20px;
         font-weight: 600;
         color: #1f2329;
+
+        .dark & {
+          color: #f1f5f9;
+        }
       }
+
       .gender-icon {
         font-size: 16px;
-        &.male { color: #1677ff; }
-        &.female { color: #ff4d4f; }
+
+        &.male {
+          color: #1677ff;
+        }
+
+        &.female {
+          color: #ff4d4f;
+        }
       }
     }
+
     .account {
       margin: 4px 0 0;
       font-size: 13px;
       color: #8f959e;
+
+      .dark & {
+        color: #94a3b8;
+      }
     }
   }
 }
@@ -253,14 +289,18 @@ watch(visible, (val) => {
 .profile-details {
   padding: 0 24px;
   margin-bottom: 24px;
-  
+
   .detail-item {
     display: flex;
     justify-content: space-between;
     padding: 12px 0;
     border-bottom: 1px solid #f0f0f0;
     font-size: 14px;
-    
+
+    .dark & {
+      border-bottom-color: #334155;
+    }
+
     &:last-child {
       border-bottom: none;
     }
@@ -269,21 +309,34 @@ watch(visible, (val) => {
       color: #8f959e;
       flex-shrink: 0;
       width: 60px;
+
+      .dark & {
+        color: #94a3b8;
+      }
     }
-    
+
     .value {
       color: #1f2329;
       text-align: right;
       word-break: break-all;
+
+      .dark & {
+        color: #f1f5f9;
+      }
     }
-    
+
     &.signature {
       flex-direction: column;
+
       .value {
         text-align: left;
         margin-top: 4px;
         color: #646a73;
         font-style: italic;
+
+        .dark & {
+          color: #94a3b8;
+        }
       }
     }
   }
@@ -293,7 +346,7 @@ watch(visible, (val) => {
   padding: 16px 24px 24px;
   display: flex;
   gap: 12px;
-  
+
   .action-btn {
     height: 40px;
     flex: 1;
@@ -301,21 +354,10 @@ watch(visible, (val) => {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    
+
     &:not(.el-button--primary) {
       flex: 0 0 40px;
       padding: 0;
-    }
-  }
-}
-
-:global(.dark) {
-  .profile-container {
-    background: #1e293b;
-    .detail-item {
-      border-color: #334155;
-      .nickname { color: #f1f5f9; }
-      .value { color: #f1f5f9; }
     }
   }
 }

@@ -171,16 +171,21 @@ const handleMoreCommand = (cmd) => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .contact-detail {
   padding: 40px;
   background: white;
   height: 100%;
+
+  .dark & {
+    background: #1e293b;
+  }
 }
 
 .header {
   display: flex;
   margin-bottom: 24px;
+  align-items: center;
 }
 
 .avatar-large {
@@ -194,12 +199,22 @@ const handleMoreCommand = (cmd) => {
   justify-content: center;
   font-size: 32px;
   margin-right: 20px;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .main-info {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .name-row {
@@ -207,21 +222,33 @@ const handleMoreCommand = (cmd) => {
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
+  flex-wrap: wrap;
 }
 
 .name {
   font-size: 24px;
   font-weight: bold;
+  color: #1f2329;
+
+  .dark & {
+    color: #f1f5f9;
+  }
 }
 
 .meta {
   color: #666;
+  font-size: 14px;
+
+  .dark & {
+    color: #94a3b8;
+  }
 }
 
 .actions {
   display: flex;
   gap: 12px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .info-list {
@@ -234,16 +261,30 @@ const handleMoreCommand = (cmd) => {
   display: flex;
   border-bottom: 1px solid #f9f9f9;
   padding-bottom: 12px;
+
+  .dark & {
+    border-bottom-color: #334155;
+  }
 }
 
 .label {
   width: 80px;
   color: #999;
+  flex-shrink: 0;
+
+  .dark & {
+    color: #94a3b8;
+  }
 }
 
 .value {
   color: #333;
   flex: 1;
+  word-break: break-all;
+
+  .dark & {
+    color: #f1f5f9;
+  }
 }
 
 .empty-state {
@@ -252,6 +293,10 @@ const handleMoreCommand = (cmd) => {
   align-items: center;
   justify-content: center;
   background: #f5f7fa;
+
+  .dark & {
+    background: #0f172a;
+  }
 }
 
 .danger-text {

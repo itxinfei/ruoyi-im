@@ -187,27 +187,48 @@ const handleVideoCall = () => {
   border-radius: 16px;
   overflow: hidden;
   padding: 0;
-  .el-dialog__header { display: none; }
-  .el-dialog__body { padding: 0; }
+
+  .el-dialog__header {
+    display: none;
+  }
+
+  .el-dialog__body {
+    padding: 0;
+  }
 }
 
 .user-card-content {
   background: #fff;
-  .dark & { background: #1e293b; }
+
+  .dark & {
+    background: #1e293b;
+  }
 }
 
 .card-cover {
   height: 120px;
   position: relative;
-  background-image: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.05) 100%);
-  
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.05) 100%);
+
   .close-card-btn {
-    position: absolute; top: 12px; right: 12px;
-    width: 32px; height: 32px; border-radius: 50%;
-    background: rgba(0,0,0,0.1); border: none; color: #fff;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.2s;
-    &:hover { background: rgba(0,0,0,0.2); }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.2);
+    }
   }
 }
 
@@ -221,50 +242,116 @@ const handleVideoCall = () => {
 
   .avatar-floating-wrapper {
     position: relative;
-    width: 80px; height: 80px;
+    width: 80px;
+    height: 80px;
     margin-bottom: 12px;
-    
+
     :deep(.profile-avatar) {
       border: 4px solid #fff;
       border-radius: 18px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      .dark & { border-color: #1e293b; }
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+      .dark & {
+        border-color: #1e293b;
+      }
     }
   }
 
   .info-content {
     .name-row {
-      display: flex; align-items: center; gap: 8px;
-      .user-name { font-size: 20px; font-weight: 600; color: #1f2329; margin: 0; .dark & { color: #f1f5f9; } }
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .user-name {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1f2329;
+        margin: 0;
+
+        .dark & {
+          color: #f1f5f9;
+        }
+      }
+
       .gender-icon {
         font-size: 14px;
-        &.male { color: #1677ff; }
-        &.female { color: #ff4d4f; }
+
+        &.male {
+          color: #1677ff;
+        }
+
+        &.female {
+          color: #ff4d4f;
+        }
       }
     }
-    .user-desc { font-size: 13px; color: #8f959e; margin: 4px 0 0; }
+
+    .user-desc {
+      font-size: 13px;
+      color: #8f959e;
+      margin: 4px 0 0;
+
+      .dark & {
+        color: #94a3b8;
+      }
+    }
   }
 }
 
 .action-bar {
-  display: flex; justify-content: space-around; padding: 24px 12px;
+  display: flex;
+  justify-content: space-around;
+  padding: 24px 12px;
   border-bottom: 1px solid #f2f3f5;
-  .dark & { border-color: #334155; }
+
+  .dark & {
+    border-color: #334155;
+  }
 
   .action-item {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    cursor: pointer; transition: transform 0.2s;
-    &:hover { transform: translateY(-2px); }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
 
     .action-icon {
-      width: 44px; height: 44px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; color: #fff;
-      &.chat-bg { background: #1677ff; }
-      &.phone-bg { background: #52c41a; }
-      &.video-bg { background: #13c2c2; }
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #fff;
+
+      &.chat-bg {
+        background: #1677ff;
+      }
+
+      &.phone-bg {
+        background: #52c41a;
+      }
+
+      &.video-bg {
+        background: #13c2c2;
+      }
     }
-    span { font-size: 12px; color: #646a73; .dark & { color: #94a3b8; } }
+
+    span {
+      font-size: 12px;
+      color: #646a73;
+
+      .dark & {
+        color: #94a3b8;
+      }
+    }
   }
 }
 
@@ -275,24 +362,70 @@ const handleVideoCall = () => {
 
   .detail-row {
     margin-bottom: 16px;
-    .label { font-size: 12px; color: #8f959e; display: block; margin-bottom: 4px; }
-    .value { font-size: 14px; color: #1f2329; margin: 0; .dark & { color: #e2e8f0; } }
-    .text-italic { font-style: italic; color: #646a73; }
+
+    .label {
+      font-size: 12px;
+      color: #8f959e;
+      display: block;
+      margin-bottom: 4px;
+
+      .dark & {
+        color: #94a3b8;
+      }
+    }
+
+    .value {
+      font-size: 14px;
+      color: #1f2329;
+      margin: 0;
+
+      .dark & {
+        color: #e2e8f0;
+      }
+    }
+
+    .text-italic {
+      font-style: italic;
+      color: #646a73;
+
+      .dark & {
+        color: #94a3b8;
+      }
+    }
   }
 }
 
 .card-footer {
-  padding: 12px; text-align: center; background: #f9fafb;
-  .dark & { background: rgba(0,0,0,0.1); }
-  span { font-size: 11px; color: #bbbfc4; }
+  padding: 12px;
+  text-align: center;
+  background: #f9fafb;
+
+  .dark & {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  span {
+    font-size: 11px;
+    color: #bbbfc4;
+  }
 }
 
 .online-status-dot {
-  position: absolute; bottom: 2px; right: 2px;
-  width: 14px; height: 14px; background: #52c41a;
-  border: 3px solid #fff; border-radius: 50%;
-  .dark & { border-color: #1e293b; }
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  background: #52c41a;
+  border: 3px solid #fff;
+  border-radius: 50%;
+
+  .dark & {
+    border-color: #1e293b;
+  }
 }
 
-.card-loading { padding: 40px; }
+.card-loading {
+  padding: 40px;
+}
 </style>

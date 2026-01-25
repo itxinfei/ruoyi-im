@@ -1,69 +1,73 @@
 <template>
   <nav
     :class="[
-      'flex flex-col items-center z-20 shrink-0 shadow-lg transition-colors duration-300',
-      isDark ? 'bg-sidebar-dark' : 'bg-primary',
-      collapsed ? 'w-16' : 'w-18'
+      'dingtalk-nav',
+      'flex flex-col items-center z-20 shrink-0 transition-colors duration-300',
+      isDark ? 'bg-nav-dark' : 'bg-nav-light'
     ]"
     style="height: 100vh;"
     role="navigation"
     aria-label="主导航"
   >
     <!-- Logo 区域 -->
-    <div class="shrink-0 pt-2 pb-2 w-full flex justify-center">
-      <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-        <span class="text-white font-bold text-2xl leading-none tracking-tight">IM</span>
+    <div class="nav-logo-wrapper">
+      <div class="nav-logo">
+        <span class="nav-logo-text">IM</span>
+        <span class="nav-logo-badge" v-if="unreadCount > 0">
+          {{ unreadCount > 99 ? '99+' : unreadCount }}
+        </span>
       </div>
     </div>
 
     <!-- 导航项 -->
-    <div class="flex flex-col gap-1 flex-1 w-full px-2 overflow-y-auto overflow-x-hidden" role="menubar">
+    <div class="nav-items" role="menubar">
       <el-tooltip
         v-for="item in navModules"
         :key="item.key"
         :content="item.label"
         placement="right"
         :show-after="500"
+        :hide-after="0"
       >
         <button
           @click="handleSwitch(item.key)"
           :class="[
             'nav-item',
-            activeModule === item.key ? 'nav-item-active' : 'nav-item-default'
+            activeModule === item.key ? 'nav-item-active' : ''
           ]"
           :aria-label="item.label"
           :aria-current="activeModule === item.key ? 'page' : undefined"
           role="menuitem"
         >
-          <span class="material-icons-outlined" aria-hidden="true">
+          <span class="nav-item-icon material-icons-outlined" aria-hidden="true">
             {{ item.icon }}
           </span>
+          <span v-if="item.badge" class="nav-item-badge">{{ item.badge }}</span>
         </button>
       </el-tooltip>
     </div>
 
     <!-- 底部操作区 -->
-    <div class="flex flex-col gap-1 w-full px-2 pb-2 shrink-0">
+    <div class="nav-footer">
       <!-- 主题切换按钮 -->
-      <el-tooltip :content="themeTooltip" placement="right" :show-after="500">
+      <el-tooltip :content="themeTooltip" placement="right" :show-after="500" :hide-after="0">
         <button
           @click="handleToggleTheme"
-          class="nav-item nav-item-default theme-toggle-btn"
+          class="nav-item nav-item-action"
           :aria-label="themeTooltip"
         >
           <span class="material-icons-outlined" aria-hidden="true">
             {{ themeIcon }}
           </span>
-          <!-- 模式小标识 -->
           <span v-if="themeMode === 'auto'" class="auto-badge">A</span>
         </button>
       </el-tooltip>
 
       <!-- 帮助与反馈 -->
-      <el-tooltip content="帮助与反馈" placement="right" :show-after="500">
+      <el-tooltip content="帮助与反馈" placement="right" :show-after="500" :hide-after="0">
         <button
           @click="handleHelp"
-          class="nav-item nav-item-default"
+          class="nav-item nav-item-action"
           aria-label="帮助与反馈"
         >
           <span class="material-icons-outlined" aria-hidden="true">help_outline</span>
@@ -71,11 +75,11 @@
       </el-tooltip>
 
       <!-- 设置按钮 -->
-      <el-tooltip content="设置" placement="right" :show-after="500">
+      <el-tooltip content="设置" placement="right" :show-after="500" :hide-after="0">
         <button
           @click="handleSwitch('settings')"
-          class="nav-item"
-          :class="activeModule === 'settings' ? 'nav-item-active' : 'nav-item-default'"
+          class="nav-item nav-item-action"
+          :class="{ 'nav-item-active': activeModule === 'settings' }"
           aria-label="设置"
         >
           <span class="material-icons-outlined" aria-hidden="true">settings</span>
@@ -83,25 +87,27 @@
       </el-tooltip>
 
       <!-- 用户头像 -->
-      <el-tooltip :content="`个人资料: ${currentUser.nickname || currentUser.username || '我'}`" placement="right" :show-after="500">
+      <el-tooltip
+        :content="`个人资料: ${currentUser.nickname || currentUser.username || '我'}`"
+        placement="right"
+        :show-after="500"
+        :hide-after="0"
+      >
         <button
           @click="handleSwitch('profile')"
-          class="avatar-btn mt-1"
-          :class="{ 'avatar-active': activeModule === 'profile' }"
+          class="nav-avatar"
+          :class="{ 'nav-avatar-active': activeModule === 'profile' }"
           :aria-label="`个人资料: ${currentUser.nickname || currentUser.username || '我'}`"
         >
-          <div class="avatar-inner">
-            <DingtalkAvatar
-              :src="currentUser.avatar"
-              :name="currentUser.nickname || currentUser.username || '我'"
-              :user-id="currentUser.id"
-              :size="48"
-              shape="circle"
-              custom-class="nav-new-avatar"
-            />
-          </div>
+          <DingtalkAvatar
+            :src="currentUser.avatar"
+            :name="currentUser.nickname || currentUser.username || '我'"
+            :user-id="currentUser.id"
+            :size="48"
+            shape="circle"
+          />
           <!-- 在线状态点 -->
-          <span class="status-dot"></span>
+          <span class="nav-avatar-status" :class="{ 'online': isUserOnline }"></span>
         </button>
       </el-tooltip>
     </div>
@@ -145,6 +151,9 @@ const unreadCount = computed(() => store.state.im?.totalUnreadCount || 0)
 // 当前用户
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 
+// 用户在线状态
+const isUserOnline = computed(() => store.state.im?.userStatus?.[currentUser.value.id] === 'online')
+
 // 导航模块配置
 const navModules = ref([
   { key: 'chat', label: '消息', icon: 'chat_bubble' },
@@ -171,7 +180,6 @@ function handleToggleTheme() {
 
 /**
  * 切换模块
- * @param {string} key - 模块标识
  */
 function handleSwitch(key) {
   emit('switch-module', key)
@@ -186,175 +194,332 @@ function handleHelp() {
 </script>
 
 <style scoped>
-/* 钉钉风格导航尺寸 */
-.w-18 {
+// ============================================================================
+// 导航容器
+// ============================================================================
+.dingtalk-nav {
   width: 72px;
+  background: var(--dt-bg-sidebar-gradient);
+  box-shadow: var(--dt-shadow-3);
 }
 
-/* 所有导航项统一样式 */
-.nav-item {
-  position: relative;
+.bg-nav-light {
+  background: linear-gradient(180deg, #1677ff 0%, #0e5fd9 100%);
+}
+
+.bg-nav-dark {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+}
+
+// ============================================================================
+// Logo 区域
+// ============================================================================
+.nav-logo-wrapper {
+  padding: 12px 0;
   width: 100%;
-  height: 44px;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-logo {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--dt-radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  transition: background-color 0.2s ease;
+  backdrop-filter: blur(10px);
+  transition: all var(--dt-transition-base);
+}
+
+.nav-logo:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.02);
+}
+
+.nav-logo-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.nav-logo-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--dt-error-color);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+// ============================================================================
+// 导航项区域
+// ============================================================================
+.nav-items {
+  flex: 1;
+  width: 100%;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.nav-items::-webkit-scrollbar {
+  width: 4px;
+}
+
+.nav-items::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+// ============================================================================
+// 导航项
+// ============================================================================
+.nav-item {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--dt-radius-lg);
   background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--dt-transition-base);
   color: rgba(255, 255, 255, 0.75);
+}
 
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-  }
-
-  .material-icons-outlined {
-    font-size: 22px;
-  }
+.nav-item:hover {
+  background: var(--dt-bg-sidebar-item-hover);
+  color: #fff;
+  transform: scale(1.05);
 }
 
 .nav-item-active {
-  background-color: rgba(255, 255, 255, 0.22);
+  background: var(--dt-bg-sidebar-item-active);
   color: #fff;
-  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.nav-item-default {
-  color: rgba(255, 255, 255, 0.75);
+.nav-item-active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  width: 4px;
+  height: 24px;
+  background: #fff;
+  border-radius: 0 4px 4px 0;
 }
 
-/* 暗色模式下的导航项样式 */
-:global(.dark) .nav-item {
-  color: rgba(255, 255, 255, 0.6);
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
+.nav-item-icon {
+  font-size: 22px;
+  transition: transform var(--dt-transition-base);
 }
 
-:global(.dark) .nav-item-active {
-  background-color: rgba(22, 119, 255, 0.2);
+.nav-item:hover .nav-item-icon {
+  transform: scale(1.1);
+}
+
+.nav-item-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--dt-error-color);
   color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-:global(.dark) .nav-item-default {
-  color: rgba(255, 255, 255, 0.6);
+// ============================================================================
+// 底部操作区
+// ============================================================================
+.nav-footer {
+  padding: 8px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  flex-shrink: 0;
 }
 
-.theme-toggle-btn {
+.nav-item-action {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--dt-radius-lg);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--dt-transition-base);
+  color: rgba(255, 255, 255, 0.65);
   position: relative;
+}
+
+.nav-item-action:hover {
+  background: var(--dt-bg-sidebar-item-hover);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.nav-item-action.nav-item-active {
+  background: var(--dt-bg-sidebar-item-active);
+  color: #fff;
 }
 
 .auto-badge {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  font-size: 9px;
-  background: #fff;
-  color: var(--dt-brand-color, #1677ff);
+  top: 8px;
+  right: 8px;
   width: 12px;
   height: 12px;
+  background: #fff;
+  color: var(--dt-brand-color);
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 3px;
-  font-weight: bold;
 }
 
-/* 用户头像按钮样式 */
-.avatar-btn {
+// ============================================================================
+// 用户头像
+// ============================================================================
+.nav-avatar {
   position: relative;
   width: 52px;
   height: 52px;
-  margin: 0 auto;
-  padding: 2px;
+  margin: 4px auto 0;
+  padding: 3px;
   border-radius: 50%;
   background: transparent;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border: none;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.15);
-  }
-}
-
-/* 暗色模式下的头像按钮 */
-:global(.dark) .avatar-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.avatar-inner {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--dt-transition-base);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.3s;
-
-  .avatar-btn:hover & {
-    border-color: rgba(255, 255, 255, 0.6);
-  }
 }
 
-.avatar-active .avatar-inner {
-  border-color: #fff;
+.nav-avatar:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.05);
+}
+
+.nav-avatar-active {
+  background: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
 }
 
-/* 暗色模式下的激活头像 */
-:global(.dark) .avatar-active .avatar-inner {
-  border-color: #fff;
-  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.3);
+.nav-avatar :deep(.dingtalk-avatar) {
+  width: 100%;
+  height: 100%;
 }
 
-/* 在线状态点 */
-.status-dot {
+.nav-avatar :deep(.avatar-inner) {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: border-color var(--dt-transition-base);
+}
+
+.nav-avatar:hover :deep(.avatar-inner) {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.nav-avatar-active :deep(.avatar-inner) {
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.nav-avatar-status {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
+  bottom: 4px;
+  right: 4px;
   width: 12px;
   height: 12px;
-  background-color: #52c41a;
-  border: 2px solid #1677ff;
+  background: var(--dt-text-tertiary);
+  border: 2px solid var(--dt-bg-sidebar);
   border-radius: 50%;
-  z-index: 1;
+  transition: all var(--dt-transition-base);
 }
 
-/* 暗色模式下的状态点 */
-:global(.dark) .status-dot {
-  border-color: rgba(255, 255, 255, 0.2);
+.nav-avatar-status.online {
+  background: var(--dt-success-color);
+  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
 }
 
-/* 滚动条样式 */
-div[class*="overflow-y-auto"]::-webkit-scrollbar {
-  width: 4px;
+// ============================================================================
+// 暗色模式适配
+// ============================================================================
+.dark .dingtalk-nav {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
 }
 
-div[class*="overflow-y-auto"]::-webkit-scrollbar-track {
-  background: transparent;
+.dark .nav-logo {
+  background: rgba(255, 255, 255, 0.08);
 }
 
-div[class*="overflow-y-auto"]::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+.dark .nav-logo:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
-div[class*="overflow-y-auto"]::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.35);
+.dark .nav-item {
+  color: rgba(255, 255, 255, 0.6);
 }
 
-/* 暗色模式下的滚动条 */
-:global(.dark) div[class*="overflow-y-auto"]::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+.dark .nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
-:global(.dark) div[class*="overflow-y-auto"]::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+.dark .nav-item-active {
+  background: rgba(22, 119, 255, 0.2);
+}
+
+.dark .nav-item-active::before {
+  background: var(--dt-brand-color);
+}
+
+.dark .nav-item-action {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark .nav-item-action:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dark .nav-avatar-status {
+  border-color: #1e293b;
+}
+
+.dark .nav-avatar-active {
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.3);
 }
 </style>

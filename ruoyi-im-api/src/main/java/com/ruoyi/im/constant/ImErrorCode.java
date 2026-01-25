@@ -78,6 +78,37 @@ public class ImErrorCode {
     /** 无效的会话类型 */
     public static final int INVALID_CONVERSATION_TYPE = 4017;
 
+    /** 会话成员不存在 */
+    public static final int CONVERSATION_NO_MEMBER = 4018;
+
+    /** 无权限 */
+    public static final int NO_PERMISSION = 4019;
+
+    // ========== 钉钉相关错误码 4100-4199 ==========
+
+    /** 钉钉用户不存在 */
+    public static final int DING_NO_TARGET_USER = 4101;
+
+    /** 钉钉消息不存在 */
+    public static final int DING_NOT_FOUND = 4102;
+
+    // ========== 群机器人相关错误码 4200-4299 ==========
+
+    /** 群组不存在（群机器人使用） */
+    public static final int GROUP_NOT_FOUND = 4201;
+
+    /** 群机器人不存在 */
+    public static final int BOT_NOT_FOUND = 4202;
+
+    /** 群机器人数量超限 */
+    public static final int GROUP_BOT_LIMIT_EXCEEDED = 4203;
+
+    /** Webhook URL无效 */
+    public static final int WEBHOOK_URL_INVALID = 4204;
+
+    /** 机器人规则不存在 */
+    public static final int BOT_RULE_NOT_FOUND = 4205;
+
     // ========== WebSocket 错误码 5000-5999 ==========
 
     /** WebSocket 连接失败 */

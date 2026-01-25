@@ -65,4 +65,8 @@ public class BotRuleRequest implements Serializable {
      */
     @Schema(description = "匹配模式：EXACT精确/CONTAINS包含/REGEX正则")
     private String matchMode = "CONTAINS";
+
+    /** 是否启用（0禁用 1启用） */
+    @Schema(description = "是否启用：0禁用/1启用")
+    private Integer isEnabled;
 }

@@ -1,13 +1,12 @@
 package com.ruoyi.im.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.ruoyi.im.domain.ImApproval;
 import com.ruoyi.im.domain.ImApprovalFormData;
 import com.ruoyi.im.domain.ImApprovalNode;
 import com.ruoyi.im.domain.ImApprovalRecord;
 import com.ruoyi.im.domain.ImApprovalTemplate;
+import com.ruoyi.im.dto.approval.ConditionBranch;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImApprovalFormDataMapper;
 import com.ruoyi.im.mapper.ImApprovalMapper;
@@ -15,7 +14,9 @@ import com.ruoyi.im.mapper.ImApprovalNodeMapper;
 import com.ruoyi.im.mapper.ImApprovalRecordMapper;
 import com.ruoyi.im.mapper.ImApprovalTemplateMapper;
 import com.ruoyi.im.service.ImApprovalService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ruoyi.im.util.ApprovalConditionEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,20 +34,31 @@ import java.util.Map;
 @Service
 public class ImApprovalServiceImpl implements ImApprovalService {
 
-    @Autowired
-    private ImApprovalMapper approvalMapper;
+    private static final Logger log = LoggerFactory.getLogger(ImApprovalServiceImpl.class);
 
-    @Autowired
-    private ImApprovalTemplateMapper templateMapper;
+    private final ImApprovalMapper approvalMapper;
+    private final ImApprovalTemplateMapper templateMapper;
+    private final ImApprovalNodeMapper nodeMapper;
+    private final ImApprovalRecordMapper recordMapper;
+    private final ImApprovalFormDataMapper formDataMapper;
+    private final ApprovalConditionEngine conditionEngine;
 
-    @Autowired
-    private ImApprovalNodeMapper nodeMapper;
-
-    @Autowired
-    private ImApprovalRecordMapper recordMapper;
-
-    @Autowired
-    private ImApprovalFormDataMapper formDataMapper;
+    /**
+     * 构造器注入依赖
+     */
+    public ImApprovalServiceImpl(ImApprovalMapper approvalMapper,
+                                 ImApprovalTemplateMapper templateMapper,
+                                 ImApprovalNodeMapper nodeMapper,
+                                 ImApprovalRecordMapper recordMapper,
+                                 ImApprovalFormDataMapper formDataMapper,
+                                 ApprovalConditionEngine conditionEngine) {
+        this.approvalMapper = approvalMapper;
+        this.templateMapper = templateMapper;
+        this.nodeMapper = nodeMapper;
+        this.recordMapper = recordMapper;
+        this.formDataMapper = formDataMapper;
+        this.conditionEngine = conditionEngine;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -299,6 +311,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
 
     /**
      * 根据流程配置创建审批节点
+     * 支持条件分支配置，根据表单数据动态确定审批路径
      */
     private void createApprovalNodesFromConfig(Long approvalId, String flowConfig) {
         if (flowConfig == null || flowConfig.isEmpty()) {
@@ -308,29 +321,102 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         }
 
         try {
-            JSONArray nodes = JSON.parseArray(flowConfig);
-            for (int i = 0; i < nodes.size(); i++) {
-                JSONObject nodeConfig = nodes.getJSONObject(i);
-                ImApprovalNode node = new ImApprovalNode();
-                node.setApprovalId(approvalId);
-                node.setNodeName(nodeConfig.getString("nodeName"));
-                node.setNodeType(nodeConfig.getString("nodeType"));
+            cn.hutool.json.JSONObject configObj = JSONUtil.parseObj(flowConfig);
 
-                JSONArray approvers = nodeConfig.getJSONArray("approvers");
-                List<String> approverIds = new ArrayList<>();
-                for (int j = 0; j < approvers.size(); j++) {
-                    approverIds.add(approvers.getString(j));
-                }
-                node.setApproverIds(String.join(",", approverIds));
-
-                node.setApproveType(nodeConfig.getString("approveType"));
-                node.setSortOrder(i + 1);
-                node.setStatus("PENDING");
-                nodeMapper.insertImApprovalNode(node);
+            // 解析条件分支（如果有）
+            if (configObj.containsKey("conditionBranches")) {
+                createNodesWithConditions(approvalId, configObj);
+            } else {
+                // 原有逻辑：解析节点数组
+                createNodesFromConfigArray(approvalId, configObj);
             }
         } catch (Exception e) {
-            // JSON解析失败，使用默认配置
+            log.error("解析流程配置失败，使用默认配置", e);
             createDefaultNode(approvalId);
+        }
+    }
+
+    /**
+     * 根据节点数组创建审批节点（原有逻辑）
+     */
+    private void createNodesFromConfigArray(Long approvalId, cn.hutool.json.JSONObject configObj) {
+        Object nodesObj = configObj.get("nodes");
+        if (!(nodesObj instanceof List)) {
+            createDefaultNode(approvalId);
+            return;
+        }
+
+        List<cn.hutool.json.JSONObject> nodes = (List<cn.hutool.json.JSONObject>) nodesObj;
+        for (int i = 0; i < nodes.size(); i++) {
+            cn.hutool.json.JSONObject nodeConfig = nodes.get(i);
+            ImApprovalNode node = new ImApprovalNode();
+            node.setApprovalId(approvalId);
+            node.setNodeName(nodeConfig.getStr("nodeName"));
+            node.setNodeType(nodeConfig.getStr("nodeType"));
+
+            // 获取审批人列表
+            cn.hutool.json.JSONArray approversArray = nodeConfig.getJSONArray("approvers");
+            if (approversArray != null && !approversArray.isEmpty()) {
+                List<String> approvers = new ArrayList<>();
+                for (int j = 0; j < approversArray.size(); j++) {
+                    approvers.add(approversArray.getStr(j));
+                }
+                node.setApproverIds(String.join(",", approvers));
+            }
+
+            node.setApproveType(nodeConfig.getStr("approveType"));
+            node.setSortOrder(i + 1);
+            node.setStatus("PENDING");
+            nodeMapper.insertImApprovalNode(node);
+        }
+    }
+
+    /**
+     * 根据条件分支创建审批节点
+     */
+    private void createNodesWithConditions(Long approvalId, cn.hutool.json.JSONObject configObj) {
+        cn.hutool.json.JSONArray conditionBranches = configObj.getJSONArray("conditionBranches");
+        if (conditionBranches == null || conditionBranches.isEmpty()) {
+            createDefaultNode(approvalId);
+            return;
+        }
+
+        for (int i = 0; i < conditionBranches.size(); i++) {
+            cn.hutool.json.JSONObject branchConfig = conditionBranches.getJSONObject(i);
+            cn.hutool.json.JSONObject nodeConfig = branchConfig.getJSONObject("node");
+            if (nodeConfig == null) {
+                continue;
+            }
+
+            ImApprovalNode node = new ImApprovalNode();
+            node.setApprovalId(approvalId);
+            node.setNodeName(nodeConfig.getStr("nodeName"));
+            node.setNodeType(nodeConfig.getStr("nodeType"));
+
+            // 获取审批人列表
+            cn.hutool.json.JSONArray approversArray = nodeConfig.getJSONArray("approvers");
+            if (approversArray != null && !approversArray.isEmpty()) {
+                List<String> approvers = new ArrayList<>();
+                for (int j = 0; j < approversArray.size(); j++) {
+                    approvers.add(approversArray.getStr(j));
+                }
+                if (!approvers.isEmpty()) {
+                    node.setApproverIds(String.join(",", approvers));
+                }
+            }
+
+            node.setApproveType(nodeConfig.getStr("approveType"));
+            node.setSortOrder(i + 1);
+            node.setStatus("PENDING");
+
+            // 保存节点（如果是条件分支节点，初始状态为PENDING，后续可能被跳过）
+            nodeMapper.insertImApprovalNode(node);
+        }
+
+        // 存储条件分支到审批实例（用于后续评估）
+        if (conditionBranches != null && !conditionBranches.isEmpty()) {
+            // 可以将条件分支信息存储到审批记录或扩展表中
+            log.debug("审批 {} 包含 {} 条件分支", approvalId, conditionBranches.size());
         }
     }
 
@@ -362,7 +448,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
             ImApprovalFormData data = new ImApprovalFormData();
             data.setApprovalId(approvalId);
             data.setFieldKey(entry.getKey());
-            data.setFieldValue(JSON.toJSONString(entry.getValue()));
+            data.setFieldValue(JSONUtil.toJsonStr(entry.getValue()));
             data.setFieldType("TEXT");
             data.setCreateTime(LocalDateTime.now());
             dataList.add(data);
@@ -447,9 +533,25 @@ public class ImApprovalServiceImpl implements ImApprovalService {
 
     /**
      * 进入下一节点
+     * 支持条件分支：根据表单数据动态确定审批路径
      */
     private void proceedToNextNode(Long approvalId) {
         List<ImApprovalNode> nodes = nodeMapper.selectNodesByApprovalId(approvalId);
+        ImApproval approval = approvalMapper.selectImApprovalById(approvalId);
+
+        // 获取模板配置中的条件分支
+        List<ConditionBranch> conditionBranches = getConditionBranchesFromTemplate(approval.getTemplateId());
+
+        // 获取表单数据用于条件评估
+        Map<String, Object> formData = loadFormDataAsMap(approvalId);
+
+        // 评估条件分支，跳过不满足条件的节点
+        if (!conditionBranches.isEmpty()) {
+            skipNodesByConditions(nodes, conditionBranches, formData, approvalId);
+        }
+
+        // 重新获取节点列表（可能已被跳过）
+        nodes = nodeMapper.selectNodesByApprovalId(approvalId);
         ImApprovalNode nextNode = null;
         boolean hasPendingNode = false;
 
@@ -463,14 +565,12 @@ public class ImApprovalServiceImpl implements ImApprovalService {
 
         if (!hasPendingNode) {
             // 所有节点已审批完成，更新审批状态
-            ImApproval approval = approvalMapper.selectImApprovalById(approvalId);
             approval.setStatus("APPROVED");
             approval.setFinishTime(LocalDateTime.now());
             approval.setUpdateTime(LocalDateTime.now());
             approvalMapper.updateImApproval(approval);
         } else if (nextNode != null) {
             // 更新当前节点
-            ImApproval approval = approvalMapper.selectImApprovalById(approvalId);
             approval.setCurrentNodeId(nextNode.getId());
             approval.setUpdateTime(LocalDateTime.now());
             approvalMapper.updateImApproval(approval);
@@ -487,6 +587,159 @@ public class ImApprovalServiceImpl implements ImApprovalService {
                 node.setStatus("SKIPPED");
                 nodeMapper.updateImApprovalNode(node);
             }
+        }
+    }
+
+    /**
+     * 从模板中获取条件分支配置
+     *
+     * @param templateId 模板ID
+     * @return 条件分支列表
+     */
+    private List<ConditionBranch> getConditionBranchesFromTemplate(Long templateId) {
+        List<ConditionBranch> conditionBranches = new ArrayList<>();
+        try {
+            ImApprovalTemplate template = templateMapper.selectImApprovalTemplateById(templateId);
+            if (template == null || template.getFlowConfig() == null) {
+                return conditionBranches;
+            }
+
+            cn.hutool.json.JSONObject configObj = JSONUtil.parseObj(template.getFlowConfig());
+            Object branchesObj = configObj.get("conditionBranches");
+
+            if (branchesObj instanceof List) {
+                List<?> branches = (List<?>) branchesObj;
+                for (Object branchObj : branches) {
+                    if (branchObj instanceof Map) {
+                        ConditionBranch branch = JSONUtil.toBean(JSONUtil.toJsonStr(branchObj), ConditionBranch.class);
+                        if (branch.getEnabled() != null && branch.getEnabled()) {
+                            conditionBranches.add(branch);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("获取条件分支配置失败: templateId={}", templateId, e);
+        }
+        return conditionBranches;
+    }
+
+    /**
+     * 加载表单数据为Map格式
+     *
+     * @param approvalId 审批ID
+     * @return 表单数据Map
+     */
+    private Map<String, Object> loadFormDataAsMap(Long approvalId) {
+        Map<String, Object> formData = new HashMap<>();
+        try {
+            List<ImApprovalFormData> formDataList = formDataMapper.selectFormDataByApprovalId(approvalId);
+            for (ImApprovalFormData data : formDataList) {
+                String value = data.getFieldValue();
+                // 尝试解析JSON值
+                if (value != null && (value.startsWith("{") || value.startsWith("["))) {
+                    try {
+                        Object parsedValue = JSONUtil.parse(value);
+                        formData.put(data.getFieldKey(), parsedValue);
+                    } catch (Exception e) {
+                        formData.put(data.getFieldKey(), value);
+                    }
+                } else {
+                    formData.put(data.getFieldKey(), value);
+                }
+            }
+        } catch (Exception e) {
+            log.error("加载表单数据失败: approvalId={}", approvalId, e);
+        }
+        return formData;
+    }
+
+    /**
+     * 根据条件分支跳过节点
+     *
+     * @param nodes             所有节点列表
+     * @param conditionBranches 条件分支配置
+     * @param formData          表单数据
+     * @param approvalId        审批ID
+     */
+    private void skipNodesByConditions(List<ImApprovalNode> nodes,
+                                       List<ConditionBranch> conditionBranches,
+                                       Map<String, Object> formData,
+                                       Long approvalId) {
+        for (ConditionBranch branch : conditionBranches) {
+            // 评估条件
+            boolean conditionMet = conditionEngine.evaluateCondition(branch, formData);
+
+            // 根据评估结果处理节点跳过
+            String targetNodeId = branch.getTargetNodeId();
+            if (targetNodeId != null) {
+                if (conditionMet) {
+                    // 条件满足，跳过其他分支的节点
+                    skipOtherBranchNodes(nodes, targetNodeId, approvalId);
+                } else {
+                    // 条件不满足，跳过目标节点
+                    skipTargetNode(nodes, targetNodeId, approvalId);
+                }
+            }
+        }
+    }
+
+    /**
+     * 跳过其他分支的节点
+     *
+     * @param nodes        节点列表
+     * @param targetNodeId 目标节点ID
+     * @param approvalId   审批ID
+     */
+    private void skipOtherBranchNodes(List<ImApprovalNode> nodes, String targetNodeId, Long approvalId) {
+        try {
+            Long targetId = Long.parseLong(targetNodeId);
+            // 找到目标节点及其排序位置
+            Integer targetSortOrder = null;
+            for (ImApprovalNode node : nodes) {
+                if (node.getId().equals(targetId)) {
+                    targetSortOrder = node.getSortOrder();
+                    break;
+                }
+            }
+
+            if (targetSortOrder != null) {
+                // 跳过同级其他节点
+                for (ImApprovalNode node : nodes) {
+                    if ("PENDING".equals(node.getStatus())
+                            && node.getSortOrder().equals(targetSortOrder)
+                            && !node.getId().equals(targetId)) {
+                        node.setStatus("SKIPPED");
+                        nodeMapper.updateImApprovalNode(node);
+                        log.debug("跳过节点: nodeId={}, 原因: 条件分支路由", node.getId());
+                    }
+                }
+            }
+        } catch (NumberFormatException e) {
+            log.warn("目标节点ID格式错误: {}", targetNodeId);
+        }
+    }
+
+    /**
+     * 跳过指定节点
+     *
+     * @param nodes        节点列表
+     * @param targetNodeId 目标节点ID
+     * @param approvalId   审批ID
+     */
+    private void skipTargetNode(List<ImApprovalNode> nodes, String targetNodeId, Long approvalId) {
+        try {
+            Long targetId = Long.parseLong(targetNodeId);
+            for (ImApprovalNode node : nodes) {
+                if (node.getId().equals(targetId) && "PENDING".equals(node.getStatus())) {
+                    node.setStatus("SKIPPED");
+                    nodeMapper.updateImApprovalNode(node);
+                    log.debug("跳过节点: nodeId={}, 原因: 条件不满足", node.getId());
+                    break;
+                }
+            }
+        } catch (NumberFormatException e) {
+            log.warn("目标节点ID格式错误: {}", targetNodeId);
         }
     }
 

@@ -2,28 +2,19 @@ package com.ruoyi.im.schedule;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.domain.ImDingMessage;
-import com.ruoyi.im.domain.ImDingReceipt;
-import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.mapper.ImDingMessageMapper;
-import com.ruoyi.im.mapper.ImDingReceiptMapper;
-import com.ruoyi.im.mapper.ImUserMapper;
-import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.websocket.Session;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * DING消息定时任务
- * 处理定时发送和强提醒功能
+ * 处理过期DING消息的清理
  *
  * @author ruoyi
  */
@@ -35,248 +26,65 @@ public class DingMessageScheduledTask {
     @Autowired
     private ImDingMessageMapper dingMessageMapper;
 
-    @Autowired
-    private ImDingReceiptMapper dingReceiptMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
-
     /**
-     * 处理定时DING消息发送
-     * 每分钟执行一次，检查是否有到期的定时DING需要发送
+     * 处理过期DING消息
+     * 每小时执行一次，检查并处理过期的DING消息
      */
-    @Scheduled(cron = "0 * * * * ?")
-    public void processScheduledDingMessages() {
+    @Scheduled(cron = "0 0 * * * ?")
+    public void processExpiredDingMessages() {
         try {
-            // 查询状态为DRAFT且定时发送时间已到的DING消息
-            // 注意：只选择数据库中实际存在的字段，避免查询不存在的remind_interval等字段
+            // 查询已过期的DING消息
             LambdaQueryWrapper<ImDingMessage> wrapper = new LambdaQueryWrapper<>();
             wrapper.select(ImDingMessage::getId,
                         ImDingMessage::getSenderId,
                         ImDingMessage::getContent,
                         ImDingMessage::getDingType,
-                        ImDingMessage::getIsUrgent,
-                        ImDingMessage::getScheduleTime,
-                        ImDingMessage::getSendTime,
+                        ImDingMessage::getPriority,
                         ImDingMessage::getStatus,
-                        ImDingMessage::getReceiptRequired,
-                        ImDingMessage::getTotalCount,
-                        ImDingMessage::getReadCount,
-                        ImDingMessage::getConfirmedCount,
-                        ImDingMessage::getAttachment,
-                        ImDingMessage::getCreateTime,
-                        ImDingMessage::getUpdateTime)
-                    .eq(ImDingMessage::getStatus, "DRAFT")
-                    .isNotNull(ImDingMessage::getScheduleTime)
-                    .le(ImDingMessage::getScheduleTime, LocalDateTime.now());
+                        ImDingMessage::getExpireTime,
+                        ImDingMessage::getCreateTime)
+                    .eq(ImDingMessage::getStatus, "SENT")
+                    .isNotNull(ImDingMessage::getExpireTime)
+                    .le(ImDingMessage::getExpireTime, LocalDateTime.now());
 
-            List<ImDingMessage> pendingDings = dingMessageMapper.selectList(wrapper);
+            List<ImDingMessage> expiredDings = dingMessageMapper.selectList(wrapper);
 
-            for (ImDingMessage ding : pendingDings) {
-                sendScheduledDing(ding);
-            }
-
-            if (!pendingDings.isEmpty()) {
-                log.info("定时DING消息处理完成，处理数量: {}", pendingDings.size());
+            if (!expiredDings.isEmpty()) {
+                log.info("发现 {} 条过期DING消息", expiredDings.size());
+                // 可以在这里将过期消息状态更新为EXPIRED
+                for (ImDingMessage ding : expiredDings) {
+                    ding.setStatus("EXPIRED");
+                    dingMessageMapper.updateById(ding);
+                }
+                log.info("过期DING消息处理完成，处理数量: {}", expiredDings.size());
             }
 
         } catch (Exception e) {
-            log.error("处理定时DING消息失败", e);
+            log.error("处理过期DING消息失败", e);
         }
     }
 
     /**
-     * 处理强提醒功能
-     * 每5分钟执行一次，检查需要发送提醒的DING消息
-     * 注：强提醒功能暂未启用（数据库字段未创建），50人内网场景暂不需要此功能
+     * DING消息统计任务
+     * 每天凌晨执行，统计DING消息数据
      */
-    @Scheduled(cron = "0 */5 * * * ?")
-    public void processDingReminders() {
-        // 强提醒功能已禁用 - 50人内网场景暂不需要
-        // 如需启用，请先在数据库添加 remind_interval, max_remind_count, reminded_count 字段
-    }
-
-    /**
-     * 发送定时DING消息
-     */
-    private void sendScheduledDing(ImDingMessage ding) {
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void generateDingStatistics() {
         try {
-            // 获取所有接收者
-            List<ImDingReceipt> receipts = dingReceiptMapper.selectList(
-                    new LambdaQueryWrapper<ImDingReceipt>()
-                            .eq(ImDingReceipt::getDingId, ding.getId())
-            );
+            // 统计已发送的DING消息数量
+            LambdaQueryWrapper<ImDingMessage> sentWrapper = new LambdaQueryWrapper<>();
+            sentWrapper.eq(ImDingMessage::getStatus, "SENT");
+            Long sentCount = dingMessageMapper.selectCount(sentWrapper);
 
-            // 更新状态为已发送
-            ding.setStatus("SENT");
-            ding.setSendTime(LocalDateTime.now());
-            dingMessageMapper.updateById(ding);
+            // 统计已过期的DING消息数量
+            LambdaQueryWrapper<ImDingMessage> expiredWrapper = new LambdaQueryWrapper<>();
+            expiredWrapper.eq(ImDingMessage::getStatus, "EXPIRED");
+            Long expiredCount = dingMessageMapper.selectCount(expiredWrapper);
 
-            // 推送通知给所有接收者
-            for (ImDingReceipt receipt : receipts) {
-                sendDingNotification(receipt.getReceiverId(), ding, ding.getSenderId());
-            }
-
-            log.info("定时DING消息已发送: dingId={}", ding.getId());
+            log.info("DING消息统计 - 已发送: {}, 已过期: {}", sentCount, expiredCount);
 
         } catch (Exception e) {
-            log.error("发送定时DING消息失败: dingId={}", ding.getId(), e);
-            ding.setStatus("FAILED");
-            dingMessageMapper.updateById(ding);
+            log.error("生成DING消息统计失败", e);
         }
-    }
-
-    /**
-     * 判断是否应该发送提醒
-     */
-    private boolean shouldSendReminder(ImDingMessage ding, LocalDateTime now) {
-        if (ding.getSendTime() == null || ding.getRemindInterval() == null) {
-            return false;
-        }
-
-        // 计算下次应该提醒的时间
-        long minutesSinceSend = ChronoUnit.MINUTES.between(ding.getSendTime(), now);
-        long minutesSinceLastReminder = minutesSinceSend / ding.getRemindInterval();
-        int expectedRemindedCount = (int) minutesSinceLastReminder;
-
-        // 如果期望的提醒次数大于实际提醒次数，说明需要发送提醒
-        return expectedRemindedCount > ding.getRemindedCount();
-    }
-
-    /**
-     * 发送强提醒通知
-     */
-    private void sendReminder(ImDingMessage ding) {
-        try {
-            // 获取未确认的接收者
-            List<ImDingReceipt> unconfirmedReceipts = dingReceiptMapper.selectList(
-                    new LambdaQueryWrapper<ImDingReceipt>()
-                            .eq(ImDingReceipt::getDingId, ding.getId())
-                            .eq(ImDingReceipt::getConfirmed, 0)
-            );
-
-            if (unconfirmedReceipts.isEmpty()) {
-                // 所有人都已确认，不需要提醒
-                return;
-            }
-
-            // 更新提醒次数
-            ding.setRemindedCount(ding.getRemindedCount() + 1);
-            dingMessageMapper.updateById(ding);
-
-            // 推送提醒通知
-            for (ImDingReceipt receipt : unconfirmedReceipts) {
-                sendReminderNotification(receipt.getReceiverId(), ding);
-            }
-
-            log.info("DING强提醒已发送: dingId={}, remindCount={}", ding.getId(), ding.getRemindedCount());
-
-        } catch (Exception e) {
-            log.error("发送DING强提醒失败: dingId={}", ding.getId(), e);
-        }
-    }
-
-    /**
-     * 发送DING消息的WebSocket通知
-     */
-    private void sendDingNotification(Long receiverId, ImDingMessage ding, Long senderId) {
-        try {
-            ImUser sender = userMapper.selectImUserById(senderId);
-            String senderName = sender != null ? (sender.getNickname() != null ? sender.getNickname() : sender.getUsername()) : "未知用户";
-            String senderAvatar = sender != null ? sender.getAvatar() : "";
-
-            Map<String, Object> dingMessage = new HashMap<>();
-            dingMessage.put("type", "ding");
-            dingMessage.put("action", "new_ding");
-
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("dingId", ding.getId());
-            payload.put("content", ding.getContent());
-            payload.put("dingType", ding.getDingType());
-            payload.put("isUrgent", ding.getIsUrgent());
-            payload.put("receiptRequired", ding.getReceiptRequired());
-            payload.put("sendTime", ding.getSendTime() != null ? ding.getSendTime().toString() : LocalDateTime.now().toString());
-            payload.put("senderId", senderId);
-            payload.put("senderName", senderName);
-            payload.put("senderAvatar", senderAvatar);
-
-            dingMessage.put("payload", payload);
-            dingMessage.put("timestamp", System.currentTimeMillis());
-
-            String messageJson = convertToJson(dingMessage);
-
-            Map<Long, Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-            Session targetSession = onlineUsers.get(receiverId);
-
-            if (targetSession != null && targetSession.isOpen()) {
-                targetSession.getBasicRemote().sendText(messageJson);
-                log.debug("DING消息已推送给用户: receiverId={}", receiverId);
-            }
-
-        } catch (Exception e) {
-            log.error("发送DING消息WebSocket通知失败: receiverId={}", receiverId, e);
-        }
-    }
-
-    /**
-     * 发送强提醒通知
-     */
-    private void sendReminderNotification(Long receiverId, ImDingMessage ding) {
-        try {
-            ImUser sender = userMapper.selectImUserById(ding.getSenderId());
-            String senderName = sender != null ? (sender.getNickname() != null ? sender.getNickname() : sender.getUsername()) : "未知用户";
-
-            Map<String, Object> reminderMessage = new HashMap<>();
-            reminderMessage.put("type", "ding");
-            reminderMessage.put("action", "ding_reminder");
-
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("dingId", ding.getId());
-            payload.put("content", ding.getContent());
-            payload.put("senderName", senderName);
-            payload.put("remindCount", ding.getRemindedCount());
-            payload.put("maxRemindCount", ding.getMaxRemindCount());
-
-            reminderMessage.put("payload", payload);
-            reminderMessage.put("timestamp", System.currentTimeMillis());
-
-            String messageJson = convertToJson(reminderMessage);
-
-            Map<Long, Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-            Session targetSession = onlineUsers.get(receiverId);
-
-            if (targetSession != null && targetSession.isOpen()) {
-                targetSession.getBasicRemote().sendText(messageJson);
-                log.debug("DING强提醒已推送给用户: receiverId={}, remindCount={}", receiverId, ding.getRemindedCount());
-            }
-
-        } catch (Exception e) {
-            log.error("发送DING强提醒通知失败: receiverId={}", receiverId, e);
-        }
-    }
-
-    /**
-     * 简单的JSON转换（实际项目中应使用ObjectMapper）
-     */
-    private String convertToJson(Map<String, Object> data) {
-        StringBuilder sb = new StringBuilder("{");
-        boolean first = true;
-        for (Map.Entry<String, Object> entry : data.entrySet()) {
-            if (!first) {
-                sb.append(",");
-            }
-            sb.append("\"").append(entry.getKey()).append("\":");
-            Object value = entry.getValue();
-            if (value instanceof String) {
-                sb.append("\"").append(value).append("\"");
-            } else if (value instanceof Number || value instanceof Boolean) {
-                sb.append(value);
-            } else {
-                sb.append("{}");
-            }
-            first = false;
-        }
-        sb.append("}");
-        return sb.toString();
     }
 }
