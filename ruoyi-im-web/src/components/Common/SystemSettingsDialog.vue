@@ -31,7 +31,9 @@
                   <el-avatar :size="64" :src="currentUser.avatar">
                     {{ currentUser.nickname?.charAt(0) || currentUser.username?.charAt(0) }}
                   </el-avatar>
-                  <span class="status-dot"></span>
+                  <el-tooltip :content="currentUser.status === 'online' ? '在线' : '离线'" placement="bottom">
+                    <span class="status-dot" :class="{ 'status-online': currentUser.status === 'online', 'status-offline': currentUser.status === 'offline' }"></span>
+                  </el-tooltip>
                 </div>
                 <div class="user-details">
                   <h3 class="username">{{ currentUser.nickname || currentUser.username }}</h3>
@@ -279,7 +281,7 @@ const menuItems = [
   { id: 'about', label: '关于应用', icon: 'info' }
 ]
 
-const currentUser = computed(() => store.getters['user/currentUser'] || {})
+const currentUser = computed(() => store.getters['user/currentUser'] || { status: 'online' })
 
 const settings = computed(() => store.state.im.settings)
 
@@ -400,20 +402,20 @@ watch(visible, (val) => {
 
 .content-area {
   flex: 1;
-  padding: 32px;
+  padding: 36px;
   background: var(--dt-bg-card);
   overflow-y: auto;
   scroll-behavior: smooth;
 
   .section-title {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
     color: var(--dt-text-primary);
   }
 
   .mt-6 {
-    margin-top: 32px;
+    margin-top: 36px;
   }
 }
 
@@ -448,6 +450,14 @@ watch(visible, (val) => {
           border: 3px solid #fff;
           border-radius: 50%;
           box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+
+          &.status-online {
+            background: #22c55e;
+          }
+
+          &.status-offline {
+            background: #6b7280;
+          }
 
           .dark & {
             border-color: var(--dt-bg-card);
@@ -520,13 +530,19 @@ watch(visible, (val) => {
 .settings-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 16px;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .setting-card {
   background: var(--dt-bg-body);
   border-radius: var(--dt-radius-xl);
-  padding: 20px;
+  padding: 24px;
   border: 1.5px solid var(--dt-border-light);
   transition: all var(--dt-transition-fast);
   display: flex;
@@ -542,19 +558,20 @@ watch(visible, (val) => {
   .setting-header {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
     flex: 1;
 
     .icon-wrapper {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--dt-radius-lg);
+      width: 52px;
+      height: 52px;
+      border-radius: var(--dt-radius-xl);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 26px;
       color: #fff;
       flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
       &.bell-bg { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
       &.sound-bg { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
@@ -568,17 +585,19 @@ watch(visible, (val) => {
     }
 
     .setting-info {
+      flex: 1;
+
       h4 {
-        font-size: 15px;
+        font-size: 16px;
         font-weight: 600;
         color: var(--dt-text-primary);
-        margin-bottom: 4px;
+        margin-bottom: 6px;
       }
 
       p {
-        font-size: 13px;
+        font-size: 14px;
         color: var(--dt-text-secondary);
-        line-height: 1.4;
+        line-height: 1.5;
       }
     }
   }
