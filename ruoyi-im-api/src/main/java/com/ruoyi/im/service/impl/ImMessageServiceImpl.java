@@ -19,11 +19,13 @@ import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImSystemConfigService;
 import com.ruoyi.im.util.AuditLogUtil;
 import com.ruoyi.im.util.MessageEncryptionUtil;
+import com.ruoyi.im.listener.BotMessageListener;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +50,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     private final com.ruoyi.im.util.ImRedisUtil redisUtil;
     private final com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService;
     private final ImSystemConfigService systemConfigService;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 构造器注入依赖
@@ -63,7 +66,8 @@ public class ImMessageServiceImpl implements ImMessageService {
                                  com.ruoyi.im.util.ImDistributedLock distributedLock,
                                  com.ruoyi.im.util.ImRedisUtil redisUtil,
                                  com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService,
-                                 ImSystemConfigService systemConfigService) {
+                                 ImSystemConfigService systemConfigService,
+                                 ApplicationEventPublisher eventPublisher) {
         this.imMessageMapper = imMessageMapper;
         this.imUserMapper = imUserMapper;
         this.imConversationMapper = imConversationMapper;
@@ -76,6 +80,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         this.redisUtil = redisUtil;
         this.broadcastService = broadcastService;
         this.systemConfigService = systemConfigService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -213,6 +218,21 @@ public class ImMessageServiceImpl implements ImMessageService {
         vo.setSenderAvatar(sender.getAvatar());
         vo.setSendTime(message.getCreateTime());
         vo.setStatus(1);
+
+        // 如果是群组消息，发布群组消息事件触发机器人自动回复
+        ImConversation conversation = imConversationMapper.selectById(conversationId);
+        if (conversation != null && "GROUP".equalsIgnoreCase(conversation.getType())) {
+            Long groupId = conversation.getTargetId();
+            if (groupId != null && "TEXT".equalsIgnoreCase(message.getMessageType())) {
+                try {
+                    eventPublisher.publishEvent(
+                            new BotMessageListener.GroupMessageEvent(conversationId, groupId, userId, plainContent)
+                    );
+                } catch (Exception e) {
+                    log.error("发布群组消息事件失败: groupId={}", groupId, e);
+                }
+            }
+        }
 
         // 异步广播消息
         broadcastService.broadcastMessageToConversation(conversationId, message.getId(), userId);

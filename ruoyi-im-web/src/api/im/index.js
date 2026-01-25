@@ -6,6 +6,8 @@ export * as conversationApi from './conversation'
 export * as contactApi from './contact'
 export * as groupApi from './group'
 export * as userApi from './user'
+export * as dingApi from './ding'
+export * as botApi from './bot'
 
 // 直接导出常用方法
 export {
@@ -57,3 +59,28 @@ export {
   setGroupMute,
   muteGroupMember
 } from './group'
+
+// DING强提醒相关API
+export {
+  sendDing,
+  queryDings,
+  getDingDetail,
+  markDingAsRead,
+  batchMarkDingAsRead,
+  cancelDing,
+  getUnreadDingCount,
+  getDingReadStatus
+} from './ding'
+
+// 群机器人相关API
+export {
+  createBot,
+  updateBot,
+  deleteBot,
+  getGroupBots,
+  getBotDetail,
+  addBotRule,
+  updateBotRule,
+  deleteBotRule,
+  setBotEnabled
+} from './bot'

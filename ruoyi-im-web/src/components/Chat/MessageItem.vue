@@ -82,7 +82,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { ChatLineSquare, MoreFilled, Loading, WarningFilled } from '@/utils/icons'
+import { ChatLineSquare, MoreFilled, Loading, WarningFilled } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({

@@ -7,6 +7,7 @@ import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.util.MessageEncryptionUtil;
+import com.ruoyi.im.vo.ding.DingMessageVO;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastService {
@@ -152,6 +154,34 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             }
         } catch (Exception e) {
             log.error("广播在线状态异常: userId={}", userId, e);
+        }
+    }
+
+    @Override
+    public void broadcastDingMessage(DingMessageVO dingVO, Set<Long> targetUserIds) {
+        try {
+            // 构建DING消息格式
+            Map<String, Object> wsMessage = new HashMap<>();
+            wsMessage.put("type", "ding");
+            wsMessage.put("data", dingVO);
+
+            String messageJson = objectMapper.writeValueAsString(wsMessage);
+
+            // 发送给目标用户
+            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            for (Long targetUserId : targetUserIds) {
+                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
+                if (targetSession != null && targetSession.isOpen()) {
+                    try {
+                        targetSession.getBasicRemote().sendText(messageJson);
+                        log.debug("DING消息已推送给用户: userId={}, dingId={}", targetUserId, dingVO.getId());
+                    } catch (Exception e) {
+                        log.error("发送DING消息给用户失败: userId={}", targetUserId, e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("广播DING消息异常: dingId={}", dingVO.getId(), e);
         }
     }
 

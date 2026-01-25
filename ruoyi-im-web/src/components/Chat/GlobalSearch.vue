@@ -108,8 +108,8 @@ const history = ref([])
 const messageResults = ref([])
 const loading = ref(false)
 
-const contacts = computed(() => store.state.im.contacts || [])
-const groups = computed(() => store.state.im.groups || [])
+const contacts = computed(() => store.state.im.contact?.contacts || [])
+const groups = computed(() => store.state.im.contact?.groups || [])
 
 const filteredContacts = computed(() => {
   if (!props.keyword) return []

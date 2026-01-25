@@ -44,6 +44,11 @@ public class ImConversationVO {
     private ImMessageVO lastMessage;
 
     /**
+     * 最后消息ID
+     */
+    private Long lastMessageId;
+
+    /**
      * 最后消息时间
      */
     private LocalDateTime lastMessageTime;

@@ -305,7 +305,7 @@ const handleDeleteSession = () => {
 }
 
 // 使用 getter 中的排序会话
-const sortedSessions = computed(() => store.getters['im/sortedSessions'])
+const sortedSessions = computed(() => store.getters['im/session/sortedSessions'])
 
 onMounted(() => {
   if (sessions.value.length === 0) {

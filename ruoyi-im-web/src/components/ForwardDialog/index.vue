@@ -87,7 +87,7 @@ const searchKeyword = ref('')
 const selectedSessionId = ref(null)
 
 // 获取会话列表
-const sessions = computed(() => store.state.im.sessions || [])
+const sessions = computed(() => store.state.im.session?.sessions || [])
 
 // 过滤会话列表
 const filteredSessions = computed(() => {

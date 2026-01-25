@@ -68,7 +68,7 @@ import HelpFeedbackDialog from '@/components/Common/HelpFeedbackDialog.vue'
 const store = useStore()
 const activeModule = ref('chat')
 const isSidebarCollapsed = ref(false)
-const currentSession = computed(() => store.state.im.currentSession)
+const currentSession = computed(() => store.state.im.session?.currentSession || null)
 const { isDark } = useTheme()
 
 // 弹窗状态控制

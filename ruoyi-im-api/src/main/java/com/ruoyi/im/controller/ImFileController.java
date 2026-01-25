@@ -1,15 +1,11 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
-import com.ruoyi.im.dto.file.ImFileUploadRequest;
 import com.ruoyi.im.service.ImFileService;
-import com.ruoyi.im.util.FileUtils;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.file.ImFileStatisticsVO;
 import com.ruoyi.im.vo.file.ImFileVO;
 import com.ruoyi.im.util.JwtUtils;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -173,13 +169,12 @@ public class ImFileController {
             @RequestParam(required = false) String token,
             HttpServletResponse response) {
         // 验证token
-        Long userId;
         if (token != null && !token.isEmpty()) {
-            userId = getUserIdFromToken(token);
+            getUserIdFromToken(token);
         } else {
             // 如果没有token，尝试从SecurityContext获取
             try {
-                userId = SecurityUtils.getLoginUserId();
+                SecurityUtils.getLoginUserId();
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
@@ -234,7 +229,8 @@ public class ImFileController {
     @Operation(summary = "获取文件预览URL", description = "获取文件预览URL")
     @GetMapping("/preview/{fileId}")
     public Result<String> getFilePreviewUrl(@PathVariable Long fileId) {
-        Long userId = SecurityUtils.getLoginUserId();
+        // 验证登录但不使用ID
+        SecurityUtils.getLoginUserId();
 
         ImFileVO fileVO = imFileService.getFileById(fileId);
         if (fileVO == null) {
