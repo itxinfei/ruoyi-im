@@ -432,29 +432,82 @@ redis-cli -h 172.168.20.222 -p 6379 -a 123456 ping
 
 ### 核心后端 Controller
 
+#### 用户 API (`/api/im/*`)
+
 | Controller | 路径 | 功能 |
 |------------|------|------|
-| `ImMessageController` | `/api/im/message` | 消息发送/查询/撤回 |
+| `ImMessageController` | `/api/im/message` | 消息发送/查询/撤回/编辑 |
 | `ImConversationController` | `/api/im/conversation` | 会话管理 |
 | `ImContactController` | `/api/im/contact` | 好友/联系人管理 |
-| `ImUserController` | `/api/im/user` | 用户管理 |
+| `ImUserController` | `/api/im/user` | 用户信息管理 |
 | `ImGroupController` | `/api/im/group` | 群组管理 |
 | `ImSessionController` | `/api/im/session` | 会话列表 |
+| `ImAuthController` | `/api/im/auth` | 登录/注册 |
+| `ImTodoController` | `/api/im/todo` | 待办事项 |
+| `ImApprovalController` | `/api/im/approval` | 审批流程 |
+| `ImMailController` | `/api/im/mail` | 邮件 |
+| `ImDocumentController` | `/api/im/document` | 文档管理 |
+| `ImAnnouncementController` | `/api/im/announcement` | 公告 |
+
+#### 管理 API (`/api/admin/*`) - 需要 ADMIN/SUPER_ADMIN 角色
+
+| Controller | 路径 | 功能 |
+|------------|------|------|
+| `ImUserAdminController` | `/api/admin/users` | 用户管理（列表/状态/角色/删除） |
+| `ImGroupAdminController` | `/api/admin/groups` | 群组管理（列表/解散/禁言） |
+| `ImMessageAdminController` | `/api/admin/messages` | 消息管理（查询/删除/统计） |
+| `ImStatsController` | `/api/admin/stats` | 数据统计（概览/活跃度） |
 
 ### 核心前端结构
 
 ```
 ruoyi-im-web/src/
-├── api/im/                      # API 客户端 (message.js、conversation.js 等)
-├── views/im/
-│   ├── ImChatLayoutOptimized.vue  # 主聊天界面 (钉钉风格)
-│   ├── chat/ChatContainer.vue     # 聊天容器组件
-│   ├── contacts/                  # 联系人模块
-│   └── workbench/                 # 工作台模块
-├── store/modules/im.js            # IM 状态管理的 Vuex Store
-├── composables/useImWebSocket.js  # WebSocket 组合式函数
-└── utils/websocket/imWebSocket.js # WebSocket 单例实现
+├── api/
+│   ├── im/                        # IM API 客户端
+│   │   ├── message.js             # 消息 API
+│   │   ├── conversation.js        # 会话 API
+│   │   ├── contact.js             # 联系人 API
+│   │   ├── group.js               # 群组 API
+│   │   └── ...
+│   └── admin.js                   # 管理员 API
+├── views/
+│   ├── auth/LoginPage.vue         # 登录页
+│   ├── MainPage.vue               # 主页面容器
+│   ├── ChatPanel.vue              # 聊天面板
+│   ├── ContactsPanel.vue          # 联系人面板
+│   ├── SessionPanel.vue           # 会话列表面板
+│   ├── WorkbenchPanel.vue         # 工作台面板
+│   ├── TodoPanel.vue              # 待办事项
+│   ├── ApprovalPanel.vue          # 审批流程
+│   ├── MailPanel.vue              # 邮件
+│   ├── AssistantPanel.vue         # AI 助理
+│   ├── DocumentsPanel.vue         # 文档管理
+│   ├── CalendarPanel.vue          # 日程日历
+│   └── admin/                     # 管理后台
+│       ├── AdminLayout.vue        # 管理后台布局
+│       ├── Dashboard.vue          # 数据概览
+│       ├── UserManagement.vue     # 用户管理
+│       ├── GroupManagement.vue    # 群组管理
+│       └── MessageManagement.vue  # 消息管理
+├── components/
+│   ├── Chat/                      # 聊天组件
+│   ├── Contacts/                  # 联系人组件
+│   └── Common/                    # 通用组件
+│       ├── DingtalkAvatar.vue     # 钉钉风格头像
+│       └── ...
+├── store/modules/im.js            # IM 状态管理
+├── router/index.js                # 路由配置（含权限守卫）
+└── composables/useImWebSocket.js  # WebSocket 组合式函数
 ```
+
+### 功能模块概览
+
+| 模块 | 功能 | 说明 |
+|------|------|------|
+| **即时通讯** | 单聊、群聊、消息撤回、消息编辑、消息转发、引用回复 | 支持文本、图片、文件、语音、视频 |
+| **联系人** | 好友管理、分组、组织架构树、外部联系人 | 支持按部门/职位浏览 |
+| **工作台** | 待办事项、审批流程、邮件、AI 助理、文档、日程 | 企业办公一体化 |
+| **管理后台** | 用户管理、群组管理、消息管理、数据统计 | 基于 @PreAuthorize 权限控制 |
 
 ---
 
@@ -557,8 +610,6 @@ ruoyi-im-web/src/
 | 文件 | 用途 |
 |------|------|
 | `ruoyi-im-api/src/main/resources/application.yml` | API 配置 (数据库、Redis、WebSocket) |
-| `ruoyi-im-admin/ruoyi-admin/src/main/resources/application.yml` | 后台管理配置 |
-| `ruoyi-im-admin/ruoyi-admin/src/main/resources/application-druid.yml` | 数据库连接池配置 |
 | `ruoyi-im-web/vite.config.js` | 前端构建/开发配置 |
 
 ---
@@ -566,7 +617,7 @@ ruoyi-im-web/src/
 # 默认访问地址
 
 - API 服务器: http://localhost:8080
-- 后台管理: http://localhost:8081 (账号: admin / 密码: 123456)
+- 管理后台: http://localhost:8080/api/admin (需 ADMIN/SUPER_ADMIN 角色)
 - 前端开发: http://localhost:5173
 
 ---
@@ -575,8 +626,8 @@ ruoyi-im-web/src/
 
 **后端**:
 - Spring Boot 2.7.18
-- Spring Security (API) / Apache Shiro (后台)
-- MyBatis-Plus 3.5.2
+- Spring Security (统一认证授权)
+- MyBatis-Plus 3.5.3
 - MySQL 5.7 with Druid 连接池
 - Redis (Lettuce 客户端)
 - JWT (jjwt 0.11.5)
