@@ -348,7 +348,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
                 .limit(MAX_RESULTS_PER_TYPE)
                 .map(file -> {
                     GlobalSearchResultVO.FileResult result = new GlobalSearchResultVO.FileResult();
-                    result.setId(file.getId());
+                    result.setFileId(file.getId());
                     result.setFileName(file.getFileName());
                     result.setFileType(file.getFileType());
                     result.setFileSize(file.getFileSize());
@@ -356,7 +356,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
                     ImUser uploader = userMap.get(file.getUploaderId());
                     result.setUploaderName(uploader != null ?
                         (uploader.getNickname() != null ? uploader.getNickname() : uploader.getUsername()) : "未知");
-                    result.setCreateTime(formatTime(file.getCreateTime()));
+                    result.setUploadTime(formatTime(file.getCreateTime()));
                     return result;
                 })
                 .collect(Collectors.toList());

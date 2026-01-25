@@ -97,7 +97,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             ImAttendanceGroupMember adminMember = new ImAttendanceGroupMember();
             adminMember.setGroupId(group.getId());
             adminMember.setUserId(userId);
-            ImUser creator = userMapper.selectById(userId);
+            ImUser creator = userMapper.selectImUserById(userId);
             adminMember.setUserName(creator != null ? creator.getNickname() : "");
             adminMember.setRole("ADMIN");
             adminMember.setStatus("ACTIVE");
@@ -182,7 +182,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
         BeanUtils.copyProperties(group, vo);
 
         // 获取负责人信息
-        ImUser manager = userMapper.selectById(group.getManagerId());
+        ImUser manager = userMapper.selectImUserById(group.getManagerId());
         if (manager != null) {
             vo.setManagerName(manager.getNickname());
         }
@@ -274,7 +274,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             ImAttendanceGroupMember member = new ImAttendanceGroupMember();
             member.setGroupId(groupId);
             member.setUserId(memberId);
-            ImUser user = userMapper.selectById(memberId);
+            ImUser user = userMapper.selectImUserById(memberId);
             member.setUserName(user != null ? user.getNickname() : "");
             member.setRole("MEMBER");
             member.setStatus("ACTIVE");

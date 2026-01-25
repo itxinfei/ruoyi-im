@@ -86,7 +86,7 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
             }
 
             // 获取用户信息
-            ImUser user = userMapper.selectById(targetUserId);
+            ImUser user = userMapper.selectImUserById(targetUserId);
             if (user == null) {
                 continue;
             }
@@ -208,7 +208,7 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
             }
 
             // 创建临时协作者记录
-            ImUser user = userMapper.selectById(userId);
+            ImUser user = userMapper.selectImUserById(userId);
             collaborator = new ImDocumentCollaborator();
             collaborator.setDocumentId(documentId);
             collaborator.setUserId(userId);
@@ -262,7 +262,7 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
     @Transactional(rollbackFor = Exception.class)
     public void logOperation(Long documentId, Long userId, String operationType,
                             Integer position, String content, Integer beforeVersion, Integer afterVersion) {
-        ImUser user = userMapper.selectById(userId);
+        ImUser user = userMapper.selectImUserById(userId);
         ImDocumentOperationLog log = new ImDocumentOperationLog();
         log.setDocumentId(documentId);
         log.setUserId(userId);

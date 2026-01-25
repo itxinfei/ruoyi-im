@@ -1,10 +1,12 @@
 package com.ruoyi.im.util;
 
+import com.ruoyi.im.config.ImConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -31,13 +33,25 @@ public class MessageEncryptionUtil {
     private static final int GCM_TAG_LENGTH = 128;
     private static final int GCM_IV_LENGTH = 12;
 
-    @Value("${im.message.encryption.enabled:false}")
+    @Autowired
+    private ImConfig imConfig;
+
     private boolean encryptionEnabled;
-
-    @Value("${im.message.encryption.key:}")
     private String encryptionKey;
-
     private SecretKey secretKey;
+
+    @PostConstruct
+    public void init() {
+        if (imConfig != null && imConfig.getMessage() != null && imConfig.getMessage().getEncryption() != null) {
+            this.encryptionEnabled = imConfig.getMessage().getEncryption().getEnabled();
+            this.encryptionKey = imConfig.getMessage().getEncryption().getKey();
+            log.info("消息加密配置已加载 - 启用: {}, 密钥: {}", encryptionEnabled, encryptionKey != null ? "已配置" : "未配置");
+        } else {
+            log.warn("消息加密配置未正确加载，使用默认值");
+            this.encryptionEnabled = false;
+            this.encryptionKey = null;
+        }
+    }
 
     public String encryptMessage(String plaintext) {
         if (!encryptionEnabled || plaintext == null || plaintext.isEmpty()) {

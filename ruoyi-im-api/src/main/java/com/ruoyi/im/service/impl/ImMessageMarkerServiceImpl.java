@@ -195,7 +195,7 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
                 vo.setMessagePreview(content);
                 vo.setSenderId(message.getSenderId());
 
-                ImUser sender = userMapper.selectById(message.getSenderId());
+                ImUser sender = userMapper.selectImUserById(message.getSenderId());
                 if (sender != null) {
                     vo.setSenderName(sender.getNickname());
                 }
@@ -204,12 +204,12 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
             // 获取会话信息
             ImConversation conversation = conversationMapper.selectById(marker.getConversationId());
             if (conversation != null) {
-                vo.setConversationName(conversation.getConversationName());
+                vo.setConversationName(conversation.getName());
             }
 
             // 检查是否过期
             if (marker.getRemindTime() != null) {
-                vo.setExpired(marker.getRemindTime().isBefore(LocalDateTime.now()));
+                vo.setIsExpired(marker.getRemindTime().isBefore(LocalDateTime.now()));
             }
 
             return vo;
@@ -241,9 +241,9 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         int processed = 0;
         for (ImMessageMarker marker : markers) {
             try {
-                // 发送提醒通知
-                webSocketBroadcastService.sendTodoReminder(marker.getUserId(), marker.getId(),
-                        marker.getMessageId(), marker.getRemark());
+                // TODO: 发送提醒通知 - 需要实现WebSocket推送
+                // webSocketBroadcastService.broadcastMessageToConversation(
+                //         marker.getConversationId(), marker.getMessageId(), marker.getUserId());
                 processed++;
             } catch (Exception e) {
                 logger.error("发送待办提醒失败: markerId={}", marker.getId(), e);

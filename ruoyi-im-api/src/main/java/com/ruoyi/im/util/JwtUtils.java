@@ -1,5 +1,6 @@
 package com.ruoyi.im.util;
 
+import com.ruoyi.im.config.ImConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -9,9 +10,11 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -27,11 +30,24 @@ public class JwtUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${im.jwt.secret:im_secret_key_2024_for_api_system_that_is_long_enough_for_HS512_algorithm}")
-    private String secret;
+    @Autowired
+    private ImConfig imConfig;
 
-    @Value("${im.jwt.expiration:86400000}")
+    private String secret;
     private long expiration;
+
+    @PostConstruct
+    public void init() {
+        if (imConfig != null && imConfig.getJwt() != null) {
+            this.secret = imConfig.getJwt().getSecret();
+            this.expiration = imConfig.getJwt().getExpiration();
+            LOGGER.info("JWT配置已加载 - 过期时间: {}ms", expiration);
+        } else {
+            LOGGER.warn("JWT配置未正确加载，使用默认值");
+            this.secret = "default_secret_key_2024_for_im_system";
+            this.expiration = 86400000L;
+        }
+    }
 
     /**
      * 获取签名密钥

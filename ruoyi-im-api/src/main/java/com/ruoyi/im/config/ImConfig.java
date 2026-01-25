@@ -18,6 +18,9 @@ import java.util.List;
 @EnableScheduling
 public class ImConfig {
 
+    /** JWT配置 */
+    private Jwt jwt = new Jwt();
+
     /** 消息配置 */
     private Message message = new Message();
     
@@ -33,6 +36,30 @@ public class ImConfig {
     /** 安全配置 */
     private Security security = new Security();
 
+    public static class Jwt {
+        /** JWT密钥 */
+        private String secret;
+
+        /** JWT过期时间(毫秒) */
+        private Long expiration;
+
+        public String getSecret() {
+            return secret;
+        }
+
+        public void setSecret(String secret) {
+            this.secret = secret;
+        }
+
+        public Long getExpiration() {
+            return expiration;
+        }
+
+        public void setExpiration(Long expiration) {
+            this.expiration = expiration;
+        }
+    }
+
     public static class Message {
         /** 撤回时间窗口（秒） */
         private Integer recallWindowSeconds = 120;
@@ -40,11 +67,11 @@ public class ImConfig {
         /** 消息最大长度 */
         private Integer maxLength = 2000;
         
-        /** 是否启用消息加密 */
-        private Boolean enableEncryption = false;
-        
         /** 消息过期天数 */
         private Integer expireDays = 30;
+
+        /** 加密配置 */
+        private Encryption encryption = new Encryption();
 
         public Integer getRecallWindowSeconds() {
             return recallWindowSeconds;
@@ -62,20 +89,44 @@ public class ImConfig {
             this.maxLength = maxLength;
         }
 
-        public Boolean getEnableEncryption() {
-            return enableEncryption;
-        }
-
-        public void setEnableEncryption(Boolean enableEncryption) {
-            this.enableEncryption = enableEncryption;
-        }
-
         public Integer getExpireDays() {
             return expireDays;
         }
 
         public void setExpireDays(Integer expireDays) {
             this.expireDays = expireDays;
+        }
+
+        public Encryption getEncryption() {
+            return encryption;
+        }
+
+        public void setEncryption(Encryption encryption) {
+            this.encryption = encryption;
+        }
+    }
+
+    public static class Encryption {
+        /** 是否启用消息加密 */
+        private Boolean enabled = true;
+
+        /** 加密密钥 */
+        private String key;
+
+        public Boolean getEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(Boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public void setKey(String key) {
+            this.key = key;
         }
     }
 
@@ -233,9 +284,6 @@ public class ImConfig {
         /** WebSocket心跳间隔（秒） */
         private Integer heartbeatInterval = 30;
 
-        /** JWT密钥 */
-        private String jwtSecret = "${im.security.jwt-secret:default_secret_key_2024_for_im_system}";
-
         public Boolean getEnableAuth() {
             return enableAuth;
         }
@@ -275,14 +323,14 @@ public class ImConfig {
         public void setHeartbeatInterval(Integer heartbeatInterval) {
             this.heartbeatInterval = heartbeatInterval;
         }
+    }
 
-        public String getJwtSecret() {
-            return jwtSecret;
-        }
+    public Jwt getJwt() {
+        return jwt;
+    }
 
-        public void setJwtSecret(String jwtSecret) {
-            this.jwtSecret = jwtSecret;
-        }
+    public void setJwt(Jwt jwt) {
+        this.jwt = jwt;
     }
 
     public Message getMessage() {

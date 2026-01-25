@@ -291,7 +291,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
             BeanUtils.copyProperties(folder, vo);
 
             // 获取所有者信息
-            ImUser owner = userMapper.selectById(folder.getOwnerId());
+            ImUser owner = userMapper.selectImUserById(folder.getOwnerId());
             if (owner != null) {
                 vo.setOwnerName(owner.getNickname());
             }
@@ -391,7 +391,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         cloudFileMapper.insert(cloudFile);
 
         // 获取上传者信息
-        ImUser uploader = userMapper.selectById(userId);
+        ImUser uploader = userMapper.selectImUserById(userId);
         if (uploader != null) {
             cloudFile.setUploaderName(uploader.getNickname());
             cloudFileMapper.updateById(cloudFile);
@@ -566,7 +566,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         vo.setHasPassword(share.getAccessPassword() != null && !share.getAccessPassword().isEmpty());
 
         // 获取分享者信息
-        ImUser sharer = userMapper.selectById(userId);
+        ImUser sharer = userMapper.selectImUserById(userId);
         if (sharer != null) {
             vo.setSharerName(sharer.getNickname());
         }
@@ -721,7 +721,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         }
 
         // 获取上传者信息
-        ImUser uploader = userMapper.selectById(cloudFile.getUploaderId());
+        ImUser uploader = userMapper.selectImUserById(cloudFile.getUploaderId());
         if (uploader != null) {
             vo.setUploaderName(uploader.getNickname());
             vo.setUploaderAvatar(uploader.getAvatar());
