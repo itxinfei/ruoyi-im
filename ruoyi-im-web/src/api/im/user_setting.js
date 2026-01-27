@@ -1,3 +1,6 @@
+/**
+ * 用户设置相关 API
+ */
 import request from '../request'
 
 /**
