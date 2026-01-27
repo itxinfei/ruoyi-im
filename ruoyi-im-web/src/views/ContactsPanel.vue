@@ -36,6 +36,18 @@
         <div class="quick-nav">
           <div
             class="nav-item"
+            :class="{ active: view === 'friends' }"
+            @click="handleNav('friends')"
+          >
+            <div class="nav-indicator"></div>
+            <div class="nav-icon friends-icon">
+              <span class="material-icons-outlined">people</span>
+            </div>
+            <span class="nav-label">我的好友</span>
+            <div v-if="friendCount > 0" class="nav-count">{{ friendCount }}</div>
+          </div>
+          <div
+            class="nav-item"
             :class="{ active: view === 'new-friends' }"
             @click="handleNav('new-friends')"
           >
@@ -168,6 +180,69 @@
         </div>
       </template>
 
+      <!-- 我的好友视图 -->
+      <template v-else-if="view === 'friends'">
+        <header class="main-header">
+          <div class="header-left">
+            <el-breadcrumb separator="/" class="header-breadcrumb">
+              <el-breadcrumb-item>
+                <span class="material-icons-outlined breadcrumb-icon">home</span>
+                通讯录
+              </el-breadcrumb-item>
+              <el-breadcrumb-item>我的好友</el-breadcrumb-item>
+            </el-breadcrumb>
+            <div class="member-count">
+              <span class="material-icons-outlined count-icon">people</span>
+              {{ friendCount }} 人
+            </div>
+          </div>
+          <div class="header-right">
+            <el-tooltip content="刷新" placement="bottom">
+              <button class="icon-btn" @click="loadFriends">
+                <span class="material-icons-outlined">refresh</span>
+              </button>
+            </el-tooltip>
+          </div>
+        </header>
+
+        <div class="main-content friends-content">
+          <div v-if="loadingFriends" v-loading="true" class="loading-wrapper"></div>
+          <div v-else-if="groupedFriends.length === 0" class="empty-state">
+            <span class="material-icons-outlined empty-icon">person_off</span>
+            <h3 class="empty-title">暂无好友</h3>
+            <p class="empty-text">点击上方添加按钮开始添加好友</p>
+          </div>
+          <div v-else class="friends-list">
+            <div v-for="group in groupedFriends" :key="group.groupName || 'default'" class="friend-group">
+              <div class="friend-group-header">
+                <h4 class="friend-group-name">{{ group.groupName || '未分组' }}</h4>
+                <span class="friend-group-count">{{ group.contacts.length }} 人</span>
+              </div>
+              <div class="friend-group-members">
+                <div
+                  v-for="friend in group.contacts"
+                  :key="friend.id"
+                  class="friend-item"
+                  @click="handleFriendClick(friend)"
+                >
+                  <DingtalkAvatar
+                    :name="friend.remark || friend.friendName"
+                    :user-id="friend.friendId"
+                    :size="44"
+                    :src="friend.friendAvatar"
+                  />
+                  <div class="friend-info">
+                    <h5 class="friend-name">{{ friend.remark || friend.friendName }}</h5>
+                    <p class="friend-desc">{{ friend.position || friend.department || '联系人' }}</p>
+                  </div>
+                  <div class="friend-online" :class="{ online: friend.online }"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+
       <!-- 新朋友视图 -->
       <template v-else-if="view === 'new-friends'">
         <NewFriendsView @back="handleBack" />
@@ -213,7 +288,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getFriendRequests } from '@/api/im/contact'
+import { getFriendRequests, getGroupedFriendList } from '@/api/im/contact'
 import { getDepartmentMembers } from '@/api/im/organization'
 import { createConversation } from '@/api/im/conversation'
 import AddContactDialog from '@/components/Contacts/AddContactDialog.vue'
@@ -225,11 +300,14 @@ import GroupProfileDialog from '@/components/Contacts/GroupProfileDialog.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const router = useRouter()
-const view = ref('department') // department | new-friends | groups
+const view = ref('friends') // friends | department | new-friends | groups
 const selectedDept = ref(null)
 const searchQuery = ref('')
 const showAddDialog = ref(false)
 const requestCount = ref(0)
+const friendCount = ref(0)
+const loadingFriends = ref(false)
+const groupedFriends = ref([])
 
 // 详情弹窗控制
 const showUserDialog = ref(false)
@@ -331,6 +409,36 @@ const checkRequests = async () => {
   }
 }
 
+const loadFriends = async () => {
+  loadingFriends.value = true
+  try {
+    const res = await getGroupedFriendList()
+    if (res.code === 200 && res.data) {
+      groupedFriends.value = res.data.map(group => ({
+        groupName: group.groupName,
+        contacts: (group.friends || []).map(c => ({
+          ...c,
+          online: c.online || false
+        }))
+      }))
+      // 计算好友总数
+      friendCount.value = groupedFriends.value.reduce(
+        (sum, g) => sum + (g.contacts?.length || 0), 0
+      )
+    }
+  } catch (e) {
+    console.error('加载好友失败', e)
+    ElMessage.error('加载好友失败')
+  } finally {
+    loadingFriends.value = false
+  }
+}
+
+const handleFriendClick = (friend) => {
+  selectedUserId.value = friend.friendId || friend.id
+  showUserDialog.value = true
+}
+
 const groupsViewRef = ref(null)
 const loadGroups = () => {
   groupsViewRef.value?.loadGroups?.()
@@ -338,12 +446,15 @@ const loadGroups = () => {
 
 onMounted(() => {
   checkRequests()
+  loadFriends()
 })
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 // ============================================================================
-// 容器
+// 容器 - 极简主义布局
 // ============================================================================
 .contacts-panel {
   display: flex;
@@ -351,10 +462,11 @@ onMounted(() => {
   flex: 1;
   min-width: 0;
   background: var(--dt-bg-body);
+  animation: fadeIn 0.4s ease-out;
 }
 
 // ============================================================================
-// 左侧边栏
+// 左侧边栏 - 精致导航
 // ============================================================================
 .contacts-sidebar {
   width: 280px;
@@ -363,628 +475,363 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-}
+  transition: all 0.3s var(--dt-ease-out);
 
-.sidebar-header {
-  padding: 16px 16px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+  .sidebar-header {
+    padding: 24px 20px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-.sidebar-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--dt-text-primary);
-  margin: 0;
+    .sidebar-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--dt-text-primary);
+      letter-spacing: -0.5px;
 
-  .title-icon {
-    font-size: 20px;
-    color: var(--dt-brand-color);
+      .title-icon {
+        font-size: 24px;
+        background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
   }
 }
 
 .add-btn {
-  width: 36px;
-  height: 36px;
-  color: var(--dt-text-secondary);
-  background: var(--dt-bg-body);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-md);
+  width: 32px;
+  height: 32px;
+  color: var(--dt-brand-color);
+  background: var(--dt-brand-lighter);
+  border: none;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
+  transition: all 0.3s var(--dt-ease-bounce);
 
   &:hover {
-    color: var(--dt-brand-color);
-    border-color: var(--dt-brand-color);
-    background: var(--dt-brand-bg);
-    transform: scale(1.05);
-  }
-
-  .material-icons-outlined {
-    font-size: 18px;
+    background: var(--dt-brand-color);
+    color: #fff;
+    transform: rotate(90deg) scale(1.1);
   }
 }
 
-// ============================================================================
-// 搜索框
-// ============================================================================
+// 搜索框美化
 .sidebar-search {
-  padding: 0 12px 12px;
-}
+  padding: 0 16px 20px;
 
-.search-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
+  .search-input-wrapper {
+    position: relative;
+    
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--dt-text-quaternary);
+      font-size: 18px;
+    }
 
-.search-icon {
-  position: absolute;
-  left: 10px;
-  color: var(--dt-text-quaternary);
-  font-size: 18px;
-  pointer-events: none;
-}
+    .search-input {
+      width: 100%;
+      height: 36px;
+      background: var(--dt-bg-body);
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 0 36px;
+      font-size: 13px;
+      color: var(--dt-text-primary);
+      transition: all 0.3s var(--dt-ease-out);
 
-.search-input {
-  width: 100%;
-  height: 38px;
-  background: var(--dt-bg-body);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-md);
-  padding: 0 36px;
-  font-size: 13px;
-  color: var(--dt-text-primary);
-  outline: none;
-  transition: all var(--dt-transition-base);
-
-  &::placeholder {
-    color: var(--dt-text-quaternary);
-  }
-
-  &:focus {
-    border-color: var(--dt-brand-color);
-    background: var(--dt-bg-card);
-    box-shadow: 0 0 0 2px var(--dt-brand-lighter);
+      &:focus {
+        background: #fff;
+        border-color: var(--dt-brand-color);
+        box-shadow: 0 0 0 4px var(--dt-brand-lighter);
+        .dark & { background: var(--dt-bg-card-dark); }
+      }
+    }
   }
 }
 
-.clear-btn {
-  position: absolute;
-  right: 8px;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 50%;
-  color: var(--dt-text-quaternary);
-  transition: all var(--dt-transition-base);
-
-  &:hover {
-    background: var(--dt-border-color);
-    color: var(--dt-text-secondary);
-  }
-
-  .material-icons-outlined {
-    font-size: 14px;
-  }
-}
-
-// ============================================================================
-// 侧边栏内容
-// ============================================================================
+// 侧边栏菜单
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
-  padding: 0 8px;
-}
+  padding: 0 10px;
+  scrollbar-width: thin;
 
-// 快捷导航
-.quick-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 12px;
-}
+  .quick-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 24px;
 
-.nav-item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--dt-radius-md);
-  cursor: pointer;
-  transition: all var(--dt-transition-base);
-  color: var(--dt-text-secondary);
+    .nav-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s var(--dt-ease-out);
+      color: var(--dt-text-secondary);
 
-  &:hover {
-    background: var(--dt-bg-body);
-    color: var(--dt-text-primary);
+      .nav-indicator {
+        position: absolute;
+        left: 0;
+        width: 4px;
+        height: 18px;
+        background: var(--dt-brand-color);
+        border-radius: 0 4px 4px 0;
+        opacity: 0;
+        transition: all 0.2s;
+      }
 
-    .nav-icon {
-      transform: scale(1.05);
+      .nav-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+
+        &.friends-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        &.new-friends-icon { background: linear-gradient(135deg, #10b981, #059669); }
+        &.groups-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+      }
+
+      .nav-label { font-size: 14px; font-weight: 500; }
+
+      .nav-badge, .nav-count {
+        padding: 2px 8px;
+        background: var(--dt-error-color);
+        color: #fff;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .nav-count { background: var(--dt-brand-color); }
+
+      &:hover {
+        background: var(--dt-bg-hover);
+        color: var(--dt-text-primary);
+        transform: translateX(4px);
+      }
+
+      &.active {
+        background: var(--dt-brand-lighter);
+        color: var(--dt-brand-color);
+        .nav-indicator { opacity: 1; }
+      }
     }
   }
-
-  &.active {
-    background: var(--dt-brand-bg);
-    color: var(--dt-brand-color);
-    font-weight: 500;
-
-    .nav-indicator {
-      opacity: 1;
-    }
-  }
-}
-
-.nav-indicator {
-  position: absolute;
-  left: 8px;
-  width: 3px;
-  height: 16px;
-  background: var(--dt-brand-color);
-  border-radius: 2px;
-  opacity: 0;
-  transition: opacity var(--dt-transition-base);
-}
-
-.nav-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--dt-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: transform var(--dt-transition-base);
-
-  .material-icons-outlined {
-    font-size: 18px;
-  }
-
-  &.new-friends-icon {
-    background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
-    color: #fff;
-  }
-
-  &.groups-icon {
-    background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
-    color: #fff;
-  }
-}
-
-.nav-label {
-  flex: 1;
-  font-size: 14px;
-}
-
-.nav-badge {
-  padding: 2px 7px;
-  background: var(--dt-error-color);
-  color: #fff;
-  border-radius: var(--dt-radius-full);
-  font-size: 11px;
-  font-weight: 600;
-  min-width: 18px;
-  text-align: center;
 }
 
 // 组织架构
 .org-section {
-  margin-top: 8px;
-}
-
-.org-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-}
-
-.org-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--dt-text-quaternary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.org-icon {
-  font-size: 16px;
-  color: var(--dt-text-quaternary);
-}
-
-.org-tree {
-  padding: 0 4px;
+  .org-section-header {
+    padding: 0 14px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    .org-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--dt-text-quaternary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .org-icon { font-size: 16px; color: var(--dt-text-quaternary); }
+  }
 }
 
 // ============================================================================
-// 右侧主内容
+// 右侧主内容 - 现代画布
 // ============================================================================
 .contacts-main {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: #fff;
+  .dark & { background: var(--dt-bg-body-dark); }
 }
 
 .main-header {
-  height: 64px;
-  padding: 0 24px;
-  background: var(--dt-bg-card);
+  height: 72px;
+  padding: 0 32px;
   border-bottom: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-shrink: 0;
-}
+  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.8);
+  .dark & { background: rgba(15, 23, 42, 0.8); border-color: var(--dt-border-dark); }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 
-.header-breadcrumb {
-  :deep(.el-breadcrumb__item) {
-    .el-breadcrumb__inner {
+    .member-count {
+      padding: 4px 12px;
+      background: var(--dt-brand-lighter);
+      color: var(--dt-brand-color);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 4px;
-      font-size: 14px;
-      color: var(--dt-text-secondary);
-      font-weight: 500;
-    }
-
-    &:last-child .el-breadcrumb__inner {
-      color: var(--dt-text-primary);
     }
   }
-}
-
-.breadcrumb-icon {
-  font-size: 16px;
-}
-
-.member-count {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  background: var(--dt-brand-bg);
-  color: var(--dt-brand-color);
-  border-radius: var(--dt-radius-full);
-  font-size: 12px;
-  font-weight: 600;
-
-  .count-icon {
-    font-size: 14px;
-  }
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 .avatar-preview {
   display: flex;
-  align-items: center;
-}
-
-.preview-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2px solid var(--dt-bg-card);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  margin-left: -8px;
-  box-shadow: var(--dt-shadow-2);
-  transition: transform var(--dt-transition-base);
-
-  &:hover {
-    transform: translateY(-2px);
-    z-index: 10;
-  }
-
-  &:first-child {
-    margin-left: 0;
-  }
-
-  &.more-count {
-    background: var(--dt-bg-body);
-    color: var(--dt-text-secondary);
-    font-size: 10px;
-  }
-}
-
-.divider {
-  width: 1px;
-  height: 20px;
-  background: var(--dt-border-color);
-}
-
-.icon-btn {
-  width: 36px;
-  height: 36px;
-  background: transparent;
-  border: none;
-  border-radius: var(--dt-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--dt-text-secondary);
-  transition: all var(--dt-transition-base);
-
-  &:hover {
-    background: var(--dt-bg-body);
-    color: var(--dt-brand-color);
-  }
-
-  .material-icons-outlined {
-    font-size: 18px;
+  .preview-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: -10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    &.more-count { background: var(--dt-bg-body); color: var(--dt-text-secondary); }
+    .dark & { border-color: var(--dt-bg-card-dark); }
   }
 }
 
 .main-content {
   flex: 1;
-  padding: 24px;
+  padding: 32px;
   overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
-// ============================================================================
-// 成员网格
-// ============================================================================
+// 成员网格美化
 .members-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
 }
 
 .member-card {
   background: var(--dt-bg-card);
-  border-radius: var(--dt-radius-lg);
-  padding: 16px;
-  box-shadow: var(--dt-shadow-card);
-  transition: all var(--dt-transition-base);
-  cursor: pointer;
-  border: 1px solid transparent;
+  border-radius: 20px;
+  padding: 24px 20px;
+  border: 1px solid var(--dt-border-light);
+  transition: all 0.3s var(--dt-ease-bounce);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--dt-brand-color), var(--dt-brand-active));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
 
   &:hover {
-    box-shadow: var(--dt-shadow-card-hover);
-    transform: translateY(-2px);
-    border-color: var(--dt-brand-color);
-
-    .member-actions {
-      opacity: 1;
-    }
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+    border-color: var(--dt-brand-lighter);
+    &::before { opacity: 1; }
+    .member-actions { transform: translateY(0); opacity: 1; }
   }
-}
 
-.member-card-header {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 12px;
-
-  :deep(.member-avatar) {
-    border-radius: var(--dt-radius-md) !important;
+  .member-avatar {
+    margin: 0 auto 16px;
+    border-radius: 18px !important;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
   }
-}
 
-.online-indicator {
-  position: absolute;
-  bottom: 2px;
-  right: calc(50% - 20px);
-  width: 12px;
-  height: 12px;
-  background: var(--dt-text-quaternary);
-  border: 2px solid var(--dt-bg-card);
-  border-radius: 50%;
-  transition: all var(--dt-transition-base);
-
-  &.online {
-    background: var(--dt-success-color);
-    box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
-  }
-}
-
-.member-card-body {
-  text-align: center;
-}
-
-.member-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--dt-text-primary);
-  margin: 0 0 4px 0;
-}
-
-.member-position {
-  font-size: 12px;
-  color: var(--dt-text-tertiary);
-  margin: 0 0 12px 0;
+  .member-name { font-size: 16px; font-weight: 700; color: var(--dt-text-primary); margin-bottom: 4px; }
+  .member-position { font-size: 12px; color: var(--dt-text-tertiary); margin-bottom: 20px; }
 }
 
 .member-actions {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 12px;
+  transform: translateY(10px);
   opacity: 0;
-  transition: opacity var(--dt-transition-base);
+  transition: all 0.3s;
+
+  .action-btn {
+    width: 36px; height: 36px;
+    border-radius: 12px;
+    background: var(--dt-brand-lighter);
+    color: var(--dt-brand-color);
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    &:hover { background: var(--dt-brand-color); color: #fff; transform: scale(1.1); }
+  }
 }
 
-.action-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--dt-radius-md);
-  background: var(--dt-bg-body);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+// 好友分组列表美化
+.friend-group {
+  margin-bottom: 32px;
+  .friend-group-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    &::after { content: ''; flex: 1; height: 1px; background: var(--dt-border-light); }
+    .friend-group-name { font-size: 13px; font-weight: 800; color: var(--dt-text-quaternary); }
+  }
+}
+
+.friend-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 20px;
+  border-radius: 16px;
   cursor: pointer;
-  color: var(--dt-text-secondary);
-  transition: all var(--dt-transition-base);
+  transition: all 0.2s;
+  &:hover { background: var(--dt-bg-body); transform: translateX(8px); }
 
-  &:hover {
-    background: var(--dt-brand-color);
-    color: #fff;
+  .friend-info {
+    flex: 1;
+    .friend-name { font-size: 15px; font-weight: 600; color: var(--dt-text-primary); }
+    .friend-desc { font-size: 12px; color: var(--dt-text-tertiary); }
   }
 
-  .material-icons-outlined {
-    font-size: 16px;
-  }
-}
-
-// ============================================================================
-// 空状态
-// ============================================================================
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-}
-
-.empty-state-large {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 20px;
-  text-align: center;
-}
-
-.empty-illustration {
-  position: relative;
-  margin-bottom: 24px;
-}
-
-.empty-icon {
-  font-size: 80px;
-  color: var(--dt-border-color);
-}
-
-.empty-decoration {
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 6px;
-  background: var(--dt-border-color);
-  border-radius: var(--dt-radius-full);
-  opacity: 0.5;
-}
-
-.empty-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--dt-text-primary);
-  margin: 0 0 8px 0;
-}
-
-.empty-text {
-  font-size: 14px;
-  color: var(--dt-text-tertiary);
-  margin: 0;
-}
-
-// ============================================================================
-// 暗色模式
-// ============================================================================
-.dark .contacts-panel {
-  background: var(--dt-bg-body-dark);
-}
-
-.dark .contacts-sidebar,
-.dark .main-header {
-  background: var(--dt-bg-card-dark);
-  border-color: var(--dt-border-dark);
-}
-
-.dark .sidebar-title,
-.dark .member-name {
-  color: var(--dt-text-primary-dark);
-}
-
-.dark .nav-item {
-  color: var(--dt-text-secondary-dark);
-
-  &:hover {
-    background: var(--dt-bg-hover-dark);
-  }
-
-  &.active {
-    background: rgba(22, 119, 255, 0.15);
+  .friend-online {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #cbd5e1;
+    &.online { background: #22c55e; box-shadow: 0 0 12px #22c55e; animation: pulse 2s infinite; }
   }
 }
 
-.dark .search-input {
-  background: var(--dt-bg-input-dark);
-  border-color: var(--dt-border-dark);
-  color: var(--dt-text-primary-dark);
+// 动画
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
 }
 
-.dark .member-card {
-  background: var(--dt-bg-card-dark);
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-.dark .icon-btn:hover {
-  background: var(--dt-bg-hover-dark);
-}
-
-.dark .empty-icon {
-  color: var(--dt-border-dark);
-}
-
-.dark .empty-decoration {
-  background: var(--dt-border-dark);
-}
-
-.dark .online-indicator {
-  border-color: var(--dt-bg-card-dark);
-}
-
-.dark .online-indicator:not(.online) {
-  background: var(--dt-border-dark);
-}
-
-// ============================================================================
-// 响应式
-// ============================================================================
-@media (max-width: 768px) {
-  .contacts-sidebar {
-    width: 240px;
-  }
-
-  .members-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-
-  .header-breadcrumb {
-    display: none;
-  }
+// 暗色模式微调
+.dark {
+  .contacts-sidebar, .main-header { border-color: #1e293b; }
+  .member-card { background: #1e293b; border-color: #334155; }
+  .friend-item:hover { background: #1e293b; }
+  .nav-item:hover { background: #1e293b; }
 }
 </style>

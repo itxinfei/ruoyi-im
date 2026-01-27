@@ -189,7 +189,11 @@
     </div>
 
     <!-- 群组多人视频通话 -->
-    <div v-if="isGroupCall && status === 'talking' && isVideoCall" class="group-video-grid">
+    <div
+      v-if="isGroupCall && status === 'talking' && isVideoCall"
+      class="group-video-grid"
+      :data-count="participants.length"
+    >
       <div
         v-for="participant in participants"
         :key="participant.userId"
@@ -1066,16 +1070,52 @@ defineExpose({
   }
 }
 
-// ==================== 群组视频网格 ====================
+// ==================== 群组视频网格 - 自适应布局 ====================
 
 .group-video-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 8px;
   padding: 8px;
   height: calc(600px - 80px);
   background: #000;
   overflow-y: auto;
+
+  // 根据参与者数量自适应布局
+  // 2人：上下布局
+  &[data-count="2"] {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(2, 1fr);
+  }
+
+  // 3-4人：2x2 网格
+  &[data-count="3"],
+  &[data-count="4"] {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+  }
+
+  // 5-6人：3x2 网格
+  &[data-count="5"],
+  &[data-count="6"] {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+  }
+
+  // 7-9人：3x3 网格
+  &[data-count="7"],
+  &[data-count="8"],
+  &[data-count="9"] {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+
+  // 10+人：自适应填充
+  &[data-count="10"],
+  &[data-count="11"],
+  &[data-count="12"] {
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 1fr;
+  }
 }
 
 .video-tile {

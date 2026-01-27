@@ -74,17 +74,6 @@
         </button>
       </el-tooltip>
 
-      <!-- 帮助与反馈 -->
-      <el-tooltip content="帮助与反馈" placement="right" :show-after="500" :hide-after="0">
-        <button
-          @click="handleHelp"
-          class="nav-item nav-item-action"
-          aria-label="帮助与反馈"
-        >
-          <span class="material-icons-outlined" aria-hidden="true">help_outline</span>
-        </button>
-      </el-tooltip>
-
       <!-- 设置按钮 -->
       <el-tooltip content="设置" placement="right" :show-after="500" :hide-after="0">
         <button
@@ -142,7 +131,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['switch-module', 'toggle-collapse', 'open-search'])
+const emit = defineEmits(['switch-module', 'toggle-collapse', 'open-search', 'open-settings'])
 const store = useStore()
 const { isDark, themeMode, toggleTheme } = useTheme()
 
@@ -160,15 +149,21 @@ const themeTooltip = computed(() => {
 const unreadCount = computed(() => store.state.im?.totalUnreadCount || 0)
 
 // 当前用户
-const currentUser = computed(() => store.getters['user/currentUser'] || {})
+const currentUser = computed(() => {
+  const user = store.getters['user/currentUser']
+  return user && Object.keys(user).length > 0 ? user : { nickname: '加载中...', username: '...', avatar: '' }
+})
 
 // 用户在线状态
-const isUserOnline = computed(() => store.state.im?.userStatus?.[currentUser.value.id] === 'online')
+const isUserOnline = computed(() => {
+  if (!currentUser.value?.id) return false
+  return store.state.im?.userStatus?.[currentUser.value.id] === 'online'
+})
 
 // 导航模块配置
 const navModules = ref([
   { key: 'chat', label: '消息', icon: 'chat_bubble' },
-  { key: 'contacts', label: '通讯录', icon: 'group' },
+  { key: 'contacts', label: '通讯录', icon: 'people' },
   { key: 'workbench', label: '工作台', icon: 'grid_view' },
   { key: 'drive', label: '云盘', icon: 'cloud' },
   { key: 'calendar', label: '日历', icon: 'calendar_today' },
@@ -197,10 +192,10 @@ function handleSwitch(key) {
 }
 
 /**
- * 处理帮助与反馈
+ * 处理帮助与反馈 - 打开设置对话框并定位到帮助标签页
  */
 function handleHelp() {
-  handleSwitch('help')
+  emit('open-settings', 'help')
 }
 
 /**
@@ -212,6 +207,8 @@ function handleOpenSearch() {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 // ============================================================================
 // 导航容器
 // ============================================================================
@@ -219,6 +216,7 @@ function handleOpenSearch() {
   width: 72px;
   background: var(--dt-bg-sidebar-gradient);
   box-shadow: var(--dt-shadow-3);
+  animation: slideInLeft 0.4s var(--dt-ease-out);
 }
 
 .bg-nav-light {
@@ -233,7 +231,7 @@ function handleOpenSearch() {
 // Logo 区域
 // ============================================================================
 .nav-logo-wrapper {
-  padding: 12px 0;
+  padding: 8px 0;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -250,12 +248,15 @@ function handleOpenSearch() {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(10px);
-  transition: all var(--dt-transition-base);
+  transition: all 0.3s var(--dt-ease-out);
+  animation: fadeInDown 0.5s var(--dt-ease-bounce);
+
+  @include hover-lift;
 }
 
 .nav-logo:hover {
   background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.02);
+  transform: scale(1.05);
 }
 
 .nav-logo-text {
@@ -264,6 +265,10 @@ function handleOpenSearch() {
   color: #fff;
   letter-spacing: -0.5px;
   line-height: 1;
+  background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .nav-logo-badge {
@@ -282,6 +287,7 @@ function handleOpenSearch() {
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: scaleIn 0.3s var(--dt-ease-bounce), pulse 2s ease-in-out infinite;
 }
 
 // ============================================================================
@@ -290,10 +296,10 @@ function handleOpenSearch() {
 .nav-items {
   flex: 1;
   width: 100%;
-  padding: 8px 12px;
+  padding: 4px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -322,20 +328,28 @@ function handleOpenSearch() {
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
-  color: rgba(255, 255, 255, 0.75);
+  transition: all 0.3s var(--dt-ease-out);
+  color: rgba(255, 255, 255, 0.85) !important; // 强制使用白色，防止登录后同步延迟导致的变色
+  animation: fadeInUp 0.4s var(--dt-ease-out) both;
+
+  @for $i from 1 through 9 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{0.05 * $i}s;
+    }
+  }
 }
 
 .nav-item:hover {
   background: var(--dt-bg-sidebar-item-hover);
   color: #fff;
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
 .nav-item-active {
   background: var(--dt-bg-sidebar-item-active);
   color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: pulse 0.3s var(--dt-ease-out);
 }
 
 .nav-item-active::before {
@@ -346,15 +360,16 @@ function handleOpenSearch() {
   height: 24px;
   background: #fff;
   border-radius: 0 4px 4px 0;
+  animation: slideInLeft 0.2s var(--dt-ease-out);
 }
 
 .nav-item-icon {
   font-size: 22px;
-  transition: transform var(--dt-transition-base);
+  transition: transform 0.3s var(--dt-ease-out);
 }
 
 .nav-item:hover .nav-item-icon {
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 
 .nav-item-badge {
@@ -373,18 +388,20 @@ function handleOpenSearch() {
   align-items: center;
   justify-content: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  animation: scaleIn 0.3s var(--dt-ease-bounce);
 }
 
 // ============================================================================
 // 底部操作区
 // ============================================================================
 .nav-footer {
-  padding: 8px 12px 16px;
+  padding: 4px 12px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
   flex-shrink: 0;
+  animation: fadeInUp 0.5s var(--dt-ease-out) both;
 }
 
 .nav-item-action {
@@ -398,7 +415,7 @@ function handleOpenSearch() {
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
+  transition: all 0.3s var(--dt-ease-out);
   color: rgba(255, 255, 255, 0.65);
   position: relative;
 }
@@ -406,6 +423,7 @@ function handleOpenSearch() {
 .nav-item-action:hover {
   background: var(--dt-bg-sidebar-item-hover);
   color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.08);
 }
 
 .nav-item-action.nav-item-active {
@@ -427,6 +445,7 @@ function handleOpenSearch() {
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: scaleIn 0.3s var(--dt-ease-bounce);
 }
 
 // ============================================================================
@@ -442,15 +461,16 @@ function handleOpenSearch() {
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
+  transition: all 0.3s var(--dt-ease-out);
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: fadeInUp 0.6s var(--dt-ease-bounce) both;
 }
 
 .nav-avatar:hover {
   background: rgba(255, 255, 255, 0.12);
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
 .nav-avatar-active {
@@ -461,11 +481,16 @@ function handleOpenSearch() {
 .nav-avatar :deep(.dingtalk-avatar) {
   width: 100%;
   height: 100%;
+  transition: transform 0.3s var(--dt-ease-out);
+}
+
+.nav-avatar:hover :deep(.dingtalk-avatar) {
+  transform: scale(1.05);
 }
 
 .nav-avatar :deep(.avatar-inner) {
   border: 2px solid rgba(255, 255, 255, 0.3);
-  transition: border-color var(--dt-transition-base);
+  transition: border-color 0.3s var(--dt-ease-out);
 }
 
 .nav-avatar:hover :deep(.avatar-inner) {
@@ -485,12 +510,13 @@ function handleOpenSearch() {
   background: var(--dt-text-tertiary);
   border: 2px solid var(--dt-bg-sidebar);
   border-radius: 50%;
-  transition: all var(--dt-transition-base);
+  transition: all 0.3s var(--dt-ease-out);
 }
 
 .nav-avatar-status.online {
   background: var(--dt-success-color);
   box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+  animation: pulse 2s ease-in-out infinite;
 }
 
 // ============================================================================

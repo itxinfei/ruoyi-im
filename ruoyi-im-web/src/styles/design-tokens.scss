@@ -216,7 +216,8 @@
   --dt-text-primary-dark: #f1f5f9;
   --dt-text-secondary-dark: #cbd5e1;
   --dt-text-tertiary-dark: #94a3b8;
-  --dt-text-disabled-dark: #64748b;
+  --dt-text-quaternary-dark: #64748b;
+  --dt-text-disabled-dark: #475569;
 
   --dt-border-dark: #334155;
   --dt-border-light-dark: #1e293b;
@@ -259,6 +260,7 @@
   --dt-text-primary: var(--dt-text-primary-dark);
   --dt-text-secondary: var(--dt-text-secondary-dark);
   --dt-text-tertiary: var(--dt-text-tertiary-dark);
+  --dt-text-quaternary: var(--dt-text-quaternary-dark);
   --dt-text-disabled: var(--dt-text-disabled-dark);
 
   --dt-border-color: var(--dt-border-dark);
@@ -434,3 +436,458 @@ $breakpoint-2xl: 1536px;
     @content;
   }
 }
+
+// ============================================================================
+// 动画关键帧 (Keyframe Animations)
+// ============================================================================
+
+// 淡入动画
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// 从上淡入
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 从下淡入
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 从左淡入
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// 从右淡入
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// 缩放淡入
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// 弹跳进入
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// 滑入从左
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+// 滑入从右
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+// 脉冲动画
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// 呼吸动画（用于在线状态等）
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+// 旋转动画
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// 加载动画（圆点跳跃）
+@keyframes dotBounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// 波纹扩散动画
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+// 骨架屏闪烁动画
+@keyframes skeleton {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// 消息气泡弹出动画
+@keyframes messagePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// 震动动画（用于错误提示等）
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+// 打字机光标闪烁
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+// 加载条动画
+@keyframes loadingBar {
+  0% {
+    left: -35%;
+    width: 35%;
+  }
+  100% {
+    left: 100%;
+    width: 100%;
+  }
+}
+
+// ============================================================================
+// 动画 Mixins
+// ============================================================================
+
+@mixin animation-fade-in($duration: var(--dt-transition-base)) {
+  animation: fadeIn $duration var(--dt-ease-out);
+}
+
+@mixin animation-fade-in-up($duration: var(--dt-transition-base)) {
+  animation: fadeInUp $duration var(--dt-ease-out);
+}
+
+@mixin animation-scale-in($duration: var(--dt-transition-base)) {
+  animation: scaleIn $duration var(--dt-ease-bounce);
+}
+
+@mixin animation-bounce-in($duration: 0.5s) {
+  animation: bounceIn $duration var(--dt-ease-bounce);
+}
+
+@mixin animation-pulse($duration: 2s, $infinite: true) {
+  animation: pulse $duration var(--dt-ease-in-out) #{if(sass($infinite): infinite; else: "")};
+}
+
+@mixin animation-spin($duration: 1s, $infinite: true) {
+  animation: spin $duration linear #{if(sass($infinite): infinite; else: "")};
+}
+
+@mixin animation-shake($duration: 0.5s) {
+  animation: shake $duration var(--dt-ease-in-out);
+}
+
+// 骨架屏效果
+@mixin skeleton-loading {
+  background: linear-gradient(
+    90deg,
+    var(--dt-bg-card-hover) 0%,
+    var(--dt-bg-card) 50%,
+    var(--dt-bg-card-hover) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton 1.5s var(--dt-ease-in-out) infinite;
+  border-radius: var(--dt-radius-sm);
+  color: transparent !important;
+  pointer-events: none;
+}
+
+// 悬停提升效果
+@mixin hover-lift($translate-y: -2px) {
+  transition: transform var(--dt-transition-base), box-shadow var(--dt-transition-base);
+
+  &:hover {
+    transform: translateY($translate-y);
+    box-shadow: var(--dt-shadow-card-hover);
+  }
+}
+
+// 涟漪效果
+@mixin ripple-effect($color: var(--dt-brand-color), $duration: 0.6s) {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: $color;
+    transform: translate(-50%, -50%);
+    transition: width $duration var(--dt-ease-out), height $duration var(--dt-ease-out);
+    opacity: 0.3;
+  }
+
+  &:active::after {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+// 平滑过渡（所有属性）
+@mixin smooth-transition($properties: all) {
+  transition: $properties var(--dt-transition-base) var(--dt-ease-in-out);
+}
+
+// 玻璃态效果
+@mixin glass-effect($blur: 10px, $opacity: 0.8) {
+  background: rgba(255, 255, 255, $opacity);
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+}
+
+// 暗色玻璃态
+@mixin glass-dark($blur: 10px, $opacity: 0.6) {
+  background: rgba(15, 23, 42, $opacity);
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+}
+
+// 渐变背景
+@mixin gradient-bg($start: #1677ff, $end: #0e5fd9, $direction: 135deg) {
+  background: linear-gradient($direction, $start, $end);
+}
+
+// 文本渐变
+@mixin text-gradient($start: #1677ff, $end: #4096ff) {
+  background: linear-gradient(135deg, $start, $end);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// 阴影层次
+@mixin shadow-level($level: 1) {
+  @if $level == 1 {
+    box-shadow: var(--dt-shadow-1);
+  } @else if $level == 2 {
+    box-shadow: var(--dt-shadow-2);
+  } @else if $level == 3 {
+    box-shadow: var(--dt-shadow-3);
+  } @else if $level == 4 {
+    box-shadow: var(--dt-shadow-4);
+  } @else if $level == 5 {
+    box-shadow: var(--dt-shadow-5);
+  }
+}
+
+// 绝对居中
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// 绝对填满
+@mixin absolute-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+// 重置列表样式
+@mixin list-reset {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+// 重置按钮样式
+@mixin reset-button {
+  @include button-reset;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+// Focus 环绕效果
+@mixin focus-ring($color: var(--dt-brand-color), $width: 2px) {
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 #{$width}px $color;
+  }
+}
+
+// 滚动隐藏（但可滚动）
+@mixin scroll-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// 响应式隐藏
+@mixin hide-on-mobile {
+  @include respond-below($breakpoint-md) {
+    display: none;
+  }
+}
+
+@mixin hide-on-desktop {
+  @include respond-to($breakpoint-lg) {
+    display: none;
+  }
+}
+
+// ============================================================================
+// 实用动画类
+// ============================================================================
+
+.animate-fade-in {
+  @include animation-fade-in;
+}
+
+.animate-fade-in-up {
+  @include animation-fade-in-up;
+}
+
+.animate-scale-in {
+  @include animation-scale-in;
+}
+
+.animate-bounce-in {
+  @include animation-bounce-in;
+}
+
+.animate-pulse {
+  @include animation-pulse;
+}
+
+.animate-spin {
+  @include animation-spin;
+}
+
+.hover-lift {
+  @include hover-lift;
+}
+
+// 延迟动画工具类
+.animation-delay-100 { animation-delay: 100ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+.animation-delay-400 { animation-delay: 400ms; }
+.animation-delay-500 { animation-delay: 500ms; }

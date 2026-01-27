@@ -57,22 +57,25 @@
     </div>
 
     <!-- 会话列表 -->
-    <div v-loading="loading" class="session-list">
-      <div
-        v-for="session in sortedSessions"
-        :key="session.id"
-        class="session-item"
-        :class="{
-          active: isActiveSession(session),
-          pinned: session.isPinned,
-          unread: session.unreadCount > 0
-        }"
-        @click="handleSessionClick(session)"
-        @contextmenu.prevent="handleContextMenu($event, session)"
-      >
-        <!-- 活跃指示条 -->
-        <div class="active-indicator"></div>
+    <div class="session-list">
+      <!-- 骨架屏加载状态 -->
+      <SkeletonLoader v-if="loading && sessions.length === 0" type="session" :count="5" />
 
+      <!-- 会话列表 -->
+      <TransitionGroup name="session-list">
+        <div
+          v-for="session in sortedSessions"
+          :key="session.id"
+          class="session-item"
+          :class="{
+            active: isActiveSession(session),
+            pinned: session.isPinned,
+            unread: session.unreadCount > 0
+          }"
+          :style="{ animationDelay: `${getSessionIndex(session) * 50}ms` }"
+          @click="handleSessionClick(session)"
+          @contextmenu.prevent="handleContextMenu($event, session)"
+        >
         <div class="avatar-wrapper">
           <!-- 群组头像 -->
           <template v-if="session.type === 'GROUP'">
@@ -129,16 +132,16 @@
           </div>
         </div>
       </div>
+      </TransitionGroup>
 
       <!-- 空状态 -->
-      <div v-if="!loading && sessions.length === 0" class="empty-state">
-        <div class="empty-illustration">
-          <span class="material-icons-outlined empty-icon">forum</span>
-          <div class="empty-decoration"></div>
-        </div>
-        <h3 class="empty-title">暂无会话</h3>
-        <p class="empty-text">点击上方 + 发起你的第一个聊天</p>
-      </div>
+      <EmptyState
+        v-if="!loading && sessions.length === 0"
+        type="chat"
+        title="暂无会话"
+        description="点击上方 + 发起你的第一个聊天"
+        :compact="true"
+      />
     </div>
 
     <!-- 右键菜单 -->
@@ -181,6 +184,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
+import EmptyState from '@/components/Common/EmptyState.vue'
 
 const props = defineProps({
   currentSession: {
@@ -203,6 +208,11 @@ const userStatus = computed(() => store.state.im.contact?.userStatus || {})
 // 判断用户是否在线
 const isUserOnline = (userId) => {
   return userStatus.value[userId] === 'online'
+}
+
+// 获取会话索引用于动画延迟
+const getSessionIndex = (session) => {
+  return sortedSessions.value.findIndex(s => s.id === session.id)
 }
 
 // 处理头像点击
@@ -349,6 +359,8 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 // ============================================================================
 // 容器
 // ============================================================================
@@ -360,6 +372,7 @@ onUnmounted(() => {
   border-right: 1px solid var(--dt-border-light);
   background: var(--dt-bg-card);
   height: 100%;
+  animation: fadeIn 0.3s var(--dt-ease-out);
 }
 
 // ============================================================================
@@ -369,7 +382,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 16px 12px;
+  padding: 18px 16px 14px;
   flex-shrink: 0;
 }
 
@@ -377,20 +390,22 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--dt-text-primary);
   margin: 0;
+  animation: fadeInDown 0.4s var(--dt-ease-out);
 
   .title-icon {
-    font-size: 20px;
+    font-size: 19px;
     color: var(--dt-brand-color);
+    animation: breathe 3s ease-in-out infinite;
   }
 }
 
 .add-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -399,15 +414,36 @@ onUnmounted(() => {
   border-radius: var(--dt-radius-md);
   cursor: pointer;
   color: var(--dt-text-secondary);
-  transition: all var(--dt-transition-base);
+  transition: all var(--dt-transition-fast);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--dt-brand-color);
+    opacity: 0;
+    transition: opacity var(--dt-transition-fast);
+  }
 
   &:hover {
-    background: var(--dt-bg-body);
     color: var(--dt-brand-color);
+    transform: translateY(-2px) rotate(90deg);
+
+    &::before {
+      opacity: 0.1;
+    }
+  }
+
+  &:active {
+    transform: translateY(0) rotate(90deg);
   }
 
   .material-icons-outlined {
-    font-size: 20px;
+    position: relative;
+    z-index: 1;
+    transition: transform var(--dt-transition-base);
   }
 }
 
@@ -415,24 +451,24 @@ onUnmounted(() => {
 // 搜索
 // ============================================================================
 .search-section {
-  padding: 0 12px 12px;
+  padding: 0 12px 14px;
 }
 
 .search-container {
   position: relative;
   display: flex;
   align-items: center;
-  height: 36px;
+  height: 38px;
   background: var(--dt-bg-body);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-full);
-  padding: 0 12px;
-  transition: all var(--dt-transition-base);
+  padding: 0 14px;
+  transition: all var(--dt-transition-fast);
 
   &:focus-within {
     background: var(--dt-bg-card);
     border-color: var(--dt-brand-color);
-    box-shadow: 0 0 0 2px var(--dt-brand-lighter);
+    box-shadow: 0 0 0 3px var(--dt-brand-lighter);
   }
 }
 
@@ -440,6 +476,7 @@ onUnmounted(() => {
   font-size: 18px;
   color: var(--dt-text-quaternary);
   pointer-events: none;
+  flex-shrink: 0;
 }
 
 .search-input {
@@ -449,7 +486,8 @@ onUnmounted(() => {
   outline: none;
   font-size: 13px;
   color: var(--dt-text-primary);
-  padding: 0 8px;
+  padding: 0 10px;
+  font-family: var(--dt-font-family);
 
   &::placeholder {
     color: var(--dt-text-quaternary);
@@ -457,23 +495,20 @@ onUnmounted(() => {
 }
 
 .clear-btn {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   color: var(--dt-text-quaternary);
-  transition: all var(--dt-transition-base);
+  transition: all var(--dt-transition-fast);
+  flex-shrink: 0;
 
   &:hover {
     background: var(--dt-border-color);
     color: var(--dt-text-secondary);
-  }
-
-  .material-icons-outlined {
-    font-size: 14px;
   }
 }
 
@@ -507,50 +542,114 @@ onUnmounted(() => {
   }
 }
 
+// 会话列表过渡动画
+.session-list-enter-active {
+  transition: all 0.3s var(--dt-ease-out);
+}
+
+.session-list-leave-active {
+  transition: all 0.2s var(--dt-ease-in);
+}
+
+.session-list-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.session-list-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.session-list-move {
+  transition: transform 0.3s var(--dt-ease-out);
+}
+
 .session-item {
   position: relative;
   display: flex;
-  padding: 10px 16px;
+  padding: 10px 12px; // 钉钉风格：更紧凑的间距
   cursor: pointer;
-  gap: 12px;
-  transition: all var(--dt-transition-base);
+  gap: 10px;
+  transition: all var(--dt-transition-fast);
+  animation: fadeInLeft 0.3s var(--dt-ease-out) both;
+  border-radius: 0; // 钉钉风格：无圆角，方形设计
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: var(--dt-brand-color);
+    border-radius: 0;
+    transition: height var(--dt-transition-fast);
+  }
 
   &:hover {
-    background: var(--dt-bg-session-hover);
+    background: rgba(0, 0, 0, 0.04); // 钉钉风格：淡淡的hover背景
+
+    &::before {
+      height: 24px;
+    }
+
+    .session-avatar {
+      transform: scale(1.02); // 减小缩放幅度
+    }
   }
 
   &.active {
-    background: var(--dt-bg-session-active);
+    background: rgba(22, 119, 255, 0.08); // 钉钉风格：品牌色的淡背景
 
-    .active-indicator {
-      opacity: 1;
+    &::before {
+      height: 32px;
     }
 
     .session-name {
-      color: var(--dt-text-primary);
+      color: var(--dt-brand-color);
       font-weight: 600;
+    }
+
+    .session-avatar {
+      box-shadow: 0 0 0 2px var(--dt-brand-color);
+    }
+
+    .preview-text {
+      color: var(--dt-text-secondary);
     }
   }
 
   &.pinned {
-    background: var(--dt-bg-body);
+    background: rgba(0, 0, 0, 0.02);
   }
 
   &.pinned.active {
-    background: var(--dt-bg-session-active);
+    background: rgba(22, 119, 255, 0.08);
   }
-}
 
-.active-indicator {
-  position: absolute;
-  left: 0;
-  top: 12px;
-  bottom: 12px;
-  width: 3px;
-  background: var(--dt-brand-color);
-  border-radius: 0 4px 4px 0;
-  opacity: 0;
-  transition: opacity var(--dt-transition-base);
+  &.unread {
+    .session-name {
+      font-weight: 600;
+    }
+
+    .preview-text {
+      color: var(--dt-text-primary);
+    }
+  }
+
+  .dark &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .dark &.active {
+    background: rgba(22, 119, 255, 0.15);
+  }
+
+  .dark &.pinned {
+    background: rgba(255, 255, 255, 0.03);
+  }
 }
 
 // 头像区域
@@ -567,19 +666,17 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.2s var(--dt-ease-out), box-shadow 0.2s var(--dt-ease-out);
 
   &.group-avatar {
     background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
     color: #fff;
     box-shadow: 0 4px 12px rgba(22, 119, 255, 0.2);
-
-    .material-icons-outlined {
-      font-size: 22px;
-    }
   }
 
   :deep(.dingtalk-avatar) {
     border-radius: var(--dt-radius-lg) !important;
+    transition: transform 0.2s var(--dt-ease-out);
   }
 }
 
@@ -597,17 +694,18 @@ onUnmounted(() => {
   &.online {
     background: var(--dt-success-color);
     box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+    animation: pulse 2s ease-in-out infinite;
   }
 }
 
 .unread-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: -2px;
+  right: -2px;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  background: var(--dt-error-color);
+  background: #ff4d4f; // 钉钉风格：更醒目的红色
   color: #fff;
   font-size: 10px;
   font-weight: 600;
@@ -617,14 +715,18 @@ onUnmounted(() => {
   justify-content: center;
   border: 2px solid var(--dt-bg-card);
   box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+  animation: scaleIn 0.3s var(--dt-ease-bounce);
+  z-index: 2;
 
   &.badge-dot {
-    min-width: 8px;
-    width: 8px;
-    height: 8px;
+    min-width: 10px;
+    width: 10px;
+    height: 10px;
     padding: 0;
     top: 0;
     right: 0;
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
   }
 }
 
@@ -640,11 +742,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   border: 2px solid var(--dt-bg-card);
-
-  .material-icons-outlined {
-    font-size: 10px;
-    color: #fff;
-  }
+  animation: fadeInUp 0.3s var(--dt-ease-out);
 }
 
 // 会话信息
@@ -654,13 +752,14 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 3px;
+  gap: 2px; // 钉钉风格：更紧凑的行间距
 }
 
 .session-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  line-height: 1.2;
 }
 
 .session-name-group {
@@ -685,11 +784,8 @@ onUnmounted(() => {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-
-  .material-icons-outlined {
-    font-size: 14px;
-    color: var(--dt-text-quaternary);
-  }
+  font-size: 12px;
+  color: var(--dt-text-quaternary);
 }
 
 .session-time {
@@ -697,18 +793,19 @@ onUnmounted(() => {
   color: var(--dt-text-quaternary);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
   flex-shrink: 0;
-  margin-left: 8px;
+  margin-left: 6px;
 }
 
 .session-preview {
   display: flex;
   align-items: center;
   gap: 2px;
+  line-height: 1.3;
 }
 
 .mention-tag {
   color: var(--dt-error-color);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   flex-shrink: 0;
 }
@@ -720,59 +817,12 @@ onUnmounted(() => {
 }
 
 .preview-text {
-  font-size: 13px;
+  font-size: 12px; // 钉钉风格：稍小的预览文字
   color: var(--dt-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
-}
-
-// ============================================================================
-// 空状态
-// ============================================================================
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-}
-
-.empty-illustration {
-  position: relative;
-  margin-bottom: 20px;
-}
-
-.empty-icon {
-  font-size: 64px;
-  color: var(--dt-border-color);
-}
-
-.empty-decoration {
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 48px;
-  height: 4px;
-  background: var(--dt-border-color);
-  border-radius: var(--dt-radius-full);
-  opacity: 0.5;
-}
-
-.empty-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--dt-text-primary);
-  margin: 0 0 6px 0;
-}
-
-.empty-text {
-  font-size: 13px;
-  color: var(--dt-text-tertiary);
-  margin: 0;
 }
 
 // ============================================================================
@@ -788,6 +838,7 @@ onUnmounted(() => {
   min-width: 160px;
   z-index: 2000;
   border: 1px solid var(--dt-border-light);
+  animation: scaleIn 0.2s var(--dt-ease-out);
 
   .menu-item {
     display: flex;
@@ -874,24 +925,6 @@ onUnmounted(() => {
   }
 }
 
-.dark .session-item {
-  &:hover {
-    background: var(--dt-bg-hover-dark);
-  }
-
-  &.active {
-    background: var(--dt-bg-active-dark);
-
-    .session-name {
-      color: var(--dt-text-primary-dark);
-    }
-  }
-
-  &.pinned {
-    background: transparent;
-  }
-}
-
 .dark .session-name {
   color: var(--dt-text-secondary-dark);
 }
@@ -931,14 +964,6 @@ onUnmounted(() => {
   .menu-divider {
     background: var(--dt-border-dark);
   }
-}
-
-.dark .empty-icon {
-  color: var(--dt-border-dark);
-}
-
-.dark .empty-decoration {
-  background: var(--dt-border-dark);
 }
 
 // ============================================================================

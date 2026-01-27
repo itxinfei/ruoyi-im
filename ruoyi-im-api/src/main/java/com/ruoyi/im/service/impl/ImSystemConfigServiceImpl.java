@@ -1,20 +1,26 @@
 package com.ruoyi.im.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ruoyi.im.domain.ImSystemConfig;
+import com.ruoyi.im.mapper.ImSystemConfigMapper;
 import com.ruoyi.im.service.ImSystemConfigService;
 import com.ruoyi.im.util.ImRedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
  * 系统配置服务实现
- * 使用Redis存储系统级配置
+ * 基于数据库驱动，并使用Redis存储系统级配置
  *
  * @author ruoyi
  */
@@ -24,12 +30,12 @@ public class ImSystemConfigServiceImpl implements ImSystemConfigService {
     private static final Logger log = LoggerFactory.getLogger(ImSystemConfigServiceImpl.class);
 
     /**
-     * Redis配置Key前缀
+     * Redis配置Key
      */
-    private static final String SYSTEM_CONFIG_PREFIX = "im:system:config:";
+    private static final String SYSTEM_CONFIG_ALL_KEY = "im:system:config:all";
 
     /**
-     * 消息撤回时间限制配置Key
+     * 消息撤回时间限制配置Key (与数据库中config_key一致)
      */
     private static final String CONFIG_RECALL_TIME_LIMIT = "message.recall.time.limit";
 
@@ -42,62 +48,98 @@ public class ImSystemConfigServiceImpl implements ImSystemConfigService {
     private ImRedisUtil redisUtil;
 
     @Autowired
+    private ImSystemConfigMapper configMapper;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
-    @Override
-    public Integer getMessageRecallTimeLimit() {
+    @PostConstruct
+    public void init() {
+        // 预热缓存
+        loadConfigsToCache();
+    }
+
+    private void loadConfigsToCache() {
         try {
-            String key = SYSTEM_CONFIG_PREFIX + CONFIG_RECALL_TIME_LIMIT;
-            Object value = redisUtil.get(key);
-            if (value != null) {
-                try {
-                    return Integer.parseInt(value.toString());
-                } catch (NumberFormatException e) {
-                    log.warn("解析撤回时间限制失败: {}", value, e);
-                }
+            List<ImSystemConfig> configs = configMapper.selectAllConfigs();
+            Map<String, String> configMap = new HashMap<>();
+            for (ImSystemConfig config : configs) {
+                configMap.put(config.getConfigKey(), config.getConfigValue());
             }
-            // 返回默认值
-            return DEFAULT_RECALL_TIME_LIMIT;
+            redisUtil.set(SYSTEM_CONFIG_ALL_KEY, configMap, 24, TimeUnit.HOURS);
+            log.info("系统配置已加载至缓存，共 {} 项", configMap.size());
         } catch (Exception e) {
-            log.error("获取消息撤回时间限制失败", e);
-            return DEFAULT_RECALL_TIME_LIMIT;
+            log.error("预热系统配置缓存失败", e);
         }
     }
 
     @Override
-    public void setMessageRecallTimeLimit(Integer minutes) {
-        try {
-            if (minutes == null || minutes < 0) {
-                throw new IllegalArgumentException("撤回时间限制必须大于等于0");
+    public Integer getMessageRecallTimeLimit() {
+        String value = getConfigValue(CONFIG_RECALL_TIME_LIMIT);
+        if (value != null) {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                log.warn("解析撤回时间限制失败: {}", value, e);
             }
-            String key = SYSTEM_CONFIG_PREFIX + CONFIG_RECALL_TIME_LIMIT;
-            redisUtil.set(key, String.valueOf(minutes), 30, TimeUnit.MINUTES);
-            log.info("更新消息撤回时间限制: {} 分钟", minutes);
-        } catch (Exception e) {
-            log.error("设置消息撤回时间限制失败", e);
-            throw new RuntimeException("设置消息撤回时间限制失败", e);
         }
+        return DEFAULT_RECALL_TIME_LIMIT;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void setMessageRecallTimeLimit(Integer minutes) {
+        updateSystemConfig(CONFIG_RECALL_TIME_LIMIT, String.valueOf(minutes));
     }
 
     @Override
     public Map<String, Object> getAllSystemConfigs() {
-        Map<String, Object> configs = new HashMap<>();
-        configs.put(CONFIG_RECALL_TIME_LIMIT, getMessageRecallTimeLimit());
-        return configs;
+        Object cached = redisUtil.get(SYSTEM_CONFIG_ALL_KEY);
+        if (cached instanceof Map) {
+            return (Map<String, Object>) cached;
+        }
+        
+        // 缓存失效，从DB加载
+        List<ImSystemConfig> configs = configMapper.selectAllConfigs();
+        Map<String, Object> configMap = new HashMap<>();
+        for (ImSystemConfig config : configs) {
+            configMap.put(config.getConfigKey(), config.getConfigValue());
+        }
+        // 更新缓存
+        redisUtil.set(SYSTEM_CONFIG_ALL_KEY, configMap, 24, TimeUnit.HOURS);
+        return configMap;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateSystemConfig(String configKey, Object configValue) {
-        if (CONFIG_RECALL_TIME_LIMIT.equals(configKey)) {
-            if (configValue instanceof Integer) {
-                setMessageRecallTimeLimit((Integer) configValue);
-            } else if (configValue instanceof String) {
-                setMessageRecallTimeLimit(Integer.parseInt((String) configValue));
-            } else {
-                throw new IllegalArgumentException("不支持的配置值类型: " + configValue.getClass());
-            }
+        String strValue = String.valueOf(configValue);
+        
+        // 1. 更新数据库
+        ImSystemConfig config = configMapper.selectByKey(configKey);
+        if (config != null) {
+            config.setConfigValue(strValue);
+            config.setUpdateTime(LocalDateTime.now());
+            configMapper.updateById(config);
         } else {
-            throw new IllegalArgumentException("不支持的配置键: " + configKey);
+            // 如果配置项不存在，则创建
+            config = new ImSystemConfig();
+            config.setConfigKey(configKey);
+            config.setConfigValue(strValue);
+            config.setConfigType("DYNAMIC");
+            config.setCreateTime(LocalDateTime.now());
+            config.setUpdateTime(LocalDateTime.now());
+            configMapper.insert(config);
         }
+        
+        // 2. 清除/更新缓存
+        loadConfigsToCache();
+        log.info("系统配置已更新: {} = {}", configKey, strValue);
+    }
+
+    private String getConfigValue(String key) {
+        Map<String, Object> configs = getAllSystemConfigs();
+        Object value = configs.get(key);
+        return value != null ? value.toString() : null;
     }
 }

@@ -125,6 +125,7 @@ import { ref, nextTick, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useStore } from 'vuex'
 import { Close, ChatDotRound, Picture, FolderOpened, Phone, Clock, Microphone } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { useImWebSocket } from '@/composables/useImWebSocket'
 import EmojiPicker from '@/components/EmojiPicker/index.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
@@ -139,6 +140,9 @@ const props = defineProps({
 const emit = defineEmits(['send', 'send-voice', 'upload-image', 'upload-file', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video'])
 
 const store = useStore()
+const { sendMessage: wsSendMessage } = useImWebSocket()
+const currentUser = computed(() => store.getters['user/currentUser'])
+
 const messageContent = ref('')
 const sendShortcutHint = computed(() => {
   const shortcut = store.state.im.settings.shortcuts.send
@@ -201,6 +205,54 @@ const autoResize = () => {
 const handleInput = () => {
   autoResize()
   emit('input', messageContent.value)
+
+  // 发送输入状态（防抖）
+  sendTypingIndicator()
+}
+
+// 输入状态防抖发送
+let typingTimer = null
+let lastTypingSendTime = 0
+const TYPING_DEBOUNCE = 1000 // 1秒内只发送一次
+const TYPING_INTERVAL = 3000 // 每3秒重新发送一次输入状态
+
+const sendTypingIndicator = () => {
+  const now = Date.now()
+
+  // 清除之前的定时器
+  if (typingTimer) {
+    clearTimeout(typingTimer)
+  }
+
+  // 检查是否需要发送（距离上次发送超过间隔时间）
+  const shouldSend = now - lastTypingSendTime > TYPING_DEBOUNCE
+
+  if (shouldSend && props.session?.id && messageContent.value.trim()) {
+    lastTypingSendTime = now
+
+    // 发送 typing 消息
+    wsSendMessage({
+      type: 'typing',
+      data: {
+        conversationId: props.session.id,
+        userId: currentUser.value?.id
+      }
+    })
+
+    // 设置下次重新发送的定时器
+    typingTimer = setTimeout(() => {
+      if (messageContent.value.trim()) {
+        lastTypingSendTime = Date.now()
+        wsSendMessage({
+          type: 'typing',
+          data: {
+            conversationId: props.session.id,
+            userId: currentUser.value?.id
+          }
+        })
+      }
+    }, TYPING_INTERVAL)
+  }
 }
 
 const handleKeydown = (e) => {
@@ -317,82 +369,298 @@ onMounted(() => {
   const saved = localStorage.getItem('im_input_height')
   if (saved) containerHeight.value = parseInt(saved)
 })
+
+onUnmounted(() => {
+  // 清理输入状态定时器
+  if (typingTimer) {
+    clearTimeout(typingTimer)
+    typingTimer = null
+  }
+})
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
+// ============================================================================
+// 容器
+// ============================================================================
 .chat-input-container {
   background: var(--dt-bg-input);
   display: flex;
   flex-direction: column;
   position: relative;
-  border-top: 1px solid #f0f1f2;
-  padding: 4px 16px 16px;
-  .dark & { border-top-color: #334155; }
+  border-top: 1px solid var(--dt-border-light);
+  padding: 8px 16px 16px;
+  transition: background var(--dt-transition-base);
+
+  .dark & {
+    border-top-color: var(--dt-border-dark);
+  }
 }
 
+// ============================================================================
+// 调整手柄
+// ============================================================================
 .resize-handle {
-  position: absolute; top: 0; left: 0; right: 0; height: 4px; cursor: ns-resize;
-  z-index: 10; &:hover { background: rgba(0, 137, 255, 0.1); }
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  cursor: ns-resize;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--dt-transition-base);
+
+  &:hover {
+    background: var(--dt-brand-light);
+  }
+
+  .resize-indicator {
+    width: 40px;
+    height: 3px;
+    background: var(--dt-border-color);
+    border-radius: var(--dt-radius-full);
+    opacity: 0.5;
+    transition: all var(--dt-transition-base);
+
+    .resize-handle:hover & {
+      width: 60px;
+      background: var(--dt-brand-color);
+      opacity: 1;
+    }
+  }
 }
 
+// ============================================================================
+// 工具栏
+// ============================================================================
 .input-toolbar {
-  display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px;
-  .toolbar-left { display: flex; align-items: center; gap: 4px; }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   .toolbar-btn {
-    background: none; border: none; padding: 6px; cursor: pointer; color: #646a73;
-    border-radius: 6px; display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-    &:hover { background: #f2f3f5; color: var(--dt-brand-color); }
-    &.active { color: var(--dt-brand-color); background: #e6f7ff; }
-    .el-icon, .material-icons-outlined { font-size: 19px; }
-    .dark & { &:hover { background: #334155; } }
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #3b4252; // 深灰色，确保在白色背景上清晰可见
+    border-radius: var(--dt-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--dt-transition-fast);
+
+    &:hover {
+      background: var(--dt-bg-hover);
+      color: var(--dt-brand-color);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &.active {
+      color: var(--dt-brand-color);
+      background: var(--dt-brand-bg);
+    }
+
+    .dark & {
+      color: #bdc3c9; // 暗色模式下使用浅灰色，确保在深色背景上清晰可见
+
+      &:hover {
+        background: var(--dt-bg-hover-dark);
+        color: var(--dt-brand-color);
+      }
+    }
   }
-  .history-btn { font-size: 13px; color: #8f959e; &:hover { color: var(--dt-brand-color); }
-    .dark & { color: var(--dt-text-tertiary-dark); &:hover { color: var(--dt-brand-color); } }
+
+  .el-divider--vertical {
+    height: 20px;
+    margin: 0 4px;
+    border-color: var(--dt-border-light);
+  }
+
+  .history-btn {
+    font-size: 13px;
+    color: var(--dt-text-tertiary);
+    transition: color var(--dt-transition-fast);
+
+    &:hover {
+      color: var(--dt-brand-color);
+    }
+
+    .dark & {
+      color: var(--dt-text-tertiary-dark);
+    }
   }
 }
 
-.reply-preview-container, .edit-preview-container {
-  padding: 8px 12px; margin-bottom: 8px; border-radius: 8px;
-  background: #f8fafc; border-left: 3px solid var(--dt-brand-color);
-  .dark & { background: rgba(30, 41, 59, 0.5); }
-  
-  .reply-content-box, .edit-content-box {
-    display: flex; align-items: center; gap: 8px; font-size: 13px;
-    .reply-user, .edit-label { color: var(--dt-brand-color); font-weight: 500; }
-    .reply-text, .edit-text { flex: 1; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-      .dark & { color: var(--dt-text-secondary-dark); }
+// ============================================================================
+// 引用/编辑预览
+// ============================================================================
+.reply-preview-container,
+.edit-preview-container {
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: var(--dt-radius-md);
+  background: var(--dt-bg-body);
+  border-left: 3px solid var(--dt-brand-color);
+  transition: all var(--dt-transition-base);
+
+  .dark & {
+    background: var(--dt-bg-hover-dark);
+  }
+
+  .reply-content-box,
+  .edit-content-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+
+    .reply-user,
+    .edit-label {
+      color: var(--dt-brand-color);
+      font-weight: 500;
+      flex-shrink: 0;
     }
-    .cancel-reply, .cancel-edit { cursor: pointer; color: #8f959e; &:hover { color: var(--dt-error-color); }
-      .dark & { color: var(--dt-text-tertiary-dark); &:hover { color: var(--dt-error-color); } }
+
+    .reply-text,
+    .edit-text {
+      flex: 1;
+      color: var(--dt-text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      .dark & {
+        color: var(--dt-text-secondary-dark);
+      }
+    }
+
+    .cancel-reply,
+    .cancel-edit {
+      cursor: pointer;
+      color: var(--dt-text-tertiary);
+      flex-shrink: 0;
+      transition: color var(--dt-transition-fast);
+
+      &:hover {
+        color: var(--dt-error-color);
+      }
+
+      .dark & {
+        color: var(--dt-text-tertiary-dark);
+      }
     }
   }
 }
 
-.edit-preview-container { border-left-color: var(--dt-success-color); .edit-label { color: var(--dt-success-color); } }
+.edit-preview-container {
+  border-left-color: var(--dt-success-color);
 
+  .edit-label {
+    color: var(--dt-success-color);
+  }
+}
+
+// ============================================================================
+// 输入区域
+// ============================================================================
 .input-area {
-  flex: 1; display: flex; flex-direction: column;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .message-input {
-  flex: 1; width: 100%; border: none; outline: none; resize: none;
-  font-size: 15px; line-height: 1.6; color: #1f2329; padding: 0; min-height: 80px;
+  flex: 1;
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: var(--dt-font-size-base);
+  line-height: 1.6;
+  color: var(--dt-text-primary);
+  padding: 8px 0;
+  min-height: 80px;
   background: transparent;
-  .dark & { color: #f1f5f9; &::placeholder { color: var(--dt-text-quaternary-dark); } }
-  &::placeholder { color: #bbbfc4; }
+  font-family: var(--dt-font-family);
+
+  &::placeholder {
+    color: var(--dt-text-quaternary);
+  }
+
+  .dark & {
+    color: var(--dt-text-primary-dark);
+  }
 }
 
 .input-footer {
-  display: flex; justify-content: flex-end; align-items: center; gap: 16px; margin-top: 8px;
-  .hint-text { font-size: 12px; color: #8f959e; user-select: none;
-    .dark & { color: var(--dt-text-tertiary-dark); }
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+
+  .hint-text {
+    font-size: 12px;
+    color: var(--dt-text-tertiary);
+    user-select: none;
+
+    .dark & {
+      color: var(--dt-text-tertiary-dark);
+    }
   }
+
   .send-btn {
-    padding: 6px 24px; border-radius: 4px; border: none; background: #f2f3f5; color: #bbbfc4;
-    font-size: 14px; cursor: default; transition: all 0.2s;
-    &.active { background: var(--dt-brand-color); color: #fff; cursor: pointer; &:hover { opacity: 0.9; } }
-    &:disabled { opacity: 0.6; cursor: not-allowed; }
+    padding: 8px 20px;
+    border-radius: var(--dt-radius-md);
+    border: none;
+    background: var(--dt-bg-body);
+    color: var(--dt-text-quaternary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: default;
+    transition: all var(--dt-transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &.active {
+      background: var(--dt-brand-color);
+      color: #fff;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .dark & {
+      background: var(--dt-bg-hover-dark);
+    }
   }
 }
 
@@ -403,39 +671,38 @@ onMounted(() => {
 // 超小屏幕 (< 480px)
 @media (max-width: 479px) {
   .chat-input-container {
-    padding: 4px 12px 12px;
+    padding: 8px 12px 12px;
   }
 
   .input-toolbar {
-    padding-bottom: 6px;
+    padding-bottom: 8px;
 
     .toolbar-left {
-      gap: 2px;
+      gap: 4px;
 
       .toolbar-btn {
-        padding: 5px;
-
-        .el-icon, .material-icons-outlined {
-          font-size: 18px;
-        }
+        width: 32px;
+        height: 32px;
       }
     }
 
     .history-btn {
       font-size: 12px;
-      padding: 0 8px;
 
       .el-icon {
         display: none;
       }
     }
+
+    .el-divider--vertical {
+      display: none;
+    }
   }
 
   .reply-preview-container,
   .edit-preview-container {
-    padding: 6px 10px;
-    margin-bottom: 6px;
-    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
 
     .reply-content-box,
     .edit-content-box {
@@ -458,7 +725,7 @@ onMounted(() => {
     }
 
     .send-btn {
-      padding: 5px 18px;
+      padding: 7px 16px;
       font-size: 13px;
     }
   }
@@ -468,17 +735,18 @@ onMounted(() => {
 @media (min-width: 480px) and (max-width: 767px) {
   .input-toolbar {
     .toolbar-left {
-      gap: 3px;
+      gap: 5px;
+    }
 
-      .toolbar-btn {
-        padding: 5px;
-      }
+    .toolbar-btn {
+      width: 34px;
+      height: 34px;
     }
   }
 
   .reply-preview-container,
   .edit-preview-container {
-    padding: 7px 11px;
+    padding: 9px 11px;
   }
 
   .input-footer {
@@ -488,10 +756,9 @@ onMounted(() => {
 
 // 平板横屏 (768px - 1023px)
 @media (min-width: 768px) and (max-width: 1023px) {
-  .input-toolbar {
-    .toolbar-btn {
-      padding: 6px;
-    }
+  .toolbar-btn {
+    width: 35px;
+    height: 35px;
   }
 }
 </style>

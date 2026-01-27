@@ -378,6 +378,8 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 // ============================================================================
 // 容器
 // ============================================================================
@@ -390,6 +392,19 @@ onMounted(() => {
   padding: 24px;
   position: relative;
   overflow: hidden;
+
+  // 统一 Material Icons 基础样式，防止对齐偏移
+  .material-icons-outlined {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    width: 1em;
+    height: 1em;
+    line-height: 1;
+    text-indent: 0;
+    text-align: center;
+  }
 
   &::before {
     content: '';
@@ -404,6 +419,59 @@ onMounted(() => {
 
   &.dark {
     background: linear-gradient(135deg, #0a1628 0%, #162032 100%);
+  }
+}
+
+// 进入动画
+.login-container {
+  animation: fadeIn 0.4s var(--dt-ease-out);
+}
+
+.login-card {
+  animation: scaleIn 0.5s var(--dt-ease-bounce);
+}
+
+.login-decoration {
+  .logo-wrapper {
+    animation: fadeInDown 0.6s var(--dt-ease-out);
+  }
+
+  .features {
+    .feature-item {
+      animation: fadeInLeft 0.5s var(--dt-ease-out) both;
+
+      &:nth-child(1) { animation-delay: 0.1s; }
+      &:nth-child(2) { animation-delay: 0.2s; }
+      &:nth-child(3) { animation-delay: 0.3s; }
+      &:nth-child(4) { animation-delay: 0.4s; }
+    }
+  }
+
+  .decoration-footer {
+    animation: fadeIn 0.8s var(--dt-ease-out) 0.3s both;
+  }
+}
+
+.login-form-section {
+  animation: fadeInRight 0.6s var(--dt-ease-out);
+
+  .login-header {
+    animation: fadeInDown 0.5s var(--dt-ease-out);
+  }
+
+  .login-tabs {
+    animation: fadeIn 0.6s var(--dt-ease-out) 0.1s both;
+  }
+
+  .form-content-wrapper {
+    > * {
+      animation: fadeInUp 0.4s var(--dt-ease-out) both;
+
+      &:nth-child(1) { animation-delay: 0.1s; }
+      &:nth-child(2) { animation-delay: 0.15s; }
+      &:nth-child(3) { animation-delay: 0.2s; }
+      &:nth-child(4) { animation-delay: 0.25s; }
+    }
   }
 }
 
@@ -581,7 +649,6 @@ onMounted(() => {
       }
 
       .material-icons-outlined {
-        font-size: 22px;
         opacity: 0.9;
       }
 
@@ -637,7 +704,6 @@ onMounted(() => {
   margin-bottom: 24px;
 
   .material-icons-outlined {
-    font-size: 32px;
     color: var(--dt-brand-color);
   }
 
@@ -699,10 +765,6 @@ onMounted(() => {
     justify-content: center;
     gap: 6px;
 
-    .material-icons-outlined {
-      font-size: 18px;
-    }
-
     &.active {
       background: var(--dt-bg-card);
       color: var(--dt-brand-color);
@@ -742,6 +804,8 @@ onMounted(() => {
       transform: translateY(-50%);
       color: var(--dt-text-quaternary);
       font-size: 20px;
+      width: 20px; // 显式宽度
+      height: 20px; // 显式高度
       z-index: 10;
       pointer-events: none;
       transition: color var(--dt-transition-fast);
@@ -886,10 +950,6 @@ onMounted(() => {
   &:disabled {
     opacity: 0.7;
   }
-
-  .material-icons-outlined {
-    font-size: 20px;
-  }
 }
 
 // 第三方登录
@@ -1003,7 +1063,6 @@ onMounted(() => {
   justify-content: center;
 
   .material-icons-outlined {
-    font-size: 22px;
     transition: all var(--dt-transition-base);
 
     &.hidden {

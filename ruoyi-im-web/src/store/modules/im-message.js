@@ -13,6 +13,38 @@ import {
 } from '@/api/im'
 import { formatMessagePreview, formatMessagePreviewFromObject } from '@/utils/message'
 
+/**
+ * 消息发送状态枚举（与后端 SendStatus 枚举对应）
+ * PENDING(0) - 等待发送
+ * SENDING(1) - 发送中
+ * DELIVERED(2) - 已送达
+ * READ(3) - 已读
+ * FAILED(4) - 发送失败
+ */
+export const SEND_STATUS = {
+  PENDING: 0,
+  SENDING: 1,
+  DELIVERED: 2,
+  READ: 3,
+  FAILED: 4
+}
+
+/**
+ * 将后端 sendStatus 数值映射为前端 UI 使用的字符串
+ * @param {number} sendStatus - 后端 sendStatus 枚举值
+ * @returns {string} 前端状态字符串
+ */
+function mapSendStatusToUi(sendStatus) {
+  const statusMap = {
+    [SEND_STATUS.PENDING]: 'sending',
+    [SEND_STATUS.SENDING]: 'sending',
+    [SEND_STATUS.DELIVERED]: 'sent',
+    [SEND_STATUS.READ]: 'read',
+    [SEND_STATUS.FAILED]: 'failed'
+  }
+  return statusMap[sendStatus] || 'sent'
+}
+
 // 简单UUID生成
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -145,6 +177,25 @@ export default {
     // 清空选中消息
     CLEAR_MESSAGE_SELECTION(state) {
       state.selectedMessages = new Set()
+    },
+
+    /**
+     * 更新消息发送状态
+     * 用于 WebSocket 接收到 message_status 事件时更新消息状态
+     * @param {Object} state - Vuex state
+     * @param {Object} payload - { sessionId, messageId, sendStatus }
+     */
+    UPDATE_MESSAGE_STATUS(state, { sessionId, messageId, sendStatus }) {
+      if (!state.messages[sessionId]) {
+        return
+      }
+      const index = state.messages[sessionId].findIndex(m => m.id === messageId)
+      if (index !== -1) {
+        state.messages[sessionId][index] = {
+          ...state.messages[sessionId][index],
+          status: mapSendStatusToUi(sendStatus)
+        }
+      }
     }
   },
 

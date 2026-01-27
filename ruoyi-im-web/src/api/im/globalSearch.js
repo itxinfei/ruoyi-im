@@ -23,11 +23,11 @@ export function globalSearch(data) {
 }
 
 /**
- * 搜索消息
+ * 搜索消息（全局搜索）
  * @param {string} keyword - 搜索关键词
  * @returns {Promise}
  */
-export function searchMessages(keyword) {
+export function globalSearchMessages(keyword) {
   return request({
     url: '/api/im/search/messages',
     method: 'get',
@@ -36,11 +36,11 @@ export function searchMessages(keyword) {
 }
 
 /**
- * 搜索联系人
+ * 搜索联系人（全局搜索）
  * @param {string} keyword - 搜索关键词
  * @returns {Promise}
  */
-export function searchContacts(keyword) {
+export function globalSearchContacts(keyword) {
   return request({
     url: '/api/im/search/contacts',
     method: 'get',
@@ -49,11 +49,11 @@ export function searchContacts(keyword) {
 }
 
 /**
- * 搜索群组
+ * 搜索群组（全局搜索）
  * @param {string} keyword - 搜索关键词
  * @returns {Promise}
  */
-export function searchGroups(keyword) {
+export function globalSearchGroups(keyword) {
   return request({
     url: '/api/im/search/groups',
     method: 'get',
@@ -62,11 +62,11 @@ export function searchGroups(keyword) {
 }
 
 /**
- * 搜索文件
+ * 搜索文件（全局搜索）
  * @param {string} keyword - 搜索关键词
  * @returns {Promise}
  */
-export function searchFiles(keyword) {
+export function globalSearchFiles(keyword) {
   return request({
     url: '/api/im/search/files',
     method: 'get',

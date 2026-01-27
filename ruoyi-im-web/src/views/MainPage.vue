@@ -7,36 +7,55 @@
         :collapsed="isSidebarCollapsed"
         @switch-module="handleSwitchModule"
         @open-search="showGlobalSearch = true"
+        @open-settings="handleOpenSettings"
         @toggle-collapse="isSidebarCollapsed = !isSidebarCollapsed"
       />
 
       <!-- 主内容区 -->
-      <main class="flex-1 min-w-0 overflow-hidden flex">
-        <SessionPanel 
-          v-if="activeModule === 'chat'" 
-          @select-session="handleSelectSession" 
-          @show-user="handleShowUser"
-        />
+      <main class="main-content-area">
+        <!-- 聊天模块：左侧会话列表 + 右侧聊天面板 -->
+        <template v-if="activeModule === 'chat'">
+          <div class="chat-layout">
+            <SessionPanel
+              @select-session="handleSelectSession"
+              @show-user="handleShowUser"
+            />
+            <ChatPanel
+              v-if="currentSession"
+              :session="currentSession"
+              @show-user="handleShowUser"
+            />
+            <div v-else class="chat-placeholder">
+              <EmptyState
+                type="chat"
+                title="选择一个会话开始聊天"
+                description="从左侧列表选择联系人或群组，开始你的对话"
+              />
+            </div>
+          </div>
+        </template>
+
+        <!-- 工作台 -->
         <WorkbenchPanel v-if="activeModule === 'workbench'" />
+        <!-- 通讯录 -->
         <ContactsPanel v-if="activeModule === 'contacts'" />
+        <!-- 云盘 -->
         <DocumentsPanel v-if="activeModule === 'drive'" />
+        <!-- 日历 -->
         <CalendarPanel v-if="activeModule === 'calendar'" />
+        <!-- 待办 -->
         <TodoPanel v-if="activeModule === 'todo'" />
+        <!-- 审批 -->
         <ApprovalPanel v-if="activeModule === 'approval'" />
+        <!-- 邮箱 -->
         <MailPanel v-if="activeModule === 'mail'" />
+        <!-- AI助理 -->
         <AssistantPanel v-if="activeModule === 'assistant'" />
-        
-        <!-- 核心聊天面板 -->
-        <ChatPanel 
-          v-if="activeModule === 'chat' && currentSession" 
-          :session="currentSession" 
-          @show-user="handleShowUser"
-        />
       </main>
 
       <!-- 全局交互弹窗 (对齐钉钉模式) -->
       <PersonalProfileDialog v-model="showProfile" />
-      <SystemSettingsDialog v-model="showSettings" />
+      <SystemSettingsDialog v-model="showSettings" :default-menu="settingsDefaultMenu" />
       <HelpFeedbackDialog v-model="showHelp" />
       <UserDetailDrawer v-model="showUserDetail" :session="detailSession" @send-message="handleSelectSession" />
       <GlobalSearchDialog v-model="showGlobalSearch" @select-message="handleSearchSelectMessage" />
@@ -61,6 +80,7 @@ import MailPanel from './MailPanel.vue'
 import AssistantPanel from './AssistantPanel.vue'
 import ChatPanel from './ChatPanel.vue'
 import UserDetailDrawer from '@/components/Chat/UserDetailDrawer.vue'
+import EmptyState from '@/components/Common/EmptyState.vue'
 
 // 新增弹窗组件
 import PersonalProfileDialog from '@/components/Common/PersonalProfileDialog.vue'
@@ -81,6 +101,7 @@ const showHelp = ref(false)
 const showUserDetail = ref(false)
 const showGlobalSearch = ref(false)
 const detailSession = ref(null)
+const settingsDefaultMenu = ref('account') // 设置对话框默认菜单
 
 const { connect, onMessage, isConnected } = useImWebSocket()
 
@@ -88,12 +109,19 @@ const handleSwitchModule = (module) => {
   if (module === 'profile') {
     showProfile.value = true
   } else if (module === 'settings') {
+    settingsDefaultMenu.value = 'account'
     showSettings.value = true
   } else if (module === 'help') {
     showHelp.value = true
   } else {
     activeModule.value = module
   }
+}
+
+// 打开设置对话框，指定默认菜单页
+const handleOpenSettings = (menu = 'account') => {
+  settingsDefaultMenu.value = menu
+  showSettings.value = true
 }
 
 const handleSelectSession = (session) => {
@@ -191,5 +219,68 @@ const handleKeydown = (e) => {
 .dingtalk-app {
   width: 100%;
   height: 100%;
+}
+
+// ============================================================================
+// 主内容区布局 - 确保所有面板正确显示
+// ============================================================================
+.main-content-area {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  background: var(--dt-bg-body);
+}
+
+// ============================================================================
+// 聊天模块特殊布局：SessionPanel + ChatPanel 并排
+// ============================================================================
+.chat-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.chat-layout > :first-child {
+  // SessionPanel
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.chat-layout > :last-child {
+  // ChatPanel
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+.chat-placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dt-bg-card);
+}
+
+// ============================================================================
+// 确保其他面板占满整个主内容区
+// ============================================================================
+.main-content-area > :not(.chat-layout) {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+// ============================================================================
+// 暗色模式适配
+// ============================================================================
+.dark .main-content-area {
+  background: var(--dt-bg-body-dark);
+}
+
+.dark .chat-placeholder {
+  background: var(--dt-bg-card-dark);
 }
 </style>

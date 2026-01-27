@@ -16,6 +16,7 @@ export const WS_STATUS = {
 export const MESSAGE_TYPE = {
   AUTH: 'auth',           // 认证
   MESSAGE: 'message',     // 聊天消息
+  MESSAGE_STATUS: 'message_status',  // 消息状态更新（发送状态变化）
   PING: 'ping',           // 心跳请求
   PONG: 'pong',           // 心跳响应
   READ: 'read',           // 已读回执
@@ -118,6 +119,10 @@ class ImWebSocket {
         case MESSAGE_TYPE.MESSAGE:
           // 聊天消息
           this.emit('message', payload)
+          break
+        case MESSAGE_TYPE.MESSAGE_STATUS:
+          // 消息状态更新
+          this.emit('message_status', payload)
           break
         case MESSAGE_TYPE.READ:
           // 已读回执

@@ -164,8 +164,10 @@ public class ImConversationServiceImpl implements ImConversationService {
                         String peerName = peerUser.getNickname() != null ? peerUser.getNickname()
                                 : peerUser.getUsername();
                         String peerAvatar = peerUser.getAvatar();
+                        boolean peerOnline = imRedisUtil.isOnlineUser(peerUserId);
                         vo.setPeerName(peerName);
                         vo.setPeerAvatar(peerAvatar);
+                        vo.setPeerOnline(peerOnline);
                         vo.setName(peerName);
                         vo.setAvatar(peerAvatar);
 

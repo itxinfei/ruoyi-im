@@ -122,7 +122,8 @@ export default {
           })
 
           if (Object.keys(userStatusMap).length > 0) {
-            commit('contact/SET_ALL_USER_STATUS', userStatusMap, { root: true })
+            // 使用 dispatch action 而不是跨模块 commit mutation，避免命名空间问题
+            dispatch('contact/batchUpdateUserStatus', userStatusMap, { root: true })
           }
         }
       } finally {

@@ -8,23 +8,37 @@
     @paste="handlePaste"
   >
     <div v-if="!session" class="empty-placeholder">
-      <el-empty description="选择一个会话开始聊天" />
+      <EmptyState
+        type="chat"
+        title="选择一个会话开始聊天"
+        description="从左侧列表选择联系人或群组，开始你的对话"
+        :compact="false"
+      />
     </div>
     <template v-else>
       <div class="main-container">
         <!-- 左侧聊天主体 -->
         <div class="chat-viewport">
-          <ChatHeader 
-            :session="session" 
-            @toggle-sidebar="handleToggleDetail" 
+          <ChatHeader
+            :session="session"
+            :typing-users="typingUsers"
+            @toggle-sidebar="handleToggleDetail"
+            @toggle-multi-select="handleToggleMultiSelect"
+            @clear-selection="handleClearSelection"
+            @announcement="showAnnouncementDialog = true"
+            @search="handleSearchMessages"
+            @pin="handlePinSession"
+            @mute="handleMuteSession"
+            @clear="handleClearMessages"
           />
-          <MessageList 
+          <MessageList
             ref="msgListRef"
             :session-id="session?.id"
-            :messages="messages" 
-            :loading="loading" 
-            :current-user="currentUser" 
+            :messages="messages"
+            :loading="loading"
+            :current-user="currentUser"
             :session-type="session?.type"
+            :multi-select-mode="isMultiSelectMode"
             @command="handleCommand"
             @at="handleAt"
             @load-more="handleLoadMore"
@@ -75,9 +89,17 @@
         ref="callDialogRef"
         :session="session"
       />
+
+      <!-- 群公告对话框 -->
+      <GroupAnnouncementDialog
+        v-model="showAnnouncementDialog"
+        :group-id="session?.targetId"
+        :can-manage="session?.type === 'GROUP' && session?.memberRole === 'ADMIN'"
+      />
+
       <!-- 多选操作栏 -->
       <Transition name="slide-up">
-        <div v-if="isMultiSelectMode" class="multi-select-toolbar">
+        <div v-if="isMultiSelectModeActive" class="multi-select-toolbar">
           <div class="selection-info">已选择 {{ selectedMessages.length }} 条消息</div>
           <div class="actions">
             <el-button type="primary" plain @click="handleBatchForward"><el-icon><Share /></el-icon> 逐条转发</el-button>
@@ -93,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, h } from 'vue'
 import { useStore } from 'vuex'
 import { Share, Collection, Delete } from '@element-plus/icons-vue'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
@@ -101,11 +123,13 @@ import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInput.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
+import GroupAnnouncementDialog from '@/components/Chat/GroupAnnouncementDialog.vue'
 import GroupDetailDrawer from '@/components/GroupDetailDrawer/index.vue'
+import EmptyState from '@/components/Common/EmptyState.vue'
 import { getMessages, batchForwardMessages, deleteMessage } from '@/api/im/message'
 import { uploadFile, uploadImage } from '@/api/im/file'
 import { addFavorite, removeFavorite } from '@/api/im/favorite'
-import { markMessage } from '@/api/im/marker'
+import { markMessage, unmarkMessage, setTodoReminder, completeTodo, getUserTodoCount } from '@/api/im/marker'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -132,13 +156,21 @@ const editingMessage = ref(null)
 const msgListRef = ref(null)
 const forwardDialogRef = ref(null)
 const callDialogRef = ref(null)
+const showAnnouncementDialog = ref(false)
 const fileInputRef = ref(null)
 const imageInputRef = ref(null)
 const messageInputRef = ref(null)
 
+// 多选模式状态（由头部按钮触发，而非基于选中状态判断）
+const isMultiSelectModeActive = ref(false)
+
 const emit = defineEmits(['show-user'])
 
-const { onMessage } = useImWebSocket()
+const { onMessage, onTyping } = useImWebSocket()
+
+// 输入状态用户列表（用于显示"xxx正在输入..."）
+const typingUsers = ref([])
+let typingTimers = {} // userId -> timerId
 
 const loadHistory = async () => {
   if (!props.session?.id) return
@@ -422,10 +454,20 @@ const handleCommand = (cmd, msg) => {
 // 处理设为待办
 const handleAddToTodo = async (msg) => {
   try {
-    // 这里应调用待办 API，暂时模拟提示
+    await setTodoReminder({
+      messageId: msg.id,
+      remindTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 默认明天提醒
+      remark: msg.content?.substring(0, 50) || '消息待办'
+    })
     ElMessage.success('已添加到待办事项')
-    console.log('添加到待办:', msg)
+    // 更新消息标记状态
+    if (msg.markers) {
+      msg.markers.push({ markerType: 'TODO', isCompleted: false })
+    } else {
+      msg.markers = [{ markerType: 'TODO', isCompleted: false }]
+    }
   } catch (e) {
+    console.error('添加待办失败', e)
     ElMessage.error('添加失败')
   }
 }
@@ -447,14 +489,79 @@ const handleFavorite = async (msg) => {
 
 // 处理标记消息
 const handleMarkMessage = async (msg) => {
+  // 使用 ElMessageBox 显示标记选项
+  try {
+    const result = await ElMessageBox({
+      title: '标记消息',
+      message: h('div', { class: 'marker-options' }, [
+        h('p', { style: 'margin-bottom: 16px; color: #64748b;' }, '请选择标记类型：'),
+        h('div', { class: 'marker-buttons', style: 'display: flex; gap: 8px; flex-wrap: wrap;' }, [
+          h('el-button', {
+            onClick: () => {
+              markMessageAction(msg, 'FLAG', '#ff4d4f')
+              ElMessageBox.close(result)
+            },
+            style: 'flex: 1; min-width: 80px;'
+          }, () => [
+            h('span', { class: 'material-icons-outlined', style: 'vertical-align: middle; margin-right: 4px; color: #ff4d4f;' }, 'flag'),
+            '标记'
+          ]),
+          h('el-button', {
+            type: 'warning',
+            onClick: () => {
+              markMessageAction(msg, 'IMPORTANT', '#faad14')
+              ElMessageBox.close(result)
+            },
+            style: 'flex: 1; min-width: 80px;'
+          }, () => [
+            h('span', { class: 'material-icons-outlined', style: 'vertical-align: middle; margin-right: 4px;' }, 'star'),
+            '重要'
+          ]),
+          h('el-button', {
+            type: 'success',
+            onClick: () => {
+              setTodoReminder({
+                messageId: msg.id,
+                remindTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                remark: msg.content?.substring(0, 50) || '消息待办'
+              })
+              ElMessageBox.close(result)
+              ElMessage.success('已添加到待办')
+            },
+            style: 'flex: 1; min-width: 80px;'
+          }, () => [
+            h('span', { class: 'material-icons-outlined', style: 'vertical-align: middle; margin-right: 4px;' }, 'check_circle'),
+            '待办'
+          ])
+        ])
+      ]),
+      showCancelButton: true,
+      showConfirmButton: false,
+      closeOnClickModal: true,
+      closeOnPressEscape: true
+    })
+  } catch (e) {
+    // 用户取消，不做处理
+  }
+}
+
+// 执行标记操作
+const markMessageAction = async (msg, markerType, color) => {
   try {
     await markMessage({
       messageId: msg.id,
-      markerType: 'FLAG',
-      color: '#ff4d4f'
+      markerType,
+      color
     })
-    ElMessage.success('已标记消息')
+    ElMessage.success(markerType === 'FLAG' ? '已标记消息' : '已标记为重要')
+    // 更新消息标记状态
+    if (msg.markers) {
+      msg.markers.push({ markerType, color })
+    } else {
+      msg.markers = [{ markerType, color }]
+    }
   } catch (e) {
+    console.error('标记失败', e)
     ElMessage.error('标记失败')
   }
 }
@@ -513,8 +620,18 @@ const handleBatchDelete = async () => {
   }
 }
 
+// 切换多选模式
+const handleToggleMultiSelect = (active) => {
+  isMultiSelectModeActive.value = active
+  if (!active) {
+    // 退出多选时清空选择
+    store.commit('im/message/CLEAR_MESSAGE_SELECTION')
+  }
+}
+
 const handleClearSelection = () => {
   store.commit('im/message/CLEAR_MESSAGE_SELECTION')
+  isMultiSelectModeActive.value = false
 }
 
 // 拖拽上传相关
@@ -737,6 +854,28 @@ const handleStartVideo = () => {
   callDialogRef.value?.open('video')
 }
 
+// 处理输入状态指示
+const handleTypingIndicator = (userId, userName) => {
+  // 清除该用户的旧定时器
+  if (typingTimers[userId]) {
+    clearTimeout(typingTimers[userId])
+  }
+
+  // 添加到正在输入的用户列表
+  if (!typingUsers.value.find(u => u.userId === userId)) {
+    typingUsers.value.push({ userId, userName })
+  }
+
+  // 设置5秒后移除输入状态
+  typingTimers[userId] = setTimeout(() => {
+    const index = typingUsers.value.findIndex(u => u.userId === userId)
+    if (index !== -1) {
+      typingUsers.value.splice(index, 1)
+    }
+    delete typingTimers[userId]
+  }, 5000)
+}
+
 // 文件上传相关
 const triggerFileUpload = () => fileInputRef.value?.click()
 const triggerImageUpload = () => imageInputRef.value?.click()
@@ -873,7 +1012,7 @@ const handleImageUpload = async (payload) => {
 
 onMounted(() => {
   if (props.session) loadHistory()
-  
+
   // 请求浏览器通知权限
   import('@/utils/messageNotification').then(({ requestNotificationPermission }) => {
     requestNotificationPermission().then(permission => {
@@ -883,6 +1022,14 @@ onMounted(() => {
         console.warn('[消息提醒] 通知权限被拒绝')
       }
     })
+  })
+
+  // 监听输入状态事件
+  onTyping((data) => {
+    if (data.conversationId !== props.session?.id) return
+    if (data.userId === currentUser.value?.id) return // 忽略自己的输入状态
+
+    handleTypingIndicator(data.userId, data.userName || data.senderName)
   })
 })
 </script>
@@ -945,13 +1092,9 @@ onMounted(() => {
   padding: 60px 20px;
   text-align: center;
 
-  :deep(.el-empty) {
-    --el-empty-padding: 40px 0;
-  }
-
-  :deep(.el-empty__description p) {
-    color: var(--dt-text-tertiary);
-    font-size: 14px;
+  :deep(.empty-state) {
+    width: 100%;
+    max-width: 400px;
   }
 }
 

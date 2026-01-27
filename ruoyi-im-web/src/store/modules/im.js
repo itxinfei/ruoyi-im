@@ -51,7 +51,8 @@ export default {
         fontSize: 'medium', // 'small' | 'medium' | 'large' | 'xlarge'
         background: 'default', // 'default' | 'custom' | 'solid'
         bubbleStyle: 'default', // 'default' | 'compact' | 'loose'
-        sendShortcut: 'enter' // 'enter' | 'ctrl-enter'
+        sendShortcut: 'enter', // 'enter' | 'ctrl-enter'
+        recallTimeLimit: 2 // 消息撤回时限（分钟），默认2分钟
       },
       // 新增：文件管理
       file: {
@@ -233,23 +234,38 @@ export default {
     },
 
     // 更新通知设置
-    updateNotificationSettings({ commit }, settings) {
+    updateNotificationSettings({ commit, dispatch }, settings) {
       commit('UPDATE_SETTINGS', { notifications: { ...settings } })
+      dispatch('batchUpdateServerSettings', {
+        'notifications.enabled': String(settings.enabled),
+        'notifications.sound': String(settings.sound)
+      })
     },
 
     // 更新隐私设置
-    updatePrivacySettings({ commit }, settings) {
+    updatePrivacySettings({ commit, dispatch }, settings) {
       commit('UPDATE_SETTINGS', { privacy: { ...settings } })
+      dispatch('batchUpdateServerSettings', {
+        'privacy.showStatus': String(settings.showStatus),
+        'privacy.readReceipt': String(settings.readReceipt)
+      })
     },
 
     // 更新通用设置
-    updateGeneralSettings({ commit }, settings) {
+    updateGeneralSettings({ commit, dispatch }, settings) {
       commit('UPDATE_SETTINGS', { general: { ...settings } })
+      dispatch('batchUpdateServerSettings', {
+        'general.language': settings.language,
+        'general.theme': settings.theme
+      })
     },
 
     // 更新快捷键设置
-    updateShortcutSettings({ commit }, settings) {
+    updateShortcutSettings({ commit, dispatch }, settings) {
       commit('UPDATE_SETTINGS', { shortcuts: { ...settings } })
+      dispatch('batchUpdateServerSettings', {
+        'shortcuts.send': settings.send
+      })
     },
 
     // 设置当前用户

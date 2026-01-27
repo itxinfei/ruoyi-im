@@ -95,7 +95,7 @@ public class ImUserServiceImpl implements ImUserService {
 
         if (password == null || dbPassword == null || !passwordEncoder.matches(password, dbPassword)) {
             logger.error("密码验证失败 - 用户名: {}", request.getUsername());
-            throw new BusinessException("PASSWORD_ERROR", "密码错误");
+            throw new BusinessException(ImErrorCode.PASSWORD_ERROR, "密码错误");
         }
 
         logger.info("密码验证成功 - 用户名: {}, 用户ID: {}", request.getUsername(), user.getId());

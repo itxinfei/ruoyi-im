@@ -94,6 +94,11 @@ export function useImWebSocket() {
     registerHandler('read', callback)
   }
 
+  // 监听消息状态更新
+  const onMessageStatus = (callback) => {
+    registerHandler('message_status', callback)
+  }
+
   // 监听通话事件
   const onCall = (callback) => {
     registerHandler('call', callback)
@@ -130,6 +135,7 @@ export function useImWebSocket() {
     onOffline,
     onTyping,
     onRead,
+    onMessageStatus,
     onCall,
 
     // WebSocket 实例

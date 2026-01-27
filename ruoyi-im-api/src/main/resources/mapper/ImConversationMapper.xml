@@ -93,7 +93,16 @@
     </select>
 
     <!-- 优化的批量查询：一次性获取用户会话及相关数据 -->
-    <resultMap id="ConversationWithMemberVO" type="com.ruoyi.im.vo.conversation.ImConversationVO" extends="BaseResultMap">
+    <resultMap id="ConversationWithMemberVO" type="com.ruoyi.im.vo.conversation.ImConversationVO">
+        <id column="id" property="id" />
+        <result column="type" property="type" />
+        <result column="target_id" property="targetId" />
+        <result column="name" property="name" />
+        <result column="avatar" property="avatar" />
+        <result column="last_message_id" property="lastMessageId" />
+        <result column="last_message_time" property="lastMessageTime" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
         <result column="unread_count" property="unreadCount" />
         <result column="is_pinned" property="isPinned" />
         <result column="is_muted" property="isMuted" />
@@ -104,7 +113,7 @@
     <select id="selectUserConversationsWithMembers" resultMap="ConversationWithMemberVO">
         SELECT
             c.id, c.type, c.target_id, c.name, c.avatar, c.last_message_id, c.last_message_time,
-            c.is_deleted, c.deleted_time, c.create_time, c.update_time,
+            c.create_time, c.update_time,
             cm.unread_count, cm.is_pinned, cm.is_muted, cm.last_read_message_id
         FROM im_conversation c
         JOIN im_conversation_member cm ON c.id = cm.conversation_id

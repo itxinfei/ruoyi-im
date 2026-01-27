@@ -99,6 +99,17 @@ export {
   detectLanguage
 } from './translation'
 
+// 全局搜索相关API
+export {
+  globalSearch,
+  globalSearchMessages,
+  globalSearchContacts,
+  globalSearchGroups,
+  globalSearchFiles,
+  searchWorkbench,
+  getHotKeywords
+} from './globalSearch'
+
 // AI助手相关API
 export {
   chat,
@@ -106,17 +117,6 @@ export {
   clearConversation,
   getSupportedModels
 } from './ai'
-
-// 全局搜索相关API
-export {
-  globalSearch,
-  searchMessages,
-  searchContacts,
-  searchGroups,
-  searchFiles,
-  searchWorkbench,
-  getHotKeywords
-} from './globalSearch'
 
 // 消息标记相关API
 export {

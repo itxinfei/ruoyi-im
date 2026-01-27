@@ -24,12 +24,23 @@
           {{ session?.memberCount || 0 }} 人
         </span>
         <span v-else class="meta-info" :class="{ online: isOnline }">
-          <span class="material-icons-outlined meta-icon">circle</span>
-          {{ isOnline ? '在线' : '离线' }}
+          <span v-if="!isTyping" class="material-icons-outlined meta-icon">circle</span>
+          <span v-if="!isTyping">{{ isOnline ? '在线' : '离线' }}</span>
+          <!-- 输入状态显示 -->
+          <span v-if="isTyping" class="typing-indicator">
+            <span class="material-icons-outlined typing-icon">edit</span>
+            正在输入...
+          </span>
         </span>
       </div>
     </div>
     <div class="header-actions">
+      <!-- 多选模式按钮 -->
+      <el-tooltip :content="isMultiSelectMode ? '取消多选' : '多选消息'" placement="bottom">
+        <button class="action-btn" :class="{ active: isMultiSelectMode }" @click="handleToggleMultiSelect">
+          <span class="material-icons-outlined">{{ isMultiSelectMode ? 'close' : 'check_circle_outline' }}</span>
+        </button>
+      </el-tooltip>
       <el-tooltip content="语音通话" placement="bottom">
         <button class="action-btn" @click="handleVoiceCall">
           <span class="material-icons-outlined">phone</span>
@@ -53,6 +64,10 @@
             <el-dropdown-item command="files">
               <span class="material-icons-outlined item-icon">folder</span>
               查看文件
+            </el-dropdown-item>
+            <el-dropdown-item v-if="session?.type === 'GROUP'" command="announcement">
+              <span class="material-icons-outlined item-icon">campaign</span>
+              群公告
             </el-dropdown-item>
             <el-dropdown-item divided command="pin">
               <span class="material-icons-outlined item-icon">
@@ -106,10 +121,27 @@ const props = defineProps({
       if (value === null) return true
       return typeof value.id === 'string' || typeof value.id === 'number'
     }
+  },
+  typingUsers: {
+    type: Array,
+    default: () => []
   }
 })
 
-const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'search', 'pin', 'mute', 'clear', 'toggle-sidebar'])
+const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'search', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar', 'toggle-multi-select', 'clear-selection'])
+
+// 多选模式状态
+const isMultiSelectMode = ref(false)
+
+// 切换多选模式
+const handleToggleMultiSelect = () => {
+  isMultiSelectMode.value = !isMultiSelectMode.value
+  emit('toggle-multi-select', isMultiSelectMode.value)
+  if (!isMultiSelectMode.value) {
+    // 退出多选时，通知父组件清空选择
+    emit('clear-selection')
+  }
+}
 
 // 用户详情抽屉显示状态
 const showUserDetail = ref(false)
@@ -125,6 +157,11 @@ const isOnline = computed(() => {
   }
 
   return props.session?.peerOnline ?? false
+})
+
+// 是否有用户正在输入
+const isTyping = computed(() => {
+  return props.typingUsers && props.typingUsers.length > 0
 })
 
 // 显示详情
@@ -157,7 +194,10 @@ const handleMenuCommand = (command) => {
       emit('search', props.session)
       break
     case 'files':
-      ElMessage.info('查看文件功能开发中')
+      emit('files', props.session)
+      break
+    case 'announcement':
+      emit('announcement', props.session)
       break
     case 'pin':
       emit('pin', props.session)
@@ -182,10 +222,11 @@ const handleMenuCommand = (command) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 20px;
   background: var(--dt-bg-card);
   flex-shrink: 0;
   z-index: 10;
+  transition: background var(--dt-transition-base);
 }
 
 // ============================================================================
@@ -196,13 +237,27 @@ const handleMenuCommand = (command) => {
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  padding: 6px;
-  margin: -6px;
-  border-radius: var(--dt-radius-md);
-  transition: all var(--dt-transition-base);
+  padding: 8px 12px;
+  margin: -8px -12px;
+  border-radius: var(--dt-radius-lg);
+  transition: all var(--dt-transition-fast);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--dt-brand-color);
+    opacity: 0;
+    transition: opacity var(--dt-transition-fast);
+  }
 
   &:hover {
-    background: var(--dt-bg-body);
+    background: var(--dt-bg-hover);
+
+    &::after {
+      opacity: 0.06;
+    }
 
     .header-avatar-wrapper {
       transform: scale(1.05);
@@ -212,6 +267,10 @@ const handleMenuCommand = (command) => {
   &:focus-visible {
     outline: 2px solid var(--dt-brand-color);
     outline-offset: 2px;
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 }
 
@@ -238,10 +297,6 @@ const handleMenuCommand = (command) => {
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 8px rgba(22, 119, 255, 0.2);
-
-  .material-icons-outlined {
-    font-size: 20px;
-  }
 }
 
 // 在线状态指示器
@@ -261,7 +316,8 @@ const handleMenuCommand = (command) => {
 .header-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  min-width: 0;
 }
 
 .header-name {
@@ -269,19 +325,20 @@ const handleMenuCommand = (command) => {
   font-weight: 600;
   color: var(--dt-text-primary);
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .meta-info {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   font-size: 12px;
   color: var(--dt-text-tertiary);
   font-weight: 500;
 
   .meta-icon {
-    font-size: 10px;
+    font-size: 11px;
+    opacity: 0.8;
   }
 
   &.online {
@@ -295,26 +352,51 @@ const handleMenuCommand = (command) => {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  padding-right: 4px;
+
+  .el-dropdown {
+    display: flex;
+    align-items: center;
+  }
 }
 
 .action-btn {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   background: transparent;
   border: none;
-  border-radius: var(--dt-radius-md);
+  border-radius: var(--dt-radius-lg);
   padding: 0;
   color: var(--dt-text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--dt-transition-base);
+  transition: all var(--dt-transition-fast);
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--dt-brand-color);
+    opacity: 0;
+    transition: opacity var(--dt-transition-fast);
+  }
 
   &:hover {
-    background: var(--dt-bg-body);
+    background: var(--dt-bg-hover);
     color: var(--dt-brand-color);
+
+    &::after {
+      opacity: 0.08;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 
   &:focus-visible {
@@ -322,17 +404,36 @@ const handleMenuCommand = (command) => {
     outline-offset: 2px;
   }
 
+  &.active {
+    color: var(--dt-brand-color);
+    background: var(--dt-brand-bg);
+
+    &::after {
+      opacity: 1;
+      background: var(--dt-brand-color);
+    }
+  }
+
   &.info-btn {
     color: var(--dt-brand-color);
     background: var(--dt-brand-bg);
 
+    &::after {
+      opacity: 1;
+    }
+
     &:hover {
       background: var(--dt-brand-light);
+
+      &::after {
+        opacity: 0;
+      }
     }
   }
 
   .material-icons-outlined {
-    font-size: 20px;
+    position: relative;
+    z-index: 1;
   }
 }
 

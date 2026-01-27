@@ -1,9 +1,9 @@
 <template>
   <el-dialog
     v-model="visible"
-    width="400px"
+    :width="dialogWidth"
+    :class="['user-profile-dialog', { 'is-mobile': isMobile }]"
     :show-close="false"
-    class="user-profile-dialog"
     destroy-on-close
     append-to-body
   >
@@ -77,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { Close, Male, Female, ChatDotRound, Phone, MoreFilled } from '@element-plus/icons-vue'
 import { getUserInfo } from '@/api/im/user'
 import { createConversation } from '@/api/im/conversation'
@@ -96,6 +96,30 @@ const store = useStore()
 const visible = ref(false)
 const loading = ref(false)
 const userDetail = ref(null)
+
+// 响应式窗口宽度
+const windowWidth = ref(window.innerWidth)
+
+// 响应式计算属性
+const isMobile = computed(() => windowWidth.value < 480)
+const dialogWidth = computed(() => {
+  if (windowWidth.value < 480) return '100%'
+  if (windowWidth.value < 768) return '90%'
+  return '400px'
+})
+
+// 窗口大小变化监听
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
 
 const handleClose = () => {
   emit('update:modelValue', false)
@@ -155,18 +179,35 @@ watch(visible, (val) => {
 </script>
 
 <style scoped lang="scss">
-.user-profile-dialog :deep(.el-dialog__header) {
-  display: none;
-}
+.user-profile-dialog {
+  :deep(.el-dialog__header) {
+    display: none;
+  }
 
-.user-profile-dialog :deep(.el-dialog__body) {
-  padding: 0;
-  overflow: hidden;
-  border-radius: 12px;
+  :deep(.el-dialog__body) {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  :deep(.el-dialog) {
+    border-radius: 16px;
+  }
+
+  // 移动端全屏
+  &.is-mobile {
+    :deep(.el-dialog) {
+      border-radius: 0;
+      margin: 0;
+    }
+
+    :deep(.el-dialog__body) {
+      max-height: 100vh;
+    }
+  }
 }
 
 .loading-state {
-  height: 300px;
+  min-height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -174,6 +215,8 @@ watch(visible, (val) => {
 
 .profile-container {
   background: #fff;
+  max-height: 80vh;
+  overflow-y: auto;
 
   .dark & {
     background: #1e293b;
@@ -293,6 +336,7 @@ watch(visible, (val) => {
   .detail-item {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     padding: 12px 0;
     border-bottom: 1px solid #f0f0f0;
     font-size: 14px;
@@ -308,7 +352,7 @@ watch(visible, (val) => {
     .label {
       color: #8f959e;
       flex-shrink: 0;
-      width: 60px;
+      min-width: 60px;
 
       .dark & {
         color: #94a3b8;
@@ -319,6 +363,8 @@ watch(visible, (val) => {
       color: #1f2329;
       text-align: right;
       word-break: break-all;
+      flex: 1;
+      margin-left: 16px;
 
       .dark & {
         color: #f1f5f9;
@@ -331,6 +377,7 @@ watch(visible, (val) => {
       .value {
         text-align: left;
         margin-top: 4px;
+        margin-left: 0;
         color: #646a73;
         font-style: italic;
 
@@ -358,6 +405,47 @@ watch(visible, (val) => {
     &:not(.el-button--primary) {
       flex: 0 0 40px;
       padding: 0;
+    }
+  }
+}
+
+// 移动端响应式样式
+@media (max-width: 479px) {
+  .profile-header {
+    padding: 0 20px;
+
+    .avatar-wrapper .user-avatar {
+      width: 70px !important;
+      height: 70px !important;
+      font-size: 24px;
+    }
+
+    .user-main .name-row .nickname {
+      font-size: 18px;
+    }
+  }
+
+  .profile-details {
+    padding: 0 20px;
+
+    .detail-item {
+      .label {
+        min-width: 50px;
+        font-size: 13px;
+      }
+
+      .value {
+        font-size: 13px;
+      }
+    }
+  }
+
+  .profile-actions {
+    padding: 12px 20px 20px;
+
+    .action-btn {
+      height: 44px;
+      font-size: 15px;
     }
   }
 }

@@ -17,9 +17,10 @@
         </div>
 
         <!-- 消息项组件 -->
-        <MessageItem 
-          v-else 
+        <MessageItem
+          v-else
           :message="msg"
+          :multi-select-mode="multiSelectMode"
           @reply="$emit('reply', $event)"
           @reaction="handleReaction"
           @command="handleCommand"
@@ -30,13 +31,14 @@
         >
           <!-- 消息气泡内容插槽 -->
           <template #bubble>
-            <MessageBubble 
-              :message="msg" 
+            <MessageBubble
+              :message="msg"
               :session-type="sessionType"
               @command="handleCommand($event, msg)"
               @at="$emit('at', msg)"
               @preview="previewImage"
               @download="downloadFile"
+              @retry="$emit('retry', $event)"
             />
           </template>
 
@@ -99,6 +101,10 @@ const props = defineProps({
   sessionType: {
     type: String,
     default: 'PRIVATE'
+  },
+  multiSelectMode: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -308,18 +314,42 @@ defineExpose({ scrollToBottom, maintainScroll })
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .message-list {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
   background: var(--dt-bg-chat);
   position: relative;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 2px;
+    transition: background var(--dt-transition-base);
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background: var(--dt-scrollbar-thumb);
+  }
+
+  .dark &:hover::-webkit-scrollbar-thumb {
+    background: var(--dt-scrollbar-thumb-dark);
+  }
 }
 
 .loading-wrapper {
   text-align: center;
   padding: 20px;
-  color: #94a3b8;
+  color: var(--dt-text-tertiary);
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -330,21 +360,21 @@ defineExpose({ scrollToBottom, maintainScroll })
 .empty {
   text-align: center;
   padding: 40px;
-  color: #bfbfbf;
+  color: var(--dt-text-quaternary);
   font-size: 13px;
 }
 
 .time-divider {
   text-align: center;
   margin: 20px 0;
-  color: #b3b3b3;
+  color: var(--dt-text-tertiary);
   font-size: 12px;
   line-height: 1;
-  
+
   .time-text {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--dt-bg-body);
     padding: 4px 12px;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-full);
     display: inline-block;
   }
 }
@@ -353,11 +383,13 @@ defineExpose({ scrollToBottom, maintainScroll })
   font-size: 11px;
   cursor: default;
 
-  .read { color: #bfbfbf; }
-  .unread { color: #1677ff; }
+  .read { color: var(--dt-text-quaternary); }
+  .unread { color: var(--dt-brand-color); }
   .read-count {
-    color: #1677ff;
+    color: var(--dt-brand-color);
     cursor: pointer;
+    transition: color var(--dt-transition-fast);
+
     &:hover { text-decoration: underline; }
   }
 }
@@ -365,16 +397,18 @@ defineExpose({ scrollToBottom, maintainScroll })
 .read-users-list {
   max-height: 200px;
   overflow-y: auto;
-  
+
   .read-user-item {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
     font-size: 13px;
-    
-    &:hover { background-color: #f8fafc; }
-    &:not(:last-child) { border-bottom: 1px solid #f1f5f9; }
+    transition: background var(--dt-transition-fast);
+    border-radius: var(--dt-radius-md);
+
+    &:hover { background: var(--dt-bg-hover); }
+    &:not(:last-child) { border-bottom: 1px solid var(--dt-border-lighter); }
   }
 }
 
@@ -382,30 +416,37 @@ defineExpose({ scrollToBottom, maintainScroll })
   position: absolute;
   right: 20px;
   bottom: 20px;
-  background: #fff;
-  border: 1px solid #e6e6e6;
-  border-radius: 20px;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-full);
   padding: 8px 16px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--dt-shadow-2);
   font-size: 13px;
-  color: #595959;
+  color: var(--dt-text-secondary);
   z-index: 10;
-  transition: all 0.2s;
-  
+  transition: all var(--dt-transition-base);
+
   &:hover {
-    background: #f8fafc;
-    border-color: #1677ff;
-    color: #1677ff;
+    background: var(--dt-bg-hover);
+    border-color: var(--dt-brand-color);
+    color: var(--dt-brand-color);
+    transform: translateY(-2px);
+    box-shadow: var(--dt-shadow-3);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
 .fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s, transform 0.3s;
+  transition: opacity var(--dt-transition-base), transform var(--dt-transition-base);
 }
+
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
@@ -413,24 +454,27 @@ defineExpose({ scrollToBottom, maintainScroll })
 </style>
 
 <style lang="scss">
+@import '@/styles/design-tokens.scss';
+
 @keyframes highlight-pulse {
   0% { background-color: transparent; }
-  15% { background-color: rgba(0, 137, 255, 0.15); }
-  85% { background-color: rgba(0, 137, 255, 0.15); }
+  15% { background-color: var(--dt-brand-lighter); }
+  85% { background-color: var(--dt-brand-lighter); }
   100% { background-color: transparent; }
 }
 
 .highlight-msg {
-  animation: highlight-pulse 2s ease-in-out forwards;
-  border-radius: 8px;
+  animation: highlight-pulse 2s var(--dt-ease-in-out) forwards;
+  border-radius: var(--dt-radius-md);
 }
+
 /* 全局样式用于气泡右键菜单 */
 .message-context-menu {
   padding: 4px 0 !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
-  border: 1px solid #f0f0f0 !important;
-  background: #fff !important;
+  border-radius: var(--dt-radius-lg) !important;
+  box-shadow: var(--dt-shadow-float) !important;
+  border: 1px solid var(--dt-border-light) !important;
+  background: var(--dt-bg-card) !important;
 
   .el-dropdown-menu__item {
     display: flex;
@@ -438,34 +482,34 @@ defineExpose({ scrollToBottom, maintainScroll })
     gap: 12px;
     padding: 10px 20px !important;
     font-size: 14px !important;
-    color: #1f2329 !important;
+    color: var(--dt-text-primary) !important;
     min-width: 140px;
-    transition: all 0.2s;
+    transition: all var(--dt-transition-fast);
 
-    .el-icon { 
-      font-size: 18px; 
-      color: #8f959e; 
+    .el-icon {
+      font-size: 18px;
+      color: var(--dt-text-secondary);
       margin-right: 4px;
     }
 
     &:hover {
-      background-color: #f2f3f5 !important;
-      color: #0089ff !important;
-      .el-icon { color: #0089ff; }
+      background-color: var(--dt-bg-hover) !important;
+      color: var(--dt-brand-color) !important;
+      .el-icon { color: var(--dt-brand-color); }
     }
 
     &.danger {
-      color: #f54a45 !important;
+      color: var(--dt-error-color) !important;
       &:hover {
-        background-color: #fff0f0 !important;
-        .el-icon { color: #f54a45; }
+        background-color: var(--dt-error-bg) !important;
+        .el-icon { color: var(--dt-error-color); }
       }
     }
   }
 
   .menu-divider {
     height: 1px;
-    background-color: #f2f3f5;
+    background-color: var(--dt-border-light);
     margin: 4px 0;
   }
 }
