@@ -13,9 +13,11 @@
       <!-- 导航列表 -->
       <div v-if="!searchQuery" class="nav-list">
         <div class="nav-item" @click="$emit('nav', 'new-friends')">
-          <div class="nav-icon new-friends">
-            <el-icon><User /></el-icon>
-          </div>
+          <el-badge :value="unreadRequestCount" :hidden="unreadRequestCount === 0" class="nav-badge">
+            <div class="nav-icon new-friends">
+              <el-icon><User /></el-icon>
+            </div>
+          </el-badge>
           <span class="nav-label">新朋友</span>
         </div>
       </div>
@@ -55,15 +57,64 @@
               <div class="desc">{{ group.memberCount || 0 }} 人</div>
             </div>
           </div>
+          <div v-if="filteredGroups.length === 0" class="empty-small">暂无群组</div>
         </el-collapse-item>
 
-        <!-- 我的联系人 -->
-        <el-collapse-item title="我的联系人" name="friends">
+        <!-- 我的联系人 - 分组显示 -->
+        <template v-if="!searchQuery">
+          <el-collapse-item
+            v-for="groupData in groupedContacts"
+            :key="groupData.groupName"
+            :name="`friends-${groupData.groupName}`"
+          >
+            <template #title>
+              <div class="group-header">
+                <span class="group-name">{{ groupData.groupName || '未分组' }}</span>
+                <span class="group-count">({{ groupData.contacts.length }})</span>
+                <el-dropdown
+                  trigger="click"
+                  @command="(cmd) => handleGroupCommand(cmd, groupData.groupName)"
+                  @click.stop
+                >
+                  <el-icon class="group-more" @click.stop><MoreFilled /></el-icon>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item command="rename">重命名分组</el-dropdown-item>
+                      <el-dropdown-item command="delete" v-if="groupData.groupName">删除分组</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </template>
+            <div
+              v-for="contact in groupData.contacts"
+              :key="contact.id"
+              class="friend-item"
+              :class="{ active: currentContact?.id === contact.id && !currentContact?.isGroup }"
+              @click="handleContactClick(contact)"
+              @contextmenu.prevent="showContactMenu($event, contact)"
+            >
+              <div class="avatar">
+                <img v-if="contact.friendAvatar" :src="contact.friendAvatar" />
+                <div v-else class="avatar-text">
+                  {{ (contact.friendName || '?').charAt(0).toUpperCase() }}
+                </div>
+              </div>
+              <div class="info">
+                <div class="name">{{ contact.remark || contact.friendName }}</div>
+                <div class="desc">{{ contact.position || '联系人' }}</div>
+              </div>
+            </div>
+            <div v-if="groupData.contacts.length === 0" class="empty-small">暂无联系人</div>
+          </el-collapse-item>
+        </template>
+
+        <!-- 搜索结果 -->
+        <el-collapse-item v-else title="搜索结果" name="search">
           <div
-            v-for="contact in filteredContacts"
+            v-for="contact in searchResults"
             :key="contact.id"
             class="friend-item"
-            :class="{ active: currentContact?.id === contact.id && !currentContact?.isGroup }"
             @click="handleContactClick(contact)"
           >
             <div class="avatar">
@@ -73,45 +124,177 @@
               </div>
             </div>
             <div class="info">
-              <div class="name">{{ contact.friendName }}</div>
-              <div class="desc">{{ contact.position || '联系人' }}</div>
+              <div class="name">{{ contact.remark || contact.friendName }}</div>
+              <div class="desc">{{ contact.groupName || '未分组' }}</div>
             </div>
           </div>
-          <div v-if="filteredContacts.length === 0" class="empty-small">暂无联系人</div>
+          <div v-if="searchResults.length === 0" class="empty-small">未找到联系人</div>
         </el-collapse-item>
       </el-collapse>
     </div>
+
+    <!-- 分组重命名对话框 -->
+    <el-dialog
+      v-model="renameDialogVisible"
+      title="重命名分组"
+      width="400px"
+      :append-to-body="true"
+    >
+      <el-form @submit.prevent="confirmRename">
+        <el-form-item label="分组名称">
+          <el-input
+            v-model="newGroupName"
+            placeholder="请输入新的分组名称"
+            maxlength="20"
+            show-word-limit
+            @keyup.enter="confirmRename"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="renameDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmRename" :loading="renameLoading">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 联系人右键菜单 -->
+    <transition name="el-fade-in">
+      <div
+        v-if="contextMenuVisible"
+        class="context-menu"
+        :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }"
+      >
+        <div class="context-menu-item" @click="handleMoveToGroup">
+          <el-icon><FolderOpened /></el-icon>
+          <span>移动到分组</span>
+        </div>
+        <div class="context-menu-item" @click="handleEditRemark">
+          <el-icon><Edit /></el-icon>
+          <span>修改备注</span>
+        </div>
+        <div class="context-menu-item danger" @click="handleDeleteContact">
+          <el-icon><Delete /></el-icon>
+          <span>删除联系人</span>
+        </div>
+      </div>
+    </transition>
+
+    <!-- 移动到分组对话框 -->
+    <el-dialog
+      v-model="moveDialogVisible"
+      title="移动到分组"
+      width="400px"
+      :append-to-body="true"
+    >
+      <el-select v-model="targetGroupName" placeholder="选择目标分组" style="width: 100%">
+        <el-option label="未分组" value="" />
+        <el-option
+          v-for="group in groupList"
+          :key="group"
+          :label="group || '未分组'"
+          :value="group"
+        />
+      </el-select>
+      <template #footer>
+        <el-button @click="moveDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmMove" :loading="moveLoading">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 修改备注对话框 -->
+    <el-dialog
+      v-model="remarkDialogVisible"
+      title="修改备注"
+      width="400px"
+      :append-to-body="true"
+    >
+      <el-input
+        v-model="newRemark"
+        placeholder="请输入备注名称"
+        maxlength="50"
+        show-word-limit
+        @keyup.enter="confirmRemark"
+      />
+      <template #footer>
+        <el-button @click="remarkDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmRemark" :loading="remarkLoading">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { Search, OfficeBuilding, User } from '@element-plus/icons-vue'
-import { getContacts } from '@/api/im/contact'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { Search, OfficeBuilding, User, MoreFilled, FolderOpened, Edit, Delete } from '@element-plus/icons-vue'
+import { getContacts, getGroupedFriendList, getGroupList, renameGroup, deleteGroup, moveContactToGroup, updateContactRemark, deleteContact, getFriendRequests } from '@/api/im/contact'
 import { getOrgTree } from '@/api/im/organization'
 import { getGroups } from '@/api/im/group'
 import { addTokenToUrl } from '@/utils/file'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const props = defineProps({
   currentContact: Object
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits(['select', 'nav', 'refresh'])
 
 const searchQuery = ref('')
 const contacts = ref([])
+const groupedContacts = ref([])
 const groups = ref([])
+const groupList = ref([])
 const orgTree = ref([])
 const loading = ref(false)
-const activeNames = ref(['org', 'groups', 'friends'])
+const activeNames = ref(['org', 'groups'])
+const unreadRequestCount = ref(0)
+
+// 分组重命名
+const renameDialogVisible = ref(false)
+const renameLoading = ref(false)
+const currentRenameGroup = ref('')
+const newGroupName = ref('')
+
+// 移动到分组
+const moveDialogVisible = ref(false)
+const moveLoading = ref(false)
+const targetGroupName = ref('')
+const currentContactForMove = ref(null)
+
+// 修改备注
+const remarkDialogVisible = ref(false)
+const remarkLoading = ref(false)
+const newRemark = ref('')
+const currentContactForRemark = ref(null)
+
+// 右键菜单
+const contextMenuVisible = ref(false)
+const contextMenuX = ref(0)
+const contextMenuY = ref(0)
+const currentContactForMenu = ref(null)
 
 const loadData = async () => {
   loading.value = true
   try {
-    const [cRes, oRes, gRes] = await Promise.all([getContacts(), getOrgTree(), getGroups()])
-    if (cRes.code === 200) contacts.value = cRes.data
+    const [gcRes, oRes, gRes, glRes, frRes] = await Promise.all([
+      getGroupedFriendList(),
+      getOrgTree(),
+      getGroups(),
+      getGroupList(),
+      getFriendRequests()
+    ])
+    if (gcRes.code === 200 && gcRes.data) {
+      groupedContacts.value = gcRes.data
+    }
     if (oRes && oRes.code === 200) orgTree.value = oRes.data
     if (gRes && gRes.code === 200) groups.value = gRes.data
+    if (glRes && glRes.code === 200) groupList.value = glRes.data
+    if (frRes && frRes.code === 200) {
+      unreadRequestCount.value = frRes.data.filter(r => r.status === 'PENDING').length
+    }
+    // 默认展开联系人分组
+    if (groupedContacts.value.length > 0) {
+      activeNames.value.push(...groupedContacts.value.map(g => `friends-${g.groupName}`))
+    }
   } catch (e) {
     console.error(e)
   } finally {
@@ -119,13 +302,19 @@ const loadData = async () => {
   }
 }
 
-const filteredContacts = computed(() => {
-  if (!searchQuery.value) return contacts.value
+const searchResults = computed(() => {
+  if (!searchQuery.value) return []
   const q = searchQuery.value.toLowerCase()
-  return contacts.value.filter(c => 
-    (c.friendName && c.friendName.toLowerCase().includes(q)) ||
-    (c.department && c.department.toLowerCase().includes(q))
-  )
+  const results = []
+  groupedContacts.value.forEach(group => {
+    group.contacts.forEach(contact => {
+      const name = (contact.remark || contact.friendName || '').toLowerCase()
+      if (name.includes(q)) {
+        results.push({ ...contact, groupName: group.groupName })
+      }
+    })
+  })
+  return results
 })
 
 const filteredGroups = computed(() => {
@@ -151,10 +340,177 @@ const handleGroupClick = (group) => {
 }
 
 const handleContactClick = (contact) => {
+  contextMenuVisible.value = false
   emit('select', { ...contact, isGroup: false })
 }
 
-onMounted(loadData)
+// 分组管理
+const handleGroupCommand = (command, groupName) => {
+  if (command === 'rename') {
+    currentRenameGroup.value = groupName
+    newGroupName.value = groupName || ''
+    renameDialogVisible.value = true
+  } else if (command === 'delete') {
+    ElMessageBox.confirm(
+      `删除分组 "${groupName}" 后，该分组下的联系人将移动到"未分组"，确定删除吗？`,
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    ).then(() => {
+      doDeleteGroup(groupName)
+    }).catch(() => {})
+  }
+}
+
+const confirmRename = async () => {
+  if (!newGroupName.value.trim()) {
+    ElMessage.warning('请输入分组名称')
+    return
+  }
+  renameLoading.value = true
+  try {
+    const res = await renameGroup(currentRenameGroup.value || '', newGroupName.value.trim())
+    if (res.code === 200) {
+      ElMessage.success('重命名成功')
+      renameDialogVisible.value = false
+      await loadData()
+      emit('refresh')
+    } else {
+      ElMessage.error(res.msg || '重命名失败')
+    }
+  } catch (e) {
+    ElMessage.error('重命名失败')
+  } finally {
+    renameLoading.value = false
+  }
+}
+
+const doDeleteGroup = async (groupName) => {
+  try {
+    const res = await deleteGroup(groupName)
+    if (res.code === 200) {
+      ElMessage.success('删除成功')
+      await loadData()
+      emit('refresh')
+    } else {
+      ElMessage.error(res.msg || '删除失败')
+    }
+  } catch (e) {
+    ElMessage.error('删除失败')
+  }
+}
+
+// 右键菜单
+const showContactMenu = (event, contact) => {
+  currentContactForMenu.value = contact
+  contextMenuX.value = event.clientX
+  contextMenuY.value = event.clientY
+  contextMenuVisible.value = true
+}
+
+const hideContextMenu = () => {
+  contextMenuVisible.value = false
+}
+
+const handleMoveToGroup = () => {
+  hideContextMenu()
+  currentContactForMove.value = currentContactForMenu.value
+  targetGroupName.value = currentContactForMenu.value.groupName || ''
+  moveDialogVisible.value = true
+}
+
+const handleEditRemark = () => {
+  hideContextMenu()
+  currentContactForRemark.value = currentContactForMenu.value
+  newRemark.value = currentContactForMenu.value.remark || currentContactForMenu.value.friendName || ''
+  remarkDialogVisible.value = true
+}
+
+const handleDeleteContact = () => {
+  hideContextMenu()
+  const contact = currentContactForMenu.value
+  ElMessageBox.confirm(
+    `确定删除联系人 "${contact.remark || contact.friendName}" 吗？`,
+    '确认删除',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
+    try {
+      const res = await deleteContact(contact.id)
+      if (res.code === 200) {
+        ElMessage.success('删除成功')
+        await loadData()
+        emit('refresh')
+      } else {
+        ElMessage.error(res.msg || '删除失败')
+      }
+    } catch (e) {
+      ElMessage.error('删除失败')
+    }
+  }).catch(() => {})
+}
+
+const confirmMove = async () => {
+  moveLoading.value = true
+  try {
+    const res = await moveContactToGroup({
+      contactId: currentContactForMove.value.id,
+      groupName: targetGroupName.value
+    })
+    if (res.code === 200) {
+      ElMessage.success('移动成功')
+      moveDialogVisible.value = false
+      await loadData()
+      emit('refresh')
+    } else {
+      ElMessage.error(res.msg || '移动失败')
+    }
+  } catch (e) {
+    ElMessage.error('移动失败')
+  } finally {
+    moveLoading.value = false
+  }
+}
+
+const confirmRemark = async () => {
+  if (!newRemark.value.trim()) {
+    ElMessage.warning('请输入备注名称')
+    return
+  }
+  remarkLoading.value = true
+  try {
+    const res = await updateContactRemark(currentContactForRemark.value.id, {
+      remark: newRemark.value.trim()
+    })
+    if (res.code === 200) {
+      ElMessage.success('修改成功')
+      remarkDialogVisible.value = false
+      await loadData()
+      emit('refresh')
+    } else {
+      ElMessage.error(res.msg || '修改失败')
+    }
+  } catch (e) {
+    ElMessage.error('修改失败')
+  } finally {
+    remarkLoading.value = false
+  }
+}
+
+onMounted(() => {
+  loadData()
+  document.addEventListener('click', hideContextMenu)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', hideContextMenu)
+})
 
 defineExpose({ reload: loadData })
 </script>
@@ -166,6 +522,7 @@ defineExpose({ reload: loadData })
   flex-direction: column;
   background: white;
   border-right: 1px solid #e6e6e6;
+  position: relative;
 }
 
 .search-box {
@@ -193,6 +550,11 @@ defineExpose({ reload: loadData })
       background: #f5f7fa;
     }
 
+    .nav-badge {
+      display: flex;
+      align-items: center;
+    }
+
     .nav-icon {
       width: 36px;
       height: 36px;
@@ -213,14 +575,33 @@ defineExpose({ reload: loadData })
   }
 }
 
-.friends-list {
-  padding-top: 10px;
-}
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding-right: 8px;
 
-.list-header {
-  padding: 0 12px 8px;
-  font-size: 12px;
-  color: #999;
+  .group-name {
+    font-size: 14px;
+    color: #333;
+  }
+
+  .group-count {
+    font-size: 12px;
+    color: #999;
+  }
+
+  .group-more {
+    margin-left: auto;
+    cursor: pointer;
+    color: #999;
+    font-size: 16px;
+
+    &:hover {
+      color: #409eff;
+    }
+  }
 }
 
 .friend-item {
@@ -285,5 +666,54 @@ defineExpose({ reload: loadData })
   color: #ccc;
   font-size: 12px;
   padding: 20px 0;
+}
+
+/* 右键菜单 */
+.context-menu {
+  position: fixed;
+  background: white;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  min-width: 150px;
+  padding: 4px 0;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+
+  &:hover {
+    background: #f5f7fa;
+  }
+
+  &.danger {
+    color: #f56c6c;
+
+    &:hover {
+      background: #fef0f0;
+    }
+  }
+}
+
+/* 折叠面板标题样式优化 */
+:deep(.el-collapse-item__header) {
+  padding: 0 12px;
+  height: 40px;
+  line-height: 40px;
+}
+
+:deep(.el-collapse-item__wrap) {
+  border-bottom: none;
+}
+
+:deep(.el-collapse-item__content) {
+  padding-bottom: 0;
 }
 </style>

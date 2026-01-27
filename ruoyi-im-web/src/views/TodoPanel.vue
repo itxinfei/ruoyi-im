@@ -273,16 +273,47 @@ const dateIcon = (dueDate) => {
   return 'event'
 }
 
+// 数据转换：后端 -> 前端
+const transformTodoFromApi = (apiTodo) => {
+  // 优先级转换：1=低, 2=中, 3=高 -> low/medium/high
+  const priorityMap = { 1: 'low', 2: 'medium', 3: 'high' }
+  const priority = priorityMap[apiTodo.priority] || 'medium'
+  // 状态转换：COMPLETED -> completed=true
+  const completed = apiTodo.status === 'COMPLETED'
+  // 格式化截止日期
+  const dueDate = apiTodo.dueDate ? new Date(apiTodo.dueDate).toISOString() : null
+
+  return {
+    id: apiTodo.id,
+    title: apiTodo.title,
+    content: apiTodo.description || '',
+    priority: priority,
+    completed: completed,
+    dueDate: dueDate,
+    completedTime: apiTodo.completedTime,
+    createdAt: apiTodo.createTime,
+    priorityClass: getPriorityClass(priority)
+  }
+}
+
+// 数据转换：前端 -> 后端
+const transformTodoToApi = (todo) => {
+  // 优先级转换：low/medium/high -> 1/2/3
+  const priorityMap = { low: 1, medium: 2, high: 3 }
+  return {
+    title: todo.title,
+    description: todo.content,
+    priority: priorityMap[todo.priority] || 2
+  }
+}
+
 // 加载待办列表
 const loadTodos = async () => {
   loading.value = true
   try {
     const res = await getTodos()
     if (res.code === 200) {
-      todos.value = (res.data || []).map(item => ({
-        ...item,
-        priorityClass: getPriorityClass(item.priority)
-      }))
+      todos.value = (res.data || []).map(item => transformTodoFromApi(item))
     } else {
       ElMessage.error(res.msg || '加载失败')
     }

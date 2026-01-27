@@ -331,7 +331,7 @@ onMounted(() => {
       .dark & { color: var(--dt-text-secondary-dark); }
     }
     .cancel-reply, .cancel-edit { cursor: pointer; color: #8f959e; &:hover { color: var(--dt-error-color); }
-      .dark & { color: var(--dt-text-tertiary-dark); &:hover { color: var(--dt-error-color); }
+      .dark & { color: var(--dt-text-tertiary-dark); &:hover { color: var(--dt-error-color); } }
     }
   }
 }

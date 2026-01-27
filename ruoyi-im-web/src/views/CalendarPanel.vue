@@ -208,13 +208,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import { getEventsByTimeRange, createEvent, updateEvent, deleteEvent } from '@/api/im/schedule'
 
 // --- State ---
 const currentDate = ref(new Date())
 const selectedDate = ref(new Date())
 const currentView = ref('周')
 const currentTimeTop = ref(0)
+const loading = ref(false)
 let timer = null
 
 const todos = ref([
@@ -222,68 +225,8 @@ const todos = ref([
   { id: 2, text: '回复客户邮件', completed: false }
 ])
 
-const allEvents = ref([
-  {
-    id: 1,
-    title: '部门周会',
-    startTime: '09:00',
-    endTime: '10:30',
-    date: '',
-    color: 'blue',
-    location: '会议室 A302',
-    attendees: [{name: '李'}, {name: '王'}, {name: '+'}]
-  },
-  {
-    id: 2,
-    title: '产品需求评审',
-    startTime: '10:00',
-    endTime: '11:30',
-    date: '',
-    color: 'blue',
-    location: '会议室 A302',
-    attendees: [{name: '张'}, {name: '陈'}]
-  },
-  {
-    id: 3,
-    title: '技术分享会',
-    startTime: '11:00',
-    endTime: '12:00',
-    date: '',
-    color: 'emerald',
-    location: null,
-    attendees: []
-  },
-  {
-    id: 4,
-    title: '全员大会',
-    startTime: '14:00',
-    endTime: '15:00',
-    date: '',
-    color: 'orange',
-    location: 'Zoom 在线会议',
-    attendees: [{name: '全'}]
-  },
-  {
-    id: 5,
-    title: 'Q4 季度规划会',
-    startTime: '16:00',
-    endTime: '18:00',
-    date: '',
-    color: 'purple',
-    location: '会议室 B101',
-    attendees: [{name: '高'}, {name: '李'}, {name: '赵'}, {name: '钱'}]
-  },
-  {
-    id: 6,
-    title: '提交周报',
-    startTime: '17:00',
-    endTime: '17:30',
-    date: '',
-    color: 'slate',
-    location: null,
-    attendees: []
-  }
-])
+// 从API加载的日程事件
+const allEvents = ref([])
 
 // --- Helpers ---
 const hours = Array.from({ length: 13 }, (_, i) => i + 8) // 08:00 - 20:00
@@ -292,27 +235,95 @@ const HOUR_HEIGHT = 80
 const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
 
-const initMockData = () => {
-  const today = new Date();
-  const fmt = (d) => {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
-  }
-
-  const d1 = new Date(today); d1.setDate(today.getDate() - 1);
-  const d2 = new Date(today);
-  const d3 = new Date(today); d3.setDate(today.getDate() + 2);
-
-  allEvents.value[0].date = fmt(d1);
-  allEvents.value[1].date = fmt(d2);
-  allEvents.value[2].date = fmt(d2);
-  allEvents.value[3].date = fmt(d2);
-  allEvents.value[4].date = fmt(d2);
-  allEvents.value[5].date = fmt(d3);
+// 格式化日期为 yyyy-MM-dd HH:mm:ss
+const formatDateTime = (date, time = '00:00:00') => {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d} ${time}`
 }
-initMockData();
+
+// 格式化日期为 yyyy-MM-dd
+const formatDateOnly = (date) => {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+// 颜色映射：后端颜色 -> 前端颜色类
+const colorMap = {
+  'BLUE': 'blue',
+  'GREEN': 'emerald',
+  'ORANGE': 'orange',
+  'PURPLE': 'purple',
+  'RED': 'red',
+  'GRAY': 'slate',
+  'DEFAULT': 'blue'
+}
+
+// 加载日程数据
+const loadEvents = async () => {
+  loading.value = true
+  try {
+    // 获取当前周的开始和结束时间
+    const curr = new Date(currentDate.value)
+    const day = curr.getDay()
+    const diff = curr.getDate() - day + (day === 0 ? -6 : 1)
+    const monday = new Date(curr.setDate(diff))
+
+    const startTime = new Date(monday)
+    startTime.setHours(0, 0, 0, 0)
+
+    const endTime = new Date(monday)
+    endTime.setDate(monday.getDate() + 6)
+    endTime.setHours(23, 59, 59, 999)
+
+    const res = await getEventsByTimeRange(
+      formatDateTime(startTime, '00:00:00'),
+      formatDateTime(endTime, '23:59:59')
+    )
+
+    if (res.code === 200 && res.data) {
+      // 转换后端数据格式为前端需要的格式
+      allEvents.value = res.data.map(event => {
+        const startDate = new Date(event.startTime)
+        const endDate = new Date(event.endTime)
+
+        return {
+          id: event.id,
+          title: event.title,
+          startTime: `${String(startDate.getHours()).padStart(2, '0')}:${String(startDate.getMinutes()).padStart(2, '0')}`,
+          endTime: `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`,
+          date: formatDateOnly(startDate),
+          color: colorMap[event.color?.toUpperCase()] || colorMap.DEFAULT,
+          location: event.location,
+          attendees: (event.participants || []).map(p => ({
+            name: p.nickname || p.username || '?'
+          })),
+          description: event.description
+        }
+      })
+    }
+  } catch (error) {
+    console.error('加载日程失败:', error)
+    // 失败时使用空数组，不显示错误
+  } finally {
+    loading.value = false
+  }
+}
+
+// 监听当前日期变化，重新加载日程
+watch(currentDate, () => {
+  loadEvents()
+})
+
+// 初始化加载
+onMounted(() => {
+  loadEvents()
+  updateCurrentTime()
+  timer = setInterval(updateCurrentTime, 60000)
+})
 
 // --- Computed ---
 const weekHeaders = computed(() => {
@@ -466,14 +477,12 @@ const handleEventClick = (event) => {
   selectedDate.value = new Date(event.date)
 }
 
-const handleAddSchedule = () => {}
+const handleAddSchedule = () => {
+  // TODO: 打开日程创建对话框
+  ElMessage.info('新建日程功能开发中...')
+}
 
-// Lifecycle
-onMounted(() => {
-  updateCurrentTime()
-  timer = setInterval(updateCurrentTime, 60000)
-})
-
+// Lifecycle (已移到前面)
 onUnmounted(() => {
   if (timer) clearInterval(timer)
 })

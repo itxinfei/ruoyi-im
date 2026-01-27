@@ -130,6 +130,16 @@ watch(visible, (val) => {
   }
 })
 
+// 数据转换：前端 -> 后端
+const transformTodoToApi = (todo) => {
+  const priorityMap = { low: 1, medium: 2, high: 3 }
+  return {
+    title: todo.title,
+    description: todo.content,
+    priority: priorityMap[todo.priority] || 2
+  }
+}
+
 // 提交表单
 const handleSubmit = async () => {
   try {
@@ -139,7 +149,8 @@ const handleSubmit = async () => {
     let res
     if (isEdit.value) {
       // 编辑模式
-      res = await updateTodo(props.todo.id, form)
+      const apiData = transformTodoToApi(form)
+      res = await updateTodo(props.todo.id, apiData)
       if (res.code === 200) {
         ElMessage.success('保存成功')
       } else {
@@ -147,7 +158,8 @@ const handleSubmit = async () => {
       }
     } else {
       // 新建模式
-      res = await createTodo(form)
+      const apiData = transformTodoToApi(form)
+      res = await createTodo(apiData)
       if (res.code === 200) {
         ElMessage.success('创建成功')
       } else {

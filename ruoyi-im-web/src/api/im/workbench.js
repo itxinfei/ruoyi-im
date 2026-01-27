@@ -1,5 +1,7 @@
 /**
  * 工作台相关 API
+ * 对应后端 ImWorkbenchController
+ * @author ruoyi
  */
 import request from '../request'
 
@@ -11,27 +13,40 @@ import request from '../request'
  * @returns {Promise}
  */
 export function getTodos(params) {
-    return request({
-        url: '/api/im/workbench/todos',
-        method: 'get',
-        params
-    })
+  return request({
+    url: '/api/im/workbench/todos',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取工作台数据概览
+ * @returns {Promise}
+ */
+export function getOverview() {
+  return request({
+    url: '/api/im/workbench/overview',
+    method: 'get'
+  })
 }
 
 /**
  * 创建待办
  * @param {Object} data - 待办数据
  * @param {string} data.title - 标题
- * @param {string} data.content - 内容
- * @param {string} data.dueDate - 截止日期
+ * @param {string} data.description - 描述
+ * @param {string} data.type - 类型（可选，默认 TASK）
+ * @param {number} data.relatedId - 关联ID（可选）
+ * @param {number} data.priority - 优先级（可选，1=低, 2=中, 3=高）
  * @returns {Promise}
  */
 export function createTodo(data) {
-    return request({
-        url: '/api/im/workbench/todo',
-        method: 'post',
-        data
-    })
+  return request({
+    url: '/api/im/workbench/todos',
+    method: 'post',
+    params: data
+  })
 }
 
 /**
@@ -40,24 +55,26 @@ export function createTodo(data) {
  * @returns {Promise}
  */
 export function completeTodo(todoId) {
-    return request({
-        url: `/api/im/workbench/todo/${todoId}/complete`,
-        method: 'put'
-    })
+  return request({
+    url: `/api/im/workbench/todos/${todoId}/complete`,
+    method: 'put'
+  })
 }
 
 /**
  * 更新待办
  * @param {number} todoId - 待办ID
  * @param {Object} data - 待办数据
+ * @param {string} data.title - 标题
+ * @param {string} data.description - 描述
  * @returns {Promise}
  */
 export function updateTodo(todoId, data) {
-    return request({
-        url: `/api/im/workbench/todo/${todoId}`,
-        method: 'put',
-        data
-    })
+  return request({
+    url: `/api/im/workbench/todos/${todoId}`,
+    method: 'put',
+    params: data
+  })
 }
 
 /**
@@ -66,10 +83,10 @@ export function updateTodo(todoId, data) {
  * @returns {Promise}
  */
 export function deleteTodo(todoId) {
-    return request({
-        url: `/api/im/workbench/todo/${todoId}`,
-        method: 'delete'
-    })
+  return request({
+    url: `/api/im/workbench/todos/${todoId}`,
+    method: 'delete'
+  })
 }
 
 /**
@@ -79,11 +96,11 @@ export function deleteTodo(todoId) {
  * @returns {Promise}
  */
 export function getApprovals(params) {
-    return request({
-        url: '/api/im/approval/pending',
-        method: 'get',
-        params
-    })
+  return request({
+    url: '/api/im/approval/pending',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -95,11 +112,11 @@ export function getApprovals(params) {
  * @returns {Promise}
  */
 export function handleApproval(data) {
-    return request({
-        url: '/api/im/approval/handle',
-        method: 'post',
-        data
-    })
+  return request({
+    url: '/api/im/approval/handle',
+    method: 'post',
+    data
+  })
 }
 
 /**
@@ -110,11 +127,11 @@ export function handleApproval(data) {
  * @returns {Promise}
  */
 export function checkIn(data) {
-    return request({
-        url: '/api/im/attendance/checkIn',
-        method: 'post',
-        data
-    })
+  return request({
+    url: '/api/im/attendance/checkIn',
+    method: 'post',
+    data
+  })
 }
 
 /**
@@ -124,11 +141,11 @@ export function checkIn(data) {
  * @returns {Promise}
  */
 export function getAttendance(params) {
-    return request({
-        url: '/api/im/attendance/records',
-        method: 'get',
-        params
-    })
+  return request({
+    url: '/api/im/attendance/records',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -136,10 +153,10 @@ export function getAttendance(params) {
  * @returns {Promise}
  */
 export function getAnnouncements() {
-    return request({
-        url: '/api/im/announcement/latest',
-        method: 'get'
-    })
+  return request({
+    url: '/api/im/announcement/latest',
+    method: 'get'
+  })
 }
 
 /**
@@ -147,8 +164,23 @@ export function getAnnouncements() {
  * @returns {Promise}
  */
 export function getStatistics() {
-    return request({
-        url: '/api/im/workbench/statistics',
-        method: 'get'
-    })
+  return request({
+    url: '/api/im/workbench/statistics',
+    method: 'get'
+  })
+}
+
+export default {
+  getTodos,
+  getOverview,
+  createTodo,
+  completeTodo,
+  updateTodo,
+  deleteTodo,
+  getApprovals,
+  handleApproval,
+  checkIn,
+  getAttendance,
+  getAnnouncements,
+  getStatistics
 }

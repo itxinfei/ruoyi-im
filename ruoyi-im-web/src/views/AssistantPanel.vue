@@ -144,6 +144,7 @@
 import { ref, computed, nextTick, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
+import { chat as chatApi } from '@/api/im/ai'
 
 const store = useStore()
 const messagesContainer = ref(null)
@@ -153,6 +154,7 @@ const currentUserNickname = computed(() => currentUser.value.nickname || current
 
 // 状态
 const currentChat = ref(null)
+const conversationId = ref(null)
 const inputMessage = ref('')
 const isSending = ref(false)
 const isTyping = ref(false)
@@ -160,21 +162,8 @@ const isTyping = ref(false)
 // 消息列表
 const messages = ref([])
 
-// 对话历史
-const chatHistory = ref([
-  {
-    id: 1,
-    title: '周报总结',
-    preview: '帮我生成本周工作总结',
-    time: '昨天'
-  },
-  {
-    id: 2,
-    title: '代码优化',
-    preview: '这段代码如何优化',
-    time: '3天前'
-  }
-])
+// 对话历史 - 暂时保留，后续可对接真实API
+const chatHistory = ref([])
 
 // 快捷功能
 const quickActions = [
@@ -186,9 +175,15 @@ const quickActions = [
   { id: 6, label: '创意', icon: 'lightbulb', bgColor: '#8b5cf6', prompt: '请给我一些创意想法：' }
 ]
 
+// 生成会话ID
+const generateConversationId = () => {
+  return `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+}
+
 // 开始新对话
 const startNewChat = () => {
   currentChat.value = null
+  conversationId.value = null
   messages.value = []
   inputMessage.value = ''
 }
@@ -202,7 +197,9 @@ const handleQuickAction = (action) => {
 // 加载历史对话
 const loadChat = (chat) => {
   currentChat.value = chat
-  messages.value = [
+  conversationId.value = chat.conversationId
+  // 这里应该从后端加载历史消息，暂时使用模拟数据
+  messages.value = chat.messages || [
     { role: 'user', content: chat.preview },
     { role: 'assistant', content: '这是历史对话的回复内容...' }
   ]
@@ -211,44 +208,83 @@ const loadChat = (chat) => {
 // 发送消息
 const sendMessage = async () => {
   const content = inputMessage.value.trim()
-  if (!content) return
+  if (!content || isSending.value) return
+
+  // 如果没有会话ID，生成一个新的
+  if (!conversationId.value) {
+    conversationId.value = generateConversationId()
+  }
 
   // 添加用户消息
   messages.value.push({ role: 'user', content })
+  const userMessage = content
   inputMessage.value = ''
 
   // 滚动到底部
   await nextTick()
   scrollToBottom()
 
-  // 模拟 AI 响应
+  // 调用 AI API
+  isSending.value = true
   isTyping.value = true
-  setTimeout(() => {
-    isTyping.value = false
-    const response = generateMockResponse(content)
-    messages.value.push({ role: 'assistant', content: response })
-    nextTick(() => scrollToBottom())
-  }, 1500 + Math.random() * 1000)
-}
 
-// 生成模拟回复
-const generateMockResponse = (input) => {
-  const responses = [
-    `我理解你说的"${input}"。这是一个很有趣的问题，让我来帮你分析一下。\n\n首先，我们可以从以下几个方面来考虑：\n1. 问题的核心是什么\n2. 有哪些可能的解决方案\n3. 每种方案的优缺点\n\n你希望我详细展开哪个方面呢？`,
-    `关于"${input}"，我的看法是：\n\n这是一个很好的问题。根据我的分析，建议你可以尝试以下方法：\n• 方法一：循序渐进\n• 方法二：寻求帮助\n• 方法三：持续学习\n\n有什么需要我进一步解释的吗？`,
-    `"${input}" - 这个问题很有意思！\n\n让我为你整理一下思路：\n\n1. 首先明确目标\n2. 然后制定计划\n3. 最后执行和验证\n\n你觉得这个思路如何？`
-  ]
-  return responses[Math.floor(Math.random() * responses.length)]
+  try {
+    const res = await chatApi({
+      content: userMessage,
+      conversationId: conversationId.value,
+      userId: currentUser.value.id
+    })
+
+    isTyping.value = false
+
+    if (res.code === 200 && res.data) {
+      const aiResponse = res.data.reply || res.data.content || res.data.message || '抱歉，我没有收到回复。'
+      messages.value.push({ role: 'assistant', content: aiResponse })
+
+      // 如果是第一条消息，更新会话历史
+      if (messages.value.length === 2) {
+        chatHistory.value.unshift({
+          id: Date.now(),
+          title: userMessage.slice(0, 20) + (userMessage.length > 20 ? '...' : ''),
+          preview: userMessage,
+          time: '刚刚',
+          conversationId: conversationId.value,
+          messages: [...messages.value]
+        })
+      }
+    } else {
+      throw new Error(res.msg || 'AI 响应失败')
+    }
+
+    nextTick(() => scrollToBottom())
+  } catch (error) {
+    console.error('AI 聊天失败:', error)
+    isTyping.value = false
+    ElMessage.error(error.message || 'AI 服务暂时不可用，请稍后重试')
+    // 失败时添加提示消息
+    messages.value.push({
+      role: 'assistant',
+      content: '抱歉，我现在无法回复。请稍后再试，或检查网络连接。'
+    })
+    nextTick(() => scrollToBottom())
+  } finally {
+    isSending.value = false
+  }
 }
 
 // 重新生成
-const regenerateMessage = () => {
+const regenerateMessage = async () => {
   // 找到最后的用户消息，重新生成
   const lastUserMessage = [...messages.value].reverse().find(m => m.role === 'user')
-  if (lastUserMessage) {
-    messages.value = messages.value.slice(0, messages.value.length - 1)
+  if (lastUserMessage && !isSending.value) {
+    // 移除最后的 AI 回复
+    const lastAssistantIndex = messages.value.map(m => m.role).lastIndexOf('assistant')
+    if (lastAssistantIndex > -1) {
+      messages.value.splice(lastAssistantIndex, 1)
+    }
+    // 重新发送
     inputMessage.value = lastUserMessage.content
-    sendMessage()
+    await sendMessage()
   }
 }
 
@@ -268,6 +304,8 @@ const formatMessage = (content) => {
     .replace(/\n/g, '<br>')
     .replace(/• /g, '<br>• ')
     .replace(/(\d+)\./g, '<br>$1.')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.*?)`/g, '<code>$1</code>')
 }
 
 // 滚动到底部
