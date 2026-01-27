@@ -75,7 +75,7 @@
             <el-button type="primary" plain @click="handleCombineForward"><el-icon><Collection /></el-icon> 合并转发</el-button>
             <el-button type="danger" plain @click="handleBatchDelete"><el-icon><Delete /></el-icon> 删除</el-button>
             <el-divider direction="vertical" />
-            <el-button link @click="isMultiSelectMode = false">取消</el-button>
+            <el-button link @click="handleClearSelection">取消</el-button>
           </div>
         </div>
       </Transition>
@@ -365,13 +365,16 @@ const handleAddToTodo = async (msg) => {
 }
 
 // 处理多选
-const isMultiSelectMode = ref(false)
-const selectedMessages = ref([])
+const isMultiSelectMode = computed(() => store.getters['im/message/selectedMessageCount'] > 0)
+const selectedMessages = computed(() => store.getters['im/message/selectedMessageList'])
 
 const handleMultiSelect = (msg) => {
-  isMultiSelectMode.value = true
-  selectedMessages.value = [msg.id]
+  store.commit('im/message/TOGGLE_MESSAGE_SELECTION', msg.id)
   ElMessage.info('进入多选模式')
+}
+
+const handleClearSelection = () => {
+  store.commit('im/message/CLEAR_MESSAGE_SELECTION')
 }
 
 // 处理已读上报

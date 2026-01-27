@@ -1,12 +1,12 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="转发消息"
+    :title="messages.length > 1 ? `转发 ${messages.length} 条消息` : '转发消息'"
     width="600px"
     @close="handleClose"
   >
     <div class="forward-dialog">
-      <div class="forward-message">
+      <div class="forward-message" v-if="messages.length === 1">
         <div class="forward-message-label">转发消息：</div>
         <div class="forward-message-content">
           <div v-if="message.type === 'IMAGE'">
@@ -23,6 +23,19 @@
           </div>
           <div v-else>
             {{ message.content }}
+          </div>
+        </div>
+      </div>
+
+      <div class="forward-message" v-else>
+        <div class="forward-message-label">转发 {{ messages.length }} 条消息：</div>
+        <div class="forward-message-content multi-message-preview">
+          <div v-for="(msg, index) in messages.slice(0, 3)" :key="msg.id" class="message-item">
+            <span class="message-sender">{{ msg.senderName }}:</span>
+            <span class="message-text">{{ getMessagePreview(msg) }}</span>
+          </div>
+          <div v-if="messages.length > 3" class="more-messages">
+            还有 {{ messages.length - 3 }} 条消息...
           </div>
         </div>
       </div>
@@ -82,7 +95,7 @@ import { addTokenToUrl } from '@/utils/file'
 const store = useStore()
 
 const visible = ref(false)
-const message = ref(null)
+const messages = ref([])
 const searchKeyword = ref('')
 const selectedSessionId = ref(null)
 
@@ -100,9 +113,29 @@ const filteredSessions = computed(() => {
   )
 })
 
+// 获取单条消息（兼容旧代码）
+const message = computed(() => messages.value[0] || null)
+
+// 获取消息预览
+const getMessagePreview = (msg) => {
+  switch (msg.type) {
+    case 'IMAGE':
+      return '[图片]'
+    case 'VIDEO':
+      return '[视频]'
+    case 'FILE':
+      return `[文件] ${msg.fileData?.fileName || '未知文件'}`
+    case 'AUDIO':
+    case 'VOICE':
+      return '[语音]'
+    default:
+      return msg.content || '[消息]'
+  }
+}
+
 // 打开对话框
-const open = (msg) => {
-  message.value = msg
+const open = (msgs) => {
+  messages.value = Array.isArray(msgs) ? msgs : [msgs]
   selectedSessionId.value = null
   searchKeyword.value = ''
   visible.value = true
@@ -124,7 +157,7 @@ const handleForward = () => {
 
   // 触发转发事件，由父组件处理实际的转发逻辑
   emit('forward', {
-    message: message.value,
+    messages: messages.value,
     targetSessionId: selectedSessionId.value
   })
 }
@@ -132,7 +165,7 @@ const handleForward = () => {
 // 关闭对话框
 const handleClose = () => {
   visible.value = false
-  message.value = null
+  messages.value = []
   selectedSessionId.value = null
   searchKeyword.value = ''
 }
@@ -174,6 +207,34 @@ defineExpose({
 
         .el-icon {
           font-size: 24px;
+        }
+      }
+
+      &.multi-message-preview {
+        .message-item {
+          padding: 8px;
+          border-bottom: 1px solid #e8e8e8;
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          .message-sender {
+            font-weight: 600;
+            color: #1890ff;
+            margin-right: 8px;
+          }
+
+          .message-text {
+            color: #595959;
+          }
+        }
+
+        .more-messages {
+          padding: 8px;
+          color: #8c8c8c;
+          font-style: italic;
+          text-align: center;
         }
       }
     }

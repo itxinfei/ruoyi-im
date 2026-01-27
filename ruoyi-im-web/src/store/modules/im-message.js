@@ -32,7 +32,10 @@ export default {
     replyingMessage: null,
 
     // 加载状态
-    loading: false
+    loading: false,
+
+    // 选中的消息列表（用于多选操作）
+    selectedMessages: new Set()
   }),
 
   getters: {
@@ -45,6 +48,19 @@ export default {
     // 获取指定会话的消息列表
     messagesBySessionId: (state) => (sessionId) => {
       return state.messages[sessionId] || []
+    },
+
+    // 获取选中消息的数量
+    selectedMessageCount: (state) => state.selectedMessages.size,
+
+    // 获取选中消息的列表
+    selectedMessageList: (state, getters, rootState) => {
+      const sessionId = rootState.session.currentSession?.id
+      if (!sessionId || !state.messages[sessionId]) return []
+
+      return Array.from(state.selectedMessages).map(messageId => {
+        return state.messages[sessionId].find(msg => msg.id === messageId)
+      }).filter(msg => msg !== undefined)
     }
   },
 
@@ -113,6 +129,22 @@ export default {
     CLEAR_STATE(state) {
       state.messages = {}
       state.replyingMessage = null
+    },
+
+    // 切换消息选中状态
+    TOGGLE_MESSAGE_SELECTION(state, messageId) {
+      if (state.selectedMessages.has(messageId)) {
+        state.selectedMessages.delete(messageId)
+      } else {
+        state.selectedMessages.add(messageId)
+      }
+      // 触发响应式更新
+      state.selectedMessages = new Set(state.selectedMessages)
+    },
+
+    // 清空选中消息
+    CLEAR_MESSAGE_SELECTION(state) {
+      state.selectedMessages = new Set()
     }
   },
 

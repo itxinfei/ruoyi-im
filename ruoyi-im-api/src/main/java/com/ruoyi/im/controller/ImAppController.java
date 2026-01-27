@@ -3,13 +3,15 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImApplication;
 import com.ruoyi.im.service.ImApplicationService;
+import com.ruoyi.im.vo.app.ImApplicationVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 应用中心控制器
@@ -22,8 +24,41 @@ import java.util.Map;
 @RequestMapping("/api/im/app")
 public class ImAppController {
 
-    @Autowired
-    private ImApplicationService applicationService;
+    private final ImApplicationService applicationService;
+
+    public ImAppController(ImApplicationService applicationService) {
+        this.applicationService = applicationService;
+    }
+
+    /**
+     * 将 Entity 转换为 VO
+     *
+     * @param app 应用实体
+     * @return 应用视图对象
+     */
+    private ImApplicationVO toVO(ImApplication app) {
+        if (app == null) {
+            return new ImApplicationVO();
+        }
+        ImApplicationVO vo = new ImApplicationVO();
+        BeanUtils.copyProperties(app, vo);
+        return vo;
+    }
+
+    /**
+     * 批量将 Entity 转换为 VO
+     *
+     * @param list 应用实体列表
+     * @return 应用视图对象列表
+     */
+    private List<ImApplicationVO> toVOList(List<ImApplication> list) {
+        if (list == null || list.isEmpty()) {
+            return List.of();
+        }
+        return list.stream()
+                .map(this::toVO)
+                .collect(Collectors.toList());
+    }
 
     /**
      * 获取应用列表
@@ -34,9 +69,9 @@ public class ImAppController {
      */
     @Operation(summary = "获取应用列表", description = "获取所有应用列表，可按分类筛选")
     @GetMapping("/list")
-    public Result<List<ImApplication>> getApplications(@RequestParam(required = false) String category) {
+    public Result<List<ImApplicationVO>> getApplications(@RequestParam(required = false) String category) {
         List<ImApplication> list = applicationService.getApplications(category);
-        return Result.success(list);
+        return Result.success(toVOList(list));
     }
 
     /**
@@ -47,9 +82,9 @@ public class ImAppController {
      */
     @Operation(summary = "获取可见应用列表", description = "获取当前用户可见的应用列表")
     @GetMapping("/visible")
-    public Result<List<ImApplication>> getVisibleApplications() {
+    public Result<List<ImApplicationVO>> getVisibleApplications() {
         List<ImApplication> list = applicationService.getVisibleApplications();
-        return Result.success(list);
+        return Result.success(toVOList(list));
     }
 
     /**
@@ -60,9 +95,15 @@ public class ImAppController {
      */
     @Operation(summary = "按分类获取应用", description = "按分类分组获取应用")
     @GetMapping("/category")
-    public Result<Map<String, List<ImApplication>>> getApplicationsByCategory() {
+    public Result<Map<String, List<ImApplicationVO>>> getApplicationsByCategory() {
         Map<String, List<ImApplication>> map = applicationService.getApplicationsByCategory();
-        return Result.success(map);
+        // 转换 Map 中的 List<ImApplication> 为 List<ImApplicationVO>
+        Map<String, List<ImApplicationVO>> voMap = map.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> toVOList(e.getValue())
+                ));
+        return Result.success(voMap);
     }
 
     /**
@@ -74,9 +115,9 @@ public class ImAppController {
      */
     @Operation(summary = "获取应用详情", description = "获取应用详细信息")
     @GetMapping("/{id}")
-    public Result<ImApplication> getApplicationById(@PathVariable Long id) {
+    public Result<ImApplicationVO> getApplicationById(@PathVariable Long id) {
         ImApplication app = applicationService.getApplicationById(id);
-        return Result.success(app);
+        return Result.success(toVO(app));
     }
 
     /**
@@ -148,7 +189,7 @@ public class ImAppController {
     @Operation(summary = "设置应用可见性", description = "设置应用的可见性状态")
     @PutMapping("/{id}/visibility")
     public Result<Void> setVisibility(@PathVariable Long id,
-                                     @RequestParam Boolean isVisible) {
+                                      @RequestParam Boolean isVisible) {
         applicationService.setVisibility(id, isVisible);
         return Result.success("设置成功");
     }

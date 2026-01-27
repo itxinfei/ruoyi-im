@@ -3,14 +3,16 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImAuditLog;
 import com.ruoyi.im.service.ImAuditService;
+import com.ruoyi.im.vo.audit.ImAuditLogVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 审计日志控制器
@@ -23,8 +25,41 @@ import java.util.Map;
 @RequestMapping("/api/im/audit")
 public class ImAuditController {
 
-    @Autowired
-    private ImAuditService imAuditService;
+    private final ImAuditService imAuditService;
+
+    public ImAuditController(ImAuditService imAuditService) {
+        this.imAuditService = imAuditService;
+    }
+
+    /**
+     * 将 Entity 转换为 VO
+     *
+     * @param log 审计日志实体
+     * @return 审计日志视图对象
+     */
+    private ImAuditLogVO toVO(ImAuditLog log) {
+        if (log == null) {
+            return new ImAuditLogVO();
+        }
+        ImAuditLogVO vo = new ImAuditLogVO();
+        BeanUtils.copyProperties(log, vo);
+        return vo;
+    }
+
+    /**
+     * 批量将 Entity 转换为 VO
+     *
+     * @param list 审计日志实体列表
+     * @return 审计日志视图对象列表
+     */
+    private List<ImAuditLogVO> toVOList(List<ImAuditLog> list) {
+        if (list == null || list.isEmpty()) {
+            return List.of();
+        }
+        return list.stream()
+                .map(this::toVO)
+                .collect(Collectors.toList());
+    }
 
     /**
      * 获取审计日志列表
@@ -64,9 +99,9 @@ public class ImAuditController {
      */
     @Operation(summary = "获取审计日志详情", description = "根据日志ID查询详细的操作日志信息")
     @GetMapping("/{id}")
-    public Result<ImAuditLog> getById(@PathVariable Long id) {
+    public Result<ImAuditLogVO> getById(@PathVariable Long id) {
         ImAuditLog log = imAuditService.getAuditLogById(id);
-        return Result.success(log);
+        return Result.success(toVO(log));
     }
 
     /**
@@ -99,12 +134,12 @@ public class ImAuditController {
      */
     @Operation(summary = "获取用户操作日志", description = "查询指定用户的操作日志")
     @GetMapping("/user/{userId}")
-    public Result<List<ImAuditLog>> getUserLogs(
+    public Result<List<ImAuditLogVO>> getUserLogs(
             @PathVariable Long userId,
             @RequestParam(required = false) LocalDateTime startTime,
             @RequestParam(required = false) LocalDateTime endTime) {
         List<ImAuditLog> logs = imAuditService.getUserLogs(userId, startTime, endTime);
-        return Result.success(logs);
+        return Result.success(toVOList(logs));
     }
 
     /**

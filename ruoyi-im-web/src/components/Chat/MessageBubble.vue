@@ -1,10 +1,14 @@
 <template>
-  <el-dropdown 
-    trigger="contextmenu" 
-    @command="handleCommand" 
+  <el-dropdown
+    trigger="contextmenu"
+    @command="handleCommand"
     popper-class="message-context-menu"
   >
-    <div class="bubble" :class="[message.type, { 'is-own': message.isOwn }]">
+    <div
+      class="bubble"
+      :class="[message.type, { 'is-own': message.isOwn, 'is-selected': isSelected }]"
+      @click="handleClick"
+    >
       <!-- 引用消息区块 (如果该消息是回复某人的) -->
       <div v-if="message.replyTo" class="bubble-reply-ref" @click.stop="$emit('scroll-to', message.replyTo.id)">
         <span class="ref-user">{{ message.replyTo.senderName }}:</span>
@@ -18,10 +22,14 @@
       </div>
 
       <!-- 图片消息 -->
-      <img v-else-if="message.type === 'IMAGE' && parsedContent.imageUrl" 
-           :src="parsedContent.imageUrl" 
-           class="msg-image" 
-           @click="$emit('preview', parsedContent.imageUrl)" />
+      <viewer v-else-if="message.type === 'IMAGE' && parsedContent.imageUrl"
+              :images="[parsedContent.imageUrl]"
+              :options="{ toolbar: true, url: 'data-source', title: false }"
+              class="image-viewer">
+        <img :src="parsedContent.imageUrl"
+             class="msg-image"
+             data-source="click" />
+      </viewer>
 
       <!-- 文件消息 -->
       <div v-else-if="message.type === 'FILE'" class="msg-file" @click="$emit('download', parsedContent)">
@@ -86,6 +94,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useStore } from 'vuex'
 import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -94,6 +103,36 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['command', 'preview', 'download', 'at', 'scroll-to'])
+
+const store = useStore()
+const selectedMessages = computed(() => store.state.im.message.selectedMessages)
+
+const isSelected = computed(() => selectedMessages.value.has(props.message.id))
+
+const handleClick = (event) => {
+  if (event.ctrlKey || event.metaKey) {
+    // Ctrl + 点击：不连续多选
+    toggleSelection()
+    event.stopPropagation()
+  } else if (event.shiftKey) {
+    // Shift + 点击：连续多选
+    rangeSelection()
+    event.stopPropagation()
+  } else {
+    // 普通点击：不做处理，让父组件处理
+    emit('command', 'click', props.message)
+  }
+}
+
+const toggleSelection = () => {
+  store.commit('im/message/TOGGLE_MESSAGE_SELECTION', props.message.id)
+}
+
+const rangeSelection = () => {
+  // TODO: 实现连续选择逻辑
+  // 需要获取当前会话的所有消息，然后找到当前消息和最后选中的消息之间的所有消息
+  toggleSelection()
+}
 
 const handleCommand = (cmd) => {
   if (!cmd) return
@@ -139,13 +178,24 @@ const formatSize = (bytes) => {
   max-width: 520px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid #e2e8f0;
-  
+
+  &.is-selected {
+    border: 2px solid #1890ff;
+    background-color: #e6f7ff;
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+  }
+
   &.is-own {
     background: var(--dt-bubble-right-bg);
     color: #1f2329;
     border-radius: 16px 4px 16px 16px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     border: none;
+
+    &.is-selected {
+      border: 2px solid #1890ff;
+      background-color: #e6f7ff;
+    }
   }
 
   /* 引用回复展示 */
