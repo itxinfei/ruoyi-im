@@ -4,8 +4,8 @@ import com.ruoyi.im.domain.ImApplication;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImApplicationMapper;
 import com.ruoyi.im.service.ImApplicationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -19,8 +19,16 @@ import java.util.stream.Collectors;
 @Service
 public class ImApplicationServiceImpl implements ImApplicationService {
 
-    @Autowired
-    private ImApplicationMapper applicationMapper;
+    private final ImApplicationMapper applicationMapper;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param applicationMapper 应用Mapper
+     */
+    public ImApplicationServiceImpl(ImApplicationMapper applicationMapper) {
+        this.applicationMapper = applicationMapper;
+    }
 
     @Override
     public List<ImApplication> getApplications(String category) {
@@ -52,6 +60,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long createApplication(String name, String code, String category, String appType, String appUrl, String icon) {
         // 检查编码是否已存在
         ImApplication existApp = applicationMapper.selectImApplicationByCode(code);
@@ -75,6 +84,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateApplication(Long appId, String name, String description, String icon) {
         ImApplication app = applicationMapper.selectImApplicationById(appId);
         if (app == null) {
@@ -87,6 +97,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteApplication(Long appId) {
         ImApplication app = applicationMapper.selectImApplicationById(appId);
         if (app == null) {
@@ -99,6 +110,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void setVisibility(Long appId, Boolean isVisible) {
         ImApplication app = applicationMapper.selectImApplicationById(appId);
         if (app == null) {
