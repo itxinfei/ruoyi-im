@@ -2,10 +2,11 @@
   <el-dialog
     v-model="visible"
     title=""
-    width="1000px"
-    class="system-settings-dialog"
+    :width="dialogWidth"
+    :class="['system-settings-dialog', { 'is-mobile': isMobile }]"
     destroy-on-close
     append-to-body
+    :fullscreen="isFullscreen"
   >
     <div class="settings-container">
       <div class="tabs-header">
@@ -397,7 +398,7 @@
 </template>
 
 <script setup>
-import { ref, watch, reactive, computed } from 'vue'
+import { ref, watch, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { useTheme } from '@/composables/useTheme'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -417,6 +418,36 @@ const showChangePassword = ref(false)
 const showEditProfile = ref(false)
 const activeMenu = ref('account')
 const { isDark, themeMode, setThemeMode } = useTheme()
+
+// 响应式状态
+const windowWidth = ref(window.innerWidth)
+
+// 响应式计算属性
+const isMobile = computed(() => windowWidth.value < 768)
+const isTablet = computed(() => windowWidth.value >= 768 && windowWidth.value < 1024)
+const isSmallDesktop = computed(() => windowWidth.value >= 1024 && windowWidth.value < 1366)
+const isFullscreen = computed(() => windowWidth.value < 480)
+
+const dialogWidth = computed(() => {
+  if (windowWidth.value < 480) return '100%'
+  if (windowWidth.value < 768) return '95%'
+  if (windowWidth.value < 1024) return '700px'
+  if (windowWidth.value < 1366) return '900px'
+  return '1000px'
+})
+
+// 窗口大小变化监听
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
 
 const menuItems = [
   { id: 'account', label: '账号安全', icon: 'manage_accounts' },
@@ -592,6 +623,317 @@ watch(visible, (val) => {
 
   :deep(.el-dialog) {
     border-radius: var(--dt-radius-2xl);
+  }
+
+  // 移动端全屏模式
+  &.is-mobile {
+    :deep(.el-dialog__body) {
+      height: 100vh;
+      max-height: 100vh;
+    }
+  }
+}
+
+// ==================== 响应式断点 ====================
+
+// 超小屏幕 (< 480px)
+@media (max-width: 479px) {
+  .system-settings-dialog {
+    :deep(.el-dialog) {
+      border-radius: 0;
+      margin: 0;
+    }
+
+    :deep(.el-dialog__body) {
+      height: 100vh;
+    }
+  }
+
+  .tabs-header {
+    padding: 12px 16px;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-item {
+      padding: 10px 14px;
+      flex-shrink: 0;
+
+      .tab-icon {
+        font-size: 20px;
+      }
+
+      .tab-label {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .content-area {
+    padding: 16px;
+
+    .section-title {
+      font-size: 18px;
+    }
+  }
+
+  .account-section .account-card {
+    padding: 20px;
+
+    .user-info {
+      flex-direction: column;
+      text-align: center;
+      gap: 16px;
+
+      .user-details {
+        .username {
+          font-size: 20px;
+        }
+      }
+    }
+
+    .action-buttons {
+      flex-direction: column;
+
+      .action-btn {
+        width: 100%;
+      }
+    }
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .setting-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    .setting-header {
+      width: 100%;
+
+      .icon-wrapper {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+
+      .setting-info {
+        h4 {
+          font-size: 16px;
+        }
+
+        p {
+          font-size: 14px;
+        }
+      }
+    }
+
+    .setting-controls {
+      width: 100%;
+      justify-content: space-between;
+
+      .el-select {
+        width: 100% !important;
+      }
+    }
+  }
+
+  .shortcut-key {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .about-section .about-card {
+    padding: 24px 16px;
+
+    .app-logo {
+      width: 64px;
+      height: 64px;
+
+      .logo-inner {
+        font-size: 24px;
+      }
+    }
+  }
+}
+
+// 小屏幕 (480px - 767px)
+@media (min-width: 480px) and (max-width: 767px) {
+  .system-settings-dialog {
+    :deep(.el-dialog__body) {
+      height: 70vh;
+    }
+  }
+
+  .tabs-header {
+    padding: 16px 20px;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-item {
+      padding: 12px 18px;
+      flex-shrink: 0;
+
+      .tab-icon {
+        font-size: 21px;
+      }
+
+      .tab-label {
+        font-size: 15px;
+      }
+    }
+  }
+
+  .content-area {
+    padding: 20px;
+
+    .section-title {
+      font-size: 19px;
+    }
+  }
+
+  .account-section .account-card {
+    padding: 24px;
+
+    .user-info {
+      gap: 16px;
+
+      .avatar-wrapper {
+        :deep(.el-avatar) {
+          width: 56px !important;
+          height: 56px !important;
+        }
+      }
+
+      .user-details {
+        .username {
+          font-size: 20px;
+        }
+
+        .user-id,
+        .user-email {
+          font-size: 14px;
+        }
+      }
+    }
+
+    .action-buttons {
+      gap: 12px;
+
+      .action-btn {
+        height: 44px;
+        font-size: 15px;
+      }
+    }
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .setting-card {
+    padding: 16px;
+
+    .setting-header {
+      gap: 12px;
+
+      .icon-wrapper {
+        width: 44px;
+        height: 44px;
+        font-size: 22px;
+      }
+
+      .setting-info {
+        h4 {
+          font-size: 17px;
+        }
+
+        p {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+
+  .shortcut-key {
+    font-size: 13px;
+    padding: 7px 14px;
+  }
+}
+
+// 平板 (768px - 1023px)
+@media (min-width: 768px) and (max-width: 1023px) {
+  .settings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tabs-header {
+    padding: 16px 20px;
+
+    .tab-item {
+      padding: 14px 20px;
+
+      .tab-icon {
+        font-size: 21px;
+      }
+
+      .tab-label {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .account-section .account-card {
+    padding: 28px;
+
+    .user-info {
+      gap: 18px;
+
+      .avatar-wrapper {
+        :deep(.el-avatar) {
+          width: 60px !important;
+          height: 60px !important;
+        }
+      }
+    }
+  }
+}
+
+// 小桌面 (1024px - 1365px)
+@media (min-width: 1024px) and (max-width: 1365px) {
+  .settings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .account-section .account-card {
+    padding: 28px;
+  }
+}
+
+// 大屏幕 (>= 1366px)
+@media (min-width: 1366px) {
+  .settings-grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 18px;
   }
 }
 
@@ -799,12 +1141,6 @@ watch(visible, (val) => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 16px;
-}
-
-@media (max-width: 768px) {
-  .settings-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .setting-card {

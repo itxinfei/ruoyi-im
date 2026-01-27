@@ -314,7 +314,9 @@ onMounted(() => {
     .el-icon, .material-icons-outlined { font-size: 19px; }
     .dark & { &:hover { background: #334155; } }
   }
-  .history-btn { font-size: 13px; color: #8f959e; &:hover { color: var(--dt-brand-color); } }
+  .history-btn { font-size: 13px; color: #8f959e; &:hover { color: var(--dt-brand-color); }
+    .dark & { color: var(--dt-text-tertiary-dark); &:hover { color: var(--dt-brand-color); } }
+  }
 }
 
 .reply-preview-container, .edit-preview-container {
@@ -325,8 +327,12 @@ onMounted(() => {
   .reply-content-box, .edit-content-box {
     display: flex; align-items: center; gap: 8px; font-size: 13px;
     .reply-user, .edit-label { color: var(--dt-brand-color); font-weight: 500; }
-    .reply-text, .edit-text { flex: 1; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .cancel-reply, .cancel-edit { cursor: pointer; color: #8f959e; &:hover { color: var(--dt-error-color); } }
+    .reply-text, .edit-text { flex: 1; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      .dark & { color: var(--dt-text-secondary-dark); }
+    }
+    .cancel-reply, .cancel-edit { cursor: pointer; color: #8f959e; &:hover { color: var(--dt-error-color); }
+      .dark & { color: var(--dt-text-tertiary-dark); &:hover { color: var(--dt-error-color); }
+    }
   }
 }
 
@@ -340,18 +346,119 @@ onMounted(() => {
   flex: 1; width: 100%; border: none; outline: none; resize: none;
   font-size: 15px; line-height: 1.6; color: #1f2329; padding: 0; min-height: 80px;
   background: transparent;
-  .dark & { color: #f1f5f9; }
+  .dark & { color: #f1f5f9; &::placeholder { color: var(--dt-text-quaternary-dark); } }
   &::placeholder { color: #bbbfc4; }
 }
 
 .input-footer {
   display: flex; justify-content: flex-end; align-items: center; gap: 16px; margin-top: 8px;
-  .hint-text { font-size: 12px; color: #8f959e; user-select: none; }
+  .hint-text { font-size: 12px; color: #8f959e; user-select: none;
+    .dark & { color: var(--dt-text-tertiary-dark); }
+  }
   .send-btn {
-    padding: 6px 24px; border-radius: 4px; border: none; background: #f2f3f5; color: #bbbfc4; 
+    padding: 6px 24px; border-radius: 4px; border: none; background: #f2f3f5; color: #bbbfc4;
     font-size: 14px; cursor: default; transition: all 0.2s;
     &.active { background: var(--dt-brand-color); color: #fff; cursor: pointer; &:hover { opacity: 0.9; } }
     &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+}
+
+// ============================================================================
+// 响应式断点
+// ============================================================================
+
+// 超小屏幕 (< 480px)
+@media (max-width: 479px) {
+  .chat-input-container {
+    padding: 4px 12px 12px;
+  }
+
+  .input-toolbar {
+    padding-bottom: 6px;
+
+    .toolbar-left {
+      gap: 2px;
+
+      .toolbar-btn {
+        padding: 5px;
+
+        .el-icon, .material-icons-outlined {
+          font-size: 18px;
+        }
+      }
+    }
+
+    .history-btn {
+      font-size: 12px;
+      padding: 0 8px;
+
+      .el-icon {
+        display: none;
+      }
+    }
+  }
+
+  .reply-preview-container,
+  .edit-preview-container {
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+
+    .reply-content-box,
+    .edit-content-box {
+      font-size: 12px;
+      gap: 6px;
+    }
+  }
+
+  .message-input {
+    font-size: 14px;
+    min-height: 60px;
+  }
+
+  .input-footer {
+    gap: 12px;
+    margin-top: 6px;
+
+    .hint-text {
+      font-size: 11px;
+    }
+
+    .send-btn {
+      padding: 5px 18px;
+      font-size: 13px;
+    }
+  }
+}
+
+// 小屏幕 (480px - 767px)
+@media (min-width: 480px) and (max-width: 767px) {
+  .input-toolbar {
+    .toolbar-left {
+      gap: 3px;
+
+      .toolbar-btn {
+        padding: 5px;
+      }
+    }
+  }
+
+  .reply-preview-container,
+  .edit-preview-container {
+    padding: 7px 11px;
+  }
+
+  .input-footer {
+    gap: 14px;
+  }
+}
+
+// 平板横屏 (768px - 1023px)
+@media (min-width: 768px) and (max-width: 1023px) {
+  .input-toolbar {
+    .toolbar-btn {
+      padding: 6px;
+    }
   }
 }
 </style>
