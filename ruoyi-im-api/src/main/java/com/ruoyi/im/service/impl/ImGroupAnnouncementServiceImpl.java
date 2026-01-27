@@ -6,7 +6,6 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImGroupAnnouncementMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.service.ImGroupAnnouncementService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,14 +20,23 @@ import java.util.List;
 @Service
 public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementService {
 
-    @Autowired
-    private ImGroupAnnouncementMapper announcementMapper;
+    private final ImGroupAnnouncementMapper announcementMapper;
+    private final ImGroupMemberMapper groupMemberMapper;
 
-    @Autowired
-    private ImGroupMemberMapper groupMemberMapper;
+    /**
+     * 构造器注入依赖
+     *
+     * @param announcementMapper 群组公告Mapper
+     * @param groupMemberMapper   群组成员Mapper
+     */
+    public ImGroupAnnouncementServiceImpl(ImGroupAnnouncementMapper announcementMapper,
+                                           ImGroupMemberMapper groupMemberMapper) {
+        this.announcementMapper = announcementMapper;
+        this.groupMemberMapper = groupMemberMapper;
+    }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long createAnnouncement(Long groupId, String content, Integer type, String attachmentUrl,
                                    Integer isPinned, LocalDateTime expireTime, Long senderId) {
         // 验证用户是否为群主或管理员
@@ -104,7 +112,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateAnnouncement(Long announcementId, String content, Long userId) {
         ImGroupAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
@@ -133,7 +141,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteAnnouncement(Long announcementId, Long userId) {
         ImGroupAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
@@ -159,7 +167,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void recallAnnouncement(Long announcementId, Long userId) {
         ImGroupAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
@@ -187,7 +195,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void setPinned(Long announcementId, Integer isPinned, Long userId) {
         ImGroupAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
@@ -211,7 +219,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int cleanupExpiredAnnouncements() {
         List<ImGroupAnnouncement> expiredAnnouncements = announcementMapper.selectExpiredAnnouncements(LocalDateTime.now());
         int count = 0;
