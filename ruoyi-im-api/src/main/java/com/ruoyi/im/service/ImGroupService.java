@@ -133,4 +133,58 @@ public interface ImGroupService {
      * @return 群组分页列表
      */
     IPage<ImGroup> getGroupPage(Page<ImGroup> page, String keyword);
+
+    /**
+     * 管理员获取群组详情（无权限检查）
+     *
+     * @param groupId 群组ID
+     * @return 群组信息
+     */
+    ImGroupVO adminGetGroupById(Long groupId);
+
+    /**
+     * 管理员解散群组（无权限检查）
+     *
+     * @param groupId 群组ID
+     */
+    void adminDismissGroup(Long groupId);
+
+    /**
+     * 管理员批量解散群组
+     *
+     * @param groupIds 群组ID列表
+     * @return 解散结果Map，包含successCount和failCount
+     */
+    java.util.Map<String, Integer> adminBatchDismissGroups(List<Long> groupIds);
+
+    /**
+     * 管理员更新群组信息（无权限检查）
+     *
+     * @param groupId 群组ID
+     * @param request 更新请求
+     */
+    void adminUpdateGroup(Long groupId, ImGroupUpdateRequest request);
+
+    /**
+     * 管理员获取群组统计
+     *
+     * @return 统计数据Map
+     */
+    java.util.Map<String, Object> getGroupStats();
+
+    /**
+     * 管理员获取群组成员列表（无权限检查）
+     *
+     * @param groupId 群组ID
+     * @return 成员列表Map
+     */
+    List<java.util.Map<String, Object>> adminGetGroupMembers(Long groupId);
+
+    /**
+     * 管理员移除群组成员（无权限检查）
+     *
+     * @param groupId 群组ID
+     * @param userId 用户ID
+     */
+    void adminRemoveMember(Long groupId, Long userId);
 }

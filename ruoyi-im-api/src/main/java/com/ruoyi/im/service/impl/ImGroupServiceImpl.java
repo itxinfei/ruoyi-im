@@ -25,6 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.ruoyi.im.constant.SystemConstants;
 
 /**
  * 群组服务实现
@@ -33,6 +36,8 @@ import java.util.List;
  */
 @Service
 public class ImGroupServiceImpl implements ImGroupService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ImGroupServiceImpl.class);
 
     private final ImGroupMapper imGroupMapper;
     private final ImGroupMemberMapper imGroupMemberMapper;
@@ -512,5 +517,140 @@ public class ImGroupServiceImpl implements ImGroupService {
     @Override
     public IPage<ImGroup> getGroupPage(Page<ImGroup> page, String keyword) {
         return imGroupMapper.selectGroupPage(page, keyword);
+    }
+
+    @Override
+    public ImGroupVO adminGetGroupById(Long groupId) {
+        ImGroup group = imGroupMapper.selectImGroupById(groupId);
+        if (group == null) {
+            return null;
+        }
+
+        ImGroupVO vo = new ImGroupVO();
+        BeanUtils.copyProperties(group, vo);
+
+        // 设置成员数量
+        Integer memberCount = imGroupMemberMapper.countMembersByGroupId(groupId);
+        vo.setMemberCount(memberCount);
+
+        return vo;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void adminDismissGroup(Long groupId) {
+        ImGroup group = imGroupMapper.selectImGroupById(groupId);
+        if (group == null) {
+            throw new BusinessException("GROUP_NOT_EXIST", "群组不存在");
+        }
+
+        // 软删除群组
+        group.setIsDeleted(SystemConstants.DELETED);
+        group.setDeletedTime(LocalDateTime.now());
+        group.setUpdateTime(LocalDateTime.now());
+        imGroupMapper.updateImGroup(group);
+
+        // 删除群组成员关系
+        List<Long> groupIds = java.util.Collections.singletonList(groupId);
+        imGroupMemberMapper.deleteByGroupIds(groupIds);
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public java.util.Map<String, Integer> adminBatchDismissGroups(List<Long> groupIds) {
+        int successCount = 0;
+        int failCount = 0;
+
+        for (Long groupId : groupIds) {
+            try {
+                ImGroup group = imGroupMapper.selectImGroupById(groupId);
+                if (group != null) {
+                    group.setIsDeleted(SystemConstants.DELETED);
+                    group.setDeletedTime(LocalDateTime.now());
+                    group.setUpdateTime(LocalDateTime.now());
+                    imGroupMapper.updateImGroup(group);
+                    imRedisUtil.evictGroupInfo(groupId);
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (Exception e) {
+                logger.error("解散群组失败，groupId={}", groupId, e);
+                failCount++;
+            }
+        }
+
+        // 删除群组成员关系
+        if (!groupIds.isEmpty()) {
+            imGroupMemberMapper.deleteByGroupIds(groupIds);
+        }
+
+        java.util.Map<String, Integer> result = new java.util.HashMap<>();
+        result.put("successCount", successCount);
+        result.put("failCount", failCount);
+        return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void adminUpdateGroup(Long groupId, ImGroupUpdateRequest request) {
+        ImGroup group = imGroupMapper.selectImGroupById(groupId);
+        if (group == null) {
+            throw new BusinessException("GROUP_NOT_EXIST", "群组不存在");
+        }
+
+        BeanUtils.copyProperties(request, group);
+        group.setId(groupId);
+        group.setUpdateTime(LocalDateTime.now());
+        imGroupMapper.updateImGroup(group);
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
+    }
+
+    @Override
+    public java.util.Map<String, Object> getGroupStats() {
+        // 查询所有群组
+        List<ImGroup> allGroups = imGroupMapper.selectImGroupList(new ImGroup());
+
+        // 统计未删除的群组
+        long total = allGroups.stream()
+                .filter(g -> g.getIsDeleted() == null || g.getIsDeleted() == SystemConstants.NOT_DELETED)
+                .count();
+
+        java.util.Map<String, Object> stats = new java.util.HashMap<>();
+        stats.put("total", total);
+
+        return stats;
+    }
+
+    @Override
+    public List<java.util.Map<String, Object>> adminGetGroupMembers(Long groupId) {
+        List<java.util.Map<String, Object>> members = imGroupMemberMapper.selectMembersByGroupId(groupId);
+
+        // 转换为适合前端显示的格式
+        for (java.util.Map<String, Object> member : members) {
+            String role = (String) member.get("role");
+            if ("OWNER".equals(role)) {
+                member.put("roleDisplay", "群主");
+            } else if ("ADMIN".equals(role)) {
+                member.put("roleDisplay", "管理员");
+            } else {
+                member.put("roleDisplay", "成员");
+            }
+        }
+
+        return members;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void adminRemoveMember(Long groupId, Long userId) {
+        imGroupMemberMapper.deleteByGroupIdAndUserId(groupId, userId);
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
     }
 }

@@ -2,13 +2,11 @@ package com.ruoyi.im.controller.admin;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.constant.UserRole;
-import com.ruoyi.im.domain.ImUser;
-import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,17 +27,14 @@ import java.util.Map;
 public class ImUserAdminController {
 
     private final ImUserService imUserService;
-    private final ImUserMapper imUserMapper;
 
     /**
      * 构造器注入依赖
      *
      * @param imUserService 用户服务
-     * @param imUserMapper 用户Mapper
      */
-    public ImUserAdminController(ImUserService imUserService, ImUserMapper imUserMapper) {
+    public ImUserAdminController(ImUserService imUserService) {
         this.imUserService = imUserService;
-        this.imUserMapper = imUserMapper;
     }
 
     /**
@@ -54,34 +49,17 @@ public class ImUserAdminController {
     @Operation(summary = "获取用户列表", description = "管理员获取用户列表，支持分页和关键词搜索")
     @GetMapping
     public Result<Map<String, Object>> list(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String role,
-            @RequestParam(required = false, defaultValue = "1") Integer pageNum,
-            @RequestParam(required = false, defaultValue = "20") Integer pageSize) {
-
-        // 构建查询条件
-        ImUser queryUser = new ImUser();
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            queryUser.setUsername(keyword); // 简化处理，实际可以通过 XML 实现更复杂的查询
-        }
-        if (role != null && !role.trim().isEmpty()) {
-            queryUser.setRole(role);
-        }
+            @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword,
+            @Parameter(description = "角色筛选") @RequestParam(required = false) String role,
+            @Parameter(description = "页码") @RequestParam(required = false, defaultValue = "1") Integer pageNum,
+            @Parameter(description = "每页大小") @RequestParam(required = false, defaultValue = "20") Integer pageSize) {
 
         // 计算偏移量
         int offset = (pageNum - 1) * pageSize;
 
         // 分页查询
-        List<ImUser> users = imUserMapper.selectImUserListWithPagination(queryUser, offset, pageSize);
-        int total = imUserMapper.selectImUserCount(queryUser);
-
-        // 转换为 VO
-        List<ImUserVO> voList = new java.util.ArrayList<>();
-        for (ImUser user : users) {
-            ImUserVO vo = new ImUserVO();
-            BeanUtils.copyProperties(user, vo);
-            voList.add(vo);
-        }
+        List<ImUserVO> voList = imUserService.getUserListWithPagination(keyword, role, offset, pageSize);
+        int total = imUserService.countUsers(keyword, role);
 
         // 返回结果
         Map<String, Object> data = new HashMap<>();
@@ -102,13 +80,8 @@ public class ImUserAdminController {
      */
     @Operation(summary = "获取用户详情", description = "管理员获取指定用户的详细信息")
     @GetMapping("/{id}")
-    public Result<ImUserVO> getById(@PathVariable Long id) {
-        ImUser user = imUserMapper.selectImUserById(id);
-        if (user == null) {
-            return Result.fail("用户不存在");
-        }
-        ImUserVO vo = new ImUserVO();
-        BeanUtils.copyProperties(user, vo);
+    public Result<ImUserVO> getById(@Parameter(description = "用户ID") @PathVariable Long id) {
+        ImUserVO vo = imUserService.getUserById(id);
         return Result.success(vo);
     }
 
@@ -121,13 +94,10 @@ public class ImUserAdminController {
      */
     @Operation(summary = "修改用户状态", description = "管理员启用或禁用用户")
     @PutMapping("/{id}/status")
-    public Result<Void> updateStatus(@PathVariable Long id, @RequestParam Integer status) {
-        ImUser user = imUserMapper.selectImUserById(id);
-        if (user == null) {
-            return Result.fail("用户不存在");
-        }
-        user.setStatus(status);
-        imUserMapper.updateImUser(user);
+    public Result<Void> updateStatus(
+            @Parameter(description = "用户ID") @PathVariable Long id,
+            @Parameter(description = "状态：0=禁用，1=启用") @RequestParam Integer status) {
+        imUserService.updateStatus(id, status);
         return Result.success("状态修改成功");
     }
 
@@ -141,16 +111,13 @@ public class ImUserAdminController {
     @Operation(summary = "修改用户角色", description = "超级管理员修改用户角色")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}/role")
-    public Result<Void> updateRole(@PathVariable Long id, @RequestParam String role) {
+    public Result<Void> updateRole(
+            @Parameter(description = "用户ID") @PathVariable Long id,
+            @Parameter(description = "角色：USER/ADMIN/SUPER_ADMIN") @RequestParam String role) {
         if (!UserRole.USER.equals(role) && !UserRole.ADMIN.equals(role) && !UserRole.SUPER_ADMIN.equals(role)) {
             return Result.fail("无效的角色");
         }
-        ImUser user = imUserMapper.selectImUserById(id);
-        if (user == null) {
-            return Result.fail("用户不存在");
-        }
-        user.setRole(role);
-        imUserMapper.updateImUser(user);
+        imUserService.updateRole(id, role);
         return Result.success("角色修改成功");
     }
 
@@ -162,12 +129,8 @@ public class ImUserAdminController {
      */
     @Operation(summary = "删除用户", description = "管理员删除指定用户")
     @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable Long id) {
-        ImUser user = imUserMapper.selectImUserById(id);
-        if (user == null) {
-            return Result.fail("用户不存在");
-        }
-        imUserMapper.deleteImUserById(id);
+    public Result<Void> delete(@Parameter(description = "用户ID") @PathVariable Long id) {
+        imUserService.deleteUser(id);
         return Result.success("删除成功");
     }
 
@@ -178,18 +141,8 @@ public class ImUserAdminController {
      */
     @Operation(summary = "获取用户统计", description = "获取用户总数、在线人数等统计信息")
     @GetMapping("/stats")
-    public Result<Map<String, Object>> getStats() {
-        long total = imUserMapper.countImUsers();
-        // 状态为1的用户表示启用/在线
-        ImUser queryUser = new ImUser();
-        queryUser.setStatus(1);
-        long online = imUserMapper.selectImUserCount(queryUser);
-
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("total", total);
-        stats.put("online", online);
-        stats.put("offline", total - online);
-
+    public Result<Map<String, Long>> getStats() {
+        Map<String, Long> stats = imUserService.getUserStats();
         return Result.success(stats);
     }
 }

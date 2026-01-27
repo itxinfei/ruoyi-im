@@ -16,7 +16,6 @@ import com.ruoyi.im.vo.marker.ImMessageMarkerVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 
 /**
  * 消息标记服务实现
+ * 提供消息标记、待办提醒、标记查询等功能
  *
  * @author ruoyi
  */
@@ -34,21 +34,44 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImMessageMarkerServiceImpl.class);
 
-    @Autowired
-    private ImMessageMarkerMapper messageMarkerMapper;
+    private final ImMessageMarkerMapper messageMarkerMapper;
+    private final ImMessageMapper messageMapper;
+    private final ImConversationMapper conversationMapper;
+    private final ImUserMapper userMapper;
+    private final ImWebSocketBroadcastService webSocketBroadcastService;
 
-    @Autowired
-    private ImMessageMapper messageMapper;
+    /**
+     * 构造器注入依赖
+     *
+     * @param messageMarkerMapper    消息标记Mapper
+     * @param messageMapper          消息Mapper
+     * @param conversationMapper     会话Mapper
+     * @param userMapper             用户Mapper
+     * @param webSocketBroadcastService WebSocket广播服务
+     */
+    public ImMessageMarkerServiceImpl(
+            ImMessageMarkerMapper messageMarkerMapper,
+            ImMessageMapper messageMapper,
+            ImConversationMapper conversationMapper,
+            ImUserMapper userMapper,
+            ImWebSocketBroadcastService webSocketBroadcastService) {
+        this.messageMarkerMapper = messageMarkerMapper;
+        this.messageMapper = messageMapper;
+        this.conversationMapper = conversationMapper;
+        this.userMapper = userMapper;
+        this.webSocketBroadcastService = webSocketBroadcastService;
+    }
 
-    @Autowired
-    private ImConversationMapper conversationMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
-
-    @Autowired
-    private ImWebSocketBroadcastService webSocketBroadcastService;
-
+    /**
+     * 标记消息
+     * 对消息添加标记（FLAG/IMPORTANT）或更新已有标记
+     *
+     * @param messageId   消息ID
+     * @param markerType  标记类型
+     * @param color       标记颜色（可选）
+     * @param userId      用户ID
+     * @return 标记ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long markMessage(Long messageId, String markerType, String color, Long userId) {
@@ -58,10 +81,9 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
             throw new BusinessException("消息不存在");
         }
 
-        // 检查是否已标记
+        // 检查是否已标记，存在则更新
         ImMessageMarker existMarker = messageMarkerMapper.selectByMessageAndUser(messageId, userId);
         if (existMarker != null) {
-            // 更新标记类型
             existMarker.setMarkerType(markerType);
             existMarker.setColor(color);
             existMarker.setUpdateTime(LocalDateTime.now());
@@ -86,6 +108,14 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         return marker.getId();
     }
 
+    /**
+     * 取消标记
+     * 删除消息的标记，可指定类型或删除全部
+     *
+     * @param messageId   消息ID
+     * @param markerType  标记类型（null则删除所有类型）
+     * @param userId      用户ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void unmarkMessage(Long messageId, String markerType, Long userId) {
@@ -99,6 +129,16 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         logger.info("取消标记成功: messageId={}, markerType={}, userId={}", messageId, markerType, userId);
     }
 
+    /**
+     * 设置待办提醒
+     * 将消息标记为待办并设置提醒时间
+     *
+     * @param messageId   消息ID
+     * @param remindTime  提醒时间
+     * @param remark      备注（可选）
+     * @param userId      用户ID
+     * @return 待办标记ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long setTodoReminder(Long messageId, LocalDateTime remindTime, String remark, Long userId) {
@@ -108,10 +148,9 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
             throw new BusinessException("消息不存在");
         }
 
-        // 检查是否已有待办标记
+        // 检查是否已有待办标记，存在则更新
         ImMessageMarker existMarker = messageMarkerMapper.selectByMessageAndUser(messageId, userId);
         if (existMarker != null && "TODO".equals(existMarker.getMarkerType())) {
-            // 更新提醒时间
             existMarker.setRemindTime(remindTime);
             existMarker.setRemark(remark);
             existMarker.setUpdateTime(LocalDateTime.now());
@@ -137,6 +176,13 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         return marker.getId();
     }
 
+    /**
+     * 完成待办
+     * 将待办标记为已完成
+     *
+     * @param markerId  标记ID
+     * @param userId    用户ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void completeTodo(Long markerId, Long userId) {
@@ -157,6 +203,13 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         logger.info("完成待办成功: markerId={}", markerId);
     }
 
+    /**
+     * 重启待办
+     * 将已完成的待办重新设为待办状态
+     *
+     * @param markerId  标记ID
+     * @param userId    用户ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void reopenTodo(Long markerId, Long userId) {
@@ -177,6 +230,14 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         logger.info("重启待办成功: markerId={}", markerId);
     }
 
+    /**
+     * 获取用户的标记列表
+     * 查询指定用户的所有标记或按类型筛选
+     *
+     * @param userId     用户ID
+     * @param markerType 标记类型筛选（可选）
+     * @return 标记VO列表，包含消息预览和会话信息
+     */
     @Override
     public List<ImMessageMarkerVO> getUserMarkers(Long userId, String markerType) {
         List<ImMessageMarker> markers = messageMarkerMapper.selectUserMarkers(userId, markerType);
@@ -216,6 +277,13 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 获取消息的标记列表
+     * 查询指定消息的所有用户标记
+     *
+     * @param messageId 消息ID
+     * @return 标记VO列表
+     */
     @Override
     public List<ImMessageMarkerVO> getMessageMarkers(Long messageId) {
         List<ImMessageMarker> markers = messageMarkerMapper.selectByMessageId(messageId);
@@ -227,12 +295,25 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 获取用户待办数量
+     * 统计指定用户的未完成待办数量
+     *
+     * @param userId 用户ID
+     * @return 待办数量
+     */
     @Override
     public Integer getUserTodoCount(Long userId) {
         Integer count = messageMarkerMapper.countUserTodos(userId);
         return count != null ? count : 0;
     }
 
+    /**
+     * 处理待办提醒
+     * 定时任务调用，处理到达提醒时间的待办
+     *
+     * @return 处理的待办数量
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int processPendingReminders() {

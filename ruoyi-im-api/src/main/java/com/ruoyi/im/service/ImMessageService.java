@@ -118,4 +118,36 @@ public interface ImMessageService {
      * @return 今日消息数量
      */
     int getTodayMessageCount(Long userId);
+
+    /**
+     * 管理员获取消息详情
+     *
+     * @param messageId 消息ID
+     * @return 消息VO
+     */
+    ImMessageVO getMessageById(Long messageId);
+
+    /**
+     * 管理员删除消息（无需权限检查）
+     *
+     * @param messageId 消息ID
+     */
+    void adminDeleteMessage(Long messageId);
+
+    /**
+     * 管理员批量删除消息
+     *
+     * @param messageIds 消息ID列表
+     * @return 删除结果Map，包含successCount和failCount
+     */
+    java.util.Map<String, Integer> adminBatchDeleteMessages(List<Long> messageIds);
+
+    /**
+     * 管理员获取消息统计
+     *
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 统计数据Map
+     */
+    java.util.Map<String, Object> getMessageStats(java.time.LocalDateTime startTime, java.time.LocalDateTime endTime);
 }

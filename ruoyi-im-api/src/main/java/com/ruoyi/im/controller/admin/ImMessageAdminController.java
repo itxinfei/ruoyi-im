@@ -1,16 +1,17 @@
 package com.ruoyi.im.controller.admin;
 
 import com.ruoyi.im.common.Result;
-import com.ruoyi.im.domain.ImMessage;
-import com.ruoyi.im.mapper.ImMessageMapper;
+import com.ruoyi.im.service.ImMessageService;
+import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
+import com.ruoyi.im.vo.message.ImMessageVO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,15 +27,15 @@ import java.util.Map;
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
 public class ImMessageAdminController {
 
-    private final ImMessageMapper imMessageMapper;
+    private final ImMessageService imMessageService;
 
     /**
      * 构造器注入依赖
      *
-     * @param imMessageMapper 消息Mapper
+     * @param imMessageService 消息服务
      */
-    public ImMessageAdminController(ImMessageMapper imMessageMapper) {
-        this.imMessageMapper = imMessageMapper;
+    public ImMessageAdminController(ImMessageService imMessageService) {
+        this.imMessageService = imMessageService;
     }
 
     /**
@@ -52,56 +53,21 @@ public class ImMessageAdminController {
      */
     @Operation(summary = "搜索消息", description = "管理员搜索消息，支持多条件筛选")
     @GetMapping
-    public Result<Map<String, Object>> search(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String messageType,
-            @RequestParam(required = false) Long senderId,
-            @RequestParam(required = false) Long conversationId,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime,
-            @RequestParam(required = false, defaultValue = "1") Integer pageNum,
-            @RequestParam(required = false, defaultValue = "20") Integer pageSize) {
+    public Result<ImMessageSearchResultVO> search(
+            @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword,
+            @Parameter(description = "消息类型") @RequestParam(required = false) String messageType,
+            @Parameter(description = "发送者ID") @RequestParam(required = false) Long senderId,
+            @Parameter(description = "会话ID") @RequestParam(required = false) Long conversationId,
+            @Parameter(description = "开始时间") @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
+            @Parameter(description = "结束时间") @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime,
+            @Parameter(description = "页码") @RequestParam(required = false, defaultValue = "1") Integer pageNum,
+            @Parameter(description = "每页大小") @RequestParam(required = false, defaultValue = "20") Integer pageSize) {
 
-        // 计算偏移量
-        int offset = (pageNum - 1) * pageSize;
+        ImMessageSearchResultVO result = imMessageService.searchMessages(
+                conversationId, keyword, messageType, senderId, startTime, endTime,
+                pageNum, pageSize, false, false, null);
 
-        // 搜索消息
-        List<ImMessage> messages = imMessageMapper.searchMessages(
-                conversationId,
-                keyword,
-                messageType,
-                senderId,
-                startTime,
-                endTime,
-                false, // 不包含已撤回消息
-                false, // 非精确匹配
-                false, // 不使用全文检索
-                offset,
-                pageSize
-        );
-
-        // 统计总数
-        int total = imMessageMapper.countSearchResults(
-                conversationId,
-                keyword,
-                messageType,
-                senderId,
-                startTime,
-                endTime,
-                false,
-                false,
-                false // 不使用全文检索
-        );
-
-        // 返回结果
-        Map<String, Object> data = new HashMap<>();
-        data.put("list", messages);
-        data.put("total", total);
-        data.put("pageNum", pageNum);
-        data.put("pageSize", pageSize);
-        data.put("pages", (total + pageSize - 1) / pageSize);
-
-        return Result.success(data);
+        return Result.success(result);
     }
 
     /**
@@ -112,8 +78,8 @@ public class ImMessageAdminController {
      */
     @Operation(summary = "获取消息详情", description = "管理员获取指定消息的详细信息")
     @GetMapping("/{id}")
-    public Result<ImMessage> getById(@PathVariable Long id) {
-        ImMessage message = imMessageMapper.selectImMessageById(id);
+    public Result<ImMessageVO> getById(@Parameter(description = "消息ID") @PathVariable Long id) {
+        ImMessageVO message = imMessageService.getMessageById(id);
         if (message == null) {
             return Result.fail("消息不存在");
         }
@@ -128,13 +94,8 @@ public class ImMessageAdminController {
      */
     @Operation(summary = "删除消息", description = "管理员删除指定消息")
     @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable Long id) {
-        ImMessage message = imMessageMapper.selectImMessageById(id);
-        if (message == null) {
-            return Result.fail("消息不存在");
-        }
-
-        imMessageMapper.deleteImMessageById(id);
+    public Result<Void> delete(@Parameter(description = "消息ID") @PathVariable Long id) {
+        imMessageService.adminDeleteMessage(id);
         return Result.success("删除成功");
     }
 
@@ -146,24 +107,9 @@ public class ImMessageAdminController {
      */
     @Operation(summary = "批量删除消息", description = "管理员批量删除消息")
     @DeleteMapping("/batch")
-    public Result<Map<String, Object>> batchDelete(@RequestBody List<Long> ids) {
-        int successCount = 0;
-        int failCount = 0;
-
-        for (Long id : ids) {
-            ImMessage message = imMessageMapper.selectImMessageById(id);
-            if (message != null) {
-                imMessageMapper.deleteImMessageById(id);
-                successCount++;
-            } else {
-                failCount++;
-            }
-        }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("successCount", successCount);
-        result.put("failCount", failCount);
-
+    public Result<Map<String, Integer>> batchDelete(
+            @Parameter(description = "消息ID列表") @RequestBody List<Long> ids) {
+        Map<String, Integer> result = imMessageService.adminBatchDeleteMessages(ids);
         return Result.success(result);
     }
 
@@ -177,39 +123,10 @@ public class ImMessageAdminController {
     @Operation(summary = "获取消息统计", description = "获取指定时间范围内的消息统计")
     @GetMapping("/stats")
     public Result<Map<String, Object>> getStats(
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
+            @Parameter(description = "开始时间") @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
+            @Parameter(description = "结束时间") @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
 
-        // 默认统计最近7天
-        if (endTime == null) {
-            endTime = LocalDateTime.now();
-        }
-        if (startTime == null) {
-            startTime = endTime.minusDays(7);
-        }
-
-        // 统计各类型消息数量
-        Map<String, Object> stats = new HashMap<>();
-
-        int totalMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, false, false, false);
-        stats.put("totalMessages", totalMessages);
-
-        // 统计文本消息
-        int textMessages = imMessageMapper.countSearchResults(null, null, "TEXT", null, startTime, endTime, false, false, false);
-        stats.put("textMessages", textMessages);
-
-        // 统计图片消息
-        int imageMessages = imMessageMapper.countSearchResults(null, null, "IMAGE", null, startTime, endTime, false, false, false);
-        stats.put("imageMessages", imageMessages);
-
-        // 统计文件消息
-        int fileMessages = imMessageMapper.countSearchResults(null, null, "FILE", null, startTime, endTime, false, false, false);
-        stats.put("fileMessages", fileMessages);
-
-        // 统计已撤回消息
-        int revokedMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, true, false, false);
-        stats.put("revokedMessages", revokedMessages);
-
+        Map<String, Object> stats = imMessageService.getMessageStats(startTime, endTime);
         return Result.success(stats);
     }
 }

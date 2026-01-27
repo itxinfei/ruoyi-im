@@ -701,4 +701,38 @@ public class ImConversationServiceImpl implements ImConversationService {
         }
         return count;
     }
+
+    @Override
+    public List<Long> getConversationMemberIds(Long conversationId) {
+        // 获取会话所有成员
+        List<ImConversationMember> members = imConversationMemberMapper.selectByConversationId(conversationId);
+        List<Long> memberIds = new ArrayList<>();
+        
+        if (members != null) {
+            for (ImConversationMember member : members) {
+                if (member.getUserId() != null) {
+                    memberIds.add(member.getUserId());
+                }
+            }
+        }
+        
+        return memberIds;
+    }
+
+    @Override
+    public Integer getUnreadCount(Long conversationId, Long userId) {
+        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        if (member != null) {
+            return member.getUnreadCount() != null ? member.getUnreadCount() : 0;
+        }
+        return 0;
+    }
+
+    @Override
+    public List<java.util.Map<String, Object>> getReadStatus(Long conversationId, Long messageId) {
+        // 实现消息已读状态查询
+        List<java.util.Map<String, Object>> result = new ArrayList<>();
+        // 这里可以根据实际业务逻辑实现，暂时返回空列表
+        return result;
+    }
 }

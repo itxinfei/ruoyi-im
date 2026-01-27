@@ -461,4 +461,64 @@ public class ImUserServiceImpl implements ImUserService {
 
         return voList;
     }
+
+    @Override
+    public List<ImUserVO> getUserListWithPagination(String keyword, String role, int offset, int limit) {
+        ImUser query = new ImUser();
+        // 简单处理：将关键词作为昵称查询（实际可能需要Mapper支持专门的keyword字段）
+        if (keyword != null && !keyword.isEmpty()) {
+            query.setNickname(keyword);
+        }
+        if (role != null && !role.isEmpty()) {
+            query.setRole(role);
+        }
+        
+        List<ImUser> users = imUserMapper.selectImUserListWithPagination(query, offset, limit);
+        List<ImUserVO> voList = new ArrayList<>();
+        for (ImUser user : users) {
+            ImUserVO vo = new ImUserVO();
+            BeanUtils.copyProperties(user, vo);
+            vo.setOnline(imRedisUtil.isOnlineUser(user.getId()));
+            voList.add(vo);
+        }
+        return voList;
+    }
+
+    @Override
+    public int countUsers(String keyword, String role) {
+        ImUser query = new ImUser();
+        if (keyword != null && !keyword.isEmpty()) {
+            query.setNickname(keyword);
+        }
+        if (role != null && !role.isEmpty()) {
+            query.setRole(role);
+        }
+        return imUserMapper.selectImUserCount(query);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateRole(Long userId, String role) {
+        ImUser user = imUserMapper.selectImUserById(userId);
+        if (user == null) {
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
+        }
+        user.setRole(role);
+        user.setUpdateTime(LocalDateTime.now());
+        imUserMapper.updateImUser(user);
+        imRedisUtil.evictUserInfo(userId);
+    }
+
+    @Override
+    public java.util.Map<String, Long> getUserStats() {
+        java.util.Map<String, Long> stats = new java.util.HashMap<>();
+        int total = imUserMapper.countImUsers();
+        long online = imRedisUtil.getOnlineUserCount();
+        
+        stats.put("total", (long) total);
+        stats.put("online", online);
+        stats.put("offline", Math.max(0, total - online));
+        
+        return stats;
+    }
 }

@@ -4,7 +4,7 @@ import com.ruoyi.im.dto.mention.ImMentionInfo;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 /**
@@ -17,8 +17,7 @@ public class ImMessageSendRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /** 会话ID */
-    @NotNull(message = "会话ID不能为空")
+    /** 会话ID（可选，若为空则必须提供receiverId） */
     private Long conversationId;
 
     /** 消息类型 */
@@ -27,9 +26,10 @@ public class ImMessageSendRequest implements Serializable {
 
     /** 消息内容 */
     @NotBlank(message = "消息内容不能为空")
+    @Size(max = 2000, message = "消息内容不能超过2000字")
     private String content;
 
-    /** 接收者ID（群组消息时必填） */
+    /** 接收者ID（私聊时若无conversationId则必填） */
     private Long receiverId;
 
     /** 回复消息ID（用于回复/引用功能） */

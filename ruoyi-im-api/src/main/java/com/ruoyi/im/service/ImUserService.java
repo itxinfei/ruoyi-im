@@ -162,4 +162,41 @@ public interface ImUserService {
      * @return 用户列表
      */
     List<ImUserVO> getUsersByIds(List<Long> userIds);
+
+    /**
+     * 分页查询用户列表
+     * 支持关键词搜索和角色筛选
+     *
+     * @param keyword 搜索关键词（用户名或昵称）
+     * @param role    角色筛选
+     * @param offset  偏移量
+     * @param limit   每页大小
+     * @return 用户VO列表
+     */
+    List<ImUserVO> getUserListWithPagination(String keyword, String role, int offset, int limit);
+
+    /**
+     * 统计用户数量
+     * 支持关键词和角色筛选
+     *
+     * @param keyword 搜索关键词
+     * @param role    角色筛选
+     * @return 用户数量
+     */
+    int countUsers(String keyword, String role);
+
+    /**
+     * 更新用户角色
+     *
+     * @param userId 用户ID
+     * @param role   新角色
+     */
+    void updateRole(Long userId, String role);
+
+    /**
+     * 获取用户统计信息
+     *
+     * @return 统计信息Map，包含total、online、offline
+     */
+    java.util.Map<String, Long> getUserStats();
 }

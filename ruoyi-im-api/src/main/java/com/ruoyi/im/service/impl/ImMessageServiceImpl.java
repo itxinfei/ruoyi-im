@@ -1,6 +1,8 @@
 package com.ruoyi.im.service.impl;
 
+import cn.hutool.http.HtmlUtil;
 import com.ruoyi.im.domain.ImConversation;
+import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImMessageEditHistory;
 import com.ruoyi.im.domain.ImUser;
@@ -33,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import com.ruoyi.im.util.SecurityUtils;
 
 @Service
 public class ImMessageServiceImpl implements ImMessageService {
@@ -132,6 +135,12 @@ public class ImMessageServiceImpl implements ImMessageService {
             if (conversation == null) {
                 throw new BusinessException("会话不存在");
             }
+            
+            // 权限检查：验证用户是否是会话成员
+            ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+            if (member == null || (member.getIsDeleted() != null && member.getIsDeleted() == 1)) {
+                throw new BusinessException("您不是该会话成员，无法发送消息");
+            }
         }
 
         // 使用分布式锁防止并发发送消息导致的数据不一致
@@ -159,6 +168,11 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setReplyToMessageId(request.getReplyToMessageId());
 
         String plainContent = request.getContent();
+        // XSS防护：如果是文本消息，进行HTML转义
+        if ("TEXT".equalsIgnoreCase(request.getType())) {
+            plainContent = HtmlUtil.escape(plainContent);
+        }
+
         String contentToSave = encryptionUtil.encryptMessage(plainContent);
         message.setContent(contentToSave);
         message.setIsRevoked(0);
@@ -249,6 +263,12 @@ public class ImMessageServiceImpl implements ImMessageService {
         // 调试日志：记录接收到的 userId
         log.info("getMessages 被调用 - conversationId={}, userId={}, lastId={}, limit={}",
                 conversationId, userId, lastId, limit);
+
+        // 权限检查：验证用户是否是会话成员
+        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        if (member == null || (member.getIsDeleted() != null && member.getIsDeleted() == 1)) {
+            throw new BusinessException("无权查看该会话消息");
+        }
 
         List<ImMessageVO> voList = new ArrayList<>();
 
@@ -756,5 +776,109 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         // 统计用户今日发送的消息数量
         return imMessageMapper.countBySenderIdAndTimeRange(userId, todayStart, todayEnd);
+    }
+
+    @Override
+    public ImMessageVO getMessageById(Long messageId) {
+        ImMessage message = imMessageMapper.selectImMessageById(messageId);
+        if (message == null) {
+            return null;
+        }
+        return convertToVO(message);
+    }
+
+    /**
+     * 将消息实体转换为VO
+     *
+     * @param message 消息实体
+     * @return 消息VO
+     */
+    private ImMessageVO convertToVO(ImMessage message) {
+        ImMessageVO vo = new ImMessageVO();
+        BeanUtils.copyProperties(message, vo);
+        
+        // 解密消息内容
+        if (message.getContent() != null) {
+            try {
+                vo.setContent(encryptionUtil.decryptMessage(message.getContent()));
+            } catch (Exception e) {
+                log.warn("消息解密失败: messageId={}, error={}", message.getId(), e.getMessage());
+                vo.setContent("[加密消息]");
+            }
+        }
+        
+        return vo;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void adminDeleteMessage(Long messageId) {
+        ImMessage message = imMessageMapper.selectImMessageById(messageId);
+        if (message == null) {
+            throw new BusinessException("MESSAGE_NOT_EXIST", "消息不存在");
+        }
+
+        imMessageMapper.deleteImMessageById(messageId);
+
+        // 记录删除日志
+        AuditLogUtil.logSuccess(SecurityUtils.getLoginUserId(), "DELETE_MESSAGE", "MESSAGE", messageId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public java.util.Map<String, Integer> adminBatchDeleteMessages(List<Long> messageIds) {
+        int successCount = 0;
+        int failCount = 0;
+
+        for (Long messageId : messageIds) {
+            try {
+                ImMessage message = imMessageMapper.selectImMessageById(messageId);
+                if (message != null) {
+                    imMessageMapper.deleteImMessageById(messageId);
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (Exception e) {
+                log.error("删除消息失败，messageId={}", messageId, e);
+                failCount++;
+            }
+        }
+
+        java.util.Map<String, Integer> result = new java.util.HashMap<>();
+        result.put("successCount", successCount);
+        result.put("failCount", failCount);
+        return result;
+    }
+
+    @Override
+    public java.util.Map<String, Object> getMessageStats(LocalDateTime startTime, LocalDateTime endTime) {
+        // 默认统计最近7天
+        if (endTime == null) {
+            endTime = LocalDateTime.now();
+        }
+        if (startTime == null) {
+            startTime = endTime.minusDays(7);
+        }
+
+        java.util.Map<String, Object> stats = new java.util.HashMap<>();
+
+        // 统计各类型消息数量
+        int totalMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, false, false, false);
+        stats.put("totalMessages", totalMessages);
+
+        int textMessages = imMessageMapper.countSearchResults(null, null, "TEXT", null, startTime, endTime, false, false, false);
+        stats.put("textMessages", textMessages);
+
+        int imageMessages = imMessageMapper.countSearchResults(null, null, "IMAGE", null, startTime, endTime, false, false, false);
+        stats.put("imageMessages", imageMessages);
+
+        int fileMessages = imMessageMapper.countSearchResults(null, null, "FILE", null, startTime, endTime, false, false, false);
+        stats.put("fileMessages", fileMessages);
+
+        int revokedMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, true, false, false);
+        stats.put("revokedMessages", revokedMessages);
+
+        return stats;
     }
 }

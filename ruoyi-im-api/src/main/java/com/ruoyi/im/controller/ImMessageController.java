@@ -14,8 +14,8 @@ import com.ruoyi.im.dto.message.ImMessageSearchRequest;
 import com.ruoyi.im.dto.message.MessageEditRequest;
 import com.ruoyi.im.dto.reaction.ImMessageReactionAddRequest;
 import com.ruoyi.im.exception.BusinessException;
-import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
+import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.service.*;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
@@ -53,6 +53,7 @@ public class ImMessageController {
     private final ImMessageMentionService mentionService;
     private final ImWebSocketBroadcastService broadcastService;
     private final ImMessageReadService messageReadService;
+    private final ImConversationService conversationService;
     private final ImMessageMapper imMessageMapper;
     private final ImConversationMemberMapper imConversationMemberMapper;
 
@@ -61,12 +62,16 @@ public class ImMessageController {
             ImMessageReactionService reactionService,
             ImMessageMentionService mentionService,
             ImWebSocketBroadcastService broadcastService,
-            ImMessageReadService messageReadService, ImMessageMapper imMessageMapper, ImConversationMemberMapper imConversationMemberMapper) {
+            ImMessageReadService messageReadService,
+            ImConversationService conversationService,
+            ImMessageMapper imMessageMapper,
+            ImConversationMemberMapper imConversationMemberMapper) {
         this.imMessageService = imMessageService;
         this.reactionService = reactionService;
         this.mentionService = mentionService;
         this.broadcastService = broadcastService;
         this.messageReadService = messageReadService;
+        this.conversationService = conversationService;
         this.imMessageMapper = imMessageMapper;
         this.imConversationMemberMapper = imConversationMemberMapper;
     }

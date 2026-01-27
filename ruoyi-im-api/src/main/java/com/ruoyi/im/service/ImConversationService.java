@@ -152,4 +152,31 @@ public interface ImConversationService {
      * @return 会话数量
      */
     int getUserConversationCount(Long userId);
+
+    /**
+     * 获取会话未读消息数
+     *
+     * @param conversationId 会话ID
+     * @param userId 用户ID
+     * @return 未读消息数
+     */
+    Integer getUnreadCount(Long conversationId, Long userId);
+
+    /**
+     * 获取会话消息已读状态
+     * 返回已读取指定消息的成员列表
+     *
+     * @param conversationId 会话ID
+     * @param messageId 消息ID
+     * @return 已读用户列表，每个Map包含userId和readTime
+     */
+    List<java.util.Map<String, Object>> getReadStatus(Long conversationId, Long messageId);
+
+    /**
+     * 获取会话所有成员ID
+     *
+     * @param conversationId 会话ID
+     * @return 成员ID列表
+     */
+    List<Long> getConversationMemberIds(Long conversationId);
 }
