@@ -3,7 +3,7 @@
  * @author ruoyi
  */
 
-import request from '@/utils/request'
+import request from '../request'
 
 // ==================== 单人通话 ====================
 
