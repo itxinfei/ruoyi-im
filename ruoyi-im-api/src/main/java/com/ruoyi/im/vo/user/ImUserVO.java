@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -51,6 +52,10 @@ public class ImUserVO implements Serializable {
 
     /** 职位 */
     private String position;
+
+    /** 生日 */
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthday;
 
     /** 在线状态 */
     private Boolean online;
