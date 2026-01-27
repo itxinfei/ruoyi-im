@@ -5,7 +5,9 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImMessageMention;
+import com.ruoyi.im.dto.message.ImMessageBatchReadStatusRequest;
 import com.ruoyi.im.dto.message.ImMessageForwardRequest;
+import com.ruoyi.im.dto.message.ImMessageMarkReadRequest;
 import com.ruoyi.im.dto.message.ImMessageReplyRequest;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.dto.message.ImMessageSearchRequest;
@@ -114,20 +116,16 @@ public class ImMessageController {
      * 标记消息已读
      * 批量标记指定消息为已读状态，并更新会话未读消息数
      *
-     * @param data 包含conversationId和messageIds的请求数据
+     * @param request 包含conversationId和messageIds的请求数据
      * @return 标记结果
      * @apiNote 标记已读后会更新会话的未读消息数，并通过WebSocket推送已读回执给发送方
      * @throws BusinessException 当消息不存在或会话不存在时抛出业务异常
      */
     @Operation(summary = "标记消息已读", description = "批量标记指定消息为已读状态")
     @PutMapping("/mark-read")
-    public Result<Void> markAsRead(@RequestBody java.util.Map<String, Object> data) {
+    public Result<Void> markAsRead(@Valid @RequestBody ImMessageMarkReadRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
-        Long conversationId = data.get("conversationId") != null ? Long.valueOf(data.get("conversationId").toString())
-                : null;
-        @SuppressWarnings("unchecked")
-        List<Long> messageIds = (List<Long>) data.get("messageIds");
-        imMessageService.markAsRead(conversationId, userId, messageIds);
+        imMessageService.markAsRead(request.getConversationId(), userId, request.getMessageIds());
         return Result.success("已标记为已读");
     }
 
@@ -441,18 +439,19 @@ public class ImMessageController {
      * 批量获取消息已读状态
      * 批量获取多条消息的已读状态，用于在消息列表中展示已读信息
      *
-     * @param conversationId 会话ID
-     * @param messageIds     消息ID列表
+     * @param request 批量查询请求参数，包含会话ID和消息ID列表
      * @return 消息已读状态Map，key为消息ID，value为已读状态
      */
     @Operation(summary = "批量获取消息已读状态", description = "批量获取多条消息的已读状态")
-    @PostMapping("/read/status/batch")
+    @PostMapping("/read-status/batch")
     public Result<Map<Long, com.ruoyi.im.vo.message.ImMessageReadStatusVO>> getBatchReadStatus(
-            @RequestParam Long conversationId,
-            @RequestBody List<Long> messageIds) {
+            @Valid @RequestBody ImMessageBatchReadStatusRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
+            List<Long> messageIds = request.getMessageIds();
+            Long conversationId = request.getConversationId();
+
             if (messageIds == null || messageIds.isEmpty()) {
                 return Result.success(new java.util.HashMap<>());
             }
@@ -472,7 +471,7 @@ public class ImMessageController {
 
             return Result.success(statusMap);
         } catch (Exception e) {
-            log.error("批量获取已读状态失败: conversationId={}", conversationId, e);
+            log.error("批量获取已读状态失败: conversationId={}", request.getConversationId(), e);
             return Result.fail("批量获取已读状态失败");
         }
     }

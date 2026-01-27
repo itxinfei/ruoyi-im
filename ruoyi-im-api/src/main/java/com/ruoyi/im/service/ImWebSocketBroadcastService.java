@@ -7,6 +7,15 @@ import java.util.Set;
 public interface ImWebSocketBroadcastService {
     void broadcastMessageToConversation(Long conversationId, Long messageId, Long senderId);
 
+    /**
+     * 广播消息给会话成员（优化版，避免重复查询发送者信息）
+     *
+     * @param conversationId 会话ID
+     * @param messageId      消息ID
+     * @param sender         发送者信息
+     */
+    void broadcastMessageToConversation(Long conversationId, Long messageId, com.ruoyi.im.domain.ImUser sender);
+
     void broadcastReactionUpdate(Long conversationId, Long messageId, Long userId, String emoji, String action);
 
     void broadcastReadReceipt(Long conversationId, Long lastReadMessageId, Long userId);

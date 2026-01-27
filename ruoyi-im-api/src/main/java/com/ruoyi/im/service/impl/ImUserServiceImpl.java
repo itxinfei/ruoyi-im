@@ -143,6 +143,16 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public ImUserVO getUserById(Long userId) {
+        // 尝试从缓存获取用户信息
+        Object cachedObj = imRedisUtil.getUserInfo(userId);
+        
+        if (cachedObj != null && cachedObj instanceof ImUserVO) {
+            ImUserVO cachedVo = (ImUserVO) cachedObj;
+            // 缓存命中，更新实时在线状态
+            cachedVo.setOnline(imRedisUtil.isOnlineUser(userId));
+            return cachedVo;
+        }
+
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
             throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
@@ -150,7 +160,12 @@ public class ImUserServiceImpl implements ImUserService {
 
         ImUserVO vo = new ImUserVO();
         BeanUtils.copyProperties(user, vo);
-        vo.setOnline(true);
+        
+        // 缓存用户信息（不包含实时在线状态）
+        imRedisUtil.cacheUserInfo(userId, vo);
+        
+        // 设置实时在线状态
+        vo.setOnline(imRedisUtil.isOnlineUser(userId));
         return vo;
     }
 
@@ -164,6 +179,9 @@ public class ImUserServiceImpl implements ImUserService {
         BeanUtils.copyProperties(request, user);
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
+        
+        // 清除缓存
+        imRedisUtil.evictUserInfo(userId);
     }
 
     @Override
@@ -176,6 +194,9 @@ public class ImUserServiceImpl implements ImUserService {
         user.setStatus(status);
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
+        
+        // 清除缓存
+        imRedisUtil.evictUserInfo(userId);
     }
 
     @Override
@@ -192,6 +213,9 @@ public class ImUserServiceImpl implements ImUserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setUpdateTime(LocalDateTime.now());
         int result = imUserMapper.updateImUser(user);
+        
+        // 清除缓存
+        imRedisUtil.evictUserInfo(userId);
         return result > 0;
     }
 
@@ -276,9 +300,7 @@ public class ImUserServiceImpl implements ImUserService {
         if (userIds == null || userIds.isEmpty()) {
             return;
         }
-        for (Long userId : userIds) {
-            imUserMapper.deleteImUserById(userId);
-        }
+        imUserMapper.deleteImUserByIds(userIds.toArray(new Long[0]));
     }
 
     @Override
@@ -293,27 +315,40 @@ public class ImUserServiceImpl implements ImUserService {
         user.setPassword(passwordEncoder.encode(defaultPassword));
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
+        
+        // 清除缓存
+        imRedisUtil.evictUserInfo(userId);
     }
 
     @Override
     public List<ImUserVO> getOnlineUsers() {
         // 通过ImRedisUtil获取在线用户列表
         Set<String> onlineUserIds = imRedisUtil.getOnlineUsers();
-        List<ImUserVO> onlineUsers = new ArrayList<>();
+        if (onlineUserIds == null || onlineUserIds.isEmpty()) {
+            return new ArrayList<>();
+        }
 
+        List<Long> userIds = new ArrayList<>();
         for (String userIdStr : onlineUserIds) {
             try {
-                Long userId = Long.parseLong(userIdStr);
-                ImUser user = imUserMapper.selectImUserById(userId);
-                if (user != null) {
-                    ImUserVO vo = new ImUserVO();
-                    BeanUtils.copyProperties(user, vo);
-                    vo.setOnline(true);
-                    onlineUsers.add(vo);
-                }
+                userIds.add(Long.parseLong(userIdStr));
             } catch (NumberFormatException e) {
                 // 忽略无效的用户ID
             }
+        }
+
+        if (userIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<ImUser> users = imUserMapper.selectImUserListByIds(userIds);
+        List<ImUserVO> onlineUsers = new ArrayList<>();
+
+        for (ImUser user : users) {
+            ImUserVO vo = new ImUserVO();
+            BeanUtils.copyProperties(user, vo);
+            vo.setOnline(true);
+            onlineUsers.add(vo);
         }
 
         return onlineUsers;

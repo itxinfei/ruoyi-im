@@ -25,6 +25,7 @@ import com.ruoyi.im.vo.message.ImMessageVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,9 @@ import java.util.List;
 public class ImMessageServiceImpl implements ImMessageService {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageServiceImpl.class);
+
+    @Value("${im.search.fulltext:false}")
+    private boolean useFullTextSearch;
 
     private final ImMessageMapper imMessageMapper;
     private final ImUserMapper imUserMapper;
@@ -235,7 +239,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         }
 
         // 异步广播消息
-        broadcastService.broadcastMessageToConversation(conversationId, message.getId(), userId);
+        broadcastService.broadcastMessageToConversation(conversationId, message.getId(), sender);
 
         return vo;
     }
@@ -627,14 +631,14 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         // 统计总数
         int total = imMessageMapper.countSearchResults(conversationId, keyword, messageType,
-                senderId, startTime, endTime, includeRevoked, exactMatch);
+                senderId, startTime, endTime, includeRevoked, exactMatch, useFullTextSearch);
 
         // 计算总页数
         int totalPages = (int) Math.ceil((double) total / pageSize);
 
         // 查询结果
         List<ImMessage> messageList = imMessageMapper.searchMessages(conversationId, keyword, messageType,
-                senderId, startTime, endTime, includeRevoked, exactMatch, offset, pageSize);
+                senderId, startTime, endTime, includeRevoked, exactMatch, useFullTextSearch, offset, pageSize);
 
         // 优化：批量查询发送者信息，避免N+1查询问题
         java.util.Map<Long, ImUser> userMap = new java.util.HashMap<>();

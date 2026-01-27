@@ -1,6 +1,7 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserStatusUpdateRequest;
@@ -188,7 +189,9 @@ public class ImUserController {
     @Operation(summary = "修改用户状态", description = "修改用户状态（启用/禁用）")
     @PutMapping("/changeStatus")
     public Result<Void> changeStatus(@Valid @RequestBody ImUserStatusUpdateRequest request) {
-        Integer status = "ENABLED".equals(request.getStatus()) ? 1 : 0;
+            Integer status = "ENABLED".equals(request.getStatus())
+                ? SystemConstants.USER_STATUS_ENABLED
+                : SystemConstants.USER_STATUS_DISABLED;
         imUserService.updateStatus(request.getId(), status);
         return Result.success("状态修改成功");
     }

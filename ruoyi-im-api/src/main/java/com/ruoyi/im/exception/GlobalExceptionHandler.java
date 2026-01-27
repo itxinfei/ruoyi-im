@@ -4,15 +4,20 @@ import com.ruoyi.im.common.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.socket.WebSocketSession;
 
 import javax.servlet.http.HttpServletRequest;
@@ -234,6 +239,93 @@ public class GlobalExceptionHandler {
         } finally {
             clearTraceId();
         }
+    }
+
+    /**
+     * 处理数据完整性违反异常
+     *
+     * 捕获并处理违反数据完整性约束的异常（如唯一键冲突）
+     *
+     * @param e 数据完整性异常对象
+     * @param request HTTP请求对象
+     * @return 包含409错误码的响应对象
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Result<Void> handleDataIntegrityViolationException(DataIntegrityViolationException e, HttpServletRequest request) {
+        String traceId = generateTraceId();
+        try {
+            log.warn("数据完整性违反[{}]: {} - {}", traceId, e.getMessage(), request.getRequestURI());
+            // 判断是否为唯一键冲突
+            String message = e.getMessage();
+            if (message != null && message.contains("Duplicate entry")) {
+                return buildErrorResult(409, "数据已存在，请勿重复提交");
+            }
+            return buildErrorResult(409, "数据完整性约束违反");
+        } finally {
+            clearTraceId();
+        }
+    }
+
+    /**
+     * 处理缺失请求参数异常
+     *
+     * 捕获并处理缺少必需的请求参数异常
+     *
+     * @param e 缺失请求参数异常对象
+     * @return 包含400错误码的响应对象
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Result<Void> handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
+        log.warn("缺失请求参数: 参数名={}, 参数类型={}", e.getParameterName(), e.getParameterType());
+        return Result.error(400, "缺少必需参数: " + e.getParameterName());
+    }
+
+    /**
+     * 处理参数类型不匹配异常
+     *
+     * 捕获并处理请求参数类型不匹配异常
+     *
+     * @param e 参数类型不匹配异常对象
+     * @return 包含400错误码的响应对象
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Result<Void> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        log.warn("参数类型不匹配: 参数名={}, 期望类型={}", e.getName(), e.getRequiredType());
+        return Result.error(400, "参数类型错误: " + e.getName());
+    }
+
+    /**
+     * 处理请求体不可读异常
+     *
+     * 捕获并处理请求体格式错误（如JSON格式错误）
+     *
+     * @param e 请求体不可读异常对象
+     * @return 包含400错误码的响应对象
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Result<Void> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        log.warn("请求体格式错误: {}", e.getMessage());
+        return Result.error(400, "请求体格式错误，请检查JSON格式");
+    }
+
+    /**
+     * 处理404异常
+     *
+     * 捕获并处理请求路径不存在的异常
+     *
+     * @param e 404异常对象
+     * @param request HTTP请求对象
+     * @return 包含404错误码的响应对象
+     */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Result<Void> handleNoHandlerFoundException(NoHandlerFoundException e, HttpServletRequest request) {
+        log.warn("请求路径不存在: {}", request.getRequestURI());
+        return Result.error(404, "请求的资源不存在");
     }
 
     /**

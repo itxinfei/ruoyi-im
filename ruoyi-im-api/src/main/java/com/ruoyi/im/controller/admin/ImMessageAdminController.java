@@ -75,6 +75,7 @@ public class ImMessageAdminController {
                 endTime,
                 false, // 不包含已撤回消息
                 false, // 非精确匹配
+                false, // 不使用全文检索
                 offset,
                 pageSize
         );
@@ -88,7 +89,8 @@ public class ImMessageAdminController {
                 startTime,
                 endTime,
                 false,
-                false
+                false,
+                false // 不使用全文检索
         );
 
         // 返回结果
@@ -189,23 +191,23 @@ public class ImMessageAdminController {
         // 统计各类型消息数量
         Map<String, Object> stats = new HashMap<>();
 
-        int totalMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, false, false);
+        int totalMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, false, false, false);
         stats.put("totalMessages", totalMessages);
 
         // 统计文本消息
-        int textMessages = imMessageMapper.countSearchResults(null, null, "TEXT", null, startTime, endTime, false, false);
+        int textMessages = imMessageMapper.countSearchResults(null, null, "TEXT", null, startTime, endTime, false, false, false);
         stats.put("textMessages", textMessages);
 
         // 统计图片消息
-        int imageMessages = imMessageMapper.countSearchResults(null, null, "IMAGE", null, startTime, endTime, false, false);
+        int imageMessages = imMessageMapper.countSearchResults(null, null, "IMAGE", null, startTime, endTime, false, false, false);
         stats.put("imageMessages", imageMessages);
 
         // 统计文件消息
-        int fileMessages = imMessageMapper.countSearchResults(null, null, "FILE", null, startTime, endTime, false, false);
+        int fileMessages = imMessageMapper.countSearchResults(null, null, "FILE", null, startTime, endTime, false, false, false);
         stats.put("fileMessages", fileMessages);
 
         // 统计已撤回消息
-        int revokedMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, true, false);
+        int revokedMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, true, false, false);
         stats.put("revokedMessages", revokedMessages);
 
         return Result.success(stats);

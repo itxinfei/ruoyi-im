@@ -44,6 +44,11 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
     @Override
     public void broadcastMessageToConversation(Long conversationId, Long messageId, Long senderId) {
+        broadcastMessageToConversation(conversationId, messageId, (com.ruoyi.im.domain.ImUser) null);
+    }
+
+    @Override
+    public void broadcastMessageToConversation(Long conversationId, Long messageId, com.ruoyi.im.domain.ImUser sender) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
             if (members == null || members.isEmpty()) {
@@ -58,11 +63,11 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             // 构建标准推送格式: {type: 'message', data: {...}}
             Map<String, Object> wsMessage = new HashMap<>();
             wsMessage.put("type", "message");
-            wsMessage.put("data", createMessageData(message));
+            wsMessage.put("data", createMessageData(message, sender));
 
             String messageJson = objectMapper.writeValueAsString(wsMessage);
 
-            broadcastToMembers(members, messageJson, senderId);
+            broadcastToMembers(members, messageJson, sender != null ? sender.getId() : message.getSenderId());
         } catch (Exception e) {
             log.error("广播消息异常: conversationId={}, messageId={}", conversationId, messageId, e);
         }
@@ -185,7 +190,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         }
     }
 
-    private Map<String, Object> createMessageData(ImMessage message) {
+    private Map<String, Object> createMessageData(ImMessage message, com.ruoyi.im.domain.ImUser sender) {
         Map<String, Object> data = new HashMap<>();
         data.put("id", message.getId());
         data.put("conversationId", message.getConversationId());
@@ -196,7 +201,10 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
         // 尝试获取发送者信息
         try {
-            com.ruoyi.im.domain.ImUser sender = imUserMapper.selectImUserById(message.getSenderId());
+            if (sender == null) {
+                sender = imUserMapper.selectImUserById(message.getSenderId());
+            }
+            
             if (sender != null) {
                 data.put("senderName", sender.getNickname());
                 data.put("senderAvatar", sender.getAvatar());

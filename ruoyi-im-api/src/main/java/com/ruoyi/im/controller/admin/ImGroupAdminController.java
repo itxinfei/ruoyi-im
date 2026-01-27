@@ -3,6 +3,7 @@ package com.ruoyi.im.controller.admin;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImGroup;
 import com.ruoyi.im.dto.group.ImGroupUpdateRequest;
 import com.ruoyi.im.mapper.ImGroupMapper;
@@ -119,7 +120,7 @@ public class ImGroupAdminController {
         }
 
         // 软删除群组
-        group.setIsDeleted(1);
+        group.setIsDeleted(SystemConstants.DELETED);
         group.setDeletedTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
 
@@ -145,7 +146,7 @@ public class ImGroupAdminController {
         for (Long id : ids) {
             ImGroup group = imGroupMapper.selectImGroupById(id);
             if (group != null) {
-                group.setIsDeleted(1);
+                group.setIsDeleted(SystemConstants.DELETED);
                 group.setDeletedTime(LocalDateTime.now());
                 imGroupMapper.updateImGroup(group);
                 successCount++;
@@ -202,7 +203,9 @@ public class ImGroupAdminController {
         List<ImGroup> allGroups = imGroupMapper.selectImGroupList(new ImGroup());
 
         // 统计未删除的群组
-        long total = allGroups.stream().filter(g -> g.getIsDeleted() == null || g.getIsDeleted() == 0).count();
+        long total = allGroups.stream()
+                .filter(g -> g.getIsDeleted() == null || g.getIsDeleted() == SystemConstants.NOT_DELETED)
+                .count();
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("total", total);

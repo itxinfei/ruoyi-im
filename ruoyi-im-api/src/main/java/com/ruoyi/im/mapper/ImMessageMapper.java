@@ -102,6 +102,7 @@ public interface ImMessageMapper extends BaseMapper<ImMessage> {
      * @param endTime        结束时间（可选）
      * @param includeRevoked 是否包含撤回的消息
      * @param exactMatch     是否精确匹配
+     * @param useFullTextSearch 是否使用全文检索
      * @param offset         偏移量
      * @param limit          限制数量
      * @return 消息集合
@@ -114,6 +115,7 @@ public interface ImMessageMapper extends BaseMapper<ImMessage> {
                                     @Param("endTime") java.time.LocalDateTime endTime,
                                     @Param("includeRevoked") Boolean includeRevoked,
                                     @Param("exactMatch") Boolean exactMatch,
+                                    @Param("useFullTextSearch") Boolean useFullTextSearch,
                                     @Param("offset") Integer offset,
                                     @Param("limit") Integer limit);
 
@@ -128,6 +130,7 @@ public interface ImMessageMapper extends BaseMapper<ImMessage> {
      * @param endTime        结束时间（可选）
      * @param includeRevoked 是否包含撤回的消息
      * @param exactMatch     是否精确匹配
+     * @param useFullTextSearch 是否使用全文检索
      * @return 结果数量
      */
     int countSearchResults(@Param("conversationId") Long conversationId,
@@ -137,7 +140,8 @@ public interface ImMessageMapper extends BaseMapper<ImMessage> {
                            @Param("startTime") java.time.LocalDateTime startTime,
                            @Param("endTime") java.time.LocalDateTime endTime,
                            @Param("includeRevoked") Boolean includeRevoked,
-                           @Param("exactMatch") Boolean exactMatch);
+                           @Param("exactMatch") Boolean exactMatch,
+                           @Param("useFullTextSearch") Boolean useFullTextSearch);
 
     /**
      * 获取搜索结果的高亮上下文

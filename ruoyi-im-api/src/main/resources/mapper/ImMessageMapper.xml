@@ -248,6 +248,9 @@
                     <when test="exactMatch">
                         and content = #{keyword}
                     </when>
+                    <when test="useFullTextSearch">
+                        and MATCH(content) AGAINST(#{keyword} IN BOOLEAN MODE)
+                    </when>
                     <otherwise>
                         and content like CONCAT('%', #{keyword}, '%')
                     </otherwise>
@@ -277,6 +280,9 @@
                 <choose>
                     <when test="exactMatch">
                         and content = #{keyword}
+                    </when>
+                    <when test="useFullTextSearch">
+                        and MATCH(content) AGAINST(#{keyword} IN BOOLEAN MODE)
                     </when>
                     <otherwise>
                         and content like CONCAT('%', #{keyword}, '%')
