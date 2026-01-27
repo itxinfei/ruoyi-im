@@ -104,6 +104,11 @@ export function useImWebSocket() {
     registerHandler('call', callback)
   }
 
+  // 监听表情回复
+  const onReaction = (callback) => {
+    registerHandler('reaction', callback)
+  }
+
   // 清理当前组件的所有监听器
   const cleanup = () => {
     registeredHandlers.forEach(({ event, callback }) => {
@@ -137,6 +142,7 @@ export function useImWebSocket() {
     onRead,
     onMessageStatus,
     onCall,
+    onReaction,
 
     // WebSocket 实例
     ws: imWebSocket

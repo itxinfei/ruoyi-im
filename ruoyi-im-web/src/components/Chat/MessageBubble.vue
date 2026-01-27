@@ -8,6 +8,8 @@
       class="bubble"
       :class="[message.type, { 'is-own': message.isOwn, 'is-selected': isSelected, 'is-long-press': isLongPressing }]"
       @click="handleClick"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
     >
       <!-- 引用消息区块 (如果该消息是回复某人的) -->
       <div v-if="message.replyTo" class="bubble-reply-ref" @click.stop="$emit('scroll-to', message.replyTo.id)">
@@ -42,7 +44,25 @@
 
       <!-- 文本消息 -->
       <div v-if="message.type === 'TEXT'" class="text-content-wrapper">
-        <span class="main-text">{{ message.content }}</span>
+        <!-- 渲染文本和代码块 -->
+        <template v-if="parsedTextContent.segments.length > 1">
+          <template v-for="(segment, index) in parsedTextContent.segments" :key="index">
+            <!-- 普通文本 -->
+            <span v-if="segment.type === 'text'" class="main-text">{{ segment.content }}</span>
+            <!-- 代码块 -->
+            <div v-else class="code-block" :class="'language-' + segment.language">
+              <div class="code-header">
+                <span class="code-language">{{ segment.language || 'text' }}</span>
+                <button class="code-copy-btn" @click="copyCode(segment.content)" title="复制代码">
+                  <el-icon><Document /></el-icon>
+                </button>
+              </div>
+              <pre class="code-content"><code>{{ segment.content }}</code></pre>
+            </div>
+          </template>
+        </template>
+        <!-- 没有代码块时直接显示原始文本 -->
+        <span v-else class="main-text">{{ message.content }}</span>
         <span v-if="message.isEdited" class="edited-tag">(已编辑)</span>
 
         <!-- 链接卡片 -->
@@ -66,6 +86,12 @@
               {{ marker.isCompleted ? 'check_circle' : 'check_circle_outline' }}
             </span>
           </span>
+        </div>
+
+        <!-- 置顶图标 -->
+        <div v-if="message.isPinned" class="message-pinned-badge" title="已置顶">
+          <el-icon><Top /></el-icon>
+          <span>已置顶</span>
         </div>
       </div>
 
@@ -209,6 +235,36 @@
           </div>
         </transition>
       </div>
+
+      <!-- 表情回复栏（悬停显示） -->
+      <transition name="reaction-bar">
+        <div v-if="showReactionBar" class="reaction-bar">
+          <button
+            v-for="emoji in quickEmojis"
+            :key="emoji.char"
+            class="reaction-btn"
+            :class="{ 'is-active': hasReacted(emoji.char) }"
+            @click.stop="handleReaction(emoji.char)"
+          >
+            <span class="emoji">{{ emoji.char }}</span>
+            <span v-if="emoji.count" class="count">{{ emoji.count }}</span>
+          </button>
+        </div>
+      </transition>
+
+      <!-- 表情聚合显示 -->
+      <div v-if="hasReactions" class="reaction-aggregate" @click="showReactionDetail = true">
+        <div
+          v-for="(reaction, index) in messageReactions"
+          :key="index"
+          class="reaction-item"
+          :class="{ 'is-active': reaction.hasOwnReaction }"
+          @click.stop="toggleReaction(reaction.emoji)"
+        >
+          <span class="reaction-emoji">{{ reaction.emoji }}</span>
+          <span class="reaction-count">{{ reaction.count }}</span>
+        </div>
+      </div>
     </div>
 
     <!-- 右键菜单 -->
@@ -229,6 +285,9 @@
         <el-dropdown-item command="todo">
           <el-icon><Checked /></el-icon> <span>设为待办</span>
         </el-dropdown-item>
+        <el-dropdown-item command="pin" :class="{ 'is-pinned': message.isPinned }">
+          <el-icon><Top /></el-icon> <span>{{ message.isPinned ? '取消置顶' : '置顶' }}</span>
+        </el-dropdown-item>
 
         <el-dropdown-item v-if="message.isOwn && canRecall" command="recall" divided class="danger">
           <el-icon><RefreshLeft /></el-icon>
@@ -248,7 +307,8 @@
 <script setup>
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
-import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, Loading, WarningFilled, VideoPlay, VideoPause, Download } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, Loading, WarningFilled, VideoPlay, VideoPause, Download, Top } from '@element-plus/icons-vue'
 import CombineMessagePreview from './CombineMessagePreview.vue'
 import LinkCard from './LinkCard.vue'
 import { extractLinksFromContent, formatLinkUrl } from '@/utils/file'
@@ -258,7 +318,7 @@ const props = defineProps({
   sessionType: { type: String, default: 'PRIVATE' }
 })
 
-const emit = defineEmits(['command', 'preview', 'download', 'at', 'scroll-to', 'retry'])
+const emit = defineEmits(['command', 'preview', 'download', 'at', 'scroll-to', 'retry', 'toggle-reaction', 'add-reaction'])
 
 const store = useStore()
 const selectedMessages = computed(() => store.state.im.message.selectedMessages)
@@ -363,6 +423,83 @@ const messageLinks = computed(() => {
   if (!props.message) return []
   return extractLinksFromContent(props.message.content)
 })
+
+// 解析文本内容中的代码块
+const parsedTextContent = computed(() => {
+  if (props.message.type !== 'TEXT' || !props.message.content) {
+    return { segments: [] }
+  }
+
+  const content = props.message.content
+  const segments = []
+  const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g
+  let lastIndex = 0
+  let match
+
+  while ((match = codeBlockRegex.exec(content)) !== null) {
+    // 添加代码块之前的普通文本
+    if (match.index > lastIndex) {
+      const textBefore = content.substring(lastIndex, match.index).trim()
+      if (textBefore) {
+        segments.push({
+          type: 'text',
+          content: textBefore
+        })
+      }
+    }
+
+    // 添加代码块
+    segments.push({
+      type: 'code',
+      language: match[1] || 'plaintext',
+      content: match[2]
+    })
+
+    lastIndex = codeBlockRegex.lastIndex
+  }
+
+  // 添加剩余的普通文本
+  if (lastIndex < content.length) {
+    const textAfter = content.substring(lastIndex).trim()
+    if (textAfter) {
+      segments.push({
+        type: 'text',
+        content: textAfter
+      })
+    }
+  }
+
+  // 如果没有代码块，将整个内容作为普通文本
+  if (segments.length === 0) {
+    segments.push({
+      type: 'text',
+      content: content
+    })
+  }
+
+  return { segments }
+})
+
+// 复制代码到剪贴板
+const copyCode = async (code) => {
+  try {
+    await navigator.clipboard.writeText(code)
+    ElMessage.success('代码已复制')
+  } catch (error) {
+    // 降级方案
+    const textarea = document.createElement('textarea')
+    textarea.value = code
+    document.body.appendChild(textarea)
+    textarea.select()
+    try {
+      document.execCommand('copy')
+      ElMessage.success('代码已复制')
+    } catch (e) {
+      ElMessage.error('复制失败')
+    }
+    document.body.removeChild(textarea)
+  }
+}
 
 // 获取撤回时限配置（分钟）
 const recallTimeLimit = computed(() => {
@@ -492,6 +629,129 @@ const handleFileClick = async () => {
     emit('download', parsedContent.value)
   }
 }
+
+// ============================================================================
+// 表情回复相关
+// ============================================================================
+// 快捷表情列表（钉钉风格）
+const quickEmojis = [
+  { char: '👍', name: '赞', type: 'thumb_up' },
+  { char: '❤️', name: '爱心', type: 'heart' },
+  { char: '😂', name: '大笑', type: 'joy' },
+  { char: '😮', name: '哇', type: 'wow' },
+  { char: '😢', name: '难过', type: 'sad' },
+  { char: '👏', name: '鼓掌', type: 'clap' }
+]
+
+const showReactionBar = ref(false)
+const showReactionDetail = ref(false)
+const isReacting = ref(false)
+
+// 鼠标悬停显示表情栏
+let reactionBarTimer = null
+const handleMouseEnter = () => {
+  if (reactionBarTimer) clearTimeout(reactionBarTimer)
+  reactionBarTimer = setTimeout(() => {
+    showReactionBar.value = true
+  }, 300)
+}
+
+const handleMouseLeave = () => {
+  if (reactionBarTimer) clearTimeout(reactionBarTimer)
+  reactionBarTimer = setTimeout(() => {
+    showReactionBar.value = false
+  }, 200)
+}
+
+// 消息的表情回复数据
+const messageReactions = computed(() => {
+  if (!props.message?.reactions) return []
+
+  const currentUser = store.getters['user/currentUser']
+  const reactions = {}
+
+  // 按表情分组
+  props.message.reactions.forEach(r => {
+    if (!reactions[r.emoji]) {
+      reactions[r.emoji] = {
+        emoji: r.emoji,
+        users: [],
+        count: 0,
+        hasOwnReaction: false
+      }
+    }
+    reactions[r.emoji].users.push(r)
+    reactions[r.emoji].count++
+    reactions[r.emoji].hasOwnReaction = r.userId === currentUser?.id
+  })
+
+  return Object.values(reactions)
+})
+
+const hasReactions = computed(() => messageReactions.value.length > 0)
+
+// 检查当前用户是否对某个表情回复过
+const hasReacted = (emoji) => {
+  const currentUser = store.getters['user/currentUser']
+  return props.message?.reactions?.some(
+    r => r.emoji === emoji && r.userId === currentUser?.id
+  )
+}
+
+// 处理表情回复
+const handleReaction = async (emoji) => {
+  if (isReacting.value) return
+
+  // 检查是否已经回复过
+  const alreadyReacted = hasReacted(emoji)
+
+  try {
+    isReacting.value = true
+    const { addReaction, removeReaction } = await import('@/api/im/message')
+
+    if (alreadyReacted) {
+      // 取消回复
+      await removeReaction(props.message.id)
+      // 更新本地状态
+      if (props.message.reactions) {
+        props.message.reactions = props.message.reactions.filter(
+          r => !(r.emoji === emoji && r.userId === store.getters['user/currentUser']?.id)
+        )
+      }
+    } else {
+      // 添加回复
+      await addReaction(props.message.id, { emoji })
+      // 添加到本地状态
+      if (!props.message.reactions) {
+        props.message.reactions = []
+      }
+      props.message.reactions.push({
+        emoji,
+        userId: store.getters['user/currentUser']?.id,
+        userName: store.getters['user/currentUser']?.nickName || '我',
+        userAvatar: store.getters['user/currentUser']?.avatar
+      })
+    }
+
+    // 通知父组件更新
+    emit('add-reaction', props.message.id, emoji, !alreadyReacted)
+  } catch (error) {
+    console.error('表情回复失败:', error)
+  } finally {
+    isReacting.value = false
+  }
+}
+
+// 切换表情回复（点击表情聚合）
+const toggleReaction = async (emoji) => {
+  await handleReaction(emoji)
+}
+
+// 导出悬停处理给父组件使用
+defineExpose({
+  handleMouseEnter,
+  handleMouseLeave
+})
 
 // 语音消息相关
 const voiceAudioRef = ref(null)
@@ -854,6 +1114,90 @@ onUnmounted(() => {
     .main-text { white-space: pre-wrap; }
     .edited-tag { font-size: 11px; opacity: 0.5; margin-top: 2px; align-self: flex-end; }
 
+    // 代码块样式
+    .code-block {
+      margin: 8px 0;
+      background: #1e1e1e;
+      border-radius: 6px;
+      overflow: hidden;
+      font-size: 13px;
+      max-width: 500px;
+
+      .code-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 12px;
+        background: #2d2d2d;
+        border-bottom: 1px solid #3e3e3e;
+
+        .code-language {
+          font-size: 11px;
+          color: #8b949e;
+          text-transform: uppercase;
+          font-weight: 500;
+        }
+
+        .code-copy-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 24px;
+          height: 24px;
+          border: none;
+          background: transparent;
+          color: #8b949e;
+          cursor: pointer;
+          border-radius: 4px;
+          transition: all 0.2s;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+          }
+
+          .el-icon {
+            font-size: 14px;
+          }
+        }
+      }
+
+      .code-content {
+        margin: 0;
+        padding: 12px;
+        overflow-x: auto;
+        background: transparent;
+
+        code {
+          font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+          line-height: 1.6;
+          color: #e6edf3;
+          white-space: pre;
+        }
+      }
+
+      // 语言标识颜色
+      &.language-javascript .code-language { color: #f1e05a; }
+      &.language-typescript .code-language { color: #3178c6; }
+      &.language-python .code-language { color: #3572A5; }
+      &.language-java .code-language { color: #b07219; }
+      &.language-cpp .code-language { color: #f34b7d; }
+      &.language-c .code-language { color: #555555; }
+      &.language-go .code-language { color: #00ADD8; }
+      &.language-rust .code-language { color: #dea584; }
+      &.language-ruby .code-language { color: #701516; }
+      &.language-php .code-language { color: #4F5D95; }
+      &.language-swift .code-language { color: #F05138; }
+      &.language-kotlin .code-language { color: #A97BFF; }
+      &.language-html .code-language { color: #e34c26; }
+      &.language-css .code-language { color: #563d7c; }
+      &.language-scss .code-language { color: #c6538c; }
+      &.language-json .code-language { color: #cbcb41; }
+      &.language-sql .code-language { color: #cc3e44; }
+      &.language-bash .code-language { color: #89e051; }
+      &.language-shell .code-language { color: #89e051; }
+    }
+
     // 链接卡片容器
     .message-links {
       margin-top: 8px;
@@ -887,6 +1231,26 @@ onUnmounted(() => {
         &:hover {
           transform: scale(1.15);
         }
+      }
+    }
+
+    // 置顶徽章
+    .message-pinned-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+      color: #fff;
+      font-size: 12px;
+      border-radius: 12px;
+      align-self: flex-start;
+      box-shadow: 0 2px 4px rgba(22, 119, 255, 0.3);
+      animation: slideInDown 0.3s var(--dt-ease-out);
+
+      .el-icon {
+        font-size: 14px;
       }
     }
   }
@@ -1040,6 +1404,18 @@ onUnmounted(() => {
   40% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+// 置顶徽章滑入动画
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -1427,6 +1803,144 @@ onUnmounted(() => {
   }
 }
 
+// ============================================================================
+// 表情回复栏
+// ============================================================================
+.reaction-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: absolute;
+  left: 0;
+  z-index: 10;
+
+  .reaction-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 4px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s var(--dt-ease-out);
+    position: relative;
+
+    .emoji {
+      font-size: 20px;
+      line-height: 1;
+      transition: transform 0.2s var(--dt-ease-out);
+    }
+
+    .count {
+      font-size: 10px;
+      font-weight: 500;
+      color: #64748b;
+      margin-top: -2px;
+    }
+
+    &:hover {
+      background: var(--dt-brand-bg);
+
+      .emoji {
+        transform: scale(1.2);
+      }
+    }
+
+    &.is-active {
+      background: rgba(22, 119, 255, 0.1);
+
+      .emoji {
+        transform: scale(1);
+      }
+    }
+  }
+}
+
+// 表情栏过渡动画
+.reaction-bar-enter-active,
+.reaction-bar-leave-active {
+  transition: all 0.2s var(--dt-ease-out);
+}
+
+.reaction-bar-enter-from,
+.reaction-bar-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+// ============================================================================
+// 表情聚合显示
+// ============================================================================
+.reaction-aggregate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+  margin-left: -2px;
+
+  .reaction-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(22, 119, 255, 0.08);
+    border-radius: 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s var(--dt-ease-out);
+    border: 1px solid transparent;
+
+    .reaction-emoji {
+      font-size: 14px;
+    }
+
+    .reaction-count {
+      font-size: 11px;
+      font-weight: 500;
+      color: #64748b;
+      min-width: 12px;
+    }
+
+    &:hover {
+      background: rgba(22, 119, 255, 0.15);
+
+      .reaction-count {
+        color: var(--dt-brand-color);
+      }
+    }
+
+    &.is-active {
+      background: var(--dt-brand-bg);
+      border-color: var(--dt-brand-color);
+
+      .reaction-emoji {
+        animation: bounce 0.3s var(--dt-ease-out);
+      }
+
+      .reaction-count {
+        color: var(--dt-brand-color);
+      }
+    }
+  }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+// ============================================================================
+// 暗色模式
+// ============================================================================
 :global(.dark) {
   .bubble {
     background: #1e293b; color: #f1f5f9; border-color: #334155;
@@ -1434,5 +1948,75 @@ onUnmounted(() => {
     .bubble-reply-ref { background: rgba(255, 255, 255, 0.05); color: #94a3b8; .ref-user { color: #f1f5f9; } }
   }
   .msg-file { background: #0f172a; border-color: #334155; .file-name { color: #f1f5f9; } }
+
+  // 表情回复栏 - 暗色模式
+  .reaction-bar {
+    background: #334155;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+
+    .reaction-btn {
+      background: transparent;
+      border-color: #475569;
+
+      &:hover {
+        background: rgba(22, 119, 255, 0.15);
+        border-color: #1677ff;
+      }
+
+      &.is-active {
+        background: rgba(22, 119, 255, 0.25);
+        border-color: #1677ff;
+      }
+    }
+  }
+
+  // 表情聚合显示 - 暗色模式
+  .reaction-aggregate {
+    .reaction-item {
+      background: rgba(22, 119, 255, 0.1);
+      border-color: #334155;
+
+      &:hover {
+        background: rgba(22, 119, 255, 0.2);
+        border-color: #1677ff;
+      }
+
+      &.is-active {
+        background: rgba(22, 119, 255, 0.25);
+        border-color: #1677ff;
+      }
+
+      .reaction-emoji {
+        filter: brightness(1.1);
+      }
+
+      .reaction-count {
+        color: #cbd5e1;
+      }
+
+      &.is-active .reaction-count {
+        color: #f1f5f9;
+      }
+    }
+  }
+
+  // 表情详情弹窗 - 暗色模式
+  .reaction-detail-dialog {
+    .dialog-header {
+      border-color: #334155;
+    }
+
+    .dialog-content {
+      background: #0f172a;
+
+      .reaction-user-item {
+        border-color: #1e293b;
+
+        &:hover {
+          background: #1e293b;
+        }
+      }
+    }
+  }
 }
 </style>

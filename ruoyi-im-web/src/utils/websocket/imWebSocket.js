@@ -23,7 +23,8 @@ export const MESSAGE_TYPE = {
   TYPING: 'typing',       // 正在输入
   ONLINE: 'online',       // 用户上线
   OFFLINE: 'offline',     // 用户下线
-  CALL: 'call'            // 音视频通话
+  CALL: 'call',           // 音视频通话
+  REACTION: 'reaction'    // 表情回复
 }
 
 class ImWebSocket {
@@ -143,6 +144,10 @@ class ImWebSocket {
         case MESSAGE_TYPE.CALL:
           // 音视频通话
           this.emit('call', payload)
+          break
+        case MESSAGE_TYPE.REACTION:
+          // 表情回复
+          this.emit('reaction', payload)
           break
         default:
           warn('ImWebSocket', '未知消息类型:', type)

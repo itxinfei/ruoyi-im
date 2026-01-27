@@ -168,7 +168,7 @@ const isMultiSelectModeActive = ref(false)
 
 const emit = defineEmits(['show-user'])
 
-const { onMessage, onTyping, onMessageStatus } = useImWebSocket()
+const { onMessage, onTyping, onMessageStatus, onReaction } = useImWebSocket()
 
 // 输入状态用户列表（用于显示"xxx正在输入..."）
 const typingUsers = ref([])
@@ -1166,6 +1166,19 @@ onMounted(() => {
       }
       messages.value[index].status = statusMap[data.sendStatus] || data.sendStatus
     }
+  })
+
+  // 监听表情回复更新
+  onReaction((data) => {
+    // WebSocket 推送的数据格式: { messageId, emoji, userId, userName, userAvatar, isAdd }
+    store.dispatch('im/message/handleReactionUpdate', {
+      messageId: data.messageId,
+      emoji: data.emoji,
+      userId: data.userId,
+      userName: data.userName,
+      userAvatar: data.userAvatar,
+      isAdd: data.isAdd !== false // 默认为添加
+    })
   })
 })
 </script>

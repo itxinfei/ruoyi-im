@@ -255,3 +255,38 @@ export function getUnreadCount(conversationId) {
   })
 }
 
+/**
+ * 置顶消息
+ * @param {number} messageId - 消息ID
+ * @returns {Promise}
+ */
+export function pinMessage(messageId) {
+  return request({
+    url: `/api/im/message/${messageId}/pin`,
+    method: 'post'
+  })
+}
+
+/**
+ * 取消置顶消息
+ * @param {number} messageId - 消息ID
+ * @returns {Promise}
+ */
+export function unpinMessage(messageId) {
+  return request({
+    url: `/api/im/message/${messageId}/pin`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 获取会话的置顶消息列表
+ * @param {number} conversationId - 会话ID
+ * @returns {Promise}
+ */
+export function getPinnedMessages(conversationId) {
+  return request({
+    url: `/api/im/message/pinned/${conversationId}`,
+    method: 'get'
+  })
+}

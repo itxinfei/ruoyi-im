@@ -353,6 +353,47 @@ export default {
     // 清除回复消息
     clearReplyingMessage({ commit }) {
       commit('SET_REPLYING_MESSAGE', null)
+    },
+
+    // 处理表情回复更新（WebSocket 推送）
+    handleReactionUpdate({ commit, rootState }, { messageId, emoji, userId, userName, userAvatar, isAdd }) {
+      // 遍历所有会话查找该消息
+      for (const sessionId in rootState.message.messages) {
+        const messages = rootState.message.messages[sessionId]
+        const index = messages.findIndex(m => m.id === messageId)
+
+        if (index !== -1) {
+          const message = messages[index]
+          let reactions = message.reactions || []
+
+          if (isAdd) {
+            // 添加表情回复
+            const existingIndex = reactions.findIndex(
+              r => r.emoji === emoji && r.userId === userId
+            )
+
+            if (existingIndex === -1) {
+              reactions.push({
+                emoji,
+                userId,
+                userName,
+                userAvatar
+              })
+            }
+          } else {
+            // 移除表情回复
+            reactions = reactions.filter(
+              r => !(r.emoji === emoji && r.userId === userId)
+            )
+          }
+
+          commit('UPDATE_MESSAGE', {
+            sessionId,
+            message: { ...message, reactions }
+          })
+          break
+        }
+      }
     }
   }
 }

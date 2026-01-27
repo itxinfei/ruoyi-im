@@ -39,32 +39,52 @@
               @preview="previewImage"
               @download="downloadFile"
               @retry="$emit('retry', $event)"
+              @add-reaction="handleAddReaction"
             />
           </template>
 
           <!-- 已读状态插槽 -->
           <template #read-status>
-            <span v-if="msg.isRead" class="read">已读</span>
+            <!-- 群聊：显示已读人数，可悬停查看详情 -->
             <el-popover
-              v-else-if="msg.readCount > 0"
+              v-if="sessionType === 'GROUP' && (msg.readCount > 0 || msg.isRead)"
               placement="top"
-              :width="200"
+              :width="220"
               trigger="hover"
+              popper-class="read-receipt-popover"
               @before-enter="fetchReadUsers(msg)"
             >
               <template #reference>
-                <span class="read-count">{{ msg.readCount }}人已读</span>
+                <span class="read-count clickable">
+                  {{ msg.readCount > 0 ? `${msg.readCount}人已读` : '已读' }}
+                </span>
               </template>
               <div v-loading="loadingReadUsers[msg.id]" class="read-users-list">
-                <div v-for="user in readUsersMap[msg.id]" :key="user.id" class="read-user-item">
-                  <DingtalkAvatar :src="user.avatar" :name="user.name" :user-id="user.id" :size="24" shape="circle" />
-                  <span>{{ user.name }}</span>
+                <div class="read-users-header">
+                  <span class="read-title">已读成员</span>
+                  <span v-if="readUsersMap[msg.id]" class="read-count-badge">{{ readUsersMap[msg.id].length }}</span>
                 </div>
-                <div v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)" class="empty">
-                  加载中...
+                <div class="read-users-body">
+                  <div v-for="user in readUsersMap[msg.id]" :key="user.id" class="read-user-item">
+                    <DingtalkAvatar :src="user.avatar" :name="user.name" :user-id="user.id" :size="32" shape="square" />
+                    <span class="user-name">{{ user.name }}</span>
+                  </div>
+                  <div v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)" class="empty-state">
+                    <el-icon><User /></el-icon>
+                    <span>暂无已读成员</span>
+                  </div>
+                </div>
+                <!-- 显示未读人数 -->
+                <div v-if="unreadCount(msg)" class="unread-users-footer">
+                  <span>未读 {{ unreadCount(msg) }} 人</span>
                 </div>
               </div>
             </el-popover>
+            <!-- 单聊：只显示已读/未读 -->
+            <span v-else-if="sessionType === 'PRIVATE'" class="read-status-simple" :class="{ read: msg.isRead || msg.readCount > 0, unread: !msg.isRead && msg.readCount === 0 }">
+              {{ msg.isRead || msg.readCount > 0 ? '已读' : '未读' }}
+            </span>
+            <!-- 无已读数据时显示未读 -->
             <span v-else class="unread">未读</span>
           </template>
         </MessageItem>
@@ -94,7 +114,7 @@
 
 <script setup>
 import { computed, ref, nextTick, watch, onMounted, onUnmounted } from 'vue'
-import { Loading, ArrowDown } from '@element-plus/icons-vue'
+import { Loading, ArrowDown, User } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMessageReadUsers } from '@/api/im/message'
 import MessageItem from './MessageItem.vue'
@@ -119,7 +139,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry'])
+const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'reaction-update'])
 
 const listRef = ref(null)
 const readUsersMap = ref({})
@@ -132,7 +152,7 @@ const imagePreviewUrls = ref([])
 // 获取已读用户列表
 const fetchReadUsers = async (msg) => {
   if (readUsersMap.value[msg.id] || loadingReadUsers.value[msg.id]) return
-  
+
   loadingReadUsers.value[msg.id] = true
   try {
     const res = await getMessageReadUsers(props.sessionId, msg.id)
@@ -144,6 +164,13 @@ const fetchReadUsers = async (msg) => {
   } finally {
     loadingReadUsers.value[msg.id] = false
   }
+}
+
+// 计算未读人数（群聊中需要知道群成员总数）
+const unreadCount = (msg) => {
+  if (!msg.groupMemberCount) return null
+  const readCount = msg.readCount || 0
+  return Math.max(0, msg.groupMemberCount - readCount)
 }
 
 // 图片预览 - 使用 v-viewer
@@ -235,10 +262,13 @@ const formatTimeDivider = (timestamp) => {
   return `${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
 }
 
-// 计算带时间分割线的消息列表
+// 计算带时间分割线和合并的消息列表
 const messagesWithDividers = computed(() => {
   const res = []
+  const MERGE_TIME_WINDOW = 3 * 60 * 1000 // 3分钟内的消息可以合并
+
   props.messages.forEach((msg, index) => {
+    // 判断是否需要显示时间分割线
     let showDivider = false
     if (index === 0) {
       showDivider = true
@@ -252,13 +282,28 @@ const messagesWithDividers = computed(() => {
     }
 
     if (showDivider) {
-      res.push({ 
-        isTimeDivider: true, 
-        timeText: formatTimeDivider(msg.timestamp), 
-        id: 'divider-' + msg.timestamp + '-' + index 
+      res.push({
+        isTimeDivider: true,
+        timeText: formatTimeDivider(msg.timestamp),
+        id: 'divider-' + msg.timestamp + '-' + index
       })
     }
-    res.push(msg)
+
+    // 判断消息是否应该与上一条合并
+    let isMerged = false
+    if (index > 0) {
+      const prevMsg = props.messages[index - 1]
+      const timeDiff = msg.timestamp - prevMsg.timestamp
+      // 合并条件：同一发送者、3分钟内、都不是系统消息
+      isMerged = prevMsg.senderId === msg.senderId &&
+                 timeDiff < MERGE_TIME_WINDOW &&
+                 !msg.isTimeDivider &&
+                 !prevMsg.isTimeDivider &&
+                 msg.type !== 'NOTICE' &&
+                 prevMsg.type !== 'NOTICE'
+    }
+
+    res.push({ ...msg, isMerged })
   })
   return res
 })
@@ -279,20 +324,57 @@ const scrollToBottom = (smooth = true) => {
 watch(() => props.messages.length, () => scrollToBottom())
 
 // 处理菜单命令
-const handleCommand = (cmd, msg) => {
+const handleCommand = async (cmd, msg) => {
   if (cmd === 'copy') {
     navigator.clipboard.writeText(msg.content)
     ElMessage.success('已复制')
   } else if (cmd === 'at') {
     emit('at', msg)
+  } else if (cmd === 'pin') {
+    // 处理置顶/取消置顶
+    await handlePinMessage(msg)
   } else {
     emit('command', cmd, msg)
   }
 }
 
-// 处理表情反应
+// 处理置顶消息
+const handlePinMessage = async (msg) => {
+  try {
+    const { pinMessage, unpinMessage } = await import('@/api/im/message')
+
+    if (msg.isPinned) {
+      await unpinMessage(msg.id)
+      ElMessage.success('已取消置顶')
+    } else {
+      await pinMessage(msg.id)
+      ElMessage.success('已置顶消息')
+    }
+
+    // 更新本地消息状态
+    const index = props.messages.findIndex(m => m.id === msg.id)
+    if (index !== -1) {
+      props.messages[index].isPinned = !msg.isPinned
+    }
+  } catch (error) {
+    console.error('置顶操作失败:', error)
+    ElMessage.error(msg.isPinned ? '取消置顶失败' : '置顶失败')
+  }
+}
+
+// 处理表情反应（从 MessageItem 组件触发）
 const handleReaction = (msg, reaction) => {
   ElMessage.success(`你对消息做出了 ${reaction} 反应`)
+}
+
+// 处理表情回复（从 MessageBubble 组件触发）
+const handleAddReaction = (messageId, emoji, isAdded) => {
+  // 表情回复已经在 MessageBubble 中处理了 API 调用
+  // 这里主要用于触发 WebSocket 广播或后续处理
+  console.log(`表情回复: ${emoji} ${isAdded ? '添加' : '取消'} 到消息 ${messageId}`)
+
+  // 触发父组件事件，用于 WebSocket 广播
+  emit('reaction-update', { messageId, emoji, isAdded })
 }
 
 // 滚动到指定消息
@@ -461,20 +543,104 @@ defineExpose({ scrollToBottom, maintainScroll })
 }
 
 .read-users-list {
-  max-height: 200px;
-  overflow-y: auto;
-
-  .read-user-item {
+  .read-users-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    font-size: 13px;
-    transition: background var(--dt-transition-fast);
-    border-radius: var(--dt-radius-md);
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid var(--dt-border-lighter);
 
-    &:hover { background: var(--dt-bg-hover); }
-    &:not(:last-child) { border-bottom: 1px solid var(--dt-border-lighter); }
+    .read-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--dt-text-primary);
+    }
+
+    .read-count-badge {
+      background: var(--dt-brand-color);
+      color: #fff;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+  }
+
+  .read-users-body {
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 4px 0;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--dt-border);
+      border-radius: 2px;
+    }
+
+    .read-user-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      font-size: 13px;
+      transition: background var(--dt-transition-fast);
+      cursor: default;
+
+      &:hover {
+        background: var(--dt-bg-hover);
+      }
+
+      .user-name {
+        color: var(--dt-text-primary);
+        font-weight: 400;
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      color: var(--dt-text-tertiary);
+      gap: 8px;
+
+      .el-icon {
+        font-size: 32px;
+        opacity: 0.5;
+      }
+    }
+  }
+
+  .unread-users-footer {
+    padding: 8px 16px;
+    border-top: 1px solid var(--dt-border-lighter);
+    color: var(--dt-text-secondary);
+    font-size: 12px;
+    text-align: center;
+  }
+}
+
+.read-status-simple {
+  &.read {
+    color: var(--dt-text-quaternary);
+  }
+
+  &.unread {
+    color: var(--dt-brand-color);
+  }
+}
+
+.read-count.clickable {
+  cursor: pointer;
+  transition: color var(--dt-transition-fast);
+
+  &:hover {
+    color: var(--dt-brand-color);
   }
 }
 
@@ -583,6 +749,13 @@ defineExpose({ scrollToBottom, maintainScroll })
         .el-icon { color: #f5222d; }
       }
     }
+
+    &.is-pinned {
+      color: #1677ff !important;
+      .el-icon {
+        color: #1677ff;
+      }
+    }
   }
 
   .menu-divider {
@@ -621,5 +794,21 @@ defineExpose({ scrollToBottom, maintainScroll })
   .menu-divider {
     background-color: #334155;
   }
+}
+
+/* 已读回执弹窗样式 */
+.read-receipt-popover {
+  padding: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+
+  .el-popover__title {
+    display: none;
+  }
+}
+
+:global(.dark) .read-receipt-popover {
+  background: #1e293b !important;
+  border-color: #334155 !important;
 }
 </style>

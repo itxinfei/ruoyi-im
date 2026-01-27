@@ -106,7 +106,7 @@
           </span>
           <!-- 置顶标记 -->
           <span v-if="session.isPinned && !isActiveSession(session)" class="pin-indicator">
-            <span class="material-icons-outlined">push_pin</span>
+            置顶
           </span>
         </div>
 
@@ -733,15 +733,18 @@ onUnmounted(() => {
   position: absolute;
   bottom: -2px;
   left: -2px;
-  width: 14px;
-  height: 14px;
+  padding: 2px 6px;
   background: var(--dt-warning-color);
-  border-radius: 50%;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--dt-bg-card);
+  border: 1px solid var(--dt-bg-card);
   animation: fadeInUp 0.3s var(--dt-ease-out);
+  font-size: 10px;
+  color: #fff;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 // 会话信息

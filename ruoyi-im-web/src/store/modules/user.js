@@ -87,12 +87,12 @@ export default {
         },
 
         // 更新用户信息
-        async updateProfile({ commit }, profileData) {
+        async updateProfile({ commit, dispatch }, profileData) {
             try {
                 const res = await updateUser(this.state.user.userInfo.id, profileData)
                 if (res.code === 200) {
                     // Refresh info
-                    await this.dispatch('user/getUserInfo')
+                    await dispatch('getUserInfo')
                 }
                 return res
             } catch (error) {

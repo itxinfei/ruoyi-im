@@ -85,7 +85,7 @@
             <el-icon class="mr-1"><Edit /></el-icon>编辑资料
           </el-button>
           <el-button size="small" round plain @click="handleChangePassword">
-            <el-icon class="mr-1"><Lock /></el-icon>安全
+            <span class="material-icons-outlined mr-1">lock</span>安全
           </el-button>
         </div>
         <el-button link type="danger" size="small" @click="handleLogout">
@@ -110,7 +110,7 @@ import { ref, watch, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import {
-  Close, Edit, Lock, Briefcase, Phone, Message,
+  Close, Edit, Phone, Message,
   SwitchButton, CopyDocument, User
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'

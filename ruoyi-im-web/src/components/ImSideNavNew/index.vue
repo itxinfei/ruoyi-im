@@ -78,7 +78,7 @@
           :class="{ 'nav-item-active': activeModule === 'settings' }"
           aria-label="设置"
         >
-          <Settings class="nav-icon" aria-hidden="true" />
+          <Setting class="nav-icon" aria-hidden="true" />
         </button>
       </el-tooltip>
 
@@ -117,7 +117,7 @@ import { useTheme } from '@/composables/useTheme'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import {
   ChatDotRound, User, Grid, Cloudy, Calendar, CircleCheck,
-  DocumentFilled, Message, Search, Settings, Dark, Sunny, Moon
+  Document, Message, Search, Setting, Sunny, Moon
 } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -136,8 +136,8 @@ const store = useStore()
 const { isDark, themeMode, toggleTheme } = useTheme()
 
 const themeIcon = computed(() => {
-  if (themeMode.value === 'auto') return Moon
-  return themeMode.value === 'dark' ? Dark : Sunny
+  // Element Plus 没有 MoonFilled，使用 Moon 和 Sunny 区分
+  return themeMode.value === 'dark' || themeMode.value === 'auto' ? Moon : Sunny
 })
 
 const themeTooltip = computed(() => {
@@ -168,7 +168,7 @@ const navModules = ref([
   { key: 'drive', label: '云盘', icon: Cloudy },
   { key: 'calendar', label: '日历', icon: Calendar },
   { key: 'todo', label: '待办', icon: CircleCheck },
-  { key: 'approval', label: '审批', icon: DocumentFilled },
+  { key: 'approval', label: '审批', icon: Document },
   { key: 'mail', label: '邮箱', icon: Message },
   { key: 'assistant', label: 'AI助理', icon: ChatDotRound }
 ])

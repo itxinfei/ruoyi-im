@@ -103,7 +103,7 @@ export default {
 
   actions: {
     // 加载会话列表
-    async loadSessions({ commit, rootState }) {
+    async loadSessions({ commit, dispatch, rootState }) {
       commit('SET_LOADING', true)
       try {
         const res = await getConversations()

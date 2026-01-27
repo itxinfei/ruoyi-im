@@ -1,7 +1,7 @@
 <template>
   <div
     class="message-item message-enter"
-    :class="{ 'is-own': message.isOwn, 'is-multi-select': multiSelectMode }"
+    :class="{ 'is-own': message.isOwn, 'is-multi-select': multiSelectMode, 'is-merged': message.isMerged }"
   >
     <!-- 时间分割线 (如果是时间消息) -->
     <div v-if="message.isTimeDivider" class="time-divider">
@@ -18,8 +18,9 @@
         />
       </div>
 
-      <!-- 头像 -->
+      <!-- 头像 (合并的消息不显示头像) -->
       <div
+        v-if="!message.isMerged"
         class="avatar-container"
         @contextmenu.prevent="$emit('at', message)"
         @click="$emit('show-user', message.senderId)"
@@ -36,8 +37,8 @@
       </div>
 
       <div class="content-wrapper">
-        <!-- 发送者姓名 -->
-        <div v-if="!message.isOwn" class="sender-name">{{ message.senderName }}</div>
+        <!-- 发送者姓名 (合并的消息不显示姓名) -->
+        <div v-if="!message.isOwn && !message.isMerged" class="sender-name">{{ message.senderName }}</div>
 
         <div class="message-content-main">
           <!-- 悬停快捷按钮区 (还原钉钉微交互) -->
@@ -123,6 +124,27 @@ const formattedTime = computed(() => {
 
   &.is-own {
     flex-direction: row-reverse;
+  }
+
+  // 合并的消息样式
+  &.is-merged {
+    margin-bottom: 4px; // 减小消息间距
+
+    // 用占位符保持头像空间，使消息对齐
+    .avatar-container {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    // 自己发送的合并消息
+    &.is-own .content-wrapper {
+      margin-right: 46px; // 头像宽度 + margin
+    }
+
+    // 别人发送的合并消息
+    &:not(.is-own) .content-wrapper {
+      margin-left: 46px; // 头像宽度 + margin
+    }
   }
 }
 
