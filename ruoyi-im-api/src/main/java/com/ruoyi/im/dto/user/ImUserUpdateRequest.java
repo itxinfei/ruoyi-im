@@ -1,5 +1,6 @@
 package com.ruoyi.im.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -8,6 +9,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.time.LocalDate;
 
 /**
  * 用户信息更新请求
@@ -51,6 +53,10 @@ public class ImUserUpdateRequest implements Serializable {
     /** 职位 */
     @Size(max = 100, message = "职位长度不能超过100")
     private String position;
+
+    /** 生日 */
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthday;
 
     /** 用户角色: USER/ADMIN/SUPER_ADMIN */
     private String role;

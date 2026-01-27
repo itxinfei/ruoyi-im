@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import com.ruoyi.im.common.BaseEntity;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -63,6 +64,10 @@ public class ImUser extends BaseEntity implements Serializable {
 
     /** 职位 */
     private String position;
+
+    /** 生日 */
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthday;
 
     /** 最后在线时间,记录用户最近一次在线的时间 */
     @TableField("last_online_time")
