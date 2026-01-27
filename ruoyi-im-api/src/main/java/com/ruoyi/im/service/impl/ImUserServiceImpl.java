@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.ruoyi.im.constant.ImErrorCode;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.BasePageRequest;
 import com.ruoyi.im.dto.user.ImLoginRequest;
@@ -21,6 +22,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -118,6 +120,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long register(ImRegisterRequest request) {
         ImUser existingUser = imUserMapper.selectImUserByUsername(request.getUsername());
         if (existingUser != null) {
@@ -129,7 +132,7 @@ public class ImUserServiceImpl implements ImUserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setStatus(1); // 1=启用
         user.setGender(0);
-        user.setAvatar("/avatar/default.png");
+        user.setAvatar(SystemConstants.DEFAULT_USER_AVATAR);
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
 
@@ -170,6 +173,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateUser(Long userId, ImUserUpdateRequest request) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
@@ -185,6 +189,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateStatus(Long userId, Integer status) { // 0=禁用, 1=启用
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
@@ -200,6 +205,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean changePassword(Long userId, String oldPassword, String newPassword) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
@@ -262,6 +268,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long createUser(ImRegisterRequest request) {
         ImUser existingUser = imUserMapper.selectImUserByUsername(request.getUsername());
         if (existingUser != null) {
@@ -274,7 +281,7 @@ public class ImUserServiceImpl implements ImUserService {
         user.setStatus(1); // 1=启用
         user.setGender(0);
         if (user.getAvatar() == null || user.getAvatar().isEmpty()) {
-            user.setAvatar("/avatar/default.png");
+            user.setAvatar(SystemConstants.DEFAULT_USER_AVATAR);
         }
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
@@ -304,15 +311,15 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void resetPassword(Long userId) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
             throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
         }
 
-        // 重置为默认密码 123456
-        String defaultPassword = "123456";
-        user.setPassword(passwordEncoder.encode(defaultPassword));
+        // 重置为默认密码
+        user.setPassword(passwordEncoder.encode(SystemConstants.DEFAULT_PASSWORD));
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
         

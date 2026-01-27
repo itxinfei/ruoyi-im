@@ -102,4 +102,15 @@ public final class SystemConstants {
 
     /** 已删除 */
     public static final int DELETED = 1;
+
+    // ========== 默认值配置 ==========
+
+    /** 默认用户头像 */
+    public static final String DEFAULT_USER_AVATAR = "/avatar/default.png";
+
+    /** 默认群组头像 */
+    public static final String DEFAULT_GROUP_AVATAR = "/avatar/group_default.png";
+
+    /** 默认初始密码 */
+    public static final String DEFAULT_PASSWORD = "123456";
 }
