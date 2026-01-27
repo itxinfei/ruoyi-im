@@ -3,8 +3,12 @@
     v-model="visible"
     title="编辑资料"
     width="500px"
+    class="edit-profile-dialog"
     :close-on-click-modal="false"
+    append-to-body
+    destroy-on-close
     @closed="handleClosed"
+    @opened="handleOpened"
   >
     <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
       <!-- 头像上传 -->
@@ -20,6 +24,7 @@
             :show-file-list="false"
             :before-upload="beforeAvatarUpload"
             :on-success="handleAvatarSuccess"
+            :on-error="handleAvatarError"
             name="avatarfile"
           >
             <el-button size="small" type="primary">更换头像</el-button>
@@ -80,7 +85,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, computed } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import { updateUser } from '@/api/im/user'
@@ -94,7 +99,12 @@ const emit = defineEmits(['update:modelValue', 'success'])
 const store = useStore()
 const formRef = ref(null)
 const saving = ref(false)
-const visible = ref(false)
+
+// 统一 visible 响应式管理方式
+const visible = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val)
+})
 
 // 上传配置
 const uploadUrl = computed(() => {
@@ -159,6 +169,12 @@ const handleAvatarSuccess = (response) => {
   }
 }
 
+// 头像上传失败处理
+const handleAvatarError = (error) => {
+  ElMessage.error('头像上传失败，请稍后重试')
+  console.error('Upload error:', error)
+}
+
 // 初始化表单
 const initForm = () => {
   const currentUser = store.getters['user/currentUser'] || store.state.im.currentUser
@@ -210,22 +226,20 @@ const handleClosed = () => {
   formRef.value?.resetFields()
 }
 
-// 监听显示状态
-watch(() => props.modelValue, (val) => {
-  visible.value = val
-  if (val) {
-    initForm()
-  }
-})
-
-watch(visible, (val) => {
-  if (!val) {
-    emit('update:modelValue', false)
-  }
-})
+// 对话框打开后初始化表单
+const handleOpened = () => {
+  initForm()
+}
 </script>
 
 <style scoped lang="scss">
+.edit-profile-dialog {
+  :deep(.el-dialog__header) {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--dt-border-light);
+  }
+}
+
 .avatar-upload {
   display: flex;
   align-items: center;
