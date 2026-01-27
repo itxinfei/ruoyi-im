@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -71,7 +72,7 @@ public class ImAttendanceController {
      */
     private List<ImAttendanceVO> toVOList(List<ImAttendance> list) {
         if (list == null || list.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
         return list.stream()
                 .map(this::toVO)

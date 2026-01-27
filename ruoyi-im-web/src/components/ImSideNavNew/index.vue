@@ -49,6 +49,17 @@
 
     <!-- 底部操作区 -->
     <div class="nav-footer">
+      <!-- 搜索按钮 -->
+      <el-tooltip content="全局搜索" placement="right" :show-after="500" :hide-after="0">
+        <button
+          @click="handleOpenSearch"
+          class="nav-item nav-item-action"
+          aria-label="全局搜索"
+        >
+          <span class="material-icons-outlined" aria-hidden="true">search</span>
+        </button>
+      </el-tooltip>
+
       <!-- 主题切换按钮 -->
       <el-tooltip :content="themeTooltip" placement="right" :show-after="500" :hide-after="0">
         <button
@@ -131,7 +142,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['switch-module', 'toggle-collapse'])
+const emit = defineEmits(['switch-module', 'toggle-collapse', 'open-search'])
 const store = useStore()
 const { isDark, themeMode, toggleTheme } = useTheme()
 
@@ -190,6 +201,13 @@ function handleSwitch(key) {
  */
 function handleHelp() {
   handleSwitch('help')
+}
+
+/**
+ * 打开全局搜索
+ */
+function handleOpenSearch() {
+  emit('open-search')
 }
 </script>
 

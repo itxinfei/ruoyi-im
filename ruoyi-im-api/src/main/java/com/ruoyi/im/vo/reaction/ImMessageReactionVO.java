@@ -22,6 +22,9 @@ public class ImMessageReactionVO implements Serializable {
     /** 消息ID */
     private Long messageId;
 
+    /** 会话ID */
+    private Long conversationId;
+
     /** 用户ID */
     private Long userId;
 

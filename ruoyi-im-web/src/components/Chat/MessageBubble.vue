@@ -45,6 +45,23 @@
         <video v-if="parsedContent.videoUrl" :src="parsedContent.videoUrl" controls class="video-preview"></video>
       </div>
 
+      <!-- 语音消息 -->
+      <div v-else-if="message.type === 'VOICE' || message.type === 'AUDIO'" class="msg-voice" @click="togglePlayVoice">
+        <div class="voice-icon">
+          <el-icon><component :is="isVoicePlaying ? 'VideoPause' : 'VideoPlay'" /></el-icon>
+        </div>
+        <div class="voice-waveform">
+          <span
+            v-for="(item, index) in 20"
+            :key="index"
+            class="wave-bar"
+            :class="{ active: isVoicePlaying && voiceProgress > (index / 20) }"
+          ></span>
+        </div>
+        <span class="voice-duration">{{ formatVoiceDuration(parsedContent.duration) }}</span>
+        <audio v-if="parsedContent.voiceUrl" :src="parsedContent.voiceUrl" ref="voiceAudioRef" @ended="onVoiceEnded" @timeupdate="onVoiceTimeUpdate"></audio>
+      </div>
+
       <!-- 系统消息 -->
       <div v-else-if="message.type === 'SYSTEM'" class="msg-system">
         {{ message.content }}
@@ -110,9 +127,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
-import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, Loading, WarningFilled } from '@element-plus/icons-vue'
+import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, Loading, WarningFilled, VideoPlay, VideoPause } from '@element-plus/icons-vue'
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -183,6 +200,57 @@ const formatSize = (bytes) => {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
+
+// 语音消息相关
+const voiceAudioRef = ref(null)
+const isVoicePlaying = ref(false)
+const voiceProgress = ref(0)
+
+// 切换语音播放
+const togglePlayVoice = () => {
+  if (!voiceAudioRef.value) return
+
+  if (isVoicePlaying.value) {
+    voiceAudioRef.value.pause()
+  } else {
+    // 停止其他正在播放的语音
+    document.querySelectorAll('audio.voice-audio').forEach(audio => {
+      if (audio !== voiceAudioRef.value) {
+        audio.pause()
+        audio.currentTime = 0
+      }
+    })
+    voiceAudioRef.value.play()
+  }
+  isVoicePlaying.value = !isVoicePlaying.value
+}
+
+// 语音播放结束
+const onVoiceEnded = () => {
+  isVoicePlaying.value = false
+  voiceProgress.value = 0
+}
+
+// 语音播放进度更新
+const onVoiceTimeUpdate = () => {
+  if (!voiceAudioRef.value) return
+  voiceProgress.value = voiceAudioRef.value.currentTime / voiceAudioRef.value.duration
+}
+
+// 格式化语音时长
+const formatVoiceDuration = (seconds) => {
+  if (!seconds) return '0:00'
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
+// 组件卸载时停止播放
+onUnmounted(() => {
+  if (voiceAudioRef.value) {
+    voiceAudioRef.value.pause()
+  }
+})
 </script>
 
 <style scoped lang="scss">
@@ -277,6 +345,68 @@ const formatSize = (bytes) => {
 
 .msg-recalled { display: flex; align-items: center; gap: 6px; color: #8f959e; font-size: 13px; font-style: italic; }
 .msg-system { font-size: 12px; color: #8f959e; text-align: center; width: 100%; margin: 8px 0; }
+
+// 语音消息样式
+.msg-voice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 160px;
+  max-width: 280px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+
+  &.is-own {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  }
+
+  .voice-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .voice-waveform {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    flex: 1;
+    height: 20px;
+
+    .wave-bar {
+      width: 3px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 2px;
+      transition: all 0.15s;
+
+      &.active {
+        background: rgba(255, 255, 255, 0.9);
+        height: 14px;
+      }
+    }
+  }
+
+  .voice-duration {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    font-variant-numeric: tabular-nums;
+  }
+}
 
 :global(.dark) {
   .bubble {

@@ -48,6 +48,12 @@
             <el-icon><Phone /></el-icon>
           </button>
         </el-tooltip>
+
+        <el-tooltip content="按住说话" placement="top">
+          <button class="toolbar-btn" :class="{ active: isVoiceMode }" @click="toggleVoiceMode">
+            <el-icon><Microphone /></el-icon>
+          </button>
+        </el-tooltip>
       </div>
 
       <div class="toolbar-right">
@@ -76,7 +82,16 @@
 
     <!-- 输入核心区域 -->
     <div class="input-area">
+      <!-- 语音录制模式 -->
+      <VoiceRecorder
+        v-if="isVoiceMode"
+        @send="handleSendVoice"
+        @cancel="isVoiceMode = false"
+      />
+
+      <!-- 文字输入模式 -->
       <textarea
+        v-else
         ref="textareaRef"
         v-model="messageContent"
         class="message-input"
@@ -86,12 +101,12 @@
         @paste="handlePaste"
         @drop.prevent="handleDrop"
       ></textarea>
-      
-      <div class="input-footer">
+
+      <div class="input-footer" v-if="!isVoiceMode">
         <span class="hint-text">{{ sendShortcutHint }}</span>
-        <button 
-          class="send-btn" 
-          :class="{ active: canSend }" 
+        <button
+          class="send-btn"
+          :class="{ active: canSend }"
           :disabled="!canSend || sending"
           @click="handleSend"
         >
@@ -108,10 +123,11 @@
 <script setup>
 import { ref, nextTick, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useStore } from 'vuex'
-import { Close, ChatDotRound, Picture, FolderOpened, Phone, Clock } from '@element-plus/icons-vue'
+import { Close, ChatDotRound, Picture, FolderOpened, Phone, Clock, Microphone } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import EmojiPicker from '@/components/EmojiPicker/index.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
+import VoiceRecorder from './VoiceRecorder.vue'
 
 const props = defineProps({
   session: Object,
@@ -120,7 +136,7 @@ const props = defineProps({
   editingMessage: Object
 })
 
-const emit = defineEmits(['send', 'upload-image', 'upload-file', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video'])
+const emit = defineEmits(['send', 'send-voice', 'upload-image', 'upload-file', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video'])
 
 const store = useStore()
 const messageContent = ref('')
@@ -132,6 +148,7 @@ const sendShortcutHint = computed(() => {
 const showEmojiPicker = ref(false)
 const textareaRef = ref(null)
 const atMemberPickerRef = ref(null)
+const isVoiceMode = ref(false)
 
 // 钉钉风格高度逻辑
 const containerHeight = ref(200)
@@ -274,6 +291,22 @@ const handleAtMember = () => {
 }
 
 const onAtSelect = (m) => insertAt(m.nickname || m.userName)
+
+// 切换语音模式
+const toggleVoiceMode = () => {
+  isVoiceMode.value = !isVoiceMode.value
+  if (isVoiceMode.value) {
+    nextTick(() => textareaRef.value?.blur())
+  } else {
+    nextTick(() => textareaRef.value?.focus())
+  }
+}
+
+// 发送语音消息
+const handleSendVoice = ({ file, duration }) => {
+  emit('send-voice', { file, duration })
+  isVoiceMode.value = false
+}
 
 // 监听回复消息，自动获取焦点
 watch(() => props.replyingMessage, (val) => {

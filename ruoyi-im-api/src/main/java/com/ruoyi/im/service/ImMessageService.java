@@ -71,6 +71,18 @@ public interface ImMessageService {
     Long forwardMessage(Long messageId, Long toConversationId, Long toUserId, String content, Long userId);
 
     /**
+     * 批量转发消息
+     *
+     * @param messageIds        消息ID列表
+     * @param toConversationId 目标会话ID
+     * @param forwardType       转发类型：batch=逐条转发, combine=合并转发
+     * @param content           转发时附加内容
+     * @param userId            当前用户ID
+     * @return 新消息ID列表
+     */
+    List<Long> batchForwardMessages(List<Long> messageIds, Long toConversationId, String forwardType, String content, Long userId);
+
+    /**
      * 引用/回复消息
      *
      * @param messageId 原消息ID

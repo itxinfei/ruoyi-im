@@ -64,4 +64,7 @@ public class ImGroupAnnouncementVO implements Serializable {
     @Schema(description = "过期时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime expireTime;
+
+    @Schema(description = "是否已过期")
+    private Boolean isExpired;
 }

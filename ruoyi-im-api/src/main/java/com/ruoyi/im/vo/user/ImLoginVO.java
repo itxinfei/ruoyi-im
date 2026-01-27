@@ -31,5 +31,6 @@ public class ImLoginVO implements Serializable {
         private String username;
         private String nickname;
         private String avatar;
+        private String role;
     }
 }

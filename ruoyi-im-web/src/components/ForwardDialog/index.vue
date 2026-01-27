@@ -96,6 +96,8 @@ const store = useStore()
 
 const visible = ref(false)
 const messages = ref([])
+const messageIds = ref([])  // 用于批量转发的消息ID列表
+const forwardType = ref('batch')  // batch=逐条转发, combine=合并转发
 const searchKeyword = ref('')
 const selectedSessionId = ref(null)
 
@@ -133,9 +135,21 @@ const getMessagePreview = (msg) => {
   }
 }
 
-// 打开对话框
+// 打开对话框（单条或多条消息转发）
 const open = (msgs) => {
   messages.value = Array.isArray(msgs) ? msgs : [msgs]
+  messageIds.value = []
+  forwardType.value = 'batch'
+  selectedSessionId.value = null
+  searchKeyword.value = ''
+  visible.value = true
+}
+
+// 打开批量转发对话框
+const openForBatch = (msgIds, type) => {
+  messageIds.value = msgIds
+  forwardType.value = type || 'batch'
+  messages.value = []
   selectedSessionId.value = null
   searchKeyword.value = ''
   visible.value = true
@@ -155,25 +169,37 @@ const handleForward = () => {
 
   visible.value = false
 
-  // 触发转发事件，由父组件处理实际的转发逻辑
-  emit('forward', {
-    messages: messages.value,
-    targetSessionId: selectedSessionId.value
-  })
+  // 批量转发（通过消息ID列表）
+  if (messageIds.value.length > 0) {
+    emit('batch-forward', {
+      messageIds: messageIds.value,
+      targetSessionId: selectedSessionId.value,
+      forwardType: forwardType.value
+    })
+  } else {
+    // 单条或多条消息转发（通过消息对象）
+    emit('forward', {
+      messages: messages.value,
+      targetSessionId: selectedSessionId.value
+    })
+  }
 }
 
 // 关闭对话框
 const handleClose = () => {
   visible.value = false
   messages.value = []
+  messageIds.value = []
+  forwardType.value = 'batch'
   selectedSessionId.value = null
   searchKeyword.value = ''
 }
 
-const emit = defineEmits(['forward'])
+const emit = defineEmits(['forward', 'batch-forward'])
 
 defineExpose({
-  open
+  open,
+  openForBatch
 })
 </script>
 

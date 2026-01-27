@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,7 +67,7 @@ public class ImGroupAnnouncementController {
      */
     private List<ImGroupAnnouncementVO> toVOList(List<ImGroupAnnouncement> list) {
         if (list == null || list.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
         return list.stream()
                 .map(this::toVO)

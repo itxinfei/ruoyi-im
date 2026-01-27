@@ -114,6 +114,7 @@ public class ImUserServiceImpl implements ImUserService {
         userInfo.setUsername(user.getUsername());
         userInfo.setNickname(user.getNickname());
         userInfo.setAvatar(user.getAvatar());
+        userInfo.setRole(user.getRole() != null ? user.getRole() : "USER");
         vo.setUserInfo(userInfo);
 
         return vo;

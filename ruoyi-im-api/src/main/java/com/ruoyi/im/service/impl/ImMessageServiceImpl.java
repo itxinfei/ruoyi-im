@@ -606,6 +606,88 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public java.util.List<Long> batchForwardMessages(java.util.List<Long> messageIds, Long toConversationId,
+                                                        String forwardType, String content, Long userId) {
+        if ("combine".equals(forwardType)) {
+            // 合并转发：创建一条聊天记录类型的消息
+            return combineForwardMessages(messageIds, toConversationId, content, userId);
+        } else {
+            // 逐条转发（默认）
+            return batchForwardMessagesIndividually(messageIds, toConversationId, content, userId);
+        }
+    }
+
+    /**
+     * 逐条转发消息
+     */
+    private java.util.List<Long> batchForwardMessagesIndividually(java.util.List<Long> messageIds,
+                                                                  Long toConversationId,
+                                                                  String content, Long userId) {
+        java.util.List<Long> newMessageIds = new java.util.ArrayList<>();
+        for (Long messageId : messageIds) {
+            Long newId = forwardMessage(messageId, toConversationId, null, content, userId);
+            newMessageIds.add(newId);
+        }
+        return newMessageIds;
+    }
+
+    /**
+     * 合并转发消息
+     * 将多条消息合并为一条聊天记录类型的消息
+     */
+    private java.util.List<Long> combineForwardMessages(java.util.List<Long> messageIds,
+                                                         Long toConversationId,
+                                                         String content, Long userId) {
+        // 获取所有原始消息
+        java.util.List<ImMessage> originalMessages = imMessageMapper.selectBatchIds(messageIds);
+        if (originalMessages == null || originalMessages.isEmpty()) {
+            throw new BusinessException("消息不存在");
+        }
+
+        // 构建合并转发内容
+        StringBuilder combineContent = new StringBuilder();
+        if (content != null && !content.isEmpty()) {
+            combineContent.append(content).append("\n\n");
+        }
+        combineContent.append("------ 聊天记录 ------\n");
+
+        // 按时间排序构建聊天记录
+        originalMessages.stream()
+                .sorted(java.util.Comparator.comparing(ImMessage::getCreateTime))
+                .forEach(msg -> {
+                    String decryptedContent = encryptionUtil.decryptMessage(msg.getContent());
+                    String senderName = getSenderName(msg.getSenderId());
+                    String timeStr = msg.getCreateTime().toLocalTime()
+                            .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
+
+                    combineContent.append(String.format("[%s %s] %s\n",
+                            senderName, timeStr, decryptedContent));
+                });
+
+        // 创建合并转发消息
+        ImMessage combineMessage = new ImMessage();
+        combineMessage.setConversationId(toConversationId);
+        combineMessage.setSenderId(userId);
+        combineMessage.setMessageType("COMBINE"); // 新增消息类型用于合并转发
+        combineMessage.setContent(encryptionUtil.encryptMessage(combineContent.toString()));
+        combineMessage.setIsRevoked(0);
+        combineMessage.setCreateTime(java.time.LocalDateTime.now());
+
+        imMessageMapper.insertImMessage(combineMessage);
+        return java.util.Collections.singletonList(combineMessage.getId());
+    }
+
+    /**
+     * 获取发送者名称（简单实现，可从缓存或数据库获取）
+     */
+    private String getSenderName(Long senderId) {
+        // 简单实现，实际应从用户服务获取
+        com.ruoyi.im.domain.ImUser user = imUserMapper.selectImUserById(senderId);
+        return user != null ? user.getNickname() : "用户" + senderId;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long replyMessage(Long messageId, String content, Long userId) {
         ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
         if (originalMessage == null) {

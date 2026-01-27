@@ -10,6 +10,11 @@ export * as dingApi from './ding'
 export * as botApi from './bot'
 export * as translationApi from './translation'
 export * as aiApi from './ai'
+export * as favoriteApi from './favorite'
+export * as transcriptApi from './transcript'
+export * as globalSearchApi from './globalSearch'
+export * as markerApi from './marker'
+export * as announcementApi from './announcement'
 
 // 直接导出常用方法
 export {
@@ -101,3 +106,45 @@ export {
   clearConversation,
   getSupportedModels
 } from './ai'
+
+// 全局搜索相关API
+export {
+  globalSearch,
+  searchMessages,
+  searchContacts,
+  searchGroups,
+  searchFiles,
+  searchWorkbench,
+  getHotKeywords
+} from './globalSearch'
+
+// 消息标记相关API
+export {
+  markMessage,
+  unmarkMessage,
+  setTodoReminder,
+  completeTodo,
+  reopenTodo,
+  getUserMarkers,
+  getMessageMarkers,
+  getUserTodoCount
+} from './marker'
+
+// 公告相关API
+export {
+  createAnnouncement,
+  updateAnnouncement,
+  deleteAnnouncement,
+  getAnnouncementDetail,
+  getAnnouncementPage,
+  getPinnedAnnouncements,
+  getLatestAnnouncements,
+  publishAnnouncement,
+  withdrawAnnouncement,
+  markAnnouncementAsRead,
+  markAllAnnouncementsAsRead,
+  toggleLikeAnnouncement,
+  addAnnouncementComment,
+  getAnnouncementStatistics,
+  setAnnouncementPinned
+} from './announcement'

@@ -91,6 +91,23 @@ export function forwardMessage(data) {
 }
 
 /**
+ * 批量转发消息
+ * @param {Object} data - 批量转发数据
+ * @param {Array<number>} data.messageIds - 原消息ID列表
+ * @param {number} data.toConversationId - 目标会话ID
+ * @param {string} data.forwardType - 转发类型：batch=逐条转发, combine=合并转发
+ * @param {string} data.content - 附加说明
+ * @returns {Promise}
+ */
+export function batchForwardMessages(data) {
+  return request({
+    url: '/api/im/message/forward/batch',
+    method: 'post',
+    data
+  })
+}
+
+/**
  * 搜索消息
  * @param {Object} params - 查询参数
  * @param {number} params.conversationId - 会话ID

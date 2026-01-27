@@ -3,6 +3,7 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImMessageMention;
 import com.ruoyi.im.dto.message.ImMessageBatchReadStatusRequest;
+import com.ruoyi.im.dto.message.ImMessageBatchForwardRequest;
 import com.ruoyi.im.dto.message.ImMessageForwardRequest;
 import com.ruoyi.im.dto.message.ImMessageMarkReadRequest;
 import com.ruoyi.im.dto.message.ImMessageReplyRequest;
@@ -156,6 +157,27 @@ public class ImMessageController {
                 request.getContent(),
                 userId);
         return Result.success("转发成功", newMessageId);
+    }
+
+    /**
+     * 批量转发消息
+     * 支持逐条转发或合并转发多条消息
+     *
+     * @param request 批量转发请求参数
+     * @return 转发结果，包含新消息ID列表
+     * @apiNote batch=逐条转发, combine=合并转发为一条聊天记录消息
+     */
+    @Operation(summary = "批量转发消息", description = "批量转发消息，支持逐条转发或合并转发")
+    @PostMapping("/forward/batch")
+    public Result<java.util.List<Long>> batchForward(@Valid @RequestBody com.ruoyi.im.dto.message.ImMessageBatchForwardRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        java.util.List<Long> newMessageIds = imMessageService.batchForwardMessages(
+                request.getMessageIds(),
+                request.getToConversationId(),
+                request.getForwardType(),
+                request.getContent(),
+                userId);
+        return Result.success("转发成功", newMessageIds);
     }
 
     /**

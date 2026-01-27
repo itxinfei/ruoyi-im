@@ -38,6 +38,7 @@
             :replying-message="replyingMessage"
             :editing-message="editingMessage"
             @send="handleSend"
+            @send-voice="handleSendVoice"
             @cancel-reply="handleCancelReply"
             @cancel-edit="handleCancelEdit"
             @edit-confirm="handleEditConfirm"
@@ -66,6 +67,7 @@
       <ForwardDialog
         ref="forwardDialogRef"
         @forward="handleForwardConfirm"
+        @batch-forward="handleBatchForwardConfirm"
       />
 
       <!-- 通话对话框 -->
@@ -100,10 +102,12 @@ import MessageInput from '@/components/Chat/MessageInput.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
 import GroupDetailDrawer from '@/components/GroupDetailDrawer/index.vue'
-import { getMessages } from '@/api/im/message'
+import { getMessages, batchForwardMessages, deleteMessage } from '@/api/im/message'
 import { uploadFile, uploadImage } from '@/api/im/file'
+import { addFavorite, removeFavorite } from '@/api/im/favorite'
+import { markMessage } from '@/api/im/marker'
 import { useImWebSocket } from '@/composables/useImWebSocket'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const props = defineProps({
   session: {
@@ -244,7 +248,7 @@ const handleSend = async (content) => {
     status: 'sending',
     readCount: 0
   }
-  
+
   messages.value.push(tempMsg)
   store.commit('im/message/SET_REPLYING_MESSAGE', null)
   msgListRef.value?.scrollToBottom()
@@ -256,7 +260,7 @@ const handleSend = async (content) => {
       content,
       replyToMessageId: replyingMessage.value?.id
     })
-    
+
     // 发送成功，更新消息状态和ID
     const index = messages.value.findIndex(m => m.id === tempId)
     if (index !== -1) {
@@ -274,6 +278,57 @@ const handleSend = async (content) => {
   }
 }
 
+// 发送语音消息
+const handleSendVoice = async ({ file, duration }) => {
+  const tempId = `temp-${Date.now()}`
+  const tempMsg = {
+    id: tempId,
+    content: JSON.stringify({ duration }),
+    type: 'VOICE',
+    senderId: currentUser.value?.id,
+    senderName: currentUser.value?.nickName || currentUser.value?.userName || '我',
+    senderAvatar: currentUser.value?.avatar,
+    timestamp: Date.now(),
+    isOwn: true,
+    status: 'uploading',
+    readCount: 0
+  }
+
+  messages.value.push(tempMsg)
+  msgListRef.value?.scrollToBottom()
+
+  try {
+    // 上传语音文件
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const uploadRes = await uploadFile(formData)
+    const voiceUrl = uploadRes.url || uploadRes.data?.url
+
+    // 发送语音消息
+    const msg = await store.dispatch('im/message/sendMessage', {
+      sessionId: props.session.id,
+      type: 'VOICE',
+      content: JSON.stringify({ voiceUrl, duration }),
+      replyToMessageId: replyingMessage.value?.id
+    })
+
+    // 发送成功，更新消息状态和ID
+    const index = messages.value.findIndex(m => m.id === tempId)
+    if (index !== -1) {
+      const realMsg = transformMsg(msg)
+      messages.value.splice(index, 1, { ...realMsg, status: 'success' })
+    }
+  } catch (error) {
+    // 发送失败，标记状态
+    const index = messages.value.findIndex(m => m.id === tempId)
+    if (index !== -1) {
+      messages.value[index].status = 'failed'
+    }
+    console.error('语音发送失败', error)
+    ElMessage.error('语音发送失败')
+  }
+}
 
 
 // Websocket handling
@@ -355,6 +410,10 @@ const handleCommand = (cmd, msg) => {
     handleMarkRead(msg)
   } else if (cmd === 'todo') {
     handleAddToTodo(msg)
+  } else if (cmd === 'favorite') {
+    handleFavorite(msg)
+  } else if (cmd === 'mark') {
+    handleMarkMessage(msg)
   } else if (cmd === 'multi-select') {
     handleMultiSelect(msg)
   }
@@ -371,6 +430,35 @@ const handleAddToTodo = async (msg) => {
   }
 }
 
+// 处理收藏消息
+const handleFavorite = async (msg) => {
+  try {
+    await addFavorite({
+      messageId: msg.id,
+      conversationId: props.session?.id,
+      remark: '',
+      tags: []
+    })
+    ElMessage.success('已收藏消息')
+  } catch (e) {
+    ElMessage.error('收藏失败')
+  }
+}
+
+// 处理标记消息
+const handleMarkMessage = async (msg) => {
+  try {
+    await markMessage({
+      messageId: msg.id,
+      markerType: 'FLAG',
+      color: '#ff4d4f'
+    })
+    ElMessage.success('已标记消息')
+  } catch (e) {
+    ElMessage.error('标记失败')
+  }
+}
+
 // 处理多选
 const isMultiSelectMode = computed(() => store.getters['im/message/selectedMessageCount'] > 0)
 const selectedMessages = computed(() => store.getters['im/message/selectedMessageList'])
@@ -378,6 +466,51 @@ const selectedMessages = computed(() => store.getters['im/message/selectedMessag
 const handleMultiSelect = (msg) => {
   store.commit('im/message/TOGGLE_MESSAGE_SELECTION', msg.id)
   ElMessage.info('进入多选模式')
+}
+
+// 批量转发 - 逐条转发
+const handleBatchForward = async () => {
+  const messageIds = selectedMessages.value.map(msg => msg.id)
+  if (messageIds.length === 0) return
+
+  // 使用 ForwardDialog 选择目标会话
+  forwardDialogRef.value?.openForBatch(messageIds, 'batch')
+}
+
+// 批量转发 - 合并转发
+const handleCombineForward = async () => {
+  const messageIds = selectedMessages.value.map(msg => msg.id)
+  if (messageIds.length === 0) return
+
+  // 使用 ForwardDialog 选择目标会话
+  forwardDialogRef.value?.openForBatch(messageIds, 'combine')
+}
+
+// 批量删除
+const handleBatchDelete = async () => {
+  const selected = selectedMessages.value
+  if (selected.length === 0) return
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selected.length} 条消息吗？`,
+      '批量删除',
+      { type: 'warning' }
+    )
+
+    // 调用删除 API
+    for (const msg of selected) {
+      // 使用已有的删除消息 API
+      await deleteMessage(msg.id)
+    }
+
+    ElMessage.success(`已删除 ${selected.length} 条消息`)
+    handleClearSelection()
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  }
 }
 
 const handleClearSelection = () => {
@@ -535,6 +668,24 @@ const handleForwardConfirm = async ({ message, targetSessionId }) => {
       targetConversationId: targetSessionId
     })
     ElMessage.success('转发成功')
+  } catch (error) {
+    ElMessage.error('转发失败')
+    console.error(error)
+  }
+}
+
+// 批量转发确认处理
+const handleBatchForwardConfirm = async ({ messageIds, targetSessionId, forwardType }) => {
+  try {
+    await batchForwardMessages({
+      messageIds: messageIds,
+      toConversationId: targetSessionId,
+      forwardType: forwardType,
+      content: ''
+    })
+    const typeText = forwardType === 'combine' ? '合并转发' : '逐条转发'
+    ElMessage.success(`${typeText}成功`)
+    handleClearSelection()
   } catch (error) {
     ElMessage.error('转发失败')
     console.error(error)

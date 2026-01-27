@@ -44,6 +44,8 @@
                   <button class="mini-btn"><el-icon><MoreFilled /></el-icon></button>
                   <template #dropdown>
                     <el-dropdown-menu>
+                       <el-dropdown-item command="mark">标记</el-dropdown-item>
+                       <el-dropdown-item command="favorite">收藏</el-dropdown-item>
                        <el-dropdown-item command="forward">转发</el-dropdown-item>
                        <el-dropdown-item command="copy" v-if="message.type === 'TEXT'">复制</el-dropdown-item>
                        <el-dropdown-item command="todo">设为待办</el-dropdown-item>

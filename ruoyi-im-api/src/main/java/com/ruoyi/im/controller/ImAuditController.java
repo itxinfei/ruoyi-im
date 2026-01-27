@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,7 +55,7 @@ public class ImAuditController {
      */
     private List<ImAuditLogVO> toVOList(List<ImAuditLog> list) {
         if (list == null || list.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
         return list.stream()
                 .map(this::toVO)

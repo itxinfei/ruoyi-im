@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,7 +54,7 @@ public class ImAppController {
      */
     private List<ImApplicationVO> toVOList(List<ImApplication> list) {
         if (list == null || list.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
         return list.stream()
                 .map(this::toVO)

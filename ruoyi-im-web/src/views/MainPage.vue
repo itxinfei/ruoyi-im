@@ -6,6 +6,7 @@
         :active-module="activeModule"
         :collapsed="isSidebarCollapsed"
         @switch-module="handleSwitchModule"
+        @open-search="showGlobalSearch = true"
         @toggle-collapse="isSidebarCollapsed = !isSidebarCollapsed"
       />
 
@@ -38,12 +39,13 @@
       <SystemSettingsDialog v-model="showSettings" />
       <HelpFeedbackDialog v-model="showHelp" />
       <UserDetailDrawer v-model="showUserDetail" :session="detailSession" @send-message="handleSelectSession" />
+      <GlobalSearchDialog v-model="showGlobalSearch" @select-message="handleSearchSelectMessage" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { useTheme } from '@/composables/useTheme'
@@ -64,6 +66,7 @@ import UserDetailDrawer from '@/components/Chat/UserDetailDrawer.vue'
 import PersonalProfileDialog from '@/components/Common/PersonalProfileDialog.vue'
 import SystemSettingsDialog from '@/components/Common/SystemSettingsDialog.vue'
 import HelpFeedbackDialog from '@/components/Common/HelpFeedbackDialog.vue'
+import GlobalSearchDialog from '@/components/Common/GlobalSearchDialog.vue'
 
 const store = useStore()
 const activeModule = ref('chat')
@@ -76,6 +79,7 @@ const showProfile = ref(false)
 const showSettings = ref(false)
 const showHelp = ref(false)
 const showUserDetail = ref(false)
+const showGlobalSearch = ref(false)
 const detailSession = ref(null)
 
 const { connect, onMessage, isConnected } = useImWebSocket()
@@ -104,6 +108,18 @@ const handleShowUser = (userId) => {
     type: 'PRIVATE'
   }
   showUserDetail.value = true
+}
+
+// 处理搜索结果点击
+const handleSearchSelectMessage = (message) => {
+  // 根据消息的会话ID切换到对应会话
+  if (message.conversationId) {
+    store.dispatch('im/session/selectSessionById', message.conversationId)
+      .then(() => {
+        activeModule.value = 'chat'
+        // 这里可以添加滚动到指定消息的逻辑
+      })
+  }
 }
 
 // Watch session change to auto-switch to chat
@@ -151,7 +167,24 @@ onMounted(async () => {
         connect(token)
     }
   }
+
+  // 添加键盘快捷键监听
+  window.addEventListener('keydown', handleKeydown)
 })
+
+onUnmounted(() => {
+  // 移除键盘快捷键监听
+  window.removeEventListener('keydown', handleKeydown)
+})
+
+// 键盘快捷键处理
+const handleKeydown = (e) => {
+  // Ctrl/Cmd + K 打开全局搜索
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault()
+    showGlobalSearch.value = true
+  }
+}
 </script>
 
 <style lang="scss" scoped>
