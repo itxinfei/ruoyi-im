@@ -1,9 +1,6 @@
 package com.ruoyi.im.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.common.Result;
-import com.ruoyi.im.domain.ImConversationMember;
-import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImMessageMention;
 import com.ruoyi.im.dto.message.ImMessageBatchReadStatusRequest;
 import com.ruoyi.im.dto.message.ImMessageForwardRequest;
@@ -13,24 +10,18 @@ import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.dto.message.ImMessageSearchRequest;
 import com.ruoyi.im.dto.message.MessageEditRequest;
 import com.ruoyi.im.dto.reaction.ImMessageReactionAddRequest;
-import com.ruoyi.im.exception.BusinessException;
-import com.ruoyi.im.mapper.ImMessageMapper;
-import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.service.*;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import com.ruoyi.im.vo.reaction.ImMessageReactionVO;
-import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +45,6 @@ public class ImMessageController {
     private final ImWebSocketBroadcastService broadcastService;
     private final ImMessageReadService messageReadService;
     private final ImConversationService conversationService;
-    private final ImMessageMapper imMessageMapper;
-    private final ImConversationMemberMapper imConversationMemberMapper;
 
     public ImMessageController(
             ImMessageService imMessageService,
@@ -63,17 +52,13 @@ public class ImMessageController {
             ImMessageMentionService mentionService,
             ImWebSocketBroadcastService broadcastService,
             ImMessageReadService messageReadService,
-            ImConversationService conversationService,
-            ImMessageMapper imMessageMapper,
-            ImConversationMemberMapper imConversationMemberMapper) {
+            ImConversationService conversationService) {
         this.imMessageService = imMessageService;
         this.reactionService = reactionService;
         this.mentionService = mentionService;
         this.broadcastService = broadcastService;
         this.messageReadService = messageReadService;
         this.conversationService = conversationService;
-        this.imMessageMapper = imMessageMapper;
-        this.imConversationMemberMapper = imConversationMemberMapper;
     }
 
     @PostMapping("/send")
@@ -124,7 +109,6 @@ public class ImMessageController {
      * @param request 包含conversationId和messageIds的请求数据
      * @return 标记结果
      * @apiNote 标记已读后会更新会话的未读消息数，并通过WebSocket推送已读回执给发送方
-     * @throws BusinessException 当消息不存在或会话不存在时抛出业务异常
      */
     @Operation(summary = "标记消息已读", description = "批量标记指定消息为已读状态")
     @PutMapping("/mark-read")
@@ -216,11 +200,8 @@ public class ImMessageController {
         }
 
         // 通过WebSocket推送反应更新通知
-        ImMessage message = imMessageMapper.selectImMessageById(messageId);
-        if (message != null) {
-            broadcastReactionUpdate(message.getConversationId(), messageId, userId,
-                    request.getEmoji(), "add");
-        }
+        broadcastService.broadcastReactionUpdate(result.getConversationId(), messageId, userId,
+                request.getEmoji(), "add");
 
         return Result.success("反应成功", result);
     }
@@ -239,9 +220,9 @@ public class ImMessageController {
         reactionService.removeReaction(messageId, userId);
 
         // 通过WebSocket推送反应更新通知
-        ImMessage message = imMessageMapper.selectImMessageById(messageId);
+        ImMessageVO message = imMessageService.getMessageById(messageId);
         if (message != null) {
-            broadcastReactionUpdate(message.getConversationId(), messageId, userId, null, "remove");
+            broadcastService.broadcastReactionUpdate(message.getConversationId(), messageId, userId, null, "remove");
         }
 
         return Result.success("已取消反应");
@@ -384,19 +365,8 @@ public class ImMessageController {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
-            // 获取用户在会话中的信息
-            ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
-                    userId);
-
-            if (member == null || member.getLastReadMessageId() == null) {
-                // 从未读过的会话，未读数 = 会话总消息数
-                Long totalCount = imMessageMapper.countByConversationId(conversationId);
-                return Result.success(totalCount != null ? totalCount.intValue() : 0);
-            }
-
-            // 查询最后已读消息之后的消息数量
-            Long unreadCount = imMessageMapper.countUnreadMessages(conversationId, member.getLastReadMessageId());
-            return Result.success(unreadCount != null ? unreadCount.intValue() : 0);
+            Integer unreadCount = conversationService.getUnreadCount(conversationId, userId);
+            return Result.success(unreadCount != null ? unreadCount : 0);
         } catch (Exception e) {
             log.error("获取未读消息数失败: conversationId={}", conversationId, e);
             return Result.fail("获取未读消息数失败");
@@ -418,173 +388,11 @@ public class ImMessageController {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
-            // 获取会话所有成员
-            List<ImConversationMember> members = imConversationMemberMapper.selectByConversationId(conversationId);
-            List<Map<String, Object>> readUsers = new java.util.ArrayList<>();
-
-            for (ImConversationMember member : members) {
-                // 如果成员的最后已读消息ID >= 当前消息ID，则表示已读
-                if (member.getLastReadMessageId() != null &&
-                        member.getLastReadMessageId() >= messageId) {
-                    Map<String, Object> userInfo = new HashMap<>();
-                    userInfo.put("userId", member.getUserId());
-                    userInfo.put("readTime", member.getLastReadTime());
-                    readUsers.add(userInfo);
-                }
-            }
-
+            List<Map<String, Object>> readUsers = conversationService.getReadStatus(conversationId, messageId);
             return Result.success(readUsers);
         } catch (Exception e) {
             log.error("获取已读状态失败: conversationId={}, messageId={}", conversationId, messageId, e);
             return Result.fail("获取已读状态失败");
-        }
-    }
-
-    /**
-     * 批量获取消息已读状态
-     * 批量获取多条消息的已读状态，用于在消息列表中展示已读信息
-     *
-     * @param request 批量查询请求参数，包含会话ID和消息ID列表
-     * @return 消息已读状态Map，key为消息ID，value为已读状态
-     */
-    @Operation(summary = "批量获取消息已读状态", description = "批量获取多条消息的已读状态")
-    @PostMapping("/read-status/batch")
-    public Result<Map<Long, com.ruoyi.im.vo.message.ImMessageReadStatusVO>> getBatchReadStatus(
-            @Valid @RequestBody ImMessageBatchReadStatusRequest request) {
-        Long userId = SecurityUtils.getLoginUserId();
-
-        try {
-            List<Long> messageIds = request.getMessageIds();
-            Long conversationId = request.getConversationId();
-
-            if (messageIds == null || messageIds.isEmpty()) {
-                return Result.success(new java.util.HashMap<>());
-            }
-
-            Map<Long, com.ruoyi.im.vo.message.ImMessageReadStatusVO> statusMap = new java.util.HashMap<>();
-
-            for (Long messageId : messageIds) {
-                try {
-                    com.ruoyi.im.vo.message.ImMessageReadStatusVO status =
-                        messageReadService.getMessageReadStatus(messageId, userId);
-                    statusMap.put(messageId, status);
-                } catch (Exception e) {
-                    // 对于无权限或不存在的情况，跳过该消息
-                    log.debug("获取消息已读状态失败: messageId={}", messageId);
-                }
-            }
-
-            return Result.success(statusMap);
-        } catch (Exception e) {
-            log.error("批量获取已读状态失败: conversationId={}", request.getConversationId(), e);
-            return Result.fail("批量获取已读状态失败");
-        }
-    }
-
-    /**
-     * 广播表情反应更新
-     * 通过WebSocket向会话成员推送表情反应变化通知
-     *
-     * @param conversationId 会话ID
-     * @param messageId      消息ID
-     * @param userId         操作用户ID
-     * @param emoji          表情
-     * @param action         操作类型（add/remove）
-     */
-    private void broadcastReactionUpdate(Long conversationId, Long messageId, Long userId,
-                                         String emoji, String action) {
-        try {
-            // 获取会话中的所有成员
-            List<ImConversationMember> members = imConversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) {
-                return;
-            }
-
-            // 构建WebSocket消息
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> reactionUpdate = new HashMap<>();
-            reactionUpdate.put("type", "reaction");
-            reactionUpdate.put("conversationId", conversationId);
-            reactionUpdate.put("messageId", messageId);
-            reactionUpdate.put("userId", userId);
-            reactionUpdate.put("emoji", emoji);
-            reactionUpdate.put("action", action);
-            reactionUpdate.put("timestamp", System.currentTimeMillis());
-
-            String messageJson = mapper.writeValueAsString(reactionUpdate);
-
-            // 从 WebSocket 端点获取在线用户集合
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-
-            // 向会话中的每个在线用户发送反应更新通知
-            for (ImConversationMember member : members) {
-                Long targetUserId = member.getUserId();
-
-                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                        log.debug("反应更新已推送给用户: userId={}, action={}", targetUserId, action);
-                    } catch (Exception e) {
-                        log.error("发送反应更新给用户失败: userId={}", targetUserId, e);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("广播反应更新异常: conversationId={}", conversationId, e);
-        }
-    }
-
-    /**
-     * 广播已读回执给会话中的其他用户
-     *
-     * @param conversationId    会话ID
-     * @param lastReadMessageId 最后已读消息ID
-     * @param userId            操作用户ID
-     */
-    private void broadcastReadReceipt(Long conversationId, Long lastReadMessageId, Long userId) {
-        try {
-            // 获取会话中的所有成员
-            List<ImConversationMember> members = imConversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) {
-                return;
-            }
-
-            // 构建WebSocket消息
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> readReceipt = new HashMap<>();
-            readReceipt.put("type", "read");
-            readReceipt.put("conversationId", conversationId);
-            readReceipt.put("lastReadMessageId", lastReadMessageId);
-            readReceipt.put("userId", userId);
-            readReceipt.put("timestamp", System.currentTimeMillis());
-
-            String messageJson = mapper.writeValueAsString(readReceipt);
-
-            // 从 WebSocket 端点获取在线用户集合
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-
-            // 向会话中的每个在线用户发送已读回执（不包括操作者自己）
-            for (ImConversationMember member : members) {
-                Long targetUserId = member.getUserId();
-
-                // 不发送给操作者自己
-                if (targetUserId.equals(userId)) {
-                    continue;
-                }
-
-                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                        log.debug("已读回执已推送给用户: userId={}", targetUserId);
-                    } catch (Exception e) {
-                        log.error("发送已读回执给用户失败: userId={}", targetUserId, e);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("广播已读回执异常: conversationId={}", conversationId, e);
         }
     }
 }
