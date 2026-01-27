@@ -366,9 +366,9 @@ const handleMenuCommand = (command) => {
   height: 38px;
   background: transparent;
   border: none;
-  border-radius: var(--dt-radius-lg);
+  border-radius: 6px;
   padding: 0;
-  color: var(--dt-text-secondary);
+  color: #3b4252;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -447,14 +447,20 @@ const handleMenuCommand = (command) => {
     gap: 10px;
     padding: 8px 12px;
     font-size: 13px;
+    color: #1f2329;
 
     .item-icon {
       font-size: 16px;
-      color: var(--dt-text-secondary);
+      color: #646a73;
     }
 
-    &:hover .item-icon {
-      color: var(--dt-brand-color);
+    &:hover {
+      background: #f5f6f7;
+      color: #1677ff;
+
+      .item-icon {
+        color: #1677ff;
+      }
     }
 
     &.danger-item {
@@ -496,7 +502,7 @@ const handleMenuCommand = (command) => {
 }
 
 .dark .action-btn {
-  color: var(--dt-text-secondary-dark);
+  color: #bdc3c9;
 
   &:hover {
     background: var(--dt-bg-hover-dark);

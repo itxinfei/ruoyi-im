@@ -78,6 +78,17 @@
         <span>回到最新</span>
       </div>
     </Transition>
+
+    <!-- 图片预览器（使用 v-viewer） -->
+    <div v-viewer class="image-viewer-container" style="display: none;">
+      <img
+        v-for="(url, index) in imagePreviewUrls"
+        :key="index"
+        :src="url"
+        :index="index"
+        style="display: none;"
+      />
+    </div>
   </div>
 </template>
 
@@ -89,9 +100,6 @@ import { getMessageReadUsers } from '@/api/im/message'
 import MessageItem from './MessageItem.vue'
 import MessageBubble from './MessageBubble.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-
-// Element Plus 内置的图片预览组件
-import ElImageViewer from 'element-plus/es/components/image-viewer/index'
 
 const props = defineProps({
   messages: {
@@ -119,9 +127,7 @@ const loadingReadUsers = ref({})
 const showScrollToBottom = ref(false)
 
 // 图片预览状态
-const showImageViewer = ref(false)
 const imagePreviewUrls = ref([])
-const initialPreviewIndex = ref(0)
 
 // 获取已读用户列表
 const fetchReadUsers = async (msg) => {
@@ -140,10 +146,61 @@ const fetchReadUsers = async (msg) => {
   }
 }
 
-// 图片预览
-const previewImage = (url) => {
-  // 实际项目中应调用全局预览组件
-  window.open(url, '_blank')
+// 图片预览 - 使用 v-viewer
+const previewImage = (clickedUrl) => {
+  // 收集会话中所有图片消息的 URL
+  const imageUrls = []
+  let clickedIndex = 0
+
+  props.messages.forEach((msg) => {
+    if (msg.type === 'IMAGE') {
+      let imageUrl = ''
+      // 尝试从不同字段获取图片 URL
+      if (typeof msg.content === 'string') {
+        try {
+          const contentObj = JSON.parse(msg.content)
+          imageUrl = contentObj.imageUrl || contentObj.url || ''
+        } catch {
+          imageUrl = msg.content
+        }
+      } else if (typeof msg.content === 'object') {
+        imageUrl = msg.content.imageUrl || msg.content.url || ''
+      }
+
+      if (imageUrl) {
+        imageUrls.push(imageUrl)
+        // 记录被点击图片的索引
+        if (imageUrl === clickedUrl || imageUrl === decodeURIComponent(clickedUrl)) {
+          clickedIndex = imageUrls.length - 1
+        }
+      }
+    }
+  })
+
+  if (imageUrls.length > 0) {
+    imagePreviewUrls.value = imageUrls
+    // 使用 v-viewer 的 API 显示预览
+    nextTick(() => {
+      const viewerContainer = document.querySelector('.image-viewer-container')
+      if (viewerContainer) {
+        // 创建临时 img 元素来触发 viewer
+        const imgElements = viewerContainer.querySelectorAll('img')
+        if (imgElements[clickedIndex]) {
+          // 使用 v-viewer 的 show 方法
+          const viewer = viewerContainer.$viewer
+          if (viewer && viewer.show) {
+            viewer.show(clickedIndex)
+          } else {
+            // 备选方案：直接点击图片
+            imgElements[clickedIndex].click()
+          }
+        }
+      }
+    })
+  } else {
+    // 降级到新窗口打开
+    window.open(clickedUrl, '_blank')
+  }
 }
 
 // 下载文件
@@ -460,6 +517,17 @@ defineExpose({ scrollToBottom, maintainScroll })
   opacity: 0;
   transform: translateY(10px);
 }
+
+// 图片预览器过渡动画
+.viewer-fade-enter-active,
+.viewer-fade-leave-active {
+  transition: opacity 0.3s;
+}
+
+.viewer-fade-enter-from,
+.viewer-fade-leave-to {
+  opacity: 0;
+}
 </style>
 
 <style lang="scss">
@@ -482,46 +550,76 @@ defineExpose({ scrollToBottom, maintainScroll })
   padding: 4px 0 !important;
   border-radius: 6px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-  border: 1px solid var(--dt-border-light) !important;
-  background: var(--dt-bg-card) !important;
-  min-width: 160px !important;
+  border: 1px solid #e5e7eb !important;
+  background: #fff !important;
+  min-width: 120px !important;
 
   .el-dropdown-menu__item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 16px !important;
-    font-size: 14px !important;
-    color: var(--dt-text-primary) !important;
-    min-width: 140px;
+    gap: 8px;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    color: #1f2329 !important;
     transition: all var(--dt-transition-fast);
 
     .el-icon {
       font-size: 16px;
-      color: var(--dt-text-secondary);
+      color: #646a73;
       margin-right: 0;
       flex-shrink: 0;
     }
 
     &:hover {
-      background-color: var(--dt-bg-hover) !important;
-      color: var(--dt-brand-color) !important;
-      .el-icon { color: var(--dt-brand-color); }
+      background-color: #f5f6f7 !important;
+      color: #1677ff !important;
+      .el-icon { color: #1677ff; }
     }
 
     &.danger {
-      color: var(--dt-error-color) !important;
+      color: #f5222d !important;
       &:hover {
-        background-color: var(--dt-error-bg) !important;
-        .el-icon { color: var(--dt-error-color); }
+        background-color: #fff1f0 !important;
+        .el-icon { color: #f5222d; }
       }
     }
   }
 
   .menu-divider {
     height: 1px;
-    background-color: var(--dt-border-light);
+    background-color: #e5e7eb;
     margin: 4px 0;
+  }
+}
+
+.dark .message-context-menu {
+  border-color: #334155 !important;
+  background: #1e293b !important;
+
+  .el-dropdown-menu__item {
+    color: #f1f5f9 !important;
+
+    .el-icon {
+      color: #bdc3c9;
+    }
+
+    &:hover {
+      background-color: #334155 !important;
+      color: #1677ff !important;
+      .el-icon { color: #1677ff; }
+    }
+
+    &.danger {
+      color: #ef4444 !important;
+      &:hover {
+        background-color: rgba(239, 68, 68, 0.1) !important;
+        .el-icon { color: #ef4444; }
+      }
+    }
+  }
+
+  .menu-divider {
+    background-color: #334155;
   }
 }
 </style>

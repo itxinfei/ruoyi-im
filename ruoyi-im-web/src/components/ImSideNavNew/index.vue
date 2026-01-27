@@ -162,15 +162,15 @@ const isUserOnline = computed(() => {
 
 // 导航模块配置
 const navModules = ref([
-  { key: 'chat', label: '消息', icon: 'chat_bubble' },
-  { key: 'contacts', label: '通讯录', icon: 'people' },
+  { key: 'chat', label: '消息', icon: 'chat_bubble_outline' },
+  { key: 'contacts', label: '通讯录', icon: 'people_outline' },
   { key: 'workbench', label: '工作台', icon: 'grid_view' },
-  { key: 'drive', label: '云盘', icon: 'cloud' },
+  { key: 'drive', label: '云盘', icon: 'cloud_upload' },
   { key: 'calendar', label: '日历', icon: 'calendar_today' },
-  { key: 'todo', label: '待办', icon: 'check_circle' },
-  { key: 'approval', label: '审批', icon: 'approval' },
+  { key: 'todo', label: '待办', icon: 'check_circle_outline' },
+  { key: 'approval', label: '审批', icon: 'fact_check' },
   { key: 'mail', label: '邮箱', icon: 'email' },
-  { key: 'assistant', label: 'AI助理', icon: 'smart_toy' }
+  { key: 'assistant', label: 'AI助理', icon: 'psychology' }
 ])
 
 /**

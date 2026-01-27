@@ -27,7 +27,7 @@
         >
           <div class="group-avatar">
             <img v-if="group.avatar" :src="addTokenToUrl(group.avatar)" :alt="`${group.name} 的群头像`" />
-            <span v-else class="material-icons-outlined" aria-hidden="true">group</span>
+            <span v-else class="avatar-fallback">{{ group.name?.charAt(0) || '群' }}</span>
           </div>
           <div class="group-info">
             <div class="group-name">{{ group.name }}</div>
@@ -199,6 +199,16 @@ onMounted(() => {
 
 .group-avatar .material-icons-outlined {
   font-size: 24px;
+}
+
+.avatar-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .group-info {

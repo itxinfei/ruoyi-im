@@ -470,7 +470,7 @@ watch(currentDate, loadEvents)
         }
         .add-hover-btn { opacity: 1; }
       }
-      &.not-curr { background: #fafbfc; .dark & { background: #0f172a/50; } .day-num { opacity: 0.3; } }
+      &.not-curr { background: #fafbfc; .dark & { background: rgba(15, 23, 42, 0.5); } .day-num { opacity: 0.3; } }
       &.is-active { background: rgba(22, 119, 255, 0.02); }
       
       .cell-head {

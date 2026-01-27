@@ -214,11 +214,14 @@
           </div>
           <div v-else class="friends-list">
             <div v-for="group in groupedFriends" :key="group.groupName || 'default'" class="friend-group">
-              <div class="friend-group-header">
+              <div class="friend-group-header" @click="toggleGroupCollapse(group.groupName)">
+                <span class="collapse-icon" :class="{ collapsed: isGroupCollapsed(group.groupName) }">
+                  <span class="material-icons-outlined">expand_more</span>
+                </span>
                 <h4 class="friend-group-name">{{ group.groupName || '未分组' }}</h4>
                 <span class="friend-group-count">{{ group.contacts.length }} 人</span>
               </div>
-              <div class="friend-group-members">
+              <div v-show="!isGroupCollapsed(group.groupName)" class="friend-group-members">
                 <div
                   v-for="friend in group.contacts"
                   :key="friend.id"
@@ -344,7 +347,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
@@ -370,6 +373,9 @@ const friendCount = ref(0)
 const loadingFriends = ref(false)
 const groupedFriends = ref([])
 
+// 分组折叠状态
+const collapsedGroups = ref(new Set())
+
 // 搜索相关状态
 const searchResults = ref([])
 const searching = ref(false)
@@ -382,6 +388,21 @@ const showGroupDialog = ref(false)
 const selectedGroupId = ref(null)
 
 const deptMembers = ref([])
+
+// 切换分组折叠状态
+const toggleGroupCollapse = (groupName) => {
+  const key = groupName || 'default'
+  if (collapsedGroups.value.has(key)) {
+    collapsedGroups.value.delete(key)
+  } else {
+    collapsedGroups.value.add(key)
+  }
+}
+
+// 判断分组是否折叠
+const isGroupCollapsed = (groupName) => {
+  return collapsedGroups.value.has(groupName || 'default')
+}
 
 const previewMembers = computed(() => {
   return deptMembers.value.slice(0, 3).map(m => ({
@@ -518,7 +539,35 @@ const loadGroups = () => {
 onMounted(() => {
   checkRequests()
   loadFriends()
+
+  // 添加键盘快捷键监听
+  window.addEventListener('keydown', handleKeydown)
 })
+
+onUnmounted(() => {
+  // 移除键盘快捷键监听
+  window.removeEventListener('keydown', handleKeydown)
+})
+
+// 键盘快捷键处理
+const handleKeydown = (e) => {
+  // ESC 关闭弹窗
+  if (e.key === 'Escape') {
+    if (showAddDialog.value) {
+      showAddDialog.value = false
+    } else if (showUserDialog.value) {
+      showUserDialog.value = false
+    } else if (showGroupDialog.value) {
+      showGroupDialog.value = false
+    }
+  }
+
+  // Ctrl/Cmd + F 聚焦搜索框
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+    e.preventDefault()
+    document.querySelector('.search-input')?.focus()
+  }
+}
 
 // 搜索功能 - 防抖处理
 let searchTimer = null
@@ -659,7 +708,7 @@ const searchResultGroups = computed(() => {
     .search-icon {
       position: absolute;
       left: 12px;
-      color: var(--dt-text-quaternary);
+      color: #8f959e;
       font-size: 18px;
     }
 
@@ -711,19 +760,20 @@ const searchResultGroups = computed(() => {
   .quick-nav {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
     margin-bottom: 16px;
-    padding: 8px 0;
+    padding: 4px 0;
 
     .nav-item {
       position: relative;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 11px 14px;
-      border-radius: 11px;
+      gap: 10px;
+      height: 44px;
+      padding: 0 14px;
+      border-radius: 10px;
       cursor: pointer;
-      transition: all 0.25s var(--dt-ease-out);
+      transition: all 0.2s var(--dt-ease-out);
       color: var(--dt-text-secondary);
       font-size: 14px;
       font-weight: 500;
@@ -820,12 +870,14 @@ const searchResultGroups = computed(() => {
 
 // 组织架构
 .org-section {
+  margin-top: 16px;
+
   .org-section-header {
     padding: 0 14px 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    
+
     .org-title {
       font-size: 11px;
       font-weight: 700;
@@ -834,6 +886,54 @@ const searchResultGroups = computed(() => {
       letter-spacing: 1px;
     }
     .org-icon { font-size: 16px; color: var(--dt-text-quaternary); }
+  }
+
+  .org-tree {
+    padding: 0 8px;
+  }
+}
+
+// ============================================================================
+// 组织架构树样式优化
+// ============================================================================
+:deep(.org-tree) {
+  .org-tree-node {
+    padding: 6px 8px;
+    margin: 2px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--dt-text-secondary);
+
+    &:hover {
+      background: var(--dt-bg-hover);
+      color: var(--dt-brand-color);
+    }
+
+    &.active {
+      background: var(--dt-brand-lighter);
+      color: var(--dt-brand-color);
+      font-weight: 600;
+    }
+
+    .tree-node-icon {
+      color: var(--dt-text-quaternary);
+      transition: color 0.2s;
+    }
+
+    &:hover .tree-node-icon {
+      color: var(--dt-brand-color);
+    }
+
+    .tree-node-children {
+      margin-left: 16px;
+      padding-left: 12px;
+      border-left: 1px dashed var(--dt-border-light);
+    }
   }
 }
 
@@ -1128,5 +1228,281 @@ const searchResultGroups = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+// ============================================================================
+// 在线状态指示器
+// ============================================================================
+.online-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+
+  &.online {
+    background: #22c55e;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+  }
+
+  .dark & {
+    border-color: var(--dt-bg-card);
+  }
+}
+
+// ============================================================================
+// 面包屑导航
+// ============================================================================
+:deep(.header-breadcrumb) {
+  .el-breadcrumb__item {
+    .el-breadcrumb__inner {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: var(--dt-text-secondary);
+      font-weight: 500;
+
+      .breadcrumb-icon {
+        font-size: 16px;
+      }
+    }
+
+    &:last-child .el-breadcrumb__inner {
+      color: var(--dt-text-primary);
+      font-weight: 600;
+    }
+  }
+
+  .el-breadcrumb__separator {
+    color: var(--dt-border-color);
+    margin: 0 8px;
+  }
+}
+
+// ============================================================================
+// 图标按钮
+// ============================================================================
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--dt-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s var(--dt-ease-out);
+
+  &:hover {
+    background: var(--dt-bg-hover);
+    color: var(--dt-brand-color);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background: var(--dt-border-light);
+  margin: 0 12px;
+}
+
+// ============================================================================
+// 空状态
+// ============================================================================
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 64px;
+    color: var(--dt-text-quaternary);
+    margin-bottom: 16px;
+  }
+
+  .empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+    margin-bottom: 8px;
+  }
+
+  .empty-text {
+    font-size: 14px;
+    color: var(--dt-text-tertiary);
+  }
+}
+
+.empty-state-large {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+
+  .empty-illustration {
+    position: relative;
+    margin-bottom: 24px;
+
+    .empty-icon {
+      font-size: 80px;
+      color: var(--dt-brand-color);
+      opacity: 0.5;
+    }
+
+    .empty-decoration {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 4px;
+      background: var(--dt-brand-color);
+      border-radius: 2px;
+      opacity: 0.3;
+    }
+  }
+
+  .empty-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+    margin-bottom: 12px;
+  }
+
+  .empty-text {
+    font-size: 14px;
+    color: var(--dt-text-tertiary);
+  }
+}
+
+// ============================================================================
+// 清除按钮
+// ============================================================================
+.clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--dt-text-quaternary);
+  border-radius: 4px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: var(--dt-bg-hover);
+    color: var(--dt-text-secondary);
+  }
+}
+
+// ============================================================================
+// 好友列表滚动优化
+// ============================================================================
+.friends-content {
+  .friends-list {
+    max-width: 800px;
+  }
+}
+
+.friend-group-members {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+// ============================================================================
+// 分组折叠功能
+// ============================================================================
+.friend-group-header {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
+
+  .collapse-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dt-text-quaternary);
+    transition: transform 0.3s var(--dt-ease-out);
+
+    &.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .material-icons-outlined {
+      font-size: 18px;
+    }
+  }
+
+  &:hover {
+    .friend-group-name {
+      color: var(--dt-brand-color);
+    }
+
+    .collapse-icon {
+      color: var(--dt-brand-color);
+    }
+  }
+}
+
+// ============================================================================
+// 响应式优化
+// ============================================================================
+@media (max-width: 1024px) {
+  .contacts-sidebar {
+    width: 200px;
+  }
+
+  .members-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .contacts-panel {
+    flex-direction: column;
+  }
+
+  .contacts-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--dt-border-light);
+  }
+
+  .sidebar-content {
+    max-height: 200px;
+  }
+
+  .members-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
 }
 </style>

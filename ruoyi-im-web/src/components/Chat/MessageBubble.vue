@@ -8,9 +8,6 @@
       class="bubble"
       :class="[message.type, { 'is-own': message.isOwn, 'is-selected': isSelected, 'is-long-press': isLongPressing }]"
       @click="handleClick"
-      @touchstart="handleTouchStart"
-      @touchend="handleTouchEnd"
-      @touchcancel="handleTouchEnd"
     >
       <!-- 引用消息区块 (如果该消息是回复某人的) -->
       <div v-if="message.replyTo" class="bubble-reply-ref" @click.stop="$emit('scroll-to', message.replyTo.id)">
@@ -62,16 +59,15 @@
         </div>
       </div>
 
-      <!-- 图片消息 - 增强全屏预览 -->
-      <viewer v-else-if="message.type === 'IMAGE' && parsedContent.imageUrl"
-              :images="[parsedContent.imageUrl]"
-              :options="viewerOptions"
-              class="image-viewer">
+      <!-- 图片消息 - 点击触发预览 -->
+      <div v-else-if="message.type === 'IMAGE' && parsedContent.imageUrl"
+           class="image-wrapper"
+           @click="handleImageClick">
         <img :src="parsedContent.imageUrl"
              class="msg-image"
              :alt="message.senderName + '的图片'"
              loading="lazy" />
-      </viewer>
+      </div>
 
       <!-- 文件消息 -->
       <div v-else-if="message.type === 'FILE'" class="msg-file" @click="$emit('download', parsedContent)">
@@ -142,7 +138,7 @@
       </div>
     </div>
 
-    <!-- 右键菜单：精品化菜单项 -->
+    <!-- 右键菜单 -->
     <template #dropdown>
       <el-dropdown-menu>
         <el-dropdown-item command="copy" v-if="message.type === 'TEXT'">
@@ -160,7 +156,7 @@
         <el-dropdown-item command="todo">
           <el-icon><Checked /></el-icon> <span>设为待办</span>
         </el-dropdown-item>
-        
+
         <el-dropdown-item v-if="message.isOwn && canRecall" command="recall" divided class="danger">
           <el-icon><RefreshLeft /></el-icon>
           <span>撤回{{ recallTimeDisplay ? ` (${recallTimeDisplay})` : '' }}</span>
@@ -208,10 +204,8 @@ const handleClick = (event) => {
     // Shift + 点击：连续多选
     rangeSelection()
     event.stopPropagation()
-  } else {
-    // 普通点击：不做处理，让父组件处理
-    emit('command', 'click', props.message)
   }
+  // 普通点击：不做任何处理
 }
 
 const toggleSelection = () => {
@@ -271,6 +265,14 @@ const handleClickCombine = (messages) => {
   emit('command', 'view-combine', { ...props.message, messages })
 }
 
+// 处理图片点击 - 触发预览
+const handleImageClick = () => {
+  const imageUrl = parsedContent.value.imageUrl
+  if (imageUrl) {
+    emit('preview', imageUrl)
+  }
+}
+
 const parsedContent = computed(() => {
   try {
     if (!props.message || !props.message.content) return {}
@@ -280,65 +282,6 @@ const parsedContent = computed(() => {
       : (props.message.content || {})
   } catch (e) { return {} }
 })
-
-// v-viewer 图片预览配置 - 支持缩放、旋转、下载、键盘快捷键
-const viewerOptions = {
-  // 内联查看模式
-  inline: false,
-  // 按钮显示
-  button: true,
-  // 导航栏
-  navbar: true,
-  // 工具栏
-  toolbar: {
-    zoomIn: 1,          // 放大
-    zoomOut: 1,         // 缩小
-    oneToOne: 1,        // 1:1
-    reset: 1,           // 重置
-    prev: 1,            // 上一张
-    play: false,        // 幻灯片播放 (单图不需要)
-    next: 1,            // 下一张
-    rotateLeft: 1,      // 左旋转
-    rotateRight: 1,     // 右旋转
-    flipHorizontal: 0,  // 水平翻转
-    flipVertical: 0     // 垂直翻转
-  },
-  // 标题显示
-  title: false,
-  // 键盘快捷键
-  keyboard: true,
-  // 快捷键配置
-  keyActions: {
-    esc: 'close',           // ESC 关闭
-    space: 'toggleZoom',    // 空格切换缩放
-    left: 'prev',           // 左箭头上一张
-    right: 'next',          // 右箭头下一张
-    up: 'zoomIn',           // 上箭头放大
-    down: 'zoomOut'         // 下箭头缩小
-  },
-  // 加载指示器
-  loading: true,
-  // 循环浏览
-  loop: false,
-  // 最小缩放比例
-  minZoomRatio: 0.1,
-  // 最大缩放比例
-  maxZoomRatio: 10,
-  // 鼠标滚轮缩放
-  movable: true,
-  // 缩放时可移动
-  zoomable: true,
-  // 可旋转
-  rotatable: true,
-  // 可翻转
-  scalable: false,
-  // 过渡动画
-  transition: true,
-  // 全屏模式
-  fullscreen: true,
-  // 双击切换缩放
-  dblclick: 'toggleZoom'
-}
 
 // 获取撤回时限配置（分钟）
 const recallTimeLimit = computed(() => {
@@ -631,6 +574,16 @@ onUnmounted(() => {
     padding: 0;
     border-radius: 4px;
     background: #000 !important;
+  }
+}
+
+// 图片容器（用于点击预览）
+.image-wrapper {
+  display: inline-block;
+  cursor: zoom-in;
+
+  .msg-image {
+    pointer-events: none; // 让点击事件穿透到 wrapper
   }
 }
 

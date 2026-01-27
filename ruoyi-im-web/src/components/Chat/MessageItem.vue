@@ -49,18 +49,6 @@
                <el-tooltip content="点赞" placement="top" :show-after="400">
                   <button class="mini-btn" @click="$emit('reaction', message, '👍')">👍</button>
                </el-tooltip>
-               <el-dropdown @command="(c) => $emit('command', c, message)" trigger="click">
-                  <button class="mini-btn"><el-icon><MoreFilled /></el-icon></button>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                       <el-dropdown-item command="mark">标记</el-dropdown-item>
-                       <el-dropdown-item command="favorite">收藏</el-dropdown-item>
-                       <el-dropdown-item command="forward">转发</el-dropdown-item>
-                       <el-dropdown-item command="copy" v-if="message.type === 'TEXT'">复制</el-dropdown-item>
-                       <el-dropdown-item command="todo">设为待办</el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-               </el-dropdown>
             </div>
           </div>
 
@@ -94,7 +82,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-import { ChatLineSquare, MoreFilled, Loading, WarningFilled } from '@element-plus/icons-vue'
+import { ChatLineSquare, Loading, WarningFilled } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const store = useStore()

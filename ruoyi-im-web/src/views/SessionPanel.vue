@@ -2,10 +2,7 @@
   <div class="session-panel">
     <!-- 头部 -->
     <div class="panel-header">
-      <h1 class="panel-title">
-        <span class="material-icons-outlined title-icon">chat</span>
-        消息
-      </h1>
+      <h1 class="panel-title">消息</h1>
       <el-dropdown trigger="click" @command="handleCommand" placement="bottom-start">
         <button class="add-btn">
           <span class="material-icons-outlined">add</span>
@@ -413,9 +410,9 @@ onUnmounted(() => {
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: var(--dt-radius-md);
+  border-radius: 6px;
   cursor: pointer;
-  color: var(--dt-text-secondary);
+  color: #3b4252;
   transition: all var(--dt-transition-fast);
   position: relative;
 
@@ -476,7 +473,7 @@ onUnmounted(() => {
 
 .search-icon {
   font-size: 18px;
-  color: var(--dt-text-quaternary);
+  color: #8f959e;
   pointer-events: none;
   flex-shrink: 0;
 }
@@ -504,13 +501,13 @@ onUnmounted(() => {
   justify-content: center;
   cursor: pointer;
   border-radius: var(--dt-radius-full);
-  color: var(--dt-text-quaternary);
+  color: #8f959e;
   transition: all var(--dt-transition-fast);
   flex-shrink: 0;
 
   &:hover {
     background: var(--dt-border-color);
-    color: var(--dt-text-secondary);
+    color: #3b4252;
   }
 }
 
@@ -848,23 +845,23 @@ onUnmounted(() => {
     gap: 10px;
     padding: 9px 10px;
     font-size: 13px;
-    color: var(--dt-text-primary);
+    color: #1f2329;
     cursor: pointer;
-    border-radius: var(--dt-radius-md);
+    border-radius: 6px;
     transition: all var(--dt-transition-base);
     font-weight: 500;
 
     .item-icon {
       font-size: 16px;
-      color: var(--dt-text-secondary);
+      color: #646a73;
     }
 
     &:hover {
-      background: var(--dt-bg-body);
-      color: var(--dt-brand-color);
+      background: #f5f6f7;
+      color: #1677ff;
 
       .item-icon {
-        color: var(--dt-brand-color);
+        color: #1677ff;
       }
     }
 
@@ -902,7 +899,7 @@ onUnmounted(() => {
 }
 
 .dark .add-btn {
-  color: var(--dt-text-secondary-dark);
+  color: #bdc3c9;
 
   &:hover {
     background: var(--dt-bg-hover-dark);
@@ -952,14 +949,19 @@ onUnmounted(() => {
   border-color: var(--dt-border-dark);
 
   .menu-item {
-    color: var(--dt-text-primary-dark);
+    color: #f1f5f9;
 
     .item-icon {
-      color: var(--dt-text-secondary-dark);
+      color: #bdc3c9;
     }
 
     &:hover {
       background: var(--dt-bg-hover-dark);
+      color: #1677ff;
+
+      .item-icon {
+        color: #1677ff;
+      }
     }
   }
 
