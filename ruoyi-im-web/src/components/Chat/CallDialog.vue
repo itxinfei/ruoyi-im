@@ -386,9 +386,9 @@ const createPeerConnection = async () => {
   peerConnection = new RTCPeerConnection(rtcConfig)
 
   // 添加本地流
-  if (localStream) {
-    localStream.getTracks().forEach(track => {
-      peerConnection.addTrack(track, localStream)
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(track => {
+      peerConnection.addTrack(track, mediaStream)
     })
   }
 
@@ -541,8 +541,8 @@ const handleHangup = async () => {
 
 // 控制按钮功能
 const toggleMute = () => {
-  if (localStream) {
-    const audioTrack = localStream.getAudioTracks()[0]
+  if (mediaStream) {
+    const audioTrack = mediaStream.getAudioTracks()[0]
     if (audioTrack) {
       isMuted.value = !isMuted.value
       audioTrack.enabled = !isMuted.value
@@ -551,8 +551,8 @@ const toggleMute = () => {
 }
 
 const toggleCamera = async () => {
-  if (localStream) {
-    const videoTrack = localStream.getVideoTracks()[0]
+  if (mediaStream) {
+    const videoTrack = mediaStream.getVideoTracks()[0]
     if (videoTrack) {
       isCameraOff.value = !isCameraOff.value
       videoTrack.enabled = !isCameraOff.value
@@ -579,7 +579,7 @@ const toggleScreenShare = async () => {
       })
 
       // 替换视频轨道
-      if (peerConnection && localStream) {
+      if (peerConnection && mediaStream) {
         const videoTrack = screenStream.getVideoTracks()[0]
         const sender = peerConnection.getSenders().find(s => s.track.kind === 'video')
         if (sender) {
@@ -602,8 +602,8 @@ const toggleScreenShare = async () => {
 
 const stopScreenShare = () => {
   // 恢复摄像头
-  if (localStream && peerConnection) {
-    const videoTrack = localStream.getVideoTracks()[0]
+  if (mediaStream && peerConnection) {
+    const videoTrack = mediaStream.getVideoTracks()[0]
     const sender = peerConnection.getSenders().find(s => s.track.kind === 'video')
     if (sender && videoTrack) {
       sender.replaceTrack(videoTrack)
