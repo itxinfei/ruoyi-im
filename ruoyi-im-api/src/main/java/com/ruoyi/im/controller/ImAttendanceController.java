@@ -4,14 +4,19 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImAttendance;
 import com.ruoyi.im.service.ImAttendanceService;
 import com.ruoyi.im.util.SecurityUtils;
+import com.ruoyi.im.vo.attendance.ImAttendanceVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 考勤打卡控制器
@@ -36,6 +41,44 @@ public class ImAttendanceController {
     }
 
     /**
+     * 将 Entity 转换为 VO
+     *
+     * @param attendance 考勤实体
+     * @return 考勤视图对象
+     */
+    private ImAttendanceVO toVO(ImAttendance attendance) {
+        if (attendance == null) {
+            return new ImAttendanceVO();
+        }
+        ImAttendanceVO vo = new ImAttendanceVO();
+        BeanUtils.copyProperties(attendance, vo);
+
+        // 格式化工作时长文本
+        if (attendance.getWorkMinutes() != null) {
+            int hours = attendance.getWorkMinutes() / 60;
+            int minutes = attendance.getWorkMinutes() % 60;
+            vo.setWorkDurationText(hours + "小时" + minutes + "分钟");
+        }
+
+        return vo;
+    }
+
+    /**
+     * 批量将 Entity 转换为 VO
+     *
+     * @param list 考勤实体列表
+     * @return 考勤视图对象列表
+     */
+    private List<ImAttendanceVO> toVOList(List<ImAttendance> list) {
+        if (list == null || list.isEmpty()) {
+            return List.of();
+        }
+        return list.stream()
+                .map(this::toVO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * 上班打卡
      *
      * @param location 打卡位置（JSON格式：{"latitude": 0, "longitude": 0, "address": ""}）
@@ -44,11 +87,11 @@ public class ImAttendanceController {
      */
     @Operation(summary = "上班打卡", description = "进行上班打卡操作")
     @PostMapping("/checkIn")
-    public Result<ImAttendance> checkIn(@RequestParam(required = false) String location,
-                                        @RequestParam(required = false) String deviceInfo) {
+    public Result<ImAttendanceVO> checkIn(@RequestParam(required = false) String location,
+                                          @RequestParam(required = false) String deviceInfo) {
         Long userId = SecurityUtils.getLoginUserId();
         ImAttendance attendance = attendanceService.checkIn(userId, location, deviceInfo);
-        return Result.success("上班打卡成功", attendance);
+        return Result.success("上班打卡成功", toVO(attendance));
     }
 
     /**
@@ -60,11 +103,11 @@ public class ImAttendanceController {
      */
     @Operation(summary = "下班打卡", description = "进行下班打卡操作")
     @PostMapping("/checkOut")
-    public Result<ImAttendance> checkOut(@RequestParam(required = false) String location,
-                                         @RequestParam(required = false) String deviceInfo) {
+    public Result<ImAttendanceVO> checkOut(@RequestParam(required = false) String location,
+                                           @RequestParam(required = false) String deviceInfo) {
         Long userId = SecurityUtils.getLoginUserId();
         ImAttendance attendance = attendanceService.checkOut(userId, location, deviceInfo);
-        return Result.success("下班打卡成功", attendance);
+        return Result.success("下班打卡成功", toVO(attendance));
     }
 
     /**
@@ -74,13 +117,10 @@ public class ImAttendanceController {
      */
     @Operation(summary = "获取今日打卡状态", description = "获取用户今日的打卡状态")
     @GetMapping("/today")
-    public Result<ImAttendance> getTodayStatus() {
+    public Result<ImAttendanceVO> getTodayStatus() {
         Long userId = SecurityUtils.getLoginUserId();
         ImAttendance attendance = attendanceService.getTodayAttendance(userId);
-        if (attendance == null) {
-            attendance = new ImAttendance();
-        }
-        return Result.success(attendance);
+        return Result.success(toVO(attendance));
     }
 
     /**
@@ -91,9 +131,9 @@ public class ImAttendanceController {
      */
     @Operation(summary = "获取打卡记录详情", description = "根据ID获取打卡记录详情")
     @GetMapping("/{id}")
-    public Result<ImAttendance> getDetail(@PathVariable Long id) {
+    public Result<ImAttendanceVO> getDetail(@PathVariable Long id) {
         ImAttendance attendance = attendanceService.getAttendanceById(id);
-        return Result.success(attendance);
+        return Result.success(toVO(attendance));
     }
 
     /**
@@ -105,11 +145,11 @@ public class ImAttendanceController {
      */
     @Operation(summary = "获取打卡记录列表", description = "获取指定日期范围内的打卡记录")
     @GetMapping("/list")
-    public Result<List<ImAttendance>> getList(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
-                                              @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+    public Result<List<ImAttendanceVO>> getList(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImAttendance> list = attendanceService.getAttendanceList(userId, startDate, endDate);
-        return Result.success(list);
+        return Result.success(toVOList(list));
     }
 
     /**
