@@ -116,7 +116,7 @@ import { useStore } from 'vuex'
 import { useTheme } from '@/composables/useTheme'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import {
-  ChatDotRound, User, Grid, Cloud, Calendar, CheckCircle,
+  ChatDotRound, User, Grid, Cloudy, Calendar, CircleCheck,
   DocumentFilled, Message, Search, Settings, Dark, Sunny, Moon
 } from '@element-plus/icons-vue'
 
@@ -165,9 +165,9 @@ const navModules = ref([
   { key: 'chat', label: '消息', icon: ChatDotRound },
   { key: 'contacts', label: '通讯录', icon: User },
   { key: 'workbench', label: '工作台', icon: Grid },
-  { key: 'drive', label: '云盘', icon: Cloud },
+  { key: 'drive', label: '云盘', icon: Cloudy },
   { key: 'calendar', label: '日历', icon: Calendar },
-  { key: 'todo', label: '待办', icon: CheckCircle },
+  { key: 'todo', label: '待办', icon: CircleCheck },
   { key: 'approval', label: '审批', icon: DocumentFilled },
   { key: 'mail', label: '邮箱', icon: Message },
   { key: 'assistant', label: 'AI助理', icon: ChatDotRound }

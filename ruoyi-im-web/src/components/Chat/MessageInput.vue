@@ -1,11 +1,22 @@
 <template>
-  <div class="chat-input-container" :style="{ minHeight: containerHeight + 'px' }">
-    <div 
-      class="resize-handle" 
+  <div class="chat-input-container" :class="{ 'is-resizing': isResizing }" :style="{ minHeight: containerHeight + 'px' }">
+    <div
+      class="resize-handle"
+      :class="{ 'is-active': isResizing }"
       @mousedown="startResize"
       @dblclick="resetHeight"
     >
-      <div class="resize-indicator"></div>
+      <div class="resize-indicator">
+        <span class="resize-dots"></span>
+      </div>
+
+      <!-- 高度指示器 -->
+      <transition name="height-indicator">
+        <div v-if="isResizing" class="height-indicator">
+          <span class="height-value">{{ Math.round(containerHeight) }}px</span>
+          <span class="height-hint">拖拽调整高度</span>
+        </div>
+      </transition>
     </div>
 
     <!-- 工具栏 -->
@@ -483,36 +494,167 @@ onUnmounted(() => {
 // ============================================================================
 // 调整手柄
 // ============================================================================
+.chat-input-container {
+  &.is-resizing {
+    box-shadow: 0 -4px 16px rgba(22, 119, 255, 0.15);
+    border-top-color: var(--dt-brand-color);
+  }
+}
+
 .resize-handle {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 8px;
   cursor: ns-resize;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background var(--dt-transition-base);
+  transition: all 0.2s var(--dt-ease-out);
 
   &:hover {
-    background: var(--dt-brand-light);
+    .resize-indicator {
+      .resize-dots {
+        &::before,
+        &::after {
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  &.is-active {
+    height: 32px;
+
+    .resize-indicator {
+      width: 48px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--dt-brand-color), var(--dt-brand-color));
+      opacity: 1;
+
+      .resize-dots {
+        background-size: 4px 4px;
+
+        &::before,
+        &::after {
+          opacity: 1;
+        }
+      }
+    }
+
+    .height-indicator {
+      opacity: 1;
+      transform: translateY(-8px);
+    }
   }
 
   .resize-indicator {
-    width: 40px;
+    width: 36px;
     height: 3px;
     background: var(--dt-border-color);
     border-radius: var(--dt-radius-full);
-    opacity: 0.5;
-    transition: all var(--dt-transition-base);
+    opacity: 0.6;
+    transition: all 0.25s var(--dt-ease-out);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    .resize-handle:hover & {
-      width: 60px;
-      background: var(--dt-brand-color);
-      opacity: 1;
+    .resize-dots {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      // 创建虚线效果
+      background-image: linear-gradient(
+        90deg,
+        var(--dt-border-color) 50%,
+        transparent 50%
+      );
+      background-size: 6px 100%;
+      background-repeat: repeat-x;
+      transition: all 0.25s var(--dt-ease-out);
+
+      &::before,
+      &::after {
+        content: '';
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: var(--dt-brand-color);
+        border-radius: 50%;
+        opacity: 0;
+        transition: all 0.25s var(--dt-ease-out);
+      }
+
+      &::before {
+        left: -4px;
+      }
+
+      &::after {
+        right: -4px;
+      }
     }
+  }
+
+  // 高度指示器
+  .height-indicator {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 12px;
+    background: var(--dt-brand-color);
+    color: #fff;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+    pointer-events: none;
+    z-index: 100;
+
+    .height-value {
+      font-size: 14px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .height-hint {
+      font-size: 10px;
+      opacity: 0.8;
+    }
+  }
+}
+
+// 高度指示器过渡动画
+.height-indicator-enter-active,
+.height-indicator-leave-active {
+  transition: all 0.2s var(--dt-ease-out);
+}
+
+.height-indicator-enter-from,
+.height-indicator-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(0);
+}
+
+// 双击重置的反馈动画
+@keyframes resetPulse {
+  0% { background: transparent; }
+  50% { background: rgba(22, 119, 255, 0.15); }
+  100% { background: transparent; }
+}
+
+.chat-input-container {
+  &:has(.resize-handle:active) {
+    animation: resetPulse 0.3s var(--dt-ease-out);
   }
 }
 

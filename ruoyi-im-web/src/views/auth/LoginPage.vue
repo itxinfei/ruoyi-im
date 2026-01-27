@@ -116,7 +116,7 @@
               <el-checkbox v-model="loginForm.rememberMe">
                 <span class="checkbox-label">记住我</span>
               </el-checkbox>
-              <el-link type="primary" :underline="false" @click="handleForgotPassword">
+              <el-link type="primary" underline="never" @click="handleForgotPassword">
                 忘记密码？
               </el-link>
             </div>

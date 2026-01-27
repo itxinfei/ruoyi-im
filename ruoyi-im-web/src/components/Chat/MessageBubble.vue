@@ -80,11 +80,42 @@
       </div>
 
       <!-- 文件消息 -->
-      <div v-else-if="message.type === 'FILE'" class="msg-file" @click="$emit('download', parsedContent)">
-        <el-icon><Document /></el-icon>
+      <div v-else-if="message.type === 'FILE'" class="msg-file" :class="{ 'is-downloading': isDownloading }" @click="handleFileClick">
+        <div class="file-icon-wrapper">
+          <el-icon><Document /></el-icon>
+          <div v-if="isDownloading" class="file-download-progress">
+            <svg viewBox="0 0 36 36">
+              <path
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="rgba(22, 119, 255, 0.15)"
+                stroke-width="3"
+              />
+              <path
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="var(--dt-brand-color)"
+                stroke-width="3"
+                :stroke-dasharray="`${downloadProgress}, 100`"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+        </div>
         <div class="file-info">
           <span class="file-name">{{ parsedContent.fileName || '未知文件' }}</span>
-          <span class="file-size">{{ formatSize(parsedContent.size) }}</span>
+          <span class="file-meta">
+            <template v-if="isDownloading">
+              下载中 {{ downloadProgress }}%
+            </template>
+            <template v-else>
+              {{ formatSize(parsedContent.size) }}
+            </template>
+          </span>
+        </div>
+        <div class="file-action">
+          <el-icon v-if="!isDownloading"><Download /></el-icon>
+          <el-icon v-else class="is-spinning"><Loading /></el-icon>
         </div>
       </div>
 
@@ -145,20 +176,38 @@
       <span v-else>[{{ message.type }}]</span>
 
       <!-- 消息状态图标 -->
-      <div v-if="message.isOwn" class="message-status">
-        <el-icon v-if="message.status === 'sending'" class="is-loading" color="#909399">
-          <Loading />
-        </el-icon>
-        <el-icon v-else-if="message.status === 'sent'" color="#909399">
-          <Check />
-        </el-icon>
-        <el-icon v-else-if="message.status === 'read'" color="#909399">
-          <Check />
-          <Check />
-        </el-icon>
-        <el-icon v-else-if="message.status === 'failed'" color="#f56c6c" @click="handleRetry">
-          <WarningFilled />
-        </el-icon>
+      <div v-if="message.isOwn" class="message-status" :class="`status-${message.status || 'sent'}`">
+        <!-- 发送中状态 -->
+        <transition name="status-fade">
+          <div v-if="message.status === 'sending'" class="status-indicator status-sending">
+            <span class="sending-dots">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </span>
+          </div>
+        </transition>
+
+        <!-- 已发送状态 -->
+        <transition name="status-scale">
+          <div v-if="message.status === 'sent'" class="status-indicator status-sent" title="已发送">
+            <span class="material-icons-outlined">check</span>
+          </div>
+        </transition>
+
+        <!-- 已读状态 -->
+        <transition name="status-scale">
+          <div v-if="message.status === 'read'" class="status-indicator status-read" title="已读">
+            <span class="material-icons-outlined">done_all</span>
+          </div>
+        </transition>
+
+        <!-- 发送失败状态 -->
+        <transition name="status-shake">
+          <div v-if="message.status === 'failed'" class="status-indicator status-failed" @click="handleRetry" title="点击重试">
+            <span class="material-icons-outlined">error_outline</span>
+          </div>
+        </transition>
       </div>
     </div>
 
@@ -199,7 +248,7 @@
 <script setup>
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
-import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, Loading, WarningFilled, VideoPlay, VideoPause } from '@element-plus/icons-vue'
+import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, Loading, WarningFilled, VideoPlay, VideoPause, Download } from '@element-plus/icons-vue'
 import CombineMessagePreview from './CombineMessagePreview.vue'
 import LinkCard from './LinkCard.vue'
 import { extractLinksFromContent, formatLinkUrl } from '@/utils/file'
@@ -386,6 +435,61 @@ const getFileName = (content) => {
     return content?.fileName || content?.name || '文件'
   } catch {
     return '文件'
+  }
+}
+
+// 文件下载相关
+const isDownloading = ref(false)
+const downloadProgress = ref(0)
+
+const handleFileClick = async () => {
+  if (isDownloading.value) return
+
+  const fileUrl = parsedContent.value?.fileUrl || parsedContent.value?.url
+  if (!fileUrl) {
+    emit('download', parsedContent.value)
+    return
+  }
+
+  // 如果是同源或支持跨域的直接下载
+  try {
+    isDownloading.value = true
+    downloadProgress.value = 0
+
+    // 模拟下载进度（实际项目中可以使用 axios 的 onDownloadProgress）
+    const progressInterval = setInterval(() => {
+      if (downloadProgress.value < 90) {
+        downloadProgress.value += Math.random() * 15
+      }
+    }, 200)
+
+    // 创建下载链接
+    const response = await fetch(fileUrl)
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+
+    const link = document.createElement('a')
+    link.href = url
+    link.download = parsedContent.value?.fileName || '下载文件'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    clearInterval(progressInterval)
+    downloadProgress.value = 100
+
+    // 延迟重置状态
+    setTimeout(() => {
+      isDownloading.value = false
+      downloadProgress.value = 0
+    }, 500)
+  } catch (error) {
+    console.error('文件下载失败:', error)
+    isDownloading.value = false
+    downloadProgress.value = 0
+    // 降级到 emit 方式
+    emit('download', parsedContent.value)
   }
 }
 
@@ -831,56 +935,243 @@ onUnmounted(() => {
 .message-status {
   display: flex;
   align-items: center;
-  margin-left: 5px;
+  margin-left: 6px;
   font-size: 14px;
   cursor: pointer;
+  transition: all 0.25s var(--dt-ease-out);
+  align-self: flex-end;
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    transition: all 0.25s var(--dt-ease-out);
+
+    .material-icons-outlined {
+      font-size: 16px;
+    }
+  }
+
+  // 发送中状态
+  .status-sending {
+    color: #94a3b8;
+
+    .sending-dots {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+
+      .dot {
+        width: 4px;
+        height: 4px;
+        background: currentColor;
+        border-radius: 50%;
+        animation: sendingBounce 1.4s ease-in-out infinite;
+
+        &:nth-child(1) { animation-delay: 0s; }
+        &:nth-child(2) { animation-delay: 0.16s; }
+        &:nth-child(3) { animation-delay: 0.32s; }
+      }
+    }
+  }
+
+  // 已发送状态
+  .status-sent {
+    color: #94a3b8;
+    opacity: 0.8;
+    transition: all 0.25s var(--dt-ease-out);
+
+    &:hover {
+      color: var(--dt-brand-color);
+      transform: scale(1.1);
+    }
+  }
+
+  // 已读状态
+  .status-read {
+    color: var(--dt-brand-color);
+    opacity: 1;
+
+    .material-icons-outlined {
+      font-weight: 600;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  // 失败状态
+  .status-failed {
+    color: #ef4444;
+    cursor: pointer;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.1);
+      opacity: 0;
+      transition: opacity 0.25s var(--dt-ease-out);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    &:hover {
+      transform: scale(1.15);
+
+      &::after {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+// 发送中的弹跳动画
+@keyframes sendingBounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// 状态过渡动画
+.status-fade-enter-active,
+.status-fade-leave-active {
   transition: all 0.2s var(--dt-ease-out);
+}
 
-  @include hover-lift;
+.status-fade-enter-from,
+.status-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
 
-  .el-icon {
-    margin: 0 1px;
-    transition: transform 0.2s var(--dt-ease-out);
-  }
+.status-scale-enter-active {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
-  &:hover .el-icon {
-    transform: scale(1.1);
-  }
+.status-scale-leave-active {
+  transition: all 0.2s var(--dt-ease-out);
+}
+
+.status-scale-enter-from {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.status-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.status-shake-enter-active {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.status-shake-leave-active {
+  transition: all 0.2s var(--dt-ease-out);
+}
+
+.status-shake-leave-to {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
 }
 
 .msg-file {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   cursor: pointer;
   background: #f8fafc;
-  padding: 12px;
-  border-radius: 6px;
+  padding: 12px 14px;
+  border-radius: 8px;
   border: 1px solid #eef2f6;
-  transition: all 0.2s var(--dt-ease-out);
+  transition: all 0.25s var(--dt-ease-out);
   animation: fadeIn 0.3s var(--dt-ease-out);
+  position: relative;
+  overflow: hidden;
 
   @include hover-lift;
 
   &:hover {
     border-color: #1677ff;
     box-shadow: 0 2px 8px rgba(22, 119, 255, 0.15);
+
+    .file-action {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
-  .el-icon {
-    font-size: 32px;
-    color: #1677ff;
-    transition: transform 0.2s var(--dt-ease-out);
+  &.is-downloading {
+    border-color: var(--dt-brand-color);
+    background: #eff6ff;
+    cursor: wait;
+
+    .file-icon-wrapper {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
   }
 
-  &:hover .el-icon {
+  .file-icon-wrapper {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    .el-icon {
+      font-size: 32px;
+      color: var(--dt-brand-color);
+      transition: transform 0.25s var(--dt-ease-out);
+    }
+
+    .file-download-progress {
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg {
+        width: 48px;
+        height: 48px;
+        transform: rotate(-90deg);
+      }
+    }
+  }
+
+  &:hover .file-icon-wrapper .el-icon {
     transform: scale(1.05);
   }
 
   .file-info {
+    flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-width: 0;
 
     .file-name {
       font-weight: 600;
@@ -891,12 +1182,67 @@ onUnmounted(() => {
       white-space: nowrap;
     }
 
-    .file-size {
+    .file-meta {
       font-size: 11px;
       color: #8f959e;
       margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      // 进度条背景
+      &::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        background: rgba(22, 119, 255, 0.2);
+        width: calc(100% - 28px);
+        border-radius: 0 0 8px 8px;
+        opacity: 0;
+        transition: opacity 0.25s var(--dt-ease-out);
+      }
     }
   }
+
+  .is-downloading .file-meta::before {
+    opacity: 1;
+  }
+
+  .file-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    color: #8f959e;
+    opacity: 0.6;
+    transition: all 0.25s var(--dt-ease-out);
+    transform: translateX(4px);
+    flex-shrink: 0;
+
+    .el-icon {
+      font-size: 18px;
+    }
+
+    &.is-spinning .el-icon {
+      animation: spin 1s linear infinite;
+      color: var(--dt-brand-color);
+    }
+  }
+}
+
+// 旋转动画
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// 脉冲动画
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 .msg-recalled {

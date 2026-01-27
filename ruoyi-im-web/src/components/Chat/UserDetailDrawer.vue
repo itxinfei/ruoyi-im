@@ -37,8 +37,8 @@
         <div class="info-content">
           <div class="name-row">
             <h2 class="user-name">{{ userName }}</h2>
-            <el-icon v-if="userInfo.gender === 1" class="gender-icon male"><Male /></el-icon>
-            <el-icon v-else-if="userInfo.gender === 2" class="gender-icon female"><Female /></el-icon>
+            <span v-if="userInfo.gender === 1" class="gender-icon male material-icons-outlined">male</span>
+            <span v-else-if="userInfo.gender === 2" class="gender-icon female material-icons-outlined">female</span>
           </div>
           <p v-if="!isGroup" class="user-desc">
             {{ userInfo.position || '成员' }} | {{ userInfo.department || '默认部门' }}
@@ -58,7 +58,7 @@
           <span>语音通话</span>
         </div>
         <div class="action-item" @click="handleVideoCall">
-          <div class="action-icon video-bg"><el-icon><VideoCamera /></el-icon></div>
+          <div class="action-icon video-bg"><el-icon><Camera /></el-icon></div>
           <span>视频通话</span>
         </div>
       </div>
@@ -103,7 +103,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { ChatDotRound, Phone, VideoCamera, Close, Male, Female } from '@element-plus/icons-vue'
+import { ChatDotRound, Phone, Camera, Close } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { getUserInfo } from '@/api/im/user'
 

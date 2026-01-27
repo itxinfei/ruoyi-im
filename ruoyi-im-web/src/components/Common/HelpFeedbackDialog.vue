@@ -91,7 +91,7 @@
               </div>
               <div class="feature-card">
                 <div class="feature-icon-wrapper video-bg">
-                  <el-icon><VideoCamera /></el-icon>
+                  <el-icon><Camera /></el-icon>
                 </div>
                 <div class="feature-content">
                   <h3>音视频通话</h3>
@@ -201,7 +201,7 @@ import { ref, watch, reactive, computed } from 'vue'
 import {
   ChatDotRound,
   Files,
-  VideoCamera,
+  Camera,
   Search,
   Plus,
   ArrowDown,

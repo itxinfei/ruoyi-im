@@ -91,8 +91,8 @@
           <div class="user-main">
             <div class="name-row">
               <span class="nickname">{{ detail.nickname || detail.username }}</span>
-              <el-icon v-if="detail.gender === 1" class="male"><Male /></el-icon>
-              <el-icon v-else-if="detail.gender === 2" class="female"><Female /></el-icon>
+              <span v-if="detail.gender === 1" class="material-icons-outlined male">male</span>
+              <span v-else-if="detail.gender === 2" class="material-icons-outlined female">female</span>
             </div>
             <div class="sub">账号: {{ detail.username }}</div>
           </div>
@@ -127,7 +127,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { Close, Plus, Male, Female } from '@element-plus/icons-vue'
+import { Close, Plus } from '@element-plus/icons-vue'
 import { getGroup, getGroupMembers, leaveGroup } from '@/api/im/group'
 import { getUserInfo } from '@/api/im/user'
 import { addTokenToUrl } from '@/utils/file'

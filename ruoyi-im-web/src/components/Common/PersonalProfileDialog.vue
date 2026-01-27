@@ -33,8 +33,8 @@
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 truncate">
               {{ currentUser.nickname || currentUser.username }}
             </h3>
-            <el-icon v-if="currentUser.sex === 1" class="text-blue-500 text-xs"><Male /></el-icon>
-            <el-icon v-else-if="currentUser.sex === 2" class="text-pink-500 text-xs"><Female /></el-icon>
+            <span v-if="currentUser.sex === 1" class="material-icons-outlined text-blue-500 text-sm">male</span>
+            <span v-else-if="currentUser.sex === 2" class="material-icons-outlined text-pink-500 text-sm">female</span>
           </div>
           <p class="text-xs text-slate-400 mt-1 truncate">{{ currentUser.position || '暂无职位' }}</p>
           <div class="mt-2">
@@ -109,9 +109,9 @@
 import { ref, watch, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { 
-  Close, Male, Female, Edit, Lock, Briefcase, Phone, Message, 
-  SwitchButton, CopyDocument, User 
+import {
+  Close, Edit, Lock, Briefcase, Phone, Message,
+  SwitchButton, CopyDocument, User
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
