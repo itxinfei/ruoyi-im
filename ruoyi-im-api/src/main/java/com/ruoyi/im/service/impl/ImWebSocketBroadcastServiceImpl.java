@@ -190,6 +190,36 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         }
     }
 
+    @Override
+    public void broadcastRecallNotification(Long conversationId, Long messageId, Long userId) {
+        try {
+            Map<String, Object> recallNotification = new HashMap<>();
+            recallNotification.put("type", "recall");
+            recallNotification.put("conversationId", conversationId);
+            recallNotification.put("messageId", messageId);
+            recallNotification.put("userId", userId);
+            recallNotification.put("timestamp", java.time.LocalDateTime.now().toString());
+
+            // 获取用户信息
+            com.ruoyi.im.domain.ImUser user = imUserMapper.selectImUserById(userId);
+            if (user != null) {
+                recallNotification.put("userName",
+                        user.getNickname() != null ? user.getNickname() : user.getUsername());
+            }
+
+            // 获取会话成员
+            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            if (members == null || members.isEmpty()) {
+                return;
+            }
+
+            String messageJson = objectMapper.writeValueAsString(recallNotification);
+            broadcastToMembers(members, messageJson, userId); // Exclude the sender/revoker themselves? Original logic excluded userId.
+        } catch (Exception e) {
+            log.error("广播撤回通知失败: messageId={}", messageId, e);
+        }
+    }
+
     private Map<String, Object> createMessageData(ImMessage message, com.ruoyi.im.domain.ImUser sender) {
         Map<String, Object> data = new HashMap<>();
         data.put("id", message.getId());

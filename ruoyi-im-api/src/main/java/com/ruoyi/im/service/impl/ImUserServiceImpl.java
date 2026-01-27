@@ -362,6 +362,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String uploadAvatar(Long userId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new BusinessException("FILE_EMPTY", "头像文件不能为空");

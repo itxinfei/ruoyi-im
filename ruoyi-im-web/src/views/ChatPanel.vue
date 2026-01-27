@@ -850,4 +850,85 @@ onMounted(() => {
     }
   }
 }
+
+// ============================================================================
+// 响应式布局
+// ============================================================================
+@media (max-width: 479px) {
+  .multi-select-toolbar {
+    height: auto;
+    min-height: 56px;
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 12px;
+
+    .selection-info {
+      width: 100%;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    .actions {
+      width: 100%;
+      justify-content: space-between;
+      flex-wrap: wrap;
+
+      .el-button {
+        font-size: 12px;
+        height: 32px;
+        padding: 0 10px;
+        flex: 1;
+        min-width: calc(50% - 4px);
+        justify-content: center;
+
+        span { display: none; }
+        .el-icon { margin: 0; }
+      }
+
+      .el-divider--vertical { display: none; }
+
+      .el-button--link {
+        flex: 0 0 auto;
+        min-width: auto;
+        width: auto;
+        span { display: inline; }
+      }
+    }
+  }
+
+  .empty-placeholder { padding: 40px 16px; }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+  .multi-select-toolbar {
+    padding: 0 16px;
+    height: 60px;
+
+    .selection-info { font-size: 13px; }
+
+    .actions {
+      gap: 6px;
+
+      .el-button {
+        font-size: 12px;
+        padding: 0 10px;
+        height: 32px;
+        span { display: none; }
+      }
+
+      .el-button--link span { display: inline; }
+    }
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .multi-select-toolbar {
+    padding: 0 20px;
+
+    .actions .el-button {
+      font-size: 13px;
+      padding: 0 10px;
+    }
+  }
+}
 </style>

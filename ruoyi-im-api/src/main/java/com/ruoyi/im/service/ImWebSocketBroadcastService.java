@@ -31,4 +31,13 @@ public interface ImWebSocketBroadcastService {
      * @param targetUserIds 目标用户ID集合
      */
     void broadcastDingMessage(DingMessageVO dingVO, Set<Long> targetUserIds);
+
+    /**
+     * 广播消息撤回通知
+     *
+     * @param conversationId 会话ID
+     * @param messageId      消息ID
+     * @param userId         操作用户ID
+     */
+    void broadcastRecallNotification(Long conversationId, Long messageId, Long userId);
 }
