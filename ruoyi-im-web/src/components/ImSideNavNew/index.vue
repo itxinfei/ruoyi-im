@@ -39,9 +39,7 @@
           :aria-current="activeModule === item.key ? 'page' : undefined"
           role="menuitem"
         >
-          <span class="nav-item-icon material-icons-outlined" aria-hidden="true">
-            {{ item.icon }}
-          </span>
+          <component :is="item.icon" class="nav-item-icon" aria-hidden="true" />
           <span v-if="item.badge" class="nav-item-badge">{{ item.badge }}</span>
         </button>
       </el-tooltip>
@@ -56,7 +54,7 @@
           class="nav-item nav-item-action"
           aria-label="全局搜索"
         >
-          <span class="material-icons-outlined" aria-hidden="true">search</span>
+          <Search class="nav-icon" aria-hidden="true" />
         </button>
       </el-tooltip>
 
@@ -67,9 +65,7 @@
           class="nav-item nav-item-action"
           :aria-label="themeTooltip"
         >
-          <span class="material-icons-outlined" aria-hidden="true">
-            {{ themeIcon }}
-          </span>
+          <component :is="themeIcon" class="nav-icon" aria-hidden="true" />
           <span v-if="themeMode === 'auto'" class="auto-badge">A</span>
         </button>
       </el-tooltip>
@@ -82,7 +78,7 @@
           :class="{ 'nav-item-active': activeModule === 'settings' }"
           aria-label="设置"
         >
-          <span class="material-icons-outlined" aria-hidden="true">settings</span>
+          <Settings class="nav-icon" aria-hidden="true" />
         </button>
       </el-tooltip>
 
@@ -119,6 +115,10 @@ import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useTheme } from '@/composables/useTheme'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import {
+  ChatDotRound, User, Grid, Cloud, Calendar, CheckCircle,
+  DocumentFilled, Message, Search, Settings, Dark, Sunny, Moon
+} from '@element-plus/icons-vue'
 
 const props = defineProps({
   activeModule: {
@@ -136,8 +136,8 @@ const store = useStore()
 const { isDark, themeMode, toggleTheme } = useTheme()
 
 const themeIcon = computed(() => {
-  if (themeMode.value === 'auto') return 'brightness_auto'
-  return themeMode.value === 'dark' ? 'dark_mode' : 'light_mode'
+  if (themeMode.value === 'auto') return Moon
+  return themeMode.value === 'dark' ? Dark : Sunny
 })
 
 const themeTooltip = computed(() => {
@@ -162,15 +162,15 @@ const isUserOnline = computed(() => {
 
 // 导航模块配置
 const navModules = ref([
-  { key: 'chat', label: '消息', icon: 'chat_bubble_outline' },
-  { key: 'contacts', label: '通讯录', icon: 'people_outline' },
-  { key: 'workbench', label: '工作台', icon: 'grid_view' },
-  { key: 'drive', label: '云盘', icon: 'cloud_upload' },
-  { key: 'calendar', label: '日历', icon: 'calendar_today' },
-  { key: 'todo', label: '待办', icon: 'check_circle_outline' },
-  { key: 'approval', label: '审批', icon: 'fact_check' },
-  { key: 'mail', label: '邮箱', icon: 'email' },
-  { key: 'assistant', label: 'AI助理', icon: 'psychology' }
+  { key: 'chat', label: '消息', icon: ChatDotRound },
+  { key: 'contacts', label: '通讯录', icon: User },
+  { key: 'workbench', label: '工作台', icon: Grid },
+  { key: 'drive', label: '云盘', icon: Cloud },
+  { key: 'calendar', label: '日历', icon: Calendar },
+  { key: 'todo', label: '待办', icon: CheckCircle },
+  { key: 'approval', label: '审批', icon: DocumentFilled },
+  { key: 'mail', label: '邮箱', icon: Message },
+  { key: 'assistant', label: 'AI助理', icon: ChatDotRound }
 ])
 
 /**
@@ -207,7 +207,7 @@ function handleOpenSearch() {
 </script>
 
 <style scoped lang="scss">
-@import '@/styles/design-tokens.scss';
+@use '@/styles/design-tokens.scss' as *;
 
 // ============================================================================
 // 导航容器
@@ -366,10 +366,18 @@ function handleOpenSearch() {
 .nav-item-icon {
   font-size: 22px;
   transition: transform 0.3s var(--dt-ease-out);
+  width: 22px;
+  height: 22px;
 }
 
 .nav-item:hover .nav-item-icon {
   transform: scale(1.15);
+}
+
+.nav-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
 }
 
 .nav-item-badge {

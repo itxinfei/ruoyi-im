@@ -112,7 +112,7 @@ const formattedTime = computed(() => {
 </script>
 
 <style scoped lang="scss">
-@import '@/styles/design-tokens.scss';
+@use '@/styles/design-tokens.scss' as *;
 
 .message-item {
   display: flex;

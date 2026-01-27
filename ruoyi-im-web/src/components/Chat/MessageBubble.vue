@@ -44,6 +44,16 @@
       <div v-if="message.type === 'TEXT'" class="text-content-wrapper">
         <span class="main-text">{{ message.content }}</span>
         <span v-if="message.isEdited" class="edited-tag">(已编辑)</span>
+
+        <!-- 链接卡片 -->
+        <div v-if="messageLinks.length > 0" class="message-links">
+          <LinkCard
+            v-for="(link, index) in messageLinks"
+            :key="index"
+            :link="link"
+          />
+        </div>
+
         <!-- 标记图标 -->
         <div v-if="hasMarkers" class="message-markers">
           <span v-for="marker in message.markers" :key="marker.id || marker.markerType"
@@ -98,6 +108,20 @@
         </div>
         <span class="voice-duration">{{ formatVoiceDuration(parsedContent.duration) }}</span>
         <audio v-if="parsedContent.voiceUrl" :src="parsedContent.voiceUrl" ref="voiceAudioRef" @ended="onVoiceEnded" @timeupdate="onVoiceTimeUpdate"></audio>
+      </div>
+
+      <!-- 位置消息 -->
+      <div v-else-if="message.type === 'LOCATION'" class="msg-location" @click="openLocation">
+        <div class="location-icon">
+          <span class="material-icons-outlined">location_on</span>
+        </div>
+        <div class="location-info">
+          <div class="location-address">{{ parsedContent.address || '位置信息' }}</div>
+          <div class="location-coords">{{ formatLocationCoords(parsedContent.latitude, parsedContent.longitude) }}</div>
+        </div>
+        <div class="location-arrow">
+          <span class="material-icons-outlined">open_in_new</span>
+        </div>
       </div>
 
       <!-- 系统消息 -->
@@ -177,6 +201,8 @@ import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, Loading, WarningFilled, VideoPlay, VideoPause } from '@element-plus/icons-vue'
 import CombineMessagePreview from './CombineMessagePreview.vue'
+import LinkCard from './LinkCard.vue'
+import { extractLinksFromContent, formatLinkUrl } from '@/utils/file'
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -276,11 +302,17 @@ const handleImageClick = () => {
 const parsedContent = computed(() => {
   try {
     if (!props.message || !props.message.content) return {}
-    const isMedia = ['IMAGE', 'FILE', 'VIDEO', 'VOICE', 'AUDIO', 'COMBINE', 'COMBINE_FORWARD'].includes(props.message.type)
+    const isMedia = ['IMAGE', 'FILE', 'VIDEO', 'VOICE', 'AUDIO', 'COMBINE', 'COMBINE_FORWARD', 'LOCATION'].includes(props.message.type)
     return (typeof props.message.content === 'string' && isMedia)
       ? JSON.parse(props.message.content)
       : (props.message.content || {})
   } catch (e) { return {} }
+})
+
+// 提取消息中的链接
+const messageLinks = computed(() => {
+  if (!props.message) return []
+  return extractLinksFromContent(props.message.content)
 })
 
 // 获取撤回时限配置（分钟）
@@ -401,6 +433,27 @@ const formatVoiceDuration = (seconds) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
+// 格式化坐标
+const formatLocationCoords = (lat, lng) => {
+  if (!lat || !lng) return ''
+  return `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+}
+
+// 打开位置（在地图中查看）
+const openLocation = () => {
+  const { latitude, longitude, address } = parsedContent.value
+  if (!latitude || !longitude) {
+    ElMessage.warning('位置信息不完整')
+    return
+  }
+
+  // 使用高德地图或百度地图打开位置
+  // 高德地图: https://uri.amap.com/marker?position=lng,lat&name=address
+  // 百度地图: https://api.map.baidu.com/marker?location=lat,lng&title=address&content=address&output=html
+  const url = `https://uri.amap.com/marker?position=${longitude},${latitude}&name=${encodeURIComponent(address || '位置')}`
+  window.open(url, '_blank')
+}
+
 // 组件卸载时停止播放
 onUnmounted(() => {
   if (voiceAudioRef.value) {
@@ -410,7 +463,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-@import '@/styles/design-tokens.scss';
+@use '@/styles/design-tokens.scss' as *;
 
 .bubble {
   background: var(--dt-bubble-left-bg);
@@ -464,38 +517,108 @@ onUnmounted(() => {
 
   /* 引用回复展示 - 钉钉风格增强 */
   .bubble-reply-ref {
+    position: relative;
     display: flex;
     flex-direction: column;
-    background: rgba(0, 0, 0, 0.03);
-    border-left: 3px solid #0089ff;
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    border-radius: 0 4px 4px 0;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid var(--dt-brand-color);
+    padding: 10px 12px;
+    margin: -8px -10px 10px -10px;
+    border-radius: 6px 0 0 6px;
     font-size: 12px;
-    color: #64748b;
+    color: #475569;
     cursor: pointer;
     overflow: hidden;
     user-select: none;
-    transition: all 0.2s var(--dt-ease-out);
+    transition: all 0.25s var(--dt-ease-out);
+    animation: slideInDown 0.3s var(--dt-ease-out);
 
-    @include hover-lift;
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    // 引用指示器竖线装饰
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 60%;
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        var(--dt-brand-color) 20%,
+        var(--dt-brand-color) 80%,
+        transparent 100%
+      );
+      border-radius: 0 2px 2px 0;
+      transition: height 0.25s var(--dt-ease-out);
+    }
+
+    // 右侧箭头指示
+    &::after {
+      content: 'keyboard_return';
+      font-family: 'Material Icons Outlined';
+      position: absolute;
+      right: 8px;
+      bottom: 6px;
+      font-size: 14px;
+      color: var(--dt-brand-color);
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: all 0.25s var(--dt-ease-out);
+    }
 
     .ref-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 4px;
+      gap: 6px;
+      margin-bottom: 5px;
 
       .ref-user {
         font-weight: 600;
-        color: #1f2329;
+        color: #334155;
         font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        &::before {
+          content: '';
+          display: inline-block;
+          width: 4px;
+          height: 4px;
+          background: var(--dt-brand-color);
+          border-radius: 50%;
+        }
       }
 
       .ref-type-icon {
-        color: #0089ff;
-        opacity: 0.7;
-        transition: opacity 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        background: rgba(22, 119, 255, 0.1);
+        color: var(--dt-brand-color);
+        border-radius: 4px;
+        font-size: 12px;
+        margin-left: auto;
+        transition: all 0.25s var(--dt-ease-out);
+
+        .material-icons-outlined {
+          font-size: 14px;
+        }
       }
     }
 
@@ -508,22 +631,116 @@ onUnmounted(() => {
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
+      padding-left: 8px;
+      border-left: 1px dashed #cbd5e1;
+      transition: all 0.25s var(--dt-ease-out);
 
       .ref-image-text,
       .ref-file-text,
       .ref-video-text,
       .ref-voice-text {
-        color: #0089ff;
+        color: var(--dt-brand-color);
         font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+
+        &::before {
+          content: 'attach_file';
+          font-family: 'Material Icons Outlined';
+          font-size: 14px;
+        }
       }
+
+      .ref-image-text::before { content: 'image'; }
+      .ref-video-text::before { content: 'videocam'; }
+      .ref-voice-text::before { content: 'mic'; }
     }
 
     &:hover {
-      background: rgba(0, 137, 255, 0.08);
-      border-left-color: #0066cc;
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      border-left-color: var(--dt-brand-color);
+      box-shadow: 0 2px 4px rgba(22, 119, 255, 0.1);
+      transform: translateX(2px);
+
+      &::before {
+        height: 80%;
+      }
+
+      &::after {
+        opacity: 0.6;
+        transform: translateX(0);
+      }
 
       .ref-type-icon {
-        opacity: 1;
+        background: var(--dt-brand-color);
+        color: #fff;
+        transform: scale(1.05);
+      }
+
+      .ref-content {
+        border-left-color: var(--dt-brand-color);
+        color: #475569;
+      }
+    }
+
+    // 激活状态（点击跳转时）
+    &:active {
+      transform: translateX(1px) scale(0.99);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  // 自己发送消息中的引用回复样式适配
+  &.is-own .bubble-reply-ref {
+    background: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.6);
+    border-left-color: var(--dt-brand-color);
+
+    .ref-header .ref-user {
+      color: #1e293b;
+    }
+
+    .ref-content {
+      color: #64748b;
+      border-left-color: rgba(148, 163, 184, 0.5);
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.7);
+      border-color: rgba(22, 119, 255, 0.3);
+    }
+  }
+
+  // 暗色模式适配
+  @media (prefers-color-scheme: dark) {
+    .bubble-reply-ref {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.1);
+      border-left-color: var(--dt-brand-color);
+
+      .ref-header .ref-user {
+        color: #e2e8f0;
+      }
+
+      .ref-content {
+        color: #94a3b8;
+        border-left-color: rgba(148, 163, 184, 0.3);
+      }
+
+      &:hover {
+        background: rgba(22, 119, 255, 0.15);
+        border-color: rgba(59, 130, 246, 0.3);
+
+        .ref-type-icon {
+          background: rgba(22, 119, 255, 0.2);
+          color: #60a5fa;
+        }
+      }
+
+      &::after {
+        color: #60a5fa;
       }
     }
   }
@@ -532,6 +749,14 @@ onUnmounted(() => {
     display: flex; flex-direction: column;
     .main-text { white-space: pre-wrap; }
     .edited-tag { font-size: 11px; opacity: 0.5; margin-top: 2px; align-self: flex-end; }
+
+    // 链接卡片容器
+    .message-links {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
     // 消息标记图标
     .message-markers {
@@ -693,6 +918,17 @@ onUnmounted(() => {
   animation: fadeIn 0.3s var(--dt-ease-out);
 }
 
+// 视频消息样式
+.msg-video {
+  .video-preview {
+    max-width: 320px;
+    max-height: 400px;
+    border-radius: 4px;
+    display: block;
+    cursor: pointer;
+  }
+}
+
 // 语音消息样式
 .msg-voice {
   display: flex;
@@ -767,6 +1003,82 @@ onUnmounted(() => {
 @keyframes voiceWave {
   from { transform: scaleY(0.8); }
   to { transform: scaleY(1.2); }
+}
+
+// 位置消息样式
+.msg-location {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+  max-width: 320px;
+  padding: 12px 16px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s var(--dt-ease-out);
+  animation: fadeIn 0.3s var(--dt-ease-out);
+
+  @include hover-lift;
+
+  &:hover {
+    border-color: var(--dt-brand-color);
+    background: #e0f2fe;
+  }
+
+  .location-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    border-radius: 50%;
+    color: #fff;
+    flex-shrink: 0;
+    transition: transform 0.2s var(--dt-ease-out);
+
+    .material-icons-outlined {
+      font-size: 24px;
+    }
+  }
+
+  &:hover .location-icon {
+    transform: scale(1.05);
+  }
+
+  .location-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .location-address {
+      font-size: 14px;
+      font-weight: 500;
+      color: #0f172a;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .location-coords {
+      font-size: 11px;
+      color: #64748b;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .location-arrow {
+    color: #0ea5e9;
+    flex-shrink: 0;
+
+    .material-icons-outlined {
+      font-size: 18px;
+    }
+  }
 }
 
 :global(.dark) {

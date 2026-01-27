@@ -29,6 +29,18 @@
           </button>
         </el-tooltip>
 
+        <el-tooltip content="视频" placement="top">
+          <button class="toolbar-btn" @click="handleVideoUpload">
+            <span class="material-icons-outlined">videocam</span>
+          </button>
+        </el-tooltip>
+
+        <el-tooltip content="位置" placement="top">
+          <button class="toolbar-btn" @click="handleLocation">
+            <span class="material-icons-outlined">location_on</span>
+          </button>
+        </el-tooltip>
+
         <el-tooltip content="截图" placement="top">
           <button class="toolbar-btn" @click="handleScreenshot">
              <span class="material-icons-outlined">content_cut</span>
@@ -117,6 +129,15 @@
 
     <EmojiPicker v-if="showEmojiPicker" @select="selectEmoji" ref="emojiPickerRef" />
     <AtMemberPicker ref="atMemberPickerRef" :session-id="session?.id" @select="onAtSelect" />
+
+    <!-- 隐藏的视频文件输入 -->
+    <input
+      type="file"
+      ref="videoInputRef"
+      accept="video/mp4,video/webm,video/ogg,video/quicktime"
+      style="display: none"
+      @change="handleVideoFileChange"
+    />
   </div>
 </template>
 
@@ -137,7 +158,7 @@ const props = defineProps({
   editingMessage: Object
 })
 
-const emit = defineEmits(['send', 'send-voice', 'upload-image', 'upload-file', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video'])
+const emit = defineEmits(['send', 'send-voice', 'upload-image', 'upload-file', 'upload-video', 'send-location', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video'])
 
 const store = useStore()
 const { sendMessage: wsSendMessage } = useImWebSocket()
@@ -152,6 +173,7 @@ const sendShortcutHint = computed(() => {
 const showEmojiPicker = ref(false)
 const textareaRef = ref(null)
 const atMemberPickerRef = ref(null)
+const videoInputRef = ref(null)
 const isVoiceMode = ref(false)
 
 // 钉钉风格高度逻辑
@@ -336,6 +358,64 @@ const selectEmoji = (emoji) => {
 }
 
 const handleScreenshot = () => ElMessage.info('正在启用系统截图...')
+
+const handleLocation = () => {
+  // 获取用户位置
+  if (!navigator.geolocation) {
+    ElMessage.error('您的浏览器不支持定位功能')
+    return
+  }
+
+  ElMessage.info('正在获取位置...')
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords
+      emit('send-location', {
+        latitude,
+        longitude,
+        address: '' // 可以通过逆地理编码获取地址
+      })
+    },
+    (error) => {
+      console.error('获取位置失败:', error)
+      ElMessage.error('获取位置失败，请检查定位权限')
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  )
+}
+
+const handleVideoUpload = () => {
+  videoInputRef.value?.click()
+}
+
+const handleVideoFileChange = async () => {
+  const file = videoInputRef.value?.files?.[0]
+  if (!file) return
+
+  // 验证视频类型和大小
+  const validTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime']
+  const maxSize = 100 * 1024 * 1024 // 100MB
+
+  if (!validTypes.some(type => file.type.includes(type))) {
+    ElMessage.error('支持的视频格式：MP4、WebM、OGG')
+    return
+  }
+
+  if (file.size > maxSize) {
+    ElMessage.error('视频大小不能超过100MB')
+    return
+  }
+
+  // 创建视频预览
+  const url = URL.createObjectURL(file)
+  emit('upload-video', { file, url })
+}
+
 const handleAtMember = () => {
   if (props.session?.type === 'GROUP') {
     atMemberPickerRef.value?.open(textareaRef.value.selectionStart || 0)
@@ -380,7 +460,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-@import '@/styles/design-tokens.scss';
+@use '@/styles/design-tokens.scss' as *;
 
 // ============================================================================
 // 容器

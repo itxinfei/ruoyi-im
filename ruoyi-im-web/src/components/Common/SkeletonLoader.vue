@@ -71,7 +71,7 @@ const { isDark } = useTheme()
 </script>
 
 <style scoped lang="scss">
-@import '@/styles/design-tokens.scss';
+@use '@/styles/design-tokens.scss' as *;
 
 // 基础骨架样式
 .skeleton-block-item {

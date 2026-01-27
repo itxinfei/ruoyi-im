@@ -60,6 +60,8 @@
             @start-video="handleStartVideo"
             @upload-image="handleImageUpload"
             @upload-file="handleFileUpload"
+            @upload-video="handleVideoUpload"
+            @send-location="handleSendLocation"
           />
         </div>
 
@@ -1007,6 +1009,121 @@ const handleImageUpload = async (payload) => {
       messages.value[index].status = 'failed'
     }
     ElMessage.error('图片发送失败')
+  }
+}
+
+// 视频上传处理
+const handleVideoUpload = async ({ file, url }) => {
+  // 1. 乐观更新：立即显示视频消息
+  const tempId = `temp-video-${Date.now()}`
+  const tempMsg = {
+    id: tempId,
+    type: 'VIDEO',
+    content: {
+      videoUrl: url, // 使用本地 Blob URL 预览
+      fileName: file.name,
+      size: file.size,
+      duration: 0 // 可以后续获取视频时长
+    },
+    senderId: currentUser.value?.id,
+    senderName: currentUser.value?.nickName || '我',
+    senderAvatar: currentUser.value?.avatar,
+    timestamp: Date.now(),
+    isOwn: true,
+    status: 'uploading',
+    readCount: 0
+  }
+  messages.value.push(tempMsg)
+  msgListRef.value?.scrollToBottom()
+
+  try {
+    // 2. 上传视频文件
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const res = await uploadFile(formData)
+    if (res.code === 200) {
+      // 3. 发送视频消息
+      const msg = await store.dispatch('im/message/sendMessage', {
+        sessionId: props.session.id,
+        type: 'VIDEO',
+        content: JSON.stringify({
+          fileId: res.data.id,
+          videoUrl: res.data.url,
+          fileName: file.name,
+          size: file.size
+        }),
+        replyToMessageId: replyingMessage.value?.id
+      })
+
+      // 4. 更新状态
+      const index = messages.value.findIndex(m => m.id === tempId)
+      if (index !== -1) {
+        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'success' })
+      }
+      // 释放 blob
+      URL.revokeObjectURL(url)
+    } else {
+      throw new Error(res.msg || 'Upload failed')
+    }
+  } catch (error) {
+    const index = messages.value.findIndex(m => m.id === tempId)
+    if (index !== -1) {
+      messages.value[index].status = 'failed'
+    }
+    ElMessage.error('视频发送失败')
+    console.error('视频上传失败', error)
+  }
+}
+
+// 发送位置消息
+const handleSendLocation = async ({ latitude, longitude, address }) => {
+  // 1. 乐观更新：立即显示位置消息
+  const tempId = `temp-location-${Date.now()}`
+  const tempMsg = {
+    id: tempId,
+    type: 'LOCATION',
+    content: {
+      latitude,
+      longitude,
+      address: address || '未知位置'
+    },
+    senderId: currentUser.value?.id,
+    senderName: currentUser.value?.nickName || '我',
+    senderAvatar: currentUser.value?.avatar,
+    timestamp: Date.now(),
+    isOwn: true,
+    status: 'sending',
+    readCount: 0
+  }
+  messages.value.push(tempMsg)
+  msgListRef.value?.scrollToBottom()
+
+  try {
+    // 2. 发送位置消息
+    const msg = await store.dispatch('im/message/sendMessage', {
+      sessionId: props.session.id,
+      type: 'LOCATION',
+      content: JSON.stringify({
+        latitude,
+        longitude,
+        address: address || '未知位置'
+      }),
+      replyToMessageId: replyingMessage.value?.id
+    })
+
+    // 3. 更新状态
+    const index = messages.value.findIndex(m => m.id === tempId)
+    if (index !== -1) {
+      messages.value.splice(index, 1, { ...transformMsg(msg), status: 'success' })
+    }
+  } catch (error) {
+    const index = messages.value.findIndex(m => m.id === tempId)
+    if (index !== -1) {
+      messages.value[index].status = 'failed'
+    }
+    ElMessage.error('位置发送失败')
+    console.error('位置发送失败', error)
   }
 }
 

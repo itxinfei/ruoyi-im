@@ -379,7 +379,7 @@ defineExpose({ scrollToBottom, maintainScroll })
 </script>
 
 <style scoped lang="scss">
-@import '@/styles/design-tokens.scss';
+@use '@/styles/design-tokens.scss' as *;
 
 .message-list {
   flex: 1;
@@ -531,7 +531,7 @@ defineExpose({ scrollToBottom, maintainScroll })
 </style>
 
 <style lang="scss">
-@import '@/styles/design-tokens.scss';
+@use '@/styles/design-tokens.scss' as *;
 
 @keyframes highlight-pulse {
   0% { background-color: transparent; }

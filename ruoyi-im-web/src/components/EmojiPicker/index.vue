@@ -1,6 +1,35 @@
 <template>
-  <div v-if="visible" class="emoji-picker">
-    <div class="emoji-tabs">
+  <div v-if="visible" class="emoji-picker" @click.stop>
+    <!-- 搜索栏 -->
+    <div class="emoji-search">
+      <el-input
+        v-model="searchKeyword"
+        placeholder="搜索表情..."
+        :prefix-icon="Search"
+        size="small"
+        clearable
+        @input="handleSearch"
+      />
+    </div>
+
+    <!-- 最近使用 -->
+    <div v-if="!searchKeyword && recentEmojis.length > 0" class="emoji-section">
+      <div class="section-title">最近使用</div>
+      <div class="emoji-grid compact">
+        <div
+          v-for="emoji in recentEmojis"
+          :key="emoji.char"
+          class="emoji-item"
+          :title="emoji.keywords?.[0] || ''"
+          @click="selectEmoji(emoji.char)"
+        >
+          {{ emoji.char }}
+        </div>
+      </div>
+    </div>
+
+    <!-- 分类标签 -->
+    <div v-if="!searchKeyword" class="emoji-tabs">
       <div
         v-for="tab in tabs"
         :key="tab.type"
@@ -12,21 +41,38 @@
       </div>
     </div>
 
-    <div class="emoji-grid">
+    <!-- 表情网格 -->
+    <div class="emoji-grid" :class="{ 'full-height': searchKeyword || !recentEmojis.length }">
       <div
         v-for="emoji in currentEmojis"
         :key="emoji.char"
         class="emoji-item"
+        :title="emoji.keywords?.[0] || ''"
         @click="selectEmoji(emoji.char)"
       >
         {{ emoji.char }}
       </div>
+
+      <!-- 无搜索结果 -->
+      <div v-if="currentEmojis.length === 0" class="no-results">
+        <span class="material-icons-outlined">search_off</span>
+        <span>未找到相关表情</span>
+      </div>
+    </div>
+
+    <!-- 删除按钮（当有选中表情时显示） -->
+    <div v-if="false" class="emoji-delete">
+      <el-button circle size="small" @click="handleDelete">
+        <el-icon><Delete /></el-icon>
+      </el-button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { Search, Delete } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   visible: {
@@ -38,11 +84,68 @@ const props = defineProps({
 const emit = defineEmits(['select'])
 
 const activeTab = ref('smile')
+const searchKeyword = ref('')
+
+// 本地存储的最近表情
+const STORAGE_KEY = 'im_recent_emojis'
+const MAX_RECENT = 20
+
+const recentEmojis = ref([])
+
+// 从本地存储加载最近表情
+const loadRecentEmojis = () => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      recentEmojis.value = parsed || []
+    }
+  } catch (e) {
+    console.error('加载最近表情失败', e)
+  }
+}
+
+// 保存最近表情到本地存储
+const saveRecentEmojis = (emojis) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(emojis))
+  } catch (e) {
+    console.error('保存最近表情失败', e)
+  }
+}
+
+// 添加表情到最近使用
+const addToRecent = (char) => {
+  const emojiData = getAllEmojis()
+  const emoji = emojiData.find(e => e.char === char)
+
+  if (!emoji) return
+
+  // 移除已存在的
+  recentEmojis.value = recentEmojis.value.filter(e => e.char !== char)
+
+  // 添加到开头
+  recentEmojis.value.unshift(emoji)
+
+  // 限制数量
+  if (recentEmojis.value.length > MAX_RECENT) {
+    recentEmojis.value = recentEmojis.value.slice(0, MAX_RECENT)
+  }
+
+  saveRecentEmojis(recentEmojis.value)
+}
+
+// 获取所有表情数据
+const getAllEmojis = () => {
+  const all = []
+  Object.values(emojiData).forEach(arr => all.push(...arr))
+  return all
+}
 
 // 表情分类标签
 const tabs = [
   { type: 'smile', label: '😀' },
-  { type: 'hand', label: '👍' },
+  { type: 'hand', label: '👋' },
   { type: 'animal', label: '🐶' },
   { type: 'food', label: '🍎' },
   { type: 'activity', label: '⚽' },
@@ -52,7 +155,7 @@ const tabs = [
 // 表情数据
 const emojiData = {
   smile: [
-    { char: '😀', keywords: ['开心', '笑脸'] },
+    { char: '😀', keywords: ['开心', '笑脸', '哈哈'] },
     { char: '😄', keywords: ['笑', '快乐'] },
     { char: '😁', keywords: ['咧嘴笑'] },
     { char: '😆', keywords: ['大笑'] },
@@ -65,7 +168,7 @@ const emojiData = {
     { char: '😊', keywords: ['开心', '幸福'] },
     { char: '😇', keywords: ['天使'] },
     { char: '🥰', keywords: ['爱心眼'] },
-    { char: '😍', keywords: ['爱'] },
+    { char: '😍', keywords: ['爱', '喜欢'] },
     { char: '🤩', keywords: ['星星眼'] },
     { char: '😘', keywords: ['亲亲'] },
     { char: '😗', keywords: ['吻'] },
@@ -76,7 +179,7 @@ const emojiData = {
     { char: '😜', keywords: ['调皮'] },
     { char: '🤪', keywords: ['搞怪'] },
     { char: '😝', keywords: ['吐舌头'] },
-    { char: '🤑', keywords: ['钱'] },
+    { char: '🤑', keywords: ['钱', '发财'] },
     { char: '🤗', keywords: ['拥抱'] },
     { char: '🤭', keywords: ['偷笑'] },
     { char: '🤫', keywords: ['嘘'] },
@@ -110,7 +213,7 @@ const emojiData = {
     { char: '🤠', keywords: ['牛仔'] },
     { char: '🥳', keywords: ['派对'] },
     { char: '🥸', keywords: ['眼镜'] },
-    { char: '😎', keywords: ['墨镜'] },
+    { char: '😎', keywords: ['墨镜', '酷'] },
     { char: '🤓', keywords: ['书呆子'] },
     { char: '🧐', keywords: ['单片眼镜'] },
     { char: '😕', keywords: ['困惑'] },
@@ -162,18 +265,18 @@ const emojiData = {
     { char: '🙀', keywords: ['恐惧猫'] },
     { char: '😿', keywords: ['哭猫'] },
     { char: '😾', keywords: ['生气猫'] },
-    { char: '🙈', keywords: ['不看'] },
-    { char: '🙉', keywords: ['不听'] },
-    { char: '🙊', keywords: ['不说'] },
-    { char: '👋', keywords: ['挥手'] },
+    { char: '🙈', keywords: ['不看', '非礼勿视'] },
+    { char: '🙉', keywords: ['不听', '非礼勿听'] },
+    { char: '🙊', keywords: ['不说', '非礼勿言'] },
+    { char: '👋', keywords: ['挥手', '再见'] },
     { char: '🤚', keywords: ['举手'] },
     { char: '🖐️', keywords: ['手掌'] },
     { char: '✋', keywords: ['手掌'] },
     { char: '🖖', keywords: ['瓦肯举手礼'] },
-    { char: '👌', keywords: ['OK'] },
+    { char: '👌', keywords: ['OK', '好的'] },
     { char: '🤌', keywords: ['捏手指'] },
     { char: '🤏', keywords: ['捏手指'] },
-    { char: '✌️', keywords: ['V字'] },
+    { char: '✌️', keywords: ['V字', '胜利'] },
     { char: '🤞', keywords: ['交叉手指'] },
     { char: '🤟', keywords: ['爱意手势'] },
     { char: '🤘', keywords: ['摇滚'] },
@@ -184,8 +287,8 @@ const emojiData = {
     { char: '🖕', keywords: ['中指'] },
     { char: '👇', keywords: ['下指'] },
     { char: '☝️', keywords: ['上指'] },
-    { char: '👍', keywords: ['赞'] },
-    { char: '👎', keywords: ['踩'] },
+    { char: '👍', keywords: ['赞', '棒', '点赞'] },
+    { char: '👎', keywords: ['踩', '差'] },
     { char: '✊', keywords: ['握拳'] },
     { char: '👊', keywords: ['出拳'] },
     { char: '🤛', keywords: ['左拳头碰'] },
@@ -219,7 +322,7 @@ const emojiData = {
     { char: '🖕', keywords: ['中指'] },
     { char: '👇', keywords: ['下指'] },
     { char: '☝️', keywords: ['上指'] },
-    { char: '👍', keywords: ['赞'] },
+    { char: '👍', keywords: ['赞', '点赞'] },
     { char: '👎', keywords: ['踩'] },
     { char: '👏', keywords: ['鼓掌'] },
     { char: '🙌', keywords: ['举手'] },
@@ -230,25 +333,18 @@ const emojiData = {
     { char: '✍️', keywords: ['写字'] },
     { char: '💅', keywords: ['美甲'] },
     { char: '🤳', keywords: ['自拍'] },
-    { char: '💪', keywords: ['肌肉'] },
+    { char: '💪', keywords: ['肌肉', '强'] },
     { char: '🦾', keywords: ['机械臂'] },
     { char: '🦿', keywords: ['机械腿'] },
     { char: '🦵', keywords: ['腿'] },
     { char: '🦶', keywords: ['脚'] },
     { char: '👂', keywords: ['耳朵'] },
     { char: '🦻', keywords: ['助听器'] },
-    { char: '👃', keywords: ['鼻子'] },
-    { char: '🧠', keywords: ['大脑'] },
-    { char: '🦷', keywords: ['牙齿'] },
-    { char: '🦴', keywords: ['骨头'] },
-    { char: '👀', keywords: ['眼睛'] },
-    { char: '👁️', keywords: ['眼睛'] },
-    { char: '👅', keywords: ['舌头'] },
-    { char: '👄', keywords: ['嘴'] }
+    { char: '👃', keywords: ['鼻子'] }
   ],
   animal: [
-    { char: '🐶', keywords: ['狗'] },
-    { char: '🐱', keywords: ['猫'] },
+    { char: '🐶', keywords: ['狗', '汪汪'] },
+    { char: '🐱', keywords: ['猫', '喵'] },
     { char: '🐭', keywords: ['老鼠'] },
     { char: '🐹', keywords: ['仓鼠'] },
     { char: '🐰', keywords: ['兔子'] },
@@ -303,7 +399,7 @@ const emojiData = {
     { char: '🌾', keywords: ['稻谷'] },
     { char: '🌿', keywords: ['草'] },
     { char: '☘️', keywords: ['三叶草'] },
-    { char: '🍀', keywords: ['四叶草'] }
+    { char: '🍀', keywords: ['四叶草', '幸运'] }
   ],
   food: [
     { char: '🍎', keywords: ['苹果'] },
@@ -414,13 +510,7 @@ const emojiData = {
     { char: '🥃', keywords: ['威士忌'] },
     { char: '🍸', keywords: ['鸡尾酒'] },
     { char: '🍹', keywords: ['热带饮料'] },
-    { char: '🧊', keywords: ['冰块'] },
-    { char: '🥢', keywords: ['筷子'] },
-    { char: '🍽️', keywords: ['餐具'] },
-    { char: '🍴', keywords: ['刀叉'] },
-    { char: '🥄', keywords: ['勺子'] },
-    { char: '🔪', keywords: ['刀'] },
-    { char: '🏺', keywords: ['陶罐'] }
+    { char: '🧊', keywords: ['冰块'] }
   ],
   activity: [
     { char: '⚽', keywords: ['足球'] },
@@ -440,7 +530,6 @@ const emojiData = {
     { char: '🏑', keywords: ['曲棍球'] },
     { char: '🥍', keywords: ['长曲棍球'] },
     { char: '🏏', keywords: ['板球'] },
-    { char: '🥅', keywords: ['球门'] },
     { char: '⛳', keywords: ['高尔夫'] },
     { char: '🪁', keywords: ['风筝'] },
     { char: '🏹', keywords: ['射箭'] },
@@ -479,7 +568,6 @@ const emojiData = {
     { char: '🥉', keywords: ['铜牌'] },
     { char: '🏅', keywords: ['奖牌'] },
     { char: '🎖️', keywords: ['勋章'] },
-    { char: '🏵️', keywords: ['玫瑰'] },
     { char: '🎗️', keywords: ['丝带'] },
     { char: '🎫', keywords: ['票'] },
     { char: '🎟️', keywords: ['票'] },
@@ -489,7 +577,7 @@ const emojiData = {
     { char: '🩰', keywords: ['舞鞋'] },
     { char: '🎨', keywords: ['艺术'] },
     { char: '🎬', keywords: ['电影'] },
-    { char: '🎤', keywords: ['麦克风'] },
+    { char: '🎤', keywords: ['麦克风', '唱歌'] },
     { char: '🎧', keywords: ['耳机'] },
     { char: '🎼', keywords: ['乐谱'] },
     { char: '🎹', keywords: ['钢琴'] },
@@ -502,23 +590,10 @@ const emojiData = {
     { char: '🪈', keywords: ['长笛'] },
     { char: '🎮', keywords: ['游戏'] },
     { char: '🎰', keywords: ['老虎机'] },
-    { char: '🎲', keywords: ['骰子'] },
-    { char: '🧩', keywords: ['拼图'] },
-    { char: '🧸', keywords: ['泰迪熊'] },
-    { char: '♠️', keywords: ['黑桃'] },
-    { char: '♥️', keywords: ['红心'] },
-    { char: '♦️', keywords: ['方块'] },
-    { char: '♣️', keywords: ['梅花'] },
-    { char: '♟️', keywords: ['棋子'] },
-    { char: '🃏', keywords: ['小丑牌'] },
-    { char: '🀄', keywords: ['麻将'] },
-    { char: '🎴', keywords: ['花札'] },
-    { char: '🎯', keywords: ['靶心'] },
-    { char: '🎳', keywords: ['保龄球'] },
-    { char: '🎱', keywords: ['台球'] }
+    { char: '🎲', keywords: ['骰子'] }
   ],
   object: [
-    { char: '❤️', keywords: ['爱心'] },
+    { char: '❤️', keywords: ['爱心', '爱'] },
     { char: '🧡', keywords: ['橙色爱心'] },
     { char: '💛', keywords: ['黄色爱心'] },
     { char: '💚', keywords: ['绿色爱心'] },
@@ -527,7 +602,7 @@ const emojiData = {
     { char: '🖤', keywords: ['黑色爱心'] },
     { char: '🤍', keywords: ['白色爱心'] },
     { char: '🤎', keywords: ['棕色爱心'] },
-    { char: '💔', keywords: ['碎心'] },
+    { char: '💔', keywords: ['碎心', '分手'] },
     { char: '❣️', keywords: ['感叹心'] },
     { char: '💕', keywords: ['双心'] },
     { char: '💞', keywords: ['爱心圈'] },
@@ -537,172 +612,126 @@ const emojiData = {
     { char: '💘', keywords: ['心箭'] },
     { char: '💝', keywords: ['礼物心'] },
     { char: '💟', keywords: ['爱心'] },
-    { char: '☮️', keywords: ['和平'] },
-    { char: '✝️', keywords: ['十字架'] },
-    { char: '☪️', keywords: ['星月'] },
-    { char: '🕉️', keywords: ['唵'] },
-    { char: '☸️', keywords: ['法轮'] },
-    { char: '✡️', keywords: ['六芒星'] },
-    { char: '🔯', keywords: ['大卫之星'] },
-    { char: '🕎', keywords: ['烛台'] },
-    { char: '☯️', keywords: ['阴阳'] },
-    { char: '☦️', keywords: ['东正教'] },
-    { char: '🛐', keywords: ['祈祷'] },
-    { char: '⛎', keywords: ['星座'] },
-    { char: '♈', keywords: ['白羊座'] },
-    { char: '♉', keywords: ['金牛座'] },
-    { char: '♊', keywords: ['双子座'] },
-    { char: '♋', keywords: ['巨蟹座'] },
-    { char: '♌', keywords: ['狮子座'] },
-    { char: '♍', keywords: ['处女座'] },
-    { char: '♎', keywords: ['天秤座'] },
-    { char: '♏', keywords: ['天蝎座'] },
-    { char: '♐', keywords: ['射手座'] },
-    { char: '♑', keywords: ['摩羯座'] },
-    { char: '♒', keywords: ['水瓶座'] },
-    { char: '♓', keywords: ['双鱼座'] },
-    { char: '🆔', keywords: ['ID'] },
-    { char: '⚛️', keywords: ['原子'] },
-    { char: '🉑', keywords: ['可'] },
-    { char: '☢️', keywords: ['辐射'] },
-    { char: '☣️', keywords: ['生物危害'] },
-    { char: '📴', keywords: ['手机关闭'] },
-    { char: '📳', keywords: ['手机震动'] },
-    { char: '🈶', keywords: ['有'] },
-    { char: '🈚', keywords: ['无'] },
-    { char: '🈸', keywords: ['申请'] },
-    { char: '🈺', keywords: ['营业'] },
-    { char: '🈷️', keywords: ['月'] },
-    { char: '🈶', keywords: ['有'] },
-    { char: '✴️', keywords: ['光芒'] },
-    { char: '❇️', keywords: ['火花'] },
-    { char: '❎', keywords: ['X'] },
-    { char: '✳️', keywords: ['八芒星'] },
-    { char: '❌', keywords: ['X'] },
-    { char: '❎', keywords: ['X'] },
-    { char: '➕', keywords: ['加号'] },
-    { char: '➖', keywords: ['减号'] },
-    { char: '➗', keywords: ['除号'] },
-    { char: '➰', keywords: ['丝带'] },
-    { char: '➿', keywords: ['丝带'] },
-    { char: '〽️', keywords: ['波浪'] },
-    { char: '✳️', keywords: ['八芒星'] },
-    { char: '✴️', keywords: ['光芒'] },
-    { char: '❇️', keywords: ['火花'] },
-    { char: '‼️', keywords: ['双感叹号'] },
-    { char: '⁉️', keywords: ['感叹问号'] },
-    { char: '❓', keywords: ['问号'] },
-    { char: '❔', keywords: ['白问号'] },
-    { char: '❕', keywords: ['白感叹号'] },
-    { char: '❗', keywords: ['感叹号'] },
-    { char: '〰️', keywords: ['波浪'] },
-    { char: '©️', keywords: ['版权'] },
-    { char: '®️', keywords: ['注册'] },
-    { char: '™️', keywords: ['商标'] },
-    { char: '#️⃣', keywords: ['井号'] },
-    { char: '*️⃣', keywords: ['星号'] },
-    { char: '0️⃣', keywords: ['0'] },
-    { char: '1️⃣', keywords: ['1'] },
-    { char: '2️⃣', keywords: ['2'] },
-    { char: '3️⃣', keywords: ['3'] },
-    { char: '4️⃣', keywords: ['4'] },
-    { char: '5️⃣', keywords: ['5'] },
-    { char: '6️⃣', keywords: ['6'] },
-    { char: '7️⃣', keywords: ['7'] },
-    { char: '8️⃣', keywords: ['8'] },
-    { char: '9️⃣', keywords: ['9'] },
-    { char: '🔟', keywords: ['10'] },
-    { char: '🔠', keywords: ['ABCD'] },
-    { char: '🔡', keywords: ['abcd'] },
-    { char: '🔢', keywords: ['123'] },
-    { char: '🔣', keywords: ['符号'] },
-    { char: '🔤', keywords: ['ABCD'] },
-    { char: '🅰️', keywords: ['A'] },
-    { char: '🆎', keywords: ['AB'] },
-    { char: '🅱️', keywords: ['B'] },
-    { char: '🆑', keywords: ['CL'] },
-    { char: '🆒', keywords: ['COOL'] },
-    { char: '🆓', keywords: ['FREE'] },
-    { char: 'ℹ️', keywords: ['INFO'] },
-    { char: '🆔', keywords: ['ID'] },
-    { char: 'Ⓜ️', keywords: ['M'] },
-    { char: '🆕', keywords: ['NEW'] },
-    { char: '🆖', keywords: ['NG'] },
-    { char: '🅾️', keywords: ['O'] },
-    { char: '🆗', keywords: ['OK'] },
-    { char: '🅿️', keywords: ['P'] },
-    { char: '🆘', keywords: ['SOS'] },
-    { char: '🆔', keywords: ['ID'] },
-    { char: '🆙', keywords: ['UP'] },
-    { char: '🆚', keywords: ['VS'] },
-    { char: '🈁', keywords: ['这里'] },
-    { char: '🈂️', keywords: ['服务'] },
-    { char: '🔴', keywords: ['红圈'] },
-    { char: '🟠', keywords: ['橙圈'] },
-    { char: '🟡', keywords: ['黄圈'] },
-    { char: '🟢', keywords: ['绿圈'] },
-    { char: '🔵', keywords: ['蓝圈'] },
-    { char: '🟣', keywords: ['紫圈'] },
-    { char: '🟤', keywords: ['棕圈'] },
-    { char: '⚫', keywords: ['黑圈'] },
-    { char: '⚪', keywords: ['白圈'] },
-    { char: '🟥', keywords: ['红方块'] },
-    { char: '🟧', keywords: ['橙方块'] },
-    { char: '🟨', keywords: ['黄方块'] },
-    { char: '🟩', keywords: ['绿方块'] },
-    { char: '🟦', keywords: ['蓝方块'] },
-    { char: '🟪', keywords: ['紫方块'] },
-    { char: '🟫', keywords: ['棕方块'] },
-    { char: '⬛', keywords: ['黑方块'] },
-    { char: '⬜', keywords: ['白方块'] },
-    { char: '◼️', keywords: ['黑方块'] },
-    { char: '◻️', keywords: ['白方块'] },
-    { char: '◾', keywords: ['黑方块'] },
-    { char: '◽', keywords: ['白方块'] },
-    { char: '▪️', keywords: ['黑小方块'] },
-    { char: '▫️', keywords: ['白小方块'] },
-    { char: '🔶', keywords: ['大橙菱形'] },
-    { char: '🔷', keywords: ['大蓝菱形'] },
-    { char: '🔸', keywords: ['小橙菱形'] },
-    { char: '🔹', keywords: ['小蓝菱形'] },
-    { char: '🔺', keywords: ['红三角'] },
-    { char: '🔻', keywords: ['倒红三角'] },
-    { char: '💠', keywords: ['菱形'] },
-    { char: '🔘', keywords: ['按钮'] },
-    { char: '🔳', keywords: ['白按钮'] },
-    { char: '🔲', keywords: ['黑按钮'] }
+    { char: '💯', keywords: ['满分', '100分'] },
+    { char: '💢', keywords: ['感叹'] },
+    { char: '💥', keywords: ['爆炸'] },
+    { char: '💫', keywords: ['闪耀'] },
+    { char: '💦', keywords: ['水滴'] },
+    { char: '💨', keywords: ['烟雾'] },
+    { char: '🕳️', keywords: ['洞'] },
+    { char: '💣', keywords: ['炸弹'] },
+    { char: '💬', keywords: ['对话'] },
+    { char: '🗨️', keywords: ['对话'] },
+    { char: '🗯', keywords: ['说话'] },
+    { char: '💭', keywords: ['思考'] },
+    { char: '💤', keywords: ['睡眠'] },
+    { char: '👁️', keywords: ['眼睛'] },
+    { char: '👂', keywords: ['耳朵'] },
+    { char: '👃', keywords: ['鼻子'] },
+    { char: '🧠', keywords: ['大脑'] },
+    { char: '🦷', keywords: ['牙齿'] },
+    { char: '🦴', keywords: ['骨头'] },
+    { char: '👀', keywords: ['眼睛'] },
+    { char: '👄', keywords: ['手'] },
+    { char: '🗣️', keywords: ['嘴'] },
+    { char: '👤', keywords: ['人'] },
+    { char: '👥', keywords: ['人'] },
+    { char: '🐵', keywords: ['猴子'] },
+    { char: '🐶', keywords: ['狗'] },
+    { char: '🐱', keywords: ['猫'] },
+    { char: '🐭', keywords: ['老鼠'] },
+    { char: '🐹', keywords: ['仓鼠'] },
+    { char: '🐰', keywords: ['兔子'] },
+    { char: '🦊', keywords: ['狐狸'] },
+    { char: '🐻', keywords: ['熊'] },
+    { char: '🐼', keywords: ['熊猫'] },
+    { char: '🐯', keywords: ['老虎'] },
+    { char: '🦁', keywords: ['狮子'] },
+    { char: '💔', keywords: ['心碎'] }
   ]
 }
 
 // 当前标签的表情
 const currentEmojis = computed(() => {
+  if (searchKeyword.value) {
+    // 搜索模式：搜索所有表情
+    const keyword = searchKeyword.value.toLowerCase().trim()
+    if (!keyword) return emojiData.smile
+
+    const allEmojis = getAllEmojis()
+    return allEmojis.filter(emoji => {
+      const char = emoji.char
+      const keywords = emoji.keywords || []
+      return char.includes(keyword) || keywords.some(k => k.includes(keyword))
+    })
+  }
   return emojiData[activeTab.value] || []
 })
 
 // 选择表情
 const selectEmoji = (char) => {
+  addToRecent(char)
   emit('select', char)
 }
+
+// 搜索处理
+const handleSearch = () => {
+  // 搜索逻辑由 computed 自动处理
+}
+
+// 初始化
+onMounted(() => {
+  loadRecentEmojis()
+})
+
+// 监听显示状态，重置搜索
+watch(() => props.visible, (val) => {
+  if (!val) {
+    searchKeyword.value = ''
+    activeTab.value = 'smile'
+  }
+})
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 .emoji-picker {
-  width: 320px;
+  width: 360px;
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: 12px;
   box-shadow: var(--dt-shadow-lg);
   overflow: hidden;
   position: absolute;
-  bottom: 100%;
+  bottom: calc(100% + 8px);
   left: 0;
-  margin-bottom: 10px;
   z-index: var(--dt-z-dropdown);
-  animation: slideUp 0.2s ease-out;
+  animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .emoji-search {
+    padding: 12px 12px 8px;
+    background: var(--dt-bg-body);
+    border-bottom: 1px solid var(--dt-border-light);
+  }
+
+  .emoji-section {
+    .section-title {
+      font-size: 12px;
+      color: var(--dt-text-tertiary);
+      padding: 8px 12px 4px;
+    }
   }
 
   .emoji-tabs {
@@ -724,12 +753,12 @@ const selectEmoji = (char) => {
       justify-content: center;
 
       &:hover {
-        background: rgba(0, 0, 0, 0.05);
+        background: rgba(0, 0, 0, 0.04);
       }
 
       &.active {
         background: #fff;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
         color: var(--dt-brand-color);
       }
     }
@@ -741,10 +770,33 @@ const selectEmoji = (char) => {
     padding: 12px;
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    gap: 8px;
-    
-    &::-webkit-scrollbar { width: 4px; }
-    &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    gap: 6px;
+
+    &.full-height {
+      height: 300px;
+    }
+
+    &.compact {
+      height: 80px;
+      grid-template-columns: repeat(10, 1fr);
+    }
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.2);
+      }
+    }
 
     .emoji-item {
       aspect-ratio: 1;
@@ -753,27 +805,70 @@ const selectEmoji = (char) => {
       justify-content: center;
       font-size: 22px;
       cursor: pointer;
-      border-radius: 8px;
-      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 6px;
+      transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
 
       &:hover {
-        background: var(--dt-bg-session-hover);
-        transform: scale(1.25);
+        background: var(--dt-bg-hover);
+        transform: scale(1.2);
         z-index: 10;
       }
-      
+
       &:active {
-        transform: scale(0.9);
+        transform: scale(0.95);
       }
+    }
+  }
+
+  .no-results {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--dt-text-quaternary);
+    height: 100%;
+    font-size: 13px;
+
+    .material-icons-outlined {
+      font-size: 32px;
+      opacity: 0.5;
     }
   }
 }
 
+// 暗色模式
 .dark .emoji-picker {
   .emoji-tabs {
-    background-color: #1e293b;
-    .emoji-tab.active { background-color: #334155; }
+    background-color: var(--dt-bg-hover-dark);
+
+    .emoji-tab {
+      &.active {
+        background: var(--dt-bg-selected-dark);
+        color: var(--dt-brand-color);
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
+    }
+  }
+
+  .emoji-grid .emoji-item {
+    &:hover {
+      background: var(--dt-bg-hover-dark);
+    }
+  }
+
+  .emoji-search {
+    background: var(--dt-bg-hover-dark);
+    border-color: var(--dt-border-dark);
+  }
+
+  .section-title {
+    color: var(--dt-text-tertiary-dark);
   }
 }
 </style>

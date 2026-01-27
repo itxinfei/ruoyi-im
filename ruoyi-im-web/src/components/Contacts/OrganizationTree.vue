@@ -125,7 +125,7 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-@import '@/styles/design-tokens.scss';
+@use '@/styles/design-tokens.scss' as *;
 
 .org-tree-container {
   display: flex;

@@ -2,75 +2,89 @@
   <el-dialog
     v-model="visible"
     :width="dialogWidth"
-    :class="['user-profile-dialog', { 'is-mobile': isMobile }]"
+    class="user-profile-dialog"
     :show-close="false"
     destroy-on-close
     append-to-body
   >
     <div v-if="loading" v-loading="loading" class="loading-state"></div>
     <div v-else-if="userDetail" class="profile-container">
-      <!-- 顶部封面与关闭按钮 -->
-      <div class="profile-cover">
-        <el-button class="close-btn" circle @click="handleClose">
-          <el-icon><Close /></el-icon>
-        </el-button>
-      </div>
+      <!-- 关闭按钮 -->
+      <button class="close-btn" @click="handleClose">
+        <span class="material-icons-outlined">close</span>
+      </button>
 
-      <!-- 用户核心信息 -->
+      <!-- 用户信息 -->
       <div class="profile-header">
-        <div class="avatar-wrapper">
-          <el-avatar :size="80" :src="addTokenToUrl(userDetail.avatar)" class="user-avatar">
-            {{ userDetail.nickname?.charAt(0) || userDetail.username?.charAt(0) }}
-          </el-avatar>
-          <div v-if="userDetail.online" class="online-status"></div>
+        <div class="avatar-section">
+          <DingtalkAvatar
+            :name="userDetail.nickname || userDetail.username"
+            :user-id="userDetail.id"
+            :size="80"
+            :src="userDetail.avatar"
+          />
+          <div v-if="userDetail.online" class="online-badge" title="在线"></div>
         </div>
-        
-        <div class="user-main">
-          <div class="name-row">
-            <h2 class="nickname">{{ userDetail.nickname || userDetail.username }}</h2>
-            <el-icon v-if="userDetail.gender === 1" class="gender-icon male"><Male /></el-icon>
-            <el-icon v-else-if="userDetail.gender === 2" class="gender-icon female"><Female /></el-icon>
-          </div>
-          <p class="account">账号：{{ userDetail.username }}</p>
-        </div>
+        <h2 class="user-name">{{ userDetail.nickname || userDetail.username }}</h2>
+        <p class="user-account">{{ userDetail.username }}</p>
       </div>
 
-      <!-- 详细资料项 -->
+      <!-- 详细信息 -->
       <div class="profile-details">
-        <div class="detail-item">
-          <span class="label">职位</span>
-          <span class="value">{{ userDetail.position || '成员' }}</span>
+        <div class="detail-section">
+          <h4 class="section-title">基本信息</h4>
+          <div class="detail-list">
+            <div class="detail-row">
+              <span class="detail-label">职位</span>
+              <span class="detail-value">{{ userDetail.position || '成员' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">部门</span>
+              <span class="detail-value">{{ userDetail.departmentName || userDetail.department || '未分配' }}</span>
+            </div>
+          </div>
         </div>
-        <div class="detail-item">
-          <span class="label">部门</span>
-          <span class="value">{{ userDetail.departmentName || userDetail.department || '未分配' }}</span>
+
+        <div v-if="userDetail.mobile || userDetail.email" class="detail-section">
+          <h4 class="section-title">联系方式</h4>
+          <div class="detail-list">
+            <div v-if="userDetail.mobile" class="detail-row">
+              <span class="detail-label">手机</span>
+              <span class="detail-value">{{ userDetail.mobile }}</span>
+            </div>
+            <div v-if="userDetail.email" class="detail-row">
+              <span class="detail-label">邮箱</span>
+              <span class="detail-value">{{ userDetail.email }}</span>
+            </div>
+          </div>
         </div>
-        <div v-if="userDetail.mobile" class="detail-item">
-          <span class="label">手机</span>
-          <span class="value">{{ userDetail.mobile }}</span>
-        </div>
-        <div v-if="userDetail.email" class="detail-item">
-          <span class="label">邮箱</span>
-          <span class="value">{{ userDetail.email }}</span>
-        </div>
-        <div v-if="userDetail.signature" class="detail-item signature">
-          <span class="label">签名</span>
-          <span class="value">{{ userDetail.signature }}</span>
+
+        <div v-if="userDetail.signature" class="detail-section">
+          <h4 class="section-title">个人签名</h4>
+          <div class="signature-text">{{ userDetail.signature }}</div>
         </div>
       </div>
 
-      <!-- 底部操作栏 -->
-      <div class="profile-actions">
-        <el-button type="primary" class="action-btn" @click="handleStartChat">
-          <el-icon><ChatDotRound /></el-icon>
-          <span>发消息</span>
+      <!-- 底部操作 -->
+      <div class="profile-footer">
+        <el-button type="primary" class="chat-btn" @click="handleStartChat">
+          <span class="material-icons-outlined">chat</span>
+          发消息
         </el-button>
-        <el-button class="action-btn" @click="handleStartCall">
-          <el-icon><Phone /></el-icon>
+        <el-button class="call-btn" @click="handleStartCall">
+          <span class="material-icons-outlined">phone</span>
         </el-button>
-        <el-button class="action-btn" @click="handleMore">
-          <el-icon><MoreFilled /></el-icon>
-        </el-button>
+        <el-dropdown trigger="click" @command="handleMoreAction">
+          <el-button class="more-btn">
+            <span class="material-icons-outlined">more_horiz</span>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="add-friend">添加为好友</el-dropdown-item>
+              <el-dropdown-item command="copy-userid">复制用户ID</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </div>
   </el-dialog>
@@ -78,12 +92,11 @@
 
 <script setup>
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
-import { Close, Male, Female, ChatDotRound, Phone, MoreFilled } from '@element-plus/icons-vue'
-import { getUserInfo } from '@/api/im/user'
-import { createConversation } from '@/api/im/conversation'
-import { addTokenToUrl } from '@/utils/file'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
+import { getUserInfo } from '@/api/im/user'
+import { createConversation } from '@/api/im/conversation'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -97,33 +110,19 @@ const visible = ref(false)
 const loading = ref(false)
 const userDetail = ref(null)
 
-// 响应式窗口宽度
 const windowWidth = ref(window.innerWidth)
-
-// 响应式计算属性
 const isMobile = computed(() => windowWidth.value < 480)
 const dialogWidth = computed(() => {
   if (windowWidth.value < 480) return '100%'
-  if (windowWidth.value < 768) return '90%'
+  if (windowWidth.value < 768) return '360px'
   return '400px'
 })
 
-// 窗口大小变化监听
-const handleResize = () => {
-  windowWidth.value = window.innerWidth
-}
+const handleResize = () => windowWidth.value = window.innerWidth
+onMounted(() => window.addEventListener('resize', handleResize))
+onUnmounted(() => window.removeEventListener('resize', handleResize))
 
-onMounted(() => {
-  window.addEventListener('resize', handleResize)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-})
-
-const handleClose = () => {
-  emit('update:modelValue', false)
-}
+const handleClose = () => emit('update:modelValue', false)
 
 const loadUserDetail = async () => {
   if (!props.userId) return
@@ -160,49 +159,40 @@ const handleStartCall = () => {
   ElMessage.info('语音通话功能开发中...')
 }
 
-const handleMore = () => {
-  // 更多操作逻辑
+const handleMoreAction = (command) => {
+  switch (command) {
+    case 'add-friend':
+      ElMessage.info('添加好友功能开发中...')
+      break
+    case 'copy-userid':
+      navigator.clipboard.writeText(String(props.userId))
+      ElMessage.success('用户ID已复制')
+      break
+  }
 }
 
 watch(() => props.modelValue, (val) => {
   visible.value = val
-  if (val && props.userId) {
-    loadUserDetail()
-  }
+  if (val && props.userId) loadUserDetail()
 })
 
 watch(visible, (val) => {
-  if (!val) {
-    emit('update:modelValue', false)
-  }
+  if (!val) emit('update:modelValue', false)
 })
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 .user-profile-dialog {
+  :deep(.el-dialog) {
+    border-radius: 12px;
+  }
   :deep(.el-dialog__header) {
     display: none;
   }
-
   :deep(.el-dialog__body) {
     padding: 0;
-    overflow: hidden;
-  }
-
-  :deep(.el-dialog) {
-    border-radius: 16px;
-  }
-
-  // 移动端全屏
-  &.is-mobile {
-    :deep(.el-dialog) {
-      border-radius: 0;
-      margin: 0;
-    }
-
-    :deep(.el-dialog__body) {
-      max-height: 100vh;
-    }
   }
 }
 
@@ -214,239 +204,237 @@ watch(visible, (val) => {
 }
 
 .profile-container {
-  background: #fff;
+  position: relative;
+  background: var(--dt-bg-card);
   max-height: 80vh;
   overflow-y: auto;
 
   .dark & {
-    background: #1e293b;
+    background: var(--dt-bg-card-dark);
+  }
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--dt-border-color);
+    border-radius: 3px;
   }
 }
 
-.profile-cover {
-  height: 120px;
-  background: linear-gradient(135deg, #1677ff 0%, #00d2ff 100%);
-  position: relative;
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--dt-text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
 
-  .close-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(0, 0, 0, 0.2);
-    border: none;
-    color: #fff;
-    transition: all 0.2s;
+  .material-icons-outlined {
+    font-size: 20px;
+  }
 
-    &:hover {
-      background: rgba(0, 0, 0, 0.4);
-    }
+  &:hover {
+    background: var(--dt-bg-hover);
+    color: var(--dt-text-primary);
   }
 }
 
+// ============================================================================
+// 头部区域
+// ============================================================================
 .profile-header {
-  padding: 0 24px;
-  margin-top: -40px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 24px;
+  padding: 32px 24px 20px;
+  text-align: center;
+}
+
+.avatar-section {
   position: relative;
-  z-index: 10;
+  margin-bottom: 16px;
 
-  .avatar-wrapper {
-    position: relative;
-    margin-bottom: 12px;
-
-    .user-avatar {
-      border: 4px solid #fff;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      background: #f0f2f5;
-      font-size: 28px;
-
-      .dark & {
-        border-color: #1e293b;
-      }
-    }
-
-    .online-status {
-      position: absolute;
-      right: 4px;
-      bottom: 4px;
-      width: 16px;
-      height: 16px;
-      background: #52c41a;
-      border: 3px solid #fff;
-      border-radius: 50%;
-
-      .dark & {
-        border-color: #1e293b;
-      }
-    }
+  :deep(.dingtalk-avatar) {
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
-  .user-main {
-    text-align: center;
-
-    .name-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-
-      .nickname {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 600;
-        color: #1f2329;
-
-        .dark & {
-          color: #f1f5f9;
-        }
-      }
-
-      .gender-icon {
-        font-size: 16px;
-
-        &.male {
-          color: #1677ff;
-        }
-
-        &.female {
-          color: #ff4d4f;
-        }
-      }
-    }
-
-    .account {
-      margin: 4px 0 0;
-      font-size: 13px;
-      color: #8f959e;
-
-      .dark & {
-        color: #94a3b8;
-      }
-    }
+  .dark & :deep(.dingtalk-avatar) {
+    border-color: var(--dt-bg-card-dark);
   }
 }
 
+.online-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: #52c41a;
+  border: 2px solid #fff;
+  border-radius: 50%;
+
+  .dark & {
+    border-color: var(--dt-bg-card-dark);
+  }
+}
+
+.user-name {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--dt-text-primary);
+}
+
+.user-account {
+  margin: 0;
+  font-size: 13px;
+  color: var(--dt-text-tertiary);
+}
+
+// ============================================================================
+// 详细信息
+// ============================================================================
 .profile-details {
-  padding: 0 24px;
-  margin-bottom: 24px;
+  padding: 0 24px 24px;
+}
 
-  .detail-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 14px;
+.detail-section {
+  margin-bottom: 20px;
 
-    .dark & {
-      border-bottom-color: #334155;
-    }
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .label {
-      color: #8f959e;
-      flex-shrink: 0;
-      min-width: 60px;
-
-      .dark & {
-        color: #94a3b8;
-      }
-    }
-
-    .value {
-      color: #1f2329;
-      text-align: right;
-      word-break: break-all;
-      flex: 1;
-      margin-left: 16px;
-
-      .dark & {
-        color: #f1f5f9;
-      }
-    }
-
-    &.signature {
-      flex-direction: column;
-
-      .value {
-        text-align: left;
-        margin-top: 4px;
-        margin-left: 0;
-        color: #646a73;
-        font-style: italic;
-
-        .dark & {
-          color: #94a3b8;
-        }
-      }
-    }
+  &:last-child {
+    margin-bottom: 0;
   }
 }
 
-.profile-actions {
-  padding: 16px 24px 24px;
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dt-text-quaternary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px 0;
+}
+
+.detail-list {
+  background: var(--dt-bg-body);
+  border: 1px solid var(--dt-border-light);
+  border-radius: 8px;
+  overflow: hidden;
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+  }
+}
+
+.detail-row {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--dt-border-light);
 
-  .action-btn {
-    height: 40px;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+  .dark & {
+    border-bottom-color: var(--dt-border-dark);
+  }
 
-    &:not(.el-button--primary) {
-      flex: 0 0 40px;
-      padding: 0;
-    }
+  &:last-child {
+    border-bottom: none;
   }
 }
 
-// 移动端响应式样式
-@media (max-width: 479px) {
-  .profile-header {
-    padding: 0 20px;
+.detail-label {
+  font-size: 13px;
+  color: var(--dt-text-secondary);
+  min-width: 60px;
+}
 
-    .avatar-wrapper .user-avatar {
-      width: 70px !important;
-      height: 70px !important;
-      font-size: 24px;
-    }
+.detail-value {
+  flex: 1;
+  font-size: 14px;
+  color: var(--dt-text-primary);
+  text-align: right;
+}
 
-    .user-main .name-row .nickname {
+.signature-text {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--dt-text-secondary);
+  line-height: 1.6;
+  font-style: italic;
+  background: var(--dt-bg-body);
+  border: 1px solid var(--dt-border-light);
+  border-radius: 8px;
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+  }
+}
+
+// ============================================================================
+// 底部操作
+// ============================================================================
+.profile-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--dt-border-light);
+
+  .dark & {
+    border-top-color: var(--dt-border-dark);
+  }
+
+  .chat-btn {
+    flex: 1;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .call-btn,
+  .more-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+
+    .material-icons-outlined {
       font-size: 18px;
     }
   }
 
-  .profile-details {
-    padding: 0 20px;
+  .more-btn {
+    color: var(--dt-text-secondary);
 
-    .detail-item {
-      .label {
-        min-width: 50px;
-        font-size: 13px;
-      }
-
-      .value {
-        font-size: 13px;
-      }
+    &:hover {
+      color: var(--dt-text-primary);
     }
   }
+}
 
-  .profile-actions {
-    padding: 12px 20px 20px;
+// ============================================================================
+// 移动端响应式
+// ============================================================================
+@media (max-width: 479px) {
+  .profile-header {
+    padding: 24px 20px 16px;
+  }
 
-    .action-btn {
-      height: 44px;
-      font-size: 15px;
-    }
+  .profile-details {
+    padding: 0 20px 20px;
+  }
+
+  .profile-footer {
+    padding: 12px 20px;
   }
 }
 </style>
