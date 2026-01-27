@@ -6,15 +6,21 @@ import com.ruoyi.im.domain.ImExternalContactGroup;
 import com.ruoyi.im.dto.contact.ExternalContactCreateRequest;
 import com.ruoyi.im.service.ImExternalContactService;
 import com.ruoyi.im.util.SecurityUtils;
+import com.ruoyi.im.vo.contact.ImExternalContactGroupVO;
+import com.ruoyi.im.vo.contact.ImExternalContactVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 外部联系人管理控制器
+ *
+ * @author ruoyi
  */
 @Tag(name = "外部联系人", description = "外部联系人管理接口")
 @RestController
@@ -30,6 +36,66 @@ public class ImExternalContactController {
      */
     public ImExternalContactController(ImExternalContactService externalContactService) {
         this.externalContactService = externalContactService;
+    }
+
+    /**
+     * 将 Entity 转换为 VO
+     *
+     * @param contact 外部联系人实体
+     * @return 外部联系人视图对象
+     */
+    private ImExternalContactVO toVO(ImExternalContact contact) {
+        if (contact == null) {
+            return new ImExternalContactVO();
+        }
+        ImExternalContactVO vo = new ImExternalContactVO();
+        BeanUtils.copyProperties(contact, vo);
+        return vo;
+    }
+
+    /**
+     * 批量将 Entity 转换为 VO
+     *
+     * @param list 外部联系人实体列表
+     * @return 外部联系人视图对象列表
+     */
+    private List<ImExternalContactVO> toVOList(List<ImExternalContact> list) {
+        if (list == null || list.isEmpty()) {
+            return List.of();
+        }
+        return list.stream()
+                .map(this::toVO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 将分组 Entity 转换为 VO
+     *
+     * @param group 分组实体
+     * @return 分组视图对象
+     */
+    private ImExternalContactGroupVO toGroupVO(ImExternalContactGroup group) {
+        if (group == null) {
+            return new ImExternalContactGroupVO();
+        }
+        ImExternalContactGroupVO vo = new ImExternalContactGroupVO();
+        BeanUtils.copyProperties(group, vo);
+        return vo;
+    }
+
+    /**
+     * 批量将分组 Entity 转换为 VO
+     *
+     * @param list 分组实体列表
+     * @return 分组视图对象列表
+     */
+    private List<ImExternalContactGroupVO> toGroupVOList(List<ImExternalContactGroup> list) {
+        if (list == null || list.isEmpty()) {
+            return List.of();
+        }
+        return list.stream()
+                .map(this::toGroupVO)
+                .collect(Collectors.toList());
     }
 
     // ==================== 联系人管理 ====================
@@ -76,11 +142,11 @@ public class ImExternalContactController {
      */
     @Operation(summary = "获取联系人详情")
     @GetMapping("/{contactId}")
-    public Result<ImExternalContact> getContactDetail(
+    public Result<ImExternalContactVO> getContactDetail(
             @PathVariable Long contactId) {
         Long userId = SecurityUtils.getLoginUserId();
         ImExternalContact contact = externalContactService.getContactDetail(contactId, userId);
-        return Result.success(contact);
+        return Result.success(toVO(contact));
     }
 
     /**
@@ -88,10 +154,10 @@ public class ImExternalContactController {
      */
     @Operation(summary = "获取联系人列表")
     @GetMapping("/list")
-    public Result<List<ImExternalContact>> getContactList() {
+    public Result<List<ImExternalContactVO>> getContactList() {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImExternalContact> list = externalContactService.getContactList(userId);
-        return Result.success(list);
+        return Result.success(toVOList(list));
     }
 
     /**
@@ -99,11 +165,11 @@ public class ImExternalContactController {
      */
     @Operation(summary = "获取分组下的联系人列表")
     @GetMapping("/group/{groupId}")
-    public Result<List<ImExternalContact>> getContactsByGroup(
+    public Result<List<ImExternalContactVO>> getContactsByGroup(
             @PathVariable Long groupId) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImExternalContact> list = externalContactService.getContactsByGroup(groupId, userId);
-        return Result.success(list);
+        return Result.success(toVOList(list));
     }
 
     /**
@@ -111,10 +177,10 @@ public class ImExternalContactController {
      */
     @Operation(summary = "获取星标联系人列表")
     @GetMapping("/starred")
-    public Result<List<ImExternalContact>> getStarredContacts() {
+    public Result<List<ImExternalContactVO>> getStarredContacts() {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImExternalContact> list = externalContactService.getStarredContacts(userId);
-        return Result.success(list);
+        return Result.success(toVOList(list));
     }
 
     /**
@@ -122,11 +188,11 @@ public class ImExternalContactController {
      */
     @Operation(summary = "搜索联系人")
     @GetMapping("/search")
-    public Result<List<ImExternalContact>> searchContacts(
+    public Result<List<ImExternalContactVO>> searchContacts(
             @RequestParam String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImExternalContact> list = externalContactService.searchContacts(keyword, userId);
-        return Result.success(list);
+        return Result.success(toVOList(list));
     }
 
     /**
@@ -185,9 +251,9 @@ public class ImExternalContactController {
      */
     @Operation(summary = "获取分组列表")
     @GetMapping("/group/list")
-    public Result<List<ImExternalContactGroup>> getGroupList() {
+    public Result<List<ImExternalContactGroupVO>> getGroupList() {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImExternalContactGroup> list = externalContactService.getGroupList(userId);
-        return Result.success(list);
+        return Result.success(toGroupVOList(list));
     }
 }

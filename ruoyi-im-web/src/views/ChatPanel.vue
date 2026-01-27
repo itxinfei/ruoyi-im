@@ -1,5 +1,12 @@
 <template>
-  <div class="chat-panel">
+  <div
+    class="chat-panel"
+    :class="{ 'is-dragging': isDragging }"
+    @dragover.prevent="handleDragOver"
+    @dragleave.prevent="handleDragLeave"
+    @drop.prevent="handleDrop"
+    @paste="handlePaste"
+  >
     <div v-if="!session" class="empty-placeholder">
       <el-empty description="选择一个会话开始聊天" />
     </div>
@@ -377,6 +384,93 @@ const handleClearSelection = () => {
   store.commit('im/message/CLEAR_MESSAGE_SELECTION')
 }
 
+// 拖拽上传相关
+const isDragging = ref(false)
+
+const handleDragOver = (event) => {
+  const files = event.dataTransfer?.files
+  if (files && files.length > 0) {
+    const hasImage = Array.from(files).some(file => file.type.startsWith('image/'))
+    if (hasImage) {
+      isDragging.value = true
+    }
+  }
+}
+
+const handleDragLeave = (event) => {
+  isDragging.value = false
+}
+
+const handleDrop = async (event) => {
+  isDragging.value = false
+
+  const files = event.dataTransfer?.files
+  if (!files || files.length === 0) return
+
+  for (const file of files) {
+    if (file.type.startsWith('image/')) {
+      await uploadImageFile(file)
+    }
+  }
+}
+
+const uploadImageFile = async (file) => {
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('type', 'image')
+
+    // 创建本地预览
+    const blobUrl = URL.createObjectURL(file)
+
+    // 发送消息
+    const tempMessage = {
+      id: Date.now(),
+      type: 'IMAGE',
+      content: JSON.stringify({ imageUrl: blobUrl }),
+      senderId: currentUser.value?.id,
+      senderName: currentUser.value?.name,
+      timestamp: new Date().toISOString(),
+      isOwn: true,
+      status: 'sending'
+    }
+
+    messages.value.push(transformMsg(tempMessage))
+
+    // 上传图片
+    const res = await uploadImage(formData)
+    if (res.code === 200 && res.data) {
+      // 更新消息
+      const index = messages.value.findIndex(m => m.id === tempMessage.id)
+      if (index !== -1) {
+        messages.value[index] = {
+          ...messages.value[index],
+          content: JSON.stringify({ imageUrl: res.data.url }),
+          status: 'sent'
+        }
+      }
+    }
+  } catch (error) {
+    ElMessage.error('上传失败')
+    console.error(error)
+  }
+}
+
+const handlePaste = async (event) => {
+  const items = event.clipboardData?.items
+  if (!items) return
+
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      const file = item.getAsFile()
+      if (file) {
+        await uploadImageFile(file)
+        break // 只处理第一张图片
+      }
+    }
+  }
+}
+
 // 处理已读上报
 const handleMarkRead = async (msg) => {
   try {
@@ -653,6 +747,23 @@ onMounted(() => {
   flex: 1;
   min-width: 0;
   background: var(--dt-bg-body);
+
+  &.is-dragging {
+    background: #e6f7ff;
+    border: 2px dashed #1890ff;
+
+    &::after {
+      content: '释放以上传图片';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      color: #1890ff;
+      font-weight: 600;
+      pointer-events: none;
+    }
+  }
 }
 
 .main-container {

@@ -7,14 +7,17 @@ import com.ruoyi.im.dto.groupbot.BotRuleRequest;
 import com.ruoyi.im.dto.groupbot.BotUpdateRequest;
 import com.ruoyi.im.service.ImGroupBotService;
 import com.ruoyi.im.util.SecurityUtils;
+import com.ruoyi.im.vo.group.ImGroupBotVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 群机器人控制器
@@ -34,6 +37,36 @@ public class ImGroupBotController {
 
     public ImGroupBotController(ImGroupBotService groupBotService) {
         this.groupBotService = groupBotService;
+    }
+
+    /**
+     * 将 Entity 转换为 VO
+     *
+     * @param bot 群机器人实体
+     * @return 群机器人视图对象
+     */
+    private ImGroupBotVO toVO(ImGroupBot bot) {
+        if (bot == null) {
+            return new ImGroupBotVO();
+        }
+        ImGroupBotVO vo = new ImGroupBotVO();
+        BeanUtils.copyProperties(bot, vo);
+        return vo;
+    }
+
+    /**
+     * 批量将 Entity 转换为 VO
+     *
+     * @param list 群机器人实体列表
+     * @return 群机器人视图对象列表
+     */
+    private List<ImGroupBotVO> toVOList(List<ImGroupBot> list) {
+        if (list == null || list.isEmpty()) {
+            return List.of();
+        }
+        return list.stream()
+                .map(this::toVO)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -88,10 +121,10 @@ public class ImGroupBotController {
      */
     @Operation(summary = "获取群组机器人列表", description = "获取指定群组的机器人列表")
     @GetMapping("/list/{groupId}")
-    public Result<List<ImGroupBot>> list(@PathVariable Long groupId) {
+    public Result<List<ImGroupBotVO>> list(@PathVariable Long groupId) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImGroupBot> bots = groupBotService.getGroupBots(groupId, userId);
-        return Result.success(bots);
+        return Result.success(toVOList(bots));
     }
 
     /**
@@ -102,10 +135,10 @@ public class ImGroupBotController {
      */
     @Operation(summary = "获取机器人详情", description = "获取机器人详细信息")
     @GetMapping("/{botId}")
-    public Result<ImGroupBot> getDetail(@PathVariable Long botId) {
+    public Result<ImGroupBotVO> getDetail(@PathVariable Long botId) {
         Long userId = SecurityUtils.getLoginUserId();
         ImGroupBot bot = groupBotService.getBotDetail(botId, userId);
-        return Result.success(bot);
+        return Result.success(toVO(bot));
     }
 
     /**

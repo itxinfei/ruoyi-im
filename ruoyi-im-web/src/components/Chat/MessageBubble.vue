@@ -57,6 +57,23 @@
       </div>
 
       <span v-else>[{{ message.type }}]</span>
+
+      <!-- 消息状态图标 -->
+      <div v-if="message.isOwn" class="message-status">
+        <el-icon v-if="message.status === 'sending'" class="is-loading" color="#909399">
+          <Loading />
+        </el-icon>
+        <el-icon v-else-if="message.status === 'sent'" color="#909399">
+          <Check />
+        </el-icon>
+        <el-icon v-else-if="message.status === 'read'" color="#909399">
+          <Check />
+          <Check />
+        </el-icon>
+        <el-icon v-else-if="message.status === 'failed'" color="#f56c6c" @click="handleRetry">
+          <WarningFilled />
+        </el-icon>
+      </div>
     </div>
 
     <!-- 右键菜单：精品化菜单项 -->
@@ -95,14 +112,14 @@
 <script setup>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked } from '@element-plus/icons-vue'
+import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, Loading, WarningFilled } from '@element-plus/icons-vue'
 
 const props = defineProps({
   message: { type: Object, required: true },
   sessionType: { type: String, default: 'PRIVATE' }
 })
 
-const emit = defineEmits(['command', 'preview', 'download', 'at', 'scroll-to'])
+const emit = defineEmits(['command', 'preview', 'download', 'at', 'scroll-to', 'retry'])
 
 const store = useStore()
 const selectedMessages = computed(() => store.state.im.message.selectedMessages)
@@ -138,6 +155,10 @@ const handleCommand = (cmd) => {
   if (!cmd) return
   if (cmd === 'at') emit('at', props.message)
   else emit('command', cmd, props.message)
+}
+
+const handleRetry = () => {
+  emit('retry', props.message)
 }
 
 const parsedContent = computed(() => {
@@ -230,6 +251,18 @@ const formatSize = (bytes) => {
 }
 
 .msg-image { max-width: 320px; max-height: 400px; border-radius: 10px; display: block; cursor: zoom-in; transition: transform 0.3s; &:hover { transform: scale(1.01); } }
+
+.message-status {
+  display: flex;
+  align-items: center;
+  margin-left: 5px;
+  font-size: 14px;
+  cursor: pointer;
+
+  .el-icon {
+    margin: 0 1px;
+  }
+}
 
 .msg-file {
   display: flex; align-items: center; gap: 14px; cursor: pointer;
