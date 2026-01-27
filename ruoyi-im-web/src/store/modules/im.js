@@ -180,7 +180,7 @@ export default {
     },
 
     // 更新设置到服务器
-    async updateServerSetting({ dispatch }, { key, value, type }) {
+    async updateServerSetting({ commit }, { key, value, type }) {
       try {
         await updateUserSetting({
           settingKey: key,
@@ -194,7 +194,7 @@ export default {
     },
 
     // 批量更新设置到服务器
-    async batchUpdateServerSettings({ dispatch }, settings) {
+    async batchUpdateServerSettings({ commit }, settings) {
       try {
         await batchUpdateUserSettings(settings)
       } catch (e) {
