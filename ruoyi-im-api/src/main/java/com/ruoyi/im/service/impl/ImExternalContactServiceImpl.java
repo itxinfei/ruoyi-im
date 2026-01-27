@@ -10,7 +10,6 @@ import com.ruoyi.im.mapper.ImExternalContactGroupMapper;
 import com.ruoyi.im.mapper.ImExternalContactMapper;
 import com.ruoyi.im.service.ImExternalContactService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,11 +23,20 @@ import java.util.List;
 @Service
 public class ImExternalContactServiceImpl implements ImExternalContactService {
 
-    @Autowired
-    private ImExternalContactMapper contactMapper;
+    private final ImExternalContactMapper contactMapper;
+    private final ImExternalContactGroupMapper groupMapper;
 
-    @Autowired
-    private ImExternalContactGroupMapper groupMapper;
+    /**
+     * 构造器注入依赖
+     *
+     * @param contactMapper 外部联系人Mapper
+     * @param groupMapper   分组Mapper
+     */
+    public ImExternalContactServiceImpl(ImExternalContactMapper contactMapper,
+                                          ImExternalContactGroupMapper groupMapper) {
+        this.contactMapper = contactMapper;
+        this.groupMapper = groupMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

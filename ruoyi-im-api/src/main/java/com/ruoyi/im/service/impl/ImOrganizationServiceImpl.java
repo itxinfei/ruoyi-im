@@ -18,7 +18,6 @@ import com.ruoyi.im.vo.organization.ImDepartmentTreeVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,14 +36,24 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImOrganizationServiceImpl.class);
 
-    @Autowired
-    private ImDepartmentMapper imDepartmentMapper;
+    private final ImDepartmentMapper imDepartmentMapper;
+    private final ImDepartmentMemberMapper imDepartmentMemberMapper;
+    private final ImUserMapper imUserMapper;
 
-    @Autowired
-    private ImDepartmentMemberMapper imDepartmentMemberMapper;
-
-    @Autowired
-    private ImUserMapper imUserMapper;
+    /**
+     * 构造器注入依赖
+     *
+     * @param imDepartmentMapper        部门Mapper
+     * @param imDepartmentMemberMapper  部门成员Mapper
+     * @param imUserMapper               用户Mapper
+     */
+    public ImOrganizationServiceImpl(ImDepartmentMapper imDepartmentMapper,
+                                      ImDepartmentMemberMapper imDepartmentMemberMapper,
+                                      ImUserMapper imUserMapper) {
+        this.imDepartmentMapper = imDepartmentMapper;
+        this.imDepartmentMemberMapper = imDepartmentMemberMapper;
+        this.imUserMapper = imUserMapper;
+    }
 
     @Override
     public List<ImDepartmentTreeVO> getDepartmentTree() {
