@@ -3,8 +3,8 @@ package com.ruoyi.im.service.impl;
 import com.ruoyi.im.domain.ImAuditLog;
 import com.ruoyi.im.mapper.ImAuditLogMapper;
 import com.ruoyi.im.service.ImAuditService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -19,8 +19,16 @@ import java.util.Map;
 @Service
 public class ImAuditServiceImpl implements ImAuditService {
 
-    @Autowired
-    private ImAuditLogMapper imAuditLogMapper;
+    private final ImAuditLogMapper imAuditLogMapper;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param imAuditLogMapper 审计日志Mapper
+     */
+    public ImAuditServiceImpl(ImAuditLogMapper imAuditLogMapper) {
+        this.imAuditLogMapper = imAuditLogMapper;
+    }
 
     @Override
     public Map<String, Object> getAuditLogList(Integer pageNum, Integer pageSize, Long userId,
@@ -88,11 +96,13 @@ public class ImAuditServiceImpl implements ImAuditService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteExpiredLogs(LocalDateTime beforeDate) {
         return imAuditLogMapper.deleteExpiredLogs(beforeDate);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void saveAuditLog(ImAuditLog auditLog) {
         if (auditLog.getCreateTime() == null) {
             auditLog.setCreateTime(LocalDateTime.now());

@@ -4,7 +4,6 @@ import com.ruoyi.im.domain.ImAttendance;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImAttendanceMapper;
 import com.ruoyi.im.service.ImAttendanceService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,8 +22,16 @@ import java.util.Map;
 @Service
 public class ImAttendanceServiceImpl implements ImAttendanceService {
 
-    @Autowired
-    private ImAttendanceMapper attendanceMapper;
+    private final ImAttendanceMapper attendanceMapper;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param attendanceMapper 考勤Mapper
+     */
+    public ImAttendanceServiceImpl(ImAttendanceMapper attendanceMapper) {
+        this.attendanceMapper = attendanceMapper;
+    }
 
     /**
      * 上班时间（9:00）
@@ -233,12 +240,14 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int updateAttendance(ImAttendance attendance) {
         attendance.setUpdateTime(LocalDateTime.now());
         return attendanceMapper.updateImAttendance(attendance);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteAttendance(Long id, Long userId) {
         ImAttendance attendance = attendanceMapper.selectImAttendanceById(id);
         if (attendance == null) {

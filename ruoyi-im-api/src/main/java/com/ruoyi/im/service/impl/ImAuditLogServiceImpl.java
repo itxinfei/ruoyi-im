@@ -5,8 +5,8 @@ import com.ruoyi.im.mapper.ImAuditLogMapper;
 import com.ruoyi.im.service.IAuditLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,8 +23,16 @@ public class ImAuditLogServiceImpl implements IAuditLogService {
 
     private static final Logger log = LoggerFactory.getLogger(ImAuditLogServiceImpl.class);
 
-    @Autowired
-    private ImAuditLogMapper auditLogMapper;
+    private final ImAuditLogMapper auditLogMapper;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param auditLogMapper 审计日志Mapper
+     */
+    public ImAuditLogServiceImpl(ImAuditLogMapper auditLogMapper) {
+        this.auditLogMapper = auditLogMapper;
+    }
 
     /**
      * 记录操作日志
@@ -32,6 +40,7 @@ public class ImAuditLogServiceImpl implements IAuditLogService {
      * @param auditLog 审计日志
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void saveLog(ImAuditLog auditLog) {
         try {
             auditLogMapper.insertImAuditLog(auditLog);
@@ -101,6 +110,7 @@ public class ImAuditLogServiceImpl implements IAuditLogService {
      * @return 删除数量
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteExpiredLogs(LocalDateTime beforeDate) {
         try {
             return auditLogMapper.deleteExpiredLogs(beforeDate);
