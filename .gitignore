@@ -27,8 +27,20 @@ Thumbs.db
 # 忽略IDEA相关文件
 **/.idea/
 
+# 忽略VSCode相关文件
+**/.vscode/
+
 # 忽略Claude相关文件
 **/.claude/
+
+# 忽略Gemini相关文件
+**/.gemini/
+
+# 忽略Agent相关文件
+**/.agent/
+
+# 忽略Sisyphus相关文件
+**/.sisyphus/
 
 # 忽略Trae相关文件
 **/.trae/
